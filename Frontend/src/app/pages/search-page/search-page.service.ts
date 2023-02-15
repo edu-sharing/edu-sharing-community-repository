@@ -1,5 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import {
     ClientConfig,
     ConfigService,
@@ -22,7 +23,8 @@ import {
     takeUntil,
     tap,
 } from 'rxjs/operators';
-import { Node, Repository, RestConstants } from '../../core-module/core.module';
+import { ListItem, Node, Repository, RestConstants } from '../../core-module/core.module';
+import { MdsHelper } from '../../core-module/rest/mds-helper';
 import {
     fromSearchResults,
     NodeDataSourceRemote,
@@ -58,6 +60,8 @@ export class SearchPageService implements OnDestroy {
     readonly searchFilters = this.userModifiableValues.createDict();
     readonly searchString = this.userModifiableValues.createString();
     readonly loadingProgress = new BehaviorSubject<number>(null);
+    readonly resultColumns = new BehaviorSubject<ListItem[]>([]);
+    readonly collectionColumns = new BehaviorSubject<ListItem[]>([]);
 
     private readonly destroyed = new Subject<void>();
     private readonly loadingContent = new BehaviorSubject<boolean>(false);
@@ -70,6 +74,7 @@ export class SearchPageService implements OnDestroy {
         private network: NetworkService,
         private route: ActivatedRoute,
         private search: SearchService,
+        private translate: TranslateService,
         private userModifiableValues: UserModifiableValuesService,
     ) {
         this.activeRepository.registerQueryParameter('repo', this.route);
@@ -83,6 +88,7 @@ export class SearchPageService implements OnDestroy {
         this.registerSearchField();
         this.registerSearchObservables();
         this.registerLoadingProgress();
+        this.registerColumns();
     }
 
     ngOnDestroy(): void {
@@ -252,6 +258,25 @@ export class SearchPageService implements OnDestroy {
                 // map((progress) => progress >= 100 ? null : progress),
             )
             .subscribe((progress) => this.loadingProgress.next(progress));
+    }
+
+    private registerColumns(): void {
+        const mds = rxjs
+            .combineLatest([
+                this.activeRepository.observeValue().pipe(filter(notNull)),
+                this.activeMetadataSet.observeValue().pipe(filter(notNull)),
+            ])
+            .pipe(
+                switchMap(([repository, metadataSet]) =>
+                    this.mds.getMetadataSet({ repository, metadataSet }),
+                ),
+            );
+        mds.pipe(map((mds) => MdsHelper.getColumns(this.translate, mds, 'search'))).subscribe(
+            this.resultColumns,
+        );
+        mds.pipe(
+            map((mds) => MdsHelper.getColumns(this.translate, mds, 'searchCollections')),
+        ).subscribe(this.collectionColumns);
     }
 
     private getSearchRemote(params: SearchRequestParams): NodeRemote<Node> {

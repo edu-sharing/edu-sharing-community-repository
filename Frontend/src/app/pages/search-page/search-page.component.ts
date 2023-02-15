@@ -1,15 +1,13 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { AfterViewInit, Component, HostBinding, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
-import { ListItem, Node, RestConstants } from '../../core-module/core.module';
+import { Node } from '../../core-module/core.module';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
 import { Scope } from '../../core-ui-module/option-item';
 import { NodeEntriesDisplayType } from '../../features/node-entries/entries-model';
 import { NodeEntriesWrapperComponent } from '../../features/node-entries/node-entries-wrapper.component';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { SearchPageService } from './search-page.service';
-import { UserModifiableValuesService } from './user-modifiable-values';
 
 @Component({
     selector: 'es-search-page',
@@ -34,24 +32,16 @@ export class SearchPageComponent implements OnInit, AfterViewInit {
     shouldLimitCollectionRows = true;
     progressBarIsVisible = false;
 
-    readonly columns = [
-        new ListItem('NODE', RestConstants.CM_NAME),
-        // new ListItem('NODE', RestConstants.CM_CREATOR),
-        new ListItem('NODE', RestConstants.CM_MODIFIED_DATE),
-    ];
     readonly resultsDataSource = this.searchPage.resultsDataSource;
     readonly collectionsDataSource = this.searchPage.collectionsDataSource;
     readonly availableRepositories = this.searchPage.availableRepositories;
     readonly activeRepository = this.searchPage.activeRepository;
     readonly filterBarIsVisible = this.searchPage.filterBarIsVisible;
     readonly loadingProgress = this.searchPage.loadingProgress;
+    readonly resultColumns = this.searchPage.resultColumns;
+    readonly collectionColumns = this.searchPage.collectionColumns;
 
-    constructor(
-        private searchPage: SearchPageService,
-        private mainNav: MainNavService,
-        private route: ActivatedRoute,
-        private userModifiableValues: UserModifiableValuesService,
-    ) {}
+    constructor(private searchPage: SearchPageService, private mainNav: MainNavService) {}
 
     ngOnInit(): void {
         this.initMainNav();

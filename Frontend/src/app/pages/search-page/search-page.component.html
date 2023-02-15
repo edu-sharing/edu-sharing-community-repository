@@ -34,7 +34,7 @@
         *ngIf="!collectionsDataSource.isEmpty()"
         [dataSource]="collectionsDataSource"
         [scope]="Scope.SearchCollections"
-        [columns]="columns"
+        [columns]="collectionColumns.value"
         [disableInfiniteScroll]="true"
         [displayType]="NodeEntriesDisplayType.SmallGrid"
         [gridConfig]="{ maxRows: shouldLimitCollectionRows ? 1 : -1 }"
@@ -61,7 +61,7 @@
         #nodeEntriesResults
         [dataSource]="resultsDataSource"
         [scope]="Scope.Search"
-        [columns]="columns"
+        [columns]="resultColumns.value"
       >
         <ng-template #empty>
           <div class="no-search-results-message">
