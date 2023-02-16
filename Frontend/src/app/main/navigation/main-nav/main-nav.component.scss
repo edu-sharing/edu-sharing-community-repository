@@ -1,6 +1,11 @@
 @import '../../../core-ui-module/styles/variables';
 @import '../../../core-ui-module/styles/toast';
 
+:host {
+    display: block;
+    height: var(--mainnavHeight);
+}
+
 ::ng-deep {
     .mobile-move-top,
     .mobile-move-bottom {
