@@ -1,5 +1,6 @@
 package org.edu_sharing.alfresco.authentication.subsystems;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -71,9 +72,14 @@ public class SubsystemChainingAuthenticationService extends org.alfresco.repo.se
     
     public void setEsLastLoginToNow(String userName) {
     	NodeRef nodeRefPerson = personService.getPerson(userName,false);
-    	// we won't do this for the guest
-        if(userName!=null && userName.equals(ApplicationInfoList.getHomeRepository().getGuest_username()))
+    	// we won't do this for the guest or admin user
+        if(userName!=null &&
+                Arrays.asList(
+                        ApplicationInfoList.getHomeRepository().getGuest_username(),
+                        ApplicationInfoList.getHomeRepository().getUsername()
+                ).contains(userName)) {
             return;
+        }
         RunAsWork<Void> runAs = new RunAsWork<Void>() {
         	@Override
         	public Void doWork() throws Exception {
