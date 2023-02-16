@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
+import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { CookieInfoComponent } from '../../common/ui/cookie-info/cookie-info.component';
 import { FrameEventsService, Node } from '../../core-module/core.module';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
@@ -63,6 +65,7 @@ export class MainNavService {
     private mainnav: MainNavComponent;
     private cookieInfo: CookieInfoComponent;
     private mainNavConfigSubject = new BehaviorSubject<MainNavConfig>(new MainNavConfig());
+    private mainNavConfigOverrideSubject = new BehaviorSubject<Partial<MainNavConfig> | null>(null);
 
     constructor(
         private managementDialogs: ManagementDialogsService,
@@ -121,7 +124,17 @@ export class MainNavService {
         });
     }
 
+    /**
+     * Override individual values for the entire application, independently of what values are given
+     * with `setMainNavConfig` and `patchMainNavConfig`.
+     */
+    globallyOverrideMainNavConfig(config: Partial<MainNavConfig>): void {
+        this.mainNavConfigOverrideSubject.next(config);
+    }
+
     observeMainNavConfig(): Observable<MainNavConfig> {
-        return this.mainNavConfigSubject.asObservable();
+        return rxjs
+            .combineLatest([this.mainNavConfigSubject, this.mainNavConfigOverrideSubject])
+            .pipe(map(([config, override]) => ({ ...config, ...(override ?? {}) })));
     }
 }
