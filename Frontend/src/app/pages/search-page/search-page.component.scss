@@ -8,8 +8,11 @@
 }
 
 mat-progress-bar {
+    position: sticky;
+    top: var(--mainnavCurrentHeight);
     flex-shrink: 0;
     transition: unset;
+    z-index: 2;
 }
 
 // Unset materialize styles

@@ -1,7 +1,7 @@
 @import '../../../core-ui-module/styles/variables';
 @import '../../../core-ui-module/styles/toast';
 
-:host {
+:host.main-nav-visible {
     display: block;
     height: var(--mainnavHeight);
 }

@@ -4,6 +4,7 @@ import {
     AfterViewInit,
     Component,
     ElementRef,
+    HostBinding,
     HostListener,
     NgZone,
     OnDestroy,
@@ -73,7 +74,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private shouldAlwaysHide = this.storage.get(TemporaryStorageService.OPTION_HIDE_MAINNAV, false);
 
-    visible = !this.shouldAlwaysHide;
+    @HostBinding('class.main-nav-visible') visible = !this.shouldAlwaysHide;
     autoLogoutTimeout$: Observable<string>;
     config: any = {};
     nodeStoreIsOpen = false;
