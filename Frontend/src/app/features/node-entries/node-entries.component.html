@@ -19,6 +19,9 @@
   #paginator
   [pageSizeOptions]="entriesGlobalService.getPaginatorSizeOptions(entriesService.scope)"
   *ngIf="entriesService.paginationStrategy === 'paginator'"
-  [class.display-none]="entriesService.dataSource.isLoading || entriesService.dataSource.isEmpty()"
+  [class.display-none]="
+    (entriesService.dataSource.isLoading && entriesService.dataSource.isLoading !== 'page') ||
+    entriesService.dataSource.isEmpty()
+  "
   (page)="openPage($event)"
 ></mat-paginator>
