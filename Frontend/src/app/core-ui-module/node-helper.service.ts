@@ -14,7 +14,6 @@ import {
     AuthorityProfile,
     CollectionReference,
     NodesRightMode,
-    Node,
     Permission,
     User,
     WorkflowDefinition,
@@ -36,6 +35,7 @@ import { SessionStorageService } from '../core-module/rest/services/session-stor
 import { map } from 'rxjs/operators';
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
 import { getRepoUrl } from '../util/repo-url';
+import { Node } from 'ngx-edu-sharing-api';
 
 export type WorkflowDefinitionStatus = {
     current: WorkflowDefinition;
@@ -279,6 +279,11 @@ export class NodeHelperService {
      * @returns {string}
      */
     public getLicenseIcon(node: Node) {
+        // prefer manual mapping instead of backend data to support custom states from local edits
+        const license = node.properties?.[RestConstants.CCM_PROP_LICENSE]?.[0];
+        if (license) {
+            return this.getLicenseIconByString(license);
+        }
         return node.license ? getRepoUrl(node.license.icon, node) : null;
     }
 
@@ -323,9 +328,8 @@ export class NodeHelperService {
      * @returns {string|any|string|any|string|any|string|any|string|any|string}
      */
     public getLicenseName(node: Node) {
-        let prop = node.properties[RestConstants.CCM_PROP_LICENSE];
-        if (prop) prop = prop[0];
-        else prop = '';
+        let prop = node.properties[RestConstants.CCM_PROP_LICENSE]?.[0];
+        if (!prop) prop = '';
         return this.getLicenseNameByString(prop);
     }
 
@@ -631,8 +635,7 @@ export class NodeHelperService {
         return workflow;
     }
     public getWorkflowStatus(node: Node, useFromConfig = false): WorkflowDefinitionStatus {
-        let value = node.properties[RestConstants.CCM_PROP_WF_STATUS];
-        if (value) value = value[0];
+        let value = node.properties[RestConstants.CCM_PROP_WF_STATUS]?.[0];
         if (!value) {
             return this.getDefaultWorkflowStatus(useFromConfig);
         }

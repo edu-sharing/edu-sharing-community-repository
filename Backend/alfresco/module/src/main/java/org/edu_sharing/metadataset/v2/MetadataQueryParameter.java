@@ -54,7 +54,7 @@ public class MetadataQueryParameter implements Serializable {
 		if(statement==null) {
 			statement = getDefaultStatement();
 		}
-		return QueryUtils.replaceCommonQueryParams(statement, QueryUtils.replacerFromSyntax(syntax));
+		return QueryUtils.replaceCommonQueryParams(statement, QueryUtils.replacerFromSyntax(syntax, true));
 	}
 	private String getDefaultStatement() {
 		if(syntax.equals(MetadataReader.QUERY_SYNTAX_DSL)){
