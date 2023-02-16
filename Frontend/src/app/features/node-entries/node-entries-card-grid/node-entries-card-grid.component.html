@@ -184,7 +184,8 @@
   *ngIf="
     entriesService.dataSource.isLoading === true ||
     entriesService.dataSource.isLoading === 'initial' ||
-    entriesService.dataSource.isLoading === 'page'
+    (entriesService.dataSource.isLoading === 'page' &&
+      entriesService.paginationStrategy === 'infinite-scroll')
   "
 >
   <ng-container *ngTemplateOutlet="loading"></ng-container>

@@ -277,19 +277,11 @@ export class SearchPageService implements OnDestroy {
             ),
             distinctUntilChanged((x, y) => x.equals(y)),
         );
-        // TODO: sync up the two remotes to keep the content of both until both have finished
-        // loading.
         searchRequestParams
-            .pipe(
-                tap(() => this.loadingContent.next(true)),
-                map((params) => this.getSearchRemote(params)),
-            )
+            .pipe(map((params) => this.getSearchRemote(params)))
             .subscribe((remote) => this.resultsDataSource.setRemote(remote));
         collectionRequestParams
-            .pipe(
-                tap(() => this.loadingCollections.next(true)),
-                map((params) => this.getCollectionsSearchRemote(params)),
-            )
+            .pipe(map((params) => this.getCollectionsSearchRemote(params)))
             .subscribe((remote) => this.collectionsDataSource.setRemote(remote));
     }
 
@@ -331,6 +323,7 @@ export class SearchPageService implements OnDestroy {
     private getSearchRemote(params: SearchRequestParams): NodeRemote<Node> {
         // console.log('%cgetSearchRemote', 'font-weight: bold', params);
         return (request: NodeRequestParams) => {
+            this.loadingContent.next(true);
             // console.log('search', request);
             return this.search
                 .search({
@@ -365,6 +358,7 @@ export class SearchPageService implements OnDestroy {
             return () => rxjs.of({ data: [], total: 0 });
         }
         return (request: NodeRequestParams) => {
+            this.loadingCollections.next(true);
             return this.search
                 .requestSearch({
                     body: {
