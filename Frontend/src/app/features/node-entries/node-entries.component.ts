@@ -6,18 +6,19 @@ import {
     OnInit,
     ViewChild,
 } from '@angular/core';
-import { GenericAuthority, Node, UIService } from '../../core-module/core.module';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { ActivatedRoute, Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
+import { Subject } from 'rxjs';
+import { distinctUntilChanged, filter, map, takeUntil, tap } from 'rxjs/operators';
+import { GenericAuthority, Node } from '../../core-module/core.module';
 import { NodeEntriesService } from '../../core-ui-module/node-entries.service';
 import { KeyboardShortcutsService } from '../../services/keyboard-shortcuts.service';
-import { NodeEntriesDisplayType } from './entries-model';
-import { NodeEntriesTemplatesService } from './node-entries-templates.service';
-import { NodeEntriesGlobalService } from './node-entries-global.service';
-import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { TranslateService } from '@ngx-translate/core';
-import { takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
 import { TranslationsService } from '../../translations/translations.service';
+import { NodeEntriesDisplayType } from './entries-model';
 import { NodeDataSourceRemote } from './node-data-source-remote';
+import { NodeEntriesGlobalService } from './node-entries-global.service';
+import { NodeEntriesTemplatesService } from './node-entries-templates.service';
 
 @Component({
     selector: 'es-node-entries',
@@ -28,25 +29,32 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
     implements OnInit, AfterViewInit, OnDestroy
 {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
-    private readonly destroyed$ = new Subject();
+
     @ViewChild(MatPaginator) paginator: MatPaginator;
 
-    private destroyed = new Subject<void>();
+    private readonly destroyed = new Subject<void>();
 
     constructor(
-        private uiService: UIService,
+        public changeDetectorRef: ChangeDetectorRef,
         public entriesGlobalService: NodeEntriesGlobalService,
         public entriesService: NodeEntriesService<T>,
         public templatesService: NodeEntriesTemplatesService,
         private globalKeyboardShortcuts: KeyboardShortcutsService,
-        public changeDetectorRef: ChangeDetectorRef,
-        public translate: TranslateService,
-        public translations: TranslationsService,
+        private route: ActivatedRoute,
+        private router: Router,
+        private translate: TranslateService,
+        private translations: TranslationsService,
     ) {}
 
     ngOnInit(): void {
-        if (this.entriesService.globalKeyboardShortcuts) {
+        if (this.entriesService.primaryInstance) {
             this.registerGlobalKeyboardShortcuts();
+        }
+    }
+
+    ngAfterViewInit() {
+        if (this.paginator) {
+            this.initPaginator(this.paginator);
         }
     }
 
@@ -71,12 +79,6 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
         );
     }
 
-    ngAfterViewInit() {
-        if (this.paginator) {
-            this.initPaginator(this.paginator);
-        }
-    }
-
     private initPaginator(paginator: MatPaginator) {
         // I18n.
         this.translations.waitForInit().subscribe(() => {
@@ -96,19 +98,64 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
                 });
         });
         // Connect data source.
-        this.entriesService.dataSource$.pipe(takeUntil(this.destroyed$)).subscribe((dataSource) => {
+        this.entriesService.dataSource$.pipe(takeUntil(this.destroyed)).subscribe((dataSource) => {
             if (dataSource instanceof NodeDataSourceRemote) {
                 dataSource.paginator = paginator;
             } else {
                 paginator.length = dataSource?.getTotal();
                 dataSource
                     ?.connectPagination()
-                    .pipe(takeUntil(this.destroyed$))
+                    .pipe(takeUntil(this.destroyed))
                     .subscribe(() => {
                         paginator.length = dataSource.getTotal();
                     });
             }
         });
+        // Register query params.
+        if (this.entriesService.primaryInstance) {
+            const defaultPageSize = this.paginator.pageSize;
+            let currentPageParam = 0;
+            let currentPageSizeParam = defaultPageSize;
+            this.route.queryParams
+                .pipe(
+                    map((params) => ({
+                        page: params.page ? parseInt(params.page) - 1 : 0,
+                        pageSize: params.pageSize ? parseInt(params.pageSize) : defaultPageSize,
+                    })),
+                    tap(({ page, pageSize }) => {
+                        currentPageParam = page;
+                        currentPageSizeParam = pageSize;
+                    }),
+                    filter(
+                        ({ page, pageSize }) =>
+                            page !== this.paginator.pageIndex ||
+                            pageSize !== this.paginator.pageSize,
+                    ),
+                )
+                .subscribe(({ page, pageSize }) => {
+                    const previousPage = this.paginator.pageIndex;
+                    this.paginator.pageIndex = page;
+                    this.paginator.pageSize = pageSize;
+                    this.paginator['_emitPageEvent'](previousPage);
+                    this.changeDetectorRef.detectChanges();
+                });
+            this.paginator.page
+                .pipe(
+                    filter(
+                        (event) =>
+                            currentPageParam !== event.pageIndex ||
+                            currentPageSizeParam !== event.pageSize,
+                    ),
+                )
+                .subscribe((event) => {
+                    const page = event.pageIndex > 0 ? event.pageIndex + 1 : null;
+                    const pageSize = event.pageSize !== defaultPageSize ? event.pageSize : null;
+                    void this.router.navigate([], {
+                        queryParams: { page, pageSize },
+                        queryParamsHandling: 'merge',
+                    });
+                });
+        }
     }
 
     openPage(page: PageEvent) {

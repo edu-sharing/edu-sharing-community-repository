@@ -93,12 +93,15 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      */
     @Input() initConfig: ListOptionsConfig;
     /**
-     * Handle page-wide keyboard shortcuts in this node-entries instance.
+     * Whether this node-entries instance represents the page's main content.
      *
-     * This should be set to true if this instance represents the page's main content. Only set to
-     * true for one instance per page.
+     * Only set to true for one instance per page.
+     *
+     * If true, this instance will
+     * - handle page-wide keyboard shortcuts
+     * - take control of the `page` and `pageSize` query parameters for pagination
      */
-    @Input() globalKeyboardShortcuts: boolean;
+    @Input() primaryInstance: boolean;
     /**
      * UI hints for whether a single click will cause a dynamic action.
      *
@@ -163,7 +166,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     }
 
     ngOnInit(): void {
-        if (this.globalKeyboardShortcuts) {
+        if (this.primaryInstance) {
             this.optionsHelper.registerGlobalKeyboardShortcuts();
         }
     }
@@ -190,7 +193,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.clickItem = this.clickItem;
         this.entriesService.dblClickItem = this.dblClickItem;
         this.entriesService.fetchData = this.fetchData;
-        this.entriesService.globalKeyboardShortcuts = this.globalKeyboardShortcuts;
+        this.entriesService.primaryInstance = this.primaryInstance;
         this.entriesService.singleClickHint = this.singleClickHint;
         this.entriesService.disableInfiniteScroll = this.disableInfiniteScroll;
 

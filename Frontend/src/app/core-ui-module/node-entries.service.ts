@@ -69,7 +69,7 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     set gridConfig(value: GridConfig) {
         this.gridConfig$.next(value);
     }
-    globalKeyboardShortcuts: boolean;
+    primaryInstance: boolean;
     singleClickHint: 'dynamic' | 'static';
     disableInfiniteScroll: boolean;
 

@@ -51,6 +51,7 @@
         [dataSource]="resultsDataSource"
         [scope]="Scope.Search"
         [columns]="resultColumns.value"
+        [primaryInstance]="true"
       >
         <ng-template #empty>
           <div class="no-search-results-message">

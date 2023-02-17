@@ -349,6 +349,8 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
                 debounceTime(10),
             )
             .subscribe(async (value) => {
+                // FIXME: This goes back to the first page when reloading. `NodeEntriesWrapper`
+                // would restore the page via the `page` query parameter otherwise.
                 await this.load({
                     offset: 0,
                     reset: true,

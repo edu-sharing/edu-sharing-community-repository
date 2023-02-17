@@ -476,6 +476,9 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                 }
                 if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE) {
                     continue;
+                } else if (['page', 'pageSize'].includes(key)) {
+                    // Handled by `NodeEntriesComponent`.
+                    continue;
                 }
                 needsUpdate = true;
             }
