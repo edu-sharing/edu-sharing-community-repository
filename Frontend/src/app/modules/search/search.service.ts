@@ -39,6 +39,7 @@ export class SearchService {
     numberofresults: number = 0;
     offset: number = 0;
     complete: boolean = false;
+    mdsInitialized: boolean = false;
     showchosenfilters: boolean = false;
     displayType: NodeEntriesDisplayType = null;
     // Used by node-render.component
