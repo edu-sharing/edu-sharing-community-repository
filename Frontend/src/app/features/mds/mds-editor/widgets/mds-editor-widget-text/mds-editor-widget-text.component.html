@@ -26,6 +26,7 @@
     [placeholder]="widget.definition.placeholder"
     [formControl]="formControl"
     (blur)="blur()"
+    (keydown.enter)="submit()"
   />
 </es-mds-editor-widget-container>
 
@@ -46,5 +47,6 @@
     [placeholder]="widget.definition.placeholder"
     [formControl]="formControl"
     (blur)="blur()"
+    (keydown.enter)="submit()"
   ></textarea>
 </es-mds-editor-widget-container>
