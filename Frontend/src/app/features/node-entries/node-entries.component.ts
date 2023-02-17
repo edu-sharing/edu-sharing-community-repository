@@ -73,23 +73,28 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
 
     ngAfterViewInit() {
         if (this.paginator) {
-            void this.initPaginator(this.paginator);
+            this.initPaginator(this.paginator);
         }
     }
 
-    private async initPaginator(paginator: MatPaginator) {
+    private initPaginator(paginator: MatPaginator) {
         // I18n.
-        await this.translations.waitForInit().toPromise();
-        paginator._intl.itemsPerPageLabel = this.translate.instant('PAGINATOR.itemsPerPageLabel');
-        paginator._intl.nextPageLabel = this.translate.instant('PAGINATOR.nextPageLabel');
-        paginator._intl.previousPageLabel = this.translate.instant('PAGINATOR.previousPageLabel');
-        paginator._intl.getRangeLabel = (page, pageSize, length) =>
-            this.translate.instant('PAGINATOR.getRangeLabel', {
-                page: page + 1,
-                pageSize,
-                length,
-                pageCount: Math.ceil(length / pageSize),
-            });
+        this.translations.waitForInit().subscribe(() => {
+            paginator._intl.itemsPerPageLabel = this.translate.instant(
+                'PAGINATOR.itemsPerPageLabel',
+            );
+            paginator._intl.nextPageLabel = this.translate.instant('PAGINATOR.nextPageLabel');
+            paginator._intl.previousPageLabel = this.translate.instant(
+                'PAGINATOR.previousPageLabel',
+            );
+            paginator._intl.getRangeLabel = (page, pageSize, length) =>
+                this.translate.instant('PAGINATOR.getRangeLabel', {
+                    page: page + 1,
+                    pageSize,
+                    length,
+                    pageCount: Math.ceil(length / pageSize),
+                });
+        });
         // Connect data source.
         this.entriesService.dataSource$.pipe(takeUntil(this.destroyed$)).subscribe((dataSource) => {
             if (dataSource instanceof NodeDataSourceRemote) {
