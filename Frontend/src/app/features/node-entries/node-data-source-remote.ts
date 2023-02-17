@@ -8,7 +8,7 @@ import { MatTableDataSourcePageEvent, MatTableDataSourcePaginator } from '@angul
 import { SearchResults } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { filter, map, switchMap, tap } from 'rxjs/operators';
 import { GenericAuthority, Node } from 'src/app/core-module/core.module';
 import { InfiniteScrollPaginator } from './infinite-scroll-paginator';
 import { ItemsCap } from './items-cap';
@@ -59,7 +59,9 @@ export class NodeDataSourceRemote<
     }
     set sort(sort: MatSort | null) {
         this._sort = sort;
-        this._updateRemoteSubscription();
+        if (this._remote) {
+            this._updateRemoteSubscription();
+        }
     }
     private _sort: MatSort | null;
 
@@ -168,24 +170,41 @@ export class NodeDataSourceRemote<
     }
 
     private _updateRemoteSubscription(): void {
-        if (!this.paginator) {
-            // We won't fetch remote data without a paginator in place. Wait for the paginator to be
-            // connected.
+        if (!this.paginator || !this.sort) {
+            // We won't fetch remote data without a paginator or sorting in place. Wait for the
+            // components to be connected to be connected.
+            //
+            // TODO: Use an approach were pagination and sorting is handled independently from UI
+            // components and UI components are merely controlled by that logic. This way, we can do
+            // our request earlier and don't get stuck, when UI components are disabled with ngIf.
+            //
+            // Concept:
+            // - Provide configuration like page size and default sorting to the module handling
+            //   pagination and sorting
+            // - Register UI components with that module when they become available
+            // - This module is the source of truth. For query params etc., we listen for events by
+            //   this module.
             return;
         }
         this._resetDone = false;
         const sortChange: Observable<Sort | null | void> = this._sort
-            ? (
-                  rxjs.merge(
-                      this._sort.sortChange,
-                      this._sort.initialized,
-                  ) as Observable<Sort | void>
-              ).pipe(
-                  tap(() => {
-                      this._resetDone = false;
-                      this._cache.clear();
-                  }),
-              )
+            ? (rxjs.merge(
+                  this._sort.sortChange.pipe(
+                      tap(() => {
+                          this._resetDone = false;
+                          this._cache.clear();
+                          this.paginator.pageIndex = 0;
+                          this.paginator.page.next({
+                              pageIndex: 0,
+                              pageSize: this.paginator.pageSize,
+                              length: this.paginator.length,
+                          });
+                      }),
+                      // Stop propagation and instead rely on the page event to trigger the request.
+                      filter(() => false),
+                  ),
+                  this._sort.initialized,
+              ) as Observable<Sort | void>)
             : rxjs.of(null);
         const pageChange: Observable<MatTableDataSourcePageEvent | void> = rxjs.merge(
             this._paginator.page,

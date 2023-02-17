@@ -10,6 +10,7 @@ import {
     MetadataSetInfo,
     NetworkService,
     SearchService,
+    MdsSortColumn,
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -25,6 +26,7 @@ import {
 } from 'rxjs/operators';
 import {
     ListItem,
+    ListItemSort,
     Node,
     Repository,
     RestConstants,
@@ -72,6 +74,9 @@ export class SearchPageService implements OnDestroy {
     readonly loadingProgress = new BehaviorSubject<number>(null);
     readonly resultColumns = new BehaviorSubject<ListItem[]>([]);
     readonly collectionColumns = new BehaviorSubject<ListItem[]>([]);
+    readonly sortableColumns = new BehaviorSubject<ListItemSort[]>(null);
+    readonly sortActive = this.userModifiableValues.createString();
+    readonly sortDirection = this.userModifiableValues.createString<'asc' | 'desc'>();
 
     private readonly destroyed = new Subject<void>();
     private readonly loadingContent = new BehaviorSubject<boolean>(false);
@@ -115,7 +120,10 @@ export class SearchPageService implements OnDestroy {
         searchFieldInstance.patchConfig({ showFiltersButton: false });
         // Jump to the search page when a search is triggered.
         rxjs.merge(
-            searchFieldInstance.onSearchTriggered().pipe(filter(({ cleared }) => !cleared)),
+            searchFieldInstance.onSearchTriggered().pipe(
+                // Don't trigger a search when the search field was cleared with the 'X' button.
+                filter(({ cleared }) => !cleared),
+            ),
             searchFieldInstance.onFilterValuesChanged(),
         ).subscribe(() => {
             this.navigationScheduler.scheduleNavigation({
@@ -133,7 +141,7 @@ export class SearchPageService implements OnDestroy {
     private initSearchPageUi(): void {
         this.registerSearchObservables();
         this.registerLoadingProgress();
-        this.registerColumns();
+        this.registerColumnsAndSortConfig();
     }
 
     private initQueryParams(): void {
@@ -303,7 +311,8 @@ export class SearchPageService implements OnDestroy {
             .subscribe((progress) => this.loadingProgress.next(progress));
     }
 
-    private registerColumns(): void {
+    private registerColumnsAndSortConfig(): void {
+        // Get MDS definition.
         const mds = rxjs
             .combineLatest([
                 this.activeRepository.observeValue().pipe(filter(notNull)),
@@ -314,12 +323,25 @@ export class SearchPageService implements OnDestroy {
                     this.mds.getMetadataSet({ repository, metadataSet }),
                 ),
             );
+        // Register columns.
         mds.pipe(map((mds) => MdsHelper.getColumns(this.translate, mds, 'search'))).subscribe(
             this.resultColumns,
         );
         mds.pipe(
             map((mds) => MdsHelper.getColumns(this.translate, mds, 'searchCollections')),
         ).subscribe(this.collectionColumns);
+        // Register sort.
+        mds.pipe(map((mds) => MdsHelper.getSortInfo(mds, 'search'))).subscribe((sortInfo) => {
+            this.sortableColumns.next(
+                sortInfo.columns.map(
+                    ({ id, mode }) =>
+                        new ListItemSort('NODE', id, mode as 'ascending' | 'descending'),
+                ),
+            );
+            this.sortActive.setSystemValue(sortInfo.default.sortBy);
+            this.sortDirection.setSystemValue(sortInfo.default.sortAscending ? 'asc' : 'desc');
+            console.log({ sortInfo });
+        });
     }
 
     private getSearchRemote(params: SearchRequestParams): NodeRemote<Node> {

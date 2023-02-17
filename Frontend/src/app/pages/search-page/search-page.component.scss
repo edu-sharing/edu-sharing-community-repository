@@ -68,17 +68,18 @@ main {
     padding: 0 25px 25px;
 }
 
-h2 {
-    margin-top: 2.5rem;
-    margin-bottom: 1rem;
+.entries-wrapper {
+    display: block;
+    margin-top: 1.5rem;
 }
 
-.collections-heading-container {
+.title-container {
     flex-grow: 1;
     display: flex;
     align-items: center;
     h2 {
         flex-grow: 1;
+        margin: 1rem 0;
     }
 }
 

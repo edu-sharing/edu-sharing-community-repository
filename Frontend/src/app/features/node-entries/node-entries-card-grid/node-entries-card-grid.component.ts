@@ -13,6 +13,7 @@ import {
     ViewChild,
     ViewChildren,
 } from '@angular/core';
+import { MatSort } from '@angular/material/sort';
 import { Node } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -23,7 +24,9 @@ import { Target } from '../../../core-ui-module/option-item';
 import { DragData } from '../../../services/nodes-drag-drop.service';
 import { SortEvent } from '../../../shared/components/sort-dropdown/sort-dropdown.component';
 import { GridLayout, NodeEntriesDisplayType } from '../entries-model';
+import { InfiniteScrollPaginator } from '../infinite-scroll-paginator';
 import { ItemsCap } from '../items-cap';
+import { NodeDataSourceRemote } from '../node-data-source-remote';
 import { NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
 
@@ -32,7 +35,7 @@ import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
     templateUrl: 'node-entries-card-grid.component.html',
     styleUrls: ['node-entries-card-grid.component.scss'],
 })
-export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnChanges, OnDestroy {
+export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnDestroy {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Target = Target;
     /**
@@ -88,9 +91,25 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnC
     ) {}
 
     ngOnInit(): void {
+        this.registerSort();
         this.registerItemsCap();
         this.registerLayout();
         this.registerVisibleItemsLimited();
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
+    }
+
+    private registerSort() {
+        if (this.entriesService.dataSource instanceof NodeDataSourceRemote) {
+            const sort = new MatSort();
+            sort.active = this.entriesService.sort?.active;
+            sort.direction = this.entriesService.sort?.direction;
+            sort._markInitialized();
+            this.entriesService.dataSource.sort = sort;
+        }
     }
 
     private registerItemsCap() {
@@ -105,20 +124,24 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnC
             )
             .subscribe((cap) => (this.itemsCap.cap = cap));
     }
+
     private registerLayout() {
         this.layout$.subscribe((layout) => (this.layout = layout));
-    }
-    ngOnChanges(changes: SimpleChanges): void {}
-
-    ngOnDestroy(): void {
-        this.destroyed.next();
-        this.destroyed.complete();
     }
 
     changeSort(sort: SortEvent) {
         this.entriesService.sort.active = sort.name;
         this.entriesService.sort.direction = sort.ascending ? 'asc' : 'desc';
         this.entriesService.sortChange.emit(this.entriesService.sort);
+        if (this.entriesService.dataSource instanceof NodeDataSourceRemote) {
+            const dataSourceSort = this.entriesService.dataSource.sort;
+            dataSourceSort.active = sort.name;
+            dataSourceSort.direction = sort.ascending ? 'asc' : 'desc';
+            dataSourceSort.sortChange.emit({
+                active: dataSourceSort.active,
+                direction: dataSourceSort.direction,
+            });
+        }
     }
 
     loadData(source: 'scroll' | 'button') {

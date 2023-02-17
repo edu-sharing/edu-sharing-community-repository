@@ -30,8 +30,12 @@
       <es-search-page-filter-bar></es-search-page-filter-bar>
     </mat-drawer>
     <main>
+      <!-- FIXME: Use *ngIf instead of [class.display-none] when data-source-remote supports sorting
+      without relying on ui elements. -->
+      <!-- *ngIf="!collectionsDataSource.isEmpty()" -->
       <es-node-entries-wrapper
-        *ngIf="!collectionsDataSource.isEmpty()"
+        [class.display-none]="collectionsDataSource.isEmpty()"
+        class="entries-wrapper"
         [dataSource]="collectionsDataSource"
         [scope]="Scope.SearchCollections"
         [columns]="collectionColumns.value"
@@ -40,19 +44,30 @@
         [gridConfig]="{ layout: 'scroll' }"
       >
         <ng-template #title>
-          <div class="collections-heading-container">
+          <div class="title-container">
             <h2 class="mat-heading-2">{{ 'SEARCH.COLLECTIONS' | translate }}</h2>
           </div>
         </ng-template>
       </es-node-entries-wrapper>
-      <h2 class="mat-heading-2">{{ 'SEARCH.MATERIALS' | translate }}</h2>
       <es-node-entries-wrapper
         #nodeEntriesResults
+        class="entries-wrapper"
         [dataSource]="resultsDataSource"
         [scope]="Scope.Search"
         [columns]="resultColumns.value"
+        [sort]="{
+          allowed: true,
+          active: sortActive.getValue(),
+          direction: sortDirection.getValue(),
+          columns: sortableColumns.getValue()
+        }"
         [primaryInstance]="true"
       >
+        <ng-template #title>
+          <div class="title-container">
+            <h2 class="mat-heading-2">{{ 'SEARCH.MATERIALS' | translate }}</h2>
+          </div>
+        </ng-template>
         <ng-template #empty>
           <div class="no-search-results-message">
             <i esIcon="search"></i>

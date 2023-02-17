@@ -25,8 +25,8 @@ export class UserModifiableValuesService {
         return new UserModifiableValue(userModifiableDictType, systemValue);
     }
 
-    createString(systemValue?: string): UserModifiableValue<string> {
-        return new UserModifiableValue(userModifiableStringType, systemValue);
+    createString<S extends string>(systemValue?: S): UserModifiableValue<S> {
+        return new UserModifiableValue(new UserModifiableStringType<S>(), systemValue);
     }
 
     // createMapped<T>(mapping: Mapping<T>, systemValue?: T): UserModifiableValue<T> {
@@ -211,12 +211,12 @@ const userModifiableDictType: UserModifiableType<{ [key: string]: any }> = {
     deserialize: JSON.parse,
 };
 
-const userModifiableStringType: UserModifiableType<string> = {
-    null: null,
-    merge: (defaultValue: string, userValue: string) => userValue ?? defaultValue,
-    serialize: (value: string) => value,
-    deserialize: (value: string) => value,
-};
+class UserModifiableStringType<S extends string> implements UserModifiableType<S> {
+    null: S = null;
+    merge = (defaultValue: S, userValue: S) => userValue ?? defaultValue;
+    serialize = (value: S) => value;
+    deserialize = (value: string) => value as S;
+}
 
 interface Mapping<T> {
     toString: (value: T) => string;

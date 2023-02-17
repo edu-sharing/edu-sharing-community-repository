@@ -15,8 +15,6 @@ export class InfiniteScrollPaginator implements MatTableDataSourcePaginator {
     initialized = rxjs.of<void>(void 0);
     pageSize = this._chunkSize;
     length = 0;
-    firstPage = () => {};
-    lastPage = () => {};
 
     constructor(private _chunkSize = 25) {}
 
