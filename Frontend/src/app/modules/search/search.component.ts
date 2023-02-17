@@ -417,8 +417,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             // Why do we need this, when the top bar is hidden anyway?
             // showScope: this.mainnav,
             // showUser: this.mainnav,
-            searchQueryChange: (searchQuery) => (this.searchService.searchTerm = searchQuery),
-            onSearch: () => this.applyParameters('mainnav'),
+            onSearch: (query) => this.applyParameters('mainnav', null, query),
             onCreate: (nodes) => this.nodeEntriesResults.addVirtualNodes(nodes),
         });
     }
@@ -460,19 +459,33 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     async applyParameters(
         origin: 'mainnav' | 'mds' | 'did-you-mean-suggestion' | 'sort' | 'uri',
         props: Values = null,
-        { replaceUrl = false } = {},
+        query: string = this.searchService.searchTerm,
+        { replaceUrl = false, force = false } = {},
     ) {
         if (origin === 'mds') {
             if (!Helper.objectEquals(this.searchService.values, props)) {
-                await this.routeSearchParameters(props, { replaceUrl });
+                await this.routeSearchParameters(query, props, { replaceUrl });
             }
             return;
         }
-        if (origin === 'uri' && Helper.objectEquals(this.searchService.values, props)) {
+        if (origin === 'mainnav') {
+            await this.routeSearchParameters(query, props, { replaceUrl });
             return;
         }
-        this.searchService.values = props;
-        console.log(this.searchService.values, props);
+        if (
+            origin === 'uri' &&
+            Helper.objectEquals(this.searchService.values, props) &&
+            this.searchService.searchTerm === query
+        ) {
+            return;
+        }
+        if (query) {
+            this.searchService.searchTerm = query;
+        }
+        if (props) {
+            this.searchService.values = props;
+        }
+
         this.searchService.reinit = true;
         this.searchService.extendedSearchUsed = true;
         this.updateGroupedRepositories();
@@ -481,7 +494,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         ) {
             this.searchService.sidenavOpened = false;
         }
-        await this.routeSearchParameters(props, { replaceUrl });
+        await this.routeSearchParameters(query, props, { replaceUrl });
         this.getSearch(this.searchService.searchTerm, true);
     }
 
@@ -570,16 +583,11 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     routeSearchParameters(
+        query = this.searchService.searchTerm,
         parameters: { [property: string]: string[] },
         { replaceUrl = false } = {},
     ) {
-        this.routeSearch(
-            this.searchService.searchTerm,
-            this.currentRepository,
-            this.mdsId,
-            parameters,
-            { replaceUrl },
-        );
+        this.routeSearch(query, this.currentRepository, this.mdsId, parameters, { replaceUrl });
     }
 
     async getMdsValues(): Promise<{ [property: string]: string[] }> {
@@ -649,7 +657,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isSearching = true;
         if (searchString == null) searchString = this.searchService.searchTerm;
         if (searchString == null) searchString = '';
-        this.searchService.searchTerm = searchString;
         if (init) {
             this.searchService.init();
         } else if (
@@ -1091,9 +1098,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             }
             if (param.parameters) {
                 this.searchService.extendedSearchUsed = true;
-                this.applyParameters('uri', JSON.parse(param['parameters']));
+                this.applyParameters('uri', JSON.parse(param.parameters), param.query);
             } else if (this.searchService.values) {
-                this.applyParameters('uri', null);
+                this.applyParameters('uri', null, param.query);
             }
             if (param['savedQuery']) {
                 this.nodeApi
@@ -1707,7 +1714,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             )
             .subscribe((values) => {
                 this.ngZone.run(() =>
-                    this.applyParameters('mds', values, { replaceUrl: !initDone }),
+                    this.applyParameters('mds', values, this.searchService.searchTerm, {
+                        replaceUrl: !initDone,
+                    }),
                 );
                 initDone = true;
             });
