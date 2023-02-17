@@ -141,7 +141,9 @@ export class SearchPageService implements OnDestroy {
         this.activeMetadataSet.registerQueryParameter('mds', this.route);
         this.searchFilters.registerQueryParameter('filters', this.route);
         this.searchString.registerQueryParameter('q', this.route);
-        this.filterBarIsVisible.registerQueryParameter('filterBar', this.route);
+        this.filterBarIsVisible.registerQueryParameter('filterBar', this.route, {
+            replaceUrl: true,
+        });
     }
 
     private registerRepositories(): void {

@@ -137,7 +137,11 @@ class UserModifiableValue<T> {
         return this.mergedValue.asObservable();
     }
 
-    registerQueryParameter(key: string, activatedRoute: ActivatedRoute): void {
+    registerQueryParameter(
+        key: string,
+        activatedRoute: ActivatedRoute,
+        { replaceUrl = false } = {},
+    ): void {
         let currentParam: string;
         activatedRoute.queryParams
             .pipe(
@@ -158,6 +162,7 @@ class UserModifiableValue<T> {
             .subscribe((param) => {
                 UserModifiableValue.navigationScheduler.scheduleNavigation({
                     queryParams: { [key]: param },
+                    replaceUrl,
                 });
             });
     }
