@@ -9,6 +9,7 @@ import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { SearchFieldService } from 'src/app/main/navigation/search-field/search-field.service';
 import { ListItem, Node } from '../../core-module/core.module';
 import { CombinedDataSource } from '../../features/node-entries/combined-data-source';
+import { Values } from '../../features/mds/types/types';
 
 /**
  * Session state for search.component.
@@ -25,6 +26,7 @@ export class SearchService {
     set searchTerm(value: string) {
         this.searchTermSubject.next(value);
     }
+    values: Values;
     dataSourceSearchResultAll = new CombinedDataSource<Node>([]);
     dataSourceSearchResult: NodeDataSource<Node>;
     searchResultRepositories: Node[][] = [];

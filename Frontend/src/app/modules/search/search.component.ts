@@ -197,7 +197,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     private enabledRepositories: string[];
     // we only initalize the banner once to prevent flickering
     private bannerInitalized = false;
-    currentValues: Values;
     private currentMdsSet: MdsDefinition;
     mdsActions: OptionItem[];
     mdsButtons: DialogButton[];
@@ -277,7 +276,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.destroyed$.complete();
     }
 
-    private initAfterView(): void {
+    private async initAfterView() {
         // For some reason, the main nav component does not get populated in time when navigating
         // back from the rendering component. However, since the user cannot go anywhere without
         // closing the tutorial, we won't be needing it in this case anyway.
@@ -288,11 +287,12 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.searchService.clear();
         this.initalized = true;
         this.searchService.clear();
-        if (this.searchService.reinit) {
+        /*if (this.searchService.reinit) {
+            console.log('reinit required');
             this.searchService.init();
             this.initalized = false;
             this.getDataSource().isLoading = true;
-        }
+        }*/
         this.savedSearchColumns.push(new ListItem('NODE', RestConstants.LOM_PROP_TITLE));
         this.optionsHelper.displayTypeChanged
             .pipe(takeUntil(this.destroyed$))
@@ -458,15 +458,23 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     async applyParameters(
-        origin: 'mainnav' | 'mds' | 'did-you-mean-suggestion' | 'sort',
+        origin: 'mainnav' | 'mds' | 'did-you-mean-suggestion' | 'sort' | 'uri',
         props: Values = null,
         { replaceUrl = false } = {},
     ) {
+        if (origin === 'mds') {
+            if (!Helper.objectEquals(this.searchService.values, props)) {
+                await this.routeSearchParameters(props, { replaceUrl });
+            }
+            return;
+        }
+        if (origin === 'uri' && Helper.objectEquals(this.searchService.values, props)) {
+            return;
+        }
+        this.searchService.values = props;
+        console.log(this.searchService.values, props);
         this.searchService.reinit = true;
         this.searchService.extendedSearchUsed = true;
-        if (origin === 'mds') {
-            this.currentValues = props;
-        }
         this.updateGroupedRepositories();
         if (
             UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_WIDTH, UIConstants.MOBILE_WIDTH)
@@ -639,7 +647,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
         }
         this.isSearching = true;
-        this.getDataSource().isLoading = true;
         if (searchString == null) searchString = this.searchService.searchTerm;
         if (searchString == null) searchString = '';
         this.searchService.searchTerm = searchString;
@@ -654,14 +661,15 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.isSearching = false;
             return;
         }
+        this.getDataSource().isLoading = true;
 
-        const criterias = this.getCriterias(this.currentValues, searchString);
+        const criterias = this.getCriterias(this.searchService.values, searchString);
 
         const repos =
             this.currentRepository == RestConstants.ALL
                 ? this.repositoryIds
                 : [{ id: this.currentRepository, enabled: true }];
-        this.searchField.setFilterValues(this.currentValues);
+        this.searchField.setFilterValues(this.searchService.values);
         this.searchRepository(repos, criterias, init);
 
         if (init) {
@@ -694,7 +702,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             .searchWithBody(
                 {
                     criteria: this.getCriterias(
-                        this.currentValues,
+                        this.searchService.values,
                         this.searchService.searchTerm,
                         false,
                     ),
@@ -830,7 +838,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     // }
 
     updateMds() {
-        this.currentValues = null;
+        this.searchService.values = null;
         this.routeSearch(this.searchService.searchTerm, this.currentRepository, this.mdsId, null);
     }
 
@@ -1040,8 +1048,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.searchService.dataSourceSearchResult?.isEmpty()
         ) {
             this.initalized = true;
-            if (!this.currentValues && this.getActiveMds()) {
-                this.currentValues = await this.getMdsValues();
+            if (!this.searchService.values && this.getActiveMds()) {
+                this.searchService.values = await this.getMdsValues();
             }
         }
         if (this.mainNavService.getMainNav() && !this.bannerInitalized) {
@@ -1049,7 +1057,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.handleScroll();
             this.bannerInitalized = true;
         }
-        this.searchService.reinit = true;
     }
 
     private prepare(param: Params): void {
@@ -1084,9 +1091,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             }
             if (param.parameters) {
                 this.searchService.extendedSearchUsed = true;
-                this.currentValues = JSON.parse(param['parameters']);
-            } else if (this.currentValues) {
-                this.currentValues = null;
+                this.applyParameters('uri', JSON.parse(param['parameters']));
+            } else if (this.searchService.values) {
+                this.applyParameters('uri', null);
             }
             if (param['savedQuery']) {
                 this.nodeApi
@@ -1097,7 +1104,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             } else {
                 this.invalidateMds();
             }
-            this.searchService.init();
         });
     }
 
@@ -1379,7 +1385,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private getCriterias(
-        properties = this.currentValues,
+        properties = this.searchService.values,
         searchString = this.searchService.searchTerm,
         addAll = true,
     ) {
@@ -1490,7 +1496,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.oldParams = param;
             }
 
-            this.searchService.init();
             this.mainNavService.getMainNav().refreshBanner();
             if (!this.loadingTask.isDone) {
                 this.loadingTask.done();
@@ -1596,7 +1601,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.routeSearch(this.searchService.searchTerm, use[0], RestConstants.DEFAULT);
             }
             if (this.currentRepository != previousRepository) {
-                this.currentValues = null;
+                this.searchService.values = null;
             }
             this.updateSelection([]);
             let repo = this.currentRepository;
