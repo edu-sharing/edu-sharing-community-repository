@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import {
     ConfigurationService,
     Node,
@@ -23,6 +23,7 @@ export class NodeRatingComponent<T extends Node> implements OnInit {
         public connector: RestConnectorService,
         public toast: Toast,
         public configService: ConfigurationService,
+        public changeDetectorRef: ChangeDetectorRef,
         public ratingService: RestRatingService,
     ) {}
 
@@ -54,6 +55,7 @@ export class NodeRatingComponent<T extends Node> implements OnInit {
                 this.toast.error(e);
             }
         }
+        this.changeDetectorRef.detectChanges();
     }
 
     getPrimaryRating() {
@@ -73,6 +75,7 @@ export class NodeRatingComponent<T extends Node> implements OnInit {
             this.toast.toast('RATING.TOAST.RATED', { name, rating });
             this.node.rating.overall.count += this.node.rating.user ? 0 : 1;
             this.node.rating.user = rating;
+            this.changeDetectorRef.detectChanges();
         } catch (e) {
             this.toast.error(e);
         }
@@ -86,6 +89,7 @@ export class NodeRatingComponent<T extends Node> implements OnInit {
             this.node.rating.overall.count--;
             this.node.rating.overall.sum -= this.node.rating.user;
             this.node.rating.user = 0;
+            this.changeDetectorRef.detectChanges();
         } catch (e) {
             this.toast.error(e);
         }
