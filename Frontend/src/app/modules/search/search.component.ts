@@ -249,8 +249,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.registerScrollHandler();
         this.registerMainNav();
+        this.scrollTo(this.searchService.offset);
     }
 
     ngAfterViewInit() {
@@ -258,6 +258,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.mainNavService.getMainNav().refreshBanner();
         setTimeout(() => {
             this.initAfterView();
+            this.registerScrollHandler();
         });
     }
 
@@ -287,7 +288,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.mainNavService.getMainNav().searchField) {
             this.tutorialElement = this.mainNavService.getMainNav().searchField.input;
         }
-        this.handleScroll();
         this.savedSearchColumns.push(new ListItem('NODE', RestConstants.LOM_PROP_TITLE));
         this.optionsHelper.displayTypeChanged
             .pipe(takeUntil(this.destroyed$))
@@ -300,8 +300,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.searchService.sidenavOpened$
             .pipe(takeUntil(this.destroyed$))
             .subscribe(() => this.extendedSearchTabGroup?.realignInkBar());
-
-        // this.scrollTo(this.searchService.offset);
         this.innerWidth = this.winRef.getNativeWindow().innerWidth;
         //this.autocompletesArray = this.autocompletes.toArray();
         this.registerSearchOnMdsUpdate();
@@ -451,7 +449,14 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         console.info('routing', origin, props, query);
         if (origin === 'mds') {
             this.searchService.mdsInitialized = true;
-            await this.routeSearchParameters(this.searchService.searchTerm, props, { replaceUrl });
+            // do not route search - it can cause reset of the scroll offset of the page
+            if (Helper.objectEquals(this.searchService.values, props)) {
+                await this.applyParameters('uri', props, this.searchService.searchTerm);
+            } else {
+                await this.routeSearchParameters(this.searchService.searchTerm, props, {
+                    replaceUrl,
+                });
+            }
             return;
         }
         if (origin === 'mainnav' || origin === 'did-you-mean-suggestion' || origin === 'sort') {
@@ -464,6 +469,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.searchService.searchTerm === query &&
             this.getDataSource()?.isEmpty() === false
         ) {
+            console.info('init is already done');
             this.initOptions();
             return;
         }
@@ -517,6 +523,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     scrollTo(y = 0) {
+        console.info('Scroll to', y);
         this.winRef.getNativeWindow().scrollTo(0, y);
         // fix: prevent upscrolling in prod mode
         setTimeout(() => this.winRef.getNativeWindow().scrollTo(0, y));
@@ -876,6 +883,13 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.mdsMobileRef.loadMds();
             });
         }
+        this.router.navigate(['./'], {
+            relativeTo: this.activatedRoute,
+            queryParamsHandling: 'merge',
+            queryParams: {
+                sidenav: this.searchService.sidenavOpened,
+            },
+        });
         setTimeout(() => {
             // recalculate the filter layout
             this.handleScroll();
@@ -1038,7 +1052,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         if (this.mainNavService.getMainNav() && !this.bannerInitalized) {
             await this.mainNavService.getMainNav().refreshBanner();
-            this.handleScroll();
             this.bannerInitalized = true;
         }
     }
