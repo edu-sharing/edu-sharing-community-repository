@@ -47,6 +47,7 @@ import {
     NodeEntriesDisplayType,
 } from './entries-model';
 import { NodeDataSource } from './node-data-source';
+import { Helper } from '../../core-module/rest/helper';
 
 @Component({
     selector: 'es-node-entries-wrapper',
@@ -255,6 +256,13 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         });
         // trigger rebuild
         this.dataSource.refresh();
+        const oldSelection = this.entriesService.selection.selected;
+        this.entriesService.selection.clear();
+        this.entriesService.selection.select(
+            ...oldSelection.map(
+                (o) => this.dataSource.getData().filter((d) => Helper.objectEquals(o, d))?.[0],
+            ),
+        );
         this.changeDetectorRef.detectChanges();
     }
 
