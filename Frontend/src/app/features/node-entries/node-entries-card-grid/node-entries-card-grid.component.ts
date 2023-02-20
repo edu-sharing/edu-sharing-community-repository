@@ -1,5 +1,6 @@
 import { CdkDragEnter, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
+    ChangeDetectionStrategy,
     Component,
     ElementRef,
     Input,
@@ -27,6 +28,7 @@ import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
     selector: 'es-node-entries-card-grid',
     templateUrl: 'node-entries-card-grid.component.html',
     styleUrls: ['node-entries-card-grid.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnChanges {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;

@@ -284,6 +284,10 @@ public class NodeRunner {
     }
 
     private void runTask(NodeRef ref) {
+        if(ref == null){
+            logger.error("nodeRef is null");
+            return;
+        }
         try {
             if (keepModifiedDate)
                 policyBehaviourFilter.disableBehaviour(ref);

@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import * as rxjs from 'rxjs';
 import { distinctUntilChanged, map, shareReplay } from 'rxjs/operators';
 import { GenericAuthority, Pagination, Node } from 'src/app/core-module/core.module';
+import { Helper } from '../../core-module/rest/helper';
 
 export class NodeDataSource<T extends Node | GenericAuthority> extends DataSource<T> {
     private dataStream = new BehaviorSubject<T[]>([]);
@@ -113,5 +114,14 @@ export class NodeDataSource<T extends Node | GenericAuthority> extends DataSourc
 
     isFullyLoaded() {
         return this.getTotal() <= this.getData()?.length;
+    }
+
+    /**
+     * force a refresh of all elements in the current data stream
+     * trigger this to enforce a rebuild of the nodes in all sub-components
+     * i.e. if data from some nodes has changed
+     */
+    refresh() {
+        this.dataStream.next(Helper.deepCopy(this.dataStream.value));
     }
 }

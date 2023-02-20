@@ -27,10 +27,14 @@
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
+import org.alfresco.repo.version.Version2Model;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -38,6 +42,7 @@ import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.edu_sharing.service.provider.Provider;
@@ -102,6 +107,9 @@ public class BulkEditNodesJob extends AbstractJob{
 	@JobFieldDescription(description = "use archive. default is \"false\"")
 	private String archive;
 
+	@JobFieldDescription(description = "use versionStore. default is \"false\". overwrites archive param.")
+	private String versionStore;
+
 	private enum Mode{
 		@JobFieldDescription(description = "Replace a property with a fixed string")
 		Replace,
@@ -135,6 +143,7 @@ public class BulkEditNodesJob extends AbstractJob{
 		} catch (Throwable t) {
 			throw new IllegalArgumentException("Missing or invalid value for required parameter 'mode'", t);
 		}
+
 
 		if(!mode.equals(Mode.Custom)) {
 			property = prepareParam(context, "property", true);
@@ -173,6 +182,8 @@ public class BulkEditNodesJob extends AbstractJob{
 
 		startFolder = prepareParam(context, "startFolder", true);
 		archive = prepareParam(context, "archive", false);
+		versionStore = prepareParam(context,"versionStore", false);
+
 		try {
 			types = Arrays.stream(((String) context.getJobDetail().getJobDataMap().get("types")).
 					split(",")).map(String::trim).map(CCConstants::getValidGlobalName).
@@ -226,7 +237,7 @@ public class BulkEditNodesJob extends AbstractJob{
 					}
 				}
 				if (mode.equals(Mode.Replace)) {
-					nodeService.setProperty(nodeRef, QName.createQName(property), value);
+					setProperty(nodeRef, QName.createQName(property), value);
 				} else if (mode.equals(Mode.Remove)) {
 					if (searchToken != null) {
 						Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
@@ -244,18 +255,18 @@ public class BulkEditNodesJob extends AbstractJob{
 								}
 							}
 							if (remove) {
-								nodeService.removeProperty(nodeRef, QName.createQName(property));
+								removeProperty(nodeRef, QName.createQName(property));
 							}
 						}
 					} else {
-						nodeService.removeProperty(nodeRef, QName.createQName(property));
+						removeProperty(nodeRef, QName.createQName(property));
 					}
 				} else if (mode.equals(Mode.RemoveSingle)) {
 					Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
 					if (current != null) {
 						if (current instanceof String) {
 							if (searchToken.equals(current)) {
-								nodeService.removeProperty(nodeRef, QName.createQName(property));
+								removeProperty(nodeRef, QName.createQName(property));
 							}
 						} else if (current instanceof List) {
 							ArrayList<String> newList = new ArrayList<>((List<String>) current);
@@ -264,7 +275,7 @@ public class BulkEditNodesJob extends AbstractJob{
 								if(newList.size() == 0) {
 									NodeServiceHelper.removeProperty(nodeRef, property);
 								} else {
-									nodeService.setProperty(nodeRef,QName.createQName(property),newList);
+									setProperty(nodeRef,QName.createQName(property),newList);
 								}
 							}
 						} else {
@@ -275,9 +286,9 @@ public class BulkEditNodesJob extends AbstractJob{
 					Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
 					if (current != null) {
 						if (current instanceof String) {
-							nodeService.setProperty(nodeRef, QName.createQName(property), processPropertyValue((String) current));
+							setProperty(nodeRef, QName.createQName(property), processPropertyValue((String) current));
 						} else if (current instanceof List) {
-							nodeService.setProperty(nodeRef, QName.createQName(property), (Serializable) ((List) current).stream().map((v) -> {
+							setProperty(nodeRef, QName.createQName(property), (Serializable) ((List) current).stream().map((v) -> {
 								if (v instanceof String) {
 									return processPropertyValue((String) v);
 								} else {
@@ -292,7 +303,7 @@ public class BulkEditNodesJob extends AbstractJob{
 					Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
 					if (current != null && current instanceof List) {
 						if (((List) current).stream().distinct().count() != ((List) current).size()) {
-							nodeService.setProperty(nodeRef, QName.createQName(property), (Serializable) ((List) current).stream().distinct().collect(Collectors.toList()));
+							setProperty(nodeRef, QName.createQName(property), (Serializable) ((List) current).stream().distinct().collect(Collectors.toList()));
 						}
 					}
 				} else {
@@ -311,6 +322,10 @@ public class BulkEditNodesJob extends AbstractJob{
 		if(new Boolean(archive)){
 			runner.setStartFolderStore(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE);
 			runner.setLuceneStore(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE);
+		}
+		if(new Boolean(versionStore)){
+			runner.setStartFolderStore(new StoreRef("workspace","version2Store"));
+			if(lucene != null && !lucene.trim().isEmpty()) throw new IllegalArgumentException("lucene can not be used with version store");
 		}
 		int count=runner.run();
 		logger.info("Processed "+count+" nodes");
@@ -370,5 +385,23 @@ public class BulkEditNodesJob extends AbstractJob{
 	@Override
 	public Class[] getJobClasses() {
 		return allJobs;
+	}
+
+	private void setProperty(NodeRef nodeRef,QName qName, Serializable serializable){
+		nodeService.setProperty(nodeRef,qName,serializable);
+
+		if(new Boolean(versionStore)){
+			QName qnameV = QName.createQName(Version2Model.NAMESPACE_URI, Version2Model.PROP_METADATA_PREFIX+qName.toString());
+			nodeService.setProperty(nodeRef,qnameV,serializable);
+		}
+	}
+
+
+	private void removeProperty(NodeRef nodeRef,QName qName){
+		nodeService.removeProperty(nodeRef,qName);
+		if(new Boolean(versionStore)){
+			QName qnameV = QName.createQName(Version2Model.NAMESPACE_URI, Version2Model.PROP_METADATA_PREFIX+qName.toString());
+			nodeService.removeProperty(nodeRef,qnameV);
+		}
 	}
 }

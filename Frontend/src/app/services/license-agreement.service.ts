@@ -70,6 +70,7 @@ export class LicenseAgreementService {
             this.authentication.observeLoginInfo(),
         ])
             .pipe(
+                filter(([_, loginInfo]) => loginInfo?.statusCode === 'OK'),
                 tap(() => this.agreementClearedSubject.next('pending')),
                 map(([config, loginInfo]) => {
                     if (this.shouldShowLicenseAgreementForUser(config, loginInfo)) {
