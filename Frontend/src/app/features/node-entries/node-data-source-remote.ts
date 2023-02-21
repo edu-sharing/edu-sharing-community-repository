@@ -3,16 +3,17 @@
  */
 
 import { DataSource } from '@angular/cdk/collections';
-import { MatSort, Sort } from '@angular/material/sort';
+import { Sort } from '@angular/material/sort';
 import { MatTableDataSourcePageEvent, MatTableDataSourcePaginator } from '@angular/material/table';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SearchResults } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { filter, map, switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, ReplaySubject, Subject, Subscription } from 'rxjs';
+import { debounceTime, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { GenericAuthority, Node } from 'src/app/core-module/core.module';
-import { InfiniteScrollPaginator } from './infinite-scroll-paginator';
 import { ItemsCap } from './items-cap';
 import { NodeCache, NodeCacheRange, NodeCacheSlice } from './node-cache';
+import { PaginationStrategy } from './node-entries-global.service';
 
 type Range = NodeCacheRange;
 
@@ -39,31 +40,23 @@ export type LoadingState =
 // TODO: Rename to something like "fetch implementation" or "request handler"
 export type NodeRemote<T> = (params: NodeRequestParams) => Observable<NodeResponse<T>>;
 
+export interface PaginationConfig {
+    defaultPageSize: number;
+    strategy: PaginationStrategy;
+}
+
 export class NodeDataSourceRemote<
     T extends Node | GenericAuthority,
     P extends MatTableDataSourcePaginator = MatTableDataSourcePaginator,
 > extends DataSource<T> {
-    get paginator(): P | InfiniteScrollPaginator | null {
-        return this._paginator;
+    get paginator(): P | null {
+        return this._paginationHandler.paginator;
     }
-    set paginator(value: P | InfiniteScrollPaginator | null) {
-        this._paginator = value;
-        if (this._remote) {
-            this._updateRemoteSubscription();
-        }
+    set paginator(value: P | null) {
+        this._paginationHandler.paginator = value;
     }
-    private _paginator: P | InfiniteScrollPaginator;
-
-    get sort(): MatSort | null {
-        return this._sort;
-    }
-    set sort(sort: MatSort | null) {
-        this._sort = sort;
-        if (this._remote) {
-            this._updateRemoteSubscription();
-        }
-    }
-    private _sort: MatSort | null;
+    private _paginationHandler = new PaginationHandler<P>();
+    private _sortHandler = new SortHandler();
 
     private _remote: NodeRemote<T>;
     private _renderChangesSubscription: Subscription | null = null;
@@ -89,7 +82,6 @@ export class NodeDataSourceRemote<
 
     constructor() {
         super();
-        this.paginator = new InfiniteScrollPaginator();
         this._registerLoadingState();
     }
 
@@ -101,6 +93,17 @@ export class NodeDataSourceRemote<
     }
 
     disconnect() {}
+
+    init({
+        paginationConfig,
+        initialSort,
+    }: {
+        paginationConfig: PaginationConfig;
+        initialSort: Sort;
+    }): void {
+        this._paginationHandler.init(paginationConfig);
+        this._sortHandler.init(initialSort);
+    }
 
     setRemote(remote: NodeRemote<T>): void {
         this._remote = remote;
@@ -117,14 +120,15 @@ export class NodeDataSourceRemote<
     }
 
     hasMore() {
-        if (!this.paginator) {
-            return undefined;
-        }
-        return this.paginator.length > (this.paginator.pageIndex + 1) * this.paginator.pageSize;
+        return this._paginationHandler.hasMore();
+    }
+
+    loadMore() {
+        return this._paginationHandler.loadMore();
     }
 
     getTotal() {
-        return this.paginator.length;
+        return this._paginationHandler.length;
     }
 
     appendData(appendData: T[], location: 'before' | 'after' = 'after') {
@@ -140,6 +144,15 @@ export class NodeDataSourceRemote<
 
     removeData(data: T[]): void {
         throw new Error('not implemented');
+    }
+
+    registerQueryParameters(route: ActivatedRoute, router: Router): void {
+        this._paginationHandler.registerQueryParameters(route, router);
+        this._sortHandler.registerQueryParameters(route, router);
+    }
+
+    changeSort(sort: Sort): void {
+        this._sortHandler.changeSort(sort);
     }
 
     private _registerLoadingState(): void {
@@ -170,52 +183,29 @@ export class NodeDataSourceRemote<
     }
 
     private _updateRemoteSubscription(): void {
-        if (!this.paginator || !this.sort) {
-            // We won't fetch remote data without a paginator or sorting in place. Wait for the
-            // components to be connected to be connected.
-            //
-            // TODO: Use an approach were pagination and sorting is handled independently from UI
-            // components and UI components are merely controlled by that logic. This way, we can do
-            // our request earlier and don't get stuck, when UI components are disabled with ngIf.
-            //
-            // Concept:
-            // - Provide configuration like page size and default sorting to the module handling
-            //   pagination and sorting
-            // - Register UI components with that module when they become available
-            // - This module is the source of truth. For query params etc., we listen for events by
-            //   this module.
-            return;
-        }
         this._resetDone = false;
-        const sortChange: Observable<Sort | null | void> = this._sort
-            ? (rxjs.merge(
-                  this._sort.sortChange.pipe(
-                      tap(() => {
-                          this._resetDone = false;
-                          this._cache.clear();
-                          this.paginator.pageIndex = 0;
-                          this.paginator.page.next({
-                              pageIndex: 0,
-                              pageSize: this.paginator.pageSize,
-                              length: this.paginator.length,
-                          });
-                      }),
-                      // Stop propagation and instead rely on the page event to trigger the request.
-                      filter(() => false),
-                  ),
-                  this._sort.initialized,
-              ) as Observable<Sort | void>)
-            : rxjs.of(null);
+        const sortChange = rxjs.merge(
+            this._sortHandler.sortChange.pipe(
+                tap(() => {
+                    this._resetDone = false;
+                    this._cache.clear();
+                    this._paginationHandler.firstPage();
+                }),
+            ),
+            this._sortHandler.initialized,
+        );
         const pageChange: Observable<MatTableDataSourcePageEvent | void> = rxjs.merge(
-            this._paginator.page,
+            this._paginationHandler.pageChange,
             //   this._internalPageChanges,
-            this._paginator.initialized,
-        ) as Observable<MatTableDataSourcePageEvent | void>;
+            this._paginationHandler.initialized,
+        );
 
         this._renderChangesSubscription?.unsubscribe();
         this._renderChangesSubscription = rxjs
             .combineLatest([sortChange, pageChange])
             .pipe(
+                // Don't send multiple requests in case a sort change triggers a page change.
+                debounceTime(0),
                 map(() => this._cache.getMissingRange(this._getRequestRange())),
                 switchMap((missingRange) => this._downloadAndCache(missingRange)),
                 map(() => this._cache.get(this._getDisplayRange())),
@@ -229,8 +219,8 @@ export class NodeDataSourceRemote<
 
     private _getRequestRange(): Range {
         return {
-            startIndex: this._paginator.pageIndex * this.paginator.pageSize,
-            endIndex: (this._paginator.pageIndex + 1) * this._paginator.pageSize,
+            startIndex: this._paginationHandler.pageIndex * this._paginationHandler.pageSize,
+            endIndex: (this._paginationHandler.pageIndex + 1) * this._paginationHandler.pageSize,
         };
     }
 
@@ -238,15 +228,15 @@ export class NodeDataSourceRemote<
         const requestRange = this._getRequestRange();
         return {
             startIndex: requestRange.startIndex,
-            endIndex: Math.min(requestRange.endIndex, this.paginator.length),
+            endIndex: Math.min(requestRange.endIndex, this._paginationHandler.length),
         };
     }
 
     private _downloadAndCache(missingRange: Range): Observable<void> {
         if (missingRange) {
             this._isLoading.next(true);
-            return this._remote({ range: missingRange, sort: this._sort }).pipe(
-                tap((response) => (this.paginator.length = response.total)),
+            return this._remote({ range: missingRange, sort: this._sortHandler.currentSort }).pipe(
+                tap((response) => (this._paginationHandler.length = response.total)),
                 tap((response) =>
                     this._cache.add(this._getCacheSlice(missingRange, response.data)),
                 ),
@@ -275,4 +265,198 @@ export function fromSearchResults(searchResults: SearchResults): NodeResponse<No
         data: searchResults.nodes,
         total: searchResults.pagination.total,
     };
+}
+
+/**
+ * A layer between the data source and a paginator component or an infinite-scroll paginator.
+ *
+ * Without this, the data source would need to wait for a paginator component to be added to the DOM
+ * to send its first request. Also, the data source would not be able to function without the
+ * paginator component or directive constantly available in the DOM.
+ */
+class PaginationHandler<P extends MatTableDataSourcePaginator = MatTableDataSourcePaginator> {
+    private _paginator: P;
+    get paginator(): P {
+        return this._paginator;
+    }
+    set paginator(value: P) {
+        this._paginator = value;
+        this._initPaginator(value);
+    }
+    private _config: PaginationConfig;
+    private _pageIndex = 0;
+    get pageIndex() {
+        return this._pageIndex;
+    }
+    set pageIndex(value) {
+        this._pageIndex = value;
+        if (this.paginator) {
+            this.paginator.pageIndex = value;
+        }
+    }
+    private _pageSize: number;
+    get pageSize(): number {
+        return this._pageSize;
+    }
+    set pageSize(value: number) {
+        this._pageSize = value;
+        if (this.paginator) {
+            this.paginator.pageSize = value;
+        }
+    }
+    private _length = 0;
+    get length() {
+        return this._length;
+    }
+    set length(value) {
+        this._length = value;
+        if (this.paginator) {
+            this.paginator.length = value;
+        }
+    }
+
+    private readonly _initialized = new ReplaySubject<void>();
+    initialized = this._initialized.asObservable();
+    private _isInitialized = false;
+    private readonly _pageChange = new Subject<MatTableDataSourcePageEvent>();
+    pageChange = this._pageChange.asObservable();
+    private readonly _paginatorReset = new Subject<void>();
+
+    init(config: PaginationConfig): void {
+        this._config = config;
+        this.pageSize = config.defaultPageSize;
+        this._isInitialized = true;
+        this._initialized.next();
+        this._initialized.complete();
+    }
+
+    firstPage(): void {
+        const previousPageIndex = this.pageIndex;
+        const previousPageSize = this.pageSize;
+        this.pageIndex = 0;
+        if (this._config.strategy === 'infinite-scroll') {
+            this.pageSize = this._config.defaultPageSize;
+        }
+        if (previousPageIndex !== this.pageIndex || previousPageSize !== this.pageSize) {
+            this._emitPageEvent();
+        }
+    }
+
+    hasMore(): boolean {
+        if (!this._isInitialized) {
+            return undefined;
+        }
+        return this.length > (this.pageIndex + 1) * this.pageSize;
+    }
+
+    /**
+     * @returns Whether there is more data to load
+     */
+    loadMore(): boolean {
+        if (this._config.strategy !== 'infinite-scroll') {
+            console.warn(
+                `Called loadMore with pagination strategy ${this._config.strategy}.`,
+                `The only supported strategy for loadMore is 'infinite-scroll'.`,
+            );
+            return false;
+        }
+        if (this.hasMore()) {
+            this.pageSize = Math.min(this.pageSize + this._config.defaultPageSize, this.length);
+            this._emitPageEvent();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    registerQueryParameters(route: ActivatedRoute, router: Router): void {
+        const defaultPageSize = this._config.defaultPageSize;
+        let currentPageParam = 0;
+        let currentPageSizeParam = this.pageSize;
+        route.queryParams
+            .pipe(
+                map((params) => ({
+                    page: params.page ? parseInt(params.page) - 1 : 0,
+                    pageSize: params.pageSize ? parseInt(params.pageSize) : defaultPageSize,
+                })),
+                tap(({ page, pageSize }) => {
+                    currentPageParam = page;
+                    currentPageSizeParam = pageSize;
+                }),
+                filter(
+                    ({ page, pageSize }) => page !== this.pageIndex || pageSize !== this.pageSize,
+                ),
+            )
+            .subscribe(({ page, pageSize }) => {
+                this.pageIndex = page;
+                this.pageSize = pageSize;
+                this._emitPageEvent();
+            });
+        this.pageChange
+            .pipe(
+                filter(
+                    (event) =>
+                        currentPageParam !== event.pageIndex ||
+                        currentPageSizeParam !== event.pageSize,
+                ),
+            )
+            .subscribe((event) => {
+                const page = event.pageIndex > 0 ? event.pageIndex + 1 : null;
+                const pageSize = event.pageSize !== defaultPageSize ? event.pageSize : null;
+                void router.navigate([], {
+                    queryParams: { page, pageSize },
+                    queryParamsHandling: 'merge',
+                });
+            });
+    }
+
+    private _initPaginator(paginator: MatTableDataSourcePaginator): void {
+        this._paginatorReset.next();
+        if (paginator) {
+            paginator.pageIndex = this.pageIndex;
+            paginator.pageSize = this.pageSize;
+            paginator.length = this.length;
+            paginator.page.pipe(takeUntil(this._paginatorReset)).subscribe((pageEvent) => {
+                this.pageIndex = pageEvent.pageIndex;
+                this.pageSize = pageEvent.pageSize;
+                this.length = pageEvent.length;
+                this._emitPageEvent();
+            });
+        }
+    }
+
+    private _emitPageEvent(): void {
+        this._pageChange.next({
+            pageIndex: this.pageIndex,
+            pageSize: this.pageSize,
+            length: this.length,
+        });
+    }
+}
+
+class SortHandler {
+    private readonly _sortChange = new Subject<Sort>();
+    readonly sortChange = this._sortChange.asObservable();
+    private readonly _initialized = new ReplaySubject<void>();
+    readonly initialized = this._initialized.asObservable();
+
+    private _currentSort: Sort;
+    get currentSort(): Sort {
+        return this._currentSort;
+    }
+
+    init(sort: Sort): void {
+        this._currentSort = sort;
+        this._initialized.next();
+        this._initialized.complete();
+    }
+
+    changeSort(sort: Sort): void {
+        this._currentSort = sort;
+        this._sortChange.next(sort);
+    }
+
+    registerQueryParameters(route: ActivatedRoute, router: Router) {
+        // throw new Error('Method not implemented.');
+    }
 }

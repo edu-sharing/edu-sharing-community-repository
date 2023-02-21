@@ -14,7 +14,6 @@ import {
     NodeClickEvent,
     NodeEntriesDisplayType,
 } from '../features/node-entries/entries-model';
-import { InfiniteScrollPaginator } from '../features/node-entries/infinite-scroll-paginator';
 import { NodeDataSource } from '../features/node-entries/node-data-source';
 import { NodeDataSourceRemote } from '../features/node-entries/node-data-source-remote';
 import {
@@ -111,7 +110,7 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
         }
         // TODO: focus next item when triggered via button.
         if (this.dataSource instanceof NodeDataSourceRemote) {
-            return (this.dataSource.paginator as InfiniteScrollPaginator).loadMore();
+            return this.dataSource.loadMore();
         } else {
             if (this.dataSource.hasMore()) {
                 this.fetchData.emit({

@@ -340,7 +340,6 @@ export class SearchPageService implements OnDestroy {
             );
             this.sortActive.setSystemValue(sortInfo.default.sortBy);
             this.sortDirection.setSystemValue(sortInfo.default.sortAscending ? 'asc' : 'desc');
-            console.log({ sortInfo });
         });
     }
 

@@ -10,7 +10,7 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, takeUntil, tap } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import { GenericAuthority, Node } from '../../core-module/core.module';
 import { NodeEntriesService } from '../../core-ui-module/node-entries.service';
 import { KeyboardShortcutsService } from '../../services/keyboard-shortcuts.service';
@@ -50,11 +50,31 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
         if (this.entriesService.primaryInstance) {
             this.registerGlobalKeyboardShortcuts();
         }
+        if (this.entriesService.dataSource instanceof NodeDataSourceRemote) {
+            const pageSize = this.entriesGlobalService.getPaginatorSizeOptions(
+                this.entriesService.scope,
+            )[0];
+            this.entriesService.dataSource.init({
+                paginationConfig: {
+                    defaultPageSize: pageSize,
+                    strategy: this.entriesService.paginationStrategy,
+                },
+                initialSort: this.entriesService.sort,
+            });
+            if (
+                this.entriesService.primaryInstance &&
+                this.entriesService.paginationStrategy === 'paginator'
+            ) {
+                // Automatic query-params handling is only supported by node-data-source-remote.
+                this.entriesService.dataSource.registerQueryParameters(this.route, this.router);
+            }
+        }
     }
 
     ngAfterViewInit() {
         if (this.paginator) {
             this.initPaginator(this.paginator);
+            this.changeDetectorRef.detectChanges();
         }
     }
 
@@ -111,51 +131,6 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
                     });
             }
         });
-        // Register query params.
-        if (this.entriesService.primaryInstance) {
-            const defaultPageSize = this.paginator.pageSize;
-            let currentPageParam = 0;
-            let currentPageSizeParam = defaultPageSize;
-            this.route.queryParams
-                .pipe(
-                    map((params) => ({
-                        page: params.page ? parseInt(params.page) - 1 : 0,
-                        pageSize: params.pageSize ? parseInt(params.pageSize) : defaultPageSize,
-                    })),
-                    tap(({ page, pageSize }) => {
-                        currentPageParam = page;
-                        currentPageSizeParam = pageSize;
-                    }),
-                    filter(
-                        ({ page, pageSize }) =>
-                            page !== this.paginator.pageIndex ||
-                            pageSize !== this.paginator.pageSize,
-                    ),
-                )
-                .subscribe(({ page, pageSize }) => {
-                    const previousPage = this.paginator.pageIndex;
-                    this.paginator.pageIndex = page;
-                    this.paginator.pageSize = pageSize;
-                    this.paginator['_emitPageEvent'](previousPage);
-                    this.changeDetectorRef.detectChanges();
-                });
-            this.paginator.page
-                .pipe(
-                    filter(
-                        (event) =>
-                            currentPageParam !== event.pageIndex ||
-                            currentPageSizeParam !== event.pageSize,
-                    ),
-                )
-                .subscribe((event) => {
-                    const page = event.pageIndex > 0 ? event.pageIndex + 1 : null;
-                    const pageSize = event.pageSize !== defaultPageSize ? event.pageSize : null;
-                    void this.router.navigate([], {
-                        queryParams: { page, pageSize },
-                        queryParamsHandling: 'merge',
-                    });
-                });
-        }
     }
 
     openPage(page: PageEvent) {

@@ -30,9 +30,8 @@
       <es-search-page-filter-bar></es-search-page-filter-bar>
     </mat-drawer>
     <main>
-      <!-- FIXME: Use *ngIf instead of [class.display-none] when data-source-remote supports sorting
-      without relying on ui elements. -->
-      <!-- *ngIf="!collectionsDataSource.isEmpty()" -->
+      <!-- We cannot use *ngIf on node-entries-wrapper since it depends on its input variables to
+      initialize data fetching. -->
       <es-node-entries-wrapper
         [class.display-none]="collectionsDataSource.isEmpty()"
         class="entries-wrapper"

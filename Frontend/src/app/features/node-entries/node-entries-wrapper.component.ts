@@ -51,8 +51,10 @@ import { NodeDataSourceRemote } from './node-data-source-remote';
 
 @Component({
     selector: 'es-node-entries-wrapper',
-    template: ` <es-node-entries #nodeEntriesComponent *ngIf="!customNodeListComponent">
-    </es-node-entries>`,
+    template: `<es-node-entries
+        #nodeEntriesComponent
+        *ngIf="!customNodeListComponent"
+    ></es-node-entries>`,
     providers: [NodeEntriesService, OptionsHelperService, NodeEntriesTemplatesService],
 })
 export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
