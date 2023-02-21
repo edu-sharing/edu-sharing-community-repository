@@ -2,40 +2,16 @@
   <div class="title">
     <ng-container *ngTemplateOutlet="templatesService.title"></ng-container>
   </div>
-  <div *ngIf="entriesService.sort?.allowed" class="order-panel">
-    <mat-slide-toggle
-      *ngIf="entriesService.sort.active === 'ccm:collection_ordered_position'"
-      [(ngModel)]="entriesService.sort.customSortingInProgress"
-      (ngModelChange)="onCustomSortingInProgressChange()"
-    >
-      {{ 'COLLECTIONS.SORT_SLIDER' | translate }}
-    </mat-slide-toggle>
-    <button
-      *ngIf="sortDropdown.menu"
-      [matMenuTriggerFor]="sortDropdown.menu"
-      mat-button
-      color="primary"
-    >
-      <span *ngIf="entriesService.sort.active">{{
-        'NODE.' + entriesService.sort.active | translate
-      }}</span>
-      <span *ngIf="!entriesService.sort.active">{{ 'SORT_BY' | translate }}</span>
-      <i
-        *ngIf="
-          entriesService.sort.active &&
-          entriesService.sort.active !== 'ccm:collection_ordered_position'
-        "
-        [esIcon]="'arrow_' + (entriesService.sort.direction === 'asc' ? 'upward' : 'downward')"
-      ></i>
-    </button>
-    <es-sort-dropdown
-      #sortDropdown
-      [columns]="getSortColumns()"
-      [sortBy]="entriesService.sort.active"
-      [sortAscending]="entriesService.sort.direction === 'asc'"
-      (onSort)="changeSort($event)"
-    ></es-sort-dropdown>
-  </div>
+  <es-sort-select-panel
+    *ngIf="entriesService.sort?.allowed"
+    class="order-panel"
+    [active]="entriesService.sort.active"
+    [direction]="entriesService.sort.direction"
+    [columns]="getSortColumns()"
+    (sortChange)="onSortChange($event)"
+    [(customSortingInProgress)]="entriesService.sort.customSortingInProgress"
+    (customSortingInProgressChange)="onCustomSortingInProgressChange()"
+  ></es-sort-select-panel>
 </div>
 <es-dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></es-dropdown>
 

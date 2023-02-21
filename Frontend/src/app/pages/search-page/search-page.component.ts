@@ -39,9 +39,7 @@ export class SearchPageComponent implements OnInit, AfterViewInit {
     readonly loadingProgress = this.searchPage.loadingProgress;
     readonly resultColumns = this.searchPage.resultColumns;
     readonly collectionColumns = this.searchPage.collectionColumns;
-    readonly sortableColumns = this.searchPage.sortableColumns;
-    readonly sortActive = this.searchPage.sortActive;
-    readonly sortDirection = this.searchPage.sortDirection;
+    readonly sortConfig = this.searchPage.sortConfig;
 
     constructor(private searchPage: SearchPageService, private mainNav: MainNavService) {
         this.searchPage.init();

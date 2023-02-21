@@ -7,10 +7,10 @@ import {
     ViewChild,
 } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { first, takeUntil } from 'rxjs/operators';
 import { GenericAuthority, Node } from '../../core-module/core.module';
 import { NodeEntriesService } from '../../core-ui-module/node-entries.service';
 import { KeyboardShortcutsService } from '../../services/keyboard-shortcuts.service';
@@ -41,7 +41,6 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
         public templatesService: NodeEntriesTemplatesService,
         private globalKeyboardShortcuts: KeyboardShortcutsService,
         private route: ActivatedRoute,
-        private router: Router,
         private translate: TranslateService,
         private translations: TranslationsService,
     ) {}
@@ -51,23 +50,17 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
             this.registerGlobalKeyboardShortcuts();
         }
         if (this.entriesService.dataSource instanceof NodeDataSourceRemote) {
-            const pageSize = this.entriesGlobalService.getPaginatorSizeOptions(
-                this.entriesService.scope,
-            )[0];
-            this.entriesService.dataSource.init({
-                paginationConfig: {
-                    defaultPageSize: pageSize,
-                    strategy: this.entriesService.paginationStrategy,
-                },
-                initialSort: this.entriesService.sort,
-            });
-            if (
-                this.entriesService.primaryInstance &&
-                this.entriesService.paginationStrategy === 'paginator'
-            ) {
-                // Automatic query-params handling is only supported by node-data-source-remote.
-                this.entriesService.dataSource.registerQueryParameters(this.route, this.router);
-            }
+            // We don't require `sort` to be defined, but if it is set but not yet ready (`null`),
+            // we wait for its value before initializing the data source, so the first request is
+            // sent with the correct sort configuration. That is why we explicitly do not drop
+            // `undefined` with the `first` operator below.
+            this.entriesService.sortSubject
+                .pipe(first((sort) => sort !== null))
+                .subscribe(() =>
+                    this.initRemoteDataSource(
+                        this.entriesService.dataSource as NodeDataSourceRemote<T>,
+                    ),
+                );
         }
     }
 
@@ -97,6 +90,23 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
             ],
             { until: this.destroyed },
         );
+    }
+
+    private initRemoteDataSource(dataSource: NodeDataSourceRemote<T>): void {
+        const pageSize = this.entriesGlobalService.getPaginatorSizeOptions(
+            this.entriesService.scope,
+        )[0];
+        dataSource.init({
+            paginationConfig: {
+                defaultPageSize: pageSize,
+                strategy: this.entriesService.paginationStrategy,
+            },
+            defaultSort: this.entriesService.sort,
+        });
+        if (this.entriesService.primaryInstance) {
+            // Automatic query-params handling is only supported by node-data-source-remote.
+            dataSource.registerQueryParameters(this.route);
+        }
     }
 
     private initPaginator(paginator: MatPaginator) {

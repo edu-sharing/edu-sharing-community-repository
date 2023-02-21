@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, tap } from 'rxjs/operators';
+import { notNull } from '../../util/functions';
 import { NavigationScheduler } from './navigation-scheduler';
 
 /**
@@ -29,9 +30,9 @@ export class UserModifiableValuesService {
         return new UserModifiableValue(new UserModifiableStringType<S>(), systemValue);
     }
 
-    // createMapped<T>(mapping: Mapping<T>, systemValue?: T): UserModifiableValue<T> {
-    //     return new UserModifiableValue<T>(new UserModifiableMappedType(mapping), systemValue);
-    // }
+    createMapped<T>(mapping: Mapping<T>, systemValue?: T): UserModifiableValue<T> {
+        return new UserModifiableValue<T>(new UserModifiableMappedType(mapping), systemValue);
+    }
 
     createBoolean(systemValue?: boolean): UserModifiableValue<boolean> {
         return new UserModifiableValue(userModifiableBooleanType, systemValue);
@@ -44,7 +45,7 @@ export class UserModifiableValuesService {
  * Allows to sync the value with a query parameter such that only values changed by the user will be
  * reflected in the query parameters.
  */
-class UserModifiableValue<T> {
+export class UserModifiableValue<T> {
     static navigationScheduler: NavigationScheduler;
 
     /**
@@ -59,26 +60,26 @@ class UserModifiableValue<T> {
         this.setUserValue(value);
     }
 
-    private systemValue = new BehaviorSubject<T>(this.type.null);
-    private userValue = new BehaviorSubject<T>(null);
-    private overrideValue = new BehaviorSubject<{ useOverride: boolean; value?: T }>({
+    private _systemValue = new BehaviorSubject<T>(this._type.null);
+    private _userValue = new BehaviorSubject<T>(null);
+    private _overrideValue = new BehaviorSubject<{ useOverride: boolean; value?: T }>({
         useOverride: false,
     });
-    private mergedValue = new BehaviorSubject<T>(null);
+    private _mergedValue = new BehaviorSubject<T>(null);
 
-    constructor(private type: UserModifiableType<T>, initialSystemValue?: T) {
-        if (initialSystemValue) {
+    constructor(private _type: UserModifiableType<T>, initialSystemValue?: T) {
+        if (initialSystemValue !== undefined) {
             this.setSystemValue(initialSystemValue);
         }
-        this.getMergedValue().subscribe(this.mergedValue);
+        this._getMergedValue().subscribe(this._mergedValue);
     }
 
     /**
      * Sets the default system value, that will be used when no user value is set.
      */
     setSystemValue(value: T): void {
-        if (this.type.serialize(value) !== this.type.serialize(this.systemValue.value)) {
-            this.systemValue.next(value);
+        if (this._serialize(value) !== this._serialize(this._systemValue.value)) {
+            this._systemValue.next(value);
         }
     }
 
@@ -86,29 +87,29 @@ class UserModifiableValue<T> {
      * Sets the user value, that will replace or be merged with the system value.
      */
     setUserValue(value: T): void {
-        if (this.type.serialize(value) !== this.type.serialize(this.userValue.value)) {
-            // console.log('setUserValue', value);
-            if (this.type.serialize(value) === this.type.serialize(this.systemValue.value)) {
+        if (this._serialize(value) !== this._serialize(this._userValue.value)) {
+            // console.log('setUserValue', { value, systemValue: this._systemValue.value });
+            if (this._serialize(value) === this._serialize(this._systemValue.value)) {
                 this.resetUserValue();
             } else {
-                this.userValue.next(value);
+                this._userValue.next(value);
             }
         }
     }
 
     resetUserValue(): void {
-        if (this.userValue.value !== null) {
+        if (this._userValue.value !== null) {
             // console.log('resetUserValue');
-            this.userValue.next(null);
+            this._userValue.next(null);
         }
     }
 
     getUserValue(): T {
-        return this.userValue.value;
+        return this._userValue.value;
     }
 
     observeUserValue(): Observable<T> {
-        return this.userValue.asObservable();
+        return this._userValue.asObservable();
     }
 
     /**
@@ -116,25 +117,25 @@ class UserModifiableValue<T> {
      */
     setOverrideValue(value: T): void {
         if (
-            !this.overrideValue.value.useOverride ||
-            this.type.serialize(this.overrideValue.value.value) !== this.type.serialize(value)
+            !this._overrideValue.value.useOverride ||
+            this._serialize(this._overrideValue.value.value) !== this._serialize(value)
         ) {
-            this.overrideValue.next({ useOverride: true, value });
+            this._overrideValue.next({ useOverride: true, value });
         }
     }
 
     unsetOverrideValue(): void {
-        if (this.overrideValue.value.useOverride) {
-            this.overrideValue.next({ useOverride: false });
+        if (this._overrideValue.value.useOverride) {
+            this._overrideValue.next({ useOverride: false });
         }
     }
 
     getValue(): T {
-        return this.mergedValue.value;
+        return this._mergedValue.value;
     }
 
     observeValue(): Observable<T> {
-        return this.mergedValue.asObservable();
+        return this._mergedValue.asObservable();
     }
 
     registerQueryParameter(
@@ -149,13 +150,13 @@ class UserModifiableValue<T> {
                 distinctUntilChanged(),
                 filter((param) => param !== currentParam),
                 tap((param) => (currentParam = param)),
-                map((param) => (param ? this.type.deserialize(param) : null)),
+                map((param) => this._deserialize(param)),
                 // tap((queryParam) => console.log('queryParams', { key, queryParam })),
             )
-            .subscribe((value) => this.userValue.next(value));
-        this.userValue
+            .subscribe((value) => this._userValue.next(value));
+        this._userValue
             .pipe(
-                map((value) => (value ? this.type.serialize(value) : null)),
+                map((value) => this._serialize(value)),
                 filter((param) => param !== currentParam),
                 tap((param) => (currentParam = param)),
             )
@@ -170,24 +171,40 @@ class UserModifiableValue<T> {
     registerFormControl(formControl: FormControl): void {
         this.observeValue()
             .pipe(
-                map((value) => this.type.serialize(value)),
+                map((value) => this._serialize(value)),
                 filter((value) => value !== formControl.value),
             )
             .subscribe((value) => formControl.setValue(value));
         formControl.valueChanges
             .pipe(
-                map((value) => this.type.deserialize(value)),
+                map((value) => this._deserialize(value)),
                 // tap((value) => console.log('formControl', value)),
             )
             .subscribe((value) => this.setUserValue(value));
     }
 
-    private getMergedValue(): Observable<T> {
-        return rxjs.combineLatest([this.systemValue, this.userValue, this.overrideValue]).pipe(
+    private _serialize(value: T | null): string | null {
+        if (notNull(value)) {
+            return this._type.serialize(value);
+        } else {
+            return null;
+        }
+    }
+
+    private _deserialize(value: string | null): T | null {
+        if (notNull(value)) {
+            return this._type.deserialize(value);
+        } else {
+            return null;
+        }
+    }
+
+    private _getMergedValue(): Observable<T> {
+        return rxjs.combineLatest([this._systemValue, this._userValue, this._overrideValue]).pipe(
             map(([systemValue, userValue, overrideValue]) =>
                 overrideValue.useOverride
                     ? overrideValue.value
-                    : this.type.merge(systemValue, userValue),
+                    : this._type.merge(systemValue, userValue),
             ),
             distinctUntilChanged(),
         );

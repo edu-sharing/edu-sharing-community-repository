@@ -3,14 +3,16 @@
  */
 
 import { DataSource } from '@angular/cdk/collections';
-import { Sort } from '@angular/material/sort';
+import { Injectable, Injector } from '@angular/core';
+import { Sort, SortDirection } from '@angular/material/sort';
 import { MatTableDataSourcePageEvent, MatTableDataSourcePaginator } from '@angular/material/table';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { SearchResults } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, ReplaySubject, Subject, Subscription } from 'rxjs';
-import { debounceTime, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { debounceTime, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { GenericAuthority, Node } from 'src/app/core-module/core.module';
+import { UserModifiableValuesService } from '../../pages/search-page/user-modifiable-values';
 import { ItemsCap } from './items-cap';
 import { NodeCache, NodeCacheRange, NodeCacheSlice } from './node-cache';
 import { PaginationStrategy } from './node-entries-global.service';
@@ -45,6 +47,27 @@ export interface PaginationConfig {
     strategy: PaginationStrategy;
 }
 
+/**
+ * UI element that allows the user to choose sorting.
+ */
+export interface SortPanel {
+    active: string;
+    direction: SortDirection;
+    readonly sortChange: Observable<Sort>;
+}
+
+@Injectable({ providedIn: 'root' })
+export class NodeDataSourceRemoteService {
+    constructor(private _injector: Injector) {}
+
+    create<
+        T extends Node | GenericAuthority,
+        P extends MatTableDataSourcePaginator = MatTableDataSourcePaginator,
+    >(): NodeDataSourceRemote<T, P> {
+        return new NodeDataSourceRemote(this._injector);
+    }
+}
+
 export class NodeDataSourceRemote<
     T extends Node | GenericAuthority,
     P extends MatTableDataSourcePaginator = MatTableDataSourcePaginator,
@@ -55,8 +78,14 @@ export class NodeDataSourceRemote<
     set paginator(value: P | null) {
         this._paginationHandler.paginator = value;
     }
-    private _paginationHandler = new PaginationHandler<P>();
-    private _sortHandler = new SortHandler();
+    get sortPanel(): SortPanel | null {
+        return this._sortHandler.sortPanel;
+    }
+    set sortPanel(value: SortPanel | null) {
+        this._sortHandler.sortPanel = value;
+    }
+    private _paginationHandler = new PaginationHandler<P>(this._injector);
+    private _sortHandler = new SortHandler(this._injector);
 
     private _remote: NodeRemote<T>;
     private _renderChangesSubscription: Subscription | null = null;
@@ -80,7 +109,7 @@ export class NodeDataSourceRemote<
     private _initDone = false;
     private _resetDone = false;
 
-    constructor() {
+    constructor(private _injector: Injector) {
         super();
         this._registerLoadingState();
     }
@@ -96,13 +125,13 @@ export class NodeDataSourceRemote<
 
     init({
         paginationConfig,
-        initialSort,
+        defaultSort,
     }: {
         paginationConfig: PaginationConfig;
-        initialSort: Sort;
+        defaultSort: Sort;
     }): void {
         this._paginationHandler.init(paginationConfig);
-        this._sortHandler.init(initialSort);
+        this._sortHandler.init(defaultSort);
     }
 
     setRemote(remote: NodeRemote<T>): void {
@@ -146,13 +175,9 @@ export class NodeDataSourceRemote<
         throw new Error('not implemented');
     }
 
-    registerQueryParameters(route: ActivatedRoute, router: Router): void {
-        this._paginationHandler.registerQueryParameters(route, router);
-        this._sortHandler.registerQueryParameters(route, router);
-    }
-
-    changeSort(sort: Sort): void {
-        this._sortHandler.changeSort(sort);
+    registerQueryParameters(route: ActivatedRoute): void {
+        this._paginationHandler.registerQueryParameters(route);
+        this._sortHandler.registerQueryParameters(route);
     }
 
     private _registerLoadingState(): void {
@@ -184,12 +209,15 @@ export class NodeDataSourceRemote<
 
     private _updateRemoteSubscription(): void {
         this._resetDone = false;
+        this._paginationHandler.firstPage();
         const sortChange = rxjs.merge(
             this._sortHandler.sortChange.pipe(
-                tap(() => {
+                tap(({ source }) => {
                     this._resetDone = false;
                     this._cache.clear();
-                    this._paginationHandler.firstPage();
+                    if (source === 'user') {
+                        this._paginationHandler.firstPage();
+                    }
                 }),
             ),
             this._sortHandler.initialized,
@@ -322,6 +350,8 @@ class PaginationHandler<P extends MatTableDataSourcePaginator = MatTableDataSour
     pageChange = this._pageChange.asObservable();
     private readonly _paginatorReset = new Subject<void>();
 
+    constructor(private _injector: Injector) {}
+
     init(config: PaginationConfig): void {
         this._config = config;
         this.pageSize = config.defaultPageSize;
@@ -369,45 +399,41 @@ class PaginationHandler<P extends MatTableDataSourcePaginator = MatTableDataSour
         }
     }
 
-    registerQueryParameters(route: ActivatedRoute, router: Router): void {
-        const defaultPageSize = this._config.defaultPageSize;
-        let currentPageParam = 0;
-        let currentPageSizeParam = this.pageSize;
-        route.queryParams
-            .pipe(
-                map((params) => ({
-                    page: params.page ? parseInt(params.page) - 1 : 0,
-                    pageSize: params.pageSize ? parseInt(params.pageSize) : defaultPageSize,
-                })),
-                tap(({ page, pageSize }) => {
-                    currentPageParam = page;
-                    currentPageSizeParam = pageSize;
-                }),
-                filter(
-                    ({ page, pageSize }) => page !== this.pageIndex || pageSize !== this.pageSize,
-                ),
-            )
-            .subscribe(({ page, pageSize }) => {
-                this.pageIndex = page;
+    registerQueryParameters(route: ActivatedRoute): void {
+        if (!this._isInitialized) {
+            throw new Error('Tried to register query params before initializing');
+        } else if (this._config.strategy === 'infinite-scroll') {
+            // Nothing to store in query params when using infinite scrolling.
+            return;
+        }
+        const userModifiableValue = this._injector.get(UserModifiableValuesService);
+        const pageIndex = userModifiableValue.createMapped<number>(
+            {
+                toString: (value) => (value + 1).toString(),
+                fromString: (value) => parseInt(value) - 1,
+            },
+            0,
+        );
+        const pageSize = userModifiableValue.createMapped<number>(
+            {
+                toString: (value) => value.toString(),
+                fromString: (value) => parseInt(value),
+            },
+            this._config.defaultPageSize,
+        );
+        pageIndex.registerQueryParameter('page', route);
+        pageSize.registerQueryParameter('pageSize', route);
+        rxjs.combineLatest([pageIndex.observeValue(), pageSize.observeValue()]).subscribe(
+            ([pageIndex, pageSize]) => {
+                this.pageIndex = pageIndex;
                 this.pageSize = pageSize;
                 this._emitPageEvent();
-            });
-        this.pageChange
-            .pipe(
-                filter(
-                    (event) =>
-                        currentPageParam !== event.pageIndex ||
-                        currentPageSizeParam !== event.pageSize,
-                ),
-            )
-            .subscribe((event) => {
-                const page = event.pageIndex > 0 ? event.pageIndex + 1 : null;
-                const pageSize = event.pageSize !== defaultPageSize ? event.pageSize : null;
-                void router.navigate([], {
-                    queryParams: { page, pageSize },
-                    queryParamsHandling: 'merge',
-                });
-            });
+            },
+        );
+        this.pageChange.subscribe((event) => {
+            pageIndex.setUserValue(event.pageIndex);
+            pageSize.setUserValue(event.pageSize);
+        });
     }
 
     private _initPaginator(paginator: MatTableDataSourcePaginator): void {
@@ -435,28 +461,77 @@ class PaginationHandler<P extends MatTableDataSourcePaginator = MatTableDataSour
 }
 
 class SortHandler {
-    private readonly _sortChange = new Subject<Sort>();
+    private _sortPanel: SortPanel;
+    get sortPanel(): SortPanel {
+        return this._sortPanel;
+    }
+    set sortPanel(value: SortPanel) {
+        this._sortPanel = value;
+        this._initSortPanel(value);
+    }
+    private readonly _sortChange = new Subject<Sort & { source: 'query-params' | 'user' }>();
     readonly sortChange = this._sortChange.asObservable();
     private readonly _initialized = new ReplaySubject<void>();
     readonly initialized = this._initialized.asObservable();
+    private _isInitialized = false;
 
+    private _defaultSort: Sort;
     private _currentSort: Sort;
     get currentSort(): Sort {
         return this._currentSort;
     }
+    private set currentSort(value: Sort) {
+        this._currentSort = value;
+        if (this.sortPanel) {
+            this.sortPanel.active = value.active;
+            this.sortPanel.direction = value.direction;
+        }
+    }
+    private readonly _sortPanelReset = new Subject<void>();
 
-    init(sort: Sort): void {
-        this._currentSort = sort;
+    constructor(private _injector: Injector) {}
+
+    init(defaultSort: Sort): void {
+        this._defaultSort = defaultSort;
+        this.currentSort = defaultSort;
+        this._isInitialized = true;
         this._initialized.next();
         this._initialized.complete();
     }
 
-    changeSort(sort: Sort): void {
-        this._currentSort = sort;
-        this._sortChange.next(sort);
+    private _changeSort(sort: Sort, source: 'query-params' | 'user'): void {
+        this.currentSort = sort;
+        this._sortChange.next({ ...sort, source });
     }
 
-    registerQueryParameters(route: ActivatedRoute, router: Router) {
-        // throw new Error('Method not implemented.');
+    registerQueryParameters(route: ActivatedRoute): void {
+        if (!this._isInitialized) {
+            throw new Error('Tried to register query params before initializing');
+        }
+        const userModifiableValue = this._injector.get(UserModifiableValuesService);
+        const sortActive = userModifiableValue.createString(this._defaultSort?.active);
+        const sortDirection = userModifiableValue.createString<SortDirection>(
+            this._defaultSort?.direction,
+        );
+        sortActive.registerQueryParameter('sortBy', route);
+        sortDirection.registerQueryParameter('sortDirection', route);
+        rxjs.combineLatest([sortActive.observeValue(), sortDirection.observeValue()]).subscribe(
+            ([active, direction]) => this._changeSort({ active, direction }, 'query-params'),
+        );
+        this.sortChange.subscribe((event) => {
+            sortActive.setUserValue(event.active);
+            sortDirection.setUserValue(event.direction);
+        });
+    }
+
+    private _initSortPanel(sortPanel: SortPanel): void {
+        this._sortPanelReset.next();
+        if (sortPanel) {
+            sortPanel.active = this.currentSort.active;
+            sortPanel.direction = this.currentSort.direction;
+            sortPanel.sortChange.pipe(takeUntil(this._sortPanelReset)).subscribe((sortEvent) => {
+                this._changeSort(sortEvent, 'user');
+            });
+        }
     }
 }

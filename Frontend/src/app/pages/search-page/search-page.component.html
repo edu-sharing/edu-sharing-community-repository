@@ -54,12 +54,7 @@
         [dataSource]="resultsDataSource"
         [scope]="Scope.Search"
         [columns]="resultColumns.value"
-        [sort]="{
-          allowed: true,
-          active: sortActive.getValue(),
-          direction: sortDirection.getValue(),
-          columns: sortableColumns.getValue()
-        }"
+        [sort]="sortConfig | async"
         [primaryInstance]="true"
       >
         <ng-template #title>

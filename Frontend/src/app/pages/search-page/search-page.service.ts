@@ -10,7 +10,6 @@ import {
     MetadataSetInfo,
     NetworkService,
     SearchService,
-    MdsSortColumn,
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -33,9 +32,10 @@ import {
     UIConstants,
 } from '../../core-module/core.module';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
+import { ListSortConfig } from '../../features/node-entries/entries-model';
 import {
     fromSearchResults,
-    NodeDataSourceRemote,
+    NodeDataSourceRemoteService,
     NodeRemote,
     NodeRequestParams,
 } from '../../features/node-entries/node-data-source-remote';
@@ -62,8 +62,8 @@ class SearchRequestParams {
 
 @Injectable()
 export class SearchPageService implements OnDestroy {
-    readonly resultsDataSource = new NodeDataSourceRemote();
-    readonly collectionsDataSource = new NodeDataSourceRemote();
+    readonly resultsDataSource = this.nodeDataSourceRemote.create();
+    readonly collectionsDataSource = this.nodeDataSourceRemote.create();
     readonly availableRepositories = new BehaviorSubject<Repository[]>(null);
     readonly activeRepository = this.userModifiableValues.createString();
     readonly availableMetadataSets = new BehaviorSubject<MetadataSetInfo[]>(null);
@@ -74,9 +74,7 @@ export class SearchPageService implements OnDestroy {
     readonly loadingProgress = new BehaviorSubject<number>(null);
     readonly resultColumns = new BehaviorSubject<ListItem[]>([]);
     readonly collectionColumns = new BehaviorSubject<ListItem[]>([]);
-    readonly sortableColumns = new BehaviorSubject<ListItemSort[]>(null);
-    readonly sortActive = this.userModifiableValues.createString();
-    readonly sortDirection = this.userModifiableValues.createString<'asc' | 'desc'>();
+    readonly sortConfig = new BehaviorSubject<ListSortConfig>(null);
 
     private readonly destroyed = new Subject<void>();
     private readonly loadingContent = new BehaviorSubject<boolean>(false);
@@ -92,6 +90,7 @@ export class SearchPageService implements OnDestroy {
         private search: SearchService,
         private translate: TranslateService,
         private userModifiableValues: UserModifiableValuesService,
+        private nodeDataSourceRemote: NodeDataSourceRemoteService,
     ) {}
 
     ngOnDestroy(): void {
@@ -332,14 +331,15 @@ export class SearchPageService implements OnDestroy {
         ).subscribe(this.collectionColumns);
         // Register sort.
         mds.pipe(map((mds) => MdsHelper.getSortInfo(mds, 'search'))).subscribe((sortInfo) => {
-            this.sortableColumns.next(
-                sortInfo.columns.map(
+            this.sortConfig.next({
+                allowed: true,
+                active: sortInfo.default.sortBy,
+                direction: sortInfo.default.sortAscending ? 'asc' : 'desc',
+                columns: sortInfo.columns.map(
                     ({ id, mode }) =>
                         new ListItemSort('NODE', id, mode as 'ascending' | 'descending'),
                 ),
-            );
-            this.sortActive.setSystemValue(sortInfo.default.sortBy);
-            this.sortDirection.setSystemValue(sortInfo.default.sortAscending ? 'asc' : 'desc');
+            });
         });
     }
 

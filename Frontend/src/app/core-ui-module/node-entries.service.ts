@@ -55,7 +55,13 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     options: ListOptions;
     checkbox: boolean;
     globalOptions: OptionItem[];
-    sort: ListSortConfig;
+    sortSubject = new BehaviorSubject<ListSortConfig>(void 0);
+    get sort(): ListSortConfig {
+        return this.sortSubject.value;
+    }
+    set sort(value: ListSortConfig) {
+        this.sortSubject.next(value);
+    }
     sortChange: EventEmitter<ListSortConfig>;
     dragDrop: ListDragGropConfig<T>;
     clickItem: EventEmitter<NodeClickEvent<T>>;

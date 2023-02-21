@@ -25,14 +25,6 @@ $horizontalScrollPadding: 1.5em;
         display: flex;
         flex-grow: 1;
     }
-    .order-panel {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        > mat-slide-toggle {
-            margin-right: 10px;
-        }
-    }
 }
 .load-more {
     display: flex;

@@ -1,5 +1,6 @@
 import { CdkDragEnter, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
+    ChangeDetectorRef,
     Component,
     ElementRef,
     HostBinding,
@@ -13,7 +14,7 @@ import {
     ViewChild,
     ViewChildren,
 } from '@angular/core';
-import { MatSort } from '@angular/material/sort';
+import { Sort } from '@angular/material/sort';
 import { Node } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -22,12 +23,12 @@ import { ListItemSort, RestConstants, UIService } from '../../../core-module/cor
 import { NodeEntriesService } from '../../../core-ui-module/node-entries.service';
 import { Target } from '../../../core-ui-module/option-item';
 import { DragData } from '../../../services/nodes-drag-drop.service';
-import { SortEvent } from '../../../shared/components/sort-dropdown/sort-dropdown.component';
 import { GridLayout, NodeEntriesDisplayType } from '../entries-model';
 import { ItemsCap } from '../items-cap';
 import { NodeDataSourceRemote } from '../node-data-source-remote';
 import { NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
+import { SortSelectPanelComponent } from '../sort-select-panel/sort-select-panel.component';
 
 @Component({
     selector: 'es-node-entries-card-grid',
@@ -42,6 +43,14 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
      * a value of 1 would mean to scroll the full width of the entire content
      */
     readonly ScrollingOffsetPercentage = 0.4;
+
+    @ViewChild(SortSelectPanelComponent)
+    set sortPanel(value: SortSelectPanelComponent) {
+        if (this.entriesService.dataSource instanceof NodeDataSourceRemote) {
+            this.entriesService.dataSource.sortPanel = value;
+            this.cdr.detectChanges();
+        }
+    }
     @ViewChildren(CdkDropList) dropListsQuery: QueryList<CdkDropList>;
     @ViewChild('grid') gridRef: ElementRef;
     @ViewChildren('item', { read: ElementRef }) itemRefs: QueryList<ElementRef<HTMLElement>>;
@@ -86,6 +95,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
         public entriesGlobalService: NodeEntriesGlobalService,
         public templatesService: NodeEntriesTemplatesService,
         public ui: UIService,
+        private cdr: ChangeDetectorRef,
         private ngZone: NgZone,
     ) {}
 
@@ -117,16 +127,10 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
         this.layout$.subscribe((layout) => (this.layout = layout));
     }
 
-    changeSort(sort: SortEvent) {
-        this.entriesService.sort.active = sort.name;
-        this.entriesService.sort.direction = sort.ascending ? 'asc' : 'desc';
+    onSortChange(sort: Sort) {
+        this.entriesService.sort.active = sort.active;
+        this.entriesService.sort.direction = sort.direction;
         this.entriesService.sortChange.emit(this.entriesService.sort);
-        if (this.entriesService.dataSource instanceof NodeDataSourceRemote) {
-            this.entriesService.dataSource.changeSort({
-                active: sort.name,
-                direction: sort.ascending ? 'asc' : 'desc',
-            });
-        }
     }
 
     loadData(source: 'scroll' | 'button') {
