@@ -24,6 +24,7 @@ import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.version.Version;
@@ -134,6 +135,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public NodeRef copyNode(String nodeId, String toNodeId, boolean copyChildren) throws Throwable {
 		NodeRef result = serviceRegistry.getRetryingTransactionHelper().doInTransaction(()->{
 			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+			throwIfRestrictedAccessPresent(nodeRef);
 
 			CopyService copyService = serviceRegistry.getCopyService();
 
@@ -162,7 +164,16 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 		return result;
 	}
-	
+
+	private void throwIfRestrictedAccessPresent(NodeRef nodeRef) {
+		Boolean restrictedAccess = (Boolean) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CCM_PROP_RESTRICTED_ACCESS);
+		if(restrictedAccess != null && restrictedAccess) {
+			if(!serviceRegistry.getPermissionService().hasPermission(nodeRef, CCConstants.PERMISSION_WRITE).equals(AccessStatus.ALLOWED)) {
+				throw new SecurityException("Node has restricted access and no permission " + CCConstants.PERMISSION_WRITE + " available");
+			}
+		}
+	}
+
 	private void resetVersion(NodeRef nodeRef) throws Throwable {
 		if(CCConstants.CCM_TYPE_IO.equals(getType(nodeRef.getId()))) {
 			HashMap<String, Object> props = new HashMap<String,Object>();
