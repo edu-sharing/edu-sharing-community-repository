@@ -94,6 +94,7 @@ import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';
 import { CombinedDataSource } from '../../features/node-entries/combined-data-source';
 import { values } from 'lodash';
+import { Sort } from '@angular/material/sort/sort';
 
 @Component({
     selector: 'es-search',
@@ -402,7 +403,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             // Why do we need this, when the top bar is hidden anyway?
             // showScope: this.mainnav,
             // showUser: this.mainnav,
-            onSearch: (query) => this.applyParameters('mainnav', null, query),
+            onSearch: (query) => this.applyParameters('mainnav', null, query, null),
             onCreate: (nodes) => this.nodeEntriesResults.addVirtualNodes(nodes),
         });
     }
@@ -433,48 +434,85 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     setRepository(repository: string) {
-        this.routeSearch(null, repository, null, {});
+        this.routeSearch(null, repository, null, null, {});
     }
 
     acceptDidYouMeanSuggestion(text: string): void {
-        this.applyParameters('did-you-mean-suggestion', null, text);
+        this.applyParameters('did-you-mean-suggestion', null, text, this.searchService.sort);
     }
 
     async applyParameters(
         origin: 'mainnav' | 'mds' | 'did-you-mean-suggestion' | 'sort' | 'uri',
         props: Values,
         query: string,
+        sort: Sort,
         { replaceUrl = false, force = false } = {},
     ) {
-        console.info('routing', origin, props, query);
+        console.info('routing', origin, props, sort, query);
         if (origin === 'mds') {
             this.searchService.mdsInitialized = true;
             // do not route search - it can cause reset of the scroll offset of the page
             if (Helper.objectEquals(this.searchService.values, props)) {
-                await this.applyParameters('uri', props, this.searchService.searchTerm);
+                await this.applyParameters(
+                    'uri',
+                    props,
+                    this.searchService.searchTerm,
+                    this.searchService.sort,
+                );
             } else {
-                await this.routeSearchParameters(this.searchService.searchTerm, props, {
-                    replaceUrl,
-                });
+                await this.routeSearchParameters(
+                    this.searchService.searchTerm,
+                    this.searchService.sort,
+                    props,
+                    {
+                        replaceUrl,
+                    },
+                );
             }
             return;
         }
-        if (origin === 'mainnav' || origin === 'did-you-mean-suggestion' || origin === 'sort') {
-            await this.routeSearchParameters(query, this.searchService.values, { replaceUrl });
+        if (origin === 'mainnav' || origin === 'did-you-mean-suggestion') {
+            const values = this.searchService.values;
+            await this.routeSearchParameters(
+                query,
+                this.searchService.sort,
+                this.searchService.values,
+                { replaceUrl },
+            );
+            return;
+        }
+        if (origin === 'sort') {
+            await this.routeSearchParameters(
+                this.searchService.searchTerm,
+                sort,
+                this.searchService.values,
+                { replaceUrl },
+            );
             return;
         }
         if (
             origin === 'uri' &&
             Helper.objectEquals(this.searchService.values, props) &&
             this.searchService.searchTerm === query &&
+            this.searchService.sort.active === sort.active &&
+            this.searchService.sort.direction === sort.direction &&
             this.getDataSource()?.isEmpty() === false
         ) {
             console.info('init is already done');
             this.initOptions();
+            this.mainNavService.getMainNav()?.refreshBanner();
             return;
         }
-        this.searchService.searchTerm = query;
+        if (this.searchService.searchTerm !== query) {
+            console.info(this.searchService.searchTerm, query);
+            this.searchService.searchTerm = query;
+        }
         this.searchService.values = props ?? {};
+        if (!this.searchService.sort) {
+            this.updateSortState();
+        }
+        this.searchService.sort.active = sort.active;
+        this.searchService.sort.direction = sort.direction;
 
         if (origin === 'uri' && !this.searchService.mdsInitialized) {
             console.info('ignoring routing - mds not ready yet');
@@ -574,10 +612,11 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     routeSearchParameters(
         query = this.searchService.searchTerm,
+        sort: Sort,
         parameters: { [property: string]: string[] },
         { replaceUrl = false } = {},
     ) {
-        return this.routeSearch(query, this.currentRepository, this.mdsId, parameters, {
+        return this.routeSearch(query, this.currentRepository, this.mdsId, sort, parameters, {
             replaceUrl,
         });
     }
@@ -597,13 +636,14 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if (!query.cleared) {
             this.uiService.hideKeyboardIfMobile();
         }
-        this.routeSearch(query.query, this.currentRepository, this.mdsId);
+        this.routeSearch(query.query, this.currentRepository, this.mdsId, this.searchService.sort);
     }
 
     async routeSearch(
         query = this.searchService.searchTerm,
         repository = this.currentRepository,
         mds = this.mdsId,
+        sort: Sort,
         parameters?: { [property: string]: string[] },
         { replaceUrl = false } = {},
     ) {
@@ -623,8 +663,11 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         queryParams.repository = repository;
         queryParams.mdsExtended = this.mdsExtended;
         queryParams.sidenav = this.searchService.sidenavOpened;
-        queryParams.materialsSortBy = this.searchService.sort.active;
-        queryParams.materialsSortAscending = this.searchService.sort.direction === 'asc';
+        if (sort) {
+            queryParams.materialsSortBy = sort.active;
+            queryParams.materialsSortAscending = sort.direction === 'asc';
+        }
+        console.info('route', queryParams);
         return await this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
             queryParams,
             replaceUrl,
@@ -784,14 +827,16 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     setDisplayType(type: NodeEntriesDisplayType) {
-        this.router.navigate(['./'], {
-            relativeTo: this.activatedRoute,
-            queryParams: {
-                displayType: type ?? null,
-            },
-            queryParamsHandling: 'merge',
-            replaceUrl: true,
-        });
+        if (this.searchService.displayType !== type) {
+            this.router.navigate(['./'], {
+                relativeTo: this.activatedRoute,
+                queryParams: {
+                    displayType: type ?? null,
+                },
+                queryParamsHandling: 'merge',
+                replaceUrl: true,
+            });
+        }
     }
 
     processSearchResult(data: SearchList, init: boolean) {
@@ -831,12 +876,17 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     updateMds() {
         this.searchService.values = null;
-        this.routeSearch(this.searchService.searchTerm, this.currentRepository, this.mdsId, null);
+        this.routeSearch(
+            this.searchService.searchTerm,
+            this.currentRepository,
+            this.mdsId,
+            this.searchService.sort,
+            null,
+        );
     }
 
     updateSort(sort: ListSortConfig) {
-        this.searchService.sort = sort;
-        this.applyParameters('sort', null, null);
+        this.applyParameters('sort', null, null, sort);
     }
 
     permissionAddToCollection(node: Node) {
@@ -1079,18 +1129,23 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.mdsExtended = false;
             this.loadSavedSearch();
             if (param['mdsExtended']) this.mdsExtended = param['mdsExtended'] == 'true';
+            let sort: Sort;
             if (param['materialsSortBy']) {
-                // set a valid state first
-                this.updateSortState();
-                this.searchService.sort.active = param['materialsSortBy'];
-                this.searchService.sort.direction =
-                    param['materialsSortAscending'] === 'true' ? 'asc' : 'desc';
+                sort = {
+                    active: param['materialsSortBy'],
+                    direction: param['materialsSortAscending'] === 'true' ? 'asc' : 'desc',
+                };
+            } else {
+                sort = {
+                    active: this.updateSortMds()?.default?.sortBy,
+                    direction: this.updateSortMds()?.default?.sortAscending ? 'asc' : 'desc',
+                };
             }
             if (param.parameters) {
                 this.searchService.extendedSearchUsed = true;
-                this.applyParameters('uri', JSON.parse(param.parameters), param.query);
+                this.applyParameters('uri', JSON.parse(param.parameters), param.query, sort);
             } else if (this.searchService.values) {
-                this.applyParameters('uri', null, param.query);
+                this.applyParameters('uri', null, param.query, sort);
             }
             if (param['savedQuery']) {
                 this.nodeApi
@@ -1322,7 +1377,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             );
         }
         const searchAction = new OptionItem('SEARCH.APPLY_FILTER', 'search', async () => {
-            this.applyParameters('mds', await this.getActiveMds().getValues(), null);
+            this.applyParameters('mds', await this.getActiveMds().getValues(), null, null);
         });
         searchAction.isPrimary = true;
         if (this.mdsDesktopRef?.editorType === 'legacy') {
@@ -1560,8 +1615,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.mdsSets = null;
             if (this.currentRepository != paramRepo) {
                 this.mdsId = RestConstants.DEFAULT;
+                this.currentRepository = paramRepo;
             }
-            this.currentRepository = paramRepo;
             this.updateRepositoryOrder();
             this.updateCurrentRepositoryId();
             if (
@@ -1579,7 +1634,12 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                         use[0],
                     use,
                 );
-                this.routeSearch(this.searchService.searchTerm, use[0], RestConstants.DEFAULT);
+                this.routeSearch(
+                    this.searchService.searchTerm,
+                    use[0],
+                    RestConstants.DEFAULT,
+                    this.searchService.sort,
+                );
             }
             if (this.currentRepository != previousRepository) {
                 this.searchService.values = null;
@@ -1688,9 +1748,15 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             )
             .subscribe((values) => {
                 this.ngZone.run(() => {
-                    this.applyParameters('mds', values, this.searchService.searchTerm, {
-                        replaceUrl: !initDone,
-                    });
+                    this.applyParameters(
+                        'mds',
+                        values,
+                        this.searchService.searchTerm,
+                        this.searchService.sort,
+                        {
+                            replaceUrl: !initDone,
+                        },
+                    );
                 });
                 initDone = true;
             });
