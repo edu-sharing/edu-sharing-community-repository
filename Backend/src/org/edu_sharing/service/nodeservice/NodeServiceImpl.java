@@ -168,8 +168,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	private void throwIfRestrictedAccessPresent(NodeRef nodeRef) {
 		Boolean restrictedAccess = (Boolean) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CCM_PROP_RESTRICTED_ACCESS);
 		if(restrictedAccess != null && restrictedAccess) {
-			if(!serviceRegistry.getPermissionService().hasPermission(nodeRef, CCConstants.PERMISSION_WRITE).equals(AccessStatus.ALLOWED)) {
-				throw new SecurityException("Node has restricted access and no permission " + CCConstants.PERMISSION_WRITE + " available");
+			if(!serviceRegistry.getPermissionService().hasPermission(nodeRef, CCConstants.PERMISSION_CHANGEPERMISSIONS).equals(AccessStatus.ALLOWED)) {
+				throw new SecurityException("Node has restricted access and no permission " + CCConstants.PERMISSION_CHANGEPERMISSIONS + " available");
 			}
 		}
 	}
