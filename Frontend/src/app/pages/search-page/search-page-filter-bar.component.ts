@@ -35,7 +35,7 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
     readonly savedSearches = this.savedSearchesService.observeSavedSearches();
     /** Deep copy of `searchFilters.userValue` for immutability. */
     searchFilterValues: Values;
-    mdsParamsReady = false;
+    mdsParams: { repository: string; setId: string } = null;
     savedSearchesButtonIsVisible = false;
 
     private mdsInitialized = false;
@@ -140,11 +140,11 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
 
     private registerMdsEditor(): void {
         rxjs.forkJoin([
-            this.activeMetadataSet.observeValue().pipe(first(notNull)),
             this.activeRepository.observeValue().pipe(first(notNull)),
+            this.activeMetadataSet.observeValue().pipe(first(notNull)),
         ])
             .pipe(
-                tap(() => (this.mdsParamsReady = true)),
+                tap(([repository, setId]) => (this.mdsParams = { repository, setId })),
                 delay(0),
                 takeUntil(this.destroyed),
             )
@@ -213,10 +213,11 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
     }
 
     private resetMds(): void {
-        console.log('resetMds', {
-            repo: this.activeRepository.getValue(),
-            mds: this.activeMetadataSet.getValue(),
-        });
+        this.mdsParams = {
+            repository: this.activeRepository.getValue(),
+            setId: this.activeMetadataSet.getValue(),
+        };
+        console.log('resetMds', this.mdsParams);
         this.mdsInitialized = false;
         // Wait for search-filter values to propagate via data binding to the mds editor.
         setTimeout(() => {

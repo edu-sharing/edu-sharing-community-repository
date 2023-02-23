@@ -231,11 +231,12 @@ export class SearchPageService implements OnDestroy {
             .observeUserValue()
             .subscribe((searchString) => searchFieldInstance.setSearchString(searchString));
         rxjs.combineLatest([
-            this.activeRepository.observeValue().pipe(filter(notNull)),
-            this.activeMetadataSet.observeValue().pipe(filter(notNull)),
+            this.activeRepository.observeValue(),
+            this.activeMetadataSet.observeValue(),
         ])
             .pipe(
                 takeUntil(this.destroyed),
+                filter(([repository, metadataSet]) => notNull(repository) && notNull(metadataSet)),
                 map(([repository, metadataSet]) => ({ repository, metadataSet })),
             )
             .subscribe((mdsInfo) => searchFieldInstance.setMdsInfo(mdsInfo));
@@ -318,10 +319,11 @@ export class SearchPageService implements OnDestroy {
         // Get MDS definition.
         const mds = rxjs
             .combineLatest([
-                this.activeRepository.observeValue().pipe(filter(notNull)),
-                this.activeMetadataSet.observeValue().pipe(filter(notNull)),
+                this.activeRepository.observeValue(),
+                this.activeMetadataSet.observeValue(),
             ])
             .pipe(
+                filter(([repository, metadataSet]) => notNull(repository) && notNull(metadataSet)),
                 switchMap(([repository, metadataSet]) =>
                     this.mds.getMetadataSet({ repository, metadataSet }),
                 ),

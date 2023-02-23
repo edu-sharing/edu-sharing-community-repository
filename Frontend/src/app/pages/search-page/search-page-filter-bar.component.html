@@ -13,10 +13,10 @@
  -->
 
 <es-mds-editor-wrapper
-  *ngIf="mdsParamsReady"
+  *ngIf="mdsParams"
   groupId="ngsearch"
-  [repository]="activeRepository.getValue()"
-  [setId]="activeMetadataSet.getValue()"
+  [repository]="mdsParams.repository"
+  [setId]="mdsParams.setId"
   [embedded]="true"
   mode="search"
   [currentValues]="searchFilterValues"
