@@ -14,7 +14,7 @@ import org.w3c.dom.NodeList;
 
 public class SigningHandler extends BasicHandler{
 
-	Logger log = Logger.getLogger(SigningHandler.class);
+	private static Logger log = Logger.getLogger(SigningHandler.class);
 	
 	@Override
 	public void invoke(MessageContext msgContext) throws AxisFault {

@@ -12,7 +12,7 @@ import org.apache.log4j.Logger;
 
 public class MonitoringServlet extends HttpServlet {
 
-	Logger logger = Logger.getLogger(MonitoringServlet.class);
+	private static Logger logger = Logger.getLogger(MonitoringServlet.class);
 	/**
 	 * 
 	 */

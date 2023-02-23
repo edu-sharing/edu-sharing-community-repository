@@ -51,7 +51,7 @@ import org.springframework.util.StreamUtils;
 
 public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 
-	private Logger logger = Logger.getLogger(PreviewServlet.class);
+	private static Logger logger = Logger.getLogger(PreviewServlet.class);
 
 	public static final String RESULT_TYPE_MIME_ICON = "mime_type";
 

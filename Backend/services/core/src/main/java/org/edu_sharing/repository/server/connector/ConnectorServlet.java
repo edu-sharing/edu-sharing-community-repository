@@ -47,7 +47,7 @@ import org.springframework.context.ApplicationContext;
 
 public class ConnectorServlet extends HttpServlet  {
 
-	Logger logger = Logger.getLogger(ConnectorServlet.class);
+	private static Logger logger = Logger.getLogger(ConnectorServlet.class);
 	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

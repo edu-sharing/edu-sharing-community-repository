@@ -45,8 +45,8 @@ import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
 public class LogoutServlet extends HttpServlet{
-	
-	Logger logger = Logger.getLogger(LogoutServlet.class);
+
+	private static Logger logger = Logger.getLogger(LogoutServlet.class);
 	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

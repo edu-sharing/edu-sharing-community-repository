@@ -2,7 +2,9 @@ package org.edu_sharing.restservices.shared;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
-public class Remote {
+import java.io.Serializable;
+
+public class Remote implements Serializable {
     @JsonProperty
     private Repo repository;
     @JsonProperty

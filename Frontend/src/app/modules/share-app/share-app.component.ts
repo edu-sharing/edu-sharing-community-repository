@@ -76,15 +76,46 @@ export class ShareAppComponent {
 
   }
     getType(){
-      if(this.isLink())
-          return "link";
-      if(this.isTextSnippet())
-          return "file-txt";
-      if(this.mimetype=="application/pdf")
-          return "file-pdf";
+        if (this.isLink()) return 'link';
+        if (this.isTextSnippet()) return 'file-txt';
+        if (this.mimetype === 'application/pdf') {
+            return 'file-pdf';
+        }
+        if (
+            [
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/msword',
+            ].includes(this.mimetype)
+        ) {
+            return 'file-word';
+        }
+        if (
+            [
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'application/vnd.ms-excel',
+            ].includes(this.mimetype)
+        ) {
+            return 'file-excel';
+        }
+        if (
+            [
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                'application/vnd.ms-powerpoint',
+            ].includes(this.mimetype)
+        ) {
+            return 'file-powerpoint';
+        }
+        if (
+            [
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/msword',
+            ].includes(this.mimetype)
+        ) {
+            return 'file-word';
+        }
       if(this.mimetype) {
-          let type = this.mimetype.split("/");
-          if(this.translate.instant('MEDIATYPE.' + type) === 'MEDIATYPE.' + type) {
+            let type = this.mimetype.split('/')[0];
+            if (this.translate.instant('MEDIATYPE.file-' + type) === 'MEDIATYPE.file-' + type) {
               type = null;
           }
           if(type != null) {
@@ -98,7 +129,16 @@ export class ShareAppComponent {
         if(this.isLink()){
             let prop:any={};
             prop[RestConstants.CCM_PROP_IO_WWWURL]=[this.getUri()];
-            this.node.createNode(this.inbox.ref.id,RestConstants.CCM_TYPE_IO,[],prop,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe((data:NodeWrapper)=>{
+            this.node
+                .createNode(
+                    this.inbox?.ref?.id || RestConstants.INBOX,
+                    RestConstants.CCM_TYPE_IO,
+                    [],
+                    prop,
+                    true,
+                    RestConstants.COMMENT_MAIN_FILE_UPLOAD,
+                )
+                .subscribe((data: NodeWrapper) => {
                 callback(data.node);
             });
         }
@@ -191,6 +231,7 @@ export class ShareAppComponent {
                     this.inbox=data.nodes[0];
                 });
                 this.previewUrl=this.connector.getThemeMimePreview(this.getType()+'.svg');
+                console.log('type', this.mimetype, this.getType());
                 if(this.isLink()) {
                     this.utilities.getWebsiteInformation(this.getUri()).subscribe((data: any) => {
                         if(data.title) {
