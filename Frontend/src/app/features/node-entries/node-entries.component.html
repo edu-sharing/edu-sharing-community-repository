@@ -1,3 +1,9 @@
+<div class="top-matter">
+  <div class="title">
+    <ng-container *ngTemplateOutlet="templatesService.title"></ng-container>
+  </div>
+  <ng-container *ngTemplateOutlet="templatesService.entriesTopMatter"></ng-container>
+</div>
 <ng-container *ngIf="entriesService.dataSource">
   <ng-container *ngIf="entriesService.displayType === NodeEntriesDisplayType.Table">
     <es-node-entries-table></es-node-entries-table>

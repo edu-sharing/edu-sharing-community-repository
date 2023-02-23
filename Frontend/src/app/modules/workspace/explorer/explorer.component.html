@@ -43,6 +43,7 @@
   [configureColumns]="true"
   (columnsChange)="saveColumns($event)"
   [displayType]="displayType"
+  [class.grid]="displayType !== NodeEntriesDisplayType.Table"
   (displayTypeChange)="displayTypeChange.emit($event)"
   [elementInteractionType]="InteractionType.Emitter"
   (fetchData)="load($event)"

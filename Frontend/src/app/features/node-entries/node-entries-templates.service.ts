@@ -8,6 +8,11 @@ export class NodeEntriesTemplatesService {
     title: TemplateRef<any>;
 
     /**
+     * Additional top matter that is provided by the selected node-entries component.
+     */
+    entriesTopMatter: TemplateRef<unknown>;
+
+    /**
      * custom container in case the data source is empty
      */
     empty: TemplateRef<any>;

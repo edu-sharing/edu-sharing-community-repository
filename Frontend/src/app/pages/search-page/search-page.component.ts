@@ -7,6 +7,8 @@ import { Scope } from '../../core-ui-module/option-item';
 import { NodeEntriesDisplayType } from '../../features/node-entries/entries-model';
 import { NodeEntriesWrapperComponent } from '../../features/node-entries/node-entries-wrapper.component';
 import { MainNavService } from '../../main/navigation/main-nav.service';
+import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
+import { notNull } from '../../util/functions';
 import { SearchPageService } from './search-page.service';
 
 @Component({
@@ -22,13 +24,19 @@ import { SearchPageService } from './search-page.service';
         ]),
     ],
 })
-export class SearchPageComponent implements OnInit, AfterViewInit {
+export class SearchPageComponent implements OnInit {
     readonly Scope = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 
     @ViewChild('nodeEntriesResults') nodeEntriesResults: NodeEntriesWrapperComponent<Node>;
+    @ViewChild(ActionbarComponent)
+    set _actionbar(value: ActionbarComponent) {
+        // Avoid changed-after-checked error.
+        setTimeout(() => (this.actionbar = value));
+    }
+    actionbar: ActionbarComponent;
 
-    @HostBinding('class.has-tab-bar') tabBarIsVisible = false;
+    @HostBinding('class.has-tab-bar') tabBarIsVisible: boolean = null;
     progressBarIsVisible = false;
 
     readonly resultsDataSource = this.searchPage.resultsDataSource;
@@ -48,15 +56,12 @@ export class SearchPageComponent implements OnInit, AfterViewInit {
     ngOnInit(): void {
         this.initMainNav();
         this.availableRepositories
-            .pipe(map((availableRepositories) => availableRepositories?.length > 1))
+            .pipe(
+                filter(notNull),
+                map((availableRepositories) => availableRepositories.length > 1),
+            )
             .subscribe((tabBarIsVisible) => (this.tabBarIsVisible = tabBarIsVisible));
         this.registerProgressBarIsVisible();
-    }
-
-    ngAfterViewInit(): void {
-        void this.nodeEntriesResults.initOptionsGenerator({
-            // TODO
-        });
     }
 
     private initMainNav(): void {

@@ -1,16 +1,13 @@
 import { CdkDragEnter, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
-    ChangeDetectorRef,
     Component,
     ElementRef,
-    HostBinding,
     Input,
     NgZone,
-    OnChanges,
     OnDestroy,
     OnInit,
     QueryList,
-    SimpleChanges,
+    TemplateRef,
     ViewChild,
     ViewChildren,
 } from '@angular/core';
@@ -44,11 +41,15 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
      */
     readonly ScrollingOffsetPercentage = 0.4;
 
+    @ViewChild('gridTop', { static: true }) set gridTop(value: TemplateRef<unknown>) {
+        this.registerGridTop(value);
+    }
     @ViewChild(SortSelectPanelComponent)
     set sortPanel(value: SortSelectPanelComponent) {
         if (this.entriesService.dataSource instanceof NodeDataSourceRemote) {
-            this.entriesService.dataSource.sortPanel = value;
-            this.cdr.detectChanges();
+            setTimeout(() => {
+                (this.entriesService.dataSource as NodeDataSourceRemote<T>).sortPanel = value;
+            });
         }
     }
     @ViewChildren(CdkDropList) dropListsQuery: QueryList<CdkDropList>;
@@ -95,7 +96,6 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
         public entriesGlobalService: NodeEntriesGlobalService,
         public templatesService: NodeEntriesTemplatesService,
         public ui: UIService,
-        private cdr: ChangeDetectorRef,
         private ngZone: NgZone,
     ) {}
 
@@ -108,6 +108,19 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
     ngOnDestroy(): void {
         this.destroyed.next();
         this.destroyed.complete();
+    }
+
+    private registerGridTop(gridTop: TemplateRef<unknown>): void {
+        setTimeout(() => {
+            this.templatesService.entriesTopMatter = gridTop;
+        });
+        this.destroyed.subscribe(() => {
+            if (this.templatesService.entriesTopMatter === gridTop) {
+                setTimeout(() => {
+                    this.templatesService.entriesTopMatter = null;
+                });
+            }
+        });
     }
 
     private registerItemsCap() {

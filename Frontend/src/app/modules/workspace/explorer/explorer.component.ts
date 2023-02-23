@@ -62,6 +62,7 @@ import { WorkspaceTreeComponent } from '../tree/tree.component';
 export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterViewInit {
     public readonly SCOPES = Scope;
     readonly InteractionType = InteractionType;
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 
     public static getColumns(
         connector: RestConnectorService,

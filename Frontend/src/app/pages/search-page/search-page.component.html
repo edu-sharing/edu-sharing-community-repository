@@ -5,7 +5,7 @@
   (animationEnd)="onProgressBarAnimationEnd()"
 ></mat-progress-bar>
 
-<ng-container *ngIf="tabBarIsVisible; else tabBody">
+<ng-container *ngIf="tabBarIsVisible">
   <nav mat-tab-nav-bar [tabPanel]="tabPanel">
     <a
       mat-tab-link
@@ -22,6 +22,11 @@
   <mat-tab-nav-panel #tabPanel>
     <ng-container *ngTemplateOutlet="tabBody"></ng-container>
   </mat-tab-nav-panel>
+</ng-container>
+<!-- Explicitly check if `tabBarIsVisible === false`, so we don't insert the body before we know
+where. -->
+<ng-container *ngIf="tabBarIsVisible === false">
+  <ng-container *ngTemplateOutlet="tabBody"></ng-container>
 </ng-container>
 
 <ng-template #tabBody>
@@ -56,10 +61,12 @@
         [columns]="resultColumns.value"
         [sort]="sortConfig | async"
         [primaryInstance]="true"
+        [initConfig]="{ actionbar }"
       >
         <ng-template #title>
           <div class="title-container">
             <h2 class="mat-heading-2">{{ 'SEARCH.MATERIALS' | translate }}</h2>
+            <es-actionbar></es-actionbar>
           </div>
         </ng-template>
         <ng-template #empty>
