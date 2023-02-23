@@ -16,12 +16,10 @@ import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.MetadataQuery;
-import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
-import org.edu_sharing.metadataset.v2.MetadataReader;
-import org.edu_sharing.metadataset.v2.MetadataSet;
+import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repackaged.elasticsearch.org.apache.http.HttpHost;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
@@ -30,7 +28,10 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.restservices.NodeDao;
+import org.edu_sharing.restservices.mds.v1.model.Suggestions;
 import org.edu_sharing.restservices.shared.Contributor;
+import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.service.admin.SystemFolder;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
@@ -75,6 +76,7 @@ import org.elasticsearch.search.suggest.SuggestBuilders;
 import org.elasticsearch.search.suggest.phrase.DirectCandidateGeneratorBuilder;
 import org.elasticsearch.search.suggest.phrase.PhraseSuggestion;
 import org.elasticsearch.xcontent.*;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 
 import java.io.ByteArrayOutputStream;
@@ -199,7 +201,6 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     public SearchResultNodeRef searchFacets(MetadataSet mds, String query, Map<String,String[]> criterias, SearchToken searchToken) throws Throwable {
-        List<NodeSearch.Facet> facetsResult = new ArrayList<>();
         BoolQueryBuilder globalConditions = getGlobalConditions(searchToken.getAuthorityScope(),searchToken.getPermissions());
 
         MetadataQuery queryData = mds.findQuery(query, MetadataReader.QUERY_SYNTAX_DSL);
@@ -213,6 +214,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 globalConditions,
                 searchToken);
 
+        return parseAggregations(searchToken, aggregations);
+    }
+
+    @NotNull
+    private SearchResultNodeRef parseAggregations(SearchToken searchToken, List<AggregationBuilder> aggregations) throws Exception {
         SearchRequest searchRequestAggs = new SearchRequest("workspace");
         SearchSourceBuilder searchSourceBuilderAggs = new SearchSourceBuilder();
         searchSourceBuilderAggs.from(0);
@@ -225,7 +231,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         logger.info("query aggs: "+searchSourceBuilderAggs.toString());
         SearchResponse resp = LogTime.log("Searching elastic for facets", () -> client.search(searchRequestAggs, RequestOptions.DEFAULT));
 
-
+        List<NodeSearch.Facet> facetsResult = new ArrayList<>();
         for(Aggregation a : resp.getAggregations()) {
             if(a instanceof ParsedFilter){
                 ParsedFilter pf = (ParsedFilter)a;
@@ -1107,5 +1113,39 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return sr;
     }
 
+    @Override
+    public List<? extends Suggestion> getSuggestions(MetadataSet mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
+        Map<String,String[]> criteriasMap = MetadataSearchHelper.convertCriterias(criterias);
+        SearchToken token = new SearchToken();
+        token.setFacets(Collections.singletonList(parameterId));
+        token.setFrom(0);
+        token.setMaxResult(0);
+        token.setFacetLimit(50);
+        token.setFacetsMinCount(1);
+        token.setQueryString(value);
+        try {
+            Map<String, MetadataKey> captions = mds.findWidget(parameterId).getValuesAsMap();
+            SearchResultNodeRef search = searchFacets(
+                    mds, queryId, criteriasMap, token
+            );
+            if(search.getFacets().size() != 1) {
+                return Collections.emptyList();
+            }
+            return search.getFacets().get(0).getValues().stream().filter(s ->
+                // if one document has i.e. multiple keywords, they will be shown in the facet
+                // so, we filter for values which actually contain the given string
+                s.getValue().toLowerCase().contains(value)
+            ).map(s -> {
+                Suggestion suggestion = new Suggestion();
+                suggestion.setKey(s.getValue());
+                suggestion.setDisplayString(
+                        captions.containsKey(s.getValue()) ? captions.get(s.getValue()).getCaption() : s.getValue()
+                );
+                return suggestion;
+            }).collect(Collectors.toList());
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
 
+    }
 }

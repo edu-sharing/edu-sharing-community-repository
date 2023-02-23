@@ -257,6 +257,14 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
             QueryBuilder qbNoFilter = getElasticSearchQuery(searchToken, queries, query, tmp, false);
             BoolQueryBuilder bqb = QueryBuilders.boolQuery();
             bqb = bqb.must(qbFilter).must(qbNoFilter).must(globalConditions);
+            String fieldName = "properties." + facet+".keyword";
+            MetadataQueryParameter parameter = query.findParameterByName(facet);
+            if(parameter != null && parameter.getFacets() != null) {
+                if(parameter.getFacets().size() != 1) {
+                    throw new IllegalArgumentException("DSL Queries only support exactly ONE facet parameter");
+                }
+                fieldName = parameter.getFacets().get(0);
+            }
             if(searchToken.getQueryString() != null && !searchToken.getQueryString().trim().isEmpty()){
 
                 boolean isi18nProp = false;
@@ -266,8 +274,10 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                 }
 
                 MultiMatchQueryBuilder mmqb = null;
-
-                if(isi18nProp){
+                if(parameter != null && parameter.getFacets() != null) {
+                    mmqb = QueryBuilders
+                            .multiMatchQuery(searchToken.getQueryString(), parameter.getFacets().get(0));
+                } else if(isi18nProp){
                     mmqb = QueryBuilders
                             .multiMatchQuery(searchToken.getQueryString(),"i18n."+currentLocale+"."+facet,"collections.i18n."+currentLocale+"."+facet);
                 }else{
@@ -281,7 +291,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
             result.add(AggregationBuilders.filter(facet, bqb).subAggregation(AggregationBuilders.terms(facet)
                     .size(searchToken.getFacetLimit())
                     .minDocCount(searchToken.getFacetsMinCount())
-                    .field("properties." + facet+".keyword")));
+                    .field(fieldName)));
 
             if(parameters.get(facet) != null && parameters.get(facet).length > 0) {
                 result.add(AggregationBuilders.filter(facet + "_selected", bqb).subAggregation(AggregationBuilders.terms(facet)

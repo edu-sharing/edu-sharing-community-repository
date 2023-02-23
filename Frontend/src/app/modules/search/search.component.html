@@ -153,7 +153,7 @@
       [mode]="'search'"
       [(extended)]="mdsExtended"
       (onMdsLoaded)="onMdsReady($event)"
-      (onDone)="applyParameters('mds', $any($event), null)"
+      (onDone)="applyParameters('mds', $any($event), null, null)"
     >
     </es-mds-editor-wrapper>
   </es-card>
@@ -199,7 +199,9 @@
             [(extended)]="mdsExtended"
             (onMdsLoaded)="currentRepository === '-all-' ? null : onMdsReady($event)"
             (onDone)="
-              currentRepository === '-all-' ? null : applyParameters('mds', $any($event), null)
+              currentRepository === '-all-'
+                ? null
+                : applyParameters('mds', $any($event), null, null)
             "
           >
           </es-mds-editor-wrapper>
