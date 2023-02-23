@@ -29,11 +29,10 @@ export class MdsService {
     }
 
     /**
-     * get the given metadata
-     * NOTE: "DEFAULT" will refer to the primary metadataset of the repository but will NOT
-     * obey any restrictions given via the (client-side) configuration
-     * @param repository
-     * @param metadataSet
+     * Gets the given metadata.
+     *
+     * NOTE: "DEFAULT" will refer to the primary metadata set of the repository but will NOT obey
+     * any restrictions given via the (client-side) configuration.
      */
     @shareReplayReturnValue()
     getMetadataSet({

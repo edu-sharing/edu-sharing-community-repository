@@ -24,10 +24,14 @@ export function shareReplayReturnValue() {
 }
 
 function serialize(value: any): string {
-    if (typeof value === 'object') {
-        // Sort by keys.
-        return JSON.stringify(value, Object.keys(value).sort());
-    } else {
-        return JSON.stringify(value);
-    }
+    // Sort by keys.
+    return JSON.stringify(value, (_, v) =>
+        v instanceof Object && !(v instanceof Array) ? sortObject(v) : v,
+    );
+}
+
+function sortObject<T>(obj: T): T {
+    return (Object.keys(obj) as Array<keyof T>)
+        .sort()
+        .reduce((acc, key) => ((acc[key] = obj[key]), acc), {} as T);
 }
