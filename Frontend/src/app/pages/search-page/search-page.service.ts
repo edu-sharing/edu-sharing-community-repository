@@ -77,8 +77,9 @@ export class SearchPageService implements OnDestroy {
     readonly sortConfig = new BehaviorSubject<ListSortConfig>(null);
 
     private readonly destroyed = new Subject<void>();
-    private readonly loadingContent = new BehaviorSubject<boolean>(false);
-    private readonly loadingCollections = new BehaviorSubject<boolean>(false);
+    private readonly loadingParams = new BehaviorSubject<boolean>(true);
+    private readonly loadingContent = new BehaviorSubject<boolean>(true);
+    private readonly loadingCollections = new BehaviorSubject<boolean>(true);
 
     constructor(
         private config: ConfigService,
@@ -262,10 +263,12 @@ export class SearchPageService implements OnDestroy {
                 // .pipe(tap((value) => console.log('searchString changed', value))),
             ])
             .pipe(
+                tap(() => this.loadingParams.next(true)),
                 filter(
                     ([repository, metadataSet, searchFilters]) =>
                         notNull(repository) && notNull(metadataSet) && notNull(searchFilters),
                 ),
+                tap(() => this.loadingParams.next(false)),
                 map(
                     ([repository, metadataSet, searchFilters, searchString]) =>
                         new SearchRequestParams(
@@ -295,17 +298,18 @@ export class SearchPageService implements OnDestroy {
     }
 
     private registerLoadingProgress(): void {
-        rxjs.combineLatest([this.loadingContent, this.loadingCollections])
+        rxjs.combineLatest([this.loadingParams, this.loadingContent, this.loadingCollections])
             .pipe(
-                map(
-                    ([loadingContent, loadingCollections]) =>
-                        (loadingContent ? 0 : 0.5) + (loadingCollections ? 0 : 0.5),
-                ),
+                map(([loadingParams, loadingContent, loadingCollections]) => {
+                    if (loadingParams) {
+                        return 10;
+                    } else {
+                        return 40 + (loadingContent ? 0 : 30) + (loadingCollections ? 0 : 30);
+                    }
+                }),
                 debounceTime(0),
                 distinctUntilChanged(),
                 // tap((progress) => console.log('progress', progress)),
-                map((progress) => progress * 100),
-                // map((progress) => progress >= 100 ? null : progress),
             )
             .subscribe((progress) => this.loadingProgress.next(progress));
     }
@@ -345,6 +349,7 @@ export class SearchPageService implements OnDestroy {
 
     private getSearchRemote(params: SearchRequestParams): NodeRemote<Node> {
         // console.log('%cgetSearchRemote', 'font-weight: bold', params);
+        this.loadingContent.next(true);
         return (request: NodeRequestParams) => {
             this.loadingContent.next(true);
             // console.log('search', request);
@@ -378,8 +383,10 @@ export class SearchPageService implements OnDestroy {
         );
         // We cannot show collections for another repository.
         if (!repository.isHomeRepo) {
+            this.loadingCollections.next(false);
             return () => rxjs.of({ data: [], total: 0 });
         }
+        this.loadingCollections.next(true);
         return (request: NodeRequestParams) => {
             this.loadingCollections.next(true);
             return this.search
