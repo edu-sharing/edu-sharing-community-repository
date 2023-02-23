@@ -932,14 +932,15 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.uiService.waitForComponent(this, 'mdsMobileRef').subscribe(() => {
                 this.mdsMobileRef.loadMds();
             });
+        } else {
+            this.router.navigate(['./'], {
+                relativeTo: this.activatedRoute,
+                queryParamsHandling: 'merge',
+                queryParams: {
+                    sidenav: this.searchService.sidenavOpened,
+                },
+            });
         }
-        this.router.navigate(['./'], {
-            relativeTo: this.activatedRoute,
-            queryParamsHandling: 'merge',
-            queryParams: {
-                sidenav: this.searchService.sidenavOpened,
-            },
-        });
         setTimeout(() => {
             // recalculate the filter layout
             this.handleScroll();
