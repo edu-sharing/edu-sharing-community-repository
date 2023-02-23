@@ -105,7 +105,9 @@ export class NodeDataSourceRemote<
     }
     private renderData = new BehaviorSubject<T[]>([]);
     private renderDataSubscription: Subscription | null;
-    private _isLoading = new BehaviorSubject<boolean>(false);
+    // Even if the data source is not in a loading state until initialized, we expect that the
+    // required data is prepared elsewhere and we already show the loading spinner.
+    private _isLoading = new BehaviorSubject<boolean>(true);
     private _initDone = false;
     private _resetDone = false;
 
