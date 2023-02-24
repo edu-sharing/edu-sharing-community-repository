@@ -31,8 +31,13 @@ where. -->
 
 <ng-template #tabBody>
   <mat-drawer-container #filterBar>
-    <mat-drawer [opened]="filterBarIsVisible.getValue()" mode="side">
-      <es-search-page-filter-bar></es-search-page-filter-bar>
+    <mat-drawer
+      [opened]="filterBarIsVisible.getValue() && (isMobileScreen | async) === false"
+      mode="side"
+    >
+      <div class="filter-bar-container">
+        <es-search-page-filter-bar></es-search-page-filter-bar>
+      </div>
     </mat-drawer>
     <main>
       <!-- We cannot use *ngIf on node-entries-wrapper since it depends on its input variables to
@@ -78,4 +83,8 @@ where. -->
       </es-node-entries-wrapper>
     </main>
   </mat-drawer-container>
+</ng-template>
+
+<ng-template #filtersDialogContent>
+  <es-search-page-filter-bar class="filters-dialog-content"></es-search-page-filter-bar>
 </ng-template>

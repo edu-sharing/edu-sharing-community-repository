@@ -162,6 +162,10 @@ export class NodeDataSourceRemote<
         return this._paginationHandler.length;
     }
 
+    observeTotal() {
+        return this.dataStream.pipe(map(() => this._paginationHandler.length));
+    }
+
     appendData(appendData: T[], location: 'before' | 'after' = 'after') {
         // TODO: handle pagination
         let data = this.dataStream.value;

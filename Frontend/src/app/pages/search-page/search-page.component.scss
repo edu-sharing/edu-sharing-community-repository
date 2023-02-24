@@ -64,6 +64,17 @@ mat-tab-nav-panel {
     background-color: unset;
 }
 
+.filter-bar-container {
+    width: 300px;
+    height: 100%;
+    padding: 20px;
+    overflow: auto;
+}
+
+.filters-dialog-content {
+    flex-grow: 1;
+}
+
 main {
     padding: 0 25px 25px;
 }

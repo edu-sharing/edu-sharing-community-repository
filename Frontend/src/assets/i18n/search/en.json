@@ -27,6 +27,8 @@
     "EMBED_SEARCH_ACTION": "Embed current search",
     "SAVE_SEARCH_ACTION": "Save",
     "FILTER": "Filter",
+    "FILTERS": "Filters",
+    "NUMBER_RESULTS": "{{ results }} result(s)",
     "CLICK_TO_REMOVE": "Click to remove",
     "PREVIEWIMAGE_FOR": "Preview image for",
     "INFORMATION_AND_PREVIEW_FOR": "Information an preview for",

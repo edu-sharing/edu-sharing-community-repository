@@ -1,11 +1,15 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import { Component, HostBinding, OnInit, ViewChild } from '@angular/core';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { Component, HostBinding, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
-import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { Node, RestConstants } from '../../core-module/core.module';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
 import { Scope } from '../../core-ui-module/option-item';
+import { CardDialogRef } from '../../features/dialogs/card-dialog/card-dialog-ref';
+import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { NodeEntriesDisplayType } from '../../features/node-entries/entries-model';
 import { NodeEntriesWrapperComponent } from '../../features/node-entries/node-entries-wrapper.component';
 import { MainNavService } from '../../main/navigation/main-nav.service';
@@ -26,10 +30,11 @@ import { SearchPageService } from './search-page.service';
         ]),
     ],
 })
-export class SearchPageComponent implements OnInit {
+export class SearchPageComponent implements OnInit, OnDestroy {
     readonly Scope = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 
+    @ViewChild('filtersDialogContent', { static: true }) filtersDialogContent: TemplateRef<unknown>;
     @ViewChild('nodeEntriesResults') nodeEntriesResults: NodeEntriesWrapperComponent<Node>;
     @ViewChild(ActionbarComponent)
     set _actionbar(value: ActionbarComponent) {
@@ -42,6 +47,7 @@ export class SearchPageComponent implements OnInit {
     progressBarIsVisible = false;
 
     readonly resultsDataSource = this.searchPage.resultsDataSource;
+    readonly totalResults = this.resultsDataSource.observeTotal();
     readonly collectionsDataSource = this.searchPage.collectionsDataSource;
     readonly availableRepositories = this.searchPage.availableRepositories;
     readonly activeRepository = this.searchPage.activeRepository;
@@ -50,8 +56,16 @@ export class SearchPageComponent implements OnInit {
     readonly resultColumns = this.searchPage.resultColumns;
     readonly collectionColumns = this.searchPage.collectionColumns;
     readonly sortConfig = this.searchPage.sortConfig;
+    readonly isMobileScreen = this.getIsMobileScreen();
+    private readonly destroyed = new Subject<void>();
 
-    constructor(private searchPage: SearchPageService, private mainNav: MainNavService) {
+    constructor(
+        private breakpointObserver: BreakpointObserver,
+        private mainNav: MainNavService,
+        private searchPage: SearchPageService,
+        private dialogs: DialogsService,
+        private translate: TranslateService,
+    ) {
         this.searchPage.init();
     }
 
@@ -64,6 +78,59 @@ export class SearchPageComponent implements OnInit {
             )
             .subscribe((tabBarIsVisible) => (this.tabBarIsVisible = tabBarIsVisible));
         this.registerProgressBarIsVisible();
+        this.registerFilterDialog();
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
+    }
+
+    private registerFilterDialog(): void {
+        let dialogRefPromise: Promise<CardDialogRef<unknown>>;
+        let isMobileScreen: boolean;
+        rxjs.combineLatest([
+            this.searchPage.filterBarIsVisible.observeValue().pipe(),
+            this.isMobileScreen.pipe(tap((value) => (isMobileScreen = value))),
+        ])
+            .pipe(takeUntil(this.destroyed))
+            .subscribe(async ([filterBarIsVisible]) => {
+                if (isMobileScreen && filterBarIsVisible && !dialogRefPromise) {
+                    dialogRefPromise = this.openFilterDialog();
+                    const dialogRef = await dialogRefPromise;
+                    dialogRef.afterClosed().subscribe(() => {
+                        dialogRefPromise = null;
+                        if (isMobileScreen) {
+                            this.filterBarIsVisible.setUserValue(false);
+                        }
+                    });
+                } else if (!isMobileScreen || !filterBarIsVisible) {
+                    void dialogRefPromise?.then((dialogRef) => dialogRef.close());
+                }
+            });
+    }
+
+    private async openFilterDialog(): Promise<CardDialogRef<unknown>> {
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'SEARCH.FILTERS',
+            contentTemplate: this.filtersDialogContent,
+            minWidth: 350,
+        });
+        this.totalResults
+            .pipe(
+                switchMap((results) => this.translate.get('SEARCH.NUMBER_RESULTS', { results })),
+                takeUntil(dialogRef.afterClosed()),
+            )
+            .subscribe((numberResults) => {
+                dialogRef.patchConfig({ subtitle: numberResults.toString() });
+            });
+        return dialogRef;
+    }
+
+    private getIsMobileScreen() {
+        return this.breakpointObserver
+            .observe(['(max-width: 900px)'])
+            .pipe(map(({ matches }) => matches));
     }
 
     private initMainNav(): void {

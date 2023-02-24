@@ -28,6 +28,8 @@
     "EMBED_SEARCH_ACTION": "Derzeitige Suche Einbinden",
     "SAVE_SEARCH_ACTION": "Speichern",
     "FILTER": "Filter",
+    "FILTERS": "Filter",
+    "NUMBER_RESULTS": "{{ results }} Ergebnis(se)",
     "CLICK_TO_REMOVE": "Klicken zum Entfernen",
     "PREVIEWIMAGE_FOR": "Vorschaubild für",
     "INFORMATION_AND_PREVIEW_FOR": "Informationen und Vorschau zu",
