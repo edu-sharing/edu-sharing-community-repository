@@ -380,7 +380,6 @@
               #actionbarReferences
               class="actionbarMaterials"
               [numberOfAlwaysVisibleOptions]="1"
-              [class.display-none]="listReferences.getSelection().isEmpty()"
             ></es-actionbar>
             <div
               class="references-wrapper"
@@ -392,7 +391,7 @@
                 [dataSource]="dataSourceReferences"
                 [columns]="referencesColumns"
                 (clickItem)="onContentClick($event.element)"
-                [displayType]="NodeEntriesDisplayType.Grid"
+                [(displayType)]="referencesDisplayType"
                 [dragDrop]="{
                   dragAllowed: isAllowedToEditCollection(),
                   dropAllowed: canDropOnRef,
