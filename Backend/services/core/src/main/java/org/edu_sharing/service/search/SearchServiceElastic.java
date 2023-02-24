@@ -1134,7 +1134,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             return search.getFacets().get(0).getValues().stream().filter(s ->
                 // if one document has i.e. multiple keywords, they will be shown in the facet
                 // so, we filter for values which actually contain the given string
-                s.getValue().toLowerCase().contains(value)
+                s.getValue().toLowerCase().contains(value.toLowerCase())
             ).map(s -> {
                 Suggestion suggestion = new Suggestion();
                 suggestion.setKey(s.getValue());
