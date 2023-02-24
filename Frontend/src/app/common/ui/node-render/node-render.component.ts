@@ -119,7 +119,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         private platformLocation: PlatformLocation,
         private optionsHelper: OptionsHelperService,
         private loadingScreen: LoadingScreenService,
-        private mainNavService: MainNavService,
+        public mainNavService: MainNavService,
         private temporaryStorageService: TemporaryStorageService,
     ) {
         (window as any).nodeRenderComponentRef = { component: this, zone: _ngZone };
@@ -178,7 +178,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.mainNavService.setMainNavConfig({
-            show: false,
+            show: true,
             currentScope: 'render',
         });
         this.optionsHelper.registerGlobalKeyboardShortcuts();
@@ -299,6 +299,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                     NodeRenderComponent.close(this.location);
                     // use a timeout to let the browser try to go back in history first
                     setTimeout(() => {
+                        console.log(this.mainNavService.getMainNav());
                         if (!this.isDestroyed) {
                             this.mainNavService.getMainNav().topBar.toggleMenuSidebar();
                         }
