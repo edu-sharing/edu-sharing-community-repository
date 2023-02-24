@@ -477,12 +477,12 @@ class SortHandler {
     readonly initialized = this._initialized.asObservable();
     private _isInitialized = false;
 
-    private _defaultSort: Sort;
-    private _currentSort: Sort;
-    get currentSort(): Sort {
+    private _defaultSort: Readonly<Sort>;
+    private _currentSort: Readonly<Sort>;
+    get currentSort(): Readonly<Sort> {
         return this._currentSort;
     }
-    private set currentSort(value: Sort) {
+    private set currentSort(value: Readonly<Sort>) {
         this._currentSort = value;
         if (this.sortPanel) {
             this.sortPanel.active = value.active;
@@ -494,6 +494,7 @@ class SortHandler {
     constructor(private _injector: Injector) {}
 
     init(defaultSort: Sort): void {
+        defaultSort = { active: defaultSort?.active, direction: defaultSort?.direction };
         this._defaultSort = defaultSort;
         this.currentSort = defaultSort;
         this._isInitialized = true;
@@ -502,8 +503,16 @@ class SortHandler {
     }
 
     private _changeSort(sort: Sort, source: 'query-params' | 'user'): void {
-        this.currentSort = sort;
-        this._sortChange.next({ ...sort, source });
+        if (!sort.direction) {
+            sort = this._defaultSort;
+        }
+        if (
+            this.currentSort.active !== sort.active ||
+            this.currentSort.direction !== sort.direction
+        ) {
+            this.currentSort = { ...sort };
+            this._sortChange.next({ ...sort, source });
+        }
     }
 
     registerQueryParameters(route: ActivatedRoute): void {

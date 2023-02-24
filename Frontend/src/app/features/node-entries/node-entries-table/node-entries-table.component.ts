@@ -31,11 +31,11 @@ import { Target } from '../../../core-ui-module/option-item';
 import { DragData } from '../../../services/nodes-drag-drop.service';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 import { BorderBoxObserverDirective } from '../../../shared/directives/border-box-observer.directive';
-import { ClickSource, InteractionType } from '../entries-model';
-
-import { NodeEntriesDataType } from '../node-entries.component';
-import { NodeEntriesGlobalService } from '../node-entries-global.service';
 import { CanDrop } from '../../../shared/directives/nodes-drop-target.directive';
+import { ClickSource, InteractionType } from '../entries-model';
+import { NodeDataSourceRemote } from '../node-data-source-remote';
+import { NodeEntriesGlobalService } from '../node-entries-global.service';
+import { NodeEntriesDataType } from '../node-entries.component';
 
 @Component({
     selector: 'es-node-entries-table',
@@ -88,6 +88,9 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     ngAfterViewInit(): void {
         void Promise.resolve().then(() => {
             this.registerSortChanges();
+            if (this.entriesService.dataSource instanceof NodeDataSourceRemote) {
+                this.entriesService.dataSource.sortPanel = this.sort;
+            }
         });
         this.visibleDataColumns$
             .pipe(first(), delay(0))
