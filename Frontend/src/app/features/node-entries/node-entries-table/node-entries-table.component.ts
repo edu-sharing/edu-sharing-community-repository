@@ -2,6 +2,7 @@ import { CdkOverlayOrigin } from '@angular/cdk/overlay';
 import {
     AfterViewInit,
     ApplicationRef,
+    ChangeDetectionStrategy,
     Component,
     ElementRef,
     NgZone,
@@ -39,6 +40,7 @@ import { NodeEntriesDataType } from '../node-entries.component';
     selector: 'es-node-entries-table',
     templateUrl: './node-entries-table.component.html',
     styleUrls: ['./node-entries-table.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     implements OnChanges, AfterViewInit, OnDestroy
