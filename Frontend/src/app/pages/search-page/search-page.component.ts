@@ -1,7 +1,9 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import { AfterViewInit, Component, HostBinding, OnInit, ViewChild } from '@angular/core';
+import { Component, HostBinding, OnInit, ViewChild } from '@angular/core';
+import * as rxjs from 'rxjs';
+import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { Node } from '../../core-module/core.module';
+import { Node, RestConstants } from '../../core-module/core.module';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
 import { Scope } from '../../core-ui-module/option-item';
 import { NodeEntriesDisplayType } from '../../features/node-entries/entries-model';
@@ -69,8 +71,26 @@ export class SearchPageComponent implements OnInit {
             title: 'SEARCH.TITLE',
             currentScope: 'search',
             canOpen: true,
-            // onCreate: (nodes) => this.nodeEntriesResults.addVirtualNodes(nodes),
+            onCreate: (nodes) => this.nodeEntriesResults.addVirtualNodes(nodes),
         });
+        const activeRepositoryIsHome: Observable<boolean> = rxjs
+            .combineLatest([this.availableRepositories, this.activeRepository.observeValue()])
+            .pipe(
+                filter(
+                    ([availableRepositories, activeRepository]) =>
+                        notNull(availableRepositories) && notNull(activeRepository),
+                ),
+                map(
+                    ([availableRepositories, activeRepository]) =>
+                        activeRepository === RestConstants.HOME_REPOSITORY ||
+                        availableRepositories.find((r) => r.id === activeRepository).isHomeRepo,
+                ),
+            );
+        activeRepositoryIsHome.subscribe((isHome) =>
+            this.mainNav.patchMainNavConfig({
+                create: { allowed: isHome, allowBinary: true },
+            }),
+        );
     }
 
     onProgressBarAnimationEnd(): void {
