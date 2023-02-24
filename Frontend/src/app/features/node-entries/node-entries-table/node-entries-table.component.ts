@@ -3,6 +3,7 @@ import {
     AfterViewInit,
     ApplicationRef,
     ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
     ElementRef,
     NgZone,
@@ -24,6 +25,7 @@ import {
     shareReplay,
     startWith,
     takeUntil,
+    tap,
 } from 'rxjs/operators';
 import { Toast } from 'src/app/core-ui-module/toast';
 import { ListItem, Node, UIService } from '../../../core-module/core.module';
@@ -77,6 +79,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         public entriesService: NodeEntriesService<T>,
         private applicationRef: ApplicationRef,
         private toast: Toast,
+        private changeDetectorRef: ChangeDetectorRef,
         public ui: UIService,
         private ngZone: NgZone,
         private elementRef: ElementRef<HTMLElement>,
@@ -91,6 +94,12 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         this.visibleDataColumns$
             .pipe(first(), delay(0))
             .subscribe(() => (this.columnChooserTriggerReady = true));
+        this.entriesService.dataSource$
+            .pipe(
+                takeUntil(this.destroyed),
+                tap(() => console.log('change')),
+            )
+            .subscribe(() => this.changeDetectorRef.detectChanges());
     }
 
     ngOnChanges(changes: SimpleChanges): void {
