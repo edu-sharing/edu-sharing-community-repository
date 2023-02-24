@@ -153,7 +153,7 @@ export class UserModifiableValue<T> {
                 map((param) => this._deserialize(param)),
                 // tap((queryParam) => console.log('queryParams', { key, queryParam })),
             )
-            .subscribe((value) => this._userValue.next(value));
+            .subscribe((value) => this.setUserValue(value));
         this._userValue
             .pipe(
                 map((value) => this._serialize(value)),

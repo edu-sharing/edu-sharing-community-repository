@@ -93,15 +93,17 @@ export class SaveSearchDialogComponent implements OnInit {
         }
         this.dialogRef.patchState({ isLoading: true });
         this.savedSearchesService.saveCurrentSearch(this.nameControl.value, { replace }).subscribe({
-            next: (entry) => {
+            next: (savedSearch) => {
                 this.toast.toast('SEARCH.SAVE_SEARCH.TOAST_SAVED');
-                this.dialogRef.close(entry.node);
+                this.dialogRef.close(savedSearch);
             },
             error: (error: ApiErrorResponse) => {
                 this.dialogRef.patchState({ isLoading: false });
                 if (error.status === RestConstants.DUPLICATE_NODE_RESPONSE) {
                     error.preventDefault();
                     void this.showShouldReplaceDialog();
+                } else {
+                    throw error;
                 }
             },
         });

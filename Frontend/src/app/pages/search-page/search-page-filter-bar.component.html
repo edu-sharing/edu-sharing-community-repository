@@ -34,7 +34,15 @@
   <mat-icon>bookmark</mat-icon>
 </button>
 <mat-menu #savedSearchesMenu="matMenu">
-  <button mat-menu-item (click)="openSaveSearchDialog()">
+  <button mat-menu-item *ngIf="reUrl.value" (click)="embedCurrentSearch()">
+    <mat-icon>redo</mat-icon>
+    <span>{{ 'SEARCH.EMBED_SEARCH_ACTION' | translate }}</span>
+  </button>
+  <button
+    mat-menu-item
+    *ngIf="!reUrl.value && !currentSavedSearch"
+    (click)="openSaveSearchDialog()"
+  >
     <mat-icon>save</mat-icon>
     <span>{{ 'SEARCH.SAVED_CURRENT_SEARCH' | translate }}</span>
   </button>
@@ -46,6 +54,8 @@
     <button
       mat-menu-item
       *ngFor="let savedSearch of savedSearches"
+      [disabled]="savedSearch === currentSavedSearch"
+      [class.current-saved-search-entry]="savedSearch === currentSavedSearch"
       (click)="applySavedSearch(savedSearch)"
     >
       <mat-icon>search</mat-icon>

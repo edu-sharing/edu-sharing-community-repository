@@ -75,6 +75,7 @@ export class SearchPageService implements OnDestroy {
     readonly resultColumns = new BehaviorSubject<ListItem[]>([]);
     readonly collectionColumns = new BehaviorSubject<ListItem[]>([]);
     readonly sortConfig = new BehaviorSubject<ListSortConfig>(null);
+    readonly reUrl = new BehaviorSubject<string | false>(null);
 
     private readonly destroyed = new Subject<void>();
     private readonly loadingParams = new BehaviorSubject<boolean>(true);
@@ -152,6 +153,7 @@ export class SearchPageService implements OnDestroy {
         this.filterBarIsVisible.registerQueryParameter('filterBar', this.route, {
             replaceUrl: true,
         });
+        this.route.queryParams.pipe(map((params) => params.reurl || false)).subscribe(this.reUrl);
     }
 
     private registerRepositories(): void {
@@ -361,6 +363,7 @@ export class SearchPageService implements OnDestroy {
                         criteria: this.getSearchCriteria(params),
                         facetLimit: 5,
                         facetMinCount: 1,
+                        permissions: this.reUrl.value ? [RestConstants.ACCESS_CC_PUBLISH] : [],
                     },
                     maxItems: request.range.endIndex - request.range.startIndex,
                     skipCount: request.range.startIndex,

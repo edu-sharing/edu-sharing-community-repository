@@ -13,6 +13,7 @@ import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
 import { debounceTime, delay, filter, first, map, skip, takeUntil, tap } from 'rxjs/operators';
 import { RestConstants, UIConstants } from '../../core-module/core.module';
+import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Values } from '../../features/mds/types/types';
@@ -33,10 +34,13 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
     readonly activeMdsForm = new FormControl(this.activeMetadataSet.getValue());
     readonly searchFilters = this.searchPage.searchFilters;
     readonly savedSearches = this.savedSearchesService.observeSavedSearches();
+    readonly reUrl = this.searchPage.reUrl;
     /** Deep copy of `searchFilters.userValue` for immutability. */
     searchFilterValues: Values;
     mdsParams: { repository: string; setId: string } = null;
     savedSearchesButtonIsVisible = false;
+    /** The saved-search that triggered the currently active search, if that is the case. */
+    currentSavedSearch: SavedSearch = null;
 
     private mdsInitialized = false;
     private defaultValues: Values;
@@ -48,6 +52,7 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
         private dialogs: DialogsService,
         private ngZone: NgZone,
         private node: NodeService,
+        private nodeHelper: NodeHelperService,
         private router: Router,
         private savedSearchesService: SavedSearchesService,
         private searchPage: SearchPageService,
@@ -66,6 +71,7 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
                 this.searchFilterValues = JSON.parse(JSON.stringify(values ?? {}));
             });
         this.registerSavedSearches();
+        this.registerCurrentSavedSearchReset();
     }
 
     ngOnDestroy(): void {
@@ -73,11 +79,14 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
         this.destroyed.complete();
     }
 
-    async openSaveSearchDialog(): Promise<void> {
-        void this.dialogs.openSaveSearchDialog({
+    async openSaveSearchDialog(): Promise<SavedSearch | null> {
+        const dialogRef = await this.dialogs.openSaveSearchDialog({
             name: await this.getSavedSearchInitialName(),
             searchString: this.searchPage.searchString.getValue(),
         });
+        const savedSearch = await dialogRef.afterClosed().toPromise();
+        this.currentSavedSearch = savedSearch;
+        return savedSearch;
     }
 
     goToSavedSearches(): void {
@@ -93,6 +102,29 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
         this.searchPage.activeMetadataSet.setUserValue(savedSearch.metadataSet);
         this.searchPage.searchString.setUserValue(savedSearch.searchString);
         this.searchPage.searchFilters.setUserValue(savedSearch.filters);
+        this.currentSavedSearch = savedSearch;
+    }
+
+    async embedCurrentSearch(): Promise<void> {
+        let savedSearch = this.currentSavedSearch;
+        if (!savedSearch) {
+            savedSearch = await this.openSaveSearchDialog();
+        }
+        if (savedSearch) {
+            this.nodeHelper.addNodeToLms(
+                this.currentSavedSearch.node,
+                this.searchPage.reUrl.value as string,
+            );
+        }
+    }
+
+    private registerCurrentSavedSearchReset(): void {
+        rxjs.combineLatest([
+            this.searchPage.searchString.observeValue(),
+            this.searchPage.searchFilters.observeValue(),
+        ])
+            .pipe(takeUntil(this.destroyed))
+            .subscribe(() => (this.currentSavedSearch = null));
     }
 
     private async getSavedSearchInitialName(): Promise<string> {

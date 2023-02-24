@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { map, startWith, tap } from 'rxjs/operators';
-import { Node, NodeEntry } from '../api/models';
+import { map, startWith, switchMap, take, tap } from 'rxjs/operators';
+import { Node } from '../api/models';
 import { SearchV1Service } from '../api/services';
 import { switchReplay } from '../utils/switch-replay';
 import { RawValuesDict } from './mds-label.service';
@@ -21,6 +21,7 @@ export interface SavedSearch {
     metadataSet: string;
     searchString: string | null;
     filters: RawValuesDict;
+    node: Node;
 }
 
 @Injectable({
@@ -42,7 +43,7 @@ export class SavedSearchesService {
      * @param replace Overrides any existing saved search with the same name. If false, a 409
      * "Conflict" response will be returned in case the name already exists.
      */
-    saveCurrentSearch(name: string, { replace = false } = {}): Observable<NodeEntry> {
+    saveCurrentSearch(name: string, { replace = false } = {}): Observable<SavedSearch> {
         const searchParams = this.search['getSearchParams']();
         return this.searchV1
             .saveSearch({
@@ -53,7 +54,18 @@ export class SavedSearchesService {
                 query: searchParams.query,
                 body: searchParams.body.criteria,
             })
-            .pipe(tap(() => this.updateSavedSearchesTrigger.next()));
+            .pipe(
+                tap(() => this.updateSavedSearchesTrigger.next()),
+                switchMap(({ node }) =>
+                    this.savedSearches.pipe(
+                        take(1),
+                        map(
+                            (savedSearches) =>
+                                savedSearches.find(({ node: n }) => n.ref.id === node.ref.id)!,
+                        ),
+                    ),
+                ),
+            );
     }
 
     observeSavedSearches(): Observable<SavedSearch[]> {
@@ -68,16 +80,19 @@ export class SavedSearchesService {
         return this.updateSavedSearchesTrigger.pipe(
             startWith(void 0 as void),
             switchReplay(() =>
-                this.node.getChildren(SAVED_SEARCH, {
-                    maxItems: COUNT_UNLIMITED,
-                    sortProperties: [LOM_PROP_TITLE],
-                    sortAscending: [true],
-                }),
-            ),
-            map((entries) =>
-                entries.nodes
-                    .filter((node) => node.type === CCM_TYPE_SAVED_SEARCH)
-                    .map((node) => this.savedSearchNodeToSavedSearch(node)),
+                this.node
+                    .getChildren(SAVED_SEARCH, {
+                        maxItems: COUNT_UNLIMITED,
+                        sortProperties: [LOM_PROP_TITLE],
+                        sortAscending: [true],
+                    })
+                    .pipe(
+                        map((entries) =>
+                            entries.nodes
+                                .filter((node) => node.type === CCM_TYPE_SAVED_SEARCH)
+                                .map((node) => this.savedSearchNodeToSavedSearch(node)),
+                        ),
+                    ),
             ),
         );
     }
@@ -93,6 +108,7 @@ export class SavedSearchesService {
             metadataSet: properties['ccm:saved_search_mds'][0],
             searchString: searchValue && searchValue[0] !== '*' ? searchValue[0] : null,
             filters,
+            node,
         };
     }
 }

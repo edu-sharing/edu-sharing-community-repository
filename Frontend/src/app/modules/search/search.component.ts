@@ -1333,11 +1333,11 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             name: this.currentSavedSearch ? this.currentSavedSearch.title : null,
             searchString: this.searchService.searchTerm,
         });
-        dialogRef.afterClosed().subscribe((node) => {
-            if (node) {
+        dialogRef.afterClosed().subscribe((savedSearch) => {
+            if (savedSearch) {
                 this.loadSavedSearch();
                 if (this.applyMode) {
-                    this.nodeHelper.addNodeToLms(node, this.searchService.reurl);
+                    this.nodeHelper.addNodeToLms(savedSearch.node, this.searchService.reurl);
                 }
             }
         });
