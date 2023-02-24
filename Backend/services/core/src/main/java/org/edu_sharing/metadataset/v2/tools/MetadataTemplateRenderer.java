@@ -257,7 +257,10 @@ public class MetadataTemplateRenderer {
 									value += getLicenseDescription(licenseName).replaceAll("((<br \\/>)|(\\n))", TEXT_LICENSE_SEPERATOR);
 								}
 							}
-							if (renderingMode.equals(RenderingMode.HTML) && properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK)) != null) {
+							if (renderingMode.equals(RenderingMode.HTML) && (
+									properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK)) != null
+									|| properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL)) != null
+							)) {
 								value += "<div class='licenseTitleOfWork'>";
 								value += "<div class='mdsWidgetCaptionChild'>" +
 										I18nAngular.getTranslationAngular("common", "LICENSE.TITLE_OF_WORK")
@@ -266,7 +269,14 @@ public class MetadataTemplateRenderer {
 								if (source) {
 									value += "<a href='" + properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_SOURCE_URL))[0] + "'>";
 								}
-								value += properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK))[0];
+								String[] title = properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK));
+								if(title != null) {
+									value += cleanupText(MetadataWidget.TextEscapingPolicy.all, title[0]);
+								} else {
+									value += cleanupText(MetadataWidget.TextEscapingPolicy.all,
+											I18nAngular.getTranslationAngular("common", "MDS.AUTHOR_UNSET")
+									);
+								}
 								if (source) {
 									value += "</a>";
 								}
