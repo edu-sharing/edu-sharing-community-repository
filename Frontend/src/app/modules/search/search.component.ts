@@ -603,9 +603,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.searchService.sidenavSet) return false;
         this.searchService.sidenavSet = true;
         if (this.innerWidth < this.breakpoint) {
-            this.searchService.sidenavOpened = false;
+            this.searchService.sidenavOpened$.next(false);
         } else {
-            this.searchService.sidenavOpened = true;
+            this.searchService.sidenavOpened$.next(true);
         }
         return true;
     }
@@ -933,13 +933,14 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.mdsMobileRef.loadMds();
             });
         } else {
-            this.router.navigate(['./'], {
+            // do not enable, this causes scroll to top when the extended search is toggled!
+            /*this.router.navigate(['./'], {
                 relativeTo: this.activatedRoute,
                 queryParamsHandling: 'merge',
                 queryParams: {
                     sidenav: this.searchService.sidenavOpened,
                 },
-            });
+            });*/
         }
         setTimeout(() => {
             // recalculate the filter layout

@@ -119,6 +119,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
     dataSourceCollections = new NodeDataSource<Node>();
     dataSourceReferences = new NodeDataSource<CollectionReference>();
 
+    referencesDisplayType = NodeEntriesDisplayType.Grid;
     viewTypeNodes: 0 | 1 | 2 = ListTableComponent.VIEW_TYPE_GRID;
 
     dialogTitle: string;

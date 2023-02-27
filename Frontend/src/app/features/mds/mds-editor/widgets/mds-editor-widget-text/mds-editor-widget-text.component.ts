@@ -59,6 +59,7 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
     blur(): void {
         this.fileNameChecker?.check();
         this.onBlur.emit();
+        this.submit();
     }
 
     private getValidators(): ValidatorFn[] {
