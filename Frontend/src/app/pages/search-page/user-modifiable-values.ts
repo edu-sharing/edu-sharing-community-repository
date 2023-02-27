@@ -18,8 +18,12 @@ import { NavigationScheduler } from './navigation-scheduler';
  */
 @Injectable({ providedIn: 'root' })
 export class UserModifiableValuesService {
-    constructor(navigationScheduler: NavigationScheduler) {
+    constructor(
+        navigationScheduler: NavigationScheduler,
+        //  preferences: SessionStorageService
+    ) {
         UserModifiableValue.navigationScheduler = navigationScheduler;
+        // UserModifiableValue.preferences = preferences;
     }
 
     createDict(systemValue?: { [key: string]: any }): UserModifiableValue<{ [key: string]: any }> {
@@ -47,6 +51,7 @@ export class UserModifiableValuesService {
  */
 export class UserModifiableValue<T> {
     static navigationScheduler: NavigationScheduler;
+    // static preferences: SessionStorageService;
 
     /**
      * Shorthand for registration with two-way bindings, e.g.,
@@ -167,6 +172,40 @@ export class UserModifiableValue<T> {
                 });
             });
     }
+
+    registerSessionStorage(key: string): void {
+        // Query the storage value only once on registration. We expect to be the only one accessing
+        // this value.
+        let storageValue = sessionStorage.getItem(key);
+        if (notNull(storageValue)) {
+            this.setUserValue(this._deserialize(storageValue));
+        }
+        this._userValue.pipe(map((value) => this._serialize(value))).subscribe((value) => {
+            if (storageValue !== value) {
+                storageValue = value;
+                if (notNull(value)) {
+                    sessionStorage.setItem(key, value);
+                } else {
+                    sessionStorage.removeItem(key);
+                }
+            }
+        });
+    }
+
+    // registerProfilePreference(key: string, until: Observable<void>): void {
+    //     let currentStorageValue: string;
+    //     UserModifiableValue.preferences
+    //         .observe(key)
+    //         .pipe(
+    //             filter((value: T) => this._serialize(value) !== currentStorageValue),
+    //             tap((value: T) => (currentStorageValue = this._serialize(value))),
+    //             takeUntil(until),
+    //         )
+    //         .subscribe((value: T) => this.setUserValue(value));
+    //     this._userValue
+    //         .pipe(filter((value: T) => this._serialize(value) !== currentStorageValue))
+    //         .subscribe((userValue) => UserModifiableValue.preferences.set(key, userValue));
+    // }
 
     registerFormControl(formControl: FormControl): void {
         this.observeValue()

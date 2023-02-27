@@ -150,9 +150,7 @@ export class SearchPageService implements OnDestroy {
         this.activeMetadataSet.registerQueryParameter('mds', this.route);
         this.searchFilters.registerQueryParameter('filters', this.route);
         this.searchString.registerQueryParameter('q', this.route);
-        this.filterBarIsVisible.registerQueryParameter('filterBar', this.route, {
-            replaceUrl: true,
-        });
+        this.filterBarIsVisible.registerSessionStorage('search-page-filter-bar');
         this.route.queryParams.pipe(map((params) => params.reurl || false)).subscribe(this.reUrl);
     }
 
