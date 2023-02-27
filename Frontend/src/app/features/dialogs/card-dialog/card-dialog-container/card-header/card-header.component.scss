@@ -12,6 +12,7 @@
         display: grid;
         grid-template-columns: auto 1fr auto;
         height: auto;
+        min-height: $titleHeight;
         .card-dialog-header-text {
             grid-column: 2;
         }
