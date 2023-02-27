@@ -23,6 +23,7 @@ export class GenericDialogConfig<R extends string> extends GenericDialogData<R> 
     closable?: CardDialogConfig['closable'] = new CardDialogConfig().closable;
     minWidth?: CardDialogConfig['minWidth'];
     maxWidth?: CardDialogConfig['maxWidth'] = 750;
+    customHeaderBarContent?: TemplateRef<HTMLElement>;
 }
 
 interface GenericDialogButton<R extends string> {
