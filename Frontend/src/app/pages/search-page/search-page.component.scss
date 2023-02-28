@@ -1,4 +1,4 @@
-@import '../../core-ui-module/styles/variables';
+@import './common';
 
 :host {
     position: relative;
@@ -24,9 +24,6 @@ nav {
     line-height: unset;
     background-color: unset;
     box-shadow: unset;
-}
-
-.mat-tab-header {
 }
 
 .mat-tab-label-active {
@@ -106,27 +103,9 @@ main {
 }
 
 .entries-wrapper {
-    display: block;
-    margin-top: 1.5rem;
+    @include entriesWrapper;
 }
 
 .title-container {
-    flex-grow: 1;
-    display: flex;
-    align-items: center;
-    h2 {
-        flex-grow: 1;
-        margin: 1rem 0;
-    }
-}
-
-.no-search-results-message {
-    color: $noResultsColor;
-    text-align: center;
-    padding: 30px 0;
-    font-size: 120%;
-    i {
-        font-size: 60px;
-        width: 100%;
-    }
+    @include titleContainer;
 }

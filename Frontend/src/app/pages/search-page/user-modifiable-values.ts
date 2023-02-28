@@ -71,6 +71,7 @@ export class UserModifiableValue<T> {
         useOverride: false,
     });
     private _mergedValue = new BehaviorSubject<T>(null);
+    private _queryParam: string;
 
     constructor(private _type: UserModifiableType<T>, initialSystemValue?: T) {
         if (initialSystemValue !== undefined) {
@@ -143,11 +144,27 @@ export class UserModifiableValue<T> {
         return this._mergedValue.asObservable();
     }
 
+    getQueryParamEntry(value: T = this.getValue()): { [key: string]: string } {
+        const serializedValue = this._serialize(value);
+        if (serializedValue === this._serialize(this._systemValue.value)) {
+            return {};
+        } else {
+            return { [this._queryParam]: serializedValue };
+        }
+    }
+
     registerQueryParameter(
         key: string,
         activatedRoute: ActivatedRoute,
         { replaceUrl = false } = {},
     ): void {
+        if (this._queryParam) {
+            console.warn(
+                `Registered user value for query parameter ${key} ` +
+                    `which is already registered for query parameter ${this._queryParam}`,
+            );
+        }
+        this._queryParam = key;
         let currentParam: string;
         activatedRoute.queryParams
             .pipe(

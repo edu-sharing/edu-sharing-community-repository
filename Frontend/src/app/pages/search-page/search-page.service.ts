@@ -1,53 +1,27 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
 import {
     ClientConfig,
     ConfigService,
     HOME_REPOSITORY,
-    MdsQueryCriteria,
     MdsService,
     MetadataSetInfo,
     NetworkService,
-    SearchService,
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, Subject } from 'rxjs';
-import {
-    debounceTime,
-    distinctUntilChanged,
-    filter,
-    map,
-    share,
-    switchMap,
-    takeUntil,
-    tap,
-} from 'rxjs/operators';
-import {
-    ListItem,
-    ListItemSort,
-    Node,
-    Repository,
-    RestConstants,
-    UIConstants,
-} from '../../core-module/core.module';
-import { MdsHelper } from '../../core-module/rest/mds-helper';
-import { ListSortConfig } from '../../features/node-entries/entries-model';
-import {
-    fromSearchResults,
-    NodeDataSourceRemoteService,
-    NodeRemote,
-    NodeRequestParams,
-} from '../../features/node-entries/node-data-source-remote';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { Repository, UIConstants } from '../../core-module/core.module';
 import {
     SearchFieldInstance,
     SearchFieldService,
 } from '../../main/navigation/search-field/search-field.service';
 import { notNull } from '../../util/functions';
 import { NavigationScheduler } from './navigation-scheduler';
+import { SearchPageResults } from './search-page-results.service';
 import { UserModifiableValuesService } from './user-modifiable-values';
 
-class SearchRequestParams {
+export class SearchRequestParams {
     constructor(
         public readonly repository: string,
         public readonly metadataSet: string,
@@ -62,25 +36,25 @@ class SearchRequestParams {
 
 @Injectable()
 export class SearchPageService implements OnDestroy {
-    readonly resultsDataSource = this.nodeDataSourceRemote.create();
-    readonly collectionsDataSource = this.nodeDataSourceRemote.create();
     readonly availableRepositories = new BehaviorSubject<Repository[]>(null);
     readonly activeRepository = this.userModifiableValues.createString();
+    readonly showingAllRepositories = new BehaviorSubject<boolean>(null);
     readonly availableMetadataSets = new BehaviorSubject<MetadataSetInfo[]>(null);
     readonly activeMetadataSet = this.userModifiableValues.createString();
     readonly filterBarIsVisible = this.userModifiableValues.createBoolean(false);
     readonly searchFilters = this.userModifiableValues.createDict();
     readonly searchString = this.userModifiableValues.createString();
     readonly loadingProgress = new BehaviorSubject<number>(null);
-    readonly resultColumns = new BehaviorSubject<ListItem[]>([]);
-    readonly collectionColumns = new BehaviorSubject<ListItem[]>([]);
-    readonly sortConfig = new BehaviorSubject<ListSortConfig>(null);
     readonly reUrl = new BehaviorSubject<string | false>(null);
+    private _results = new BehaviorSubject<SearchPageResults>(null);
+    get results(): SearchPageResults {
+        return this._results.value;
+    }
+    set results(value: SearchPageResults) {
+        this._results.next(value);
+    }
 
     private readonly destroyed = new Subject<void>();
-    private readonly loadingParams = new BehaviorSubject<boolean>(true);
-    private readonly loadingContent = new BehaviorSubject<boolean>(true);
-    private readonly loadingCollections = new BehaviorSubject<boolean>(true);
 
     constructor(
         private config: ConfigService,
@@ -89,10 +63,7 @@ export class SearchPageService implements OnDestroy {
         private navigationScheduler: NavigationScheduler,
         private network: NetworkService,
         private route: ActivatedRoute,
-        private search: SearchService,
-        private translate: TranslateService,
         private userModifiableValues: UserModifiableValuesService,
-        private nodeDataSourceRemote: NodeDataSourceRemoteService,
     ) {}
 
     ngOnDestroy(): void {
@@ -106,6 +77,7 @@ export class SearchPageService implements OnDestroy {
         this.registerSearchField();
         this.initSearchPageUi();
         this.initQueryParams();
+        this.registerAllRepositories();
     }
 
     /**
@@ -140,9 +112,7 @@ export class SearchPageService implements OnDestroy {
     }
 
     private initSearchPageUi(): void {
-        this.registerSearchObservables();
         this.registerLoadingProgress();
-        this.registerColumnsAndSortConfig();
     }
 
     private initQueryParams(): void {
@@ -167,28 +137,45 @@ export class SearchPageService implements OnDestroy {
         });
     }
 
+    private registerAllRepositories(): void {
+        this.showingAllRepositories.subscribe((showingAllRepositories) => {
+            if (showingAllRepositories) {
+                this.activeRepository.setOverrideValue(null);
+                this.filterBarIsVisible.resetUserValue();
+            } else {
+                this.activeRepository.unsetOverrideValue();
+            }
+        });
+    }
+
     private registerAvailableMetadataSets(): void {
         this.activeRepository
             .observeValue()
             .pipe(
                 filter(notNull),
                 tap(() => this.availableMetadataSets.next(null)),
-                switchMap((currentRepository) =>
-                    rxjs.combineLatest([
-                        this.mds.getAvailableMetadataSets(currentRepository),
-                        this.config.observeConfig(),
-                        this.availableRepositories.pipe(filter(notNull)),
-                        rxjs.of(currentRepository),
-                    ]),
-                ),
-            )
-            .subscribe(([metadataSets, config, repositories, repository]) =>
-                this.availableMetadataSets.next(
-                    filterMetadataSets(
-                        metadataSets,
-                        config,
-                        repositories.find(({ id }) => id === repository),
+                switchMap((activeRepository) =>
+                    this.availableRepositories.pipe(
+                        filter(notNull),
+                        map((repositories) => repositories.find((r) => r.id === activeRepository)),
                     ),
+                ),
+                switchMap((repository) => this.getAvailableMetadataSets(repository)),
+            )
+            .subscribe((availableMetadataSets) =>
+                this.availableMetadataSets.next(availableMetadataSets),
+            );
+    }
+
+    getAvailableMetadataSets(repository: Repository): Observable<MetadataSetInfo[]> {
+        return rxjs
+            .combineLatest([
+                this.mds.getAvailableMetadataSets(repository.id),
+                this.config.observeConfig(),
+            ])
+            .pipe(
+                map(([availableMetadataSets, config]) =>
+                    filterMetadataSets(availableMetadataSets, config, repository),
                 ),
             );
     }
@@ -214,11 +201,15 @@ export class SearchPageService implements OnDestroy {
         const searchFieldInstance = this.searchField.enable(
             {
                 placeholder: 'SEARCH.SEARCH_STUFF',
-                showFiltersButton: true,
-                enableFiltersAndSuggestions: true,
             },
             this.destroyed,
         );
+        this.showingAllRepositories.subscribe((showingAllRepositories) => {
+            searchFieldInstance.patchConfig({
+                showFiltersButton: !showingAllRepositories,
+                enableFiltersAndSuggestions: !showingAllRepositories,
+            });
+        });
         searchFieldInstance
             .onFiltersButtonClicked()
             .subscribe(() =>
@@ -251,184 +242,13 @@ export class SearchPageService implements OnDestroy {
         return searchFieldInstance;
     }
 
-    private registerSearchObservables() {
-        const searchRequestParams = rxjs
-            .combineLatest([
-                this.activeRepository.observeValue(),
-                // .pipe(tap((value) => console.log('activeRepository changed', value))),
-                this.activeMetadataSet.observeValue(),
-                // .pipe(tap((value) => console.log('activeMetadataSet changed', value))),
-                this.searchFilters.observeValue(),
-                // .pipe(tap((value) => console.log('searchFilters changed', value))),
-                this.searchString.observeValue(),
-                // .pipe(tap((value) => console.log('searchString changed', value))),
-            ])
-            .pipe(
-                tap(() => this.loadingParams.next(true)),
-                filter(
-                    ([repository, metadataSet, searchFilters]) =>
-                        notNull(repository) && notNull(metadataSet) && notNull(searchFilters),
-                ),
-                tap(() => this.loadingParams.next(false)),
-                map(
-                    ([repository, metadataSet, searchFilters, searchString]) =>
-                        new SearchRequestParams(
-                            repository,
-                            metadataSet,
-                            searchFilters,
-                            searchString,
-                        ),
-                ),
-                distinctUntilChanged((x, y) => x.equals(y)),
-                share(),
-            );
-        const collectionRequestParams = searchRequestParams.pipe(
-            // Omit searchFilters.
-            map(
-                ({ repository, metadataSet, searchString }) =>
-                    new SearchRequestParams(repository, metadataSet, {}, searchString),
-            ),
-            distinctUntilChanged((x, y) => x.equals(y)),
-        );
-        searchRequestParams
-            .pipe(map((params) => this.getSearchRemote(params)))
-            .subscribe((remote) => this.resultsDataSource.setRemote(remote));
-        collectionRequestParams
-            .pipe(map((params) => this.getCollectionsSearchRemote(params)))
-            .subscribe((remote) => this.collectionsDataSource.setRemote(remote));
-    }
-
     private registerLoadingProgress(): void {
-        rxjs.combineLatest([this.loadingParams, this.loadingContent, this.loadingCollections])
+        this._results
             .pipe(
-                map(([loadingParams, loadingContent, loadingCollections]) => {
-                    if (loadingParams) {
-                        return 10;
-                    } else {
-                        return 40 + (loadingContent ? 0 : 30) + (loadingCollections ? 0 : 30);
-                    }
-                }),
-                debounceTime(0),
-                distinctUntilChanged(),
-                // tap((progress) => console.log('progress', progress)),
+                filter(notNull),
+                switchMap((results) => results.loadingProgress),
             )
-            .subscribe((progress) => this.loadingProgress.next(progress));
-    }
-
-    private registerColumnsAndSortConfig(): void {
-        // Get MDS definition.
-        const mds = rxjs
-            .combineLatest([
-                this.activeRepository.observeValue(),
-                this.activeMetadataSet.observeValue(),
-            ])
-            .pipe(
-                filter(([repository, metadataSet]) => notNull(repository) && notNull(metadataSet)),
-                switchMap(([repository, metadataSet]) =>
-                    this.mds.getMetadataSet({ repository, metadataSet }),
-                ),
-            );
-        // Register columns.
-        mds.pipe(map((mds) => MdsHelper.getColumns(this.translate, mds, 'search'))).subscribe(
-            this.resultColumns,
-        );
-        mds.pipe(
-            map((mds) => MdsHelper.getColumns(this.translate, mds, 'searchCollections')),
-        ).subscribe(this.collectionColumns);
-        // Register sort.
-        mds.pipe(map((mds) => MdsHelper.getSortInfo(mds, 'search'))).subscribe((sortInfo) => {
-            this.sortConfig.next({
-                allowed: true,
-                active: sortInfo.default.sortBy,
-                direction: sortInfo.default.sortAscending ? 'asc' : 'desc',
-                columns: sortInfo.columns.map(
-                    ({ id, mode }) =>
-                        new ListItemSort('NODE', id, mode as 'ascending' | 'descending'),
-                ),
-            });
-        });
-    }
-
-    private getSearchRemote(params: SearchRequestParams): NodeRemote<Node> {
-        // console.log('%cgetSearchRemote', 'font-weight: bold', params);
-        this.loadingContent.next(true);
-        return (request: NodeRequestParams) => {
-            this.loadingContent.next(true);
-            // console.log('search', request);
-            return this.search
-                .search({
-                    body: {
-                        criteria: this.getSearchCriteria(params),
-                        facetLimit: 5,
-                        facetMinCount: 1,
-                        permissions: this.reUrl.value ? [RestConstants.ACCESS_CC_PUBLISH] : [],
-                    },
-                    maxItems: request.range.endIndex - request.range.startIndex,
-                    skipCount: request.range.startIndex,
-                    sortAscending: request.sort ? [request.sort.direction === 'asc'] : null,
-                    sortProperties: request.sort ? [request.sort.active] : null,
-                    contentType: 'FILES',
-                    repository: params.repository,
-                    metadataset: params.metadataSet,
-                    query: RestConstants.DEFAULT_QUERY_NAME,
-                    propertyFilter: [RestConstants.ALL],
-                })
-                .pipe(
-                    map(fromSearchResults),
-                    tap(() => this.loadingContent.next(false)),
-                );
-        };
-    }
-
-    private getCollectionsSearchRemote(params: SearchRequestParams): NodeRemote<Node> {
-        const repository = this.availableRepositories.value.find(
-            ({ id }) => id === params.repository,
-        );
-        // We cannot show collections for another repository.
-        if (!repository.isHomeRepo) {
-            this.loadingCollections.next(false);
-            return () => rxjs.of({ data: [], total: 0 });
-        }
-        this.loadingCollections.next(true);
-        return (request: NodeRequestParams) => {
-            this.loadingCollections.next(true);
-            return this.search
-                .requestSearch({
-                    body: {
-                        criteria: this.getSearchCriteria(params),
-                        facets: [],
-                    },
-                    sortProperties: [
-                        RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
-                        RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
-                        RestConstants.CM_MODIFIED_DATE,
-                    ],
-                    sortAscending: [false, true, false],
-                    maxItems: request.range.endIndex - request.range.startIndex,
-                    skipCount: request.range.startIndex,
-                    // sortAscending: request.sort ? [request.sort.direction === 'asc'] : null,
-                    // sortProperties: request.sort ? [request.sort.active] : null,
-                    contentType: 'ALL', // This is now handled via mds queries
-                    repository: params.repository,
-                    metadataset: params.metadataSet,
-                    query: RestConstants.QUERY_NAME_COLLECTIONS,
-                    propertyFilter: [RestConstants.ALL],
-                })
-                .pipe(
-                    map(fromSearchResults),
-                    tap(() => this.loadingCollections.next(false)),
-                );
-        };
-    }
-
-    private getSearchCriteria(params: SearchRequestParams): MdsQueryCriteria[] {
-        const criteria: MdsQueryCriteria[] = Object.entries(params.searchFilters ?? {}).map(
-            ([property, values]) => ({ property, values }),
-        );
-        if (params.searchString) {
-            criteria.push({ property: 'ngsearchword', values: [params.searchString] });
-        }
-        return criteria;
+            .subscribe(this.loadingProgress);
     }
 }
 

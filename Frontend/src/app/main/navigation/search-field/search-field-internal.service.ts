@@ -19,16 +19,7 @@ import {
     Subject,
     timer,
 } from 'rxjs';
-import {
-    catchError,
-    debounce,
-    distinctUntilChanged,
-    filter,
-    first,
-    map,
-    switchMap,
-    timeout,
-} from 'rxjs/operators';
+import { catchError, debounce, distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 import { EventListener, FrameEventsService } from '../../../core-module/core.module';
 import { notNull } from '../../../util/functions';
 import { SearchFieldComponent } from './search-field.component';
@@ -74,7 +65,7 @@ export class SearchFieldInternalService implements EventListener {
 
     readonly mdsInfo$ = this.mdsInfoSubject.pipe(filter((config) => config !== null));
     readonly rawFilters$ = this.filtersSubject.pipe(
-        map((filters) => this.mdsLabel.getRawValuesDict(filters)),
+        map((filters) => (filters ? this.mdsLabel.getRawValuesDict(filters) : null)),
     );
 
     constructor(
@@ -160,13 +151,9 @@ export class SearchFieldInternalService implements EventListener {
     setFilterValues(values: RawValuesDict, { emitValuesChange = false } = {}): void {
         this.getMdsIdentifier()
             .pipe(
-                // Wait for five seconds for the mds info to become available.
-                timeout(5_000),
-                catchError(() => {
-                    console.warn('Called setFilterValues when mds was not configured.');
-                    return rxjs.EMPTY;
-                }),
-                switchMap((mdsId) => this.mdsLabel.labelValuesDict(mdsId, values ?? {})),
+                switchMap((mdsId) =>
+                    mdsId ? this.mdsLabel.labelValuesDict(mdsId, values ?? {}) : rxjs.of(null),
+                ),
             )
             .subscribe((filterValues) => {
                 this.filtersSubject.next(filterValues);
@@ -192,21 +179,28 @@ export class SearchFieldInternalService implements EventListener {
                 debounce((inputString) => (inputString ? timer(200) : EMPTY)),
                 switchMap((inputString) =>
                     inputString
-                        ? this.search.getAsYouTypeFacetSuggestions(
-                              inputString,
-                              this.categoriesSubject.value,
-                              NUMBER_OF_FACET_SUGGESTIONS,
-                          )
+                        ? this.search
+                              .getAsYouTypeFacetSuggestions(
+                                  inputString,
+                                  this.categoriesSubject.value,
+                                  NUMBER_OF_FACET_SUGGESTIONS,
+                              )
+                              // TODO: Figure out if the MDS supports suggestion facet queries
+                              // beforehand.
+                              .pipe(catchError((error) => (error.preventDefault(), rxjs.of(null))))
                         : of(null),
                 ),
             )
             .subscribe((suggestions) => this.suggestionsSubject.next(suggestions));
     }
 
-    private getMdsIdentifier(): Observable<MdsIdentifier> {
+    private getMdsIdentifier(): Observable<MdsIdentifier | null> {
         return this.mdsInfoSubject.pipe(
-            first((mdsInfo) => notNull(mdsInfo?.repository) && notNull(mdsInfo?.metadataSet)),
-            map(({ repository, metadataSet }) => ({ repository, metadataSet })),
+            map((mdsInfo) =>
+                notNull(mdsInfo?.repository) && notNull(mdsInfo?.metadataSet)
+                    ? { repository: mdsInfo.repository, metadataSet: mdsInfo.metadataSet }
+                    : null,
+            ),
         );
     }
 }

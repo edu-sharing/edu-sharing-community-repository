@@ -3,7 +3,7 @@
  */
 
 import { DataSource } from '@angular/cdk/collections';
-import { Injectable, Injector } from '@angular/core';
+import { Injector } from '@angular/core';
 import { Sort, SortDirection } from '@angular/material/sort';
 import { MatTableDataSourcePageEvent, MatTableDataSourcePaginator } from '@angular/material/table';
 import { ActivatedRoute } from '@angular/router';
@@ -56,20 +56,8 @@ export interface SortPanel {
     readonly sortChange: Observable<Sort>;
 }
 
-@Injectable({ providedIn: 'root' })
-export class NodeDataSourceRemoteService {
-    constructor(private _injector: Injector) {}
-
-    create<
-        T extends Node | GenericAuthority,
-        P extends MatTableDataSourcePaginator = MatTableDataSourcePaginator,
-    >(): NodeDataSourceRemote<T, P> {
-        return new NodeDataSourceRemote(this._injector);
-    }
-}
-
 export class NodeDataSourceRemote<
-    T extends Node | GenericAuthority,
+    T extends Node | GenericAuthority = Node,
     P extends MatTableDataSourcePaginator = MatTableDataSourcePaginator,
 > extends DataSource<T> {
     get paginator(): P | null {

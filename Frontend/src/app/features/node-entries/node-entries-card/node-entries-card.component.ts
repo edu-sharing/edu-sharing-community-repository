@@ -98,7 +98,7 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
     }
 
     getVisibleColumns() {
-        return this.entriesService.columns.filter((c) => c.visible);
+        return this.entriesService.columns?.filter((c) => c.visible);
     }
 
     async openMenu(node: T) {

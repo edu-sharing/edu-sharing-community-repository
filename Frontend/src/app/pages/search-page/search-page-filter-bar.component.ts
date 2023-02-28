@@ -249,7 +249,7 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
             repository: this.activeRepository.getValue(),
             setId: this.activeMetadataSet.getValue(),
         };
-        console.log('resetMds', this.mdsParams);
+        // console.log('resetMds', this.mdsParams);
         this.mdsInitialized = false;
         // Wait for search-filter values to propagate via data binding to the mds editor.
         setTimeout(() => {

@@ -5,16 +5,15 @@ import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { Observable, Subject } from 'rxjs';
 import { filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
-import { Node, RestConstants } from '../../core-module/core.module';
+import { Node, Repository, RestConstants, UIConstants } from '../../core-module/core.module';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
 import { Scope } from '../../core-ui-module/option-item';
 import { CardDialogRef } from '../../features/dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
-import { NodeEntriesDisplayType } from '../../features/node-entries/entries-model';
 import { NodeEntriesWrapperComponent } from '../../features/node-entries/node-entries-wrapper.component';
 import { MainNavService } from '../../main/navigation/main-nav.service';
-import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
 import { notNull } from '../../util/functions';
+import { NavigationScheduler } from './navigation-scheduler';
 import { SearchPageService } from './search-page.service';
 
 @Component({
@@ -32,33 +31,22 @@ import { SearchPageService } from './search-page.service';
 })
 export class SearchPageComponent implements OnInit, OnDestroy {
     readonly Scope = Scope;
-    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 
     @ViewChild('filtersDialogResetButton', { static: true })
     filtersDialogResetButton: TemplateRef<HTMLElement>;
     @ViewChild('filtersDialogContent', { static: true }) filtersDialogContent: TemplateRef<unknown>;
     @ViewChild('nodeEntriesResults') nodeEntriesResults: NodeEntriesWrapperComponent<Node>;
-    @ViewChild(ActionbarComponent)
-    set _actionbar(value: ActionbarComponent) {
-        // Avoid changed-after-checked error.
-        setTimeout(() => (this.actionbar = value));
-    }
-    actionbar: ActionbarComponent;
 
     @HostBinding('class.has-tab-bar') tabBarIsVisible: boolean = null;
     progressBarIsVisible = false;
 
-    readonly resultsDataSource = this.searchPage.resultsDataSource;
-    readonly totalResults = this.resultsDataSource.observeTotal();
-    readonly collectionsDataSource = this.searchPage.collectionsDataSource;
     readonly availableRepositories = this.searchPage.availableRepositories;
     readonly activeRepository = this.searchPage.activeRepository;
+    readonly showingAllRepositories = this.searchPage.showingAllRepositories;
     readonly filterBarIsVisible = this.searchPage.filterBarIsVisible;
+    readonly searchString = this.searchPage.searchString;
     readonly searchFilters = this.searchPage.searchFilters;
     readonly loadingProgress = this.searchPage.loadingProgress;
-    readonly resultColumns = this.searchPage.resultColumns;
-    readonly collectionColumns = this.searchPage.collectionColumns;
-    readonly sortConfig = this.searchPage.sortConfig;
     readonly isMobileScreen = this.getIsMobileScreen();
     private readonly destroyed = new Subject<void>();
 
@@ -68,6 +56,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
         private searchPage: SearchPageService,
         private dialogs: DialogsService,
         private translate: TranslateService,
+        private navigationScheduler: NavigationScheduler,
     ) {
         this.searchPage.init();
     }
@@ -87,6 +76,13 @@ export class SearchPageComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.destroyed.next();
         this.destroyed.complete();
+    }
+
+    goToRepository(repository: Repository): void {
+        this.activeRepository.setUserValue(repository.id);
+        this.navigationScheduler.scheduleNavigation({
+            route: [UIConstants.ROUTER_PREFIX, 'search'],
+        });
     }
 
     private registerFilterDialog(): void {
@@ -120,7 +116,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
             minWidth: 350,
             customHeaderBarContent: this.filtersDialogResetButton,
         });
-        this.totalResults
+        this.searchPage.results.totalResults
             .pipe(
                 switchMap((results) => this.translate.get('SEARCH.NUMBER_RESULTS', { results })),
                 takeUntil(dialogRef.afterClosed()),
