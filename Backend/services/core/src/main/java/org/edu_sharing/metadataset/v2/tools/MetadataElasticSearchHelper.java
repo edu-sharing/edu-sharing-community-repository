@@ -273,18 +273,14 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                     isi18nProp = true;
                 }
 
-                MultiMatchQueryBuilder mmqb = null;
+                QueryBuilder mmqb = null;
                 if(parameter != null && parameter.getFacets() != null) {
-                    mmqb = QueryBuilders
-                            .multiMatchQuery(searchToken.getQueryString(), parameter.getFacets().get(0));
+                    mmqb = getFacetFilter(searchToken.getQueryString(), parameter.getFacets().get(0));
                 } else if(isi18nProp){
-                    mmqb = QueryBuilders
-                            .multiMatchQuery(searchToken.getQueryString(),"i18n."+currentLocale+"."+facet,"collections.i18n."+currentLocale+"."+facet);
+                    mmqb = getFacetFilter(searchToken.getQueryString(),"i18n."+currentLocale+"."+facet, "collections.i18n."+currentLocale+"."+facet);
                 }else{
-                    mmqb = QueryBuilders
-                            .multiMatchQuery(searchToken.getQueryString(),"properties."+facet);
+                    mmqb = getFacetFilter(searchToken.getQueryString(),"properties."+facet, "properties."+facet+".keyword");
                 }
-                mmqb.type(MultiMatchQueryBuilder.Type.BOOL_PREFIX).operator(Operator.AND);
                 bqb.must(mmqb);
             }
 
@@ -305,5 +301,16 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         }
 
         return result;
+    }
+
+    private static QueryBuilder getFacetFilter(String queryString, String... fieldName) throws IllegalArgumentException {
+        BoolQueryBuilder bool = QueryBuilders.boolQuery();
+        bool.minimumShouldMatch(1);
+        Arrays.stream(fieldName).forEach(
+                field -> {
+                    bool.should(QueryBuilders.wildcardQuery(field, queryString + "*").caseInsensitive(true));
+                }
+        );
+        return bool;
     }
 }
