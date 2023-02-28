@@ -1,5 +1,10 @@
 @import '../../../core-ui-module/styles/variables';
 
+@mixin suggestionCardHeading {
+    font-size: $fontSizeSmall;
+    color: $textLight;
+}
+
 :host {
     position: relative;
     display: block;
@@ -56,9 +61,7 @@ mat-form-field {
     }
     > label {
         display: flex;
-        color: $textLight;
-        font-size: $fontSizeSmall;
-        text-transform: uppercase;
+        @include suggestionCardHeading;
         margin-bottom: 5px;
     }
     .chips-wrapper {
@@ -124,9 +127,7 @@ mat-form-field {
 ::ng-deep .cdk-overlay-container .suggestion-card {
     es-mds-editor-widget-container {
         label {
-            font-size: $fontSizeSmall;
-            color: $textLight;
-            text-transform: uppercase;
+            @include suggestionCardHeading;
         }
     }
 }

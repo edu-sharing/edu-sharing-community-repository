@@ -28,6 +28,7 @@
     "SAVE_SEARCH_ACTION": "Save",
     "FILTER": "Filter",
     "FILTERS": "Filters",
+    "FILTER_BY": "Filter by: {{property}}",
     "NUMBER_RESULTS": "{{ results }} result(s)",
     "CLICK_TO_REMOVE": "Click to remove",
     "PREVIEWIMAGE_FOR": "Preview image for",
