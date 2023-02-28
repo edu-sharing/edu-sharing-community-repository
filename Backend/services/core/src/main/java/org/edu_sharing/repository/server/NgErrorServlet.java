@@ -36,6 +36,13 @@ public class NgErrorServlet extends HttpServlet {
 					errorMessage.toString()),
 					Integer.parseInt(errorCode.toString())
 			);
+		}catch(NullPointerException e) {
+			try {
+				Throwable t = (Throwable) req.getAttribute("javax.servlet.error.exception");
+				logger.error(t);
+			} catch(Throwable t){
+				resp.sendError(500, "Fatal error preparing error.html: "+t.getMessage());
+			}
 		}catch(Throwable t) {
 			logger.error(t);
 			resp.sendError(500, "Fatal error preparing error.html: "+t.getMessage());
