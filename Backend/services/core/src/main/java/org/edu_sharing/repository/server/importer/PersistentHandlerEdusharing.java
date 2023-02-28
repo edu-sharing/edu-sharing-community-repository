@@ -367,10 +367,10 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 
 		try {
-			mcAlfrescoBaseClient.updateNode(nodeId, simpleProps);
+			NodeServiceFactory.getLocalService().updateNodeNative(nodeId, simpleProps);
 		}catch(DuplicateChildNodeNameException e){
 			simpleProps.put(CCConstants.CM_NAME, EduSharingNodeHelper.makeUniqueName((String) simpleProps.get(CCConstants.CM_NAME)));
-			mcAlfrescoBaseClient.updateNode(nodeId, simpleProps);
+			NodeServiceFactory.getLocalService().updateNodeNative(nodeId, simpleProps);
 		}
 		createChildobjects(nodeId, nodeProps);
 	}
