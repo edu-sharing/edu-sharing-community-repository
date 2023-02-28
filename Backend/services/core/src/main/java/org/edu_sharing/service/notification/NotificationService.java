@@ -12,5 +12,5 @@ import org.edu_sharing.repository.client.rpc.Result;
 import org.edu_sharing.repository.client.rpc.User;
 
 public interface NotificationService {
-	public void notifyNodeIssue(String nodeId,String reason,String userEmail,String userComment) throws Throwable;
+	void notifyNodeIssue(String nodeId,String reason,String userEmail,String userComment) throws Throwable;
 }

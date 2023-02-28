@@ -49,6 +49,10 @@ public class NotificationServiceImpl implements NotificationService {
 		currentLocale = new AuthenticationToolAPI().getCurrentLocale();
 	}
 
+	public void init(){
+
+	}
+
 	@Override
 	public void notifyNodeIssue(String nodeId, String reason, String userEmail, String userComment) throws Throwable {
 		HashMap<String, Object> properties = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);

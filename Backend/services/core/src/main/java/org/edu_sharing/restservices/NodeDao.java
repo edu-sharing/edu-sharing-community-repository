@@ -63,7 +63,7 @@ import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.*;
 import org.edu_sharing.service.nodeservice.NodeService;
-import org.edu_sharing.service.notification.NotificationServiceFactory;
+import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.rating.RatingDetails;
@@ -2338,7 +2338,8 @@ public class NodeDao {
 
     public void reportNode(String reason, String userEmail, String userComment) throws DAOException {
 		try{
-			NotificationServiceFactory.getNotificationService(repoDao.getApplicationInfo().getAppId())
+			//NotificationServiceFactoryUtility.getNotificationService(repoDao.getApplicationInfo().getAppId())
+			NotificationServiceFactoryUtility.getLocalService()
 			.notifyNodeIssue(nodeId, reason, userEmail, userComment);
 		}catch(Throwable t){
 			throw DAOException.mapping(t);
