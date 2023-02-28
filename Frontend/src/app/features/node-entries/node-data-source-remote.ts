@@ -215,7 +215,9 @@ export class NodeDataSourceRemote<
 
     private _updateRemoteSubscription(): void {
         this._resetDone = false;
-        this._paginationHandler.firstPage();
+        if (this._initDone) {
+            this._paginationHandler.firstPage();
+        }
         const sortChange = rxjs.merge(
             this._sortHandler.sortChange.pipe(
                 tap(({ source }) => {
