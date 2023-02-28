@@ -25,9 +25,13 @@ public class NgErrorServlet extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		handleRequest(req, resp);
+	}
+
+	private static void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		try {
-			Object errorMessage=req.getAttribute("javax.servlet.error.message");
-			Object errorCode=req.getAttribute("javax.servlet.error.status_code");
+			Object errorMessage= req.getAttribute("javax.servlet.error.message");
+			Object errorCode= req.getAttribute("javax.servlet.error.status_code");
 			ErrorFilter.handleError(req, resp, new Throwable(
 					errorMessage.toString()),
 					Integer.parseInt(errorCode.toString())
@@ -40,11 +44,6 @@ public class NgErrorServlet extends HttpServlet {
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		Object errorMessage=req.getAttribute("javax.servlet.error.message");
-		Object errorCode=req.getAttribute("javax.servlet.error.status_code");
-		ErrorFilter.handleError(req, resp, new Throwable(
-						errorMessage.toString()),
-				Integer.parseInt(errorCode.toString())
-		);
+		handleRequest(req, resp);
 	}
 }
