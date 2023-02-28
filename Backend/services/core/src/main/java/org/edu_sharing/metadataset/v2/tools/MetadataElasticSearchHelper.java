@@ -308,7 +308,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         bool.minimumShouldMatch(1);
         Arrays.stream(fieldName).forEach(
                 field -> {
-                    bool.should(QueryBuilders.wildcardQuery(field, queryString + "*").caseInsensitive(true));
+                    bool.should(QueryBuilders.wildcardQuery(field, "*" + queryString + "*").caseInsensitive(true));
                 }
         );
         return bool;
