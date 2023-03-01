@@ -82,6 +82,7 @@ import {
     MdsDefinition,
     MdsService,
     MetadataSetInfo,
+    NetworkService,
     SearchResults,
     SearchService as SearchApiService,
 } from 'ngx-edu-sharing-api';
@@ -241,7 +242,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private config: ConfigurationService,
         private uiService: UIService,
         private optionsHelper: OptionsHelperService,
-        private network: RestNetworkService,
+        private network: NetworkService,
         private temporaryStorageService: TemporaryStorageService,
         private searchField: SearchFieldService,
         private searchApi: SearchApiService,
@@ -335,10 +336,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             .hasToolPermission(RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT)
             .subscribe((unchecked) => {
                 this.network.getRepositories().subscribe(
-                    (data: NetworkRepositories) => {
-                        this.allRepositories = Helper.deepCopy(data.repositories);
+                    (repositories) => {
+                        this.allRepositories = Helper.deepCopy(repositories);
                         this.repositories = ConfigurationHelper.filterValidRepositories(
-                            data.repositories,
+                            repositories,
                             this.config,
                             !unchecked,
                         );
