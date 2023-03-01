@@ -34,6 +34,8 @@ export class SearchPageComponent implements OnInit, OnDestroy {
     readonly Scope = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 
+    @ViewChild('filtersDialogResetButton', { static: true })
+    filtersDialogResetButton: TemplateRef<HTMLElement>;
     @ViewChild('filtersDialogContent', { static: true }) filtersDialogContent: TemplateRef<unknown>;
     @ViewChild('nodeEntriesResults') nodeEntriesResults: NodeEntriesWrapperComponent<Node>;
     @ViewChild(ActionbarComponent)
@@ -52,6 +54,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
     readonly availableRepositories = this.searchPage.availableRepositories;
     readonly activeRepository = this.searchPage.activeRepository;
     readonly filterBarIsVisible = this.searchPage.filterBarIsVisible;
+    readonly searchFilters = this.searchPage.searchFilters;
     readonly loadingProgress = this.searchPage.loadingProgress;
     readonly resultColumns = this.searchPage.resultColumns;
     readonly collectionColumns = this.searchPage.collectionColumns;
@@ -115,6 +118,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
             title: 'SEARCH.FILTERS',
             contentTemplate: this.filtersDialogContent,
             minWidth: 350,
+            customHeaderBarContent: this.filtersDialogResetButton,
         });
         this.totalResults
             .pipe(

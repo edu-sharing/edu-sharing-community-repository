@@ -36,7 +36,27 @@ where. -->
       mode="side"
     >
       <div class="filter-bar-container">
-        <es-search-page-filter-bar></es-search-page-filter-bar>
+        <div class="filter-bar-heading">
+          <h2 class="filter-bar-title">{{ 'SEARCH.FILTERS' | translate }}</h2>
+          <button
+            *ngIf="searchFilters.getUserValue()"
+            mat-button
+            (click)="searchFilters.setUserValue(null)"
+          >
+            <i esIcon="clear_all"></i>
+            {{ 'CLEAR_FILTERS' | translate }}
+          </button>
+          <button
+            class="filter-bar-close-button"
+            mat-icon-button
+            (click)="filterBarIsVisible.setUserValue(false)"
+          >
+            <i esIcon="close" [aria]="true"></i>
+          </button>
+        </div>
+        <div class="filter-bar-body">
+          <es-search-page-filter-bar></es-search-page-filter-bar>
+        </div>
       </div>
     </mat-drawer>
     <main>
@@ -87,4 +107,15 @@ where. -->
 
 <ng-template #filtersDialogContent>
   <es-search-page-filter-bar class="filters-dialog-content"></es-search-page-filter-bar>
+</ng-template>
+
+<ng-template #filtersDialogResetButton>
+  <button
+    *ngIf="searchFilters.getUserValue()"
+    mat-button
+    (click)="searchFilters.setUserValue(null)"
+  >
+    <i esIcon="clear_all"></i>
+    {{ 'CLEAR_FILTERS' | translate }}
+  </button>
 </ng-template>
