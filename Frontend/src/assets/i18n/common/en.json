@@ -75,7 +75,7 @@
   "ASCENDING": "ascending",
   "DESCENDING": "descending",
   "SELECTED": "selected",
-  "CLEAR_FILTERS": "Clear filters",
+  "CLEAR_FILTERS": "reset",
   "EDIT_ACCOUNT": "Manage account",
   "CHANGE_LANGUAGE": "Change language",
   "DEFAULT_METADATASET": "Default-Metadataset ({{name}})",
