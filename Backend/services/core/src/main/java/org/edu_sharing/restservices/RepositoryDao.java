@@ -182,7 +182,7 @@ public class RepositoryDao {
 	}
 
 	public String getUserSavedSearch(boolean createIfNotExists) {
-		return nodeService.getUserInbox(createIfNotExists);
+		return nodeService.getUserSavedSearch(createIfNotExists);
 
 	}
 
