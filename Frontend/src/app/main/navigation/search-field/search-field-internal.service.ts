@@ -175,7 +175,7 @@ export class SearchFieldInternalService implements EventListener {
                     this.enableFiltersAndSuggestionsSubject.value ? inputString : null,
                 ),
                 map((inputString) => (inputString?.length >= 3 ? inputString : null)),
-                filter(() => !!this.categoriesSubject.value),
+                filter(() => this.categoriesSubject.value?.length > 1),
                 debounce((inputString) => (inputString ? timer(200) : EMPTY)),
                 switchMap((inputString) =>
                     inputString
@@ -187,7 +187,18 @@ export class SearchFieldInternalService implements EventListener {
                               )
                               // TODO: Figure out if the MDS supports suggestion facet queries
                               // beforehand.
-                              .pipe(catchError((error) => (error.preventDefault(), rxjs.of(null))))
+                              .pipe(
+                                  catchError((error) => {
+                                      console.warn(
+                                          'Failed to fetch as-you-type facet suggestions. ' +
+                                              'In case your MDS does not support facet ' +
+                                              'suggestions, please override the group ' +
+                                              '"search_input" to not contain any views.',
+                                      );
+                                      error.preventDefault();
+                                      return rxjs.of(null);
+                                  }),
+                              )
                         : of(null),
                 ),
             )
