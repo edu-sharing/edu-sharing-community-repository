@@ -30,19 +30,14 @@ package org.edu_sharing.repository.server.jobs.quartz;
 import org.alfresco.repo.version.Version2Model;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.edu_sharing.service.util.CSVTool;
@@ -187,7 +182,7 @@ public class BulkEditNodesJob extends AbstractJob{
 			types = Arrays.stream(((String) context.getJobDetail().getJobDataMap().get("types")).
 					split(",")).map(String::trim).map(CCConstants::getValidGlobalName).
 					collect(Collectors.toList());
-		} catch (Throwable t) {
+		} catch (Throwable ignored) {
 		}
 		if (types == null || types.isEmpty()) {
 			throwMissingParam("types");
@@ -293,7 +288,7 @@ public class BulkEditNodesJob extends AbstractJob{
 								} else {
 									return v;
 								}
-							}).collect(Collectors.toList()), true);
+							}).collect(Collectors.toList()));
 						} else {
 							logger.info("Can not replace property " + property + "for node " + nodeRef + ": current data is not of type String/List");
 						}

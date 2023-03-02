@@ -271,7 +271,9 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
             }
         });
         // trigger rebuild
-        this.dataSource.refresh();
+        if (this.dataSource instanceof NodeDataSource) {
+            (this.dataSource as NodeDataSource<T>).refresh();
+        }
         const oldSelection = this.entriesService.selection.selected;
         this.entriesService.selection.clear();
         this.entriesService.selection.select(

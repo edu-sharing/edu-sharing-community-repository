@@ -103,7 +103,7 @@
           [dataSource]="dataSourceReferences"
           [globalKeyboardShortcuts]="true"
           [columns]="referencesColumns"
-          [displayType]="NodeEntriesDisplayType.Grid"
+          [(displayType)]="referencesDisplayType"
           [dragDrop]="{
             dragAllowed: isAllowedToEditCollection(),
             dropAllowed: canDropOnRef,
