@@ -11,7 +11,7 @@ import org.edu_sharing.service.rating.RatingDetails;
 import java.util.*;
 
 @Schema(description = "")
-public class Node {
+public class Node implements Serializable {
 
 	private NodeRef ref = null;
 	private NodeRef parent = null;

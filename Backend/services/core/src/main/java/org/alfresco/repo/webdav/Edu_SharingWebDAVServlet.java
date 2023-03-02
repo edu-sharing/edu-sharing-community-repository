@@ -101,7 +101,8 @@ public class Edu_SharingWebDAVServlet extends HttpServlet
     
     
     // WebDAV helper class
-    private WebDAVHelper m_davHelper;
+
+    private transient WebDAVHelper m_davHelper;
     private WebDAVActivityPoster activityPoster;
     
     

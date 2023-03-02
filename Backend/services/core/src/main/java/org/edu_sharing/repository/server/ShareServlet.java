@@ -35,7 +35,7 @@ import org.springframework.security.core.Authentication;
 
 public class ShareServlet extends HttpServlet implements SingleThreadModel {
 
-	Logger logger = Logger.getLogger(ShareServlet.class);
+	static Logger logger = Logger.getLogger(ShareServlet.class);
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

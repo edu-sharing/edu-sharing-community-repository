@@ -16,7 +16,7 @@ public class PersonDeleteOptions implements Serializable {
     public DeleteOption ratings,comments,collectionFeedback,statistics,stream;
     public String receiver,receiverGroup;
 
-    public static class FolderOptions {
+    public static class FolderOptions implements Serializable {
         public FolderDeleteMode folders;
         public DeleteMode privateFiles,ccFiles;
     }
@@ -27,11 +27,11 @@ public class PersonDeleteOptions implements Serializable {
         public boolean move;
     }
 
-    public static class CollectionOptions {
+    public static class CollectionOptions implements Serializable {
         public DeleteMode privateCollections,publicCollections;
     }
 
-    public static class DeleteOption {
+    public static class DeleteOption implements Serializable {
         public boolean delete;
 
         public DeleteOption() {

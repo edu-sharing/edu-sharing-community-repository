@@ -63,7 +63,7 @@ import org.springframework.security.saml.SAMLCredential;
 
 public class ShibbolethServlet extends HttpServlet {
 
-	Logger logger = Logger.getLogger(ShibbolethServlet.class);
+	private static Logger logger = Logger.getLogger(ShibbolethServlet.class);
 
 	Boolean useHeaders = null;
 	private String redirectUrl;

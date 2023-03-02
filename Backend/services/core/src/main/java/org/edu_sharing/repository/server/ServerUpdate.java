@@ -51,7 +51,7 @@ public class ServerUpdate extends HttpServlet implements SingleThreadModel {
 
 	private static Log logger = LogFactory.getLog(ServerUpdate.class);
 
-	PrintWriter out = null;
+	transient PrintWriter out = null;
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
