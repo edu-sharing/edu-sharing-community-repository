@@ -768,26 +768,32 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 	}
 	@Override
-	public String getOrCreateUserInbox() {
+	public String getUserInbox(boolean createIfNotExists) {
 		NodeRef userhome=repositoryHelper.getUserHome(repositoryHelper.getPerson());
 		List<ChildAssociationRef> inbox = nodeService.getChildAssocsByPropertyValue(userhome, QName.createQName(CCConstants.CCM_PROP_MAP_TYPE), CCConstants.CCM_VALUE_MAP_TYPE_USERINBOX);
 		if(inbox!=null && inbox.size()>0)
 			return inbox.get(0).getChildRef().getId();
-		HashMap<String,Object> properties=new HashMap<>();
-		properties.put(CCConstants.CM_NAME,"Inbox");
-		properties.put(CCConstants.CCM_PROP_MAP_TYPE,CCConstants.CCM_VALUE_MAP_TYPE_USERINBOX);
-		return createNodeBasic(userhome.getId(),CCConstants.CCM_TYPE_MAP,properties);
+		if(createIfNotExists) {
+			HashMap<String, Object> properties = new HashMap<>();
+			properties.put(CCConstants.CM_NAME, "Inbox");
+			properties.put(CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_USERINBOX);
+			return createNodeBasic(userhome.getId(), CCConstants.CCM_TYPE_MAP, properties);
+		}
+		return null;
 	}
 	@Override
-	public String getOrCreateUserSavedSearch() {
+	public String getUserSavedSearch(boolean createIfNotExists) {
 		NodeRef userhome=repositoryHelper.getUserHome(repositoryHelper.getPerson());
 		List<ChildAssociationRef> savedSearch = nodeService.getChildAssocsByPropertyValue(userhome, QName.createQName(CCConstants.CCM_PROP_MAP_TYPE), CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH);
 		if(savedSearch!=null && savedSearch.size()>0)
 			return savedSearch.get(0).getChildRef().getId();
-		HashMap<String,Object> properties=new HashMap<>();
-		properties.put(CCConstants.CM_NAME,"SavedSearch");
-		properties.put(CCConstants.CCM_PROP_MAP_TYPE,CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH);
-		return createNodeBasic(userhome.getId(),CCConstants.CCM_TYPE_MAP,properties);
+		if(createIfNotExists) {
+			HashMap<String, Object> properties = new HashMap<>();
+			properties.put(CCConstants.CM_NAME, "SavedSearch");
+			properties.put(CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH);
+			return createNodeBasic(userhome.getId(), CCConstants.CCM_TYPE_MAP, properties);
+		}
+		return null;
 	}
 
 	/**

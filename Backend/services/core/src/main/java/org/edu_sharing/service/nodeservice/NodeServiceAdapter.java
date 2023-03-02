@@ -89,7 +89,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public String getOrCreateUserInbox() {
+	public String getUserInbox(boolean createIfNotExists) {
 		return null;
 	}
 
@@ -254,8 +254,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public String getOrCreateUserSavedSearch() {
-		// TODO Auto-generated method stub
+	public String getUserSavedSearch(boolean createIfNotExists) {
 		return null;
 	}
 

@@ -504,15 +504,20 @@ public class NodeDao {
 	}
 
 	public static String mapNodeConstants(RepositoryDao repoDao,String node) throws DAOException {
+		return mapNodeConstants(repoDao, node, true);
+	}
+
+
+		public static String mapNodeConstants(RepositoryDao repoDao,String node, boolean createIfNotExists) throws DAOException {
 		try {
 			if ("-userhome-".equals(node)) {
 				node = repoDao.getUserHome();
 			}
 			if ("-inbox-".equals(node)) {
-				node = repoDao.getUserInbox();
+				node = repoDao.getUserInbox(createIfNotExists);
 			}
 			if ("-saved_search-".equals(node)) {
-				node = repoDao.getUserSavedSearch();
+				node = repoDao.getUserSavedSearch(createIfNotExists);
 			}
 			return node;
 		}catch (Exception e){
@@ -2350,7 +2355,7 @@ public class NodeDao {
 	public static NodeDao saveSearch(String repoId, String mdsId, String query, String name,
 			List<MdsQueryCriteria> parameters,boolean replace) throws DAOException {
 		try{
-    		String parent = RepositoryDao.getHomeRepository().getUserSavedSearch();
+    		String parent = RepositoryDao.getHomeRepository().getUserSavedSearch(true);
     		NodeDao parentDao = new NodeDao(RepositoryDao.getHomeRepository(), parent);
     		HashMap<String, String[]> props=new HashMap();
     		props.put(CCConstants.CM_NAME, new String[]{NodeServiceHelper.cleanupCmName(name)});

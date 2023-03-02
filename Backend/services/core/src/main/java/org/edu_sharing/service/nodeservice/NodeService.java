@@ -52,9 +52,9 @@ public interface NodeService {
 	
 	public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission) throws Exception;
 
-	public String getOrCreateUserInbox();
-	
-	public String getOrCreateUserSavedSearch();
+	public String getUserInbox(boolean createIfNotExists);
+
+	public String getUserSavedSearch(boolean createIfNotExists);
 
 	public String getPrimaryParent(String nodeId);
 
