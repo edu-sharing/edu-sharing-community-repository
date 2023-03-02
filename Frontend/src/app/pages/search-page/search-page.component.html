@@ -1,0 +1,94 @@
+<mat-progress-bar
+  mode="determinate"
+  [value]="progressBarIsVisible ? loadingProgress.value : 0"
+  [@fadeOut]="progressBarIsVisible ? 'visible' : 'hidden'"
+  (animationEnd)="onProgressBarAnimationEnd()"
+></mat-progress-bar>
+
+<ng-container *ngIf="tabBarIsVisible">
+  <nav mat-tab-nav-bar [tabPanel]="tabPanel">
+    <a
+      mat-tab-link
+      *ngIf="availableRepositories.getValue().length > 1"
+      [routerLink]="['./all']"
+      [queryParams]="searchString.getQueryParamEntry()"
+      routerLinkActive
+      #routerLinkActive="routerLinkActive"
+      [active]="routerLinkActive.isActive"
+    >
+      {{ 'SEARCH.REPOSITORY_ALL' | translate }}
+    </a>
+    <a
+      mat-tab-link
+      *ngFor="let repository of availableRepositories.getValue()"
+      (click)="goToRepository(repository)"
+      [active]="repository.id === activeRepository.getValue()"
+    >
+      <div class="repository-icon">
+        <img [src]="repository | repositoryIcon" alt="" />
+      </div>
+      {{ repository.title }}
+    </a>
+  </nav>
+  <mat-tab-nav-panel #tabPanel>
+    <ng-container *ngTemplateOutlet="tabBody"></ng-container>
+  </mat-tab-nav-panel>
+</ng-container>
+<!-- Explicitly check if `tabBarIsVisible === false`, so we don't insert the body before we know
+where. -->
+<ng-container *ngIf="tabBarIsVisible === false">
+  <ng-container *ngTemplateOutlet="tabBody"></ng-container>
+</ng-container>
+
+<ng-template #tabBody>
+  <mat-drawer-container #filterBar>
+    <mat-drawer
+      [opened]="filterBarIsVisible.getValue() && (isMobileScreen | async) === false"
+      mode="side"
+    >
+      <div class="filter-bar-container">
+        <div class="filter-bar-heading">
+          <h2 class="filter-bar-title">{{ 'SEARCH.FILTERS' | translate }}</h2>
+          <button
+            *ngIf="searchFilters.getUserValue()"
+            mat-button
+            (click)="searchFilters.setUserValue(null)"
+          >
+            <i esIcon="clear_all"></i>
+            {{ 'CLEAR_FILTERS' | translate }}
+          </button>
+          <button
+            class="filter-bar-close-button"
+            mat-icon-button
+            (click)="filterBarIsVisible.setUserValue(false)"
+          >
+            <i esIcon="close" [aria]="true"></i>
+          </button>
+        </div>
+        <div class="filter-bar-body">
+          <es-search-page-filter-bar
+            *ngIf="(showingAllRepositories | async) === false"
+          ></es-search-page-filter-bar>
+        </div>
+      </div>
+    </mat-drawer>
+    <main>
+      <router-outlet></router-outlet>
+    </main>
+  </mat-drawer-container>
+</ng-template>
+
+<ng-template #filtersDialogContent>
+  <es-search-page-filter-bar class="filters-dialog-content"></es-search-page-filter-bar>
+</ng-template>
+
+<ng-template #filtersDialogResetButton>
+  <button
+    *ngIf="searchFilters.getUserValue()"
+    mat-button
+    (click)="searchFilters.setUserValue(null)"
+  >
+    <i esIcon="clear_all"></i>
+    {{ 'CLEAR_FILTERS' | translate }}
+  </button>
+</ng-template>

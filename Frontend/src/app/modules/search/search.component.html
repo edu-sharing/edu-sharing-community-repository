@@ -382,7 +382,7 @@
                 direction: searchService.sort?.direction,
                 columns: searchService.sort?.columns
               }"
-              [globalKeyboardShortcuts]="true"
+              [primaryInstance]="true"
               (sortChange)="updateSort($event)"
               [displayType]="searchService.displayType"
               (displayTypeChange)="setDisplayType($event)"

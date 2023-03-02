@@ -57,7 +57,6 @@ export class ServicesComponent implements OnInit, OnDestroy {
         this.mainNav.setMainNavConfig({
             title: 'SERVICES.TITLE',
             currentScope: 'services',
-            searchEnabled: false,
         });
     }
 

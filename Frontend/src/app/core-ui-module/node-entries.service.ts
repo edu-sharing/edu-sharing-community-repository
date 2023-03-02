@@ -14,7 +14,6 @@ import {
     NodeClickEvent,
     NodeEntriesDisplayType,
 } from '../features/node-entries/entries-model';
-import { InfiniteScrollPaginator } from '../features/node-entries/infinite-scroll-paginator';
 import { NodeDataSource } from '../features/node-entries/node-data-source';
 import { NodeDataSourceRemote } from '../features/node-entries/node-data-source-remote';
 import {
@@ -56,7 +55,13 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     options: ListOptions;
     checkbox: boolean;
     globalOptions: OptionItem[];
-    sort: ListSortConfig;
+    sortSubject = new BehaviorSubject<ListSortConfig>(void 0);
+    get sort(): ListSortConfig {
+        return this.sortSubject.value;
+    }
+    set sort(value: ListSortConfig) {
+        this.sortSubject.next(value);
+    }
     sortChange: EventEmitter<ListSortConfig>;
     dragDrop: ListDragGropConfig<T>;
     clickItem: EventEmitter<NodeClickEvent<T>>;
@@ -69,7 +74,7 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     set gridConfig(value: GridConfig) {
         this.gridConfig$.next(value);
     }
-    globalKeyboardShortcuts: boolean;
+    primaryInstance: boolean;
     singleClickHint: 'dynamic' | 'static';
     disableInfiniteScroll: boolean;
 
@@ -111,7 +116,7 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
         }
         // TODO: focus next item when triggered via button.
         if (this.dataSource instanceof NodeDataSourceRemote) {
-            return (this.dataSource.paginator as InfiniteScrollPaginator).loadMore();
+            return this.dataSource.loadMore();
         } else {
             if (this.dataSource.hasMore()) {
                 this.fetchData.emit({

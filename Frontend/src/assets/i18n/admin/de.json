@@ -767,6 +767,7 @@
   "NO_PERMISSIONS_FOR_SCOPE": "Keine Berechtigungen, um diesen Bereich anzuzeigen",
   "DATE_SELECT_YEAR": "Jahr wählen",
   "SEARCH_CLEAR": "Löschen",
+  "TOGGLE_SEARCH_FILTERS": "Toggle search filters",
   "DATE_CLEAR": "Löschen",
   "USER_TUTORIAL_HEADING": "Dein Profil",
   "USER_TUTORIAL_DESCRIPTION": "Hier können Sie ein eigenes Profilbild angeben und zeigen, wer Sie sind und was Sie tun. Sie entscheiden, was Andere sehen können.",

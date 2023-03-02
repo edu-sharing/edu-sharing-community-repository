@@ -29,9 +29,11 @@ export type PaginationStrategy = 'infinite-scroll' | 'paginator';
 
 type PaginationScope = Scope | 'DEFAULT';
 /**
- * this service is intented to add custom behaviour to the global tables & grid views
+ * this service is intended to add custom behaviour to the global tables & grid views
  */
-@Injectable()
+@Injectable({
+    providedIn: 'root',
+})
 export class NodeEntriesGlobalService {
     private customFields: CustomFieldInfo[] = [];
     private paginationStrategy: { [key in PaginationScope]?: PaginationStrategy } = {

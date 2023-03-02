@@ -1,5 +1,10 @@
 @import '../../../core-ui-module/styles/variables';
 
+@mixin suggestionCardHeading {
+    font-size: $fontSizeSmall;
+    color: $textLight;
+}
+
 :host {
     position: relative;
     display: block;
@@ -20,6 +25,7 @@
 
 mat-form-field {
     width: 100%;
+    color: $workspaceTopBarInputText;
 }
 
 .search-field-wrapper {
@@ -27,7 +33,6 @@ mat-form-field {
     display: flex;
     background: $workspaceTopBarInputBackground;
     border-radius: 2px;
-    padding: 4px;
     &.input-has-focus {
         border-radius: 0;
         &:not(.cdk-keyboard-focused) {
@@ -40,6 +45,15 @@ mat-form-field {
     }
 }
 
+.filters-button {
+    margin-right: 6px;
+    margin-left: -10px;
+    &.mat-badge ::ng-deep .mat-badge-content {
+        right: -3px;
+        top: -3px;
+    }
+}
+
 .suggestion-active-filter {
     &.suggestion-active-filter-separator {
         padding-bottom: 8px;
@@ -48,9 +62,7 @@ mat-form-field {
     }
     > label {
         display: flex;
-        color: $textLight;
-        font-size: $fontSizeSmall;
-        text-transform: uppercase;
+        @include suggestionCardHeading;
         margin-bottom: 5px;
     }
     .chips-wrapper {
@@ -78,21 +90,10 @@ mat-form-field {
     display: flex;
     align-items: center;
     min-width: 120px;
-    .filter-prefix {
-        font-weight: bold;
-        padding: 5px;
-        width: 24px;
-        font-size: $fontSizeXSmall;
-        text-align: center;
-        border-radius: 50%;
-        background-color: darken($warningMedium, 14%);
-        user-select: none;
-        margin: 0 5px;
-    }
+    padding-left: 16px;
 }
 
 .search-input {
-    color: $workspaceTopBarInputText;
     -webkit-appearance: none; // Fix white background on Safari
     width: unset;
     min-width: 0;
@@ -103,8 +104,9 @@ mat-form-field {
 }
 
 .submit-button {
+    height: 48px;
+    width: 48px;
     border-radius: 0 2px 2px 0;
-    color: $workspaceTopBarInputText;
     background-color: mix($workspaceTopBarInputBackground, $workspaceTopBarBackground, 80%);
 }
 
@@ -128,9 +130,7 @@ mat-form-field {
 ::ng-deep .cdk-overlay-container .suggestion-card {
     es-mds-editor-widget-container {
         label {
-            font-size: $fontSizeSmall;
-            color: $textLight;
-            text-transform: uppercase;
+            @include suggestionCardHeading;
         }
     }
 }

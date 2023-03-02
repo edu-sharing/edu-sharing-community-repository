@@ -8,6 +8,7 @@ export class NodeDataSource<T extends Node | GenericAuthority> extends DataSourc
     private dataStream = new BehaviorSubject<T[]>([]);
     private pagination$ = new BehaviorSubject<Pagination>(null);
     public isLoading: boolean;
+    initialPageLoaded = false;
     private _itemsCap: ItemsCap<T> | null;
     get itemsCap(): ItemsCap<T> | null {
         return this._itemsCap;

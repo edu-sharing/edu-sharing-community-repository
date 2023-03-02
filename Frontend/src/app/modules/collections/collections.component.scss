@@ -23,11 +23,10 @@ mat-tab-group {
     position: relative;
     // Use `margin-top` instead of `top` to not create a negative position offset at the bottom of
     // the container, which could be overlapped by a custom footer.
-    margin-top: var(--mainnavHeight);
     min-height: calc(100vh - var(--mainnavHeight));
 
     &.collectionsContainerTabs {
-        margin-top: calc(var(--mainnavHeight) + 48px);
+        margin-top: 48px;
         min-height: calc(100vh - (var(--mainnavHeight) + 48px));
     }
 

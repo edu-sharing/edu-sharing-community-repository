@@ -245,7 +245,6 @@ export class NodeRelationsDialogComponent implements OnInit {
             // switch to original node id!
             node = await this.nodeService
                 .getNode(
-                    RestConstants.HOME_REPOSITORY,
                     RestHelper.removeSpacesStoreRef(
                         node.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL],
                     ),

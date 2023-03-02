@@ -63,7 +63,7 @@ export class SearchService {
         this.searchConfigSubject.pipe().subscribe((config) => {
             const { repository, metadataSet } = config;
             if (repository && metadataSet) {
-                this.searchField.setMdsInfo({ repository, metadataSet });
+                // this.searchField.setMdsInfo({ repository, metadataSet });
             }
         });
     }

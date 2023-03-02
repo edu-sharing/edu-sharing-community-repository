@@ -4,4 +4,11 @@
  */
 :root {
     --mainnavHeight: 70px;
+    // The updated height of the main nav panel if updated.
+    //
+    // Usually this will be the same value as --mainnavHeight. For custom navigation bars that
+    // change their height when scrolling, this value will indicate the current height. Note that it
+    // usually is sensible to use --mainnavHeight instead of this value for scrolling content to
+    // prevent stuttering when the navigation bar is expanded or collapsed.
+    --mainnavCurrentHeight: var(--mainnavHeight);
 }

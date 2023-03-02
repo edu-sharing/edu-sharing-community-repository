@@ -84,7 +84,6 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this.mainNav.setMainNavConfig({
             title: 'PROFILES.TITLE_NAV',
             currentScope: 'profiles',
-            searchEnabled: false,
         });
     }
 

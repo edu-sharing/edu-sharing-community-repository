@@ -165,6 +165,7 @@ export enum HideMode {
 export enum Scope {
     Render = 'Render',
     Search = 'Search',
+    SearchCollections = 'SearchCollections',
     CollectionsReferences = 'CollectionsReferences',
     CollectionsProposals = 'CollectionsReferences',
     CollectionsCollection = 'CollectionsProposals',

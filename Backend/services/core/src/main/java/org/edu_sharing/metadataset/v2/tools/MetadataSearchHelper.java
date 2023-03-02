@@ -2,13 +2,16 @@ package org.edu_sharing.metadataset.v2.tools;
 
 import com.sun.star.lang.IllegalArgumentException;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -19,12 +22,15 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.SearchServiceImpl;
 import org.edu_sharing.service.search.Suggestion;
 import org.edu_sharing.service.search.model.SharedToMeType;
+import org.springframework.context.ApplicationContext;
 
 import java.security.InvalidParameterException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MetadataSearchHelper {
 	
@@ -124,6 +130,13 @@ public class MetadataSearchHelper {
 			for(Map.Entry<String, Object> prop : props.entrySet()){
 				statement = statement.replace("${user."+prop.getKey() + "}", prop.getValue().toString());
 			}
+			Pattern pattern = Pattern.compile("(\\$\\{user\\.[a-zA-Z:.]+\\})");
+			Matcher matcher = pattern.matcher(statement);
+			while(matcher.find()) {
+				logger.warn("Statement had variable " + matcher.group(0) + " but the property was not set/found");
+				statement = statement.replace(matcher.group(0), "null");
+			}
+
 		} catch (Throwable t) {
 			logger.warn("replaceCommonQueryVariables failed: " + t.getMessage());
 		}
