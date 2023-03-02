@@ -1759,7 +1759,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         await this.nodeEntriesResults.initOptionsGenerator({
             actionbar: this.actionbarComponent,
             customOptions: this.customOptions,
-            scope: Scope.Search,
         });
     }
 }
