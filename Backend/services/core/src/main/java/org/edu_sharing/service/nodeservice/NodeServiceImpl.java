@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import com.typesafe.config.Config;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.node.MLPropertyInterceptor;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
@@ -58,6 +59,7 @@ import org.edu_sharing.service.search.Suggestion;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.springframework.context.ApplicationContext;
+import org.springframework.extensions.surf.util.I18NUtil;
 
 public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.NodeService {
 
@@ -930,8 +932,13 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     }
 
 	private Serializable getSortPropertyValue(NodeRef ref, QName prop) {
-		Serializable value =  nodeServiceAlfresco.getProperty(ref, prop);
-		if(prop.toString().equals(CCConstants.LOM_PROP_GENERAL_TITLE) && value == null) {
+		Serializable value = nodeServiceAlfresco.getProperty(ref, prop);
+		//dbnodeservice returns mltext
+		if(value instanceof MLText){
+			value = ((MLText)value).getValue(I18NUtil.getLocale());
+		}
+
+		if(prop.toString().equals(CCConstants.LOM_PROP_GENERAL_TITLE) && StringUtils.isBlank((String)value)) {
 			return nodeServiceAlfresco.getProperty(ref, ContentModel.PROP_NAME);
 		}
 		return value;

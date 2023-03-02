@@ -1,5 +1,6 @@
 import {
     AfterViewInit,
+    ChangeDetectorRef,
     Component,
     ComponentFactoryResolver,
     ComponentRef,
@@ -48,6 +49,7 @@ import {
 } from './entries-model';
 import { NodeDataSource } from './node-data-source';
 import { NodeDataSourceRemote } from './node-data-source-remote';
+import { Helper } from '../../core-module/rest/helper';
 
 @Component({
     selector: 'es-node-entries-wrapper',
@@ -140,6 +142,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         private nodeHelperService: NodeHelperService,
         private mainNav: MainNavService,
         private templatesService: NodeEntriesTemplatesService,
+        private changeDetectorRef: ChangeDetectorRef,
         private elementRef: ElementRef,
     ) {
         // regulary re-bind template since it might have updated without ngChanges trigger
@@ -267,6 +270,16 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
                 this.nodeHelperService.copyDataToNode(d as Node, hits[0] as Node);
             }
         });
+        // trigger rebuild
+        this.dataSource.refresh();
+        const oldSelection = this.entriesService.selection.selected;
+        this.entriesService.selection.clear();
+        this.entriesService.selection.select(
+            ...oldSelection.map(
+                (o) => this.dataSource.getData().filter((d) => Helper.objectEquals(o, d))?.[0],
+            ),
+        );
+        this.changeDetectorRef.detectChanges();
     }
 
     showReorderColumnsDialog(): void {}
@@ -293,6 +306,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.selection.clear();
         this.entriesService.selection.select(...virtual);
         this.virtualNodesAdded.emit(virtual as Node[]);
+        this.changeDetectorRef.detectChanges();
     }
 
     setOptions(options: ListOptions): void {

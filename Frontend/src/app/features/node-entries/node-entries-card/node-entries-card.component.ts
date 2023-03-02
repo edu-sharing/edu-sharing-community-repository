@@ -39,6 +39,7 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
     dropdownLeft: number;
     dropdownTop: number;
     showRatings: boolean;
+    isCollection: boolean;
     constructor(
         public entriesService: NodeEntriesService<T>,
         public nodeHelper: NodeHelperService,
@@ -50,7 +51,9 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
         private toast: Toast,
     ) {}
 
-    ngOnChanges(changes: SimpleChanges): void {}
+    ngOnChanges(changes: SimpleChanges): void {
+        this.isCollection = this.nodeHelper.isNodeCollection(changes.node);
+    }
 
     getTextColor() {
         return ColorHelper.getPreferredColor(this.node.collection.color) === PreferredColor.Black

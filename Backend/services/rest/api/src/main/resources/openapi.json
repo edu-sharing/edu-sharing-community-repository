@@ -21303,7 +21303,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Mds"
+                  "$ref": "#/components/schemas/Suggestions"
                 }
               }
             },

@@ -29,9 +29,9 @@ import org.springframework.context.ApplicationContext;
 
 public class Monitoring extends HttpServlet {
 
-	BasicDataSource dataSource = null;
-	
-	Logger logger = Logger.getLogger(Monitoring.class);
+	private transient BasicDataSource dataSource = null;
+
+	private static Logger logger = Logger.getLogger(Monitoring.class);
 
 	@Override
 	public void init() throws ServletException {

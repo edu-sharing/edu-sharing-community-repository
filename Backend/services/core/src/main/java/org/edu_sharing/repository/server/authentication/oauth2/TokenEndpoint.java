@@ -35,9 +35,9 @@ public class TokenEndpoint extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	private TokenService tokenService;
-	AuthenticationComponent authenticationComponent;
-	private EduAuthentication eduAuthenticationService;
+	private transient TokenService tokenService;
+	private transient AuthenticationComponent authenticationComponent;
+	private transient EduAuthentication eduAuthenticationService;
 	
 	@Override
 	public void init() throws ServletException {

@@ -3,9 +3,10 @@ package org.edu_sharing.restservices;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class UserStatus {
+public class UserStatus implements Serializable  {
     @JsonProperty private PersonLifecycleService.PersonStatus status;
     @JsonProperty private long date;
 

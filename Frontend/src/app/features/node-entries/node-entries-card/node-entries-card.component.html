@@ -1,7 +1,8 @@
 <div
   class="grid-card"
-  [class.grid-card-collection]="nodeHelper.isNodeCollection(node)"
+  [class.grid-card-collection]="isCollection"
   [class.grid-card-virtual]="node.virtual"
+  [style.background-color]="isCollection ? node.collection.color : null"
   [class.dynamic-single-click]="entriesService.singleClickHint === 'dynamic'"
   [class.selected]="entriesService.selection.isSelected(node)"
   (contextmenu)="openContextmenu($event)"
@@ -32,13 +33,10 @@
     tabindex="-1"
     aria-hidden="true"
   ></button>
-  <div
-    class="card-top-bar"
-    [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
-  >
+  <div class="card-top-bar" [style.background-color]="isCollection ? node.collection.color : null">
     <div class="card-top-bar-collection-color" *ngIf="nodeHelper.isNodeCollection(node)"></div>
     <div class="card-top-bar-type">
-      <ng-container *ngIf="nodeHelper.isNodeCollection(node)">
+      <ng-container *ngIf="isCollection">
         <i
           [matTooltip]="
             'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName
@@ -51,14 +49,11 @@
           [esIcon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"
         ></i>
       </ng-container>
-      <ng-container *ngIf="!nodeHelper.isNodeCollection(node)">
+      <ng-container *ngIf="!isCollection">
         <ng-container *ngTemplateOutlet="type; context: { node: this.node }"></ng-container>
       </ng-container>
     </div>
-    <div
-      *ngIf="nodeHelper.isNodeCollection(node) && node.collection.pinned"
-      class="card-top-bar-flag"
-    >
+    <div *ngIf="isCollection && node.collection.pinned" class="card-top-bar-flag">
       <i esIcon="edu-pin"></i>
     </div>
     <div class="card-top-bar-empty"></div>
@@ -185,21 +180,18 @@
   <ng-template #image let-playAnimation="playAnimation">
     <div
       class="card-image-area"
-      [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
+      [style.background-color]="isCollection ? node.collection.color : null"
     >
       <ng-container *ngIf="getTemplate(CustomFieldSpecialType.preview) as ref">
         <ng-container *ngTemplateOutlet="ref; context: { node: this.node }"></ng-container>
       </ng-container>
       <ng-container *ngIf="!getTemplate(CustomFieldSpecialType.preview)">
         <es-preview-image
-          *ngIf="!(nodeHelper.isNodeCollection(node) && node.preview.isIcon)"
+          *ngIf="!(isCollection && node.preview.isIcon)"
           [node]="node"
           [playAnimation]="playAnimation"
         ></es-preview-image>
-        <div
-          *ngIf="nodeHelper.isNodeCollection(node) && node.preview.isIcon"
-          class="card-collection-image"
-        >
+        <div *ngIf="isCollection && node.preview.isIcon" class="card-collection-image">
           <i esIcon="layers"></i>
         </div>
       </ng-container>

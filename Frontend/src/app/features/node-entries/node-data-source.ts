@@ -2,6 +2,7 @@ import { DataSource } from '@angular/cdk/collections';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { GenericAuthority, Pagination, Node } from 'src/app/core-module/core.module';
 import { ItemsCap } from './items-cap';
+import { Helper } from '../../core-module/rest/helper';
 
 export class NodeDataSource<T extends Node | GenericAuthority> extends DataSource<T> {
     private dataStream = new BehaviorSubject<T[]>([]);
@@ -111,5 +112,14 @@ export class NodeDataSource<T extends Node | GenericAuthority> extends DataSourc
 
     isFullyLoaded() {
         return this.getTotal() <= this.dataStream.value?.length;
+    }
+
+    /**
+     * force a refresh of all elements in the current data stream
+     * trigger this to enforce a rebuild of the nodes in all sub-components
+     * i.e. if data from some nodes has changed
+     */
+    refresh() {
+        this.dataStream.next(Helper.deepCopy(this.dataStream.value));
     }
 }
