@@ -66,6 +66,12 @@ button {
         border-radius: 50%;
         @include materialShadow();
     }
+    &.actionbar-background-primary {
+        .mat-button {
+            background-color: #fff;
+            color: $primary;
+        }
+    }
     &.actionbar-all-flat button {
         background: white;
         color: $primary;

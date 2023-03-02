@@ -31,7 +31,7 @@
     "LINK_DUPLICATES_INFO": "Für diesen Link wurden bereits ähnliche Inhalte gefunden. Bitte überprüfen Sie, ob dieser Inhalt bereits existiert",
     "RELOGIN": "Neu Anmelden",
     "AUTOLOGOUT": "Sie wurden abgemeldet",
-    "AUTOLOGOUT_INFO": "Ihre Sitzung wurde aufgrund von Inaktivität zu Ihrer Sicherheit automatisch beendet, da Sie mindestens {{ minutes }} Minuten nicht aktiv waren. Bitte melden Sie sich erneut an.",
+    "AUTOLOGOUT_INFO": "Ihre Sitzung wurde zu Ihrer Sicherheit automatisch beendet, da sie mindestens {{ minutes }} Minuten nicht aktiv waren. Bitte melden sie sich erneut an.",
     "ADD_FOLDER": "Neuer Ordner",
     "ADD_LTI": "LTI-Tools",
     "LTI_HEADING": "Link als externe LTI-Ressource anlegen",
@@ -416,6 +416,9 @@
       "CONTACT": "Andere Nutzende dürfen mich für weitere Lizenzverhandlungen kontaktieren",
       "MORE": "Mehr Informationen",
       "CHECKBOX_AUTHOR": "Ich bin Autor{{GENDER_SEPARATOR}}in des Materials",
+      "MIXED_AUTHORS": "Unterschiedliche Autoren-Angaben",
+      "MIXED_AUTHORS_INFO": "Die gewählten Elemente enthalten unterschiedliche Autoren-Angaben. Wenn diese im Bulk bearbeitet werden sollen, müssen alle Werte überschrieben werden.\nWählen Sie \"Ändern\", wenn Sie dies tun möchten.",
+      "MIXED_AUTHORS_EDIT": "Ändern",
       "COPYRIGHT": {
         "FREE": "Copyright, freier Zugang",
         "FREE_INFO": "Kostenfrei zugänglich. Nutzung gemäß UrhG.",

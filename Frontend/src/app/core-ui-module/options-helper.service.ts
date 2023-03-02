@@ -244,7 +244,7 @@ export class OptionsHelperService implements OnDestroy {
      */
     refreshComponents(refreshListOptions = true) {
         if (this.data == null) {
-            console.warn('options helper refresh called but no data previously bound');
+            console.info('options helper refresh called but no data previously bound');
             return;
         }
         if (this.subscriptions?.length) {
@@ -1045,11 +1045,15 @@ export class OptionsHelperService implements OnDestroy {
         simpleEditNode.group = DefaultGroups.Edit;
         simpleEditNode.priority = 15;
 
-        const editNode = new OptionItem(
-            'OPTIONS.EDIT',
-            'edit',
-            async (object) => (management.nodeMetadata = await this.getObjectsAsync(object, true)),
-        );
+        const editNode = new OptionItem('OPTIONS.EDIT', 'edit', async (object) => {
+            const nodes = await this.getObjectsAsync(object, true);
+            const dialogRef = await this.dialogs.openMdsEditorDialogForNodes({ nodes });
+            dialogRef.afterClosed().subscribe((result) => {
+                if (result) {
+                    this.onNodesChanged(result);
+                }
+            });
+        });
         editNode.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.MapRef];
         editNode.constrains = [
             Constrain.FilesAndDirectories,
@@ -1322,7 +1326,7 @@ export class OptionsHelperService implements OnDestroy {
         const feedbackMaterial = new OptionItem(
             'OPTIONS.MATERIAL_FEEDBACK',
             'chat_bubble',
-            (object) => (management.materialWriteFeedback = this.getObjects(object)[0]),
+            (object) => this.dialogs.openSendFeedbackDialog({ node: this.getObjects(object)[0] }),
         );
         feedbackMaterial.constrains = [
             Constrain.HomeRepository,

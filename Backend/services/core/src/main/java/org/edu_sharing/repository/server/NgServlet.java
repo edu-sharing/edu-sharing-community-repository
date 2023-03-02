@@ -68,26 +68,6 @@ public class NgServlet extends HttpServlet {
 			if(url.getPath().contains(COMPONENTS_ERROR)){
 				resp.setStatus(getErrorCode(url.getPath()));
 			}
-			if(req.getHeader("User-Agent")!=null){
-			    String platform="";
-                if(req.getHeader("User-Agent").contains("ios"))
-                    platform="ios";
-                if(req.getHeader("User-Agent").contains("android"))
-                    platform="android";
-				if(req.getHeader("User-Agent").contains("cordova / edu-sharing-app")){
-                    html=addToHead("<script type=\"text/javascript\" src=\"assets/cordova/"+platform+"/cordova.js\"></script>",html);
-                    logger.info("cordova app, add cordova.js to header");
-                }
-				if (req.getHeader("User-Agent").contains("ionic / edu-sharing-app")) {
-					// when using ionic, our app-registry will care for delivering the right plattform data
-					String[] headers=req.getHeader("User-Agent").split("\\/");
-                    String version=headers[headers.length-1].trim();
-                    if(!version.matches("\\d\\.\\d(\\.\\d)?"))
-                        version="0.0.0";
-					html =addToHead("<script type=\"text/javascript\" src=\"https://app-registry.edu-sharing.com/js/"+version+"/"+platform+"/cordova.js\"></script>",html);
-					logger.info("ionic app, add cordova.js to header");
-				}
-			}
 			resp.setHeader("Content-Type","text/html");
 			resp.getOutputStream().write(html.getBytes("UTF-8"));
 		}catch(Throwable t) {

@@ -29,6 +29,7 @@ package org.edu_sharing.repository.server.jobs.quartz;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -95,6 +96,9 @@ public class BulkEditNodesJob extends AbstractJob{
 	private CSVTool.CSVResult csv;
 	@JobFieldDescription(description = "classname, if mode == Custom. Must be a subclass of java.util.function.Consumer<NodeRef>")
 	private String customClass;
+
+	@JobFieldDescription(description = "use archive. default is \"false\"")
+	private String archive;
 
 	private enum Mode{
 		@JobFieldDescription(description = "Replace a property with a fixed string")
@@ -166,6 +170,7 @@ public class BulkEditNodesJob extends AbstractJob{
 		lucene = prepareParam(context, "lucene", false);
 
 		startFolder = prepareParam(context, "startFolder", true);
+		archive = prepareParam(context, "archive", false);
 		try {
 			types = Arrays.stream(((String) context.getJobDetail().getJobDataMap().get("types")).
 					split(",")).map(String::trim).map(CCConstants::getValidGlobalName).
@@ -301,6 +306,10 @@ public class BulkEditNodesJob extends AbstractJob{
 		runner.setLucene(lucene);
 		runner.setKeepModifiedDate(true);
 		runner.setTransaction(NodeRunner.TransactionMode.Local);
+		if(new Boolean(archive)){
+			runner.setStartFolderStore(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE);
+			runner.setLuceneStore(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE);
+		}
 		int count=runner.run();
 		logger.info("Processed "+count+" nodes");
 	}

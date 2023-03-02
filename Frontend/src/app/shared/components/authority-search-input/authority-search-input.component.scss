@@ -21,8 +21,10 @@ es-user-avatar {
 
 .mat-option {
     height: $optionHeight;
+    &.mat-option-disabled {
+        color: $textMediumLight;
+    }
 }
-
 .mat-optgroup ::ng-deep .mat-optgroup-label {
     display: flex;
     align-items: flex-end;

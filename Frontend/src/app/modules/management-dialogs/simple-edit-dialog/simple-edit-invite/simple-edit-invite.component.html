@@ -64,7 +64,10 @@
           <mat-button-toggle
             class="button-toggle-global"
             *ngFor="let group of globalGroups"
-            [disabled]="group.authorityName === 'GROUP_EVERYONE' && !tpInviteEveryone"
+            [disabled]="
+              (group.authorityName === 'GROUP_EVERYONE' && !tpInviteEveryone) ||
+              (authenticationService.observeLoginInfo() | async)?.currentScope !== null
+            "
             [value]="group.authorityName"
           >
             <ng-container *ngIf="group.authorityName === 'GROUP_EVERYONE'">{{

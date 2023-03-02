@@ -36,6 +36,12 @@ import {
     LicenseDialogData,
     LicenseDialogResult,
 } from './dialog-modules/license-dialog/license-dialog-data';
+import {
+    MdsEditorDialogDataNodes,
+    MdsEditorDialogDataValues,
+    MdsEditorDialogResultNodes,
+    MdsEditorDialogResultValues,
+} from './dialog-modules/mds-editor-dialog/mds-editor-dialog-data';
 import { NodeEmbedDialogData } from './dialog-modules/node-embed-dialog/node-embed-dialog.component';
 import { NodeInfoDialogData } from './dialog-modules/node-info-dialog/node-info-dialog.component';
 import {
@@ -48,6 +54,14 @@ import {
     NodeTemplateDialogResult,
 } from './dialog-modules/node-template-dialog/node-template-dialog-data';
 import { QrDialogData } from './dialog-modules/qr-dialog/qr-dialog.component';
+import {
+    SaveSearchDialogData,
+    SaveSearchDialogResult,
+} from './dialog-modules/save-search-dialog/save-search-dialog-data';
+import {
+    SendFeedbackDialogData,
+    SendFeedbackDialogResult,
+} from './dialog-modules/send-feedback-dialog/send-feedback-dialog-data';
 import {
     ShareDialogData,
     ShareDialogResult,
@@ -370,6 +384,81 @@ export class DialogsService {
             ...configForNode(data.node),
             width: 600,
             minHeight: 700,
+            data,
+            closable: Closable.Standard,
+        });
+    }
+
+    async openMdsEditorDialogForNodes(
+        data: MdsEditorDialogDataNodes,
+    ): Promise<CardDialogRef<MdsEditorDialogDataNodes, MdsEditorDialogResultNodes>> {
+        const { MdsEditorDialogComponent } = await import(
+            './dialog-modules/mds-editor-dialog/mds-editor-dialog.module'
+        );
+        data = { ...new MdsEditorDialogDataNodes(), ...data };
+        return this.cardDialog.open(MdsEditorDialogComponent, {
+            title: 'MDS.TITLE',
+            ...(await configForNodes(data.nodes, this.translate).toPromise()),
+            minWidth: 600,
+            minHeight: 700,
+            contentPadding: 0,
+            data,
+        });
+    }
+
+    async openMdsEditorDialogForValues(
+        data: MdsEditorDialogDataValues,
+    ): Promise<CardDialogRef<MdsEditorDialogDataValues, MdsEditorDialogResultValues>> {
+        const { MdsEditorDialogComponent } = await import(
+            './dialog-modules/mds-editor-dialog/mds-editor-dialog.module'
+        );
+        data = { ...new MdsEditorDialogDataValues(), ...data };
+        return this.cardDialog.open(MdsEditorDialogComponent, {
+            title: 'MDS.TITLE',
+            minWidth: 600,
+            minHeight: 700,
+            contentPadding: 0,
+            data,
+        });
+    }
+
+    async openSendFeedbackDialog(
+        data: SendFeedbackDialogData,
+    ): Promise<CardDialogRef<SendFeedbackDialogData, SendFeedbackDialogResult>> {
+        const { SendFeedbackDialogComponent } = await import(
+            './dialog-modules/send-feedback-dialog/send-feedback-dialog.module'
+        );
+        return this.cardDialog.open(SendFeedbackDialogComponent, {
+            title: 'FEEDBACK.TITLE',
+            ...configForNode(data.node),
+            minWidth: 500,
+            data,
+            closable: Closable.Standard,
+        });
+    }
+
+    async openThirdPartyLicensesDialog(): Promise<CardDialogRef<void, void>> {
+        const { ThirdPartyLicensesDialogComponent } = await import(
+            './dialog-modules/third-party-licenses-dialog/third-party-licenses-dialog.module'
+        );
+        return this.cardDialog.open(ThirdPartyLicensesDialogComponent, {
+            title: 'LICENSE_INFORMATION',
+            avatar: { kind: 'icon', icon: 'copyright' },
+            minWidth: 800,
+            minHeight: 800,
+        });
+    }
+
+    async openSaveSearchDialog(
+        data: SaveSearchDialogData,
+    ): Promise<CardDialogRef<SaveSearchDialogData, SaveSearchDialogResult>> {
+        const { SaveSearchDialogComponent } = await import(
+            './dialog-modules/save-search-dialog/save-search-dialog.module'
+        );
+        return this.cardDialog.open(SaveSearchDialogComponent, {
+            title: 'SEARCH.SAVE_SEARCH.TITLE',
+            avatar: { kind: 'icon', icon: 'search' },
+            width: 600,
             data,
             closable: Closable.Standard,
         });

@@ -1,36 +1,24 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import {
-    Authority,
-    DialogButton,
-    Group,
-    LocalPermissions,
-    Permission,
-    Permissions,
+    ConfigurationService,
+    Node,
     RestConnectorService,
+    RestConstants,
+    RestIamService,
+    RestNodeService,
     RestOrganizationService,
 } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
-import { RestNodeService } from '../../../../core-module/core.module';
-import { Connector, Node } from '../../../../core-module/core.module';
-import { ConfigurationService } from '../../../../core-module/core.module';
-import { UIHelper } from '../../../../core-ui-module/ui-helper';
-import { RestIamService } from '../../../../core-module/core.module';
-import { TranslateService } from '@ngx-translate/core';
 import { trigger } from '@angular/animations';
 import { UIAnimation } from '../../../../core-module/ui/ui-animation';
-import { RestConstants } from '../../../../core-module/core.module';
-import { Router } from '@angular/router';
-import { RestHelper } from '../../../../core-module/core.module';
-import { RestConnectorsService } from '../../../../core-module/core.module';
-import { FrameEventsService } from '../../../../core-module/core.module';
-import { OPEN_URL_MODE } from '../../../../core-module/ui/ui-constants';
-import { BridgeService } from '../../../../core-bridge-module/bridge.service';
-import { forkJoin, Observable, Observer } from 'rxjs';
+import { forkJoin, from, Observable } from 'rxjs';
 import { MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { Helper } from '../../../../core-module/rest/helper';
 import { CollectionChooserComponent } from '../../../../core-ui-module/components/collection-chooser/collection-chooser.component';
 import { VCard } from '../../../../core-module/ui/VCard';
 import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
+import { Values } from '../../../../features/mds/types/types';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
     selector: 'es-simple-edit-license',
@@ -107,12 +95,15 @@ export class SimpleEditLicenseComponent implements OnInit {
             });
         }
         return forkJoin(
-            this._nodes.map(async (n, i) => {
-                const properties = await this.getProperties();
-                return this.nodeApi.editNodeMetadataNewVersion(
-                    n.ref.id,
-                    RestConstants.COMMENT_LICENSE_UPDATE,
-                    properties,
+            this._nodes.map((n) => {
+                return from(this.getProperties()).pipe(
+                    switchMap((props) =>
+                        this.nodeApi.editNodeMetadataNewVersion(
+                            n.ref.id,
+                            RestConstants.COMMENT_LICENSE_UPDATE,
+                            props,
+                        ),
+                    ),
                 );
             }),
         );
@@ -187,22 +178,26 @@ export class SimpleEditLicenseComponent implements OnInit {
                         this.invalid = !this.fromUpload && !isValid;
                         this.wasInvalid = this.invalid;
                     }
-                    if (this.tpLicense) {
+                    if (this.tpLicense && this.modeGroup) {
                         if (this.fromUpload) {
                             this.modeGroup.value = 'own';
                         } else {
                             const esuid = await this.getESUID();
-                            if (esuid && esuid === vcard.uid) {
-                                this.modeGroup.value = 'own';
-                            } else {
-                                this.modeGroup.value = 'foreign';
+                            if (this.modeGroup) {
+                                if (esuid && esuid === vcard.uid) {
+                                    this.modeGroup.value = 'own';
+                                } else {
+                                    this.modeGroup.value = 'foreign';
+                                }
                             }
                         }
-                        this.initialMode = this.modeGroup.value;
-                        if (isValid) {
-                            this.licenseGroup.value = license;
-                        } else {
-                            this.licenseGroup.value = 'NONE';
+                        if (this.modeGroup) {
+                            this.initialMode = this.modeGroup.value;
+                            if (isValid) {
+                                this.licenseGroup.value = license;
+                            } else {
+                                this.licenseGroup.value = 'NONE';
+                            }
                         }
                     }
                     this.onInitFinished.emit();
@@ -212,7 +207,7 @@ export class SimpleEditLicenseComponent implements OnInit {
         );
     }
 
-    private async getProperties() {
+    private async getProperties(): Promise<Values> {
         const properties: any = {};
         if (this.modeGroup.value === 'own') {
             const vcard = await this.iamApi.getCurrentUserVCard();

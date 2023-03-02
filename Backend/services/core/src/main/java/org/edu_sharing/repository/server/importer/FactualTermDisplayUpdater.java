@@ -6,6 +6,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
@@ -42,33 +43,38 @@ public class FactualTermDisplayUpdater {
 
     public void updateDisplayStrings(String key) throws IllegalArgumentException {
         AuthenticationUtil.runAsSystem(()->{
-            Map<String,Object> filter = new HashMap<>();
-            filter.put(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD,key);
-            List<NodeRef> nodeRefs = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO,filter);
-            logger.info("found "+nodeRefs.size() +" io's with classification_keyword:"+key);
-            for(NodeRef nodeRef : nodeRefs){
-                List<String> keys = (List<String>) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD));
-                ArrayList<String> displays = new ArrayList<>();
-                for(String k : keys){
-                    List<? extends Suggestion> suggestions = MetadataSearchHelper.getSuggestions(appId, mds, "ngsearch",
-                            CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD), k, null);
-                    displays.add(suggestions.get(0).getDisplayString());
-                }
-                logger.info("updateing;"+nodeRef+";"+key);
-                serviceRegistry.getRetryingTransactionHelper().doInTransaction(()->{
-                    try {
-
-                        policyBehaviourFilter.disableBehaviour(nodeRef);
-                        nodeService.setProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD_DISPLAY),displays);
-                        new RepositoryCache().remove(nodeRef.getId());
-                    }finally {
-                        policyBehaviourFilter.enableBehaviour(nodeRef);
-                    }
-                    return null;
-                });
-            }
+            runforStore(key, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+            runforStore(key, StoreRef.STORE_REF_ARCHIVE_SPACESSTORE);
             return null;
         });
+    }
+
+    private void runforStore(String key, StoreRef storeRef) throws IllegalArgumentException {
+        Map<String,Object> filter = new HashMap<>();
+        filter.put(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD, key);
+        List<NodeRef> nodeRefs = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO,filter,storeRef);
+        logger.info("found "+nodeRefs.size() +" io's with classification_keyword:"+ key + " in store:" + storeRef);
+        for(NodeRef nodeRef : nodeRefs){
+            List<String> keys = (List<String>) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD));
+            ArrayList<String> displays = new ArrayList<>();
+            for(String k : keys){
+                List<? extends Suggestion> suggestions = MetadataSearchHelper.getSuggestions(appId, mds, "ngsearch",
+                        CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD), k, null);
+                displays.add(suggestions.get(0).getDisplayString());
+            }
+            logger.info("updateing;"+nodeRef+";"+ key);
+            serviceRegistry.getRetryingTransactionHelper().doInTransaction(()->{
+                try {
+
+                    policyBehaviourFilter.disableBehaviour(nodeRef);
+                    nodeService.setProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD_DISPLAY),displays);
+                    new RepositoryCache().remove(nodeRef.getId());
+                }finally {
+                    policyBehaviourFilter.enableBehaviour(nodeRef);
+                }
+                return null;
+            });
+        }
     }
 
 }

@@ -18,8 +18,8 @@ public class RenderingDao {
 			return repoDao.getRenderingServiceClient().getDetails(nodeId,nodeVersion,
 					displayMode==null || displayMode.isEmpty() ? RenderingTool.DISPLAY_DYNAMIC : displayMode,
 					parameters);
-		}catch(Exception e){
-			throw DAOException.mapping(e);
+		}catch(Throwable t){
+			throw DAOException.mapping(t);
 		}
 	}
 }

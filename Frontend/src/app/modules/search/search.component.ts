@@ -64,6 +64,7 @@ import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { FormControl } from '@angular/forms';
 import { BehaviorSubject, ReplaySubject, combineLatest, Observable, Subject } from 'rxjs';
 import {
+    debounceTime,
     delay,
     distinctUntilChanged,
     first,
@@ -97,7 +98,10 @@ import {
 } from 'src/app/features/node-entries/entries-model';
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';
+import { A } from '@angular/cdk/keycodes';
+import { CombinedDataSource } from '../../features/node-entries/combined-data-source';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
+import { DialogsService } from '../../features/dialogs/dialogs.service';
 
 @Component({
     selector: 'es-search',
@@ -176,7 +180,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     extendedRepositorySelected = false;
     savedSearch: Node[] = [];
     savedSearchColumns: ListItem[] = [];
-    saveSearchDialog = false;
     savedSearchLoading = false;
     savedSearchQuery: string = null;
     savedSearchQueryModel: string = null;
@@ -246,6 +249,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private ngZone: NgZone,
         private loadingScreen: LoadingScreenService,
         private mainNavService: MainNavService,
+        private dialogs: DialogsService,
     ) {
         // Subscribe early to make sure the suggestions are requested with search requests.
         this.didYouMeanSuggestion$.pipe(takeUntil(this.destroyed$)).subscribe();
@@ -268,7 +272,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     ngOnDestroy() {
         this.temporaryStorageService.set(
             TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE,
-            this.searchService.dataSourceSearchResult[0],
+            this.searchService.dataSourceSearchResult,
         );
         this.destroyed$.next();
         this.destroyed$.complete();
@@ -288,7 +292,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.searchService.reinit) {
             this.searchService.init();
             this.initalized = false;
-            this.searchService.dataSourceSearchResult[0].isLoading = true;
+            this.getDataSource().isLoading = true;
         }
         this.savedSearchColumns.push(new ListItem('NODE', RestConstants.LOM_PROP_TITLE));
         this.optionsHelper.displayTypeChanged
@@ -628,27 +632,25 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     getSearch(searchString: string = null, init = false, event: FetchEvent = null) {
         if ((this.isSearching && init) || this.repositoryIds.length == 0) {
-            /*setTimeout(
-                () => this.getSearch(searchString, init),
-                100,
-            );*/
+            // dirty fix for legacy search
+            setTimeout(() => this.getSearch(searchString, init), 16);
             return;
         }
         if (this.isSearching && !init) {
             return;
         }
         this.isSearching = true;
-        this.searchService.dataSourceSearchResult[0].isLoading = true;
+        this.getDataSource().isLoading = true;
         if (searchString == null) searchString = this.searchService.searchTerm;
         if (searchString == null) searchString = '';
         this.searchService.searchTerm = searchString;
         if (init) {
             this.searchService.init();
         } else if (
-            this.searchService.dataSourceSearchResult[0]?.getData()?.length >
+            this.searchService.dataSourceSearchResult?.getData()?.length >
             SearchComponent.MAX_ITEMS_COUNT
         ) {
-            this.searchService.dataSourceSearchResult[0].isLoading = false;
+            this.getDataSource().isLoading = false;
             this.searchService.complete = true;
             this.isSearching = false;
             return;
@@ -803,7 +805,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         */
         this.searchService.ignored = data.ignored;
         if (data.nodes.length < 1 && this.currentRepository != RestConstants.ALL) {
-            this.searchService.dataSourceSearchResult[0].isLoading = false;
+            this.getDataSource().isLoading = false;
             this.isSearching = false;
             this.searchService.complete = true;
             return;
@@ -1035,8 +1037,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.updateColumns();
         this.updateSortState();
         if (
-            !this.searchService.dataSourceSearchResult[0] ||
-            this.searchService.dataSourceSearchResult[0]?.isEmpty()
+            !this.searchService.dataSourceSearchResult ||
+            this.searchService.dataSourceSearchResult?.isEmpty()
         ) {
             this.initalized = true;
             if (!this.currentValues && this.getActiveMds()) {
@@ -1107,7 +1109,33 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     private getCurrentNode(node: Node) {
         return node ? node : this.getSelection()[0];
     }
-
+    private callSearchApi(
+        repo: any,
+        metadataset: string,
+        request: any,
+        criteria: any,
+        permissions: string[],
+        neededFacets: string[],
+    ) {
+        return this.searchApi.search({
+            body: {
+                criteria,
+                facets: neededFacets,
+                permissions,
+                facetLimit: 5,
+                facetMinCount: 1,
+            },
+            skipCount: request.offset,
+            maxItems: request.count ?? this.search.getRestConnector().numberPerRequest,
+            sortProperties: request.sortBy,
+            sortAscending: request.sortAscending,
+            propertyFilter: request.propertyFilter[0],
+            contentType: 'FILES',
+            repository: repo ? repo.id : RestConstants.HOME_REPOSITORY,
+            metadataset,
+            query: RestConstants.DEFAULT_QUERY_NAME,
+        });
+    }
     private searchRepository(
         repos: any[],
         criteria: SearchRequestCriteria[],
@@ -1119,14 +1147,14 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         console.log(event);
         if (position > 0 && position >= repos.length) {
             this.searchService.numberofresults = event?.amount;
-            this.searchService.dataSourceSearchResult[0].isLoading = false;
+            this.getDataSource().isLoading = false;
             this.isSearching = false;
             return;
         }
         if (event?.reset) {
-            this.searchService.dataSourceSearchResult[0].reset();
+            this.getDataSource().reset();
         }
-        this.searchService.dataSourceSearchResult[0].isLoading = true;
+        this.getDataSource().isLoading = true;
         let repo = repos[position];
         if (!repo.enabled) {
             this.searchRepository(repos, criteria, init, event, position + 1);
@@ -1161,37 +1189,29 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.currentRepository == RestConstants.ALL && !this.groupResults
                     ? Math.max(5, Math.round(count / (this.repositories.length - 1)))
                     : count,
-            offset: event?.offset || 0,
+            offset:
+                (this.currentRepository === RestConstants.ALL
+                    ? this.searchService.dataSourceSearchResultAll
+                          .getDatasource(position)
+                          ?.getData()?.length
+                    : event?.offset) || 0,
             propertyFilter: [properties],
         };
         let permissions: string[];
         if (this.applyMode) {
             permissions = [RestConstants.ACCESS_CC_PUBLISH];
         }
-        let queryRequest: Observable<SearchResults | NodeList> =
-            this.mdsDesktopRef.mdsEditorInstance.getNeededFacets().pipe(
+        let queryRequest: Observable<SearchResults | NodeList>;
+        if (this.currentRepository === RestConstants.ALL) {
+            queryRequest = this.callSearchApi(repo, mdsId, request, criteria, permissions, null);
+        } else {
+            queryRequest = this.mdsDesktopRef.mdsEditorInstance.getNeededFacets().pipe(
                 first(),
                 switchMap((neededFacets) =>
-                    this.searchApi.search({
-                        body: {
-                            criteria,
-                            facets: neededFacets,
-                            permissions,
-                            facetLimit: 5,
-                            facetMinCount: 1,
-                        },
-                        skipCount: request.offset,
-                        maxItems: request.count ?? this.search.getRestConnector().numberPerRequest,
-                        sortProperties: request.sortBy,
-                        sortAscending: request.sortAscending,
-                        propertyFilter: request.propertyFilter[0],
-                        contentType: 'FILES',
-                        repository: repo ? repo.id : RestConstants.HOME_REPOSITORY,
-                        metadataset: mdsId,
-                        query: RestConstants.DEFAULT_QUERY_NAME,
-                    }),
+                    this.callSearchApi(repo, mdsId, request, criteria, permissions, neededFacets),
                 ),
             );
+        }
         const useFrontpage =
             !this.searchService.searchTerm &&
             !this.searchService.extendedSearchUsed &&
@@ -1206,18 +1226,19 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         queryRequest.subscribe(
             async (data: SearchList) => {
-                if (!this.searchService.dataSourceSearchResult[position] || event?.reset) {
-                    this.searchService.dataSourceSearchResult[position] =
-                        new NodeDataSource<Node>();
-                    this.searchService.dataSourceSearchResult[position].setData(
-                        data.nodes,
-                        data.pagination,
-                    );
+                if (this.currentRepository === RestConstants.ALL) {
+                    this.searchService.dataSourceSearchResultAll
+                        .getDatasource(position)
+                        .appendData(data.nodes);
+                    this.searchService.dataSourceSearchResultAll
+                        .getDatasource(position)
+                        .setPagination(data.pagination);
                 } else {
-                    this.searchService.dataSourceSearchResult[position].appendData(data.nodes);
-                    this.searchService.dataSourceSearchResult[position].setPagination(
-                        data.pagination,
-                    );
+                    if (event?.reset) {
+                        this.searchService.dataSourceSearchResult.reset();
+                    }
+                    this.searchService.dataSourceSearchResult.appendData(data.nodes);
+                    this.searchService.dataSourceSearchResult.setPagination(data.pagination);
                 }
                 await this.nodeEntriesResults.initOptionsGenerator({
                     actionbar: this.actionbarComponent,
@@ -1287,7 +1308,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.applyMode ? 'SEARCH.EMBED_SEARCH_ACTION' : 'SEARCH.SAVE_SEARCH_ACTION',
                     this.applyMode ? 'redo' : 'save',
                     () => {
-                        this.saveSearchDialog = true;
+                        this.openSaveSearchDialog();
                     },
                 ),
             );
@@ -1309,50 +1330,19 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.mdsButtons = DialogButton.fromOptionItem([searchAction]);
     }
 
-    closeSaveSearchDialog() {
-        this.saveSearchDialog = false;
-    }
-
-    saveSearch(name: string, replace = false) {
-        this.search
-            .saveSearch(
-                name,
-                this.queryId,
-                this.getCriterias(),
-                this.currentRepository,
-                this.mdsId,
-                replace,
-            )
-            .subscribe(
-                (data: NodeWrapper) => {
-                    this.saveSearchDialog = false;
-                    this.toast.toast('SEARCH.SAVE_SEARCH.TOAST_SAVED');
-                    this.loadSavedSearch();
-                    if (this.applyMode) {
-                        this.nodeHelper.addNodeToLms(data.node, this.searchService.reurl);
-                    }
-                },
-                (error: any) => {
-                    if (error.status === RestConstants.DUPLICATE_NODE_RESPONSE) {
-                        this.toast.showConfigurableDialog({
-                            title: 'SEARCH.SAVE_SEARCH.SEARCH_EXISTS_TITLE',
-                            message: 'SEARCH.SAVE_SEARCH.SEARCH_EXISTS_MESSAGE',
-                            buttons: [
-                                new DialogButton('RENAME', { color: 'standard' }, () =>
-                                    this.toast.closeModalDialog(),
-                                ),
-                                new DialogButton('REPLACE', { color: 'primary' }, () => {
-                                    this.toast.closeModalDialog();
-                                    this.saveSearch(name, true);
-                                }),
-                            ],
-                            isCancelable: true,
-                        });
-                    } else {
-                        this.toast.error(error);
-                    }
-                },
-            );
+    private async openSaveSearchDialog(): Promise<void> {
+        const dialogRef = await this.dialogs.openSaveSearchDialog({
+            name: this.currentSavedSearch ? this.currentSavedSearch.title : null,
+            searchString: this.searchService.searchTerm,
+        });
+        dialogRef.afterClosed().subscribe((node) => {
+            if (node) {
+                this.loadSavedSearch();
+                if (this.applyMode) {
+                    this.nodeHelper.addNodeToLms(node, this.searchService.reurl);
+                }
+            }
+        });
     }
 
     private getCriterias(
@@ -1369,7 +1359,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if (!addAll) return criterias;
         if (properties) {
             criterias = criterias.concat(
-                RestSearchService.convertCritierias(properties, this.getActiveMds().currentWidgets),
+                RestSearchService.convertCritierias(
+                    properties,
+                    this.getActiveMds()?.currentWidgets || [],
+                ),
             );
         }
         if (this.oldParams.reurlTypes) {
@@ -1433,7 +1426,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private async invalidateMds() {
         if (this.currentRepository == RestConstants.ALL) {
-            this.onMdsReady();
+            await this.onMdsReady();
+            this.searchAll();
         } else {
             await this.getActiveMds().loadMds();
             //this.onMdsReady();
@@ -1573,42 +1567,46 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             }
             this.updateSelection([]);
             let repo = this.currentRepository;
-            this.mds.getAvailableMetadataSets(repo).subscribe(
-                (metadataSets: MetadataSetInfo[]) => {
-                    if (repo != this.currentRepository) {
-                        return;
-                    }
-                    this.mdsSets = ConfigurationHelper.filterValidMds(
-                        this.currentRepositoryObject
-                            ? this.currentRepositoryObject
-                            : this.currentRepository,
-                        metadataSets,
-                        this.config,
-                    );
-                    if (this.mdsSets) {
-                        UIHelper.prepareMetadatasets(this.translate, this.mdsSets);
-                        try {
-                            this.mdsId = this.mdsSets[0].id;
-                            if (
-                                param.mds &&
-                                Helper.indexOfObjectArray(this.mdsSets, 'id', param.mds) !== -1
-                            ) {
-                                this.mdsId = param.mds;
-                            }
-                        } catch (e) {
-                            console.warn('got invalid mds list from repository:');
-                            console.warn(this.mdsSets);
-                            console.warn('will continue with default mds');
-                            this.mdsId = RestConstants.DEFAULT;
+            this.mds
+                .getAvailableMetadataSets(
+                    repo === RestConstants.ALL ? RestConstants.HOME_REPOSITORY : repo,
+                )
+                .subscribe(
+                    (metadataSets: MetadataSetInfo[]) => {
+                        if (repo != this.currentRepository) {
+                            return;
                         }
+                        this.mdsSets = ConfigurationHelper.filterValidMds(
+                            this.currentRepositoryObject
+                                ? this.currentRepositoryObject
+                                : this.currentRepository,
+                            metadataSets,
+                            this.config,
+                        );
+                        if (this.mdsSets) {
+                            UIHelper.prepareMetadatasets(this.translate, this.mdsSets);
+                            try {
+                                this.mdsId = this.mdsSets[0].id;
+                                if (
+                                    param.mds &&
+                                    Helper.indexOfObjectArray(this.mdsSets, 'id', param.mds) !== -1
+                                ) {
+                                    this.mdsId = param.mds;
+                                }
+                            } catch (e) {
+                                console.warn('got invalid mds list from repository:');
+                                console.warn(this.mdsSets);
+                                console.warn('will continue with default mds');
+                                this.mdsId = RestConstants.DEFAULT;
+                            }
+                            this.prepare(param);
+                        }
+                    },
+                    (error: any) => {
+                        this.mdsId = RestConstants.DEFAULT;
                         this.prepare(param);
-                    }
-                },
-                (error: any) => {
-                    this.mdsId = RestConstants.DEFAULT;
-                    this.prepare(param);
-                },
-            );
+                    },
+                );
         });
     }
 
@@ -1666,10 +1664,13 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 ),
                 map((valuesDict) => JSON.stringify(valuesDict)),
                 distinctUntilChanged(),
+                debounceTime(250),
                 map((json) => JSON.parse(json)),
             )
             .subscribe((values) => {
-                this.applyParameters('mds', values, { replaceUrl: !initDone });
+                this.ngZone.run(() =>
+                    this.applyParameters('mds', values, { replaceUrl: !initDone }),
+                );
                 initDone = true;
             });
         this.mdsDesktopRef.mdsEditorInstance.mdsInitDone
@@ -1679,5 +1680,16 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 delay(0),
             )
             .subscribe(() => this.updateMdsActions());
+    }
+    getDataSource() {
+        return this.currentRepository === RestConstants.ALL
+            ? this.searchService.dataSourceSearchResultAll
+            : this.searchService.dataSourceSearchResult;
+    }
+
+    searchAll() {
+        const sources = this.repositoryIds.map(() => new NodeDataSource<Node>());
+        this.searchService.dataSourceSearchResultAll = new CombinedDataSource<Node>(sources);
+        this.getSearch(this.searchService.searchTerm, true);
     }
 }

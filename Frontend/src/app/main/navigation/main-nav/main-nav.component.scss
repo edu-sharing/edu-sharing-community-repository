@@ -19,21 +19,6 @@
     max-width: 100%;
     z-index: $topBarZIndex;
 }
-:host ::ng-deep .card-licenses {
-    display: flex;
-    flex-direction: column;
-    .license-group {
-        white-space: pre;
-        font-family: monospace;
-        overflow-x: auto;
-    }
-    .license-spacer {
-        width: 100%;
-        height: 1px;
-        margin: 15px 10px;
-        background-color: $cardSeparatorLineColor;
-    }
-}
 .dialog {
     z-index: $dialogZIndex + 5;
 }

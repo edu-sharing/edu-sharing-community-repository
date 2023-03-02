@@ -38,6 +38,7 @@
       [class.indeterminate]="(indeterminateValues$ | async)?.includes(value.key)"
       [class.mat-chip-selected]="false"
       [matTooltip]="getTooltip(value)"
+      matTooltipPosition="above"
     >
       <span class="mat-chip-label">{{ value.label }}</span>
       <mat-icon matChipRemove>cancel</mat-icon>

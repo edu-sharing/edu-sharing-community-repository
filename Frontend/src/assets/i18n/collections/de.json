@@ -18,6 +18,8 @@
     "EDITORIAL_PUBLIC_INFO": "Die redaktionelle Sammlung ist für alle Nutzende und ggf. Gäste sichtbar",
     "CREATOR": "Ersteller{{GENDER_SEPARATOR}}in",
     "SHARING_STATE": "Freigabezustand",
+    "NO_SUBCOLLECTIONS": "Keine Untersammlungen vorhanden",
+    "NO_SUBCOLLECTIONS_HINT": "Sie können weitere Sammlungen über den \"Neu\"-Button anlegen",
     "STEP": {
       "GENERAL": "Titel, Bild, Beschreibung und Farbe",
       "METADATA": "Weitere Informationen",
@@ -115,7 +117,7 @@
   "collections_description": "Beschreibung:",
 
   "collections_content": "Materialien",
-  "collections_noContentAvailable": "Hier sind noch keine Materialien vorhanden.",
+  "collections_noContentAvailable": "Keine Materialien vorhanden",
   "collections_howToAddContent": "Sie können in der Suchumgebung nach geeigneten Materialien für Ihre Sammlung suchen. Klicken Sie einfach auf ein geeignetes Material und wählen Sie dann die Option 'zu Sammlung hinzufügen' aus.",
   "collectionNew_preview": "Vorschau meiner Sammlung",
   "collectionNew_setColor": "Farbe für diese Sammlung:",

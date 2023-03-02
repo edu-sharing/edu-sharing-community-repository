@@ -11,12 +11,25 @@
         flex-grow: 1;
         color: $textPrimary;
         font-weight: bold;
-        line-height: 1.5em;
         margin: 0 20px;
         a {
             text-transform: uppercase;
         }
-        @include limitLineCount(3);
+        > div > div {
+            display: grid;
+            grid-template-rows: auto auto;
+            grid-gap: 5px;
+            > span {
+                &:first-child {
+                    @include limitLineCount(1, 1.25);
+                }
+                > a:not(:first-child):before {
+                    color: $textMain;
+                    content: ' | ';
+                    cursor: default;
+                }
+            }
+        }
     }
     es-actionbar {
         min-width: 170px;
@@ -165,8 +178,8 @@ label.search {
     position: fixed;
     right: 0;
     width: $addToWidth;
-    top: calc(105px + var(--mainnavHeight));
-    height: calc(100% - 105px - var(--mainnavHeight));
+    top: calc(115px + var(--mainnavHeight));
+    height: calc(100% - 115px - var(--mainnavHeight));
     z-index: 2;
     padding-bottom: 20px;
     background-color: #fff;

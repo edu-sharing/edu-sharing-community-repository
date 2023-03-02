@@ -26,27 +26,30 @@
       [formControl]="input"
       cdkFocusInitial
     />
+    <es-spinner-small *ngIf="suggestionLoading | async" matSuffix></es-spinner-small>
     <mat-hint *ngIf="hint">{{ hint }}</mat-hint>
     <mat-autocomplete
       #autoGroup="matAutocomplete"
       class="mat-autocomplete-high"
       (optionSelected)="setOption($event)"
     >
-      <mat-optgroup
-        *ngFor="let group of suggestionGroups$ | async"
-        label="{{ group.label | translate }}"
-      >
-        <mat-option
-          class="authority-search-input-option"
-          *ngFor="let suggestion of group.values"
-          [value]="suggestion"
-        >
-          <es-authority-row
-            [authority]="suggestion.originalObject"
-            [secondaryTitle]="suggestion.secondaryTitle"
-          ></es-authority-row>
+      <ng-container *ngIf="suggestionGroups$ | async as groups">
+        <mat-option *ngIf="groups.length === 0" [disabled]="true">
+          <div class="no-match">{{ 'NODE_SEARCH_SELECTOR.NO_MATCHES' | translate }}</div>
         </mat-option>
-      </mat-optgroup>
+        <mat-optgroup *ngFor="let group of groups" label="{{ group.label | translate }}">
+          <mat-option
+            class="authority-search-input-option"
+            *ngFor="let suggestion of group.values"
+            [value]="suggestion"
+          >
+            <es-authority-row
+              [authority]="suggestion.originalObject"
+              [secondaryTitle]="suggestion.secondaryTitle"
+            ></es-authority-row>
+          </mat-option>
+        </mat-optgroup>
+      </ng-container>
     </mat-autocomplete>
   </mat-form-field>
 </form>

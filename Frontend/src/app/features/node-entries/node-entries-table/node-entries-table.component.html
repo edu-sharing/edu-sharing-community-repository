@@ -99,15 +99,14 @@
     *ngFor="let column of visibleDataColumns$ | async; let first = first"
     [matColumnDef]="column.name"
   >
-    <ng-container *ngIf="entriesService.sort?.allowed && isSortable(column)">
-      <mat-header-cell *matHeaderCellDef mat-sort-header [class.mat-column-primary]="first">{{
-        column | appListItemLabel
-      }}</mat-header-cell>
-    </ng-container>
-    <ng-container *ngIf="!(entriesService.sort?.allowed && isSortable(column))">
-      <mat-header-cell *matHeaderCellDef [class.mat-column-primary]="first">{{
-        column | appListItemLabel
-      }}</mat-header-cell>
+    <ng-container>
+      <mat-header-cell
+        *matHeaderCellDef
+        mat-sort-header
+        [disabled]="!(entriesService.sort?.allowed && isSortable(column))"
+        [class.mat-column-primary]="first"
+        >{{ column | esListItemLabel | async }}</mat-header-cell
+      >
     </ng-container>
     <mat-cell
       *matCellDef="let node"

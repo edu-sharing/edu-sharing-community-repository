@@ -191,7 +191,7 @@ export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
         }
     }
 
-    private refresh() {
+    refresh() {
         if (!this._node) return;
         this.nodeApi
             .getChildren(this._node, [RestConstants.FILTER_FOLDERS], {

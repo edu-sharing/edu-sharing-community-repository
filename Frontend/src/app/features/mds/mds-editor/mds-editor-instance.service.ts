@@ -797,6 +797,8 @@ export class MdsEditorInstanceService implements OnDestroy {
      *
      * @throws UserPresentableError
      */
+    // TODO: provide high-level functions (also `initWithValues`) that resolve when the mds is
+    // inflated.
     async initWithNodes(
         nodes: Node[],
         {
@@ -930,6 +932,10 @@ export class MdsEditorInstanceService implements OnDestroy {
 
     getHasUserChanges(): boolean {
         return this.hasUserChanges$.value;
+    }
+
+    observeHasUserChanges(): Observable<boolean> {
+        return this.hasUserChanges$.asObservable();
     }
 
     getCanSave(): boolean {

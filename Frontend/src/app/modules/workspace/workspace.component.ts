@@ -58,6 +58,7 @@ import { CanDrop } from '../../shared/directives/nodes-drop-target.directive';
 import { TranslationsService } from '../../translations/translations.service';
 import { WorkspaceExplorerComponent } from './explorer/explorer.component';
 import { canDragDrop, canDropOnNode } from './workspace-utils';
+import { WorkspaceTreeComponent } from './tree/tree.component';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 
 @Component({
@@ -91,6 +92,8 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     ];
 
     @ViewChild('explorer') explorer: WorkspaceExplorerComponent;
+
+    @ViewChild(WorkspaceTreeComponent) treeComponent: WorkspaceTreeComponent;
     @ViewChild('actionbar') actionbarRef: ActionbarComponent;
 
     cardHasOpenModals$: Observable<boolean>;
@@ -702,7 +705,9 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                 },
             );
         }
-        this.currentFolder = null;
+        if (this.currentFolder?.ref.id !== id) {
+            this.currentFolder = null;
+        }
         this.allowBinary = true;
         const root = !id || WorkspaceMainComponent.VALID_ROOTS_NODES.indexOf(id) !== -1;
         if (!root) {

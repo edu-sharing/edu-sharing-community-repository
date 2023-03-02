@@ -5,6 +5,7 @@ import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { RestHelper } from '../../../core-module/core.module';
 import { DialogButton } from '../../../core-module/ui/dialog-button';
+import { JumpMark } from '../../../services/jump-marks.service';
 import { CardAvatar } from './card-dialog-container/card-header/card-avatar';
 
 export const CARD_DIALOG_DATA = new InjectionToken<any>('CardDialogData');
@@ -31,6 +32,7 @@ export class CardDialogConfig<D = unknown> {
      * will get priority.
      */
     autoFocus?: AutoFocusTarget | string | boolean = 'first-tabbable';
+    jumpMarks?: JumpMark[];
     data?: D;
 }
 

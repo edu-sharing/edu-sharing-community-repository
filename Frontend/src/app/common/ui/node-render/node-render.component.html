@@ -109,7 +109,6 @@
 
 <!-- Possibly unused. -->
 <es-workspace-management
-  [(nodeMetadata)]="nodeMetadata"
   [(addToCollection)]="addToCollection"
   [(nodeVariant)]="nodeVariant"
   [(nodeWorkflow)]="nodeWorkflow"
@@ -117,7 +116,6 @@
   [(nodeDelete)]="nodeDelete"
   (onRefresh)="refresh()"
   (onStoredAddToCollection)="refresh()"
-  (onCloseMetadata)="closeMetadata()"
   (onDelete)="onDelete($event)"
 >
 </es-workspace-management>

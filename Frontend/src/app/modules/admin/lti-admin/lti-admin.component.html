@@ -19,7 +19,7 @@
         <ng-container matColumnDef="tsExpiry">
           <th mat-header-cell *matHeaderCellDef>{{ 'ADMIN.LTI.TS' | translate }}</th>
           <td mat-cell *matCellDef="let element">
-            {{ element.tsExpiry | formatDate: { useRelativeLabels: false, time: true } }}
+            {{ element.tsExpiry | formatDate: { relative: false, time: true } }}
           </td>
         </ng-container>
 

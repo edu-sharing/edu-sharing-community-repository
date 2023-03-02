@@ -20,6 +20,7 @@ import { RestConnectorService } from '../../../core-module/rest/services/rest-co
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { ClickSource, InteractionType } from '../entries-model';
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
+import { CustomFieldSpecialType, NodeEntriesGlobalService } from '../node-entries-global.service';
 
 @Component({
     selector: 'es-node-entries-card',
@@ -30,6 +31,7 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
     readonly InteractionType = InteractionType;
     readonly Target = Target;
     readonly ClickSource = ClickSource;
+    readonly CustomFieldSpecialType = CustomFieldSpecialType;
     @Input() dropdown: DropdownComponent;
     @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
 
@@ -44,6 +46,7 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
         public connector: RestConnectorService,
         public configService: ConfigurationService,
         public templatesService: NodeEntriesTemplatesService,
+        private nodeEntriesGlobalService: NodeEntriesGlobalService,
         private toast: Toast,
     ) {}
 
@@ -111,5 +114,15 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
             (await this.connector
                 .hasToolPermission(RestConstants.TOOLPERMISSION_RATE_READ)
                 .toPromise());
+    }
+
+    getTemplate(name: CustomFieldSpecialType) {
+        return this.nodeEntriesGlobalService.getCustomFieldTemplate(
+            {
+                type: 'NODE',
+                name,
+            },
+            this.node as Node,
+        );
     }
 }

@@ -28,7 +28,17 @@
   </es-node-search-selector>
 </form>
 <div class="relation-result" *ngIf="target">
-  <es-node-row [node]="swapRelation ? target : source" [columns]="selector.columns"></es-node-row>
+  <div class="relation-node">
+    <es-node-row [node]="swapRelation ? target : source" [columns]="selector.columns"></es-node-row>
+    <button
+      mat-icon-button
+      color="primary"
+      (click)="openNode(swapRelation ? target : source)"
+      matTooltip="{{ 'NODE_RELATIONS.OPEN_NODE' | translate }}"
+    >
+      <i esIcon="open_in_new" [aria]="false"></i>
+    </button>
+  </div>
   <div class="relation-details">
     <span>{{
       'NODE_RELATIONS.RELATION_TYPE.' + $any(RelationsInverted)[form.get('relation').value]
@@ -37,7 +47,17 @@
     <i esIcon="swap_horiz" altText="{{ 'NODE_RELATIONS.RELATES_TO' | translate }}"></i>
     <span>{{ 'NODE_RELATIONS.RELATION_TYPE.' + form.get('relation').value | translate }}</span>
   </div>
-  <es-node-row [node]="swapRelation ? source : target" [columns]="selector.columns"></es-node-row>
+  <div class="relation-node">
+    <es-node-row [node]="swapRelation ? source : target" [columns]="selector.columns"></es-node-row>
+    <button
+      mat-icon-button
+      color="primary"
+      (click)="openNode(swapRelation ? source : target)"
+      matTooltip="{{ 'NODE_RELATIONS.OPEN_NODE' | translate }}"
+    >
+      <i esIcon="open_in_new" [aria]="false"></i>
+    </button>
+  </div>
 </div>
 <div class="actions" *ngIf="target">
   <button mat-flat-button color="warn" (click)="target = null; updateButtons()">

@@ -35,7 +35,7 @@ import {
     UIService,
     RestUtilitiesService,
 } from '../../../../core-module/core.module';
-import { CardJumpmark } from '../../../../shared/components/card/card.component';
+import { JumpMark } from '../../../../services/jump-marks.service';
 import { MdsHelper } from '../../../../core-module/rest/mds-helper';
 import {
     MdsType,
@@ -253,7 +253,7 @@ export class MdsComponent {
     @Output() onMdsLoaded = new EventEmitter();
     rendered: SafeHtml;
     renderedSuggestions: SafeHtml;
-    jumpmarks: CardJumpmark[];
+    jumpmarks: JumpMark[];
     isLoading = false;
 
     private widgetName = 'cclom:general_keyword';
@@ -506,9 +506,7 @@ export class MdsComponent {
         for (let viewId of group.views) {
             for (let view of data.views) {
                 if (view.id == viewId) {
-                    this.jumpmarks.push(
-                        new CardJumpmark(view.id + '_header', view.caption, view.icon),
-                    );
+                    this.jumpmarks.push(new JumpMark(view.id + '_header', view.caption, view.icon));
                     break;
                 }
             }
