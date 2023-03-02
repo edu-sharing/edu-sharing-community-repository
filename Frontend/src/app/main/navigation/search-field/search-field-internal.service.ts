@@ -131,12 +131,19 @@ export class SearchFieldInternalService implements EventListener {
      * To be called by the search-field component.
      */
     removeFilter(property: string, filter: LabeledValue): void {
-        const filterList = this.filtersSubject.value[property];
-        const index = filterList?.findIndex((f) => f.value === filter.value);
+        const { [property]: propertyFilters, ...otherFilters } = this.filtersSubject.value;
+        const index = propertyFilters?.findIndex((f) => f.value === filter.value);
         if (index >= 0) {
-            const filterCopy = filterList.slice();
-            filterCopy.splice(index, 1);
-            const newFilters = { ...this.filtersSubject.value, [property]: filterCopy };
+            let newFilters: { [x: string]: LabeledValue[] };
+            if (propertyFilters.length > 1) {
+                const filterCopy = propertyFilters.slice();
+                filterCopy.splice(index, 1);
+                newFilters = { ...otherFilters, [property]: filterCopy };
+            } else {
+                // The filter to be removed was the last one of this property. Remove the entire
+                // property list.
+                newFilters = otherFilters;
+            }
             this.filtersSubject.next(newFilters);
             this.filterValuesChanged.next(this.mdsLabel.getRawValuesDict(newFilters));
         }
