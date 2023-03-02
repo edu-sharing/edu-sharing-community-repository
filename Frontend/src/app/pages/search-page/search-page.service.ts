@@ -88,7 +88,7 @@ export class SearchPageService implements OnDestroy {
      */
     initSearchFieldOnly(): void {
         this.initBasicData();
-        const searchFieldInstance = this.registerSearchField();
+        const searchFieldInstance = this.registerSearchField({ autoFocusSearchField: false });
         this.initQueryParams();
         searchFieldInstance.patchConfig({ showFiltersButton: false });
         // Jump to the search page when a search is triggered.
@@ -197,10 +197,11 @@ export class SearchPageService implements OnDestroy {
         });
     }
 
-    private registerSearchField(): SearchFieldInstance {
+    private registerSearchField({ autoFocusSearchField = true } = {}): SearchFieldInstance {
         const searchFieldInstance = this.searchField.enable(
             {
                 placeholder: 'SEARCH.SEARCH_STUFF',
+                autoFocus: autoFocusSearchField,
             },
             this.destroyed,
         );

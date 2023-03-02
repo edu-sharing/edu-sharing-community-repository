@@ -22,6 +22,7 @@ import {
 import {
     catchError,
     debounce,
+    delay,
     distinctUntilChanged,
     filter,
     first,
@@ -30,7 +31,7 @@ import {
     timeout,
 } from 'rxjs/operators';
 import { EventListener, FrameEventsService } from '../../../core-module/core.module';
-import { notNull } from '../../../util/functions';
+import { isTrue, notNull } from '../../../util/functions';
 import { SearchFieldComponent } from './search-field.component';
 import { MdsInfo, SearchEvent, SearchFieldConfig } from './search-field.service';
 
@@ -46,7 +47,7 @@ const NUMBER_OF_FACET_SUGGESTIONS = 5;
 export class SearchFieldInternalService implements EventListener {
     readonly config = new BehaviorSubject<SearchFieldConfig | null>(null);
     /** Reference to the search-field component, if currently visible. */
-    searchFieldComponent: SearchFieldComponent;
+    searchFieldComponent = new BehaviorSubject<SearchFieldComponent>(null);
     /** The user clicked the filters button inside the search field. */
     readonly filtersButtonClicked = new Subject<void>();
     /** The user triggered a search using the search field. */
@@ -94,6 +95,39 @@ export class SearchFieldInternalService implements EventListener {
                 distinctUntilChanged(),
             )
             .subscribe((enabled) => this.setEnableFiltersAndSuggestions(enabled));
+        this.registerAutoFocus();
+    }
+
+    private registerAutoFocus(): void {
+        const autoFocus = this.config.pipe(
+            map((config) => config?.autoFocus ?? false),
+            // `config` will be set to `null` between page changes, so we will get events on page
+            // changes if `autoFocus` is set to `true`.
+            distinctUntilChanged(),
+        );
+        const inputElement = this.searchFieldComponent.pipe(
+            switchMap((component) => component?.inputSubject ?? rxjs.of(null)),
+            map((input) => input?.nativeElement),
+        );
+        // Each time the autoFocus option is set to true (i.e. we changed to a page that set the
+        // option), wait for the input element to become available _once_ and focus it.
+        autoFocus
+            .pipe(
+                filter(isTrue),
+                switchMap(() =>
+                    inputElement.pipe(
+                        first(notNull),
+                        timeout(5_000),
+                        catchError(
+                            () => (console.warn('Could not focus search field'), rxjs.EMPTY),
+                        ),
+                    ),
+                ),
+                // Don't loose focus to the main-menu button being refocused after the menu closes
+                // on page navigation.
+                delay(0),
+            )
+            .subscribe((input) => input.focus());
     }
 
     onEvent(event: string, data: any) {

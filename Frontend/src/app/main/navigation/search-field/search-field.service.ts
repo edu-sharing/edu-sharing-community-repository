@@ -20,6 +20,8 @@ export class SearchFieldConfig {
      * being handled.
      */
     enableFiltersAndSuggestions = false;
+    /** Focus the search field input when it initially becomes available. */
+    autoFocus = false;
 }
 
 export type MdsInfo = Pick<SearchConfig, 'repository' | 'metadataSet'>;
@@ -85,7 +87,7 @@ export class SearchFieldInstance {
      * Use only for positioning, not for data.
      */
     getInputElement(): ElementRef {
-        return this._internal.searchFieldComponent.input;
+        return this._internal.searchFieldComponent.value.input;
     }
 }
 

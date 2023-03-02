@@ -8,6 +8,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, takeUntil } from 'rxjs/operators';
 import { SearchFieldFacetsComponent } from '../../../features/mds/mds-editor/search-field-facets/search-field-facets.component';
 import { Values } from '../../../features/mds/types/types';
+import { LoadingScreenService } from '../../loading-screen/loading-screen.service';
 import { SearchFieldInternalService } from './search-field-internal.service';
 import { SearchFieldConfig } from './search-field.service';
 
@@ -23,7 +24,14 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     totalFiltersCount: number;
     config: SearchFieldConfig;
 
-    @ViewChild('input') input: ElementRef;
+    readonly inputSubject = new BehaviorSubject<ElementRef<HTMLInputElement>>(null);
+    @ViewChild('input')
+    get input(): ElementRef<HTMLInputElement> {
+        return this.inputSubject.value;
+    }
+    set input(value: ElementRef<HTMLInputElement>) {
+        this.inputSubject.next(value);
+    }
     @ViewChild(CdkConnectedOverlay) private overlay: CdkConnectedOverlay;
     @ViewChild(SearchFieldFacetsComponent) private searchFieldFacets: SearchFieldFacetsComponent;
     @ViewChild(MatChip) private firstActiveChip: MatChip;
@@ -50,6 +58,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     ];
     readonly mdsInfo$ = this.internal.mdsInfo$;
     inputHasFocus = false;
+    isLoading: boolean;
     /**
      * Whether we got any user input into the search field since the overlay was dismissed the last
      * time.
@@ -62,10 +71,14 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
 
     private readonly destroyed$ = new Subject<void>();
 
-    constructor(private internal: SearchFieldInternalService, private ngZone: NgZone) {}
+    constructor(
+        private internal: SearchFieldInternalService,
+        private loadingScreen: LoadingScreenService,
+        private ngZone: NgZone,
+    ) {}
 
     ngOnInit(): void {
-        this.internal.searchFieldComponent = this;
+        this.internal.searchFieldComponent.next(this);
         this.internal.config
             .pipe(takeUntil(this.destroyed$))
             .subscribe((config) => (this.config = config));
@@ -117,13 +130,17 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
                 filter((showOverlay) => showOverlay === false),
             )
             .subscribe(() => (this.inputSinceOverlayDismissed = false));
+        this.loadingScreen
+            .observeIsLoading()
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((isLoading) => (this.isLoading = isLoading));
     }
 
     ngOnDestroy(): void {
         this.destroyed$.next();
         this.destroyed$.complete();
-        if (this.internal.searchFieldComponent === this) {
-            this.internal.searchFieldComponent = null;
+        if (this.internal.searchFieldComponent.value === this) {
+            this.internal.searchFieldComponent.next(null);
         }
     }
 
