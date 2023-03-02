@@ -11,7 +11,7 @@
 >
   <ng-template #title>
     <div class="title-container">
-      <h2 class="mat-heading-2">{{ repo.title | titlecase }}</h2>
+      <h2 class="mat-heading-2">{{ repo.title | titlecase }} ({{ repo.dataSource.getTotal() }})</h2>
       <a
         *ngIf="repo.dataSource.getTotal() > repo.dataSource.getData().length"
         mat-button

@@ -12,7 +12,9 @@
 >
   <ng-template #title>
     <div class="title-container">
-      <h2 class="mat-heading-2">{{ 'SEARCH.COLLECTIONS' | translate }}</h2>
+      <h2 class="mat-heading-2">
+        {{ 'SEARCH.COLLECTIONS' | translate }} ({{ collectionsDataSource.getTotal() }})
+      </h2>
     </div>
   </ng-template>
 </es-node-entries-wrapper>
@@ -29,7 +31,12 @@
 >
   <ng-template #title>
     <div class="title-container">
-      <h2 class="mat-heading-2">{{ 'SEARCH.MATERIALS' | translate }}</h2>
+      <h2 class="mat-heading-2">
+        {{ 'SEARCH.MATERIALS' | translate }}
+        <ng-container *ngIf="!resultsDataSource.isEmpty()">
+          ({{ resultsDataSource.getTotal() }})
+        </ng-container>
+      </h2>
       <es-actionbar></es-actionbar>
     </div>
   </ng-template>
