@@ -1,17 +1,18 @@
 import { CdkDragEnter, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
+    ChangeDetectionStrategy,
     Component,
     ElementRef,
     Input,
     NgZone,
-    OnChanges,
     OnDestroy,
     OnInit,
     QueryList,
-    SimpleChanges,
+    TemplateRef,
     ViewChild,
     ViewChildren,
 } from '@angular/core';
+import { Sort } from '@angular/material/sort';
 import { Node } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -20,20 +21,39 @@ import { ListItemSort, RestConstants, UIService } from '../../../core-module/cor
 import { NodeEntriesService } from '../../../core-ui-module/node-entries.service';
 import { Target } from '../../../core-ui-module/option-item';
 import { DragData } from '../../../services/nodes-drag-drop.service';
-import { SortEvent } from '../../../shared/components/sort-dropdown/sort-dropdown.component';
 import { GridLayout, NodeEntriesDisplayType } from '../entries-model';
 import { ItemsCap } from '../items-cap';
+import { NodeDataSourceRemote } from '../node-data-source-remote';
 import { NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
+import { SortSelectPanelComponent } from '../sort-select-panel/sort-select-panel.component';
 
 @Component({
     selector: 'es-node-entries-card-grid',
     templateUrl: 'node-entries-card-grid.component.html',
     styleUrls: ['node-entries-card-grid.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnChanges, OnDestroy {
+export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnDestroy {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Target = Target;
+    /**
+     * relative scrolling when a scrolling arrow (left or right) is used
+     * a value of 1 would mean to scroll the full width of the entire content
+     */
+    readonly ScrollingOffsetPercentage = 0.4;
+
+    @ViewChild('gridTop', { static: true }) set gridTop(value: TemplateRef<unknown>) {
+        this.registerGridTop(value);
+    }
+    @ViewChild(SortSelectPanelComponent)
+    set sortPanel(value: SortSelectPanelComponent) {
+        if (this.entriesService.dataSource instanceof NodeDataSourceRemote) {
+            setTimeout(() => {
+                (this.entriesService.dataSource as NodeDataSourceRemote<T>).sortPanel = value;
+            });
+        }
+    }
     @ViewChildren(CdkDropList) dropListsQuery: QueryList<CdkDropList>;
     @ViewChild('grid') gridRef: ElementRef;
     @ViewChildren('item', { read: ElementRef }) itemRefs: QueryList<ElementRef<HTMLElement>>;
@@ -87,6 +107,24 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnC
         this.registerVisibleItemsLimited();
     }
 
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
+    }
+
+    private registerGridTop(gridTop: TemplateRef<unknown>): void {
+        setTimeout(() => {
+            this.templatesService.entriesTopMatter = gridTop;
+        });
+        this.destroyed.subscribe(() => {
+            if (this.templatesService.entriesTopMatter === gridTop) {
+                setTimeout(() => {
+                    this.templatesService.entriesTopMatter = null;
+                });
+            }
+        });
+    }
+
     private registerItemsCap() {
         this.entriesService.dataSource$
             .pipe(takeUntil(this.destroyed))
@@ -99,19 +137,14 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnC
             )
             .subscribe((cap) => (this.itemsCap.cap = cap));
     }
+
     private registerLayout() {
         this.layout$.subscribe((layout) => (this.layout = layout));
     }
-    ngOnChanges(changes: SimpleChanges): void {}
 
-    ngOnDestroy(): void {
-        this.destroyed.next();
-        this.destroyed.complete();
-    }
-
-    changeSort(sort: SortEvent) {
-        this.entriesService.sort.active = sort.name;
-        this.entriesService.sort.direction = sort.ascending ? 'asc' : 'desc';
+    onSortChange(sort: Sort) {
+        this.entriesService.sort.active = sort.active;
+        this.entriesService.sort.direction = sort.direction;
         this.entriesService.sortChange.emit(this.entriesService.sort);
     }
 
@@ -264,11 +297,6 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnC
         if (direction === 'left') {
             return element.scrollLeft > 0;
         } else if (direction === 'right') {
-            console.log(
-                element.scrollLeft,
-                element.scrollWidth - element.clientWidth,
-                element.clientWidth,
-            );
             /*
              use a small pixel buffer (10px) because scrolling aligns with the start of each card and
              it can cause slight alignment issues on the end of the container
@@ -286,10 +314,14 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnC
     }
 
     doScroll(direction: 'left' | 'right') {
-        console.log('doScroll');
         // 1 is enough because the browser will handle it via css snapping
-        this.gridRef?.nativeElement.scrollBy({
-            left: direction === 'right' ? 1 : -1,
+        const leftScroll = this.gridRef?.nativeElement.scrollLeft;
+        const rect = this.gridRef?.nativeElement.getBoundingClientRect();
+        // using scroll because it works more reliable than scrollBy
+        this.gridRef?.nativeElement.scroll({
+            left:
+                leftScroll +
+                rect.width * this.ScrollingOffsetPercentage * (direction === 'right' ? 1 : -1),
             behavior: 'smooth',
         });
     }

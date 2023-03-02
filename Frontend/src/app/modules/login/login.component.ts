@@ -82,6 +82,12 @@ export class LoginComponent implements OnInit, OnDestroy {
                     // default register mode: allow local registration if not disabled
                     this.config.register = { local: true };
                 }
+                if (this.bridge.getCordova().isRunningCordova()) {
+                    this.router.navigate([UIConstants.ROUTER_PREFIX, 'app'], {
+                        replaceUrl: true,
+                    });
+                    return;
+                }
                 this.updateButtons();
                 this.username = this.configService.instant('defaultUsername', '');
                 this.password = this.configService.instant('defaultPassword', '');
@@ -260,7 +266,6 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.mainNav.setMainNavConfig({
             currentScope: 'login',
             title: 'SIDEBAR.LOGIN',
-            searchEnabled: false,
         });
     }
 

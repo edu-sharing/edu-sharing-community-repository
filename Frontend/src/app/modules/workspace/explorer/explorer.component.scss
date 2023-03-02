@@ -8,14 +8,15 @@
     }
 }
 :host ::ng-deep {
-    es-node-entries-card-grid {
-        display: block;
-        margin: 10px 20px;
-    }
     @media screen and (max-width: $mobileTabSwitchWidth) {
         .list > div {
             // keep space for scrolling to the very end
             margin-bottom: $mobileTabNavHeight;
         }
     }
+}
+
+es-node-entries-wrapper.grid {
+    display: block;
+    margin: 10px 20px;
 }

@@ -44,6 +44,7 @@ import { NodeEntriesWrapperComponent } from '../../features/node-entries/node-en
 export class SharingComponent {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
+    readonly Scope = Scope;
     @ViewChild('nodeEntries') nodeEntries: NodeEntriesWrapperComponent<Node>;
     loading = true;
     passwordInput: string;
@@ -181,7 +182,6 @@ export class SharingComponent {
                 this.nodesDataSource.isLoading = false;
                 setTimeout(() => {
                     this.nodeEntries.initOptionsGenerator({
-                        scope: Scope.Sharing,
                         customOptions: this.options,
                     });
                 });

@@ -84,7 +84,7 @@ a:active {
     top: 0;
     left: 0;
     height: var(--mainnavHeight);
-    z-index: 10;
+    z-index: $topBarZIndex + 1;
     position: fixed;
     width: 100%;
     line-height: 62px;
@@ -122,7 +122,6 @@ a:active {
 
 #nodeRenderContentWrapper {
     background: #ebebeb;
-    margin-top: var(--mainnavHeight);
     width: 100%;
 }
 

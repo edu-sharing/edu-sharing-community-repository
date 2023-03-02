@@ -1,4 +1,7 @@
-import { AfterViewInit, Component, Input, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import {
     ArchiveRestore,
     GenericAuthority,
@@ -10,10 +13,7 @@ import {
     TemporaryStorageService,
 } from '../../../core-module/core.module';
 import { CustomOptions, ElementType, OptionItem, Scope } from '../../../core-ui-module/option-item';
-import { RecycleRestoreComponent } from './restore/restore.component';
-import { TranslateService } from '@ngx-translate/core';
 import { Toast } from '../../../core-ui-module/toast';
-import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
 import {
     FetchEvent,
     InteractionType,
@@ -21,18 +21,21 @@ import {
     NodeClickEvent,
     NodeEntriesDisplayType,
 } from '../../../features/node-entries/entries-model';
-import { NodeEntriesWrapperComponent } from '../../../features/node-entries/node-entries-wrapper.component';
-import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { NodeDataSource } from '../../../features/node-entries/node-data-source';
+import { NodeEntriesWrapperComponent } from '../../../features/node-entries/node-entries-wrapper.component';
+import { SearchFieldService } from '../../../main/navigation/search-field/search-field.service';
+import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
+import { RecycleRestoreComponent } from './restore/restore.component';
 
 @Component({
     selector: 'es-recycle',
     templateUrl: 'recycle.component.html',
     styleUrls: ['recycle.component.scss'],
 })
-export class RecycleMainComponent implements AfterViewInit {
+export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
+    readonly Scope = Scope;
     @ViewChild('list') list: NodeEntriesWrapperComponent<Node>;
     dataSource = new NodeDataSource();
     public toDelete: Node[] = null;
@@ -66,13 +69,17 @@ export class RecycleMainComponent implements AfterViewInit {
             sortAscending: sortAscending,
         });
     }
+    private destroyed = new Subject<void>();
+
     constructor(
         private archive: RestArchiveService,
         private toast: Toast,
-        public mainNavService: MainNavService,
         private translate: TranslateService,
         private service: TemporaryStorageService,
-    ) {
+        private searchField: SearchFieldService,
+    ) {}
+
+    ngOnInit(): void {
         this.options.addOptions.push(
             new OptionItem('RECYCLE.OPTION.RESTORE_SINGLE', 'undo', (node: Node) =>
                 this.restoreSingle(node),
@@ -86,22 +93,29 @@ export class RecycleMainComponent implements AfterViewInit {
         this.options.addOptions.forEach((o) => {
             o.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         });
-        this.mainNavService.patchMainNavConfig({
-            onSearch: (query) => {
-                this.searchQuery = query;
+        this.searchField
+            .getCurrentInstance()
+            .onSearchTriggered()
+            .pipe(takeUntil(this.destroyed))
+            .subscribe(({ searchString }) => {
+                this.searchQuery = searchString;
                 this.refresh();
-            },
-        });
+            });
     }
 
     ngAfterViewInit(): void {
         this.refresh();
         this.list.initOptionsGenerator({
-            scope: Scope.WorkspaceList,
             actionbar: this.actionbar,
             customOptions: this.options,
         });
     }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
+    }
+
     private restoreFinished(list: Node[], restoreResult: any) {
         this.toast.closeModalDialog();
 
@@ -183,9 +197,9 @@ export class RecycleMainComponent implements AfterViewInit {
 
     async refresh(event?: FetchEvent) {
         this.dataSource.isLoading = true;
-        // @TODO: handle pagination after merge!
         if (event == null) {
             this.dataSource.reset();
+            this.list?.getSelection().clear();
         }
         const result = await this.loadData(
             this.searchQuery,
@@ -193,8 +207,12 @@ export class RecycleMainComponent implements AfterViewInit {
             this.sort.active,
             this.sort.direction === 'asc',
         ).toPromise();
-
-        this.dataSource.setData(result.nodes, result.pagination);
+        if (event == null) {
+            this.dataSource.setData(result.nodes, result.pagination);
+        } else {
+            this.dataSource.appendData(result.nodes);
+            this.dataSource.setPagination(result.pagination);
+        }
         this.dataSource.isLoading = false;
     }
 

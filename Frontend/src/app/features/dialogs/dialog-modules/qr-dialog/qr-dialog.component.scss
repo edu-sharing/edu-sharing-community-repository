@@ -1,3 +1,5 @@
 :host {
     display: flex;
+    // Make the QR code shrinkable to the vertical dialog size.
+    min-height: 100%;
 }

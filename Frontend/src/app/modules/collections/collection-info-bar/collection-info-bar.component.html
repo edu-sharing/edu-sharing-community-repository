@@ -29,7 +29,7 @@
       <img
         *ngIf="collection?.preview?.url"
         class="collection-header-image"
-        [src]="collection | appNodeImage: { crop: true, width: 400, height: 350 }"
+        [src]="collection | esNodeImage: { crop: true, width: 400, height: 350 } | async"
         role="presentation"
       />
     </div>

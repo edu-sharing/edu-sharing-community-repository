@@ -1,0 +1,19 @@
+:host {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.mds-editor {
+    flex-grow: 1;
+}
+
+.saved-searches-button {
+    position: sticky;
+    align-self: flex-end;
+    bottom: 0;
+}
+
+.current-saved-search-entry {
+    font-weight: bold;
+}

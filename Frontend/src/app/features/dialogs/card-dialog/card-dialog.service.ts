@@ -53,7 +53,7 @@ export class CardDialogService {
         );
         containerRef.instance.dialogRef = dialogRef;
         const contentInjector = Injector.create({
-            parent: this.injector,
+            parent: containerRef.injector,
             providers: [
                 { provide: CARD_DIALOG_DATA, useValue: config.data },
                 { provide: CardDialogRef, useValue: dialogRef },

@@ -8,6 +8,7 @@ import { ListNodeLicenseComponent } from './list-node-license/list-node-license.
 import { ListNodeReplicationSourceComponent } from './list-node-replication-source/list-node-replication-source.component';
 import { ListNodeWorkflowComponent } from './list-node-workflow/list-node-workflow.component';
 import { ListTextComponent } from './list-text/list-text.component';
+import { NodeRowComponent } from './node-row/node-row.component';
 import { NodeSourcePipe } from './node-source.pipe';
 
 @NgModule({
@@ -21,8 +22,9 @@ import { NodeSourcePipe } from './node-source.pipe';
         ListCountsComponent,
         NodeSourcePipe,
         FormatDurationPipe,
+        NodeRowComponent,
     ],
     imports: [SharedModule],
-    exports: [ListBaseComponent, ListTextComponent, FormatDurationPipe],
+    exports: [ListBaseComponent, ListTextComponent, FormatDurationPipe, NodeRowComponent],
 })
 export class ListItemsModule {}

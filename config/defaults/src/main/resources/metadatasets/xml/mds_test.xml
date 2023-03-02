@@ -277,6 +277,13 @@
 				]]>
 		</html>
 	</template>
+		<template>
+			<id>search</id>
+			<html><![CDATA[
+			  <ccm:educationallearningresourcetype>
+              <cclom:general_keyword>
+				]]></html>
+		</template>
 </templates>
 <groups>
 	<group>

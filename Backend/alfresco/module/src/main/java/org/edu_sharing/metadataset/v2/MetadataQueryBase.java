@@ -40,9 +40,9 @@ public abstract class MetadataQueryBase implements Serializable{
             return existingParameters!=null && !existingParameters.contains(e.getKey());
         }).collect(Collectors.toList());
         if(filter.size() == 0) {
-            return QueryUtils.replaceCommonQueryParams(basequery.get(null), QueryUtils.replacerFromSyntax(syntax));
+            return QueryUtils.replaceCommonQueryParams(basequery.get(null), QueryUtils.replacerFromSyntax(syntax, true));
         }
-        return QueryUtils.replaceCommonQueryParams(filter.get(0).getValue(), QueryUtils.replacerFromSyntax(syntax));
+        return QueryUtils.replaceCommonQueryParams(filter.get(0).getValue(), QueryUtils.replacerFromSyntax(syntax, true));
     }
 
     public void setSyntax(String syntax) {

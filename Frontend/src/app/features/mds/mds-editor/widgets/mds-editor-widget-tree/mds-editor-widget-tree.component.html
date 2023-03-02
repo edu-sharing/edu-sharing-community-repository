@@ -36,6 +36,7 @@
         [value]="value"
         [removable]="true"
         [matTooltip]="value.label + ' (' + ('MDS.DELETE_KEY_NOTICE' | translate) + ')'"
+        matTooltipPosition="above"
         [class.indeterminate]="(this.indeterminateValues$ | async)?.includes(value.key)"
         [class.mat-chip-selected]="false"
         (click)="revealInTree(value)"

@@ -1,10 +1,27 @@
 import { Injectable, TemplateRef } from '@angular/core';
 import { ListItem, ListItemType } from '../../core-module/ui/list-item';
 import { Scope } from '../../core-ui-module/option-item';
+import { Node } from 'ngx-edu-sharing-api';
 
+export type CustomField = {
+    type: ListItemType;
+    name: string | CustomFieldSpecialType;
+};
+export enum CustomFieldSpecialType {
+    preview,
+    type,
+}
 export type CustomFieldInfo = {
     type: ListItemType;
-    name: string;
+    /**
+     * either the property name (i.e. "cm:name") or a special value
+     */
+    name: string | CustomFieldSpecialType;
+
+    /**
+     * custom callback which should return true if the template should be used for the given item
+     */
+    useCallback?: (node: Node) => boolean;
     templateRef: TemplateRef<unknown>;
 };
 
@@ -12,9 +29,11 @@ export type PaginationStrategy = 'infinite-scroll' | 'paginator';
 
 type PaginationScope = Scope | 'DEFAULT';
 /**
- * this service is intented to add custom behaviour to the global tables & grid views
+ * this service is intended to add custom behaviour to the global tables & grid views
  */
-@Injectable()
+@Injectable({
+    providedIn: 'root',
+})
 export class NodeEntriesGlobalService {
     private customFields: CustomFieldInfo[] = [];
     private paginationStrategy: { [key in PaginationScope]?: PaginationStrategy } = {
@@ -40,9 +59,13 @@ export class NodeEntriesGlobalService {
     public getPaginatorSizeOptions(scope: Scope) {
         return this.paginatorSizeOptions[scope] ?? this.paginatorSizeOptions['DEFAULT'];
     }
-    public getCustomFieldTemplate(item: ListItem) {
-        return this.customFields.filter((c) => c.type === item.type && c.name === item.name)?.[0]
-            ?.templateRef;
+    public getCustomFieldTemplate(item: CustomField, node: Node) {
+        return this.customFields.filter(
+            (c) =>
+                c.type === item.type &&
+                c.name === item.name &&
+                (!c.useCallback || c.useCallback(node)),
+        )?.[0]?.templateRef;
     }
 
     /**

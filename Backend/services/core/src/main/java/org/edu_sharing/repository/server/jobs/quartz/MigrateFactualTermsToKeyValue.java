@@ -2,7 +2,10 @@ package org.edu_sharing.repository.server.jobs.quartz;
 
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.version.Version2Model;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -16,6 +19,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,6 +33,12 @@ public class MigrateFactualTermsToKeyValue extends AbstractJob{
     @JobFieldDescription(description = "testmode")
     boolean test = true;
 
+    @JobFieldDescription(description = " weather to use the archive store, default is false")
+    boolean archive = false;
+
+    @JobFieldDescription(description = " weather to use the versionstore store, default is false. overwrites archive param")
+    boolean versionStore = false;
+
     static String PROP = CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD;
     static String PROP_DISPLAY = CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD_DISPLAY;
 
@@ -36,35 +46,50 @@ public class MigrateFactualTermsToKeyValue extends AbstractJob{
     ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
     BehaviourFilter policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
 
+    static final StoreRef version2Store = new StoreRef("workspace","version2Store");
+
     Logger logger = Logger.getLogger(MigrateFactualTermsToKeyValue.class);
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         startFolder = (String)jobExecutionContext.getJobDetail().getJobDataMap().get("startFolder");
         test = new Boolean((String)jobExecutionContext.getJobDetail().getJobDataMap().get("test"));
+        archive = new Boolean((String)jobExecutionContext.getJobDetail().getJobDataMap().get("archive"));
+        versionStore = new Boolean((String)jobExecutionContext.getJobDetail().getJobDataMap().get("versionStore"));
         if(startFolder == null || startFolder.trim().equals("")) {
             logger.error("no start folder provided");
             return;
         }
         AuthenticationUtil.runAsSystem(() ->{
-            run(startFolder);
+
+            StoreRef storeRef = (archive) ? StoreRef.STORE_REF_ARCHIVE_SPACESSTORE : StoreRef.STORE_REF_WORKSPACE_SPACESSTORE;
+            storeRef = (versionStore) ? version2Store : storeRef;
+            run(new NodeRef(storeRef,startFolder));
             return null;
         });
     }
 
-    public void run(String startFolder){
+    public void run(NodeRef startFolder){
 
 
         PersistenHandlerKeywordsDNBMarc ph = new PersistenHandlerKeywordsDNBMarc();
         NodeRunner nr = new NodeRunner();
-        nr.setStartFolder(startFolder);
+        nr.setStartFolder(startFolder.getId());
+        nr.setStartFolderStore(startFolder.getStoreRef());
         nr.setTypes(Arrays.asList(CCConstants.CCM_TYPE_IO));
         nr.setRecurseMode(RecurseMode.Folders);
+        if(startFolder.getStoreRef().equals(version2Store)){
+            nr.setRecurseMode(RecurseMode.All);
+        }
         nr.setInvalidateCache(true);
         nr.setTransaction(NodeRunner.TransactionMode.None);
         nr.setKeepModifiedDate(false);
         nr.setThreaded(false);
         nr.setTask(n-> {
+            if(n == null){
+                logger.error("nodeRef is null");
+                return;
+            }
 
             List<String> displayNames = (List<String>)serviceRegistry.getNodeService().getProperty(n, QName.createQName(PROP));
             if(displayNames != null && displayNames.size() > 0){
@@ -94,8 +119,8 @@ public class MigrateFactualTermsToKeyValue extends AbstractJob{
                         serviceRegistry.getRetryingTransactionHelper().doInTransaction(()->{
                             try {
                                 policyBehaviourFilter.disableBehaviour(n);
-                                serviceRegistry.getNodeService().setProperty(n, QName.createQName(PROP), keys);
-                                serviceRegistry.getNodeService().setProperty(n, QName.createQName(PROP_DISPLAY), displays);
+                                setProperty(n, QName.createQName(PROP), keys);
+                                setProperty(n, QName.createQName(PROP_DISPLAY), displays);
                             }finally {
                                 policyBehaviourFilter.enableBehaviour(n);
                             }
@@ -107,5 +132,14 @@ public class MigrateFactualTermsToKeyValue extends AbstractJob{
             }
         });
         nr.run();
+    }
+
+    private void setProperty(NodeRef nodeRef,QName qName, Serializable serializable){
+        serviceRegistry.getNodeService().setProperty(nodeRef,qName,serializable);
+
+        if(new Boolean(versionStore)){
+            QName qnameV = QName.createQName(Version2Model.NAMESPACE_URI, Version2Model.PROP_METADATA_PREFIX+qName.toString());
+            serviceRegistry.getNodeService().setProperty(nodeRef,qnameV,serializable);
+        }
     }
 }

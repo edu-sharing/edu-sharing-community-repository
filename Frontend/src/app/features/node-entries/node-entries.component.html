@@ -1,3 +1,9 @@
+<div class="top-matter">
+  <div class="title">
+    <ng-container *ngTemplateOutlet="templatesService.title"></ng-container>
+  </div>
+  <ng-container *ngTemplateOutlet="templatesService.entriesTopMatter"></ng-container>
+</div>
 <ng-container *ngIf="entriesService.dataSource">
   <ng-container *ngIf="entriesService.displayType === NodeEntriesDisplayType.Table">
     <es-node-entries-table></es-node-entries-table>
@@ -15,14 +21,12 @@
     <ng-container *ngTemplateOutlet="templatesService.empty"></ng-container>
   </ng-container>
 </ng-container>
-<!-- @TODO: hiding it via ngIf would be better, but we need to access the reference in ts file -->
 <mat-paginator
   #paginator
   [pageSizeOptions]="entriesGlobalService.getPaginatorSizeOptions(entriesService.scope)"
+  *ngIf="entriesService.paginationStrategy === 'paginator'"
   [class.display-none]="
-    !entriesService.dataSource ||
-    entriesService.paginationStrategy !== 'paginator' ||
-    entriesService.dataSource.isLoading ||
+    (entriesService.dataSource.isLoading && entriesService.dataSource.isLoading !== 'page') ||
     entriesService.dataSource.isEmpty()
   "
   (page)="openPage($event)"

@@ -17,6 +17,10 @@ import {
     ContributorsDialogResult,
 } from './dialog-modules/contributors-dialog/contributors-dialog-data';
 import {
+    CreateMapLinkDialogData,
+    CreateMapLinkDialogResult,
+} from './dialog-modules/create-map-link-dialog/create-map-link-dialog-data';
+import {
     FileChooserDialogData,
     FileChooserDialogResult,
 } from './dialog-modules/file-chooser-dialog/file-chooser-dialog-data';
@@ -32,10 +36,32 @@ import {
     LicenseDialogData,
     LicenseDialogResult,
 } from './dialog-modules/license-dialog/license-dialog-data';
+import {
+    MdsEditorDialogDataNodes,
+    MdsEditorDialogDataValues,
+    MdsEditorDialogResultNodes,
+    MdsEditorDialogResultValues,
+} from './dialog-modules/mds-editor-dialog/mds-editor-dialog-data';
 import { NodeEmbedDialogData } from './dialog-modules/node-embed-dialog/node-embed-dialog.component';
 import { NodeInfoDialogData } from './dialog-modules/node-info-dialog/node-info-dialog.component';
+import {
+    NodeRelationsDialogData,
+    NodeRelationsDialogResult,
+} from './dialog-modules/node-relations-dialog/node-relations-dialog-data';
 import { NodeReportDialogData } from './dialog-modules/node-report-dialog/node-report-dialog.component';
+import {
+    NodeTemplateDialogData,
+    NodeTemplateDialogResult,
+} from './dialog-modules/node-template-dialog/node-template-dialog-data';
 import { QrDialogData } from './dialog-modules/qr-dialog/qr-dialog.component';
+import {
+    SaveSearchDialogData,
+    SaveSearchDialogResult,
+} from './dialog-modules/save-search-dialog/save-search-dialog-data';
+import {
+    SendFeedbackDialogData,
+    SendFeedbackDialogResult,
+} from './dialog-modules/send-feedback-dialog/send-feedback-dialog-data';
 import {
     ShareDialogData,
     ShareDialogResult,
@@ -71,7 +97,7 @@ export class DialogsService {
     async openGenericDialog<R extends string>(
         config: GenericDialogConfig<R>,
     ): Promise<CardDialogRef<GenericDialogData<R>, R>> {
-        const { title, maxWidth, closable, ...data } = {
+        const { title, minWidth, maxWidth, customHeaderBarContent, closable, ...data } = {
             ...new GenericDialogConfig<R>(),
             ...config,
         };
@@ -80,7 +106,9 @@ export class DialogsService {
         );
         return this.cardDialog.open(GenericDialogComponent, {
             title,
+            minWidth,
             maxWidth,
+            customHeaderBarContent,
             closable,
             data,
         });
@@ -314,6 +342,127 @@ export class DialogsService {
             width: 500,
             height: 700,
             data,
+        });
+    }
+
+    async openCreateMapLinkDialog(
+        data: CreateMapLinkDialogData,
+    ): Promise<CardDialogRef<CreateMapLinkDialogData, CreateMapLinkDialogResult>> {
+        const { CreateMapLinkDialogComponent } = await import(
+            './dialog-modules/create-map-link-dialog/create-map-link-dialog.module'
+        );
+        return this.cardDialog.open(CreateMapLinkDialogComponent, {
+            title: 'MAP_LINK.TITLE',
+            ...configForNode(data.node),
+            closable: Closable.Standard,
+            width: 600,
+            data,
+        });
+    }
+
+    async openNodeRelationsDialog(
+        data: NodeRelationsDialogData,
+    ): Promise<CardDialogRef<NodeRelationsDialogData, NodeRelationsDialogResult>> {
+        const { NodeRelationsDialogComponent } = await import(
+            './dialog-modules/node-relations-dialog/node-relations-dialog.module'
+        );
+        return this.cardDialog.open(NodeRelationsDialogComponent, {
+            title: 'NODE_RELATIONS.TITLE',
+            ...configForNode(data.node),
+            width: 700,
+            minHeight: 700,
+            data,
+        });
+    }
+
+    async openNodeTemplateDialog(
+        data: NodeTemplateDialogData,
+    ): Promise<CardDialogRef<NodeTemplateDialogData, NodeTemplateDialogResult>> {
+        const { NodeTemplateDialogComponent } = await import(
+            './dialog-modules/node-template-dialog/node-template-dialog.module'
+        );
+        return this.cardDialog.open(NodeTemplateDialogComponent, {
+            title: 'OPTIONS.TEMPLATE',
+            ...configForNode(data.node),
+            width: 600,
+            minHeight: 700,
+            data,
+            closable: Closable.Standard,
+        });
+    }
+
+    async openMdsEditorDialogForNodes(
+        data: MdsEditorDialogDataNodes,
+    ): Promise<CardDialogRef<MdsEditorDialogDataNodes, MdsEditorDialogResultNodes>> {
+        const { MdsEditorDialogComponent } = await import(
+            './dialog-modules/mds-editor-dialog/mds-editor-dialog.module'
+        );
+        data = { ...new MdsEditorDialogDataNodes(), ...data };
+        return this.cardDialog.open(MdsEditorDialogComponent, {
+            title: 'MDS.TITLE',
+            ...(await configForNodes(data.nodes, this.translate).toPromise()),
+            minWidth: 600,
+            minHeight: 700,
+            contentPadding: 0,
+            data,
+        });
+    }
+
+    async openMdsEditorDialogForValues(
+        data: MdsEditorDialogDataValues,
+    ): Promise<CardDialogRef<MdsEditorDialogDataValues, MdsEditorDialogResultValues>> {
+        const { MdsEditorDialogComponent } = await import(
+            './dialog-modules/mds-editor-dialog/mds-editor-dialog.module'
+        );
+        data = { ...new MdsEditorDialogDataValues(), ...data };
+        return this.cardDialog.open(MdsEditorDialogComponent, {
+            title: 'MDS.TITLE',
+            minWidth: 600,
+            minHeight: 700,
+            contentPadding: 0,
+            data,
+        });
+    }
+
+    async openSendFeedbackDialog(
+        data: SendFeedbackDialogData,
+    ): Promise<CardDialogRef<SendFeedbackDialogData, SendFeedbackDialogResult>> {
+        const { SendFeedbackDialogComponent } = await import(
+            './dialog-modules/send-feedback-dialog/send-feedback-dialog.module'
+        );
+        return this.cardDialog.open(SendFeedbackDialogComponent, {
+            title: 'FEEDBACK.TITLE',
+            ...configForNode(data.node),
+            minWidth: 500,
+            data,
+            closable: Closable.Standard,
+        });
+    }
+
+    async openThirdPartyLicensesDialog(): Promise<CardDialogRef<void, void>> {
+        const { ThirdPartyLicensesDialogComponent } = await import(
+            './dialog-modules/third-party-licenses-dialog/third-party-licenses-dialog.module'
+        );
+        return this.cardDialog.open(ThirdPartyLicensesDialogComponent, {
+            title: 'LICENSE_INFORMATION',
+            avatar: { kind: 'icon', icon: 'copyright' },
+            minWidth: 800,
+            minHeight: 800,
+        });
+    }
+
+    async openSaveSearchDialog(
+        data: SaveSearchDialogData,
+    ): Promise<CardDialogRef<SaveSearchDialogData, SaveSearchDialogResult>> {
+        const { SaveSearchDialogComponent } = await import(
+            './dialog-modules/save-search-dialog/save-search-dialog.module'
+        );
+        return this.cardDialog.open(SaveSearchDialogComponent, {
+            title: 'SEARCH.SAVE_SEARCH.TITLE',
+            avatar: { kind: 'icon', icon: 'search' },
+            width: 600,
+            data,
+            closable: Closable.Standard,
         });
     }
 }

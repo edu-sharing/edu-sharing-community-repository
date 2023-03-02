@@ -1,4 +1,7 @@
-<div class="topBar fixed scrollWithBanner" *ngIf="showTopBar">
+<div
+  class="topBar fixed scrollWithBanner"
+  *ngIf="showTopBar && !mainNavService.getMainNav()?.topBar?.isSidenavOpen()"
+>
   <div class="displayBar">
     <button mat-button class="clickable" title="{{ 'BACK' | translate }}" (click)="close()">
       <i esIcon="keyboard_arrow_left"></i> <span class="render-back">{{ 'BACK' | translate }}</span>
@@ -109,7 +112,6 @@
 
 <!-- Possibly unused. -->
 <es-workspace-management
-  [(nodeMetadata)]="nodeMetadata"
   [(addToCollection)]="addToCollection"
   [(nodeVariant)]="nodeVariant"
   [(nodeWorkflow)]="nodeWorkflow"
@@ -117,7 +119,6 @@
   [(nodeDelete)]="nodeDelete"
   (onRefresh)="refresh()"
   (onStoredAddToCollection)="refresh()"
-  (onCloseMetadata)="closeMetadata()"
   (onDelete)="onDelete($event)"
 >
 </es-workspace-management>

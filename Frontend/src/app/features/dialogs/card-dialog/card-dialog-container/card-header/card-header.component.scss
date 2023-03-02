@@ -2,10 +2,7 @@
 @import '../../../../../shared/components/card/variables';
 
 :host {
-    border-top-left-radius: inherit;
-    border-top-right-radius: inherit;
     flex-shrink: 0;
-    background-color: $actionDialogBackground;
     border-bottom: solid 1px $cardSeparatorLineColor;
     display: flex;
     align-items: center;
@@ -15,14 +12,17 @@
         display: grid;
         grid-template-columns: auto 1fr auto;
         height: auto;
+        min-height: $titleHeight;
         .card-dialog-header-text {
             grid-column: 2;
         }
         .additional-content {
             grid-row: 2;
             grid-column: 1 / 4;
-            margin: 0 10px 10px;
             justify-content: center;
+            &:not(:empty) {
+                margin: 0 10px 10px;
+            }
         }
     }
 }

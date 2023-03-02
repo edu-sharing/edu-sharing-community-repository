@@ -33,7 +33,6 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
         this.sliderOptions.step = this.widget.definition.step ?? 1;
         this.isRange = this.widget.definition.type === MdsWidgetType.Range;
         this.currentValue = this.getInitialValue_();
-        console.log(this.currentValue);
         // Since computation of initial values is a bit different for sliders and ranges, we handle
         // processing of default values here in this component. To reflect default values, we save
         // values once when initializing. This might mark the whole dialog as dirty without the user
@@ -69,7 +68,6 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
     // `MdsEditorWidgetBase`.
     private getInitialValue_(): number[] {
         const initialValues = this.widget.getInitialValues().jointValues;
-        console.log(initialValues);
         if (this.isRange) {
             if (initialValues.length === 2) {
                 return [parseInt(initialValues[0], 10), parseInt(initialValues[1], 10)];

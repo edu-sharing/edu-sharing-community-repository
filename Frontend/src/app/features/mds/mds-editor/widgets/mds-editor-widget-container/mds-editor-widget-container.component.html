@@ -1,4 +1,6 @@
 <div class="widget-container" [class.read-only]="widget?.definition.interactionType === 'None'">
+  <!-- FIXME: The mat-ripple class applies 'overflow: hidden' to the container, which cuts off
+  ripple effects of content elements. -->
   <div matRipple [matRippleDisabled]="true" class="ripple-container" #nativeElement>
     <div class="header-container">
       <label *ngIf="label" [id]="labelId">{{ label }}</label>
@@ -64,7 +66,9 @@
         >
       </mat-label>
       <ng-container *ngTemplateOutlet="content"></ng-container>
-      <mat-hint *ngIf="widget.definition.bottomCaption">
+      <!-- Use [hidden] instead of *ngIf to avoid changed-after-checked errors when setting
+      bottomCaption. -->
+      <mat-hint [hidden]="!widget.definition.bottomCaption">
         {{ widget.definition.bottomCaption }}
       </mat-hint>
       <mat-error [hidden]="!control.errors?.required">

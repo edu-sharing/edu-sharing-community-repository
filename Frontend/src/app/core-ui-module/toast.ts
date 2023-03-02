@@ -402,10 +402,22 @@ export class Toast implements OnDestroy {
     }
 
     private getToolpermissionMessage(permission: string) {
+        let tpDescription = this.injector
+            .get(TranslateService)
+            .instant('TOOLPERMISSION.' + permission);
+        if (permission.startsWith(RestConstants.TOOLPERMISSION_REPOSITORY_PREFIX)) {
+            tpDescription = this.injector
+                .get(TranslateService)
+                .instant('TOOLPERMISSION.TOOLPERMISSION_REPOSITORY', {
+                    repository: permission.substring(
+                        RestConstants.TOOLPERMISSION_REPOSITORY_PREFIX.length,
+                    ),
+                });
+        }
         return (
             this.translate.instant('TOOLPERMISSION_ERROR_HEADER') +
             '\n- ' +
-            this.translate.instant('TOOLPERMISSION.' + permission) +
+            tpDescription +
             '\n\n' +
             this.translate.instant('TOOLPERMISSION_ERROR_FOOTER', {
                 permission,
@@ -574,7 +586,7 @@ export class Toast implements OnDestroy {
             message = 'TOAST.NO_CONNECTION';
             dialogTitle = null;
         }
-        if (errorObject?.traceId) {
+        if (dialogTitle && errorObject?.traceId) {
             dialogTitle =
                 this.translate.instant(dialogTitle, translationParameters) +
                 ' (' +

@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
+import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { CookieInfoComponent } from '../../common/ui/cookie-info/cookie-info.component';
 import { FrameEventsService, Node } from '../../core-module/core.module';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
@@ -22,10 +24,6 @@ export class MainNavConfig {
      */
     show? = true;
     /**
-     * Show and enables the search field
-     */
-    searchEnabled?: boolean;
-    /**
      * Shows the current location
      */
     showScope? = true;
@@ -33,10 +31,6 @@ export class MainNavConfig {
      * Shows and enables the user menu
      */
     showUser? = true;
-    /**
-     * The placeholder text for the search field, will be translated
-     */
-    searchPlaceholder?: string;
     /**
      * When true, the sidebar can be clicked to open the menu
      */
@@ -49,19 +43,19 @@ export class MainNavConfig {
      * "add material" options
      */
     create?: MainNavCreateConfig = new MainNavCreateConfig();
-    searchQuery?: string;
     currentScope: string;
+    /**
+     * Hide the search field although it was enabled via `SearchFieldService`.
+     *
+     * Use if you include the search-field component yourself in your page.
+     */
+    hideSearchField? = false;
 
     /**
      * If create is allowed, this event will fire the new nodes
      */
     onCreate?: (node: Node[]) => void;
     onCreateNotAllowed?: () => void;
-    /**
-     * Called when a search event happened, emits the search string and additional event info.
-     */
-    onSearch?: (query: string, cleared: boolean) => void;
-    searchQueryChange?: (searchQuery: string) => void;
 }
 
 @Injectable({
@@ -71,6 +65,7 @@ export class MainNavService {
     private mainnav: MainNavComponent;
     private cookieInfo: CookieInfoComponent;
     private mainNavConfigSubject = new BehaviorSubject<MainNavConfig>(new MainNavConfig());
+    private mainNavConfigOverrideSubject = new BehaviorSubject<Partial<MainNavConfig> | null>(null);
 
     constructor(
         private managementDialogs: ManagementDialogsService,
@@ -129,7 +124,17 @@ export class MainNavService {
         });
     }
 
+    /**
+     * Override individual values for the entire application, independently of what values are given
+     * with `setMainNavConfig` and `patchMainNavConfig`.
+     */
+    globallyOverrideMainNavConfig(config: Partial<MainNavConfig>): void {
+        this.mainNavConfigOverrideSubject.next(config);
+    }
+
     observeMainNavConfig(): Observable<MainNavConfig> {
-        return this.mainNavConfigSubject.asObservable();
+        return rxjs
+            .combineLatest([this.mainNavConfigSubject, this.mainNavConfigOverrideSubject])
+            .pipe(map(([config, override]) => ({ ...config, ...(override ?? {}) })));
     }
 }

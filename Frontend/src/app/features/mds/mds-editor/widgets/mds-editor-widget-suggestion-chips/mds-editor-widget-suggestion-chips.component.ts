@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FacetValue, SearchService } from 'ngx-edu-sharing-api';
 import { combineLatest, Observable, Subject } from 'rxjs';
-import { map, startWith, takeUntil } from 'rxjs/operators';
+import { map, shareReplay, startWith, takeUntil } from 'rxjs/operators';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 
 @Component({
@@ -65,6 +65,7 @@ export class MdsEditorWidgetSuggestionChipsComponent implements OnInit, OnDestro
                     (suggestion) => !values?.some((value) => value === suggestion.value),
                 ),
             ),
+            shareReplay(1),
         );
     }
 }

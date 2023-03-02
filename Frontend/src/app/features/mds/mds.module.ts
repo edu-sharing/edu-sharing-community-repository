@@ -1,10 +1,9 @@
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { NgModule } from '@angular/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { EditorModule } from '@tinymce/tinymce-angular';
 import { SharedModule } from '../../shared/shared.module';
 import { MdsComponent } from './legacy/mds/mds.component';
-import { InputFillProgressComponent } from './mds-editor/input-fill-progress/input-fill-progress.component';
-import { MdsEditorCardComponent } from './mds-editor/mds-editor-card/mds-editor-card.component';
 import { MdsEditorCoreComponent } from './mds-editor/mds-editor-core/mds-editor-core.component';
 import { MdsEditorEmbeddedComponent } from './mds-editor/mds-editor-embedded/mds-editor-embedded.component';
 import { MdsEditorViewComponent } from './mds-editor/mds-editor-view/mds-editor-view.component';
@@ -44,16 +43,13 @@ import { MdsEditorWidgetVersionComponent } from './mds-editor/widgets/mds-editor
 import { MdsEditorWidgetTinyMCE } from './mds-editor/widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
 import { MdsViewerComponent } from './mds-viewer/mds-viewer.component';
 import { MdsWidgetComponent } from './mds-viewer/widget/mds-widget.component';
-import { MatFormFieldModule } from '@angular/material/form-field';
 
 @NgModule({
     declarations: [
         HighlightPipe,
-        InputFillProgressComponent,
         LabelPipe,
         LicenseDetailsComponent,
         MdsComponent,
-        MdsEditorCardComponent,
         MdsEditorComponent,
         MdsEditorCoreComponent,
         MdsEditorEmbeddedComponent,
@@ -97,6 +93,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
         MdsEditorWidgetAuthorComponent,
         MdsEditorWrapperComponent,
         MdsViewerComponent,
+        MdsEditorCoreComponent,
+        SearchFieldFacetsComponent,
+        PropertySlugPipe,
     ],
 })
 export class MdsModule {}

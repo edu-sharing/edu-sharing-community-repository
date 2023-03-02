@@ -44,6 +44,11 @@ export class TranslationsService {
         }
         supportedLanguages$
             .pipe(
+                tap((supportedLanguages) => {
+                    if (!supportedLanguages.includes('none')) {
+                        supportedLanguages.push('none');
+                    }
+                }),
                 tap((supportedLanguages: string[]) => this.translate.addLangs(supportedLanguages)),
                 // Select queryParams.locale if set meaningfully
                 switchMap((supportedLanguages: string[]) =>

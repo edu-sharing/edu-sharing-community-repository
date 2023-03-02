@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;;
 
 
 @Schema(description = "")
-public class UserProfile  {
+public class UserProfile implements Serializable {
   
   private String firstName = null;
   private String lastName = null;

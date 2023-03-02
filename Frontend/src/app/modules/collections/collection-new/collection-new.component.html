@@ -176,12 +176,16 @@
             <img
               class="blurred-image"
               [src]="
-                currentCollection | appNodeImage: { maxWidth: 300, maxHeight: 300, crop: true }
+                currentCollection
+                  | esNodeImage: { maxWidth: 300, maxHeight: 300, crop: true }
+                  | async
               "
             />
             <img
               [src]="
-                currentCollection | appNodeImage: { maxWidth: 300, maxHeight: 300, crop: true }
+                currentCollection
+                  | esNodeImage: { maxWidth: 300, maxHeight: 300, crop: true }
+                  | async
               "
               class="card-image-preview"
             />

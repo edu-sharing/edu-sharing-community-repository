@@ -2,6 +2,7 @@ import { Component, Input, OnChanges, SimpleChanges, TemplateRef } from '@angula
 import { AVAILABLE_LIST_WIDGETS, ListWidgetType } from '../available-widgets';
 import { ListWidget } from '../list-widget';
 import { NodeEntriesGlobalService } from '../../node-entries/node-entries-global.service';
+import { UniversalNode } from '../../../common/definitions';
 
 @Component({
     selector: 'es-list-base',
@@ -20,7 +21,10 @@ export class ListBaseComponent extends ListWidget implements OnChanges {
 
     ngOnChanges(changes: SimpleChanges): void {
         if (this.node && this.item) {
-            this.customTemplate = this.nodeEntriesGlobalService.getCustomFieldTemplate(this.item);
+            this.customTemplate = this.nodeEntriesGlobalService.getCustomFieldTemplate(
+                this.item,
+                this.node as UniversalNode,
+            );
             if (this.customTemplate) {
                 this.widgetType = ListWidgetType.Custom;
             } else if (this.forceText) {

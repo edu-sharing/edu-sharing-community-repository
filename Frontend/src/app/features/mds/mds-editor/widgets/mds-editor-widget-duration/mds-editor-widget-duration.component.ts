@@ -28,7 +28,6 @@ export class MdsEditorWidgetDurationComponent extends MdsEditorWidgetBase implem
         this.initCurrentValue();
         this.sliderOptions.floor = this.widget.definition.min ?? 0;
         this.sliderOptions.ceil = this.widget.definition.max ?? 599;
-        console.log(this.widget.definition, this.sliderOptions);
         this.updateInput();
         this.widget.observeIsDisabled().subscribe((isDisabled) => {
             this.sliderOptions = {

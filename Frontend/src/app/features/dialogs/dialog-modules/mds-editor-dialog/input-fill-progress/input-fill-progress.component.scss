@@ -1,0 +1,57 @@
+@import '../../../../../core-ui-module/styles/variables';
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+
+    .status {
+        width: 100%;
+        flex-grow: 1;
+        background-color: #eee;
+        position: relative;
+        .current-bar {
+            position: absolute;
+            height: 100%;
+            transition: $transitionNormal all;
+        }
+        .minimum-bar,
+        .publish-bar {
+            position: absolute;
+            height: 100%;
+        }
+        .minimum-bar {
+            background-color: #777;
+        }
+        .publish-bar {
+            background-color: #aaa;
+        }
+        &.status-mandatory .current-bar {
+            background-color: $colorStatusNegative;
+        }
+        &.status-mandatoryForPublish .current-bar {
+            background-color: $colorStatusWarning;
+        }
+        &.status-recommended .current-bar {
+            background-color: $colorStatusRecommended;
+        }
+        &.status-finished .current-bar,
+        &.status-optional .current-bar {
+            background-color: $colorStatusPositive;
+        }
+    }
+    > label {
+        padding: 8px 0;
+        font-size: $fontSizeSmall;
+        text-align: center;
+        &.status-mandatory {
+            color: darken($colorStatusNegative, 20%);
+        }
+        &.status-mandatoryForPublish {
+            color: darken($colorStatusWarning, 20%);
+        }
+        .show-missing-button {
+            font-weight: bold;
+        }
+    }
+}

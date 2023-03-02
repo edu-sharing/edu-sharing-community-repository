@@ -60,10 +60,7 @@ export class MdsEditorWidgetLinkComponent
             if (Array.isArray(nodes)) {
                 this.mainnav.getDialogs().onRefresh.emit(nodes);
             }
-            this.mainnav.getDialogs().nodeMetadata = null;
-
-            this.mainnav.getDialogs().nodeMetadata = null;
-            this.mainnav.getDialogs().nodeTemplate = this.mdsEditorValues.nodes$.value[0];
+            this.dialogs.openNodeTemplateDialog({ node: this.mdsEditorValues.nodes$.value[0] });
         } else if (this.widgetName === 'contributor') {
             await MdsEditorWidgetAuthorComponent.openContributorDialog(
                 this.mdsEditorValues,

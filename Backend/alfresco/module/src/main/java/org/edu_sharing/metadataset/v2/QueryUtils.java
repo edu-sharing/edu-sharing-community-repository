@@ -35,7 +35,7 @@ public class QueryUtils {
         }
 
         query = replacer.replaceString(query,"${educontext}", NodeCustomizationPolicies.getEduSharingContext());
-query = replacer.replaceString(query, "${authority}", AuthenticationUtil.getFullyAuthenticatedUser());
+        query = replacer.replaceString(query, "${authority}", AuthenticationUtil.getFullyAuthenticatedUser());
         return query;
     }
 

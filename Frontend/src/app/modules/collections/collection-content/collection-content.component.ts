@@ -30,7 +30,6 @@ import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { ListItem } from '../../../core-module/ui/list-item';
 import {
     DropSource,
-    DropTarget,
     FetchEvent,
     InteractionType,
     ListEventInterface,
@@ -67,9 +66,7 @@ import { OptionsHelperService } from '../../../core-ui-module/options-helper.ser
 import { CollectionInfoBarComponent } from '../collection-info-bar/collection-info-bar.component';
 import { DialogType } from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import { DragData } from '../../../services/nodes-drag-drop.service';
-import { NodeEntriesDataType } from '../../../features/node-entries/node-entries.component';
 import { CanDrop } from '../../../shared/directives/nodes-drop-target.directive';
-import { DropData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 
 @Component({
     selector: 'es-collection-content',
@@ -85,10 +82,12 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         ],
         sortAscending: [false, true, false],
     };
+    referencesDisplayType = NodeEntriesDisplayType.Grid;
     private readonly destroyed$ = new Subject<void>();
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
+    readonly Scope = Scope;
 
     @Input() collection: Node;
     /**
@@ -258,6 +257,15 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 'OPTIONS.' + (this.isRootLevel ? 'NEW_COLLECTION' : 'NEW_SUB_COLLECTION');
             if (this.isRootLevel) {
                 // display root collections with tabs
+
+                // Use hardcoded sorting for root collection.
+                this.sortCollections.active = RestConstants.CM_MODIFIED_DATE;
+                this.sortCollections.direction = 'desc';
+                // To respect sort configuration of the mds, we would need to wait for it here.
+                //
+                // const sort = metadataSet.sorts.find(sort => sort.id === 'collections');
+                // this.sortCollections.active = sort?.default?.sortBy ?? RestConstants.CM_MODIFIED_DATE;
+                // this.sortCollections.direction = sort?.default?.sortAscending ? 'asc' : 'desc';
                 this.refreshContent();
             } else {
                 // load metadata of collection
@@ -287,7 +295,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         this.collection = collection;
                         this.mainNavUpdateTrigger.next();
                         this.dataSourceCollections.isLoading = false;
-
+                        this.setOptionsCollection();
                         this.refreshContent();
                         if (
                             this.collection.access.indexOf(
@@ -580,7 +588,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.mainNavService.setMainNavConfig({
             title: 'COLLECTIONS.TITLE',
             currentScope: 'collections',
-            searchEnabled: false,
             // TODO: document where this fails.
             //
             // onCreate: (nodes) => this.addNodesToCollection(nodes),
@@ -778,7 +785,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         setTimeout(() => {
             this.setOptionsCollection();
             this.listReferences?.initOptionsGenerator({
-                scope: Scope.CollectionsReferences,
                 actionbar: this.actionbarReferences,
                 parent: this.collection,
             });
@@ -943,9 +949,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                     );
                     this.dataSourceCollectionProposals.isLoading = false;
                     setTimeout(() => {
-                        this.listProposals?.initOptionsGenerator({
-                            scope: Scope.CollectionsProposals,
-                        });
+                        this.listProposals?.initOptionsGenerator({});
                     });
                 });
         }

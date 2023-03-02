@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import com.typesafe.config.Config;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.node.MLPropertyInterceptor;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
@@ -58,6 +59,7 @@ import org.edu_sharing.service.search.Suggestion;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.springframework.context.ApplicationContext;
+import org.springframework.extensions.surf.util.I18NUtil;
 
 public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.NodeService {
 
@@ -860,14 +862,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 prop1=cache.get(key1);
             }
             else{
-                prop1 = nodeServiceAlfresco.getProperty(n1, prop);
+                prop1 = getSortPropertyValue(n1, prop);
                 cache.put(key1,prop1);
             }
             if(cache.containsKey(key2)){
                 prop2=cache.get(key2);
             }
             else{
-                prop2 = nodeServiceAlfresco.getProperty(n2, prop);
+                prop2 = getSortPropertyValue(n2, prop);
                 cache.put(key2,prop2);
             }
             int compare=0;
@@ -898,8 +900,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 				if (compare == 0) {
 					// cast ml text to string
-					if(prop1 instanceof MLText && prop2 instanceof MLText) {
+					if(prop1 instanceof MLText) {
 						prop1 = ((MLText) prop1).getDefaultValue();
+					}
+					if(prop2 instanceof MLText) {
 						prop2 = ((MLText) prop2).getDefaultValue();
 					}
 					if (prop1 instanceof String && prop2 instanceof String) {
@@ -922,7 +926,20 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         return 0;
     }
 
-    @Override
+	private Serializable getSortPropertyValue(NodeRef ref, QName prop) {
+		Serializable value = nodeServiceAlfresco.getProperty(ref, prop);
+		//dbnodeservice returns mltext
+		if(value instanceof MLText){
+			value = ((MLText)value).getValue(I18NUtil.getLocale());
+		}
+
+		if(prop.toString().equals(CCConstants.LOM_PROP_GENERAL_TITLE) && StringUtils.isBlank((String)value)) {
+			return nodeServiceAlfresco.getProperty(ref, ContentModel.PROP_NAME);
+		}
+		return value;
+	}
+
+	@Override
 	public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String assocName, List<String> filter, SortDefinition sortDefinition){
 		NodeRef parentNodeRef = getParentRef(parentID);
         List<ChildAssociationRef> result;

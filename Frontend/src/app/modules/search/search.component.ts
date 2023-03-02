@@ -11,19 +11,16 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.component';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import {
     CollectionWrapper,
     ConfigurationHelper,
     ConfigurationService,
     DialogButton,
-    Facette,
     ListItem,
     ListItemSort,
     LoginResult,
     MdsInfo,
-    MdsMetadatasets,
     NetworkRepositories,
     Node,
     NodeList,
@@ -47,7 +44,6 @@ import { Helper } from '../../core-module/rest/helper';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
 import { OPEN_URL_MODE, UIConstants } from '../../core-module/ui/ui-constants';
-import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
 import {
     CustomOptions,
     DefaultGroups,
@@ -62,8 +58,10 @@ import { SearchService } from './search.service';
 import { WindowRefService } from './window-ref.service';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { FormControl } from '@angular/forms';
-import { BehaviorSubject, ReplaySubject, combineLatest, Observable, Subject } from 'rxjs';
+import * as rxjs from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import {
+    debounceTime,
     delay,
     distinctUntilChanged,
     first,
@@ -71,7 +69,6 @@ import {
     shareReplay,
     switchMap,
     takeUntil,
-    tap,
 } from 'rxjs/operators';
 import { MatTabGroup } from '@angular/material/tabs';
 import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
@@ -81,23 +78,27 @@ import {
     MdsDefinition,
     MdsService,
     MetadataSetInfo,
+    NetworkService,
     SearchResults,
     SearchService as SearchApiService,
 } from 'ngx-edu-sharing-api';
-import * as rxjs from 'rxjs';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Values } from '../../features/mds/types/types';
 import {
-    NodeEntriesDisplayType,
     InteractionType,
     ListSortConfig,
+    NodeEntriesDisplayType,
     FetchEvent,
 } from 'src/app/features/node-entries/entries-model';
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';
+import { CombinedDataSource } from '../../features/node-entries/combined-data-source';
+import { values } from 'lodash';
+import { Sort } from '@angular/material/sort/sort';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
+import { DialogsService } from '../../features/dialogs/dialogs.service';
 
 @Component({
     selector: 'es-search',
@@ -123,7 +124,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     toolPermissions: string[];
     innerWidth: number = 0;
     breakpoint: number = 800;
-    initalized: boolean;
     tutorialElement: ElementRef;
     mdsExtended = false;
     private collectionsMoreSubject = new BehaviorSubject(false);
@@ -176,7 +176,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     extendedRepositorySelected = false;
     savedSearch: Node[] = [];
     savedSearchColumns: ListItem[] = [];
-    saveSearchDialog = false;
     savedSearchLoading = false;
     savedSearchQuery: string = null;
     savedSearchQueryModel: string = null;
@@ -196,7 +195,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     private enabledRepositories: string[];
     // we only initalize the banner once to prevent flickering
     private bannerInitalized = false;
-    currentValues: Values;
     private currentMdsSet: MdsDefinition;
     mdsActions: OptionItem[];
     mdsButtons: DialogButton[];
@@ -238,7 +236,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private config: ConfigurationService,
         private uiService: UIService,
         private optionsHelper: OptionsHelperService,
-        private network: RestNetworkService,
+        private network: NetworkService,
         private temporaryStorageService: TemporaryStorageService,
         private searchField: SearchFieldService,
         private searchApi: SearchApiService,
@@ -246,14 +244,15 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private ngZone: NgZone,
         private loadingScreen: LoadingScreenService,
         private mainNavService: MainNavService,
+        private dialogs: DialogsService,
     ) {
         // Subscribe early to make sure the suggestions are requested with search requests.
         this.didYouMeanSuggestion$.pipe(takeUntil(this.destroyed$)).subscribe();
     }
 
     ngOnInit(): void {
-        this.registerScrollHandler();
         this.registerMainNav();
+        this.scrollTo(this.searchService.offset);
         this.breadcrumbsService.setNodePath(null);
     }
 
@@ -262,34 +261,31 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.mainNavService.getMainNav().refreshBanner();
         setTimeout(() => {
             this.initAfterView();
+            this.registerScrollHandler();
         });
     }
 
     ngOnDestroy() {
+        if (
+            !this.router.routerState.snapshot.url.startsWith(
+                '/' + UIConstants.ROUTER_PREFIX + 'render',
+            )
+        ) {
+            this.searchService.clear();
+            this.searchService.reinit = true;
+            this.searchService.mdsInitialized = false;
+            this.searchService.init();
+        }
         this.temporaryStorageService.set(
             TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE,
-            this.searchService.dataSourceSearchResult[0],
+            this.searchService.dataSourceSearchResult,
         );
         this.destroyed$.next();
         this.destroyed$.complete();
     }
 
-    private initAfterView(): void {
-        // For some reason, the main nav component does not get populated in time when navigating
-        // back from the rendering component. However, since the user cannot go anywhere without
-        // closing the tutorial, we won't be needing it in this case anyway.
-        if (this.mainNavService.getMainNav().searchField) {
-            this.tutorialElement = this.mainNavService.getMainNav().searchField.input;
-        }
-        this.handleScroll();
-        this.searchService.clear();
-        this.initalized = true;
-        this.searchService.clear();
-        if (this.searchService.reinit) {
-            this.searchService.init();
-            this.initalized = false;
-            this.searchService.dataSourceSearchResult[0].isLoading = true;
-        }
+    private async initAfterView() {
+        // this.tutorialElement = this.mainNavService.getMainNav().searchField.input;
         this.savedSearchColumns.push(new ListItem('NODE', RestConstants.LOM_PROP_TITLE));
         this.optionsHelper.displayTypeChanged
             .pipe(takeUntil(this.destroyed$))
@@ -302,8 +298,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.searchService.sidenavOpened$
             .pipe(takeUntil(this.destroyed$))
             .subscribe(() => this.extendedSearchTabGroup?.realignInkBar());
-
-        this.scrollTo(this.searchService.offset);
         this.innerWidth = this.winRef.getNativeWindow().innerWidth;
         //this.autocompletesArray = this.autocompletes.toArray();
         this.registerSearchOnMdsUpdate();
@@ -322,24 +316,16 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             }
         }
         this.printListener();
-        if (this.searchService.displayType == null) {
-            this.setDisplayType(
-                this.config.instant(
-                    'searchViewType',
-                    this.config.instant('searchViewType', NodeEntriesDisplayType.Grid),
-                ),
-            );
-        }
         this.groupResults = this.config.instant('searchGroupResults', false);
 
         this.connector
             .hasToolPermission(RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT)
             .subscribe((unchecked) => {
                 this.network.getRepositories().subscribe(
-                    (data: NetworkRepositories) => {
-                        this.allRepositories = Helper.deepCopy(data.repositories);
+                    (repositories) => {
+                        this.allRepositories = Helper.deepCopy(repositories);
                         this.repositories = ConfigurationHelper.filterValidRepositories(
-                            data.repositories,
+                            repositories,
                             this.config,
                             !unchecked,
                         );
@@ -397,27 +383,33 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     create: { allowed: this.isHomeRepository(), allowBinary: true },
                 }),
         );
-        this.searchService.searchTermSubject
-            .pipe(takeUntil(this.destroyed$))
-            .subscribe((searchTerm) =>
-                this.mainNavService.patchMainNavConfig({ searchQuery: searchTerm }),
-            );
+        // this.searchService.searchTermSubject
+        //     .pipe(takeUntil(this.destroyed$))
+        //     .subscribe((searchTerm) => this.searchField.setSearchString(searchTerm));
     }
 
     private initMainNav(): void {
         this.mainNavService.setMainNavConfig({
             title: 'SEARCH.TITLE',
             currentScope: 'search',
-            searchEnabled: true,
-            searchPlaceholder: 'SEARCH.SEARCH_STUFF',
             canOpen: true,
             // Why do we need this, when the top bar is hidden anyway?
             // showScope: this.mainnav,
             // showUser: this.mainnav,
-            searchQueryChange: (searchQuery) => (this.searchService.searchTerm = searchQuery),
-            onSearch: () => this.applyParameters('mainnav'),
             onCreate: (nodes) => this.nodeEntriesResults.addVirtualNodes(nodes),
         });
+        const searchFieldInstance = this.searchField.enable(
+            {
+                placeholder: 'SEARCH.SEARCH_STUFF',
+            },
+            this.destroyed$,
+        );
+        searchFieldInstance
+            .onSearchStringChanged()
+            .subscribe((searchString) => (this.searchService.searchTerm = searchString));
+        searchFieldInstance
+            .onSearchTriggered()
+            .subscribe((event) => this.applyParameters('mainnav', null, event.searchString, null));
     }
 
     registerScrollHandler(): void {
@@ -446,31 +438,100 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     setRepository(repository: string) {
-        this.routeSearch(null, repository, null, {});
+        this.routeSearch(null, repository, null, null, {});
     }
 
     acceptDidYouMeanSuggestion(text: string): void {
-        this.searchService.searchTerm = text;
-        this.applyParameters('did-you-mean-suggestion');
+        this.applyParameters('did-you-mean-suggestion', null, text, this.searchService.sort);
     }
 
     async applyParameters(
-        origin: 'mainnav' | 'mds' | 'did-you-mean-suggestion' | 'sort',
-        props: Values = null,
-        { replaceUrl = false } = {},
+        origin: 'mainnav' | 'mds' | 'did-you-mean-suggestion' | 'sort' | 'uri',
+        props: Values,
+        query: string,
+        sort: Sort,
+        { replaceUrl = false, force = false } = {},
     ) {
+        console.info('routing', origin, props, sort, query);
+        if (origin === 'mds') {
+            this.searchService.mdsInitialized = true;
+            // do not route search - it can cause reset of the scroll offset of the page
+            if (Helper.objectEquals(this.searchService.values, props)) {
+                await this.applyParameters(
+                    'uri',
+                    props,
+                    this.searchService.searchTerm,
+                    this.searchService.sort,
+                );
+            } else {
+                await this.routeSearchParameters(
+                    this.searchService.searchTerm,
+                    this.searchService.sort,
+                    props,
+                    {
+                        replaceUrl,
+                    },
+                );
+            }
+            return;
+        }
+        if (origin === 'mainnav' || origin === 'did-you-mean-suggestion') {
+            const values = this.searchService.values;
+            await this.routeSearchParameters(
+                query,
+                this.searchService.sort,
+                this.searchService.values,
+                { replaceUrl },
+            );
+            return;
+        }
+        if (origin === 'sort') {
+            await this.routeSearchParameters(
+                this.searchService.searchTerm,
+                sort,
+                this.searchService.values,
+                { replaceUrl },
+            );
+            return;
+        }
+        if (
+            origin === 'uri' &&
+            Helper.objectEquals(this.searchService.values, props) &&
+            this.searchService.searchTerm === query &&
+            this.searchService.sort.active === sort.active &&
+            this.searchService.sort.direction === sort.direction &&
+            this.getDataSource()?.isEmpty() === false
+        ) {
+            console.info('init is already done');
+            this.initOptions();
+            this.mainNavService.getMainNav()?.refreshBanner();
+            return;
+        }
+        if (this.searchService.searchTerm !== query) {
+            console.info(this.searchService.searchTerm, query);
+            this.searchService.searchTerm = query;
+        }
+        this.searchService.values = props ?? {};
+        if (!this.searchService.sort) {
+            this.updateSortState();
+        }
+        this.searchService.sort.active = sort.active;
+        this.searchService.sort.direction = sort.direction;
+
+        if (origin === 'uri' && !this.searchService.mdsInitialized) {
+            console.info('ignoring routing - mds not ready yet');
+            return;
+        }
+
         this.searchService.reinit = true;
         this.searchService.extendedSearchUsed = true;
-        if (origin === 'mds') {
-            this.currentValues = props;
-        }
         this.updateGroupedRepositories();
         if (
             UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_WIDTH, UIConstants.MOBILE_WIDTH)
         ) {
             this.searchService.sidenavOpened = false;
         }
-        await this.routeSearchParameters(props, { replaceUrl });
+        // await this.routeSearchParameters(query, props, { replaceUrl });
         this.getSearch(this.searchService.searchTerm, true);
     }
 
@@ -504,15 +565,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     scrollTo(y = 0) {
+        console.info('Scroll to', y);
         this.winRef.getNativeWindow().scrollTo(0, y);
         // fix: prevent upscrolling in prod mode
         setTimeout(() => this.winRef.getNativeWindow().scrollTo(0, y));
-    }
-
-    handleFocus(event: Event) {
-        if (this.innerWidth < this.breakpoint) {
-            this.scrollTo();
-        }
     }
 
     isMobileHeight() {
@@ -551,24 +607,22 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.searchService.sidenavSet) return false;
         this.searchService.sidenavSet = true;
         if (this.innerWidth < this.breakpoint) {
-            this.searchService.sidenavOpened = false;
+            this.searchService.sidenavOpened$.next(false);
         } else {
-            this.searchService.sidenavOpened = true;
+            this.searchService.sidenavOpened$.next(true);
         }
         return true;
     }
 
     routeSearchParameters(
+        query = this.searchService.searchTerm,
+        sort: Sort,
         parameters: { [property: string]: string[] },
         { replaceUrl = false } = {},
     ) {
-        this.routeSearch(
-            this.searchService.searchTerm,
-            this.currentRepository,
-            this.mdsId,
-            parameters,
-            { replaceUrl },
-        );
+        return this.routeSearch(query, this.currentRepository, this.mdsId, sort, parameters, {
+            replaceUrl,
+        });
     }
 
     async getMdsValues(): Promise<{ [property: string]: string[] }> {
@@ -586,13 +640,14 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if (!query.cleared) {
             this.uiService.hideKeyboardIfMobile();
         }
-        this.routeSearch(query.query, this.currentRepository, this.mdsId);
+        this.routeSearch(query.query, this.currentRepository, this.mdsId, this.searchService.sort);
     }
 
     async routeSearch(
         query = this.searchService.searchTerm,
         repository = this.currentRepository,
         mds = this.mdsId,
+        sort: Sort,
         parameters?: { [property: string]: string[] },
         { replaceUrl = false } = {},
     ) {
@@ -602,66 +657,60 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if (repository !== this.currentRepository) {
             parameters = null;
         }
-        this.scrollTo();
-        UIHelper.getCommonParameters(this.activatedRoute).subscribe(async (queryParams) => {
-            queryParams.addToCollection = this.addToCollection ? this.addToCollection.ref.id : null;
-            queryParams.query = query;
-            queryParams.parameters =
-                parameters && Object.keys(parameters) ? JSON.stringify(parameters) : null;
-            queryParams.repositoryFilter = this.getEnabledRepositories().join(',');
-            queryParams.mds = mds;
-            queryParams.repository = repository;
-            queryParams.mdsExtended = this.mdsExtended;
-            queryParams.sidenav = this.searchService.sidenavOpened;
-            queryParams.materialsSortBy = this.searchService.sort.active;
-            queryParams.materialsSortAscending = this.searchService.sort.direction === 'asc';
-            const result = await this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
-                queryParams,
-                replaceUrl,
-            });
-            if (result !== true) {
-                // this.invalidateMds();
-                // this.searchService.init();
-            }
+        const queryParams = await UIHelper.getCommonParameters(this.activatedRoute).toPromise();
+        queryParams.addToCollection = this.addToCollection ? this.addToCollection.ref.id : null;
+        queryParams.query = query;
+        queryParams.parameters =
+            parameters && Object.keys(parameters) ? JSON.stringify(parameters) : null;
+        queryParams.repositoryFilter = this.getEnabledRepositories().join(',');
+        queryParams.mds = mds;
+        queryParams.repository = repository;
+        queryParams.mdsExtended = this.mdsExtended;
+        queryParams.sidenav = this.searchService.sidenavOpened;
+        if (sort) {
+            queryParams.materialsSortBy = sort.active;
+            queryParams.materialsSortAscending = sort.direction === 'asc';
+        }
+        console.info('route', queryParams);
+        return await this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
+            queryParams,
+            replaceUrl,
         });
     }
 
     getSearch(searchString: string = null, init = false, event: FetchEvent = null) {
         if ((this.isSearching && init) || this.repositoryIds.length == 0) {
-            /*setTimeout(
-                () => this.getSearch(searchString, init),
-                100,
-            );*/
+            // dirty fix for legacy search
+            setTimeout(() => this.getSearch(searchString, init), 16);
             return;
         }
         if (this.isSearching && !init) {
             return;
         }
         this.isSearching = true;
-        this.searchService.dataSourceSearchResult[0].isLoading = true;
         if (searchString == null) searchString = this.searchService.searchTerm;
         if (searchString == null) searchString = '';
-        this.searchService.searchTerm = searchString;
         if (init) {
             this.searchService.init();
         } else if (
-            this.searchService.dataSourceSearchResult[0]?.getData()?.length >
+            this.searchService.dataSourceSearchResult?.getData()?.length >
             SearchComponent.MAX_ITEMS_COUNT
         ) {
-            this.searchService.dataSourceSearchResult[0].isLoading = false;
+            this.getDataSource().isLoading = false;
             this.searchService.complete = true;
             this.isSearching = false;
             return;
         }
+        this.getDataSource().isLoading = true;
 
-        const criterias = this.getCriterias(this.currentValues, searchString);
+        const criterias = this.getCriterias(this.searchService.values, searchString);
 
         const repos =
             this.currentRepository == RestConstants.ALL
                 ? this.repositoryIds
                 : [{ id: this.currentRepository, enabled: true }];
-        this.searchField.setFilterValues(this.currentValues);
-        this.searchRepository(repos, criterias, init, event);
+        // this.searchField.setFilterValues(this.searchService.values);
+        this.searchRepository(repos, criterias, init);
 
         if (init) {
             this.searchService.dataSourceCollections.reset();
@@ -693,7 +742,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             .searchWithBody(
                 {
                     criteria: this.getCriterias(
-                        this.currentValues,
+                        this.searchService.values,
                         this.searchService.searchTerm,
                         false,
                     ),
@@ -782,15 +831,16 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     setDisplayType(type: NodeEntriesDisplayType) {
-        this.searchService.displayType = type;
-        this.router.navigate(['./'], {
-            relativeTo: this.activatedRoute,
-            queryParams: {
-                displayType: type ?? null,
-            },
-            queryParamsHandling: 'merge',
-            replaceUrl: true,
-        });
+        if (this.searchService.displayType !== type) {
+            this.router.navigate(['./'], {
+                relativeTo: this.activatedRoute,
+                queryParams: {
+                    displayType: type ?? null,
+                },
+                queryParamsHandling: 'merge',
+                replaceUrl: true,
+            });
+        }
     }
 
     processSearchResult(data: SearchList, init: boolean) {
@@ -803,7 +853,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         */
         this.searchService.ignored = data.ignored;
         if (data.nodes.length < 1 && this.currentRepository != RestConstants.ALL) {
-            this.searchService.dataSourceSearchResult[0].isLoading = false;
+            this.getDataSource().isLoading = false;
             this.isSearching = false;
             this.searchService.complete = true;
             return;
@@ -829,13 +879,18 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     // }
 
     updateMds() {
-        this.currentValues = null;
-        this.routeSearch(this.searchService.searchTerm, this.currentRepository, this.mdsId, null);
+        this.searchService.values = null;
+        this.routeSearch(
+            this.searchService.searchTerm,
+            this.currentRepository,
+            this.mdsId,
+            this.searchService.sort,
+            null,
+        );
     }
 
     updateSort(sort: ListSortConfig) {
-        this.searchService.sort = sort;
-        this.applyParameters('sort');
+        this.applyParameters('sort', null, null, sort);
     }
 
     permissionAddToCollection(node: Node) {
@@ -881,6 +936,15 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.uiService.waitForComponent(this, 'mdsMobileRef').subscribe(() => {
                 this.mdsMobileRef.loadMds();
             });
+        } else {
+            // do not enable, this causes scroll to top when the extended search is toggled!
+            /*this.router.navigate(['./'], {
+                relativeTo: this.activatedRoute,
+                queryParamsHandling: 'merge',
+                queryParams: {
+                    sidenav: this.searchService.sidenavOpened,
+                },
+            });*/
         }
         setTimeout(() => {
             // recalculate the filter layout
@@ -1035,20 +1099,17 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.updateColumns();
         this.updateSortState();
         if (
-            !this.searchService.dataSourceSearchResult[0] ||
-            this.searchService.dataSourceSearchResult[0]?.isEmpty()
+            !this.searchService.dataSourceSearchResult ||
+            this.searchService.dataSourceSearchResult?.isEmpty()
         ) {
-            this.initalized = true;
-            if (!this.currentValues && this.getActiveMds()) {
-                this.currentValues = await this.getMdsValues();
+            if (!this.searchService.values && this.getActiveMds()) {
+                // this.applyParameters('mds', await this.getMdsValues(), null);
             }
         }
         if (this.mainNavService.getMainNav() && !this.bannerInitalized) {
             await this.mainNavService.getMainNav().refreshBanner();
-            this.handleScroll();
             this.bannerInitalized = true;
         }
-        this.searchService.reinit = true;
     }
 
     private prepare(param: Params): void {
@@ -1074,18 +1135,23 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.mdsExtended = false;
             this.loadSavedSearch();
             if (param['mdsExtended']) this.mdsExtended = param['mdsExtended'] == 'true';
+            let sort: Sort;
             if (param['materialsSortBy']) {
-                // set a valid state first
-                this.updateSortState();
-                this.searchService.sort.active = param['materialsSortBy'];
-                this.searchService.sort.direction =
-                    param['materialsSortAscending'] === 'true' ? 'asc' : 'desc';
+                sort = {
+                    active: param['materialsSortBy'],
+                    direction: param['materialsSortAscending'] === 'true' ? 'asc' : 'desc',
+                };
+            } else {
+                sort = {
+                    active: this.updateSortMds()?.default?.sortBy,
+                    direction: this.updateSortMds()?.default?.sortAscending ? 'asc' : 'desc',
+                };
             }
             if (param.parameters) {
                 this.searchService.extendedSearchUsed = true;
-                this.currentValues = JSON.parse(param['parameters']);
-            } else if (this.currentValues) {
-                this.currentValues = null;
+                this.applyParameters('uri', JSON.parse(param.parameters), param.query, sort);
+            } else if (this.searchService.values) {
+                this.applyParameters('uri', null, param.query, sort);
             }
             if (param['savedQuery']) {
                 this.nodeApi
@@ -1096,7 +1162,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             } else {
                 this.invalidateMds();
             }
-            this.searchService.init();
         });
     }
 
@@ -1107,7 +1172,33 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     private getCurrentNode(node: Node) {
         return node ? node : this.getSelection()[0];
     }
-
+    private callSearchApi(
+        repo: any,
+        metadataset: string,
+        request: any,
+        criteria: any,
+        permissions: string[],
+        neededFacets: string[],
+    ) {
+        return this.searchApi.search({
+            body: {
+                criteria,
+                facets: neededFacets,
+                permissions,
+                facetLimit: 5,
+                facetMinCount: 1,
+            },
+            skipCount: request.offset,
+            maxItems: request.count ?? this.search.getRestConnector().numberPerRequest,
+            sortProperties: request.sortBy,
+            sortAscending: request.sortAscending,
+            propertyFilter: request.propertyFilter[0],
+            contentType: 'FILES',
+            repository: repo ? repo.id : RestConstants.HOME_REPOSITORY,
+            metadataset,
+            query: RestConstants.DEFAULT_QUERY_NAME,
+        });
+    }
     private searchRepository(
         repos: any[],
         criteria: SearchRequestCriteria[],
@@ -1119,14 +1210,14 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         console.log(event);
         if (position > 0 && position >= repos.length) {
             this.searchService.numberofresults = event?.amount;
-            this.searchService.dataSourceSearchResult[0].isLoading = false;
+            this.getDataSource().isLoading = false;
             this.isSearching = false;
             return;
         }
         if (event?.reset) {
-            this.searchService.dataSourceSearchResult[0].reset();
+            this.getDataSource().reset();
         }
-        this.searchService.dataSourceSearchResult[0].isLoading = true;
+        this.getDataSource().isLoading = true;
         let repo = repos[position];
         if (!repo.enabled) {
             this.searchRepository(repos, criteria, init, event, position + 1);
@@ -1161,37 +1252,29 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.currentRepository == RestConstants.ALL && !this.groupResults
                     ? Math.max(5, Math.round(count / (this.repositories.length - 1)))
                     : count,
-            offset: event?.offset || 0,
+            offset:
+                (this.currentRepository === RestConstants.ALL
+                    ? this.searchService.dataSourceSearchResultAll
+                          .getDatasource(position)
+                          ?.getData()?.length
+                    : event?.offset) || 0,
             propertyFilter: [properties],
         };
         let permissions: string[];
         if (this.applyMode) {
             permissions = [RestConstants.ACCESS_CC_PUBLISH];
         }
-        let queryRequest: Observable<SearchResults | NodeList> =
-            this.mdsDesktopRef.mdsEditorInstance.getNeededFacets().pipe(
+        let queryRequest: Observable<SearchResults | NodeList>;
+        if (this.currentRepository === RestConstants.ALL) {
+            queryRequest = this.callSearchApi(repo, mdsId, request, criteria, permissions, null);
+        } else {
+            queryRequest = this.mdsDesktopRef.mdsEditorInstance.getNeededFacets().pipe(
                 first(),
                 switchMap((neededFacets) =>
-                    this.searchApi.search({
-                        body: {
-                            criteria,
-                            facets: neededFacets,
-                            permissions,
-                            facetLimit: 5,
-                            facetMinCount: 1,
-                        },
-                        skipCount: request.offset,
-                        maxItems: request.count ?? this.search.getRestConnector().numberPerRequest,
-                        sortProperties: request.sortBy,
-                        sortAscending: request.sortAscending,
-                        propertyFilter: request.propertyFilter[0],
-                        contentType: 'FILES',
-                        repository: repo ? repo.id : RestConstants.HOME_REPOSITORY,
-                        metadataset: mdsId,
-                        query: RestConstants.DEFAULT_QUERY_NAME,
-                    }),
+                    this.callSearchApi(repo, mdsId, request, criteria, permissions, neededFacets),
                 ),
             );
+        }
         const useFrontpage =
             !this.searchService.searchTerm &&
             !this.searchService.extendedSearchUsed &&
@@ -1206,24 +1289,21 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         queryRequest.subscribe(
             async (data: SearchList) => {
-                if (!this.searchService.dataSourceSearchResult[position] || event?.reset) {
-                    this.searchService.dataSourceSearchResult[position] =
-                        new NodeDataSource<Node>();
-                    this.searchService.dataSourceSearchResult[position].setData(
-                        data.nodes,
-                        data.pagination,
-                    );
+                if (this.currentRepository === RestConstants.ALL) {
+                    this.searchService.dataSourceSearchResultAll
+                        .getDatasource(position)
+                        .appendData(data.nodes);
+                    this.searchService.dataSourceSearchResultAll
+                        .getDatasource(position)
+                        .setPagination(data.pagination);
                 } else {
-                    this.searchService.dataSourceSearchResult[position].appendData(data.nodes);
-                    this.searchService.dataSourceSearchResult[position].setPagination(
-                        data.pagination,
-                    );
+                    if (event?.reset) {
+                        this.searchService.dataSourceSearchResult.reset();
+                    }
+                    this.searchService.dataSourceSearchResult.appendData(data.nodes);
+                    this.searchService.dataSourceSearchResult.setPagination(data.pagination);
                 }
-                await this.nodeEntriesResults.initOptionsGenerator({
-                    actionbar: this.actionbarComponent,
-                    customOptions: this.customOptions,
-                    scope: Scope.Search,
-                });
+                this.initOptions();
                 this.searchService.isFrontpage = useFrontpage && tryFrontpage;
                 this.processSearchResult(data, init);
                 this.searchService.showchosenfilters = true;
@@ -1287,7 +1367,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.applyMode ? 'SEARCH.EMBED_SEARCH_ACTION' : 'SEARCH.SAVE_SEARCH_ACTION',
                     this.applyMode ? 'redo' : 'save',
                     () => {
-                        this.saveSearchDialog = true;
+                        this.openSaveSearchDialog();
                     },
                 ),
             );
@@ -1300,7 +1380,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             );
         }
         const searchAction = new OptionItem('SEARCH.APPLY_FILTER', 'search', async () => {
-            this.applyParameters('mds', await this.getActiveMds().getValues());
+            this.applyParameters('mds', await this.getActiveMds().getValues(), null, null);
         });
         searchAction.isPrimary = true;
         if (this.mdsDesktopRef?.editorType === 'legacy') {
@@ -1309,54 +1389,23 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.mdsButtons = DialogButton.fromOptionItem([searchAction]);
     }
 
-    closeSaveSearchDialog() {
-        this.saveSearchDialog = false;
-    }
-
-    saveSearch(name: string, replace = false) {
-        this.search
-            .saveSearch(
-                name,
-                this.queryId,
-                this.getCriterias(),
-                this.currentRepository,
-                this.mdsId,
-                replace,
-            )
-            .subscribe(
-                (data: NodeWrapper) => {
-                    this.saveSearchDialog = false;
-                    this.toast.toast('SEARCH.SAVE_SEARCH.TOAST_SAVED');
-                    this.loadSavedSearch();
-                    if (this.applyMode) {
-                        this.nodeHelper.addNodeToLms(data.node, this.searchService.reurl);
-                    }
-                },
-                (error: any) => {
-                    if (error.status === RestConstants.DUPLICATE_NODE_RESPONSE) {
-                        this.toast.showConfigurableDialog({
-                            title: 'SEARCH.SAVE_SEARCH.SEARCH_EXISTS_TITLE',
-                            message: 'SEARCH.SAVE_SEARCH.SEARCH_EXISTS_MESSAGE',
-                            buttons: [
-                                new DialogButton('RENAME', { color: 'standard' }, () =>
-                                    this.toast.closeModalDialog(),
-                                ),
-                                new DialogButton('REPLACE', { color: 'primary' }, () => {
-                                    this.toast.closeModalDialog();
-                                    this.saveSearch(name, true);
-                                }),
-                            ],
-                            isCancelable: true,
-                        });
-                    } else {
-                        this.toast.error(error);
-                    }
-                },
-            );
+    private async openSaveSearchDialog(): Promise<void> {
+        const dialogRef = await this.dialogs.openSaveSearchDialog({
+            name: this.currentSavedSearch ? this.currentSavedSearch.title : null,
+            searchString: this.searchService.searchTerm,
+        });
+        dialogRef.afterClosed().subscribe((savedSearch) => {
+            if (savedSearch) {
+                this.loadSavedSearch();
+                if (this.applyMode) {
+                    this.nodeHelper.addNodeToLms(savedSearch.node, this.searchService.reurl);
+                }
+            }
+        });
     }
 
     private getCriterias(
-        properties = this.currentValues,
+        properties = this.searchService.values,
         searchString = this.searchService.searchTerm,
         addAll = true,
     ) {
@@ -1369,7 +1418,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if (!addAll) return criterias;
         if (properties) {
             criterias = criterias.concat(
-                RestSearchService.convertCritierias(properties, this.getActiveMds().currentWidgets),
+                RestSearchService.convertCritierias(
+                    properties,
+                    this.getActiveMds()?.currentWidgets || [],
+                ),
             );
         }
         if (this.oldParams.reurlTypes) {
@@ -1433,9 +1485,12 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private async invalidateMds() {
         if (this.currentRepository == RestConstants.ALL) {
-            this.onMdsReady();
+            await this.onMdsReady();
+            this.searchAll();
         } else {
-            await this.getActiveMds().loadMds();
+            if (!this.searchService.mdsInitialized) {
+                await this.getActiveMds().loadMds();
+            }
             //this.onMdsReady();
             //this.getActiveMds().loadMds();
         }
@@ -1443,27 +1498,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private initParams() {
         this.activatedRoute.queryParams.pipe(takeUntil(this.destroyed$)).subscribe((param) => {
-            if (this.oldParams) {
-                // check if reinit can be skipped (e.g. if only view relevant params changed)
-                let reinit = false;
-                for (const key of Object.keys(param || {}).concat(Object.keys(this.oldParams))) {
-                    if (this.oldParams[key] === param[key]) {
-                        continue;
-                    }
-                    if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE || key === 'nodeStore') {
-                        continue;
-                    }
-                    reinit = true;
-                }
-                this.oldParams = param;
-                if (!reinit) {
-                    return;
-                }
-            } else {
-                this.oldParams = param;
-            }
-
-            this.searchService.init();
+            this.oldParams = param;
             this.mainNavService.getMainNav().refreshBanner();
             if (!this.loadingTask.isDone) {
                 this.loadingTask.done();
@@ -1471,8 +1506,16 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.hasCheckbox = true;
             this.searchService.reurl = null;
             if (param.displayType != null) {
-                this.setDisplayType(parseInt(param.displayType, 10));
+                this.searchService.displayType = parseInt(param.displayType, 10);
+            } else if (this.searchService.displayType == null) {
+                this.setDisplayType(
+                    this.config.instant(
+                        'searchViewType',
+                        this.config.instant('searchViewType', NodeEntriesDisplayType.Grid),
+                    ),
+                );
             }
+
             if (param.addToCollection) {
                 const addTo = new OptionItem(
                     'SEARCH.ADD_INTO_COLLECTION_SHORT',
@@ -1530,9 +1573,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             if (param.sidenav) {
                 this.searchService.sidenavOpened = param.sidenav !== 'false';
             }
-            if (param.query) {
-                this.searchService.searchTerm = param.query;
-            }
             if (param.repositoryFilter) {
                 this.enabledRepositories = param['repositoryFilter'].split(',');
                 // do a reload of the repos
@@ -1547,8 +1587,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.mdsSets = null;
             if (this.currentRepository != paramRepo) {
                 this.mdsId = RestConstants.DEFAULT;
+                this.currentRepository = paramRepo;
             }
-            this.currentRepository = paramRepo;
             this.updateRepositoryOrder();
             this.updateCurrentRepositoryId();
             if (
@@ -1566,49 +1606,58 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                         use[0],
                     use,
                 );
-                this.routeSearch(this.searchService.searchTerm, use[0], RestConstants.DEFAULT);
+                this.routeSearch(
+                    this.searchService.searchTerm,
+                    use[0],
+                    RestConstants.DEFAULT,
+                    this.searchService.sort,
+                );
             }
             if (this.currentRepository != previousRepository) {
-                this.currentValues = null;
+                this.searchService.values = null;
             }
             this.updateSelection([]);
             let repo = this.currentRepository;
-            this.mds.getAvailableMetadataSets(repo).subscribe(
-                (metadataSets: MetadataSetInfo[]) => {
-                    if (repo != this.currentRepository) {
-                        return;
-                    }
-                    this.mdsSets = ConfigurationHelper.filterValidMds(
-                        this.currentRepositoryObject
-                            ? this.currentRepositoryObject
-                            : this.currentRepository,
-                        metadataSets,
-                        this.config,
-                    );
-                    if (this.mdsSets) {
-                        UIHelper.prepareMetadatasets(this.translate, this.mdsSets);
-                        try {
-                            this.mdsId = this.mdsSets[0].id;
-                            if (
-                                param.mds &&
-                                Helper.indexOfObjectArray(this.mdsSets, 'id', param.mds) !== -1
-                            ) {
-                                this.mdsId = param.mds;
-                            }
-                        } catch (e) {
-                            console.warn('got invalid mds list from repository:');
-                            console.warn(this.mdsSets);
-                            console.warn('will continue with default mds');
-                            this.mdsId = RestConstants.DEFAULT;
+            this.mds
+                .getAvailableMetadataSets(
+                    repo === RestConstants.ALL ? RestConstants.HOME_REPOSITORY : repo,
+                )
+                .subscribe(
+                    (metadataSets: MetadataSetInfo[]) => {
+                        if (repo != this.currentRepository) {
+                            return;
                         }
+                        this.mdsSets = ConfigurationHelper.filterValidMds(
+                            this.currentRepositoryObject
+                                ? this.currentRepositoryObject
+                                : this.currentRepository,
+                            metadataSets,
+                            this.config,
+                        );
+                        if (this.mdsSets) {
+                            UIHelper.prepareMetadatasets(this.translate, this.mdsSets);
+                            try {
+                                this.mdsId = this.mdsSets[0].id;
+                                if (
+                                    param.mds &&
+                                    Helper.indexOfObjectArray(this.mdsSets, 'id', param.mds) !== -1
+                                ) {
+                                    this.mdsId = param.mds;
+                                }
+                            } catch (e) {
+                                console.warn('got invalid mds list from repository:');
+                                console.warn(this.mdsSets);
+                                console.warn('will continue with default mds');
+                                this.mdsId = RestConstants.DEFAULT;
+                            }
+                            this.prepare(param);
+                        }
+                    },
+                    (error: any) => {
+                        this.mdsId = RestConstants.DEFAULT;
                         this.prepare(param);
-                    }
-                },
-                (error: any) => {
-                    this.mdsId = RestConstants.DEFAULT;
-                    this.prepare(param);
-                },
-            );
+                    },
+                );
         });
     }
 
@@ -1653,7 +1702,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         // Don't create a new browser-history entry for the initial mds values update, so the back
         // navigation will skip the resulting redirect.
         let initDone = false;
-        rxjs.merge(this.searchField.filterValuesChange, this.mdsDesktopRef.mdsEditorInstance.values)
+        rxjs.merge(
+            // this.searchField.onFilterValuesChanged(this.destroyed$),
+            this.mdsDesktopRef.mdsEditorInstance.values,
+        )
             .pipe(
                 takeUntil(this.destroyed$),
                 map((valuesDict) =>
@@ -1666,10 +1718,21 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 ),
                 map((valuesDict) => JSON.stringify(valuesDict)),
                 distinctUntilChanged(),
+                debounceTime(250),
                 map((json) => JSON.parse(json)),
             )
             .subscribe((values) => {
-                this.applyParameters('mds', values, { replaceUrl: !initDone });
+                this.ngZone.run(() => {
+                    this.applyParameters(
+                        'mds',
+                        values,
+                        this.searchService.searchTerm,
+                        this.searchService.sort,
+                        {
+                            replaceUrl: !initDone,
+                        },
+                    );
+                });
                 initDone = true;
             });
         this.mdsDesktopRef.mdsEditorInstance.mdsInitDone
@@ -1679,5 +1742,23 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 delay(0),
             )
             .subscribe(() => this.updateMdsActions());
+    }
+    getDataSource() {
+        return this.currentRepository === RestConstants.ALL
+            ? this.searchService.dataSourceSearchResultAll
+            : this.searchService.dataSourceSearchResult;
+    }
+
+    searchAll() {
+        const sources = this.repositoryIds.map(() => new NodeDataSource<Node>());
+        this.searchService.dataSourceSearchResultAll = new CombinedDataSource<Node>(sources);
+        this.getSearch(this.searchService.searchTerm, true);
+    }
+
+    private async initOptions() {
+        await this.nodeEntriesResults.initOptionsGenerator({
+            actionbar: this.actionbarComponent,
+            customOptions: this.customOptions,
+        });
     }
 }

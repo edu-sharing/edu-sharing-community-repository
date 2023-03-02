@@ -34,9 +34,13 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
             initialValue = initialValue.map((v) => DateHelper.formatDateByPattern(v, 'y-M-d'));
         }
         this.formControl = new FormControl(initialValue[0] ?? null, this.getValidators());
-        this.formControl.valueChanges.pipe(filter((value) => value !== null)).subscribe((value) => {
-            this.setValue([value]);
-        });
+        this.formControl.valueChanges
+            .pipe(
+                filter((value) => value !== null && this.mdsEditorInstance.editorMode !== 'search'),
+            )
+            .subscribe((value) => {
+                this.setValue([value]);
+            });
         if (this.widget.definition.id === 'cm:name') {
             this.fileNameChecker = new FileNameChecker(
                 this.formControl,
@@ -55,6 +59,7 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
     blur(): void {
         this.fileNameChecker?.check();
         this.onBlur.emit();
+        this.submit();
     }
 
     private getValidators(): ValidatorFn[] {
@@ -74,6 +79,20 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
             validators.push(Validators.maxLength(widgetDefinition.maxlength));
         }
         return validators;
+    }
+
+    showBulkMixedValues() {
+        return (
+            this.widget.getInitialValues().individualValues &&
+            this.mdsEditorInstance.editorBulkMode?.isBulk &&
+            this.widget.getBulkMode() === 'no-change'
+        );
+    }
+
+    submit() {
+        if (this.mdsEditorInstance.editorMode === 'search') {
+            this.setValue([this.formControl.value]);
+        }
     }
 }
 

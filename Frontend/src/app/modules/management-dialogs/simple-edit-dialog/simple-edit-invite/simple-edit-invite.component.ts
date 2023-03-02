@@ -31,6 +31,7 @@ import { BridgeService } from '../../../../core-bridge-module/bridge.service';
 import { forkJoin, Observable, Observer } from 'rxjs';
 import { MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { Helper } from '../../../../core-module/rest/helper';
+import { AuthenticationService } from 'ngx-edu-sharing-api';
 
 type Org = { organization: Organization; groups?: any };
 
@@ -87,6 +88,7 @@ export class SimpleEditInviteComponent {
         private configService: ConfigurationService,
         private iamApi: RestIamService,
         private organizationApi: RestOrganizationService,
+        public authenticationService: AuthenticationService,
         private toast: Toast,
     ) {
         this.configService

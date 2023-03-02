@@ -121,7 +121,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         private platformLocation: PlatformLocation,
         private optionsHelper: OptionsHelperService,
         private loadingScreen: LoadingScreenService,
-        private mainNavService: MainNavService,
+        public mainNavService: MainNavService,
         private temporaryStorageService: TemporaryStorageService,
     ) {
         (window as any).nodeRenderComponentRef = { component: this, zone: _ngZone };
@@ -180,7 +180,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.mainNavService.setMainNavConfig({
-            show: false,
+            show: true,
             currentScope: 'render',
         });
         this.optionsHelper.registerGlobalKeyboardShortcuts();
@@ -213,7 +213,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
     private isSafe = false;
     private isOpenable: boolean;
     private closeOnBack: boolean;
-    public nodeMetadata: Node[];
     public nodeWorkflow: Node[];
     public addNodesStream: Node[];
     public nodeDelete: Node[];
@@ -261,9 +260,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
 
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
-        if (this.nodeMetadata != null) {
-            return;
-        }
         if (CardComponent.getNumberOfOpenCards() > 0) {
             return;
         }
@@ -299,6 +295,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                     NodeRenderComponent.close(this.location);
                     // use a timeout to let the browser try to go back in history first
                     setTimeout(() => {
+                        console.log(this.mainNavService.getMainNav());
                         if (!this.isDestroyed) {
                             this.mainNavService.getMainNav().topBar.toggleMenuSidebar();
                         }
@@ -359,9 +356,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             this.getPosition() < this.list.length - 1 &&
             !this.list[this.getPosition() + 1].isDirectory
         );
-    }
-    public closeMetadata() {
-        this.nodeMetadata = null;
     }
     public refresh() {
         if (this.isLoading) {

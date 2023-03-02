@@ -2,18 +2,17 @@
   <div class="info">
     <div *ngIf="_mode !== 'ORG' && !embedded">
       <div *ngIf="!org">
-        {{ 'PERMISSIONS.INFO_GLOBAL_' + _mode | translate }}
-        <br />
+        <span>{{ 'PERMISSIONS.INFO_GLOBAL_' + _mode | translate }}</span>
         <a class="clickable" (click)="setOrgTab()">{{ 'PERMISSIONS.CHOOSE_ORG' | translate }}</a>
       </div>
       <div *ngIf="org">
-        {{ 'PERMISSIONS.INFO_ORG_' + _mode | translate: { org: org.profile.displayName } }}
-        <br />
+        <span>{{
+          'PERMISSIONS.INFO_ORG_' + _mode | translate: { org: org.profile.displayName }
+        }}</span>
         <span *ngIf="isAdmin">
           <a class="clickable" (click)="deselectOrg()">{{ 'PERMISSIONS.NO_ORG' | translate }}</a>
-          |
+          <a class="clickable" (click)="setOrgTab()">{{ 'PERMISSIONS.CHOOSE_ORG' | translate }}</a>
         </span>
-        <a class="clickable" (click)="setOrgTab()">{{ 'PERMISSIONS.CHOOSE_ORG' | translate }}</a>
       </div>
     </div>
   </div>
@@ -51,7 +50,7 @@
     }}</mat-checkbox>
     <div class="status-change" *ngIf="editStatus.status.date">
       {{ 'PERMISSIONS.STATUS_LAST_CHANGE' | translate }}:
-      {{ editStatus.status.date | formatDate: { useRelativeLabels: false, time: true } }}
+      {{ editStatus.status.date | formatDate: { relative: false, time: true } }}
     </div>
   </div>
 </es-card>
@@ -119,6 +118,7 @@
     </div>
     <es-node-entries-wrapper
       #signupList
+      [scope]="Scope.UserManagement"
       [displayType]="DisplayType.Table"
       [elementInteractionType]="InteractionType.Emitter"
       [columns]="addMemberColumns"
@@ -360,6 +360,7 @@
     </div>
     <es-node-entries-wrapper
       #memberAdd
+      [scope]="Scope.UserManagement"
       [columns]="editGroups ? editGroupColumns : addMemberColumns"
       [dataSource]="memberList"
       [displayType]="DisplayType.Table"
@@ -370,7 +371,7 @@
   </div>
 </es-card>
 <!-- <div *ngIf="addTo" [@fade]="addTo" class="dialog darken"></div> -->
-<div *ngIf="addTo" [@fromRight]="addTo" class="addTo">
+<div *ngIf="addTo" [@fromRight]="addTo" class="addTo scrollWithBanner">
   <div class="addToList">
     <es-permissions-authorities
       #addToComponent
@@ -403,6 +404,7 @@
 <es-node-entries-wrapper
   class="list"
   #mainList
+  [scope]="Scope.UserManagement"
   infinite-scroll
   (scrolled)="loadAuthorities()"
   [scrollWindow]="false"

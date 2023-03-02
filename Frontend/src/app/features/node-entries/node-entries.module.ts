@@ -14,7 +14,7 @@ import { NodeRatingComponent } from './node-rating/node-rating.component';
 import { OptionButtonComponent } from './option-button/option-button.component';
 import { PreviewImageComponent } from './preview-image/preview-image.component';
 import { DragPreviewComponent } from './drag-preview/drag-preview.component';
-import { NodeEntriesGlobalService } from './node-entries-global.service';
+import { SortSelectPanelComponent } from './sort-select-panel/sort-select-panel.component';
 
 @NgModule({
     declarations: [
@@ -31,9 +31,9 @@ import { NodeEntriesGlobalService } from './node-entries-global.service';
         OptionButtonComponent,
         FocusStateDirective,
         DragPreviewComponent,
+        SortSelectPanelComponent,
     ],
     imports: [SharedModule, ListItemsModule],
-    providers: [NodeEntriesGlobalService],
     exports: [NodeEntriesWrapperComponent, ListItemLabelPipe],
 })
 export class NodeEntriesModule {}

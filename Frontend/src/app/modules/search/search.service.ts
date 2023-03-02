@@ -8,6 +8,8 @@ import {
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { SearchFieldService } from 'src/app/main/navigation/search-field/search-field.service';
 import { ListItem, Node } from '../../core-module/core.module';
+import { CombinedDataSource } from '../../features/node-entries/combined-data-source';
+import { Values } from '../../features/mds/types/types';
 
 /**
  * Session state for search.component.
@@ -24,7 +26,9 @@ export class SearchService {
     set searchTerm(value: string) {
         this.searchTermSubject.next(value);
     }
-    dataSourceSearchResult: { [key: number]: NodeDataSource<Node> } = [];
+    values: Values;
+    dataSourceSearchResultAll = new CombinedDataSource<Node>([]);
+    dataSourceSearchResult: NodeDataSource<Node>;
     searchResultRepositories: Node[][] = [];
     dataSourceCollections = new NodeDataSource<Node>();
     columns: ListItem[] = [];
@@ -35,6 +39,7 @@ export class SearchService {
     numberofresults: number = 0;
     offset: number = 0;
     complete: boolean = false;
+    mdsInitialized: boolean = false;
     showchosenfilters: boolean = false;
     displayType: NodeEntriesDisplayType = null;
     // Used by node-render.component
@@ -58,7 +63,7 @@ export class SearchService {
         this.searchConfigSubject.pipe().subscribe((config) => {
             const { repository, metadataSet } = config;
             if (repository && metadataSet) {
-                this.searchField.setMdsInfo({ repository, metadataSet });
+                // this.searchField.setMdsInfo({ repository, metadataSet });
             }
         });
     }
@@ -72,8 +77,8 @@ export class SearchService {
             return;
         }
         this.offset = 0;
-        this.dataSourceSearchResult = [new NodeDataSource<Node>()];
-        this.dataSourceSearchResult[0].isLoading = true;
+        this.dataSourceSearchResult = new NodeDataSource<Node>();
+        this.dataSourceSearchResult.isLoading = true;
         this.dataSourceCollections.reset();
         this.searchResultRepositories = [];
         this.complete = false;

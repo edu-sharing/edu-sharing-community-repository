@@ -1,25 +1,20 @@
-import { forkJoin as observableForkJoin, BehaviorSubject, Observable, Subscriber } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
-import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import { RestConstants } from '../../../../../core-module/rest/rest-constants';
-import { VCard } from '../../../../../core-module/ui/VCard';
-import { UIService } from '../../../../../core-module/rest/services/ui.service';
+import { BehaviorSubject, forkJoin as observableForkJoin, Observable } from 'rxjs';
+import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { Node, NodeWrapper } from '../../../../../core-module/rest/data-object';
-import { RestIamService } from '../../../../../core-module/rest/services/rest-iam.service';
-import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
-import { Helper } from '../../../../../core-module/rest/helper';
-import { Values } from '../../../types/types';
-import { RestNodeService } from '../../../../../core-module/rest/services/rest-node.service';
+import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { RestHelper } from '../../../../../core-module/rest/rest-helper';
 import { RestConnectorService } from '../../../../../core-module/rest/services/rest-connector.service';
+import { RestNodeService } from '../../../../../core-module/rest/services/rest-node.service';
 import { RestUtilitiesService } from '../../../../../core-module/rest/services/rest-utilities.service';
-import { Toast } from '../../../../../core-ui-module/toast';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { Toast } from '../../../../../core-ui-module/toast';
 import { DialogsService as LegacyDialogsService } from '../../../../../modules/management-dialogs/dialogs.service';
 import { DialogsService } from '../../../../dialogs/dialogs.service';
+import { Values } from '../../../types/types';
+import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
+import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 
 interface Childobject {
     icon: string;
@@ -45,10 +40,10 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
     };
     hasChanges = new BehaviorSubject<boolean>(false);
     children: Childobject[] = [];
-    _edit: ChildobjectEdit;
     childrenDelete: Node[] = [];
     isSupported: boolean;
     nodes: Node[];
+
     constructor(
         private mdsEditorValues: MdsEditorInstanceService,
         private nodeApi: RestNodeService,
@@ -85,6 +80,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
                 }
             });
     }
+
     onChange(): void {
         this.hasChanges.next(true);
     }
@@ -145,23 +141,18 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
             },
         );
     }
-    setProperties(props: Values, edit?: ChildobjectEdit) {
-        edit = edit ?? this._edit;
+
+    setProperties(newProperties: Values, edit: ChildobjectEdit) {
         // keep any existing license data
-        if (props) {
-            if (!edit.child.properties) {
-                edit.child.properties = edit.properties;
-            }
-            if (this._edit) {
-                for (const key of Object.keys(props)) {
-                    edit.child.properties[key] = props[key];
-                }
-            }
-            edit.child.name = edit.child.properties[RestConstants.LOM_PROP_TITLE]?.[0]
-                ? edit.child.properties[RestConstants.LOM_PROP_TITLE][0]
-                : edit.child.properties[RestConstants.CM_NAME][0];
+        if (!edit.child.properties) {
+            edit.child.properties = edit.properties;
         }
-        this._edit = null;
+        for (const key of Object.keys(newProperties)) {
+            edit.child.properties[key] = newProperties[key];
+        }
+        edit.child.name = edit.child.properties[RestConstants.LOM_PROP_TITLE]?.[0]
+            ? edit.child.properties[RestConstants.LOM_PROP_TITLE][0]
+            : edit.child.properties[RestConstants.CM_NAME][0];
         this.onChange();
     }
 
@@ -178,12 +169,22 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
         props[RestConstants.CCM_PROP_CHILDOBJECT_ORDER] = [this.children.indexOf(child) + ''];
         return props;
     }
-    edit(child: Childobject) {
-        this._edit = {
-            child: child,
-            properties: this.getProperties(child),
-        };
+
+    async editMetadata(child: Childobject) {
+        const properties = this.getProperties(child);
+        const dialogRef = await this.dialogs.openMdsEditorDialogForValues({
+            values: properties,
+            groupId: 'io_childobject',
+            editorMode: 'nodes',
+            setId: this.nodes?.[0].metadataset,
+        });
+        dialogRef.afterClosed().subscribe((newProperties) => {
+            if (newProperties) {
+                this.setProperties(newProperties, { child, properties });
+            }
+        });
     }
+
     async editLicense(child: Childobject) {
         const properties = this.getProperties(child);
         const dialogRef = await this.dialogs.openLicenseDialog({ kind: 'properties', properties });
@@ -193,6 +194,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
             }
         });
     }
+
     remove(child: Childobject) {
         this.children.splice(this.children.indexOf(child), 1);
         if (child.node) {
@@ -200,6 +202,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
         }
         this.onChange();
     }
+
     async onSaveNode(nodes: Node[]) {
         await observableForkJoin(
             this.children.map(
@@ -277,6 +280,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
         await this.deleteChildren();
         return nodes;
     }
+
     drop(event: CdkDragDrop<string[]>) {
         moveItemInArray(this.children, event.previousIndex, event.currentIndex);
         this.onChange();

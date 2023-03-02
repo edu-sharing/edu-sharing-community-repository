@@ -5,6 +5,7 @@ import {
     FocusMonitor,
     InteractivityChecker,
 } from '@angular/cdk/a11y';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { _getFocusedElementPierceShadowDom } from '@angular/cdk/platform';
 import { CdkPortalOutlet, ComponentPortal } from '@angular/cdk/portal';
 import { DOCUMENT } from '@angular/common';
@@ -23,9 +24,10 @@ import {
     ViewChild,
 } from '@angular/core';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
 import { DialogButton } from '../../../../core-module/core.module';
 import { UIAnimation } from '../../../../core-module/ui/ui-animation';
+import { JumpMark, JumpMarksService } from '../../../../services/jump-marks.service';
 import { CardDialogConfig, Closable } from '../card-dialog-config';
 import { CardDialogRef } from '../card-dialog-ref';
 import { AutoSavingState } from '../card-dialog-state';
@@ -47,6 +49,7 @@ type CardState = 'void' | 'enter' | 'exit';
     selector: 'es-card-dialog-container',
     templateUrl: './card-dialog-container.component.html',
     styleUrls: ['./card-dialog-container.component.scss'],
+    providers: [JumpMarksService],
     animations: [
         trigger('defaultAnimation', [
             state('void, exit', style({ opacity: 0, transform: 'scale(0.7)' })),
@@ -96,14 +99,27 @@ type CardState = 'void' | 'enter' | 'exit';
                 ),
             ]),
         ]),
+        trigger('expandContent', [
+            state('locked', style({ height: '{{height}}', width: '{{width}}' }), {
+                params: { height: '0px', width: '0px' },
+            }),
+            transition('* => expand', [
+                animate(
+                    UIAnimation.ANIMATION_TIME_SLOW + 'ms ease',
+                    style({ height: '*', width: '*' }),
+                ),
+            ]),
+        ]),
+        trigger('slideInFromRight', [
+            state('void', style({ transform: 'translateX(100%)', width: 0 })),
+            transition(':enter, :leave', [animate(UIAnimation.ANIMATION_TIME_SLOW + 'ms ease')]),
+        ]),
     ],
 })
 export class CardDialogContainerComponent implements OnInit, OnDestroy {
     readonly id = idCounter++;
     @HostBinding('attr.aria-modal') readonly ariaModal = 'true';
     @HostBinding('attr.role') readonly role = 'dialog';
-    @HostBinding('class') readonly class = 'mat-elevation-z24';
-    @HostBinding('class.card-dialog-mobile') isMobile: boolean;
     // Make the container focusable, so keyboard shortcuts keep working when the user clicked some
     // non-interactive element.
     @HostBinding('attr.tabindex') readonly tabIndex = '-1';
@@ -114,12 +130,23 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
     @HostBinding('@mobileAnimation') mobileAnimation: CardState | null = null;
 
     @ViewChild(CdkPortalOutlet, { static: true }) portalOutlet: CdkPortalOutlet;
+    @ViewChild('cardContent', { static: true }) cardContent: ElementRef<HTMLElement>;
 
     config: CardDialogConfig<unknown> = {};
     buttons: DialogButton[];
     isLoading = false;
     closeButtonTemporarilyDisabled = false;
     autoSavingState: AutoSavingState = null;
+    isMobile: boolean;
+    activeJumpMark: JumpMark | null = null;
+    expandAnimation = {
+        state: 'initial' as 'initial' | 'locked' | 'expand',
+        height: '0px',
+        width: '0px',
+    };
+    readonly hideJumpMarks = this.breakpointObserver
+        .observe(['(max-width: 800px)'])
+        .pipe(map((result) => result.matches));
 
     /** Emits when an animation state changes. */
     readonly animationStateChanged = new EventEmitter<DialogAnimationEvent>();
@@ -141,6 +168,7 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
         private focusTrapFactory: ConfigurableFocusTrapFactory,
         private _interactivityChecker: InteractivityChecker,
         private _ngZone: NgZone,
+        private breakpointObserver: BreakpointObserver,
         private focusMonitor?: FocusMonitor,
     ) {}
 
@@ -165,6 +193,7 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
             .subscribe((isLoading) => {
                 this.updateButtons();
                 this.isLoading = isLoading;
+                this.triggerExpandAnimation();
             });
         this.dialogRef
             .observeState('autoSavingState')
@@ -187,6 +216,21 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
             }));
         } else {
             this.buttons = this.config.buttons;
+        }
+    }
+
+    private triggerExpandAnimation() {
+        const element = this.cardContent.nativeElement;
+        if (this.expandAnimation.state === 'initial' && this.isLoading) {
+            // Wait for the container to assume its initial dimensions, then lock these until
+            // loading stops.
+            setTimeout(() => {
+                this.expandAnimation.state = 'locked';
+                this.expandAnimation.height = element.scrollHeight + 'px';
+                this.expandAnimation.width = element.scrollWidth + 'px';
+            });
+        } else if (this.expandAnimation.state === 'locked' && !this.isLoading) {
+            this.expandAnimation.state = 'expand';
         }
     }
 
@@ -343,7 +387,11 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
                 this._focusByCssSelector(this.config.autoFocus!);
                 break;
         }
-        this.closeButtonTemporarilyDisabled = false;
+        this._ngZone.runOutsideAngular(() =>
+            setTimeout(() => {
+                this.closeButtonTemporarilyDisabled = false;
+            }),
+        );
     }
 
     /**

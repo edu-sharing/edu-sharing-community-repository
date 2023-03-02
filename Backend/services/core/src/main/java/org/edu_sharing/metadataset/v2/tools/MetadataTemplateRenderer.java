@@ -23,6 +23,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 
@@ -256,7 +257,10 @@ public class MetadataTemplateRenderer {
 									value += getLicenseDescription(licenseName).replaceAll("((<br \\/>)|(\\n))", TEXT_LICENSE_SEPERATOR);
 								}
 							}
-							if (renderingMode.equals(RenderingMode.HTML) && properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK)) != null) {
+							if (renderingMode.equals(RenderingMode.HTML) && (
+									properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK)) != null
+									|| properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL)) != null
+							)) {
 								value += "<div class='licenseTitleOfWork'>";
 								value += "<div class='mdsWidgetCaptionChild'>" +
 										I18nAngular.getTranslationAngular("common", "LICENSE.TITLE_OF_WORK")
@@ -265,13 +269,24 @@ public class MetadataTemplateRenderer {
 								if (source) {
 									value += "<a href='" + properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_SOURCE_URL))[0] + "'>";
 								}
-								value += properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK))[0];
+								String[] title = properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK));
+								if(title != null) {
+									value += cleanupText(MetadataWidget.TextEscapingPolicy.all, title[0]);
+								} else {
+									value += cleanupText(MetadataWidget.TextEscapingPolicy.all,
+											I18nAngular.getTranslationAngular("common", "MDS.AUTHOR_UNSET")
+									);
+								}
 								if (source) {
 									value += "</a>";
 								}
 								if (properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL)) != null) {
+									String url = properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL))[0];
+									if (!url.contains("://")) {
+										url = "http://" + url;
+									}
 									value += " (<a href='" +
-											properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL))[0] + "'>" +
+											url + "'>" +
 											I18nAngular.getTranslationAngular("common", "LICENSE.LINK_AUTHOR")
 											+ "</a>)";
 								}
@@ -608,7 +623,12 @@ public class MetadataTemplateRenderer {
 
 	private static String cleanupText(MetadataWidget.TextEscapingPolicy textEscapingPolicy, String untrustedHTML) {
 		if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.htmlBasic)) {
-			PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.BLOCKS).and(Sanitizers.LINKS);
+			PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.BLOCKS).and(
+					new HtmlPolicyBuilder()
+							.allowStandardUrlProtocols().allowElements("a")
+							.allowAttributes("href", "target").onElements("a").requireRelNofollowOnLinks()
+							.toFactory()
+			);
 			return policy.sanitize(untrustedHTML);
 		} else if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.all)){
 			return StringEscapeUtils.escapeHtml4(untrustedHTML);

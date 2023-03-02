@@ -1085,6 +1085,12 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 								append("^10 OR ")
 								.append("@ccm\\:groupEmail:")
 								.append("\"").append(QueryParser.escape(token)).append("\"");
+						// allow global admins to find groups based on authority name (e.g. default system groups)
+						if(isAdminOrSystem()) {
+							subQuery.append(" OR ")
+									.append("@cm\\:authorityName:")
+									.append("\"").append(QueryParser.escape(token)).append("\"");
+						}
 						subQuery.append(")");
 	
 					}
@@ -1158,9 +1164,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				searchQuery.append(" AND (").append(groupPathQuery).append(")");
 			}
 		}
-
-		searchQuery.append(" AND NOT (@cm\\:authorityName:" + CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS
-				+ " or @cm\\:authorityName:" + CCConstants.AUTHORITY_GROUP_EMAIL_CONTRIBUTORS + ")");
+		if(!isAdminOrSystem()) {
+			searchQuery.append(" AND NOT (@cm\\:authorityName:" + CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS
+					+ " or @cm\\:authorityName:" + CCConstants.AUTHORITY_GROUP_EMAIL_CONTRIBUTORS + ")");
+		}
 
 		logger.info("findGroups: " + searchQuery);
 
