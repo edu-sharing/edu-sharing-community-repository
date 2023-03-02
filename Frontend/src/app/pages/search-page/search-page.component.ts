@@ -15,6 +15,7 @@ import { MainNavService } from '../../main/navigation/main-nav.service';
 import { notNull } from '../../util/functions';
 import { NavigationScheduler } from './navigation-scheduler';
 import { SearchPageService } from './search-page.service';
+import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 
 @Component({
     selector: 'es-search-page',
@@ -56,6 +57,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
         private searchPage: SearchPageService,
         private dialogs: DialogsService,
         private translate: TranslateService,
+        private breadcrumbsService: BreadcrumbsService,
         private navigationScheduler: NavigationScheduler,
     ) {
         this.searchPage.init();
@@ -63,6 +65,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.initMainNav();
+        this.breadcrumbsService.setNodePath(null);
         this.availableRepositories
             .pipe(
                 filter(notNull),
