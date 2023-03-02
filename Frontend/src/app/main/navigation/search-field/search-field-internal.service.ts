@@ -19,7 +19,16 @@ import {
     Subject,
     timer,
 } from 'rxjs';
-import { catchError, debounce, distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
+import {
+    catchError,
+    debounce,
+    distinctUntilChanged,
+    filter,
+    first,
+    map,
+    switchMap,
+    timeout,
+} from 'rxjs/operators';
 import { EventListener, FrameEventsService } from '../../../core-module/core.module';
 import { notNull } from '../../../util/functions';
 import { SearchFieldComponent } from './search-field.component';
@@ -158,8 +167,20 @@ export class SearchFieldInternalService implements EventListener {
     setFilterValues(values: RawValuesDict, { emitValuesChange = false } = {}): void {
         this.getMdsIdentifier()
             .pipe(
+                first(notNull),
+                // Wait for the mds information to be set, but give up after 5 seconds.
+                timeout(5_000),
                 switchMap((mdsId) =>
                     mdsId ? this.mdsLabel.labelValuesDict(mdsId, values ?? {}) : rxjs.of(null),
+                ),
+                catchError(
+                    () => (
+                        console.warn(
+                            'Tried to set filter values for search field, ' +
+                                'but did not set mds information',
+                        ),
+                        rxjs.EMPTY
+                    ),
                 ),
             )
             .subscribe((filterValues) => {
