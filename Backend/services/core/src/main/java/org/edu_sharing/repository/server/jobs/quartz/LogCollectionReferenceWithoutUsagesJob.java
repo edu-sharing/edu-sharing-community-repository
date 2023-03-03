@@ -27,8 +27,8 @@ import java.util.stream.Collectors;
 @JobDescription(description = "Logs all CollectionIOReference objects whose referenced nodes have no usages")
 public class LogCollectionReferenceWithoutUsagesJob extends AbstractJobMapAnnotationParams {
 
-    @Autowired
-    @Setter
+    //@Autowired
+    //@Setter
     private Usage2Service usage2Service;
 
     @Autowired
@@ -37,6 +37,8 @@ public class LogCollectionReferenceWithoutUsagesJob extends AbstractJobMapAnnota
 
     @Override
     public void executeInternal(JobExecutionContext jobExecutionContext) {
+        usage2Service = new Usage2Service();
+
         NodeRunner runner = new NodeRunner();
         runner.setThreaded(false);
         runner.setRunAsSystem(true);

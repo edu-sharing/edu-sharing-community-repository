@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import com.typesafe.config.Config;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.node.MLPropertyInterceptor;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
@@ -58,6 +59,7 @@ import org.edu_sharing.service.search.Suggestion;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.springframework.context.ApplicationContext;
+import org.springframework.extensions.surf.util.I18NUtil;
 
 public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.NodeService {
 
@@ -766,26 +768,32 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 	}
 	@Override
-	public String getOrCreateUserInbox() {
+	public String getUserInbox(boolean createIfNotExists) {
 		NodeRef userhome=repositoryHelper.getUserHome(repositoryHelper.getPerson());
 		List<ChildAssociationRef> inbox = nodeService.getChildAssocsByPropertyValue(userhome, QName.createQName(CCConstants.CCM_PROP_MAP_TYPE), CCConstants.CCM_VALUE_MAP_TYPE_USERINBOX);
 		if(inbox!=null && inbox.size()>0)
 			return inbox.get(0).getChildRef().getId();
-		HashMap<String,Object> properties=new HashMap<>();
-		properties.put(CCConstants.CM_NAME,"Inbox");
-		properties.put(CCConstants.CCM_PROP_MAP_TYPE,CCConstants.CCM_VALUE_MAP_TYPE_USERINBOX);
-		return createNodeBasic(userhome.getId(),CCConstants.CCM_TYPE_MAP,properties);
+		if(createIfNotExists) {
+			HashMap<String, Object> properties = new HashMap<>();
+			properties.put(CCConstants.CM_NAME, "Inbox");
+			properties.put(CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_USERINBOX);
+			return createNodeBasic(userhome.getId(), CCConstants.CCM_TYPE_MAP, properties);
+		}
+		return null;
 	}
 	@Override
-	public String getOrCreateUserSavedSearch() {
+	public String getUserSavedSearch(boolean createIfNotExists) {
 		NodeRef userhome=repositoryHelper.getUserHome(repositoryHelper.getPerson());
 		List<ChildAssociationRef> savedSearch = nodeService.getChildAssocsByPropertyValue(userhome, QName.createQName(CCConstants.CCM_PROP_MAP_TYPE), CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH);
 		if(savedSearch!=null && savedSearch.size()>0)
 			return savedSearch.get(0).getChildRef().getId();
-		HashMap<String,Object> properties=new HashMap<>();
-		properties.put(CCConstants.CM_NAME,"SavedSearch");
-		properties.put(CCConstants.CCM_PROP_MAP_TYPE,CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH);
-		return createNodeBasic(userhome.getId(),CCConstants.CCM_TYPE_MAP,properties);
+		if(createIfNotExists) {
+			HashMap<String, Object> properties = new HashMap<>();
+			properties.put(CCConstants.CM_NAME, "SavedSearch");
+			properties.put(CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH);
+			return createNodeBasic(userhome.getId(), CCConstants.CCM_TYPE_MAP, properties);
+		}
+		return null;
 	}
 
 	/**
@@ -930,8 +938,13 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     }
 
 	private Serializable getSortPropertyValue(NodeRef ref, QName prop) {
-		Serializable value =  nodeServiceAlfresco.getProperty(ref, prop);
-		if(prop.toString().equals(CCConstants.LOM_PROP_GENERAL_TITLE) && value == null) {
+		Serializable value = nodeServiceAlfresco.getProperty(ref, prop);
+		//dbnodeservice returns mltext
+		if(value instanceof MLText){
+			value = ((MLText)value).getValue(I18NUtil.getLocale());
+		}
+
+		if(prop.toString().equals(CCConstants.LOM_PROP_GENERAL_TITLE) && StringUtils.isBlank((String)value)) {
 			return nodeServiceAlfresco.getProperty(ref, ContentModel.PROP_NAME);
 		}
 		return value;

@@ -2,7 +2,9 @@ package org.edu_sharing.restservices.shared;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class UserQuota {
+import java.io.Serializable;
+
+public class UserQuota implements Serializable  {
     @JsonProperty private boolean enabled;
     @JsonProperty private long sizeCurrent;
     @JsonProperty private long sizeQuota;

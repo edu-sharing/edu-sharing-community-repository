@@ -1,0 +1,27 @@
+@import '../../core-ui-module/styles/variables';
+
+@mixin entriesWrapper {
+    display: block;
+    margin-top: 1.5rem;
+}
+
+@mixin titleContainer {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    h2 {
+        flex-grow: 1;
+        margin: 1rem 0;
+    }
+}
+
+@mixin noSearchResultsMessage {
+    color: $noResultsColor;
+    text-align: center;
+    padding: 30px 0;
+    font-size: 120%;
+    i {
+        font-size: 60px;
+        width: 100%;
+    }
+}

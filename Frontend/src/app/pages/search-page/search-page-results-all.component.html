@@ -1,0 +1,33 @@
+<es-node-entries-wrapper
+  *ngFor="let repo of repoData | async"
+  [class.display-none]="repo.dataSource.isEmpty()"
+  class="entries-wrapper"
+  [dataSource]="repo.dataSource"
+  [scope]="Scope.Search"
+  [columns]="repo.columns | async"
+  [disableInfiniteScroll]="true"
+  [displayType]="NodeEntriesDisplayType.Grid"
+  [gridConfig]="{ layout: 'scroll' }"
+>
+  <ng-template #title>
+    <div class="title-container">
+      <h2 class="mat-heading-2">{{ repo.title | titlecase }} ({{ repo.dataSource.getTotal() }})</h2>
+      <a
+        *ngIf="repo.dataSource.getTotal() > repo.dataSource.getData().length"
+        mat-button
+        [routerLink]="['..']"
+        [queryParams]="getShowMoreQueryParams(repo.id)"
+      >
+        {{ 'SHOW_MORE' | translate }}
+        <i esIcon="keyboard_arrow_right"></i>
+      </a>
+    </div>
+  </ng-template>
+</es-node-entries-wrapper>
+
+<es-spinner *ngIf="(loadingProgress | async) < 100"></es-spinner>
+
+<div *ngIf="allEmpty" class="no-search-results-message">
+  <i esIcon="search"></i>
+  {{ 'SEARCH.QUERY_NO_RESULT' | translate }}
+</div>

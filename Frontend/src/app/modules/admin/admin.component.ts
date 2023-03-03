@@ -47,7 +47,7 @@ import { CsvHelper } from '../../core-module/csv.helper';
 import { trigger } from '@angular/animations';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
 import { Scope } from '../../core-ui-module/option-item';
-import { AboutService } from 'ngx-edu-sharing-api';
+import { AboutService, NetworkService } from 'ngx-edu-sharing-api';
 import { AuthoritySearchMode } from '../../shared/components/authority-search-input/authority-search-input.component';
 import { PlatformLocation } from '@angular/common';
 import { MainNavService } from '../../main/navigation/main-nav.service';
@@ -100,7 +100,7 @@ export class AdminComponent implements OnInit, OnDestroy {
         private translations: TranslationsService,
         private iamService: RestIamService,
         private storage: SessionStorageService,
-        private networkService: RestNetworkService,
+        private networkService: NetworkService,
         private mediacenterService: RestMediacenterService,
         private componentFactoryResolver: ComponentFactoryResolver,
         private viewContainerRef: ViewContainerRef,
@@ -253,7 +253,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.mainNav.setMainNavConfig({
             title: 'ADMIN.TITLE',
             currentScope: 'admin',
-            searchEnabled: false,
         });
     }
 
@@ -318,7 +317,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         }
         await this.nodeEntriesSearchResult.initOptionsGenerator({
             actionbar: this.actionbarComponent,
-            scope: Scope.Admin,
         });
         const request = {
             offset: this.lucene.offset ? this.lucene.offset : 0,
@@ -1050,8 +1048,8 @@ export class AdminComponent implements OnInit, OnDestroy {
             },
         );
         // check if appid is changed
-        this.networkService.getRepositories().subscribe((repos) => {
-            const id = repos.repositories.filter((repo) => repo.isHomeRepo)[0].id;
+        this.networkService.getRepositories().subscribe((repositories) => {
+            const id = repositories.filter((repo) => repo.isHomeRepo)[0].id;
             this.systemChecks.push({
                 name: 'APPID',
                 status: id == 'local' ? 'WARN' : 'OK',

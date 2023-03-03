@@ -2,6 +2,8 @@
 @import '../../../core-ui-module/styles/variables';
 @import '../../../core-ui-module/styles/mixins';
 
+$horizontalScrollPadding: 1.5em;
+
 @keyframes OrderAnimationCards {
     0% {
         transform: rotate(-0.25deg);
@@ -13,28 +15,14 @@
         transform: rotate(-0.25deg);
     }
 }
-.grid-top {
-    display: flex;
-    align-items: center;
-    .title {
-        display: flex;
-        flex-grow: 1;
-    }
-    .order-panel {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        > mat-slide-toggle {
-            margin-right: 10px;
-        }
-    }
-}
+
 .load-more {
     display: flex;
     justify-content: center;
 }
 .card-grid-wrapper {
     position: relative;
+    z-index: 0;
     .scroll-helper-left,
     .scroll-helper-right {
         position: absolute;
@@ -54,27 +42,27 @@
         }
     }
     .scroll-helper-left {
-        left: 0;
+        left: -$horizontalScrollPadding;
         justify-content: flex-start;
         background: linear-gradient(
             to left,
             rgba(255, 255, 255, 0.000001) 0,
-            rgb(255, 255, 255) calc(100% - 10px)
+            rgb(255, 255, 255) calc(100% - $horizontalScrollPadding)
         );
         > button {
-            margin-left: -1px;
+            margin-left: calc($horizontalScrollPadding - 8px);
         }
     }
     .scroll-helper-right {
-        right: 0;
+        right: -$horizontalScrollPadding;
         justify-content: flex-end;
         background: linear-gradient(
             to right,
             rgba(255, 255, 255, 0.000001) 0,
-            rgb(255, 255, 255) calc(100% - 10px)
+            rgb(255, 255, 255) calc(100% - $horizontalScrollPadding)
         );
         > button {
-            margin-right: -10px;
+            margin-right: calc($horizontalScrollPadding - 8px);
         }
     }
 }
@@ -93,7 +81,12 @@
         grid-auto-flow: column;
         grid-auto-columns: minmax($cardWidth, 1fr);
         // slightly more padding to prevent shadow clipping
-        padding: 1.5em;
+        padding: $horizontalScrollPadding;
+        // compensate for larger padding
+        margin: calc(1em - $horizontalScrollPadding) (-$horizontalScrollPadding) 0;
+        &::-webkit-scrollbar-track {
+            margin: 0 $horizontalScrollPadding;
+        }
         @include materialScrollbar();
         > .card-grid-drag-wrapper {
             scroll-snap-align: center;

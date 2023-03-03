@@ -257,6 +257,14 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
             QueryBuilder qbNoFilter = getElasticSearchQuery(searchToken, queries, query, tmp, false);
             BoolQueryBuilder bqb = QueryBuilders.boolQuery();
             bqb = bqb.must(qbFilter).must(qbNoFilter).must(globalConditions);
+            String fieldName = "properties." + facet+".keyword";
+            MetadataQueryParameter parameter = query.findParameterByName(facet);
+            if(parameter != null && parameter.getFacets() != null) {
+                if(parameter.getFacets().size() != 1) {
+                    throw new IllegalArgumentException("DSL Queries only support exactly ONE facet parameter");
+                }
+                fieldName = parameter.getFacets().get(0);
+            }
             if(searchToken.getQueryString() != null && !searchToken.getQueryString().trim().isEmpty()){
 
                 boolean isi18nProp = false;
@@ -265,23 +273,21 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                     isi18nProp = true;
                 }
 
-                MultiMatchQueryBuilder mmqb = null;
-
-                if(isi18nProp){
-                    mmqb = QueryBuilders
-                            .multiMatchQuery(searchToken.getQueryString(),"i18n."+currentLocale+"."+facet,"collections.i18n."+currentLocale+"."+facet);
+                QueryBuilder mmqb = null;
+                if(parameter != null && parameter.getFacets() != null) {
+                    mmqb = getFacetFilter(searchToken.getQueryString(), parameter.getFacets().get(0));
+                } else if(isi18nProp){
+                    mmqb = getFacetFilter(searchToken.getQueryString(),"i18n."+currentLocale+"."+facet, "collections.i18n."+currentLocale+"."+facet);
                 }else{
-                    mmqb = QueryBuilders
-                            .multiMatchQuery(searchToken.getQueryString(),"properties."+facet);
+                    mmqb = getFacetFilter(searchToken.getQueryString(),"properties."+facet, "properties."+facet+".keyword");
                 }
-                mmqb.type(MultiMatchQueryBuilder.Type.BOOL_PREFIX).operator(Operator.AND);
                 bqb.must(mmqb);
             }
 
             result.add(AggregationBuilders.filter(facet, bqb).subAggregation(AggregationBuilders.terms(facet)
                     .size(searchToken.getFacetLimit())
                     .minDocCount(searchToken.getFacetsMinCount())
-                    .field("properties." + facet+".keyword")));
+                    .field(fieldName)));
 
             if(parameters.get(facet) != null && parameters.get(facet).length > 0) {
                 result.add(AggregationBuilders.filter(facet + "_selected", bqb).subAggregation(AggregationBuilders.terms(facet)
@@ -295,5 +301,16 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         }
 
         return result;
+    }
+
+    private static QueryBuilder getFacetFilter(String queryString, String... fieldName) throws IllegalArgumentException {
+        BoolQueryBuilder bool = QueryBuilders.boolQuery();
+        bool.minimumShouldMatch(1);
+        Arrays.stream(fieldName).forEach(
+                field -> {
+                    bool.should(QueryBuilders.wildcardQuery(field, "*" + queryString + "*").caseInsensitive(true));
+                }
+        );
+        return bool;
     }
 }

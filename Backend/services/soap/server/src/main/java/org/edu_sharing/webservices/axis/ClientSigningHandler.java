@@ -16,7 +16,7 @@ import org.edu_sharing.repository.server.tools.security.Signing;
 
 public class ClientSigningHandler extends BasicHandler{
 	
-	Logger logger = Logger.getLogger(ClientSigningHandler.class);
+	private static Logger logger = Logger.getLogger(ClientSigningHandler.class);
 	
 	@Override
 	public void invoke(MessageContext context) throws AxisFault {

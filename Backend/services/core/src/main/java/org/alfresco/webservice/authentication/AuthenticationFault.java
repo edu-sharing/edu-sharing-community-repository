@@ -62,7 +62,7 @@ public class AuthenticationFault  extends org.apache.axis.AxisFault  implements 
         this.message1 = message1;
     }
 
-    private java.lang.Object __equalsCalc = null;
+    private transient java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
         if (!(obj instanceof AuthenticationFault)) return false;
         AuthenticationFault other = (AuthenticationFault) obj;

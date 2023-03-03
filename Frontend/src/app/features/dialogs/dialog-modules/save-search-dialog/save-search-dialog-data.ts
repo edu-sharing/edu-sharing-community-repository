@@ -1,8 +1,8 @@
-import { Node } from '../../../../core-module/core.module';
+import { SavedSearch } from 'ngx-edu-sharing-api';
 
 export interface SaveSearchDialogData {
     name: string;
     searchString: string;
 }
 
-export type SaveSearchDialogResult = Node | null;
+export type SaveSearchDialogResult = SavedSearch | null;

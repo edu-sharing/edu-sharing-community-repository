@@ -62,6 +62,7 @@ import { WorkspaceTreeComponent } from '../tree/tree.component';
 export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterViewInit {
     public readonly SCOPES = Scope;
     readonly InteractionType = InteractionType;
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 
     public static getColumns(
         connector: RestConnectorService,
@@ -349,6 +350,8 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
                 debounceTime(10),
             )
             .subscribe(async (value) => {
+                // FIXME: This goes back to the first page when reloading. `NodeEntriesWrapper`
+                // would restore the page via the `page` query parameter otherwise.
                 await this.load({
                     offset: 0,
                     reset: true,
@@ -476,7 +479,6 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         await this.nodeEntries?.initOptionsGenerator({
             actionbar: this.actionbar,
             customOptions: this.customOptions,
-            scope: Scope.WorkspaceList,
             parent: this.node$.value,
         });
     }

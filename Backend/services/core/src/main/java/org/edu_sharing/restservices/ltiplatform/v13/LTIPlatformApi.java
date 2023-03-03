@@ -609,10 +609,10 @@ public class LTIPlatformApi {
                 parentId = repoDao.getUserHome();
             }
             if ("-inbox-".equals(parentId)) {
-                parentId =repoDao.getUserInbox();
+                parentId =repoDao.getUserInbox(true);
             }
             if ("-saved_search-".equals(parentId)) {
-                parentId = repoDao.getUserSavedSearch();
+                parentId = repoDao.getUserSavedSearch(true);
             }
 
             for(ApplicationInfo appInfo : ApplicationInfoList.getApplicationInfos().values()){

@@ -1,9 +1,9 @@
-interface NodeCacheRange {
+export interface NodeCacheRange {
     startIndex: number;
     endIndex: number;
 }
 
-interface NodeCacheSlice<T> extends NodeCacheRange {
+export interface NodeCacheSlice<T> extends NodeCacheRange {
     data: T[];
 }
 

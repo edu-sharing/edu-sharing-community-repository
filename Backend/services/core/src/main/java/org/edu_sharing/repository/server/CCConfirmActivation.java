@@ -46,7 +46,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
 public class CCConfirmActivation extends HttpServlet {
 
-	Logger log = Logger.getLogger(CCConfirmActivation.class);
+	static Logger log = Logger.getLogger(CCConfirmActivation.class);
 
 	String repositoryFehler = "Repository Fehler. Bitte kontaktieren Sie den Administrator!";
 

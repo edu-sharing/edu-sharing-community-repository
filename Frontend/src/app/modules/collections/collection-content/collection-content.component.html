@@ -79,6 +79,7 @@
         [elementInteractionType]="interactionType"
         #listProposals
         [dataSource]="dataSourceCollectionProposals"
+        [scope]="Scope.CollectionsProposals"
         [displayType]="NodeEntriesDisplayType.Grid"
         [columns]="proposalColumns"
         [globalOptions]=""
@@ -101,9 +102,10 @@
           #listReferences
           [elementInteractionType]="InteractionType.Emitter"
           [dataSource]="dataSourceReferences"
-          [globalKeyboardShortcuts]="true"
+          [scope]="Scope.CollectionsReferences"
+          [primaryInstance]="true"
           [columns]="referencesColumns"
-          [displayType]="NodeEntriesDisplayType.Grid"
+          [(displayType)]="referencesDisplayType"
           [dragDrop]="{
             dragAllowed: isAllowedToEditCollection(),
             dropAllowed: canDropOnRef,

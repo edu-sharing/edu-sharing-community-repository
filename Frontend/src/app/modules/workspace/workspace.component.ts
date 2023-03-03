@@ -4,7 +4,7 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { delay, filter, first, switchMap } from 'rxjs/operators';
+import { delay, first } from 'rxjs/operators';
 import {
     DropSource,
     DropTarget,
@@ -37,7 +37,6 @@ import {
     UIService,
 } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
-import { KeyEvents } from '../../core-module/ui/key-events';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
 import { UIConstants } from '../../core-module/ui/ui-constants';
 import { CardService } from '../../core-ui-module/card.service';
@@ -52,14 +51,18 @@ import { Toast } from '../../core-ui-module/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
+import {
+    SearchEvent,
+    SearchFieldService,
+} from '../../main/navigation/search-field/search-field.service';
 import { DragData } from '../../services/nodes-drag-drop.service';
 import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
+import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 import { CanDrop } from '../../shared/directives/nodes-drop-target.directive';
 import { TranslationsService } from '../../translations/translations.service';
 import { WorkspaceExplorerComponent } from './explorer/explorer.component';
-import { canDragDrop, canDropOnNode } from './workspace-utils';
 import { WorkspaceTreeComponent } from './tree/tree.component';
-import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
+import { canDragDrop, canDropOnNode } from './workspace-utils';
 
 @Component({
     selector: 'es-workspace-main',
@@ -187,6 +190,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         private ngZone: NgZone,
         private loadingScreen: LoadingScreenService,
         private mainNavService: MainNavService,
+        private searchField: SearchFieldService,
     ) {
         this.event.addListener(this, this.destroyed$);
         this.translations.waitForInit().subscribe(() => {
@@ -243,7 +247,6 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         this.mainNavService.setMainNavConfig({
             title: this.isSafe ? 'WORKSPACE.TITLE_SAFE' : 'WORKSPACE.TITLE',
             currentScope: this.isSafe ? 'safe' : 'workspace',
-            searchEnabled: !this.isBlocked,
             create: {
                 allowed: this.createAllowed,
                 allowBinary: this.allowBinary,
@@ -252,11 +255,22 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             },
             onCreate: (nodes) => this.explorer.nodeEntries.addVirtualNodes(nodes),
             onCreateNotAllowed: () => this.createNotAllowed(),
-            searchPlaceholder: this.isSafe ? 'WORKSPACE.SAFE_SEARCH' : 'WORKSPACE.SEARCH',
             canOpen: this.mainnav,
-            searchQuery: this.searchQuery?.query,
-            onSearch: (query, cleared) => this.doSearch({ query, cleared }),
         });
+        if (!this.isBlocked) {
+            const searchFieldInstance = this.searchField.enable(
+                {
+                    placeholder: this.isSafe ? 'WORKSPACE.SAFE_SEARCH' : 'WORKSPACE.SEARCH',
+                },
+                this.destroyed$,
+            );
+            searchFieldInstance.onSearchTriggered().subscribe((event) => this.doSearch(event));
+            this.searchQuerySubject.subscribe((searchQuery) =>
+                searchFieldInstance.setSearchString(searchQuery?.query),
+            );
+        } else {
+            this.searchField.disable();
+        }
     }
 
     private registerUpdateMainNav(): void {
@@ -272,11 +286,6 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                     parent: currentFolder,
                     folder: true,
                 },
-            }),
-        );
-        this.searchQuerySubject.subscribe((searchQuery) =>
-            this.mainNavService.patchMainNavConfig({
-                searchQuery: searchQuery?.query,
             }),
         );
     }
@@ -467,6 +476,9 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                 }
                 if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE) {
                     continue;
+                } else if (['page', 'pageSize'].includes(key)) {
+                    // Handled by `NodeEntriesComponent`.
+                    continue;
                 }
                 needsUpdate = true;
             }
@@ -551,14 +563,14 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         }
     }
 
-    doSearch(query: any) {
+    doSearch(event: SearchEvent) {
         const id = this.currentFolder
             ? this.currentFolder.ref.id
             : this.searchQuery && this.searchQuery.node
             ? this.searchQuery.node.ref.id
             : null;
-        void this.routeTo(this.root, id, query.query);
-        if (!query.cleared) {
+        void this.routeTo(this.root, id, event.searchString);
+        if (!event.cleared) {
             this.ui.hideKeyboardIfMobile();
         }
     }

@@ -344,10 +344,10 @@ export class MdsEditorWidgetChipsComponent
             if (!knownValue && this.widget.getInitialDisplayValues()) {
                 const ds = this.widget
                     .getInitialDisplayValues()
-                    .values?.find((v) => v.key === value).displayString;
+                    .values?.find((v) => v.key === value)?.displayString;
                 return {
                     key: value,
-                    label: ds,
+                    label: ds || value,
                 };
             }
             if (knownValue) {

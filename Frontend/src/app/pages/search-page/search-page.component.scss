@@ -1,0 +1,111 @@
+@import './common';
+
+:host {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - var(--mainnavHeight));
+}
+
+mat-progress-bar {
+    position: sticky;
+    top: var(--mainnavCurrentHeight);
+    flex-shrink: 0;
+    transition: unset;
+    z-index: 2;
+}
+
+// Unset materialize styles
+//
+// TODO: remove this and materialize style sheet
+nav {
+    height: unset;
+    width: unset;
+    line-height: unset;
+    background-color: unset;
+    box-shadow: unset;
+}
+
+.mat-tab-label-active {
+    opacity: 1;
+}
+
+.repository-icon {
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.01);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    border-radius: 50px;
+    height: 32px;
+    width: 32px;
+    flex-shrink: 0;
+    img {
+        background-color: white;
+        height: 20px;
+        width: 20px;
+        border-radius: 2px;
+    }
+}
+
+mat-tab-nav-panel {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.mat-drawer-container {
+    flex-grow: 1;
+    background-color: unset;
+}
+
+.filter-bar-container {
+    width: 300px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-bar-heading {
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    height: 60px;
+    border-bottom: 1px solid
+        rgba(var(--palette-foreground-divider), var(--palette-foreground-divider-alpha));
+    .filter-bar-title {
+        flex-grow: 1;
+        font-size: 180%;
+        margin: 0;
+    }
+    .filter-bar-close-button {
+        margin-right: -10px;
+        flex-shrink: 0;
+        height: 40px;
+        width: 40px;
+    }
+}
+
+.filter-bar-body {
+    flex-grow: 1;
+    padding: 20px;
+    overflow: auto;
+}
+
+.filters-dialog-content {
+    flex-grow: 1;
+}
+
+main {
+    padding: 0 25px 25px;
+}
+
+.entries-wrapper {
+    @include entriesWrapper;
+}
+
+.title-container {
+    @include titleContainer;
+}

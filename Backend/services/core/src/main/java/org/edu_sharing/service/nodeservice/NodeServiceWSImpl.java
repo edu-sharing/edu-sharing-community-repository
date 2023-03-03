@@ -90,7 +90,7 @@ public class NodeServiceWSImpl extends NodeServiceAdapter {
 	}
 
 	@Override
-	public String getOrCreateUserInbox() {
+	public String getUserInbox(boolean createIfNotExists) {
 		return null;
 	}
 	

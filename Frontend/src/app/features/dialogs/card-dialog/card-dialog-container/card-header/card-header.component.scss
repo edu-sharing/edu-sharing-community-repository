@@ -12,14 +12,17 @@
         display: grid;
         grid-template-columns: auto 1fr auto;
         height: auto;
+        min-height: $titleHeight;
         .card-dialog-header-text {
             grid-column: 2;
         }
         .additional-content {
             grid-row: 2;
             grid-column: 1 / 4;
-            margin: 0 10px 10px;
             justify-content: center;
+            &:not(:empty) {
+                margin: 0 10px 10px;
+            }
         }
     }
 }

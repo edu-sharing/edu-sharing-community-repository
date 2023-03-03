@@ -173,16 +173,16 @@ public class RepositoryDao {
 		return baseClient.getHomeFolderID(getUserName());
 		
 	}
-	public String getUserInbox() {
-		return nodeService.getOrCreateUserInbox();
+	public String getUserInbox(boolean createIfNotExists) {
+		return nodeService.getUserInbox(createIfNotExists);
 	}
 
 	public String getRepositoryType() {
 		return appInfo.getRepositoryType();
 	}
 
-	public String getUserSavedSearch() {
-		return nodeService.getOrCreateUserSavedSearch();
+	public String getUserSavedSearch(boolean createIfNotExists) {
+		return nodeService.getUserSavedSearch(createIfNotExists);
 
 	}
 

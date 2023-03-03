@@ -130,7 +130,7 @@ public class NodeFrontpage {
         SearchResponse searchResult = searchServiceElastic.searchNative(searchRequest);
         List<NodeRef> result=new ArrayList<>();
         for(SearchHit hit : searchResult.getHits().getHits()){
-            logger.info("score:"+hit.getScore() +" id:"+hit.getId() + " "+ ((Map)hit.getSourceAsMap().get("properties")).get("cm:name"));
+            logger.debug("score:"+hit.getScore() +" id:"+hit.getId() + " "+ ((Map)hit.getSourceAsMap().get("properties")).get("cm:name"));
             result.add(searchServiceElastic.transformSearchHit(new HashSet<>(), AuthenticationUtil.getFullyAuthenticatedUser(),hit,false));
         }
         result = result.subList(0, result.size() > config.totalCount ? config.totalCount : result.size());

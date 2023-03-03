@@ -5,8 +5,10 @@ import io.swagger.v3.oas.annotations.media.Schema;;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
+
 @Schema(description = "")
-public class Person {
+public class Person implements Serializable {
 
 	private String firstName = null;
 	private String lastName = null;

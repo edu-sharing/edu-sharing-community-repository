@@ -1,1 +1,13 @@
 @import '../../core-ui-module/styles/variables';
+
+.top-matter {
+    display: flex;
+    align-items: center;
+    position: relative;
+    // Don't draw the vertical scroll buttons over the top matter
+    z-index: 1;
+    .title {
+        display: flex;
+        flex-grow: 1;
+    }
+}

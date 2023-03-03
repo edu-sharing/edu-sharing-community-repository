@@ -43,7 +43,6 @@ export class MdsNodeRelationsWidgetComponent implements OnInit, OnChanges {
                 if (this.node.properties[RestConstants.CCM_PROP_FORKED_ORIGIN]) {
                     this.nodeService
                         .getNode(
-                            RestConstants.HOME_REPOSITORY,
                             RestHelper.removeSpacesStoreRef(
                                 this.node.properties[RestConstants.CCM_PROP_FORKED_ORIGIN][0],
                             ),

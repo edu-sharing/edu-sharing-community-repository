@@ -448,7 +448,7 @@ public class NodeApi  {
 		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	if("-inbox-".equals(node)){
-    			node = repoDao.getUserInbox();
+    			node = repoDao.getUserInbox(true);
     		}
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
 	    	
@@ -826,13 +826,15 @@ public class NodeApi  {
     		Filter propFilter = new Filter(propertyFilter);
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	node=NodeDao.mapNodeConstants(repoDao,node);
+	    	node=NodeDao.mapNodeConstants(repoDao,node, false);
 
 			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
 
 			NodeEntries response=null;
 			List<NodeRef> children=null;
-			if("-shared_files-".equals(node)){
+			if(node == null) {
+				response = new NodeEntries();
+			} else if("-shared_files-".equals(node)){
 		    	User person = PersonDao.getPerson(repoDao, PersonDao.ME).asPerson();
 		    	children = person.getSharedFolders();
 		    	List<org.alfresco.service.cmr.repository.NodeRef> converted=NodeDao.convertApiNodeRef(children);

@@ -208,4 +208,21 @@ export class RenderHelperService {
         this.injectModuleComments(node);
         this.applyActionButtons(node);
     }
+
+    /**
+     * applies the render data given as the detailsSnippet and injects it in the given HTMLELement
+     * Script urls given by the rendering data will be obeyed. However, inline scripts are NOT supported
+     * This function should be used to align with CSP security policies
+     */
+    applyRenderData(htmlElement: HTMLElement, detailsSnippet: string) {
+        htmlElement.innerHTML = detailsSnippet;
+        Array.from(htmlElement.querySelectorAll('script')).forEach((script) => {
+            const newScriptElement = document.createElement('script');
+            Array.from(script.attributes).forEach((attr) => {
+                newScriptElement.setAttribute(attr.name, attr.value);
+            });
+            document.head.appendChild(newScriptElement);
+            script.parentElement.removeChild(script);
+        });
+    }
 }

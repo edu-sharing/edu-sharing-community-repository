@@ -266,7 +266,6 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.mainNav.setMainNavConfig({
             currentScope: 'login',
             title: 'SIDEBAR.LOGIN',
-            searchEnabled: false,
         });
     }
 
