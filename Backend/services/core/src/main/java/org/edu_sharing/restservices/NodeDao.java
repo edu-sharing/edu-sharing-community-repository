@@ -2119,6 +2119,7 @@ public class NodeDao {
 										getStoreIdentifier(),
 										remoteId!=null ? remoteId : getRef().getId(),
 										this.version,
+										type,
 										nodeProps);
 		if(previewData != null){
 			result.setMimetype(previewData.getMimetype());
