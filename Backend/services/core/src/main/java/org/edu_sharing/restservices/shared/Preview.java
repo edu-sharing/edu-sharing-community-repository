@@ -44,7 +44,7 @@ public class Preview implements Serializable {
       // may fails for remote repos
     }
     setUrl(preview.getUrl());
-    if(CCConstants.CCM_TYPE_IO.equals(type)) {
+    if(CCConstants.CCM_TYPE_IO.equals(type) || CCConstants.CCM_TYPE_IO.equals(CCConstants.getValidGlobalName(type))) {
       if(detail != null) {
         setIsIcon(detail.getType().equals(PreviewServlet.PreviewDetail.TYPE_DEFAULT));
       }
