@@ -111,6 +111,8 @@ public class CCConstants {
 
 	public final static String AUTH_TYPE_DEFAULT = "AUTH_TYPE_DEFAULT";
 
+	public final static String AUTH_TYPE_SIGNATURE = "AUTH_TYPE_SIGNATURE";
+
 	public final static String AUTH_TYPE_SHIBBOLETH = "AUTH_TYPE_SHIBBOLETH";
 
 	public final static String AUTH_TYPE_CAS = "AUTH_TYPE_CAS";
