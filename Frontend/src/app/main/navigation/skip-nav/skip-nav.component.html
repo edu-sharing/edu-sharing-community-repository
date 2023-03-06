@@ -3,8 +3,7 @@
     *ngFor="let target of availableTargets | async"
     class="skip-link"
     href
-    onclick="return false;"
-    (click)="skipTo(target)"
+    (click)="skipTo($event, target)"
     >{{ 'SKIP_LINKS.' + target | translate }}</a
   >
 </div>
