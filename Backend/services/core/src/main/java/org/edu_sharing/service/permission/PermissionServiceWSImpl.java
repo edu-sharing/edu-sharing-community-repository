@@ -125,6 +125,16 @@ public class PermissionServiceWSImpl implements PermissionService {
 	}
 
 	@Override
+	public void addUserToSharedList(String user, NodeRef nodeRef) {
+
+	}
+
+	@Override
+	public void cleanUpSharedList(NodeRef nodeRef) {
+
+	}
+
+	@Override
 	public Result<List<User>> findUsers(String query, Map<String, Double> searchFields,
 			boolean globalContext, int from, int nrOfResults) {
 
