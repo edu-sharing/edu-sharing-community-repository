@@ -95,10 +95,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
             .pipe(first(), delay(0))
             .subscribe(() => (this.columnChooserTriggerReady = true));
         this.entriesService.dataSource$
-            .pipe(
-                takeUntil(this.destroyed),
-                tap(() => console.log('change')),
-            )
+            .pipe(takeUntil(this.destroyed))
             .subscribe(() => this.changeDetectorRef.detectChanges());
     }
 
