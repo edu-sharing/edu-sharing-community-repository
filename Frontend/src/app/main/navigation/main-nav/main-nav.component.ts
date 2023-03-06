@@ -410,7 +410,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                 filter(
                     ({ user, loginInfo }) =>
                         loginInfo.statusCode === RestConstants.STATUS_CODE_OK &&
-                        user.editProfile &&
+                        user?.editProfile &&
                         this.configService.instant('editProfile', false),
                 ),
                 take(1),
