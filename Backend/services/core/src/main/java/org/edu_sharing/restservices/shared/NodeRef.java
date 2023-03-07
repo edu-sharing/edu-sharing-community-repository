@@ -7,10 +7,11 @@ import org.edu_sharing.restservices.RepositoryDao;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 @Schema(description = "")
-public class NodeRef implements Comparable<NodeRef> {
+public class NodeRef implements Serializable, Comparable<NodeRef> {
 
 	private String repo = null;
 	private boolean isHomeRepo = false;

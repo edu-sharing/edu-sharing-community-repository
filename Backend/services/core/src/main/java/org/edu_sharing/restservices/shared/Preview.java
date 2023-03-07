@@ -4,6 +4,7 @@ package org.edu_sharing.restservices.shared;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.Schema;;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -20,7 +21,7 @@ import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 
 
 @Schema(description = "")
-public class Preview  {
+public class Preview implements Serializable {
   
   private String url = null;
   private Integer width = null;

@@ -1,15 +1,18 @@
-import { Component } from '@angular/core';
-import { ListItem, RestConstants, ProposalNode, Node } from 'src/app/core-module/core.module';
+import { Component, OnInit } from '@angular/core';
+import { ListItem, RestConstants, ProposalNode } from 'src/app/core-module/core.module';
 import { NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
 import { ListWidget } from '../list-widget';
-import { Organization } from 'ngx-edu-sharing-api';
+import { MdsService, Node, Organization } from 'ngx-edu-sharing-api';
+import { MdsHelper } from '../../../core-module/rest/mds-helper';
+import { of } from 'rxjs';
+import { switchMap } from 'rxjs/internal/operators';
 
 @Component({
     selector: 'es-list-text',
     templateUrl: './list-text.component.html',
     styleUrls: ['./list-text.component.scss'],
 })
-export class ListTextComponent extends ListWidget {
+export class ListTextComponent extends ListWidget implements OnInit {
     static supportedItems = [
         new ListItem('NODE', '*'),
         new ListItem('NODE_PROPOSAL', '*'),
@@ -20,9 +23,16 @@ export class ListTextComponent extends ListWidget {
     ];
     readonly DATE_FIELDS = RestConstants.DATE_FIELDS;
     readonly VCARD_FIELDS = RestConstants.getAllVCardFields();
+    displayName: string;
 
-    constructor(private nodeHelper: NodeHelperService) {
+    constructor(private nodeHelper: NodeHelperService, private mds: MdsService) {
         super();
+    }
+
+    ngOnInit(): void {
+        this.nodeSubject.pipe(switchMap(() => this.getDisplayname())).subscribe((displayName) => {
+            this.displayName = displayName;
+        });
     }
     getNode() {
         if (this.item.type === 'NODE_PROPOSAL') {
@@ -55,5 +65,31 @@ export class ListTextComponent extends ListWidget {
             (this.node as Organization).authorityName ===
             RestConstants.GROUP_ALFRESCO_ADMINISTRATORS
         );
+    }
+
+    private async getDisplayname() {
+        const node = this.getNode() as Node;
+        if (!node.properties) {
+            return '';
+        }
+        const mds = await this.mds
+            .getMetadataSet({
+                repository: node.ref.repo,
+                metadataSet: node.metadataset || RestConstants.DEFAULT,
+            })
+            .toPromise();
+
+        const widget = MdsHelper.getWidget(this.item.name, null, mds.widgets);
+        if (widget?.values) {
+            const i18n = node.properties[this.item.name]
+                ?.map((prop) => widget.values.filter((v) => v.id === prop)?.[0]?.caption)
+                .filter((cap) => !!cap);
+            if (i18n?.length > 0) {
+                return i18n.join(', ');
+            }
+        }
+        return node.properties[this.item.name + '_DISPLAYNAME']?.length > 0
+            ? node.properties[this.item.name + '_DISPLAYNAME'].join(', ')
+            : node.properties[this.item.name]?.join(', ');
     }
 }

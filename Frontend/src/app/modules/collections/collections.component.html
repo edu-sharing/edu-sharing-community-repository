@@ -384,6 +384,7 @@
             <div
               class="references-wrapper"
               [class.wrapper-empty]="dataSourceReferences.isEmpty()"
+              [class.wrapper-table]="referencesDisplayType === NodeEntriesDisplayType.Table"
               [class.wrapper-edit]="isUserAllowedToEdit(collectionContent.node)"
             >
               <es-node-entries-wrapper

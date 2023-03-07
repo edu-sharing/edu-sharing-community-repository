@@ -5,6 +5,7 @@ import org.elasticsearch.action.search.SearchResponse;
 
 public class SearchResultNodeRefElastic extends SearchResultNodeRef {
 
+	@SuppressWarnings("NonSerializableFieldInSerializableClass")
 	private SearchResponse elasticResponse;
 
 	public SearchResponse getElasticResponse() {

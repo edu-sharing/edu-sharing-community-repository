@@ -222,7 +222,7 @@ public class NodeDao {
 		return AuthenticationUtil.runAsSystem(new RunAsWork<NodeDao>() {
 			@Override
 			public NodeDao doWork() throws Exception {
-				ShareServiceImpl service=new ShareServiceImpl();
+				ShareServiceImpl service=new ShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
 				Share share=service.getShare(nodeId, token);
 				if(share==null){
 					throw new Exception("No share found for nodeId and token");
@@ -2255,7 +2255,7 @@ public class NodeDao {
 
 	public List<NodeShare> getShares(String email) throws DAOSecurityException {
 		throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
-		ShareServiceImpl service = new ShareServiceImpl();
+		ShareServiceImpl service = new ShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
 		List<NodeShare> entries=new ArrayList<>();
 		for(Share share : service.getShares(this.nodeId)){
 			if(email==null || email.equals(share.getEmail()))
@@ -2265,7 +2265,7 @@ public class NodeDao {
 	}
 
 	public NodeShare createShare(long expiryDate,String password) throws DAOException {
-		ShareServiceImpl service = new ShareServiceImpl();
+		ShareServiceImpl service = new ShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
 		try {
 			throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
 			return new NodeShare(new org.alfresco.service.cmr.repository.NodeRef(NodeDao.storeRef,this.nodeId),service.createShare(nodeId, expiryDate,password));
@@ -2276,10 +2276,10 @@ public class NodeDao {
 
 	public void removeShare(String shareId) throws DAOException {
 		throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
-		ShareServiceImpl service=new ShareServiceImpl();
+		ShareServiceImpl service=new ShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
     	for(Share share : service.getShares(this.nodeId)){
     		if(share.getNodeId().equals(shareId)){
-    			service.removeShare(shareId);
+    			service.removeShare(this.nodeId, shareId);
     			return;
     		}
 		}
@@ -2288,7 +2288,7 @@ public class NodeDao {
 
 	public NodeShare updateShare(String shareId, long expiryDate, String password) throws DAOException {
 		throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
-		ShareServiceImpl service=new ShareServiceImpl();
+		ShareServiceImpl service=new ShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
     	for(Share share : service.getShares(this.nodeId)){
     		if(share.getNodeId().equals(shareId)){
     			share.setExpiryDate(expiryDate);

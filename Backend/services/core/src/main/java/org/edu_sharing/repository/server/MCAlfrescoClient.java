@@ -499,11 +499,11 @@ public interface MCAlfrescoClient {
 	public abstract void executeAction(String nodeId, String actionName, String actionId, HashMap parameters, boolean async) throws Exception;
 
 	public String copyNode(String nodeId, String toNodeId, boolean copyChildren) throws Exception;
-	
+
 	public void createShare(String nodeId, String[] emails, long expiryDate) throws Exception;
 	
 	public boolean isOwner(String nodeId, String user);
-	
+
 	public Share[] getShares(String nodeId);
 	
 	public void setOwner(String nodeId, String username);

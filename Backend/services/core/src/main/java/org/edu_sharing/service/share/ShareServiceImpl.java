@@ -15,7 +15,6 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.namespace.QName;
 import org.apache.axis.utils.StringUtils;
@@ -33,6 +32,7 @@ import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
+import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
@@ -53,15 +53,18 @@ public class ShareServiceImpl implements ShareService {
 	public static String I18n_MailSubjectLink = "dialog_share_mailsubject_link";
 	public static String I18n_MailText = "dialog_share_mailtext_file";
 	public static String I18n_MailTextLink = "dialog_share_mailtext_link";
-	
-	ServiceRegistry serviceRegistry= null;
+
+	private final ServiceRegistry serviceRegistry;
+	private final PermissionService permissionService;
+
 	
 	Logger logger = Logger.getLogger(ShareServiceImpl.class);
 	
-	public ShareServiceImpl() {
+	public ShareServiceImpl(PermissionService permissionService) {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 
-		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+		this.serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+		this.permissionService = permissionService;
 	}
 	
 	public Share createShare(String nodeId, long expiryDate, String password) throws EMailValidationException, EMailSendFailedException, ExpiryDateValidationException, NodeDoesNotExsistException, PermissionFailedException{
@@ -112,11 +115,16 @@ public class ShareServiceImpl implements ShareService {
 		NodeRef personNodeRef = (NodeRef)serviceRegistry.getPersonService().getPerson(authService.getCurrentUserName());
 		Map<QName, Serializable> personProps = serviceRegistry.getNodeService().getProperties(personNodeRef);
 		String nameInvitor = (String)personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_FIRSTNAME))+" "+(String)personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_LASTNAME));
-		
+
+
 		//shares is no mandatory aspect so:
 		if(!nodeService.hasAspect(io, SHARES_ASPECT)){
 			nodeService.addAspect(io, SHARES_ASPECT, null);
 		}
+
+		permissionService.addUserToSharedList(authService.getCurrentUserName(), io);
+		ArrayList<String> phUsers = (ArrayList<String>) nodeService.getProperty(io, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
+
 		String token=null;
 		for(String email : emails){
 			
@@ -130,7 +138,7 @@ public class ShareServiceImpl implements ShareService {
 			
 			props.put(SHARE_PROP_SHARE_TOKEN, token);
 			props.put(SHARE_PROP_DOWNLOAD_COUNTER, 0);
-			
+
 			ChildAssociationRef createdChild = nodeService.createNode(io, SHARE_ASSOC, QName.createQName(email), SHARE_TYPE, props);
 			
 			if(!EMAIL_TYPE_LINK.equals(email)){
@@ -178,14 +186,16 @@ public class ShareServiceImpl implements ShareService {
 		}		
 	}
 	@Override
-	public void removeShare(String shareNodeId){
+	public void removeShare(String nodeId, String shareNodeId){
 		serviceRegistry.getNodeService().deleteNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,shareNodeId));
+		permissionService.cleanUpSharedList(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
 	}
-	
+
 	@Override
 	public void updateShare(String nodeId, String email, long expiryDate) throws EMailValidationException, ExpiryDateValidationException,
 			NodeDoesNotExsistException, PermissionFailedException {
 	}
+
 	public void updateDownloadCount(Share share){
 		throwIfScopedNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,share.getIoNodeId()));
 		serviceRegistry.getNodeService().setProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, share.getNodeId()), SHARE_PROP_DOWNLOAD_COUNTER,share.getDownloadCount());

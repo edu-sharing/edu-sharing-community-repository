@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class oEmbedServlet extends HttpServlet {
-    Logger logger = Logger.getLogger(oEmbedServlet.class);
+    private static Logger logger = Logger.getLogger(oEmbedServlet.class);
         protected void doGet(HttpServletRequest req, HttpServletResponse resp)
                 throws ServletException, IOException {
             oEmbedBase base;

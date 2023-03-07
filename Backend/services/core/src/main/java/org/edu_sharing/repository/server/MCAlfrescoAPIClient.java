@@ -152,6 +152,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.PropertiesGetInterceptor;
 import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
 import org.edu_sharing.service.util.AlfrescoDaoHelper;
@@ -3223,13 +3224,13 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 	@Override
 	public void createShare(String nodeId, String[] emails, long expiryDate) throws Exception {
-		ShareService shareService = new ShareServiceImpl();
+		ShareService shareService = new ShareServiceImpl(PermissionServiceFactory.getPermissionService(appInfo.getAppId()));
 		String locale = (String) Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.AUTH_LOCALE);
 		shareService.createShare(nodeId, emails, expiryDate, null, locale);
 	}
 
 	public Share[] getShares(String nodeId) {
-		ShareService shareService = new ShareServiceImpl();
+		ShareService shareService = new ShareServiceImpl(PermissionServiceFactory.getPermissionService(appInfo.getAppId()));
 		return shareService.getShares(nodeId);
 	}
 
