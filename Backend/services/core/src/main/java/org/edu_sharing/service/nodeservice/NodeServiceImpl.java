@@ -935,7 +935,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		Serializable value = nodeServiceAlfresco.getProperty(ref, prop);
 		//dbnodeservice returns mltext
 		if(value instanceof MLText){
-			value = ((MLText)value).getValue(I18NUtil.getLocale());
+			value = ((MLText)value).getDefaultValue();
 		}
 
 		if(prop.toString().equals(CCConstants.LOM_PROP_GENERAL_TITLE) && StringUtils.isBlank((String)value)) {
