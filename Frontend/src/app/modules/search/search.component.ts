@@ -662,7 +662,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         queryParams.mds = mds;
         queryParams.repository = repository;
         queryParams.mdsExtended = this.mdsExtended;
-        queryParams.sidenav = this.searchService.sidenavOpened;
         if (sort) {
             queryParams.materialsSortBy = sort.active;
             queryParams.materialsSortAscending = sort.direction === 'asc';
@@ -1600,9 +1599,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 return;
             }
             this.mainnav = param.mainnav !== 'false';
-            if (param.sidenav) {
-                this.searchService.sidenavOpened = param.sidenav !== 'false';
-            }
             if (param.repositoryFilter) {
                 this.enabledRepositories = param['repositoryFilter'].split(',');
                 // do a reload of the repos
