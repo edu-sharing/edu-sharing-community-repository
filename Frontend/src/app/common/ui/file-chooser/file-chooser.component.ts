@@ -103,7 +103,6 @@ export class FileChooserComponent implements OnInit {
      * Path to show as breadcrumbs, beginning with the first item after the current home directory.
      */
     readonly path$ = new BehaviorSubject<Node[]>([]);
-    isLoading: boolean;
     columns: ListItem[] = [];
     sort: ListSortConfig;
     selectedFiles: Node[] = [];
@@ -314,7 +313,7 @@ export class FileChooserComponent implements OnInit {
             this.list.reset();
             // this.hasMoreToLoad = true; // !this._collections; // Collections have no paging
         }
-        this.isLoading = true;
+        this.list.isLoading = true;
         if (this._collections) {
             return this.collectionApi
                 .search(this.searchQuery, {
@@ -361,7 +360,7 @@ export class FileChooserComponent implements OnInit {
             return;
         }
         this.viewDirectory(this.currentDirectory, false);
-        this.isLoading = true;
+        this.list.isLoading = true;
     }
 
     setSorting(data: ListSortConfig) {
@@ -373,7 +372,7 @@ export class FileChooserComponent implements OnInit {
     private showList(list: NodeList) {
         this.addToList(list);
         this.updateButtons();
-        this.isLoading = false;
+        this.list.isLoading = false;
     }
 
     cancel() {
@@ -381,7 +380,7 @@ export class FileChooserComponent implements OnInit {
     }
 
     private addToList(list: NodeList) {
-        this.isLoading = false;
+        this.list.isLoading = false;
         if (!list.nodes.length) {
             return;
         }

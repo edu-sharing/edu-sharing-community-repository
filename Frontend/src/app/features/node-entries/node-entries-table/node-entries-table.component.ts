@@ -94,7 +94,11 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         this.visibleDataColumns$
             .pipe(first(), delay(0))
             .subscribe(() => (this.columnChooserTriggerReady = true));
-        rxjs.combineLatest([this.entriesService.dataSource$, this.entriesService.options$])
+        rxjs.merge([
+            this.entriesService.dataSource$,
+            this.entriesService.options$,
+            this.entriesService.dataSource.isLoadingSubject,
+        ])
             .pipe(takeUntil(this.destroyed))
             .subscribe(() => this.changeDetectorRef.detectChanges());
     }

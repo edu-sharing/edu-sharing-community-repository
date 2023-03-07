@@ -8,7 +8,13 @@ import { Helper } from '../../core-module/rest/helper';
 export class NodeDataSource<T extends Node | GenericAuthority> extends DataSource<T> {
     private dataStream = new BehaviorSubject<T[]>([]);
     private pagination: Pagination;
-    public isLoading: boolean;
+    public isLoadingSubject = new BehaviorSubject<boolean>(false);
+    get isLoading() {
+        return this.isLoadingSubject.value;
+    }
+    set isLoading(isLoading: boolean) {
+        this.isLoadingSubject.next(isLoading);
+    }
     private displayCountSubject = new BehaviorSubject<number | null>(null);
     private areAllDisplayed$ = rxjs.combineLatest([this.dataStream, this.displayCountSubject]).pipe(
         map(([data, displayCount]) => this.getAreAllDisplayed(displayCount, data)),

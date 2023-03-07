@@ -153,15 +153,8 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
 
     @ViewChild('list') list: ListTableComponent;
     @ViewChild(NodeEntriesWrapperComponent) nodeEntries: NodeEntriesWrapperComponent<Node>;
-    readonly dataSourceSubject = new BehaviorSubject<NodeDataSource<Node>>(null);
     @Input() customOptions: CustomOptions;
-    @Input()
-    get dataSource() {
-        return this.dataSourceSubject.value;
-    }
-    set dataSource(dataSource: NodeDataSource<Node>) {
-        this.dataSourceSubject.next(dataSource);
-    }
+    @Input() dataSource = new NodeDataSource<Node>();
     @Output() nodesChange = new EventEmitter<Node[]>();
     sort: ListSortConfig = {
         allowed: true,
@@ -236,7 +229,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             return;
         }
         if (reset) {
-            this.dataSource = new NodeDataSource<Node>();
+            this.dataSource.reset();
             this.nodeEntries.getSelection().clear();
             this.onReset.emit();
         } else if (this.dataSource.isFullyLoaded()) {
