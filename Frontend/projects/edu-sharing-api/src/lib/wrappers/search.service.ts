@@ -5,7 +5,7 @@ import { filter, map, switchMap, tap } from 'rxjs/operators';
 import { LabeledValue, MdsIdentifier, SearchResults } from '../../public-api';
 import * as apiModels from '../api/models';
 import { SearchV1Service } from '../api/services';
-import { onSubscription } from '../utils/on-subscription';
+import { onSubscription } from '../utils/rxjs-operators/on-subscription';
 import { LabeledValuesDict, MdsLabelService, RawValuesDict } from './mds-label.service';
 
 /** Configuration for `SearchService`. */

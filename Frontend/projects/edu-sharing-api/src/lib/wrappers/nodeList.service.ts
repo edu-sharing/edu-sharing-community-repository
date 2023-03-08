@@ -6,7 +6,7 @@ import { NodeEntries } from '../api/models';
 import { IamV1Service } from '../api/services';
 import { HOME_REPOSITORY, ME } from '../constants';
 import { ApiErrorResponse } from '../models';
-import { switchReplay } from '../utils/switch-replay';
+import { switchReplay } from '../utils/rxjs-operators/switch-replay';
 import { AuthenticationService } from './authentication.service';
 
 export interface SortPolicy {

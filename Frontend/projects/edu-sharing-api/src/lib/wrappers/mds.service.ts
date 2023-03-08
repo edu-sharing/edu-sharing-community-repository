@@ -4,7 +4,7 @@ import { map } from 'rxjs/operators';
 import { MdsV1Service } from '../api/services';
 import { DEFAULT, HOME_REPOSITORY } from '../constants';
 import { MdsDefinition, MdsSort, MdsView, MetadataSetInfo } from '../models';
-import { shareReplayReturnValue } from '../utils/decorators';
+import { shareReplayReturnValue } from '../utils/decorators/share-replay-return-value';
 
 export interface MdsIdentifier {
     repository: string;
