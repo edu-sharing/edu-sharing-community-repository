@@ -22489,6 +22489,153 @@
         ]
       }
     },
+    "/mediacenter/v1/mediacenter/{repository}/{mediacenter}/licenses/export": {
+      "post": {
+        "description": "e.g. cm:name",
+        "operationId": "exportMediacenterLicensedNodes",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "sort properties",
+            "in": "query",
+            "name": "sortProperties",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index",
+            "in": "query",
+            "name": "sortAscending",
+            "schema": {
+              "items": {
+                "type": "boolean"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "properties to fetch, use parent::<property> to include parent property values",
+            "in": "query",
+            "name": "properties",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "authorityName of the mediacenter that licenses nodes",
+            "in": "path",
+            "name": "mediacenter",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchParameters"
+              }
+            }
+          },
+          "description": "search parameters",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "get nodes that are licensed by the given mediacenter",
+        "tags": [
+          "MEDIACENTER v1"
+        ]
+      }
+    },
     "/mediacenter/v1/mediacenter/{repository}/{mediacenter}/manages": {
       "get": {
         "operationId": "getMediacenterGroups",
