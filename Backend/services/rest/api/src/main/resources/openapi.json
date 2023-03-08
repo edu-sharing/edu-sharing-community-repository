@@ -22491,7 +22491,7 @@
     },
     "/mediacenter/v1/mediacenter/{repository}/{mediacenter}/licenses/export": {
       "post": {
-        "description": "e.g. @cm\\:name:\"*\"",
+        "description": "e.g. cm:name",
         "operationId": "exportMediacenterLicensedNodes",
         "parameters": [
           {
