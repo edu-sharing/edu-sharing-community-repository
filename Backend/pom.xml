@@ -21,9 +21,21 @@
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <maven.compiler.release>8</maven.compiler.release>
     <java.version>1.8</java.version>
   </properties>
+
+
+  <profiles>
+    <profile>
+      <id>jdk9+</id>
+      <activation>
+        <jdk>!1.8</jdk>
+      </activation>
+      <properties>
+        <maven.compiler.release>8</maven.compiler.release>
+      </properties>
+    </profile>
+  </profiles>
 
   <licenses>
     <license>
