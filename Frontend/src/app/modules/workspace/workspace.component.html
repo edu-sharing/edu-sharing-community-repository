@@ -89,7 +89,7 @@
       *ngIf="root !== 'RECYCLE'"
       [current]="currentFolder"
       [root]="root"
-      [tree]="treeComponent"
+      (refreshTree)="treeComponent?.refresh()"
       [searchQuery]="searchQuery"
       [customOptions]="customOptions"
       [displayType]="displayType"
