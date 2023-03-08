@@ -18,6 +18,13 @@
 
   <name>edu_sharing-community-repository-backend</name>
 
+  <properties>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.release>8</maven.compiler.release>
+    <java.version>1.8</java.version>
+  </properties>
+
   <licenses>
     <license>
       <name>GNU Lesser General Public License v3.0 or later</name>
@@ -26,35 +33,6 @@
       </url>
     </license>
   </licenses>
-
-  <build>
-
-    <plugins>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>enforce</id>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <phase>initialize</phase>
-            <configuration>
-              <rules>
-                <requireJavaVersion>
-                  <version>${java.version.range}</version>
-                </requireJavaVersion>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-    </plugins>
-
-  </build>
 
   <modules>
     <module>alfresco</module>
