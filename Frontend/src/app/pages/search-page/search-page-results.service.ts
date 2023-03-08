@@ -182,8 +182,12 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
         const repository = this._searchPage.availableRepositories.value.find(
             ({ id }) => id === params.repository,
         );
-        // We cannot show collections for another repository.
-        if (!repository.isHomeRepo) {
+        if (
+            // We cannot show collections for another repository.
+            !repository.isHomeRepo ||
+            // We don't show other collections when searching for material to add to a collection.
+            this._searchPage.addToCollectionMode.value
+        ) {
             this.loadingCollections.next(false);
             return () => rxjs.of({ data: [], total: 0 });
         }

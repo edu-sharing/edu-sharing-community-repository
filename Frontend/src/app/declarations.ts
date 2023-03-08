@@ -5,7 +5,6 @@ import { MdsTestComponent } from './common/test/mds-test/mds-test.component';
 import { ModalDialogToastComponent } from './common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import { ToolListComponent } from './common/ui/tool-list/tool-list.component';
 import { ToucheventDirective } from './common/ui/touchevents/touchevents';
-import { SmallCollectionComponent } from './common/ui/small-collection/small-collection.component';
 import { InfobarComponent } from './common/ui/infobar/infobar.component';
 import { AutocompleteComponent } from './common/ui/autocomplete/autocomplete.component';
 import { CookieInfoComponent } from './common/ui/cookie-info/cookie-info.component';
@@ -35,7 +34,6 @@ export const DECLARATIONS = [
     AutocompleteComponent,
     ColorTransformPipe,
     TimePipe,
-    SmallCollectionComponent,
     ScrollToTopButtonComponent,
     CustomGlobalExtensionsComponent,
     GlobalContainerComponent,

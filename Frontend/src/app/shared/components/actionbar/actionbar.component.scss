@@ -2,6 +2,7 @@
 
 .actionbar {
     display: flex;
+    gap: 10px;
 }
 .actionToggle > button {
     color: $textLight;
@@ -34,9 +35,6 @@ button {
 .more {
     color: $primary;
     background-color: transparent;
-}
-button {
-    margin: 0 5px;
 }
 .actionbar-background-dark {
     .mat-button {

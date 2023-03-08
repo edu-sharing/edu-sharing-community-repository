@@ -130,12 +130,15 @@ export class OptionItem {
      *
      * @param name the option name, which is used for the translation
      * @param icon A material icon name
-     * @param callback A function callback when this option is choosen. Will get the current node passed as an argument
+     * @param callback A function callback when this option is chosen. Will get the current node
+     * passed as an argument. If available, the relevant nodes are passed as second argument,
+     * i.e., the selection, if any, or the current node as single-item array otherwise.
      */
     constructor(
         public name: string,
         public icon: string,
-        public callback: (object?: Node | any) => void,
+        // TODO: Maybe switch to only providing the second parameter.
+        public callback: (object?: Node | any, objects?: (Node | any)[]) => void,
     ) {}
 }
 export class CustomOptions {

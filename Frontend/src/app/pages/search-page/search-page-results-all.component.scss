@@ -6,6 +6,10 @@
 //     margin-top: 1.5rem;
 // }
 
+.add-to-collection-banner {
+    @include addToCollectionBanner;
+}
+
 .entries-wrapper {
     @include entriesWrapper;
 }

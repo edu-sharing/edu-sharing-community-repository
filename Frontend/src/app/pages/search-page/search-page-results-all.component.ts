@@ -18,6 +18,7 @@ export class SearchPageResultsAllComponent implements OnInit {
 
     readonly repoData = this._results.repoData;
     readonly loadingProgress = this._results.loadingProgress;
+    readonly addToCollectionMode = this._searchPage.addToCollectionMode;
     allEmpty = false;
 
     private readonly _searchString = this._searchPage.searchString;

@@ -1675,6 +1675,16 @@ export class OptionsHelperService implements OnDestroy {
 
     setData(data: OptionData) {
         this.data = data;
+        this.wrapOptionCallbacks();
+    }
+
+    private wrapOptionCallbacks(): void {
+        if (this.data.customOptions?.addOptions) {
+            for (const option of this.data.customOptions.addOptions) {
+                const callback = option.callback;
+                option.callback = (node) => callback(node, this.getObjects(node));
+            }
+        }
     }
 
     private sortOptionsByGroup(options: OptionItem[]) {

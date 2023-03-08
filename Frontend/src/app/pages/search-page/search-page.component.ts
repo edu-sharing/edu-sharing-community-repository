@@ -16,6 +16,7 @@ import { notNull } from '../../util/functions';
 import { NavigationScheduler } from './navigation-scheduler';
 import { SearchPageService } from './search-page.service';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
     selector: 'es-search-page',
@@ -40,6 +41,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
 
     @HostBinding('class.has-tab-bar') tabBarIsVisible: boolean = null;
     progressBarIsVisible = false;
+    queryParamsAllRepositories: { [key: string]: string };
 
     readonly availableRepositories = this.searchPage.availableRepositories;
     readonly activeRepository = this.searchPage.activeRepository;
@@ -52,13 +54,14 @@ export class SearchPageComponent implements OnInit, OnDestroy {
     private readonly destroyed = new Subject<void>();
 
     constructor(
-        private breakpointObserver: BreakpointObserver,
-        private mainNav: MainNavService,
-        private searchPage: SearchPageService,
-        private dialogs: DialogsService,
-        private translate: TranslateService,
         private breadcrumbsService: BreadcrumbsService,
+        private breakpointObserver: BreakpointObserver,
+        private dialogs: DialogsService,
+        private mainNav: MainNavService,
         private navigationScheduler: NavigationScheduler,
+        private route: ActivatedRoute,
+        private searchPage: SearchPageService,
+        private translate: TranslateService,
     ) {
         this.searchPage.init();
     }
@@ -74,6 +77,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
             .subscribe((tabBarIsVisible) => (this.tabBarIsVisible = tabBarIsVisible));
         this.registerProgressBarIsVisible();
         this.registerFilterDialog();
+        this.registerQueryParamsAllRepositories();
     }
 
     ngOnDestroy(): void {
@@ -110,6 +114,18 @@ export class SearchPageComponent implements OnInit, OnDestroy {
                     void dialogRefPromise?.then((dialogRef) => dialogRef.close());
                 }
             });
+    }
+
+    private registerQueryParamsAllRepositories(): void {
+        rxjs.combineLatest([this.route.queryParams, this.searchString.observeQueryParamEntry()])
+            .pipe(
+                takeUntil(this.destroyed),
+                map(([queryParams, searchStringEntry]) => ({
+                    addToCollection: queryParams.addToCollection,
+                    ...searchStringEntry,
+                })),
+            )
+            .subscribe((params) => (this.queryParamsAllRepositories = params));
     }
 
     private async openFilterDialog(): Promise<CardDialogRef<unknown>> {
