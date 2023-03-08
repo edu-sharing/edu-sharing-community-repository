@@ -1,3 +1,10 @@
+<!-- For meaningful multi-item actions, we would need to share one actionbar with all
+NodeEntriesWrapper instances. Currently, however, each NodeEntriesWrapper instance will provide its
+own OptionsHelperService instance and take exclusive control of the actionbar. -->
+
+<!-- <es-actionbar #actionbar class="actionbar"></es-actionbar> -->
+
+<!-- [initConfig]="{ actionbar, customOptions: { removeOptions: ['OPTIONS.SWITCH_TO_LIST_VIEW']} }" -->
 <es-node-entries-wrapper
   *ngFor="let repo of repoData | async"
   [class.display-none]="repo.dataSource.isEmpty()"
@@ -8,6 +15,8 @@
   [disableInfiniteScroll]="true"
   [displayType]="NodeEntriesDisplayType.Grid"
   [gridConfig]="{ layout: 'scroll' }"
+  [checkbox]="false"
+  [initConfig]="{}"
 >
   <ng-template #title>
     <div class="title-container">

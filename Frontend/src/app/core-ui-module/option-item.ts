@@ -147,16 +147,16 @@ export class CustomOptions {
     /**
      * List of ids of options to explicitly support
      */
-    public supportedOptions?: string[] = [];
+    public supportedOptions?: string[];
     /**
      * List of ids of options to explicitly remove
      * Only supported if supportedOptions is empty
      */
-    public removeOptions?: string[] = [];
+    public removeOptions?: string[];
     /**
      * Options to add/insert into the menu
      */
-    public addOptions?: OptionItem[] = [];
+    public addOptions?: OptionItem[];
 }
 export enum HideMode {
     Disable,
