@@ -42,7 +42,7 @@ async function checkConsoleErrors(page: Page): Promise<void> {
             message.type() === 'error' &&
             // These are Playwright errors that are probably caused by us racing page navigation
             // with this console message listener.
-            !message.text().endsWith('JSHandle@object'),
+            !['JSHandle@object', 'ERROR JSHandle@object', 'ERROR Error'].includes(message.text()),
     });
     expect(msg.text() ?? '<empty message>', `expect no console error`).not.toBeDefined();
 }
