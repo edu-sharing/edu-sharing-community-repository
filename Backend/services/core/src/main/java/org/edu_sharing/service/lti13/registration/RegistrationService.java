@@ -19,6 +19,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
+import org.edu_sharing.restservices.ltiplatform.v13.LTIPlatformConstants;
 import org.edu_sharing.restservices.ltiplatform.v13.model.OpenIdConfiguration;
 import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.admin.SystemFolder;
@@ -440,7 +441,13 @@ public class RegistrationService {
             properties.put(ApplicationInfo.KEY_LTITOOL_TARGET_LINK_URI_DEEPLINK,targetLinkUriDeepLink);
         }
         properties.put(ApplicationInfo.KEY_LTITOOL_REDIRECT_URLS,redirectUris);
-        if(customParameters != null){properties.put(ApplicationInfo.KEY_LTITOOL_CUSTOM_PARAMETERS, customParameters);}
+        if(customParameters != null){
+            properties.put(ApplicationInfo.KEY_LTITOOL_CUSTOM_PARAMETERS, customParameters);
+            JSONObject jo = (JSONObject) new JSONParser().parse(customParameters);
+            if(jo.get(LTIPlatformConstants.CUSTOM_CLAIM_GET_CONTENTAPIURL)  != null){
+                properties.put(ApplicationInfo.KEY_LTITOOL_CUSTOMCONTENT_OPTION,"true");
+            }
+        }
         properties.put(ApplicationInfo.KEY_LOGO,logoUri);
         properties.put(ApplicationInfo.KEY_LTI_KEYSET_URL,jwksuri);
         properties.put(ApplicationInfo.KEY_LTI_DEPLOYMENT_ID, Integer.toString(lastDeploymentId));

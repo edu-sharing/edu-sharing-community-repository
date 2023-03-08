@@ -221,9 +221,13 @@ public class LTIJWTUtil {
                             CCConstants.SECURITY_KEY_ALGORITHM);*/
                     String keysetUrl = appInfo.getLtiKeysetUrl();
                     if(keysetUrl == null){
-                        throw new RuntimeException("keyset url is null");
+                        if(appInfo.ishomeNode()){
+                            keysetUrl = appInfo.getBaseUrl() + "/edu-sharing/rest/lti/v13/jwks";
+                        }else {
+                            throw new RuntimeException("keyset url is null");
+                        }
                     }
-                    JWKSet publicKeys = JWKSet.load(new URL(appInfo.getLtiKeysetUrl()));
+                    JWKSet publicKeys = JWKSet.load(new URL(keysetUrl));
                     String keyId = header.getKeyId();
                     if(keyId == null) throw new RuntimeException("missing keyid");
                     JWK jwk = publicKeys.getKeyByKeyId(keyId);
