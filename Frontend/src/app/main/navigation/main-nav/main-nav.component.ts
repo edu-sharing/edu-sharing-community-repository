@@ -413,6 +413,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.user
             .observeCurrentUserInfo()
             .pipe(
+                filter(({ user }) => user != null),
                 filter(
                     ({ user, loginInfo }) =>
                         loginInfo.statusCode === RestConstants.STATUS_CODE_OK &&
