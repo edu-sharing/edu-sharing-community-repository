@@ -352,6 +352,18 @@ export class UIHelper {
                 });
         }
     }
+
+    /**
+     * handles adding nodes to a collection
+     * @param nodeHelper
+     * @param collectionService
+     * @param router
+     * @param bridge
+     * @param collection
+     * @param nodes
+     * @param callback
+     * @param allowDuplicate false (default) will trigger a confirmation if duplicate was detected, true will always create a duplicate and 'ignore' works as false but will not trigger a confirmation but silently abort
+     */
     static addToCollection(
         nodeHelper: NodeHelperService,
         collectionService: RestCollectionService,
@@ -360,14 +372,14 @@ export class UIHelper {
         collection: Node,
         nodes: Node[],
         callback: (nodes: CollectionReference[]) => void = null,
-        allowDuplicate = false,
+        allowDuplicate: boolean | 'ignore' = false,
     ) {
         Observable.forkJoin(nodes.map(node =>
             collectionService.addNodeToCollection(
                 collection.ref.id,
                 node.ref.id,
                 node.ref.repo,
-                allowDuplicate
+                allowDuplicate === true
                 ).pipe(
                     catchError(error => of({error, node}),)
                 )
@@ -387,34 +399,36 @@ export class UIHelper {
             if(failed.length > 0) {
                 const duplicated = failed.filter(({error}) => error.status === RestConstants.DUPLICATE_NODE_RESPONSE);
                 if (duplicated.length > 0) {
-                    bridge.showModalDialog({
-                        title: 'COLLECTIONS.ADD_TO.DUPLICATE_TITLE',
-                        message: 'COLLECTIONS.ADD_TO.DUPLICATE_MESSAGE',
-                        messageParameters: {count: duplicated.length},
-                        isCancelable: true,
-                        buttons: DialogButton.getYesNo(
-                            () => {
-                                bridge.closeModalDialog();
-                                if (callback) {
-                                    callback(results.map(n => n.node as CollectionReference));
+                    if(allowDuplicate !== 'ignore') {
+                        bridge.showModalDialog({
+                            title: 'COLLECTIONS.ADD_TO.DUPLICATE_TITLE',
+                            message: 'COLLECTIONS.ADD_TO.DUPLICATE_MESSAGE',
+                            messageParameters: {count: duplicated.length},
+                            isCancelable: true,
+                            buttons: DialogButton.getYesNo(
+                                () => {
+                                    bridge.closeModalDialog();
+                                    if (callback) {
+                                        callback(results.map(n => n.node as CollectionReference));
+                                    }
+                                },
+                                () => {
+                                    bridge.closeModalDialog();
+                                    UIHelper.addToCollection(
+                                        nodeHelper,
+                                        collectionService,
+                                        router,
+                                        bridge,
+                                        collection,
+                                        duplicated.map(d => d.node),
+                                        callback,
+                                        true
+                                    )
                                 }
-                            },
-                            () => {
-                                bridge.closeModalDialog();
-                                UIHelper.addToCollection(
-                                    nodeHelper,
-                                    collectionService,
-                                    router,
-                                    bridge,
-                                    collection,
-                                    duplicated.map(d => d.node),
-                                    callback,
-                                    true
-                                )
-                            }
-                        )
-                    });
-                    return;
+                            )
+                        });
+                        return;
+                    }
                 } else {
                     nodeHelper.handleNodeError(
                         RestHelper.getTitle(failed[0].node),

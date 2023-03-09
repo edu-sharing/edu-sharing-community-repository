@@ -38,7 +38,13 @@ public class NodeServicePixabayImpl extends NodeServiceAdapterCached{
 			URL url = new URL(download);
 			HttpsURLConnection connection = SearchServicePixabayImpl.openPixabayUrl(url);
 			connection.connect();
-			return connection.getInputStream();
+			InputStream is = connection.getInputStream();
+			// this MIGHT be just fine - no data was received yet!
+			/*if(is.available() == 0){
+				logger.warn("inputStream from pixabay for node " + nodeId + " has 0 bytes, url from pixabay: " + url);
+				return null;
+			}*/
+			return is;
 		}catch(Throwable t){
 			// this is likely to fail since pixabay does block any programatic image access
 			logger.warn("Can not fetch inputStream from pixabay for node "+nodeId+": "+t.getMessage(),t);
