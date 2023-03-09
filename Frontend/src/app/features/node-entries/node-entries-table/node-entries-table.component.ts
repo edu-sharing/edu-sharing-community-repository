@@ -35,7 +35,7 @@ import { DragData } from '../../../services/nodes-drag-drop.service';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 import { BorderBoxObserverDirective } from '../../../shared/directives/border-box-observer.directive';
 import { CanDrop } from '../../../shared/directives/nodes-drop-target.directive';
-import { ClickSource, InteractionType } from '../entries-model';
+import { ClickSource, InteractionType, NodeEntriesDisplayType } from '../entries-model';
 import { NodeEntriesDataType } from '../node-entries.component';
 
 @Component({
@@ -49,6 +49,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
 {
     readonly InteractionType = InteractionType;
     readonly ClickSource = ClickSource;
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Target = Target;
 
     @ViewChild(MatSort) sort: MatSort;
