@@ -53,6 +53,9 @@ button {
     .mat-flat-button {
         background-color: #fff;
         color: $primary;
+        &:disabled {
+            color: $textLight;
+        }
     }
 }
 .actionbar-round {

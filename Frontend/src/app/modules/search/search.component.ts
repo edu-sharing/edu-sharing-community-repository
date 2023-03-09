@@ -48,6 +48,7 @@ import {
     CustomOptions,
     DefaultGroups,
     ElementType,
+    HideMode,
     OptionItem,
     Scope,
 } from '../../core-ui-module/option-item';
@@ -1563,6 +1564,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     },
                 );
                 addTo.elementType = OptionsHelperService.ElementTypesAddToCollection;
+                addTo.permissions = [RestConstants.ACCESS_CC_PUBLISH];
+                addTo.permissionsMode = HideMode.Disable;
                 addTo.group = DefaultGroups.Reuse;
                 addTo.showAlways = true;
                 const cancel = new OptionItem('CANCEL', 'close', () => {
