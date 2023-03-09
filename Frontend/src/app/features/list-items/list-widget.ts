@@ -17,7 +17,14 @@ export class ListWidget {
         UniversalNode | ProposalNode | Group | Person | Statistics
     >(null); // node (or group/user)
 
-    @Input() item: ListItem;
+    @Input()
+    get item(): ListItem {
+        return this.itemSubject.value;
+    }
+    set item(value: ListItem) {
+        this.itemSubject.next(value);
+    }
+    protected readonly itemSubject = new BehaviorSubject<ListItem>(null);
 
     /**
      * Provide a label for non-obvious fields that describes the field the given value belongs to.

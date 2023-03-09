@@ -48,6 +48,7 @@ import {
     CustomOptions,
     DefaultGroups,
     ElementType,
+    HideMode,
     OptionItem,
     Scope,
 } from '../../core-ui-module/option-item';
@@ -171,7 +172,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     extendedRepositorySelected = false;
     savedSearch: Node[] = [];
-    savedSearchColumns: ListItem[] = [];
+    savedSearchColumns: ListItem[] = [new ListItem('NODE', RestConstants.LOM_PROP_TITLE)];
     saveSearchDialog = false;
     savedSearchLoading = false;
     savedSearchQuery: string = null;
@@ -289,7 +290,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.mainNavService.getMainNav().searchField) {
             this.tutorialElement = this.mainNavService.getMainNav().searchField.input;
         }
-        this.savedSearchColumns.push(new ListItem('NODE', RestConstants.LOM_PROP_TITLE));
         this.optionsHelper.displayTypeChanged
             .pipe(takeUntil(this.destroyed$))
             .subscribe((type) => this.setDisplayType(type));
@@ -662,7 +662,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         queryParams.mds = mds;
         queryParams.repository = repository;
         queryParams.mdsExtended = this.mdsExtended;
-        queryParams.sidenav = this.searchService.sidenavOpened;
         if (sort) {
             queryParams.materialsSortBy = sort.active;
             queryParams.materialsSortAscending = sort.direction === 'asc';
@@ -1564,6 +1563,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     },
                 );
                 addTo.elementType = OptionsHelperService.ElementTypesAddToCollection;
+                addTo.permissions = [RestConstants.ACCESS_CC_PUBLISH];
+                addTo.permissionsMode = HideMode.Disable;
                 addTo.group = DefaultGroups.Reuse;
                 addTo.showAlways = true;
                 const cancel = new OptionItem('CANCEL', 'close', () => {
@@ -1600,9 +1601,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 return;
             }
             this.mainnav = param.mainnav !== 'false';
-            if (param.sidenav) {
-                this.searchService.sidenavOpened = param.sidenav !== 'false';
-            }
             if (param.repositoryFilter) {
                 this.enabledRepositories = param['repositoryFilter'].split(',');
                 // do a reload of the repos

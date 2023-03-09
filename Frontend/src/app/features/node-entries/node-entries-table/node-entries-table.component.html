@@ -9,9 +9,15 @@
   tabindex="-1"
   aria-hidden="true"
 ></button>
+<es-node-entries-global-options
+  *ngIf="entriesService.globalOptions?.length"
+  [displayType]="NodeEntriesDisplayType.Table"
+>
+</es-node-entries-global-options>
 <mat-table
   [dataSource]="entriesService.dataSource"
   matSort
+  [matSortDisableClear]="true"
   [matSortActive]="entriesService.sort?.active"
   [matSortDirection]="entriesService.sort?.direction"
   esInfiniteScroll
@@ -204,7 +210,11 @@
     ></es-drag-preview>
   </mat-row>
 </mat-table>
-<ng-container *ngIf="!entriesService.dataSource.isLoading && entriesService.dataSource.hasMore()">
+<ng-container
+  *ngIf="
+    !(entriesService.dataSource.isLoadingSubject | async) && entriesService.dataSource.hasMore()
+  "
+>
   <div class="load-more">
     <button mat-button color="primary" (click)="loadData()">
       <i esIcon="refresh"></i>
@@ -212,7 +222,7 @@
     </button>
   </div>
 </ng-container>
-<ng-container *ngIf="entriesService.dataSource.isLoading">
+<ng-container *ngIf="entriesService.dataSource.isLoadingSubject | async">
   <ng-container *ngTemplateOutlet="loading"> </ng-container>
 </ng-container>
 <!--

@@ -1230,7 +1230,7 @@
 				]
 				}}
 			</basequery>
-			<property name="ngsearchword">
+			<property name="ngsearchword" asFilter="false">
 				<statement>
 					{"bool":{"should":[
 					{
@@ -1269,7 +1269,7 @@
 				{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}
 				]
 				}}</basequery>
-			<property name="ngsearchword">
+			<property name="ngsearchword" asFilter="false">
 				<basequery>
 					{"bool": {
 					"must_not":[
@@ -1361,7 +1361,7 @@
 					"simple_query_string" : {
 					"query": "${value}*",
 					"fields": [
-					"properties.cm:name.keyword^4",
+					"properties.cm:name^4",
 					"properties.cclom:title^4",
 					"properties.cclom:general_description^2",
 					"properties.cclom:general_keyword^2",

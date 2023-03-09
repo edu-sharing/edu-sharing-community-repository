@@ -524,12 +524,9 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     private async showNodeInCurrentFolder(id: string) {
         // TODO: Consider moving this to `NodeDataSource`. We would need to make sure that the
         // dataSource is not replaced by explorer, however.
-        const visibleNodes = await this.explorer.dataSourceSubject
-            .pipe(
-                filter(notNull),
-                switchMap((dataSource) => dataSource.connect()),
-                first((data) => data?.length > 1),
-            )
+        const visibleNodes = await this.explorer.dataSource
+            .connect()
+            .pipe(first((data) => data?.length > 1))
             .toPromise();
         let node = visibleNodes.find((node) => node.ref.id === id);
         if (!node) {

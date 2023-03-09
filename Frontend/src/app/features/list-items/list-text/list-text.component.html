@@ -150,7 +150,7 @@
     <ng-container
       *ngIf="DATE_FIELDS.indexOf(item.name) === -1 && VCARD_FIELDS.indexOf(item.name) === -1"
     >
-      {{ displayName }}
+      {{ displayName$ | async }}
     </ng-container>
     <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) !== -1">
       {{
