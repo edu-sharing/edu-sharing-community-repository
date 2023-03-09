@@ -500,7 +500,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     }
 
     syncTreeViewOnAdd(nodes: Node[]) {
-        if (nodes.filter((n) => n.virtual && n.isDirectory).length && this.tree) {
+        if (nodes.filter((n) => n.virtual && n.isDirectory).length) {
             this.refreshTree.emit();
         }
     }
