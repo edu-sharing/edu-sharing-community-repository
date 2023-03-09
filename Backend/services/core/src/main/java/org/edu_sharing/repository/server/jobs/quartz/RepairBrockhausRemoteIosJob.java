@@ -31,7 +31,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
@@ -116,7 +116,7 @@ public class RepairBrockhausRemoteIosJob extends AbstractJob{
 				}
 				logger.info("Processing Object " + ref + "... " + brockhausId + " " + title + " phrase: " + searchPhrase);
 				Map<String, String[]> criteria = new HashMap<>();
-				criteria.put(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA, new String[]{searchPhrase});
+				criteria.put(MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA, new String[]{searchPhrase});
 				String src = brockhausId.substring(1).split("-")[0];
 				criteria.put("src", new String[]{"ecs"});
 				if(src.equalsIgnoreCase("julex")) {
@@ -125,7 +125,7 @@ public class RepairBrockhausRemoteIosJob extends AbstractJob{
 				SearchToken token = new SearchToken();
 				token.setMaxResult(50);
 				Thread.sleep(throttle);
-				SearchResultNodeRef results = searchServiceBrockhaus.searchV2(null, MetadataSetV2.DEFAULT_CLIENT_QUERY, criteria, token);
+				SearchResultNodeRef results = searchServiceBrockhaus.search(null, MetadataSet.DEFAULT_CLIENT_QUERY, criteria, token);
 				String finalDescription = (String) description;
 				List<NodeRef> filtered = results.getData().stream().filter(r -> {
 					HashMap<String, Object> props = r.getProperties();
