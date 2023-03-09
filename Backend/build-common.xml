@@ -76,6 +76,16 @@
 			</and>
 		</condition>
 		<antcall target="unzip-solr-webapp"></antcall>
+
+		<condition property="unzip.share.war">
+			<and>
+				<not>
+					<available file="${app.server.deploy.dir}/share" type="dir"></available>
+				</not>
+				<available file="${app.server.deploy.dir}/share.war" type="file"></available>
+			</and>
+		</condition>
+		<antcall target="unzip-share-webapp"></antcall>
 		<!--
 			dont fail here cause solr could be on another server
 		<condition property="folder.solr.exists">
@@ -136,8 +146,8 @@
 		<copy todir="${webserver.home}/webapps/${webapp.name}">
 			<fileset dir="webservices" includes="**/*.*" excludes="WEB-INF/lib/*.jar,WEB-INF/web.xml">
 			</fileset>		
-		</copy>			
-		
+		</copy>
+
 		<!--copy extras-->
 		<antcall target="prepare-extension"></antcall>
 
@@ -150,9 +160,19 @@
 		
 		<target name="unzip-solr-webapp" if="unzip.solr.war">
 			    <echo>will unzip solr4.war</echo>
-			    <unzip src="${app.server.deploy.dir}/solr4.war" dest="${app.server.deploy.dir}/solr4" />
+			    <unzip src="${app.server.deploy.dir}/solr4.war" dest="${app.server.deploy.dir}/solr4"  />
+					<copy file="lib/edu_sharing_xml-security-7.0.jar" tofile="${app.server.deploy.dir}/solr4/WEB-INF/lib/edu_sharing_xml-security-7.0.jar" failonerror="false"/>
+					<copy file="${app.server.deploy.dir}/alfresco/WEB-INF/lib/xalan-2.7.2-alfresco.jar" tofile="${app.server.deploy.dir}/solr4/WEB-INF/lib/xalan-2.7.2-alfresco.jar" failonerror="false"/>
+					<copy file="${app.server.deploy.dir}/alfresco/WEB-INF/lib/serializer-2.7.2.jar" tofile="${app.server.deploy.dir}/solr4/WEB-INF/lib/serializer-2.7.2.jar" failonerror="false"/>
 		</target>
-	
+
+	<target name="unzip-share-webapp" if="unzip.share.war">
+		<echo>will unzip share.war</echo>
+		<unzip src="${app.server.deploy.dir}/share.war" dest="${app.server.deploy.dir}/share" />
+		<copy file="lib/edu_sharing_xml-security-7.0.jar" tofile="${app.server.deploy.dir}/share/WEB-INF/lib/edu_sharing_xml-security-7.0.jar" failonerror="false"/>
+		<copy file="${app.server.deploy.dir}/alfresco/WEB-INF/lib/xalan-2.7.2-alfresco.jar" tofile="${app.server.deploy.dir}/share/WEB-INF/lib/xalan-2.7.2-alfresco.jar" failonerror="false"/>
+	</target>
+
 	<target name="prepare-extension" if="extension-name">
 			<echo>current extension is active will overwrite</echo>
 				

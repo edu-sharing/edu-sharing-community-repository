@@ -27,6 +27,11 @@ After install, please add the following part into the `tomcat/bin/setenv.sh`:
 CATALINA_OPTS="-Dorg.xml.sax.parser=com.sun.org.apache.xerces.internal.parsers.SAXParser $CATALINA_OPTS"
 CATALINA_OPTS="-Djavax.xml.parsers.DocumentBuilderFactory=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl $CATALINA_OPTS"
 CATALINA_OPTS="-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl $CATALINA_OPTS"
+
+CATALINA_OPTS="-Djavax.xml.xpath.XPathFactory:http://java.sun.com/jaxp/xpath/dom=org.edu_sharing.xml.security.xpath.XPathFactory $CATALINA_OPTS"
+CATALINA_OPTS="-Dorg.xml.sax.driver=org.edu_sharing.xml.security.sax.XMLReader $CATALINA_OPTS"
+CATALINA_OPTS="-Djavax.xml.transform.TransformerFactory=org.edu_sharing.xml.security.transform.TransformerFactory $CATALINA_OPTS"
+
 ```
 
 FAQ
