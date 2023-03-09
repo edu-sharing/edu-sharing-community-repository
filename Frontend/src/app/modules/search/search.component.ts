@@ -172,7 +172,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     extendedRepositorySelected = false;
     savedSearch: Node[] = [];
-    savedSearchColumns: ListItem[] = [];
+    savedSearchColumns: ListItem[] = [new ListItem('NODE', RestConstants.LOM_PROP_TITLE)];
     saveSearchDialog = false;
     savedSearchLoading = false;
     savedSearchQuery: string = null;
@@ -290,7 +290,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.mainNavService.getMainNav().searchField) {
             this.tutorialElement = this.mainNavService.getMainNav().searchField.input;
         }
-        this.savedSearchColumns.push(new ListItem('NODE', RestConstants.LOM_PROP_TITLE));
         this.optionsHelper.displayTypeChanged
             .pipe(takeUntil(this.destroyed$))
             .subscribe((type) => this.setDisplayType(type));
