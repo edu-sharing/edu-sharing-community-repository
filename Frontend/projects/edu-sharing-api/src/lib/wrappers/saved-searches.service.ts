@@ -3,7 +3,7 @@ import { Observable, Subject } from 'rxjs';
 import { map, startWith, switchMap, take, tap } from 'rxjs/operators';
 import { Node } from '../api/models';
 import { SearchV1Service } from '../api/services';
-import { switchReplay } from '../utils/switch-replay';
+import { switchReplay } from '../utils/rxjs-operators/switch-replay';
 import { RawValuesDict } from './mds-label.service';
 import { NodeService } from './node.service';
 import { SearchService } from './search.service';

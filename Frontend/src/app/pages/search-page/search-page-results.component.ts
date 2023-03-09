@@ -27,6 +27,7 @@ export class SearchPageResultsComponent implements OnInit {
     readonly resultColumns = this.results.resultColumns;
     readonly collectionColumns = this.results.collectionColumns;
     readonly sortConfig = this.results.sortConfig;
+    readonly addToCollectionMode = this.searchPage.addToCollectionMode;
 
     constructor(private searchPage: SearchPageService, private results: SearchPageResultsService) {}
 

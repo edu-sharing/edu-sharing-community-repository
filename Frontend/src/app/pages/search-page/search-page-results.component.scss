@@ -1,5 +1,9 @@
 @import './common';
 
+.add-to-collection-banner {
+    @include addToCollectionBanner;
+}
+
 .entries-wrapper {
     @include entriesWrapper;
 }

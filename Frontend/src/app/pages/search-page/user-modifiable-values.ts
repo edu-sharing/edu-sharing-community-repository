@@ -153,6 +153,10 @@ export class UserModifiableValue<T> {
         }
     }
 
+    observeQueryParamEntry(): Observable<{ [key: string]: string }> {
+        return this.observeValue().pipe(map((value) => this.getQueryParamEntry(value)));
+    }
+
     registerQueryParameter(
         key: string,
         activatedRoute: ActivatedRoute,

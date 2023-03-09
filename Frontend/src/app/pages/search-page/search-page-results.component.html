@@ -1,3 +1,13 @@
+<es-small-collection
+  *ngIf="addToCollectionMode.value as addToCollection"
+  class="add-to-collection-banner"
+  [collection]="addToCollection.collection"
+  [titleLabel]="'SEARCH.ADD_INTO_COLLECTION'"
+  [titleLabelShort]="'SEARCH.ADD_INTO_COLLECTION_SHORT'"
+>
+  <es-actionbar backgroundType="primary"></es-actionbar>
+</es-small-collection>
+
 <!-- We cannot use *ngIf on node-entries-wrapper since it depends on its input variables to
       initialize data fetching. -->
 <es-node-entries-wrapper
@@ -27,7 +37,7 @@
   [columns]="resultColumns.value"
   [sort]="sortConfig | async"
   [primaryInstance]="true"
-  [initConfig]="{ actionbar }"
+  [initConfig]="{ actionbar, customOptions: addToCollectionMode.value?.customOptions}"
 >
   <ng-template #title>
     <div class="title-container">
@@ -37,7 +47,7 @@
           ({{ resultsDataSource.getTotal() }})
         </ng-container>
       </h2>
-      <es-actionbar></es-actionbar>
+      <es-actionbar *ngIf="!addToCollectionMode.value"></es-actionbar>
     </div>
   </ng-template>
   <ng-template #empty>

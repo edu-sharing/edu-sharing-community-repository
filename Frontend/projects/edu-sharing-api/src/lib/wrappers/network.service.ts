@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 import { NetworkV1Service } from '../api/services';
 import { HOME_REPOSITORY } from '../constants';
 import { Node } from '../models';
-import { shareReplayReturnValue } from '../utils/decorators';
+import { shareReplayReturnValue } from '../utils/decorators/share-replay-return-value';
 
 interface Repository {
     id: string;

@@ -1,4 +1,4 @@
-import { ApiErrorResponse } from '../models';
+import { ApiErrorResponse } from '../../models';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { delay } from 'rxjs/operators';

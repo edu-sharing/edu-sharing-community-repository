@@ -11,7 +11,7 @@
       mat-tab-link
       *ngIf="availableRepositories.getValue().length > 1"
       [routerLink]="['./all']"
-      [queryParams]="searchString.getQueryParamEntry()"
+      [queryParams]="queryParamsAllRepositories"
       routerLinkActive
       #routerLinkActive="routerLinkActive"
       [active]="routerLinkActive.isActive"
