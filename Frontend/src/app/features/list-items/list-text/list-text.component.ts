@@ -1,18 +1,11 @@
-import {
-    ChangeDetectionStrategy,
-    ChangeDetectorRef,
-    Component,
-    OnChanges,
-    OnInit,
-    SimpleChanges,
-} from '@angular/core';
-import { ListItem, ProposalNode, RestConstants } from 'src/app/core-module/core.module';
-import { NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
-import { ListWidget } from '../list-widget';
+import { ChangeDetectorRef, Component, OnInit, SimpleChanges } from '@angular/core';
 import { MdsService, Node, Organization } from 'ngx-edu-sharing-api';
-import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { BehaviorSubject, merge } from 'rxjs';
-import { switchMap } from 'rxjs/internal/operators';
+import { switchMap } from 'rxjs/operators';
+import { ListItem, ProposalNode, RestConstants } from '../../../core-module/core.module';
+import { MdsHelper } from '../../../core-module/rest/mds-helper';
+import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
+import { ListWidget } from '../list-widget';
 
 @Component({
     selector: 'es-list-text',
