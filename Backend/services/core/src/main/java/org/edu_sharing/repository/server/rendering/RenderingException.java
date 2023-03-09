@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.ErrorFilter;
 import org.edu_sharing.repository.server.tools.HttpException;
+import org.edu_sharing.service.InsufficientPermissionException;
 import org.json.JSONObject;
 
 import javax.servlet.ServletException;
@@ -15,6 +16,23 @@ import java.io.File;
 import java.io.IOException;
 
 public class RenderingException extends ErrorFilter.ErrorFilterException {
+
+    public static RenderingException fromThrowable(Throwable throwable) {
+        if(throwable instanceof InsufficientPermissionException) {
+            return new RenderingException(
+                    HttpServletResponse.SC_FORBIDDEN,
+                    throwable.getMessage(),
+                    I18N.permissions_missing,
+                    throwable
+            );
+        }
+        return new RenderingException(
+                HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                throwable.getMessage(),
+                RenderingException.I18N.unknown,
+                throwable
+        );
+    }
 
     public enum I18N{
         invalid_parameters,

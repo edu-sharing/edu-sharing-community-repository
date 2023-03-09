@@ -52,7 +52,13 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     displayType: NodeEntriesDisplayType;
     selection = new SelectionModel<T>(true, []);
     elementInteractionType: InteractionType;
-    options: ListOptions;
+    options$ = new BehaviorSubject<ListOptions>(null);
+    get options() {
+        return this.options$.value;
+    }
+    set options(options: ListOptions) {
+        this.options$.next(options);
+    }
     checkbox: boolean;
     globalOptions: OptionItem[];
     sortSubject = new BehaviorSubject<ListSortConfig>(void 0);

@@ -1,15 +1,25 @@
-import { Component } from '@angular/core';
-import { ListItem, RestConstants, ProposalNode, Node } from 'src/app/core-module/core.module';
+import {
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    Component,
+    OnChanges,
+    OnInit,
+    SimpleChanges,
+} from '@angular/core';
+import { ListItem, ProposalNode, RestConstants } from 'src/app/core-module/core.module';
 import { NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
 import { ListWidget } from '../list-widget';
-import { Organization } from 'ngx-edu-sharing-api';
+import { MdsService, Node, Organization } from 'ngx-edu-sharing-api';
+import { MdsHelper } from '../../../core-module/rest/mds-helper';
+import { BehaviorSubject, merge } from 'rxjs';
+import { switchMap } from 'rxjs/internal/operators';
 
 @Component({
     selector: 'es-list-text',
     templateUrl: './list-text.component.html',
     styleUrls: ['./list-text.component.scss'],
 })
-export class ListTextComponent extends ListWidget {
+export class ListTextComponent extends ListWidget implements OnInit {
     static supportedItems = [
         new ListItem('NODE', '*'),
         new ListItem('NODE_PROPOSAL', '*'),
@@ -20,9 +30,22 @@ export class ListTextComponent extends ListWidget {
     ];
     readonly DATE_FIELDS = RestConstants.DATE_FIELDS;
     readonly VCARD_FIELDS = RestConstants.getAllVCardFields();
+    displayName$ = new BehaviorSubject<string>(null);
 
-    constructor(private nodeHelper: NodeHelperService) {
+    constructor(
+        private nodeHelper: NodeHelperService,
+        private mds: MdsService,
+        private changeDetectorRef: ChangeDetectorRef,
+    ) {
         super();
+    }
+
+    async ngOnChanges(changes: SimpleChanges) {}
+
+    async ngOnInit() {
+        merge([this.nodeSubject, this.itemSubject])
+            .pipe(switchMap(() => this.updateDisplayname()))
+            .subscribe((displayName) => {});
     }
     getNode() {
         if (this.item.type === 'NODE_PROPOSAL') {
@@ -55,5 +78,34 @@ export class ListTextComponent extends ListWidget {
             (this.node as Organization).authorityName ===
             RestConstants.GROUP_ALFRESCO_ADMINISTRATORS
         );
+    }
+
+    private async updateDisplayname() {
+        const node = this.getNode() as Node;
+        if (!node.properties) {
+            this.displayName$.next('');
+            return;
+        }
+        this.displayName$.next(
+            node.properties[this.item.name + '_DISPLAYNAME']?.length > 0
+                ? node.properties[this.item.name + '_DISPLAYNAME'].join(', ')
+                : node.properties[this.item.name]?.join(', '),
+        );
+
+        const mds = await this.mds
+            .getMetadataSet({
+                repository: node.ref.repo,
+                metadataSet: node.metadataset || RestConstants.DEFAULT,
+            })
+            .toPromise();
+        const widget = MdsHelper.getWidget(this.item.name, null, mds.widgets);
+        if (widget?.values) {
+            const i18n = node.properties[this.item.name]
+                ?.map((prop) => widget.values.filter((v) => v.id === prop)?.[0]?.caption)
+                .filter((cap) => !!cap);
+            if (i18n) {
+                this.displayName$.next(i18n.join(', '));
+            }
+        }
     }
 }

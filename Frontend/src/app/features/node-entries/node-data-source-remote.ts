@@ -79,7 +79,14 @@ export class NodeDataSourceRemote<
     private _renderChangesSubscription: Subscription | null = null;
     private _cache = new NodeCache<T>();
     private dataStream = new BehaviorSubject<T[]>([]);
-    isLoading: LoadingState;
+    // FIXME: type 'boolean' only used for type compatibility with non-remote data source.
+    isLoadingSubject = new BehaviorSubject<LoadingState | boolean>(null);
+    get isLoading(): LoadingState | boolean {
+        return this.isLoadingSubject.value;
+    }
+    set isLoading(value: LoadingState | boolean) {
+        this.isLoadingSubject.next(value);
+    }
     private _itemsCap: ItemsCap<T> | null;
     get itemsCap(): ItemsCap<T> | null {
         return this._itemsCap;

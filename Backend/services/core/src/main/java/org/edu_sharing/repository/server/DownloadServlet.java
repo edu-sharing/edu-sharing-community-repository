@@ -196,7 +196,7 @@ public class DownloadServlet extends HttpServlet{
 		}
 
 		Share share=null;
-		ShareService shareService=new ShareServiceImpl();
+		ShareService shareService=new ShareServiceImpl(PermissionServiceFactory.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId()));
 		if(parentNodeId!=null && token!=null){
 			try {
 				share = shareService.getShare(parentNodeId, token);
