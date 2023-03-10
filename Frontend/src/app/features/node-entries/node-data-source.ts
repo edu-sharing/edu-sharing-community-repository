@@ -52,7 +52,10 @@ export class NodeDataSource<T extends Node | GenericAuthority> extends DataSourc
      * Removes elements from the visible data.
      */
     removeData(removeData: T[]): void {
-        const data = this.getData().filter((value) => !removeData.includes(value));
+        const data = this.getData().filter(
+            (value) =>
+                !removeData.find((d) => Helper.objectEquals((d as Node).ref, (value as Node).ref)),
+        );
         this.dataStream.next(data);
         if (this.pagination) {
             this.setPagination({
