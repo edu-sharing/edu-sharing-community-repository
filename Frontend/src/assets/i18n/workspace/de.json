@@ -442,7 +442,7 @@
             "CUT_COPY": "{{count}} Element(e) wurden in die Zwischenablage übernommen",
             "PASTE": "{{count}} Element(e) wurden von {{from}} nach {{to}} {{mode}}",
             "PASTE_DRAG": "{{count}} Element(e) wurde(n) nach {{to}} {{mode}}",
-            "DUPLICATE_NAME": "Der Name {{name}} existiert bereits.<br>Bitte verwenden Sie einen anderen, eindeutigen Namen",
+            "DUPLICATE_NAME": "Der Name {{name}} existiert bereits.\nBitte verwenden Sie einen anderen, eindeutigen Namen",
             "CYCLIC_NODE": "Ein Ordner kann nicht in sich selbst eingefügt werden",
             "NOT_POSSIBLE_IN_SEARCH": "Dieser Vorgang ist während einer Suche leider nicht möglich",
             "NOT_POSSIBLE_GENERAL": "In diesem Bereich ist ein Upload nicht möglich",

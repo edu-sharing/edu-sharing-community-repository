@@ -51,6 +51,11 @@ export class NodeUrlComponent {
     }
 
     get(mode: 'routerLink' | 'queryParams'): any {
-        return this.nodeHelper.getNodeLink(mode, this.node);
+        const data = this.nodeHelper.getNodeLink(mode, this.node);
+        if (mode === 'queryParams') {
+            // enforce cleanup of this parameter
+            (data as Params).fromLogin = null;
+        }
+        return data;
     }
 }
