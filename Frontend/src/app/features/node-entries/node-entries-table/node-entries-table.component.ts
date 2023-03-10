@@ -95,13 +95,16 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         this.visibleDataColumns$
             .pipe(first(), delay(0))
             .subscribe(() => (this.columnChooserTriggerReady = true));
-        rxjs.merge([
-            this.entriesService.dataSource$,
-            this.entriesService.options$,
-            this.entriesService.dataSource.isLoadingSubject,
+        rxjs.combineLatest([
+            this.entriesService.dataSource$.pipe(startWith(void 0 as void)),
+            this.entriesService.options$.pipe(startWith(void 0 as void)),
+            this.entriesService.dataSource.isLoadingSubject.pipe(startWith(void 0 as void)),
+            this.entriesService.selection.changed.pipe(startWith(void 0 as void)),
         ])
             .pipe(takeUntil(this.destroyed))
-            .subscribe(() => this.changeDetectorRef.detectChanges());
+            .subscribe(() => {
+                this.changeDetectorRef.detectChanges();
+            });
     }
 
     ngOnChanges(changes: SimpleChanges): void {
