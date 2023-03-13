@@ -151,7 +151,7 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
             };
             // set default tab based on config
             if (!this.author.freetext?.trim() && !this.author.author?.getDisplayName().trim()) {
-                if (this.attributes.defaulttab) {
+                if (this.attributes?.defaulttab) {
                     const tab = DefaultTab[this.attributes.defaulttab as DefaultTab];
                     if (tab === DefaultTab.vcard) {
                         this.authorTab = 1;
