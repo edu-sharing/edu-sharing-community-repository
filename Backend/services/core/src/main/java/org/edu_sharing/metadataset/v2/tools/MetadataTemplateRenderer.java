@@ -650,7 +650,7 @@ public class MetadataTemplateRenderer {
 			);
 			return policy.sanitize(untrustedHTML);
 		} else if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.all)){
-			return StringEscapeUtils.escapeHtml4(untrustedHTML);
+			return StringEscapeUtils.escapeHtml4(untrustedHTML).replaceAll("[\\u0000-\\u001F\\u007F-\\u009F]","");
 		} else if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.none)){
 			return untrustedHTML;
 		} else {
