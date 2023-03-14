@@ -470,6 +470,7 @@ export class AdminMediacenterComponent {
     async exportNodes() {
         const properties = this.nodeColumns.map((c) => c.name);
         const propertiesLabel = properties.map((p) => this.translate.instant('NODE.' + p));
+        this.toast.showProgressDialog();
         const data = await this.mediacenterService
             .exportMediacenterLicensedNodes({
                 repository: RestConstants.HOME_REPOSITORY,
@@ -482,6 +483,7 @@ export class AdminMediacenterComponent {
                 properties,
             })
             .toPromise();
+        this.toast.closeModalDialog();
         CsvHelper.download(
             await this.translate.get('ADMIN.MEDIACENTER.NODES.CSV_FILENAME').toPromise(),
             propertiesLabel,
