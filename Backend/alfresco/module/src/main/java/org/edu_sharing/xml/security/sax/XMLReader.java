@@ -1,4 +1,4 @@
-package org.edu_sharing.sax;
+package org.edu_sharing.xml.security.sax;
 
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;

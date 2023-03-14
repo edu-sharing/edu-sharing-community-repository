@@ -1,4 +1,4 @@
-package org.edu_sharing.xpath;
+package org.edu_sharing.xml.security.xpath;
 
 
 import javax.xml.XMLConstants;

@@ -1,4 +1,4 @@
-package org.edu_sharing.transform;
+package org.edu_sharing.xml.security.transform;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.TransformerConfigurationException;
