@@ -9,7 +9,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiRequestConfiguration } from './api-request-configuration';
 import { EduSharingApiConfiguration } from './edu-sharing-api-configuration';
-import { handleError } from './utils/handle-error';
+import { handleError } from './utils/rxjs-operators/handle-error';
 import { tap } from 'rxjs/operators';
 
 @Injectable()

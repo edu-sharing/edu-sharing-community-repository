@@ -52,8 +52,6 @@ import org.edu_sharing.repository.server.tracking.buffer.FileRingBuffer;
 import org.edu_sharing.repository.server.tracking.buffer.MemoryRingBuffer;
 import org.edu_sharing.repository.server.tracking.buffer.TrackingBuffer;
 import org.edu_sharing.repository.update.*;
-import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.authority.AuthorityServiceImpl;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
@@ -96,7 +94,10 @@ public class MCAlfrescoManager implements ServletContextListener {
 			}
 			
 			logger.info("check for updates");
-			
+
+			// run this BEFORE any other update because it depends on checking if edu-sharing is already installed!
+			new Release_8_1_SetCompanyHomePermissions(null).execute();
+
 			//remove lom subobjects
 			new Release_1_7_SubObjectsToFlatObjects(null).execute();
 			

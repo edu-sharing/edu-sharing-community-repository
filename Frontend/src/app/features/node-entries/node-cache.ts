@@ -1,21 +1,22 @@
-interface NodeCacheRange {
+import { notNull } from '../../util/functions';
+
+export interface NodeCacheRange {
     startIndex: number;
     endIndex: number;
 }
 
-interface NodeCacheSlice<T> extends NodeCacheRange {
-    data: T[];
+export interface NodeCacheSlice<T> extends NodeCacheRange {
+    data: readonly T[];
 }
 
 export class NodeCache<T> {
-    private _slices: NodeCacheSlice<T>[] = [];
+    private _slices: readonly NodeCacheSlice<T>[] = [];
 
     add(slice: NodeCacheSlice<T>): void {
         if (slice.endIndex - slice.startIndex !== slice.data.length) {
             throw new Error('Tried to add invalid slice to cache: ' + JSON.stringify(slice));
         }
-        this._slices.push(slice);
-        this._normalizeSlices();
+        this._slices = this._normalizeSlices([...this._slices, slice]);
     }
 
     clear() {
@@ -50,18 +51,23 @@ export class NodeCache<T> {
         return { startIndex: fromIndex, endIndex: toIndex };
     }
 
-    private _normalizeSlices(): void {
-        this._slices.sort((lhs, rhs) => lhs.startIndex - rhs.startIndex);
-        for (let i = 0; i < this._slices.length - 1; i++) {
-            for (let j = i + 1; j < this._slices.length; j++) {
-                if (this._canMerge(this._slices[i], this._slices[j])) {
-                    this._slices[i] = this._merge(this._slices[i], this._slices[j]);
+    private _normalizeSlices(slices: NodeCacheSlice<T>[]): NodeCacheSlice<T>[] {
+        slices.sort((lhs, rhs) => lhs.startIndex - rhs.startIndex);
+        for (let i = 0; i < slices.length - 1; i++) {
+            for (let j = i + 1; j < slices.length; j++) {
+                if (this._canMerge(slices[i], slices[j])) {
+                    slices[i] = this._merge(slices[i], slices[j]);
+                    slices[j] = null; // Mark for deletion
                 }
             }
         }
+        return slices.filter(notNull);
     }
 
     private _canMerge(lhs: NodeCacheSlice<T>, rhs: NodeCacheSlice<T>): boolean {
+        if (!lhs || !rhs) {
+            return false;
+        }
         return lhs.endIndex >= rhs.startIndex;
     }
 

@@ -8,10 +8,11 @@ import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.rating.RatingDetails;
 
+import java.io.Serializable;
 import java.util.*;
 
 @Schema(description = "")
-public class Node {
+public class Node implements Serializable {
 
 	private NodeRef ref = null;
 	private NodeRef parent = null;

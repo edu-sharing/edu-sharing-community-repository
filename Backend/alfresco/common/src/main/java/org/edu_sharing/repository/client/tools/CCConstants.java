@@ -111,6 +111,8 @@ public class CCConstants {
 
 	public final static String AUTH_TYPE_DEFAULT = "AUTH_TYPE_DEFAULT";
 
+	public final static String AUTH_TYPE_SIGNATURE = "AUTH_TYPE_SIGNATURE";
+
 	public final static String AUTH_TYPE_SHIBBOLETH = "AUTH_TYPE_SHIBBOLETH";
 
 	public final static String AUTH_TYPE_CAS = "AUTH_TYPE_CAS";
@@ -156,6 +158,7 @@ public class CCConstants {
 	public static final String PROP_USER_ISSHADOWUSER = "{http://www.alfresco.org/model/content/1.0}isShadowUser";
 	public static final String PROP_USER_REPOSITORYID = "{http://www.alfresco.org/model/content/1.0}repositoryId";
 	public static final String PROP_USER_ESUID = "{http://www.alfresco.org/model/content/1.0}esuid";
+	public final static String PROP_USER_SECONDARY_IDS = "{http://www.alfresco.org/model/content/1.0}essecondaryIds";
 	public static final String PROP_USER_ESREMOTEROLES = "{http://www.alfresco.org/model/content/1.0}esremoteroles";
 	public static final String PROP_USER_ESSSOTYPE = "{http://www.alfresco.org/model/content/1.0}esssotype";
 	public static final String PROP_USER_ESLASTLOGIN = "{http://www.alfresco.org/model/content/1.0}esLastLogin";

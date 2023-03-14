@@ -2,6 +2,7 @@
 
 .actionbar {
     display: flex;
+    gap: 10px;
 }
 .actionToggle > button {
     color: $textLight;
@@ -35,9 +36,6 @@ button {
     color: $primary;
     background-color: transparent;
 }
-button {
-    margin: 0 5px;
-}
 .actionbar-background-dark {
     .mat-button {
         color: $textOnPrimary;
@@ -53,6 +51,9 @@ button {
     .mat-flat-button {
         background-color: #fff;
         color: $primary;
+        &:disabled {
+            color: $textLight;
+        }
     }
 }
 .actionbar-round {

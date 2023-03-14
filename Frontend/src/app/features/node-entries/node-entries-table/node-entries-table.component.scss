@@ -85,6 +85,27 @@ mat-cell {
 .dropdown-dummy {
     position: fixed;
 }
+.childobjects {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 15px;
+    display: inline-flex;
+    align-items: center;
+    min-width: 35px;
+    min-height: 22px;
+    justify-content: center;
+    cursor: default;
+    user-select: none;
+    padding: 2px 8px;
+    margin-left: 5px;
+    > .childobject-count {
+        display: inline-flex;
+        align-items: center;
+        > i {
+            font-size: 13px;
+            margin-left: 4px;
+        }
+    }
+}
 .cell-icon {
     .icon-bg {
         width: 30px;

@@ -1,6 +1,8 @@
 <div class="frame" cdkDropList [cdkDropListSortingDisabled]="true">
-  <div *ngIf="isBlocked" class="isBlocked">{{ 'NO_PERMISSIONS_FOR_SCOPE' | translate }}</div>
-  <div *ngIf="!isBlocked" [class.hide]="globalProgress">
+  <div *ngIf="isBlocked" class="workspace-container isBlocked">
+    {{ 'NO_PERMISSIONS_FOR_SCOPE' | translate }}
+  </div>
+  <div *ngIf="!isBlocked" class="workspace-container" [class.hide]="globalProgress">
     <div class="dialog" *ngIf="showSelectRoot" (click)="showSelectRoot = false"></div>
     <div class="selectRootMenu collection" [@overlay]="showSelectRoot" *ngIf="showSelectRoot">
       <a
@@ -88,7 +90,7 @@
       *ngIf="root !== 'RECYCLE'"
       [current]="currentFolder"
       [root]="root"
-      [tree]="treeComponent"
+      (refreshTree)="treeComponent?.refresh()"
       [searchQuery]="searchQuery"
       [customOptions]="customOptions"
       [displayType]="displayType"

@@ -99,6 +99,16 @@ public class PermissionServiceAdapter implements PermissionService {
 	}
 
 	@Override
+	public void addUserToSharedList(String user, NodeRef nodeRef) {
+
+	}
+
+	@Override
+	public void cleanUpSharedList(NodeRef nodeRef) {
+
+	}
+
+	@Override
 	public void createNotifyObject(String nodeId, String user, String action) {
 	}
 

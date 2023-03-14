@@ -5,11 +5,11 @@ import org.edu_sharing.repository.client.rpc.Group;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.Schema;;
+import io.swagger.v3.oas.annotations.media.Schema;;import java.io.Serializable;
 
 
 @Schema(description = "")
-public class GroupProfile  {
+public class GroupProfile implements Serializable {
   
   private String displayName = null;
   private String groupType = null;

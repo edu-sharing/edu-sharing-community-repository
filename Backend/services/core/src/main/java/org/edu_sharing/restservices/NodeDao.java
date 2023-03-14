@@ -222,7 +222,7 @@ public class NodeDao {
 		return AuthenticationUtil.runAsSystem(new RunAsWork<NodeDao>() {
 			@Override
 			public NodeDao doWork() throws Exception {
-				ShareServiceImpl service=new ShareServiceImpl();
+				ShareServiceImpl service=new ShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
 				Share share=service.getShare(nodeId, token);
 				if(share==null){
 					throw new Exception("No share found for nodeId and token");
@@ -504,15 +504,20 @@ public class NodeDao {
 	}
 
 	public static String mapNodeConstants(RepositoryDao repoDao,String node) throws DAOException {
+		return mapNodeConstants(repoDao, node, true);
+	}
+
+
+		public static String mapNodeConstants(RepositoryDao repoDao,String node, boolean createIfNotExists) throws DAOException {
 		try {
 			if ("-userhome-".equals(node)) {
 				node = repoDao.getUserHome();
 			}
 			if ("-inbox-".equals(node)) {
-				node = repoDao.getUserInbox();
+				node = repoDao.getUserInbox(createIfNotExists);
 			}
 			if ("-saved_search-".equals(node)) {
-				node = repoDao.getUserSavedSearch();
+				node = repoDao.getUserSavedSearch(createIfNotExists);
 			}
 			return node;
 		}catch (Exception e){
@@ -2114,6 +2119,7 @@ public class NodeDao {
 										getStoreIdentifier(),
 										remoteId!=null ? remoteId : getRef().getId(),
 										this.version,
+										type,
 										nodeProps);
 		if(previewData != null){
 			result.setMimetype(previewData.getMimetype());
@@ -2255,7 +2261,7 @@ public class NodeDao {
 
 	public List<NodeShare> getShares(String email) throws DAOSecurityException {
 		throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
-		ShareServiceImpl service = new ShareServiceImpl();
+		ShareServiceImpl service = new ShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
 		List<NodeShare> entries=new ArrayList<>();
 		for(Share share : service.getShares(this.nodeId)){
 			if(email==null || email.equals(share.getEmail()))
@@ -2265,7 +2271,7 @@ public class NodeDao {
 	}
 
 	public NodeShare createShare(long expiryDate,String password) throws DAOException {
-		ShareServiceImpl service = new ShareServiceImpl();
+		ShareServiceImpl service = new ShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
 		try {
 			throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
 			return new NodeShare(new org.alfresco.service.cmr.repository.NodeRef(NodeDao.storeRef,this.nodeId),service.createShare(nodeId, expiryDate,password));
@@ -2276,10 +2282,10 @@ public class NodeDao {
 
 	public void removeShare(String shareId) throws DAOException {
 		throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
-		ShareServiceImpl service=new ShareServiceImpl();
+		ShareServiceImpl service=new ShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
     	for(Share share : service.getShares(this.nodeId)){
     		if(share.getNodeId().equals(shareId)){
-    			service.removeShare(shareId);
+    			service.removeShare(this.nodeId, shareId);
     			return;
     		}
 		}
@@ -2288,7 +2294,7 @@ public class NodeDao {
 
 	public NodeShare updateShare(String shareId, long expiryDate, String password) throws DAOException {
 		throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
-		ShareServiceImpl service=new ShareServiceImpl();
+		ShareServiceImpl service=new ShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
     	for(Share share : service.getShares(this.nodeId)){
     		if(share.getNodeId().equals(shareId)){
     			share.setExpiryDate(expiryDate);
@@ -2351,7 +2357,7 @@ public class NodeDao {
 	public static NodeDao saveSearch(String repoId, String mdsId, String query, String name,
 			List<MdsQueryCriteria> parameters,boolean replace) throws DAOException {
 		try{
-    		String parent = RepositoryDao.getHomeRepository().getUserSavedSearch();
+    		String parent = RepositoryDao.getHomeRepository().getUserSavedSearch(true);
     		NodeDao parentDao = new NodeDao(RepositoryDao.getHomeRepository(), parent);
     		HashMap<String, String[]> props=new HashMap();
     		props.put(CCConstants.CM_NAME, new String[]{NodeServiceHelper.cleanupCmName(name)});

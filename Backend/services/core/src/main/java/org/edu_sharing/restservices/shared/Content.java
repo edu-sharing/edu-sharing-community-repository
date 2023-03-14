@@ -2,7 +2,9 @@ package org.edu_sharing.restservices.shared;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Content {
+import java.io.Serializable;
+
+public class Content implements Serializable {
     @JsonProperty
     private String url;
     @JsonProperty

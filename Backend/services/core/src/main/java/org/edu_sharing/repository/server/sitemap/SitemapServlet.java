@@ -37,7 +37,7 @@ import org.edu_sharing.service.search.model.SortDefinition;
 public class SitemapServlet extends HttpServlet{
     public final static String NS_SITEMAP="http://www.sitemaps.org/schemas/sitemap/0.9";
     public final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-    Logger logger = Logger.getLogger(SitemapServlet.class);
+    private static Logger logger = Logger.getLogger(SitemapServlet.class);
     private static final int NODES_PER_MAP = 500;
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)

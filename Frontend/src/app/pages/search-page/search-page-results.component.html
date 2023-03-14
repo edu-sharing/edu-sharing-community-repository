@@ -1,0 +1,59 @@
+<es-small-collection
+  *ngIf="addToCollectionMode.value as addToCollection"
+  class="add-to-collection-banner"
+  [collection]="addToCollection.collection"
+  [titleLabel]="'SEARCH.ADD_INTO_COLLECTION'"
+  [titleLabelShort]="'SEARCH.ADD_INTO_COLLECTION_SHORT'"
+>
+  <es-actionbar backgroundType="primary"></es-actionbar>
+</es-small-collection>
+
+<!-- We cannot use *ngIf on node-entries-wrapper since it depends on its input variables to
+      initialize data fetching. -->
+<es-node-entries-wrapper
+  [class.display-none]="collectionsDataSource.isEmpty()"
+  class="entries-wrapper"
+  [dataSource]="collectionsDataSource"
+  [scope]="Scope.SearchCollections"
+  [columns]="collectionColumns.value"
+  [disableInfiniteScroll]="true"
+  [displayType]="NodeEntriesDisplayType.SmallGrid"
+  [gridConfig]="{ layout: 'scroll' }"
+>
+  <ng-template #title>
+    <div class="title-container">
+      <h2 class="mat-heading-2">
+        {{ 'SEARCH.COLLECTIONS' | translate }} ({{ collectionsDataSource.getTotal() }})
+      </h2>
+    </div>
+  </ng-template>
+</es-node-entries-wrapper>
+
+<es-node-entries-wrapper
+  #nodeEntriesResults
+  class="entries-wrapper"
+  [dataSource]="resultsDataSource"
+  [scope]="Scope.Search"
+  [columns]="resultColumns.value"
+  [sort]="sortConfig | async"
+  [primaryInstance]="true"
+  [initConfig]="{ actionbar, customOptions: addToCollectionMode.value?.customOptions}"
+>
+  <ng-template #title>
+    <div class="title-container">
+      <h2 class="mat-heading-2">
+        {{ 'SEARCH.MATERIALS' | translate }}
+        <ng-container *ngIf="!resultsDataSource.isEmpty()">
+          ({{ resultsDataSource.getTotal() }})
+        </ng-container>
+      </h2>
+      <es-actionbar *ngIf="!addToCollectionMode.value"></es-actionbar>
+    </div>
+  </ng-template>
+  <ng-template #empty>
+    <div class="no-search-results-message">
+      <i esIcon="search"></i>
+      {{ 'SEARCH.QUERY_NO_RESULT' | translate }}
+    </div>
+  </ng-template>
+</es-node-entries-wrapper>

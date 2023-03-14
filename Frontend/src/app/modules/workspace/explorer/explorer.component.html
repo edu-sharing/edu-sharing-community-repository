@@ -38,10 +38,12 @@
   -->
 <es-node-entries-wrapper
   [dataSource]="dataSource"
+  [scope]="SCOPES.WorkspaceList"
   [columns]="columns"
   [configureColumns]="true"
   (columnsChange)="saveColumns($event)"
   [displayType]="displayType"
+  [class.grid]="displayType !== NodeEntriesDisplayType.Table"
   (displayTypeChange)="displayTypeChange.emit($event)"
   [elementInteractionType]="InteractionType.Emitter"
   (fetchData)="load($event)"
@@ -51,13 +53,14 @@
     dropAllowed: canDrop,
     dropped: drop
   }"
-  [globalKeyboardShortcuts]="true"
+  [primaryInstance]="true"
   [singleClickHint]="'static'"
   (sortChange)="setSorting($event)"
   (clickItem)="clickItem($event)"
   (dblClickItem)="onOpenNode.emit($event.element)"
   (nodesDeleted)="onDelete($event.objects)"
-  (virtualNodesAdded)="syncTreeView($event)"
+  (nodesChanged)="syncTreeViewOnChange($event)"
+  (virtualNodesAdded)="syncTreeViewOnAdd($event)"
 >
   <ng-template #empty>
     <h5 class="noElementsInfo" *ngIf="searchQuery$.value == null || searchQuery$.value === ''">

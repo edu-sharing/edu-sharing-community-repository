@@ -12,6 +12,7 @@
 <mat-table
   [dataSource]="entriesService.dataSource"
   matSort
+  [matSortDisableClear]="true"
   [matSortActive]="entriesService.sort?.active"
   [matSortDirection]="entriesService.sort?.direction"
   esInfiniteScroll
@@ -154,6 +155,20 @@
         [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
         matTooltipTouchGestures="off"
       ></es-list-base>
+      <ng-container *ngIf="first">
+        <div class="childobjects" *ngIf="node.properties?.['virtual:childobjectcount'] > 0">
+          <div
+            class="childobject-count"
+            matTooltip="{{
+              'CHILDOBJECT_COUNT'
+                | translate: { count: node.properties['virtual:childobjectcount'] * 1 + 1 }
+            }}"
+          >
+            <span>{{ node.properties['virtual:childobjectcount'] * 1 + 1 }}</span
+            ><i esIcon="filter_none"></i>
+          </div>
+        </div>
+      </ng-container>
     </mat-cell>
   </ng-container>
   <mat-header-row mat-header-row *matHeaderRowDef="visibleColumnNames$ | async"></mat-header-row>
@@ -194,7 +209,7 @@
 </mat-table>
 <ng-container
   *ngIf="
-    !entriesService.dataSource.isLoading &&
+    (entriesService.dataSource.isLoadingSubject | async) === false &&
     entriesService.dataSource.hasMore() &&
     entriesService.paginationStrategy === 'infinite-scroll'
   "
@@ -206,7 +221,7 @@
     </button>
   </div>
 </ng-container>
-<ng-container *ngIf="entriesService.dataSource.isLoading">
+<ng-container *ngIf="entriesService.dataSource.isLoadingSubject | async">
   <ng-container *ngTemplateOutlet="loading"> </ng-container>
 </ng-container>
 <!--

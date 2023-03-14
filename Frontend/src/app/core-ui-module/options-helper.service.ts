@@ -372,14 +372,12 @@ export class OptionsHelperService implements OnDestroy {
         options = options.filter((o) =>
             o.showCallback(target === Target.List && objects && objects[0] ? objects[0] : null),
         );
-        options
-            .filter(
-                (o) =>
-                    !o.enabledCallback(
-                        target === Target.List && objects && objects[0] ? objects[0] : null,
-                    ),
-            )
-            .forEach((o) => (o.isEnabled = false));
+        options.forEach(
+            (o) =>
+                (o.isEnabled = o.enabledCallback(
+                    target === Target.List && objects && objects[0] ? objects[0] : null,
+                )),
+        );
         return options;
     }
 
@@ -1639,26 +1637,22 @@ export class OptionsHelperService implements OnDestroy {
         if (!this.data.customOptions) {
             return options;
         }
-        if (!this.data.customOptions.useDefaultOptions) {
+        const customOptions = { ...new CustomOptions(), ...this.data.customOptions };
+        if (!customOptions.useDefaultOptions) {
             options = [];
         }
-        if (
-            this.data.customOptions.supportedOptions &&
-            isArray(this.data.customOptions.supportedOptions)
-        ) {
-            options = options.filter(
-                (o) => this.data.customOptions.supportedOptions.indexOf(o.name) !== -1,
-            );
-        } else if (this.data.customOptions.removeOptions) {
-            for (const option of this.data.customOptions.removeOptions) {
+        if (customOptions.supportedOptions && isArray(customOptions.supportedOptions)) {
+            options = options.filter((o) => customOptions.supportedOptions.indexOf(o.name) !== -1);
+        } else if (customOptions.removeOptions) {
+            for (const option of customOptions.removeOptions) {
                 const index = options.findIndex((o) => o.name === option);
                 if (index !== -1) {
                     options.splice(index, 1);
                 }
             }
         }
-        if (this.data.customOptions.addOptions) {
-            for (const option of this.data.customOptions.addOptions) {
+        if (customOptions.addOptions) {
+            for (const option of customOptions.addOptions) {
                 const existing = options.filter((o) => o.name === option.name);
                 if (existing.length === 1) {
                     // only replace changed values
@@ -1679,6 +1673,16 @@ export class OptionsHelperService implements OnDestroy {
 
     setData(data: OptionData) {
         this.data = data;
+        this.wrapOptionCallbacks();
+    }
+
+    private wrapOptionCallbacks(): void {
+        if (this.data.customOptions?.addOptions) {
+            for (const option of this.data.customOptions.addOptions) {
+                const callback = option.callback;
+                option.callback = (node) => callback(node, this.getObjects(node));
+            }
+        }
     }
 
     private sortOptionsByGroup(options: OptionItem[]) {

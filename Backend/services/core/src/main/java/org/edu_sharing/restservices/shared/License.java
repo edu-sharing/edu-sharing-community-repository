@@ -2,7 +2,9 @@ package org.edu_sharing.restservices.shared;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
-public class License {
+import java.io.Serializable;
+
+public class License implements Serializable {
     @JsonProperty String icon;
     @JsonProperty String url;
 

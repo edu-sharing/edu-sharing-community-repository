@@ -62,6 +62,7 @@ import { WorkspaceTreeComponent } from '../tree/tree.component';
 export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterViewInit {
     public readonly SCOPES = Scope;
     readonly InteractionType = InteractionType;
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 
     public static getColumns(
         connector: RestConnectorService,
@@ -166,7 +167,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
 
     public columns: ListItem[] = [];
     @Input() displayType = NodeEntriesDisplayType.Table;
-    @Input() tree: WorkspaceTreeComponent;
+    @Output() refreshTree = new EventEmitter<void>();
     @Output() displayTypeChange = new EventEmitter<NodeEntriesDisplayType>();
     @Input() reorderDialog = false;
     @Output() reorderDialogChange = new EventEmitter<boolean>();
@@ -349,6 +350,8 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
                 debounceTime(10),
             )
             .subscribe(async (value) => {
+                // FIXME: This goes back to the first page when reloading. `NodeEntriesWrapper`
+                // would restore the page via the `page` query parameter otherwise.
                 await this.load({
                     offset: 0,
                     reset: true,
@@ -476,7 +479,6 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         await this.nodeEntries?.initOptionsGenerator({
             actionbar: this.actionbar,
             customOptions: this.customOptions,
-            scope: Scope.WorkspaceList,
             parent: this.node$.value,
         });
     }
@@ -484,8 +486,8 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     onDelete(nodes: Node[]): void {
         this.dataSource.removeData(nodes);
         this.nodeEntries?.getSelection().clear();
-        if (nodes.filter((n) => n.isDirectory).length && this.tree) {
-            this.tree.refresh();
+        if (nodes.filter((n) => n.isDirectory).length) {
+            this.refreshTree.emit();
         }
     }
 
@@ -501,9 +503,15 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         }
     }
 
-    syncTreeView(nodes: Node[]) {
-        if (nodes.filter((n) => n.virtual && n.isDirectory).length && this.tree) {
-            this.tree.refresh();
+    syncTreeViewOnChange(nodes: Node[] | void) {
+        if (nodes && nodes.filter((n) => n.isDirectory).length) {
+            this.refreshTree.emit();
+        }
+    }
+
+    syncTreeViewOnAdd(nodes: Node[]) {
+        if (nodes.filter((n) => n.virtual && n.isDirectory).length) {
+            this.refreshTree.emit();
         }
     }
 }

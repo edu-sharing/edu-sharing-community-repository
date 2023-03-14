@@ -25,6 +25,7 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import { NetworkService } from 'ngx-edu-sharing-api';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import {
@@ -483,7 +484,7 @@ export class ListTableComponent
         private changes: ChangeDetectorRef,
         private storage: TemporaryStorageService,
         private sessionStorage: SessionStorageService,
-        private network: RestNetworkService,
+        private network: NetworkService,
         private connectors: RestConnectorsService,
         private locator: RestLocatorService,
         private sanitizer: DomSanitizer,
@@ -561,8 +562,8 @@ export class ListTableComponent
             return;
         }
         this.locator.setRoute(this.route).subscribe(() => {
-            this.network.getRepositories().subscribe((data: NetworkRepositories) => {
-                this.repositories = data.repositories;
+            this.network.getRepositories().subscribe((repositories) => {
+                this.repositories = repositories;
                 this.changeDetectorRef.detectChanges();
             });
         });

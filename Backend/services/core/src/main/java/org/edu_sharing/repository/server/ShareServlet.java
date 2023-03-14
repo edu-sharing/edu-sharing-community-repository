@@ -28,14 +28,14 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
 import org.springframework.context.ApplicationContext;
-import org.springframework.security.core.Authentication;
 
 public class ShareServlet extends HttpServlet implements SingleThreadModel {
 
-	Logger logger = Logger.getLogger(ShareServlet.class);
+	static Logger logger = Logger.getLogger(ShareServlet.class);
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -102,7 +102,7 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 					return null;
 				}
 
-				ShareService shareService = new ShareServiceImpl();
+				ShareService shareService = new ShareServiceImpl(PermissionServiceFactory.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId()));
 				Share share = shareService.getShare(nodeId, token);
 				if (share == null) {
 					resp.sendRedirect(URLTool.getNgMessageUrl("invalid_share"));

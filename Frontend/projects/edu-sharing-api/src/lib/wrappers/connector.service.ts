@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
-import { distinctUntilChanged, map, tap } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 import { ConnectorList } from '../api/models';
 import { ConnectorV1Service } from '../api/services';
 import { HOME_REPOSITORY } from '../constants';
-import { shareReturnValue } from '../utils/decorators';
-import { switchReplay } from '../utils/switch-replay';
+import { shareReplayReturnValue } from '../utils/decorators/share-replay-return-value';
+import { switchReplay } from '../utils/rxjs-operators/switch-replay';
 import { AuthenticationService } from './authentication.service';
 
 @Injectable({
@@ -18,7 +18,7 @@ export class ConnectorService {
         private connectorV1: ConnectorV1Service,
     ) {}
 
-    @shareReturnValue()
+    @shareReplayReturnValue()
     observeConnectorList({ repository = HOME_REPOSITORY } = {}): Observable<ConnectorList | null> {
         return this.authentication.observeLoginInfo().pipe(
             map(({ isValidLogin }) => isValidLogin),

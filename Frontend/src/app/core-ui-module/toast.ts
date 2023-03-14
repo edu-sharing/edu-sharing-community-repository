@@ -586,7 +586,7 @@ export class Toast implements OnDestroy {
             message = 'TOAST.NO_CONNECTION';
             dialogTitle = null;
         }
-        if (errorObject?.traceId) {
+        if (dialogTitle && errorObject?.traceId) {
             dialogTitle =
                 this.translate.instant(dialogTitle, translationParameters) +
                 ' (' +

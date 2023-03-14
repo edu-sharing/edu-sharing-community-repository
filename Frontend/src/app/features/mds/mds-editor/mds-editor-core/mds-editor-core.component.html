@@ -21,15 +21,6 @@
   [view]="view"
   [core]="this"
 ></es-mds-editor-view>
-<button
-  *ngIf="editorMode === 'search' && mdsEditorInstance.widgets.value?.length > 0"
-  mat-button
-  color="primary"
-  class="clear-button"
-  (click)="clear()"
->
-  {{ 'CLEAR_FILTERS' | translate }}
-</button>
 <es-mds-editor-view
   *ngFor="let view of suggestionsViews"
   [view]="view"

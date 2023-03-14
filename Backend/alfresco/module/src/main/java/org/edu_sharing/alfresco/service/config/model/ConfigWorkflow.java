@@ -14,7 +14,7 @@ public class ConfigWorkflow implements Serializable {
 	@XmlElement
 	public ConfigWorkflowList[] workflows;
 
-	public static class ConfigWorkflowList {
+	public static class ConfigWorkflowList implements Serializable {
 		@XmlElement
 		public String id;
 		@XmlElement

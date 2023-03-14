@@ -12,7 +12,7 @@ import {
 import { FacetsDict } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { debounceTime, takeUntil } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import { MdsView, Values } from '../../types/types';
 import { MdsEditorWidgetSearchSuggestionsComponent } from '../widgets/mds-editor-widget-search-suggestions/mds-editor-widget-search-suggestions.component';
@@ -77,7 +77,8 @@ export class SearchFieldFacetsComponent implements OnInit, OnDestroy {
             this._values = values;
             this.valuesChange.emit(values);
         });
-        this.initInfoSubject.subscribe((info) => this.init(info));
+        // Debounce initialization so we don't use partially updated parameters.
+        this.initInfoSubject.pipe(debounceTime(0)).subscribe((info) => this.init(info));
         this.mdsEditorInstance
             .getNeededFacets()
             .pipe(takeUntil(this.destroyed$))

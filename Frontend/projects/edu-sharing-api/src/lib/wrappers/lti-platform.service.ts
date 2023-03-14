@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { Tools } from '../api/models/tools';
 import { Injectable } from '@angular/core';
 import { distinctUntilChanged, map } from 'rxjs/operators';
-import { switchReplay } from '../utils/switch-replay';
+import { switchReplay } from '../utils/rxjs-operators/switch-replay';
 import * as rxjs from 'rxjs';
 import { AuthenticationService } from './authentication.service';
 

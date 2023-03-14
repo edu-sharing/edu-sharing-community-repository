@@ -150,14 +150,14 @@ export class AdminMediacenterComponent {
             };
             this.isLoadingMediacenterNodes = true;
 
-            let criterias: any = [];
+            let criteria: any = [];
             if (this.mediacenterNodesSearchWord) {
-                criterias.push({
+                criteria.push({
                     property: RestConstants.PRIMARY_SEARCH_CRITERIA,
                     values: [this.mediacenterNodesSearchWord],
                 });
             }
-            criterias = criterias.concat(
+            criteria = criteria.concat(
                 RestSearchService.convertCritierias(
                     await this.mediacenterMds.getValues(),
                     this.mediacenterMds.currentWidgets,
@@ -167,7 +167,7 @@ export class AdminMediacenterComponent {
             this.mediacenterService
                 .getLicensedNodes(
                     this.currentMediacenter.authorityName,
-                    criterias,
+                    criteria,
                     RestConstants.HOME_REPOSITORY,
                     licensedNodeReq,
                 )

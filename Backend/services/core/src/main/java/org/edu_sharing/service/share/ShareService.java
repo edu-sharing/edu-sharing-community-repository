@@ -15,7 +15,7 @@ public interface ShareService {
 	
 	public void updateShare(Share share);
 	
-	public void removeShare(String shareNodeId);
+	public void removeShare(String nodeId, String shareNodeId);
 	
 	public Share[] getShares(String nodeId);
 	

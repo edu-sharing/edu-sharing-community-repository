@@ -23,7 +23,9 @@ export class SkipNavComponent implements OnInit {
         this.availableTargets = this.skipNav.getAvailableTargets();
     }
 
-    skipTo(target: SkipTarget): void {
+    skipTo(event: MouseEvent, target: SkipTarget): void {
+        event.preventDefault();
+        event.stopPropagation();
         this.skipNav.skipTo(target);
     }
 }

@@ -79,6 +79,10 @@ export class TopBarComponent {
         }
     }
 
+    isSidenavOpen() {
+        return this.mainMenuSidebar?.show;
+    }
+
     openCreateMenu(x: number, y: number) {
         this.createMenuX = x;
         this.createMenuY = y;

@@ -1,4 +1,3 @@
-<div class="main-nav-placeholder"></div>
 <es-modal-dialog
   [title]="showWarning ? 'ADMIN.WARNING_TITLE' : null"
   [message]="'ADMIN.WARNING_INFO'"
@@ -1052,6 +1051,7 @@
         <es-node-entries-wrapper
           #searchResults
           [dataSource]="searchResponse"
+          [scope]="SCOPES.Admin"
           [columns]="searchColumns"
           [configureColumns]="true"
           [displayType]="NodeEntriesDisplayType.Table"

@@ -20,8 +20,7 @@ import { RestConnectorService } from '../../../core-module/rest/services/rest-co
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { ClickSource, InteractionType } from '../entries-model';
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
-import { NodeEntriesGlobalService } from '../node-entries-global.service';
-import { DefaultListItem } from '../../../core-module/ui/list-item';
+import { CustomFieldSpecialType, NodeEntriesGlobalService } from '../node-entries-global.service';
 
 @Component({
     selector: 'es-node-entries-card',
@@ -32,6 +31,7 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
     readonly InteractionType = InteractionType;
     readonly Target = Target;
     readonly ClickSource = ClickSource;
+    readonly CustomFieldSpecialType = CustomFieldSpecialType;
     @Input() dropdown: DropdownComponent;
     @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
 
@@ -39,6 +39,7 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
     dropdownLeft: number;
     dropdownTop: number;
     showRatings: boolean;
+    isCollection: boolean;
     constructor(
         public entriesService: NodeEntriesService<T>,
         public nodeHelper: NodeHelperService,
@@ -50,7 +51,9 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
         private toast: Toast,
     ) {}
 
-    ngOnChanges(changes: SimpleChanges): void {}
+    ngOnChanges(changes: SimpleChanges): void {
+        this.isCollection = this.nodeHelper.isNodeCollection(changes.node);
+    }
 
     getTextColor() {
         return ColorHelper.getPreferredColor(this.node.collection.color) === PreferredColor.Black
@@ -98,7 +101,7 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
     }
 
     getVisibleColumns() {
-        return this.entriesService.columns.filter((c) => c.visible);
+        return this.entriesService.columns?.filter((c) => c.visible);
     }
 
     async openMenu(node: T) {
@@ -116,7 +119,13 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
                 .toPromise());
     }
 
-    getTypeTemplate() {
-        return this.nodeEntriesGlobalService.getCustomFieldTemplate(DefaultListItem.NODE_TYPE);
+    getTemplate(name: CustomFieldSpecialType) {
+        return this.nodeEntriesGlobalService.getCustomFieldTemplate(
+            {
+                type: 'NODE',
+                name,
+            },
+            this.node as Node,
+        );
     }
 }

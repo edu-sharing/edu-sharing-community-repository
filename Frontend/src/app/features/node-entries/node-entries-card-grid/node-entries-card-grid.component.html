@@ -1,42 +1,16 @@
-<div class="grid-top">
-  <div class="title">
-    <ng-container *ngTemplateOutlet="templatesService.title"></ng-container>
-  </div>
-  <div *ngIf="entriesService.sort?.allowed" class="order-panel">
-    <mat-slide-toggle
-      *ngIf="entriesService.sort.active === 'ccm:collection_ordered_position'"
-      [(ngModel)]="entriesService.sort.customSortingInProgress"
-      (ngModelChange)="onCustomSortingInProgressChange()"
-    >
-      {{ 'COLLECTIONS.SORT_SLIDER' | translate }}
-    </mat-slide-toggle>
-    <button
-      *ngIf="sortDropdown.menu"
-      [matMenuTriggerFor]="sortDropdown.menu"
-      mat-button
-      color="primary"
-    >
-      <span *ngIf="entriesService.sort.active">{{
-        'NODE.' + entriesService.sort.active | translate
-      }}</span>
-      <span *ngIf="!entriesService.sort.active">{{ 'SORT_BY' | translate }}</span>
-      <i
-        *ngIf="
-          entriesService.sort.active &&
-          entriesService.sort.active !== 'ccm:collection_ordered_position'
-        "
-        [esIcon]="'arrow_' + (entriesService.sort.direction === 'asc' ? 'upward' : 'downward')"
-      ></i>
-    </button>
-    <es-sort-dropdown
-      #sortDropdown
-      [columns]="getSortColumns()"
-      [sortBy]="entriesService.sort.active"
-      [sortAscending]="entriesService.sort.direction === 'asc'"
-      (onSort)="changeSort($event)"
-    ></es-sort-dropdown>
-  </div>
-</div>
+<ng-template #gridTop>
+  <es-sort-select-panel
+    *ngIf="entriesService.sort?.allowed"
+    class="order-panel"
+    [active]="entriesService.sort.active"
+    [direction]="entriesService.sort.direction"
+    [columns]="getSortColumns()"
+    (sortChange)="onSortChange($event)"
+    [(customSortingInProgress)]="entriesService.sort.customSortingInProgress"
+    (customSortingInProgressChange)="onCustomSortingInProgressChange()"
+  ></es-sort-select-panel>
+</ng-template>
+
 <es-dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></es-dropdown>
 
 <!-- Do not render the list element (`role="list"` or `li`) when there are no list items. -->
@@ -180,7 +154,14 @@
     </button>
   </div>
 </ng-container>
-<ng-container *ngIf="entriesService.dataSource.isLoading">
+<ng-container
+  *ngIf="
+    entriesService.dataSource.isLoading === true ||
+    entriesService.dataSource.isLoading === 'initial' ||
+    (entriesService.dataSource.isLoading === 'page' &&
+      entriesService.paginationStrategy === 'infinite-scroll')
+  "
+>
   <ng-container *ngTemplateOutlet="loading"></ng-container>
 </ng-container>
 
@@ -221,12 +202,7 @@
       (click)="doScroll('left')"
       *ngIf="scroll.left"
     >
-      <button
-        mat-icon-button
-        color="primary"
-        class="mat-button-badge"
-        (click)="$event.stopPropagation(); doScroll('left')"
-      >
+      <button mat-icon-button color="primary" (click)="$event.stopPropagation(); doScroll('left')">
         <i esIcon="keyboard_arrow_left" [aria]="true"></i>
       </button>
     </div>
@@ -236,12 +212,7 @@
       (click)="doScroll('right')"
       *ngIf="scroll.right"
     >
-      <button
-        mat-icon-button
-        color="primary"
-        class="mat-button-badge"
-        (click)="$event.stopPropagation(); doScroll('right')"
-      >
+      <button mat-icon-button color="primary" (click)="$event.stopPropagation(); doScroll('right')">
         <i esIcon="keyboard_arrow_right" [aria]="true"></i>
       </button>
     </div>

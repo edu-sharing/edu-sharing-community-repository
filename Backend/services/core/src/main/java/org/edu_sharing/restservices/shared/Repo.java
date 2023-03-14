@@ -5,9 +5,11 @@ import io.swagger.v3.oas.annotations.media.Schema;;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
+
 
 @Schema(description = "")
-public class Repo  {
+public class Repo implements Serializable {
   
   private String id = null;
   private Boolean isHomeRepo = null;

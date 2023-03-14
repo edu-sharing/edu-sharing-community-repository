@@ -4,9 +4,8 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 import { LabeledValue, MdsIdentifier, SearchResults } from '../../public-api';
 import * as apiModels from '../api/models';
-import { NodeEntry } from '../api/models';
 import { SearchV1Service } from '../api/services';
-import { onSubscription } from '../utils/on-subscription';
+import { onSubscription } from '../utils/rxjs-operators/on-subscription';
 import { LabeledValuesDict, MdsLabelService, RawValuesDict } from './mds-label.service';
 
 /** Configuration for `SearchService`. */
@@ -294,24 +293,6 @@ export class SearchService {
         }
         const filterRawValues = this.criteriaToRawValues(filterCriteria);
         return this.mdsLabel.labelValuesDict(this.getMdsIdentifier(), filterRawValues);
-    }
-
-    /**
-     * Saves the most recent search that was requested via `search`.
-     *
-     * @param replace Overrides any existing saved search with the same name. If false, a 409
-     * "Conflict" response will be returned in case the name already exists.
-     */
-    saveCurrentSearch(name: string, { replace = false } = {}): Observable<NodeEntry> {
-        const searchParams = this.getSearchParams();
-        return this.searchV1.saveSearch({
-            name,
-            replace,
-            repository: searchParams.repository,
-            metadataset: searchParams.metadataset,
-            query: searchParams.query,
-            body: searchParams.body.criteria,
-        });
     }
 
     /** Registers the internal `facetsSubject` to be updated with search responses. */

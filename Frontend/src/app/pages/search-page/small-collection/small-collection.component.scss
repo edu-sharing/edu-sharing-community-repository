@@ -1,28 +1,31 @@
 @import '../../../core-ui-module/styles/variables';
 
+// $height: $secondaryBarHeight;
+$height: 50px;
+
 .smallCollection {
     display: flex;
-    height: $secondaryBarHeight;
+    min-height: $height;
     width: 100%;
-    background-color: $primary;
+    border-radius: 10px;
     .right {
-        padding-left: 20px;
+        background-color: $primary;
+        border-top-right-radius: inherit;
+        border-bottom-right-radius: inherit;
+        padding: 7px;
         display: flex;
-        justify-content: center;
-        flex-direction: column;
         flex-grow: 1;
+        align-items: center;
+        gap: 10px;
         color: #fff;
         .title {
+            margin-left: 13px;
             font-size: 120%;
         }
         .scope {
             display: flex;
             align-items: center;
-            color: #eee;
-            font-size: $fontSizeXSmall;
-            > span {
-                padding-left: 5px;
-            }
+            flex-grow: 1;
         }
     }
 
@@ -31,26 +34,33 @@
         justify-content: center;
     }
     .image {
-        width: $secondaryBarHeight - 5px;
+        align-self: stretch;
+        width: $height;
         display: flex;
+        flex-shrink: 0;
+        border-top-left-radius: inherit;
+        border-bottom-left-radius: inherit;
         .icon {
             display: flex;
             align-items: center;
             justify-content: center;
             background-color: #fff;
-            width: 45px;
-            height: 45px;
+            width: calc(#{$height} - 10px);
+            height: calc(#{$height} - 10px);
             border-radius: 50%;
         }
         img {
-            height: calc(#{$secondaryBarHeight} - 5px);
+            height: 100%;
             width: 100%;
+            border-top-left-radius: inherit;
+            border-bottom-left-radius: inherit;
         }
     }
 }
 .titleMobile {
     display: none;
 }
+
 :host ::ng-deep {
     es-list-collection-info {
         display: flex;

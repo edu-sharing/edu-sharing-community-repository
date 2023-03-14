@@ -387,7 +387,11 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
                 this._focusByCssSelector(this.config.autoFocus!);
                 break;
         }
-        this.closeButtonTemporarilyDisabled = false;
+        this._ngZone.runOutsideAngular(() =>
+            setTimeout(() => {
+                this.closeButtonTemporarilyDisabled = false;
+            }),
+        );
     }
 
     /**

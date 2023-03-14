@@ -98,10 +98,10 @@ public class WebDAVServlet extends HttpServlet
     private static NodeRef defaultRootNode; // for default domain
     
     // WebDAV helper class
-    private WebDAVHelper m_davHelper;
+    private transient WebDAVHelper m_davHelper;
     private WebDAVActivityPoster activityPoster;
 
-    private WebDAVInitParameters initParams;
+    private transient WebDAVInitParameters initParams;
 
     /**
      * @see javax.servlet.http.HttpServlet#service(javax.servlet.http.HttpServletRequest,

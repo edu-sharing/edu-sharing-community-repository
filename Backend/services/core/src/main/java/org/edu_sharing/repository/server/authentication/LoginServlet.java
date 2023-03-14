@@ -30,8 +30,8 @@ public class LoginServlet extends HttpServlet {
 	public static final String ERR_AUTH_FAILED = "ERR_AUTH_FAILED";
 	
 	public static final String AUTH_RESULT_ERROR = "AUTH_RESULT_ERROR";
-	
-	Logger log = Logger.getLogger(LoginServlet.class);
+
+	private static Logger log = Logger.getLogger(LoginServlet.class);
 
 	private void loginProcess(HttpServletRequest req, HttpServletResponse resp, String userName, String password, String redirectSuccessUrl) throws ServletException, IOException {
 		try{

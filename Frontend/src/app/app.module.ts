@@ -1,18 +1,22 @@
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { LocationStrategy } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatTooltipDefaultOptions, MAT_TOOLTIP_DEFAULT_OPTIONS } from '@angular/material/tooltip';
+import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { ResizableModule } from 'angular-resizable-element';
 import {
     EduSharingApiConfigurationParams,
     EduSharingApiModule,
     EDU_SHARING_API_CONFIG,
 } from 'ngx-edu-sharing-api';
+import { CoreUiModule } from './core-ui-module/core-ui.module';
 import { ErrorHandlerService } from './core-ui-module/error-handler.service';
 import { DECLARATIONS } from './declarations';
 import { extensionDeclarations } from './extension/extension-declarations';
 import { extensionImports } from './extension/extension-imports';
 import { extensionProviders } from './extension/extension-providers';
+import { extensionSchemas } from './extension/extension-schemas';
 import { DialogsModule } from './features/dialogs/dialogs.module';
 import { ListItemsModule } from './features/list-items/list-items.module';
 import { MdsModule } from './features/mds/mds.module';
@@ -43,12 +47,10 @@ import { DECLARATIONS_STARTUP } from './modules/startup/declarations';
 import { DECLARATIONS_STREAM } from './modules/stream/declarations';
 import { DECLARATIONS_WORKSPACE } from './modules/workspace/declarations';
 import { PROVIDERS } from './providers';
+import { AppLocationStrategy } from './router/location-strategy';
 import { RouterComponent } from './router/router.component';
 import { SharedModule } from './shared/shared.module';
 import { TranslationsModule } from './translations/translations.module';
-import { CoreUiModule } from './core-ui-module/core-ui.module';
-import { MaterialCssVarsModule } from 'angular-material-css-vars';
-import { extensionSchemas } from './extension/extension-schemas';
 
 // http://blog.angular-university.io/angular2-ngmodule/
 // -> Making modules more readable using the spread operator
@@ -113,6 +115,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
                     onError: (err, req) => errorHandler.handleError(err, req),
                 } as EduSharingApiConfigurationParams),
         },
+        { provide: LocationStrategy, useClass: AppLocationStrategy },
         PROVIDERS,
         PROVIDERS_SEARCH,
         { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },

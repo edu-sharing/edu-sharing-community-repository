@@ -26,7 +26,7 @@
       [isCreateAllowed]="isCreateAllowed()"
       [isSafe]="isSafe()"
       [mainMenuStyle]="mainMenuStyle"
-      [searchEnabled]="mainNavConfig.searchEnabled"
+      [searchEnabled]="searchFieldEnabled"
       [showChat]="showChat()"
       [showScope]="mainNavConfig.showScope"
       [showUser]="showUser"
@@ -41,15 +41,7 @@
     >
       <es-search-field
         data-selector-search-field
-        *ngIf="mainNavConfig.searchEnabled"
-        [(searchString)]="searchQuery"
-        (searchStringChange)="
-          mainNavConfig.searchQueryChange && mainNavConfig.searchQueryChange($event)
-        "
-        [placeholder]="mainNavConfig.searchPlaceholder"
-        [enableFiltersAndSuggestions]="mainNavConfig.currentScope === 'search'"
-        (searchSubmit)="doSearch(searchQuery)"
-        (clear)="clearSearch()"
+        *ngIf="searchFieldEnabled && !mainNavConfig.hideSearchField"
       ></es-search-field
     ></es-top-bar>
 

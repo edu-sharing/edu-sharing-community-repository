@@ -355,7 +355,29 @@ public class LTIPlatformApi {
             })
     public Response startDynamicRegistration(@Parameter(description = "url",required=true) @FormParam("url") String url,
                                            @Context HttpServletRequest req){
+            return startDynamicRegistrationBase(url);
+    }
 
+    @GET
+    @Path("/start-dynamic-registration" )
+    @Operation(summary = "starts lti dynamic registration.", description = "start dynmic registration")
+
+    @Consumes({ "application/x-www-form-urlencoded" })
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class)))
+            })
+    public Response startDynamicRegistrationGet(@Parameter(description = "url",required=true) @QueryParam("url") String url,
+                                             @Context HttpServletRequest req){
+        return startDynamicRegistrationBase(url);
+    }
+
+    public Response startDynamicRegistrationBase(String url){
         //generate client id to allow multiple tool deployments
         String clientId = RegistrationService.generateNewClientId();
 
@@ -373,6 +395,7 @@ public class LTIPlatformApi {
                     .setExpiration(exp)
                     .claim("scope",LTIConstants.LTI_REGISTRATION_SCOPE_NEW)
                     .signWith(new Signing().getPemPrivateKey(homeApp.getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM))
+                    .setHeaderParam(LTIConstants.KID, homeApp.getLtiKid())
                     .compact();
             String openIdConfigurationUrl = homeApp.getClientBaseUrl()+"/rest/ltiplatform/v13/openid-configuration/";
             url = UrlTool.setParam(url,"openid_configuration", openIdConfigurationUrl);
@@ -609,10 +632,10 @@ public class LTIPlatformApi {
                 parentId = repoDao.getUserHome();
             }
             if ("-inbox-".equals(parentId)) {
-                parentId =repoDao.getUserInbox();
+                parentId =repoDao.getUserInbox(true);
             }
             if ("-saved_search-".equals(parentId)) {
-                parentId = repoDao.getUserSavedSearch();
+                parentId = repoDao.getUserSavedSearch(true);
             }
 
             for(ApplicationInfo appInfo : ApplicationInfoList.getApplicationInfos().values()){
@@ -1108,6 +1131,7 @@ public class LTIPlatformApi {
 
                 ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef, ContentModel.PROP_CONTENT);
                 if (reader == null) {
+                    logger.info("no content found for " + nodeRef);
                     return Response.status(Response.Status.NOT_FOUND).entity("no content found").build();
                 }
 
