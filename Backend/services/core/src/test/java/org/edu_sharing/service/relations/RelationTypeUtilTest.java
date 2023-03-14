@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RelationTypeUtilTest {
 
+
     @ParameterizedTest
     @EnumSource(OutputRelationType.class)
     void invertRelationTypeTest(OutputRelationType type) {
