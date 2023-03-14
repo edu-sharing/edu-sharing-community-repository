@@ -497,7 +497,6 @@ export class WorkspaceManagementDialogsComponent {
             this._nodeSimpleEdit = this.nodeLicense;
         } else if (this._nodeFromUpload) {
             this.onUploadFilesProcessed.emit(this.nodeLicense);
-            this._nodeFromUpload = false;
         }
         this.nodeLicense = null;
         this.nodeLicenseOnUpload = false;
@@ -519,6 +518,11 @@ export class WorkspaceManagementDialogsComponent {
     closeEditor(refresh: boolean, nodes: Node[] = null) {
         if (this._nodeFromUpload && !this.reopenSimpleEdit && nodes == null) {
             this.deleteNodes(this._nodeMetadata);
+            this.onDelete.emit({
+                objects: this._nodeMetadata,
+                error: false,
+                count: this._nodeMetadata.length,
+            });
             refresh = true;
         }
         const previousNodes = this._nodeMetadata;

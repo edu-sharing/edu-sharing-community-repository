@@ -11,12 +11,16 @@ import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.com
 import { Values } from '../../../types/types';
 import { MatTabGroup } from '@angular/material/tabs';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
+import { Attributes } from '../../util/parse-attributes';
 
 export interface AuthorData {
     freetext: string;
     author: VCard;
 }
-
+enum DefaultTab {
+    freetext = 'freetext',
+    vcard = 'vcard',
+}
 @Component({
     selector: 'es-mds-editor-widget-author',
     templateUrl: './mds-editor-widget-author.component.html',
@@ -27,6 +31,7 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         requiresNode: false,
         supportsBulk: false,
     };
+    readonly attributes: Attributes;
     @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
     @Input() showContributorDialog = true;
     _nodes: Node[];
@@ -144,9 +149,23 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
                 freetext: freetext?.[0] ?? '',
                 author: authorVCard,
             };
+            // set default tab based on config
+            if (!this.author.freetext?.trim() && !this.author.author?.getDisplayName().trim()) {
+                if (this.attributes?.defaulttab) {
+                    const tab = DefaultTab[this.attributes.defaulttab as DefaultTab];
+                    if (tab === DefaultTab.vcard) {
+                        this.authorTab = 1;
+                    }
+                }
+            }
             // switch to author tab if no freetext but author exists
             if (!this.author.freetext?.trim() && this.author.author?.getDisplayName().trim()) {
                 this.authorTab = 1;
+            } else if (
+                this.author.freetext?.trim() &&
+                !this.author.author?.getDisplayName().trim()
+            ) {
+                this.authorTab = 0;
             }
             // deep copy the elements to compare state
             this.initialAuthor = {

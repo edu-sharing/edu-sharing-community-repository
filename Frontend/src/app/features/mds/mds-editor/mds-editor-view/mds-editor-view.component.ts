@@ -63,6 +63,7 @@ import { MdsEditorWidgetBase } from '../widgets/mds-editor-widget-base';
 import { MdsEditorWidgetVCardComponent } from '../widgets/mds-editor-widget-vcard/mds-editor-widget-vcard.component';
 import { MdsEditorWidgetTinyMCE } from '../widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
 import { EditorMode } from '../../types/mds-types';
+import { Attributes, getAttributesArray } from '../util/parse-attributes';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
@@ -244,7 +245,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                     // native widgets not (yet) supported for inline editing
                     continue;
                 } else {
-                    this.injectNativeWidget(widgets[0], widgetName, element);
+                    const attributes = getAttributesArray(this.view.html, widgetName);
+                    this.injectNativeWidget(widgets[0], widgetName, element, attributes);
                 }
             } else {
                 if (widgets.length >= 1) {
@@ -293,6 +295,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         widget: Widget,
         widgetName: NativeWidgetType,
         element: Element,
+        attributes: Attributes,
     ): void {
         element = replaceElementWithDiv(element);
         const WidgetComponent = MdsEditorViewComponent.nativeWidgets[widgetName];
@@ -336,6 +339,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 {
                     widgetName,
                     widget,
+                    attributes,
                 },
                 { replace: false },
                 this.injector,

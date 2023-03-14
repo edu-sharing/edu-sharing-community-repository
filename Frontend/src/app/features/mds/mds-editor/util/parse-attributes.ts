@@ -51,6 +51,14 @@ const knownPropertyInfo: { [property: string]: PartialBy<PropertyInfo, 'property
     values: { type: 'object' },
 };
 
+export type Attributes = { [key: string]: string };
+export function getAttributesArray(html: string, widgetId: string): Attributes {
+    const attr = getAttributes(html, widgetId);
+    const result: Attributes = {};
+    attr.forEach((attr) => (result[attr.name] = attr.value));
+    return result;
+}
+
 function getAttributes(html: string, widgetId: string): Attr[] {
     const div = document.createElement('div');
     div.innerHTML = html;
