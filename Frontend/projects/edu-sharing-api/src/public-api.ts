@@ -16,6 +16,7 @@ export * from './lib/wrappers/collection.service';
 export * from './lib/wrappers/config.service';
 export * from './lib/wrappers/connector.service';
 export * from './lib/wrappers/lti-platform.service';
+export * from './lib/wrappers/mediacenter.service';
 export * from './lib/wrappers/mds-label.service';
 export * from './lib/wrappers/mds.service';
 export * from './lib/wrappers/network.service';

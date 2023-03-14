@@ -6,12 +6,7 @@
   <div class="select-mediacenter" *ngIf="mediacenters">
     <mat-form-field class="mediacenter">
       <mat-label>{{ 'ADMIN.MEDIACENTER.SELECT' | translate }}</mat-label>
-      <mat-select
-        id="type"
-        type="text"
-        [ngModel]="currentMediacenter"
-        (ngModelChange)="setMediacenter($event)"
-      >
+      <mat-select id="type" [ngModel]="currentMediacenter" (ngModelChange)="setMediacenter($event)">
         <mat-option *ngFor="let mediacenter of mediacenters" [value]="mediacenter">{{
           mediacenter.profile.displayName
         }}</mat-option>
@@ -179,6 +174,12 @@
       </mat-tab>
       <mat-tab label="{{ 'ADMIN.MEDIACENTER.NODES.TITLE' | translate }}">
         <div class="nodes">
+          <div class="export">
+            <button mat-flat-button color="primary" (click)="exportNodes()">
+              <i esIcon="cloud_download"></i>
+              {{ 'ADMIN.MEDIACENTER.NODES.CSV_EXPORT' | translate }}
+            </button>
+          </div>
           <!--h6 class="mat-heading-6">{{'ADMIN.MEDIACENTER.NODES.DESCRIPTION' | translate}}</h6-->
           <es-mds-editor-wrapper
             #mediacenterMds
@@ -220,7 +221,7 @@
       <mat-tab label="{{ 'ADMIN.MEDIACENTER.STATISTICS.TITLE' | translate }}">
         <!-- workaround for https://github.com/angular/components/issues/7274 -->
         <es-admin-statistics
-          *ngIf="currentTab == 3 && currentMediacenter"
+          *ngIf="currentTab === 3 && currentMediacenter"
           [mediacenter]="currentMediacenter"
           (onOpenNode)="onOpenNode.emit($event)"
         ></es-admin-statistics>

@@ -21,9 +21,9 @@ import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { AuthoritySearchMode } from '../../../shared/components/authority-search-input/authority-search-input.component';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
-
-// Charts.js
-declare var Chart: any;
+import { MediacenterService } from 'ngx-edu-sharing-api';
+import { CsvHelper } from '../../../core-module/csv.helper';
+import { Values } from '../../../features/mds/types/types';
 
 @Component({
     selector: 'es-admin-mediacenter',
@@ -69,7 +69,8 @@ export class AdminMediacenterComponent {
     public removeSchoolsFromMC = false;
 
     constructor(
-        private mediacenterService: RestMediacenterService,
+        private mediacenterServiceLegacy: RestMediacenterService,
+        private mediacenterService: MediacenterService,
         private mdsService: RestMdsService,
         private translate: TranslateService,
         private connector: RestConnectorService,
@@ -120,7 +121,7 @@ export class AdminMediacenterComponent {
         this.resetMediacenterNodes();
 
         if (mediacenter) {
-            this.mediacenterService
+            this.mediacenterServiceLegacy
                 .getManagedGroups(mediacenter.authorityName)
                 .subscribe((groups) => {
                     this.mediacenterGroups = groups;
@@ -150,21 +151,9 @@ export class AdminMediacenterComponent {
             };
             this.isLoadingMediacenterNodes = true;
 
-            let criteria: any = [];
-            if (this.mediacenterNodesSearchWord) {
-                criteria.push({
-                    property: RestConstants.PRIMARY_SEARCH_CRITERIA,
-                    values: [this.mediacenterNodesSearchWord],
-                });
-            }
-            criteria = criteria.concat(
-                RestSearchService.convertCritierias(
-                    await this.mediacenterMds.getValues(),
-                    this.mediacenterMds.currentWidgets,
-                ),
-            );
+            let criteria = await this.getMediacenterNodesCriteria();
 
-            this.mediacenterService
+            this.mediacenterServiceLegacy
                 .getLicensedNodes(
                     this.currentMediacenter.authorityName,
                     criteria,
@@ -187,6 +176,22 @@ export class AdminMediacenterComponent {
                     this.isLoadingMediacenterNodes = false;
                 });
         }
+    }
+
+    private async getMediacenterNodesCriteria() {
+        let criteria: any = [];
+        if (this.mediacenterNodesSearchWord) {
+            criteria.push({
+                property: RestConstants.PRIMARY_SEARCH_CRITERIA,
+                values: [this.mediacenterNodesSearchWord],
+            });
+        }
+        return criteria.concat(
+            RestSearchService.convertCritierias(
+                await this.mediacenterMds.getValues(),
+                this.mediacenterMds.currentWidgets,
+            ),
+        );
     }
 
     searchMediaCenterNodes() {
@@ -228,10 +233,10 @@ export class AdminMediacenterComponent {
                         },
                     };
                     this.toast.showProgressDialog();
-                    this.mediacenterService.addMediacenter(id, profile).subscribe(
+                    this.mediacenterServiceLegacy.addMediacenter(id, profile).subscribe(
                         (result) => {
                             RestHelper.waitForResult(
-                                () => this.mediacenterService.getMediacenters(),
+                                () => this.mediacenterServiceLegacy.getMediacenters(),
                                 (list: Mediacenter[]) => {
                                     return (
                                         list.filter((r) => r.authorityName === result.authorityName)
@@ -260,7 +265,7 @@ export class AdminMediacenterComponent {
 
     saveChanges() {
         this.toast.showProgressDialog();
-        this.mediacenterService
+        this.mediacenterServiceLegacy
             .editMediacenter(
                 this.currentMediacenterCopy.authorityName,
                 this.currentMediacenterCopy.profile,
@@ -283,14 +288,14 @@ export class AdminMediacenterComponent {
 
     refresh() {
         this.mediacenters = null;
-        this.mediacenterService.getMediacenters().subscribe((m) => {
+        this.mediacenterServiceLegacy.getMediacenters().subscribe((m) => {
             this.mediacenters = m.filter((m) => m.administrationAccess);
         });
     }
 
     addCurrentGroup() {
         this.toast.showProgressDialog();
-        this.mediacenterService
+        this.mediacenterServiceLegacy
             .addManagedGroup(this.currentMediacenterCopy.authorityName, this.addGroup.authorityName)
             .subscribe(
                 (groups) => {
@@ -316,7 +321,7 @@ export class AdminMediacenterComponent {
                 () => this.toast.closeModalDialog(),
                 () => {
                     this.toast.showProgressDialog();
-                    this.mediacenterService
+                    this.mediacenterServiceLegacy
                         .deleteMediacenter(this.currentMediacenter.authorityName)
                         .subscribe(
                             () => {
@@ -342,7 +347,7 @@ export class AdminMediacenterComponent {
 
     private deleteGroup(authority: Group) {
         this.toast.showProgressDialog();
-        this.mediacenterService
+        this.mediacenterServiceLegacy
             .removeManagedGroup(this.currentMediacenterCopy.authorityName, authority.authorityName)
             .subscribe(
                 (groups) => {
@@ -377,7 +382,7 @@ export class AdminMediacenterComponent {
             return;
         }
         this.globalProgress = true;
-        this.mediacenterService.importMediacenters(this.mediacentersFile).subscribe(
+        this.mediacenterServiceLegacy.importMediacenters(this.mediacentersFile).subscribe(
             (data: any) => {
                 this.toast.toast('ADMIN.MEDIACENTER.IMPORT.IMPORTED', { rows: data.rows });
                 this.globalProgress = false;
@@ -396,7 +401,7 @@ export class AdminMediacenterComponent {
             return;
         }
         this.globalProgress = true;
-        this.mediacenterService.importOrganisations(this.organisationsFile).subscribe(
+        this.mediacenterServiceLegacy.importOrganisations(this.organisationsFile).subscribe(
             (data: any) => {
                 this.toast.toast('ADMIN.MEDIACENTER.ORGIMPORT.IMPORTED', { rows: data.rows });
                 this.globalProgress = false;
@@ -416,7 +421,7 @@ export class AdminMediacenterComponent {
             return;
         }
         this.globalProgress = true;
-        this.mediacenterService
+        this.mediacenterServiceLegacy
             .importMcOrgConnections(this.orgMcFile, this.removeSchoolsFromMC)
             .subscribe(
                 (data: any) => {
@@ -443,5 +448,28 @@ export class AdminMediacenterComponent {
         this.mediacenterNodes = null;
         this.mediacenterNodesTotal = 0;
         this.hasMoreMediacenterNodes = true;
+    }
+
+    async exportNodes() {
+        const properties = this.nodeColumns.map((c) => c.name);
+        const propertiesLabel = properties.map((p) => this.translate.instant('NODE.' + p));
+        const data = await this.mediacenterService
+            .exportMediacenterLicensedNodes({
+                repository: RestConstants.HOME_REPOSITORY,
+                mediacenter: this.currentMediacenter.authorityName,
+                sortProperties: [this.mediacenterNodesSort.sortBy],
+                sortAscending: [this.mediacenterNodesSort.sortAscending],
+                body: {
+                    criteria: await this.getMediacenterNodesCriteria(),
+                },
+                properties,
+            })
+            .toPromise();
+        CsvHelper.download(
+            await this.translate.get('ADMIN.MEDIACENTER.NODES.CSV_FILENAME').toPromise(),
+            propertiesLabel,
+            data as unknown as Values,
+            properties,
+        );
     }
 }
