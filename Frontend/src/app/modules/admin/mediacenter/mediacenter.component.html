@@ -197,25 +197,20 @@
           <button mat-raised-button color="primary" (click)="searchMediaCenterNodes()">
             <i esIcon="search"></i>{{ 'ADMIN.MEDIACENTER.NODES.FILTER' | translate }}
           </button>
-          <es-listTable
-            *ngIf="mediacenterNodes"
-            [nodes]="mediacenterNodes"
-            [hasIcon]="true"
-            [hasHeading]="true"
-            [hasCheckbox]="true"
-            icon="node"
-            [isClickable]="true"
-            [createLink]="false"
+          <es-node-entries-wrapper
+            #nodeEntriesTable
+            [dataSource]="mediacenterNodesDataSource"
+            [elementInteractionType]="InteractionType.Emitter"
+            [displayType]="NodeEntriesDisplayType.Table"
+            [scope]="SCOPES.MediacenterNodesList"
+            [checkbox]="false"
             [columns]="nodeColumns"
-            [sortBy]="mediacenterNodesSort.sortBy"
-            [sortAscending]="mediacenterNodesSort.sortAscending"
-            (clickRow)="onOpenNode.emit($event.node)"
-            (sortListener)="setMediacenterNodesSort($event)"
-            (loadMore)="loadMediacenterNodes()"
-            [isLoading]="isLoadingMediacenterNodes"
-            [hasMore]="hasMoreMediacenterNodes"
-            [totalCount]="mediacenterNodesTotal"
-          ></es-listTable>
+            [configureColumns]="true"
+            [sort]="mediacenterNodesSort"
+            (clickItem)="onOpenNode.emit($event.element)"
+            (sortChange)="setMediacenterNodesSort($event)"
+            (fetchData)="loadMediacenterNodes()"
+          ></es-node-entries-wrapper>
         </div>
       </mat-tab>
       <mat-tab label="{{ 'ADMIN.MEDIACENTER.STATISTICS.TITLE' | translate }}">

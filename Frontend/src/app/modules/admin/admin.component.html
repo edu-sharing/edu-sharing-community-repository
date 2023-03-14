@@ -172,7 +172,7 @@
       <es-admin-statistics (onOpenNode)="openNodeRender($event)"></es-admin-statistics>
     </div>
     <div *ngIf="modeIsActive('MEDIACENTER')" class="content mediacenter">
-      <es-admin-mediacenter></es-admin-mediacenter>
+      <es-admin-mediacenter (onOpenNode)="openNodeRender($event)"></es-admin-mediacenter>
     </div>
     <div *ngIf="modeIsActive('FRONTPAGE')" class="content frontpage">
       <es-admin-frontpage (onOpenNode)="openNodeRender($event)"></es-admin-frontpage>
