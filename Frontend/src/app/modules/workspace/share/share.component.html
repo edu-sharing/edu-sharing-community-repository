@@ -37,7 +37,6 @@
             <mat-chip
               *ngFor="let permission of getNewInvitedAuthorities()"
               (removed)="removePermission(permission)"
-              class="badge"
             >
               <div class="mat-chip-group">
                 <span class="primary">{{ permission | permissionName }}</span>
@@ -59,23 +58,24 @@
               [attr.aria-controls]="showChooseType ? 'es-workspace-share-choose-type-menu' : null"
             >
               <ng-container *ngIf="currentType.length == 0">
-                <i icon="help_outline"></i>
+                <i esIcon="help_outline"></i>
                 <span>{{ 'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate }}</span>
-                <i aria-hidden="true" icon="keyboard_arrow_down"></i
+                <i aria-hidden="true" esIcon="keyboard_arrow_down"></i
               ></ng-container>
               <ng-container *ngIf="currentType.indexOf('Consumer') > -1">
-                <i icon="remove_red_eye"></i>
+                <i esIcon="remove_red_eye"></i>
                 <span>{{ 'WORKSPACE.SHARE.TYPE_VIEWER' | translate }}</span>
-                <i aria-hidden="true" icon="keyboard_arrow_down"></i
+                <i aria-hidden="true" esIcon="keyboard_arrow_down"></i
               ></ng-container>
               <ng-container *ngIf="currentType.indexOf('Collaborator') > -1">
-                <i icon="edit"></i> <span>{{ 'WORKSPACE.SHARE.TYPE_COWORKER' | translate }}</span>
-                <i aria-hidden="true" icon="keyboard_arrow_down"></i
+                <i esIcon="edit"></i>
+                <span>{{ 'WORKSPACE.SHARE.TYPE_COWORKER' | translate }}</span>
+                <i aria-hidden="true" esIcon="keyboard_arrow_down"></i
               ></ng-container>
               <ng-container *ngIf="currentType.indexOf('Coordinator') > -1">
-                <i icon="work"></i>
+                <i esIcon="work"></i>
                 <span>{{ 'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate }}</span>
-                <i aria-hidden="true" icon="keyboard_arrow_down"></i
+                <i aria-hidden="true" esIcon="keyboard_arrow_down"></i
               ></ng-container>
             </button>
 

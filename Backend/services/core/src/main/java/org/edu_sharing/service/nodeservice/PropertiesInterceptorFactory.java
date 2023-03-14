@@ -21,7 +21,7 @@ public class PropertiesInterceptorFactory {
         synchronized (PropertiesInterceptorFactory.class) {
             try {
                 List<String> className = new ArrayList<>(LightbendConfigLoader.get().getStringList(key));
-                ArrayList<Class<?>> clazz = className.stream().map((String className1) -> {
+                ArrayList<Class<?>> clazz = (ArrayList<Class<?>>)className.stream().map((String className1) -> {
                     try {
                         return Class.forName(className1);
                     } catch (ClassNotFoundException e) {
