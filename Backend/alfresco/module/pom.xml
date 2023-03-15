@@ -611,11 +611,6 @@
       </exclusions>
     </dependency>
 
-    <dependency>
-      <groupId>xerces</groupId>
-      <artifactId>xercesImpl</artifactId>
-    </dependency>
-
   </dependencies>
 
 </project>

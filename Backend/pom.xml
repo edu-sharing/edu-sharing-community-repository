@@ -50,6 +50,7 @@
     <module>alfresco</module>
     <module>services</module>
     <module>tomcat</module>
+    <module>xml-security</module>
   </modules>
 
 </project>
