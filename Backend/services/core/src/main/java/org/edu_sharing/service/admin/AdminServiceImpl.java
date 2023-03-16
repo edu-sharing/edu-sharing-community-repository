@@ -270,7 +270,7 @@ public class AdminServiceImpl implements AdminService  {
 		Result result = new StreamResult(file);
 		writePublisherToMDSXml(result,vcardProps,valueSpaceProp,ignoreValues,authInfo);
 	}
-	
+
 	public String getPublisherToMDSXml(List<String> vcardProps, String valueSpaceProp, String ignoreValues, HashMap authInfo) throws Throwable {
 		StringWriter writer=new StringWriter();
 		Result result = new StreamResult(writer);
@@ -315,20 +315,20 @@ public class AdminServiceImpl implements AdminService  {
 		xformer.transform(source, result);
 	}
 	public void writePublisherToMDSXml(Result result,String vcardProps, String valueSpaceProp, String ignoreValues, HashMap authInfo) throws Throwable {
-		
+
 		List<String> ignoreValuesList = null;
 		if(ignoreValues != null && !ignoreValues.trim().equals("")){
 			ignoreValuesList = Arrays.asList(ignoreValues.split(","));
 		}else{
 			ignoreValuesList = new ArrayList<String>();
 		}
-	
+
 		ArrayList<String> allValues = new ArrayList<String>();
 		String[] splittedVCardProp = vcardProps.split(",");
 		for (String oneVCardProp : splittedVCardProp) {
 			allValues.addAll(getAllValuesFor(oneVCardProp));
 		}
-		
+
 		if (allValues != null && allValues.size() > 0) {
 
 			DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -343,7 +343,7 @@ public class AdminServiceImpl implements AdminService  {
 
 			ArrayList<String> toSort = new ArrayList<String>();
 			for (String vcardString : allValues) {
-				
+
 				//multivalue
 				String[] splitted = vcardString.split(StringTool.escape(CCConstants.MULTIVALUE_SEPARATOR));
 				for(String splittedVCardString :splitted ){
@@ -356,26 +356,26 @@ public class AdminServiceImpl implements AdminService  {
 						if (vcardList != null && vcardList.size() > 0) {
 							Map<String, Object> map = vcardList.get(0);
 							String publisherString = (String) map.get(CCConstants.VCARD_T_FN);
-							
+
 							if (publisherString != null && !publisherString.trim().equals("")) {
-								
+
 								//allow only 80 chars cause suggest box makes Problems with longer values
 								publisherString = publisherString.trim();
 								if(publisherString.length() > 80){
 									publisherString = publisherString.substring(0, 80);
 								}
-								
+
 								//remove "," at the end(appears since we deactivated the punctuation in lucene analyzer)
 								if(publisherString.endsWith(",")){
 									publisherString = publisherString.substring(0, publisherString.length() - 1);
 								}
-								
+
 								publisherString = publisherString.trim();
-								
+
 								if(!publisherString.equals("") && !toSort.contains(publisherString) && !ignoreValuesList.contains(publisherString.trim())){
 									toSort.add(publisherString);
 								}
-								
+
 							}
 						}
 					}
@@ -385,13 +385,13 @@ public class AdminServiceImpl implements AdminService  {
 			Comparator<String> comp = new Comparator<String>() {
 
 				public int compare(String o1, String o2) {
-									
-					Collator collator = Collator.getInstance(Locale.GERMAN);		
+
+					Collator collator = Collator.getInstance(Locale.GERMAN);
 					return collator.compare(o1, o2);
 				}
 			};
 			Collections.sort(toSort, comp);
-			
+
 			for (String sortedVal : toSort) {
 				Element key = document.createElement("key");
 				key.appendChild(document.createTextNode(sortedVal));
@@ -399,7 +399,7 @@ public class AdminServiceImpl implements AdminService  {
 			}
 
 			Source source = new DOMSource(document);
-			
+
 			// Write the DOM document to the file
 			Transformer xformer = TransformerFactory.newInstance().newTransformer();
 			xformer.transform(source, result);
@@ -407,34 +407,34 @@ public class AdminServiceImpl implements AdminService  {
 		}
 
 	}
-	
+
 	@Override
 	public void refreshApplicationInfo() {
 				RepoFactory.refresh();
 	}
-	
+
 	private String getAppPropertiesApplications() throws Exception{
 		String appRegistryfileName = PropertiesHelper.Config.getPropertyFilePath("ccapp-registry.properties.xml");
 		Properties propsAppRegistry = PropertiesHelper.getProperties(appRegistryfileName, PropertiesHelper.XML);
 		return propsAppRegistry.getProperty("applicationfiles");
 	}
-	
+
 	private void changeAppPropertiesApplications(String newValue,String comment) throws Exception{
 		String appRegistryfileName = PropertiesHelper.Config.getPropertyFilePath("ccapp-registry.properties.xml");
-		
+
 		Properties propsAppRegistry = PropertiesHelper.getProperties(appRegistryfileName, PropertiesHelper.XML);
-		
+
 		String pathAppRegistry = PropertiesHelper.Config.getAbsolutePathForConfigFile(appRegistryfileName);
-		
+
 		//backup
 		propsAppRegistry.storeToXML(new FileOutputStream(new File(pathAppRegistry+System.currentTimeMillis()+".bak")), " backup of registry");
-		
+
 		propsAppRegistry.setProperty("applicationfiles", newValue);
 		//overwrite
 		propsAppRegistry.storeToXML(new FileOutputStream(new File(pathAppRegistry)), comment);
-		
+
 	}
-	
+
 	@Override
 	public void removeApplication(ApplicationInfo info) throws Exception{
 		String[] split=getAppPropertiesApplications().split(",");
@@ -454,28 +454,28 @@ public class AdminServiceImpl implements AdminService  {
 
 	@Override
 	public HashMap<String,String> addApplication(String appMetadataUrl) throws Exception{
-		
+
 			HttpQueryTool httpQuery = new HttpQueryTool();
 			String httpQueryResult = httpQuery.query(appMetadataUrl);
 			if(httpQueryResult == null){
 				throw new CCException(null,"something went wrong. got no result for metadata url: "+appMetadataUrl);
 			}
-			
+
 			InputStream is = new ByteArrayInputStream(httpQueryResult.getBytes("UTF-8"));
 			return addApplicationFromStream(is);
 	}
-	
+
 	@Override
 	public HashMap<String, String> addApplicationFromStream(InputStream is) throws Exception {
 
 		Properties props = new SortedProperties();
 		props.loadFromXML(is);
 		String appId = props.getProperty(ApplicationInfo.KEY_APPID);
-		
+
 		if(appId == null || appId.trim().equals("")){
 			throw new Exception("no appId found");
 		}
-		
+
 		return storeProperties(appId,props);
 	}
 
@@ -540,7 +540,7 @@ public class AdminServiceImpl implements AdminService  {
 			}
 
 		}
-		
+
 		File appFile = new File(PropertiesHelper.Config.getAbsolutePathForConfigFile(PropertiesHelper.Config.getPropertyFilePath(filename)));
 		if(!appFile.exists()){
 			props.storeToXML(new FileOutputStream(appFile), "");
@@ -560,13 +560,13 @@ public class AdminServiceImpl implements AdminService  {
 
 			//store that in the homeApplication.properties.xml cause every repository has it's own renderservice
 			//and we don't want to config an renderservice of an remote repository
-			
+
 			String homeAppFileName = PropertiesHelper.Config.getPropertyFilePath(AdminServiceFactory.HOME_APPLICATION_PROPERTIES);
 			Properties homeAppProps = PropertiesHelper.getProperties(homeAppFileName, PropertiesHelper.XML);
 			homeAppProps = new SortedProperties(homeAppProps);
-			
+
 			String homeAppPath = PropertiesHelper.Config.getAbsolutePathForConfigFile(homeAppFileName);
-			
+
 			//backup
 			homeAppProps.storeToXML(new FileOutputStream(new File(homeAppPath+System.currentTimeMillis()+".bak")), " backup of homeApplication.properties.xml");
 
@@ -585,7 +585,7 @@ public class AdminServiceImpl implements AdminService  {
 		}
 		return result;
 	}
-	
+
 	@Override
 	public String getPropertyToMDSXml(List<String> properties) throws Throwable{
 		properties.replaceAll(NameSpaceTool::transformToLongQName);
@@ -595,7 +595,7 @@ public class AdminServiceImpl implements AdminService  {
 		return writer.toString();
 		// return getPublisherToMDSXml(properties,null, null, getAuthInfo());
 	}
-	
+
 	@Override
 	public List<ServerUpdateInfo> getServerUpdateInfos(){
 		List<ServerUpdateInfo> result = new ArrayList<ServerUpdateInfo>();
@@ -612,7 +612,7 @@ public class AdminServiceImpl implements AdminService  {
 				result.add(new ServerUpdateInfo(FolderToMap.ID,FolderToMap.description));
 				result.add(new ServerUpdateInfo(Edu_SharingPersonEsuidUpdate.ID,Edu_SharingPersonEsuidUpdate.description));
 				result.add(new ServerUpdateInfo(Release_3_2_FillOriginalId.ID,Release_3_2_FillOriginalId.description));
-				result.add(new ServerUpdateInfo(Release_3_2_DefaultScope.ID,Release_3_2_DefaultScope.description));			
+				result.add(new ServerUpdateInfo(Release_3_2_DefaultScope.ID,Release_3_2_DefaultScope.description));
 				result.add(new ServerUpdateInfo(Release_4_1_FixClassificationKeywordPrefix.ID,Release_4_1_FixClassificationKeywordPrefix.description));
 				result.add(new ServerUpdateInfo(Release_4_2_PersonStatusUpdater.ID,Release_4_2_PersonStatusUpdater.description));
 				result.add(new ServerUpdateInfo(Release_5_0_NotifyRefactoring.ID,Release_5_0_NotifyRefactoring.description));
@@ -632,7 +632,7 @@ public class AdminServiceImpl implements AdminService  {
 		}).collect(Collectors.toList());
 		return result;
 	}
-	
+
 	@Override
 	public String runUpdate(String updateId,boolean execute) throws Exception{
 		StringWriter result=new StringWriter();
@@ -656,7 +656,7 @@ public class AdminServiceImpl implements AdminService  {
 		}
 		return result.toString();
 	}
-	
+
 	@Override
 	public void refreshEduGroupCache(boolean keepExisting){
 		if(keepExisting) {
@@ -669,20 +669,12 @@ public class AdminServiceImpl implements AdminService  {
 	@Override
 	public void testMail(String receiver, String template) {
 		try {
-			String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
-			String subject = MailTemplate.getSubject(template, currentLocale);
-			String content = MailTemplate.getContent(template, currentLocale, true);
 			HashMap<String, String> dummy = new HashMap<>();
 			dummy.put("link", URLTool.getNgComponentsUrl(true) + "admin");
 			dummy.put("link.static", URLTool.getNgComponentsUrl(false) + "admin");
-			Mail mail = new Mail();
-			ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
-			mail.sendMailHtml(
-					context,
-					receiver,
-					subject, content, dummy);
-		}catch(Throwable t){
-			throw new RuntimeException(t);
+			MailTemplate.sendMail(receiver, template, dummy);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -698,7 +690,7 @@ public class AdminServiceImpl implements AdminService  {
 		simpleCache.getKeys().forEach(k -> result.put((Serializable)k,(Serializable)simpleCache.get((Serializable)k)));
 		return result;
 	}
-	
+
 	@Override
 	public void removeCacheEntry(Integer index, String beanName) {
 		SimpleCache simpleCache = (SimpleCache)AlfAppContextGate.getApplicationContext().getBean(beanName);
@@ -709,7 +701,7 @@ public class AdminServiceImpl implements AdminService  {
 				keyToRemove = (Serializable)key;
 			}
 		}
-		
+
 		if(keyToRemove != null) {
 			simpleCache.remove(keyToRemove);
 		}
@@ -720,7 +712,7 @@ public class AdminServiceImpl implements AdminService  {
 		SimpleCache simpleCache = (SimpleCache)AlfAppContextGate.getApplicationContext().getBean(beanName);
 		simpleCache.clear();
 	}
-	
+
 	@Override
 	public List<String> getCatalinaOut() throws IOException{
 		List<String> result=new ArrayList<>();
@@ -736,18 +728,18 @@ public class AdminServiceImpl implements AdminService  {
 		}
 		return result;
 	}
-	
+
 	@Override
 	public CacheCluster getCacheCluster(){
 		return CacheManagerFactory.getCacheCluster();
 	}
-	
+
 	@Override
 	public List<CacheCluster> getCacheClusters() {
 		// TODO Auto-generated method stub
 		return SystemStatistic.getAllRepoStates();
 	}
-	
+
 	/*
 	 * Returns the number of active sessions from tomcat
 	 */
@@ -759,13 +751,13 @@ public class AdminServiceImpl implements AdminService  {
 	    ObjectName objectName = new ObjectName("Catalina:type=Manager,context="+context+",host=localhost");
 	    Object activeSessions = mBeanServer.getAttribute(objectName, "activeSessions");
 	    System.out.println(activeSessions);
-	    return (Integer) activeSessions;	
+	    return (Integer) activeSessions;
 	}
-	
+
 	@Override
 	public void applyTemplate(String template,String group,String folderId) throws Throwable{
 		FolderTemplatesImpl ft = new FolderTemplatesImpl(new MCAlfrescoAPIClient());
-	 	ft.setTemplate(template,group, folderId);			
+	 	ft.setTemplate(template,group, folderId);
 	 	List<String> slist = ft.getMessage();
 	 	String error=slist.toString();
 	 	if(slist.size()>0 && !error.isEmpty())
@@ -775,15 +767,15 @@ public class AdminServiceImpl implements AdminService  {
 	public Collection<NodeRef> getActiveNodeLocks(){
 		 return EditLockServiceFactory.getEditLockService().getActiveLocks();
 	}
-	
+
 	@Override
 	public List<GlobalGroup> getGlobalGroups() throws Throwable{
-		
+
 		ArrayList<GlobalGroup> result = new ArrayList<GlobalGroup>();
-		
+
 		MCAlfrescoBaseClient mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
 		HashMap<String, HashMap<String, Object>> raw = mcAlfrescoBaseClient.search("TYPE:cm\\:authorityContainer AND @ccm\\:scopetype:\"global\"");
-			
+
 		for(Map.Entry<String, HashMap<String,Object>> entry : raw.entrySet()){
 			GlobalGroup group = new GlobalGroup();
 			group.setName((String)entry.getValue().get(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
@@ -796,11 +788,11 @@ public class AdminServiceImpl implements AdminService  {
 		}
 		return result;
 	}
-	
+
 	private HashMap<String, String> getAuthInfo(){
 		return new AuthenticationToolAPI().getAuthentication(Context.getCurrentInstance().getRequest().getSession());
 	}
-	
+
 	@Override
 	public List<Class> getImporterClasses() throws Exception {
 		Class[] importerBaseClass = new Class[]{
@@ -810,14 +802,14 @@ public class AdminServiceImpl implements AdminService  {
 		};
 		return Arrays.asList(importerBaseClass);
 	}
-	
+
 	/**
 	 * Import excel data and return the number of rows processed
 	 * @param parent
 	 * @param csv
 	 * @param addToCollection
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	@Override
 	public int importExcel(String parent, InputStream csv, Boolean addToCollection) throws Exception{
@@ -866,7 +858,7 @@ public class AdminServiceImpl implements AdminService  {
 	@Override
 	public void importOai(String set, String fileUrl, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String importerJobClassName, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String persistentHandlerClassName, String oaiIds, boolean forceUpdate, String from, String until, String periodInDays) throws Exception{
 		//new JobExecuter().start(ImporterJob.class, authInfo, setsParam.toArray(new String[setsParam.size()]));
-		
+
 		HashMap<String,Object> paramsMap = new HashMap<String,Object>();
 		List<String> sets=new ArrayList(Arrays.asList(set.split(",")));
 		if(fileUrl!=null && !fileUrl.isEmpty() && !(fileUrl.startsWith("http://") || fileUrl.startsWith("https://")))
@@ -882,16 +874,16 @@ public class AdminServiceImpl implements AdminService  {
 		if(metadataSetId != null && !metadataSetId.trim().equals("")){
 			paramsMap.put(OAIConst.PARAM_METADATASET_ID, metadataSetId);
 		}
-		
+
 		//metadataPrefix
 		if(metadataPrefix != null && !metadataPrefix.trim().equals("")){
 			paramsMap.put(OAIConst.PARAM_OAI_METADATA_PREFIX,metadataPrefix);
 		}
-		
+
 		if(importerClassName != null && !importerClassName.trim().equals("")){
 			paramsMap.put(OAIConst.PARAM_IMPORTERCLASS,importerClassName);
 		}
-		
+
 		if(recordHandlerClassName != null && !recordHandlerClassName.trim().equals("")){
 			paramsMap.put(OAIConst.PARAM_RECORDHANDLER,recordHandlerClassName);
 		}
@@ -912,9 +904,9 @@ public class AdminServiceImpl implements AdminService  {
 			paramsMap.put(OAIConst.PARAM_PERIOD_IN_DAYS, periodInDays);
 		}
 
-		
+
 		paramsMap.put(OAIConst.PARAM_USERNAME, AuthenticationUtil.getFullyAuthenticatedUser());
-		
+
 		Class importerClass = null;
 		for(Class c : AdminServiceFactory.getInstance().getImporterClasses()){
 			if(c.getName().equals(importerJobClassName)){
@@ -922,11 +914,11 @@ public class AdminServiceImpl implements AdminService  {
 				break;
 			}
 		}
-		
+
 		if(importerClass == null){
 			throw new Exception("no Importer Jobclass found for " + importerJobClassName);
 		}
-		
+
 		ImmediateJobListener jobListener = JobHandler.getInstance().startJob(importerClass,paramsMap);
 		if(jobListener.isVetoed()){
 			throw new Exception("job was vetoed by "+jobListener.getVetoBy());
@@ -978,12 +970,12 @@ public class AdminServiceImpl implements AdminService  {
 		paramsMap.put("sticky", sticky+"");
 		paramsMap.put(JobHandler.AUTH_INFO_KEY, getAuthInfo());
 		ImmediateJobListener jobListener = JobHandler.getInstance().startJob(org.edu_sharing.repository.server.jobs.quartz.RefreshCacheJob.class, paramsMap);
-		
+
 		if(jobListener.isVetoed()){
 			throw new Exception("job was vetoed by "+jobListener.getVetoBy());
-		}	
+		}
 	}
-	
+
 	@Override
 	public void removeDeletedImports(String oaiBaseUrl, String cataloges, String oaiMetadataPrefix) throws Exception{
 		HashMap<String,Object> paramsMap = new HashMap<String,Object>();
@@ -994,18 +986,18 @@ public class AdminServiceImpl implements AdminService  {
 		paramsMap.put(RemoveDeletedImportsFromSetJob.PARAM_TESTMODE, "false");
 
 		ImmediateJobListener jobListener = JobHandler.getInstance().startJob(org.edu_sharing.repository.server.jobs.quartz.RemoveDeletedImportsFromSetJob.class, paramsMap);
-		
+
 		if(jobListener.isVetoed()){
 			throw new Exception("job was vetoed by "+jobListener.getVetoBy());
 		}
 	}
-	
+
 	@Override
 	public Properties getPropertiesXML(String xmlFile) throws Exception {
 		Properties homeAppProps = PropertiesHelper.getProperties(PropertiesHelper.Config.getPropertyFilePath(xmlFile), PropertiesHelper.XML);
 		return homeAppProps;
 	}
-	
+
 	@Override
 	public void updatePropertiesXML(String xmlFile,Map<String,String> properties) throws Exception {
 		File appFile = new File(PropertiesHelper.Config.getAbsolutePathForConfigFile(
@@ -1017,7 +1009,7 @@ public class AdminServiceImpl implements AdminService  {
 		}
 		RepoFactory.refresh();
 	}
-	
+
 	public void exportLom(String filterQuery, String targetDir, boolean subobjectHandler) throws Exception {
 		HashMap<String,Object> paramsMap = new HashMap<String,Object>();
 		paramsMap.put(ExporterJob.PARAM_LUCENE_FILTER, filterQuery);

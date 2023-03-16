@@ -56,6 +56,7 @@ import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
 import org.edu_sharing.service.oai.OAIExporterService;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.share.ShareService;
@@ -273,21 +274,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public void addPermissions(String _nodeId, HashMap<String, String[]> _authPerm, Boolean _inheritPermissions,
 							   String _mailText, Boolean _sendMail, Boolean _sendCopy) throws Throwable {
 
-		EmailValidator mailValidator = EmailValidator.getInstance(true, true);
-
-		String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
-
-		// used for sending copy to user
-		String copyMailText = "";
-
 		String user = new AuthenticationToolAPI().getCurrentUser();
-		MailTemplate.UserMail sender = MailTemplate.getUserMailData(user);
-
 		for (String authority : _authPerm.keySet()) {
 			String[] permissions = _authPerm.get(authority);
 			setPermissions(_nodeId, authority, permissions, _inheritPermissions);
 
-			MailTemplate.UserMail receiver = MailTemplate.getUserMailData(authority);
 			AuthorityType authorityType = AuthorityType.getAuthorityType(authority);
 
 
@@ -295,85 +286,14 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				addToRecent(personService.getPerson(authority));
 			}
 			// send group email notifications
-			if(AuthorityType.GROUP.equals(authorityType)){
+			if (AuthorityType.GROUP.equals(authorityType)) {
 				addToRecent(authorityService.getAuthorityNodeRef(authority));
 			}
 
-
-			if (mailValidator.isValid(receiver.getEmail()) && _sendMail) {
-				Mail mail = new Mail();
-				HashMap<String, Object> props = repoClient.getProperties(_nodeId);
-				String nodeType = (String) props.get(CCConstants.NODETYPE);
-
-				String name;
-				if (nodeType.equals(CCConstants.CCM_TYPE_IO)) {
-					name = (String) props.get(CCConstants.LOM_PROP_GENERAL_TITLE);
-					name = (name == null || name.trim().isEmpty()) ? (String) props.get(CCConstants.CM_NAME) : name;
-				} else {
-					name = (String) props.get(CCConstants.CM_PROP_C_TITLE);
-					name = (name == null || name.trim().isEmpty()) ? (String) props.get(CCConstants.CM_NAME) : name;
-				}
-
-				String permText = "";
-				for (String perm : permissions) {
-					if(CCConstants.CCM_VALUE_SCOPE_SAFE.equals(NodeServiceInterceptor.getEduSharingScope())){
-						// do not show some permission infos in safe invitations since they don't make sense
-						if(Arrays.asList(CCConstants.PERMISSION_CC_PUBLISH).contains(perm)){
-							continue;
-						}
-					}
-					String i18nPerm = I18nServer
-							.getTranslationDefaultResourcebundle(I18nServer.getPermissionCaption(perm), "en_EN");
-					String i18nPermDesc = I18nServer.getTranslationDefaultResourcebundle(
-							I18nServer.getPermissionDescription(perm), currentLocale);
-
-					if (i18nPermDesc != null) {
-						if (!permText.isEmpty())
-							permText += "\n";
-						permText += i18nPermDesc;
-					}
-
-				}
-
-				String linkText = I18nServer.getTranslationDefaultResourcebundle("dialog_inviteusers_mailtext_link",
-						currentLocale);
-				String localeStr = currentLocale;
-				if (localeStr == null || localeStr.equals("default")) {
-					localeStr = "de_DE";
-				}
-
-				ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
-				Map<String, String> replace = new HashMap<>();
-				receiver.applyToMap("", replace);
-				sender.applyToMap("inviter.", replace);
-				MailTemplate.applyNodePropertiesToMap("node.", props, replace);
-				replace.put("name", name.trim());
-				replace.put("message", _mailText.replace("\n", "<br />").trim());
-				replace.put("permissions", permText.trim());
-				MailTemplate.addContentLinks(appInfo, _nodeId, replace, "link");
-				String template="invited";
-				boolean send=true;
-				org.edu_sharing.service.nodeservice.NodeService nodeServiceApp = NodeServiceFactory.getNodeService(appInfo.getAppId());
-				if(nodeType.equals(CCConstants.CCM_TYPE_MAP) &&
-						nodeServiceApp.hasAspect(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),_nodeId,CCConstants.CCM_ASPECT_COLLECTION)){
-					template="invited_collection";
-					// if the receiver is the creator itself, skip it (because it is automatically added)
-					if(authority.equals(nodeServiceApp.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),_nodeId,CCConstants.CM_PROP_C_CREATOR))){
-						send=false;
-					}
-				}
-				if(CCConstants.CCM_VALUE_SCOPE_SAFE.equals(NodeServiceInterceptor.getEduSharingScope())){
-					template = "invited_safe";
-				}
-				if(send) {
-					mail.sendMailHtml(context, sender.getFullName(), sender.getEmail(), receiver.getEmail(), MailTemplate.getSubject(template, currentLocale),
-							MailTemplate.getContent(template, currentLocale, true), replace);
-				}
-
-			} else {
-				logger.info("username/authority: " + authority + " has no valid emailaddress:" + receiver.getEmail());
+			if (_sendMail) {
+				NotificationServiceFactoryUtility.getLocalService()
+						.notifyPermissionChanged(user, authority,_nodeId, permissions, _mailText);
 			}
-
 		}
 
 		org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory
