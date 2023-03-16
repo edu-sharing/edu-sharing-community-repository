@@ -178,6 +178,8 @@ public interface NodeService {
 
     Serializable getPropertyNative(String storeProtocol, String storeId, String nodeId, String property) throws Throwable;
 
+	void keepModifiedDate(String storeProtocol, String storeId, String nodeId, Runnable task);
+
 	/**
 	 * create a published copy of the node
 	 * if handle mode is set, a handle should also be generated
