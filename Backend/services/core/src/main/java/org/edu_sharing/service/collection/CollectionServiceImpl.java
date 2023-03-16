@@ -3,6 +3,7 @@ package org.edu_sharing.service.collection;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.alfresco.model.ContentModel;
@@ -948,24 +949,29 @@ public class CollectionServiceImpl implements CollectionService{
 
 	@Override
 	public void setOrder(String parentId, String[] nodes) {
-		List<NodeRef> refs=getChildren(parentId, null, new SortDefinition(),Arrays.asList(new String[]{"files", "folders"}));
-		int order=0;
+		List<NodeRef> refs=getChildren(parentId, null, new SortDefinition(),Arrays.asList("files", "folders"));
+		AtomicInteger order=new AtomicInteger(0);
 
 		HashMap<String,Object> collectionProps=new HashMap<>();
 		nodeService.updateNodeNative(parentId, collectionProps);
 		
-		if(nodes==null || nodes.length==0)
+		if(nodes == null)
 			return;
 		for(String node : nodes) {
-			NodeRef ref=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,node);
-			if(!refs.contains(ref))
-				throw new IllegalArgumentException("Node id "+node+" is not a children of the collection "+parentId);
-			
-			nodeService.addAspect(node, CCConstants.CCM_ASPECT_COLLECTION_ORDERED);
-			HashMap<String,Object> props=new HashMap<>();
-			props.put(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION, order);
-			nodeService.updateNodeNative(node, props);
-			order++;
+			transactionService.getRetryingTransactionHelper().doInTransaction(() -> {
+				NodeRef ref=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,node);
+				policyBehaviourFilter.disableBehaviour(ref, ContentModel.ASPECT_AUDITABLE);
+				if(!refs.contains(ref))
+					throw new IllegalArgumentException("Node id "+node+" is not a children of the collection "+parentId);
+
+				nodeService.addAspect(node, CCConstants.CCM_ASPECT_COLLECTION_ORDERED);
+				HashMap<String,Object> props=new HashMap<>();
+				props.put(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION, order.get());
+				nodeService.updateNodeNative(node, props);
+				policyBehaviourFilter.enableBehaviour(ref, ContentModel.ASPECT_AUDITABLE);
+				return ref;
+			});
+			order.incrementAndGet();
 		}
 	}
 
