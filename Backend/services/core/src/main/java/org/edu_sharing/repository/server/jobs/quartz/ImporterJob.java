@@ -278,7 +278,7 @@ public class ImporterJob extends AbstractJob implements JobClusterLocker.Cluster
 				logger.info("finished import in " + (System.currentTimeMillis() - millisec) / 1000 + " secs");
 		}
 		// refresh cache after importing
-		if (!isInterrupted)
+		if (!isInterrupted && !(idList != null && idList.length > 0))
 			new RefreshCacheExecuter().excecute(null, true, null);
 
 		} catch (Throwable e) {
