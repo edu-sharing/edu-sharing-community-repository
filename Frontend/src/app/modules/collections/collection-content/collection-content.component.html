@@ -55,7 +55,7 @@
         </ng-template>
       </es-node-entries-wrapper>
       <div
-        *ngIf="dataSourceCollections.isEmpty()"
+        *ngIf="dataSourceCollections.isEmpty() && !dataSourceCollections.isLoading"
         class="section-headline collection-nocontent-container"
       >
         <div class="collection-nocontent-big">
