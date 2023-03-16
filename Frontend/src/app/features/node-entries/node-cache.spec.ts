@@ -66,6 +66,20 @@ describe('NodeCache', () => {
         expect(nodeCache.get({ startIndex: 0, endIndex: 10 })).toEqual(ARRAY_0_10);
     });
 
+    it('should remove residual slices', () => {
+        nodeCache.add({
+            startIndex: 0,
+            endIndex: 5,
+            data: ARRAY_0_5,
+        });
+        nodeCache.add({
+            startIndex: 5,
+            endIndex: 10,
+            data: ARRAY_5_10,
+        });
+        expect(nodeCache['_slices'].length).toEqual(1);
+    });
+
     it('should merge two reverse-connected slices', () => {
         nodeCache.add({
             startIndex: 5,

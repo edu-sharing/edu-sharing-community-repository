@@ -3,7 +3,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { MdsDefinition, MdsService, MetadataSetInfo, SearchService } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { distinctUntilChanged, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { ListItem, Node, Repository, RestConstants } from '../../core-module/core.module';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
 import {
@@ -12,6 +12,7 @@ import {
     NodeRemote,
     NodeRequestParams,
 } from '../../features/node-entries/node-data-source-remote';
+import { SearchPageRestoreService } from './search-page-restore.service';
 import { SearchPageResults } from './search-page-results.service';
 import { SearchPageService } from './search-page.service';
 
@@ -35,10 +36,12 @@ export class SearchPageResultsAllService implements SearchPageResults, OnDestroy
         private _injector: Injector,
         private _search: SearchService,
         private _searchPage: SearchPageService,
+        private _searchPageRestore: SearchPageRestoreService,
         private _mds: MdsService,
         private _translate: TranslateService,
     ) {
         this._initRepoData();
+        this._registerPageRestore();
         this._registerLoadingProgress();
     }
 
@@ -72,10 +75,9 @@ export class SearchPageResultsAllService implements SearchPageResults, OnDestroy
                 takeUntil(this._destroyed),
             )
             .subscribe(([metadataSet, searchString]) => {
-                dataSource.setRemote(
-                    this._getSearchRemote(repository, metadataSet, searchString, loadingContent),
-                );
+                dataSource.setRemote(this._getSearchRemote(repository, metadataSet, searchString));
             });
+        dataSource.isLoadingSubject.subscribe((isLoading) => loadingContent.next(!!isLoading));
         return {
             title: repository.title,
             id: repository.id,
@@ -113,11 +115,9 @@ export class SearchPageResultsAllService implements SearchPageResults, OnDestroy
         repository: Repository,
         metadataSet: MetadataSetInfo,
         searchString: string,
-        loadingContent: Subject<boolean>,
     ): NodeRemote<Node> {
         const criteria = searchString ? [{ property: 'ngsearchword', values: [searchString] }] : [];
         return (request: NodeRequestParams) => {
-            loadingContent.next(true);
             return this._search
                 .search({
                     body: {
@@ -134,11 +134,16 @@ export class SearchPageResultsAllService implements SearchPageResults, OnDestroy
                     query: RestConstants.DEFAULT_QUERY_NAME,
                     propertyFilter: [RestConstants.ALL],
                 })
-                .pipe(
-                    map(fromSearchResults),
-                    tap(() => loadingContent.next(false)),
-                );
+                .pipe(map(fromSearchResults));
         };
+    }
+
+    private _registerPageRestore() {
+        this.repoData.subscribe((repoData) => {
+            for (const repo of repoData) {
+                this._searchPageRestore.registerDataSource(repo.id, repo.dataSource);
+            }
+        });
     }
 
     private _registerLoadingProgress(): void {

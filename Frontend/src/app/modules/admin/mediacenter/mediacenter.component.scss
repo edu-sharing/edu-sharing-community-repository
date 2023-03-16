@@ -97,7 +97,13 @@
     }
 }
 
-.nodes mat-form-field {
-    width: 67%;
-    margin-right: 2%;
+.nodes {
+    .export {
+        display: flex;
+        justify-content: flex-end;
+    }
+    mat-form-field {
+        width: 67%;
+        margin-right: 2%;
+    }
 }

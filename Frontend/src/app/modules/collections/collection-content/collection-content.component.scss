@@ -83,6 +83,11 @@
         grid-template-columns: max-content auto;
         grid-gap: 50px;
         align-items: center;
+        &.wrapper-table {
+            es-node-entries-wrapper {
+                display: none;
+            }
+        }
         @media only screen and (max-width: $mobileWidth+$mobileStage*1) {
             grid-gap: 0;
             grid-template-columns: auto;

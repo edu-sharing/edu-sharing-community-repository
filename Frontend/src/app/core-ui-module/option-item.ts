@@ -179,6 +179,8 @@ export enum Scope {
     UserManagement = 'UserManagement',
     Stream = 'Stream',
     CreateMenu = 'CreateMenu',
+
+    MediacenterNodesList = 'MediacenterNodesList',
     Admin = 'Admin', // Admin Tools / Debugging
 }
 export enum ElementType {

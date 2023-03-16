@@ -372,14 +372,12 @@ export class OptionsHelperService implements OnDestroy {
         options = options.filter((o) =>
             o.showCallback(target === Target.List && objects && objects[0] ? objects[0] : null),
         );
-        options
-            .filter(
-                (o) =>
-                    !o.enabledCallback(
-                        target === Target.List && objects && objects[0] ? objects[0] : null,
-                    ),
-            )
-            .forEach((o) => (o.isEnabled = false));
+        options.forEach(
+            (o) =>
+                (o.isEnabled = o.enabledCallback(
+                    target === Target.List && objects && objects[0] ? objects[0] : null,
+                )),
+        );
         return options;
     }
 

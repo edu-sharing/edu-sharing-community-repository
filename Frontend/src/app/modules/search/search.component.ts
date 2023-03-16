@@ -48,6 +48,7 @@ import {
     CustomOptions,
     DefaultGroups,
     ElementType,
+    HideMode,
     OptionItem,
     Scope,
 } from '../../core-ui-module/option-item';
@@ -666,7 +667,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         queryParams.mds = mds;
         queryParams.repository = repository;
         queryParams.mdsExtended = this.mdsExtended;
-        queryParams.sidenav = this.searchService.sidenavOpened;
         if (sort) {
             queryParams.materialsSortBy = sort.active;
             queryParams.materialsSortAscending = sort.direction === 'asc';
@@ -1534,6 +1534,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     },
                 );
                 addTo.elementType = OptionsHelperService.ElementTypesAddToCollection;
+                addTo.permissions = [RestConstants.ACCESS_CC_PUBLISH];
+                addTo.permissionsMode = HideMode.Disable;
                 addTo.group = DefaultGroups.Reuse;
                 addTo.showAlways = true;
                 const cancel = new OptionItem('CANCEL', 'close', () => {
@@ -1570,9 +1572,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 return;
             }
             this.mainnav = param.mainnav !== 'false';
-            if (param.sidenav) {
-                this.searchService.sidenavOpened = param.sidenav !== 'false';
-            }
             if (param.repositoryFilter) {
                 this.enabledRepositories = param['repositoryFilter'].split(',');
                 // do a reload of the repos

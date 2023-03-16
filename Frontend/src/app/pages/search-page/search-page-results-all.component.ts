@@ -1,6 +1,5 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import * as rxjs from 'rxjs';
-import { delay, map, switchMap } from 'rxjs/operators';
+import { Component, OnInit } from '@angular/core';
+import { debounceTime, map } from 'rxjs/operators';
 import { Scope } from '../../core-ui-module/option-item';
 import { NodeEntriesDisplayType } from '../../features/node-entries/entries-model';
 import { SearchPageResultsAllService } from './search-page-results-all.service';
@@ -47,7 +46,7 @@ export class SearchPageResultsAllComponent implements OnInit {
     private _registerAllEmpty(): void {
         this.loadingProgress
             .pipe(
-                delay(0),
+                debounceTime(0),
                 map((progress) => {
                     if (progress < 100) {
                         return false;

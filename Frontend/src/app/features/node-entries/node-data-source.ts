@@ -7,7 +7,13 @@ import { Helper } from '../../core-module/rest/helper';
 export class NodeDataSource<T extends Node | GenericAuthority> extends DataSource<T> {
     private dataStream = new BehaviorSubject<T[]>([]);
     private pagination$ = new BehaviorSubject<Pagination>(null);
-    public isLoading: boolean;
+    public isLoadingSubject = new BehaviorSubject<boolean>(false);
+    get isLoading() {
+        return this.isLoadingSubject.value;
+    }
+    set isLoading(isLoading: boolean) {
+        this.isLoadingSubject.next(isLoading);
+    }
     initialPageLoaded = false;
     private _itemsCap: ItemsCap<T> | null;
     get itemsCap(): ItemsCap<T> | null {

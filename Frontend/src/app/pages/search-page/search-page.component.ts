@@ -1,6 +1,7 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, HostBinding, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { Observable, Subject } from 'rxjs';
@@ -12,11 +13,10 @@ import { CardDialogRef } from '../../features/dialogs/card-dialog/card-dialog-re
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { NodeEntriesWrapperComponent } from '../../features/node-entries/node-entries-wrapper.component';
 import { MainNavService } from '../../main/navigation/main-nav.service';
+import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 import { notNull } from '../../util/functions';
 import { NavigationScheduler } from './navigation-scheduler';
 import { SearchPageService } from './search-page.service';
-import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
-import { ActivatedRoute } from '@angular/router';
 
 @Component({
     selector: 'es-search-page',

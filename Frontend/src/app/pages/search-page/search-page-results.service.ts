@@ -23,6 +23,7 @@ import {
     NodeRequestParams,
 } from '../../features/node-entries/node-data-source-remote';
 import { notNull } from '../../util/functions';
+import { SearchPageRestoreService } from './search-page-restore.service';
 import { SearchPageService, SearchRequestParams } from './search-page.service';
 
 export interface SearchPageResults {
@@ -47,11 +48,13 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
 
     constructor(
         private _injector: Injector,
+        private _mds: MdsService,
         private _search: SearchService,
         private _searchPage: SearchPageService,
-        private _mds: MdsService,
+        private _searchPageRestore: SearchPageRestoreService,
         private _translate: TranslateService,
     ) {
+        this._registerPageRestore();
         this._registerSearchObservables();
         this._registerColumnsAndSortConfig();
         this._registerLoadingProgress();
@@ -60,6 +63,11 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
     ngOnDestroy(): void {
         this._destroyed.next();
         this._destroyed.complete();
+    }
+
+    private _registerPageRestore() {
+        this._searchPageRestore.registerDataSource('materials', this.resultsDataSource);
+        this._searchPageRestore.registerDataSource('collections', this.collectionsDataSource);
     }
 
     private _registerSearchObservables() {
@@ -103,11 +111,24 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
             distinctUntilChanged((x, y) => x.equals(y)),
         );
         searchRequestParams
-            .pipe(map((params) => this._getSearchRemote(params)))
+            .pipe(
+                tap(() => this.loadingContent.next(true)),
+                map((params) => this._getSearchRemote(params)),
+            )
             .subscribe((remote) => this.resultsDataSource.setRemote(remote));
+
         collectionRequestParams
-            .pipe(map((params) => this._getCollectionsSearchRemote(params)))
+            .pipe(
+                tap(() => this.loadingCollections.next(true)),
+                map((params) => this._getCollectionsSearchRemote(params)),
+            )
             .subscribe((remote) => this.collectionsDataSource.setRemote(remote));
+        this.resultsDataSource.isLoadingSubject.subscribe((isLoading) =>
+            this.loadingContent.next(!!isLoading),
+        );
+        this.collectionsDataSource.isLoadingSubject.subscribe((isLoading) =>
+            this.loadingCollections.next(!!isLoading),
+        );
     }
 
     private _registerColumnsAndSortConfig(): void {
@@ -147,9 +168,7 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
 
     private _getSearchRemote(params: SearchRequestParams): NodeRemote<Node> {
         // console.log('%cgetSearchRemote', 'font-weight: bold', params);
-        this.loadingContent.next(true);
         return (request: NodeRequestParams) => {
-            this.loadingContent.next(true);
             // console.log('search', request);
             return this._search
                 .search({
@@ -171,10 +190,7 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
                     query: RestConstants.DEFAULT_QUERY_NAME,
                     propertyFilter: [RestConstants.ALL],
                 })
-                .pipe(
-                    map(fromSearchResults),
-                    tap(() => this.loadingContent.next(false)),
-                );
+                .pipe(map(fromSearchResults));
         };
     }
 
@@ -191,9 +207,7 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
             this.loadingCollections.next(false);
             return () => rxjs.of({ data: [], total: 0 });
         }
-        this.loadingCollections.next(true);
         return (request: NodeRequestParams) => {
-            this.loadingCollections.next(true);
             return this._search
                 .requestSearch({
                     body: {
@@ -216,10 +230,7 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
                     query: RestConstants.QUERY_NAME_COLLECTIONS,
                     propertyFilter: [RestConstants.ALL],
                 })
-                .pipe(
-                    map(fromSearchResults),
-                    tap(() => this.loadingCollections.next(false)),
-                );
+                .pipe(map(fromSearchResults));
         };
     }
 

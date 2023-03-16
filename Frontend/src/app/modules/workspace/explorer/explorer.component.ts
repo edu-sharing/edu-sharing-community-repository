@@ -167,7 +167,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
 
     public columns: ListItem[] = [];
     @Input() displayType = NodeEntriesDisplayType.Table;
-    @Input() tree: WorkspaceTreeComponent;
+    @Output() refreshTree = new EventEmitter<void>();
     @Output() displayTypeChange = new EventEmitter<NodeEntriesDisplayType>();
     @Input() reorderDialog = false;
     @Output() reorderDialogChange = new EventEmitter<boolean>();
@@ -486,8 +486,8 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     onDelete(nodes: Node[]): void {
         this.dataSource.removeData(nodes);
         this.nodeEntries?.getSelection().clear();
-        if (nodes.filter((n) => n.isDirectory).length && this.tree) {
-            this.tree.refresh();
+        if (nodes.filter((n) => n.isDirectory).length) {
+            this.refreshTree.emit();
         }
     }
 
@@ -503,9 +503,15 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         }
     }
 
-    syncTreeView(nodes: Node[]) {
-        if (nodes.filter((n) => n.virtual && n.isDirectory).length && this.tree) {
-            this.tree.refresh();
+    syncTreeViewOnChange(nodes: Node[] | void) {
+        if (nodes && nodes.filter((n) => n.isDirectory).length) {
+            this.refreshTree.emit();
+        }
+    }
+
+    syncTreeViewOnAdd(nodes: Node[]) {
+        if (nodes.filter((n) => n.virtual && n.isDirectory).length) {
+            this.refreshTree.emit();
         }
     }
 }
