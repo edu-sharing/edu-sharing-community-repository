@@ -1396,7 +1396,12 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             .saveSearch(
                 name,
                 this.queryId,
-                this.getCriterias(),
+                this.getCriterias(
+                    this.searchService.values,
+                    this.searchService.searchTerm,
+                    true,
+                    false,
+                ),
                 this.currentRepository,
                 this.mdsId,
                 replace,
@@ -1437,6 +1442,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         properties = this.searchService.values,
         searchString = this.searchService.searchTerm,
         addAll = true,
+        unfoldTrees = true,
     ) {
         let criterias: SearchRequestCriteria[] = [];
         if (searchString)
@@ -1450,6 +1456,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 RestSearchService.convertCritierias(
                     properties,
                     this.getActiveMds()?.currentWidgets || [],
+                    unfoldTrees,
                 ),
             );
         }
@@ -1466,6 +1473,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.extendedSearchSelectedTab.setValue(0);
         UIHelper.routeToSearchNode(this.router, this.searchService.reurl, node);
         this.currentSavedSearch = node;
+        setTimeout(() => this.getActiveMds()?.loadMds());
     }
 
     goToSaveSearchWorkspace() {
