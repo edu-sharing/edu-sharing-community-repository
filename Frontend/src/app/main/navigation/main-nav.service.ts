@@ -44,6 +44,11 @@ export class MainNavConfig {
      */
     create?: MainNavCreateConfig = new MainNavCreateConfig();
     currentScope: string;
+
+    /**
+     * additional scope info, i.e. for collections this can be "edit" when in edit/create context
+     */
+    additionalScope?: 'edit';
     /**
      * Hide the search field although it was enabled via `SearchFieldService`.
      *

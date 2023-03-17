@@ -520,7 +520,9 @@
       "NODES": {
         "TITLE": "Media",
         "SEARCHWORD": "Name/Id of the media",
-        "FILTER": "Filter media"
+        "FILTER": "Filter media",
+        "CSV_EXPORT": "Download as csv",
+        "CSV_FILENAME": "media list"
       },
       "STATISTICS": {
         "TITLE": "Statistics"

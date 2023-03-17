@@ -26,7 +26,7 @@ public class CMISSearchHelper {
     private static Logger logger= Logger.getLogger(CMISSearchHelper.class);
 
     public static ResultSet fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters,List<String> aspects, CMISSearchData data, int from, int pageSize, int maxPermissionChecks, StoreRef storeRef){
-    	logger.info("from: "+from+ " pageSize:"+ pageSize);
+    	logger.debug("from: "+from+ " pageSize:"+ pageSize);
     	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
         ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
@@ -100,7 +100,7 @@ public class CMISSearchHelper {
         String query="SELECT "+tableNameAlias+".cmis:name FROM "+ tableName + " AS " + tableNameAlias + " " + join + where;
         params.setQuery(query);
         ResultSet result = serviceRegistry.getSearchService().query(params);
-        logger.info(query+": "+result.getNumberFound() +" "+ result.length() +" "+ result.getClass().getName() +" getBulkFetchSize: "+ result.getBulkFetchSize()+" "+result);
+        logger.debug(query+": "+result.getNumberFound() +" "+ result.length() +" "+ result.getClass().getName() +" getBulkFetchSize: "+ result.getBulkFetchSize()+" "+result);
         return result;
     }
 
@@ -126,7 +126,7 @@ public class CMISSearchHelper {
      	   from += pageSize;
         }while(resultSet.length() > 0);
 
-        logger.info("result:" + result.size());
+        logger.debug("result:" + result.size());
         return result;
     }
 
@@ -188,7 +188,7 @@ public class CMISSearchHelper {
 
         sp.setQuery("SELECT * FROM ccm:iometadata WHERE ccm:replicationsourceid = '"+replicationSourceId+"'");
         ResultSet resultSet = serviceRegistry.getSearchService().query(sp);
-        logger.info("found "+ resultSet.getNodeRefs().size() +" for:" + replicationSourceId);
+        logger.debug("found "+ resultSet.getNodeRefs().size() +" for:" + replicationSourceId);
         if(resultSet.getNodeRefs().size() == 0) return null;
         return resultSet.getNodeRefs().get(0);
     }

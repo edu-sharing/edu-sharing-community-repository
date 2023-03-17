@@ -451,6 +451,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 				replIdMap = new HashMap<>();
 				replIdTimestampMap = new HashMap<>();
 				// fetch data parallel for faster build up
+				getLogger().info("Starting build of timestamp map...");
 				allNodes.parallelStream().forEach((entry)->{
 					AuthenticationUtil.runAs(()-> {
 						String replSource = NodeServiceHelper.getProperty(entry, CCConstants.CCM_PROP_IO_REPLICATIONSOURCE);

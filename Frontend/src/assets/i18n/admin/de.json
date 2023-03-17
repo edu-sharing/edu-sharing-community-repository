@@ -533,7 +533,9 @@
       "NODES": {
         "TITLE": "Medien",
         "SEARCHWORD": "Name/Id des Mediums",
-        "FILTER": "Medien filtern"
+        "FILTER": "Medien filtern",
+        "CSV_EXPORT": "Als CSV herunterladen",
+        "CSV_FILENAME": "Medienliste"
       },
       "STATISTICS": {
         "TITLE": "Statistiken"
