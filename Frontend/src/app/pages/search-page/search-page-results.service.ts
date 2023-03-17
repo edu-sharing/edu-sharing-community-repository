@@ -84,6 +84,12 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
             ])
             .pipe(
                 takeUntil(this._destroyed),
+                // @TODO: This is most likely not the best solution!
+                // in some browser (i.e. firefox) the other events trigger earlier than the mds itself
+                // this can cause that the facets required for the mds are not yet registered
+                // We should check if we can find an appropriate event when the mds is finished
+                // instead of the activeMetadataSet observable
+                debounceTime(10),
                 tap(() => this.loadingParams.next(true)),
                 filter(
                     ([repository, metadataSet, searchFilters]) =>
