@@ -20761,6 +20761,87 @@
       }
     },
     "/ltiplatform/v13/start-dynamic-registration": {
+      "get": {
+        "description": "start dynmic registration",
+        "operationId": "startDynamicRegistrationGet",
+        "parameters": [
+          {
+            "description": "url",
+            "in": "query",
+            "name": "url",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "starts lti dynamic registration.",
+        "tags": [
+          "LTI Platform v13"
+        ]
+      },
       "post": {
         "description": "start dynmic registration",
         "operationId": "startDynamicRegistration",
@@ -26649,6 +26730,15 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "description": "keepModifiedDate",
+            "in": "query",
+            "name": "keepModifiedDate",
+            "schema": {
+              "default": false,
+              "type": "boolean"
             }
           },
           {
