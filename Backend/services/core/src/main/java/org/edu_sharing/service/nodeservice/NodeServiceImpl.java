@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import com.typesafe.config.Config;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
-import org.alfresco.repo.node.MLPropertyInterceptor;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
@@ -59,7 +58,6 @@ import org.edu_sharing.service.search.Suggestion;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.springframework.context.ApplicationContext;
-import org.springframework.extensions.surf.util.I18NUtil;
 
 public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.NodeService {
 
@@ -1090,6 +1088,18 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	@Override
 	public Serializable getPropertyNative(String storeProtocol, String storeId, String nodeId, String property){
 		return nodeService.getProperty(new NodeRef(new StoreRef(storeProtocol,storeId), nodeId), QName.createQName(property));
+	}
+
+	@Override
+	public void keepModifiedDate(String storeProtocol, String storeId, String nodeId, Runnable task) {
+		serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+			NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);
+			// disable behaviour so no version data is altered externally
+			policyBehaviourFilter.disableBehaviour(nodeRef, ContentModel.ASPECT_AUDITABLE);
+			task.run();
+			policyBehaviourFilter.enableBehaviour(nodeRef, ContentModel.ASPECT_AUDITABLE);
+			return null;
+		});
 	}
 
 	@Override

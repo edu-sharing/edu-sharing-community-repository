@@ -374,6 +374,11 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
+	public void keepModifiedDate(String storeProtocol, String storeId, String nodeId, Runnable task) {
+		task.run();
+	}
+
+	@Override
 	public String publishCopy(String nodeId, HandleMode handleMode) throws Throwable {
 		throw new NotImplementedException("publishCopy");
 	}
