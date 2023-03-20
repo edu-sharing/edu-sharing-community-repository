@@ -51,7 +51,7 @@ public class MetadataQueryPreprocessor {
     // convert values like YYYY-MM-DD to a unix millis string (e.g. for elastic)
     private static String date_millis(MetadataQueryParameter parameter,String value){
         try {
-            return String.valueOf(new SimpleDateFormat("YYYY-MM-dd").parse(value).getTime());
+            return String.valueOf(new SimpleDateFormat("yyyy-MM-dd").parse(value).getTime());
         } catch (ParseException e) {
             logger.warn("Mds could not parse date: " + value, e);
             return value;
