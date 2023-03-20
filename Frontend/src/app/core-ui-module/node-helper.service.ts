@@ -923,6 +923,22 @@ export class NodeHelperService {
             );
         });
     }
+
+    /**
+     * this method syncs common attributes like name, title, description on this node by fetching it from the properties
+     * This is helpful if you did client-side editing and want to reflect the changes in the UI
+     * @param node
+     */
+    syncAttributesWithProperties(node: Node) {
+        node.name = node.properties[RestConstants.CM_NAME]?.[0];
+        node.title =
+            node.properties[RestConstants.CM_PROP_TITLE]?.[0] ||
+            node.properties[RestConstants.LOM_PROP_TITLE]?.[0];
+        if (node.collection) {
+            node.collection.description = node.properties[RestConstants.CM_DESCRIPTION]?.[0];
+        }
+        return node;
+    }
 }
 
 export class LinkData {
