@@ -23,5 +23,6 @@ import { SmallCollectionComponent } from './small-collection/small-collection.co
         SearchPageResultsAllComponent,
     ],
     imports: [SearchPageRoutingModule, SharedModule, ListItemsModule, NodeEntriesModule, MdsModule],
+    exports: [SmallCollectionComponent],
 })
 export class SearchPageModule {}

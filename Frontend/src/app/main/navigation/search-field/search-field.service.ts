@@ -63,7 +63,7 @@ export class SearchFieldInstance {
         return this._internal.filterValuesChanged.pipe(takeUntil(this._until));
     }
 
-    setSearchString(value: string): void {
+    public setSearchString(value: string): void {
         this._internal.searchString.next(value);
     }
 
