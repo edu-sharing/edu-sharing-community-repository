@@ -23,7 +23,7 @@
     -->
     <mat-chip-list
       #chipList
-      [attr.aria-labelledby]="chipsControl?.value.length > 0 ? container.labelId : null"
+      [attr.aria-labelledby]="chipsControl?.value?.length > 0 ? container.labelId : null"
       (click)="$event.stopPropagation(); $event.preventDefault()"
       [multiple]="true"
       [formControl]="chipsControl"

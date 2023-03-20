@@ -13,13 +13,14 @@ import {
     zip,
 } from 'rxjs';
 import {
-    combineAll,
     filter,
     first,
     map,
     shareReplay,
     skip,
+    startWith,
     switchMap,
+    take,
     takeUntil,
     tap,
 } from 'rxjs/operators';
@@ -141,6 +142,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         private readonly bulkMode = new BehaviorSubject<BulkMode>(null); // only when `isBulk`
         private showMissingRequiredFunction: (shouldScrollIntoView: boolean) => boolean;
         private readonly ready = new Subject<void>();
+        readonly initialValuesSubject = new BehaviorSubject<InitialValues>(null);
 
         /**
          * An observable of the values that are common between all nodes if the property was to be
@@ -266,6 +268,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             if (this.mdsEditorInstanceService.getIsBulk(nodes)) {
                 this.bulkMode.next('no-change');
             }
+            this.initialValuesSubject.next(this.initialValues);
             this.ready.next();
             this.ready.complete();
         }
@@ -282,12 +285,28 @@ export class MdsEditorInstanceService implements OnDestroy {
             }
             // Set initial values, so the initial completion status is calculated correctly.
             this.value$.next([...this.initialValues.jointValues]);
+            this.initialValuesSubject.next(this.initialValues);
             this.ready.next();
             this.ready.complete();
         }
 
+        /**
+         *  @deprecated
+         *  prefer to subscribe the initialValuesSubject instead, because the initial values might
+         *  not be ready when the widget gets loaded
+         * */
         getInitialValues(): InitialValues {
             return this.initialValues;
+        }
+
+        getInitalValuesAsync(): Promise<InitialValues> {
+            return this.initialValuesSubject
+                .pipe(
+                    startWith(this.initialValuesSubject.value),
+                    filter((v) => !!v),
+                    take(1),
+                )
+                .toPromise();
         }
 
         getHasUnsavedDefault(): boolean {

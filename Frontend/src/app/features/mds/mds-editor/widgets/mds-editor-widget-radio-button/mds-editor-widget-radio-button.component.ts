@@ -16,10 +16,11 @@ export class MdsEditorWidgetRadioButtonComponent extends MdsEditorWidgetBase imp
     formControl: FormControl;
     mode: 'horizontal' | 'vertical';
 
-    ngOnInit(): void {
+    async ngOnInit() {
+        this.formControl = new FormControl(null, this.getStandardValidators({ requiredValidator }));
         this.mode = this.getMode();
         this.values = DisplayValues.fromMdsValues(this.widget.definition.values);
-        const initialValue = this.getInitialValue();
+        const initialValue = (await this.widget.getInitalValuesAsync()).jointValues;
         this.formControl = new FormControl(
             this.values.get(initialValue[0]),
             this.getStandardValidators({ requiredValidator }),
