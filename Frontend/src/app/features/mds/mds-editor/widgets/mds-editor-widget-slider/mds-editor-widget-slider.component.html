@@ -8,7 +8,7 @@
     *ngIf="isRange"
     class="ngx-slider-small"
     [value]="currentValue[0]"
-    [(highValue)]="currentValue[1]"
+    [highValue]="currentValue[1]"
     [options]="sliderOptions"
     (valueChange)="updateValue($event)"
     (highValueChange)="updateHighValue($event)"

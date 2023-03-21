@@ -33,12 +33,6 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
         this.sliderOptions.step = this.widget.definition.step ?? 1;
         this.isRange = this.widget.definition.type === MdsWidgetType.Range;
         this.currentValue = await this.getInitialValue_();
-        console.log(
-            'slider init',
-            this.sliderOptions,
-            this.widget.definition.id,
-            this.currentValue,
-        );
         // Since computation of initial values is a bit different for sliders and ranges, we handle
         // processing of default values here in this component. To reflect default values, we save
         // values once when initializing. This might mark the whole dialog as dirty without the user
@@ -109,16 +103,23 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
         }
         if (this.widget.definition.type === 'slider') {
             // emit single value
-            this.setValue([value.toString()], true);
+            this.setSliderValue([value]);
         } else {
-            this.setValue([value.toString(), this.currentValue[1].toString()], true);
+            this.setSliderValue([value, this.currentValue?.[1]]);
         }
+    }
+    setSliderValue(value: number[]) {
+        this.currentValue = value;
+        this.setValue(
+            value.map((v) => v?.toString()),
+            true,
+        );
     }
 
     updateHighValue(value: number) {
         if (isNaN(value)) {
             return;
         }
-        this.setValue([this.currentValue[0].toString(), value.toString()], true);
+        this.setValue([this.currentValue?.[0]?.toString(), value.toString()], true);
     }
 }
