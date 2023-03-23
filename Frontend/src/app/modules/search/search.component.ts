@@ -1795,4 +1795,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             scope: Scope.Search,
         });
     }
+
+    onDelete(nodes: Node[]): void {
+        this.getDataSource().removeData(nodes);
+        this.nodeEntriesResults?.getSelection().clear();
+    }
 }
