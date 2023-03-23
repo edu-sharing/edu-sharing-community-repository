@@ -62,6 +62,16 @@ export class SearchPageService implements OnDestroy {
     readonly loadingProgress = new BehaviorSubject<number>(null);
     readonly reUrl = new BehaviorSubject<string | false>(null);
     readonly addToCollectionMode = new BehaviorSubject<AddToCollectionMode>(null);
+    /**
+     * A list of properties that should be fetched as facets with a search request.
+     *
+     * The facets are determined by the mds instance of the filter-bar and are used to show
+     * suggestions for filter values to the user.
+     *
+     * Will be set to `null` while a value is being determined. Set to the empty array in case there
+     * are no facets to fetch.
+     */
+    readonly facetsToFetch = new BehaviorSubject<string[]>(null);
     private _results = new BehaviorSubject<SearchPageResults>(null);
     get results(): SearchPageResults {
         return this._results.value;

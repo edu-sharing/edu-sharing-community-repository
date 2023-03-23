@@ -221,6 +221,10 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
                 filter(() => notNull(this.activeMetadataSet.getValue())),
             )
             .subscribe(() => this.resetMds());
+        this.mdsEditor.mdsEditorInstance
+            .getNeededFacets()
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((neededFacets) => this.searchPage.facetsToFetch.next(neededFacets));
     }
 
     // TODO: Provide this functionality in mds editor.
