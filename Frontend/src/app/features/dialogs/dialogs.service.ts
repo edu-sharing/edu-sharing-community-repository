@@ -59,6 +59,10 @@ import {
     SaveSearchDialogResult,
 } from './dialog-modules/save-search-dialog/save-search-dialog-data';
 import {
+    SavedSearchesDialogData,
+    SavedSearchesDialogResult,
+} from './dialog-modules/saved-searches-dialog/saved-searches-dialog-data';
+import {
     SendFeedbackDialogData,
     SendFeedbackDialogResult,
 } from './dialog-modules/send-feedback-dialog/send-feedback-dialog-data';
@@ -463,6 +467,22 @@ export class DialogsService {
             width: 600,
             data,
             closable: Closable.Standard,
+        });
+    }
+
+    async openSavedSearchesDialog(
+        data: SavedSearchesDialogData,
+    ): Promise<CardDialogRef<SavedSearchesDialogData, SavedSearchesDialogResult>> {
+        const { SavedSearchesDialogComponent } = await import(
+            './dialog-modules/saved-searches-dialog/saved-searches-dialog.module'
+        );
+        return this.cardDialog.open(SavedSearchesDialogComponent, {
+            title: 'SEARCH.SAVED_SEARCHES.TITLE',
+            avatar: { kind: 'icon', icon: 'search' },
+            contentPadding: 0,
+            width: 600,
+            data,
+            closable: Closable.Casual,
         });
     }
 }

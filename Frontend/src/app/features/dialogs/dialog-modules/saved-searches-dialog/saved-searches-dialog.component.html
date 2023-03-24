@@ -1,0 +1,30 @@
+<ng-template #saveCurrentSearch>
+  <button mat-raised-button (click)="openSaveSearchDialog()">
+    <i esIcon="star_outline"></i>
+    {{ 'SEARCH.SAVED_SEARCHES.SAVED_CURRENT_SEARCH' | translate }}
+  </button>
+</ng-template>
+
+<mat-tab-group>
+  <mat-tab [label]="'SEARCH.SAVED_SEARCHES.TAB_MY' | translate">
+    <ng-template matTabContent>
+      <es-actionbar #actionbar class="actionbar"></es-actionbar>
+      <es-node-entries-wrapper
+        [dataSource]="mySavedSearchesSource"
+        [columns]="columns"
+        [displayType]="displayType"
+        [scope]="scope"
+        [initConfig]="{actionbar}"
+        (clickItem)="selectSavedSearch($event.element)"
+        [elementInteractionType]="interactionType"
+      >
+        <ng-template #empty>
+          <p class="no-results-notice">{{ 'SEARCH.SAVED_SEARCHES.NO_SAVED_SEARCH' | translate }}</p>
+        </ng-template>
+      </es-node-entries-wrapper>
+    </ng-template>
+  </mat-tab>
+  <mat-tab [label]="'SEARCH.SAVED_SEARCHES.TAB_SHARED' | translate">
+    <ng-template matTabContent> </ng-template>
+  </mat-tab>
+</mat-tab-group>

@@ -1,0 +1,17 @@
+@import '../../../../core-ui-module/styles/variables';
+
+:host ::ng-deep .mat-tab-body-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.actionbar {
+    padding: 25px 25px 0;
+    align-self: flex-end;
+}
+
+.no-results-notice {
+    padding: 25px;
+    color: $textLight;
+    // font-size: 1.3rem;
+}

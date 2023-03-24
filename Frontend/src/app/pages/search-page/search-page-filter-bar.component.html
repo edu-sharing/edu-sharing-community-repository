@@ -29,12 +29,13 @@
   mat-fab
   class="saved-searches-button"
   color="primary"
-  [matMenuTriggerFor]="savedSearchesMenu"
-  [matTooltip]="'SEARCH.SAVED_SEARCHES_LABEL' | translate"
+  [matTooltip]="'SEARCH.SAVED_SEARCHES.TITLE' | translate"
+  (click)="openSavedSearchesDialog()"
 >
   <mat-icon>bookmark</mat-icon>
 </button>
-<mat-menu #savedSearchesMenu="matMenu">
+
+<!-- <mat-menu #savedSearchesMenu="matMenu">
   <button mat-menu-item *ngIf="reUrl.value" (click)="embedCurrentSearch()">
     <mat-icon>redo</mat-icon>
     <span>{{ 'SEARCH.EMBED_SEARCH_ACTION' | translate }}</span>
@@ -63,4 +64,4 @@
       <span>{{ savedSearch.title }}</span>
     </button>
   </ng-container>
-</mat-menu>
+</mat-menu> -->

@@ -39,8 +39,6 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
     searchFilterValues: Values;
     mdsParams: { repository: string; setId: string } = null;
     savedSearchesButtonIsVisible = false;
-    /** The saved-search that triggered the currently active search, if that is the case. */
-    currentSavedSearch: SavedSearch = null;
 
     private mdsInitialized = false;
     private defaultValues: Values;
@@ -51,9 +49,6 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
         private authentication: AuthenticationService,
         private dialogs: DialogsService,
         private ngZone: NgZone,
-        private node: NodeService,
-        private nodeHelper: NodeHelperService,
-        private router: Router,
         private savedSearchesService: SavedSearchesService,
         private searchPage: SearchPageService,
         private searchService: SearchService,
@@ -71,7 +66,6 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
                 this.searchFilterValues = JSON.parse(JSON.stringify(values ?? {}));
             });
         this.registerSavedSearches();
-        this.registerCurrentSavedSearchReset();
     }
 
     ngOnDestroy(): void {
@@ -79,52 +73,25 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
         this.destroyed.complete();
     }
 
-    async openSaveSearchDialog(): Promise<SavedSearch | null> {
-        const dialogRef = await this.dialogs.openSaveSearchDialog({
-            name: await this.getSavedSearchInitialName(),
-            searchString: this.searchPage.searchString.getValue(),
+    async openSavedSearchesDialog(): Promise<void> {
+        const dialogRef = await this.dialogs.openSavedSearchesDialog({
+            saveSearchData: {
+                name: await this.getSavedSearchInitialName(),
+                searchString: this.searchPage.searchString.getValue(),
+            },
         });
-        const savedSearch = await dialogRef.afterClosed().toPromise();
-        this.currentSavedSearch = savedSearch;
-        return savedSearch;
+        dialogRef.afterClosed().subscribe((selectedSavedSearch) => {
+            if (selectedSavedSearch) {
+                this.applySavedSearch(selectedSavedSearch);
+            }
+        });
     }
 
-    goToSavedSearches(): void {
-        this.node.getNode(RestConstants.SAVED_SEARCH).subscribe((node) =>
-            this.router.navigate([UIConstants.ROUTER_PREFIX + 'workspace/files'], {
-                queryParams: { id: node.ref.id },
-            }),
-        );
-    }
-
-    applySavedSearch(savedSearch: SavedSearch): void {
+    private applySavedSearch(savedSearch: SavedSearch): void {
         this.searchPage.activeRepository.setUserValue(savedSearch.repository);
         this.searchPage.activeMetadataSet.setUserValue(savedSearch.metadataSet);
         this.searchPage.searchString.setUserValue(savedSearch.searchString);
         this.searchPage.searchFilters.setUserValue(savedSearch.filters);
-        this.currentSavedSearch = savedSearch;
-    }
-
-    async embedCurrentSearch(): Promise<void> {
-        let savedSearch = this.currentSavedSearch;
-        if (!savedSearch) {
-            savedSearch = await this.openSaveSearchDialog();
-        }
-        if (savedSearch) {
-            this.nodeHelper.addNodeToLms(
-                this.currentSavedSearch.node,
-                this.searchPage.reUrl.value as string,
-            );
-        }
-    }
-
-    private registerCurrentSavedSearchReset(): void {
-        rxjs.combineLatest([
-            this.searchPage.searchString.observeValue(),
-            this.searchPage.searchFilters.observeValue(),
-        ])
-            .pipe(takeUntil(this.destroyed))
-            .subscribe(() => (this.currentSavedSearch = null));
     }
 
     private async getSavedSearchInitialName(): Promise<string> {
