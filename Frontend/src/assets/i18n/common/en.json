@@ -773,6 +773,48 @@
     "API_FORBIDDEN": "No permissions to access this content",
     "API_FORBIDDEN_LOGIN": "Please login to access this section"
   },
+  "NODE_SEARCH_SELECTOR": {
+    "MORE_FILTERS": "Search filters",
+    "NO_MATCHES": "No matching elements found",
+    "NO_PERMISSIONS": "You don't have permissions for this element"
+  },
+  "NODE_RELATIONS": {
+    "TITLE": "Manage relations",
+    "CREATE_RELATION": "Create new relation",
+    "RELATION_TYPE_LABEL": "Relation type",
+    "RELATION_SEARCH_LABEL": "Search for a related element",
+    "EXISTING_RELATIONS": "Existing relations",
+    "NO_RELATIONS": "There are no relations for this element.",
+    "SWAP": "Swap",
+    "RESELECT": "Reset",
+    "CREATE_CONFIRM": "Create relation",
+    "NO_PERMISSIONS": "You don't have permissions to set relations to this element",
+    "RELATION_CREATED": "Date",
+    "RELATION_CREATOR": "Creator",
+    "VARIANT_CREATED": "Date",
+    "VARIANT_CREATOR": "Creator",
+    "OPEN_NODE": "Show element",
+    "REMOVE_RELATION": "Remove relation",
+    "RESTORE_RELATION": "Restore relation",
+    "CURRENT_VERSION": "Current version",
+    "RELATION_EXISTS": "This relation already exists and cannot be added again",
+    "RELATION_COPY_HINT": "Managing relations of a public copy. Note that these relations apply to all public versions as well as to the original element.",
+    "RELATION_TYPE": {
+      "VERSIONS": "Versions",
+      "FORKED_CHILDS": "Has variants",
+      "FORKED_ORIGIN": "Is variant of",
+      "isPartOf": "is part of",
+      "isBasedOn": "is based on",
+      "references": "references",
+      "hasPart": "has part",
+      "isBasisFor": "is basis for"
+    },
+    "RELATION_TYPE_FULLY": {
+      "isPartOf": "is part of (isPartOf)",
+      "isBasedOn": "is based on (isBasedOn)",
+      "references": "references (references)"
+    }
+  },
   "VCARD": {
     "Givenname": "First name",
     "Surname": "Last name",

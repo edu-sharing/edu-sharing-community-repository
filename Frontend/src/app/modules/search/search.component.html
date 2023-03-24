@@ -384,6 +384,7 @@
               [displayType]="searchService.displayType"
               (displayTypeChange)="setDisplayType($event)"
               (fetchData)="getMoreResults()"
+              (nodesDeleted)="onDelete($event.objects)"
             >
               <ng-template #title>
                 <div class="heading" *ngIf="!getDataSource()?.isEmpty()">
