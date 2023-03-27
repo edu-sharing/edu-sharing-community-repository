@@ -27,6 +27,7 @@ import { NodeDataSourceRemote } from '../node-data-source-remote';
 import { NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
 import { SortSelectPanelComponent } from '../sort-select-panel/sort-select-panel.component';
+import { CustomTemplatesDataSource } from '../custom-templates-data-source';
 
 @Component({
     selector: 'es-node-entries-card-grid',
@@ -99,7 +100,11 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
         public templatesService: NodeEntriesTemplatesService,
         public ui: UIService,
         private ngZone: NgZone,
-    ) {}
+    ) {
+        this.entriesService.dataSource$.pipe(takeUntil(this.destroyed)).subscribe(() => {
+            this.updateScrollState();
+        });
+    }
 
     ngOnInit(): void {
         this.registerItemsCap();
@@ -324,5 +329,9 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
                 rect.width * this.ScrollingOffsetPercentage * (direction === 'right' ? 1 : -1),
             behavior: 'smooth',
         });
+    }
+
+    isCustomTemplate() {
+        return this.entriesService.dataSource instanceof CustomTemplatesDataSource;
     }
 }

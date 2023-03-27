@@ -84,44 +84,51 @@
           (nodeDropped)="onNodesDropped($event)"
           #dropTarget="esNodesDropTarget"
         >
-          <es-node-entries-card
-            *ngIf="displayType === NodeEntriesDisplayType.Grid"
-            #item
-            [node]="node"
-            [dropdown]="dropdown"
-            role="listitem"
-            cdkDrag
-            [cdkDragDisabled]="!getDragEnabled()"
-            [cdkDragData]="getDragData(node)"
-            esNodesDrag
-            (cdkDragStarted)="onDragStarted(node)"
-            (cdkDragEnded)="onDragEnded()"
-            [class.selected-when-dragging]="isDragging && entriesService.selection.isSelected(node)"
-          >
-            <ng-container *ngIf="entriesService.selection.selected.length > 1">
-              <es-node-entries-card
-                *cdkDragPreview
-                [node]="node"
-                [matBadge]="
-                  entriesService.selection.selected.length > 1
-                    ? entriesService.selection.selected.length
-                    : null
-                "
-                class="card-drag-preview"
-              ></es-node-entries-card>
-            </ng-container>
-          </es-node-entries-card>
-          <es-node-entries-card-small
-            *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
-            #item
-            [node]="node"
-            role="listitem"
-            cdkDrag
-            [cdkDragDisabled]="!getDragEnabled()"
-            [cdkDragData]="[node]"
-            esNodesDrag
-          >
-          </es-node-entries-card-small>
+          <ng-container *ngIf="isCustomTemplate()">
+            <ng-container *ngTemplateOutlet="$any(node)"></ng-container>
+          </ng-container>
+          <ng-container *ngIf="!isCustomTemplate()">
+            <es-node-entries-card
+              *ngIf="displayType === NodeEntriesDisplayType.Grid"
+              #item
+              [node]="node"
+              [dropdown]="dropdown"
+              role="listitem"
+              cdkDrag
+              [cdkDragDisabled]="!getDragEnabled()"
+              [cdkDragData]="getDragData(node)"
+              esNodesDrag
+              (cdkDragStarted)="onDragStarted(node)"
+              (cdkDragEnded)="onDragEnded()"
+              [class.selected-when-dragging]="
+                isDragging && entriesService.selection.isSelected(node)
+              "
+            >
+              <ng-container *ngIf="entriesService.selection.selected.length > 1">
+                <es-node-entries-card
+                  *cdkDragPreview
+                  [node]="node"
+                  [matBadge]="
+                    entriesService.selection.selected.length > 1
+                      ? entriesService.selection.selected.length
+                      : null
+                  "
+                  class="card-drag-preview"
+                ></es-node-entries-card>
+              </ng-container>
+            </es-node-entries-card>
+            <es-node-entries-card-small
+              *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
+              #item
+              [node]="node"
+              role="listitem"
+              cdkDrag
+              [cdkDragDisabled]="!getDragEnabled()"
+              [cdkDragData]="[node]"
+              esNodesDrag
+            >
+            </es-node-entries-card-small>
+          </ng-container>
           <div
             *ngIf="dropTarget.active?.canDrop?.denyExplicit"
             class="card-grid-drop-blocked-container"
