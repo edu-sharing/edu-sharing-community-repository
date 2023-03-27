@@ -56,7 +56,7 @@ import {
 } from '../types/types';
 import { parseAttributes } from './util/parse-attributes';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
-import {Helper} from "../../../core-module/rest/helper";
+import { Helper } from '../../../core-module/rest/helper';
 
 export interface CompletionStatusField {
     widget: Widget;
@@ -165,7 +165,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             public readonly variables: { [key: string]: string } = null,
         ) {
             // deep copy to prevent persistence from inline overrides
-            this._definition = Helper.deepCopy(this._definition)
+            this._definition = Helper.deepCopy(this._definition);
             this.replaceVariables();
             combineLatest([this.value$, this.bulkMode, this.ready])
                 .pipe(
