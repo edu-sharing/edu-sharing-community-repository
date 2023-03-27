@@ -655,7 +655,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
                 this.refreshContent();
                 this.toast.closeModalDialog();
             },
-            allowDuplicate
+            allowDuplicate,
         );
     }
 

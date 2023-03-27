@@ -431,19 +431,19 @@ export class UIHelper {
                     ({ error }) => error.status === RestConstants.DUPLICATE_NODE_RESPONSE,
                 );
                 if (duplicated.length > 0 && !asProposal) {
-                    if(allowDuplicate !== 'ignore') {
-                    bridge.showModalDialog({
-                        title: 'COLLECTIONS.ADD_TO.DUPLICATE_TITLE',
-                        message: 'COLLECTIONS.ADD_TO.DUPLICATE_MESSAGE',
-                        messageParameters: { count: duplicated.length },
-                        isCancelable: true,
-                        buttons: DialogButton.getYesNo(
-                            () => {
-                                bridge.closeModalDialog();
-                                if (callback) {
-                                    // Invoke `callback` only with the nodes successfully added
-                                    // before.
-                                    callback(success.map((n) => n.node as CollectionReference));
+                    if (allowDuplicate !== 'ignore') {
+                        bridge.showModalDialog({
+                            title: 'COLLECTIONS.ADD_TO.DUPLICATE_TITLE',
+                            message: 'COLLECTIONS.ADD_TO.DUPLICATE_MESSAGE',
+                            messageParameters: { count: duplicated.length },
+                            isCancelable: true,
+                            buttons: DialogButton.getYesNo(
+                                () => {
+                                    bridge.closeModalDialog();
+                                    if (callback) {
+                                        // Invoke `callback` only with the nodes successfully added
+                                        // before.
+                                        callback(success.map((n) => n.node as CollectionReference));
                                     }
                                 },
                                 () => {
@@ -454,19 +454,21 @@ export class UIHelper {
                                         router,
                                         bridge,
                                         collection,
-                                    duplicated.map((d) => d.node),
-                                    false,
-                                    (nodes) =>
-                                        // Invoke `callback` with both, the nodes successfully added
-                                        // before and the duplicate nodes added now.
-                                        callback?.([
-                                            ...success.map((n) => n.node as CollectionReference),
-                                            ...nodes,
-                                        ]),
-                                    true,
-                                );
-                            },
-                        ),
+                                        duplicated.map((d) => d.node),
+                                        false,
+                                        (nodes) =>
+                                            // Invoke `callback` with both, the nodes successfully added
+                                            // before and the duplicate nodes added now.
+                                            callback?.([
+                                                ...success.map(
+                                                    (n) => n.node as CollectionReference,
+                                                ),
+                                                ...nodes,
+                                            ]),
+                                        true,
+                                    );
+                                },
+                            ),
                         });
                         return;
                     }
