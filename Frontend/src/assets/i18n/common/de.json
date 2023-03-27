@@ -645,7 +645,7 @@
     "CONTRIBUTOR": "Beteiligte",
     "SHARE_LINK": "Download-Link freigeben",
     "WORKFLOW": "Workflow",
-    "TEMPLATE": "Metadaten Vorlage",
+        "TEMPLATE": "Metadatenvorlage",
     "VARIANT": "Variante anlegen",
     "VARIANT_OPEN": "Als Variante öffnen",
     "QR_CODE": "QR-Code Link",

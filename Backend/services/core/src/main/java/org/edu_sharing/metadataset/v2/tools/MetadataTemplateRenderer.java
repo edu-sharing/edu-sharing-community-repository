@@ -167,6 +167,14 @@ public class MetadataTemplateRenderer {
 					values = new String[]{"-"};
 					wasEmpty = true;
 				}
+				if("range".equals(widget.getType()) && wasEmpty) {
+					String[] from = properties.get(srcWidget.getId() + "_from");
+					String[] to = properties.get(srcWidget.getId() + "_to");
+					if(from != null && to != null && from.length > 0 && to.length > 0) {
+						values = new String[]{from[0] + "-" + to[0]};
+						wasEmpty = false;
+					}
+				}
 				if (renderingMode.equals(RenderingMode.HTML)) {
 					widgetHtml.append("<div data-widget-id='").append(widget.getId()).append("' class='mdsWidget");
 					if (widget.getType() != null) {

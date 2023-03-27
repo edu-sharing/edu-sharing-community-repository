@@ -641,7 +641,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
         }
     };
 
-    addNodesToCollection(nodes: Node[]) {
+    addNodesToCollection(nodes: Node[], allowDuplicate: boolean | 'ignore' = false) {
         this.toast.showProgressDialog();
         UIHelper.addToCollection(
             this.nodeHelper,
@@ -655,6 +655,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
                 this.refreshContent();
                 this.toast.closeModalDialog();
             },
+            allowDuplicate
         );
     }
 
