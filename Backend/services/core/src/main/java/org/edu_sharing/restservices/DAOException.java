@@ -67,6 +67,12 @@ public class DAOException extends Exception {
 				&& t.getCause().getClass().getName().contains("VirusDetectedException")){
 			return new DAOVirusDetectedException(t.getCause(),nodeId);
 		}
+		if(t instanceof AlfrescoRuntimeException
+				&& t.getCause() != null
+				&& t.getCause().getClass().getName().contains("VirusScanFailedException")
+		){
+			return new DAOVirusScanFailedException(t.getCause(),nodeId);
+		}
 		if (t instanceof NodeExistsException) {
 			
 			return new DAOValidationException(t,nodeId); 
