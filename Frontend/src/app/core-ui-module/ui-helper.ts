@@ -377,6 +377,18 @@ export class UIHelper {
                 });
         }
     }
+
+    /**
+     * handles adding nodes to a collection
+     * @param nodeHelper
+     * @param collectionService
+     * @param router
+     * @param bridge
+     * @param collection
+     * @param nodes
+     * @param callback
+     * @param allowDuplicate false (default) will trigger a confirmation if duplicate was detected, true will always create a duplicate and 'ignore' works as false but will not trigger a confirmation but silently abort
+     */
     static addToCollection(
         nodeHelper: NodeHelperService,
         collectionService: RestCollectionService,
@@ -386,7 +398,7 @@ export class UIHelper {
         nodes: Node[],
         asProposal = false,
         callback: (nodes: CollectionReference[]) => void = null,
-        allowDuplicate = false,
+        allowDuplicate: boolean | 'ignore' = false,
     ) {
         observableForkJoin(
             nodes.map((node) =>
@@ -395,7 +407,7 @@ export class UIHelper {
                         collection.ref.id,
                         node.ref.id,
                         node.ref.repo,
-                        allowDuplicate,
+                        allowDuplicate === true,
                         asProposal,
                     )
                     .pipe(catchError((error) => of({ error, node }))),
@@ -419,6 +431,7 @@ export class UIHelper {
                     ({ error }) => error.status === RestConstants.DUPLICATE_NODE_RESPONSE,
                 );
                 if (duplicated.length > 0 && !asProposal) {
+                    if(allowDuplicate !== 'ignore') {
                     bridge.showModalDialog({
                         title: 'COLLECTIONS.ADD_TO.DUPLICATE_TITLE',
                         message: 'COLLECTIONS.ADD_TO.DUPLICATE_MESSAGE',
@@ -431,16 +444,16 @@ export class UIHelper {
                                     // Invoke `callback` only with the nodes successfully added
                                     // before.
                                     callback(success.map((n) => n.node as CollectionReference));
-                                }
-                            },
-                            () => {
-                                bridge.closeModalDialog();
-                                UIHelper.addToCollection(
-                                    nodeHelper,
-                                    collectionService,
-                                    router,
-                                    bridge,
-                                    collection,
+                                    }
+                                },
+                                () => {
+                                    bridge.closeModalDialog();
+                                    UIHelper.addToCollection(
+                                        nodeHelper,
+                                        collectionService,
+                                        router,
+                                        bridge,
+                                        collection,
                                     duplicated.map((d) => d.node),
                                     false,
                                     (nodes) =>
@@ -454,8 +467,9 @@ export class UIHelper {
                                 );
                             },
                         ),
-                    });
-                    return;
+                        });
+                        return;
+                    }
                 } else {
                     nodeHelper.handleNodeError(
                         RestHelper.getTitle(failed[0].node),

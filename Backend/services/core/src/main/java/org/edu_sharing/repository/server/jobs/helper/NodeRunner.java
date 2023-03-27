@@ -18,6 +18,7 @@ import javax.transaction.NotSupportedException;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -101,6 +102,10 @@ public class NodeRunner {
 
     private String lucene = null;
     private StoreRef luceneStore = StoreRef.STORE_REF_WORKSPACE_SPACESSTORE;
+    /**
+     * custom nodes list to iterate over
+     */
+    private Collection<NodeRef> nodesList;
 
     public NodeRunner() {
 	}
@@ -185,8 +190,9 @@ public class NodeRunner {
         try {
             List<NodeRef> nodes;
 
-
-            if(lucene == null || lucene.trim().equals("")) {
+            if(nodesList != null) {
+                nodes = new ArrayList<>(nodesList);
+            } else if(lucene == null || lucene.trim().equals("")) {
                 if (runAsSystem)
                     nodes = AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenRecursive(startFolderStore, startFolder, types, recurseMode));
                 else
@@ -336,6 +342,14 @@ public class NodeRunner {
 
     public StoreRef getLuceneStore() {
         return luceneStore;
+    }
+
+    public Collection<NodeRef> getNodesList() {
+        return nodesList;
+    }
+
+    public void setNodesList(Collection<NodeRef> nodesList) {
+        this.nodesList = nodesList;
     }
 
     public void setStartFolderStore(StoreRef startFolderStore) {
