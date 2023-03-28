@@ -328,7 +328,8 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
         this.gridRef?.nativeElement.scroll({
             left:
                 leftScroll +
-                rect.width * this.ScrollingOffsetPercentage * (direction === 'right' ? 1 : -1),
+                Math.max(250, rect.width * this.ScrollingOffsetPercentage) *
+                    (direction === 'right' ? 1 : -1),
             behavior: 'smooth',
         });
     }
