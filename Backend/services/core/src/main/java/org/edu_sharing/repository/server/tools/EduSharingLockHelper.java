@@ -3,6 +3,7 @@ package org.edu_sharing.repository.server.tools;
 import org.edu_sharing.repository.server.jobs.quartz.JobClusterLocker;
 import org.edu_sharing.spring.ApplicationContextFactory;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
@@ -21,15 +22,17 @@ public class EduSharingLockHelper {
      * Run the given method only once at a time, also across the cluster (if enabled)
      * @param clazz The class, used for scoping the keyName given to lock
      * @param keyName The key to lock your method, e.g. your method name or dynamic data if the lock should be only for a specific parameter value
-     * @param runnable The runnable to run only once at a time for the given clazz + keyName combination
+     * @param callable The callable to run only once at a time for the given clazz + keyName combination
      */
-    public static void runSingleton(Class clazz, String keyName, Runnable runnable) {
+    public static <T> T runSingleton(Class clazz, String keyName, Callable<T> callable) {
         EduSharingLockManager manager = (EduSharingLockManager) ApplicationContextFactory.getApplicationContext().getBean("esLockManager");
         Lock lock = manager.getLock(clazz, keyName);
         try {
             EduSharingLockHelper.acquire(lock);
             try {
-                runnable.run();
+                return callable.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             } finally {
                 lock.unlock();
             }
