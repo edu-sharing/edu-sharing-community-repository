@@ -18,6 +18,7 @@ import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import {
+    debounceTime,
     delay,
     distinctUntilChanged,
     first,
@@ -88,6 +89,9 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         private elementRef: ElementRef<HTMLElement>,
     ) {
         this.registerMaximumColumnsNumber();
+        this.entriesService.selection.changed
+            .pipe(takeUntil(this.destroyed), debounceTime(0))
+            .subscribe(() => this.changeDetectorRef.detectChanges());
     }
 
     ngAfterViewInit(): void {
