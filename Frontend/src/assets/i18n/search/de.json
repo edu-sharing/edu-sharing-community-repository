@@ -69,7 +69,8 @@
       "TAB_MY": "Meine",
       "TAB_SHARED": "Geteilte",
       "SAVED_CURRENT_SEARCH": "Derzeitige Suche speichern",
-      "MANAGE_SAVED_SEARCH": "Gespeicherte Suchen verwalten",
+      "SEARCH_BUTTON": "Suchen",
+      "EMBED_BUTTON": "Einbetten",
       "NO_SAVED_SEARCH": "Noch keine gespeicherten Suchen.",
       "NO_SAVED_SEARCH_FOUND": "Keine übereinstimmenden gespeicherten Suchen."
     },

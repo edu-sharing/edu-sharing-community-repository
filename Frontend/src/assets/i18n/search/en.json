@@ -69,7 +69,8 @@
       "TAB_MY": "My",
       "TAB_SHARED": "Shared",
       "SAVED_CURRENT_SEARCH": "Save current search",
-      "MANAGE_SAVED_SEARCH": "Manage saved searches",
+      "SEARCH_BUTTON": "Search",
+      "EMBED_BUTTON": "Embed",
       "NO_SAVED_SEARCH": "No searches have been saved yet.",
       "NO_SAVED_SEARCH_FOUND": "No matching saved searches."
     },

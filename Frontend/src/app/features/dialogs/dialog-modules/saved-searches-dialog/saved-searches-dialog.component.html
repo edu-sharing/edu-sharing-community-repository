@@ -15,8 +15,9 @@
         [displayType]="displayType"
         [scope]="scope"
         [initConfig]="{actionbar}"
-        (clickItem)="selectSavedSearch($event.element)"
+        (clickItem)="onClick($event.element)"
         [elementInteractionType]="interactionType"
+        [singleClickHint]="data.reUrl ? 'static' : 'dynamic'"
       >
         <ng-template #empty>
           <p class="no-results-notice">{{ 'SEARCH.SAVED_SEARCHES.NO_SAVED_SEARCH' | translate }}</p>

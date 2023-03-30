@@ -33,7 +33,6 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
     readonly activeMetadataSet = this.searchPage.activeMetadataSet;
     readonly activeMdsForm = new FormControl(this.activeMetadataSet.getValue());
     readonly searchFilters = this.searchPage.searchFilters;
-    readonly savedSearches = this.savedSearchesService.observeSavedSearches();
     readonly reUrl = this.searchPage.reUrl;
     /** Deep copy of `searchFilters.userValue` for immutability. */
     searchFilterValues: Values;
@@ -49,7 +48,6 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
         private authentication: AuthenticationService,
         private dialogs: DialogsService,
         private ngZone: NgZone,
-        private savedSearchesService: SavedSearchesService,
         private searchPage: SearchPageService,
         private searchService: SearchService,
         private translate: TranslateService,
@@ -79,6 +77,7 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
                 name: await this.getSavedSearchInitialName(),
                 searchString: this.searchPage.searchString.getValue(),
             },
+            reUrl: this.reUrl.value || null,
         });
         dialogRef.afterClosed().subscribe((selectedSavedSearch) => {
             if (selectedSavedSearch) {

@@ -3,6 +3,7 @@ import { SaveSearchDialogData } from '../save-search-dialog/save-search-dialog-d
 
 export interface SavedSearchesDialogData {
     saveSearchData: SaveSearchDialogData;
+    reUrl?: string;
 }
 
 export type SavedSearchesDialogResult = SavedSearch | null;
