@@ -43,16 +43,18 @@ import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { NodeEntriesDataType } from 'src/app/features/node-entries/node-entries.component';
 import { canDropOnNode } from '../workspace-utils';
-import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import {
     catchError,
     debounceTime,
     distinctUntilChanged,
     retryWhen,
     switchMap,
+    takeUntil,
     tap,
 } from 'rxjs/operators';
 import { WorkspaceTreeComponent } from '../tree/tree.component';
+import { LocalEventsService } from '../../../services/local-events.service';
 
 @Component({
     selector: 'es-workspace-explorer',
@@ -210,6 +212,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     @Output() onDrop = new EventEmitter<{ target: DropTarget; source: DropSource<Node> }>();
     @Output() onReset = new EventEmitter();
     private path: Node[];
+    private destroyed = new Subject<void>();
     searchGlobal() {
         this.onSearchGlobal.emit(this.searchQuery$.value);
     }
@@ -303,6 +306,8 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     }
 
     ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
         this.temporaryStorage.set(
             TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE,
             this.dataSource,
@@ -339,9 +344,11 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         private toast: Toast,
         public ui: UIService,
         private nodeApi: RestNodeService,
+        private localEvents: LocalEventsService,
     ) {
         // super(temporaryStorage,['_node','_nodes','sortBy','sortAscending','columns','totalCount','hasMoreToLoad']);
         this.initColumns();
+        this.registerNodesDeleted();
         combineLatest([this.node$, this.searchQuery$])
             .pipe(
                 distinctUntilChanged((a, b) => {
@@ -483,12 +490,14 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         });
     }
 
-    onDelete(nodes: Node[]): void {
-        this.dataSource.removeData(nodes);
-        this.nodeEntries?.getSelection().clear();
-        if (nodes.filter((n) => n.isDirectory).length) {
-            this.refreshTree.emit();
-        }
+    private registerNodesDeleted(): void {
+        this.localEvents.nodesDeleted.pipe(takeUntil(this.destroyed)).subscribe((nodes) => {
+            this.dataSource.removeData(nodes);
+            this.nodeEntries?.getSelection().clear();
+            if (nodes.filter((n) => n.isDirectory).length) {
+                this.refreshTree.emit();
+            }
+        });
     }
 
     saveColumns(columns: ListItem[]) {

@@ -75,15 +75,16 @@ export class NodeDataSource<T extends Node | GenericAuthority> extends DataSourc
     /**
      * Removes elements from the visible data.
      */
-    removeData(removeData: T[]): void {
-        const data = this.getData().filter((value) => !removeData.includes(value));
-        this.dataStream.next(data);
+    removeData(toRemove: T[]): void {
+        const newData = this.getData().filter((value) => !toRemove.includes(value));
+        const removedData = this.getData().filter((value) => toRemove.includes(value));
+        this.dataStream.next(newData);
         if (this.pagination$.value) {
             const pagination = this.pagination$.value;
             this.setPagination({
-                count: pagination.count - removeData.length,
+                count: pagination.count - removedData.length,
                 from: pagination.from,
-                total: pagination.total - removeData.length,
+                total: pagination.total - removedData.length,
             });
         }
     }

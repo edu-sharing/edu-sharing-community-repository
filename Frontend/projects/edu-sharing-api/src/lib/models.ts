@@ -32,7 +32,7 @@ export {
     WebsiteInformation,
 } from './api/models';
 import { HttpErrorResponse } from '@angular/common/http';
-import { MdsView } from './api/models';
+import { Acl, MdsView } from './api/models';
 
 export type MdsViewRelation = MdsView['rel'];
 
@@ -40,3 +40,5 @@ export type ApiErrorResponse = HttpErrorResponse & {
     readonly defaultPrevented: boolean;
     preventDefault: () => void;
 };
+
+export type NodePermissions = Acl;

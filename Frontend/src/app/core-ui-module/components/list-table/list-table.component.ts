@@ -68,6 +68,7 @@ import { NodeHelperService } from '../../node-helper.service';
 import { CustomOptions, OptionItem, Scope, Target } from '../../option-item';
 import { OptionsHelperService } from '../../options-helper.service';
 import { Toast } from '../../toast';
+import { LocalEventsService } from '../../../services/local-events.service';
 
 @Component({
     selector: 'es-listTable',
@@ -497,6 +498,7 @@ export class ListTableComponent
         private frame: FrameEventsService,
         private renderer: Renderer2,
         private mainnavService: MainNavService,
+        private localEvents: LocalEventsService,
     ) {
         this.optionsHelper.registerGlobalKeyboardShortcuts();
         this.nodeHelper.setViewContainerRef(this.viewContainerRef);
@@ -533,9 +535,9 @@ export class ListTableComponent
 
     ngAfterViewInit(): void {
         this.optionsHelper.initComponents(this.actionbar, this);
-        this.optionsHelper.nodesDeleted
+        this.localEvents.nodesDeleted
             .pipe(takeUntil(this.destroyed))
-            .subscribe((nodes) => this.removeNodes(nodes.error, nodes.objects));
+            .subscribe((nodes) => this.removeNodes(nodes));
     }
 
     ngOnDestroy(): void {
@@ -1185,12 +1187,9 @@ export class ListTableComponent
         this.optionsHelper.refreshComponents();
     }
 
-    removeNodes(error: boolean, objects: Node[] | any[]) {
-        if (error) {
-            return;
-        }
-        for (const object of objects) {
-            const p = RestHelper.getRestObjectPositionInArray(object, this._nodes);
+    removeNodes(nodes: Node[]) {
+        for (const node of nodes) {
+            const p = RestHelper.getRestObjectPositionInArray(node, this._nodes);
             if (p !== -1) {
                 this._nodes.splice(p, 1);
             }

@@ -21,6 +21,10 @@ import {
     CreateMapLinkDialogResult,
 } from './dialog-modules/create-map-link-dialog/create-map-link-dialog-data';
 import {
+    DeleteNodesDialogData,
+    DeleteNodesDialogResult,
+} from './dialog-modules/delete-nodes-dialog/delete-nodes-dialog-data';
+import {
     FileChooserDialogData,
     FileChooserDialogResult,
 } from './dialog-modules/file-chooser-dialog/file-chooser-dialog-data';
@@ -481,6 +485,21 @@ export class DialogsService {
             avatar: { kind: 'icon', icon: 'search' },
             contentPadding: 0,
             width: 600,
+            data,
+            closable: Closable.Casual,
+        });
+    }
+
+    async openDeleteNodesDialog(
+        data: DeleteNodesDialogData,
+    ): Promise<CardDialogRef<DeleteNodesDialogData, DeleteNodesDialogResult>> {
+        const { DeleteNodesDialogComponent } = await import(
+            './dialog-modules/delete-nodes-dialog/delete-nodes-dialog.module'
+        );
+        return this.cardDialog.open(DeleteNodesDialogComponent, {
+            ...(await configForNodes(data.nodes, this.translate).toPromise()),
+            minHeight: 240,
+            width: 500,
             data,
             closable: Closable.Casual,
         });

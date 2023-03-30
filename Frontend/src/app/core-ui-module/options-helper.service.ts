@@ -11,8 +11,9 @@ import {
     Subject,
     Subscription,
 } from 'rxjs';
+import * as rxjs from 'rxjs';
 import { isArray } from 'rxjs/internal/util/isArray';
-import { takeUntil } from 'rxjs/operators';
+import { catchError, map, takeUntil } from 'rxjs/operators';
 import { BridgeService } from '../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
@@ -66,6 +67,8 @@ import {
 } from './option-item';
 import { Toast } from './toast';
 import { UIHelper } from './ui-helper';
+import { LocalEventsService } from '../services/local-events.service';
+import { forkJoinWithErrors } from '../util/rxjs/forkJoinWithErrors';
 
 type DeleteEvent = {
     objects: Node[] | any;
@@ -85,7 +88,6 @@ export class OptionsHelperService implements OnDestroy {
 
     readonly virtualNodesAdded = new EventEmitter<Node[]>();
     readonly nodesChanged = new EventEmitter<Node[] | void>();
-    readonly nodesDeleted = new EventEmitter<DeleteEvent>();
     readonly displayTypeChanged = new EventEmitter<NodeEntriesDisplayType>();
 
     private keyboardShortcutsSubscription: Subscription;
@@ -107,11 +109,9 @@ export class OptionsHelperService implements OnDestroy {
         private nodeHelper: NodeHelperService,
         private route: ActivatedRoute,
         private eventService: FrameEventsService,
-        private http: HttpClient,
         private ui: UIService,
         private toast: Toast,
         private translate: TranslateService,
-        private platformLocation: PlatformLocation,
         private nodeService: RestNodeService,
         private collectionService: RestCollectionService,
         private configService: ConfigurationService,
@@ -122,13 +122,22 @@ export class OptionsHelperService implements OnDestroy {
         private dialogs: DialogsService,
         private keyboardShortcuts: KeyboardShortcutsService,
         private ngZone: NgZone,
+        private localEvents: LocalEventsService,
     ) {
-        this.route.queryParams.subscribe((queryParams) => (this.queryParams = queryParams));
+        this.registerStaticSubscriptions();
     }
 
     ngOnDestroy(): void {
         this.destroyed.next();
         this.destroyed.complete();
+    }
+
+    /** Performs subscriptions that don't have to be refreshed. */
+    private registerStaticSubscriptions(): void {
+        this.route.queryParams.subscribe((queryParams) => (this.queryParams = queryParams));
+        this.localEvents.nodesDeleted
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((nodes) => this.list?.deleteNodes(nodes));
     }
 
     private handleKeyboardEvent(event: KeyboardEvent) {
@@ -257,14 +266,6 @@ export class OptionsHelperService implements OnDestroy {
                     .getDialogs()
                     .onRefresh.subscribe((nodes: void | Node[]) =>
                         this.onNodesChanged(nodes ? nodes : undefined),
-                    ),
-            );
-            this.subscriptions.push(
-                this.mainNavService
-                    .getDialogs()
-                    ?.onDelete?.subscribe(
-                        (result: { objects: any; count: number; error: boolean }) =>
-                            this.deleteNodes(result),
                     ),
             );
         }
@@ -1155,7 +1156,7 @@ export class OptionsHelperService implements OnDestroy {
         pasteNodes.group = DefaultGroups.FileOperations;
 
         const deleteNode = new OptionItem('OPTIONS.DELETE', 'delete', (object) => {
-            management.nodeDelete = this.getObjects(object);
+            void this.dialogs.openDeleteNodesDialog({ nodes: this.getObjects(object) });
         });
         deleteNode.elementType = [ElementType.Node, ElementType.SavedSearch, ElementType.MapRef];
         deleteNode.constrains = [
@@ -1186,7 +1187,7 @@ export class OptionsHelperService implements OnDestroy {
         unblockNode.priority = 10;
 
         const unpublishNode = new OptionItem('OPTIONS.UNPUBLISH', 'cloud_off', (object) => {
-            management.nodeDelete = this.getObjects(object);
+            void this.dialogs.openDeleteNodesDialog({ nodes: this.getObjects(object) });
         });
         unpublishNode.elementType = [ElementType.NodePublishedCopy];
         unpublishNode.constrains = [
@@ -1822,27 +1823,22 @@ export class OptionsHelperService implements OnDestroy {
     }
 
     private removeFromCollection(nodes: Node[]) {
-        observableForkJoin(
+        forkJoinWithErrors(
             nodes.map((node: Node) =>
-                this.collectionService.removeFromCollection(node.ref.id, this.data.parent.ref.id),
+                this.collectionService
+                    .removeFromCollection(node.ref.id, this.data.parent.ref.id)
+                    .pipe(map(() => node)),
             ),
-        ).subscribe(
-            () => {
-                this.deleteNodes({ objects: nodes, error: false, count: nodes.length });
+        ).subscribe(({ successes: deletedNodes, errors }) => {
+            if (errors.length > 0) {
+                this.toast.error(errors[0]);
+            } else {
                 this.toast.toast('COLLECTIONS.REMOVED_FROM_COLLECTION');
-            },
-            (error) => {
-                this.deleteNodes({ objects: nodes, error: true, count: nodes.length });
-                this.toast.error(error);
-            },
-        );
-    }
-
-    private deleteNodes(event: DeleteEvent) {
-        this.nodesDeleted.emit(event);
-        if (this.list && !event.error) {
-            this.list.deleteNodes(event.objects);
-        }
+            }
+            if (deletedNodes.length > 0) {
+                this.localEvents.nodesDeleted.next(deletedNodes);
+            }
+        });
     }
 
     private editCollection(object: Node | any) {

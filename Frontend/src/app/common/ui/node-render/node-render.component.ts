@@ -73,6 +73,7 @@ import { LoadingScreenService } from '../../../main/loading-screen/loading-scree
 import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
+import { LocalEventsService } from '../../../services/local-events.service';
 
 @Component({
     selector: 'es-node-render',
@@ -123,6 +124,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         private loadingScreen: LoadingScreenService,
         public mainNavService: MainNavService,
         private temporaryStorageService: TemporaryStorageService,
+        private localEvents: LocalEventsService,
     ) {
         (window as any).nodeRenderComponentRef = { component: this, zone: _ngZone };
         (window as any).ngRender = {
@@ -187,9 +189,9 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         this.optionsHelper.nodesChanged
             .pipe(takeUntil(this.destroyed$))
             .subscribe(() => this.refresh());
-        this.optionsHelper.nodesDeleted
+        this.localEvents.nodesDeleted
             .pipe(takeUntil(this.destroyed$))
-            .subscribe((result) => this.onDelete(result));
+            .subscribe(() => this.close());
     }
 
     public isLoading = true;
@@ -504,10 +506,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         this.nodeApi
             .getNodeParents(this._nodeId)
             .subscribe((nodes) => this.breadcrumbsService.setNodePath(nodes.nodes.reverse()));
-    }
-    onDelete(event: any) {
-        if (event.error) return;
-        this.close();
     }
     addVideoControls() {
         let videoElement: HTMLVideoElement;

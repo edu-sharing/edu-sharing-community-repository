@@ -21,6 +21,7 @@ import { OptionsHelperService } from '../../../core-ui-module/options-helper.ser
 import { DragData } from '../../../services/nodes-drag-drop.service';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 import { canDropOnNode } from '../workspace-utils';
+import { LocalEventsService } from '../../../services/local-events.service';
 
 @Component({
     selector: 'es-workspace-sub-tree',
@@ -83,10 +84,14 @@ export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
     private expandedNodes: string[] = [];
     private destroyed = new Subject<void>();
 
-    constructor(private nodeApi: RestNodeService, private optionsService: OptionsHelperService) {}
+    constructor(
+        private nodeApi: RestNodeService,
+        private optionsService: OptionsHelperService,
+        private localEvents: LocalEventsService,
+    ) {}
 
     ngOnInit(): void {
-        rxjs.merge(this.optionsService.nodesChanged, this.optionsService.nodesDeleted)
+        rxjs.merge(this.optionsService.nodesChanged, this.localEvents.nodesDeleted)
             .pipe(takeUntil(this.destroyed))
             .subscribe(() => this.refresh());
     }

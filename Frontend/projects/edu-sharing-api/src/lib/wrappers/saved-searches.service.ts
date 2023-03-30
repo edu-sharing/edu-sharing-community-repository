@@ -35,7 +35,9 @@ export class SavedSearchesService {
         private search: SearchService,
         private node: NodeService,
         private searchV1: SearchV1Service,
-    ) {}
+    ) {
+        node.nodesChanged.subscribe(() => this.updateSavedSearchesTrigger.next());
+    }
 
     /**
      * Saves the most recent search that was requested via `search`.
@@ -71,8 +73,6 @@ export class SavedSearchesService {
     observeSavedSearches(): Observable<SavedSearch[]> {
         // TODO: Shared saved searches.
         // See https://scm.edu-sharing.com/edu-sharing/community/repository/edu-sharing-community-repository/-/blob/f150529668d32155486687766a703978952a3609/Frontend/src/app/modules/search/search.component.ts#L1411-1422
-        //
-        // TODO: Trigger update when saved-search nodes are edited / deleted.
         return this.savedSearches;
     }
 
