@@ -14,7 +14,6 @@ import {
     NodeEntriesDisplayType,
 } from '../node-entries/entries-model';
 import { NodeDataSource } from '../node-entries/node-data-source';
-import { NodeDataSourceRemote } from '../node-entries/node-data-source-remote';
 import {
     NodeEntriesGlobalService,
     PaginationStrategy,
@@ -23,22 +22,21 @@ import {
 import { OptionItem, Scope } from '../types/option-item';
 import { ListItem } from '../types/list-item';
 import { UIService } from './ui.service';
+import { NodeDataSourceRemote } from '../node-entries/node-data-source-remote';
 
 @Injectable()
 export class NodeEntriesService<T extends NodeEntriesDataType> {
     list: ListEventInterface<T>;
-    readonly dataSource$ = new BehaviorSubject<NodeDataSource<T> | NodeDataSourceRemote<T> | null>(
-        null,
-    );
+    readonly dataSource$ = new BehaviorSubject<NodeDataSource<T> | null>(null);
     /**
      * scope the current list is in, e.g. workspace
      * This is used for additional config injection based on the scope
      */
     scope: Scope;
-    get dataSource(): NodeDataSource<T> | NodeDataSourceRemote<T> {
+    get dataSource(): NodeDataSource<T> {
         return this.dataSource$.value;
     }
-    set dataSource(value: NodeDataSource<T> | NodeDataSourceRemote<T>) {
+    set dataSource(value: NodeDataSource<T>) {
         this.dataSource$.next(value);
     }
     get paginationStrategy(): PaginationStrategy {
@@ -124,7 +122,7 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
         }
         // TODO: focus next item when triggered via button.
         if (this.dataSource instanceof NodeDataSourceRemote) {
-            return this.dataSource.loadMore();
+            return (this.dataSource as NodeDataSourceRemote).loadMore();
         } else {
             if (this.dataSource.hasMore()) {
                 this.fetchData.emit({

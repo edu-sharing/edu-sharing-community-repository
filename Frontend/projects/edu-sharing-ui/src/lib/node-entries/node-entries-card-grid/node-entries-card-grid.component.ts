@@ -19,7 +19,6 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { distinctUntilChanged, map, switchMap, take, takeUntil } from 'rxjs/operators';
 import { GridLayout, NodeEntriesDisplayType } from '../entries-model';
 import { ItemsCap } from '../items-cap';
-import { NodeDataSourceRemote } from '../node-data-source-remote';
 import { NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
 import { SortSelectPanelComponent } from '../sort-select-panel/sort-select-panel.component';
@@ -50,11 +49,11 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
     }
     @ViewChild(SortSelectPanelComponent)
     set sortPanel(value: SortSelectPanelComponent) {
-        if (this.entriesService.dataSource instanceof NodeDataSourceRemote) {
-            setTimeout(() => {
-                (this.entriesService.dataSource as NodeDataSourceRemote<T>).sortPanel = value;
-            });
-        }
+        // if (this.entriesService.dataSource instanceof NodeDataSourceRemote) {
+        setTimeout(() => {
+            (this.entriesService.dataSource as any).sortPanel = value;
+        });
+        // }
     }
     @ViewChildren(CdkDropList) dropListsQuery: QueryList<CdkDropList>;
     @ViewChild('grid') gridRef: ElementRef;

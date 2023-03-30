@@ -60,7 +60,7 @@ import {
 } from '../../../core-module/core.module';
 import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { VideoControlsComponent } from '../../../core-ui-module/components/video-controls/video-controls.component';
-import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
+import { ActionbarComponent } from '../../../../../projects/edu-sharing-ui/src/lib/actionbar/actionbar.component';
 import { OptionsHelperService } from '../../../core-ui-module/options-helper.service';
 import { RestTrackingService } from '../../../core-module/rest/services/rest-tracking.service';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';

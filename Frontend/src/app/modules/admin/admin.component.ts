@@ -58,7 +58,7 @@ import {
 } from 'src/app/features/node-entries/entries-model';
 import { NodeDataSource } from '../../features/node-entries/node-data-source';
 import { WorkspaceExplorerComponent } from '../workspace/explorer/explorer.component';
-import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
+import { ActionbarComponent } from '../../../../projects/edu-sharing-ui/src/lib/actionbar/actionbar.component';
 import { NodeEntriesWrapperComponent } from '../../features/node-entries/node-entries-wrapper.component';
 import { XmlAppPropertiesDialogData } from '../../features/dialogs/dialog-modules/xml-app-properties-dialog/xml-app-properties-dialog-data';
 

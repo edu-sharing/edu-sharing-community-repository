@@ -30,7 +30,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTreeModule } from '@angular/material/tree';
 import { RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
-import { ActionbarComponent } from './components/actionbar/actionbar.component';
+import { ActionbarComponent } from '../../../projects/edu-sharing-ui/src/lib/actionbar/actionbar.component';
 import { AuthorityRowComponent } from './components/authority-search-input/authority-row/authority-row.component';
 import { AuthoritySearchInputComponent } from './components/authority-search-input/authority-search-input.component';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';

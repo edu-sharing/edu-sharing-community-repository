@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Sort, SortDirection } from '@angular/material/sort';
-import { SortEvent, SortPanel } from '../node-data-source-remote';
-import { ListItemSort } from '../../types/list-item';
+import { ListItemSort, SortEvent, SortPanel } from '../../types/list-item';
 
 @Component({
     selector: 'es-sort-select-panel',

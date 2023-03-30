@@ -4,6 +4,7 @@ import {
     Input,
     OnChanges,
     OnInit,
+    Optional,
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
@@ -18,6 +19,7 @@ import { AuthenticationService, ConfigService, Node, RestConstants } from 'ngx-e
 import { ColorHelper, PreferredColor } from '../../util/color-helper';
 import { take } from 'rxjs/internal/operators';
 import { DropdownComponent } from '../../dropdown/dropdown.component';
+import { Toast } from '../../services/abstract/toast.service';
 
 @Component({
     selector: 'es-node-entries-card',
@@ -30,7 +32,6 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
     readonly ClickSource = ClickSource;
     readonly CustomFieldSpecialType = CustomFieldSpecialType;
     @Input() dropdown: DropdownComponent;
-    toast: any = {};
 
     @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
 
@@ -47,9 +48,8 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
         public authenticationService: AuthenticationService,
         public templatesService: NodeEntriesTemplatesService,
         private nodeEntriesGlobalService: NodeEntriesGlobalService,
-    ) // @TODO
-    // private toast: Toast,
-    {}
+        @Optional() private toast: Toast,
+    ) {}
 
     ngOnChanges(changes: SimpleChanges): void {
         this.isCollection = this.nodeHelper.isNodeCollection(changes.node);

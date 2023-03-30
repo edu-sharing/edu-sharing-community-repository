@@ -1,11 +1,11 @@
-@import '../../../core-ui-module/styles/variables';
+@import '../../../assets/scss/mixins';
 
 .actionbar {
     display: flex;
     gap: 10px;
 }
 .actionToggle > button {
-    color: $textLight;
+    color: var(--textLight);
 }
 button {
     min-width: unset;
@@ -33,26 +33,26 @@ button {
     border-left: 1px solid #ddd;
 }
 .more {
-    color: $primary;
+    color: var(--primary);
     background-color: transparent;
 }
 .actionbar-background-dark {
     .mat-button {
-        color: $textOnPrimary;
+        color: rgb(var(--palette-foreground-text-dark));
         &:disabled {
-            color: $textOnPrimaryLight;
+            color: rgba(var(--palette-foreground-text-dark), 0.75);
         }
     }
 }
 .actionbar-background-primary {
     .mat-button {
-        color: $textOnPrimary;
+        color: rgb(var(--palette-foreground-text-dark));
     }
     .mat-flat-button {
         background-color: #fff;
-        color: $primary;
+        color: var(--primary);
         &:disabled {
-            color: $textLight;
+            color: var(--textLight);
         }
     }
 }
@@ -70,20 +70,20 @@ button {
     &.actionbar-background-primary {
         .mat-button {
             background-color: #fff;
-            color: $primary;
+            color: var(--primary);
         }
     }
     &.actionbar-all-flat button {
         background: white;
-        color: $primary;
+        color: var(--primary);
         &:disabled {
-            color: $textLight;
+            color: var(--textLight);
         }
     }
     .more,
     .actionAlways {
         background: white;
-        color: $primary;
+        color: var(--primary);
         display: flex;
         width: 45px;
         height: 45px;
@@ -107,7 +107,7 @@ button {
     }
 }
 
-@media screen and (max-width: ($mobileWidth+$mobileStage*4)) {
+@media screen and (max-width: (calc(var(--mobileWidth) + var(--mobileStage) * 4))) {
     .action-always {
         padding: 0 1rem;
     }

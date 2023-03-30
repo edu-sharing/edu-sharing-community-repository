@@ -626,14 +626,6 @@ export class UIHelper {
         }
     }
 
-    static filterToggleOptions(options: OptionItem[], toggle: boolean) {
-        let result: OptionItem[] = [];
-        for (let option of options) {
-            if (option.isToggle == toggle) result.push(option);
-        }
-        return result;
-    }
-
     /**
      * open a window (blank) to prevent popup blocking
      * @param {RestConnectorService} connector

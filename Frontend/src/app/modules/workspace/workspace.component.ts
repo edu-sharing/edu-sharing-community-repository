@@ -56,7 +56,7 @@ import {
     SearchFieldService,
 } from '../../main/navigation/search-field/search-field.service';
 import { DragData } from '../../../../projects/edu-sharing-ui/src/lib/services/nodes-drag-drop.service';
-import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
+import { ActionbarComponent } from '../../../../projects/edu-sharing-ui/src/lib/actionbar/actionbar.component';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 import { CanDrop } from '../../../../projects/edu-sharing-ui/src/lib/directives/drag-nodes/nodes-drop-target.directive';
 import { TranslationsService } from '../../translations/translations.service';

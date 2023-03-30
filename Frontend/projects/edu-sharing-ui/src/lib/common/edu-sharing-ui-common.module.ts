@@ -21,6 +21,7 @@ import { MatRippleModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { OptionTooltipPipe } from '../pipes/option-tooltip.pipe';
 import { ReplaceCharsPipe } from '../pipes/replace-chars.pipe';
+import { ActionbarComponent } from '../actionbar/actionbar.component';
 
 @NgModule({
     declarations: [
@@ -40,6 +41,7 @@ import { ReplaceCharsPipe } from '../pipes/replace-chars.pipe';
         NodeUrlComponent,
         DropdownComponent,
         OptionTooltipPipe,
+        ActionbarComponent,
     ],
     imports: [
         CommonModule,
@@ -64,6 +66,7 @@ import { ReplaceCharsPipe } from '../pipes/replace-chars.pipe';
         SpinnerComponent,
         NodeUrlComponent,
         DropdownComponent,
+        ActionbarComponent,
     ],
 })
 export class EduSharingUiCommonModule {}

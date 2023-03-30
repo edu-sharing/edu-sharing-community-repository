@@ -1,12 +1,11 @@
 import { trigger } from '@angular/animations';
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { UIService } from '../../../core-module/core.module';
-import { Helper } from '../../../core-module/rest/helper';
-import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
-import { UIConstants } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
-import { OptionItem } from '../../../core-ui-module/option-item';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
+import { UIAnimation } from '../util/ui-animation';
+import { UIConstants } from '../util/ui-constants';
+import { OptionItem } from '../types/option-item';
+import { UIService } from '../services/ui.service';
+import { Helper } from '../util/helper';
 
 @Component({
     selector: 'es-actionbar',
@@ -69,27 +68,26 @@ export class ActionbarComponent implements OnChanges {
     optionsMenu: OptionItem[] = [];
     optionsToggle: OptionItem[] = [];
 
-    constructor(private ui: UIService, private translate: TranslateService) {}
+    constructor(private uiService: UIService, private translate: TranslateService) {}
 
     private prepareOptions(options: OptionItem[]) {
-        options = UIHelper.filterValidOptions(this.ui, Helper.deepCopyArray(options));
+        options = this.uiService.filterValidOptions(Helper.deepCopyArray(options));
         if (options == null) {
             this.optionsAlways = [];
             this.optionsMenu = [];
             return;
         }
-        this.optionsToggle = UIHelper.filterToggleOptions(options, true);
+        this.optionsToggle = this.uiService.filterToggleOptions(options, true);
         this.optionsAlways = this.getActionOptions(
-            UIHelper.filterToggleOptions(options, false),
+            this.uiService.filterToggleOptions(options, false),
         ).slice(0, this.getNumberOptions());
         if (!this.optionsAlways.length) {
-            this.optionsAlways = UIHelper.filterToggleOptions(options, false).slice(
-                0,
-                this.getNumberOptions(),
-            );
+            this.optionsAlways = this.uiService
+                .filterToggleOptions(options, false)
+                .slice(0, this.getNumberOptions());
         }
         this.optionsMenu = this.hideActionOptions(
-            UIHelper.filterToggleOptions(options, false),
+            this.uiService.filterToggleOptions(options, false),
             this.optionsAlways,
         );
         // may causes weird looking

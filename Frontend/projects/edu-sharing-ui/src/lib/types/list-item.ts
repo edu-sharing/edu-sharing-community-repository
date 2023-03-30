@@ -1,3 +1,6 @@
+import { Sort, SortDirection } from '@angular/material/sort';
+import { Observable } from 'rxjs';
+
 export type ListItemType = 'NODE' | 'NODE_PROPOSAL' | 'COLLECTION' | 'ORG' | 'GROUP' | 'USER';
 
 /**
@@ -49,4 +52,16 @@ export class ListItemSort extends ListItem {
     ) {
         super(type, name, config);
     }
+}
+export class SortEvent extends ListItemSort {
+    ascending: boolean;
+}
+
+/**
+ * UI element that allows the user to choose sorting.
+ */
+export interface SortPanel {
+    active: string;
+    direction: SortDirection;
+    readonly sortChange: Observable<Sort>;
 }

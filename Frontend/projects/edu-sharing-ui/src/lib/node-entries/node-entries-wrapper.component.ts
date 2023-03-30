@@ -2,7 +2,6 @@ import {
     AfterViewInit,
     ChangeDetectorRef,
     Component,
-    ComponentFactoryResolver,
     ComponentRef,
     ContentChild,
     ElementRef,
@@ -36,30 +35,28 @@ import {
     NodeEntriesDisplayType,
 } from './entries-model';
 import { NodeDataSource } from './node-data-source';
-import { NodeDataSourceRemote } from './node-data-source-remote';
 import { Helper } from '../util/helper';
 import { NodeEntriesService } from '../services/node-entries.service';
 import { OptionItem, Scope } from '../types/option-item';
 import { NodeHelperService } from '../services/node-helper.service';
 import { ListItem } from '../types/list-item';
 import { TemporaryStorageService } from '../services/temporary-storage.service';
-import { Node, CollectionReference, User } from 'ngx-edu-sharing-api';
+import { CollectionReference, Node, User } from 'ngx-edu-sharing-api';
 import { VirtualNode } from '../types/api-models';
+import { OptionsHelperDataService } from '../services/options-helper-data.service';
+import { UIService } from '../services/ui.service';
+
 @Component({
     selector: 'es-node-entries-wrapper',
     template: `<es-node-entries
         #nodeEntriesComponent
         *ngIf="!customNodeListComponent"
     ></es-node-entries>`,
-    // @TODO
-    //providers: [NodeEntriesService, OptionsHelperService, NodeEntriesTemplatesService],
-    providers: [NodeEntriesService, NodeEntriesTemplatesService],
+    providers: [NodeEntriesService, OptionsHelperDataService, NodeEntriesTemplatesService],
 })
 export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     implements AfterViewInit, OnInit, OnChanges, OnDestroy, ListEventInterface<T>
 {
-    // @TODO
-    optionsHelper: any = {};
     /**
      * title (above) the table/grid
      */
@@ -77,7 +74,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      */
     @ContentChild('overlay') overlayRef: TemplateRef<any>;
     @ViewChild('nodeEntriesComponent') nodeEntriesComponentRef: NodeEntriesComponent<T>;
-    @Input() dataSource: NodeDataSource<T> | NodeDataSourceRemote<T>;
+    @Input() dataSource: NodeDataSource<T>;
     @Input() scope: Scope;
     @Input() columns: ListItem[];
     @Input() configureColumns: boolean;
@@ -138,14 +135,13 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     private destroyed = new Subject<void>();
 
     constructor(
-        private temporaryStorageService: TemporaryStorageService,
-        private componentFactoryResolver: ComponentFactoryResolver,
         private viewContainerRef: ViewContainerRef,
+        private temporaryStorageService: TemporaryStorageService,
         private ngZone: NgZone,
         private entriesService: NodeEntriesService<T>,
-        // @TODO
-        //public optionsHelper: OptionsHelperService,
+        public optionsHelper: OptionsHelperDataService,
         private nodeHelperService: NodeHelperService,
+        private uiService: UIService,
         // @TODO
         // private mainNav: MainNavService,
         private templatesService: NodeEntriesTemplatesService,
@@ -160,8 +156,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         */
 
         this.entriesService.selection.changed.subscribe(() => {
-            // @TODO
-            /*
             if (this.optionsHelper.getData()) {
                 this.optionsHelper.getData().selectedObjects =
                     this.entriesService.selection.selected;
@@ -170,14 +164,12 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
                 console.warn('optionsHelper is not initalized correctly; data is empty');
             }
             this.optionsHelper.refreshComponents();
-             */
         });
     }
 
     ngOnInit(): void {
         if (this.primaryInstance) {
-            // @TODO
-            // this.optionsHelper.registerGlobalKeyboardShortcuts();
+            this.optionsHelper.registerGlobalKeyboardShortcuts();
         }
     }
 
@@ -233,17 +225,13 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         if (this.customNodeListComponent == null) {
             return;
         }
-        // @TODO
-        /*
-        this.componentRef = UIHelper.injectAngularComponent(
-            this.componentFactoryResolver,
+        this.componentRef = this.uiService.injectAngularComponent(
             this.viewContainerRef,
             this.customNodeListComponent,
             this.elementRef.nativeElement,
             // Input bindings are initialized in `ngOnChanges`.
             this.getOutputBindings(),
         );
-         */
     }
     /**
      * Creates a simple map of the output bindings defined in this component.
@@ -337,8 +325,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     }
 
     async initOptionsGenerator(config: ListOptionsConfig) {
-        // @TODO
-        /*
         await this.optionsHelper.initComponents(config.actionbar, this);
         this.optionsHelper.setData({
             scope: this.entriesService.scope,
@@ -349,7 +335,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
             customOptions: config.customOptions,
         });
         this.optionsHelper.refreshComponents();
-         */
     }
 
     ngAfterViewInit(): void {

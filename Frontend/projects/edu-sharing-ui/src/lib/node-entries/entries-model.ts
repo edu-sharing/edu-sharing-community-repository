@@ -5,6 +5,7 @@ import { CustomOptions, OptionItem, Target } from '../types/option-item';
 import { ListItem, ListItemSort } from '../types/list-item';
 import { CanDrop, DragData, DropAction } from '../types/drag-drop';
 import { Node, GenericAuthority } from 'ngx-edu-sharing-api';
+import { ActionbarComponent } from '../actionbar/actionbar.component';
 
 export type NodeRoot =
     | 'MY_FILES'
@@ -31,8 +32,7 @@ export enum InteractionType {
 
 export type ListOptions = { [key in Target]?: OptionItem[] };
 export type ListOptionsConfig = {
-    // @TODO     actionbar?: ActionbarComponent;
-    actionbar?: any;
+    actionbar?: ActionbarComponent;
     parent?: Node;
     customOptions?: CustomOptions;
 };

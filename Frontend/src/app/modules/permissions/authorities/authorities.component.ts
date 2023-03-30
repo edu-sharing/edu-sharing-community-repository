@@ -52,7 +52,7 @@ import { Helper } from '../../../core-module/rest/helper';
 import { trigger } from '@angular/animations';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { ModalDialogOptions } from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
-import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
+import { ActionbarComponent } from '../../../../../projects/edu-sharing-ui/src/lib/actionbar/actionbar.component';
 import { forkJoin } from 'rxjs';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { CsvHelper } from '../../../core-module/csv.helper';

@@ -27,7 +27,6 @@ import {
     takeUntil,
 } from 'rxjs/operators';
 import { ClickSource, InteractionType, NodeEntriesDataType } from '../entries-model';
-import { NodeDataSourceRemote } from '../node-data-source-remote';
 import { NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeEntriesService } from '../../services/node-entries.service';
 import { UIService } from '../../services/ui.service';
@@ -36,6 +35,9 @@ import { ListItem } from '../../types/list-item';
 import { CanDrop, DragData } from '../../types/drag-drop';
 import { Node } from 'ngx-edu-sharing-api';
 import { Target } from '../../types/option-item';
+import { Toast } from '../../services/abstract/toast.service';
+import { DropdownComponent } from '../../dropdown/dropdown.component';
+import { NodeDataSourceRemote } from '../node-data-source-remote';
 
 @Component({
     selector: 'es-node-entries-table',
@@ -53,9 +55,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     @ViewChild(MatSort) sort: MatSort;
     @ViewChild(MatPaginator) paginator: MatPaginator;
     @ViewChild('columnChooserTrigger') columnChooserTrigger: CdkOverlayOrigin;
-    // @TODO
-    dropdown: any = {};
-    // @ViewChild(DropdownComponent) dropdown: DropdownComponent;
+    @ViewChild(DropdownComponent) dropdown: DropdownComponent;
     @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
 
     dropdownLeft: number;
@@ -80,8 +80,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         public entriesService: NodeEntriesService<T>,
         public entriesGlobalService: NodeEntriesGlobalService,
         private applicationRef: ApplicationRef,
-        // @TODO
-        // private toast: Toast,
+        private toast: Toast,
         private changeDetectorRef: ChangeDetectorRef,
         public ui: UIService,
         private ngZone: NgZone,
@@ -94,7 +93,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         void Promise.resolve().then(() => {
             this.registerSortChanges();
             if (this.entriesService.dataSource instanceof NodeDataSourceRemote) {
-                this.entriesService.dataSource.sortPanel = this.sort;
+                (this.entriesService.dataSource as NodeDataSourceRemote).sortPanel = this.sort;
             }
         });
         this.visibleDataColumns$
@@ -137,8 +136,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
             if (this.dropdown.canShowDropdown()) {
                 this.menuTrigger.openMenu();
             } else {
-                // @TODO
-                // this.toast.toast('NO_AVAILABLE_OPTIONS');
+                this.toast.toast('NO_AVAILABLE_OPTIONS');
             }
         });
     }

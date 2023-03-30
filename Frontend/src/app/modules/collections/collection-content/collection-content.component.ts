@@ -55,7 +55,7 @@ import * as EduData from '../../../core-module/core.module';
 import { ConfigurationHelper, ConfigurationService } from '../../../core-module/core.module';
 import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { TranslateService } from '@ngx-translate/core';
-import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
+import { ActionbarComponent } from '../../../../../projects/edu-sharing-ui/src/lib/actionbar/actionbar.component';
 import { ListTableComponent } from '../../../core-ui-module/components/list-table/list-table.component';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {

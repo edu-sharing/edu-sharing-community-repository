@@ -6,6 +6,8 @@ import { CanDrop, DropAction } from '../types/drag-drop';
 import { NodesDropTargetLegacyDirective } from '../directives/nodes-drop-target-legacy.directive';
 import { NodesDropTargetDirective } from '../directives/drag-nodes/nodes-drop-target.directive';
 import { Node } from 'ngx-edu-sharing-api';
+import { Toast } from './abstract/toast.service';
+import { UIService } from './ui.service';
 
 @Injectable({
     providedIn: 'root',
@@ -31,13 +33,8 @@ export class NodesDragDropService {
     get canDrop() {
         return this.canDropSubject.value;
     }
-    // @TODO
-    toast: any = {};
 
-    constructor(private ngZone: NgZone) // @TODO
-    // private toast: Toast,
-    // private uiService: UIService
-    {
+    constructor(private ngZone: NgZone, private toast: Toast, private uiService: UIService) {
         this.registerDropTarget();
         this.registerCanDrop();
         this.registerDropActionSubject();
@@ -139,15 +136,12 @@ export class NodesDragDropService {
     }
 
     private registerDropActionSubject() {
-        // @TODO
-        /*
         this.uiService
             .observeCtrlOrCmdKeyPressedOutsideZone()
             .pipe(map((ctrlOrCmdPressed) => this.getDropAction(ctrlOrCmdPressed)))
             .subscribe((dropAction) =>
                 this.ngZone.run(() => this.dropActionSubject.next(dropAction)),
             );
-         */
     }
 
     private getDropAction(ctrlOrCmdPressed: boolean): DropAction {

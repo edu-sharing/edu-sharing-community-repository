@@ -24,7 +24,7 @@ import {
 import { NodeDataSource } from '../../../features/node-entries/node-data-source';
 import { NodeEntriesWrapperComponent } from '../../../features/node-entries/node-entries-wrapper.component';
 import { SearchFieldService } from '../../../main/navigation/search-field/search-field.service';
-import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
+import { ActionbarComponent } from '../../../../../projects/edu-sharing-ui/src/lib/actionbar/actionbar.component';
 import { RecycleRestoreComponent } from './restore/restore.component';
 
 @Component({

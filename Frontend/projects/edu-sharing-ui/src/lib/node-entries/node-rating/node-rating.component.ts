@@ -1,31 +1,35 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { Node } from 'ngx-edu-sharing-api';
+import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { Node, ConfigService, AuthenticationService, RestConstants } from 'ngx-edu-sharing-api';
+import { Toast } from '../../services/abstract/toast.service';
+import { take } from 'rxjs/internal/operators';
+import { RestHelper } from '../../util/rest-helper';
 @Component({
     selector: 'es-node-rating',
     templateUrl: 'node-rating.component.html',
     styleUrls: ['node-rating.component.scss'],
 })
 export class NodeRatingComponent<T extends Node> implements OnInit {
-    @Input() node: T;
     // @TODO
-    ngOnInit() {}
-    /*
+    ratingService: any = {};
+    @Input() node: T;
     mode: RatingMode;
     hasPermission: boolean;
     hoverStar: number;
     constructor(
-        public connector: RestConnectorService,
         public toast: Toast,
-        public configService: ConfigurationService,
+        public configService: ConfigService,
+        public authenticationService: AuthenticationService,
         public changeDetectorRef: ChangeDetectorRef,
-        public ratingService: RestRatingService,
-    ) {}
+    ) // @TODO
+    // public ratingService: RestRatingService,
+    {}
 
     async ngOnInit() {
-        this.mode = await this.configService.get('rating.mode', 'none').toPromise();
-        this.hasPermission = await this.connector
-            .hasToolPermission(RestConstants.TOOLPERMISSION_RATE_READ)
-            .toPromise();
+        await this.configService.observeConfig().pipe(take(1)).toPromise();
+        this.mode = this.configService.instant('rating.mode', 'none');
+        this.hasPermission = await this.authenticationService.hasToolpermission(
+            RestConstants.TOOLPERMISSION_RATE_READ,
+        );
     }
 
     async toogleLike() {
@@ -88,6 +92,5 @@ export class NodeRatingComponent<T extends Node> implements OnInit {
             this.toast.error(e);
         }
     }
-     */
 }
 export type RatingMode = 'none' | 'likes' | 'stars';

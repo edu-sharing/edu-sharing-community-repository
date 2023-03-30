@@ -13,12 +13,12 @@ import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
 import { NodeEntriesDataType, NodeEntriesDisplayType } from './entries-model';
-import { NodeDataSourceRemote } from './node-data-source-remote';
 import { NodeEntriesGlobalService } from './node-entries-global.service';
 import { NodeEntriesTemplatesService } from './node-entries-templates.service';
 import { NodeEntriesService } from '../services/node-entries.service';
 import { Node, GenericAuthority } from 'ngx-edu-sharing-api';
-import { KeyboardShortcutsService } from '../services/keyboard-shortcuts.service';
+import { KeyboardShortcutsService } from '../services/abstract/keyboard-shortcuts.service';
+import { NodeDataSourceRemote } from './node-data-source-remote';
 
 @Component({
     selector: 'es-node-entries',
@@ -128,7 +128,7 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
         // Connect data source.
         this.entriesService.dataSource$.pipe(takeUntil(this.destroyed)).subscribe((dataSource) => {
             if (dataSource instanceof NodeDataSourceRemote) {
-                dataSource.paginator = paginator;
+                (dataSource as NodeDataSourceRemote).paginator = paginator;
             } else {
                 paginator.length = dataSource?.getTotal();
                 dataSource

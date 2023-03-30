@@ -12,7 +12,7 @@ import {
 } from '../../core-module/core.module';
 import { RestConnectorService } from '../../core-module/core.module';
 import { CustomOptions, OptionItem } from '../../core-ui-module/option-item';
-import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
+import { ActionbarComponent } from '../../../../projects/edu-sharing-ui/src/lib/actionbar/actionbar.component';
 
 @Component({
     selector: 'es-node-list',

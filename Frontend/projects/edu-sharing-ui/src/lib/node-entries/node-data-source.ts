@@ -3,18 +3,30 @@ import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { ItemsCap } from './items-cap';
 import { Node, GenericAuthority, Pagination } from 'ngx-edu-sharing-api';
 import { Helper } from '../util/helper';
+
+export type LoadingState =
+    // The data source is loading data for the first time.
+    | 'initial'
+    // Loading data after change of parameters, i.e., it will replace the current data when done.
+    | 'reset'
+    // Loading another page with unchanged parameters.
+    | 'page'
+    // Loading done.
+    | false;
+
 export class NodeDataSource<T extends Node | GenericAuthority> extends DataSource<T> {
-    private dataStream = new BehaviorSubject<T[]>([]);
+    protected dataStream = new BehaviorSubject<T[]>([]);
     private pagination$ = new BehaviorSubject<Pagination>(null);
-    public isLoadingSubject = new BehaviorSubject<boolean>(false);
-    get isLoading() {
+    // FIXME: type 'boolean' only used for type compatibility with non-remote data source.
+    isLoadingSubject = new BehaviorSubject<LoadingState | boolean>(null);
+    get isLoading(): LoadingState | boolean {
         return this.isLoadingSubject.value;
     }
-    set isLoading(isLoading: boolean) {
-        this.isLoadingSubject.next(isLoading);
+    set isLoading(value: LoadingState | boolean) {
+        this.isLoadingSubject.next(value);
     }
     initialPageLoaded = false;
-    private _itemsCap: ItemsCap<T> | null;
+    protected _itemsCap: ItemsCap<T> | null;
     get itemsCap(): ItemsCap<T> | null {
         return this._itemsCap;
     }
@@ -22,8 +34,8 @@ export class NodeDataSource<T extends Node | GenericAuthority> extends DataSourc
         this._itemsCap = value;
         this.connectRenderData();
     }
-    private renderData = new BehaviorSubject<T[]>([]);
-    private renderDataSubscription: Subscription | null;
+    protected renderData = new BehaviorSubject<T[]>([]);
+    protected renderDataSubscription: Subscription | null;
 
     constructor(initialData: T[] = []) {
         super();

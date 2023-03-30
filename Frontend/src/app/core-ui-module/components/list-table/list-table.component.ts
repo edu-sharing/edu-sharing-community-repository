@@ -59,7 +59,7 @@ import { KeyEvents } from '../../../core-module/ui/key-events';
 import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { UIConstants } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
-import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
+import { ActionbarComponent } from '../../../../../projects/edu-sharing-ui/src/lib/actionbar/actionbar.component';
 import { NodeUrlComponent } from '../../../../../projects/edu-sharing-ui/src/lib/node-url/node-url.component';
 import { NodeTitlePipe } from '../../../../../projects/edu-sharing-ui/src/lib/pipes/node-title.pipe';
 import { DistinctClickEvent } from '../../directives/distinct-click.directive';

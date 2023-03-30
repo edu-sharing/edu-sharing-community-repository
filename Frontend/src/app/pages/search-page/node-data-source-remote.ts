@@ -11,11 +11,10 @@ import { SearchResults } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, ReplaySubject, Subject, Subscription } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil, tap } from 'rxjs/operators';
-import { ItemsCap } from './items-cap';
-import { NodeCache, NodeCacheRange, NodeCacheSlice } from './node-cache';
-import { PaginationStrategy } from './node-entries-global.service';
+import { NodeCache, NodeCacheRange, NodeCacheSlice, NodeDataSource } from 'ngx-edu-sharing-ui';
 import { Node, GenericAuthority } from 'ngx-edu-sharing-api';
-import { ListItemSort } from '../types/list-item';
+import { ListItemSort } from '../../../../projects/edu-sharing-ui/src/lib/types/list-item';
+import { UserModifiableValuesService } from './user-modifiable-values';
 
 type Range = NodeCacheRange;
 
@@ -29,37 +28,8 @@ export interface NodeResponse<T> {
     total: number;
 }
 
-export type LoadingState =
-    // The data source is loading data for the first time.
-    | 'initial'
-    // Loading data after change of parameters, i.e., it will replace the current data when done.
-    | 'reset'
-    // Loading another page with unchanged parameters.
-    | 'page'
-    // Loading done.
-    | false;
-
 // TODO: Rename to something like "fetch implementation" or "request handler"
 export type NodeRemote<T> = (params: NodeRequestParams) => Observable<NodeResponse<T>>;
-
-export interface PaginationConfig {
-    defaultPageSize: number;
-    strategy: PaginationStrategy;
-}
-
-/**
- * UI element that allows the user to choose sorting.
- */
-export interface SortPanel {
-    active: string;
-    direction: SortDirection;
-    readonly sortChange: Observable<Sort>;
-}
-
-export class SortEvent extends ListItemSort {
-    ascending: boolean;
-}
-
 export class NodeDataSourceRemoteState {
     _cache: {};
     _pageIndex: number;
@@ -72,7 +42,7 @@ let nextId = 0;
 export class NodeDataSourceRemote<
     T extends Node | GenericAuthority = Node,
     P extends MatTableDataSourcePaginator = MatTableDataSourcePaginator,
-> extends DataSource<T> {
+> extends NodeDataSourceRemote<T> {
     get paginator(): P | null {
         return this._paginationHandler.paginator;
     }
@@ -91,19 +61,6 @@ export class NodeDataSourceRemote<
     private _remote: NodeRemote<T>;
     private _renderChangesSubscription: Subscription | null = null;
     private _cache = new NodeCache<T>();
-    private dataStream = new BehaviorSubject<T[]>([]);
-    // FIXME: type 'boolean' only used for type compatibility with non-remote data source.
-    isLoadingSubject = new BehaviorSubject<LoadingState | boolean>(null);
-    get isLoading(): LoadingState | boolean {
-        return this.isLoadingSubject.value;
-    }
-    set isLoading(value: LoadingState | boolean) {
-        this.isLoadingSubject.next(value);
-    }
-    private _itemsCap: ItemsCap<T> | null;
-    get itemsCap(): ItemsCap<T> | null {
-        return this._itemsCap;
-    }
     set itemsCap(value: ItemsCap<T> | null) {
         this._itemsCap = value;
         // Only reconnect if already connected.
@@ -111,8 +68,6 @@ export class NodeDataSourceRemote<
             this._connectRenderData();
         }
     }
-    private renderData = new BehaviorSubject<T[]>([]);
-    private renderDataSubscription: Subscription | null;
     // Even if the data source is not in a loading state until initialized, we expect that the
     // required data is prepared elsewhere and we already show the loading spinner.
     private _isLoading = new BehaviorSubject<boolean>(true);
@@ -459,8 +414,6 @@ class PaginationHandler<P extends MatTableDataSourcePaginator = MatTableDataSour
             // Nothing to store in query params when using infinite scrolling.
             return;
         }
-        // @TODO
-        /*
         const userModifiableValue = this._injector.get(UserModifiableValuesService);
         const pageIndex = userModifiableValue.createMapped<number>(
             {
@@ -489,7 +442,6 @@ class PaginationHandler<P extends MatTableDataSourcePaginator = MatTableDataSour
             pageIndex.setUserValue(event.pageIndex);
             pageSize.setUserValue(event.pageSize);
         });
-         */
     }
 
     private _initPaginator(paginator: MatTableDataSourcePaginator): void {

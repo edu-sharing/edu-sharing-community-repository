@@ -2,8 +2,7 @@ import { trigger } from '@angular/animations';
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { MatMenu } from '@angular/material/menu';
 import { UIAnimation } from '../util/ui-animation';
-import { ListItem } from '../types/list-item';
-import { SortEvent } from '../node-entries/node-data-source-remote';
+import { ListItem, SortEvent } from '../types/list-item';
 
 @Component({
     selector: 'es-sort-dropdown',

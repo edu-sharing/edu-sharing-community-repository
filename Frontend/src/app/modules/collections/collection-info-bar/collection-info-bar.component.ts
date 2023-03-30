@@ -13,7 +13,7 @@ import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { Permission } from '../../../core-module/rest/data-object';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
-import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
+import { ActionbarComponent } from '../../../../../projects/edu-sharing-ui/src/lib/actionbar/actionbar.component';
 import { MdsViewerComponent } from '../../../features/mds/mds-viewer/mds-viewer.component';
 
 @Component({

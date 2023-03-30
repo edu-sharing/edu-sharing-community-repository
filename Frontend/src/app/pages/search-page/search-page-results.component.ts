@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Scope } from '../../core-ui-module/option-item';
 import { NodeEntriesDisplayType } from '../../features/node-entries/entries-model';
-import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
+import { ActionbarComponent } from '../../../../projects/edu-sharing-ui/src/lib/actionbar/actionbar.component';
 import { SearchPageResultsService } from './search-page-results.service';
 import { SearchPageService } from './search-page.service';
 

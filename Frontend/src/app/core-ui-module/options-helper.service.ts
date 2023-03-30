@@ -51,7 +51,7 @@ import {
     KeyboardShortcutsService,
     matchesShortcutCondition,
 } from '../services/keyboard-shortcuts.service';
-import { ActionbarComponent } from '../shared/components/actionbar/actionbar.component';
+import { ActionbarComponent } from '../../../projects/edu-sharing-ui/src/lib/actionbar/actionbar.component';
 import { DropdownComponent } from '../../../projects/edu-sharing-ui/src/lib/dropdown/dropdown.component';
 import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
 import {
@@ -66,6 +66,7 @@ import {
 } from './option-item';
 import { Toast } from './toast';
 import { UIHelper } from './ui-helper';
+import { OptionData } from '../../../projects/edu-sharing-ui/src/lib/services/options-helper-data.service';
 
 type DeleteEvent = {
     objects: Node[] | any;
@@ -95,7 +96,6 @@ export class OptionsHelperService implements OnDestroy {
     private actionbar: ActionbarComponent;
     private dropdown: DropdownComponent;
     private queryParams: Params;
-    private data: OptionData;
     private destroyed = new Subject<void>();
 
     constructor(
@@ -223,27 +223,11 @@ export class OptionsHelperService implements OnDestroy {
         }
     }
 
-    async initComponents(
-        actionbar: ActionbarComponent = null,
-        list: ListEventInterface<NodeEntriesDataType> = null,
-        dropdown: DropdownComponent = null,
-    ) {
-        if (!this.mainNavService.getMainNav()) {
-            console.warn('mainnav was not available via singleton service');
-        }
-        this.actionbar = actionbar;
-        this.list = list;
-        this.dropdown = dropdown;
-        if ((await this.iamService.getCurrentUserAsync()).person.authorityName) {
-            await this.networkService.getRepositories().toPromise();
-        }
-    }
-
     /**
      * refresh all bound components with available menu options
      */
-    refreshComponents(refreshListOptions = true) {
-        if (this.data == null) {
+    refreshComponents(refreshListOptions: boolean, data: OptionData) {
+        if (data == null) {
             console.info('options helper refresh called but no data previously bound');
             return;
         }
@@ -310,7 +294,7 @@ export class OptionsHelperService implements OnDestroy {
         return true;
     }
 
-    getAvailableOptions(target: Target, objects: Node[] = null) {
+    getAvailableOptions(target: Target, objects: Node[], data: OptionData) {
         if (target === Target.List) {
             if (objects == null) {
                 // fetch ALL options of ALL items inside list
@@ -318,10 +302,10 @@ export class OptionsHelperService implements OnDestroy {
                 objects = null;
             }
         } else if (target === Target.Actionbar) {
-            objects = this.data.selectedObjects || this.data.activeObjects;
+            objects = data.selectedObjects || data.activeObjects;
         } else if (target === Target.ListDropdown) {
-            if (this.data.activeObjects) {
-                objects = this.data.activeObjects;
+            if (data.activeObjects) {
+                objects = data.activeObjects;
             } else {
                 return null;
             }
@@ -1667,16 +1651,7 @@ export class OptionsHelperService implements OnDestroy {
         return options;
     }
 
-    getData() {
-        return this.data;
-    }
-
-    setData(data: OptionData) {
-        this.data = data;
-        this.wrapOptionCallbacks();
-    }
-
-    private wrapOptionCallbacks(): void {
+    private wrapOptionCallbacks(): OptionData {
         if (this.data.customOptions?.addOptions) {
             for (const option of this.data.customOptions.addOptions) {
                 const callback = option.callback;
@@ -1879,17 +1854,4 @@ export class OptionsHelperService implements OnDestroy {
             }
         });
     }
-}
-
-export interface OptionData {
-    scope: Scope;
-    activeObjects?: Node[] | any[];
-    selectedObjects?: Node[] | any[];
-    allObjects?: Node[] | any[];
-    parent?: Node | any;
-    customOptions?: CustomOptions;
-    /**
-     * custom interceptor to modify the default options array
-     */
-    postPrepareOptions?: (options: OptionItem[], objects: Node[]) => void;
 }
