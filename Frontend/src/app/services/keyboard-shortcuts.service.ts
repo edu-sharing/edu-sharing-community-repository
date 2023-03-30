@@ -5,24 +5,12 @@ import { KeyEvents } from '../core-module/ui/key-events';
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { CardComponent } from '../shared/components/card/card.component';
 
-type Modifier = 'Ctrl/Cmd' | 'Shift' | 'Alt';
-
-export interface KeyboardShortcutCondition {
-    modifiers?: Modifier[];
-    keyCode: string;
-    ignoreWhen?: (event: KeyboardEvent) => boolean;
-}
-
-export interface KeyboardShortcut extends KeyboardShortcutCondition {
-    callback: () => void;
-}
-
 interface ShortcutsRecord {
     shortcuts: KeyboardShortcut[];
 }
 
 @Injectable({ providedIn: 'root' })
-export class KeyboardShortcutsService {
+export class KeyboardShortcutsService implements KeyboardShortcutsService {
     private shortcuts: ShortcutsRecord[] = [];
     private flattenedShortcuts: KeyboardShortcut[] = [];
 

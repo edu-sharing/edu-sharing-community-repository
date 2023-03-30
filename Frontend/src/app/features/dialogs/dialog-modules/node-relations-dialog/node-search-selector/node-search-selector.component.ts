@@ -26,7 +26,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { ListItem } from '../../../../../core-module/ui/list-item';
 import { NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { MdsEditorWrapperComponent } from '../../../../mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 
 type Status = {

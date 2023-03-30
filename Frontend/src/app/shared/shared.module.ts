@@ -36,7 +36,7 @@ import { AuthoritySearchInputComponent } from './components/authority-search-inp
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { CalendarComponent } from './components/calendar/calendar.component';
 import { CardComponent } from './components/card/card.component';
-import { DropdownComponent } from './components/dropdown/dropdown.component';
+import { DropdownComponent } from '../../../projects/edu-sharing-ui/src/lib/dropdown/dropdown.component';
 import { GlobalProgressComponent } from './components/global-progress/global-progress.component';
 import { InfoMessageComponent } from './components/info-message/info-message.component';
 import { InputPasswordComponent } from './components/input-password/input-password.component';
@@ -44,22 +44,20 @@ import { LicenseSourceComponent } from './components/license-source/license-sour
 import { LinkComponent } from './components/link/link.component';
 import { ModalDialogComponent } from './components/modal-dialog/modal-dialog.component';
 import { MultiLineLabelComponent } from './components/multi-line-label/multi-line-label.component';
-import { NodeUrlComponent } from './components/node-url/node-url.component';
-import { SortDropdownComponent } from './components/sort-dropdown/sort-dropdown.component';
+import { NodeUrlComponent } from '../../../projects/edu-sharing-ui/src/lib/node-url/node-url.component';
 import { SpinnerSmallComponent } from './components/spinner-small/spinner-small.component';
-import { SpinnerComponent } from './components/spinner/spinner.component';
+import { SpinnerComponent } from '../../../projects/edu-sharing-ui/src/lib/spinner/spinner.component';
 import { TutorialComponent } from './components/tutorial/tutorial.component';
 import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
 import { WorkspaceCreateConnector } from './dialogs/create-connector/create-connector.component';
 import { BorderBoxObserverDirective } from './directives/border-box-observer.directive';
-import { CheckTextOverflowDirective } from './directives/check-text-overflow.directive';
 import { ElementRefDirective } from './directives/element-ref.directive';
 import { EscapeHtmlPipe } from './directives/escape-html.pipe';
 import { FileDropDirective } from './directives/file-drop';
 import { IconDirective } from './directives/icon.directive';
 import { InfiniteScrollDirective } from './directives/infinite-scroll.directive';
-import { NodesDragDirective } from './directives/nodes-drag.directive';
-import { NodesDropTargetDirective } from './directives/nodes-drop-target.directive';
+import { NodesDragDirective } from '../../../projects/edu-sharing-ui/src/lib/directives/drag-nodes/nodes-drag.directive';
+import { NodesDropTargetDirective } from '../../../projects/edu-sharing-ui/src/lib/directives/drag-nodes/nodes-drop-target.directive';
 import { OnAttributeChangeDirective } from './directives/on-attribute-change.directive';
 import { RegisterCustomPropertyDirective } from './directives/register-custom-property.directive';
 import { SkipTargetDirective } from './directives/skip-target.directive';
@@ -69,18 +67,17 @@ import { AuthorityNamePipe } from './pipes/authority-name.pipe';
 import { BitwisePipe } from './pipes/bitwise.pipe';
 import { FormatSizePipe } from './pipes/file-size.pipe';
 import { FormatDatePipe } from './pipes/format-date.pipe';
-import { NodeIconPipe } from './pipes/node-icon.pipe';
 import { NodeImageSizePipe } from './pipes/node-image-size.pipe';
 import { NodeImagePipe } from './pipes/node-image.pipe';
 import { NodePersonNamePipe } from './pipes/node-person-name.pipe';
-import { NodeTitlePipe } from './pipes/node-title.pipe';
-import { OptionTooltipPipe } from './pipes/option-tooltip.pipe';
+import { OptionTooltipPipe } from '../../../projects/edu-sharing-ui/src/lib/pipes/option-tooltip.pipe';
 import { PermissionNamePipe } from './pipes/permission-name.pipe';
-import { ReplaceCharsPipe } from './pipes/replace-chars.pipe';
+import { ReplaceCharsPipe } from '../../../projects/edu-sharing-ui/src/lib/pipes/replace-chars.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
-import { VCardNamePipe } from './pipes/vcard-name.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
 import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.component';
+import { EduSharingUiModule } from 'edu-sharing-ui';
+import { environment } from '../../environments/environment';
 
 @NgModule({
     declarations: [
@@ -95,7 +92,6 @@ import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.
         BreadcrumbsComponent,
         CalendarComponent,
         CardComponent,
-        CheckTextOverflowDirective,
         DropdownComponent,
         ElementRefDirective,
         EscapeHtmlPipe,
@@ -113,7 +109,6 @@ import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.
         MultiLineLabelComponent,
         NodeImageSizePipe,
         NodePersonNamePipe,
-        NodeTitlePipe,
         NodeUrlComponent,
         OnAttributeChangeDirective,
         OptionTooltipPipe,
@@ -122,18 +117,13 @@ import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.
         ReplaceCharsPipe,
         SafeHtmlPipe,
         SkipTargetDirective,
-        SortDropdownComponent,
         SpinnerComponent,
         SpinnerSmallComponent,
         TutorialComponent,
         UserAvatarComponent,
-        VCardNamePipe,
         VersionLabelPipe,
         WorkspaceCreateConnector,
-        NodesDragDirective,
-        NodesDropTargetDirective,
         CreateLtitoolComponent,
-        NodeIconPipe,
         NodeImagePipe,
     ],
     imports: [
@@ -156,6 +146,7 @@ import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.
         ReactiveFormsModule,
         RouterModule,
         TranslateModule,
+        EduSharingUiModule.forRoot({ production: environment.production }),
     ],
     exports: [
         A11yModule,
@@ -170,7 +161,6 @@ import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.
         BreadcrumbsComponent,
         CalendarComponent,
         CardComponent,
-        CheckTextOverflowDirective,
         CommonModule,
         DragDropModule,
         DropdownComponent,
@@ -213,7 +203,6 @@ import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.
         MultiLineLabelComponent,
         NodeImageSizePipe,
         NodePersonNamePipe,
-        NodeTitlePipe,
         NodeUrlComponent,
         OnAttributeChangeDirective,
         OptionTooltipPipe,
@@ -225,21 +214,19 @@ import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.
         RouterModule,
         SafeHtmlPipe,
         SkipTargetDirective,
-        SortDropdownComponent,
         SpinnerComponent,
         SpinnerSmallComponent,
         TranslateModule,
         TutorialComponent,
         UserAvatarComponent,
-        VCardNamePipe,
         VersionLabelPipe,
         WorkspaceCreateConnector,
         NodesDragDirective,
         NodesDropTargetDirective,
         MatBadgeModule,
         CreateLtitoolComponent,
-        NodeIconPipe,
         NodeImagePipe,
+        EduSharingUiModule,
     ],
 })
 export class SharedModule {}

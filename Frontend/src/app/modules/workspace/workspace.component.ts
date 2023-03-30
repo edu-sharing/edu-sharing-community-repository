@@ -37,8 +37,8 @@ import {
     UIService,
 } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
-import { UIAnimation } from '../../core-module/ui/ui-animation';
-import { UIConstants } from '../../core-module/ui/ui-constants';
+import { UIAnimation } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
+import { UIConstants } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { CardService } from '../../core-ui-module/card.service';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import {
@@ -55,10 +55,10 @@ import {
     SearchEvent,
     SearchFieldService,
 } from '../../main/navigation/search-field/search-field.service';
-import { DragData } from '../../services/nodes-drag-drop.service';
+import { DragData } from '../../../../projects/edu-sharing-ui/src/lib/services/nodes-drag-drop.service';
 import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
-import { CanDrop } from '../../shared/directives/nodes-drop-target.directive';
+import { CanDrop } from '../../../../projects/edu-sharing-ui/src/lib/directives/drag-nodes/nodes-drop-target.directive';
 import { TranslationsService } from '../../translations/translations.service';
 import { WorkspaceExplorerComponent } from './explorer/explorer.component';
 import { WorkspaceTreeComponent } from './tree/tree.component';

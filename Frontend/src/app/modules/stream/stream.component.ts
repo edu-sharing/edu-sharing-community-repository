@@ -30,9 +30,9 @@ import {
     Target,
 } from '../../core-ui-module/option-item';
 import { UIHelper } from '../../core-ui-module/ui-helper';
-import { UIConstants } from '../../core-module/ui/ui-constants';
+import { UIConstants } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { Observable, Subject, Subscription } from 'rxjs';
-import { UIAnimation } from '../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { trigger } from '@angular/animations';
 import { CordovaService } from '../../common/services/cordova.service';
 import * as moment from 'moment';

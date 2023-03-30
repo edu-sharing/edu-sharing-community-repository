@@ -10,7 +10,7 @@ import {
     RestSearchService,
     VCardResult,
 } from '../../../../core-module/core.module';
-import { UIAnimation } from '../../../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { VCard } from '../../../../core-module/ui/VCard';
 import { DateHelper } from '../../../../core-ui-module/DateHelper';
 import { Toast } from '../../../../core-ui-module/toast';

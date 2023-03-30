@@ -15,7 +15,7 @@ import { AuthenticationService, MdsService, Node, UserService } from 'ngx-edu-sh
 import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { filter, takeUntil } from 'rxjs/operators';
-import { UIConstants } from '../../../core-module/ui/ui-constants';
+import { UIConstants } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { NodeDataSource } from '../../../features/node-entries/node-data-source';
 import {
     CollectionReference,
@@ -65,8 +65,8 @@ import {
 import { OptionsHelperService } from '../../../core-ui-module/options-helper.service';
 import { CollectionInfoBarComponent } from '../collection-info-bar/collection-info-bar.component';
 import { DialogType } from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
-import { DragData } from '../../../services/nodes-drag-drop.service';
-import { CanDrop } from '../../../shared/directives/nodes-drop-target.directive';
+import { DragData } from '../../../../../projects/edu-sharing-ui/src/lib/services/nodes-drag-drop.service';
+import { CanDrop } from '../../../../../projects/edu-sharing-ui/src/lib/directives/drag-nodes/nodes-drop-target.directive';
 
 @Component({
     selector: 'es-collection-content',

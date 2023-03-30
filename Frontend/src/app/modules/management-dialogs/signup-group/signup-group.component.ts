@@ -28,7 +28,7 @@ import { RestIamService } from '../../../core-module/core.module';
 import { TranslateService } from '@ngx-translate/core';
 import { MdsComponent } from '../../../features/mds/legacy/mds/mds.component';
 import { RestConstants } from '../../../core-module/core.module';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { trigger } from '@angular/animations';
 import { RestStreamService } from '../../../core-module/core.module';
 import { RestHelper } from '../../../core-module/core.module';

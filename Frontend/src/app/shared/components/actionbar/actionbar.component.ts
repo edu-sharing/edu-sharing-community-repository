@@ -3,8 +3,8 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { UIService } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { UIConstants } from '../../../core-module/ui/ui-constants';
+import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
+import { UIConstants } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { OptionItem } from '../../../core-ui-module/option-item';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 

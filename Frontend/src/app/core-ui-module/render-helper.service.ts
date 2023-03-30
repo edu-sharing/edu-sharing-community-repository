@@ -6,7 +6,7 @@ import { RestConstants } from '../core-module/rest/rest-constants';
 import { RestUsageService } from '../core-module/rest/services/rest-usage.service';
 import { ListItem } from '../core-module/ui/list-item';
 import { CommentsListComponent } from '../modules/management-dialogs/node-comments/comments-list/comments-list.component';
-import { SpinnerComponent } from '../shared/components/spinner/spinner.component';
+import { SpinnerComponent } from '../../../projects/edu-sharing-ui/src/lib/spinner/spinner.component';
 import { UIHelper } from './ui-helper';
 import { MdsNodeRelationsWidgetComponent } from '../common/ui/node-render/node-relations/node-relations-widget.component';
 import { replaceElementWithDiv } from '../features/mds/mds-editor/util/replace-element-with-div';

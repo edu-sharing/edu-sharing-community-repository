@@ -42,8 +42,11 @@ import {
 } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
-import { UIAnimation } from '../../core-module/ui/ui-animation';
-import { OPEN_URL_MODE, UIConstants } from '../../core-module/ui/ui-constants';
+import { UIAnimation } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
+import {
+    OPEN_URL_MODE,
+    UIConstants,
+} from '../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import {
     CustomOptions,
     DefaultGroups,

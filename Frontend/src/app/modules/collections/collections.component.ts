@@ -37,7 +37,7 @@ import {
 import { Toast } from '../../core-ui-module/toast';
 import { Scope } from '../../core-ui-module/option-item';
 import { UIHelper } from '../../core-ui-module/ui-helper';
-import { UIConstants } from '../../core-module/ui/ui-constants';
+import { UIConstants } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { Location } from '@angular/common';
@@ -45,7 +45,7 @@ import { Helper } from '../../core-module/rest/helper';
 import { ColorHelper, PreferredColor } from '../../core-module/ui/color-helper';
 import { HttpClient } from '@angular/common/http';
 import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
-import { SortEvent } from '../../shared/components/sort-dropdown/sort-dropdown.component';
+import { SortEvent } from '../../../../projects/edu-sharing-ui/src/lib/sort-dropdown/sort-dropdown.component';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { CollectionInfoBarComponent } from './collection-info-bar/collection-info-bar.component';
 import { CollectionContentComponent } from './collection-content/collection-content.component';

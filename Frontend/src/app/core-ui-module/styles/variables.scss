@@ -14,19 +14,18 @@ $warning: #cd2457 !default;
 $warningMedium: #e98c1b !default;
 $toastLeftError: #c15d5d !default;
 $toastPrimary: #5c5c5c !default;
-$textLight: #585858 !default;
+$textLight: var(--textLight) !default;
 $textMediumLight: #888 !default;
 $textVeryLight: #aaa !default;
-$textMain: #383838 !default;
+$textMain: var(--textMain) !default;
 $textRenderingLabels: #6f6f6f !default;
 $fontSizeXLarge: 120% !default;
 $fontSizeLarge: 110% !default;
 $fontSizeSmall: 90% !default;
-$fontSizeXSmall: 85% !default;
+$fontSizeXSmall: var(--fontSizeXSmall) !default;
 $backgroundColor: #fff !default;
 $workspaceSidebarWidth: 300px !default;
 $workspaceInheritColor: #42ca8d !default;
-$nodeVirtualColor: #42ca8d !default;
 $editorialCollectionsBackground: #f5ec19 !default;
 $itemSelectedBackground: $primaryVeryLight !default;
 $itemSelectedTextColor: $primaryMediumDark !default;
@@ -41,14 +40,6 @@ $workspaceSelectedBackgroundEffect: linear-gradient(
         var(--primary) 5px,
         rgba(0, 0, 0, 0) 5px,
         rgba(0, 0, 0, 0) 5px
-    )
-    no-repeat !default;
-$listItemSelectedBackgroundEffect: linear-gradient(
-        to right,
-        var(--primary) 0,
-        var(--primary) 5px,
-        rgb(var(--palette-primary-50)) 5px,
-        rgb(var(--palette-primary-50)) 5px
     )
     no-repeat !default;
 $workspaceTreeBackground: #f7f7f7 !default;
@@ -77,29 +68,26 @@ $commentsActionsSeperatorLineColor: $backgroundColor !default;
 $noResultsColor: rgba(black, 0.54) !default;
 $darkenColor: rgba(0, 0, 0, 0.75) !default;
 $darkenLightColor: rgba(0, 0, 0, 0.25) !default;
-$colorStatusPositive: #40bf8e !default;
 $colorStatusWarning: $warningMedium !default;
 $colorStatusRecommended: #acd331 !default;
 $colorStatusNeutral: #777 !default;
-$colorStatusNegative: $warning !default;
-$colorStarActive: #ba7c00 !default;
+$colorStarActive: var(--colorStarActive) !default;
 $focusColor: rgb(var(--palette-primary-300)) !default;
 $placeholderColor: #767676 !default;
 $focusWidth: 2px !default;
-$cardWidth: 220px !default;
 $cardHeight: 300px !default;
 $listItemHeight: 70px !default;
 $listCardSmallHeight: 100px !default;
 $listHeadingHeight: 36px !default;
 $cardPadding: 25px !default;
-$transitionNormal: 0.2s !default;
-$mobileWidth: 700px !default;
+$transitionNormal: var(--transitionNormal) !default;
+$mobileWidth: var(--mobileWidth) !default;
 $mobileHeight: 750px !default;
 $mobileHeightWithKeyboard: 550px !default;
 $mobileHeightLandscape: 400px !default;
 $mobileWidthPortrait: 400px !default;
 // this factor should be multiplied by a natural number, e.g. *3 means stage 3 (relatively early)
-$mobileStage: 100px !default;
+$mobileStage: var(--mobileStage) !default;
 $dialogZIndex: 130 !default;
 // before the top bar on mobile, but behind the mobile tabs and the top bar on desktop
 $dialogNonModalZIndex: 90 !default; // before the top bar on mobile, but behind the mobile tabs and the top bar on desktop

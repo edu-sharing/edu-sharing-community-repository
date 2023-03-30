@@ -34,7 +34,7 @@ import {
 import { Params, Router } from '@angular/router';
 import { OptionItem, Scope } from '../../core-ui-module/option-item';
 import { Toast } from '../../core-ui-module/toast';
-import { UIAnimation } from '../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { trigger } from '@angular/animations';
 import { ActionbarHelperService } from '../../common/services/actionbar-helper';
 import { CordovaService } from '../../common/services/cordova.service';

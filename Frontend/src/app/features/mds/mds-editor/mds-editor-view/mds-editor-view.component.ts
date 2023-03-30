@@ -22,7 +22,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { BehaviorSubject, combineLatest, Observable, ReplaySubject, Subject } from 'rxjs';
 import { filter, first, map, take, takeUntil } from 'rxjs/operators';
 import { Node } from '../../../../core-module/core.module';
-import { UIAnimation } from '../../../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { MdsWidgetComponent } from '../../mds-viewer/widget/mds-widget.component';
 import { JUMP_MARK_POSTFIX } from '../../../dialogs/card-dialog/card-dialog-container/jump-marks-handler.directive';

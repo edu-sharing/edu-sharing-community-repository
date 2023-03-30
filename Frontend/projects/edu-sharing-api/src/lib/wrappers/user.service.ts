@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, using } from 'rxjs';
 import { first, map, startWith, switchMap, take, tap } from 'rxjs/operators';
 import { User, UserEntry, UserProfileEdit } from '../api/models';
 import { IamV1Service } from '../api/services';
 import { HOME_REPOSITORY, ME } from '../constants';
 import { switchReplay } from '../utils/rxjs-operators/switch-replay';
 import { AuthenticationService, LoginInfo } from './authentication.service';
+import * as Constants from '../constants';
 
 export { UserEntry, User };
 
@@ -43,6 +44,26 @@ export class UserService {
         } else {
             return this.getUserInner(userId, repository);
         }
+    }
+
+    getUserPreferences(userId: string = Constants.ME, repository: string = HOME_REPOSITORY) {
+        return this.iamApi
+            .getPreferences({
+                repository,
+                person: userId,
+            })
+            .pipe(map((p) => JSON.parse(p.preferences as string)));
+    }
+    setUserPreferences(
+        preferences: any,
+        userId: string = Constants.ME,
+        repository: string = HOME_REPOSITORY,
+    ) {
+        return this.iamApi.setPreferences({
+            repository,
+            person: userId,
+            body: JSON.stringify(preferences),
+        });
     }
 
     /**

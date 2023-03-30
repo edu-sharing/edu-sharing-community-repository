@@ -9,7 +9,7 @@ import { Observable, Subject } from 'rxjs';
 import { AccessScope, Application, LoginResult, Service } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
 import { RestHelper } from '../../core-module/core.module';
-import { UIConstants } from '../../core-module/ui/ui-constants';
+import { UIConstants } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { RestConstants } from '../../core-module/core.module';
 import { HttpClient } from '@angular/common/http';
 import { MainNavService } from '../../main/navigation/main-nav.service';

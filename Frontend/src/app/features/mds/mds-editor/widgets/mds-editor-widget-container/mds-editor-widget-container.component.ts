@@ -20,7 +20,7 @@ import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { MdsWidget } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { distinctUntilChanged, map, startWith, takeUntil } from 'rxjs/operators';
-import { UIAnimation } from '../../../../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { ViewInstanceService } from '../../mds-editor-view/view-instance.service';

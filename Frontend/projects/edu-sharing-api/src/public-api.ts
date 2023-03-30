@@ -9,6 +9,7 @@ export {
 export * from './lib/constants';
 export * from './lib/edu-sharing-api.module';
 export * from './lib/models';
+export * from './lib/model-overrides/proposals';
 export * from './lib/wrappers/about.service';
 export * from './lib/wrappers/api-helpers.service';
 export * from './lib/wrappers/authentication.service';
@@ -25,7 +26,9 @@ export * from './lib/wrappers/nodeList.service';
 export * from './lib/wrappers/relation.service';
 export * from './lib/wrappers/saved-searches.service';
 export * from './lib/wrappers/search.service';
+export * from './lib/wrappers/session-storage.service';
 export * from './lib/wrappers/user.service';
+export * from './lib/rest-constants';
 
 // Unwrapped API services.
 //

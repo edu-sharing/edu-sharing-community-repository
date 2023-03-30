@@ -3,8 +3,8 @@ import { DropSource, NodeRoot } from 'src/app/features/node-entries/entries-mode
 import { Node } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { OptionItem } from '../../../core-ui-module/option-item';
-import { DragData } from '../../../services/nodes-drag-drop.service';
-import { CanDrop } from '../../../shared/directives/nodes-drop-target.directive';
+import { DragData } from '../../../../../projects/edu-sharing-ui/src/lib/services/nodes-drag-drop.service';
+import { CanDrop } from '../../../../../projects/edu-sharing-ui/src/lib/directives/drag-nodes/nodes-drop-target.directive';
 import { WorkspaceMainComponent } from '../workspace.component';
 import { WorkspaceSubTreeComponent } from '../sub-tree/sub-tree.component';
 

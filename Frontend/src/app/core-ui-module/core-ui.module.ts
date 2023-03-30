@@ -25,8 +25,8 @@ import { UserTileComponent } from './components/user-tile/user-tile.component';
 import { DurationPipe } from './components/video-controls/duration.pipe';
 import { VideoControlsComponent } from './components/video-controls/video-controls.component';
 import { DistinctClickDirective } from './directives/distinct-click.directive';
-import { NodesDragSourceDirective } from './directives/drag-nodes/nodes-drag-source.directive';
-import { NodesDropTargetDirective } from './directives/drag-nodes/nodes-drop-target.directive';
+import { NodesDragSourceDirective } from '../../../projects/edu-sharing-ui/src/lib/directives/drag-nodes/nodes-drag-source.directive';
+import { NodesDropTargetLegacyDirective } from '../../../projects/edu-sharing-ui/src/lib/directives/nodes-drop-target-legacy.directive';
 import { TitleDirective } from './directives/title.directive';
 import { NodeHelperService } from './node-helper.service';
 import { OptionsHelperService } from './options-helper.service';
@@ -59,8 +59,6 @@ import { NodeEntriesModule } from '../features/node-entries/node-entries.module'
         MdsNodeRelationsWidgetComponent,
         ToastMessageComponent,
         UrlPipe,
-        NodesDragSourceDirective,
-        NodesDropTargetDirective,
         ImageConfigDirective,
         ListOptionItemComponent,
         DistinctClickDirective,
@@ -113,8 +111,6 @@ import { NodeEntriesModule } from '../features/node-entries/node-entries.module'
         UserTileComponent,
         CollectionChooserComponent,
         UrlPipe,
-        NodesDragSourceDirective,
-        NodesDropTargetDirective,
         TitleDirective,
     ],
 })

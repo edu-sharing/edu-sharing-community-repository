@@ -26,7 +26,7 @@ import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { RestHelper } from '../../../../../core-module/rest/rest-helper';
 import { RestConnectorService } from '../../../../../core-module/rest/services/rest-connector.service';
 import { RestNodeService } from '../../../../../core-module/rest/services/rest-node.service';
-import { OPEN_URL_MODE } from '../../../../../core-module/ui/ui-constants';
+import { OPEN_URL_MODE } from '../../../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
 import { Toast } from '../../../../../core-ui-module/toast';
 import { UIHelper } from '../../../../../core-ui-module/ui-helper';

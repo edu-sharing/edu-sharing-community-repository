@@ -10,7 +10,7 @@ import {
 } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { forkJoin, from, Observable } from 'rxjs';
 import { MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { Helper } from '../../../../core-module/rest/helper';

@@ -12,7 +12,7 @@ import { RestIamService } from '../../core-module/core.module';
 import { IamUser, User } from '../../core-module/core.module';
 import { AuthorityNamePipe } from '../../shared/pipes/authority-name.pipe';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { UserProfileComponent } from '../../main/navigation/user-profile/user-profile.component';
 import { RestConstants } from '../../core-module/core.module';
 import { RestHelper } from '../../core-module/core.module';

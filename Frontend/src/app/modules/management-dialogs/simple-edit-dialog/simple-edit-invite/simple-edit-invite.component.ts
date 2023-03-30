@@ -19,14 +19,14 @@ import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { RestIamService } from '../../../../core-module/core.module';
 import { TranslateService } from '@ngx-translate/core';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { RestConstants } from '../../../../core-module/core.module';
 import { Router } from '@angular/router';
 import { RestHelper } from '../../../../core-module/core.module';
 import { RestConnectorsService } from '../../../../core-module/core.module';
 import { FrameEventsService } from '../../../../core-module/core.module';
 
-import { OPEN_URL_MODE } from '../../../../core-module/ui/ui-constants';
+import { OPEN_URL_MODE } from '../../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { BridgeService } from '../../../../core-bridge-module/bridge.service';
 import { forkJoin, Observable, Observer } from 'rxjs';
 import { MatButtonToggleGroup } from '@angular/material/button-toggle';

@@ -15,7 +15,7 @@ import {
     EventListener,
     FrameEventsService,
 } from '../../../../core-module/rest/services/frame-events.service';
-import { UIAnimation } from '../../../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { ConfigurationService, RestConnectorService } from '../../../../core-module/core.module';
 import { first } from 'rxjs/operators';
 import { LoadingScreenService } from '../../../../main/loading-screen/loading-screen.service';

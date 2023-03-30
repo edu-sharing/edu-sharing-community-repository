@@ -38,14 +38,14 @@ import {
     ViewContainerRef,
 } from '@angular/core';
 import { Helper } from '../../core-module/rest/helper';
-import { UIConstants } from '../../core-module/ui/ui-constants';
+import { UIConstants } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { SuggestItem } from '../../common/ui/autocomplete/autocomplete.component';
 import { Observable, Observer } from 'rxjs';
 import { CustomHelper } from '../../common/custom-helper';
 import { DateHelper } from '../../core-ui-module/DateHelper';
 import { CsvHelper } from '../../core-module/csv.helper';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { Scope } from '../../core-ui-module/option-item';
 import { AboutService, NetworkService } from 'ngx-edu-sharing-api';
 import { AuthoritySearchMode } from '../../shared/components/authority-search-input/authority-search-input.component';

@@ -8,7 +8,7 @@ import {
     ElementRef,
     HostListener,
 } from '@angular/core';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { trigger } from '@angular/animations';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { Helper } from '../../../core-module/rest/helper';

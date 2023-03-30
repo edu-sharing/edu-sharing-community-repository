@@ -21,7 +21,7 @@ import {
     RestHelper,
     SearchRequestCriteria,
 } from '../../../../core-module/core.module';
-import { OPEN_URL_MODE } from '../../../../core-module/ui/ui-constants';
+import { OPEN_URL_MODE } from '../../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
 import { Toast } from '../../../../core-ui-module/toast';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';

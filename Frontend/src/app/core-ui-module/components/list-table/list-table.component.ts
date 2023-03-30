@@ -56,14 +56,17 @@ import {
 import { Helper } from '../../../core-module/rest/helper';
 import { ColorHelper, PreferredColor } from '../../../core-module/ui/color-helper';
 import { KeyEvents } from '../../../core-module/ui/key-events';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { UIConstants } from '../../../core-module/ui/ui-constants';
+import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
+import { UIConstants } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
-import { NodeUrlComponent } from '../../../shared/components/node-url/node-url.component';
-import { NodeTitlePipe } from '../../../shared/pipes/node-title.pipe';
+import { NodeUrlComponent } from '../../../../../projects/edu-sharing-ui/src/lib/node-url/node-url.component';
+import { NodeTitlePipe } from '../../../../../projects/edu-sharing-ui/src/lib/pipes/node-title.pipe';
 import { DistinctClickEvent } from '../../directives/distinct-click.directive';
-import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
+import {
+    DragData,
+    DropData,
+} from '../../../../../projects/edu-sharing-ui/src/lib/directives/drag-nodes/drag-nodes';
 import { NodeHelperService } from '../../node-helper.service';
 import { CustomOptions, OptionItem, Scope, Target } from '../../option-item';
 import { OptionsHelperService } from '../../options-helper.service';

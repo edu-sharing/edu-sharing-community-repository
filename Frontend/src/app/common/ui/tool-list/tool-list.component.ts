@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { BrowserModule, DomSanitizer } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { trigger } from '@angular/animations';
 import { Node } from '../../../core-module/core.module';
 

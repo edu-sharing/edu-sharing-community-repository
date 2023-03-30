@@ -36,8 +36,11 @@ import {
     TemporaryStorageService,
     UIService,
 } from '../../../core-module/core.module';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { OPEN_URL_MODE, UIConstants } from '../../../core-module/ui/ui-constants';
+import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
+import {
+    OPEN_URL_MODE,
+    UIConstants,
+} from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { OptionGroup, OptionItem } from '../../../core-ui-module/option-item';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';

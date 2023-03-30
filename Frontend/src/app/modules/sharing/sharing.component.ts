@@ -22,7 +22,10 @@ import {
     OptionItem,
     Scope,
 } from '../../core-ui-module/option-item';
-import { OPEN_URL_MODE, UIConstants } from '../../core-module/ui/ui-constants';
+import {
+    OPEN_URL_MODE,
+    UIConstants,
+} from '../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { Toast } from '../../core-ui-module/toast';
 import { Helper } from '../../core-module/rest/helper';
 import { UIHelper } from '../../core-ui-module/ui-helper';

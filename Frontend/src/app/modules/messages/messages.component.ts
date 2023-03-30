@@ -5,7 +5,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { RestConnectorService } from '../../core-module/core.module';
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { RouterComponent } from '../../router/router.component';
-import { UIConstants } from '../../core-module/ui/ui-constants';
+import { UIConstants } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 @Component({
     selector: 'es-messages-main',
     templateUrl: 'messages.component.html',

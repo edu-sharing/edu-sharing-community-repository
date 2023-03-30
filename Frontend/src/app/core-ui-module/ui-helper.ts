@@ -1,6 +1,9 @@
 import { forkJoin as observableForkJoin, Observable, Observer, of } from 'rxjs';
 import { catchError, first, take } from 'rxjs/operators';
-import { OPEN_URL_MODE, UIConstants } from '../core-module/ui/ui-constants';
+import {
+    OPEN_URL_MODE,
+    UIConstants,
+} from '../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { ConfigurationService } from '../core-module/rest/services/configuration.service';
 import { TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
@@ -50,12 +53,8 @@ export class UIHelper {
     static COPY_URL_PARAMS = ['mainnav', 'reurl', 'reurlTypes', 'reurlCreate', 'applyDirectories'];
 
     public static evaluateMediaQuery(type: string, value: number) {
-        if (type == UIConstants.MEDIA_QUERY_MAX_WIDTH) return value > window.innerWidth;
-        if (type == UIConstants.MEDIA_QUERY_MIN_WIDTH) return value < window.innerWidth;
-        if (type == UIConstants.MEDIA_QUERY_MAX_HEIGHT) return value > window.innerHeight;
-        if (type == UIConstants.MEDIA_QUERY_MIN_HEIGHT) return value < window.innerHeight;
-        console.warn('Unsupported media query ' + type);
-        return true;
+        // @TODO
+        UIService.evaluateMediaQuery();
     }
 
     public static getBlackWhiteContrast(color: string) {}
@@ -625,23 +624,6 @@ export class UIHelper {
                 return window.open(url, '_blank');
             }
         }
-    }
-
-    static filterValidOptions(ui: UIService, options: OptionItem[]) {
-        if (options == null) return null;
-        options = options.filter((value) => value != null);
-        let optionsFiltered: OptionItem[] = [];
-        for (let option of options) {
-            if (
-                (!option.onlyMobile || (option.onlyMobile && ui.isMobile())) &&
-                (!option.onlyDesktop || (option.onlyDesktop && !ui.isMobile())) &&
-                (!option.mediaQueryType ||
-                    (option.mediaQueryType &&
-                        UIHelper.evaluateMediaQuery(option.mediaQueryType, option.mediaQueryValue)))
-            )
-                optionsFiltered.push(option);
-        }
-        return optionsFiltered;
     }
 
     static filterToggleOptions(options: OptionItem[], toggle: boolean) {

@@ -4,7 +4,7 @@
 
 import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
-import { UIConstants } from '../../../core-module/ui/ui-constants';
+import { UIConstants } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { DomSanitizer } from '@angular/platform-browser';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { Group, RestConnectorService, UserSimple } from '../../../core-module/core.module';

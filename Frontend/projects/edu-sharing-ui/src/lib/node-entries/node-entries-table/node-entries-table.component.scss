@@ -1,0 +1,143 @@
+@use 'sass:color';
+@import '../../../../assets/scss/mixins';
+
+$defaultColumnWidth: 120px;
+$minColumnWidth: 30%;
+$rowHeight: 58px;
+
+:host {
+    display: flex;
+    flex-direction: column;
+    ::ng-deep {
+        mat-cell es-node-url {
+            width: 100%;
+            a {
+                color: #000;
+            }
+            &.cdk-keyboard-focused {
+                @include setGlobalKeyboardFocus('border');
+            }
+        }
+        es-list-base {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            display: flex;
+            width: 100%;
+            height: $rowHeight;
+            align-items: center;
+        }
+    }
+}
+mat-header-cell,
+mat-cell {
+    margin: 0 3px;
+    // do not fix the "primary/title" column
+    &:not(.mat-column-primary) {
+        flex: 0 $defaultColumnWidth;
+    }
+    &.mat-column-primary {
+        min-width: $minColumnWidth;
+    }
+    &.mat-column-select {
+        flex: 0 54px;
+        min-width: 54px;
+    }
+    &.mat-column-icon {
+        flex: 0 65px;
+        min-width: 65px;
+        justify-content: center;
+    }
+    &.mat-column-actions {
+        flex: 0 50px;
+        min-width: 50px;
+        display: flex;
+        justify-content: flex-end;
+        padding-right: 5px;
+    }
+}
+
+.mat-row {
+    &.dynamic-single-click {
+        cursor: pointer;
+        &:hover {
+            background-color: rgb(var(--palette-primary-50));
+        }
+    }
+    &.mat-row-selected {
+        background: var(--listItemSelectedBackgroundEffect);
+    }
+    // Overrides `.mat-row-selected` background by order
+    &.mat-row-virtual {
+        background: linear-gradient(to right, var(--nodeVirtualColor) 5px, transparent 5px)
+            no-repeat;
+        border-right: 2px dashed var(--nodeVirtualColorLight);
+    }
+    &.mat-row-virtual-first {
+        border-top: 2px dashed var(--nodeVirtualColorLight);
+    }
+    &.mat-row-virtual-last {
+        border-bottom: 2px dashed var(--nodeVirtualColorLight);
+    }
+    &.selected-when-dragging {
+        opacity: 0.5; // Same as .cdk-drag-placeholder
+    }
+}
+.dropdown-dummy {
+    position: fixed;
+}
+.childobjects {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 15px;
+    display: inline-flex;
+    align-items: center;
+    min-width: 35px;
+    min-height: 22px;
+    justify-content: center;
+    cursor: default;
+    user-select: none;
+    padding: 2px 8px;
+    margin-left: 5px;
+    > .childobject-count {
+        display: inline-flex;
+        align-items: center;
+        > i {
+            font-size: 13px;
+            margin-left: 4px;
+        }
+    }
+}
+.cell-icon {
+    .icon-bg {
+        width: 30px;
+        height: 30px;
+        padding: 3px;
+        margin: 1px 0;
+        background-color: #fff;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        @include materialShadowSmall();
+        > img {
+            width: 18px;
+            height: auto;
+        }
+        > i {
+            color: #666;
+            font-size: 18px;
+        }
+    }
+}
+.mat-column-link {
+    flex: 0 60px;
+    a {
+        display: flex;
+        justify-content: center;
+    }
+}
+
+.load-more {
+    display: flex;
+    justify-content: center;
+}

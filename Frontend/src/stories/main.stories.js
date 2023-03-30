@@ -97,8 +97,8 @@ import { ReplaceCharsPipe } from '../app/core-ui-module/pipes/replace-chars.pipe
 import { PermissionNamePipe } from '../app/core-ui-module/pipes/permission-name.pipe';
 import { UrlPipe } from '../app/core-ui-module/pipes/url.pipe';
 import { AuthorityAffiliationPipe } from '../app/core-ui-module/pipes/authority-affiliation.pipe';
-import { NodesDragSourceDirective } from '../app/core-ui-module/directives/drag-nodes/nodes-drag-source.directive';
-import { NodesDropTargetDirective } from '../app/core-ui-module/directives/drag-nodes/nodes-drop-target.directive';
+import { NodesDragSourceDirective } from '../../projects/edu-sharing-ui/src/lib/directives/drag-nodes/nodes-drag-source.directive';
+import { NodesDropTargetLegacyDirective } from '../../projects/edu-sharing-ui/src/lib/directives/nodes-drop-target-legacy.directive';
 import { SafeHtmlPipe } from '../app/core-ui-module/pipes/safe-html.pipe';
 import { ListOptionItemComponent } from '../app/core-ui-module/components/list-option-item/list-option-item.component';
 import { A11yModule } from '@angular/cdk/a11y';

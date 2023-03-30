@@ -1,7 +1,7 @@
 import { trigger } from '@angular/animations';
 import { Component, EventEmitter, Input, NgZone, OnInit, Output, ViewChild } from '@angular/core';
 import { ConfigurationService, DialogButton } from '../../../core-module/core.module';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { CordovaService } from '../../services/cordova.service';
 import { ThemePalette } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';

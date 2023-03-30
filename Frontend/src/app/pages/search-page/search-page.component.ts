@@ -7,7 +7,7 @@ import * as rxjs from 'rxjs';
 import { Observable, Subject } from 'rxjs';
 import { filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { Node, Repository, RestConstants, UIConstants } from '../../core-module/core.module';
-import { UIAnimation } from '../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { Scope } from '../../core-ui-module/option-item';
 import { CardDialogRef } from '../../features/dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../../features/dialogs/dialogs.service';

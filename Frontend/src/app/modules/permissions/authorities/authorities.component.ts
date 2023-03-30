@@ -46,7 +46,7 @@ import {
     OptionItem,
     Scope,
 } from '../../../core-ui-module/option-item';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { SuggestItem } from '../../../common/ui/autocomplete/autocomplete.component';
 import { Helper } from '../../../core-module/rest/helper';
 import { trigger } from '@angular/animations';

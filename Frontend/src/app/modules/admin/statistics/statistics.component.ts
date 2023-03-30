@@ -24,7 +24,7 @@ import { SessionStorageService } from '../../../core-module/rest/services/sessio
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
 import { UIService } from '../../../core-module/rest/services/ui.service';
 import { MdsHelper } from '../../../core-module/rest/mds-helper';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { trigger } from '@angular/animations';
 import { ListCountsComponent } from 'src/app/features/list-items/list-counts/list-counts.component';
 

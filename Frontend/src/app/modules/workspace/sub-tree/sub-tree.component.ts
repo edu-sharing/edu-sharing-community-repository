@@ -15,11 +15,11 @@ import { takeUntil } from 'rxjs/operators';
 import { DropSource } from 'src/app/features/node-entries/entries-model';
 import { Node, NodeList, RestConstants, RestNodeService } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { OptionItem, Scope } from '../../../core-ui-module/option-item';
 import { OptionsHelperService } from '../../../core-ui-module/options-helper.service';
-import { DragData } from '../../../services/nodes-drag-drop.service';
-import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
+import { DragData } from '../../../../../projects/edu-sharing-ui/src/lib/services/nodes-drag-drop.service';
+import { DropdownComponent } from '../../../../../projects/edu-sharing-ui/src/lib/dropdown/dropdown.component';
 import { canDropOnNode } from '../workspace-utils';
 
 @Component({

@@ -18,7 +18,7 @@ import { FrameEventsService } from '../../../core-module/core.module';
 import { Title } from '@angular/platform-browser';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { SessionStorageService } from '../../../core-module/core.module';
-import { UIConstants } from '../../../core-module/ui/ui-constants';
+import { UIConstants } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { Helper } from '../../../core-module/rest/helper';
 import { RestHelper } from '../../../core-module/core.module';
 import { PlatformLocation } from '@angular/common';

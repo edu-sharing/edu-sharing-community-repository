@@ -52,7 +52,7 @@ import {
     matchesShortcutCondition,
 } from '../services/keyboard-shortcuts.service';
 import { ActionbarComponent } from '../shared/components/actionbar/actionbar.component';
-import { DropdownComponent } from '../shared/components/dropdown/dropdown.component';
+import { DropdownComponent } from '../../../projects/edu-sharing-ui/src/lib/dropdown/dropdown.component';
 import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
 import {
     Constrain,

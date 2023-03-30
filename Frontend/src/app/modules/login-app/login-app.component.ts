@@ -14,7 +14,10 @@ import {
     DialogButton,
     RestConnectorService,
 } from '../../core-module/core.module';
-import { OPEN_URL_MODE, UIConstants } from '../../core-module/ui/ui-constants';
+import {
+    OPEN_URL_MODE,
+    UIConstants,
+} from '../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { CordovaService } from '../../common/services/cordova.service';
 import { ConfigurationService } from '../../core-module/core.module';
 import { UIHelper } from '../../core-ui-module/ui-helper';

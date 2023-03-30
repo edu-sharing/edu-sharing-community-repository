@@ -8,7 +8,7 @@ import { ProgressType } from '../shared/components/modal-dialog/modal-dialog.com
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { TemporaryStorageService } from '../core-module/rest/services/temporary-storage.service';
 import { DialogButton } from '../core-module/ui/dialog-button';
-import { UIConstants } from '../core-module/ui/ui-constants';
+import { UIConstants } from '../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { DateHelper } from './DateHelper';
 import { ToastMessageComponent } from './components/toast-message/toast-message.component';
 import { RestConnectorService } from '../core-module/core.module';
@@ -27,15 +27,6 @@ interface Action {
     /** Translated button label. */
     label: string;
     callback: () => void;
-}
-export enum ToastDuration {
-    Seconds_3 = 3,
-    Seconds_5 = 5,
-    Seconds_8 = 8,
-    Seconds_15 = 15,
-    Seconds_30 = 30,
-    Seconds_60 = 60,
-    Infinite = null,
 }
 export enum ToastType {
     InfoSimple, // A simple info just confirming an action without providing useful data

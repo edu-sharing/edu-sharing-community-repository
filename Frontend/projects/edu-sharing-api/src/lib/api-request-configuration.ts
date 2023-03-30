@@ -25,7 +25,7 @@ export class ApiRequestConfiguration {
 
     /** Apply the current headers to the given request */
     apply(req: HttpRequest<any>): HttpRequest<any> {
-        const headers: { [name: string]: string | string[] } = {};
+        const headers: { [key: string]: string | string[] } = {};
         const isAPICall = req.url.startsWith(this.apiConfiguration.rootUrl);
         if (!isAPICall) {
             return req;

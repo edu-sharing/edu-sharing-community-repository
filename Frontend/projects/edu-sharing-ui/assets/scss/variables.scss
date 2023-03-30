@@ -1,0 +1,32 @@
+/**
+    declarations of dynamic css variabled
+    will only be included once via angular to prevent duplicate :root entries
+ */
+:root {
+    --primary: rgb(var(--palette-primary-500));
+    --warning: #cd2457;
+    --tableIconSize: 38px;
+    --textLight: 38px;
+    --textMain: #383838;
+    --cardWidth: 220px;
+    --colorStatusPositive: #40bf8e;
+    --colorStatusNegative: var(--warning);
+    --colorStarActive: #ba7c00;
+    --nodeVirtualColor: #42ca8d;
+    --nodeVirtualColorLight: #b8fcdd;
+    --transitionNormal: 0.2s;
+    --focusWidth: 2px;
+    --fontSizeXSmall: 85%;
+    --mobileWidth: 700px;
+    --mobileStage: 100px;
+    --itemSelectedTextColor: rgb(var(--palette-primary-700));
+    --listItemSelectedBackground: rgb(var(--palette-primary-50));
+    --listItemSelectedBackgroundEffect: linear-gradient(
+            to right,
+            var(--primary) 0,
+            var(--primary) 5px,
+            rgb(var(--palette-primary-50)) 5px,
+            rgb(var(--palette-primary-50)) 5px
+        )
+        no-repeat;
+}

@@ -18,7 +18,7 @@ import {
     WorkflowDefinition,
     WorkflowEntry,
 } from '../../../core-module/core.module';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
 import { Toast } from '../../../core-ui-module/toast';
 import {

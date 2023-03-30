@@ -7,7 +7,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { ConfigurationService } from '../../../core-module/core.module';
 import { Title } from '@angular/platform-browser';
 import { SessionStorageService } from '../../../core-module/core.module';
-import { UIConstants } from '../../../core-module/ui/ui-constants';
+import { UIConstants } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { RestRegisterService } from '../../../core-module/core.module';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { CordovaService } from '../../../common/services/cordova.service';

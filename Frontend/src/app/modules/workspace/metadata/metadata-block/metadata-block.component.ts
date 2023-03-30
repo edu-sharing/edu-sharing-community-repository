@@ -24,7 +24,7 @@ import { Toast } from '../../../../core-ui-module/toast';
 import { VCard } from '../../../../core-module/ui/VCard';
 import { Router } from '@angular/router';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
-import { UIConstants } from '../../../../core-module/ui/ui-constants';
+import { UIConstants } from '../../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
 import { FormatDatePipe } from '../../../../shared/pipes/format-date.pipe';
 import { NodeImageSizePipe } from '../../../../shared/pipes/node-image-size.pipe';

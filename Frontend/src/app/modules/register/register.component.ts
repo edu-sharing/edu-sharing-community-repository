@@ -10,7 +10,7 @@ import {
     RestHelper,
     UIService,
 } from '../../core-module/core.module';
-import { UIConstants } from '../../core-module/ui/ui-constants';
+import { UIConstants } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { Toast } from '../../core-ui-module/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { RegisterDoneComponent } from './register-done/register-done.component';

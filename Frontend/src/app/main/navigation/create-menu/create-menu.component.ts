@@ -35,7 +35,7 @@ import {
     UIConstants,
 } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { CardService } from '../../../core-ui-module/card.service';
 import { DateHelper } from '../../../core-ui-module/DateHelper';
 import { LinkData, NodeHelperService } from '../../../core-ui-module/node-helper.service';
@@ -58,7 +58,7 @@ import {
 } from '../../../modules/management-dialogs/management-dialogs.service';
 import { PasteService } from '../../../services/paste.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
-import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
+import { DropdownComponent } from '../../../../../projects/edu-sharing-ui/src/lib/dropdown/dropdown.component';
 
 @Component({
     selector: 'es-create-menu',

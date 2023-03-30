@@ -25,11 +25,11 @@ import {
     Scope,
     Target,
 } from '../../../core-ui-module/option-item';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { trigger } from '@angular/animations';
 import { Location, PlatformLocation } from '@angular/common';
-import { UIConstants } from '../../../core-module/ui/ui-constants';
+import { UIConstants } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { SearchService } from '../../../modules/search/search.service';
 import { HttpClient } from '@angular/common/http';
 import {

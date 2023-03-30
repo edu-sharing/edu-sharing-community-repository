@@ -15,7 +15,7 @@ import {
     RestIamService,
     UIConstants,
 } from '../../../core-module/core.module';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { LoginInfo, User, UserService } from 'ngx-edu-sharing-api';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';

@@ -17,7 +17,7 @@ import { Helper } from '../../../../core-module/rest/helper';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import {
     Node,
     NodeList,

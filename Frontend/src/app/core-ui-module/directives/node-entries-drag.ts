@@ -1,5 +1,8 @@
 import { Directive, ElementRef, HostListener } from '@angular/core';
-import { dragNodesTransferType, readDraggedNodes } from './drag-nodes/drag-nodes';
+import {
+    dragNodesTransferType,
+    readDraggedNodes,
+} from '../../../../projects/edu-sharing-ui/src/lib/directives/drag-nodes/drag-nodes';
 import { ConfigurationService } from '../../core-module/rest/services/configuration.service';
 
 @Directive({

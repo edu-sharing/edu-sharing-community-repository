@@ -11,7 +11,7 @@ import {
     RestNodeService,
 } from '../../../../core-module/core.module';
 import { forkJoin } from 'rxjs';
-import { UIConstants } from '../../../../core-module/ui/ui-constants';
+import { UIConstants } from '../../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { Toast } from '../../../../core-ui-module/toast';
 import {
     CARD_DIALOG_DATA,

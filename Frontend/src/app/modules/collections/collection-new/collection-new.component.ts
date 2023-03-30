@@ -46,7 +46,7 @@ import { LocalPermissions } from '../../../core-module/core.module';
 import { Collection } from '../../../core-module/core.module';
 import { RestConnectorService } from '../../../core-module/core.module';
 import { ConfigurationService } from '../../../core-module/core.module';
-import { UIConstants } from '../../../core-module/ui/ui-constants';
+import { UIConstants } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { MdsComponent } from '../../../features/mds/legacy/mds/mds.component';
 import { TranslateService } from '@ngx-translate/core';
 import { ColorHelper, PreferredColor } from '../../../core-module/ui/color-helper';

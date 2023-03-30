@@ -22,7 +22,7 @@ import {
     UsageList,
     Version,
 } from '../../../core-module/core.module';
-import { UIConstants } from '../../../core-module/ui/ui-constants';
+import { UIConstants } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { VCard } from '../../../core-module/ui/VCard';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { UIHelper } from '../../../core-ui-module/ui-helper';

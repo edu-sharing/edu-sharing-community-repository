@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit, HostListener } from '@a
 import { TranslateService } from '@ngx-translate/core';
 import { DateHelper } from '../../../core-ui-module/DateHelper';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { DateAdapter } from '@angular/material/core';
 
 @Component({
