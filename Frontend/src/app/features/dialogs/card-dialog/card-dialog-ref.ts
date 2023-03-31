@@ -10,6 +10,8 @@ import { CardDialogState } from './card-dialog-state';
 // A lot of this code is copied from
 // https://github.com/angular/components/blob/13.3.x/src/material/dialog/dialog-ref.ts.
 
+type LifecycleState = 'open' | 'closing' | 'closed';
+
 export class CardDialogRef<D = unknown, R = unknown> {
     private readonly beforeClosedSubject = new Subject<R | undefined>();
     private readonly afterClosedSubject = new Subject<R | undefined>();
@@ -18,6 +20,7 @@ export class CardDialogRef<D = unknown, R = unknown> {
     private result: R;
     private configSubject: BehaviorSubject<CardDialogConfig<D>>;
     private stateSubject: BehaviorSubject<CardDialogState>;
+    private lifecycleState: LifecycleState = 'open';
 
     get config() {
         return this.configSubject.value;
@@ -78,7 +81,7 @@ export class CardDialogRef<D = unknown, R = unknown> {
                 );
             });
 
-        // this._state = MatDialogState.CLOSING;
+        this.lifecycleState = 'closing';
         this.containerInstance.startExitAnimation();
     }
 
@@ -160,7 +163,12 @@ export class CardDialogRef<D = unknown, R = unknown> {
         }
     }
 
+    getLifecycleState(): LifecycleState {
+        return this.lifecycleState;
+    }
+
     private finishDialogClose(): void {
+        this.lifecycleState = 'closed';
         this.overlayRef.dispose();
     }
 

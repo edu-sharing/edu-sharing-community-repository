@@ -34,7 +34,9 @@ export class DialogsNavigationGuard implements CanDeactivate<unknown> {
         currentState: RouterStateSnapshot,
         nextState?: RouterStateSnapshot,
     ): boolean {
-        const openDialogs = this.cardDialog.openDialogs;
+        const openDialogs = this.cardDialog.openDialogs
+            // Disregard dialogs that are closing right now.
+            .filter((dialog) => dialog.getLifecycleState() === 'open');
         if (this.restoreState) {
             // The user tried to navigate back or forward.
             //

@@ -121,17 +121,19 @@ export class DeleteNodesDialogComponent implements OnInit {
                     this.toast.toast('WORKSPACE.TOAST.DELETE_FINISHED');
                 }
                 if (processedNodes.length > 0) {
-                    if (this.shouldBlockImport) {
-                        this.localEvents.nodesChanged.next(processedNodes);
-                    } else {
-                        this.localEvents.nodesDeleted.next(processedNodes);
-                    }
                     this.dialogRef.close({
                         nodes: processedNodes,
                         action: this.shouldBlockImport ? 'changed' : 'deleted',
                     });
                 } else {
                     this.dialogRef.close(null);
+                }
+                // If subscribers to the emitted events cause routing actions, the dialog could
+                // interfere if still open. So we emit the events after closing the dialog.
+                if (this.shouldBlockImport) {
+                    this.localEvents.nodesChanged.next(processedNodes);
+                } else {
+                    this.localEvents.nodesDeleted.next(processedNodes);
                 }
             },
         );
