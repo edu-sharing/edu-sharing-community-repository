@@ -1,5 +1,4 @@
-import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
+import { EventEmitter, Injectable } from '@angular/core';
 import { Node } from '../core-module/core.module';
 
 /**
@@ -9,6 +8,20 @@ import { Node } from '../core-module/core.module';
     providedIn: 'root',
 })
 export class LocalEventsService {
-    readonly nodesChanged = new Subject<Node[]>();
-    readonly nodesDeleted = new Subject<Node[]>();
+    /**
+     * The metadata of one or more nodes have been updated.
+     *
+     * The emitted value is the array of updated nodes.
+     *
+     * The emitter should not be triggered with an empty array or null.
+     */
+    readonly nodesChanged = new EventEmitter<Node[]>();
+    /**
+     * One or more nodes have been moved to the recycle bin.
+     *
+     * The emitted value is the array of former nodes.
+     *
+     * The emitter should not be triggered with an empty array or null.
+     */
+    readonly nodesDeleted = new EventEmitter<Node[]>();
 }

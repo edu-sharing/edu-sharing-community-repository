@@ -58,7 +58,6 @@
   (sortChange)="setSorting($event)"
   (clickItem)="clickItem($event)"
   (dblClickItem)="onOpenNode.emit($event.element)"
-  (nodesChanged)="syncTreeViewOnChange($event)"
   (virtualNodesAdded)="syncTreeViewOnAdd($event)"
 >
   <ng-template #empty>

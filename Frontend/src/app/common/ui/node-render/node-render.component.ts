@@ -186,7 +186,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             currentScope: 'render',
         });
         this.optionsHelper.registerGlobalKeyboardShortcuts();
-        this.optionsHelper.nodesChanged
+        this.localEvents.nodesChanged
             .pipe(takeUntil(this.destroyed$))
             .subscribe(() => this.refresh());
         this.localEvents.nodesDeleted

@@ -91,7 +91,7 @@ export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
-        rxjs.merge(this.optionsService.nodesChanged, this.localEvents.nodesDeleted)
+        rxjs.merge(this.localEvents.nodesChanged, this.localEvents.nodesDeleted)
             .pipe(takeUntil(this.destroyed))
             .subscribe(() => this.refresh());
     }

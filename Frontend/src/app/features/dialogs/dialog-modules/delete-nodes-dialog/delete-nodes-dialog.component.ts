@@ -100,7 +100,9 @@ export class DeleteNodesDialogComponent implements OnInit {
         }
         this.dialogRef.patchConfig({ title });
         if (!waitingForResponse) {
-            this.dialogRef.patchState({ isLoading: false });
+            setTimeout(() => {
+                this.dialogRef.patchState({ isLoading: false });
+            });
         }
     }
 
@@ -131,9 +133,9 @@ export class DeleteNodesDialogComponent implements OnInit {
                 // If subscribers to the emitted events cause routing actions, the dialog could
                 // interfere if still open. So we emit the events after closing the dialog.
                 if (this.shouldBlockImport) {
-                    this.localEvents.nodesChanged.next(processedNodes);
+                    this.localEvents.nodesChanged.emit(processedNodes);
                 } else {
-                    this.localEvents.nodesDeleted.next(processedNodes);
+                    this.localEvents.nodesDeleted.emit(processedNodes);
                 }
             },
         );

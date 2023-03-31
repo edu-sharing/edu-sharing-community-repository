@@ -196,7 +196,7 @@ export class WorkspaceManagementDialogsComponent {
             ),
         ).subscribe(
             (nodes: NodeWrapper[]) => {
-                this.onRefresh.emit(nodes.map((n) => n.node));
+                this.localEvents.nodesChanged.next(nodes.map((n) => n.node));
                 const previousNodes = originalNodes;
                 if (this.reopenSimpleEdit) {
                     this.reopenSimpleEdit = false;
@@ -213,7 +213,7 @@ export class WorkspaceManagementDialogsComponent {
         this.nodeWorkflow = null;
         this.nodeWorkflowChange.emit(null);
         if (nodes) {
-            this.onRefresh.emit(nodes);
+            this.localEvents.nodesChanged.emit(nodes);
         }
     }
 
@@ -227,9 +227,7 @@ export class WorkspaceManagementDialogsComponent {
         this.filesToUpload = null;
         this.filesToUploadChange.emit(null);
     }
-    public refresh() {
-        this.onRefresh.emit();
-    }
+
     public uploadFile(event: FileList) {
         this.onUploadFileSelected.emit(event);
     }
@@ -273,7 +271,7 @@ export class WorkspaceManagementDialogsComponent {
             }
             this.nodeLicenseOnUpload = false;
             if (updatedNodes) {
-                this.onRefresh.emit(updatedNodes);
+                this.localEvents.nodesChanged.emit(updatedNodes);
             }
         });
     }
@@ -316,7 +314,7 @@ export class WorkspaceManagementDialogsComponent {
             this.nodeSidebar = updatedNodes[0];
         }
         if (refresh) {
-            this.onRefresh.emit(updatedNodes);
+            this.localEvents.nodesChanged.emit(updatedNodes);
         }
     }
 
@@ -459,13 +457,13 @@ export class WorkspaceManagementDialogsComponent {
             .subscribe(
                 (data: NodeVersions) => {
                     this.toast.closeModalDialog();
-                    this.refresh();
                     this.closeSidebar();
                     // @TODO type is not compatible
                     this.nodeService
                         .getNodeMetadata(version.version.node.id, [RestConstants.ALL])
                         .subscribe(
                             (node) => {
+                                this.localEvents.nodesChanged.emit([node.node]);
                                 this.nodeSidebar = node.node;
                                 this.nodeSidebarChange.emit(node.node);
                                 this.toast.toast('WORKSPACE.REVERTED_VERSION');
@@ -505,7 +503,7 @@ export class WorkspaceManagementDialogsComponent {
             }
         }
         if (event.nodes) {
-            this.onRefresh.emit(event.nodes);
+            this.localEvents.nodesChanged.emit(event.nodes);
         }
         this._nodeSimpleEdit = null;
         this.nodeSimpleEditChange.emit(null);
@@ -539,7 +537,7 @@ export class WorkspaceManagementDialogsComponent {
             }),
         ).subscribe((results: Node[]) => {
             this.toast.closeModalDialog();
-            this.onRefresh.emit(results);
+            this.localEvents.nodesChanged.emit(results);
         });
     }
 
@@ -558,7 +556,7 @@ export class WorkspaceManagementDialogsComponent {
             )
             .then(() => {
                 this.toast.toast('COLLECTIONS.PROPOSALS.TOAST.DECLINED');
-                this.localEvents.nodesDeleted.next(nodes);
+                this.localEvents.nodesDeleted.emit(nodes);
             });
     }
 
@@ -590,8 +588,7 @@ export class WorkspaceManagementDialogsComponent {
                     )
                     .then((results) => {
                         this.toast.toast('COLLECTIONS.PROPOSALS.TOAST.ACCEPTED');
-                        this.localEvents.nodesDeleted.next(nodes);
-                        this.onRefresh.emit();
+                        this.localEvents.nodesDeleted.emit(nodes);
                         this.onEvent.emit({
                             event: ManagementEventType.AddCollectionNodes,
                             data: {

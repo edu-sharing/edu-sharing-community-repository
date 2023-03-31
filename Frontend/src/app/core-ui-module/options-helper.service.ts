@@ -1,19 +1,16 @@
-import { PlatformLocation } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { EventEmitter, Injectable, NgZone, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
-    forkJoin,
-    forkJoin as observableForkJoin,
-    fromEvent,
-    of,
     Subject,
     Subscription,
+    forkJoin,
+    fromEvent,
+    forkJoin as observableForkJoin,
+    of,
 } from 'rxjs';
-import * as rxjs from 'rxjs';
 import { isArray } from 'rxjs/internal/util/isArray';
-import { catchError, map, takeUntil } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
 import { BridgeService } from '../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
@@ -27,8 +24,8 @@ import {
     Connector,
     Filetype,
     Node,
-    NodesRightMode,
     NodeWrapper,
+    NodesRightMode,
     ProposalNode,
 } from '../core-module/rest/data-object';
 import { Helper } from '../core-module/rest/helper';
@@ -52,8 +49,10 @@ import {
     KeyboardShortcutsService,
     matchesShortcutCondition,
 } from '../services/keyboard-shortcuts.service';
+import { LocalEventsService } from '../services/local-events.service';
 import { ActionbarComponent } from '../shared/components/actionbar/actionbar.component';
 import { DropdownComponent } from '../shared/components/dropdown/dropdown.component';
+import { forkJoinWithErrors } from '../util/rxjs/forkJoinWithErrors';
 import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
 import {
     Constrain,
@@ -67,14 +66,6 @@ import {
 } from './option-item';
 import { Toast } from './toast';
 import { UIHelper } from './ui-helper';
-import { LocalEventsService } from '../services/local-events.service';
-import { forkJoinWithErrors } from '../util/rxjs/forkJoinWithErrors';
-
-type DeleteEvent = {
-    objects: Node[] | any;
-    count: number;
-    error: boolean;
-};
 
 @Injectable()
 export class OptionsHelperService implements OnDestroy {
@@ -87,7 +78,6 @@ export class OptionsHelperService implements OnDestroy {
     static ElementTypesAddToCollection = [ElementType.Node, ElementType.NodePublishedCopy];
 
     readonly virtualNodesAdded = new EventEmitter<Node[]>();
-    readonly nodesChanged = new EventEmitter<Node[] | void>();
     readonly displayTypeChanged = new EventEmitter<NodeEntriesDisplayType>();
 
     private keyboardShortcutsSubscription: Subscription;
@@ -138,6 +128,9 @@ export class OptionsHelperService implements OnDestroy {
         this.localEvents.nodesDeleted
             .pipe(takeUntil(this.destroyed))
             .subscribe((nodes) => this.list?.deleteNodes(nodes));
+        this.localEvents.nodesChanged
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((nodes) => this.list?.updateNodes(nodes));
     }
 
     private handleKeyboardEvent(event: KeyboardEvent) {
@@ -260,15 +253,6 @@ export class OptionsHelperService implements OnDestroy {
             this.subscriptions.forEach((s) => s.unsubscribe());
             this.subscriptions = [];
         }
-        if (this.mainNavService.getMainNav()) {
-            this.subscriptions.push(
-                this.mainNavService
-                    .getDialogs()
-                    .onRefresh.subscribe((nodes: void | Node[]) =>
-                        this.onNodesChanged(nodes ? nodes : undefined),
-                    ),
-            );
-        }
 
         this.globalOptions = this.getAvailableOptions(Target.Actionbar);
         if (this.list) {
@@ -282,13 +266,6 @@ export class OptionsHelperService implements OnDestroy {
         }
         if (this.actionbar) {
             this.actionbar.options = this.globalOptions;
-        }
-    }
-
-    private onNodesChanged(nodes?: Node[]): void {
-        this.nodesChanged.emit(nodes);
-        if (this.list) {
-            this.list.updateNodes(nodes);
         }
     }
 
@@ -893,14 +870,9 @@ export class OptionsHelperService implements OnDestroy {
         streamNode.customShowCallback = (objects) =>
             this.configService.instant('stream.enabled', false);
 
-        const licenseNode = new OptionItem('OPTIONS.LICENSE', 'copyright', async (object) => {
+        const licenseNode = new OptionItem('OPTIONS.LICENSE', 'copyright', (object) => {
             const nodes = this.getObjects(object);
-            const dialogRef = await this.dialogs.openLicenseDialog({ kind: 'nodes', nodes });
-            dialogRef.afterClosed().subscribe((result: Node[] | null) => {
-                if (result) {
-                    this.onNodesChanged(result);
-                }
-            });
+            void this.dialogs.openLicenseDialog({ kind: 'nodes', nodes });
         });
         licenseNode.elementType = [ElementType.Node, ElementType.NodeChild];
         licenseNode.constrains = [
@@ -916,14 +888,9 @@ export class OptionsHelperService implements OnDestroy {
         licenseNode.group = DefaultGroups.Edit;
         licenseNode.priority = 30;
 
-        const contributorNode = new OptionItem('OPTIONS.CONTRIBUTOR', 'group', async (object) => {
-            const dialogRef = await this.dialogs.openContributorsDialog({
+        const contributorNode = new OptionItem('OPTIONS.CONTRIBUTOR', 'group', (object) => {
+            void this.dialogs.openContributorsDialog({
                 node: this.getObjects(object)[0],
-            });
-            dialogRef.afterClosed().subscribe((updatedNode) => {
-                if (updatedNode) {
-                    this.onNodesChanged([updatedNode]);
-                }
             });
         });
         contributorNode.constrains = [
@@ -1046,12 +1013,7 @@ export class OptionsHelperService implements OnDestroy {
 
         const editNode = new OptionItem('OPTIONS.EDIT', 'edit', async (object) => {
             const nodes = await this.getObjectsAsync(object, true);
-            const dialogRef = await this.dialogs.openMdsEditorDialogForNodes({ nodes });
-            dialogRef.afterClosed().subscribe((result) => {
-                if (result) {
-                    this.onNodesChanged(result);
-                }
-            });
+            void this.dialogs.openMdsEditorDialogForNodes({ nodes });
         });
         editNode.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.MapRef];
         editNode.constrains = [
@@ -1257,12 +1219,7 @@ export class OptionsHelperService implements OnDestroy {
 
         const relationNode = new OptionItem('OPTIONS.RELATIONS', 'swap_horiz', async (node) => {
             const nodes = await this.getObjectsAsync(node, true);
-            const dialogRef = await this.dialogs.openNodeRelationsDialog({ node: nodes[0] });
-            dialogRef.afterClosed().subscribe((wasUpdated) => {
-                if (wasUpdated) {
-                    this.onNodesChanged();
-                }
-            });
+            void this.dialogs.openNodeRelationsDialog({ node: nodes[0] });
         });
         relationNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         relationNode.constrains = [Constrain.NoBulk, Constrain.User];
@@ -1836,7 +1793,7 @@ export class OptionsHelperService implements OnDestroy {
                 this.toast.toast('COLLECTIONS.REMOVED_FROM_COLLECTION');
             }
             if (deletedNodes.length > 0) {
-                this.localEvents.nodesDeleted.next(deletedNodes);
+                this.localEvents.nodesDeleted.emit(deletedNodes);
             }
         });
     }
