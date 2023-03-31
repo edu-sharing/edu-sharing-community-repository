@@ -349,7 +349,6 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         // super(temporaryStorage,['_node','_nodes','sortBy','sortAscending','columns','totalCount','hasMoreToLoad']);
         this.initColumns();
         this.registerNodesDeleted();
-        this.registerNodesChanged();
         combineLatest([this.node$, this.searchQuery$])
             .pipe(
                 distinctUntilChanged((a, b) => {
@@ -495,9 +494,6 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         this.localEvents.nodesDeleted.pipe(takeUntil(this.destroyed)).subscribe((nodes) => {
             this.dataSource.removeData(nodes);
             this.nodeEntries?.getSelection().clear();
-            if (nodes.filter((n) => n.isDirectory).length) {
-                this.refreshTree.emit();
-            }
         });
     }
 
@@ -511,14 +507,6 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         } else {
             this.select(event);
         }
-    }
-
-    private registerNodesChanged(): void {
-        this.localEvents.nodesChanged.pipe(takeUntil(this.destroyed)).subscribe((nodes) => {
-            if (nodes.filter((n) => n.isDirectory).length) {
-                this.refreshTree.emit();
-            }
-        });
     }
 
     syncTreeViewOnAdd(nodes: Node[]) {

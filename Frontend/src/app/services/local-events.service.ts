@@ -23,5 +23,7 @@ export class LocalEventsService {
      *
      * The emitter should not be triggered with an empty array or null.
      */
+    // FIXME: Maybe a `nodesMoved` emitter would make for sense for updating lists that used to
+    // include a node and lists that the node was moved to.
     readonly nodesDeleted = new EventEmitter<Node[]>();
 }
