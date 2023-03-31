@@ -213,11 +213,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
     private isSafe = false;
     private isOpenable: boolean;
     private closeOnBack: boolean;
-    public nodeWorkflow: Node[];
-    public addNodesStream: Node[];
-    public nodeDelete: Node[];
-    public nodeVariant: Node;
-    public addToCollection: Node[];
     private editor: string;
     private fromLogin = false;
     public banner: any;
