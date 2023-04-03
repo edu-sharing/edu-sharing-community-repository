@@ -31,7 +31,7 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         requiresNode: false,
         supportsBulk: false,
     };
-    readonly attributes: Attributes;
+    attributes: Attributes;
     @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
     @Input() showContributorDialog = true;
     _nodes: Node[];
@@ -119,15 +119,29 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
     }
     private async updateValues(nodes: Node[]) {
         this._nodes = nodes;
-        if (nodes?.length) {
+        this.refreshTabs();
+    }
+
+    async openContributorDialog() {
+        const updatedNode = await MdsEditorWidgetAuthorComponent.openContributorDialog(
+            this.mdsEditorValues,
+            this.mainNavService,
+        );
+        this.updateValues([updatedNode]);
+    }
+
+    public async refreshTabs() {
+        if (this._nodes?.length) {
             let freetext = Array.from(
                 new Set(
-                    nodes.map((n) => n.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT]?.[0]),
+                    this._nodes.map(
+                        (n) => n.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT]?.[0],
+                    ),
                 ),
             );
             let author = Array.from(
                 new Set(
-                    nodes.map(
+                    this._nodes.map(
                         (n) =>
                             n.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]?.[0],
                     ),
@@ -174,13 +188,5 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
             };
             setTimeout(() => this.tabGroup.realignInkBar());
         }
-    }
-
-    async openContributorDialog() {
-        const updatedNode = await MdsEditorWidgetAuthorComponent.openContributorDialog(
-            this.mdsEditorValues,
-            this.mainNavService,
-        );
-        this.updateValues([updatedNode]);
     }
 }

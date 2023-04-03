@@ -98,6 +98,9 @@ function guessPropertyInfo(attribute: Attr, widgetDefinition: MdsWidget): Proper
     const property = Object.keys(widgetDefinition).find(
         (property) => property.toLowerCase() === attribute.name,
     );
+    if (['defaulttab'].includes(attribute.name)) {
+        return { property, type: 'string' };
+    }
     if (property) {
         const type = typeof (widgetDefinition as any)[property];
         if (
