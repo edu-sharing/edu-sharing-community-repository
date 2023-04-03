@@ -120,7 +120,13 @@ export class NodeRelationManagerComponent implements OnInit, OnChanges {
     }
 
     openNode(node: UniversalNode) {
-        UIHelper.openUrl(this.nodeHelper.getNodeUrl(node), this.bridgeService, OPEN_URL_MODE.Blank);
+        UIHelper.openUrl(
+            this.nodeHelper.getNodeUrl(node, {
+                closeOnBack: true,
+            }),
+            this.bridgeService,
+            OPEN_URL_MODE.Blank,
+        );
     }
 
     removeRelation(relation: RelationData) {
