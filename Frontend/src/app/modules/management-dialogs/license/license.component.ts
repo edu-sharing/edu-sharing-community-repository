@@ -31,6 +31,7 @@ import { UserPresentableError } from '../../../features/mds/mds-editor/mds-edito
 import { MdsEditorInstanceService } from '../../../features/mds/mds-editor/mds-editor-instance.service';
 import { ViewInstanceService } from '../../../features/mds/mds-editor/mds-editor-view/view-instance.service';
 import { MdsEditorWidgetAuthorComponent } from '../../../features/mds/mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
+import { getAttributesArray } from '../../../features/mds/mds-editor/util/parse-attributes';
 
 @Component({
     selector: 'es-workspace-license',
@@ -94,14 +95,9 @@ export class WorkspaceLicenseComponent {
         this.loadConfig();
         this._properties = properties;
         this.readLicense();
-        this.mdsEditorInstanceService.initWithNodes(
-            [
-                {
-                    properties,
-                } as any,
-            ],
-            { refetch: false },
-        );
+        this.initMds({
+            properties: properties,
+        });
         this.loading = false;
         this.updateButtons();
     }
@@ -110,7 +106,7 @@ export class WorkspaceLicenseComponent {
         this.loadNodes(nodesIn).subscribe(
             async (nodes) => {
                 try {
-                    await this.mdsEditorInstanceService.initWithNodes(nodes);
+                    await this.initMds({ nodes: nodes });
                 } catch (e) {
                     if (e instanceof UserPresentableError || e.message) {
                         this.toast.error(null, e.message);
@@ -750,6 +746,33 @@ export class WorkspaceLicenseComponent {
                     RestConstants.CCM_PROP_AUTHOR_FREETEXT,
                 ))
         );
+    }
+    async initMds({ properties = null, nodes = null }: { properties?: Values; nodes?: Node[] }) {
+        if (properties) {
+            await this.mdsEditorInstanceService.initWithNodes(
+                [
+                    {
+                        properties,
+                    } as any,
+                ],
+                { groupId: 'io', refetch: false },
+            );
+        } else {
+            await this.mdsEditorInstanceService.initWithNodes(nodes, { groupId: 'io' });
+        }
+        const viewId = this.mdsEditorInstanceService.widgets.value.filter(
+            (w) => w.definition.id === 'author',
+        )?.[0]?.viewId;
+        const view = this.mdsEditorInstanceService.views.filter((v) => v.id === viewId)[0];
+        if (view) {
+            const attr = getAttributesArray(view.html, 'author');
+            setTimeout(() => {
+                if (this.author) {
+                    this.author.attributes = attr;
+                    this.author.refreshTabs();
+                }
+            });
+        }
     }
 
     resetMixedAuthorValues() {

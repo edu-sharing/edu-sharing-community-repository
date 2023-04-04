@@ -400,6 +400,7 @@
       "RELEASE": "Release object under this license",
       "RELEASE_MULTI": "Release {{count}} objects under this license",
       "CONTACT": "Other users may contact me for further licensing negotiations",
+      "CHECKBOX_AUTHOR": "I am author of the material",
       "MORE": "More information",
       "MIXED_AUTHORS": "Varying contributorsn",
       "MIXED_AUTHORS_INFO": "The chosen elements have varying contributor data. In order to edit them in bulk mode you need to overwrite them.\nChoose \"Edit\" if you want to do so.",
