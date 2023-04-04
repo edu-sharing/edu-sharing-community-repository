@@ -9,6 +9,12 @@
   <mat-tab [label]="'SEARCH.SAVED_SEARCHES.TAB_MY' | translate">
     <ng-template matTabContent>
       <es-actionbar #actionbar class="actionbar"></es-actionbar>
+      <!--
+        FIXME:
+          - Paginator active although we load all data at once
+          - "Load more" button appears again when switching tabs back, although there are no more
+            elements to load
+      -->
       <es-node-entries-wrapper
         [dataSource]="mySavedSearchesSource"
         [columns]="columns"
@@ -26,6 +32,38 @@
     </ng-template>
   </mat-tab>
   <mat-tab [label]="'SEARCH.SAVED_SEARCHES.TAB_SHARED' | translate">
-    <ng-template matTabContent> </ng-template>
+    <!--
+      FIXME: We show shared and the user's own saved searches alike.
+     -->
+    <ng-template matTabContent>
+      <form class="search-input-form">
+        <mat-form-field class="search-input-field">
+          <mat-label>{{ 'SEARCH.SAVED_SEARCHES.SEARCH_INPUT' | translate }}</mat-label>
+          <input matInput [formControl]="searchInputControl" />
+        </mat-form-field>
+      </form>
+      <es-actionbar #actionbar class="actionbar"></es-actionbar>
+      <es-node-entries-wrapper
+        [dataSource]="sharedSavedSearchesSource"
+        [columns]="columns"
+        [displayType]="displayType"
+        [scope]="scope"
+        [initConfig]="{actionbar}"
+        (clickItem)="onClick($event.element)"
+        [elementInteractionType]="interactionType"
+        [singleClickHint]="data.reUrl ? 'static' : 'dynamic'"
+      >
+        <ng-template #empty>
+          <p class="no-results-notice">
+            {{
+              (searchInputControl.value
+                ? 'SEARCH.SAVED_SEARCHES.NO_SAVED_SEARCH_FOUND'
+                : 'SEARCH.SAVED_SEARCHES.NO_SAVED_SEARCH'
+              ) | translate
+            }}
+          </p>
+        </ng-template>
+      </es-node-entries-wrapper>
+    </ng-template>
   </mat-tab>
 </mat-tab-group>

@@ -7,15 +7,25 @@ import {
     TemplateRef,
     ViewChild,
 } from '@angular/core';
-import { Node, SavedSearchesService } from 'ngx-edu-sharing-api';
+import { FormControl } from '@angular/forms';
+import { Node, SavedSearch, SavedSearchesService } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { filter, first, map, startWith, switchMap, take, takeUntil } from 'rxjs/operators';
+import {
+    debounceTime,
+    filter,
+    first,
+    map,
+    startWith,
+    switchMap,
+    take,
+    takeUntil,
+} from 'rxjs/operators';
 import { DialogButton, ListItem } from '../../../../core-module/core.module';
 import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
 import { Scope } from '../../../../core-ui-module/option-item';
 import { notNull } from '../../../../util/functions';
 import { InteractionType, NodeEntriesDisplayType } from '../../../node-entries/entries-model';
-import { NodeDataSourceRemote, NodeResponse } from '../../../node-entries/node-data-source-remote';
+import { NodeDataSourceRemote } from '../../../node-entries/node-data-source-remote';
 import { NodeEntriesWrapperComponent } from '../../../node-entries/node-entries-wrapper.component';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
@@ -46,10 +56,12 @@ export class SavedSearchesDialogComponent implements OnInit, OnDestroy {
     }
 
     readonly mySavedSearchesSource = new NodeDataSourceRemote(this.injector);
+    readonly sharedSavedSearchesSource = new NodeDataSourceRemote(this.injector);
     readonly columns = [new ListItem('NODE', 'title')];
     readonly displayType = NodeEntriesDisplayType.Table;
     readonly scope = Scope.SavedSearches;
     readonly interactionType = InteractionType.Emitter;
+    readonly searchInputControl = new FormControl('');
 
     private destroyed = new Subject<void>();
 
@@ -62,6 +74,7 @@ export class SavedSearchesDialogComponent implements OnInit, OnDestroy {
         private injector: Injector,
     ) {
         this.registerMySavedSearchesSource();
+        this.registerSharedSavedSearchesSource();
     }
 
     ngOnInit(): void {
@@ -77,22 +90,41 @@ export class SavedSearchesDialogComponent implements OnInit, OnDestroy {
     }
 
     private registerMySavedSearchesSource(): void {
-        const subject = new BehaviorSubject<NodeResponse<Node>>(null);
+        this.mySavedSearchesSource;
+        const subject = new BehaviorSubject<SavedSearch[]>(null);
         this.savedSearchesService
-            .observeSavedSearches()
-            .pipe(
-                takeUntil(this.destroyed),
-                map((savedSearches) => ({
-                    data: savedSearches.map(({ node }) => node),
-                    total: savedSearches.length,
-                })),
-            )
+            .observeMySavedSearches()
+            .pipe(takeUntil(this.destroyed))
             .subscribe(subject);
         // `NodeDataSourceRemote` doesn't account for remote observables that emit multiple times.
         // So we set a new remote each time `observeSavedSearches` emits.
         subject.subscribe(() =>
-            this.mySavedSearchesSource.setRemote(() => subject.pipe(first(notNull))),
+            this.mySavedSearchesSource.setRemote(({ range }) =>
+                subject.pipe(
+                    first(notNull),
+                    map((savedSearches) => ({
+                        data: savedSearches
+                            // TODO: Configure the data source / node entries to not use pagination
+                            // instead of simulating pagination like this.
+                            .slice(range.startIndex, range.endIndex)
+                            .map(({ node }) => node),
+                        total: savedSearches.length,
+                    })),
+                ),
+            ),
         );
+    }
+
+    private registerSharedSavedSearchesSource(): void {
+        this.searchInputControl.valueChanges
+            .pipe(startWith(null as string), debounceTime(300))
+            .subscribe((value) => {
+                this.sharedSavedSearchesSource.setRemote((params) =>
+                    this.savedSearchesService
+                        .getSharedSavedSearches({ searchString: value, ...params.range })
+                        .pipe(),
+                );
+            });
     }
 
     private getButtons(): DialogButton[] {
@@ -133,7 +165,7 @@ export class SavedSearchesDialogComponent implements OnInit, OnDestroy {
 
     returnSavedSearch(node: Node = this.nodeEntries.getSelection().selected[0]): void {
         this.savedSearchesService
-            .observeSavedSearches()
+            .observeMySavedSearches()
             .pipe(take(1))
             .subscribe((savedSearches) => {
                 const savedSearch = savedSearches.find((savedSearch) => savedSearch.node === node);

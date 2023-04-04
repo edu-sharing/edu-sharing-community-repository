@@ -484,6 +484,7 @@ export class DialogsService {
             title: 'SEARCH.SAVED_SEARCHES.TITLE',
             avatar: { kind: 'icon', icon: 'search' },
             contentPadding: 0,
+            minHeight: 500,
             width: 600,
             data,
             closable: Closable.Casual,

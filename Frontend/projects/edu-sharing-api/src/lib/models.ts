@@ -42,3 +42,11 @@ export type ApiErrorResponse = HttpErrorResponse & {
 };
 
 export type NodePermissions = Acl;
+
+/** Copy from Angular Material. */
+export interface Sort {
+    /** The id of the column being sorted. */
+    active: string;
+    /** The sort direction. */
+    direction: 'asc' | 'desc' | '';
+}
