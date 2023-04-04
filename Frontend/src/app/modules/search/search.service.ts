@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
-import { SearchConfig } from 'ngx-edu-sharing-api';
+import { Node, SearchConfig } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
 import {
+    CombinedDataSource,
+    ListItem,
     ListSortConfig,
+    NodeDataSource,
     NodeEntriesDisplayType,
-} from 'src/app/features/node-entries/entries-model';
-import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
+} from 'ngx-edu-sharing-ui';
 import { SearchFieldService } from 'src/app/main/navigation/search-field/search-field.service';
-import { ListItem, Node } from '../../core-module/core.module';
-import { CombinedDataSource } from '../../features/node-entries/combined-data-source';
 import { Values } from '../../features/mds/types/types';
 
 /**

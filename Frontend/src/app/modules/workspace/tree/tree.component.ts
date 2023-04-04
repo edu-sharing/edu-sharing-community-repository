@@ -1,10 +1,6 @@
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import { DropSource, NodeRoot } from 'src/app/features/node-entries/entries-model';
 import { Node } from '../../../core-module/core.module';
-import { Helper } from '../../../core-module/rest/helper';
-import { OptionItem } from '../../../core-ui-module/option-item';
-import { DragData } from '../../../../../projects/edu-sharing-ui/src/lib/services/nodes-drag-drop.service';
-import { CanDrop } from '../../../../../projects/edu-sharing-ui/src/lib/directives/drag-nodes/nodes-drop-target.directive';
+import { CanDrop, DragData, DropSource, NodeRoot, OptionItem } from 'ngx-edu-sharing-ui';
 import { WorkspaceMainComponent } from '../workspace.component';
 import { WorkspaceSubTreeComponent } from '../sub-tree/sub-tree.component';
 

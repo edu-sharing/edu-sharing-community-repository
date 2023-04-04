@@ -2,12 +2,10 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { distinctUntilChanged, filter } from 'rxjs/operators';
 import {
     ConfigurationHelper,
-    ConfigurationService,
     IamUser,
-    ListItem,
     Node,
     NodePermissions,
     NodeVersions,
@@ -22,18 +20,20 @@ import {
     UsageList,
     Version,
 } from '../../../core-module/core.module';
-import { UIConstants } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
-import { VCard } from '../../../core-module/ui/VCard';
+import {
+    DurationHelper,
+    FormatDatePipe,
+    InteractionType,
+    ListItem,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    NodeImageSizePipe,
+    UIConstants,
+    VCard,
+} from 'ngx-edu-sharing-ui';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { FormatDatePipe } from '../../../shared/pipes/format-date.pipe';
-import { NodeImageSizePipe } from '../../../shared/pipes/node-image-size.pipe';
-import { NodeService } from 'ngx-edu-sharing-api';
-import { NodeDataSource } from '../../../features/node-entries/node-data-source';
-import {
-    InteractionType,
-    NodeEntriesDisplayType,
-} from '../../../features/node-entries/entries-model';
+import { ConfigService, NodeService } from 'ngx-edu-sharing-api';
 
 // Charts.js
 declare var Chart: any;
@@ -98,7 +98,7 @@ export class WorkspaceMetadataComponent implements OnInit {
 
     constructor(
         private translate: TranslateService,
-        private config: ConfigurationService,
+        private config: ConfigService,
         private nodeHelper: NodeHelperService,
         private router: Router,
         private iamApi: RestIamService,
@@ -273,7 +273,7 @@ export class WorkspaceMetadataComponent implements OnInit {
             this.config,
         );
         data.createDate = new FormatDatePipe(this.translate).transform(node.createdAt);
-        data.duration = RestHelper.getDurationFormatted(
+        data.duration = DurationHelper.getDurationFormatted(
             node.properties[RestConstants.LOM_PROP_TECHNICAL_DURATION]?.[0],
         );
         data.author = this.toVCards(

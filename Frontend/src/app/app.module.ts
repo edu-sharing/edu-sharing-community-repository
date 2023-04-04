@@ -2,13 +2,13 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LocationStrategy } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
-import { MatTooltipDefaultOptions, MAT_TOOLTIP_DEFAULT_OPTIONS } from '@angular/material/tooltip';
+import { MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions } from '@angular/material/tooltip';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { ResizableModule } from 'angular-resizable-element';
 import {
+    EDU_SHARING_API_CONFIG,
     EduSharingApiConfigurationParams,
     EduSharingApiModule,
-    EDU_SHARING_API_CONFIG,
 } from 'ngx-edu-sharing-api';
 import { CoreUiModule } from './core-ui-module/core-ui.module';
 import { ErrorHandlerService } from './core-ui-module/error-handler.service';
@@ -18,9 +18,13 @@ import { extensionImports } from './extension/extension-imports';
 import { extensionProviders } from './extension/extension-providers';
 import { extensionSchemas } from './extension/extension-schemas';
 import { DialogsModule } from './features/dialogs/dialogs.module';
-import { ListItemsModule } from './features/list-items/list-items.module';
 import { MdsModule } from './features/mds/mds.module';
-import { NodeEntriesModule } from './features/node-entries/node-entries.module';
+import {
+    EduSharingUiModule,
+    KeyboardShortcutsService as KeyboardShortcutsServiceAbstract,
+    OptionsHelperService as OptionsHelperServiceAbstract,
+    Toast as ToastAbstract,
+} from 'ngx-edu-sharing-ui';
 import { IMPORTS } from './imports';
 import { MainModule } from './main/main.module';
 import { DECLARATIONS_ADMIN } from './modules/admin/declarations';
@@ -51,6 +55,10 @@ import { AppLocationStrategy } from './router/location-strategy';
 import { RouterComponent } from './router/router.component';
 import { SharedModule } from './shared/shared.module';
 import { TranslationsModule } from './translations/translations.module';
+import { environment } from '../environments/environment';
+import { Toast } from './core-ui-module/toast';
+import { OptionsHelperService } from './core-ui-module/options-helper.service';
+import { KeyboardShortcutsService } from './services/keyboard-shortcuts.service';
 
 // http://blog.angular-university.io/angular2-ngmodule/
 // -> Making modules more readable using the spread operator
@@ -91,10 +99,9 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     imports: [
         IMPORTS,
         SharedModule,
-        NodeEntriesModule,
-        ListItemsModule,
         MainModule,
         EduSharingApiModule.forRoot(),
+        EduSharingUiModule.forRoot({ production: environment.production }),
         TranslationsModule.forRoot(),
         DragDropModule,
         extensionImports,
@@ -107,6 +114,9 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         }),
     ],
     providers: [
+        { provide: ToastAbstract, useClass: Toast },
+        { provide: OptionsHelperServiceAbstract, useClass: OptionsHelperService },
+        { provide: KeyboardShortcutsServiceAbstract, useClass: KeyboardShortcutsService },
         {
             provide: EDU_SHARING_API_CONFIG,
             deps: [ErrorHandlerService],

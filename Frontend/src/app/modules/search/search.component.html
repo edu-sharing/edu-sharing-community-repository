@@ -249,30 +249,7 @@
           <div class="empty" *ngIf="!savedSearch.length && !savedSearchLoading && savedSearchQuery">
             {{ 'SEARCH.NO_SAVED_SEARCH_FOUND' | translate }}
           </div>
-          <div class="savedSearch">
-            <es-listTable
-              [scope]="SCOPES.Search"
-              [hasHeading]="false"
-              [selectOnClick]="false"
-              [isClickable]="true"
-              [nodes]="savedSearch"
-              [hasIcon]="true"
-              [viewType]="0"
-              [customOptions]="savedSearchOptions"
-              [isLoading]="savedSearchLoading"
-              [selectedNodes]="currentSavedSearch ? [currentSavedSearch] : null"
-              [columns]="savedSearchColumns"
-              (clickRow)="loadSavedSearchNode($event.node)"
-            ></es-listTable>
-            <div
-              class="manageSavedSearch"
-              *ngIf="savedSearch.length && savedSearchOwn && isWorkspaceEnabled()"
-            >
-              <button mat-button (click)="goToSaveSearchWorkspace()">
-                {{ 'SEARCH.MANAGE_SAVED_SEARCH' | translate }}
-              </button>
-            </div>
-          </div>
+          <div class="savedSearch">TODO</div>
         </mat-tab>
       </mat-tab-group>
       <div

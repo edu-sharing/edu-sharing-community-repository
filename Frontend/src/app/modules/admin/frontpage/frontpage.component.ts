@@ -2,7 +2,12 @@ import { RestAdminService } from '../../../core-module/rest/services/rest-admin.
 import { Component, EventEmitter, Output } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Node } from '../../../core-module/rest/data-object';
-import { ListItem } from '../../../core-module/ui/list-item';
+import {
+    InteractionType,
+    ListItem,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+} from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { ConfigurationService } from '../../../core-module/rest/services/configuration.service';
 import {
@@ -16,11 +21,6 @@ import { Toast } from '../../../core-ui-module/toast';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { NodeDataSource } from '../../../features/node-entries/node-data-source';
-import {
-    InteractionType,
-    NodeEntriesDisplayType,
-} from 'src/app/features/node-entries/entries-model';
 
 @Component({
     selector: 'es-admin-frontpage',

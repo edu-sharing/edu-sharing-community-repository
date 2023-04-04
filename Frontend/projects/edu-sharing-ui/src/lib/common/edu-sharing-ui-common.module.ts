@@ -22,6 +22,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { OptionTooltipPipe } from '../pipes/option-tooltip.pipe';
 import { ReplaceCharsPipe } from '../pipes/replace-chars.pipe';
 import { ActionbarComponent } from '../actionbar/actionbar.component';
+import { BorderBoxObserverDirective } from '../directives/border-box-observer.directive';
+import { MatButtonModule } from '@angular/material/button';
 
 @NgModule({
     declarations: [
@@ -42,10 +44,12 @@ import { ActionbarComponent } from '../actionbar/actionbar.component';
         DropdownComponent,
         OptionTooltipPipe,
         ActionbarComponent,
+        BorderBoxObserverDirective,
     ],
     imports: [
         CommonModule,
         MatMenuModule,
+        MatButtonModule,
         MatTooltipModule,
         MatRippleModule,
         TranslateModule,
@@ -67,6 +71,7 @@ import { ActionbarComponent } from '../actionbar/actionbar.component';
         NodeUrlComponent,
         DropdownComponent,
         ActionbarComponent,
+        BorderBoxObserverDirective,
     ],
 })
 export class EduSharingUiCommonModule {}

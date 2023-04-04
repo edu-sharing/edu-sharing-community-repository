@@ -2,8 +2,18 @@ import { TranslateService } from '@ngx-translate/core';
 import { Observable, Observer } from 'rxjs';
 import { Params, Router } from '@angular/router';
 import { Location } from '@angular/common';
-import { DefaultGroups, OptionGroup, OptionItem } from './option-item';
-import { UIConstants } from '../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
+import {
+    DefaultGroups,
+    ListItem,
+    NodeHelperService as NodeHelperServiceBase,
+    NodePersonNamePipe,
+    NodesRightMode,
+    OptionGroup,
+    OptionItem,
+    RepoUrlService,
+    TemporaryStorageService,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import { Helper } from '../core-module/rest/helper';
 import { HttpClient } from '@angular/common/http';
 import { MessageType } from '../core-module/ui/message-type';
@@ -14,27 +24,18 @@ import {
     AuthorityProfile,
     CollectionReference,
     DeepLinkResponse,
-    NodesRightMode,
     Permission,
-    ProposalNode,
     Repository,
     User,
-    WorkflowDefinition,
 } from '../core-module/rest/data-object';
-import { TemporaryStorageService } from '../core-module/rest/services/temporary-storage.service';
 import { RestConstants } from '../core-module/rest/rest-constants';
-import { ConfigurationService } from '../core-module/rest/services/configuration.service';
 import { RestHelper } from '../core-module/rest/rest-helper';
 import { RestConnectorService } from '../core-module/rest/services/rest-connector.service';
-import { ListItem } from '../core-module/ui/list-item';
-import { RestNetworkService } from '../core-module/rest/services/rest-network.service';
-import { NodePersonNamePipe } from '../shared/pipes/node-person-name.pipe';
 import { UniversalNode } from '../common/definitions';
 import { SessionStorageService } from '../core-module/rest/services/session-storage.service';
 import { map } from 'rxjs/operators';
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
-import { getRepoUrl } from '../util/repo-url';
-import { Node } from 'ngx-edu-sharing-api';
+import { ApiHelpersService, ConfigService, NetworkService, Node } from 'ngx-edu-sharing-api';
 
 export interface ConfigEntry {
     name: string;
@@ -62,12 +63,16 @@ export interface ConfigOptionItem extends ConfigEntry {
 }
 
 @Injectable()
-export class NodeHelperService extends TODO {
+export class NodeHelperService extends NodeHelperServiceBase {
     private viewContainerRef: ViewContainerRef;
     constructor(
-        private translate: TranslateService,
+        translate: TranslateService,
+        apiHelpersService: ApiHelpersService,
+        networkService: NetworkService,
+        configService: ConfigService,
+        repoUrlService: RepoUrlService,
         private componentFactoryResolver: ComponentFactoryResolver,
-        private config: ConfigurationService,
+        private config: ConfigService,
         private rest: RestConnectorService,
         private bridge: BridgeService,
         private http: HttpClient,
@@ -78,7 +83,9 @@ export class NodeHelperService extends TODO {
         private sessionStorage: SessionStorageService,
         private storage: TemporaryStorageService,
         private location: Location,
-    ) {}
+    ) {
+        super(translate, apiHelpersService, networkService, configService, repoUrlService);
+    }
     setViewContainerRef(viewContainerRef: ViewContainerRef) {
         this.viewContainerRef = viewContainerRef;
     }
@@ -195,7 +202,7 @@ export class NodeHelperService extends TODO {
      */
     public downloadNode(node: any, version = RestConstants.NODE_VERSION_CURRENT, metadata = false) {
         this.downloadUrl(
-            getRepoUrl(node.downloadUrl, node) +
+            this.repoUrlService.getRepoUrl(node.downloadUrl, node) +
                 (version && version != RestConstants.NODE_VERSION_CURRENT
                     ? '&version=' + version
                     : '') +
@@ -212,7 +219,7 @@ export class NodeHelperService extends TODO {
         return new Observable<Node>((observer: Observer<Node>) => {
             const options: any = this.rest.getRequestOptions();
             options.responseType = 'blob';
-            const url = getRepoUrl(node.preview.url, node);
+            const url = this.repoUrlService.getRepoUrl(node.preview.url, node);
             this.rest
                 .get(url + '&allowRedirect=false&quality=' + quality, options, false)
                 .subscribe(

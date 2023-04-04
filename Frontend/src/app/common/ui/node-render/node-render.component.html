@@ -96,16 +96,16 @@
       <es-spinner></es-spinner>
     </div>
 
-    <div class="similarNodes" *ngIf="similarNodes && similarNodes.length > 0">
+    <div class="similarNodes" *ngIf="!similarNodes.isEmpty()">
       <div class="caption">Ähnliche Objekte</div>
-      <es-listTable
-        (clickRow)="switchNode($event)"
-        [nodes]="similarNodes"
-        [viewType]="1"
-        [hasCheckbox]="false"
-        [isClickable]="true"
+      <es-node-entries-wrapper
+        [dataSource]="similarNodes"
+        [displayType]="DisplayType.Grid"
         [columns]="similarNodeColumns"
-      ></es-listTable>
+        [checkbox]="false"
+        [elementInteractionType]="InteractionType.DefaultActionLink"
+      >
+      </es-node-entries-wrapper>
     </div>
   </div>
 </div>

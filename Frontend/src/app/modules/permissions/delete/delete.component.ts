@@ -1,21 +1,27 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import {
     DeleteMode,
     DialogButton,
     Group,
     JobDescription,
-    ListItem,
     RestAdminService,
     RestConstants,
     RestIamService,
     SessionStorageService,
-    User,
 } from '../../../core-module/core.module';
 import { Toast } from '../../../core-ui-module/toast';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
 import { Helper } from '../../../core-module/rest/helper';
 import { AuthoritySearchMode } from '../../../shared/components/authority-search-input/authority-search-input.component';
+import {
+    InteractionType,
+    ListItem,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
+} from 'ngx-edu-sharing-ui';
+import { User } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-permissions-delete',
@@ -23,15 +29,17 @@ import { AuthoritySearchMode } from '../../../shared/components/authority-search
     styleUrls: ['delete.component.scss'],
 })
 export class PermissionsDeleteComponent implements OnInit {
+    readonly DisplayType = NodeEntriesDisplayType;
+    readonly InteractionType = InteractionType;
     readonly AuthoritySearchMode = AuthoritySearchMode;
+    @ViewChild(NodeEntriesWrapperComponent)
+    nodeEntriesWrapperComponent: NodeEntriesWrapperComponent<User>;
     deleteModes = [DeleteMode.none, DeleteMode.assign, DeleteMode.delete];
     deleteModesFolder = [DeleteMode.none, DeleteMode.assign];
     options: any;
     receiver: User;
     receiverGroup: Group;
-    users: User[];
-    selectedUsers: User[] = [];
-    loading = false;
+    usersDataSource = new NodeDataSource<User>();
     columns: ListItem[] = [];
     deleteResult: string;
     deleteButtons: DialogButton[];
@@ -133,24 +141,23 @@ export class PermissionsDeleteComponent implements OnInit {
     }
 
     refresh() {
-        this.selectedUsers = [];
-        this.loading = true;
+        this.usersDataSource.isLoading = true;
         const request = { maxItems: RestConstants.COUNT_UNLIMITED };
         this.iam.searchUsers('*', true, 'todelete', request).subscribe(
             (users) => {
-                this.users = users.users;
-                this.loading = false;
+                this.usersDataSource.setData(users.users as unknown as User[], users.pagination);
+                this.usersDataSource.isLoading = false;
             },
             (error) => {
                 this.toast.error(error);
-                this.loading = false;
+                this.usersDataSource.isLoading = false;
             },
         );
     }
 
     prepareStart() {
         let message = this.translate.instant('PERMISSIONS.DELETE.CONFIRM.USERS');
-        for (const user of this.selectedUsers) {
+        for (const user of this.nodeEntriesWrapperComponent.getSelection().selected) {
             message += '\n' + new AuthorityNamePipe(this.translate).transform(user, null);
         }
         if (this.hasAssigning()) {
@@ -180,7 +187,9 @@ export class PermissionsDeleteComponent implements OnInit {
         if (this.job !== 'NONE') {
             this.admin
                 .startJobSync(this.job.name, {
-                    authorities: this.selectedUsers.map((u) => u.authorityName),
+                    authorities: this.nodeEntriesWrapperComponent
+                        .getSelection()
+                        .selected.map((u) => u.authorityName),
                 })
                 .subscribe(
                     (result) => {
@@ -205,7 +214,9 @@ export class PermissionsDeleteComponent implements OnInit {
         delete submit.version;
         this.admin
             .deletePersons(
-                this.selectedUsers.map((u) => u.authorityName),
+                this.nodeEntriesWrapperComponent
+                    .getSelection()
+                    .selected.map((u) => u.authorityName),
                 submit,
             )
             .subscribe(
@@ -226,7 +237,7 @@ export class PermissionsDeleteComponent implements OnInit {
     }
 
     canSubmit() {
-        return this.selectedUsers.length && !this.missingAssigning();
+        return !this.nodeEntriesWrapperComponent.getSelection().isEmpty && !this.missingAssigning();
     }
 
     allAssigning() {

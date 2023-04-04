@@ -1,6 +1,6 @@
-import { Component, Input, EventEmitter, Output, ViewChild, ElementRef } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-license-source',

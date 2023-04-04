@@ -1,25 +1,24 @@
-import { Component, ViewChild, HostListener, ElementRef, OnDestroy, OnInit } from '@angular/core';
-import { Router, ActivatedRoute, Params } from '@angular/router';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { TranslationsService } from '../../translations/translations.service';
-import { ListItem, RestSearchService } from '../../core-module/core.module';
-import { RestNodeService } from '../../core-module/core.module';
-import { RestConstants } from '../../core-module/core.module';
-import { RestConnectorService } from '../../core-module/core.module';
-import { Node, NodeList, LoginResult } from '../../core-module/core.module';
-import { OptionItem, Scope } from '../../core-ui-module/option-item';
-import { TemporaryStorageService } from '../../core-module/core.module';
-import { UIConstants } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
-import { RestMdsService } from '../../core-module/core.module';
-import { RestHelper } from '../../core-module/core.module';
+import {
+    NodeList,
+    RestConnectorService,
+    RestConstants,
+    RestMdsService,
+    RestNodeService,
+    RestSearchService,
+    TemporaryStorageService,
+} from '../../core-module/core.module';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
-import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
 import { Helper } from '../../core-module/rest/helper';
-import { NodeUrlComponent } from '../../../../projects/edu-sharing-ui/src/lib/node-url/node-url.component';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { SearchFieldService } from '../../main/navigation/search-field/search-field.service';
+import { ListItem, OptionItem, Scope, UIConstants } from 'ngx-edu-sharing-ui';
+import { Node } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-oer',

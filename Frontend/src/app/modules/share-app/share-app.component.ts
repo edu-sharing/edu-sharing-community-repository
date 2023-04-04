@@ -2,36 +2,35 @@ import { TranslationsService } from '../../translations/translations.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Toast } from '../../core-ui-module/toast';
-import { ListItem, RestConnectorService } from '../../core-module/core.module';
-import { DomSanitizer, Title } from '@angular/platform-browser';
-import { TranslateService } from '@ngx-translate/core';
-import { Component, ViewChild, ElementRef, ApplicationRef } from '@angular/core';
 import {
-    LoginResult,
-    ServerUpdate,
-    CacheInfo,
-    Application,
-    Node,
-    ParentList,
-    Collection,
-    NodeWrapper,
-    ConnectorList,
     Connector,
+    ConnectorList,
+    FrameEventsService,
+    Node,
+    NodeWrapper,
+    ParentList,
+    RestCollectionService,
+    RestConnectorService,
+    RestConnectorsService,
+    RestConstants,
+    RestHelper,
+    RestNodeService,
+    RestUtilitiesService,
 } from '../../core-module/core.module';
-import { RestAdminService } from '../../core-module/core.module';
+import { DomSanitizer } from '@angular/platform-browser';
+import { TranslateService } from '@ngx-translate/core';
+import { Component } from '@angular/core';
 import { Helper } from '../../core-module/rest/helper';
-import { RestConstants } from '../../core-module/core.module';
-import { UIConstants } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
-import { RestUtilitiesService } from '../../core-module/core.module';
-import { RestNodeService } from '../../core-module/core.module';
-import { RestCollectionService } from '../../core-module/core.module';
-import { RestHelper } from '../../core-module/core.module';
 import { CordovaService, OnBackBehaviour } from '../../common/services/cordova.service';
-import { DateHelper } from '../../core-ui-module/DateHelper';
-import { RestConnectorsService } from '../../core-module/core.module';
-import { FrameEventsService } from '../../core-module/core.module';
-import { InteractionType, NodeEntriesDisplayType } from '../../features/node-entries/entries-model';
-import { NodeDataSource } from '../../features/node-entries/node-data-source';
+import {
+    DateHelper,
+    InteractionType,
+    ListItem,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
+
 @Component({
     selector: 'es-share-app',
     templateUrl: 'share-app.component.html',

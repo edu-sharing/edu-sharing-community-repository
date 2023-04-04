@@ -17,7 +17,7 @@ import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Values } from '../../features/mds/types/types';
-import { notNull } from '../../util/functions';
+import { notNull } from 'ngx-edu-sharing-ui';
 import { SearchPageService } from './search-page.service';
 
 @Component({

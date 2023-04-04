@@ -14,19 +14,13 @@ import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { Repository, UIConstants } from '../../core-module/core.module';
-import {
-    CustomOptions,
-    DefaultGroups,
-    ElementType,
-    OptionItem,
-} from '../../core-ui-module/option-item';
+import { CustomOptions, DefaultGroups, ElementType, notNull, OptionItem } from 'ngx-edu-sharing-ui';
 import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import {
     SearchFieldInstance,
     SearchFieldService,
 } from '../../main/navigation/search-field/search-field.service';
-import { notNull } from '../../util/functions';
 import { NavigationScheduler } from './navigation-scheduler';
 import { SearchPageResults } from './search-page-results.service';
 import { UserModifiableValuesService } from './user-modifiable-values';

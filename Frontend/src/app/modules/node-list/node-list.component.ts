@@ -1,18 +1,13 @@
-import { Component, Input, EventEmitter, ViewEncapsulation, Output } from '@angular/core';
-import { Observable } from 'rxjs';
-import { BrowserModule } from '@angular/platform-browser';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Toast } from '../../core-ui-module/toast';
 import {
-    ArchiveRestore,
-    RestoreResult,
     ArchiveSearch,
     Node,
-    ListItem,
     Pagination,
+    RestConnectorService,
 } from '../../core-module/core.module';
-import { RestConnectorService } from '../../core-module/core.module';
-import { CustomOptions, OptionItem } from '../../core-ui-module/option-item';
-import { ActionbarComponent } from '../../../../projects/edu-sharing-ui/src/lib/actionbar/actionbar.component';
+import { CustomOptions, ListItem, OptionItem } from 'ngx-edu-sharing-ui';
+import { ActionbarComponent } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-node-list',

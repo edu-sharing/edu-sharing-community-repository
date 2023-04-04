@@ -192,19 +192,7 @@
       </div>
     </div>
 
-    <h5 class="mat-heading-5" *ngIf="nodesNoData">{{ 'ADMIN.STATISTICS.NO_DATA' | translate }}</h5>
-    <es-listTable
-      *ngIf="!nodesNoData"
-      [hasIcon]="true"
-      [hasHeading]="true"
-      [isClickable]="true"
-      [createLink]="false"
-      (clickRow)="onOpenNode.emit($event.node)"
-      [viewType]="0"
-      [columns]="columns"
-      [isLoading]="nodesLoading"
-      [nodes]="nodes"
-    ></es-listTable>
+    TODO
   </mat-tab>
   <mat-tab label="{{ 'ADMIN.STATISTICS.SINGLE' | translate }}" class="stats-single">
     <h4 class="mat-heading-4 mat-heading-underline">

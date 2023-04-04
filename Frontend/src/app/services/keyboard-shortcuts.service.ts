@@ -4,6 +4,7 @@ import { take } from 'rxjs/operators';
 import { KeyEvents } from '../core-module/ui/key-events';
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { CardComponent } from '../shared/components/card/card.component';
+import { KeyboardShortcut, KeyboardShortcutCondition, Modifier } from 'ngx-edu-sharing-ui';
 
 interface ShortcutsRecord {
     shortcuts: KeyboardShortcut[];

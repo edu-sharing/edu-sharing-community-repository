@@ -1,46 +1,48 @@
 import { forkJoin as observableForkJoin, Observable } from 'rxjs';
 import {
     Component,
-    Input,
-    EventEmitter,
-    Output,
-    HostListener,
     ContentChild,
+    EventEmitter,
+    HostListener,
+    Input,
+    Output,
     TemplateRef,
 } from '@angular/core';
 import {
-    CollectionProposalStatus,
     CollectionReference,
+    ConfigurationService,
     DialogButton,
     LocalPermissions,
+    Node,
     NodeVersions,
-    ProposalNode,
+    NodeWrapper,
+    RestCollectionService,
     RestConnectorService,
+    RestConstants,
+    RestHelper,
     RestNodeService,
+    RestSearchService,
+    RestUsageService,
     Version,
 } from '../../core-module/core.module';
 import { TranslateService } from '@ngx-translate/core';
-import { RestSearchService } from '../../core-module/core.module';
 import { Toast } from '../../core-ui-module/toast';
-import { RestConstants } from '../../core-module/core.module';
-import { NodeWrapper, Node } from '../../core-module/core.module';
-import { RestHelper } from '../../core-module/core.module';
-import { ConfigurationService } from '../../core-module/core.module';
-import { RestCollectionService } from '../../core-module/core.module';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
+import {
+    ClipboardObject,
+    TemporaryStorageService,
+    UIAnimation,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { Router } from '@angular/router';
-import { UIConstants } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
-import { ClipboardObject, TemporaryStorageService } from '../../core-module/core.module';
-import { RestUsageService } from '../../core-module/core.module';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { LinkData, NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { ErrorProcessingService } from '../../core-ui-module/error.processing';
 import { BulkBehavior } from '../../features/mds/types/types';
 import { MainNavService } from 'src/app/main/navigation/main-nav.service';
 import { SimpleEditCloseEvent } from './simple-edit-dialog/simple-edit-dialog.component';
-import { FeedbackV1Service } from 'ngx-edu-sharing-api';
+import { CollectionProposalStatus, FeedbackV1Service, ProposalNode } from 'ngx-edu-sharing-api';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 
 export enum DialogType {

@@ -10,12 +10,9 @@ import {
 } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { forkJoin, from, Observable } from 'rxjs';
 import { MatButtonToggleGroup } from '@angular/material/button-toggle';
-import { Helper } from '../../../../core-module/rest/helper';
-import { CollectionChooserComponent } from '../../../../core-ui-module/components/collection-chooser/collection-chooser.component';
-import { VCard } from '../../../../core-module/ui/VCard';
+import { UIAnimation, VCard } from 'ngx-edu-sharing-ui';
 import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
 import { Values } from '../../../../features/mds/types/types';
 import { switchMap } from 'rxjs/operators';

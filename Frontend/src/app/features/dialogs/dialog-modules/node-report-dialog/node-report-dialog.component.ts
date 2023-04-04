@@ -19,10 +19,10 @@ import {
     RestIamService,
     RestNodeService,
 } from '../../../../core-module/core.module';
-import { UIAnimation } from '../../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { Toast } from '../../../../core-ui-module/toast';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 
 export interface NodeReportDialogData {
     node: Node;

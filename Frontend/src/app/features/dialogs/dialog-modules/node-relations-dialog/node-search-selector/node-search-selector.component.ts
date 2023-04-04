@@ -9,24 +9,19 @@ import {
     TemplateRef,
     ViewChild,
 } from '@angular/core';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { debounceTime, filter, map, switchMap, tap } from 'rxjs/operators';
 import { RestSearchService } from '../../../../../core-module/rest/services/rest-search.service';
-import {
-    Node,
-    NodesRightMode,
-    SearchRequestCriteria,
-} from '../../../../../core-module/rest/data-object';
+import { Node, SearchRequestCriteria } from '../../../../../core-module/rest/data-object';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { MdsHelper } from '../../../../../core-module/rest/mds-helper';
 import { RestMdsService } from '../../../../../core-module/rest/services/rest-mds.service';
 import { TranslateService } from '@ngx-translate/core';
-import { ListItem } from '../../../../../core-module/ui/list-item';
+import { ListItem, NodesRightMode, UIAnimation } from 'ngx-edu-sharing-ui';
 import { NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { MdsEditorWrapperComponent } from '../../../../mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 
 type Status = {

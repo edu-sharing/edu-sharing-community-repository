@@ -1,8 +1,8 @@
 import { Directive, EventEmitter, HostListener, Input, Output } from '@angular/core';
 import {
-    DragData,
+    DragDataLegacy,
     dragNodesTransferType,
-    DropAction,
+    DropActionLegacy,
     readDraggedNodes,
 } from './drag-nodes/drag-nodes';
 
@@ -41,8 +41,8 @@ export class NodesDropTargetLegacyDirective {
      *
      * Output events are *only* fired, when this function evaluates to `true`.
      */
-    @Input('esLegacyNodesDropTarget') canDrop: boolean | ((dragData: DragData) => boolean);
-    @Input() nodesDragAllowedActions: DropAction[] = ['move', 'copy'];
+    @Input('esLegacyNodesDropTarget') canDrop: boolean | ((dragData: DragDataLegacy) => boolean);
+    @Input() nodesDragAllowedActions: DropActionLegacy[] = ['move', 'copy'];
 
     @Output() nodesDragEnter = new EventEmitter<DragEvent>();
     @Output() nodesDragLeave = new EventEmitter<DragEvent>();
@@ -53,7 +53,7 @@ export class NodesDropTargetLegacyDirective {
     /**
      * Triggered when one or more nodes are dropped onto the element.
      */
-    @Output() nodesDrop = new EventEmitter<DragData>();
+    @Output() nodesDrop = new EventEmitter<DragDataLegacy>();
 
     /**
      * Difference of enter- and leave events.
@@ -70,7 +70,7 @@ export class NodesDropTargetLegacyDirective {
      */
     private enterCount = 0;
     private canDropCurrent: boolean;
-    private dropAction: DropAction;
+    private dropAction: DropActionLegacy;
 
     constructor() {}
 
@@ -143,7 +143,7 @@ export class NodesDropTargetLegacyDirective {
         return this.canDrop;
     }
 
-    private getDropAction(event: DragEvent): DropAction {
+    private getDropAction(event: DragEvent): DropActionLegacy {
         if (this.nodesDragAllowedActions.includes('copy') && event.ctrlKey) {
             return 'copy';
         } else if (this.nodesDragAllowedActions.includes('link') && event.altKey) {

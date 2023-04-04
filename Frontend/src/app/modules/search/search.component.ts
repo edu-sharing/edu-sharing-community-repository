@@ -17,11 +17,8 @@ import {
     ConfigurationHelper,
     ConfigurationService,
     DialogButton,
-    ListItem,
-    ListItemSort,
     LoginResult,
     MdsInfo,
-    NetworkRepositories,
     Node,
     NodeList,
     NodeWrapper,
@@ -37,24 +34,32 @@ import {
     RestSearchService,
     SearchList,
     SearchRequestCriteria,
-    TemporaryStorageService,
     UIService,
 } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
-import { UIAnimation } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import {
-    OPEN_URL_MODE,
-    UIConstants,
-} from '../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
-import {
+    ActionbarComponent,
+    CombinedDataSource,
     CustomOptions,
     DefaultGroups,
     ElementType,
+    FetchEvent,
     HideMode,
+    InteractionType,
+    ListItem,
+    ListItemSort,
+    ListSortConfig,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
+    OPEN_URL_MODE,
     OptionItem,
     Scope,
-} from '../../core-ui-module/option-item';
+    TemporaryStorageService,
+    UIAnimation,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import { Toast } from '../../core-ui-module/toast';
 import { TranslationsService } from '../../translations/translations.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
@@ -76,9 +81,9 @@ import {
 } from 'rxjs/operators';
 import { MatTabGroup } from '@angular/material/tabs';
 import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
-import { ActionbarComponent } from '../../../../projects/edu-sharing-ui/src/lib/actionbar/actionbar.component';
 import { SearchFieldService } from 'src/app/main/navigation/search-field/search-field.service';
 import {
+    ConfigService,
     MdsDefinition,
     MdsService,
     MetadataSetInfo,
@@ -90,16 +95,6 @@ import { LoadingScreenService } from '../../main/loading-screen/loading-screen.s
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Values } from '../../features/mds/types/types';
-import {
-    InteractionType,
-    ListSortConfig,
-    NodeEntriesDisplayType,
-    FetchEvent,
-} from 'src/app/features/node-entries/entries-model';
-import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
-import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';
-import { CombinedDataSource } from '../../features/node-entries/combined-data-source';
-import { values } from 'lodash';
 import { Sort } from '@angular/material/sort/sort';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
@@ -237,7 +232,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private winRef: WindowRefService,
         public searchService: SearchService,
         private nodeHelper: NodeHelperService,
-        private config: ConfigurationService,
+        private configLegacy: ConfigurationService,
+        private configService: ConfigService,
         private uiService: UIService,
         private optionsHelper: OptionsHelperService,
         private network: NetworkService,
@@ -311,7 +307,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     private initAfterTranslationsReady(): void {
         if (this.setSidenavSettings()) {
             // auto, never, always
-            let sidenavMode = this.config.instant('searchSidenavMode', 'never');
+            let sidenavMode = this.configLegacy.instant('searchSidenavMode', 'never');
             if (sidenavMode === 'never') {
                 this.searchService.sidenavOpened = false;
             }
@@ -320,7 +316,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             }
         }
         this.printListener();
-        this.groupResults = this.config.instant('searchGroupResults', false);
+        this.groupResults = this.configLegacy.instant('searchGroupResults', false);
 
         this.connector
             .hasToolPermission(RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT)
@@ -330,7 +326,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                         this.allRepositories = Helper.deepCopy(repositories);
                         this.repositories = ConfigurationHelper.filterValidRepositories(
                             repositories,
-                            this.config,
+                            this.configService,
                             !unchecked,
                         );
                         if (this.repositories.length < 1) {
@@ -531,7 +527,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.searchService.extendedSearchUsed = true;
         this.updateGroupedRepositories();
         if (
-            UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_WIDTH, UIConstants.MOBILE_WIDTH)
+            UIService.evaluateMediaQuery(
+                UIConstants.MEDIA_QUERY_MAX_WIDTH,
+                UIConstants.MOBILE_WIDTH,
+            )
         ) {
             this.searchService.sidenavOpened = false;
         }
@@ -917,7 +916,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     isWorkspaceEnabled() {
-        return ConfigurationHelper.hasMenuButton(this.config, 'workspace');
+        return ConfigurationHelper.hasMenuButton(this.configService, 'workspace');
     }
 
     setSavedSearchQuery(query: string) {
@@ -1118,7 +1117,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     private prepare(param: Params): void {
         if (this.setSidenavSettings()) {
             // auto, never, always
-            let sidenavMode = this.config.instant('searchSidenavMode', 'never');
+            let sidenavMode = this.configLegacy.instant('searchSidenavMode', 'never');
             if (sidenavMode == 'never') {
                 this.searchService.sidenavOpened = false;
             }
@@ -1129,7 +1128,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.connector.isLoggedIn().subscribe((data: LoginResult) => {
             this.toolPermissions = data.toolPermissions;
             if (data.isValidLogin && data.currentScope != null) {
-                RestHelper.goToLogin(this.router, this.config);
+                RestHelper.goToLogin(this.router, this.configLegacy);
                 return;
             }
             this.login = data;
@@ -1241,7 +1240,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         let mdsId = this.mdsId;
         if (this.currentRepository == RestConstants.ALL) {
-            const mdsAllowed = ConfigurationHelper.filterValidMds(repo, null, this.config);
+            const mdsAllowed = ConfigurationHelper.filterValidMds(repo, null, this.configService);
             if (mdsAllowed) {
                 mdsId = mdsAllowed[0];
             }
@@ -1282,7 +1281,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             !this.searchService.searchTerm &&
             !this.searchService.extendedSearchUsed &&
             this.isHomeRepository() &&
-            this.config.instant('frontpage.enabled', true);
+            this.configLegacy.instant('frontpage.enabled', true);
         if (useFrontpage && tryFrontpage) {
             queryRequest = this.nodeApi.getChildren(
                 RestConstants.NODES_FRONTPAGE,
@@ -1512,9 +1511,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.searchService.displayType = parseInt(param.displayType, 10);
             } else if (this.searchService.displayType == null) {
                 this.setDisplayType(
-                    this.config.instant(
+                    this.configLegacy.instant(
                         'searchViewType',
-                        this.config.instant('searchViewType', NodeEntriesDisplayType.Grid),
+                        this.configLegacy.instant('searchViewType', NodeEntriesDisplayType.Grid),
                     ),
                 );
             }
@@ -1594,13 +1593,13 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.updateRepositoryOrder();
             this.updateCurrentRepositoryId();
             if (
-                this.config.instant('availableRepositories') &&
+                this.configLegacy.instant('availableRepositories') &&
                 this.repositories.length &&
                 this.currentRepository != RestConstants.ALL &&
                 RestNetworkService.getRepositoryById(this.currentRepository, this.repositories) ==
                     null
             ) {
-                let use = this.config.instant('availableRepositories');
+                let use = this.configLegacy.instant('availableRepositories');
                 console.info(
                     'current repository ' +
                         this.currentRepository +
@@ -1634,7 +1633,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                                 ? this.currentRepositoryObject
                                 : this.currentRepository,
                             metadataSets,
-                            this.config,
+                            this.configService,
                         );
                         if (this.mdsSets) {
                             UIHelper.prepareMetadatasets(this.translate, this.mdsSets);

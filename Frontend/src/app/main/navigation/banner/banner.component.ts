@@ -3,7 +3,9 @@
  */
 
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { ConfigurationHelper, ConfigurationService } from '../../../core-module/core.module';
+import { ConfigurationHelper } from '../../../core-module/core.module';
+import { ConfigService } from 'ngx-edu-sharing-api';
+import { take } from 'rxjs/operators';
 
 @Component({
     selector: 'es-banner',
@@ -14,12 +16,15 @@ export class BannerComponent {
     @Input() scope: string;
     @Output() onUpdate = new EventEmitter();
     public banner: any;
-    constructor(private config: ConfigurationService) {
+    constructor(private config: ConfigService) {
         this.banner = ConfigurationHelper.getBanner(this.config);
-        this.config.getAll().subscribe(() => {
-            this.banner = ConfigurationHelper.getBanner(this.config);
-            this.onUpdate.emit(this.banner);
-        });
+        this.config
+            .observeConfig()
+            .pipe(take(1))
+            .subscribe(() => {
+                this.banner = ConfigurationHelper.getBanner(this.config);
+                this.onUpdate.emit(this.banner);
+            });
     }
 
     clickBanner() {

@@ -20,6 +20,11 @@ type DeleteEvent = {
     count: number;
     error: boolean;
 };
+export interface OptionsHelperComponents {
+    actionbar: ActionbarComponent;
+    dropdown: DropdownComponent;
+    list: ListEventInterface<NodeEntriesDataType>;
+}
 
 export interface OptionData {
     scope: Scope;
@@ -35,9 +40,7 @@ export interface OptionData {
 }
 @Injectable()
 export class OptionsHelperDataService implements OnDestroy {
-    private actionbar: ActionbarComponent;
-    private dropdown: DropdownComponent;
-    private list: ListEventInterface<NodeEntriesDataType>;
+    private components: OptionsHelperComponents;
     private data: OptionData;
     private keyboardShortcutsSubscription: Subscription;
     private globalOptions: OptionItem[];
@@ -56,6 +59,7 @@ export class OptionsHelperDataService implements OnDestroy {
         @Optional() private keyboardShortcutsService: KeyboardShortcutsService,
         @Optional() private optionsHelperService: OptionsHelperService,
     ) {}
+
     ngOnDestroy(): void {
         this.destroyed.next();
         this.destroyed.complete();
@@ -66,9 +70,11 @@ export class OptionsHelperDataService implements OnDestroy {
         list: ListEventInterface<NodeEntriesDataType> = null,
         dropdown: DropdownComponent = null,
     ) {
-        this.actionbar = actionbar;
-        this.list = list;
-        this.dropdown = dropdown;
+        this.components = {
+            actionbar,
+            list,
+            dropdown,
+        };
         if ((await this.userService.getUser(ME).pipe(take(1)).toPromise()).person.authorityName) {
             await this.networkService.getRepositories().pipe(take(1)).toPromise();
         }
@@ -77,20 +83,31 @@ export class OptionsHelperDataService implements OnDestroy {
     getData() {
         return this.data;
     }
+
     setData(data: OptionData) {
         this.data = this.optionsHelperService.wrapOptionCallbacks(data);
     }
+
     refreshComponents(refreshListOptions = true) {
         if (this.optionsHelperService == null) {
             console.warn('optionsHelperService not provided. No default actions will be generated');
             return;
         }
         this.globalOptions = this.getAvailableOptions(Target.Actionbar);
-        this.optionsHelperService?.refreshComponents(refreshListOptions, this.data);
+        this.optionsHelperService?.refreshComponents(
+            this.components,
+            this.data,
+            refreshListOptions,
+        );
     }
 
     getAvailableOptions(target: Target, objects: Node[] = null) {
-        return this.optionsHelperService?.getAvailableOptions(target, objects, this.data);
+        return this.optionsHelperService?.getAvailableOptions(
+            target,
+            objects,
+            this.components,
+            this.data,
+        );
     }
 
     private addVirtualObjects(objects: any[]) {
@@ -99,8 +116,8 @@ export class OptionsHelperDataService implements OnDestroy {
             return o;
         });
         this.virtualNodesAdded.emit(objects);
-        if (this.list) {
-            this.list.addVirtualNodes(objects);
+        if (this.components?.list) {
+            this.components?.list.addVirtualNodes(objects);
         }
     }
 
@@ -113,6 +130,7 @@ export class OptionsHelperDataService implements OnDestroy {
             }
         });
     }
+
     private handleKeyboardEvent(event: KeyboardEvent) {
         if (this.globalOptions && !this.keyboardShortcutsService?.shouldIgnoreShortcut(event)) {
             const matchedOption = this.globalOptions.find(
@@ -127,5 +145,25 @@ export class OptionsHelperDataService implements OnDestroy {
                 this.ngZone.run(() => matchedOption.callback(null));
             }
         }
+    }
+    filterOptions(options: OptionItem[], target: Target, objects: Node[] | any = null) {
+        return this.optionsHelperService.filterOptions(options, target, this.data, objects);
+    }
+    /**
+     * shortcut to simply disable all options on the given compoennts
+     * @param actionbar
+     * @param list
+     */
+    clearComponents(actionbar: ActionbarComponent, list: ListEventInterface<Node> = null) {
+        if (list) {
+            list.setOptions(null);
+        }
+        if (actionbar) {
+            actionbar.options = [];
+        }
+    }
+
+    pasteNode(nodes: Node[] = []) {
+        this.optionsHelperService.pasteNode(this.components, this.data, nodes);
     }
 }

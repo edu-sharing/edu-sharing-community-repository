@@ -3,7 +3,7 @@ import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core
 import { BehaviorSubject, forkJoin, from, Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { Node, RestConstants, RestNodeService } from '../../../../core-module/core.module';
-import { UIAnimation } from '../../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { Toast } from '../../../../core-ui-module/toast';
 import { MdsEditorWrapperComponent } from '../../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { BulkBehavior } from '../../../../features/mds/types/types';

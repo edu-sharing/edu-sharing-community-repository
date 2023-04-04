@@ -5,7 +5,7 @@ import { Node } from '../../../../../core-module/rest/data-object';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { RestIamService } from '../../../../../core-module/rest/services/rest-iam.service';
 import { UIService } from '../../../../../core-module/rest/services/ui.service';
-import { VCard } from '../../../../../core-module/ui/VCard';
+import { VCard } from 'ngx-edu-sharing-ui';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { Values } from '../../../types/types';

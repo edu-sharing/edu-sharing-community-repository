@@ -74,6 +74,12 @@ import { MatButtonModule } from '@angular/material/button';
         MatTooltipModule,
         TranslateModule,
     ],
-    exports: [NodeEntriesWrapperComponent, ListItemLabelPipe],
+    exports: [
+        NodeEntriesWrapperComponent,
+        NodesDragDirective,
+        NodesDragSourceDirective,
+        NodesDropTargetDirective,
+        ListItemLabelPipe,
+    ],
 })
 export class NodeEntriesModule {}

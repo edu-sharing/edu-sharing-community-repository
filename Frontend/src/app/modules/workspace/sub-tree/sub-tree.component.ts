@@ -12,14 +12,17 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { DropSource } from 'src/app/features/node-entries/entries-model';
+import {
+    DragData,
+    DropdownComponent,
+    DropSource,
+    OptionItem,
+    OptionsHelperDataService,
+    Scope,
+    UIAnimation,
+} from 'ngx-edu-sharing-ui';
 import { Node, NodeList, RestConstants, RestNodeService } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
-import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
-import { OptionItem, Scope } from '../../../core-ui-module/option-item';
-import { OptionsHelperService } from '../../../core-ui-module/options-helper.service';
-import { DragData } from '../../../../../projects/edu-sharing-ui/src/lib/services/nodes-drag-drop.service';
-import { DropdownComponent } from '../../../../../projects/edu-sharing-ui/src/lib/dropdown/dropdown.component';
 import { canDropOnNode } from '../workspace-utils';
 
 @Component({
@@ -30,7 +33,7 @@ import { canDropOnNode } from '../workspace-utils';
         trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST)),
         trigger('open', UIAnimation.openOverlay()),
     ],
-    providers: [OptionsHelperService],
+    providers: [OptionsHelperDataService],
 })
 export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
     private static MAX_FOLDER_COUNT = 100;
@@ -83,7 +86,10 @@ export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
     private expandedNodes: string[] = [];
     private destroyed = new Subject<void>();
 
-    constructor(private nodeApi: RestNodeService, private optionsService: OptionsHelperService) {}
+    constructor(
+        private nodeApi: RestNodeService,
+        private optionsService: OptionsHelperDataService,
+    ) {}
 
     ngOnInit(): void {
         rxjs.merge(this.optionsService.nodesChanged, this.optionsService.nodesDeleted)

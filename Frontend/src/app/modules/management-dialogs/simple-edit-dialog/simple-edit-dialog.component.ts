@@ -7,22 +7,21 @@ import {
     RestConnectorService,
     RestConnectorsService,
     RestConstants,
-    RestHelper,
     RestIamService,
     RestNodeService,
 } from '../../../core-module/core.module';
 import { Toast } from '../../../core-ui-module/toast';
 import { TranslateService } from '@ngx-translate/core';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { Router } from '@angular/router';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import { SimpleEditMetadataComponent } from './simple-edit-metadata/simple-edit-metadata.component';
 import { SimpleEditInviteComponent } from './simple-edit-invite/simple-edit-invite.component';
 import { SimpleEditLicenseComponent } from './simple-edit-license/simple-edit-license.component';
-import { forkJoin, Observable } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { CardType } from '../../../shared/components/card/card.component';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 
 export interface SimpleEditCloseEvent {
     reason: 'abort' | 'done' | 'temporary';

@@ -1,24 +1,24 @@
 import { first, map, shareReplay, switchMap } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { AsyncSubject, Observable } from 'rxjs';
 import * as rxjs from 'rxjs';
+import { Observable } from 'rxjs';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
     FrameEventsService,
+    OrganizationOrganizations,
     RestConnectorService,
     RestConstants,
+    RestMediacenterService,
+    RestOrganizationService,
     UIConstants,
     UIService,
-    RestOrganizationService,
-    OrganizationOrganizations,
-    RestMediacenterService,
 } from '../../core-module/core.module';
-import { OPEN_URL_MODE } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
+import { OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { ConfigEntry } from '../../core-ui-module/node-helper.service';
-import { LoginInfo, AuthenticationService } from 'ngx-edu-sharing-api';
+import { AuthenticationService, LoginInfo } from 'ngx-edu-sharing-api';
 
 type Target = { type: 'path'; path: string } | { type: 'url'; url: string; openInNew: boolean };
 

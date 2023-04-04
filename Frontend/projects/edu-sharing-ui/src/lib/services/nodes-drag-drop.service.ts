@@ -3,7 +3,6 @@ import * as rxjs from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, map, pairwise } from 'rxjs/operators';
 import { CanDrop, DropAction } from '../types/drag-drop';
-import { NodesDropTargetLegacyDirective } from '../directives/nodes-drop-target-legacy.directive';
 import { NodesDropTargetDirective } from '../directives/drag-nodes/nodes-drop-target.directive';
 import { Node } from 'ngx-edu-sharing-api';
 import { Toast } from './abstract/toast.service';

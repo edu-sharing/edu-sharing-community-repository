@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { debounceTime, map } from 'rxjs/operators';
-import { Scope } from '../../core-ui-module/option-item';
-import { NodeEntriesDisplayType } from '../../features/node-entries/entries-model';
 import { SearchPageResultsAllService } from './search-page-results-all.service';
 import { SearchPageService } from './search-page.service';
+import { NodeEntriesDisplayType, Scope } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-search-page-results-all',

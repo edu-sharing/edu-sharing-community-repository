@@ -9,12 +9,11 @@ import {
     ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { NodeStatistics, Node, Statistics } from '../../../core-module/rest/data-object';
-import { ListItem } from '../../../core-module/ui/list-item';
+import { Node, NodeStatistics, Statistics } from '../../../core-module/rest/data-object';
+import { ListCountsComponent, ListItem, UIAnimation } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { ConfigurationService } from '../../../core-module/rest/services/configuration.service';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { RestStatisticsService } from '../../../core-module/rest/services/rest-statistics.service';
 import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
 import { Toast } from '../../../core-ui-module/toast';
@@ -23,10 +22,7 @@ import { CsvHelper } from '../../../core-module/csv.helper';
 import { SessionStorageService } from '../../../core-module/rest/services/session-storage.service';
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
 import { UIService } from '../../../core-module/rest/services/ui.service';
-import { MdsHelper } from '../../../core-module/rest/mds-helper';
-import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { trigger } from '@angular/animations';
-import { ListCountsComponent } from 'src/app/features/list-items/list-counts/list-counts.component';
 
 // Charts.js
 declare var Chart: any;

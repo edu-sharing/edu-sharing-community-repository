@@ -6,15 +6,18 @@ import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { Observable, Subject } from 'rxjs';
 import { filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
-import { Node, Repository, RestConstants, UIConstants } from '../../core-module/core.module';
-import { UIAnimation } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
-import { Scope } from '../../core-ui-module/option-item';
+import { Node, Repository, RestConstants } from '../../core-module/core.module';
+import {
+    NodeEntriesWrapperComponent,
+    notNull,
+    Scope,
+    UIAnimation,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import { CardDialogRef } from '../../features/dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
-import { NodeEntriesWrapperComponent } from '../../features/node-entries/node-entries-wrapper.component';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
-import { notNull } from '../../util/functions';
 import { NavigationScheduler } from './navigation-scheduler';
 import { SearchPageService } from './search-page.service';
 

@@ -3,7 +3,7 @@
 .content {
     padding: 20px 30px;
     width: 100%;
-    max-width: $cardWidth * 4 + 125px;
+    max-width: calc(var(--cardWidth) * 4 + 125px);
     margin: auto;
     margin-top: var(--mainnavHeight);
     display: flex;
@@ -73,7 +73,7 @@
         }
     }
 }
-@media all and (max-width: ($cardWidth*3)) {
+@media all and (max-width: (calc(var(--cardWidth) * 3))) {
     :host ::ng-deep .cardSmallList {
         width: calc(100% - 10px) !important;
     }

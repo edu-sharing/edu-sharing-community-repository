@@ -17,11 +17,11 @@ import { UIConstants } from '../util/ui-constants';
 })
 export class NodeHelperService {
     constructor(
-        private translate: TranslateService,
-        private apiHelpersService: ApiHelpersService,
-        private networkService: NetworkService,
-        private configService: ConfigService,
-        private repoUrlService: RepoUrlService,
+        protected translate: TranslateService,
+        protected apiHelpersService: ApiHelpersService,
+        protected networkService: NetworkService,
+        protected configService: ConfigService,
+        protected repoUrlService: RepoUrlService,
     ) {}
 
     public getCollectionScopeInfo(node: Node): { icon: string; scopeName: string } {

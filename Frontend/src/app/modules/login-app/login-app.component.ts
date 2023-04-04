@@ -1,29 +1,19 @@
-import {
-    Component,
-    OnInit,
-    //ApplicationRef
-} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 import { Toast } from '../../core-ui-module/toast';
-import { Router, Route, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
-    OAuthResult,
-    LoginResult,
-    AccessScope,
-    RestConstants,
+    ConfigurationService,
     DialogButton,
+    OAuthResult,
     RestConnectorService,
+    RestConstants,
+    RestLocatorService,
 } from '../../core-module/core.module';
-import {
-    OPEN_URL_MODE,
-    UIConstants,
-} from '../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
+import { OPEN_URL_MODE, UIConstants } from 'ngx-edu-sharing-ui';
 import { CordovaService } from '../../common/services/cordova.service';
-import { ConfigurationService } from '../../core-module/core.module';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { TranslationsService } from '../../translations/translations.service';
-import { RestHelper } from '../../core-module/core.module';
-import { RestLocatorService } from '../../core-module/core.module';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { PlatformLocation } from '@angular/common';
 

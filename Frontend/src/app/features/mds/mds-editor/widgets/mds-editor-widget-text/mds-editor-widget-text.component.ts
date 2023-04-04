@@ -3,7 +3,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl, ValidatorFn, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { DialogButton } from '../../../../../core-module/core.module';
-import { DateHelper } from '../../../../../core-ui-module/DateHelper';
+import { DateHelper } from 'ngx-edu-sharing-ui';
 import { Toast } from '../../../../../core-ui-module/toast';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';

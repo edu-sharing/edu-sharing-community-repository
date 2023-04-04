@@ -13,14 +13,10 @@ import {
 import {
     ConfigurationService,
     DialogButton,
-    GenericAuthority,
-    Group,
     GroupSignupDetails,
     IamAuthorities,
     IamGroups,
     IamUsers,
-    ListItem,
-    ListItemSort,
     Node,
     NodeList,
     Organization,
@@ -32,41 +28,40 @@ import {
     RestOrganizationService,
     SharedFolder,
     UIService,
-    User,
-    UserSimple,
 } from '../../../core-module/core.module';
 import { Toast, ToastType } from '../../../core-ui-module/toast';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
+    ActionbarComponent,
     Constrain,
     CustomOptions,
     DefaultGroups,
     ElementType,
+    FetchEvent,
+    InteractionType,
+    ListItem,
+    ListItemSort,
+    ListItemType,
+    ListSortConfig,
+    NodeClickEvent,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
     OptionItem,
+    OptionsHelperDataService,
     Scope,
-} from '../../../core-ui-module/option-item';
-import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
+    UIAnimation,
+} from 'ngx-edu-sharing-ui';
 import { SuggestItem } from '../../../common/ui/autocomplete/autocomplete.component';
 import { Helper } from '../../../core-module/rest/helper';
 import { trigger } from '@angular/animations';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { ModalDialogOptions } from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
-import { ActionbarComponent } from '../../../../../projects/edu-sharing-ui/src/lib/actionbar/actionbar.component';
 import { forkJoin } from 'rxjs';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { CsvHelper } from '../../../core-module/csv.helper';
-import { ListItemType } from '../../../core-module/ui/list-item';
-import { OptionsHelperService } from '../../../core-ui-module/options-helper.service';
-import {
-    FetchEvent,
-    InteractionType,
-    ListSortConfig,
-    NodeClickEvent,
-    NodeEntriesDisplayType,
-} from 'src/app/features/node-entries/entries-model';
-import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
-import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';
+import { GenericAuthority, Group, User } from 'ngx-edu-sharing-api';
 import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
 import { filter } from 'rxjs/operators';
 
@@ -141,13 +136,13 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     memberButtons: DialogButton[];
     signupButtons: DialogButton[];
     signupListButtons: DialogButton[];
-    editStatus: UserSimple;
+    editStatus: User;
     editStatusNotify = true;
     editStatusButtons: DialogButton[];
     groupSignup: Organization;
     groupSignupListNode: Organization;
     groupSignupListShown = false;
-    groupSignupList = new NodeDataSource<UserSimple>();
+    groupSignupList = new NodeDataSource<User>();
     groupSignupDetails: GroupSignupDetails;
     private _org: Organization;
     @Output() onDeselectOrg = new EventEmitter();
@@ -322,7 +317,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         private ref: ApplicationRef,
         private translate: TranslateService,
         private organization: RestOrganizationService,
-        private optionsHelperService: OptionsHelperService,
+        private optionsHelperService: OptionsHelperDataService,
         private connector: RestConnectorService,
         private iam: RestIamService,
     ) {
@@ -453,9 +448,9 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                     this.ref.tick();
                     this.signupList.getSelection().clear();
                     this.groupSignupList.setData(
-                        await this.iam
+                        (await this.iam
                             .getGroupSignupList(this.groupSignup.authorityName)
-                            .toPromise(),
+                            .toPromise()) as unknown as User[],
                     );
                     await this.signupList.initOptionsGenerator({
                         actionbar: this.actionbarSignup,
@@ -605,7 +600,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             const signupAdd = new OptionItem(
                 'PERMISSIONS.ORG_SIGNUP_ADD',
                 'person_add',
-                (node: UserSimple) => {
+                (node: User) => {
                     this.toast.showProgressDialog();
                     const users = NodeHelperService.getActionbarNodes(
                         this.signupList.getSelection().selected,
@@ -633,7 +628,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             const signupRemove = new OptionItem(
                 'PERMISSIONS.ORG_SIGNUP_REJECT',
                 'close',
-                (node: UserSimple) => {
+                (node: User) => {
                     this.toast.showProgressDialog();
                     const users = NodeHelperService.getActionbarNodes(
                         this.signupList.getSelection().selected,
@@ -867,7 +862,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                     .getGroupMembers(this.org.authorityName, query, this._mode, request)
                     .subscribe(async (data: IamAuthorities) => {
                         this.dataSource.setPagination(data.pagination);
-                        await this.dataSource.appendData(data.authorities);
+                        await this.dataSource.appendData(data.authorities as Organization[]);
                         this.dataSource.isLoading = false;
                     });
             } else if (this._mode == 'GROUP') {
@@ -875,13 +870,13 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                     .searchGroups(query, true, '', '', request)
                     .subscribe(async (data: IamGroups) => {
                         this.dataSource.setPagination(data.pagination);
-                        await this.dataSource.appendData(data.groups);
+                        await this.dataSource.appendData(data.groups as Group[]);
                         this.dataSource.isLoading = false;
                     });
             } else if (this._mode == 'USER') {
                 this.iam.searchUsers(query, true, '', request).subscribe(async (data: IamUsers) => {
                     this.dataSource.setPagination(data.pagination);
-                    await this.dataSource.appendData(data.users);
+                    await this.dataSource.appendData(data.users as unknown as User[]);
                     this.dataSource.isLoading = false;
                 });
             }
@@ -1170,7 +1165,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                     )
                     .subscribe(async (data: IamAuthorities) => {
                         this.memberList.setPagination(data.pagination);
-                        await this.memberList.appendData(data.authorities);
+                        await this.memberList.appendData(data.authorities as unknown as User[]);
                         this.memberList.isLoading = false;
                     });
             } else {
@@ -1182,7 +1177,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                     .searchUsers(this.manageMemberSearch, true, '', request)
                     .subscribe(async (data) => {
                         this.memberList.setPagination(data.pagination);
-                        await this.memberList.appendData(data.users);
+                        await this.memberList.appendData(data.users as unknown as User[]);
                         this.memberList.isLoading = false;
                     });
             }
@@ -1195,7 +1190,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 .getUserGroups(this.editGroups.authorityName, this.manageMemberSearch, request)
                 .subscribe(async (data) => {
                     this.memberList.setPagination(data.pagination);
-                    await this.memberList.appendData(data.groups);
+                    await this.memberList.appendData(data.groups as Group[]);
                     this.memberList.isLoading = false;
                 });
         } else {
@@ -1212,7 +1207,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 )
                 .subscribe(async (data) => {
                     this.memberList.setPagination(data.pagination);
-                    await this.memberList.appendData(data.authorities);
+                    await this.memberList.appendData(data.authorities as unknown as User[]);
                     this.memberList.isLoading = false;
                 });
         }
@@ -1271,7 +1266,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     private downloadMembers() {
         const headers = this.columns.map((c) => this.translate.instant(this._mode + '.' + c.name));
         const data: string[][] = [];
-        for (const entry of this.dataSource.getData() as UserSimple[]) {
+        for (const entry of this.dataSource.getData() as User[]) {
             data.push([
                 entry.authorityName,
                 entry.profile.firstName,
@@ -1337,7 +1332,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             ),
         ];
     }
-    private setPersonStatus(data: UserSimple) {
+    private setPersonStatus(data: User) {
         this.editStatus = data;
         this.updateButtons();
     }

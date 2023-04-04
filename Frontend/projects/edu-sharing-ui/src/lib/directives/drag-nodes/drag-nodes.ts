@@ -1,14 +1,13 @@
 import { Node } from 'ngx-edu-sharing-api';
+import { DropAction } from '../../types/drag-drop';
 
-export type DropAction = 'move' | 'copy' | 'link';
-
-export interface DragData {
+export interface DragDataLegacy {
     event?: DragEvent;
     nodes?: Node[];
     dropAction?: DropAction;
 }
 
-export interface DropData extends DragData {
+export interface DropDataLegacy extends DragDataLegacy {
     target: DragNodeTarget;
 }
 

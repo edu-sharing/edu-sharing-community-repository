@@ -10,13 +10,13 @@ import {
     RestHelper,
     UIService,
 } from '../../core-module/core.module';
-import { UIConstants } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { Toast } from '../../core-ui-module/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { RegisterDoneComponent } from './register-done/register-done.component';
 import { RegisterFormComponent } from './register-form/register-form.component';
 import { RegisterRequestComponent } from './register-request/register-request.component';
 import { RegisterResetPasswordComponent } from './register-reset-password/register-reset-password.component';
+import { UIConstants } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-register',

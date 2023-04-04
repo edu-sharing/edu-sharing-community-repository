@@ -890,7 +890,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                 const sets = ConfigurationHelper.filterValidMds(
                     repository,
                     await this.mdsService.getAvailableMetadataSets().toPromise(),
-                    this.configService,
+                    this.config,
                 );
                 mdsId = sets[0]?.id;
             } catch (e) {

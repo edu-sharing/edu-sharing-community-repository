@@ -19,17 +19,24 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { TranslationsService } from '../../../translations/translations.service';
 import {
+    ActionbarComponent,
     DefaultGroups,
     ElementType,
+    InteractionType,
+    ListItem,
+    NodeDataSource,
+    NodeEntriesDisplayType,
     OptionItem,
+    OptionsHelperDataService,
     Scope,
     Target,
-} from '../../../core-ui-module/option-item';
-import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
+    TemporaryStorageService,
+    UIAnimation,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { trigger } from '@angular/animations';
 import { Location, PlatformLocation } from '@angular/common';
-import { UIConstants } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { SearchService } from '../../../modules/search/search.service';
 import { HttpClient } from '@angular/common/http';
 import {
@@ -38,12 +45,10 @@ import {
     EventListener,
     EventType,
     FrameEventsService,
-    ListItem,
     LoginResult,
     Mds,
     Node,
     NodeList,
-    ProposalNode,
     RestConnectorService,
     RestConnectorsService,
     RestConstants,
@@ -55,13 +60,10 @@ import {
     RestSearchService,
     RestToolService,
     RestUsageService,
-    TemporaryStorageService,
     UIService,
 } from '../../../core-module/core.module';
 import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { VideoControlsComponent } from '../../../core-ui-module/components/video-controls/video-controls.component';
-import { ActionbarComponent } from '../../../../../projects/edu-sharing-ui/src/lib/actionbar/actionbar.component';
-import { OptionsHelperService } from '../../../core-ui-module/options-helper.service';
 import { RestTrackingService } from '../../../core-module/rest/services/rest-tracking.service';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
@@ -71,17 +73,20 @@ import { RenderHelperService } from '../../../core-ui-module/render-helper.servi
 import { Subject } from 'rxjs';
 import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
-import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
+import { ConfigService, ProposalNode } from 'ngx-edu-sharing-api';
+import { OptionsHelperService } from 'src/app/core-ui-module/options-helper.service';
 
 @Component({
     selector: 'es-node-render',
     templateUrl: 'node-render.component.html',
     styleUrls: ['node-render.component.scss'],
-    providers: [OptionsHelperService],
+    providers: [OptionsHelperDataService],
     animations: [trigger('fadeFast', UIAnimation.fade(UIAnimation.ANIMATION_TIME_FAST))],
 })
 export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
+    readonly DisplayType = NodeEntriesDisplayType;
+    readonly InteractionType = InteractionType;
     @Input() set node(node: Node | string) {
         const id = (node as Node).ref ? (node as Node).ref.id : (node as string);
         jQuery('#nodeRenderContent').html('');
@@ -112,14 +117,15 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         private frame: FrameEventsService,
         private toast: Toast,
         private cd: ChangeDetectorRef,
-        private config: ConfigurationService,
+        private configLegacy: ConfigurationService,
+        private configService: ConfigService,
         private route: ActivatedRoute,
         private networkService: RestNetworkService,
         private breadcrumbsService: BreadcrumbsService,
         private _ngZone: NgZone,
         private router: Router,
         private platformLocation: PlatformLocation,
-        private optionsHelper: OptionsHelperService,
+        private optionsHelper: OptionsHelperDataService,
         private loadingScreen: LoadingScreenService,
         public mainNavService: MainNavService,
         private temporaryStorageService: TemporaryStorageService,
@@ -134,7 +140,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         this.renderHelper.setViewContainerRef(viewContainerRef);
 
         this.translations.waitForInit().subscribe(() => {
-            this.banner = ConfigurationHelper.getBanner(this.config);
+            this.banner = ConfigurationHelper.getBanner(this.configService);
             this.connector.setRoute(this.route);
             this.networkService.prepareCache();
             this.route.queryParams.subscribe((params: Params) => {
@@ -230,7 +236,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
     canScrollLeft = false;
     canScrollRight = false;
     private queryParams: Params;
-    public similarNodes: Node[];
+    public similarNodes = new NodeDataSource<Node>();
     mds: Mds;
     isDestroyed = false;
     private readonly destroyed$ = new Subject<void>();
@@ -285,7 +291,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                     UIHelper.goToDefaultLocation(
                         this.router,
                         this.platformLocation,
-                        this.config,
+                        this.configLegacy,
                         false,
                     );
                 } else {
@@ -433,7 +439,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             return;
         }
         const parameters = {
-            showDownloadButton: this.config.instant('rendering.showDownloadButton', false),
+            showDownloadButton: this.configLegacy.instant('rendering.showDownloadButton', false),
             showDownloadAdvice: !this.isOpenable,
         };
         this._node = null;
@@ -552,7 +558,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         );
     }
     private postprocessHtml() {
-        if (!this.config.instant('rendering.showPreview', true)) {
+        if (!this.configLegacy.instant('rendering.showPreview', true)) {
             jQuery('.edusharing_rendering_content_wrapper').hide();
             jQuery('.showDetails').hide();
         }
@@ -747,8 +753,10 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
     }
 
     private loadSimilarNodes() {
+        this.similarNodes.isLoading = true;
         this.searchApi.searchFingerprint(this._nodeId).subscribe((data: NodeList) => {
-            this.similarNodes = data.nodes;
+            this.similarNodes.isLoading = false;
+            this.similarNodes.setData(data.nodes, data.pagination);
         });
     }
 

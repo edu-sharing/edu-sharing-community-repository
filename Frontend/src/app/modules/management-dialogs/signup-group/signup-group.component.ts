@@ -1,38 +1,16 @@
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import {
-    Component,
-    Input,
-    EventEmitter,
-    Output,
-    ViewChild,
-    ElementRef,
-    OnInit,
-} from '@angular/core';
-import { DialogButton, Group, RestConnectorService } from '../../../core-module/core.module';
-import { Toast } from '../../../core-ui-module/toast';
-import { RestNodeService } from '../../../core-module/core.module';
-import {
-    NodeWrapper,
-    Node,
-    NodePermissions,
-    LocalPermissionsResult,
-    Permission,
+    ConfigurationService,
+    DialogButton,
+    Group,
     LoginResult,
-    View,
-    STREAM_STATUS,
-    IamUser,
-    AuthorityProfile,
+    RestConnectorService,
+    RestConstants,
+    RestIamService,
+    RestNodeService,
+    RestStreamService,
 } from '../../../core-module/core.module';
-import { ConfigurationService } from '../../../core-module/core.module';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { RestIamService } from '../../../core-module/core.module';
-import { TranslateService } from '@ngx-translate/core';
-import { MdsComponent } from '../../../features/mds/legacy/mds/mds.component';
-import { RestConstants } from '../../../core-module/core.module';
-import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
-import { trigger } from '@angular/animations';
-import { RestStreamService } from '../../../core-module/core.module';
-import { RestHelper } from '../../../core-module/core.module';
-import { Helper } from '../../../core-module/rest/helper';
+import { Toast } from '../../../core-ui-module/toast';
 
 enum Step {
     selectGroup,

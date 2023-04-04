@@ -1,7 +1,5 @@
-import { PipeTransform, Pipe } from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { DateHelper } from '../../core-ui-module/DateHelper';
-import { isNumeric } from 'rxjs/util/isNumeric';
 import { RestConstants } from '../../core-module/rest/rest-constants';
 import { Version } from '../../core-module/rest/data-object';
 

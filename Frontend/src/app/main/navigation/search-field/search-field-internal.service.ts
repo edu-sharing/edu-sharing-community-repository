@@ -31,7 +31,7 @@ import {
     timeout,
 } from 'rxjs/operators';
 import { EventListener, FrameEventsService } from '../../../core-module/core.module';
-import { isTrue, notNull } from '../../../util/functions';
+import { isTrue, notNull } from 'ngx-edu-sharing-ui';
 import { SearchFieldComponent } from './search-field.component';
 import { MdsInfo, SearchEvent, SearchFieldConfig } from './search-field.service';
 

@@ -2,8 +2,8 @@ import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/cor
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { TranslateService } from '@ngx-translate/core';
 import { Node } from '../../../../core-module/rest/data-object';
-import { RelationService, NodeService, RelationData } from 'ngx-edu-sharing-api';
-import { ListItem } from '../../../../core-module/ui/list-item';
+import { NodeService, RelationData, RelationService } from 'ngx-edu-sharing-api';
+import { ListItem } from 'ngx-edu-sharing-ui';
 import { forkJoin as observableForkJoin } from 'rxjs';
 import { RestHelper } from '../../../../core-module/rest/rest-helper';
 

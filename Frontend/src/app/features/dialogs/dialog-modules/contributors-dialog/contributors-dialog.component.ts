@@ -6,11 +6,11 @@ import {
     RestConstants,
     RestNodeService,
 } from '../../../../core-module/core.module';
-import { VCard } from '../../../../core-module/ui/VCard';
+import { VCard } from 'ngx-edu-sharing-ui';
 import { Toast } from '../../../../core-ui-module/toast';
 import {
-    CardDialogConfig,
     CARD_DIALOG_DATA,
+    CardDialogConfig,
     Closable,
     configForNode,
 } from '../../card-dialog/card-dialog-config';

@@ -2,18 +2,23 @@
  * Some code from https://github.com/angular/components/blob/15.0.x/src/material/table/table-data-source.ts
  */
 
-import { DataSource } from '@angular/cdk/collections';
 import { Injector } from '@angular/core';
-import { Sort, SortDirection } from '@angular/material/sort';
+import { Sort } from '@angular/material/sort';
 import { MatTableDataSourcePageEvent, MatTableDataSourcePaginator } from '@angular/material/table';
 import { ActivatedRoute } from '@angular/router';
-import { SearchResults } from 'ngx-edu-sharing-api';
+import { GenericAuthority, Node, SearchResults } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, ReplaySubject, Subject, Subscription } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil, tap } from 'rxjs/operators';
-import { NodeCache, NodeCacheRange, NodeCacheSlice, NodeDataSource } from 'ngx-edu-sharing-ui';
-import { Node, GenericAuthority } from 'ngx-edu-sharing-api';
-import { ListItemSort } from '../../../../projects/edu-sharing-ui/src/lib/types/list-item';
+import {
+    ItemsCap,
+    NodeCache,
+    NodeCacheRange,
+    NodeCacheSlice,
+    NodeDataSourceRemote as NodeDataSourceRemoteBase,
+    PaginationConfig,
+    SortPanel,
+} from 'ngx-edu-sharing-ui';
 import { UserModifiableValuesService } from './user-modifiable-values';
 
 type Range = NodeCacheRange;
@@ -42,7 +47,7 @@ let nextId = 0;
 export class NodeDataSourceRemote<
     T extends Node | GenericAuthority = Node,
     P extends MatTableDataSourcePaginator = MatTableDataSourcePaginator,
-> extends NodeDataSourceRemote<T> {
+> extends NodeDataSourceRemoteBase<T, P> {
     get paginator(): P | null {
         return this._paginationHandler.paginator;
     }

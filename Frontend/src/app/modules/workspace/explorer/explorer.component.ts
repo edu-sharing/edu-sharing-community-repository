@@ -1,6 +1,5 @@
 import {
     AfterViewInit,
-    ChangeDetectorRef,
     Component,
     EventEmitter,
     Input,
@@ -12,7 +11,6 @@ import {
 } from '@angular/core';
 import {
     ConfigurationService,
-    ListItem,
     Node,
     NodeList,
     RestConnectorService,
@@ -20,39 +18,32 @@ import {
     RestNodeService,
     RestSearchService,
     SessionStorageService,
-    TemporaryStorageService,
     UIService,
 } from '../../../core-module/core.module';
 import { TranslateService } from '@ngx-translate/core';
-import { CustomOptions, Scope } from '../../../core-ui-module/option-item';
 import { Toast } from '../../../core-ui-module/toast';
 import { Helper } from '../../../core-module/rest/helper';
-import { ActionbarComponent } from '../../../../../projects/edu-sharing-ui/src/lib/actionbar/actionbar.component';
-import { ListTableComponent } from '../../../core-ui-module/components/list-table/list-table.component';
 import {
+    ActionbarComponent,
+    CustomOptions,
     DropSource,
     DropTarget,
     FetchEvent,
     InteractionType,
+    ListItem,
     ListSortConfig,
     NodeClickEvent,
+    NodeDataSource,
+    NodeEntriesDataType,
     NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
     NodeRoot,
-} from 'src/app/features/node-entries/entries-model';
-import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';
-import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
-import { NodeEntriesDataType } from 'src/app/features/node-entries/node-entries.component';
+    Scope,
+    TemporaryStorageService,
+} from 'ngx-edu-sharing-ui';
 import { canDropOnNode } from '../workspace-utils';
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject } from 'rxjs';
-import {
-    catchError,
-    debounceTime,
-    distinctUntilChanged,
-    retryWhen,
-    switchMap,
-    tap,
-} from 'rxjs/operators';
-import { WorkspaceTreeComponent } from '../tree/tree.component';
+import { catchError, debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
 
 @Component({
     selector: 'es-workspace-explorer',
@@ -153,7 +144,6 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         return defaultColumns;
     }
 
-    @ViewChild('list') list: ListTableComponent;
     @ViewChild(NodeEntriesWrapperComponent) nodeEntries: NodeEntriesWrapperComponent<Node>;
     @Input() customOptions: CustomOptions;
     @Input() dataSource: NodeDataSource<Node>;

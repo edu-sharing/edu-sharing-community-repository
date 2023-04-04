@@ -1,30 +1,23 @@
-import { Component, Input, EventEmitter, Output, ViewChild, ElementRef } from '@angular/core';
-import { DialogButton, RestConnectorService } from '../../../core-module/core.module';
-import { Toast } from '../../../core-ui-module/toast';
-import { RestNodeService } from '../../../core-module/core.module';
+import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import {
-    NodeWrapper,
-    Node,
-    NodePermissions,
-    LocalPermissionsResult,
-    Permission,
-    LoginResult,
-    View,
-    STREAM_STATUS,
-    IamUser,
     AuthorityProfile,
+    ConfigurationService,
+    DialogButton,
+    LoginResult,
+    Node,
+    RestConnectorService,
+    RestConstants,
+    RestHelper,
+    RestIamService,
+    RestNodeService,
+    RestStreamService,
+    STREAM_STATUS,
 } from '../../../core-module/core.module';
-import { ConfigurationService } from '../../../core-module/core.module';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { RestIamService } from '../../../core-module/core.module';
-import { TranslateService } from '@ngx-translate/core';
+import { Toast } from '../../../core-ui-module/toast';
 import { MdsComponent } from '../../../features/mds/legacy/mds/mds.component';
-import { RestConstants } from '../../../core-module/core.module';
-import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import { trigger } from '@angular/animations';
-import { RestStreamService } from '../../../core-module/core.module';
-import { RestHelper } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-add-stream',

@@ -28,7 +28,6 @@ import { RocketChatService } from '../../../common/ui/global-container/rocketcha
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
-    FrameEventsService,
     RestConnectorService,
     RestConstants,
     RestHelper,
@@ -36,12 +35,13 @@ import {
     TemporaryStorageService,
     UIService,
 } from '../../../core-module/core.module';
-import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
 import {
     OPEN_URL_MODE,
+    OptionGroup,
+    OptionItem,
+    UIAnimation,
     UIConstants,
-} from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
-import { OptionGroup, OptionItem } from '../../../core-ui-module/option-item';
+} from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';
@@ -708,7 +708,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         if (
             window.scrollY < 0 ||
             this.fixScrollElements ||
-            !UIHelper.evaluateMediaQuery(
+            !UIService.evaluateMediaQuery(
                 UIConstants.MEDIA_QUERY_MAX_WIDTH,
                 UIConstants.MOBILE_TAB_SWITCH_WIDTH,
             )

@@ -26,9 +26,9 @@ export class UIService {
     }
 
     constructor(
-        private componentFactoryResolver: ComponentFactoryResolver,
-        private injector: Injector,
-        private ngZone: NgZone,
+        protected componentFactoryResolver: ComponentFactoryResolver,
+        protected injector: Injector,
+        protected ngZone: NgZone,
     ) {
         // HostListener not working, so use window
         this.ngZone.runOutsideAngular(() => {

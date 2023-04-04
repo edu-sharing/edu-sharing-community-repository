@@ -1,11 +1,29 @@
-import { OptionData } from '../options-helper-data.service';
-import { Target } from '../../types/option-item';
+import { OptionData, OptionsHelperComponents } from '../options-helper-data.service';
+import { OptionItem, Target } from '../../types/option-item';
 import { Node } from 'ngx-edu-sharing-api';
 
 export abstract class OptionsHelperService {
     abstract wrapOptionCallbacks(data: OptionData): OptionData;
 
-    abstract refreshComponents(refreshListOptions: boolean, data: OptionData);
+    abstract refreshComponents(
+        components: OptionsHelperComponents,
+        data: OptionData,
+        refreshListOptions: boolean,
+    ): void;
 
-    abstract getAvailableOptions(target: Target, objects: Node[], data: OptionData);
+    abstract getAvailableOptions(
+        target: Target,
+        objects: Node[],
+        components: OptionsHelperComponents,
+        data: OptionData,
+    ): OptionItem[];
+
+    abstract pasteNode(components: OptionsHelperComponents, data: OptionData, nodes: Node[]): void;
+
+    abstract filterOptions(
+        options: OptionItem[],
+        target: Target,
+        data: OptionData,
+        objects: Node[] | any,
+    ): OptionItem[];
 }

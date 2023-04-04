@@ -4,11 +4,8 @@ import { NavigationStart, Router, Scroll } from '@angular/router';
 import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
 import { debounceTime, delay, filter, map, switchMap } from 'rxjs/operators';
-import {
-    NodeDataSourceRemote,
-    NodeDataSourceRemoteState,
-} from '../../features/node-entries/node-data-source-remote';
-import { notNull } from '../../util/functions';
+import { NodeDataSourceRemote, NodeDataSourceRemoteState } from './node-data-source-remote';
+import { notNull } from 'ngx-edu-sharing-ui';
 
 class RestoreEntry {
     /**

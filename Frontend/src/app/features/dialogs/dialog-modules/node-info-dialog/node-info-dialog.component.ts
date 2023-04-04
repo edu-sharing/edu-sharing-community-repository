@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
     ConfigurationHelper,
-    ConfigurationService,
     Node,
     NodeList,
     Permissions,
@@ -11,16 +10,13 @@ import {
     RestNodeService,
 } from '../../../../core-module/core.module';
 import { forkJoin } from 'rxjs';
-import { UIConstants } from '../../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { Toast } from '../../../../core-ui-module/toast';
-import {
-    CARD_DIALOG_DATA,
-    configForNode,
-    configForNodes,
-} from '../../card-dialog/card-dialog-config';
+import { CARD_DIALOG_DATA, configForNodes } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { BreadcrumbsService } from '../../../../shared/components/breadcrumbs/breadcrumbs.service';
+import { UIConstants } from 'ngx-edu-sharing-ui';
+import { ConfigService } from 'ngx-edu-sharing-api';
 
 export interface NodeInfoDialogData {
     nodes: Node[];
@@ -51,7 +47,7 @@ export class NodeInfoDialogComponent implements OnInit {
         private dialogRef: CardDialogRef,
         private nodeApi: RestNodeService,
         private toast: Toast,
-        private config: ConfigurationService,
+        private config: ConfigService,
         private router: Router,
         private breadcrumbsService: BreadcrumbsService,
         private translate: TranslateService,

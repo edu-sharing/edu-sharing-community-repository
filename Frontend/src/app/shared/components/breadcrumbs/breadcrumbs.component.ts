@@ -1,12 +1,8 @@
 import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
 import { Params, QueryParamsHandling } from '@angular/router';
-import { DropSource } from 'src/app/features/node-entries/entries-model';
-import { Node, RestConstants, RestNodeService } from '../../../core-module/core.module';
-import {
-    DragData,
-    NodesDragDropService,
-} from '../../../../../projects/edu-sharing-ui/src/lib/services/nodes-drag-drop.service';
-import { CanDrop } from '../../../../../projects/edu-sharing-ui/src/lib/directives/drag-nodes/nodes-drop-target.directive';
+import { CanDrop, DragData, DropSource, NodesDragDropService } from 'ngx-edu-sharing-ui';
+import { Node, RestNodeService } from '../../../core-module/core.module';
+
 import { BreadcrumbsService } from './breadcrumbs.service';
 
 /**

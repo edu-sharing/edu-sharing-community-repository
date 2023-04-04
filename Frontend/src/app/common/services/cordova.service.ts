@@ -5,10 +5,8 @@ import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { HttpClient } from '@angular/common/http';
-import { UIConstants } from '../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
+import { DateHelper, UIConstants } from 'ngx-edu-sharing-ui';
 import { FrameEventsService } from '../../core-module/rest/services/frame-events.service';
-
-import { DateHelper } from '../../core-ui-module/DateHelper';
 import { OAuthResult } from '../../core-module/rest/data-object';
 import { RestConstants } from '../../core-module/rest/rest-constants';
 import { RestConnectorService } from '../../core-module/rest/services/rest-connector.service';

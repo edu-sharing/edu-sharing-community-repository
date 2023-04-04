@@ -1,20 +1,27 @@
 import { Injectable, Injector, OnDestroy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { MdsDefinition, MdsService, MetadataSetInfo, SearchService } from 'ngx-edu-sharing-api';
+import {
+    MdsDefinition,
+    MdsService,
+    MetadataSetInfo,
+    Node,
+    SearchService,
+} from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, map, switchMap, takeUntil, tap } from 'rxjs/operators';
-import { ListItem, Node, Repository, RestConstants } from '../../core-module/core.module';
+import { Repository, RestConstants } from '../../core-module/core.module';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
 import {
     fromSearchResults,
     NodeDataSourceRemote,
     NodeRemote,
     NodeRequestParams,
-} from '../../features/node-entries/node-data-source-remote';
+} from './node-data-source-remote';
 import { SearchPageRestoreService } from './search-page-restore.service';
 import { SearchPageResults } from './search-page-results.service';
 import { SearchPageService } from './search-page.service';
+import { ListItem } from 'ngx-edu-sharing-ui';
 
 interface RepoData {
     title: string;

@@ -1,8 +1,8 @@
-import { PipeTransform, Pipe } from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { Node } from '../../../../../core-module/rest/data-object';
-import { VCard } from '../../../../../core-module/ui/VCard';
+import { VCard } from 'ngx-edu-sharing-ui';
 
 /**
  * Format the version label and checking constants if required

@@ -1,23 +1,20 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
-    ConfigurationService,
     FrameEventsService,
+    Node,
     NodeRemoteWrapper,
     NodeWrapper,
-    Node,
     RestConnectorService,
     RestConstants,
+    RestLocatorService,
     RestNodeService,
-    SessionStorageService,
     TemporaryStorageService,
 } from '../../../core-module/core.module';
 import { Toast } from '../../../core-ui-module/toast';
 import { SearchService } from '../../../modules/search/search.service';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
-import { UIConstants } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-constants';
 import { TranslationsService } from '../../../translations/translations.service';
-import { RestLocatorService } from '../../../core-module/core.module';
 import { RouterHelper } from '../../../core-ui-module/router.helper';
 import { PlatformLocation } from '@angular/common';
 

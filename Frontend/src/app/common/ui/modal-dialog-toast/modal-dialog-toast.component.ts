@@ -2,7 +2,7 @@ import { trigger } from '@angular/animations';
 import { Component } from '@angular/core';
 import { DialogButton } from '../../../core-module/core.module';
 import { Node } from '../../../core-module/rest/data-object.js';
-import { UIAnimation } from '../../../../../projects/edu-sharing-ui/src/lib/util/ui-animation';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { Toast } from '../../../core-ui-module/toast';
 import { CardType } from '../../../shared/components/card/card.component';
 import { ProgressType } from '../../../shared/components/modal-dialog/modal-dialog.component';
