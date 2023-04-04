@@ -1,4 +1,5 @@
 <es-mds-editor-widget-container
+  *ngIf="currentValue"
   [widget]="widget"
   [label]="widget.definition.caption"
   [valueType]="valueType"
@@ -6,17 +7,17 @@
   <ngx-slider
     *ngIf="isRange"
     class="ngx-slider-small"
-    [(value)]="currentValue[0]"
-    [(highValue)]="currentValue[1]"
+    [value]="currentValue[0]"
+    [highValue]="currentValue[1]"
     [options]="sliderOptions"
-    (valueChange)="updateValues()"
-    (highValueChange)="updateValues()"
+    (valueChange)="updateValue($event)"
+    (highValueChange)="updateHighValue($event)"
   ></ngx-slider>
   <ngx-slider
     *ngIf="!isRange"
     class="ngx-slider-small"
-    [(value)]="currentValue[0]"
+    [value]="currentValue[0]"
     [options]="sliderOptions"
-    (valueChange)="updateValues()"
+    (valueChange)="updateValue($event)"
   ></ngx-slider>
 </es-mds-editor-widget-container>

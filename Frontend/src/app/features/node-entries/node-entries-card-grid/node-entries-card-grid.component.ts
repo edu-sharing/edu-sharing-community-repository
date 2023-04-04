@@ -27,6 +27,7 @@ import { NodeDataSourceRemote } from '../node-data-source-remote';
 import { NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
 import { SortSelectPanelComponent } from '../sort-select-panel/sort-select-panel.component';
+import { CustomTemplatesDataSource } from '../custom-templates-data-source';
 
 @Component({
     selector: 'es-node-entries-card-grid',
@@ -99,7 +100,11 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
         public templatesService: NodeEntriesTemplatesService,
         public ui: UIService,
         private ngZone: NgZone,
-    ) {}
+    ) {
+        this.entriesService.dataSource$.pipe(takeUntil(this.destroyed)).subscribe(() => {
+            this.updateScrollState();
+        });
+    }
 
     ngOnInit(): void {
         this.registerItemsCap();
@@ -294,14 +299,16 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
 
     private canScroll(direction: 'left' | 'right') {
         const element = this.gridRef?.nativeElement;
-        if (direction === 'left') {
-            return element.scrollLeft > 0;
-        } else if (direction === 'right') {
-            /*
-             use a small pixel buffer (10px) because scrolling aligns with the start of each card and
-             it can cause slight alignment issues on the end of the container
-             */
-            return element.scrollLeft < element.scrollWidth - element.clientWidth - 10;
+        if (element) {
+            if (direction === 'left') {
+                return element.scrollLeft > 0;
+            } else if (direction === 'right') {
+                /*
+                 use a small pixel buffer (10px) because scrolling aligns with the start of each card and
+                 it can cause slight alignment issues on the end of the container
+                 */
+                return element.scrollLeft < element.scrollWidth - element.clientWidth - 10;
+            }
         }
         return false;
     }
@@ -321,8 +328,13 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
         this.gridRef?.nativeElement.scroll({
             left:
                 leftScroll +
-                rect.width * this.ScrollingOffsetPercentage * (direction === 'right' ? 1 : -1),
+                Math.max(250, rect.width * this.ScrollingOffsetPercentage) *
+                    (direction === 'right' ? 1 : -1),
             behavior: 'smooth',
         });
+    }
+
+    isCustomTemplate() {
+        return this.entriesService.dataSource instanceof CustomTemplatesDataSource;
     }
 }

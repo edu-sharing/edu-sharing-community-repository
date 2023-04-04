@@ -520,11 +520,17 @@ export class SearchService {
             previousSearchParams.body.criteria,
             searchParams.body.criteria,
         );
-        // If the only criterion that has changed is the facet in question, we can keep the facet.
-        return (
-            changedCriteria.length === 0 ||
-            (changedCriteria.length === 1 && changedCriteria[0] === facetProperty)
-        );
+        // ~~If the only criterion that has changed is the facet in question, we can keep the facet.~~
+        // return (
+        //     changedCriteria.length === 0 ||
+        //     (changedCriteria.length === 1 && changedCriteria[0] === facetProperty)
+        // );
+
+        // The above works only when multiple values of the criterion are OR-combined. Otherwise,
+        // additional filter values for the criterion will reduce the available facets.
+        //
+        // TODO: Clarify if either OR or AND combination is preferred / always used.
+        return changedCriteria.length === 0;
     }
 
     /** Compares two objects and return the keys of properties that are not deep-equal in a string

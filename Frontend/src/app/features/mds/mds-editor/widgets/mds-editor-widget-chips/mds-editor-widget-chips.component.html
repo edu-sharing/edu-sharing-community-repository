@@ -20,7 +20,7 @@
     #chipList
     *ngIf="chipsControl"
     [formControl]="chipsControl"
-    [attr.aria-labelledby]="chipsControl.value.length > 0 ? container.labelId : null"
+    [attr.aria-labelledby]="chipsControl.value?.length > 0 ? container.labelId : null"
     esOnAttributeChange="aria-describedby"
     (attributeChange)="input.setAttribute('aria-describedby', $event)"
     [multiple]="true"

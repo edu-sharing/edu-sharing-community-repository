@@ -13,13 +13,15 @@ import {
     zip,
 } from 'rxjs';
 import {
-    combineAll,
+    distinctUntilChanged,
     filter,
     first,
     map,
     shareReplay,
     skip,
+    startWith,
     switchMap,
+    take,
     takeUntil,
     tap,
 } from 'rxjs/operators';
@@ -34,8 +36,6 @@ import {
     RestSearchService,
 } from '../../../core-module/core.module';
 import { SearchService } from '../../../modules/search/search.service';
-import { MdsEditorCommonService } from './mds-editor-common.service';
-import { NativeWidgetComponent } from './mds-editor-view/mds-editor-view.component';
 import { EditorMode } from '../types/mds-types';
 import {
     BulkBehavior,
@@ -54,6 +54,8 @@ import {
     RequiredMode,
     Values,
 } from '../types/types';
+import { MdsEditorCommonService } from './mds-editor-common.service';
+import { NativeWidgetComponent } from './mds-editor-view/mds-editor-view.component';
 import { parseAttributes } from './util/parse-attributes';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 
@@ -141,6 +143,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         private readonly bulkMode = new BehaviorSubject<BulkMode>(null); // only when `isBulk`
         private showMissingRequiredFunction: (shouldScrollIntoView: boolean) => boolean;
         private readonly ready = new Subject<void>();
+        readonly initialValuesSubject = new BehaviorSubject<InitialValues>(null);
 
         /**
          * An observable of the values that are common between all nodes if the property was to be
@@ -266,6 +269,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             if (this.mdsEditorInstanceService.getIsBulk(nodes)) {
                 this.bulkMode.next('no-change');
             }
+            this.initialValuesSubject.next(this.initialValues);
             this.ready.next();
             this.ready.complete();
         }
@@ -282,12 +286,28 @@ export class MdsEditorInstanceService implements OnDestroy {
             }
             // Set initial values, so the initial completion status is calculated correctly.
             this.value$.next([...this.initialValues.jointValues]);
+            this.initialValuesSubject.next(this.initialValues);
             this.ready.next();
             this.ready.complete();
         }
 
+        /**
+         *  @deprecated
+         *  prefer to subscribe the initialValuesSubject instead, because the initial values might
+         *  not be ready when the widget gets loaded
+         * */
         getInitialValues(): InitialValues {
             return this.initialValues;
+        }
+
+        getInitalValuesAsync(): Promise<InitialValues> {
+            return this.initialValuesSubject
+                .pipe(
+                    startWith(this.initialValuesSubject.value),
+                    filter((v) => !!v),
+                    take(1),
+                )
+                .toPromise();
         }
 
         getHasUnsavedDefault(): boolean {
@@ -1457,9 +1477,20 @@ export class MdsEditorInstanceService implements OnDestroy {
      * Returns a list of properties for which the MDS editor requires facet values.
      *
      * The observable continues to emit updates as long as the mds editor is alive.
+     *
+     * Emits `null` while the mds editor is (re-)initializing.
      */
     getNeededFacets(): Observable<string[]> {
-        return this.mdsInitDone.pipe(map(() => this.getNeededFacetsInstant()));
+        return this._new_initializingStateSubject.pipe(
+            map((state) => {
+                if (state === 'complete') {
+                    return this.getNeededFacetsInstant();
+                } else {
+                    return null;
+                }
+            }),
+            distinctUntilChanged(),
+        );
     }
 
     // TODO: The facet subscriptions could be registered by the widgets themselves, but since the

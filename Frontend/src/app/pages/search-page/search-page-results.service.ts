@@ -7,6 +7,7 @@ import {
     debounceTime,
     distinctUntilChanged,
     filter,
+    first,
     map,
     share,
     switchMap,
@@ -85,9 +86,25 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
             .pipe(
                 takeUntil(this._destroyed),
                 tap(() => this.loadingParams.next(true)),
+                // Search filters and facets to fetch depend on the active repository and metadata
+                // set. Their values will be set to `null` while data is being determined after
+                // repository or metadata set changed. Give other components a tick to do this, so
+                // we don't prematurely send a search request with outdated data.
+                debounceTime(0),
                 filter(
                     ([repository, metadataSet, searchFilters]) =>
                         notNull(repository) && notNull(metadataSet) && notNull(searchFilters),
+                ),
+                // Wait until the filter bar's MDS instance has registered its needed facets for
+                // suggestions at the search service. We don't explicitly include the facets in the
+                // search request here to let the search service decide not to update the facets
+                // when not needed (e.g., when loading a new page). See comments on
+                // `MdsEditorWrapperComponent.registerLegacySuggestions` for further context.
+                switchMap((values) =>
+                    this._searchPage.facetsToFetch.pipe(
+                        first(notNull),
+                        map(() => values),
+                    ),
                 ),
                 tap(() => this.loadingParams.next(false)),
                 map(
