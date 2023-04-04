@@ -1,3 +1,15 @@
+<button
+  *ngIf="savedSearchesButtonIsVisible"
+  mat-stroked-button
+  color="primary"
+  class="saved-searches-button"
+  [matTooltip]="'SEARCH.SAVED_SEARCHES.TITLE' | translate"
+  (click)="openSavedSearchesDialog()"
+>
+  <i esIcon="bookmark_outline"></i>
+  {{ 'SEARCH.SAVED_SEARCHES.TITLE' | translate }}
+</button>
+
 <mat-form-field appearance="fill" *ngIf="(availableMetadataSets | async)?.length > 1">
   <mat-label>{{ 'SEARCH.METADATASET' | translate }}</mat-label>
   <mat-select [formControl]="activeMdsForm">
@@ -23,17 +35,6 @@
   [currentValues]="searchFilterValues"
 >
 </es-mds-editor-wrapper>
-
-<button
-  *ngIf="savedSearchesButtonIsVisible"
-  mat-fab
-  class="saved-searches-button"
-  color="primary"
-  [matTooltip]="'SEARCH.SAVED_SEARCHES.TITLE' | translate"
-  (click)="openSavedSearchesDialog()"
->
-  <mat-icon>bookmark</mat-icon>
-</button>
 
 <!-- <mat-menu #savedSearchesMenu="matMenu">
   <button mat-menu-item *ngIf="reUrl.value" (click)="embedCurrentSearch()">
