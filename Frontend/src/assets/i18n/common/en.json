@@ -845,6 +845,7 @@
     "redo": "Apply"
   },
   "FILL_STATUS": {
+    "MESSAGE": "fields completed",
     "REQUIRED": "required fields",
     "REQUIREDPUBLISH": "for publishing required fields",
     "SHOW": "show"
