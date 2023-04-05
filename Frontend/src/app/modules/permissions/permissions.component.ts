@@ -1,24 +1,16 @@
-import { Component, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
-import { TranslationsService } from '../../translations/translations.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
 import {
-    NodeRef,
-    IamUser,
-    NodeWrapper,
-    Node,
-    Version,
-    NodeVersions,
+    ConfigurationService,
     LoginResult,
-    IamGroups,
-    Group,
-    OrganizationOrganizations,
     Organization,
+    OrganizationOrganizations,
+    RestConnectorService,
+    RestHelper,
+    RestOrganizationService,
 } from '../../core-module/core.module';
-import { Router, Params, Routes } from '@angular/router';
+import { Router } from '@angular/router';
 import { Toast } from '../../core-ui-module/toast';
-import { RestConnectorService } from '../../core-module/core.module';
-import { RestOrganizationService } from '../../core-module/core.module';
-import { ConfigurationService } from '../../core-module/core.module';
-import { RestHelper } from '../../core-module/core.module';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { Subject } from 'rxjs';

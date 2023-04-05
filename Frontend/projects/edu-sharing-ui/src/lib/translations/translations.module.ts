@@ -4,6 +4,7 @@ import { MissingTranslationHandler, TranslateLoader, TranslateModule } from '@ng
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { FallbackTranslationHandler } from './fallback-translation-handler';
 import { TranslationLoader } from './translation-loader';
+import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
 
 /**
  * Import this module once in the app module to provide the `TranslateService`.
@@ -17,7 +18,7 @@ import { TranslationLoader } from './translation-loader';
             loader: {
                 provide: TranslateLoader,
                 useFactory: TranslationLoader.create,
-                deps: [HttpClient, ConfigService],
+                deps: [HttpClient, ConfigService, EduSharingUiConfiguration],
             },
             missingTranslationHandler: {
                 provide: MissingTranslationHandler,

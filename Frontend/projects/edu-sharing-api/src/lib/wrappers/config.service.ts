@@ -7,13 +7,13 @@ import {
     shareReplay,
     startWith,
     switchMap,
+    take,
     tap,
 } from 'rxjs/operators';
 import { ApiRequestConfiguration } from '../api-request-configuration';
 import * as apiModels from '../api/models';
 import { ConfigV1Service } from '../api/services';
 import { switchReplay } from '../utils/rxjs-operators/switch-replay';
-import { Values } from '../api/models';
 
 export type ClientConfig = apiModels.Values;
 export type Variables = apiModels.Variables['current'];
@@ -146,6 +146,10 @@ export class ConfigService {
      * are not sure, use `get` instead.
      */
     public instant<T = string>(name: string, defaultValue?: T): T {
+        return this.instantInternal(name, defaultValue);
+    }
+    public async get<T = string>(name: string, defaultValue?: T): Promise<T> {
+        await this.observeConfig().pipe(take(1)).toPromise();
         return this.instantInternal(name, defaultValue);
     }
 }

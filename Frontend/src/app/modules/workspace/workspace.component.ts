@@ -57,7 +57,7 @@ import {
     SearchFieldService,
 } from '../../main/navigation/search-field/search-field.service';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
-import { TranslationsService } from '../../translations/translations.service';
+import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
 import { WorkspaceExplorerComponent } from './explorer/explorer.component';
 import { WorkspaceTreeComponent } from './tree/tree.component';
 import { canDragDrop, canDropOnNode } from './workspace-utils';

@@ -1,4 +1,4 @@
-import { TranslationsService } from '../../translations/translations.service';
+import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Toast } from '../../core-ui-module/toast';

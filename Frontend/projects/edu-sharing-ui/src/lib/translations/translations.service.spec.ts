@@ -2,8 +2,7 @@ import { fakeAsync } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
-import { BridgeService } from '../core-bridge-module/bridge.service';
-import { ConfigurationService, SessionStorageService } from '../core-module/core.module';
+import { ConfigService, SessionStorageService } from 'ngx-edu-sharing-api';
 import { TranslationsService } from './translations.service';
 
 class BridgeServiceStub {
@@ -12,9 +11,9 @@ class BridgeServiceStub {
     }
 }
 
-class ConfigurationServiceStub {
-    get(key: string, defaultValue?: any) {
-        return rxjs.of(defaultValue);
+class ConfigServiceStub {
+    get(key: string, defaultValue?: any): Promise<string> {
+        return defaultValue;
     }
     instant(key: string, defaultValue?: any) {
         return defaultValue;
@@ -42,7 +41,7 @@ describe('TranslationsService', () => {
         let translationsService: TranslationsService;
         let translateServiceSpy: any;
         let bridgeServiceStub: BridgeServiceStub;
-        let configurationServiceStub: ConfigurationServiceStub;
+        let configurationServiceStub: ConfigServiceStub;
         let sessionStorageServiceStub: SessionStorageServiceStub;
         let activatedRouteStub: ActivatedRouteStub;
 
@@ -57,15 +56,15 @@ describe('TranslationsService', () => {
             translateServiceSpy.getTranslation.and.callFake(() => rxjs.of(null));
             translateServiceSpy.use.and.callFake(() => rxjs.of(null));
             bridgeServiceStub = new BridgeServiceStub();
-            configurationServiceStub = new ConfigurationServiceStub();
+            configurationServiceStub = new ConfigServiceStub();
             sessionStorageServiceStub = new SessionStorageServiceStub();
             activatedRouteStub = new ActivatedRouteStub();
             translationsService = new TranslationsService(
-                bridgeServiceStub as BridgeService,
-                configurationServiceStub as ConfigurationService,
+                configurationServiceStub as ConfigService,
                 activatedRouteStub as any as ActivatedRoute,
                 sessionStorageServiceStub as any as SessionStorageService,
                 translateServiceSpy as TranslateService,
+                null,
             );
         });
 

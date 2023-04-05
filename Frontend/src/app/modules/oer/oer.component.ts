@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { TranslationsService } from '../../translations/translations.service';
+import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
 import {
     NodeList,
     RestConnectorService,

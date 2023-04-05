@@ -42,7 +42,7 @@ import { BehaviorSubject } from 'rxjs';
 import { LtiComponent } from '../modules/lti/lti.component';
 import { printCurrentTaskInfo } from './track-change-detection';
 import { environment } from '../../environments/environment';
-import { TranslationsService } from '../translations/translations.service';
+import { TranslationsService } from '../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
 import { LoadingScreenService } from '../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';

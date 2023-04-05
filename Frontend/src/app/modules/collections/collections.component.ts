@@ -51,7 +51,7 @@ import { HttpClient } from '@angular/common/http';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { CollectionInfoBarComponent } from './collection-info-bar/collection-info-bar.component';
 import { CollectionContentComponent } from './collection-content/collection-content.component';
-import { TranslationsService } from '../../translations/translations.service';
+import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 
 // component class

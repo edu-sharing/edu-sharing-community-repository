@@ -18,7 +18,7 @@ import { Helper } from '../../core-module/rest/helper';
 import { InputPasswordComponent } from '../../shared/components/input-password/input-password.component';
 import { RouterHelper } from '../../core-ui-module/router.helper';
 import { Toast } from '../../core-ui-module/toast';
-import { TranslationsService } from '../../translations/translations.service';
+import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { AuthenticationService, LoginInfo } from 'ngx-edu-sharing-api';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';

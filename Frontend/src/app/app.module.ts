@@ -24,6 +24,7 @@ import {
     KeyboardShortcutsService as KeyboardShortcutsServiceAbstract,
     OptionsHelperService as OptionsHelperServiceAbstract,
     Toast as ToastAbstract,
+    TranslationsModule,
 } from 'ngx-edu-sharing-ui';
 import { IMPORTS } from './imports';
 import { MainModule } from './main/main.module';
@@ -54,12 +55,10 @@ import { PROVIDERS } from './providers';
 import { AppLocationStrategy } from './router/location-strategy';
 import { RouterComponent } from './router/router.component';
 import { SharedModule } from './shared/shared.module';
-import { TranslationsModule } from './translations/translations.module';
 import { environment } from '../environments/environment';
 import { Toast } from './core-ui-module/toast';
 import { OptionsHelperService } from './core-ui-module/options-helper.service';
 import { KeyboardShortcutsService } from './services/keyboard-shortcuts.service';
-
 // http://blog.angular-university.io/angular2-ngmodule/
 // -> Making modules more readable using the spread operator
 

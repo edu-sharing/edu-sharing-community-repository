@@ -1,14 +1,16 @@
 import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
 import { Toast } from '../../../core-ui-module/toast';
-import { Router, UrlSerializer } from '@angular/router';
-import { RegisterInformation } from '../../../core-module/core.module';
-import { TranslationsService } from '../../../translations/translations.service';
-import { RestConnectorService } from '../../../core-module/core.module';
-import { ConfigurationService } from '../../../core-module/core.module';
+import { Router } from '@angular/router';
+import {
+    ConfigurationService,
+    RegisterInformation,
+    RestConnectorService,
+    RestRegisterService,
+} from '../../../core-module/core.module';
+import { TranslationsService } from '../../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { PlatformLocation } from '@angular/common';
-import { RestRegisterService } from '../../../core-module/core.module';
-import { FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 

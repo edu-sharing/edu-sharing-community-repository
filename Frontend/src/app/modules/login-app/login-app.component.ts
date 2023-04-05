@@ -13,7 +13,7 @@ import {
 import { OPEN_URL_MODE, UIConstants } from 'ngx-edu-sharing-ui';
 import { CordovaService } from '../../common/services/cordova.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
-import { TranslationsService } from '../../translations/translations.service';
+import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { PlatformLocation } from '@angular/common';
 

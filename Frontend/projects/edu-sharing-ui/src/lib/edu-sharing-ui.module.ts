@@ -10,6 +10,7 @@ import { NodeImageSizePipe } from './pipes/node-image-size.pipe';
 import { FormatDatePipe } from './pipes/format-date.pipe';
 import { ListItemLabelPipe } from './node-entries/list-item-label.pipe';
 import { SortDropdownComponent } from './sort-dropdown/sort-dropdown.component';
+import { TranslationsModule } from './translations/translations.module';
 
 @NgModule({
     declarations: [],
@@ -19,6 +20,7 @@ import { SortDropdownComponent } from './sort-dropdown/sort-dropdown.component';
         EduSharingUiCommonModule,
         ListItemsModule,
         NodeEntriesModule,
+        TranslationsModule.forRoot(),
     ],
     exports: [
         CommonModule,
@@ -32,6 +34,7 @@ import { SortDropdownComponent } from './sort-dropdown/sort-dropdown.component';
         ListItemsModule,
         ListItemLabelPipe,
         SortDropdownComponent,
+        TranslationsModule,
     ],
 })
 export class EduSharingUiModule {

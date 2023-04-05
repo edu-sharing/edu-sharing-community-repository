@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { TranslationsService } from '../../translations/translations.service';
+import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
 import {
     FrameEventsService,
     Node,

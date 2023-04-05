@@ -1,23 +1,14 @@
+import { Component } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
-    Component,
-    Input,
-    EventEmitter,
-    Output,
-    ElementRef,
-    ViewChild,
-    OnInit,
-} from '@angular/core';
-import { Toast } from '../../core-ui-module/toast';
-import { Router, Route, Params, ActivatedRoute, UrlSerializer } from '@angular/router';
-import { OAuthResult, LoginResult, AccessScope, Node } from '../../core-module/core.module';
-import { RouterComponent } from '../../router/router.component';
-import { TranslateService } from '@ngx-translate/core';
-import { TranslationsService } from '../../translations/translations.service';
-import { RestConnectorService } from '../../core-module/core.module';
-import { RestConstants } from '../../core-module/core.module';
-import { FrameEventsService } from '../../core-module/core.module';
-import { RestNodeService } from '../../core-module/core.module';
-import { TemporaryStorageService } from '../../core-module/core.module';
+    FrameEventsService,
+    Node,
+    RestConnectorService,
+    RestConstants,
+    RestNodeService,
+    TemporaryStorageService,
+} from '../../core-module/core.module';
+import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 
 @Component({

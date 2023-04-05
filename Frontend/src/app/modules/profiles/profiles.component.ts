@@ -1,7 +1,7 @@
 import { forkJoin as observableForkJoin, Subject } from 'rxjs';
 
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { TranslationsService } from '../../translations/translations.service';
+import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
 import {
     ConfigurationService,
     ProfileSettings,

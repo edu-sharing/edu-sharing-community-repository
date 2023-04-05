@@ -61,7 +61,7 @@ import {
     UIConstants,
 } from 'ngx-edu-sharing-ui';
 import { Toast } from '../../core-ui-module/toast';
-import { TranslationsService } from '../../translations/translations.service';
+import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { SearchService } from './search.service';
 import { WindowRefService } from './window-ref.service';

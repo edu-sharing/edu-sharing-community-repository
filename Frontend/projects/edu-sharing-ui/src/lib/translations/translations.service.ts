@@ -1,11 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Optional } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
+import { BehaviorSubject, from, Observable, of as observableOf } from 'rxjs';
 import { first, map, switchMap, tap } from 'rxjs/operators';
-import { BridgeService } from '../core-bridge-module/bridge.service';
-import { ConfigurationService, SessionStorageService } from '../core-module/core.module';
 import { LANGUAGES } from './languages';
+import { ConfigService, SessionStorageService } from 'ngx-edu-sharing-api';
+import { AppService } from '../services/abstract/app.service';
 
 // 'none' means that only labels should be shown (for dev)
 const DEFAULT_SUPPORTED_LANGUAGES = ['de', 'de-informal', 'en', 'none'];
@@ -16,12 +16,14 @@ export class TranslationsService {
     private languageLoaded = new BehaviorSubject(false);
 
     constructor(
-        private bridge: BridgeService,
-        private config: ConfigurationService,
+        private config: ConfigService,
         private route: ActivatedRoute,
         private storage: SessionStorageService,
         private translate: TranslateService,
-    ) {}
+        @Optional() private appService: AppService,
+    ) {
+        console.log('init');
+    }
 
     /**
      * Determines and configures the language to use and triggers loading of translations with
@@ -30,11 +32,11 @@ export class TranslationsService {
      * Call this once in the app component.
      */
     initialize(): Observable<void> {
-        const supportedLanguages$: Observable<string[]> = this.config.get(
-            'supportedLanguages',
-            DEFAULT_SUPPORTED_LANGUAGES,
+        console.log('init');
+        const supportedLanguages$ = from(
+            this.config.get('supportedLanguages', DEFAULT_SUPPORTED_LANGUAGES),
         );
-        if (this.bridge.isRunningCordova()) {
+        if (this.appService?.isRunningApp()) {
             return supportedLanguages$.pipe(
                 switchMap((supportedLanguages: string[]) =>
                     this.initializeCordova(supportedLanguages),
@@ -152,26 +154,22 @@ export class TranslationsService {
         return this.waitForInit();
     }
 
-    private initializeCordova(supportedLanguages = DEFAULT_SUPPORTED_LANGUAGES) {
+    private async initializeCordova(supportedLanguages = DEFAULT_SUPPORTED_LANGUAGES) {
         this.translate.addLangs(supportedLanguages);
         let language = supportedLanguages[0];
         this.translate.setDefaultLang(language);
         this.translate.use(language);
         this.language = language;
-        this.bridge
-            .getCordova()
-            .getLanguage()
-            .subscribe((data: string) => {
-                if (supportedLanguages.indexOf(data) != -1) {
-                    language = data;
-                }
-                this.language = language;
-                this.translate.use(language).subscribe(() => {
-                    this.languageLoaded.next(true);
-                });
-                // this.translate.getTranslation(language).subscribe(() => {
-                // });
-            });
+        const data = await this.appService.getLanguage();
+        if (supportedLanguages.indexOf(data) != -1) {
+            language = data;
+        }
+        this.language = language;
+        this.translate.use(language).subscribe(() => {
+            this.languageLoaded.next(true);
+        });
+        // this.translate.getTranslation(language).subscribe(() => {
+        // });
         return this.waitForInit();
     }
 

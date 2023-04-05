@@ -3,16 +3,18 @@ import { fakeAsync, tick } from '@angular/core/testing';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
-import { TranslationsService } from './translations.service';
-import { TranslationLoader, TRANSLATION_LIST } from './translation-loader';
+import { TRANSLATION_LIST, TranslationLoader } from './translation-loader';
 import { TranslationSource } from './translation-source';
+import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
 
 class HttpClientStub {
     get(url: string): Observable<any> {
         return rxjs.of(null);
     }
 }
-
+class EduSharingUiConfigurationStub {
+    production = false;
+}
 class ConfigStub {
     observeTranslationOverrides(lang: string): Observable<any> {
         return rxjs.of(null);
@@ -27,13 +29,16 @@ describe('TranslationLoader', () => {
     let translationLoader: TranslationLoader;
     let httpClient: HttpClientStub;
     let config: ConfigStub;
+    let uiConfig: EduSharingUiConfigurationStub;
 
     beforeEach(() => {
         httpClient = new HttpClientStub();
         config = new ConfigStub();
+        uiConfig = new EduSharingUiConfigurationStub();
         translationLoader = TranslationLoader.create(
             httpClient as HttpClient,
             config as unknown as ConfigService,
+            uiConfig as unknown as EduSharingUiConfiguration,
         );
     });
 

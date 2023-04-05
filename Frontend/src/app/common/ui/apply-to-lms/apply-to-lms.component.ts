@@ -14,7 +14,7 @@ import {
 import { Toast } from '../../../core-ui-module/toast';
 import { SearchService } from '../../../modules/search/search.service';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
-import { TranslationsService } from '../../../translations/translations.service';
+import { TranslationsService } from '../../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
 import { RouterHelper } from '../../../core-ui-module/router.helper';
 import { PlatformLocation } from '@angular/common';
 

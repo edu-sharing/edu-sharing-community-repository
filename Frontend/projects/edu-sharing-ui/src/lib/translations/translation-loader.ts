@@ -4,7 +4,7 @@ import { ConfigService } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { concat, Observable, of } from 'rxjs';
 import { catchError, first, map, reduce } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
+import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
 import { LANGUAGES } from './languages';
 import { TranslationSource } from './translation-source';
 
@@ -29,13 +29,19 @@ export const TRANSLATION_LIST = [
 type Dictionary = { [key: string]: string | Dictionary };
 
 export class TranslationLoader implements TranslateLoader {
-    static create(http: HttpClient, config: ConfigService) {
-        return new TranslationLoader(http, config);
+    static create(
+        http: HttpClient,
+        configService: ConfigService,
+        configuration: EduSharingUiConfiguration,
+    ) {
+        console.log('create static', configuration);
+        return new TranslationLoader(http, configService, configuration);
     }
 
     private constructor(
         private http: HttpClient,
-        private config: ConfigService,
+        private configService: ConfigService,
+        private configuration: EduSharingUiConfiguration,
         private prefix: string = 'assets/i18n',
         private suffix: string = '.json',
     ) {}
@@ -51,14 +57,16 @@ export class TranslationLoader implements TranslateLoader {
         if (lang === 'none') {
             return of({});
         }
-        this.config.setLocale(LANGUAGES[lang]);
+        this.configService.setLocale(LANGUAGES[lang]);
         return rxjs
             .forkJoin({
                 originalTranslations: this.getOriginalTranslations(lang).pipe(
                     // Default to empty dictionary if we got nothing
                     map((translations) => translations || {}),
                 ),
-                translationOverrides: this.config.observeTranslationOverrides().pipe(first()),
+                translationOverrides: this.configService
+                    .observeTranslationOverrides()
+                    .pipe(first()),
             })
             .pipe(
                 map(({ originalTranslations, translationOverrides }) =>
@@ -76,7 +84,7 @@ export class TranslationLoader implements TranslateLoader {
     private getOriginalTranslations(lang: string): Observable<Dictionary> {
         switch (this.getSource()) {
             case 'repository':
-                return this.config.observeDefaultTranslations().pipe(first());
+                return this.configService.observeDefaultTranslations().pipe(first());
             case 'local':
                 return this.mergeTranslations(this.fetchTranslations(lang));
         }
@@ -84,7 +92,7 @@ export class TranslationLoader implements TranslateLoader {
 
     private getSource(): 'repository' | 'local' {
         if (
-            (environment.production && this.source === TranslationSource.Auto) ||
+            (this.configuration.production && this.source === TranslationSource.Auto) ||
             this.source === TranslationSource.Repository
         ) {
             return 'repository';
