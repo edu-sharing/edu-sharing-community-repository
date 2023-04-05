@@ -796,6 +796,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
         if (!this.isReady) {
             return;
         }
+        this.dataSourceCollectionProposals.reset();
         this.isLoading = true;
         if (!this.loadingTask.isDone) {
             this.loadingTask.done();
