@@ -229,7 +229,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
 
     private getHasSuggestions(suggestions: FacetsDict): boolean {
         return (
-            suggestions &&
+            !!suggestions &&
             Object.values(suggestions).some((suggestion) => suggestion.values.length > 0)
         );
     }
