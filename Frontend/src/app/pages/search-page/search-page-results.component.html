@@ -52,6 +52,16 @@
           </ng-container>
         </ng-container>
       </h2>
+      <button
+        *ngIf="nodeEntriesResults.getSelection().isEmpty()"
+        mat-button
+        class="filters-button"
+        [attr.aria-label]="'SEARCH.FILTERS' | translate"
+        (click)="toggleFilters()"
+      >
+        <i esIcon="filter_list"></i>
+        <span>{{ 'SEARCH.FILTERS' | translate }}</span>
+      </button>
       <es-actionbar *ngIf="!addToCollectionMode.value"></es-actionbar>
     </div>
   </ng-template>
