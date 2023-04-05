@@ -236,6 +236,8 @@
   },
   "NODE": {
     "cm:name": "filename",
+    "cm:title": "title",
+    "ccm:replicationsource": "origin",
     "score": "relevance",
     "description": "description",
     "mimetype": "file type",
