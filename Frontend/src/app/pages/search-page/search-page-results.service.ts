@@ -30,6 +30,7 @@ import { SearchPageService, SearchRequestParams } from './search-page.service';
 export interface SearchPageResults {
     totalResults?: Observable<number>;
     loadingProgress: Observable<number>;
+    addNodes: (nodes: Node[]) => void;
 }
 
 @Injectable()
@@ -64,6 +65,10 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
     ngOnDestroy(): void {
         this._destroyed.next();
         this._destroyed.complete();
+    }
+
+    addNodes(nodes: Node[]): void {
+        this.resultsDataSource.appendData(nodes, 'before');
     }
 
     private _registerPageRestore() {

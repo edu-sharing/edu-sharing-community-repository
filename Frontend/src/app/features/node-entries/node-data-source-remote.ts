@@ -179,13 +179,16 @@ export class NodeDataSourceRemote<
             data = appendData.concat(data);
         }
         this.dataStream.next(data);
+        this._paginationHandler.length += appendData.length;
         this._cache.clear();
     }
 
     removeData(data: T[]): void {
         const currentData = this.dataStream.value;
+        const deleteCount = currentData.filter((entry) => data.includes(entry)).length;
         const updatedData = currentData.filter((entry) => !data.includes(entry));
         this.dataStream.next(updatedData);
+        this._paginationHandler.length -= deleteCount;
         this._cache.clear();
     }
 
