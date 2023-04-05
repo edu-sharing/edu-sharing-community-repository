@@ -3,8 +3,6 @@ package org.edu_sharing.service.notification;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import javax.servlet.ServletContext;
-
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -12,23 +10,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.restservices.mds.v1.model.MdsValue;
-import org.edu_sharing.service.authority.AuthorityService;
-import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
-import org.springframework.context.ApplicationContext;
-
-import com.sun.star.lang.IllegalArgumentException;
+import org.edu_sharing.service.rating.RatingDetails;
 
 public class NotificationServiceImpl implements NotificationService {
 
@@ -159,43 +151,6 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyGroupSignupList(String receiver, String groupName, NodeRef userRef) throws Exception {
-        notifyGroupSignup(groupName, userRef, receiver, "groupSignupList");
-    }
-
-    @Override
-    public void notifyGroupSignupUser(String userEmail, String groupName, NodeRef userRef) throws Exception {
-        notifyGroupSignup(groupName, userRef, userEmail, "groupSignupUser");
-    }
-
-    @Override
-    public void notifyGroupSignupAdmin(String groupEmail, String groupName, NodeRef userRef) throws Exception {
-        notifyGroupSignup(groupName, userRef, groupEmail, "groupSignupAdmin");
-    }
-
-    @Override
-    public void notifyGroupSignupHandeld(NodeRef userRef, String groupName, boolean add) throws Exception {
-        String receiver = NodeServiceHelper.getProperty(userRef, CCConstants.CM_PROP_PERSON_EMAIL);
-        if (StringUtils.isBlank(receiver)) {
-            return;
-        }
-
-        String template = "groupSignupConfirmed";
-        if (!add) {
-            template = "groupSignupRejected";
-        }
-        notifyGroupSignup(groupName, userRef, receiver, template);
-    }
-
-    private void notifyGroupSignup(String groupName, NodeRef userRef, String receiver, String messageType) throws Exception {
-        HashMap<String, String> replace = new HashMap<>();
-        replace.put("group", groupName);
-        replace.put("firstName", nodeService.getProperty(userRef.getStoreRef().getProtocol(), userRef.getStoreRef().getIdentifier(), userRef.getId(), CCConstants.CM_PROP_PERSON_FIRSTNAME));
-        replace.put("lastName", nodeService.getProperty(userRef.getStoreRef().getProtocol(), userRef.getStoreRef().getIdentifier(), userRef.getId(), CCConstants.CM_PROP_PERSON_LASTNAME));
-        MailTemplate.sendMail(receiver, messageType, replace);
-    }
-
-    @Override
     public void notifyMetadataSetSuggestion(MdsValue mdsValue, MetadataWidget widgetDefinition, List<String> nodes) throws Throwable {
         String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
         Map<String, String> replace = new HashMap<>();
@@ -223,5 +178,19 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
+    @Override
+    public void notifyComment(String node, String comment, String commentReference, HashMap<String, Object> nodeProperties, Status status) {
+
+    }
+
+    @Override
+    public void notifyCollection(String collectionId, String refNodeId, HashMap<String, Object> collectionProperties, HashMap<String, Object> nodeProperties, Status status) {
+
+    }
+
+    @Override
+    public void notifyRatingChanged(String nodeId, HashMap<String, Object> nodeProps, Double rating, RatingDetails accumulatedRatings, Status removed) {
+
+    }
 
 }

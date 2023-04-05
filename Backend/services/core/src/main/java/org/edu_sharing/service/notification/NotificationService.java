@@ -1,8 +1,8 @@
 package org.edu_sharing.service.notification;
 
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.restservices.mds.v1.model.MdsValue;
+import org.edu_sharing.service.rating.RatingDetails;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,13 +16,11 @@ public interface NotificationService {
 
     void notifyPermissionChanged(String senderAuthority, String receiverAuthority, String nodeId, String[] permissions, String mailText) throws Throwable;
 
-	void notifyGroupSignupList(String groupEmail, String groupName, NodeRef userRef) throws Exception;
-
-	void notifyGroupSignupUser(String userEmail, String groupName, NodeRef userRef) throws Exception;
-
-	void notifyGroupSignupAdmin(String groupEmail, String groupName, NodeRef userRef) throws Exception;
-
-	void notifyGroupSignupHandeld(NodeRef userRef, String groupName, boolean add) throws Exception;
-
 	void notifyMetadataSetSuggestion(MdsValue mdsValue, MetadataWidget widgetDefinition, List<String> nodes) throws Throwable;
+
+	void notifyComment(String node, String comment, String commentReference, HashMap<String, Object> nodeProperties, Status status);
+
+	void notifyCollection(String collectionId, String refNodeId, HashMap<String, Object> collectionProperties, HashMap<String, Object> nodeProperties, Status status);
+
+	void notifyRatingChanged(String nodeId, HashMap<String, Object> nodeProps, Double rating, RatingDetails accumulatedRatings, Status removed);
 }

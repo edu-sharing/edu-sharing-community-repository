@@ -433,7 +433,7 @@ public class GroupDao {
                     list.add(userRef);
 
                     if (StringUtils.isNotBlank(groupEmail)) {
-                        notificationService.notifyGroupSignupList(groupEmail, getDisplayName(), userRef);
+                        notifyGroupSignup(getDisplayName(), userRef, groupEmail, "groupSignupList");
                     }
 
                 } else {
@@ -447,10 +447,10 @@ public class GroupDao {
                     addMember(AuthenticationUtil.getFullyAuthenticatedUser());
                     userEmail = NodeServiceHelper.getProperty(userRef, CCConstants.CM_PROP_PERSON_EMAIL);
                     if (StringUtils.isNotBlank(userEmail)) {
-                        notificationService.notifyGroupSignupUser(userEmail, getDisplayName(), userRef);
+                        notifyGroupSignup(getDisplayName(), userRef, userEmail, "groupSignupUser");
                     }
                     if (StringUtils.isNotBlank(groupEmail)) {
-                        notificationService.notifyGroupSignupAdmin(userEmail, getDisplayName(), userRef);
+                        notifyGroupSignup(getDisplayName(), userRef, groupEmail, "groupSignupAdmin");
                     }
                 }
                 return GroupSignupResult.Ok;
@@ -489,22 +489,30 @@ public class GroupDao {
     private void handleSignup(String user, boolean add) {
         checkAdminAccess();
         AuthenticationUtil.runAsSystem(() -> {
-            ArrayList<NodeRef> userRefs =
-                    (ArrayList<NodeRef>) NodeServiceHelper.getPropertyNative(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_LIST);
-            Optional<NodeRef> userRef = userRefs.stream().filter((r) -> NodeServiceHelper.getProperty(r, CCConstants.CM_PROP_PERSON_USERNAME).equals(user)).findFirst();
-            if (!userRef.isPresent()) {
-                throw new IllegalArgumentException("User " + user + " is not on the waiting list of " + groupName);
-            }
+            ArrayList<NodeRef> userRefs = (ArrayList<NodeRef>) NodeServiceHelper.getPropertyNative(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_LIST);
+            NodeRef userRef = userRefs.stream().filter((r) -> NodeServiceHelper.getProperty(r, CCConstants.CM_PROP_PERSON_USERNAME).equals(user))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("User " + user + " is not on the waiting list of " + groupName));
+
             // filter the user
             userRefs = userRefs.stream().
-                    filter((r) -> !r.equals(userRef.get())).
+                    filter((r) -> !r.equals(userRef)).
                     collect(Collectors.toCollection(ArrayList::new));
             NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_LIST, userRefs, false);
             if (add) {
                 addMember(user);
             }
 
-            notificationService.notifyGroupSignupHandeld(userRef.get(), getDisplayName(), add);
+            String receiver = NodeServiceHelper.getProperty(userRef, CCConstants.CM_PROP_PERSON_EMAIL);
+            if (StringUtils.isBlank(receiver)) {
+                return null;
+            }
+
+            String template = "groupSignupConfirmed";
+            if (!add) {
+                template = "groupSignupRejected";
+            }
+            notifyGroupSignup(groupName, userRef, receiver, template);
             return null;
         });
     }
@@ -524,4 +532,13 @@ public class GroupDao {
             throw DAOException.mapping(t);
         }
     }
+
+    private void notifyGroupSignup(String groupName, NodeRef userRef, String receiver, String messageType) throws Exception {
+        HashMap<String, String> replace = new HashMap<>();
+        replace.put("group", groupName);
+        replace.put("firstName", NodeServiceHelper.getProperty(userRef, CCConstants.CM_PROP_PERSON_FIRSTNAME));
+        replace.put("lastName", NodeServiceHelper.getProperty(userRef, CCConstants.CM_PROP_PERSON_LASTNAME));
+        MailTemplate.sendMail(receiver, messageType, replace);
+    }
+
 }
