@@ -464,7 +464,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                             this.postprocessHtml();
                             this.handleProposal();
                             this.renderHelper.doAll(this._node);
-                            this.addVideoControls();
                             this.linkSearchableWidgets();
                             this.loadNode();
                             this.loadSimilarNodes();
@@ -506,43 +505,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         this.nodeApi
             .getNodeParents(this._nodeId)
             .subscribe((nodes) => this.breadcrumbsService.setNodePath(nodes.nodes.reverse()));
-    }
-    addVideoControls() {
-        let videoElement: HTMLVideoElement;
-        let target: Element;
-        if (!this.isCollectionRef()) {
-            return;
-        }
-        try {
-            videoElement = document.querySelector('.edusharing_rendering_content_wrapper video');
-            if (!videoElement) {
-                throw new Error();
-            }
-            const listener = () => {
-                this.tracking
-                    .trackEvent(EventType.VIEW_MATERIAL_PLAY_MEDIA, this._node.ref.id)
-                    .subscribe(() => {});
-                videoElement.removeEventListener('play', listener);
-            };
-            videoElement.addEventListener('play', listener);
-            target = document.createElement('div');
-            videoElement.parentElement.appendChild(target);
-        } catch (e) {
-            // console.log("did not find video element, skipping controls",e);
-            setTimeout(() => this.addVideoControls(), 1000 / 30);
-            return;
-        }
-        const data = {
-            video: videoElement,
-            node: this._node,
-        };
-        UIHelper.injectAngularComponent(
-            this.componentFactoryResolver,
-            this.viewContainerRef,
-            VideoControlsComponent,
-            target,
-            data,
-        );
     }
     private postprocessHtml() {
         if (!this.config.instant('rendering.showPreview', true)) {
