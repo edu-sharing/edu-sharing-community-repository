@@ -583,6 +583,8 @@
     "COLLECTION_PIN": "Pin collection",
     "MATERIAL_FEEDBACK": "Feedback...",
     "MATERIAL_FEEDBACK_VIEW": "View feedback",
+    "COLLECTION_PROPOSAL_ACCEPT": "Accept proposal",
+    "COLLECTION_PROPOSAL_DECLINE": "Decline proposal",
     "OPEN": "Open",
     "DOWNLOAD": "Download",
     "DOWNLOAD_ALL": "download zip",
