@@ -78,8 +78,12 @@ export class SavedSearchesService {
 
     /**
      * Fetches the saved searches of the current user from the backend.
+     *
+     * For paginated access.
+     *
+     * Returns the raw node objects.
      */
-    getMySavedSearches({
+    getMySavedSearchesNodes({
         startIndex,
         endIndex,
     }: {
@@ -104,8 +108,12 @@ export class SavedSearchesService {
 
     /**
      * Fetches all saved searches that the current user has access to from the backend.
+     *
+     * For paginated access.
+     *
+     * Returns the raw node objects.
      */
-    getSharedSavedSearches({
+    getSharedSavedSearchesNodes({
         searchString,
         startIndex,
         endIndex,
@@ -143,6 +151,24 @@ export class SavedSearchesService {
     }
 
     /**
+     * Converts a raw saved-search node object into a `SavedSearch` object.
+     */
+    savedSearchNodeToSavedSearch(node: Node): SavedSearch {
+        const properties = node.properties!;
+        const criteria = JSON.parse(properties[CCM_PROP_SAVED_SEARCH_PARAMETERS][0]);
+        const values = this.search['criteriaToRawValues'](criteria);
+        const { [PRIMARY_SEARCH_CRITERIA]: searchValue, ...filters } = values;
+        return {
+            title: properties['cclom:title'][0],
+            repository: properties['ccm:saved_search_repository'][0],
+            metadataSet: properties['ccm:saved_search_mds'][0],
+            searchString: searchValue && searchValue[0] !== '*' ? searchValue[0] : null,
+            filters,
+            node,
+        };
+    }
+
+    /**
      * Constructs an observable, that fetches the user's saved searches from the backend.
      *
      * The observable updates whenever `updateMySavedSearchesTrigger` fires.
@@ -166,21 +192,6 @@ export class SavedSearchesService {
                     ),
             ),
         );
-    }
-
-    private savedSearchNodeToSavedSearch(node: Node): SavedSearch {
-        const properties = node.properties!;
-        const criteria = JSON.parse(properties[CCM_PROP_SAVED_SEARCH_PARAMETERS][0]);
-        const values = this.search['criteriaToRawValues'](criteria);
-        const { [PRIMARY_SEARCH_CRITERIA]: searchValue, ...filters } = values;
-        return {
-            title: properties['cclom:title'][0],
-            repository: properties['ccm:saved_search_repository'][0],
-            metadataSet: properties['ccm:saved_search_mds'][0],
-            searchString: searchValue && searchValue[0] !== '*' ? searchValue[0] : null,
-            filters,
-            node,
-        };
     }
 }
 

@@ -1,19 +1,10 @@
 import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import {
-    AuthenticationService,
-    NodeService,
-    SavedSearch,
-    SavedSearchesService,
-    SearchService,
-} from 'ngx-edu-sharing-api';
+import { AuthenticationService, SavedSearch, SearchService } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
 import { debounceTime, delay, filter, first, map, skip, takeUntil, tap } from 'rxjs/operators';
-import { RestConstants, UIConstants } from '../../core-module/core.module';
-import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Values } from '../../features/mds/types/types';

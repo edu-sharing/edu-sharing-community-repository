@@ -10,16 +10,7 @@ import {
 import { FormControl } from '@angular/forms';
 import { Node, SavedSearch, SavedSearchesService } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, Subject } from 'rxjs';
-import {
-    debounceTime,
-    filter,
-    first,
-    map,
-    startWith,
-    switchMap,
-    take,
-    takeUntil,
-} from 'rxjs/operators';
+import { debounceTime, filter, first, map, startWith, switchMap, takeUntil } from 'rxjs/operators';
 import { DialogButton, ListItem } from '../../../../core-module/core.module';
 import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
 import { Scope } from '../../../../core-ui-module/option-item';
@@ -120,9 +111,10 @@ export class SavedSearchesDialogComponent implements OnInit, OnDestroy {
             .pipe(startWith(null as string), debounceTime(300))
             .subscribe((value) => {
                 this.sharedSavedSearchesSource.setRemote((params) =>
-                    this.savedSearchesService
-                        .getSharedSavedSearches({ searchString: value, ...params.range })
-                        .pipe(),
+                    this.savedSearchesService.getSharedSavedSearchesNodes({
+                        searchString: value,
+                        ...params.range,
+                    }),
                 );
             });
     }
@@ -138,7 +130,7 @@ export class SavedSearchesDialogComponent implements OnInit, OnDestroy {
         }
         buttons.push(
             new DialogButton('SEARCH.SAVED_SEARCHES.SEARCH_BUTTON', { color: 'primary' }, () =>
-                this.returnSavedSearch(),
+                this.closeDialogWithResult(),
             ),
         );
         this._nodeEntries
@@ -159,18 +151,17 @@ export class SavedSearchesDialogComponent implements OnInit, OnDestroy {
             this.nodeEntries.getSelection().clear();
             this.nodeEntries.getSelection().select(node);
         } else {
-            this.returnSavedSearch(node);
+            this.closeDialogWithResult(node);
         }
     }
 
-    returnSavedSearch(node: Node = this.nodeEntries.getSelection().selected[0]): void {
-        this.savedSearchesService
-            .observeMySavedSearches()
-            .pipe(take(1))
-            .subscribe((savedSearches) => {
-                const savedSearch = savedSearches.find((savedSearch) => savedSearch.node === node);
-                this.dialogRef.close(savedSearch);
-            });
+    /**
+     * Closes the dialog and returns the given or the currently selected saved-search node as
+     * result.
+     */
+    closeDialogWithResult(node: Node = this.nodeEntries.getSelection().selected[0]): void {
+        const savedSearch = this.savedSearchesService.savedSearchNodeToSavedSearch(node);
+        this.dialogRef.close(savedSearch);
     }
 
     async openSaveSearchDialog(): Promise<void> {
