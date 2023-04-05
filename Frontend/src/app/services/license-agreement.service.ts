@@ -25,7 +25,7 @@ import {
 } from '../features/dialogs/dialog-modules/license-agreement-dialog/license-agreement-dialog-data';
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { MainNavService } from '../main/navigation/main-nav.service';
-import { TranslationsService } from '../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
+import { TranslationsService } from 'ngx-edu-sharing-ui';
 
 /** Version string to remember as accepted in case we encountered errors fetching the license. */
 const LICENSE_ERROR_CASE_VERSION = '0.0';

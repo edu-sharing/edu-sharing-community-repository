@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
+import { ListItem, OptionItem, Scope, TranslationsService, UIConstants } from 'ngx-edu-sharing-ui';
 import {
     NodeList,
     RestConnectorService,
@@ -17,7 +17,6 @@ import { Helper } from '../../core-module/rest/helper';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { SearchFieldService } from '../../main/navigation/search-field/search-field.service';
-import { ListItem, OptionItem, Scope, UIConstants } from 'ngx-edu-sharing-ui';
 import { Node } from 'ngx-edu-sharing-api';
 
 @Component({

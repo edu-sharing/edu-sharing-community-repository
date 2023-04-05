@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
+import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ConfigurationService, RestNetworkService, Service } from '../../core-module/core.module';
 import { Toast } from '../../core-ui-module/toast';

@@ -1,6 +1,22 @@
 import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
+import {
+    CustomOptions,
+    DefaultGroups,
+    ElementType,
+    InteractionType,
+    ListItem,
+    ListSortConfig,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
+    OPEN_URL_MODE,
+    OptionItem,
+    Scope,
+    TemporaryStorageService,
+    TranslationsService,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import {
     ConfigurationHelper,
     Node,
@@ -18,22 +34,6 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { ConfigService } from 'ngx-edu-sharing-api';
-import {
-    CustomOptions,
-    DefaultGroups,
-    ElementType,
-    InteractionType,
-    ListItem,
-    ListSortConfig,
-    NodeDataSource,
-    NodeEntriesDisplayType,
-    NodeEntriesWrapperComponent,
-    OPEN_URL_MODE,
-    OptionItem,
-    Scope,
-    TemporaryStorageService,
-    UIConstants,
-} from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-sharing',

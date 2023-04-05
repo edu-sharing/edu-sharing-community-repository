@@ -17,7 +17,6 @@ import {
 import { Toast } from '../../../core-ui-module/toast';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { TranslationsService } from '../../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
 import {
     ActionbarComponent,
     DefaultGroups,
@@ -31,6 +30,7 @@ import {
     Scope,
     Target,
     TemporaryStorageService,
+    TranslationsService,
     UIAnimation,
     UIConstants,
 } from 'ngx-edu-sharing-ui';

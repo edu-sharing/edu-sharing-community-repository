@@ -1,7 +1,13 @@
 import { forkJoin as observableForkJoin, Subject } from 'rxjs';
 
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
+import {
+    DefaultGroups,
+    OptionItem,
+    TranslationsService,
+    UIAnimation,
+    VCard,
+} from 'ngx-edu-sharing-ui';
 import {
     ConfigurationService,
     ProfileSettings,
@@ -18,7 +24,6 @@ import { trigger } from '@angular/animations';
 import { Helper } from '../../core-module/rest/helper';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
-import { DefaultGroups, OptionItem, UIAnimation, VCard } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-profiles',

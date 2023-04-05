@@ -1,5 +1,11 @@
 import { Component } from '@angular/core';
-import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
+import {
+    ListItem,
+    NodeDataSource,
+    Scope,
+    TranslationsService,
+    UIAnimation,
+} from 'ngx-edu-sharing-ui';
 import {
     FrameEventsService,
     Node,
@@ -22,7 +28,6 @@ import { CordovaService } from '../../common/services/cordova.service';
 import { HttpClient } from '@angular/common/http';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { CardService } from '../../core-ui-module/card.service';
-import { ListItem, NodeDataSource, Scope, UIAnimation } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-editorial',

@@ -2,7 +2,7 @@ import { PlatformLocation } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Params, Router, UrlSerializer } from '@angular/router';
-import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
+import { TranslationsService, UIConstants } from 'ngx-edu-sharing-ui';
 import {
     ConfigurationService,
     DialogButton,
@@ -16,7 +16,6 @@ import { RegisterDoneComponent } from './register-done/register-done.component';
 import { RegisterFormComponent } from './register-form/register-form.component';
 import { RegisterRequestComponent } from './register-request/register-request.component';
 import { RegisterResetPasswordComponent } from './register-reset-password/register-reset-password.component';
-import { UIConstants } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-register',

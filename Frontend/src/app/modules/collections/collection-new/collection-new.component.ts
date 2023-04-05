@@ -12,7 +12,19 @@ import {
 
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { TranslationsService } from '../../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
+import {
+    ColorHelper,
+    DefaultGroups,
+    InteractionType,
+    ListItem,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
+    OptionItem,
+    PreferredColor,
+    TranslationsService,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 
 import * as EduData from '../../../core-module/core.module';
 import {
@@ -40,18 +52,6 @@ import {
     User,
 } from '../../../core-module/core.module';
 import { Toast } from '../../../core-ui-module/toast';
-import {
-    ColorHelper,
-    DefaultGroups,
-    InteractionType,
-    ListItem,
-    NodeDataSource,
-    NodeEntriesDisplayType,
-    NodeEntriesWrapperComponent,
-    OptionItem,
-    PreferredColor,
-    UIConstants,
-} from 'ngx-edu-sharing-ui';
 import { ConfigService, Group } from 'ngx-edu-sharing-api';
 import { TranslateService } from '@ngx-translate/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';

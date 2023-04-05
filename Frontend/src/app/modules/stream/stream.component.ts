@@ -1,6 +1,16 @@
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router, RoutesRecognized } from '@angular/router';
-import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
+import {
+    CustomOptions,
+    DefaultGroups,
+    OptionItem,
+    OptionsHelperDataService,
+    Scope,
+    Target,
+    TranslationsService,
+    UIAnimation,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import * as EduData from '../../core-module/core.module';
 import {
     Connector,
@@ -22,16 +32,6 @@ import {
     TemporaryStorageService,
 } from '../../core-module/core.module'; //
 import { Toast } from '../../core-ui-module/toast'; //
-import {
-    CustomOptions,
-    DefaultGroups,
-    OptionItem,
-    OptionsHelperDataService,
-    Scope,
-    Target,
-    UIAnimation,
-    UIConstants,
-} from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { Observable, Subject, Subscription } from 'rxjs';
 import { trigger } from '@angular/animations';

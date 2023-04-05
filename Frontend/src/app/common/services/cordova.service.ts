@@ -5,7 +5,7 @@ import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { HttpClient } from '@angular/common/http';
-import { DateHelper, UIConstants } from 'ngx-edu-sharing-ui';
+import { AppService as AppServiceAbstract, DateHelper, UIConstants } from 'ngx-edu-sharing-ui';
 import { FrameEventsService } from '../../core-module/rest/services/frame-events.service';
 import { OAuthResult } from '../../core-module/rest/data-object';
 import { RestConstants } from '../../core-module/rest/rest-constants';
@@ -23,7 +23,7 @@ export enum OnBackBehaviour {
  */
 @Injectable()
 // tslint:disable:no-console
-export class CordovaService {
+export class CordovaService extends AppServiceAbstract {
     private onBackBehaviour = OnBackBehaviour.default;
     platform: 'ios' | 'android';
 
@@ -53,6 +53,7 @@ export class CordovaService {
         private injector: Injector,
         private events: FrameEventsService,
     ) {
+        super();
         const userAgent = navigator.userAgent;
         if (userAgent?.includes('ionic / edu-sharing-app')) {
             if (userAgent.includes('ios')) {
@@ -1374,9 +1375,8 @@ export class CordovaService {
     }
 
     getLanguage() {
-        return new Observable<string>((observer: Observer<string>) => {
-            observer.next(navigator.language.split('-')[0]);
-            observer.complete();
+        return new Promise<string>((resolve) => {
+            resolve(navigator.language.split('-')[0]);
             /*try {
           (navigator as any).globalization.getPreferredLanguage(
             (lang:any)=>{
@@ -1438,5 +1438,8 @@ export class CordovaService {
             replaceUrl: true,
             queryParams: { next },
         });
+    }
+    isRunningApp(): boolean {
+        return this.isRunningCordova();
     }
 }

@@ -8,7 +8,7 @@ import {
     RestNodeService,
     TemporaryStorageService,
 } from '../../core-module/core.module';
-import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
+import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 
 @Component({

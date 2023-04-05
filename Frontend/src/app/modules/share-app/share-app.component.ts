@@ -1,4 +1,12 @@
-import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
+import {
+    DateHelper,
+    InteractionType,
+    ListItem,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    TranslationsService,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Toast } from '../../core-ui-module/toast';
@@ -22,14 +30,6 @@ import { TranslateService } from '@ngx-translate/core';
 import { Component } from '@angular/core';
 import { Helper } from '../../core-module/rest/helper';
 import { CordovaService, OnBackBehaviour } from '../../common/services/cordova.service';
-import {
-    DateHelper,
-    InteractionType,
-    ListItem,
-    NodeDataSource,
-    NodeEntriesDisplayType,
-    UIConstants,
-} from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-share-app',

@@ -1,4 +1,16 @@
-import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
+import {
+    ActionbarComponent,
+    DateHelper,
+    InteractionType,
+    ListItem,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
+    Scope,
+    TranslationsService,
+    UIAnimation,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Toast } from '../../core-ui-module/toast';
@@ -36,18 +48,6 @@ import {
     ViewContainerRef,
 } from '@angular/core';
 import { Helper } from '../../core-module/rest/helper';
-import {
-    ActionbarComponent,
-    DateHelper,
-    InteractionType,
-    ListItem,
-    NodeDataSource,
-    NodeEntriesDisplayType,
-    NodeEntriesWrapperComponent,
-    Scope,
-    UIAnimation,
-    UIConstants,
-} from 'ngx-edu-sharing-ui';
 import { SuggestItem } from '../../common/ui/autocomplete/autocomplete.component';
 import { Observable, Observer } from 'rxjs';
 import { CustomHelper } from '../../common/custom-helper';

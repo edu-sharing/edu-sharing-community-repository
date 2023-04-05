@@ -20,6 +20,7 @@ import { extensionSchemas } from './extension/extension-schemas';
 import { DialogsModule } from './features/dialogs/dialogs.module';
 import { MdsModule } from './features/mds/mds.module';
 import {
+    AppService as AppServiceAbstract,
     EduSharingUiModule,
     KeyboardShortcutsService as KeyboardShortcutsServiceAbstract,
     OptionsHelperService as OptionsHelperServiceAbstract,
@@ -59,6 +60,7 @@ import { environment } from '../environments/environment';
 import { Toast } from './core-ui-module/toast';
 import { OptionsHelperService } from './core-ui-module/options-helper.service';
 import { KeyboardShortcutsService } from './services/keyboard-shortcuts.service';
+import { CordovaService } from './common/services/cordova.service';
 // http://blog.angular-university.io/angular2-ngmodule/
 // -> Making modules more readable using the spread operator
 
@@ -116,6 +118,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         { provide: ToastAbstract, useClass: Toast },
         { provide: OptionsHelperServiceAbstract, useClass: OptionsHelperService },
         { provide: KeyboardShortcutsServiceAbstract, useClass: KeyboardShortcutsService },
+        { provide: CordovaService, useClass: AppServiceAbstract },
         {
             provide: EDU_SHARING_API_CONFIG,
             deps: [ErrorHandlerService],

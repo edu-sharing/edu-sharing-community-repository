@@ -11,7 +11,7 @@ import {
 import { MdsTestComponent } from '../common/test/mds-test/mds-test.component';
 import { ApplyToLmsComponent } from '../common/ui/apply-to-lms/apply-to-lms.component';
 import { NodeRenderComponent } from '../common/ui/node-render/node-render.component';
-import { AccessibilityService, UIConstants } from 'ngx-edu-sharing-ui';
+import { AccessibilityService, TranslationsService, UIConstants } from 'ngx-edu-sharing-ui';
 import { AdminComponent } from '../modules/admin/admin.component';
 import { CollectionNewComponent } from '../modules/collections/collection-new/collection-new.component';
 import { CollectionsMainComponent } from '../modules/collections/collections.component';
@@ -42,7 +42,6 @@ import { BehaviorSubject } from 'rxjs';
 import { LtiComponent } from '../modules/lti/lti.component';
 import { printCurrentTaskInfo } from './track-change-detection';
 import { environment } from '../../environments/environment';
-import { TranslationsService } from '../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
 import { LoadingScreenService } from '../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';

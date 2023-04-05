@@ -1,7 +1,7 @@
 import { Injectable, Injector } from '@angular/core';
 import { Toast } from '../core-ui-module/toast';
 import { CordovaService } from '../common/services/cordova.service';
-import { TranslationsService } from '../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
+import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { MessageType } from '../core-module/ui/message-type';
 import { ModalDialogOptions } from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import { ProgressType } from '../shared/components/modal-dialog/modal-dialog.component';

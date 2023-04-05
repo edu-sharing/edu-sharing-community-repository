@@ -38,6 +38,7 @@ export * from './lib/pipes/node-image-size.pipe';
 export * from './lib/pipes/file-size.pipe';
 export * from './lib/pipes/node-person-name.pipe';
 export * from './lib/pipes/node-title.pipe';
+export * from './lib/services/abstract/app.service';
 export * from './lib/services/abstract/options-helper.service';
 export * from './lib/services/abstract/keyboard-shortcuts.service';
 export * from './lib/services/abstract/toast.service';

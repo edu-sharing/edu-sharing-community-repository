@@ -1,9 +1,8 @@
-import { TranslationsService } from '../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
+import { TranslationsService, UIConstants } from 'ngx-edu-sharing-ui';
 import { ActivatedRoute, Data, Params, Router } from '@angular/router';
 import { Toast } from '../../core-ui-module/toast';
 import { TranslateService } from '@ngx-translate/core';
 import { Component } from '@angular/core';
-import { UIConstants } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-messages-main',

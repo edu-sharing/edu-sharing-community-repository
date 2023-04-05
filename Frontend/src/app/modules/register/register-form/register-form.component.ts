@@ -7,7 +7,7 @@ import {
     RestConnectorService,
     RestRegisterService,
 } from '../../../core-module/core.module';
-import { TranslationsService } from '../../../../../projects/edu-sharing-ui/src/lib/translations/translations.service';
+import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { PlatformLocation } from '@angular/common';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
