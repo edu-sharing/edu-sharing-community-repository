@@ -281,6 +281,10 @@
     "ACCEPTED": "accepted",
     "PENDING": "pending"
   },
+  "NODE_PROPOSAL": {
+    "cm:created": "proposed at",
+    "cm:creator": "proposed by"
+  },
   "COOKIE_INFO": {
     "ACCEPT": " Accept",
     "DECLINE": " Decline & Exit",
