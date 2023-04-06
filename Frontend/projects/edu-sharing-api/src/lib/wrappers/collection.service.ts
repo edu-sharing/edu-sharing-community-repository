@@ -5,6 +5,7 @@ import { CollectionV1Service } from '../api/services';
 import { HOME_REPOSITORY } from '../constants';
 import { Node } from '../models';
 import { cachedShareReplay, KeyCache } from '../utils/decorators/cached-share-replay';
+import { ReferenceEntries } from '../api/models/reference-entries';
 
 @Injectable({
     providedIn: 'root',

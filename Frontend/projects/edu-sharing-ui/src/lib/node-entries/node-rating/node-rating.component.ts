@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { Node, ConfigService, AuthenticationService, RestConstants } from 'ngx-edu-sharing-api';
 import { Toast } from '../../services/abstract/toast.service';
-import { take } from 'rxjs/internal/operators';
+import { take } from 'rxjs/operators';
 import { RestHelper } from '../../util/rest-helper';
 @Component({
     selector: 'es-node-rating',
@@ -19,9 +19,8 @@ export class NodeRatingComponent<T extends Node> implements OnInit {
         public toast: Toast,
         public configService: ConfigService,
         public authenticationService: AuthenticationService,
-        public changeDetectorRef: ChangeDetectorRef,
-    ) // @TODO
-    // public ratingService: RestRatingService,
+        public changeDetectorRef: ChangeDetectorRef, // @TODO
+    ) // public ratingService: RestRatingService,
     {}
 
     async ngOnInit() {

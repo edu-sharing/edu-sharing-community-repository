@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { NetworkService, Node } from 'ngx-edu-sharing-api';
-import { take } from 'rxjs/internal/operators';
+import { take } from 'rxjs/operators';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
 
 @Injectable({

@@ -6,7 +6,7 @@ import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import { Directive, ElementRef, Input, OnInit, OnDestroy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
-import { take } from 'rxjs/internal/operators';
+import { take } from 'rxjs/operators';
 
 /**
  * Replaces the element's content with an icon.

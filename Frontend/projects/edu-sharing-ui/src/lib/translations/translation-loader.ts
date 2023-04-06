@@ -34,7 +34,6 @@ export class TranslationLoader implements TranslateLoader {
         configService: ConfigService,
         configuration: EduSharingUiConfiguration,
     ) {
-        console.log('create static', configuration);
         return new TranslationLoader(http, configService, configuration);
     }
 

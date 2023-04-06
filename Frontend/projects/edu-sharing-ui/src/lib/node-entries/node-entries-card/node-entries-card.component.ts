@@ -17,7 +17,7 @@ import { NodeEntriesService } from '../../services/node-entries.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { AuthenticationService, ConfigService, Node, RestConstants } from 'ngx-edu-sharing-api';
 import { ColorHelper, PreferredColor } from '../../util/color-helper';
-import { take } from 'rxjs/internal/operators';
+import { take } from 'rxjs/operators';
 import { DropdownComponent } from '../../dropdown/dropdown.component';
 import { Toast } from '../../services/abstract/toast.service';
 

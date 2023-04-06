@@ -21,9 +21,7 @@ export class TranslationsService {
         private storage: SessionStorageService,
         private translate: TranslateService,
         @Optional() private appService: AppService,
-    ) {
-        console.log('init');
-    }
+    ) {}
 
     /**
      * Determines and configures the language to use and triggers loading of translations with
@@ -32,7 +30,6 @@ export class TranslationsService {
      * Call this once in the app component.
      */
     initialize(): Observable<void> {
-        console.log('init');
         const supportedLanguages$ = from(
             this.config.get('supportedLanguages', DEFAULT_SUPPORTED_LANGUAGES),
         );

@@ -35,3 +35,6 @@ async ngOnInit() {
   await this.translationsService.initialize().toPromise()
 }
 ```
+
+In your scss, make sure to include the global variables via
+`@import "node-modules/ngx-edu-sharing-ui/assets/scss/variables";`

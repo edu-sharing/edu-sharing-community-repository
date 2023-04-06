@@ -7,11 +7,10 @@ import {
 } from '../node-entries/entries-model';
 import { EventEmitter, Injectable, NgZone, OnDestroy, Optional } from '@angular/core';
 import { AuthenticationService, ME, NetworkService, Node, UserService } from 'ngx-edu-sharing-api';
-import { take } from 'rxjs/internal/operators';
+import { take, takeUntil } from 'rxjs/operators';
 import { CustomOptions, OptionItem, Scope, Target } from '../types/option-item';
 import { OptionsHelperService } from './abstract/options-helper.service';
 import { fromEvent, Subject, Subscription } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 import { matchesShortcutCondition } from '../types/keyboard-shortcuts';
 import { KeyboardShortcutsService } from './abstract/keyboard-shortcuts.service';
 import { ActivatedRoute } from '@angular/router';
