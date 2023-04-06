@@ -796,6 +796,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
         if (!this.isReady) {
             return;
         }
+        this.dataSourceCollectionProposals.reset();
         this.isLoading = true;
         if (!this.loadingTask.isDone) {
             this.loadingTask.done();
@@ -1198,7 +1199,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
             )
             .subscribe(
                 () => {
-                    this.afterDeleteFromCollection();
+                    this.afterDeleteFromCollection([this.contentDetailObject]);
                     this.toast.closeModalDialog();
                     if (callback) {
                         callback();
@@ -1211,8 +1212,10 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
             );
     }
 
-    afterDeleteFromCollection() {
-        this.toast.toast('COLLECTIONS.REMOVED_FROM_COLLECTION');
+    afterDeleteFromCollection(nodes: Node[]) {
+        if (nodes?.some((n) => !(n as ProposalNode).proposal)) {
+            this.toast.toast('COLLECTIONS.REMOVED_FROM_COLLECTION');
+        }
         this.refreshContent();
     }
 

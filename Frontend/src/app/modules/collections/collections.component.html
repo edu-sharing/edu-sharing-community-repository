@@ -352,8 +352,11 @@
           </section>
 
           <section
-            *ngIf="!isLoading && !dataSourceCollectionProposals.isEmpty()"
+            *ngIf="
+              !dataSourceCollectionProposals.isLoading && !dataSourceCollectionProposals.isEmpty()
+            "
             class="collections-cards-div"
+            [class.display-none]="isLoading"
           >
             <div class="content-header heading-group">
               <h2 class="mat-heading-3">
@@ -417,7 +420,7 @@
                 "
                 [globalKeyboardShortcuts]="true"
                 (fetchData)="loadMoreReferences()"
-                (nodesDeleted)="afterDeleteFromCollection()"
+                (nodesDeleted)="afterDeleteFromCollection($event.objects)"
               >
                 <ng-template #title>
                   <div class="content-header heading-group">

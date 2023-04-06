@@ -236,6 +236,8 @@
   },
   "NODE": {
     "cm:name": "filename",
+    "cm:title": "title",
+    "ccm:replicationsource": "origin",
     "score": "relevance",
     "description": "description",
     "mimetype": "file type",
@@ -246,7 +248,7 @@
     "ccm:educationallearningresourcetype": "Type",
     "ccm:replicationsourceid": "Original-ID",
     "ccm:educationalcontext": "Educational Context",
-    "ccm:lifecyclecontributer_publisher": "Publisher",
+    "ccm:lifecyclecontributer_publisher": "publisher",
     "ccm:lifecyclecontributer_publisherFN": "",
     "sys:node-uuid": "node-id",
     "dimensions": "image size",
@@ -262,7 +264,7 @@
     "sys:archivedDate": "deleted",
     "cclom:version": "version",
     "virtual:usagecount": "usage count",
-    "ccm:author_freetext": "General Author information",
+    "ccm:author_freetext": "General author information",
     "ccm:lifecyclecontributer_authorFN": "author",
     "ccm:wf_status": "status",
     "ccm:eaf_productionyear": "Production year",
@@ -278,6 +280,10 @@
     "DECLINED": "declined",
     "ACCEPTED": "accepted",
     "PENDING": "pending"
+  },
+  "NODE_PROPOSAL": {
+    "cm:created": "proposed at",
+    "cm:creator": "proposed by"
   },
   "COOKIE_INFO": {
     "ACCEPT": " Accept",
@@ -581,6 +587,8 @@
     "COLLECTION_PIN": "Pin collection",
     "MATERIAL_FEEDBACK": "Feedback...",
     "MATERIAL_FEEDBACK_VIEW": "View feedback",
+    "COLLECTION_PROPOSAL_ACCEPT": "Accept proposal",
+    "COLLECTION_PROPOSAL_DECLINE": "Decline proposal",
     "OPEN": "Open",
     "DOWNLOAD": "Download",
     "DOWNLOAD_ALL": "download zip",
@@ -637,7 +645,7 @@
     "SHOW_EXTENDED_TRUE": "extended info shown",
     "SHOW_EXTENDED_SEARCH": "Show more filters",
     "AUTHOR_LABEL": "About the Author",
-    "AUTHOR_FREETEXT": "General Author information",
+    "AUTHOR_FREETEXT": "General author information",
     "AUTHOR_FREETEXT_PLACEHOLDER": "Who are the authors of this work? How should they be attributed?",
     "AUTHOR_PERSON": "Author & Contributors",
     "AUTHOR_UNSET": "<not set>",
