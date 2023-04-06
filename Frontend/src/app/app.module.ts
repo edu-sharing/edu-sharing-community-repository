@@ -38,8 +38,6 @@ import { DECLARATIONS_OER } from './modules/oer/declarations';
 import { DECLARATIONS_PERMISSIONS } from './modules/permissions/declarations';
 import { DECLARATIONS_PROFILES } from './modules/profiles/declarations';
 import { DECLARATIONS_REGISTER } from './modules/register/declarations';
-import { DECLARATIONS_SEARCH } from './modules/search/declarations';
-import { PROVIDERS_SEARCH } from './modules/search/providers';
 import { DECLARATIONS_SERVICES } from './modules/services/declarations';
 import { DECLARATIONS_SHARE_APP } from './modules/share-app/declarations';
 import { DECLARATIONS_SHARING } from './modules/sharing/declarations';
@@ -66,7 +64,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS,
         DECLARATIONS_RECYCLE,
         DECLARATIONS_WORKSPACE,
-        DECLARATIONS_SEARCH,
         DECLARATIONS_COLLECTIONS,
         DECLARATIONS_LOGIN,
         DECLARATIONS_REGISTER,
@@ -117,7 +114,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         },
         { provide: LocationStrategy, useClass: AppLocationStrategy },
         PROVIDERS,
-        PROVIDERS_SEARCH,
         { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
         { provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: matTooltipDefaultOptions },
         extensionProviders,
@@ -127,7 +123,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS,
         DECLARATIONS_RECYCLE,
         DECLARATIONS_WORKSPACE,
-        DECLARATIONS_SEARCH,
         DECLARATIONS_COLLECTIONS,
         DECLARATIONS_LOGIN,
         DECLARATIONS_REGISTER,

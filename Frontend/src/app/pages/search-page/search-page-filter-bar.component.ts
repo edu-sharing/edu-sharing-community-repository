@@ -5,6 +5,7 @@ import { AuthenticationService, SavedSearch, SearchService } from 'ngx-edu-shari
 import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
 import { debounceTime, delay, filter, first, map, skip, takeUntil, tap } from 'rxjs/operators';
+import { RestConstants } from '../../core-module/core.module';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Values } from '../../features/mds/types/types';
@@ -29,6 +30,7 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
     searchFilterValues: Values;
     mdsParams: { repository: string; setId: string } = null;
     savedSearchesButtonIsVisible = false;
+    mdsExternalFilters: Values;
 
     private mdsInitialized = false;
     private defaultValues: Values;
@@ -138,6 +140,18 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
                 takeUntil(this.destroyed),
             )
             .subscribe(() => this.initMdsEditor());
+        this.searchPage.searchString
+            .observeValue()
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((searchString) => {
+                if (searchString) {
+                    this.mdsExternalFilters = {
+                        [RestConstants.PRIMARY_SEARCH_CRITERIA]: [searchString],
+                    };
+                } else {
+                    this.mdsExternalFilters = null;
+                }
+            });
     }
 
     private registerSavedSearches(): void {

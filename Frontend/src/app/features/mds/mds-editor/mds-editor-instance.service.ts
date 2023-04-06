@@ -35,7 +35,6 @@ import {
     RestMdsService,
     RestSearchService,
 } from '../../../core-module/core.module';
-import { SearchService } from '../../../modules/search/search.service';
 import { EditorMode } from '../types/mds-types';
 import {
     BulkBehavior,
@@ -472,11 +471,11 @@ export class MdsEditorInstanceService implements OnDestroy {
             }
             let criteria: any[] = [];
             if (this.mdsEditorInstanceService.editorMode === 'search') {
-                const values = await this.mdsEditorInstanceService.getValues();
+                const values = {
+                    ...(await this.mdsEditorInstanceService.getValues()),
+                    ...(this.mdsEditorInstanceService.externalFilters ?? {}),
+                };
                 delete values[this.definition.id];
-                values[RestConstants.PRIMARY_SEARCH_CRITERIA] = [
-                    this.mdsEditorInstanceService.searchService.searchTerm,
-                ];
                 criteria = RestSearchService.convertCritierias(
                     values,
                     this.mdsEditorInstanceService.widgets.value.map((w) => w.definition),
@@ -617,6 +616,8 @@ export class MdsEditorInstanceService implements OnDestroy {
      * Will be appended on init depending if they exist in the currently rendered group.
      */
     nativeWidgets = new BehaviorSubject<NativeWidget[]>([]);
+    /** Input to `MdsEditorWrapper`. */
+    externalFilters: Values;
 
     // Mutable state
     private readonly completionStatus$ = new BehaviorSubject<CompletionStatus>(null);
@@ -668,7 +669,6 @@ export class MdsEditorInstanceService implements OnDestroy {
         private restMdsService: RestMdsService,
         private configService: ConfigurationService,
         private restConnector: RestConnectorService,
-        private searchService: SearchService,
         private config: ConfigService,
     ) {
         this.registerInitMds();
