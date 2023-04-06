@@ -651,7 +651,7 @@
     "AUTHOR_FREETEXT_PLACEHOLDER": "Who are the authors of this work? How should they be attributed?",
     "AUTHOR_PERSON": "Author & Contributors",
     "AUTHOR_UNSET": "<not set>",
-    "LICENSE": "license",
+    "LICENSE": "License",
     "WORKFLOW": "workflow state",
     "BULK_EDIT": "Edit",
     "LICENSE_LINK": "manage license",
