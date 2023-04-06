@@ -34,7 +34,12 @@ own OptionsHelperService instance and take exclusive control of the actionbar. -
 >
   <ng-template #title>
     <div class="title-container">
-      <h2 class="mat-heading-2">{{ repo.title | titlecase }} ({{ repo.dataSource.getTotal() }})</h2>
+      <h2 class="mat-heading-2">
+        {{ repo.title | titlecase }}
+        <ng-container *ngIf="!repo.dataSource.isLoading; else smallLoadingSpinner">
+          ({{ repo.dataSource.getTotal() }})
+        </ng-container>
+      </h2>
       <a
         *ngIf="repo.dataSource.getTotal() > repo.dataSource.getData().length"
         mat-button
@@ -54,3 +59,7 @@ own OptionsHelperService instance and take exclusive control of the actionbar. -
   <i esIcon="search"></i>
   {{ 'SEARCH.QUERY_NO_RESULT' | translate }}
 </div>
+
+<ng-template #smallLoadingSpinner>
+  <mat-spinner diameter="24" class="small-progress-spinner"></mat-spinner>
+</ng-template>

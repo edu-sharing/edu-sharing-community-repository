@@ -36,4 +36,9 @@ export class SearchPageResultsComponent implements OnInit {
             this.searchPage.showingAllRepositories.next(false);
         });
     }
+
+    toggleFilters(): void {
+        const filterBarIsVisible = this.searchPage.filterBarIsVisible;
+        filterBarIsVisible.setUserValue(!filterBarIsVisible.getValue());
+    }
 }

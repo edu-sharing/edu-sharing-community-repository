@@ -1,4 +1,4 @@
-import { forkJoin as observableForkJoin, Observable } from 'rxjs';
+import { trigger } from '@angular/animations';
 import {
     Component,
     ContentChild,
@@ -8,6 +8,9 @@ import {
     Output,
     TemplateRef,
 } from '@angular/core';
+import { Router } from '@angular/router';
+import { forkJoin as observableForkJoin, Observable } from 'rxjs';
+import { BridgeService } from '../../core-bridge-module/bridge.service';
 import {
     CollectionReference,
     ConfigurationService,
@@ -17,33 +20,25 @@ import {
     NodeVersions,
     NodeWrapper,
     RestCollectionService,
-    RestConnectorService,
     RestConstants,
     RestHelper,
     RestNodeService,
-    RestSearchService,
-    RestUsageService,
     Version,
 } from '../../core-module/core.module';
-import { TranslateService } from '@ngx-translate/core';
 import { Toast } from '../../core-ui-module/toast';
-import { trigger } from '@angular/animations';
 import {
-    ClipboardObject,
+    LocalEventsService,
     TemporaryStorageService,
     UIAnimation,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../core-ui-module/ui-helper';
-import { Router } from '@angular/router';
-import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { LinkData, NodeHelperService } from '../../core-ui-module/node-helper.service';
-import { ErrorProcessingService } from '../../core-ui-module/error.processing';
-import { BulkBehavior } from '../../features/mds/types/types';
-import { MainNavService } from 'src/app/main/navigation/main-nav.service';
-import { SimpleEditCloseEvent } from './simple-edit-dialog/simple-edit-dialog.component';
-import { CollectionProposalStatus, FeedbackV1Service, ProposalNode } from 'ngx-edu-sharing-api';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
+import { BulkBehavior } from '../../features/mds/types/types';
+import { SimpleEditCloseEvent } from './simple-edit-dialog/simple-edit-dialog.component';
+import { CollectionProposalStatus, ProposalNode } from 'ngx-edu-sharing-api';
+import { ErrorProcessingService } from 'src/app/core-ui-module/error.processing';
 
 export enum DialogType {
     SimpleEdit = 'SimpleEdit',
@@ -91,58 +86,6 @@ export class WorkspaceManagementDialogsComponent {
             isCancelable: true,
         });
     }
-    @Input() set nodeDelete(nodeDelete: Node[]) {
-        this._nodeDelete = nodeDelete;
-        if (nodeDelete == null) return;
-        this.nodeDeleteTitle =
-            'WORKSPACE.DELETE_TITLE' + (nodeDelete.length === 1 ? '_SINGLE' : '');
-        this.nodeDeleteMessage =
-            'WORKSPACE.DELETE_MESSAGE' + (nodeDelete.length === 1 ? '_SINGLE' : '');
-        this.nodeDeleteMessageParams = { name: RestHelper.getName(nodeDelete[0]) };
-        this.nodeDeleteButtons = DialogButton.getCancel(() => {
-            this._nodeDelete = null;
-        });
-        this.nodeDeleteButtons.push(
-            new DialogButton('YES_DELETE', { color: 'danger' }, () => {
-                this.deleteConfirmed(nodeDelete);
-            }),
-        );
-        if (nodeDelete.length === 1) {
-            if (nodeDelete[0].collection) {
-                this.nodeDeleteTitle = 'WORKSPACE.DELETE_TITLE_COLLECTION';
-                this.nodeDeleteMessage = 'WORKSPACE.DELETE_MESSAGE_COLLECTION';
-            } else if (this.nodeHelper.isNodePublishedCopy(nodeDelete[0])) {
-                this.nodeDeleteTitle = 'WORKSPACE.DELETE_TITLE_PUBLISHED_COPY';
-                this.nodeDeleteMessage = 'WORKSPACE.DELETE_MESSAGE_PUBLISHED_COPY';
-            } else if (nodeDelete[0].mediatype === 'folder-link') {
-                this.nodeDeleteTitle = 'WORKSPACE.DELETE_TITLE_FOLDER_LINK';
-                this.nodeDeleteMessage = 'WORKSPACE.DELETE_MESSAGE_FOLDER_LINK';
-            } else if (!nodeDelete[0].isDirectory) {
-                // check for usages and warn user
-                this.usageService
-                    .getNodeUsages(nodeDelete[0].ref.id, nodeDelete[0].ref.repo)
-                    .subscribe((usages) => {
-                        if (usages.usages.length > 0) {
-                            this.nodeDeleteMessage = 'WORKSPACE.DELETE_MESSAGE_SINGLE_USAGES';
-                            this.nodeDeleteMessageParams = {
-                                name: nodeDelete[0].name,
-                                usages: usages.usages.length,
-                            };
-                        }
-                    });
-            }
-        }
-        this.nodeDeleteBlock =
-            this.connector.getCurrentLogin()?.isAdmin &&
-            nodeDelete.every((n) => n.properties[RestConstants.CCM_PROP_REPLICATIONSOURCE] != null);
-        this.nodeDeleteBlockStatus = this.nodeDeleteBlock;
-    }
-    @Output() nodeDeleteChange = new EventEmitter();
-    @Output() onDelete = new EventEmitter<{
-        objects: Node[] | any;
-        error: boolean;
-        count: number;
-    }>();
     @Input() nodeWorkflow: Node[];
     @Output() nodeWorkflowChange = new EventEmitter();
     @Input() signupGroup: boolean;
@@ -183,15 +126,8 @@ export class WorkspaceManagementDialogsComponent {
         collection: Node;
         references: CollectionReference[];
     }>();
-    _nodeDelete: Node[];
     _nodeSimpleEdit: Node[];
     _nodeFromUpload = false;
-    nodeDeleteTitle: string;
-    nodeDeleteMessage: string;
-    nodeDeleteMessageParams: any;
-    nodeDeleteBlock: boolean;
-    nodeDeleteBlockStatus = true;
-    nodeDeleteButtons: DialogButton[];
     public editorPending = false;
     reopenSimpleEdit = false;
     private nodeLicenseOnUpload = false;
@@ -232,21 +168,16 @@ export class WorkspaceManagementDialogsComponent {
     }
     public constructor(
         private nodeService: RestNodeService,
-        private usageService: RestUsageService,
         private temporaryStorage: TemporaryStorageService,
         private collectionService: RestCollectionService,
-        private feedbackService: FeedbackV1Service,
-        private translate: TranslateService,
         private config: ConfigurationService,
-        private connector: RestConnectorService,
-        private searchService: RestSearchService,
-        private mainNavService: MainNavService,
         private toast: Toast,
         private errorProcessing: ErrorProcessingService,
         private nodeHelper: NodeHelperService,
         private bridge: BridgeService,
         private router: Router,
         private dialogs: DialogsService,
+        private localEvents: LocalEventsService,
     ) {}
     async openShareDialog(nodes: Node[]): Promise<void> {
         const dialogRef = await this.dialogs.openShareDialog({
@@ -266,7 +197,7 @@ export class WorkspaceManagementDialogsComponent {
             ),
         ).subscribe(
             (nodes: NodeWrapper[]) => {
-                this.onRefresh.emit(nodes.map((n) => n.node));
+                this.localEvents.nodesChanged.next(nodes.map((n) => n.node));
                 const previousNodes = originalNodes;
                 if (this.reopenSimpleEdit) {
                     this.reopenSimpleEdit = false;
@@ -283,77 +214,10 @@ export class WorkspaceManagementDialogsComponent {
         this.nodeWorkflow = null;
         this.nodeWorkflowChange.emit(null);
         if (nodes) {
-            this.onRefresh.emit(nodes);
+            this.localEvents.nodesChanged.emit(nodes);
         }
     }
-    private deleteConfirmed(nodes: Node[], position = 0, error = false): void {
-        if (position >= nodes.length) {
-            this.toast.closeModalDialog();
-            this._nodeDelete = null;
-            if (!error) {
-                this.toast.toast('WORKSPACE.TOAST.DELETE_FINISHED');
-            }
-            if (this.nodeDeleteBlockStatus) {
-                this.onRefresh.emit(nodes);
-            } else {
-                this.onDelete.emit({ objects: nodes, error: error, count: position });
-            }
-            return;
-        }
-        this.toast.showProgressDialog();
-        let callback;
-        if (this.nodeDeleteBlockStatus) {
-            const props: any = {};
-            props[RestConstants.CCM_PROP_IMPORT_BLOCKED] = [true];
-            callback = new Observable((observer) => {
-                this.nodeService
-                    .editNodeMetadataNewVersion(
-                        nodes[position].ref.id,
-                        RestConstants.COMMENT_BLOCKED_IMPORT,
-                        props,
-                    )
-                    .subscribe(({ node }) => {
-                        const permissions = new LocalPermissions();
-                        permissions.inherited = false;
-                        permissions.permissions = [];
-                        this.nodeService
-                            .setNodePermissions(node.ref.id, permissions)
-                            .subscribe(() => {
-                                observer.next(node);
-                                observer.complete();
-                            });
-                    });
-            });
-        } else {
-            callback = this.nodeService.deleteNode(nodes[position].ref.id);
-        }
-        callback.subscribe(
-            (node: Node) => {
-                if (node) {
-                    nodes[position] = node;
-                }
-                this.removeNodeFromClipboard(nodes[position]);
-                this.deleteConfirmed(nodes, position + 1, error);
-            },
-            (error: any) => {
-                this.toast.error(error);
-                this.deleteConfirmed(nodes, position + 1, true);
-            },
-        );
-    }
-    private removeNodeFromClipboard(node: Node) {
-        let clip = this.temporaryStorage.get('workspace_clipboard') as ClipboardObject;
-        if (clip == null) return;
 
-        for (let n of clip.nodes) {
-            if (n.ref.id == node.ref.id) {
-                clip.nodes.splice(clip.nodes.indexOf(n), 1);
-            }
-            if (clip.nodes.length == 0) {
-                this.temporaryStorage.remove('workspace_clipboard');
-            }
-        }
-    }
     public uploadDone(event: Node[]) {
         if (this.config.instant('licenseDialogOnUpload', false)) {
             void this.openLicenseDialog(event);
@@ -364,9 +228,7 @@ export class WorkspaceManagementDialogsComponent {
         this.filesToUpload = null;
         this.filesToUploadChange.emit(null);
     }
-    public refresh() {
-        this.onRefresh.emit();
-    }
+
     public uploadFile(event: FileList) {
         this.onUploadFileSelected.emit(event);
     }
@@ -410,7 +272,7 @@ export class WorkspaceManagementDialogsComponent {
             }
             this.nodeLicenseOnUpload = false;
             if (updatedNodes) {
-                this.onRefresh.emit(updatedNodes);
+                this.localEvents.nodesChanged.emit(updatedNodes);
             }
         });
     }
@@ -453,7 +315,7 @@ export class WorkspaceManagementDialogsComponent {
             this.nodeSidebar = updatedNodes[0];
         }
         if (refresh) {
-            this.onRefresh.emit(updatedNodes);
+            this.localEvents.nodesChanged.emit(updatedNodes);
         }
     }
 
@@ -596,13 +458,13 @@ export class WorkspaceManagementDialogsComponent {
             .subscribe(
                 (data: NodeVersions) => {
                     this.toast.closeModalDialog();
-                    this.refresh();
                     this.closeSidebar();
                     // @TODO type is not compatible
                     this.nodeService
                         .getNodeMetadata(version.version.node.id, [RestConstants.ALL])
                         .subscribe(
                             (node) => {
+                                this.localEvents.nodesChanged.emit([node.node]);
                                 this.nodeSidebar = node.node;
                                 this.nodeSidebarChange.emit(node.node);
                                 this.toast.toast('WORKSPACE.REVERTED_VERSION');
@@ -642,7 +504,7 @@ export class WorkspaceManagementDialogsComponent {
             }
         }
         if (event.nodes) {
-            this.onRefresh.emit(event.nodes);
+            this.localEvents.nodesChanged.emit(event.nodes);
         }
         this._nodeSimpleEdit = null;
         this.nodeSimpleEditChange.emit(null);
@@ -676,7 +538,7 @@ export class WorkspaceManagementDialogsComponent {
             }),
         ).subscribe((results: Node[]) => {
             this.toast.closeModalDialog();
-            this.onRefresh.emit(results);
+            this.localEvents.nodesChanged.emit(results);
         });
     }
 
@@ -695,7 +557,7 @@ export class WorkspaceManagementDialogsComponent {
             )
             .then(() => {
                 this.toast.toast('COLLECTIONS.PROPOSALS.TOAST.DECLINED');
-                this.onDelete.emit({ objects: nodes, error: false, count: nodes.length });
+                this.localEvents.nodesDeleted.emit(nodes);
             });
     }
 
@@ -727,8 +589,7 @@ export class WorkspaceManagementDialogsComponent {
                     )
                     .then((results) => {
                         this.toast.toast('COLLECTIONS.PROPOSALS.TOAST.ACCEPTED');
-                        this.onDelete.emit({ objects: nodes, error: false, count: nodes.length });
-                        this.onRefresh.emit();
+                        this.localEvents.nodesDeleted.emit(nodes);
                         this.onEvent.emit({
                             event: ManagementEventType.AddCollectionNodes,
                             data: {

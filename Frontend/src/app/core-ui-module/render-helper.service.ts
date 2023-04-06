@@ -1,7 +1,7 @@
 import { ComponentFactoryResolver, Injectable, ViewContainerRef } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Node } from '../core-module/rest/data-object';
+import { EventType, Node } from '../core-module/rest/data-object';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { RestUsageService } from '../core-module/rest/services/rest-usage.service';
 import { CommentsListComponent } from '../modules/management-dialogs/node-comments/comments-list/comments-list.component';
@@ -19,6 +19,8 @@ import { UIHelper } from './ui-helper';
 import { MdsNodeRelationsWidgetComponent } from '../common/ui/node-render/node-relations/node-relations-widget.component';
 import { replaceElementWithDiv } from '../features/mds/mds-editor/util/replace-element-with-div';
 import { MdsEditorWrapperComponent } from '../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { RestTrackingService } from '../core-module/rest/services/rest-tracking.service';
+import { VideoControlsComponent } from './components/video-controls/video-controls.component';
 
 @Injectable()
 export class RenderHelperService {
@@ -32,6 +34,7 @@ export class RenderHelperService {
         private componentFactoryResolver: ComponentFactoryResolver,
         private usageApi: RestUsageService,
         private optionsHelperService: OptionsHelperDataService,
+        private tracking: RestTrackingService,
     ) {}
 
     setViewContainerRef(viewContainerRef: ViewContainerRef) {
@@ -210,6 +213,42 @@ export class RenderHelperService {
         this.injectNodeRelationsWidget(node);
         this.injectModuleComments(node);
         this.applyActionButtons(node);
+        this.injectVideoControls(node);
+    }
+
+    injectVideoControls(node: Node) {
+        let videoElement: HTMLVideoElement;
+        let target: Element;
+        try {
+            videoElement = document.querySelector('.edusharing_rendering_content_wrapper video');
+            if (!videoElement) {
+                throw new Error();
+            }
+            const listener = () => {
+                this.tracking
+                    .trackEvent(EventType.VIEW_MATERIAL_PLAY_MEDIA, node.ref.id)
+                    .subscribe(() => {});
+                videoElement.removeEventListener('play', listener);
+            };
+            videoElement.addEventListener('play', listener);
+            target = document.createElement('div');
+            videoElement.parentElement.appendChild(target);
+        } catch (e) {
+            // console.log("did not find video element, skipping controls",e);
+            setTimeout(() => this.injectVideoControls(node), 1000 / 30);
+            return;
+        }
+        const data = {
+            video: videoElement,
+            node,
+        };
+        UIHelper.injectAngularComponent(
+            this.componentFactoryResolver,
+            this.viewContainerRef,
+            VideoControlsComponent,
+            target,
+            data,
+        );
     }
 
     /**

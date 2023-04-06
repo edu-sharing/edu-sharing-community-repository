@@ -157,6 +157,7 @@ import { environment } from '../../environments/environment';
         MatInputModule,
         MatMenuModule,
         MatOptionModule,
+        MatProgressSpinnerModule,
         MatRadioModule,
         MatRippleModule,
         MatSelectModule,

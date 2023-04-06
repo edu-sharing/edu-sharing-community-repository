@@ -136,7 +136,6 @@ export class NodeDataSourceRemote<
     }
 
     appendData(appendData: T[], location: 'before' | 'after' = 'after') {
-        // TODO: handle pagination
         let data = this.dataStream.value;
         if (location === 'after') {
             data = data.concat(appendData);
@@ -144,10 +143,17 @@ export class NodeDataSourceRemote<
             data = appendData.concat(data);
         }
         this.dataStream.next(data);
+        this._paginationHandler.length += appendData.length;
+        this._cache.clear();
     }
 
     removeData(data: T[]): void {
-        throw new Error('not implemented');
+        const currentData = this.dataStream.value;
+        const deleteCount = currentData.filter((entry) => data.includes(entry)).length;
+        const updatedData = currentData.filter((entry) => !data.includes(entry));
+        this.dataStream.next(updatedData);
+        this._paginationHandler.length -= deleteCount;
+        this._cache.clear();
     }
 
     registerQueryParameters(route: ActivatedRoute): void {

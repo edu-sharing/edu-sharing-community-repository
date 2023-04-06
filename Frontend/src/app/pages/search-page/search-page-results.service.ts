@@ -35,6 +35,7 @@ import { RestConstants } from '../../core-module/rest/rest-constants';
 export interface SearchPageResults {
     totalResults?: Observable<number>;
     loadingProgress: Observable<number>;
+    addNodes: (nodes: Node[]) => void;
 }
 
 @Injectable()
@@ -69,6 +70,10 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
     ngOnDestroy(): void {
         this._destroyed.next();
         this._destroyed.complete();
+    }
+
+    addNodes(nodes: Node[]): void {
+        this.resultsDataSource.appendData(nodes, 'before');
     }
 
     private _registerPageRestore() {

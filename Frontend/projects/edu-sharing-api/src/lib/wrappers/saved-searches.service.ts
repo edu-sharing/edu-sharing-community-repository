@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { map, startWith, switchMap, take, tap } from 'rxjs/operators';
-import { Node } from '../api/models';
+import { MdsQueryCriteria, Node } from '../api/models';
 import { SearchV1Service } from '../api/services';
+import { CONTENT_TYPE_ALL, DEFAULT, HOME_REPOSITORY, PROPERTY_FILTER_ALL } from '../constants';
+import { Sort } from '../models';
 import { switchReplay } from '../utils/rxjs-operators/switch-replay';
 import { RawValuesDict } from './mds-label.service';
 import { NodeService } from './node.service';
@@ -28,14 +30,16 @@ export interface SavedSearch {
     providedIn: 'root',
 })
 export class SavedSearchesService {
-    private readonly updateSavedSearchesTrigger = new Subject<void>();
-    private readonly savedSearches = this.getSavedSearches();
+    private readonly updateMySavedSearchesTrigger = new Subject<void>();
+    private readonly mySavedSearches = this.getMySavedSearchesObservable();
 
     constructor(
         private search: SearchService,
         private node: NodeService,
         private searchV1: SearchV1Service,
-    ) {}
+    ) {
+        node.nodesChanged.subscribe(() => this.updateMySavedSearchesTrigger.next());
+    }
 
     /**
      * Saves the most recent search that was requested via `search`.
@@ -55,9 +59,9 @@ export class SavedSearchesService {
                 body: searchParams.body.criteria,
             })
             .pipe(
-                tap(() => this.updateSavedSearchesTrigger.next()),
+                tap(() => this.updateMySavedSearchesTrigger.next()),
                 switchMap(({ node }) =>
-                    this.savedSearches.pipe(
+                    this.mySavedSearches.pipe(
                         take(1),
                         map(
                             (savedSearches) =>
@@ -68,16 +72,109 @@ export class SavedSearchesService {
             );
     }
 
-    observeSavedSearches(): Observable<SavedSearch[]> {
-        // TODO: Shared saved searches.
-        // See https://scm.edu-sharing.com/edu-sharing/community/repository/edu-sharing-community-repository/-/blob/f150529668d32155486687766a703978952a3609/Frontend/src/app/modules/search/search.component.ts#L1411-1422
-        //
-        // TODO: Trigger update when saved-search nodes are edited / deleted.
-        return this.savedSearches;
+    observeMySavedSearches(): Observable<SavedSearch[]> {
+        return this.mySavedSearches;
     }
 
-    private getSavedSearches(): Observable<SavedSearch[]> {
-        return this.updateSavedSearchesTrigger.pipe(
+    /**
+     * Fetches the saved searches of the current user from the backend.
+     *
+     * For paginated access.
+     *
+     * Returns the raw node objects.
+     */
+    getMySavedSearchesNodes({
+        startIndex,
+        endIndex,
+    }: {
+        startIndex: number;
+        endIndex: number;
+    }): Observable<{
+        data: Node[];
+        total: number;
+    }> {
+        // Since results have to be filtered for `CCM_TYPE_SAVED_SEARCH`, we cannot send paginated
+        // requests. So we fetch all results and simulate pagination here.
+        //
+        // FIXME: Can we filter for `CCM_TYPE_SAVED_SEARCH` in the backend?
+        return this.observeMySavedSearches().pipe(
+            take(1),
+            map((savedSearches) => ({
+                data: savedSearches.slice(startIndex, endIndex).map(({ node }) => node),
+                total: savedSearches.length,
+            })),
+        );
+    }
+
+    /**
+     * Fetches all saved searches that the current user has access to from the backend.
+     *
+     * For paginated access.
+     *
+     * Returns the raw node objects.
+     */
+    getSharedSavedSearchesNodes({
+        searchString,
+        startIndex,
+        endIndex,
+    }: // sort,
+    {
+        searchString?: string;
+        startIndex: number;
+        endIndex: number;
+        // sort?: Sort;
+    }): Observable<{
+        data: Node[];
+        total: number;
+    }> {
+        const criteria: MdsQueryCriteria[] = [];
+        if (searchString) {
+            criteria.push({ property: PRIMARY_SEARCH_CRITERIA, values: [searchString] });
+        }
+        return this.search
+            .requestSearch({
+                repository: HOME_REPOSITORY,
+                query: 'saved_search',
+                metadataset: DEFAULT,
+                contentType: CONTENT_TYPE_ALL,
+                propertyFilter: [PROPERTY_FILTER_ALL],
+                skipCount: startIndex,
+                maxItems: endIndex - startIndex,
+                sortProperties: [LOM_PROP_TITLE],
+                sortAscending: [true],
+                // ...getSortParameters(sort),
+                body: {
+                    criteria,
+                },
+            })
+            .pipe(map(({ nodes, pagination }) => ({ data: nodes, total: pagination.total })));
+    }
+
+    /**
+     * Converts a raw saved-search node object into a `SavedSearch` object.
+     */
+    savedSearchNodeToSavedSearch(node: Node): SavedSearch {
+        const properties = node.properties!;
+        const criteria = JSON.parse(properties[CCM_PROP_SAVED_SEARCH_PARAMETERS][0]);
+        const values = this.search['criteriaToRawValues'](criteria);
+        const { [PRIMARY_SEARCH_CRITERIA]: searchValue, ...filters } = values;
+        return {
+            title: properties['cclom:title'][0],
+            repository: properties['ccm:saved_search_repository'][0],
+            metadataSet: properties['ccm:saved_search_mds'][0],
+            searchString: searchValue && searchValue[0] !== '*' ? searchValue[0] : null,
+            filters,
+            node,
+        };
+    }
+
+    /**
+     * Constructs an observable, that fetches the user's saved searches from the backend.
+     *
+     * The observable updates whenever `updateMySavedSearchesTrigger` fires.
+     */
+    private getMySavedSearchesObservable(): Observable<SavedSearch[]> {
+        return this.updateMySavedSearchesTrigger.pipe(
             startWith(void 0 as void),
             switchReplay(() =>
                 this.node
@@ -96,19 +193,15 @@ export class SavedSearchesService {
             ),
         );
     }
+}
 
-    private savedSearchNodeToSavedSearch(node: Node): SavedSearch {
-        const properties = node.properties!;
-        const criteria = JSON.parse(properties[CCM_PROP_SAVED_SEARCH_PARAMETERS][0]);
-        const values = this.search['criteriaToRawValues'](criteria);
-        const { [PRIMARY_SEARCH_CRITERIA]: searchValue, ...filters } = values;
+function getSortParameters(sort: Sort) {
+    if (!sort?.active || !sort?.direction) {
         return {
-            title: properties['cclom:title'][0],
-            repository: properties['ccm:saved_search_repository'][0],
-            metadataSet: properties['ccm:saved_search_mds'][0],
-            searchString: searchValue && searchValue[0] !== '*' ? searchValue[0] : null,
-            filters,
-            node,
+            sortProperties: [sort.active],
+            sortAscending: [sort.direction === 'asc'],
         };
+    } else {
+        return {};
     }
 }

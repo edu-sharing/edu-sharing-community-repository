@@ -40,7 +40,6 @@ export class SearchPageComponent implements OnInit, OnDestroy {
     @ViewChild('filtersDialogResetButton', { static: true })
     filtersDialogResetButton: TemplateRef<HTMLElement>;
     @ViewChild('filtersDialogContent', { static: true }) filtersDialogContent: TemplateRef<unknown>;
-    @ViewChild('nodeEntriesResults') nodeEntriesResults: NodeEntriesWrapperComponent<Node>;
 
     @HostBinding('class.has-tab-bar') tabBarIsVisible: boolean = null;
     progressBarIsVisible = false;
@@ -160,7 +159,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
             title: 'SEARCH.TITLE',
             currentScope: 'search',
             canOpen: true,
-            onCreate: (nodes) => this.nodeEntriesResults.addVirtualNodes(nodes),
+            onCreate: (nodes) => this.searchPage.results.addNodes(nodes),
         });
         const activeRepositoryIsHome: Observable<boolean> = rxjs
             .combineLatest([this.availableRepositories, this.activeRepository.observeValue()])

@@ -24,7 +24,7 @@ import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { NodeRelationsDialogData, NodeRelationsDialogResult } from './node-relations-dialog-data';
-import { ListItem, NodesRightMode, OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
+import { ListItem, LocalEventsService, NodesRightMode, OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-node-relations-dialog',
@@ -60,13 +60,14 @@ export class NodeRelationsDialogComponent implements OnInit {
     constructor(
         @Inject(CARD_DIALOG_DATA) public data: NodeRelationsDialogData,
         private dialogRef: CardDialogRef<NodeRelationsDialogData, NodeRelationsDialogResult>,
-        private relationService: RelationService,
-        private nodeHelper: NodeHelperService,
-        private nodeService: NodeService,
-        private userService: UserService,
-        private toast: Toast,
         private bridgeService: BridgeService,
         private cdr: ChangeDetectorRef,
+        private localEvents: LocalEventsService,
+        private nodeHelper: NodeHelperService,
+        private nodeService: NodeService,
+        private relationService: RelationService,
+        private toast: Toast,
+        private userService: UserService,
     ) {
         this.dialogRef.patchState({ isLoading: true });
     }
@@ -164,6 +165,7 @@ export class NodeRelationsDialogComponent implements OnInit {
                 }),
             ).toPromise();
             this.dialogRef.close(true);
+            this.localEvents.nodesChanged.emit([this.data.node]);
         } catch (e) {}
         this.toast.closeModalDialog();
     }

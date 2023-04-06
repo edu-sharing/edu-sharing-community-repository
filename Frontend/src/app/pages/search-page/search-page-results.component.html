@@ -23,7 +23,10 @@
   <ng-template #title>
     <div class="title-container">
       <h2 class="mat-heading-2">
-        {{ 'SEARCH.COLLECTIONS' | translate }} ({{ collectionsDataSource.getTotal() }})
+        {{ 'SEARCH.COLLECTIONS' | translate }}
+        <ng-container *ngIf="!collectionsDataSource.isLoading; else smallLoadingSpinner">
+          ({{ collectionsDataSource.getTotal() }})
+        </ng-container>
       </h2>
     </div>
   </ng-template>
@@ -43,10 +46,22 @@
     <div class="title-container">
       <h2 class="mat-heading-2">
         {{ 'SEARCH.MATERIALS' | translate }}
-        <ng-container *ngIf="!resultsDataSource.isEmpty()">
-          ({{ resultsDataSource.getTotal() }})
+        <ng-container *ngIf="!resultsDataSource.isLoading; else smallLoadingSpinner">
+          <ng-container *ngIf="!resultsDataSource.isEmpty()">
+            ({{ resultsDataSource.getTotal() }})
+          </ng-container>
         </ng-container>
       </h2>
+      <button
+        *ngIf="nodeEntriesResults.getSelection().isEmpty()"
+        mat-button
+        class="filters-button"
+        [attr.aria-label]="'SEARCH.FILTERS' | translate"
+        (click)="toggleFilters()"
+      >
+        <i esIcon="filter_list"></i>
+        <span>{{ 'SEARCH.FILTERS' | translate }}</span>
+      </button>
       <es-actionbar *ngIf="!addToCollectionMode.value"></es-actionbar>
     </div>
   </ng-template>
@@ -57,3 +72,7 @@
     </div>
   </ng-template>
 </es-node-entries-wrapper>
+
+<ng-template #smallLoadingSpinner>
+  <mat-spinner diameter="24" class="small-progress-spinner"></mat-spinner>
+</ng-template>

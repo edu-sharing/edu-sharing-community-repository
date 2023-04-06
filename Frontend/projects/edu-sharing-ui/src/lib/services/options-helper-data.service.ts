@@ -14,6 +14,8 @@ import { fromEvent, Subject, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { matchesShortcutCondition } from '../types/keyboard-shortcuts';
 import { KeyboardShortcutsService } from './abstract/keyboard-shortcuts.service';
+import { ActivatedRoute } from '@angular/router';
+import { LocalEventsService } from './local-events.service';
 
 type DeleteEvent = {
     objects: Node[] | any;
@@ -53,13 +55,25 @@ export class OptionsHelperDataService implements OnDestroy {
 
     constructor(
         private ngZone: NgZone,
+        private route: ActivatedRoute,
+        private localEvents: LocalEventsService,
         private authenticationService: AuthenticationService,
         private userService: UserService,
         private networkService: NetworkService,
         @Optional() private keyboardShortcutsService: KeyboardShortcutsService,
         @Optional() private optionsHelperService: OptionsHelperService,
-    ) {}
-
+    ) {
+        this.registerStaticSubscriptions();
+    }
+    /** Performs subscriptions that don't have to be refreshed. */
+    private registerStaticSubscriptions(): void {
+        this.localEvents.nodesDeleted
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((nodes) => this.components.list?.deleteNodes(nodes));
+        this.localEvents.nodesChanged
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((nodes) => this.components.list?.updateNodes(nodes));
+    }
     ngOnDestroy(): void {
         this.destroyed.next();
         this.destroyed.complete();

@@ -26,6 +26,7 @@ import { ListItem } from 'ngx-edu-sharing-ui';
 interface RepoData {
     title: string;
     id: string;
+    isHome: boolean;
     dataSource: NodeDataSourceRemote;
     columns: Observable<ListItem[]>;
     loadingParams: Observable<boolean>;
@@ -55,6 +56,11 @@ export class SearchPageResultsAllService implements SearchPageResults, OnDestroy
     ngOnDestroy(): void {
         this._destroyed.next();
         this._destroyed.complete();
+    }
+
+    addNodes(nodes: Node[]): void {
+        const homeRepoData = this.repoData.value.find(({ isHome }) => isHome);
+        homeRepoData?.dataSource.appendData(nodes, 'before');
     }
 
     private _initRepoData() {
@@ -88,6 +94,7 @@ export class SearchPageResultsAllService implements SearchPageResults, OnDestroy
         return {
             title: repository.title,
             id: repository.id,
+            isHome: repository.isHomeRepo,
             dataSource,
             columns,
             loadingParams,

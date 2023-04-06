@@ -16,6 +16,7 @@ import {
     DragData,
     DropdownComponent,
     DropSource,
+    LocalEventsService,
     OptionItem,
     OptionsHelperDataService,
     Scope,
@@ -43,11 +44,6 @@ export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
     dropdownLeft: string;
     dropdownTop: string;
 
-    @Input() set reload(reload: Boolean) {
-        if (reload) {
-            this.refresh();
-        }
-    }
     private _currentPath: string[] = [];
     /** Parent hierarchy of the currently selected node. */
     @Input()
@@ -89,12 +85,18 @@ export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
     constructor(
         private nodeApi: RestNodeService,
         private optionsService: OptionsHelperDataService,
+        private localEvents: LocalEventsService,
     ) {}
 
     ngOnInit(): void {
-        rxjs.merge(this.optionsService.nodesChanged, this.optionsService.nodesDeleted)
+        rxjs.merge(this.localEvents.nodesChanged, this.localEvents.nodesDeleted)
             .pipe(takeUntil(this.destroyed))
-            .subscribe(() => this.refresh());
+            .subscribe((nodes) => {
+                const nodeIds = this._nodes.map((node) => node.ref.id);
+                if (nodes.some((node) => nodeIds.includes(node.ref.id))) {
+                    this.refresh();
+                }
+            });
     }
 
     /**

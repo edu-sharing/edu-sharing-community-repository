@@ -1,9 +1,10 @@
 import { AfterViewInit, Component, Inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { delay, filter, first, map } from 'rxjs/operators';
-import { DialogButton } from '../../../../core-module/core.module';
+import { DialogButton, Node } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
 import { JumpMark } from '../../../../services/jump-marks.service';
+import { LocalEventsService } from 'ngx-edu-sharing-ui';
 import { MdsEditorCoreComponent } from '../../../mds/mds-editor/mds-editor-core/mds-editor-core.component';
 import { MdsEditorInstanceService } from '../../../mds/mds-editor/mds-editor-instance.service';
 import { EditorType } from '../../../mds/types/types';
@@ -36,6 +37,7 @@ export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
         @Inject(CARD_DIALOG_DATA) public data: MdsEditorDialogData,
         private dialogRef: CardDialogRef<MdsEditorDialogData, MdsEditorDialogResult>,
         private mdsEditorInstance: MdsEditorInstanceService,
+        private localEvents: LocalEventsService,
         private toast: Toast,
     ) {
         this.dialogRef.patchState({ isLoading: true });
@@ -147,6 +149,9 @@ export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
             const updatedNodesOrValues = await this.mdsEditorInstance.save();
             this.toast.toast('WORKSPACE.EDITOR.UPDATED');
             this.dialogRef.close(updatedNodesOrValues);
+            if (hasNodes(this.data)) {
+                this.localEvents.nodesChanged.emit(updatedNodesOrValues as Node[]);
+            }
         } else {
             // No changes, behave like close.
             if (this.mdsEditorInstance.getIsValid()) {

@@ -42,6 +42,7 @@ export * from './lib/services/abstract/app.service';
 export * from './lib/services/abstract/options-helper.service';
 export * from './lib/services/abstract/keyboard-shortcuts.service';
 export * from './lib/services/abstract/toast.service';
+export * from './lib/services/local-events.service';
 export * from './lib/services/ui.service';
 export * from './lib/services/accessibility.service';
 export * from './lib/services/nodes-drag-drop.service';

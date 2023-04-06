@@ -6,7 +6,7 @@ import {
     RestConstants,
     RestNodeService,
 } from '../../../../core-module/core.module';
-import { VCard } from 'ngx-edu-sharing-ui';
+import { LocalEventsService, VCard } from 'ngx-edu-sharing-ui';
 import { Toast } from '../../../../core-ui-module/toast';
 import {
     CARD_DIALOG_DATA,
@@ -40,9 +40,10 @@ export class ContributorsDialogComponent implements OnInit {
     constructor(
         @Inject(CARD_DIALOG_DATA) public data: ContributorsDialogData,
         private dialogRef: CardDialogRef<ContributorsDialogData, ContributorsDialogResult>,
+        private dialogs: DialogsService,
+        private localEvents: LocalEventsService,
         private nodeService: RestNodeService,
         private toast: Toast,
-        private dialogs: DialogsService,
     ) {}
 
     ngOnInit(): void {
@@ -184,6 +185,7 @@ export class ContributorsDialogComponent implements OnInit {
                 ({ node }) => {
                     this.dialogRef.close(node);
                     this.toast.toast('WORKSPACE.TOAST.CONTRIBUTOR_UPDATED');
+                    this.localEvents.nodesChanged.emit([node]);
                 },
                 (error: any) => {
                     this.toast.error(error);

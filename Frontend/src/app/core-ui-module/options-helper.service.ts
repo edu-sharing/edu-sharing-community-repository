@@ -1,5 +1,3 @@
-import { PlatformLocation } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { EventEmitter, Injectable, NgZone, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -12,7 +10,7 @@ import {
     Subscription,
 } from 'rxjs';
 import { isArray } from 'rxjs/internal/util/isArray';
-import { takeUntil } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
 import { BridgeService } from '../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
@@ -46,6 +44,7 @@ import {
     DefaultGroups,
     ElementType,
     HideMode,
+    LocalEventsService,
     NodeEntriesDisplayType,
     NodesRightMode,
     OptionData,
@@ -60,12 +59,7 @@ import { ProposalNode } from 'ngx-edu-sharing-api';
 import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
 import { Toast } from './toast';
 import { UIHelper } from './ui-helper';
-
-type DeleteEvent = {
-    objects: Node[] | any;
-    count: number;
-    error: boolean;
-};
+import { forkJoinWithErrors } from '../util/rxjs/forkJoinWithErrors';
 
 @Injectable()
 export class OptionsHelperService extends OptionsHelperServiceAbstract implements OnDestroy {
@@ -78,8 +72,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     static ElementTypesAddToCollection = [ElementType.Node, ElementType.NodePublishedCopy];
 
     readonly virtualNodesAdded = new EventEmitter<Node[]>();
-    readonly nodesChanged = new EventEmitter<Node[] | void>();
-    readonly nodesDeleted = new EventEmitter<DeleteEvent>();
     readonly displayTypeChanged = new EventEmitter<NodeEntriesDisplayType>();
 
     private keyboardShortcutsSubscription: Subscription;
@@ -97,11 +89,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         private nodeHelper: NodeHelperService,
         private route: ActivatedRoute,
         private eventService: FrameEventsService,
-        private http: HttpClient,
         private uiService: UIService,
         private toast: Toast,
         private translate: TranslateService,
-        private platformLocation: PlatformLocation,
         private nodeService: RestNodeService,
         private collectionService: RestCollectionService,
         private configService: ConfigurationService,
@@ -112,6 +102,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         private dialogs: DialogsService,
         private keyboardShortcuts: KeyboardShortcutsService,
         private ngZone: NgZone,
+        private localEvents: LocalEventsService,
     ) {
         super();
         this.route.queryParams.subscribe((queryParams) => (this.queryParams = queryParams));
@@ -218,23 +209,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             this.subscriptions.forEach((s) => s.unsubscribe());
             this.subscriptions = [];
         }
-        if (this.mainNavService.getMainNav()) {
-            this.subscriptions.push(
-                this.mainNavService
-                    .getDialogs()
-                    .onRefresh.subscribe((nodes: void | Node[]) =>
-                        this.onNodesChanged(components, nodes ? nodes : undefined),
-                    ),
-            );
-            this.subscriptions.push(
-                this.mainNavService
-                    .getDialogs()
-                    ?.onDelete?.subscribe(
-                        (result: { objects: any; count: number; error: boolean }) =>
-                            this.deleteNodes(components, result),
-                    ),
-            );
-        }
 
         this.globalOptions = this.getAvailableOptions(Target.Actionbar, [], components, data);
         if (components.list) {
@@ -258,13 +232,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         }
         if (components.actionbar) {
             components.actionbar.options = this.globalOptions;
-        }
-    }
-
-    private onNodesChanged(components: OptionsHelperComponents, nodes?: Node[]): void {
-        this.nodesChanged.emit(nodes);
-        if (components.list) {
-            components.list.updateNodes(nodes);
         }
     }
 
@@ -882,14 +849,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         streamNode.customShowCallback = (objects) =>
             this.configService.instant('stream.enabled', false);
 
-        const licenseNode = new OptionItem('OPTIONS.LICENSE', 'copyright', async (object) => {
+        const licenseNode = new OptionItem('OPTIONS.LICENSE', 'copyright', (object) => {
             const nodes = this.getObjects(object, data);
-            const dialogRef = await this.dialogs.openLicenseDialog({ kind: 'nodes', nodes });
-            dialogRef.afterClosed().subscribe((result: Node[] | null) => {
-                if (result) {
-                    this.onNodesChanged(components, result);
-                }
-            });
+            void this.dialogs.openLicenseDialog({ kind: 'nodes', nodes });
         });
         licenseNode.elementType = [ElementType.Node, ElementType.NodeChild];
         licenseNode.constrains = [
@@ -905,14 +867,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         licenseNode.group = DefaultGroups.Edit;
         licenseNode.priority = 30;
 
-        const contributorNode = new OptionItem('OPTIONS.CONTRIBUTOR', 'group', async (object) => {
-            const dialogRef = await this.dialogs.openContributorsDialog({
+        const contributorNode = new OptionItem('OPTIONS.CONTRIBUTOR', 'group', (object) => {
+            void this.dialogs.openContributorsDialog({
                 node: this.getObjects(object, data)[0],
-            });
-            dialogRef.afterClosed().subscribe((updatedNode) => {
-                if (updatedNode) {
-                    this.onNodesChanged(components, [updatedNode]);
-                }
             });
         });
         contributorNode.constrains = [
@@ -1035,12 +992,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
 
         const editNode = new OptionItem('OPTIONS.EDIT', 'edit', async (object) => {
             const nodes = await this.getObjectsAsync(object, data, true);
-            const dialogRef = await this.dialogs.openMdsEditorDialogForNodes({ nodes });
-            dialogRef.afterClosed().subscribe((result) => {
-                if (result) {
-                    this.onNodesChanged(components, result);
-                }
-            });
+            void this.dialogs.openMdsEditorDialogForNodes({ nodes });
         });
         editNode.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.MapRef];
         editNode.constrains = [
@@ -1145,7 +1097,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         pasteNodes.group = DefaultGroups.FileOperations;
 
         const deleteNode = new OptionItem('OPTIONS.DELETE', 'delete', (object) => {
-            management.nodeDelete = this.getObjects(object, data);
+            void this.dialogs.openDeleteNodesDialog({ nodes: this.getObjects(object, data) });
         });
         deleteNode.elementType = [ElementType.Node, ElementType.SavedSearch, ElementType.MapRef];
         deleteNode.constrains = [
@@ -1176,7 +1128,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         unblockNode.priority = 10;
 
         const unpublishNode = new OptionItem('OPTIONS.UNPUBLISH', 'cloud_off', (object) => {
-            management.nodeDelete = this.getObjects(object, data);
+            void this.dialogs.openDeleteNodesDialog({ nodes: this.getObjects(object, data) });
         });
         unpublishNode.elementType = [ElementType.NodePublishedCopy];
         unpublishNode.constrains = [
@@ -1246,12 +1198,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
 
         const relationNode = new OptionItem('OPTIONS.RELATIONS', 'swap_horiz', async (node) => {
             const nodes = await this.getObjectsAsync(node, data, true);
-            const dialogRef = await this.dialogs.openNodeRelationsDialog({ node: nodes[0] });
-            dialogRef.afterClosed().subscribe((wasUpdated) => {
-                if (wasUpdated) {
-                    this.onNodesChanged(components);
-                }
-            });
+            void this.dialogs.openNodeRelationsDialog({ node: nodes[0] });
         });
         relationNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         relationNode.constrains = [Constrain.NoBulk, Constrain.User];
@@ -1815,27 +1762,22 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         components: OptionsHelperComponents,
         data: OptionData,
     ) {
-        observableForkJoin(
+        forkJoinWithErrors(
             nodes.map((node: Node) =>
-                this.collectionService.removeFromCollection(node.ref.id, data.parent.ref.id),
+                this.collectionService
+                    .removeFromCollection(node.ref.id, data.parent.ref.id)
+                    .pipe(map(() => node)),
             ),
-        ).subscribe(
-            () => {
-                this.deleteNodes(components, { objects: nodes, error: false, count: nodes.length });
+        ).subscribe(({ successes: deletedNodes, errors }) => {
+            if (errors.length > 0) {
+                this.toast.error(errors[0]);
+            } else {
                 this.toast.toast('COLLECTIONS.REMOVED_FROM_COLLECTION');
-            },
-            (error) => {
-                this.deleteNodes(components, { objects: nodes, error: true, count: nodes.length });
-                this.toast.error(error);
-            },
-        );
-    }
-
-    private deleteNodes(components: OptionsHelperComponents, event: DeleteEvent) {
-        this.nodesDeleted.emit(event);
-        if (components?.list && !event.error) {
-            components.list.deleteNodes(event.objects);
-        }
+            }
+            if (deletedNodes.length > 0) {
+                this.localEvents.nodesDeleted.emit(deletedNodes);
+            }
+        });
     }
 
     private editCollection(object: Node | any) {

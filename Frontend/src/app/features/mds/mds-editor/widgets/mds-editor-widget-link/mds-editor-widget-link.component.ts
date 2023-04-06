@@ -1,16 +1,13 @@
-import { Component, OnInit, Input, NgZone } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
-import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import { MdsEditorWidgetAuthorComponent } from '../mds-editor-widget-author/mds-editor-widget-author.component';
-import { Constraints, NativeWidgetType } from '../../../types/types';
-import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
-import { RestConnectorService } from '../../../../../core-module/rest/services/rest-connector.service';
-import { DomSanitizer } from '@angular/platform-browser';
+import { Component, Input, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
-import { MainNavService } from '../../../../../main/navigation/main-nav.service';
+import { BehaviorSubject } from 'rxjs';
+import { LocalEventsService } from 'ngx-edu-sharing-ui';
 import { DialogsService } from '../../../../dialogs/dialogs.service';
+import { Constraints, NativeWidgetType } from '../../../types/types';
+import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
+import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
+import { MdsEditorWidgetAuthorComponent } from '../mds-editor-widget-author/mds-editor-widget-author.component';
+import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
     selector: 'es-mds-editor-widget-link',
@@ -35,11 +32,10 @@ export class MdsEditorWidgetLinkComponent
     linkLabel: string;
 
     constructor(
-        private connector: RestConnectorService,
-        private mainnav: MainNavService,
         public translate: TranslateService,
         public mdsEditorValues: MdsEditorInstanceService,
         private dialogs: DialogsService,
+        private localEvents: LocalEventsService,
     ) {
         super(mdsEditorValues, translate);
     }
@@ -58,7 +54,7 @@ export class MdsEditorWidgetLinkComponent
         if (this.widgetName === 'maptemplate') {
             const nodes = await this.mdsEditorValues.save();
             if (Array.isArray(nodes)) {
-                this.mainnav.getDialogs().onRefresh.emit(nodes);
+                this.localEvents.nodesChanged.emit(nodes);
             }
             this.dialogs.openNodeTemplateDialog({ node: this.mdsEditorValues.nodes$.value[0] });
         } else if (this.widgetName === 'contributor') {
