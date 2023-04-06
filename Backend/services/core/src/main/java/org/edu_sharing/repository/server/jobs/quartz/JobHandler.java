@@ -346,10 +346,10 @@ public class JobHandler {
 		// use startDelayed() to not block server startup by IMMEDIATE jobs
 		quartzScheduler.startDelayed(10);
 
-		refresh();
+		refresh(true);
 	}
 
-	public synchronized void refresh() {
+	public synchronized void refresh(boolean triggerImmediateJobs) {
 		try {
 			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 			List<? extends Config> list = LightbendConfigLoader.get().getConfigList("jobs.entries");
@@ -377,7 +377,9 @@ public class JobHandler {
 				String triggerConfig = job.getString("trigger");
 				Trigger trigger = getTriggerFromString(jobName, triggerConfig);
 				if (trigger != null) {
-					jobConfigList.add(new JobConfig(clazz, trigger, params, jobName));
+					if(!triggerConfig.contains(TRIGGER_TYPE_IMMEDIATE) || triggerImmediateJobs) {
+						jobConfigList.add(new JobConfig(clazz, trigger, params, jobName));
+					}
 				} else {
 					logger.warn("Job "+jobName+" has no trigger and will not be scheduled");
 				}
