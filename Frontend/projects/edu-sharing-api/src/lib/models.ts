@@ -25,6 +25,7 @@ export {
     Pagination,
     Person,
     RelationData,
+    ReferenceEntries,
     SearchResultNode as SearchResults,
     Repo as Repository,
     Statistics,
