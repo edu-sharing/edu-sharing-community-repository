@@ -13,6 +13,7 @@ import {
     zip,
 } from 'rxjs';
 import {
+    distinctUntilChanged,
     filter,
     first,
     map,
@@ -35,8 +36,6 @@ import {
     RestSearchService,
 } from '../../../core-module/core.module';
 import { SearchService } from '../../../modules/search/search.service';
-import { MdsEditorCommonService } from './mds-editor-common.service';
-import { NativeWidgetComponent } from './mds-editor-view/mds-editor-view.component';
 import { EditorMode } from '../types/mds-types';
 import {
     BulkBehavior,
@@ -55,6 +54,8 @@ import {
     RequiredMode,
     Values,
 } from '../types/types';
+import { MdsEditorCommonService } from './mds-editor-common.service';
+import { NativeWidgetComponent } from './mds-editor-view/mds-editor-view.component';
 import { parseAttributes } from './util/parse-attributes';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 
@@ -1476,9 +1477,20 @@ export class MdsEditorInstanceService implements OnDestroy {
      * Returns a list of properties for which the MDS editor requires facet values.
      *
      * The observable continues to emit updates as long as the mds editor is alive.
+     *
+     * Emits `null` while the mds editor is (re-)initializing.
      */
     getNeededFacets(): Observable<string[]> {
-        return this.mdsInitDone.pipe(map(() => this.getNeededFacetsInstant()));
+        return this._new_initializingStateSubject.pipe(
+            map((state) => {
+                if (state === 'complete') {
+                    return this.getNeededFacetsInstant();
+                } else {
+                    return null;
+                }
+            }),
+            distinctUntilChanged(),
+        );
     }
 
     // TODO: The facet subscriptions could be registered by the widgets themselves, but since the

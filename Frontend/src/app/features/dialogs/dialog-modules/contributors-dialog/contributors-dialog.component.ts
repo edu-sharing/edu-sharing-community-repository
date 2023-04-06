@@ -23,6 +23,7 @@ import {
 } from '../contributor-edit-dialog/contributor-edit-dialog-data';
 import { YES_OR_NO } from '../generic-dialog/generic-dialog-data';
 import { ContributorsDialogData, ContributorsDialogResult } from './contributors-dialog-data';
+import { LocalEventsService } from '../../../../services/local-events.service';
 
 @Component({
     selector: 'es-contributors-dialog',
@@ -40,9 +41,10 @@ export class ContributorsDialogComponent implements OnInit {
     constructor(
         @Inject(CARD_DIALOG_DATA) public data: ContributorsDialogData,
         private dialogRef: CardDialogRef<ContributorsDialogData, ContributorsDialogResult>,
+        private dialogs: DialogsService,
+        private localEvents: LocalEventsService,
         private nodeService: RestNodeService,
         private toast: Toast,
-        private dialogs: DialogsService,
     ) {}
 
     ngOnInit(): void {
@@ -184,6 +186,7 @@ export class ContributorsDialogComponent implements OnInit {
                 ({ node }) => {
                     this.dialogRef.close(node);
                     this.toast.toast('WORKSPACE.TOAST.CONTRIBUTOR_UPDATED');
+                    this.localEvents.nodesChanged.emit([node]);
                 },
                 (error: any) => {
                     this.toast.error(error);

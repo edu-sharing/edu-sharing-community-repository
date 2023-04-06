@@ -23,6 +23,11 @@ public class MetadataWidget extends MetadataTranslatable{
 		Input,
 		None
 	}
+	public enum WidgetExpandable {
+		disabled,
+		expanded,
+		collapsed
+	}
 	public enum WidgetFilterMode {
 		disabled,
 		auto,
@@ -75,6 +80,7 @@ public class MetadataWidget extends MetadataTranslatable{
 	private TextEscapingPolicy textEscapingPolicy = TextEscapingPolicy.htmlBasic;
 	private InteractionType interactionType = InteractionType.Input;
 	private WidgetFilterMode filterMode = WidgetFilterMode.disabled;
+	private WidgetExpandable expandable = WidgetExpandable.disabled;
 	/**
 	 * hint for the client if this widget creates a link to the search
 	 * so e.g. if you click a keyword, you can be directed to the search with this keyword as filter
@@ -327,6 +333,14 @@ public class MetadataWidget extends MetadataTranslatable{
 
 	public void setFilterMode(WidgetFilterMode filterMode) {
 		this.filterMode = filterMode;
+	}
+
+	public WidgetExpandable getExpandable() {
+		return expandable;
+	}
+
+	public void setExpandable(WidgetExpandable expandable) {
+		this.expandable = expandable;
 	}
 
 	@Override

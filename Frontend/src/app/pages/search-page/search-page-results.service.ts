@@ -7,6 +7,7 @@ import {
     debounceTime,
     distinctUntilChanged,
     filter,
+    first,
     map,
     share,
     switchMap,
@@ -29,6 +30,7 @@ import { SearchPageService, SearchRequestParams } from './search-page.service';
 export interface SearchPageResults {
     totalResults?: Observable<number>;
     loadingProgress: Observable<number>;
+    addNodes: (nodes: Node[]) => void;
 }
 
 @Injectable()
@@ -65,6 +67,10 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
         this._destroyed.complete();
     }
 
+    addNodes(nodes: Node[]): void {
+        this.resultsDataSource.appendData(nodes, 'before');
+    }
+
     private _registerPageRestore() {
         this._searchPageRestore.registerDataSource('materials', this.resultsDataSource);
         this._searchPageRestore.registerDataSource('collections', this.collectionsDataSource);
@@ -84,16 +90,26 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
             ])
             .pipe(
                 takeUntil(this._destroyed),
-                // @TODO: This is most likely not the best solution!
-                // in some browser (i.e. firefox) the other events trigger earlier than the mds itself
-                // this can cause that the facets required for the mds are not yet registered
-                // We should check if we can find an appropriate event when the mds is finished
-                // instead of the activeMetadataSet observable
-                debounceTime(10),
                 tap(() => this.loadingParams.next(true)),
+                // Search filters and facets to fetch depend on the active repository and metadata
+                // set. Their values will be set to `null` while data is being determined after
+                // repository or metadata set changed. Give other components a tick to do this, so
+                // we don't prematurely send a search request with outdated data.
+                debounceTime(0),
                 filter(
                     ([repository, metadataSet, searchFilters]) =>
                         notNull(repository) && notNull(metadataSet) && notNull(searchFilters),
+                ),
+                // Wait until the filter bar's MDS instance has registered its needed facets for
+                // suggestions at the search service. We don't explicitly include the facets in the
+                // search request here to let the search service decide not to update the facets
+                // when not needed (e.g., when loading a new page). See comments on
+                // `MdsEditorWrapperComponent.registerLegacySuggestions` for further context.
+                switchMap((values) =>
+                    this._searchPage.facetsToFetch.pipe(
+                        first(notNull),
+                        map(() => values),
+                    ),
                 ),
                 tap(() => this.loadingParams.next(false)),
                 map(

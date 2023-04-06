@@ -245,7 +245,7 @@ public class RepoFactory {
 		ConfigServiceFactory.refresh();
 		VersionService.invalidateCache();
 		try {
-			JobHandler.getInstance().refresh();
+			JobHandler.getInstance().refresh(false);
 		} catch (Exception ignored) {}
 		eduSharingProps = null;
 		PropertiesInterceptorFactory.refresh();

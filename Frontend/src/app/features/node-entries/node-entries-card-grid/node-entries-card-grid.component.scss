@@ -81,8 +81,10 @@ $horizontalScrollPadding: 1.5em;
     &.card-grid-layout-scroll {
         position: relative;
         overflow-x: auto;
+        overflow-y: hidden;
         scroll-snap-type: x mandatory;
         grid-auto-flow: column;
+        grid-template-columns: repeat(auto-fit, $cardWidth);
         grid-auto-columns: minmax($cardWidth, 1fr);
         // slightly more padding to prevent shadow clipping
         padding: $horizontalScrollPadding;

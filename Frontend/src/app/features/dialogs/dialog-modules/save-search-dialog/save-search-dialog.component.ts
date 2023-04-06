@@ -51,7 +51,7 @@ export class SaveSearchDialogComponent implements OnInit {
         this.nameControl.valueChanges.subscribe((name) => updateName(name));
         updateName(name);
         this.savedSearchesService
-            .observeSavedSearches()
+            .observeMySavedSearches()
             .pipe(take(1))
             .subscribe(this._savedSearches);
         this.registerAutoCompleteValues();

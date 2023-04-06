@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 import { NodeV1Service, SearchV1Service } from '../api/services';
 import { HOME_REPOSITORY } from '../constants';
-import { Node, NodeEntries } from '../models';
+import { Node, NodeEntries, NodePermissions } from '../models';
 
 export class NodeConstants {
     public static SPACES_STORE_REF = 'workspace://SpacesStore/';
@@ -23,6 +23,9 @@ export class NodeTools {
     providedIn: 'root',
 })
 export class NodeService {
+    private readonly _nodesChanged = new Subject<void>();
+    readonly nodesChanged = this._nodesChanged.asObservable();
+
     constructor(private nodeV1: NodeV1Service, private searchV1: SearchV1Service) {}
 
     getNode(id: string, { repository = HOME_REPOSITORY } = {}): Observable<Node> {
@@ -33,6 +36,15 @@ export class NodeService {
                 propertyFilter: ['-all-'],
             })
             .pipe(map((nodeEntry) => nodeEntry.node));
+    }
+
+    deleteNode(
+        id: string,
+        { recycle = true, repository = HOME_REPOSITORY } = {},
+    ): Observable<void> {
+        return this.nodeV1
+            .delete({ repository, recycle, node: id })
+            .pipe(tap(() => this._nodesChanged.next()));
     }
 
     getChildren(
@@ -70,17 +82,68 @@ export class NodeService {
             value: [NodeTools.createSpacesStoreRef(id)],
         });
     }
+
     getPublishedCopies(id: string, { repository = HOME_REPOSITORY } = {}) {
         return this.nodeV1.getPublishedCopies({
             repository,
             node: id,
         });
     }
-    copyMetadata(node: string, from: string, { repository = HOME_REPOSITORY }) {
+
+    /**
+     * Changes the properties of the given node.
+     *
+     * If `versionComment` is provided, creates a new version, otherwise changes the properties
+     * in-place.
+     */
+    editNodeMetadata(
+        id: string,
+        properties: { [key: string]: string[] },
+        {
+            versionComment,
+            repository = HOME_REPOSITORY,
+        }: { versionComment?: string; repository?: string } = {},
+    ): Observable<Node> {
+        if (versionComment) {
+            return this.nodeV1
+                .changeMetadataWithVersioning({
+                    repository,
+                    node: id,
+                    versionComment,
+                    body: properties,
+                })
+                .pipe(
+                    tap(() => this._nodesChanged.next()),
+                    map(({ node }) => node),
+                );
+        } else {
+            return this.nodeV1.changeMetadata({ repository, node: id, body: properties }).pipe(
+                tap(() => this._nodesChanged.next()),
+                map(({ node }) => node),
+            );
+        }
+    }
+
+    copyMetadata(targetId: string, sourceId: string, { repository = HOME_REPOSITORY }) {
         return this.nodeV1.copyMetadata({
-            node,
-            from,
+            node: targetId,
+            from: sourceId,
             repository,
+        });
+    }
+
+    setPermissions(
+        id: string,
+        permissions: NodePermissions,
+        { sendMail = false, mailText = '', sendCopy = false, repository = HOME_REPOSITORY } = {},
+    ): Observable<void> {
+        return this.nodeV1.setPermission({
+            node: id,
+            sendMail,
+            mailtext: mailText,
+            sendCopy,
+            repository,
+            body: permissions,
         });
     }
 

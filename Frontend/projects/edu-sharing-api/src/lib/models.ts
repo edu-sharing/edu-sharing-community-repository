@@ -32,7 +32,7 @@ export {
     WebsiteInformation,
 } from './api/models';
 import { HttpErrorResponse } from '@angular/common/http';
-import { MdsView } from './api/models';
+import { Acl, MdsView } from './api/models';
 
 export type MdsViewRelation = MdsView['rel'];
 
@@ -40,3 +40,13 @@ export type ApiErrorResponse = HttpErrorResponse & {
     readonly defaultPrevented: boolean;
     preventDefault: () => void;
 };
+
+export type NodePermissions = Acl;
+
+/** Copy from Angular Material. */
+export interface Sort {
+    /** The id of the column being sorted. */
+    active: string;
+    /** The sort direction. */
+    direction: 'asc' | 'desc' | '';
+}

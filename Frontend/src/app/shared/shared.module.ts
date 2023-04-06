@@ -199,6 +199,7 @@ import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.
         MatInputModule,
         MatMenuModule,
         MatOptionModule,
+        MatProgressSpinnerModule,
         MatRadioModule,
         MatRippleModule,
         MatSelectModule,
