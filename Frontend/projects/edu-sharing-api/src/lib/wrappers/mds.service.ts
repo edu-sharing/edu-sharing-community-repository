@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { MdsV1Service } from '../api/services';
 import { DEFAULT, HOME_REPOSITORY } from '../constants';
-import { MdsDefinition, MdsSort, MdsView, MetadataSetInfo } from '../models';
+import { MdsDefinition, MdsSort, MdsValue, MdsView, MdsWidget, MetadataSetInfo } from '../models';
 import { shareReplayReturnValue } from '../utils/decorators/share-replay-return-value';
 
 export interface MdsIdentifier {
@@ -54,5 +54,34 @@ export class MdsService {
                         } as MdsDefinition),
                 ),
             );
+    }
+
+    static unfoldTreeChilds(props: string[], widget: MdsWidget, limit = 100) {
+        let attach: string[] = [];
+        if (props) {
+            for (let prop of props) {
+                for (let child of widget.values as MdsValue[]) {
+                    let copy = child;
+                    for (let i = 0; i <= limit && copy.parent; i++) {
+                        if (copy.parent == prop && attach.indexOf(child.id) == -1) {
+                            attach.push(child.id);
+                        }
+                        if (copy.parent) {
+                            copy = (widget.values as MdsValue[]).find(
+                                (v: any) => v.id == copy.parent,
+                            ) as MdsValue;
+                        } else break;
+                        if (i == 100) {
+                            console.warn(
+                                'possible tree recursion detected in valuespace for widget ' +
+                                    widget.id,
+                            );
+                        }
+                    }
+                }
+            }
+            return attach;
+        }
+        return null;
     }
 }
