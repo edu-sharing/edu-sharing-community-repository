@@ -1,25 +1,37 @@
 # EduSharingUi
 
+This library bundles base ui components from edu-sharing.
+
 This library was generated with [Angular CLI](https://github.com/angular/angular-cli) version 13.3.0.
 
-## Code scaffolding
+## Required Init tasks
 
-Run `ng generate component component-name --project edu-sharing-ui` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module --project edu-sharing-ui`.
+Your project must provide a Toast service (for message viewing). You may use a mat-snackbar for displaying.
 
-> Note: Don't forget to add `--project edu-sharing-ui` or else it will be added to the default project in your `angular.json` file.
+in your app.module.ts:
 
-## Build
+```ts
+import { Toast as ToastAbstract } from 'ngx-edu-sharing-ui';
+providers: [
+    { provide: ToastAbstract, useClass: Toast },
+    // ...
+];
+```
 
-Run `ng build edu-sharing-ui` to build the project. The build artifacts will be stored in the `dist/` directory.
+Make sure that your `Toast`-Service extends the abstract Toast service.
 
-## Publishing
+You might also provide other services for extended functionality, including
+`Toast`, `OptionsHelperService`, `KeyboardShortcutsService`, `AppService`.
 
-After building your library with `ng build edu-sharing-ui`, go to the dist folder `cd dist/edu-sharing-ui` and run `npm publish`.
+Check out our sample angular application for a full example
+Check the `app.module.ts` for registration.
 
-## Running unit tests
+In one of your primary components (i.e. router) you need to initalize the material theme and translations:
 
-Run `ng test edu-sharing-ui` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+```ts
+async ngOnInit() {
+  this.materialCssVarsService.setPrimaryColor('#2e9e9b');
+  this.materialCssVarsService.setAccentColor('#2e9e9b');
+  await this.translationsService.initialize().toPromise()
+}
+```
