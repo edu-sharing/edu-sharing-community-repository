@@ -10,6 +10,7 @@ import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Values } from '../../features/mds/types/types';
 import { notNull } from '../../util/functions';
+import { GlobalSearchPageServiceInternal } from './global-search-page.service';
 import { SearchPageService } from './search-page.service';
 
 @Component({
@@ -26,6 +27,7 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
     readonly activeMdsForm = new FormControl(this.activeMetadataSet.getValue());
     readonly searchFilters = this.searchPage.searchFilters;
     readonly reUrl = this.searchPage.reUrl;
+    readonly customTemplates = this.globalSearchPageInternal.customTemplates;
     /** Deep copy of `searchFilters.userValue` for immutability. */
     searchFilterValues: Values;
     mdsParams: { repository: string; setId: string } = null;
@@ -40,6 +42,7 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
     constructor(
         private authentication: AuthenticationService,
         private dialogs: DialogsService,
+        private globalSearchPageInternal: GlobalSearchPageServiceInternal,
         private ngZone: NgZone,
         private searchPage: SearchPageService,
         private searchService: SearchService,

@@ -4,6 +4,7 @@ import { NodeEntriesDisplayType } from '../../features/node-entries/entries-mode
 import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
 import { SearchPageResultsService } from './search-page-results.service';
 import { SearchPageService } from './search-page.service';
+import { GlobalSearchPageServiceInternal } from './global-search-page.service';
 
 @Component({
     selector: 'es-search-page-results',
@@ -28,8 +29,13 @@ export class SearchPageResultsComponent implements OnInit {
     readonly collectionColumns = this.results.collectionColumns;
     readonly sortConfig = this.results.sortConfig;
     readonly addToCollectionMode = this.searchPage.addToCollectionMode;
+    readonly customTemplates = this.globalSearchPageInternal.customTemplates;
 
-    constructor(private searchPage: SearchPageService, private results: SearchPageResultsService) {}
+    constructor(
+        private globalSearchPageInternal: GlobalSearchPageServiceInternal,
+        private results: SearchPageResultsService,
+        private searchPage: SearchPageService,
+    ) {}
 
     ngOnInit(): void {
         setTimeout(() => {
