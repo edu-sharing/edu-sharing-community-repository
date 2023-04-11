@@ -1,7 +1,7 @@
 import { ElementRef, Injectable } from '@angular/core';
 import { RawValuesDict, SearchConfig } from 'ngx-edu-sharing-api';
 import { Observable, Subject } from 'rxjs';
-import { map, take, takeUntil } from 'rxjs/operators';
+import { delay, map, take, takeUntil } from 'rxjs/operators';
 import { notNull } from '../../../util/functions';
 import { SearchFieldInternalService } from './search-field-internal.service';
 
@@ -63,8 +63,12 @@ export class SearchFieldInstance {
         return this._internal.filterValuesChanged.pipe(takeUntil(this._until));
     }
 
-    public setSearchString(value: string): void {
+    setSearchString(value: string): void {
         this._internal.searchString.next(value);
+    }
+
+    getSearchString(): string {
+        return this._internal.searchString.value;
     }
 
     /**
@@ -135,7 +139,7 @@ export class SearchFieldService {
     }
 
     /**
-     * Returns the current search field instance or null if the search field is disabled.
+     * Returns the current search-field instance or null if the search field is disabled.
      *
      * The returned instance's lifetime is determined by the `until` subject given when `enable` was
      * called. Use this method if you want to use a search field instance, that has been enabled
@@ -144,6 +148,19 @@ export class SearchFieldService {
      */
     getCurrentInstance(): SearchFieldInstance | null {
         return this._currentInstance;
+    }
+
+    /**
+     * Returns an updated observable of the current search-field instance or null if the search
+     * field is disabled.
+     *
+     * Use this to monitor how other components interact with the search field.
+     */
+    observeCurrentInstance(): Observable<SearchFieldInstance | null> {
+        return this.observeEnabled().pipe(
+            delay(0),
+            map(() => this._currentInstance),
+        );
     }
 
     private _createInstance(): SearchFieldInstance {
