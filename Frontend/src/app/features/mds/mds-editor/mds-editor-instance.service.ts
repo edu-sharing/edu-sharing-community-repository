@@ -57,6 +57,7 @@ import { MdsEditorCommonService } from './mds-editor-common.service';
 import { NativeWidgetComponent } from './mds-editor-view/mds-editor-view.component';
 import { parseAttributes } from './util/parse-attributes';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
+import { Helper } from '../../../core-module/rest/helper';
 
 export interface CompletionStatusField {
     widget: Widget;
@@ -153,19 +154,20 @@ export class MdsEditorInstanceService implements OnDestroy {
             shareReplay(1),
         );
 
-        private readonly _new_inputValues$ =
-            this.mdsEditorInstanceService._new_inputValuesSubject.pipe(
-                map((values) => values[this.definition.id]),
-            );
+        get definition() {
+            return this._definition;
+        }
 
         constructor(
             private mdsEditorInstanceService: MdsEditorInstanceService,
-            public readonly definition: MdsWidget,
+            private _definition: MdsWidget,
             public readonly viewId: string,
             public readonly repositoryId: string,
             public readonly relation: MdsViewRelation = null,
             public readonly variables: { [key: string]: string } = null,
         ) {
+            // deep copy to prevent persistence from inline overrides
+            this._definition = Helper.deepCopy(this._definition);
             this.replaceVariables();
             combineLatest([this.value$, this.bulkMode, this.ready])
                 .pipe(

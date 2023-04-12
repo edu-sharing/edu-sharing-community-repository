@@ -242,6 +242,8 @@
   },
   "NODE": {
     "cm:name": "filename",
+    "cm:title": "title",
+    "ccm:replicationsource": "origin",
     "score": "relevance",
     "description": "description",
     "mimetype": "file type",
@@ -252,7 +254,7 @@
     "ccm:educationallearningresourcetype": "Type",
     "ccm:replicationsourceid": "Original-ID",
     "ccm:educationalcontext": "Educational Context",
-    "ccm:lifecyclecontributer_publisher": "Publisher",
+    "ccm:lifecyclecontributer_publisher": "publisher",
     "ccm:lifecyclecontributer_publisherFN": "",
     "sys:node-uuid": "node-id",
     "dimensions": "image size",
@@ -268,7 +270,7 @@
     "sys:archivedDate": "deleted",
     "cclom:version": "version",
     "virtual:usagecount": "usage count",
-    "ccm:author_freetext": "General Author information",
+    "ccm:author_freetext": "General author information",
     "ccm:lifecyclecontributer_authorFN": "author",
     "ccm:wf_status": "status",
     "ccm:eaf_productionyear": "Production year",
@@ -284,6 +286,10 @@
     "DECLINED": "declined",
     "ACCEPTED": "accepted",
     "PENDING": "pending"
+  },
+  "NODE_PROPOSAL": {
+    "cm:created": "proposed at",
+    "cm:creator": "proposed by"
   },
   "COOKIE_INFO": {
     "ACCEPT": " Accept",
@@ -591,6 +597,8 @@
     "COLLECTION_PIN": "Pin collection",
     "MATERIAL_FEEDBACK": "Feedback...",
     "MATERIAL_FEEDBACK_VIEW": "View feedback",
+    "COLLECTION_PROPOSAL_ACCEPT": "Accept proposal",
+    "COLLECTION_PROPOSAL_DECLINE": "Decline proposal",
     "OPEN": "Open",
     "DOWNLOAD": "Download",
     "DOWNLOAD_ALL": "download zip",
@@ -647,7 +655,7 @@
     "SHOW_EXTENDED_TRUE": "extended info shown",
     "SHOW_EXTENDED_SEARCH": "Show more filters",
     "AUTHOR_LABEL": "About the Author",
-    "AUTHOR_FREETEXT": "General Author information",
+    "AUTHOR_FREETEXT": "General author information",
     "AUTHOR_FREETEXT_PLACEHOLDER": "Who are the authors of this work? How should they be attributed?",
     "AUTHOR_PERSON": "Author & Contributors",
     "AUTHOR_UNSET": "<not set>",
@@ -781,6 +789,48 @@
     "API_FORBIDDEN": "No permissions to access this content",
     "API_FORBIDDEN_LOGIN": "Please login to access this section"
   },
+  "NODE_SEARCH_SELECTOR": {
+    "MORE_FILTERS": "Search filters",
+    "NO_MATCHES": "No matching elements found",
+    "NO_PERMISSIONS": "You don't have permissions for this element"
+  },
+  "NODE_RELATIONS": {
+    "TITLE": "Manage relations",
+    "CREATE_RELATION": "Create new relation",
+    "RELATION_TYPE_LABEL": "Relation type",
+    "RELATION_SEARCH_LABEL": "Search for a related element",
+    "EXISTING_RELATIONS": "Existing relations",
+    "NO_RELATIONS": "There are no relations for this element.",
+    "SWAP": "Swap",
+    "RESELECT": "Reset",
+    "CREATE_CONFIRM": "Create relation",
+    "NO_PERMISSIONS": "You don't have permissions to set relations to this element",
+    "RELATION_CREATED": "Date",
+    "RELATION_CREATOR": "Creator",
+    "VARIANT_CREATED": "Date",
+    "VARIANT_CREATOR": "Creator",
+    "OPEN_NODE": "Show element",
+    "REMOVE_RELATION": "Remove relation",
+    "RESTORE_RELATION": "Restore relation",
+    "CURRENT_VERSION": "Current version",
+    "RELATION_EXISTS": "This relation already exists and cannot be added again",
+    "RELATION_COPY_HINT": "Managing relations of a public copy. Note that these relations apply to all public versions as well as to the original element.",
+    "RELATION_TYPE": {
+      "VERSIONS": "Versions",
+      "FORKED_CHILDS": "Has variants",
+      "FORKED_ORIGIN": "Is variant of",
+      "isPartOf": "is part of",
+      "isBasedOn": "is based on",
+      "references": "references",
+      "hasPart": "has part",
+      "isBasisFor": "is basis for"
+    },
+    "RELATION_TYPE_FULLY": {
+      "isPartOf": "is part of (isPartOf)",
+      "isBasedOn": "is based on (isBasedOn)",
+      "references": "references (references)"
+    }
+  },
   "VCARD": {
     "Givenname": "First name",
     "Surname": "Last name",
@@ -811,6 +861,7 @@
     "redo": "Apply"
   },
   "FILL_STATUS": {
+    "MESSAGE": "fields completed",
     "REQUIRED": "required fields",
     "REQUIREDPUBLISH": "for publishing required fields",
     "SHOW": "show"

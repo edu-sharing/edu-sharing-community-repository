@@ -1,7 +1,6 @@
 package org.edu_sharing.service.search;
 
 import com.google.gson.Gson;
-import com.hazelcast.map.impl.query.Query;
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.vcard.VCard;
 import net.sourceforge.cardme.vcard.types.ExtendedType;
@@ -28,8 +27,6 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.URLTool;
-import org.edu_sharing.restservices.NodeDao;
-import org.edu_sharing.restservices.mds.v1.model.Suggestions;
 import org.edu_sharing.restservices.shared.Contributor;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.restservices.shared.NodeSearch;
@@ -79,9 +76,7 @@ import org.elasticsearch.xcontent.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -237,12 +232,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 ParsedFilter pf = (ParsedFilter)a;
                 for(Aggregation aggregation : pf.getAggregations().asList()){
                     if(aggregation instanceof ParsedStringTerms){
+                        AggregationBuilder definition = aggregations.stream().filter(agg -> agg.getName().equalsIgnoreCase(a.getName())).findAny().get();
                         ParsedStringTerms pst = (ParsedStringTerms) aggregation;
-                        facetsResult.add(getFacet(pst));
+                        facetsResult.add(getFacet(pst ,definition));
                     }
                 }
             }else{
-                logger.error("non supported aggreagtion " + a.getName());
+                logger.error("non supported aggregation " + a.getName());
             }
         }
 
@@ -402,7 +398,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 for(Aggregation a : aggregations){
                     if(a instanceof  ParsedStringTerms) {
                         ParsedStringTerms pst = (ParsedStringTerms) a;
-                        facetsResult.add(getFacet(pst));
+                        facetsResult.add(getFacet(pst, null));
                     }else if (a instanceof ParsedCardinality){
                         ParsedCardinality pc = (ParsedCardinality)a;
                         if (a.getName().equals("original_count")) {
@@ -417,9 +413,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                             if(aggregation instanceof ParsedStringTerms){
                                 ParsedStringTerms pst = (ParsedStringTerms) aggregation;
                                 if(a.getName().endsWith("_selected")){
-                                    facetsResultSelected.add(getFacet(pst));
+                                    facetsResultSelected.add(getFacet(pst, null));
                                 }else{
-                                    facetsResult.add(getFacet(pst));
+                                    facetsResult.add(getFacet(pst, null));
                                 }
                             }
                         }
@@ -512,19 +508,30 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return sr;
     }
 
-    private NodeSearch.Facet getFacet(ParsedStringTerms pst){
+    private NodeSearch.Facet getFacet(ParsedStringTerms pst, AggregationBuilder builder){
         NodeSearch.Facet facet = new NodeSearch.Facet();
         facet.setProperty(pst.getName());
         List<NodeSearch.Facet.Value> values = new ArrayList<>();
         facet.setValues(values);
 
         for (Terms.Bucket b : pst.getBuckets()) {
-            String key = b.getKeyAsString();
-            long count = b.getDocCount();
-            NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
-            value.setValue(key);
-            value.setCount((int)count);
-            values.add(value);
+            if(builder != null && "multi_terms".equals(builder.getMetadata().get("type"))) {
+                String[] key = b.getKeyAsString().split("\\|");
+                for (String k : key) {
+                    long count = b.getDocCount();
+                    NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
+                    value.setValue(k);
+                    value.setCount((int) count);
+                    values.add(value);
+                }
+            } else {
+                String key = b.getKeyAsString();
+                long count = b.getDocCount();
+                NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
+                value.setValue(key);
+                value.setCount((int) count);
+                values.add(value);
+            }
         }
 
         facet.setSumOtherDocCount(pst.getSumOfOtherDocCounts());
@@ -1071,7 +1078,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                      logger.error("ping failed, close failed:" + e.getMessage()+" creating new");
                  }
              }
-             client = new RestHighLevelClient(RestClient.builder(getConfiguredHosts()));
+             client = new ESRestHighLevelClient(RestClient.builder(getConfiguredHosts()));
         }
     }
 
@@ -1132,9 +1139,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 return Collections.emptyList();
             }
             return search.getFacets().get(0).getValues().stream().filter(s ->
-                // if one document has i.e. multiple keywords, they will be shown in the facet
-                // so, we filter for values which actually contain the given string
-                s.getValue().toLowerCase().contains(value.toLowerCase())
+                    // if one document has i.e. multiple keywords, they will be shown in the facet
+                    // so, we filter for values which actually contain the given string
+                    s.getValue().toLowerCase().contains(value.toLowerCase())
             ).map(s -> {
                 Suggestion suggestion = new Suggestion();
                 suggestion.setKey(s.getValue());
@@ -1142,7 +1149,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         captions.containsKey(s.getValue()) ? captions.get(s.getValue()).getCaption() : s.getValue()
                 );
                 return suggestion;
-            }).collect(Collectors.toList());
+            }).distinct().collect(Collectors.toList());
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }

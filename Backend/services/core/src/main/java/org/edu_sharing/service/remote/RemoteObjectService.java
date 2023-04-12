@@ -52,13 +52,14 @@ public class RemoteObjectService {
 					String remoteObjectFolderId = null;
 					remoteObjectFolderId = getRemoteObjectsFolder();
 
-					// schau nach ob remote object schon existiert
-					mcAlfrescoBaseClient.setResolveRemoteObjects(false);
-					HashMap<String, Object> remoteObjectProps = mcAlfrescoBaseClient.getChild(remoteObjectFolderId,
-							CCConstants.CCM_TYPE_REMOTEOBJECT, CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, nodeId);
-
-					String remoteObjectNodeId = null;
-					if (remoteObjectProps == null) {
+						// check for existing remote object
+						NodeRef existing = NodeServiceFactory.getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+								remoteObjectFolderId, CCConstants.CCM_TYPE_REMOTEOBJECT, CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, nodeId);
+						 /*HashMap<String, Object> remoteObjectProps = mcAlfrescoBaseClient.getChild(remoteObjectFolderId,
+								CCConstants.CCM_TYPE_REMOTEOBJECT, CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, nodeId);*/
+						HashMap<String, Object> remoteObjectProps;
+					String remoteObjectNodeId;
+						if (existing == null) {
 						logger.info("found no remote object for remote node id:" + nodeId + " creating new one");
 						// create RemoteObject as system
 						remoteObjectProps = new HashMap<>();
@@ -83,7 +84,7 @@ public class RemoteObjectService {
 									CCConstants.CM_PROP_CONTENT);
 						}
 					} else {
-						remoteObjectNodeId = (String) remoteObjectProps.get(CCConstants.SYS_PROP_NODE_UID);
+							remoteObjectNodeId = existing.getId();
 					}
 
 					// CLEANUP english?

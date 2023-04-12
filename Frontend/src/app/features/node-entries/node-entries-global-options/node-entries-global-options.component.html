@@ -1,0 +1,23 @@
+<div
+  *ngIf="entriesService.globalOptions?.length"
+  role="listitem"
+  class="global-options"
+  [class.global-options-small]="displayType === NodeEntriesDisplayType.SmallGrid"
+  [class.global-options-table]="displayType === NodeEntriesDisplayType.Table"
+>
+  <button
+    mat-button
+    *ngFor="let option of entriesService.globalOptions"
+    (click)="option.callback()"
+    class="global-option-btn"
+    attr.data-test="card-button-{{ option.name }}"
+  >
+    <ng-container *ngTemplateOutlet="globalOption; context: { option: this.option }"></ng-container>
+  </button>
+</div>
+<ng-template #globalOption let-option="option">
+  <span class="global-option">
+    <i [esIcon]="option.icon"></i>
+    <span class="label">{{ option.name | translate }}</span>
+  </span>
+</ng-template>

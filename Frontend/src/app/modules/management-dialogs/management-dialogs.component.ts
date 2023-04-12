@@ -267,7 +267,6 @@ export class WorkspaceManagementDialogsComponent {
                 this._nodeSimpleEdit = nodes;
             } else if (this._nodeFromUpload) {
                 this.onUploadFilesProcessed.emit(nodes);
-                this._nodeFromUpload = false;
             }
             this.nodeLicenseOnUpload = false;
             if (updatedNodes) {
@@ -298,6 +297,7 @@ export class WorkspaceManagementDialogsComponent {
         let refresh = !!updatedNodes;
         if (this._nodeFromUpload && !this.reopenSimpleEdit && updatedNodes == null) {
             this.deleteNodes(originalNodes);
+            this.localEvents.nodesDeleted.emit(originalNodes);
             refresh = true;
         }
         this.onCloseMetadata.emit(updatedNodes);

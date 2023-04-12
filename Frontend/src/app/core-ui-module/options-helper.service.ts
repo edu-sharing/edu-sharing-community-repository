@@ -547,8 +547,8 @@ export class OptionsHelperService implements OnDestroy {
             'check',
             (object) => management.addProposalsToCollection(this.getObjects(object)),
         );
-        acceptProposal.customEnabledCallback = (nodes) =>
-            nodes.every((n) => (n as ProposalNode).accessible);
+        /*acceptProposal.customEnabledCallback = (nodes) =>
+            nodes.every((n) => (n as ProposalNode).accessible);*/
         acceptProposal.elementType = [ElementType.NodeProposal];
         acceptProposal.constrains = [Constrain.User];
         acceptProposal.group = DefaultGroups.Primary;
