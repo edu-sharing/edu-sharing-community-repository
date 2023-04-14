@@ -637,7 +637,7 @@
     },
     "LTITOOL": {
       "HEADER": "LTI Tool Registrierung",
-      "REGISTER" : "Registrierung starten",
+      "REGISTER": "Registrierung starten",
       "DYNAMIC_URL": "Url des Tools für die dynamische Registrierung",
       "DYNAMIC_INFO": "Mit Hilfe der dynamischen LTI-Registrierung können LTI Tools einfach mit edu-sharing verbunden werden. \n Ermitteln Sie die Url für die dynamische Registrierung des Tools und fügen Sie diese in das feld \"Url des Tools für die dynamische Registrierung\" ein. Durch klick auf \"Registrierung starten\" wird das externe Tool automatisch an edu-sharing angebunden.",
       "MANUAL_INFO": "Sollte ihr LTI-Kompatibles Tool die dynamische Registrierung nicht unterstützen oder diese nicht funktionieren, können Sie die manuelle Registrierung nutzen.\n\nNach Klick auf \"Speichern\" wird mit den gegebenen Daten eine Anbindung vorbereitet.",
