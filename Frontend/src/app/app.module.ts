@@ -49,6 +49,10 @@ import { AppLocationStrategy } from './router/location-strategy';
 import { RouterComponent } from './router/router.component';
 import { SharedModule } from './shared/shared.module';
 import { TranslationsModule } from './translations/translations.module';
+import { CoreUiModule } from './core-ui-module/core-ui.module';
+import { MaterialCssVarsModule } from 'angular-material-css-vars';
+import { extensionSchemas } from './extension/extension-schemas';
+import { LtitoolAdminComponent } from './modules/admin/ltitool-admin/ltitool-admin.component';
 
 // http://blog.angular-university.io/angular2-ngmodule/
 // -> Making modules more readable using the spread operator
@@ -84,6 +88,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         extensionDeclarations,
         LtiComponent,
         LtiAdminComponent,
+        LtitoolAdminComponent,
     ],
     imports: [
         IMPORTS,
