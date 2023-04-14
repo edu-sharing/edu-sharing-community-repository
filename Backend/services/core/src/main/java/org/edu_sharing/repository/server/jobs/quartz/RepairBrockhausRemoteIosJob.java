@@ -160,7 +160,7 @@ public class RepairBrockhausRemoteIosJob extends AbstractJob{
 				if(newId != null) {
 					logger.info("Replacing old id " + brockhausId + " with new id " + newId);
 					if (!test) {
-						NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, newId);
+						NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, newId,false);
 					}
 				}
 			}catch (Throwable t){
