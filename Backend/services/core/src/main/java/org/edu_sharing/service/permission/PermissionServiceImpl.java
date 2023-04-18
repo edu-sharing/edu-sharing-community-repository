@@ -80,6 +80,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	private PersonService personService;
 	private ApplicationInfo appInfo;
 	private ToolPermissionService toolPermission;
+	private org.edu_sharing.service.nodeservice.NodeService eduNodeService;
 
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	OrganisationService organisationService = (OrganisationService)applicationContext.getBean("eduOrganisationService");
@@ -96,6 +97,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext
 				.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
+		eduNodeService = NodeServiceFactory.getNodeService(appId);
 		nodeService = serviceRegistry.getNodeService();
 		shareService = new ShareServiceImpl(this);
 		permissionService = serviceRegistry.getPermissionService();
@@ -291,8 +293,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 
 			if (_sendMail) {
+				HashMap<String, Object> props = eduNodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), _nodeId);
+				String[] aspects = eduNodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), _nodeId);
 				NotificationServiceFactoryUtility.getLocalService()
-						.notifyPermissionChanged(user, authority,_nodeId, permissions, _mailText);
+						.notifyPermissionChanged(user, authority, _nodeId, props, aspects, permissions, _mailText);
 			}
 		}
 

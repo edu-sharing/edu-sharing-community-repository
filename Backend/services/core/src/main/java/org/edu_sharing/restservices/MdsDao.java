@@ -1,7 +1,9 @@
 package org.edu_sharing.restservices;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
@@ -9,6 +11,8 @@ import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.restservices.mds.v1.model.*;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.restservices.shared.Mds;
+import org.edu_sharing.service.nodeservice.NodeService;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.notification.NotificationService;
 import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
 import org.edu_sharing.service.search.Suggestion;
@@ -17,6 +21,7 @@ public class MdsDao {
 
 	public static final String DEFAULT = "-default-";
 	private final NotificationService notificationService;
+	private final NodeService nodeService;
 
 	public static List<MetadataSetInfo> getAllMdsDesc(RepositoryDao repoDao) throws Exception {
 		return RepoFactory.getMetadataSetsForRepository(repoDao.getId());
@@ -49,7 +54,7 @@ public class MdsDao {
 		try {
 			
 			MetadataSet mds=MetadataHelper.getMetadataset(repoDao.getApplicationInfo(),mdsId);
-			
+
 			if (mds == null) {
 				throw new DAOMissingException(new IllegalArgumentException(mdsId));
 			}
@@ -68,6 +73,7 @@ public class MdsDao {
 	private MdsDao(RepositoryDao repoDao, MetadataSet mds) {
 		this.repoDao = repoDao;		
 		this.mds = mds;
+		this.nodeService = NodeServiceFactory.getNodeService(repoDao.getApplicationInfo().getAppId());
 		this.notificationService = NotificationServiceFactoryUtility.getLocalService();
 	}
 
@@ -134,12 +140,26 @@ public class MdsDao {
 		MetadataWidget widgetDefinition = mds.findAllWidgets(widget).stream().filter((w) -> w.getSuggestionReceiver() != null && !w.getSuggestionReceiver().isEmpty()).findFirst()
 				.orElseThrow(() -> new DAOValidationException(new IllegalArgumentException("No widget definition found which can receive suggestion data")));
 
+
 		MdsValue result = new MdsValue();
 		result.setId(UUID.randomUUID().toString());
 		result.setParent(parent);
 		result.setCaption(valueCaption);
 		try {
-			notificationService.notifyMetadataSetSuggestion(result, widgetDefinition, nodes);
+			if (nodes == null){
+				nodes = new ArrayList<>();
+			}
+
+			List<Map<String, Object>> nodeProperties = nodes.stream()
+					.map(x -> {
+						try {
+							return nodeService.getProperties(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), x);
+						} catch (Throwable e) {
+							return new HashMap<String, Object>();
+						}
+					})
+					.collect(Collectors.toList());
+			notificationService.notifyMetadataSetSuggestion(result, widgetDefinition, nodes, nodeProperties);
 		} catch (Throwable t) {
 			throw DAOException.mapping(t);
 		}

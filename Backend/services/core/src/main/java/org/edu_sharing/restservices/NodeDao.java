@@ -2360,8 +2360,9 @@ public class NodeDao {
 
     public void reportNode(String reason, String userEmail, String userComment) throws DAOException {
         try {
+            HashMap<String, Object> properties = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
             NotificationServiceFactoryUtility.getLocalService()
-                    .notifyNodeIssue(nodeId, reason, userEmail, userComment);
+                    .notifyNodeIssue(nodeId, reason, properties, userEmail, userComment);
         } catch (Throwable t) {
             throw DAOException.mapping(t);
         }

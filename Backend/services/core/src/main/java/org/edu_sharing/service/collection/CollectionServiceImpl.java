@@ -275,8 +275,8 @@ public class CollectionServiceImpl implements CollectionService {
                         collectionId,
                         originalNodeId, null, null, null, -1, versLabel, refId, null);
 
-                HashMap<String, Object> collectionProperties;
-                HashMap<String, Object> nodeProperties;
+                Map<String, Object> collectionProperties;
+                Map<String, Object> nodeProperties;
                 try {
                     collectionProperties = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionId);
                 } catch (Throwable ignored) {

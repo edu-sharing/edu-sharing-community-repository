@@ -208,7 +208,7 @@ public class MailTemplate {
 		return builder.parse(in);
 	}
 
-	public static void applyNodePropertiesToMap(String prefix, HashMap<String, Object> properties, Map<String, String> map) {
+	public static void applyNodePropertiesToMap(String prefix, Map<String, Object> properties, Map<String, String> map) {
 		properties.forEach((key, value) -> map.put(prefix + CCConstants.getValidLocalName(key), value instanceof Collection ?
 				StringUtils.join((Collection)value, ", ") : value == null ? "" : value.toString()));
 	}
