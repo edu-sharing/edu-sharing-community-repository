@@ -11,12 +11,16 @@ import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.com
 import { Values } from '../../../types/types';
 import { MatTabGroup } from '@angular/material/tabs';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
+import { Attributes } from '../../util/parse-attributes';
 
 export interface AuthorData {
     freetext: string;
     author: VCard;
 }
-
+enum DefaultTab {
+    freetext = 'freetext',
+    vcard = 'vcard',
+}
 @Component({
     selector: 'es-mds-editor-widget-author',
     templateUrl: './mds-editor-widget-author.component.html',
@@ -27,6 +31,7 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         requiresNode: false,
         supportsBulk: false,
     };
+    attributes: Attributes;
     @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
     @Input() showContributorDialog = true;
     _nodes: Node[];
@@ -114,15 +119,29 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
     }
     private async updateValues(nodes: Node[]) {
         this._nodes = nodes;
-        if (nodes?.length) {
+        this.refreshTabs();
+    }
+
+    async openContributorDialog() {
+        const updatedNode = await MdsEditorWidgetAuthorComponent.openContributorDialog(
+            this.mdsEditorValues,
+            this.mainNavService,
+        );
+        this.updateValues([updatedNode]);
+    }
+
+    public async refreshTabs() {
+        if (this._nodes?.length) {
             let freetext = Array.from(
                 new Set(
-                    nodes.map((n) => n.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT]?.[0]),
+                    this._nodes.map(
+                        (n) => n.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT]?.[0],
+                    ),
                 ),
             );
             let author = Array.from(
                 new Set(
-                    nodes.map(
+                    this._nodes.map(
                         (n) =>
                             n.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]?.[0],
                     ),
@@ -144,9 +163,23 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
                 freetext: freetext?.[0] ?? '',
                 author: authorVCard,
             };
+            // set default tab based on config
+            if (!this.author.freetext?.trim() && !this.author.author?.getDisplayName().trim()) {
+                if (this.attributes?.defaulttab) {
+                    const tab = DefaultTab[this.attributes.defaulttab as DefaultTab];
+                    if (tab === DefaultTab.vcard) {
+                        this.authorTab = 1;
+                    }
+                }
+            }
             // switch to author tab if no freetext but author exists
             if (!this.author.freetext?.trim() && this.author.author?.getDisplayName().trim()) {
                 this.authorTab = 1;
+            } else if (
+                this.author.freetext?.trim() &&
+                !this.author.author?.getDisplayName().trim()
+            ) {
+                this.authorTab = 0;
             }
             // deep copy the elements to compare state
             this.initialAuthor = {
@@ -155,13 +188,5 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
             };
             setTimeout(() => this.tabGroup.realignInkBar());
         }
-    }
-
-    async openContributorDialog() {
-        const updatedNode = await MdsEditorWidgetAuthorComponent.openContributorDialog(
-            this.mdsEditorValues,
-            this.mainNavService,
-        );
-        this.updateValues([updatedNode]);
     }
 }
