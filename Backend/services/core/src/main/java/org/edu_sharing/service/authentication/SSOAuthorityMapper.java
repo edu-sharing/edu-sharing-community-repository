@@ -784,4 +784,8 @@ public class SSOAuthorityMapper {
 	public boolean isPreferRemoteUser() {
 		return preferRemoteUser;
 	}
+
+	public void setPreferRemoteUser(boolean preferRemoteUser) {
+		this.preferRemoteUser = preferRemoteUser;
+	}
 }
