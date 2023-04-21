@@ -13,7 +13,6 @@ import {
     TemporaryStorageService,
 } from '../../../core-module/core.module';
 import { Toast } from '../../../core-ui-module/toast';
-import { SearchService } from '../../../modules/search/search.service';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
 import { TranslationsService } from '../../../translations/translations.service';
@@ -44,7 +43,6 @@ export class ApplyToLmsComponent {
         private router: Router,
         private platformLocation: PlatformLocation,
         private route: ActivatedRoute,
-        private searchService: SearchService,
     ) {
         this.route.queryParams.subscribe((params: Params) => {
             if (params.reurl) {

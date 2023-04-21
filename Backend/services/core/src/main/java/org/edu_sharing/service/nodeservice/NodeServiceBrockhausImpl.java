@@ -32,13 +32,12 @@ public class NodeServiceBrockhausImpl extends NodeServiceAdapterCached{
 	@Override
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable {
 		HashMap<String, Object> props = super.getProperties(storeProtocol, storeId, nodeId);
-		if(props != null) {
-			return props;
+		if (props == null) {
+			props = new HashMap<>();
 		}
-		props = new HashMap<>();
 		String url=SearchServiceBrockhausImpl.buildUrl(apiKey,nodeId);
-		props.put(CCConstants.CONTENTURL,SearchServiceBrockhausImpl.buildUrl(apiKey,url));
-		props.put(CCConstants.CCM_PROP_IO_WWWURL,SearchServiceBrockhausImpl.buildUrl(apiKey,url));
+		props.put(CCConstants.CONTENTURL,url);
+		props.put(CCConstants.CCM_PROP_IO_WWWURL,url);
 
 		return props;
 	}

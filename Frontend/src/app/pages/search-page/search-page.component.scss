@@ -90,8 +90,9 @@ mat-tab-nav-panel {
 
 .filter-bar-body {
     flex-grow: 1;
-    padding: 20px;
     overflow: auto;
+    --container-padding: 20px;
+    padding: var(--container-padding);
 }
 
 .filters-dialog-content {

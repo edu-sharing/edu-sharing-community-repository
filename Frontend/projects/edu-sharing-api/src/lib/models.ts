@@ -6,6 +6,7 @@ export {
     ConnectorList,
     FeedbackData,
     LicenseAgreement,
+    ManualRegistrationData,
     Mds as MdsDefinition,
     MdsGroup,
     MdsQueryCriteria,

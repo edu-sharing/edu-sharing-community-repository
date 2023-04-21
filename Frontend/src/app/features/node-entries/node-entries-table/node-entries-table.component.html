@@ -9,6 +9,11 @@
   tabindex="-1"
   aria-hidden="true"
 ></button>
+<es-node-entries-global-options
+  *ngIf="entriesService.globalOptions?.length"
+  [displayType]="NodeEntriesDisplayType.Table"
+>
+</es-node-entries-global-options>
 <mat-table
   [dataSource]="entriesService.dataSource"
   matSort

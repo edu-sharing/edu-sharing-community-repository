@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ListItem, Statistics } from 'src/app/core-module/core.module';
+import { ListItem, Statistics } from '../../../core-module/core.module';
 import { ListWidget } from '../list-widget';
 
 @Component({

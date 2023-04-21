@@ -5,10 +5,12 @@ import { AuthenticationService, SavedSearch, SearchService } from 'ngx-edu-shari
 import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
 import { debounceTime, delay, filter, first, map, skip, takeUntil, tap } from 'rxjs/operators';
+import { RestConstants } from '../../core-module/core.module';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Values } from '../../features/mds/types/types';
 import { notNull } from '../../util/functions';
+import { GlobalSearchPageServiceInternal } from './global-search-page.service';
 import { SearchPageService } from './search-page.service';
 
 @Component({
@@ -25,10 +27,12 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
     readonly activeMdsForm = new FormControl(this.activeMetadataSet.getValue());
     readonly searchFilters = this.searchPage.searchFilters;
     readonly reUrl = this.searchPage.reUrl;
+    readonly customTemplates = this.globalSearchPageInternal.customTemplates;
     /** Deep copy of `searchFilters.userValue` for immutability. */
     searchFilterValues: Values;
     mdsParams: { repository: string; setId: string } = null;
     savedSearchesButtonIsVisible = false;
+    mdsExternalFilters: Values;
 
     private mdsInitialized = false;
     private defaultValues: Values;
@@ -38,6 +42,7 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
     constructor(
         private authentication: AuthenticationService,
         private dialogs: DialogsService,
+        private globalSearchPageInternal: GlobalSearchPageServiceInternal,
         private ngZone: NgZone,
         private searchPage: SearchPageService,
         private searchService: SearchService,
@@ -138,6 +143,18 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
                 takeUntil(this.destroyed),
             )
             .subscribe(() => this.initMdsEditor());
+        this.searchPage.searchString
+            .observeValue()
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((searchString) => {
+                if (searchString) {
+                    this.mdsExternalFilters = {
+                        [RestConstants.PRIMARY_SEARCH_CRITERIA]: [searchString],
+                    };
+                } else {
+                    this.mdsExternalFilters = null;
+                }
+            });
     }
 
     private registerSavedSearches(): void {

@@ -20,7 +20,7 @@ import { NodeDataSource } from '../../../features/node-entries/node-data-source'
 import {
     InteractionType,
     NodeEntriesDisplayType,
-} from 'src/app/features/node-entries/entries-model';
+} from '../../../features/node-entries/entries-model';
 
 @Component({
     selector: 'es-admin-frontpage',

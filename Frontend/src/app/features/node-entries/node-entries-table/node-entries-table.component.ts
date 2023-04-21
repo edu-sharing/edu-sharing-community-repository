@@ -26,9 +26,8 @@ import {
     shareReplay,
     startWith,
     takeUntil,
-    tap,
 } from 'rxjs/operators';
-import { Toast } from 'src/app/core-ui-module/toast';
+import { Toast } from '../../../core-ui-module/toast';
 import { ListItem, Node, UIService } from '../../../core-module/core.module';
 import { NodeEntriesService } from '../../../core-ui-module/node-entries.service';
 import { Target } from '../../../core-ui-module/option-item';
@@ -36,7 +35,7 @@ import { DragData } from '../../../services/nodes-drag-drop.service';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 import { BorderBoxObserverDirective } from '../../../shared/directives/border-box-observer.directive';
 import { CanDrop } from '../../../shared/directives/nodes-drop-target.directive';
-import { ClickSource, InteractionType } from '../entries-model';
+import { ClickSource, InteractionType, NodeEntriesDisplayType } from '../entries-model';
 import { NodeDataSourceRemote } from '../node-data-source-remote';
 import { NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeEntriesDataType } from '../node-entries.component';
@@ -52,6 +51,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
 {
     readonly InteractionType = InteractionType;
     readonly ClickSource = ClickSource;
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Target = Target;
 
     @ViewChild(MatSort) sort: MatSort;
@@ -104,13 +104,16 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         this.visibleDataColumns$
             .pipe(first(), delay(0))
             .subscribe(() => (this.columnChooserTriggerReady = true));
-        rxjs.merge([
-            this.entriesService.dataSource$,
-            this.entriesService.options$,
-            this.entriesService.dataSource.isLoadingSubject,
+        rxjs.combineLatest([
+            this.entriesService.dataSource$.pipe(startWith(void 0 as void)),
+            this.entriesService.options$.pipe(startWith(void 0 as void)),
+            this.entriesService.dataSource.isLoadingSubject.pipe(startWith(void 0 as void)),
+            this.entriesService.selection.changed.pipe(startWith(void 0 as void)),
         ])
             .pipe(takeUntil(this.destroyed))
-            .subscribe(() => this.changeDetectorRef.detectChanges());
+            .subscribe(() => {
+                this.changeDetectorRef.detectChanges();
+            });
     }
 
     ngOnChanges(changes: SimpleChanges): void {

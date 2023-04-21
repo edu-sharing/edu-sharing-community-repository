@@ -40,7 +40,7 @@
       [matTooltip]="getTooltip(value)"
       matTooltipPosition="above"
     >
-      <span class="mat-chip-label">{{ value.label }}</span>
+      <span class="mat-chip-label" [innerHTML]="value.label | escapeHtml"></span>
       <mat-icon matChipRemove>cancel</mat-icon>
     </mat-chip>
     <div class="input-wrapper">

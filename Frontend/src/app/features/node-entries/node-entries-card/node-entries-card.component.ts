@@ -14,7 +14,7 @@ import { ColorHelper, PreferredColor } from '../../../core-module/ui/color-helpe
 import { OptionItem, Target } from '../../../core-ui-module/option-item';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 import { MatMenuTrigger } from '@angular/material/menu';
-import { Toast } from 'src/app/core-ui-module/toast';
+import { Toast } from '../../../core-ui-module/toast';
 import { ConfigurationService } from '../../../core-module/rest/services/configuration.service';
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
 import { RestConstants } from '../../../core-module/rest/rest-constants';

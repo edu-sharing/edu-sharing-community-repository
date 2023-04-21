@@ -28,7 +28,6 @@ import { PermissionsRoutingComponent } from '../modules/permissions/permissions-
 import { PermissionsMainComponent } from '../modules/permissions/permissions.component';
 import { ProfilesComponent } from '../modules/profiles/profiles.component';
 import { RegisterComponent } from '../modules/register/register.component';
-import { SearchComponent } from '../modules/search/search.component';
 import { ServicesComponent } from '../modules/services/services.components';
 import { ShareAppComponent } from '../modules/share-app/share-app.component';
 import { SharingComponent } from '../modules/sharing/sharing.component';

@@ -10,8 +10,8 @@ import {
     DropTarget,
     NodeEntriesDisplayType,
     NodeRoot,
-} from 'src/app/features/node-entries/entries-model';
-import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
+} from '../../features/node-entries/entries-model';
+import { NodeDataSource } from '../../features/node-entries/node-data-source';
 import {
     ClipboardObject,
     ConfigurationService,
