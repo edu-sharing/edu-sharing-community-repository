@@ -23,7 +23,7 @@ import {
 import * as rxjs from 'rxjs';
 import { Observable, ReplaySubject, Subject } from 'rxjs';
 import { delay, filter, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
-import { NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
+import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { RocketChatService } from '../../../common/ui/global-container/rocketchat/rocket-chat.service';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {

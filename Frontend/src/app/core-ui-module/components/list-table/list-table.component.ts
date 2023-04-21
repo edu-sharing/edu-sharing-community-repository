@@ -33,7 +33,7 @@ import {
     ListOptions,
     ListOptionsConfig,
     NodeEntriesDisplayType,
-} from 'src/app/features/node-entries/entries-model';
+} from '../../../features/node-entries/entries-model';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,

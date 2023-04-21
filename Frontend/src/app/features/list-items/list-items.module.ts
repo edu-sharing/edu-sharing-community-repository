@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { SharedModule } from 'src/app/shared/shared.module';
+import { SharedModule } from '../../shared/shared.module';
 import { FormatDurationPipe } from './format-duration.pipe';
 import { ListBaseComponent } from './list-base/list-base.component';
 import { ListCollectionInfoComponent } from './list-collection-info/list-collection-info.component';

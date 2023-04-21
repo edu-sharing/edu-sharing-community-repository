@@ -27,7 +27,7 @@ import {
     startWith,
     takeUntil,
 } from 'rxjs/operators';
-import { Toast } from 'src/app/core-ui-module/toast';
+import { Toast } from '../../../core-ui-module/toast';
 import { ListItem, Node, UIService } from '../../../core-module/core.module';
 import { NodeEntriesService } from '../../../core-ui-module/node-entries.service';
 import { Target } from '../../../core-ui-module/option-item';

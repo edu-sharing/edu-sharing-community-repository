@@ -1,7 +1,7 @@
 import { Input, Type, Directive } from '@angular/core';
 import { Person } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
-import { ProposalNode, Group, Statistics, ListItem } from 'src/app/core-module/core.module';
+import { ProposalNode, Group, Statistics, ListItem } from '../../core-module/core.module';
 import { UniversalNode } from '../../common/definitions';
 
 @Directive()

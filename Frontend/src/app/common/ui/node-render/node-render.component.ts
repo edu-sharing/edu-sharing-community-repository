@@ -70,7 +70,7 @@ import { RenderHelperService } from '../../../core-ui-module/render-helper.servi
 import { Subject } from 'rxjs';
 import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
-import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
+import { NodeDataSource } from '../../../features/node-entries/node-data-source';
 import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
 import { LocalEventsService } from '../../../services/local-events.service';
 
