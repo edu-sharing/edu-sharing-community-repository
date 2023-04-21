@@ -1,6 +1,7 @@
 package org.edu_sharing.service.search;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class Suggestion implements Serializable {
     private String key;
@@ -20,5 +21,18 @@ public class Suggestion implements Serializable {
 
     public String getDisplayString() {
         return displayString;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Suggestion that = (Suggestion) o;
+        return Objects.equals(key, that.key) && Objects.equals(displayString, that.displayString);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(key, displayString);
     }
 }

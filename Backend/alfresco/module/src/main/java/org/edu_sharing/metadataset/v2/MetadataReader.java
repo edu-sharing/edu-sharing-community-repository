@@ -488,6 +488,9 @@ public class MetadataReader {
 				if(name.equals("filterMode")){
 					widget.setFilterMode(MetadataWidget.WidgetFilterMode.valueOf(value));
 				}
+				if(name.equals("unfold")){
+					widget.setExpandable(MetadataWidget.WidgetExpandable.valueOf(value));
+				}
 				if(name.equals("searchable")){
 					widget.setSearchable(value.equalsIgnoreCase("true"));
 				}

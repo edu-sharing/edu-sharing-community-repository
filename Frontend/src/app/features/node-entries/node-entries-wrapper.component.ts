@@ -130,8 +130,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Output() dblClickItem = new EventEmitter<NodeClickEvent<T>>();
     @Output() sortChange = new EventEmitter<ListSortConfig>();
     @Output() virtualNodesAdded = this.optionsHelper.virtualNodesAdded;
-    @Output() nodesChanged = this.optionsHelper.nodesChanged;
-    @Output() nodesDeleted = this.optionsHelper.nodesDeleted;
     @Output() displayTypeChanged = this.optionsHelper.displayTypeChanged;
 
     customNodeListComponent: Type<NodeEntriesComponent<T>>;

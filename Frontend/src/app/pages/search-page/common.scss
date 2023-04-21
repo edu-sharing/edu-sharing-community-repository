@@ -18,6 +18,9 @@
         flex-grow: 1;
         margin: 1rem 0;
     }
+    .small-progress-spinner {
+        margin-left: 12px;
+    }
 }
 
 @mixin noSearchResultsMessage {

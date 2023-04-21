@@ -1,11 +1,9 @@
-$checkbox-margin-horizontal: 20px;
-$checkbox-margin-vertical: 10px;
-
 :host ::ng-deep .mat-checkbox {
     display: flex;
     max-width: 100%;
     .mat-checkbox-layout {
-        overflow: hidden;
+        flex-grow: 1; // Maximize clickable area
+        min-width: 0; // Cut overflowing labels
         .mat-checkbox-label {
             overflow: hidden;
             text-overflow: ellipsis;
@@ -16,15 +14,8 @@ $checkbox-margin-vertical: 10px;
 .checkboxes-group {
     display: flex;
     flex-wrap: wrap;
-    margin-right: -$checkbox-margin-horizontal;
-    margin-bottom: -$checkbox-margin-vertical;
-    padding: 5px 20px;
+    gap: 10px 20px;
     &.vertical {
         flex-direction: column;
     }
-}
-
-.mat-checkbox {
-    margin-right: $checkbox-margin-horizontal;
-    margin-bottom: $checkbox-margin-vertical;
 }

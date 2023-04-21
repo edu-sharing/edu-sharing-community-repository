@@ -16,4 +16,4 @@ module.exports = async ({ config, mode }) => {
     console.log(config);
     // Return the altered config
     return config;
-}
+};

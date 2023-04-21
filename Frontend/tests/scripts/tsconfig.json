@@ -9,7 +9,7 @@
     "lib": ["es2018"],
     "types": ["node"],
     "experimentalDecorators": true,
-    "strict": true,
+    "strict": true
   },
   "include": ["*.ts", "*.mts"]
 }

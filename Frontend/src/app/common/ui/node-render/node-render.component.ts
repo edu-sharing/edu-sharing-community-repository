@@ -30,7 +30,6 @@ import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { trigger } from '@angular/animations';
 import { Location, PlatformLocation } from '@angular/common';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
-import { SearchService } from '../../../modules/search/search.service';
 import { HttpClient } from '@angular/common/http';
 import {
     ConfigurationHelper,
@@ -73,6 +72,7 @@ import { LoadingScreenService } from '../../../main/loading-screen/loading-scree
 import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
+import { LocalEventsService } from '../../../services/local-events.service';
 
 @Component({
     selector: 'es-node-render',
@@ -96,7 +96,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         private nodeHelper: NodeHelperService,
         private renderHelper: RenderHelperService,
         private location: Location,
-        private searchService: SearchService,
         private connector: RestConnectorService,
         private http: HttpClient,
         private connectors: RestConnectorsService,
@@ -123,6 +122,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         private loadingScreen: LoadingScreenService,
         public mainNavService: MainNavService,
         private temporaryStorageService: TemporaryStorageService,
+        private localEvents: LocalEventsService,
     ) {
         (window as any).nodeRenderComponentRef = { component: this, zone: _ngZone };
         (window as any).ngRender = {
@@ -184,12 +184,12 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             currentScope: 'render',
         });
         this.optionsHelper.registerGlobalKeyboardShortcuts();
-        this.optionsHelper.nodesChanged
+        this.localEvents.nodesChanged
             .pipe(takeUntil(this.destroyed$))
             .subscribe(() => this.refresh());
-        this.optionsHelper.nodesDeleted
+        this.localEvents.nodesDeleted
             .pipe(takeUntil(this.destroyed$))
-            .subscribe((result) => this.onDelete(result));
+            .subscribe(() => this.close());
     }
 
     public isLoading = true;
@@ -213,11 +213,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
     private isSafe = false;
     private isOpenable: boolean;
     private closeOnBack: boolean;
-    public nodeWorkflow: Node[];
-    public addNodesStream: Node[];
-    public nodeDelete: Node[];
-    public nodeVariant: Node;
-    public addToCollection: Node[];
     private editor: string;
     private fromLogin = false;
     public banner: any;
@@ -289,9 +284,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                         false,
                     );
                 } else {
-                    if (window.history.state?.scope === Scope.Search) {
-                        this.searchService.reinit = false;
-                    }
                     NodeRenderComponent.close(this.location);
                     // use a timeout to let the browser try to go back in history first
                     setTimeout(() => {
@@ -467,7 +459,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                             this.postprocessHtml();
                             this.handleProposal();
                             this.renderHelper.doAll(this._node);
-                            this.addVideoControls();
                             this.linkSearchableWidgets();
                             this.loadNode();
                             this.loadSimilarNodes();
@@ -509,47 +500,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         this.nodeApi
             .getNodeParents(this._nodeId)
             .subscribe((nodes) => this.breadcrumbsService.setNodePath(nodes.nodes.reverse()));
-    }
-    onDelete(event: any) {
-        if (event.error) return;
-        this.close();
-    }
-    addVideoControls() {
-        let videoElement: HTMLVideoElement;
-        let target: Element;
-        if (!this.isCollectionRef()) {
-            return;
-        }
-        try {
-            videoElement = document.querySelector('.edusharing_rendering_content_wrapper video');
-            if (!videoElement) {
-                throw new Error();
-            }
-            const listener = () => {
-                this.tracking
-                    .trackEvent(EventType.VIEW_MATERIAL_PLAY_MEDIA, this._node.ref.id)
-                    .subscribe(() => {});
-                videoElement.removeEventListener('play', listener);
-            };
-            videoElement.addEventListener('play', listener);
-            target = document.createElement('div');
-            videoElement.parentElement.appendChild(target);
-        } catch (e) {
-            // console.log("did not find video element, skipping controls",e);
-            setTimeout(() => this.addVideoControls(), 1000 / 30);
-            return;
-        }
-        const data = {
-            video: videoElement,
-            node: this._node,
-        };
-        UIHelper.injectAngularComponent(
-            this.componentFactoryResolver,
-            this.viewContainerRef,
-            VideoControlsComponent,
-            target,
-            data,
-        );
     }
     private postprocessHtml() {
         if (!this.config.instant('rendering.showPreview', true)) {

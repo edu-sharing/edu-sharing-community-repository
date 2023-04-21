@@ -21,10 +21,12 @@ import * as rxjs from 'rxjs';
 import { BehaviorSubject, combineLatest, EMPTY, from, Observable, Subject, timer } from 'rxjs';
 import {
     debounce,
+    debounceTime,
     delay,
     distinctUntilChanged,
     filter,
     map,
+    shareReplay,
     startWith,
     switchMap,
     throttleTime,
@@ -333,9 +335,14 @@ export class MdsEditorWidgetChipsComponent
                 distinctUntilChanged(),
             ),
         ]).pipe(
+            // When accepting a value, the chips' value and the input's value both change. Debounce
+            // to only trigger once in that case.
+            debounceTime(0),
             switchMap(([filterString, selectedValues]) =>
                 this.filter(filterString, selectedValues),
             ),
+            // Don't send multiple requests for multiple subscribers.
+            shareReplay(1),
         );
     }
 

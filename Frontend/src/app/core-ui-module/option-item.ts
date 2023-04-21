@@ -169,6 +169,7 @@ export enum Scope {
     Render = 'Render',
     Search = 'Search',
     SearchCollections = 'SearchCollections',
+    SavedSearches = 'SavedSearches',
     CollectionsReferences = 'CollectionsReferences',
     CollectionsProposals = 'CollectionsProposals',
     CollectionsCollection = 'CollectionsCollection',

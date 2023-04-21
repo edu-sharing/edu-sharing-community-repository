@@ -43,7 +43,6 @@ import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import { NodeStoreService } from '../../../modules/search/node-store.service';
 import { LicenseAgreementService } from '../../../services/license-agreement.service';
 import { MainMenuEntriesService } from '../main-menu-entries.service';
 import { MainNavConfig, MainNavService } from '../main-nav.service';
@@ -120,7 +119,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         private user: UserService,
         private ngZone: NgZone,
         // private changeDetectorRef: ChangeDetectorRef,
-        private nodeStore: NodeStoreService,
         private rocketChat: RocketChatService,
         private dialogs: DialogsService,
         private licenseAgreement: LicenseAgreementService,

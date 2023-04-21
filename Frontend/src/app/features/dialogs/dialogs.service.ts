@@ -21,6 +21,10 @@ import {
     CreateMapLinkDialogResult,
 } from './dialog-modules/create-map-link-dialog/create-map-link-dialog-data';
 import {
+    DeleteNodesDialogData,
+    DeleteNodesDialogResult,
+} from './dialog-modules/delete-nodes-dialog/delete-nodes-dialog-data';
+import {
     FileChooserDialogData,
     FileChooserDialogResult,
 } from './dialog-modules/file-chooser-dialog/file-chooser-dialog-data';
@@ -58,6 +62,10 @@ import {
     SaveSearchDialogData,
     SaveSearchDialogResult,
 } from './dialog-modules/save-search-dialog/save-search-dialog-data';
+import {
+    SavedSearchesDialogData,
+    SavedSearchesDialogResult,
+} from './dialog-modules/saved-searches-dialog/saved-searches-dialog-data';
 import {
     SendFeedbackDialogData,
     SendFeedbackDialogResult,
@@ -463,6 +471,38 @@ export class DialogsService {
             width: 600,
             data,
             closable: Closable.Standard,
+        });
+    }
+
+    async openSavedSearchesDialog(
+        data: SavedSearchesDialogData,
+    ): Promise<CardDialogRef<SavedSearchesDialogData, SavedSearchesDialogResult>> {
+        const { SavedSearchesDialogComponent } = await import(
+            './dialog-modules/saved-searches-dialog/saved-searches-dialog.module'
+        );
+        return this.cardDialog.open(SavedSearchesDialogComponent, {
+            title: 'SEARCH.SAVED_SEARCHES.TITLE',
+            avatar: { kind: 'icon', icon: 'search' },
+            contentPadding: 0,
+            minHeight: 500,
+            width: 600,
+            data,
+            closable: Closable.Casual,
+        });
+    }
+
+    async openDeleteNodesDialog(
+        data: DeleteNodesDialogData,
+    ): Promise<CardDialogRef<DeleteNodesDialogData, DeleteNodesDialogResult>> {
+        const { DeleteNodesDialogComponent } = await import(
+            './dialog-modules/delete-nodes-dialog/delete-nodes-dialog.module'
+        );
+        return this.cardDialog.open(DeleteNodesDialogComponent, {
+            ...(await configForNodes(data.nodes, this.translate).toPromise()),
+            minHeight: 240,
+            width: 500,
+            data,
+            closable: Closable.Casual,
         });
     }
 }

@@ -1,7 +1,8 @@
 import { Component, Inject, OnInit, ViewChild } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { DialogButton } from '../../../../core-module/core.module';
+import { DialogButton, Node } from '../../../../core-module/core.module';
+import { LocalEventsService } from '../../../../services/local-events.service';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { LicenseDialogContentComponent } from './license-dialog-content.component';
@@ -24,6 +25,7 @@ export class LicenseDialogComponent implements OnInit {
     constructor(
         @Inject(CARD_DIALOG_DATA) public data: LicenseDialogData,
         private dialogRef: CardDialogRef<LicenseDialogData, LicenseDialogResult>,
+        private localEvents: LocalEventsService,
     ) {}
 
     ngOnInit(): void {
@@ -50,6 +52,9 @@ export class LicenseDialogComponent implements OnInit {
 
     onDone(result: LicenseDialogResult) {
         this.dialogRef.close(result);
+        if (this.data.kind === 'nodes' && Array.isArray(result)) {
+            this.localEvents.nodesChanged.emit(result as Node[]);
+        }
     }
 
     setIsLoading(isLoading: boolean) {

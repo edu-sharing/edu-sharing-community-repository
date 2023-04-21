@@ -1,17 +1,20 @@
 import { DataSource } from '@angular/cdk/collections';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { GenericAuthority, Pagination, Node } from 'src/app/core-module/core.module';
-import { ItemsCap } from './items-cap';
+import { GenericAuthority, Node, Pagination } from 'src/app/core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
+import { ItemsCap } from './items-cap';
+import { LoadingState } from './node-data-source-remote';
 
 export class NodeDataSource<T extends Node | GenericAuthority> extends DataSource<T> {
     private dataStream = new BehaviorSubject<T[]>([]);
     private pagination$ = new BehaviorSubject<Pagination>(null);
-    public isLoadingSubject = new BehaviorSubject<boolean>(false);
+    // Include `LoadingState` to be type-compatible to `NodeDataSourceRemote` although not used
+    // here.
+    public isLoadingSubject = new BehaviorSubject<LoadingState | boolean>(false);
     get isLoading() {
         return this.isLoadingSubject.value;
     }
-    set isLoading(isLoading: boolean) {
+    set isLoading(isLoading: LoadingState | boolean) {
         this.isLoadingSubject.next(isLoading);
     }
     initialPageLoaded = false;
@@ -75,15 +78,19 @@ export class NodeDataSource<T extends Node | GenericAuthority> extends DataSourc
     /**
      * Removes elements from the visible data.
      */
-    removeData(removeData: T[]): void {
-        const data = this.getData().filter((value) => !removeData.includes(value));
-        this.dataStream.next(data);
+    removeData(toRemove: T[]): void {
+        const newData = this.getData().filter(
+            (value) =>
+                !toRemove.some((d) => Helper.objectEquals((d as Node).ref, (value as Node).ref)),
+        );
+        const removedData = this.getData().filter((value) => !newData.includes(value));
+        this.dataStream.next(newData);
         if (this.pagination$.value) {
             const pagination = this.pagination$.value;
             this.setPagination({
-                count: pagination.count - removeData.length,
+                count: pagination.count - removedData.length,
                 from: pagination.from,
-                total: pagination.total - removeData.length,
+                total: pagination.total - removedData.length,
             });
         }
     }

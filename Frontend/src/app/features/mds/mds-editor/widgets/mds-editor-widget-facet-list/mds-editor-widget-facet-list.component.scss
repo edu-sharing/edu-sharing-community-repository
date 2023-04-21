@@ -6,7 +6,7 @@ $countBackgroundColor: scale-color($backgroundColor, $lightness: -15%);
     mat-form-field {
         width: 100%;
         > div {
-            padding-bottom: 0;
+            padding-bottom: 1em;
         }
     }
     mat-checkbox {
@@ -19,6 +19,10 @@ $countBackgroundColor: scale-color($backgroundColor, $lightness: -15%);
             min-width: 0;
         }
     }
+}
+
+ul {
+    margin: 0;
 }
 
 li {
@@ -49,6 +53,7 @@ mat-checkbox {
 }
 
 .load-more-button {
+    margin-top: 1em;
     .spinner {
         margin-left: 10px;
         transform: scale(0.8);

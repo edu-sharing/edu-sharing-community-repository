@@ -2,13 +2,13 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LocationStrategy } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
-import { MatTooltipDefaultOptions, MAT_TOOLTIP_DEFAULT_OPTIONS } from '@angular/material/tooltip';
+import { MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions } from '@angular/material/tooltip';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { ResizableModule } from 'angular-resizable-element';
 import {
+    EDU_SHARING_API_CONFIG,
     EduSharingApiConfigurationParams,
     EduSharingApiModule,
-    EDU_SHARING_API_CONFIG,
 } from 'ngx-edu-sharing-api';
 import { CoreUiModule } from './core-ui-module/core-ui.module';
 import { ErrorHandlerService } from './core-ui-module/error-handler.service';
@@ -25,6 +25,7 @@ import { IMPORTS } from './imports';
 import { MainModule } from './main/main.module';
 import { DECLARATIONS_ADMIN } from './modules/admin/declarations';
 import { LtiAdminComponent } from './modules/admin/lti-admin/lti-admin.component';
+import { LtitoolAdminComponent } from './modules/admin/ltitool-admin/ltitool-admin.component';
 import { LuceneTemplateMemoryComponent } from './modules/admin/lucene-template-memory/lucene-template-memory.component';
 import { DECLARATIONS_COLLECTIONS } from './modules/collections/declarations';
 import { DECLARATIONS_FILE_UPLOAD } from './modules/file-upload/declarations';
@@ -38,8 +39,6 @@ import { DECLARATIONS_OER } from './modules/oer/declarations';
 import { DECLARATIONS_PERMISSIONS } from './modules/permissions/declarations';
 import { DECLARATIONS_PROFILES } from './modules/profiles/declarations';
 import { DECLARATIONS_REGISTER } from './modules/register/declarations';
-import { DECLARATIONS_SEARCH } from './modules/search/declarations';
-import { PROVIDERS_SEARCH } from './modules/search/providers';
 import { DECLARATIONS_SERVICES } from './modules/services/declarations';
 import { DECLARATIONS_SHARE_APP } from './modules/share-app/declarations';
 import { DECLARATIONS_SHARING } from './modules/sharing/declarations';
@@ -66,7 +65,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS,
         DECLARATIONS_RECYCLE,
         DECLARATIONS_WORKSPACE,
-        DECLARATIONS_SEARCH,
         DECLARATIONS_COLLECTIONS,
         DECLARATIONS_LOGIN,
         DECLARATIONS_REGISTER,
@@ -87,6 +85,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         extensionDeclarations,
         LtiComponent,
         LtiAdminComponent,
+        LtitoolAdminComponent,
     ],
     imports: [
         IMPORTS,
@@ -117,7 +116,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         },
         { provide: LocationStrategy, useClass: AppLocationStrategy },
         PROVIDERS,
-        PROVIDERS_SEARCH,
         { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
         { provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: matTooltipDefaultOptions },
         extensionProviders,
@@ -127,7 +125,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS,
         DECLARATIONS_RECYCLE,
         DECLARATIONS_WORKSPACE,
-        DECLARATIONS_SEARCH,
         DECLARATIONS_COLLECTIONS,
         DECLARATIONS_LOGIN,
         DECLARATIONS_REGISTER,

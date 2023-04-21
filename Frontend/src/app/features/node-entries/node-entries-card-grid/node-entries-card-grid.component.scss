@@ -168,58 +168,6 @@ $horizontalScrollPadding: 1.5em;
             }
         }
     }
-    > .global-options {
-        display: grid;
-        grid-template-columns: auto;
-        grid-template-rows: repeat(auto-fit, minmax(70px, 1fr));
-        grid-row-gap: 20px;
-        height: 100%;
-        min-height: 250px;
-        &.global-options-small {
-            min-height: 130px;
-        }
-        .global-option-btn {
-            display: flex;
-            height: 100%;
-            padding: 0;
-        }
-        .global-option {
-            cursor: pointer;
-            display: flex;
-            @include materialShadow();
-            width: 100%;
-            height: 100%;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border: 3px dashed $primary;
-            color: $primary;
-            > i {
-                font-size: 32px;
-                margin-bottom: 5px;
-            }
-            > .label {
-                cursor: pointer;
-                font-weight: bold;
-            }
-            &:hover,
-            &:focus {
-                background-color: $primaryVeryLight;
-            }
-        }
-    }
-}
-:host ::ng-deep {
-    .card-grid {
-        > .global-options {
-            .global-option-btn {
-                .mat-button-wrapper {
-                    width: 100%;
-                    height: 100%;
-                }
-            }
-        }
-    }
 }
 
 .card-drag-preview {

@@ -102,6 +102,13 @@
     "ADD_TO": {
       "DUPLICATE_TITLE": "Element(s) already existing",
       "DUPLICATE_MESSAGE": "The collection already contains {{count}} of the element(s). Are you want to add them again?"
+    },
+    "PROPOSALS": {
+      "TITLE": "Materials proposed by users",
+      "TOAST": {
+        "ACCEPTED": "The element has been added to the collection.",
+        "DECLINED": "The proposal has been declined."
+      }
     }
   },
 
