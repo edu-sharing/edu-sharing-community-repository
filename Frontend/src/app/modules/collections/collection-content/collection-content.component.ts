@@ -575,7 +575,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             .removeFromCollection(this.collection.ref.id, this.collection.ref.id)
             .subscribe(
                 () => {
-                    this.toast.toast('COLLECTIONS.REMOVED_FROM_COLLECTION');
+                    if (!('proposal' in this.collection)) {
+                        this.toast.toast('COLLECTIONS.REMOVED_FROM_COLLECTION');
+                    }
                     this.toast.closeModalDialog();
                     this.refreshContent();
                     if (callback) {
@@ -618,6 +620,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private refreshContent() {
         this.dataSourceCollections.reset();
         this.dataSourceReferences.reset();
+        this.dataSourceCollectionProposals.reset();
         this.listReferences?.getSelection().clear();
         this.dataSourceCollections.isLoading = true;
         this.dataSourceReferences.isLoading = true;
@@ -881,7 +884,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         }
     }
 
-    addNodesToCollection(nodes: Node[]) {
+    addNodesToCollection(nodes: Node[], allowDuplicate: boolean | 'ignore' = false) {
         this.toast.showProgressDialog();
         UIHelper.addToCollection(
             this.nodeHelper,
@@ -895,6 +898,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 this.refreshContent();
                 this.toast.closeModalDialog();
             },
+            allowDuplicate,
         );
     }
 

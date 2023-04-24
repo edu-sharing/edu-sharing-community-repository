@@ -1,6 +1,7 @@
 import { EventEmitter, Injectable, NgZone, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import { NodeListErrorResponses, NodeListService } from 'ngx-edu-sharing-api';
 import {
     forkJoin,
     forkJoin as observableForkJoin,
@@ -8,9 +9,10 @@ import {
     of,
     Subject,
     Subscription,
+    Observable,
 } from 'rxjs';
 import { isArray } from 'rxjs/internal/util/isArray';
-import { map, takeUntil } from 'rxjs/operators';
+import { catchError, map, takeUntil, tap } from 'rxjs/operators';
 import { BridgeService } from '../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
@@ -32,7 +34,6 @@ import { MessageType } from '../core-module/ui/message-type';
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { WorkspaceManagementDialogsComponent } from '../modules/management-dialogs/management-dialogs.component';
-import { NodeStoreService } from '../modules/search/node-store.service';
 import {
     KeyboardShortcutsService,
     matchesShortcutCondition,
@@ -98,7 +99,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         private mainNavService: MainNavService,
         private storage: TemporaryStorageService,
         private bridge: BridgeService,
-        private nodeStore: NodeStoreService,
+        private nodeList: NodeListService,
         private dialogs: DialogsService,
         private keyboardShortcuts: KeyboardShortcutsService,
         private ngZone: NgZone,
@@ -525,8 +526,8 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             'check',
             (object) => management.addProposalsToCollection(this.getObjects(object, data)),
         );
-        acceptProposal.customEnabledCallback = (nodes) =>
-            nodes.every((n) => (n as ProposalNode).accessible);
+        /*acceptProposal.customEnabledCallback = (nodes) =>
+            nodes.every((n) => (n as ProposalNode).accessible);*/
         acceptProposal.elementType = [ElementType.NodeProposal];
         acceptProposal.constrains = [Constrain.User];
         acceptProposal.group = DefaultGroups.Primary;
@@ -1490,9 +1491,43 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
 
     private bookmarkNodes(nodes: Node[]) {
         this.bridge.showProgressDialog();
-        this.nodeStore.add(nodes).subscribe(() => {
+        this.addToNodeStore(nodes).subscribe(() => {
             this.bridge.closeModalDialog();
         });
+    }
+
+    private addToNodeStore(nodes: Node[]): Observable<void> {
+        return this.nodeList
+            .addToNodeList(
+                RestConstants.NODE_STORE_LIST,
+                nodes.map((node) => node.ref.id),
+            )
+            .pipe(
+                tap(() => {
+                    this.toast.toast('SEARCH.ADDED_TO_NODE_STORE', {
+                        count: nodes.length,
+                    });
+                }),
+                catchError((errors: NodeListErrorResponses) => {
+                    const numberSuccessful = nodes.length - errors.length;
+                    if (numberSuccessful > 0) {
+                        this.toast.toast('SEARCH.ADDED_TO_NODE_STORE', {
+                            count: numberSuccessful,
+                        });
+                    }
+                    for (const { nodeId, error } of errors) {
+                        if (error.status === RestConstants.DUPLICATE_NODE_RESPONSE) {
+                            this.toast.error(null, 'SEARCH.ADDED_TO_NODE_STORE_EXISTS', {
+                                name: RestHelper.getTitle(
+                                    nodes.find((node) => node.ref.id === nodeId),
+                                ),
+                            });
+                            error.preventDefault();
+                        }
+                    }
+                    return of(void 0);
+                }),
+            );
     }
 
     /**

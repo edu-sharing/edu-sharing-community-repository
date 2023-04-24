@@ -66,6 +66,15 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
     @Input() repository = RestConstants.HOME_REPOSITORY;
     @Input() editorMode: EditorMode;
     @Input() setId: string;
+    /**
+     * Filters that should be applied in addition to the MDS's own values when fetching remote
+     * values to be suggested to the user.
+     *
+     * Currently applied only if `editorMode === 'search'`.
+     */
+    @Input() set externalFilters(values: Values) {
+        this.mdsEditorInstance.externalFilters = values;
+    }
 
     @Output() extendedChange = new EventEmitter();
     @Output() onCancel = new EventEmitter();

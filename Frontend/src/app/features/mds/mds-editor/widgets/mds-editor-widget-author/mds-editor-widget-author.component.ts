@@ -1,6 +1,7 @@
-import { filter, tap } from 'rxjs/operators';
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { MatTabGroup } from '@angular/material/tabs';
 import { BehaviorSubject } from 'rxjs';
+import { filter, tap } from 'rxjs/operators';
 import { Node } from '../../../../../core-module/rest/data-object';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { RestIamService } from '../../../../../core-module/rest/services/rest-iam.service';
@@ -8,16 +9,19 @@ import { UIService } from '../../../../../core-module/rest/services/ui.service';
 import { VCard } from 'ngx-edu-sharing-ui';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
-import { Values } from '../../../types/types';
-import { MatTabGroup } from '@angular/material/tabs';
+import { Attributes } from '../../util/parse-attributes';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
 import { DialogsService } from '../../../../dialogs/dialogs.service';
+import { Values } from '../../../types/types';
 
 export interface AuthorData {
     freetext: string;
     author: VCard;
 }
-
+enum DefaultTab {
+    freetext = 'freetext',
+    vcard = 'vcard',
+}
 @Component({
     selector: 'es-mds-editor-widget-author',
     templateUrl: './mds-editor-widget-author.component.html',
@@ -28,6 +32,7 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         requiresNode: false,
         supportsBulk: false,
     };
+    attributes: Attributes;
     @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
     @Input() showContributorDialog = true;
     _nodes: Node[];
@@ -115,15 +120,21 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
     }
     private async updateValues(nodes: Node[]) {
         this._nodes = nodes;
-        if (nodes?.length) {
+        this.refreshTabs();
+    }
+
+    public async refreshTabs() {
+        if (this._nodes?.length) {
             let freetext = Array.from(
                 new Set(
-                    nodes.map((n) => n.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT]?.[0]),
+                    this._nodes.map(
+                        (n) => n.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT]?.[0],
+                    ),
                 ),
             );
             let author = Array.from(
                 new Set(
-                    nodes.map(
+                    this._nodes.map(
                         (n) =>
                             n.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]?.[0],
                     ),
@@ -145,9 +156,23 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
                 freetext: freetext?.[0] ?? '',
                 author: authorVCard,
             };
+            // set default tab based on config
+            if (!this.author.freetext?.trim() && !this.author.author?.getDisplayName().trim()) {
+                if (this.attributes?.defaulttab) {
+                    const tab = DefaultTab[this.attributes.defaulttab as DefaultTab];
+                    if (tab === DefaultTab.vcard) {
+                        this.authorTab = 1;
+                    }
+                }
+            }
             // switch to author tab if no freetext but author exists
             if (!this.author.freetext?.trim() && this.author.author?.getDisplayName().trim()) {
                 this.authorTab = 1;
+            } else if (
+                this.author.freetext?.trim() &&
+                !this.author.author?.getDisplayName().trim()
+            ) {
+                this.authorTab = 0;
             }
             // deep copy the elements to compare state
             this.initialAuthor = {

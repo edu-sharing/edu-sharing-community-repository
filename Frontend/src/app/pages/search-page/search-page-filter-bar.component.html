@@ -28,5 +28,8 @@
   [embedded]="true"
   mode="search"
   [currentValues]="searchFilterValues"
+  [externalFilters]="mdsExternalFilters"
 >
 </es-mds-editor-wrapper>
+
+<ng-container *ngTemplateOutlet="customTemplates.value.filterBarBottom"></ng-container>

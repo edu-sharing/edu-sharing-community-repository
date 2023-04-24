@@ -35,7 +35,6 @@ import {
     RestMdsService,
     RestSearchService,
 } from '../../../core-module/core.module';
-import { SearchService } from '../../../modules/search/search.service';
 import { EditorMode } from '../types/mds-types';
 import {
     BulkBehavior,
@@ -58,6 +57,7 @@ import { MdsEditorCommonService } from './mds-editor-common.service';
 import { NativeWidgetComponent } from './mds-editor-view/mds-editor-view.component';
 import { parseAttributes } from './util/parse-attributes';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
+import { Helper } from '../../../core-module/rest/helper';
 
 export interface CompletionStatusField {
     widget: Widget;
@@ -154,19 +154,20 @@ export class MdsEditorInstanceService implements OnDestroy {
             shareReplay(1),
         );
 
-        private readonly _new_inputValues$ =
-            this.mdsEditorInstanceService._new_inputValuesSubject.pipe(
-                map((values) => values[this.definition.id]),
-            );
+        get definition() {
+            return this._definition;
+        }
 
         constructor(
             private mdsEditorInstanceService: MdsEditorInstanceService,
-            public readonly definition: MdsWidget,
+            private _definition: MdsWidget,
             public readonly viewId: string,
             public readonly repositoryId: string,
             public readonly relation: MdsViewRelation = null,
             public readonly variables: { [key: string]: string } = null,
         ) {
+            // deep copy to prevent persistence from inline overrides
+            this._definition = Helper.deepCopy(this._definition);
             this.replaceVariables();
             combineLatest([this.value$, this.bulkMode, this.ready])
                 .pipe(
@@ -472,11 +473,11 @@ export class MdsEditorInstanceService implements OnDestroy {
             }
             let criteria: any[] = [];
             if (this.mdsEditorInstanceService.editorMode === 'search') {
-                const values = await this.mdsEditorInstanceService.getValues();
+                const values = {
+                    ...(await this.mdsEditorInstanceService.getValues()),
+                    ...(this.mdsEditorInstanceService.externalFilters ?? {}),
+                };
                 delete values[this.definition.id];
-                values[RestConstants.PRIMARY_SEARCH_CRITERIA] = [
-                    this.mdsEditorInstanceService.searchService.searchTerm,
-                ];
                 criteria = RestSearchService.convertCritierias(
                     values,
                     this.mdsEditorInstanceService.widgets.value.map((w) => w.definition),
@@ -617,6 +618,8 @@ export class MdsEditorInstanceService implements OnDestroy {
      * Will be appended on init depending if they exist in the currently rendered group.
      */
     nativeWidgets = new BehaviorSubject<NativeWidget[]>([]);
+    /** Input to `MdsEditorWrapper`. */
+    externalFilters: Values;
 
     // Mutable state
     private readonly completionStatus$ = new BehaviorSubject<CompletionStatus>(null);
@@ -668,7 +671,6 @@ export class MdsEditorInstanceService implements OnDestroy {
         private restMdsService: RestMdsService,
         private configService: ConfigurationService,
         private restConnector: RestConnectorService,
-        private searchService: SearchService,
         private config: ConfigService,
     ) {
         this.registerInitMds();

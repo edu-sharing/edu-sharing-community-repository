@@ -262,6 +262,9 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
     }
 
     private _getSearchCriteria(params: SearchRequestParams): MdsQueryCriteria[] {
+        // TODO: Port `unfoldTrees` feature from 8.0. See
+        // https://scm.edu-sharing.com/edu-sharing/community/repository/edu-sharing-angular-core-module/-/blob/5447ea837a99a3dab04395c10464dd417ddb73a1/rest/services/rest-search.service.ts#L34.
+        // Also consider a backend solution.
         const criteria: MdsQueryCriteria[] = Object.entries(params.searchFilters ?? {}).map(
             ([property, values]) => ({ property, values }),
         );

@@ -17,13 +17,14 @@ export type LoadingState =
 export class NodeDataSource<T extends Node | GenericAuthority> extends DataSource<T> {
     protected dataStream = new BehaviorSubject<T[]>([]);
     private pagination$ = new BehaviorSubject<Pagination>(null);
-    // FIXME: type 'boolean' only used for type compatibility with non-remote data source.
-    isLoadingSubject = new BehaviorSubject<LoadingState | boolean>(null);
-    get isLoading(): LoadingState | boolean {
+    // Include `LoadingState` to be type-compatible to `NodeDataSourceRemote` although not used
+    // here.
+    public isLoadingSubject = new BehaviorSubject<LoadingState | boolean>(false);
+    get isLoading() {
         return this.isLoadingSubject.value;
     }
-    set isLoading(value: LoadingState | boolean) {
-        this.isLoadingSubject.next(value);
+    set isLoading(isLoading: LoadingState | boolean) {
+        this.isLoadingSubject.next(isLoading);
     }
     initialPageLoaded = false;
     protected _itemsCap: ItemsCap<T> | null;
@@ -87,8 +88,11 @@ export class NodeDataSource<T extends Node | GenericAuthority> extends DataSourc
      * Removes elements from the visible data.
      */
     removeData(toRemove: T[]): void {
-        const newData = this.getData().filter((value) => !toRemove.includes(value));
-        const removedData = this.getData().filter((value) => toRemove.includes(value));
+        const newData = this.getData().filter(
+            (value) =>
+                !toRemove.some((d) => Helper.objectEquals((d as Node).ref, (value as Node).ref)),
+        );
+        const removedData = this.getData().filter((value) => !newData.includes(value));
         this.dataStream.next(newData);
         if (this.pagination$.value) {
             const pagination = this.pagination$.value;

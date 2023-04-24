@@ -1,0 +1,75 @@
+<mat-tab-group mat-stretch-tabs>
+  <mat-tab label="{{ 'ADMIN.LTI.DYNAMIC' | translate }}">
+    <div class="lti-wrapper">
+      <es-info-message mode="info">
+        <span class="info-message">{{ 'ADMIN.LTITOOL.DYNAMIC_INFO' | translate }}</span>
+      </es-info-message>
+      <div class="base-fields">
+        <mat-form-field floatLabel="always">
+          <mat-label>{{ 'ADMIN.LTITOOL.DYNAMIC_URL' | translate }}</mat-label>
+          <input
+            [(ngModel)]="ltiToolDynRegUrl"
+            matInput
+            placeholder="https://toolwithdynamicregistration.url"
+          />
+        </mat-form-field>
+        <button id="btn-register" mat-raised-button color="primary" (click)="register()">
+          {{ 'ADMIN.LTITOOL.REGISTER' | translate }}
+        </button>
+      </div>
+      <iframe [src]="ltiToolDynRegUrlSafe" *ngIf="showIframe"></iframe>
+    </div>
+  </mat-tab>
+  <mat-tab label="{{ 'ADMIN.LTI.ADVANCED' | translate }}">
+    <div class="lti-wrapper">
+      <es-info-message mode="info">
+        <span class="info-message">{{ 'ADMIN.LTITOOL.MANUAL_INFO' | translate }}</span>
+      </es-info-message>
+      <div class="base-fields">
+        <mat-form-field floatLabel="always">
+          <mat-label>{{ 'ADMIN.LTITOOL.DATA.keysetUrl' | translate }}</mat-label>
+          <input
+            matInput
+            [(ngModel)]="manualRegistrationData.keysetUrl"
+            placeholder="https://domain/tool/keyset"
+          />
+        </mat-form-field>
+        <mat-form-field floatLabel="always">
+          <mat-label>{{ 'ADMIN.LTITOOL.DATA.loginInitiationUrl' | translate }}</mat-label>
+          <input
+            matInput
+            [(ngModel)]="manualRegistrationData.loginInitiationUrl"
+            placeholder="https://domain/tool/login"
+          />
+        </mat-form-field>
+        <mat-form-field floatLabel="always">
+          <mat-label>{{ 'ADMIN.LTITOOL.DATA.redirectionUrls' | translate }}</mat-label>
+          <input
+            matInput
+            (change)="changeRedirectionUrl($event)"
+            placeholder="https://domain/tool/launch"
+          />
+        </mat-form-field>
+        <mat-form-field floatLabel="always">
+          <mat-label>{{ 'ADMIN.LTITOOL.DATA.targetLinkUri' | translate }}</mat-label>
+          <input
+            matInput
+            [(ngModel)]="manualRegistrationData.targetLinkUri"
+            placeholder="https://domain/tool/launch"
+          />
+        </mat-form-field>
+        <mat-form-field floatLabel="always">
+          <mat-label>{{ 'ADMIN.LTITOOL.DATA.clientName' | translate }}</mat-label>
+          <input
+            matInput
+            [(ngModel)]="manualRegistrationData.clientName"
+            placeholder="Example Tool"
+          />
+        </mat-form-field>
+      </div>
+      <button mat-raised-button color="primary" (click)="manualRegistration()">
+        {{ 'ADMIN.LTI.SAVE' | translate }}
+      </button>
+    </div>
+  </mat-tab>
+</mat-tab-group>

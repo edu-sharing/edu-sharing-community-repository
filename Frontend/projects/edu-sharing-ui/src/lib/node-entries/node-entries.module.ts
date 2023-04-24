@@ -33,6 +33,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSortModule } from '@angular/material/sort';
 import { MatRippleModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
+import { NodeEntriesGlobalOptionsComponent } from './node-entries-global-options/node-entries-global-options.component';
 
 @NgModule({
     declarations: [
@@ -53,6 +54,7 @@ import { MatButtonModule } from '@angular/material/button';
         NodesDragDirective,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
+        NodeEntriesGlobalOptionsComponent,
     ],
     imports: [
         CommonModule,

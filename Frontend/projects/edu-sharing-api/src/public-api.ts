@@ -40,4 +40,5 @@ export {
     StreamV1Service,
     ClientutilsV1Service,
     FeedbackV1Service,
+    LtiPlatformV13Service,
 } from './lib/api/services';

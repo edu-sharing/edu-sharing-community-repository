@@ -37,9 +37,13 @@ export class TranslationsModule {
 
     constructor(@Optional() @SkipSelf() parentModule?: TranslationsModule) {
         if (parentModule) {
-            throw new Error(
+            console.warn(
                 'TranslationsModule is already loaded. Import it in the AppModule only',
+                parentModule,
             );
+            /*throw new Error(
+                'TranslationsModule is already loaded. Import it in the AppModule only',
+            );*/
         }
     }
 }

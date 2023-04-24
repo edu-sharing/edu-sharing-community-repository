@@ -23,10 +23,8 @@ import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
 import { filter, first, map, take, takeUntil } from 'rxjs/operators';
 import { Node } from '../../../../core-module/core.module';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
-import { MdsWidgetComponent } from '../../mds-viewer/widget/mds-widget.component';
 import { JUMP_MARK_POSTFIX } from '../../../dialogs/card-dialog/card-dialog-container/jump-marks-handler.directive';
-import { MdsEditorCoreComponent } from '../mds-editor-core/mds-editor-core.component';
-import { GeneralWidget, MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
+import { MdsWidgetComponent } from '../../mds-viewer/widget/mds-widget.component';
 import {
     Constraints,
     InputStatus,
@@ -36,9 +34,13 @@ import {
     NativeWidgetType,
     Values,
 } from '../../types/types';
+import { MdsEditorCoreComponent } from '../mds-editor-core/mds-editor-core.component';
+import { GeneralWidget, MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
+import { Attributes, getAttributesArray } from '../util/parse-attributes';
 import { replaceElementWithDiv } from '../util/replace-element-with-div';
 import { MdsEditorWidgetAuthorComponent } from '../widgets/mds-editor-widget-author/mds-editor-widget-author.component';
 import { MdsEditorWidgetAuthorityComponent } from '../widgets/mds-editor-widget-authority/mds-editor-widget-authority.component';
+import { MdsEditorWidgetBase } from '../widgets/mds-editor-widget-base';
 import { MdsEditorWidgetCheckboxComponent } from '../widgets/mds-editor-widget-checkbox/mds-editor-widget-checkbox.component';
 import { MdsEditorWidgetCheckboxesComponent } from '../widgets/mds-editor-widget-checkboxes/mds-editor-widget-checkboxes.component';
 import { MdsEditorWidgetChildobjectsComponent } from '../widgets/mds-editor-widget-childobjects/mds-editor-widget-childobjects.component';
@@ -56,11 +58,10 @@ import { MdsEditorWidgetSliderComponent } from '../widgets/mds-editor-widget-sli
 import { MdsEditorWidgetSuggestionChipsComponent } from '../widgets/mds-editor-widget-suggestion-chips/mds-editor-widget-suggestion-chips.component';
 import { MdsEditorWidgetTextComponent } from '../widgets/mds-editor-widget-text/mds-editor-widget-text.component';
 import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
-import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
-import { ViewInstanceService } from './view-instance.service';
-import { MdsEditorWidgetBase } from '../widgets/mds-editor-widget-base';
 import { MdsEditorWidgetVCardComponent } from '../widgets/mds-editor-widget-vcard/mds-editor-widget-vcard.component';
+import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import { MdsEditorWidgetTinyMCE } from '../widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
+import { ViewInstanceService } from './view-instance.service';
 import { EditorMode } from '../../types/mds-types';
 import { JumpMark, JumpMarksService } from '../../../../services/jump-marks.service';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
@@ -273,7 +274,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                     // native widgets not (yet) supported for inline editing
                     continue;
                 } else {
-                    this.injectNativeWidget(widgets[0], widgetName, element);
+                    const attributes = getAttributesArray(this.view.html, widgetName);
+                    this.injectNativeWidget(widgets[0], widgetName, element, attributes);
                 }
             } else {
                 if (widgets.length >= 1) {
@@ -322,6 +324,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         widget: Widget,
         widgetName: NativeWidgetType,
         element: Element,
+        attributes: Attributes,
     ): void {
         element = replaceElementWithDiv(element);
         const WidgetComponent = MdsEditorViewComponent.nativeWidgets[widgetName];
@@ -365,6 +368,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 {
                     widgetName,
                     widget,
+                    attributes,
                 },
                 { replace: false },
                 this.injector,

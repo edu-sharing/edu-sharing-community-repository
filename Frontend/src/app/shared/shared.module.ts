@@ -12,6 +12,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatOptionModule, MatRippleModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -29,7 +30,6 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTreeModule } from '@angular/material/tree';
 import { RouterModule } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
 import { AuthorityRowComponent } from './components/authority-search-input/authority-row/authority-row.component';
 import { AuthoritySearchInputComponent } from './components/authority-search-input/authority-search-input.component';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
@@ -46,11 +46,12 @@ import { SpinnerSmallComponent } from './components/spinner-small/spinner-small.
 import { TutorialComponent } from './components/tutorial/tutorial.component';
 import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
 import { WorkspaceCreateConnector } from './dialogs/create-connector/create-connector.component';
+import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.component';
 import { ElementRefDirective } from './directives/element-ref.directive';
 import { EscapeHtmlPipe } from './directives/escape-html.pipe';
 import { FileDropDirective } from './directives/file-drop';
 import { InfiniteScrollDirective } from './directives/infinite-scroll.directive';
-import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
+import { EduSharingUiModule, TranslationsModule } from 'ngx-edu-sharing-ui';
 import { OnAttributeChangeDirective } from './directives/on-attribute-change.directive';
 import { RegisterCustomPropertyDirective } from './directives/register-custom-property.directive';
 import { SkipTargetDirective } from './directives/skip-target.directive';
@@ -61,7 +62,6 @@ import { BitwisePipe } from './pipes/bitwise.pipe';
 import { PermissionNamePipe } from './pipes/permission-name.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
-import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.component';
 import { environment } from '../../environments/environment';
 
 @NgModule({
@@ -117,10 +117,10 @@ import { environment } from '../../environments/environment';
         MatTooltipModule,
         ReactiveFormsModule,
         RouterModule,
-        TranslateModule,
         EduSharingUiModule.forRoot({
             production: environment.production,
         }),
+        TranslationsModule.forRoot(),
     ],
     exports: [
         A11yModule,
@@ -149,6 +149,7 @@ import { environment } from '../../environments/environment';
         MatButtonModule,
         MatCardModule,
         MatCheckboxModule,
+        MatExpansionModule,
         MatPaginatorModule,
         MatProgressBarModule,
         MatChipsModule,
@@ -179,7 +180,6 @@ import { environment } from '../../environments/environment';
         SafeHtmlPipe,
         SkipTargetDirective,
         SpinnerSmallComponent,
-        TranslateModule,
         TutorialComponent,
         UserAvatarComponent,
         VersionLabelPipe,

@@ -662,11 +662,14 @@ export class NodeHelperService extends NodeHelperServiceBase {
     /**
      * Returns the full URL to a node, including the server origin and base href.
      */
-    getNodeUrl(node: UniversalNode): string {
+    getNodeUrl(node: UniversalNode, queryParams?: Params): string {
         const link = this.getNodeLink('queryParams', node);
         if (link) {
             const urlTree = this.router.createUrlTree([this.getNodeLink('routerLink', node)], {
-                queryParams: this.getNodeLink('queryParams', node) as Params,
+                queryParams: {
+                    ...(this.getNodeLink('queryParams', node) as Params),
+                    ...queryParams,
+                },
             });
             return location.origin + this.location.prepareExternalUrl(urlTree.toString());
         } else {

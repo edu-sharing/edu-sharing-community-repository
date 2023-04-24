@@ -34,7 +34,6 @@ import { TranslationsModule } from './translations/translations.module';
         ListItemsModule,
         ListItemLabelPipe,
         SortDropdownComponent,
-        TranslationsModule,
     ],
 })
 export class EduSharingUiModule {

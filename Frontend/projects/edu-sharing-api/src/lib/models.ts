@@ -7,6 +7,7 @@ export {
     CollectionReference,
     FeedbackData,
     LicenseAgreement,
+    ManualRegistrationData,
     Mds as MdsDefinition,
     MdsGroup,
     MdsQueryCriteria,

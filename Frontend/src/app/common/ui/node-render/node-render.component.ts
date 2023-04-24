@@ -38,7 +38,6 @@ import {
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { trigger } from '@angular/animations';
 import { Location, PlatformLocation } from '@angular/common';
-import { SearchService } from '../../../modules/search/search.service';
 import { HttpClient } from '@angular/common/http';
 import {
     ConfigurationHelper,
@@ -100,7 +99,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         private nodeHelper: NodeHelperService,
         private renderHelper: RenderHelperService,
         private location: Location,
-        private searchService: SearchService,
         private connector: RestConnectorService,
         private http: HttpClient,
         private connectors: RestConnectorsService,
@@ -290,9 +288,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                         false,
                     );
                 } else {
-                    if (window.history.state?.scope === Scope.Search) {
-                        this.searchService.reinit = false;
-                    }
                     NodeRenderComponent.close(this.location);
                     // use a timeout to let the browser try to go back in history first
                     setTimeout(() => {

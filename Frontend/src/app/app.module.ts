@@ -25,12 +25,12 @@ import {
     KeyboardShortcutsService as KeyboardShortcutsServiceAbstract,
     OptionsHelperService as OptionsHelperServiceAbstract,
     Toast as ToastAbstract,
-    TranslationsModule,
 } from 'ngx-edu-sharing-ui';
 import { IMPORTS } from './imports';
 import { MainModule } from './main/main.module';
 import { DECLARATIONS_ADMIN } from './modules/admin/declarations';
 import { LtiAdminComponent } from './modules/admin/lti-admin/lti-admin.component';
+import { LtitoolAdminComponent } from './modules/admin/ltitool-admin/ltitool-admin.component';
 import { LuceneTemplateMemoryComponent } from './modules/admin/lucene-template-memory/lucene-template-memory.component';
 import { DECLARATIONS_COLLECTIONS } from './modules/collections/declarations';
 import { DECLARATIONS_FILE_UPLOAD } from './modules/file-upload/declarations';
@@ -44,8 +44,6 @@ import { DECLARATIONS_OER } from './modules/oer/declarations';
 import { DECLARATIONS_PERMISSIONS } from './modules/permissions/declarations';
 import { DECLARATIONS_PROFILES } from './modules/profiles/declarations';
 import { DECLARATIONS_REGISTER } from './modules/register/declarations';
-import { DECLARATIONS_SEARCH } from './modules/search/declarations';
-import { PROVIDERS_SEARCH } from './modules/search/providers';
 import { DECLARATIONS_SERVICES } from './modules/services/declarations';
 import { DECLARATIONS_SHARE_APP } from './modules/share-app/declarations';
 import { DECLARATIONS_SHARING } from './modules/sharing/declarations';
@@ -75,7 +73,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS,
         DECLARATIONS_RECYCLE,
         DECLARATIONS_WORKSPACE,
-        DECLARATIONS_SEARCH,
         DECLARATIONS_COLLECTIONS,
         DECLARATIONS_LOGIN,
         DECLARATIONS_REGISTER,
@@ -96,6 +93,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         extensionDeclarations,
         LtiComponent,
         LtiAdminComponent,
+        LtitoolAdminComponent,
     ],
     imports: [
         IMPORTS,
@@ -103,7 +101,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         MainModule,
         EduSharingApiModule.forRoot(),
         EduSharingUiModule.forRoot({ production: environment.production }),
-        TranslationsModule.forRoot(),
         DragDropModule,
         extensionImports,
         ResizableModule,
@@ -129,7 +126,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         },
         { provide: LocationStrategy, useClass: AppLocationStrategy },
         PROVIDERS,
-        PROVIDERS_SEARCH,
         { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
         { provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: matTooltipDefaultOptions },
         extensionProviders,
@@ -139,7 +135,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS,
         DECLARATIONS_RECYCLE,
         DECLARATIONS_WORKSPACE,
-        DECLARATIONS_SEARCH,
         DECLARATIONS_COLLECTIONS,
         DECLARATIONS_LOGIN,
         DECLARATIONS_REGISTER,
