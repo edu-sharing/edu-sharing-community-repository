@@ -4,7 +4,6 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -12,17 +11,16 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.RecurseMode;
 
 import java.io.PrintWriter;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-public class Release_8_0_CleanupCollectionSeriesObject extends UpdateAbstract {
+public class Release_8_1_CleanupCollectionSeriesObject extends UpdateAbstract {
 	NodeService nodeService = serviceRegistry.getNodeService();
 
 	@Override
 	public String getId() {
-		return "Release_8_0_CleanupCollectionSeriesObject";
+		return "Release_8_1_CleanupCollectionSeriesObject";
 	}
 
 	@Override
@@ -31,9 +29,9 @@ public class Release_8_0_CleanupCollectionSeriesObject extends UpdateAbstract {
 	}
 
 
-	public Release_8_0_CleanupCollectionSeriesObject(PrintWriter out) {
+	public Release_8_1_CleanupCollectionSeriesObject(PrintWriter out) {
 		this.out = out;
-		this.logger = Logger.getLogger(Release_8_0_CleanupCollectionSeriesObject.class);
+		this.logger = Logger.getLogger(Release_8_1_CleanupCollectionSeriesObject.class);
 	}
 	@Override
 	public void execute() {
