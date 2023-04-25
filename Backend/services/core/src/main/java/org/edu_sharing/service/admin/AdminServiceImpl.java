@@ -595,42 +595,20 @@ public class AdminServiceImpl implements AdminService  {
 		return writer.toString();
 		// return getPublisherToMDSXml(properties,null, null, getAuthInfo());
 	}
-	
+
 	@Override
 	public List<ServerUpdateInfo> getServerUpdateInfos(){
-		List<ServerUpdateInfo> result = new ArrayList<ServerUpdateInfo>();
-				result.add(new ServerUpdateInfo(Licenses1.ID,Licenses1.description));
-				result.add(new ServerUpdateInfo(Licenses2.ID,Licenses2.description));
-				result.add(new ServerUpdateInfo(ClassificationKWToGeneralKW.ID,ClassificationKWToGeneralKW.description));
-				result.add(new ServerUpdateInfo(SystemFolderNameToDisplayName.ID,SystemFolderNameToDisplayName.description));
-				result.add(new ServerUpdateInfo(Release_1_6_SystemFolderNameRename.ID, Release_1_6_SystemFolderNameRename.description));
-				result.add(new ServerUpdateInfo(Release_1_7_SubObjectsToFlatObjects.ID, Release_1_7_SubObjectsToFlatObjects.description));
-				result.add(new ServerUpdateInfo(Release_1_7_UnmountGroupFolders.ID, Release_1_7_UnmountGroupFolders.description));
-				result.add(new ServerUpdateInfo(Edu_SharingAuthoritiesUpdate.ID, Edu_SharingAuthoritiesUpdate.description));
-				result.add(new ServerUpdateInfo(FixMissingUserstoreNode.ID,FixMissingUserstoreNode.description));
-				result.add(new ServerUpdateInfo(KeyGenerator.ID,KeyGenerator.description));
-				result.add(new ServerUpdateInfo(FolderToMap.ID,FolderToMap.description));
-				result.add(new ServerUpdateInfo(Edu_SharingPersonEsuidUpdate.ID,Edu_SharingPersonEsuidUpdate.description));
-				result.add(new ServerUpdateInfo(Release_3_2_FillOriginalId.ID,Release_3_2_FillOriginalId.description));
-				result.add(new ServerUpdateInfo(Release_3_2_DefaultScope.ID,Release_3_2_DefaultScope.description));			
-				result.add(new ServerUpdateInfo(Release_4_1_FixClassificationKeywordPrefix.ID,Release_4_1_FixClassificationKeywordPrefix.description));
-				result.add(new ServerUpdateInfo(Release_4_2_PersonStatusUpdater.ID,Release_4_2_PersonStatusUpdater.description));
-				result.add(new ServerUpdateInfo(Release_5_0_NotifyRefactoring.ID,Release_5_0_NotifyRefactoring.description));
-				result.add(new ServerUpdateInfo(Release_5_0_Educontext_Default.ID,Release_5_0_Educontext_Default.description));
-				result.add(new ServerUpdateInfo(Release_8_0_Migrate_Database_Scripts.ID,Release_8_0_Migrate_Database_Scripts.description));
-				result.add(new ServerUpdateInfo(Release_8_1_SetCompanyHomePermissions.ID,Release_8_1_SetCompanyHomePermissions.description));
+		return Arrays.stream(ServerUpdate.getAvailableUpdates(new PrintWriter(new StringWriter()))).
+				map((u) -> new ServerUpdateInfo(u.getId(), u.getDescription())).
+				peek((r)->{
+					try {
+						HashMap<String, Object> entry = new Protocol().getSysUpdateEntry(r.getId());
+						String date=(String)entry.get(CCConstants.CCM_PROP_SYSUPDATE_DATE);
+						r.setExecutedAt(Long.parseLong(date));
+					}catch(Throwable ignored){
 
-		result=result.stream().map((r)->{
-			try {
-				HashMap<String, Object> entry = new Protocol().getSysUpdateEntry(r.getId());
-				String date=(String)entry.get(CCConstants.CCM_PROP_SYSUPDATE_DATE);
-				r.setExecutedAt(Long.parseLong(date));
-			}catch(Throwable t){
-
-			}
-			return r;
-		}).collect(Collectors.toList());
-		return result;
+					}
+				}).collect(Collectors.toList());
 	}
 	
 	@Override

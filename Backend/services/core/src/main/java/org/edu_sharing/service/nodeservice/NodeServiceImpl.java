@@ -968,6 +968,33 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             result=this.getChildAssocs(parentNodeRef);
 		}
 		else{
+			// special handling for series objects inside collections
+			if(assocName.equals(CCConstants.CCM_ASSOC_CHILDIO)) {
+				if(hasAspect(StoreRef.PROTOCOL_WORKSPACE,
+						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+						parentID,
+						CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)
+				) {
+					return AuthenticationUtil.runAsSystem(() -> {
+						try {
+							return sortNodeRefList(
+									this.getChildAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+													(String) getPropertyNative(StoreRef.PROTOCOL_WORKSPACE,
+															StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+															parentID,
+															CCConstants.CCM_PROP_IO_ORIGINAL
+													)),
+											QName.createQName(assocName), RegexQNamePattern.MATCH_ALL),
+									filter,
+									sortDefinition
+							);
+						}catch(Throwable ignored) {
+							// original might be deleted!
+						}
+						return Collections.emptyList();
+					});
+				}
+			}
             result=this.getChildAssocs(parentNodeRef,QName.createQName(assocName),RegexQNamePattern.MATCH_ALL);
 		}
         result=sortNodeRefList(result,filter,sortDefinition);
