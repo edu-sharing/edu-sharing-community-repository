@@ -126,6 +126,7 @@ public class ServerUpdate extends HttpServlet implements SingleThreadModel {
 					new Release_5_0_NotifyRefactoring(out),
 					new Release_5_0_Educontext_Default(out),
 					new Release_8_0_Migrate_Database_Scripts(out),
+					new Release_8_0_CleanupCollectionSeriesObject(out)
 					new Release_8_1_SetCompanyHomePermissions(out)
 			};
 	}
