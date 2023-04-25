@@ -23,6 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.extensions.surf.util.URLEncoder;
 import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -46,12 +47,13 @@ public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 
 	private static final String BROCKHAUS_API = "https://api2.brockhaus.de/search";
 	private final String apiKey;
+	private final ApplicationInfo appInfo;
 
 	Logger logger = Logger.getLogger(SearchServiceBrockhausImpl.class);
 	String repositoryId = null;
 
 	public SearchServiceBrockhausImpl(String appId) {
-		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
+		this.appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
 		this.repositoryId = appInfo.getAppId();
 		this.apiKey = appInfo.getApiKey();
 	}
@@ -117,7 +119,9 @@ public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 
 		String[] searchWordCriteria=criterias.get(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA);
 		if(searchWordCriteria == null){
-			searchWordCriteria = new String[] {"*"};
+			searchWordCriteria = new String[] {
+					!StringUtils.isEmpty(appInfo.getRecommend_objects_query()) ?
+							appInfo.getRecommend_objects_query() : "*"};
 		}
 		String searchWord = searchWordCriteria[0];
 		String src="ecs";
