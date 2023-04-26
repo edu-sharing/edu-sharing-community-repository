@@ -23,16 +23,19 @@ import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URLEncoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class NodeServiceDDBImpl extends NodeServiceAdapterCached{
 	Logger logger = Logger.getLogger(NodeServiceDDBImpl.class);
 
 	private final String APIKey;
-	private XPathFactory pfactory = XPathFactory.newInstance();
-	private XPath xpath = pfactory.newXPath();
+	private final XPathFactory pfactory = XPathFactory.newInstance();
+	private final XPath xpath = pfactory.newXPath();
 
-	private Map<String, String> LICENSE_MAPPINGS = new HashMap<String, String>(){{
+	private final Map<String, String> LICENSE_MAPPINGS = new HashMap<String, String>(){{
 		put("http://creativecommons.org/publicdomain/zero/1.0/", CCConstants.COMMON_LICENSE_CC_ZERO);
 		put("http://creativecommons.org/licenses/by/3.0/", CCConstants.COMMON_LICENSE_CC_BY);
 		put("http://creativecommons.org/licenses/by-sa/4.0/", CCConstants.COMMON_LICENSE_CC_BY_SA);
@@ -82,6 +85,8 @@ public class NodeServiceDDBImpl extends NodeServiceAdapterCached{
 					getXPathSingleValue(doc, "/cortex/edm/RDF/ProvidedCHO/creator")
 			);
 			properties.put(
+					CCConstants.CM_PROP_C_MODIFIED,getLastModified(doc));
+			properties.put(
 					CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER,
 					// fix after DESP-738
 					ValueTool.toMultivalue(getXPathArray(doc, Collections.singleton("/cortex/indexing-profile/facet[@name='provider_fct']")).stream().map(
@@ -94,7 +99,10 @@ public class NodeServiceDDBImpl extends NodeServiceAdapterCached{
 			);
 			properties.put(
 					CCConstants.LOM_PROP_GENERAL_KEYWORD,
-					getXPathArray(doc, Collections.singleton("/cortex/indexing-profile/facet[@name='keywords_fct']/value"))
+					getXPathArray(doc, Arrays.asList(
+							"/cortex/indexing-profile/facet[@name='keywords_fct']/value",
+							"/cortex/indexing-profile/facet[@name='topic_fct']/value"
+					)).stream().distinct().collect(Collectors.toList())
 			);
 			properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL,
 					getThumbnail(doc)
@@ -109,6 +117,13 @@ public class NodeServiceDDBImpl extends NodeServiceAdapterCached{
 		return properties;
 	}
 
+	private Date getLastModified(Document doc) throws XPathExpressionException, ParseException {
+		String date = getXPathSingleValue(doc, "/cortex/indexing-profile/facet[@name='last_update']");
+		if (date != null) {
+			return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").parse(date);
+		}
+		return null;
+	}
 	private String getThumbnail(Document doc) throws XPathExpressionException {
 		Node node = (org.w3c.dom.Node) xpath.evaluate("cortex/preview/thumbnail", doc, XPathConstants.NODE);
 		return "";

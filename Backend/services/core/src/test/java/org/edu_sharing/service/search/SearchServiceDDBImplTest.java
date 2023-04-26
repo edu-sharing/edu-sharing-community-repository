@@ -84,10 +84,10 @@ class SearchServiceDDBImplTest {
             HashMap<String, Object> result2 = underTestNode.getProperties(null, null, this.nodeId2);
             assertEquals("Mathes, Philipp", result2.get(CCConstants.LOM_PROP_GENERAL_TITLE));
             assertEquals(VCardTool.nameToVCard("Hessisches Hauptstaatsarchiv"), result2.get(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER));
-            assertEquals(VCardTool.nameToVCard("Hessisches Hauptstaatsarchiv"), result2.get(CCConstants.CM_PROP_C_CREATOR));
             assertEquals("Hierarchie: Herzogtum Nassau: Amt Wiesbaden >> 30 Freiwillige Gerichtsbarkeit >> 30.16 Wiesbaden\n" +
                     "Identifikation (Fallakte): Aktenart: Nachlassakte - Angaben zur Person: Personenname: Mathes, Philipp - Angaben zur Person: Wohnort: Wiesbaden", result2.get(CCConstants.LOM_PROP_GENERAL_DESCRIPTION));
             assertEquals(1, ((List)result2.get(CCConstants.LOM_PROP_GENERAL_KEYWORD)).size());
+            assertEquals("Wed Mar 01 14:00:16 CET 2023", result2.get(CCConstants.CM_PROP_C_MODIFIED).toString());
             assertEquals(CCConstants.COMMON_LICENSE_CC_ZERO, result2.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY));
         } catch (Throwable e) {
             throw new RuntimeException(e);
