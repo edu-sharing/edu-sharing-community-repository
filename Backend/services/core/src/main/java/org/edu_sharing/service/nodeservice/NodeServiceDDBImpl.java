@@ -1,28 +1,49 @@
 package org.edu_sharing.service.nodeservice;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLEncoder;
-import java.util.HashMap;
-
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
+import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.search.SearchServiceDDBImpl;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.net.URLEncoder;
+import java.util.*;
 
 public class NodeServiceDDBImpl extends NodeServiceAdapterCached{
 	Logger logger = Logger.getLogger(NodeServiceDDBImpl.class);
 
 	private final String APIKey;
-	
+	private XPathFactory pfactory = XPathFactory.newInstance();
+	private XPath xpath = pfactory.newXPath();
+
+	private Map<String, String> LICENSE_MAPPINGS = new HashMap<String, String>(){{
+		put("http://creativecommons.org/publicdomain/zero/1.0/", CCConstants.COMMON_LICENSE_CC_ZERO);
+		put("http://creativecommons.org/licenses/by/3.0/", CCConstants.COMMON_LICENSE_CC_BY);
+		put("http://creativecommons.org/licenses/by-sa/4.0/", CCConstants.COMMON_LICENSE_CC_BY_SA);
+		put("http://creativecommons.org/licenses/by-nc-nd/4.0/", CCConstants.COMMON_LICENSE_CC_BY_NC_ND);
+		put("http://rightsstatements.org/vocab/InC/1.0/", CCConstants.LICENSE_COPYRIGHT_LICENSE);
+		put("http://creativecommons.org/publicdomain/mark/1.0/", CCConstants.LICENSE_PDM);
+	}};
 	public NodeServiceDDBImpl(String appId) {
 		super(appId);
 		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
+		this.appId = appId;
 		this.APIKey = appInfo.getApiKey();
 	}
 
@@ -38,214 +59,90 @@ public class NodeServiceDDBImpl extends NodeServiceAdapterCached{
 		String url = "https://www.deutsche-digitale-bibliothek.de/item/"+nodeId;
 		properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, url);
 		properties.put(CCConstants.CCM_PROP_IO_WWWURL, url);
-		//properties.put(CCConstants.CONTENTURL,URLTool.getRedirectServletLink(this.repositoryId, nodeId));
-		properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,"ddb");
+		properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE, "ddb");
 		try{
 			// fetch binary info
-			String all = SearchServiceDDBImpl.httpGet(SearchServiceDDBImpl.DDB_API+"/items/"+nodeId+"/aip?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8"), null);
-			JSONObject allJson = new JSONObject(all);
-			try {
-				JSONArray binaries = (JSONArray)allJson.getJSONObject("binaries").getJSONArray("binary");
-				JSONObject binary = null;
-				JSONObject binaryFallback = binaries.getJSONObject(0);
-
-				for(int i = 0; i < binaries.length();i++){
-					binary =  (JSONObject)binaries.get(0);
-					String path = (String)binary.get("@path");
-
-					// prefer mvpr
-					if(path.contains("mvpr")){
-						break;
-					}
-				}
-
-				if(binary == null){
-					binary = binaryFallback;
-				}
-				String name  = (String)binary.get("@name");
-				properties.put(CCConstants.CM_NAME, name);
-				properties.put(CCConstants.LOM_PROP_GENERAL_TITLE, name);
-				String contenturl  = (String)binary.get("@path");
-				String mimetyp = (String)binary.get("@mimetype");
-				contenturl = SearchServiceDDBImpl.DDB_API+contenturl+"?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
-
-				//properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, contenturl);
-
-				properties.put(CCConstants.LOM_PROP_TECHNICAL_FORMAT, mimetyp);
-			}catch(Throwable t) {}
-			try {
-				JSONObject meta=allJson.getJSONObject("edm").getJSONObject("RDF").getJSONObject("ProvidedCHO");
-				try {
-					properties.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER,
-							VCardTool.nameToVCard(meta.getString("publisher")));
-				}catch(Throwable t) {}
-				try {
-					String creator=getLanguageString(meta, "creator");
-					properties.put(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR,
-							VCardTool.nameToVCard(creator));
-					properties.put(CCConstants.CM_PROP_C_CREATOR,creator);
-					properties.put(CCConstants.NODECREATOR_FIRSTNAME,creator);
-					properties.put(CCConstants.NODEMODIFIER_FIRSTNAME,creator);
-				}catch(Throwable t) {}
-				try {
-					String name=getLanguageString(meta, "title");
-					properties.put(CCConstants.CM_NAME, name);
-					properties.put(CCConstants.LOM_PROP_GENERAL_TITLE, name);
-				}catch(Throwable t) {}
-			}catch(Throwable t) {}
-
-
-			String imageUrl = null;
-
-			try {
-
-				JSONObject joPreview = (JSONObject)allJson.get("preview");
-				if(joPreview.has("thumbnail") && joPreview.get("thumbnail") != null && joPreview.get("thumbnail") instanceof JSONObject) {
-					JSONObject joThumbnail = (JSONObject)joPreview.getJSONObject("thumbnail");
-
-					String previewId = (String)joThumbnail.get("@href");
-
-
-					String thumbUrl = "https://iiif.deutsche-digitale-bibliothek.de/image/2/" + previewId + "/info.json";
-					String thumbResult = SearchServiceDDBImpl.httpGet(thumbUrl, null);
-
-					JSONObject jo = new JSONObject(thumbResult);
-					JSONArray ja = (JSONArray)jo.get("sizes");
-
-
-
-					JSONObject joSize = (JSONObject)ja.get(0);
-
-					if(ja.length() > 3) {
-						joSize = (JSONObject)ja.get(1);
-					}
-
-					Integer width = (Integer)joSize.get("width");
-					Integer height = (Integer)joSize.get("height");
-
-					imageUrl = "https://iiif.deutsche-digitale-bibliothek.de/image/2/" + previewId + "/full/!" + width + "," + height + "/0/default.jpg";
-				}
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-
-			/*String previewUrl;
-			try {
-				previewUrl=DDB_API+allJson.getJSONObject("preview").getJSONObject("thumbnail").getString("@href")+"?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
-			}
-			catch(Throwable t) {
-				previewUrl=new MimeTypesV2(appInfo).getPreview(CCConstants.CCM_TYPE_IO, properties, null);
-			}*/
-
-			if(imageUrl != null) {
-				properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, imageUrl);
-			}
-			JSONObject item = allJson.getJSONObject("view").getJSONObject("item");
-			try {
-				if(item != null){
-					JSONArray fields = (JSONArray)item.get("fields");
-
-					for(int i = 0; i < fields.length();i++){
-						JSONObject fieldsObj = (JSONObject)fields.get(i);
-						String usage = (String)fieldsObj.get("@usage");
-						if("index".equals(usage)){
-							JSONArray entries = (JSONArray)fieldsObj.get("field");
-							for(int f = 0; f < entries.length();f++){
-								JSONObject entry = (JSONObject)entries.get(f);
-								String name = (String)entry.get("name");
-
-								Object val = entry.get("value");
-								String value = "";
-								if(val instanceof String){
-									value = (String) val;
-								}else if(val instanceof JSONArray){
-									Object tmp = ((JSONArray)val).get(0);
-									if(tmp instanceof String){
-										value = (String)tmp;
-									}
-									if(tmp instanceof JSONObject){
-										value = tmp.toString();
-									}
-								}else{
-									logger.error("unknown type for name:"+name+" val:"+val );
-								}
-
-								String fid = (String)entry.get("@id");
-
-								if("description".equals(fid)){
-									properties.put(CCConstants.LOM_PROP_GENERAL_DESCRIPTION, value);
-								}
-
-								if("license".equals(fid) && value!=null){
-									if(value.contains("/by-sa")){
-										properties.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY, CCConstants.COMMON_LICENSE_CC_BY_SA);
-									}
-									if(value.contains("/by-nc-sa")){
-										properties.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY, CCConstants.COMMON_LICENSE_CC_BY_NC_SA);
-									}
-									if(value.contains("/rv-fz")){
-										properties.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY, CCConstants.LICENSE_COPYRIGHT_FREE);
-									}
-								}
-							}
-						}
-						if("display".equals(usage)){
-							JSONArray entries = (JSONArray)fieldsObj.get("field");
-							for(int f = 0; f < entries.length();f++){
-								JSONObject entry = (JSONObject)entries.get(f);
-								String name = (String)entry.get("name");
-
-								Object val = entry.get("value");
-								String value = "";
-								if(val instanceof String){
-									value = (String) val;
-								}else if(val instanceof JSONArray){
-									Object tmp = ((JSONArray)val).get(0);
-									if(tmp instanceof String){
-										value = (String)tmp;
-									}
-									if(tmp instanceof JSONObject){
-										value = tmp.toString();
-									}
-
-								}else{
-									logger.error("unknown type for name:"+name+" val:"+val );
-								}
-
-								String fid = (String)entry.get("@id");
-
-								if("Sprache".equals(name)){
-									properties.put(CCConstants.LOM_PROP_GENERAL_LANGUAGE, value);
-								}
-								if("Dokumenttyp".equals(name)){
-									properties.put(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE, value);
-								}
-
-							}
-						}
-					}
-				}
-			}
-			catch(Throwable t) {}
-			try {
-				JSONObject institution = (JSONObject)item.get("institution");
-				if(institution != null){
-					String instName = (String)institution.get("name");
-					properties.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR+"FN", instName);
-
-				}
-			}catch(Throwable t) {
-
-			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
+			String all = SearchServiceDDBImpl.httpGet(SearchServiceDDBImpl.DDB_API+"/items/"+nodeId+"?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8"), new HashMap<String, String>() {{
+				put("Accept", "application/xml");
+				put("Content-Type", "application/xml");
+			}});
+			DocumentBuilderFactory factory =
+					DocumentBuilderFactory.newInstance();
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			Document doc = builder.parse(new ByteArrayInputStream(all.getBytes()));
+			properties.put(
+					CCConstants.CM_NAME,
+					getXPathSingleValue(doc, "/cortex/edm/RDF/ProvidedCHO/title")
+			);
+			properties.put(
+					CCConstants.LOM_PROP_GENERAL_TITLE, properties.get(CCConstants.CM_NAME)
+			);
+			properties.put(
+					CCConstants.CM_PROP_C_CREATOR,
+					getXPathSingleValue(doc, "/cortex/edm/RDF/ProvidedCHO/creator")
+			);
+			properties.put(
+					CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER,
+					// fix after DESP-738
+					ValueTool.toMultivalue(getXPathArray(doc, Collections.singleton("/cortex/indexing-profile/facet[@name='provider_fct']")).stream().map(
+							VCardTool::nameToVCard
+					).toArray(String[]::new))
+			);
+			properties.put(
+					CCConstants.LOM_PROP_GENERAL_DESCRIPTION,
+					StringUtils.join(getXPathArray(doc, Collections.singleton("/cortex/edm/RDF/ProvidedCHO/description")), "\n")
+			);
+			properties.put(
+					CCConstants.LOM_PROP_GENERAL_KEYWORD,
+					getXPathArray(doc, Collections.singleton("/cortex/indexing-profile/facet[@name='keywords_fct']/value"))
+			);
+			properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL,
+					getThumbnail(doc)
+			);
+			properties.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY,
+					getLicense(doc)
+			);
+		} catch (Throwable t) {
 		}
 
 		updateCache(properties);
 		return properties;
-   }
+	}
+
+	private String getThumbnail(Document doc) throws XPathExpressionException {
+		Node node = (org.w3c.dom.Node) xpath.evaluate("cortex/preview/thumbnail", doc, XPathConstants.NODE);
+		return "";
+	}
+
+	private Object getLicense(Document doc) throws XPathExpressionException {
+		try {
+			Node rights = (Node) xpath.evaluate("cortex/edm/RDF/Aggregation/rights", doc, XPathConstants.NODE);
+			String licenseUri = rights.getAttributes().getNamedItem("ns2:resource").getNodeValue();
+			return LICENSE_MAPPINGS.get(licenseUri);
+		}catch(Throwable t) {
+			return null;
+		}
+	}
+
+	private String getXPathSingleValue(Document doc, String path) throws XPathExpressionException {
+		return (String) xpath.evaluate(path, doc, XPathConstants.STRING);
+	}
+	private List<String> getXPathArray(Document doc, Collection<String> path) throws XPathExpressionException {
+		return path.stream().map(
+				p -> {
+					try {
+						NodeList nodeList = (NodeList) xpath.evaluate(p, doc, XPathConstants.NODESET);
+						List<String> result = new ArrayList<>(nodeList.getLength());
+						for (int index = 0; index < nodeList.getLength(); index++) {
+							result.add(nodeList.item(index).getTextContent());
+						}
+						return result;
+					} catch (XPathExpressionException e) {
+						throw new RuntimeException(e);
+					}
+				}
+		).collect(ArrayList::new, List::addAll, List::addAll);
+	}
 
 	private String getLanguageString(JSONObject meta, String field) throws JSONException {
 		try {
@@ -260,14 +157,7 @@ public class NodeServiceDDBImpl extends NodeServiceAdapterCached{
 	}
 	@Override
 	public String getType(String nodeId) {
-		// TODO Auto-generated method stub
 		return CCConstants.CCM_TYPE_IO;
-	}
-	
-	@Override
-	public String[] getAspects(String storeProtocol, String storeId, String nodeId) {
-		// TODO Auto-generated method stub
-		return new String[] {};
 	}
 
 	@Override
