@@ -97,7 +97,7 @@ public class RemoveOrphanCollectionUsageDescriptions extends AbstractJob{
 		});
 		runner.setTypes(Collections.singletonList(CCConstants.CCM_TYPE_USAGE));
 		runner.setRunAsSystem(true);
-		runner.setRecurseMode(RecurseMode.All);
+		runner.setLucene("TYPE:\"ccm:usage\"");
 		runner.setThreaded(false);
 		runner.setKeepModifiedDate(true);
 		runner.setTransaction(NodeRunner.TransactionMode.Local);
