@@ -35,7 +35,6 @@ import {
     ConfigurationHelper,
     ConfigurationService,
     EventListener,
-    EventType,
     FrameEventsService,
     ListItem,
     LoginResult,
@@ -58,7 +57,6 @@ import {
     UIService,
 } from '../../../core-module/core.module';
 import { MdsHelper } from '../../../core-module/rest/mds-helper';
-import { VideoControlsComponent } from '../../../core-ui-module/components/video-controls/video-controls.component';
 import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
 import { OptionsHelperService } from '../../../core-ui-module/options-helper.service';
 import { RestTrackingService } from '../../../core-module/rest/services/rest-tracking.service';
@@ -740,8 +738,9 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             data[id] = [value];
             params.mds = this.getMdsId();
             params.sidenav = true;
-            params.repository = this.repository;
-            params.parameters = JSON.stringify(data);
+            params.repo = this.repository;
+            params.filters = JSON.stringify(data);
+            console.log(params.filters);
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], { queryParams: params });
         });
     }
