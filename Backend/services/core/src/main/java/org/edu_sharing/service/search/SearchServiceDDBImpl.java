@@ -5,6 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
@@ -24,57 +25,54 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class SearchServiceDDBImpl extends SearchServiceAdapter{
-	
+
 	public static final String DDB_API = "https://api.deutsche-digitale-bibliothek.de";
 
 	Logger logger = Logger.getLogger(SearchServiceDDBImpl.class);
-	
+
 	String repositoryId = null;
 
 	String APIKey = null;
 
 	private ApplicationInfo appInfo;
-			
-	
+
+
 	public SearchServiceDDBImpl(String appId) {
 		appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
-		this.repositoryId = appInfo.getAppId();		
-		this.APIKey = appInfo.getApiKey(); 
+		this.repositoryId = appInfo.getAppId();
+		this.APIKey = appInfo.getApiKey();
 
 	}
 
 	public static HttpsURLConnection openDDBUrl(URL url) throws KeyManagementException, IOException, NoSuchAlgorithmException{
 		HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-		
+
 		// TODO!
 		TrustManager[] trustAllCerts = new TrustManager[]{
-			    new X509TrustManager() {
-			        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-			            return null;
-			        }
-			        public void checkClientTrusted(
-			            java.security.cert.X509Certificate[] certs, String authType) {
-			        }
-			        public void checkServerTrusted(
-			            java.security.cert.X509Certificate[] certs, String authType) {
-			        }
-			    }
-			};
+				new X509TrustManager() {
+					public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+						return null;
+					}
+					public void checkClientTrusted(
+							java.security.cert.X509Certificate[] certs, String authType) {
+					}
+					public void checkServerTrusted(
+							java.security.cert.X509Certificate[] certs, String authType) {
+					}
+				}
+		};
 		SSLContext sc = SSLContext.getInstance("SSL");
-	    sc.init(null, trustAllCerts, new java.security.SecureRandom());
+		sc.init(null, trustAllCerts, new java.security.SecureRandom());
 		connection.setSSLSocketFactory(sc.getSocketFactory());
 		connection.setHostnameVerifier(new HostnameVerifier() {
-		    public boolean verify(String hostname, SSLSession session) {
-		      return true;
-		    }
-		  });
+			public boolean verify(String hostname, SSLSession session) {
+				return true;
+			}
+		});
 		return connection;
 	}
 	public SearchResultNodeRef searchDDB(String repositoryId,String apiKey,String path) throws Exception{
@@ -87,16 +85,16 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		JSONObject results = (JSONObject)resultsArr.get(0);
 		JSONArray docs = (JSONArray)results.get("docs");
 
-		
+
 		SearchResultNodeRef searchResultNodeRef = new SearchResultNodeRef();
 		List<NodeRef> data=new ArrayList<>();
-		
+
 		HashMap<String,HashMap<String,Object>> result = new HashMap<String, HashMap<String,Object>>();
 		for(int i = 0; i < docs.length(); i++){
 			JSONObject doc = (JSONObject)docs.get(i);
 			String id =  this.getNodeId(doc);
 			org.edu_sharing.service.model.NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(
-					repositoryId, 
+					repositoryId,
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
 					id);
@@ -108,29 +106,29 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		return searchResultNodeRef;
 
 	}
-	
+
 	private String query(String urlAsStr) throws Exception {
 		URL url = new URL(urlAsStr);
 		HttpsURLConnection connection = openDDBUrl(url);
-		connection.connect();		
+		connection.connect();
 
-        InputStreamReader isr = new InputStreamReader(connection.getInputStream(), "UTF-8");
-        BufferedReader br = new BufferedReader(isr);
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while ((line = br.readLine()) != null) {
-            sb.append(line);
-        }
-        br.close();
-        isr.close();
-        connection.disconnect();
-        return sb.toString();
+		InputStreamReader isr = new InputStreamReader(connection.getInputStream(), "UTF-8");
+		BufferedReader br = new BufferedReader(isr);
+		StringBuilder sb = new StringBuilder();
+		String line;
+		while ((line = br.readLine()) != null) {
+			sb.append(line);
+		}
+		br.close();
+		isr.close();
+		connection.disconnect();
+		return sb.toString();
 	}
 
 	public static String httpGet(String urlStr, Map<String, String> headers) throws IOException {
-        // open HTTP connection with URL
+		// open HTTP connection with URL
 		return new HttpQueryTool().query(urlStr, headers, new HttpGet(urlStr));
-    }	
+	}
 
 	private String getNodeId(JSONObject doc){
 		String id = null;
@@ -146,25 +144,25 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 	@Override
 	public List<? extends Suggestion> getSuggestions(MetadataSet mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
 		List<Suggestion> result = new ArrayList<Suggestion>();
-		
+
 		List<String> facets = mds.findQuery(queryId, MetadataReader.QUERY_SYNTAX_LUCENE).findParameterByName(parameterId).getFacets();
 		//String url = getUrl("/search",parameterId +":("+value+")",facets, 0, 0);
 		String url = getUrl("/search","*",facets, 0, 0);
 		System.out.println("url:" + url);
-		
+
 		try {
 			String json = this.query(url);
 			System.out.println(json);
 			JSONObject jo = new JSONObject(json);
-	    	
+
 			JSONArray resultsArr = (JSONArray)jo.get("facets");
-			
+
 			for(int i = 0; i < resultsArr.length(); i++) {
 				JSONObject facetObj = (JSONObject)resultsArr.get(i);
 				String field = facetObj.getString("field");
 				int numberOfFacets = facetObj.getInt("numberOfFacets");
 				if(facets.contains(field) && numberOfFacets > 0) {
-					
+
 					JSONArray facetValues = facetObj.getJSONArray("facetValues");
 					for(int j = 0; j < facetValues.length(); j++) {
 						JSONObject facetteVal = (JSONObject)facetValues.get(j);
@@ -179,20 +177,20 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 							result.add(dto);
 						}
 					}
-					
-					
+
+
 				}
 			}
-	
+
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}
 		return result;
 	}
-	
+
 	public String getUrl(String basePath, String query, List<String> facets, int offset, int rows){
 		String url = DDB_API + basePath;
-		
+
 		try {
 			url += "?oauth_consumer_key=" + URLEncoder.encode(APIKey, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
@@ -209,19 +207,19 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 				}else {
 					url += "," +facet;
 				}
-				
+
 			}
 		}
 		url += "&offset="+offset;
 		url += "&rows="+rows;
-		
+
 		return url;
 	}
-	
+
 	@Override
 	public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criterias,
 									  SearchToken searchToken) throws Throwable {
-		
+
 
 		if(!MetadataSet.DEFAULT_CLIENT_QUERY.equals(query)){
 			throw new Exception("Only ngsearch query is supported for this repository type, requested "+query);
@@ -239,25 +237,31 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		String[] searchWordCriteria=criterias.get(MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA);
 
 
- 		String searchWord = "";
- 		if(searchWordCriteria!=null && searchWordCriteria.length>0) {
- 			searchWord = searchWordCriteria[0];
- 		}
+		String searchWord = "";
+		if(searchWordCriteria!=null && searchWordCriteria.length>0) {
+			searchWord = searchWordCriteria[0];
+		}
 		if (searchWord.equals("*") ){
 			searchWord="";
 		}
+		MetadataQuery mdsQuery = mds.findQuery(MetadataSet.DEFAULT_CLIENT_QUERY, MetadataReader.QUERY_SYNTAX_LUCENE);
 		List<String> extendedFilters = new ArrayList<>();
-		Stream.of(
-				"virtual:title",
-				"virtual:place",
-				"virtual:affiliate",
-				"virtual:keywords"
-		).forEach(
-				key -> {
-					if(criterias.get(key) != null) {
-						String ddbData = criterias.get(key)[0];
-						if (!ddbData.equals("")) {
-							extendedFilters.add(key.split(":")[1] +":" + QueryParser.escape(ddbData));
+		new HashMap<String, String>() {{
+			put("virtual:title", "title");
+			put("virtual:place", "place");
+			put("virtual:affiliate", "affiliate");
+			put("cclom:general_keyword", "keywords");
+		}}.forEach(
+				(key, value) -> {
+					if (criterias.get(key) != null) {
+						String lucene = StringUtils.join(Arrays.stream(criterias.get(key)).
+										filter(StringUtils::isNotEmpty).
+										map(
+												str -> value + ":" + QueryParser.escape(str)
+										).collect(Collectors.toList()),
+								" " + mdsQuery.findParameterByName(key).getMultiplejoin() + " ");
+						if(!lucene.isEmpty()) {
+							extendedFilters.add("(" + lucene + ")");
 						}
 					}
 				}
@@ -278,6 +282,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			}
 			StringBuilder uri = new StringBuilder(oauth + "&query=" + org.springframework.extensions.surf.util.URLEncoder.encodeUriComponent(solrQuery) + offset + rows);
 
+
 			searchToken.setQueryString(uri.toString());
 
 			return searchDDB(repositoryId,APIKey, uri.toString());
@@ -289,7 +294,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			String line;
 			BufferedReader bR = new BufferedReader(  new InputStreamReader(is));
 			while((line =  bR.readLine()) != null){
-			    responseStrBuilder.append(line);
+				responseStrBuilder.append(line);
 			}
 			is.close();
 			throw new Exception("Error from DDB: "+connection.getResponseCode()+" "+responseStrBuilder.toString());
@@ -300,7 +305,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		}
 
 	}
-	
+
 	public static void main(String[] args) {
 		try {
 			String searchWord = "*";
@@ -312,26 +317,26 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			path += "&facet=place_fct";
 			path += "&offset="+0;
 			path += "&rows="+0;
-			
-			
+
+
 			URL url=new URL(DDB_API+path);
 			HttpsURLConnection connection = openDDBUrl(url);
-			connection.connect();		
-	
-	        InputStreamReader isr = new InputStreamReader(connection.getInputStream(), "UTF-8");
-	        BufferedReader br = new BufferedReader(isr);
-	        StringBuilder sb = new StringBuilder();
-	        String line;
-	        while ((line = br.readLine()) != null) {
-	            sb.append(line);
-	        }
-	        br.close();
-	        isr.close();
-	        connection.disconnect();
-	        String jsonString = sb.toString();
-	        System.out.println(jsonString);
+			connection.connect();
+
+			InputStreamReader isr = new InputStreamReader(connection.getInputStream(), "UTF-8");
+			BufferedReader br = new BufferedReader(isr);
+			StringBuilder sb = new StringBuilder();
+			String line;
+			while ((line = br.readLine()) != null) {
+				sb.append(line);
+			}
+			br.close();
+			isr.close();
+			connection.disconnect();
+			String jsonString = sb.toString();
+			System.out.println(jsonString);
 			JSONObject jo = new JSONObject(jsonString);
-	    	
+
 			Integer nrOfResult = (Integer)jo.get("numberOfResults");
 			JSONArray resultsArr = (JSONArray)jo.get("results");
 			JSONObject results = (JSONObject)resultsArr.get(0);
@@ -341,5 +346,5 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		}
 	}
 
-	
+
 }

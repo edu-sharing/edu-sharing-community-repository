@@ -24,10 +24,11 @@
 		</widget>
 		<!-- new -->
 		<widget>
-			<id>virtual:keywords</id>
-			<type>text</type>
+			<id>cclom:general_keyword</id>
+			<type>multivalueSuggestBadges</type>
 			<caption>Stichwort</caption>
 			<placeholder>z.B. Aufsatz</placeholder>
+			<searchable>true</searchable>
 		</widget>
 		<widget>
 			<id>virtual:language</id>
@@ -62,7 +63,7 @@
 	            <virtual:title>
 	            <virtual:place>
 	            <virtual:affiliate>
-	            <virtual:keywords>
+	            <cclom:general_keyword>
 		  ]]></html>
 		</template>
 		<template>
@@ -123,10 +124,12 @@
 					<facet>affiliate_fct</facet>
 				</facets>
 			</property>
-			<property name="virtual:keywords">
+			<property name="cclom:general_keyword">
 				<facets>
 					<facet>keywords_fct</facet>
 				</facets>
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
 			</property>
 			<property name="virtual:language">
 				<facets>
