@@ -3,7 +3,7 @@
 </label>
 <ng-container *ngIf="item.type === 'ORG' || item.type === 'GROUP'">
   <ng-container [ngSwitch]="item.name">
-    <span *ngSwitchCase="'displayName'">
+    <span *ngSwitchCase="'displayName'" [class.type-danger]="isDangerousGroup()">
       {{ $any(getNode()).profile.displayName }}
     </span>
     <span *ngSwitchCase="'groupType'">
@@ -160,22 +160,12 @@
     <ng-container
       *ngIf="DATE_FIELDS.indexOf(item.name) === -1 && VCARD_FIELDS.indexOf(item.name) === -1"
     >
-      {{
-        $any(getNode()).properties
-          ? $any(getNode()).properties[item.name + '_DISPLAYNAME']?.join('')
-            ? $any(getNode()).properties[item.name + '_DISPLAYNAME'].join(', ')
-            : $any(getNode()).properties[item.name]?.join(', ')
-          : ''
-      }}
+      {{ displayName$ | async }}
     </ng-container>
-    <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) !== -1">
-      {{
-        $any(getNode()).properties[item.name]
-          ? ($any(getNode()).properties[item.name][0] | formatDate)
-          : ''
-      }}
+    <ng-container *ngIf="DATE_FIELDS.includes(item.name)">
+      {{ $any(getNode()).properties[item.name]?.[0] | formatDate: { async: true } | async }}
     </ng-container>
-    <ng-container *ngIf="VCARD_FIELDS.indexOf(item.name) !== -1">
+    <ng-container *ngIf="VCARD_FIELDS.includes(item.name)">
       {{
         $any(getNode()).properties[item.name]
           ? ($any(getNode()).properties[item.name][0] | vcardName)

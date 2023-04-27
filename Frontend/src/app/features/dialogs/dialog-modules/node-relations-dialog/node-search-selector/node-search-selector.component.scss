@@ -1,0 +1,55 @@
+@import '../../../../../core-ui-module/styles/variables';
+
+mat-form-field {
+    width: 100%;
+}
+.node-row-option {
+    height: auto;
+    line-height: unset;
+    &.mat-option-disabled {
+        color: $textMediumLight;
+        cursor: not-allowed;
+    }
+}
+.more {
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    // background-color: $cardLightBackground;
+    width: 100%;
+    margin-top: -15px;
+    padding: 2px 15px;
+    > span {
+        flex-grow: 1;
+    }
+    @include materialShadowBottom();
+}
+.mds-wrapper {
+    background-color: $cardLightBackground;
+}
+.missing-permissions {
+    position: absolute;
+    height: 100%;
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-gap: 10px;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(1px);
+    z-index: 2;
+    padding: 0 5px 0 16px;
+    background-color: rgba(255, 255, 255, 0.9);
+    color: $textMain;
+    font-weight: bold;
+}
+:host ::ng-deep {
+    .mds-wrapper {
+        es-mds-editor-core {
+            padding: 10px 20px 0 20px;
+        }
+        .clear-button {
+            display: none;
+        }
+    }
+}

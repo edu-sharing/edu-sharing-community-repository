@@ -1,7 +1,6 @@
 package org.edu_sharing.repository.server.tools;
 
 import com.typesafe.config.Config;
-import jdk.nashorn.internal.codegen.CompilerConstants;
 import org.alfresco.repo.cache.SimpleCache;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

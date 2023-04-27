@@ -187,7 +187,7 @@ public class NodeContentGet extends StreamContent
         
         if(isCollectionRefObject){
         	
-        	logger.info("it's an collection ref object: switching nodeId");
+        	logger.debug("it's an collection ref object: switching nodeId");
         	List<AssociationRef> assocRef = nodeService.getTargetAssocs(nodeRef, ContentModel.ASSOC_ORIGINAL);
         	if(assocRef != null && assocRef.size() > 0){
         		nodeRef = assocRef.get(0).getTargetRef();

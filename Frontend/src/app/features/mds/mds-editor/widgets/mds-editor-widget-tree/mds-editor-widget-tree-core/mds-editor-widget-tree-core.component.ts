@@ -1,5 +1,6 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
 import {
+    ChangeDetectorRef,
     Component,
     ElementRef,
     EventEmitter,
@@ -66,6 +67,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     private destroyed$: ReplaySubject<void> = new ReplaySubject(1);
     constructor(
         private toast: Toast,
+        public changeDetectorRef: ChangeDetectorRef,
         private mdsEditorInstanceService: MdsEditorInstanceService,
         private mdsService: MdsV1Service,
     ) {}
@@ -185,6 +187,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
                 .getElementById(this.getCheckboxId(node) + '-state')
                 .setAttribute('role', 'alert');
         }
+        this.changeDetectorRef.detectChanges();
     }
 
     getCheckboxId(node: TreeNode): string {

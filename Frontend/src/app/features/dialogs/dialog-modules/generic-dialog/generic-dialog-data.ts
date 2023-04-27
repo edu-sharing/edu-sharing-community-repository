@@ -1,3 +1,4 @@
+import { TemplateRef } from '@angular/core';
 import { ButtonConfig } from '../../../../core-module/ui/dialog-button';
 import { CardDialogConfig } from '../../card-dialog/card-dialog-config';
 
@@ -6,6 +7,8 @@ export class GenericDialogData<R extends string> {
     messageText?: string;
     /** Translation parameters for the given message text. */
     messageParameters?: { [key: string]: string };
+    /** Custom template to use as dialog content. */
+    contentTemplate?: TemplateRef<unknown>;
     /**
      * Buttons to include in the bottom bar of the dialog.
      *
@@ -18,7 +21,9 @@ export class GenericDialogData<R extends string> {
 export class GenericDialogConfig<R extends string> extends GenericDialogData<R> {
     title: CardDialogConfig['title'];
     closable?: CardDialogConfig['closable'] = new CardDialogConfig().closable;
+    minWidth?: CardDialogConfig['minWidth'];
     maxWidth?: CardDialogConfig['maxWidth'] = 750;
+    customHeaderBarContent?: TemplateRef<HTMLElement>;
 }
 
 interface GenericDialogButton<R extends string> {
@@ -39,4 +44,9 @@ export const YES_OR_NO: GenericDialogButton<'YES' | 'NO'>[] = [
 export const DISCARD_OR_BACK: GenericDialogButton<'DISCARD' | 'BACK'>[] = [
     { label: 'BACK', config: { color: 'standard' } },
     { label: 'DISCARD', config: { color: 'primary' } },
+];
+
+export const REPLACE_OR_BACK: GenericDialogButton<'REPLACE' | 'BACK'>[] = [
+    { label: 'BACK', config: { color: 'standard' } },
+    { label: 'REPLACE', config: { color: 'primary' } },
 ];

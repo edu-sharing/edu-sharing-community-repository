@@ -1,53 +1,43 @@
-import { forkJoin as observableForkJoin, observable, Observable } from 'rxjs';
+import { trigger } from '@angular/animations';
 import {
     Component,
-    Input,
-    EventEmitter,
-    Output,
-    ViewChild,
-    ElementRef,
-    HostListener,
     ContentChild,
+    EventEmitter,
+    HostListener,
+    Input,
+    Output,
     TemplateRef,
 } from '@angular/core';
+import { Router } from '@angular/router';
+import { Observable, forkJoin as observableForkJoin } from 'rxjs';
+import { BridgeService } from '../../core-bridge-module/bridge.service';
 import {
     CollectionProposalStatus,
     CollectionReference,
+    ConfigurationService,
     DialogButton,
     LocalPermissions,
-    NodeProperties,
+    Node,
     NodeVersions,
+    NodeWrapper,
     ProposalNode,
-    RestConnectorService,
+    RestCollectionService,
+    RestConstants,
+    RestHelper,
     RestNodeService,
+    TemporaryStorageService,
     Version,
 } from '../../core-module/core.module';
-import { TranslateService } from '@ngx-translate/core';
-import { RestSearchService } from '../../core-module/core.module';
-import { Toast } from '../../core-ui-module/toast';
-import { RestConstants } from '../../core-module/core.module';
-import { NodeWrapper, Node, Collection } from '../../core-module/core.module';
-import { RestHelper } from '../../core-module/core.module';
-import { RestToolService } from '../../core-module/core.module';
-import { ConfigurationService } from '../../core-module/core.module';
-import { RestCollectionService } from '../../core-module/core.module';
-import { trigger } from '@angular/animations';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
-import { UIHelper } from '../../core-ui-module/ui-helper';
-import { Router } from '@angular/router';
 import { UIConstants } from '../../core-module/ui/ui-constants';
-import { ClipboardObject, TemporaryStorageService } from '../../core-module/core.module';
-import { RestUsageService } from '../../core-module/core.module';
-import { BridgeService } from '../../core-bridge-module/bridge.service';
-import { LinkData, NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { ErrorProcessingService } from '../../core-ui-module/error.processing';
-import { BulkBehavior } from '../../features/mds/types/types';
-import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
-import { MainNavService } from 'src/app/main/navigation/main-nav.service';
-import { first } from 'rxjs/operators';
-import { SimpleEditCloseEvent } from './simple-edit-dialog/simple-edit-dialog.component';
-import { FeedbackV1Service } from 'ngx-edu-sharing-api';
+import { LinkData, NodeHelperService } from '../../core-ui-module/node-helper.service';
+import { Toast } from '../../core-ui-module/toast';
+import { UIHelper } from '../../core-ui-module/ui-helper';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
+import { BulkBehavior } from '../../features/mds/types/types';
+import { LocalEventsService } from '../../services/local-events.service';
+import { SimpleEditCloseEvent } from './simple-edit-dialog/simple-edit-dialog.component';
 
 export enum DialogType {
     SimpleEdit = 'SimpleEdit',
@@ -71,11 +61,8 @@ export interface ManagementEvent {
     ],
 })
 export class WorkspaceManagementDialogsComponent {
-    readonly BulkBehaviour = BulkBehavior;
-    @ViewChild(MdsEditorWrapperComponent) mdsEditorWrapperRef: MdsEditorWrapperComponent;
     @ContentChild('collectionChooserBeforeRecent')
     collectionChooserBeforeRecentRef: TemplateRef<any>;
-    @Input() showLtiTools = false;
     @Input() uploadShowPicker = false;
     @Input() uploadMultiple = true;
     @Input() fileIsOver = false;
@@ -84,12 +71,9 @@ export class WorkspaceManagementDialogsComponent {
     @Input() filesToUpload: FileList;
     @Output() filesToUploadChange = new EventEmitter();
     @Input() parent: Node;
-    @Output() showLtiToolsChange = new EventEmitter();
     @Input() addPinnedCollection: Node;
     @Output() addPinnedCollectionChange = new EventEmitter();
     @Output() onEvent = new EventEmitter<ManagementEvent>();
-    @Input() linkMap: Node;
-    @Output() linkMapChange = new EventEmitter<Node>();
     @Input() set nodeImportUnblock(nodeImportUnblock: Node[]) {
         this.toast.showConfigurableDialog({
             title: 'WORKSPACE.UNBLOCK_TITLE',
@@ -101,58 +85,6 @@ export class WorkspaceManagementDialogsComponent {
             isCancelable: true,
         });
     }
-    @Input() set nodeDelete(nodeDelete: Node[]) {
-        this._nodeDelete = nodeDelete;
-        if (nodeDelete == null) return;
-        this.nodeDeleteTitle =
-            'WORKSPACE.DELETE_TITLE' + (nodeDelete.length === 1 ? '_SINGLE' : '');
-        this.nodeDeleteMessage =
-            'WORKSPACE.DELETE_MESSAGE' + (nodeDelete.length === 1 ? '_SINGLE' : '');
-        this.nodeDeleteMessageParams = { name: RestHelper.getName(nodeDelete[0]) };
-        this.nodeDeleteButtons = DialogButton.getCancel(() => {
-            this._nodeDelete = null;
-        });
-        this.nodeDeleteButtons.push(
-            new DialogButton('YES_DELETE', { color: 'danger' }, () => {
-                this.deleteConfirmed(nodeDelete);
-            }),
-        );
-        if (nodeDelete.length === 1) {
-            if (nodeDelete[0].collection) {
-                this.nodeDeleteTitle = 'WORKSPACE.DELETE_TITLE_COLLECTION';
-                this.nodeDeleteMessage = 'WORKSPACE.DELETE_MESSAGE_COLLECTION';
-            } else if (this.nodeHelper.isNodePublishedCopy(nodeDelete[0])) {
-                this.nodeDeleteTitle = 'WORKSPACE.DELETE_TITLE_PUBLISHED_COPY';
-                this.nodeDeleteMessage = 'WORKSPACE.DELETE_MESSAGE_PUBLISHED_COPY';
-            } else if (nodeDelete[0].mediatype === 'folder-link') {
-                this.nodeDeleteTitle = 'WORKSPACE.DELETE_TITLE_FOLDER_LINK';
-                this.nodeDeleteMessage = 'WORKSPACE.DELETE_MESSAGE_FOLDER_LINK';
-            } else if (!nodeDelete[0].isDirectory) {
-                // check for usages and warn user
-                this.usageService
-                    .getNodeUsages(nodeDelete[0].ref.id, nodeDelete[0].ref.repo)
-                    .subscribe((usages) => {
-                        if (usages.usages.length > 0) {
-                            this.nodeDeleteMessage = 'WORKSPACE.DELETE_MESSAGE_SINGLE_USAGES';
-                            this.nodeDeleteMessageParams = {
-                                name: nodeDelete[0].name,
-                                usages: usages.usages.length,
-                            };
-                        }
-                    });
-            }
-        }
-        this.nodeDeleteBlock =
-            this.connector.getCurrentLogin()?.isAdmin &&
-            nodeDelete.every((n) => n.properties[RestConstants.CCM_PROP_REPLICATIONSOURCE] != null);
-        this.nodeDeleteBlockStatus = this.nodeDeleteBlock;
-    }
-    @Output() nodeDeleteChange = new EventEmitter();
-    @Output() onDelete = new EventEmitter<{
-        objects: Node[] | any;
-        error: boolean;
-        count: number;
-    }>();
     @Input() nodeWorkflow: Node[];
     @Output() nodeWorkflowChange = new EventEmitter();
     @Input() signupGroup: boolean;
@@ -161,27 +93,16 @@ export class WorkspaceManagementDialogsComponent {
     @Output() addNodesStreamChange = new EventEmitter();
     @Input() nodeVariant: Node;
     @Output() nodeVariantChange = new EventEmitter();
-    @Input() set nodeMetadata(nodeMetadata: Node[]) {
-        this._nodeMetadata = nodeMetadata;
-        this._nodeFromUpload = false;
-    }
-    @Output() nodeMetadataChange = new EventEmitter<Node[]>();
-    @Input() nodeTemplate: Node;
-    @Output() nodeTemplateChange = new EventEmitter();
     @Input() set nodeSimpleEdit(nodeSimpleEdit: Node[]) {
         this._nodeSimpleEdit = nodeSimpleEdit;
         this._nodeFromUpload = false;
     }
     @Input() nodeSimpleEditChange = new EventEmitter<Node[]>();
-    @Input() materialWriteFeedback: Node;
-    @Output() materialWriteFeedbackChange = new EventEmitter<Node>();
     @Input() materialViewFeedback: Node;
     @Output() materialViewFeedbackChange = new EventEmitter<Node>();
     @Input() nodeSidebar: Node;
     @Output() nodeSidebarChange = new EventEmitter<Node>();
     @Input() showUploadSelect = false;
-    @Input() nodeRelations: Node[];
-    @Output() nodeRelationsChange = new EventEmitter<Node[]>();
     @Output() showUploadSelectChange = new EventEmitter();
     @Output() onUploadSelectCanceled = new EventEmitter();
     @Output() onClose = new EventEmitter();
@@ -204,23 +125,9 @@ export class WorkspaceManagementDialogsComponent {
         collection: Node;
         references: CollectionReference[];
     }>();
-    _nodeDelete: Node[];
-    _nodeMetadata: Node[];
     _nodeSimpleEdit: Node[];
     _nodeFromUpload = false;
-    nodeDeleteTitle: string;
-    nodeDeleteMessage: string;
-    nodeDeleteMessageParams: any;
-    nodeDeleteBlock: boolean;
-    nodeDeleteBlockStatus = true;
-    nodeDeleteButtons: DialogButton[];
-    public createMetadata: string;
     public editorPending = false;
-    public metadataParent: Node;
-    public ltiToolConfig: Node;
-    public ltiObject: Node;
-    currentLtiTool: Node;
-    ltiToolRefresh: Boolean;
     reopenSimpleEdit = false;
     private nodeLicenseOnUpload = false;
     /**
@@ -244,15 +151,6 @@ export class WorkspaceManagementDialogsComponent {
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
         if (event.key === 'Escape') {
-            if (this._nodeMetadata != null || this.createMetadata) {
-                if (this.mdsEditorWrapperRef.handleKeyboardEvent(event)) {
-                    return;
-                }
-                this.closeEditor(false);
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
             if (this.nodeSidebar != null) {
                 this.closeSidebar();
                 event.preventDefault();
@@ -265,49 +163,21 @@ export class WorkspaceManagementDialogsComponent {
                 event.stopPropagation();
                 return;
             }
-            if (this.nodeTemplate != null) {
-                this.closeTemplate();
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
-            if (this.showLtiTools) {
-                this.closeLtiTools();
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
-            if (this.ltiObject) {
-                this.ltiObject = null;
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
         }
     }
     public constructor(
         private nodeService: RestNodeService,
-        private usageService: RestUsageService,
-        private toolService: RestToolService,
         private temporaryStorage: TemporaryStorageService,
         private collectionService: RestCollectionService,
-        private feedbackService: FeedbackV1Service,
-        private translate: TranslateService,
         private config: ConfigurationService,
-        private connector: RestConnectorService,
-        private searchService: RestSearchService,
-        private mainNavService: MainNavService,
         private toast: Toast,
         private errorProcessing: ErrorProcessingService,
         private nodeHelper: NodeHelperService,
         private bridge: BridgeService,
         private router: Router,
         private dialogs: DialogsService,
+        private localEvents: LocalEventsService,
     ) {}
-    closeLtiToolConfig() {
-        this.ltiToolConfig = null;
-        this.ltiToolRefresh = new Boolean();
-    }
     async openShareDialog(nodes: Node[]): Promise<void> {
         const dialogRef = await this.dialogs.openShareDialog({
             nodes,
@@ -326,7 +196,7 @@ export class WorkspaceManagementDialogsComponent {
             ),
         ).subscribe(
             (nodes: NodeWrapper[]) => {
-                this.onRefresh.emit(nodes.map((n) => n.node));
+                this.localEvents.nodesChanged.next(nodes.map((n) => n.node));
                 const previousNodes = originalNodes;
                 if (this.reopenSimpleEdit) {
                     this.reopenSimpleEdit = false;
@@ -343,77 +213,10 @@ export class WorkspaceManagementDialogsComponent {
         this.nodeWorkflow = null;
         this.nodeWorkflowChange.emit(null);
         if (nodes) {
-            this.onRefresh.emit(nodes);
+            this.localEvents.nodesChanged.emit(nodes);
         }
     }
-    private deleteConfirmed(nodes: Node[], position = 0, error = false): void {
-        if (position >= nodes.length) {
-            this.toast.closeModalDialog();
-            this._nodeDelete = null;
-            if (!error) {
-                this.toast.toast('WORKSPACE.TOAST.DELETE_FINISHED');
-            }
-            if (this.nodeDeleteBlockStatus) {
-                this.onRefresh.emit(nodes);
-            } else {
-                this.onDelete.emit({ objects: nodes, error: error, count: position });
-            }
-            return;
-        }
-        this.toast.showProgressDialog();
-        let callback;
-        if (this.nodeDeleteBlockStatus) {
-            const props: any = {};
-            props[RestConstants.CCM_PROP_IMPORT_BLOCKED] = [true];
-            callback = new Observable((observer) => {
-                this.nodeService
-                    .editNodeMetadataNewVersion(
-                        nodes[position].ref.id,
-                        RestConstants.COMMENT_BLOCKED_IMPORT,
-                        props,
-                    )
-                    .subscribe(({ node }) => {
-                        const permissions = new LocalPermissions();
-                        permissions.inherited = false;
-                        permissions.permissions = [];
-                        this.nodeService
-                            .setNodePermissions(node.ref.id, permissions)
-                            .subscribe(() => {
-                                observer.next(node);
-                                observer.complete();
-                            });
-                    });
-            });
-        } else {
-            callback = this.nodeService.deleteNode(nodes[position].ref.id);
-        }
-        callback.subscribe(
-            (node: Node) => {
-                if (node) {
-                    nodes[position] = node;
-                }
-                this.removeNodeFromClipboard(nodes[position]);
-                this.deleteConfirmed(nodes, position + 1, error);
-            },
-            (error: any) => {
-                this.toast.error(error);
-                this.deleteConfirmed(nodes, position + 1, true);
-            },
-        );
-    }
-    private removeNodeFromClipboard(node: Node) {
-        let clip = this.temporaryStorage.get('workspace_clipboard') as ClipboardObject;
-        if (clip == null) return;
 
-        for (let n of clip.nodes) {
-            if (n.ref.id == node.ref.id) {
-                clip.nodes.splice(clip.nodes.indexOf(n), 1);
-            }
-            if (clip.nodes.length == 0) {
-                this.temporaryStorage.remove('workspace_clipboard');
-            }
-        }
-    }
     public uploadDone(event: Node[]) {
         if (this.config.instant('licenseDialogOnUpload', false)) {
             void this.openLicenseDialog(event);
@@ -424,9 +227,7 @@ export class WorkspaceManagementDialogsComponent {
         this.filesToUpload = null;
         this.filesToUploadChange.emit(null);
     }
-    public refresh() {
-        this.onRefresh.emit();
-    }
+
     public uploadFile(event: FileList) {
         this.onUploadFileSelected.emit(event);
     }
@@ -448,9 +249,6 @@ export class WorkspaceManagementDialogsComponent {
                 this.toast.closeModalDialog();
             });
     }
-    openLtiConfig(event: Node) {
-        this.ltiToolConfig = event;
-    }
     public closeUploadSelect() {
         this.showUploadSelect = false;
         this.showUploadSelectChange.emit(false);
@@ -459,40 +257,20 @@ export class WorkspaceManagementDialogsComponent {
         this.closeUploadSelect();
         this.onUploadSelectCanceled.emit(false);
     }
-    async openContributorsDialog(node: Node) {
-        const dialogRef = await this.dialogs.openContributorsDialog({ node });
-        dialogRef.afterClosed().subscribe((updatedNode) => {
-            if (this.editorPending) {
-                this.editorPending = false;
-                this._nodeMetadata = [node];
-            }
-            if (updatedNode) {
-                this.onRefresh.emit([updatedNode]);
-            }
-        });
-    }
-    closeLtiTools() {
-        this.showLtiTools = false;
-        this.showLtiToolsChange.emit(false);
-    }
     async openLicenseDialog(nodes: Node[]): Promise<void> {
         const dialogRef = await this.dialogs.openLicenseDialog({ kind: 'nodes', nodes });
         dialogRef.afterClosed().subscribe((updatedNodes) => {
             if (this.nodeLicenseOnUpload) {
                 this.showMetadataAfterUpload(nodes);
-            } else if (this.editorPending) {
-                this.editorPending = false;
-                this._nodeMetadata = nodes;
             } else if (this.reopenSimpleEdit) {
                 this.reopenSimpleEdit = false;
                 this._nodeSimpleEdit = nodes;
             } else if (this._nodeFromUpload) {
                 this.onUploadFilesProcessed.emit(nodes);
-                this._nodeFromUpload = false;
             }
             this.nodeLicenseOnUpload = false;
             if (updatedNodes) {
-                this.onRefresh.emit(updatedNodes);
+                this.localEvents.nodesChanged.emit(updatedNodes);
             }
         });
     }
@@ -504,75 +282,42 @@ export class WorkspaceManagementDialogsComponent {
             this.toast.closeModalDialog();
         });
     }
-    closeEditor(refresh: boolean, nodes: Node[] = null) {
-        if (this._nodeFromUpload && !this.reopenSimpleEdit && nodes == null) {
-            this.deleteNodes(this._nodeMetadata);
+
+    async openMdsEditor(nodes: Node[]): Promise<void> {
+        const dialogRef = await this.dialogs.openMdsEditorDialogForNodes({
+            nodes,
+            bulkBehavior: this._nodeFromUpload ? BulkBehavior.Replace : BulkBehavior.Default,
+        });
+        dialogRef
+            .afterClosed()
+            .subscribe((updatedNodes) => this.closeMdsEditor(nodes, updatedNodes));
+    }
+
+    private closeMdsEditor(originalNodes: Node[], updatedNodes: Node[] = null) {
+        let refresh = !!updatedNodes;
+        if (this._nodeFromUpload && !this.reopenSimpleEdit && updatedNodes == null) {
+            this.deleteNodes(originalNodes);
+            this.localEvents.nodesDeleted.emit(originalNodes);
             refresh = true;
         }
-        const previousNodes = this._nodeMetadata;
-        this._nodeMetadata = null;
-        this.nodeMetadataChange.emit(null);
-        this.createMetadata = null;
-        this.onCloseMetadata.emit(nodes);
+        this.onCloseMetadata.emit(updatedNodes);
         if (this.reopenSimpleEdit) {
             this.reopenSimpleEdit = false;
-            this._nodeSimpleEdit = previousNodes;
+            this._nodeSimpleEdit = originalNodes;
         } else if (this._nodeFromUpload) {
-            this.onUploadFilesProcessed.emit(nodes);
+            this.onUploadFilesProcessed.emit(updatedNodes);
+        } else if (
+            this.nodeSidebar &&
+            this.nodeSidebar.ref.id === originalNodes[0]?.ref.id &&
+            updatedNodes
+        ) {
+            this.nodeSidebar = updatedNodes[0];
         }
         if (refresh) {
-            this.onRefresh.emit(nodes);
-            if (
-                nodes?.length === 1 &&
-                nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) !== -1
-            ) {
-                this.currentLtiTool = nodes[0];
-            } else {
-                this.ltiToolRefresh = new Boolean();
-            }
+            this.localEvents.nodesChanged.emit(updatedNodes);
         }
     }
 
-    public editLti(event: Node) {
-        //this.closeLtiTools();
-        this._nodeMetadata = [event];
-    }
-    public createLti(event: any) {
-        //this.closeLtiTools();
-        this.createMetadata = event.type;
-        this.metadataParent = event.node;
-    }
-    public createLtiObject(event: Node) {
-        this.closeLtiTools();
-        this.ltiObject = event;
-    }
-    public createLtiNodeObject(event: any) {
-        let win = window.open('', '_blank');
-        let properties = RestHelper.createNameProperty(event.name);
-        properties[RestConstants.CCM_PROP_TOOL_INSTANCE_REF] = [
-            RestHelper.createSpacesStoreRef(this.ltiObject),
-        ];
-        this.nodeService
-            .createNode(
-                event.parent.ref.id,
-                RestConstants.CCM_TYPE_IO,
-                [RestConstants.CCM_ASPECT_TOOL_OBJECT],
-                properties,
-                true,
-                RestConstants.COMMENT_MAIN_FILE_UPLOAD,
-            )
-            .subscribe(
-                (data: NodeWrapper) => {
-                    this.ltiObject = null;
-                    this.toolService.openLtiObject(data.node, win);
-                    this.onRefresh.emit();
-                },
-                (error: any) => {
-                    this.toast.error(error);
-                    win.close();
-                },
-            );
-    }
     public closeStream() {
         this.addNodesStream = null;
         this.addNodesStreamChange.emit(null);
@@ -671,21 +416,16 @@ export class WorkspaceManagementDialogsComponent {
     }
 
     private showMetadataAfterUpload(event: Node[]) {
+        this._nodeFromUpload = true;
         const dialog = this.config.instant('upload.postDialog', DialogType.SimpleEdit);
         if (dialog === DialogType.SimpleEdit) {
             this._nodeSimpleEdit = event;
             this.nodeSimpleEditChange.emit(event);
         } else if (dialog === DialogType.Mds) {
-            this._nodeMetadata = event;
+            void this.openMdsEditor(event);
         } else {
             console.error('Invalid configuration for upload.postDialog: ' + dialog);
         }
-        this._nodeFromUpload = true;
-    }
-
-    closeTemplate() {
-        this.nodeTemplate = null;
-        this.nodeTemplateChange.emit(null);
     }
 
     closePinnedCollection() {
@@ -693,35 +433,6 @@ export class WorkspaceManagementDialogsComponent {
         this.addPinnedCollectionChange.emit(null);
     }
 
-    closeCollectionWriteFeedback() {
-        this.materialWriteFeedback = null;
-        this.materialWriteFeedbackChange.emit(null);
-    }
-
-    addMaterialFeedback(feedback: { [key in string]: string[] }) {
-        if (!feedback) {
-            return;
-        }
-        delete feedback[RestConstants.CM_NAME];
-        this.toast.showProgressDialog();
-        this.feedbackService
-            .addFeedback({
-                repository: RestConstants.HOME_REPOSITORY,
-                node: this.materialWriteFeedback.ref.id,
-                body: feedback,
-            })
-            .subscribe(
-                () => {
-                    this.toast.closeModalDialog();
-                    this.closeCollectionWriteFeedback();
-                    this.toast.toast('FEEDBACK.TOAST');
-                },
-                (error) => {
-                    this.toast.closeModalDialog();
-                    this.toast.error(error);
-                },
-            );
-    }
     restoreVersion(restore: { version: Version; node: Node }) {
         this.toast.showConfigurableDialog({
             title: 'WORKSPACE.METADATA.RESTORE_TITLE',
@@ -746,13 +457,13 @@ export class WorkspaceManagementDialogsComponent {
             .subscribe(
                 (data: NodeVersions) => {
                     this.toast.closeModalDialog();
-                    this.refresh();
                     this.closeSidebar();
                     // @TODO type is not compatible
                     this.nodeService
                         .getNodeMetadata(version.version.node.id, [RestConstants.ALL])
                         .subscribe(
                             (node) => {
+                                this.localEvents.nodesChanged.emit([node.node]);
                                 this.nodeSidebar = node.node;
                                 this.nodeSidebarChange.emit(node.node);
                                 this.toast.toast('WORKSPACE.REVERTED_VERSION');
@@ -774,14 +485,6 @@ export class WorkspaceManagementDialogsComponent {
         this.nodeSidebarChange.emit(null);
     }
 
-    closeRelations(changed: boolean) {
-        this.nodeRelations = null;
-        this.nodeRelationsChange.emit(null);
-        if (changed) {
-            this.onRefresh.emit();
-        }
-    }
-
     displayNode(node: Node) {
         if (node.version) {
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id, node.version]);
@@ -800,7 +503,7 @@ export class WorkspaceManagementDialogsComponent {
             }
         }
         if (event.nodes) {
-            this.onRefresh.emit(event.nodes);
+            this.localEvents.nodesChanged.emit(event.nodes);
         }
         this._nodeSimpleEdit = null;
         this.nodeSimpleEditChange.emit(null);
@@ -834,13 +537,8 @@ export class WorkspaceManagementDialogsComponent {
             }),
         ).subscribe((results: Node[]) => {
             this.toast.closeModalDialog();
-            this.onRefresh.emit(results);
+            this.localEvents.nodesChanged.emit(results);
         });
-    }
-
-    closeLinkMap(node: Node = null) {
-        this.linkMap = null;
-        this.linkMapChange.emit(null);
     }
 
     declineProposals(nodes: ProposalNode[]) {
@@ -858,7 +556,7 @@ export class WorkspaceManagementDialogsComponent {
             )
             .then(() => {
                 this.toast.toast('COLLECTIONS.PROPOSALS.TOAST.DECLINED');
-                this.onDelete.emit({ objects: nodes, error: false, count: nodes.length });
+                this.localEvents.nodesDeleted.emit(nodes);
             });
     }
 
@@ -890,8 +588,7 @@ export class WorkspaceManagementDialogsComponent {
                     )
                     .then((results) => {
                         this.toast.toast('COLLECTIONS.PROPOSALS.TOAST.ACCEPTED');
-                        this.onDelete.emit({ objects: nodes, error: false, count: nodes.length });
-                        this.onRefresh.emit();
+                        this.localEvents.nodesDeleted.emit(nodes);
                         this.onEvent.emit({
                             event: ManagementEventType.AddCollectionNodes,
                             data: {

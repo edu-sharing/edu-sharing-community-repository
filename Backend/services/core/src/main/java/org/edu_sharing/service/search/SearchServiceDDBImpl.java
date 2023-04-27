@@ -1,11 +1,22 @@
 package org.edu_sharing.service.search;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
+import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.log4j.Logger;
+import org.edu_sharing.metadataset.v2.MetadataReader;
+import org.edu_sharing.metadataset.v2.MetadataSet;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.HttpQueryTool;
+import org.edu_sharing.service.model.NodeRef;
+import org.edu_sharing.service.search.model.SearchToken;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import javax.net.ssl.*;
+import java.io.*;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
@@ -14,26 +25,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
-import org.alfresco.service.cmr.repository.StoreRef;
-import org.apache.log4j.Logger;
-import org.edu_sharing.metadataset.v2.MetadataReader;
-import org.edu_sharing.metadataset.v2.MetadataSet;
-import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.service.model.NodeRef;
-import org.edu_sharing.service.search.model.SearchToken;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class SearchServiceDDBImpl extends SearchServiceAdapter{
 	
@@ -82,15 +73,11 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		  });
 		return connection;
 	}
-	public  SearchResultNodeRef searchDDB(String repositoryId,String apiKey,String path) throws Exception{
-		//String lang=new AuthenticationToolAPI().getCurrentLocale().split("_")[0];
-
+	public SearchResultNodeRef searchDDB(String repositoryId,String apiKey,String path) throws Exception{
 		String jsonString = "";
-		
 		String urlAsStr = DDB_API+path;
 		jsonString = query(urlAsStr);
 		JSONObject jo = new JSONObject(jsonString);
-    	
 		Integer nrOfResult = (Integer)jo.get("numberOfResults");
 		JSONArray resultsArr = (JSONArray)jo.get("results");
 		JSONObject results = (JSONObject)resultsArr.get(0);
@@ -112,53 +99,8 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			data.add(ref);
 
 		}
-		// prefetch properties parallel for better performance
-		/*
-		// does currently not result in better performance since api gets slower with parallel requests
-		NodeServiceDDBImpl nodeServiceDDB = new NodeServiceDDBImpl(appInfo.getAppId());
-		data = data.parallelStream().map((item) -> {
-			try {
-				long time = System.currentTimeMillis();
-				item.setProperties(nodeServiceDDB.getProperties(null, null, item.getNodeId()));
-				logger.info("Time ddb: " + (System.currentTimeMillis() - time));
-			} catch (Throwable throwable) {
-				logger.warn("DDB properties fetch failed", throwable);
-			}
-			return item;
-		}).collect(Collectors.toList());
-		 */
 		searchResultNodeRef.setData(data);
-
-		/*
-
-		
-			HashMap<String,Object> properties=new HashMap<>();
-			properties.put(CCConstants.SYS_PROP_NODE_UID,map.getNamedItem("id").getNodeValue());
-			properties.put(CCConstants.LOM_PROP_GENERAL_TITLE,map.getNamedItem("title").getNodeValue());
-			
-			properties.put(CCConstants.LOM_PROP_GENERAL_KEYWORD,map.getNamedItem("tags").getNodeValue().replace(" ",CCConstants.MULTIVALUE_SEPARATOR));
-
-			properties.put(CCConstants.CM_ASSOC_THUMBNAILS, map.getNamedItem("image").getNodeValue());
-			properties.put(CCConstants.CONTENTURL,map.getNamedItem("url").getNodeValue());
-			properties.put(CCConstants.LOM_PROP_TECHNICAL_FORMAT, "application/xhtml+xml");
-			properties.put(CCConstants.CCM_PROP_IO_WWWURL,map.getNamedItem("url").getNodeValue());
-			properties.put(CCConstants.NODETYPE, CCConstants.CCM_TYPE_IO);
-			properties.put(CCConstants.CM_PROP_C_CREATOR,map.getNamedItem("author").getNodeValue());
-
-			properties.put(CCConstants.REPOSITORY_ID, "LEARNINGAPPS" );
-			properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,"LearningApps");
-			properties.put(CCConstants.CM_PROP_C_CREATOR,map.getNamedItem("author").getNodeValue());
-			properties.put(CCConstants.NODECREATOR_FIRSTNAME,map.getNamedItem("author").getNodeValue());
-			properties.put(CCConstants.NODEMODIFIER_FIRSTNAME,map.getNamedItem("author").getNodeValue());
-			
-			String createdate = map.getNamedItem("created").getNodeValue();
-
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.GERMAN);
-			LocalDateTime date  = LocalDateTime.parse(createdate, formatter);
-			DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMAN);
-			properties.put(CCConstants.CM_PROP_C_MODIFIED,date.format(formatter2));
-			  
-		}*/
+		searchResultNodeRef.setNodeCount(jo.getInt("numberOfResults"));
 		return searchResultNodeRef;
 
 	}
@@ -181,33 +123,9 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
         return sb.toString();
 	}
 
-	public static String httpGet(String urlStr, HashMap<String, String> properties) throws IOException {
-        if (properties == null) {
-            properties = new HashMap<String, String>();
-        }
+	public static String httpGet(String urlStr, Map<String, String> headers) throws IOException {
         // open HTTP connection with URL
-        URL url = new URL(urlStr);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        // set properties if any do exist
-        for (String key : properties.keySet()) {
-            conn.setRequestProperty(key, properties.get(key));
-        }
-        // test if request was successful (status 200)
-        if (conn.getResponseCode() != 200) {
-            throw new IOException(conn.getResponseMessage());
-        }
-        // buffer the result into a string
-        InputStreamReader isr = new InputStreamReader(conn.getInputStream(), "UTF-8");
-        BufferedReader br = new BufferedReader(isr);
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while ((line = br.readLine()) != null) {
-            sb.append(line);
-        }
-        br.close();
-        isr.close();
-        conn.disconnect();
-        return sb.toString();
+		return new HttpQueryTool().query(urlStr, headers, new HttpGet(urlStr));
     }	
 
 	private String getNodeId(JSONObject doc){

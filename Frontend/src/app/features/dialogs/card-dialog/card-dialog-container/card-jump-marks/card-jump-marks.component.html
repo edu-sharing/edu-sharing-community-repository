@@ -1,0 +1,9 @@
+<button
+  mat-button
+  color="primary"
+  *ngFor="let jumpMark of jumpMarks"
+  [class.active]="jumpMark === activeJumpMark"
+  (click)="scrollToJumpMark.emit(jumpMark)"
+>
+  <i [esIcon]="jumpMark.icon"></i> {{ jumpMark.label }}
+</button>

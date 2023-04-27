@@ -133,6 +133,8 @@ public class VCardConverter {
 	public static String getNameForVCard(String prefix,HashMap<String,Object> data){
 		if(isPersonVCard(prefix,data)){
 			String name="";
+			if(data.containsKey(prefix+CCConstants.VCARD_TITLE))
+				name+=data.get(prefix+CCConstants.VCARD_TITLE)+" ";
 			if(data.containsKey(prefix+CCConstants.VCARD_GIVENNAME))
 				name+=data.get(prefix+CCConstants.VCARD_GIVENNAME)+" ";
 			if(data.containsKey(prefix+CCConstants.VCARD_SURNAME))

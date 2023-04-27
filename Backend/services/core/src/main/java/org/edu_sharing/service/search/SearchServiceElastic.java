@@ -1,7 +1,6 @@
 package org.edu_sharing.service.search;
 
 import com.google.gson.Gson;
-import com.hazelcast.map.impl.query.Query;
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.vcard.VCard;
 import net.sourceforge.cardme.vcard.types.ExtendedType;
@@ -16,12 +15,10 @@ import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.MetadataQuery;
-import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
-import org.edu_sharing.metadataset.v2.MetadataReader;
-import org.edu_sharing.metadataset.v2.MetadataSet;
+import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repackaged.elasticsearch.org.apache.http.HttpHost;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
@@ -31,6 +28,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.restservices.shared.Contributor;
+import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.service.admin.SystemFolder;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
@@ -75,11 +73,10 @@ import org.elasticsearch.search.suggest.SuggestBuilders;
 import org.elasticsearch.search.suggest.phrase.DirectCandidateGeneratorBuilder;
 import org.elasticsearch.search.suggest.phrase.PhraseSuggestion;
 import org.elasticsearch.xcontent.*;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -176,7 +173,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         //enhance to collection permissions
         MatchQueryBuilder collectionTypeProposal = QueryBuilders.matchQuery("collections.relation.type", "ccm:collection_proposal");
-        BoolQueryBuilder collectionPermissions = getPermissionsQuery("collections.permissions.read");
+        // @TODO: FIX after DESP-840
+        BoolQueryBuilder collectionPermissions = getPermissionsQuery("collections.permissions.read.keyword");
         collectionPermissions.should(QueryBuilders.matchQuery("collections.owner", user));
         collectionPermissions.mustNot(collectionTypeProposal);
 
@@ -198,7 +196,6 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     public SearchResultNodeRef searchFacets(MetadataSet mds, String query, Map<String,String[]> criterias, SearchToken searchToken) throws Throwable {
-        List<NodeSearch.Facet> facetsResult = new ArrayList<>();
         BoolQueryBuilder globalConditions = getGlobalConditions(searchToken.getAuthorityScope(),searchToken.getPermissions());
 
         MetadataQuery queryData = mds.findQuery(query, MetadataReader.QUERY_SYNTAX_DSL);
@@ -212,6 +209,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 globalConditions,
                 searchToken);
 
+        return parseAggregations(searchToken, aggregations);
+    }
+
+    @NotNull
+    private SearchResultNodeRef parseAggregations(SearchToken searchToken, List<AggregationBuilder> aggregations) throws Exception {
         SearchRequest searchRequestAggs = new SearchRequest("workspace");
         SearchSourceBuilder searchSourceBuilderAggs = new SearchSourceBuilder();
         searchSourceBuilderAggs.from(0);
@@ -224,18 +226,19 @@ public class SearchServiceElastic extends SearchServiceImpl {
         logger.info("query aggs: "+searchSourceBuilderAggs.toString());
         SearchResponse resp = LogTime.log("Searching elastic for facets", () -> client.search(searchRequestAggs, RequestOptions.DEFAULT));
 
-
+        List<NodeSearch.Facet> facetsResult = new ArrayList<>();
         for(Aggregation a : resp.getAggregations()) {
             if(a instanceof ParsedFilter){
                 ParsedFilter pf = (ParsedFilter)a;
                 for(Aggregation aggregation : pf.getAggregations().asList()){
                     if(aggregation instanceof ParsedStringTerms){
+                        AggregationBuilder definition = aggregations.stream().filter(agg -> agg.getName().equalsIgnoreCase(a.getName())).findAny().get();
                         ParsedStringTerms pst = (ParsedStringTerms) aggregation;
-                        facetsResult.add(getFacet(pst));
+                        facetsResult.add(getFacet(pst ,definition));
                     }
                 }
             }else{
-                logger.error("non supported aggreagtion " + a.getName());
+                logger.error("non supported aggregation " + a.getName());
             }
         }
 
@@ -395,7 +398,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 for(Aggregation a : aggregations){
                     if(a instanceof  ParsedStringTerms) {
                         ParsedStringTerms pst = (ParsedStringTerms) a;
-                        facetsResult.add(getFacet(pst));
+                        facetsResult.add(getFacet(pst, null));
                     }else if (a instanceof ParsedCardinality){
                         ParsedCardinality pc = (ParsedCardinality)a;
                         if (a.getName().equals("original_count")) {
@@ -410,9 +413,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                             if(aggregation instanceof ParsedStringTerms){
                                 ParsedStringTerms pst = (ParsedStringTerms) aggregation;
                                 if(a.getName().endsWith("_selected")){
-                                    facetsResultSelected.add(getFacet(pst));
+                                    facetsResultSelected.add(getFacet(pst, null));
                                 }else{
-                                    facetsResult.add(getFacet(pst));
+                                    facetsResult.add(getFacet(pst, null));
                                 }
                             }
                         }
@@ -505,19 +508,30 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return sr;
     }
 
-    private NodeSearch.Facet getFacet(ParsedStringTerms pst){
+    private NodeSearch.Facet getFacet(ParsedStringTerms pst, AggregationBuilder builder){
         NodeSearch.Facet facet = new NodeSearch.Facet();
         facet.setProperty(pst.getName());
         List<NodeSearch.Facet.Value> values = new ArrayList<>();
         facet.setValues(values);
 
         for (Terms.Bucket b : pst.getBuckets()) {
-            String key = b.getKeyAsString();
-            long count = b.getDocCount();
-            NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
-            value.setValue(key);
-            value.setCount((int)count);
-            values.add(value);
+            if(builder != null && "multi_terms".equals(builder.getMetadata().get("type"))) {
+                String[] key = b.getKeyAsString().split("\\|");
+                for (String k : key) {
+                    long count = b.getDocCount();
+                    NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
+                    value.setValue(k);
+                    value.setCount((int) count);
+                    values.add(value);
+                }
+            } else {
+                String key = b.getKeyAsString();
+                long count = b.getDocCount();
+                NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
+                value.setValue(key);
+                value.setCount((int) count);
+                values.add(value);
+            }
         }
 
         facet.setSumOtherDocCount(pst.getSumOfOtherDocCounts());
@@ -1064,7 +1078,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                      logger.error("ping failed, close failed:" + e.getMessage()+" creating new");
                  }
              }
-             client = new RestHighLevelClient(RestClient.builder(getConfiguredHosts()));
+             client = new ESRestHighLevelClient(RestClient.builder(getConfiguredHosts()));
         }
     }
 
@@ -1106,5 +1120,39 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return sr;
     }
 
+    @Override
+    public List<? extends Suggestion> getSuggestions(MetadataSet mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
+        Map<String,String[]> criteriasMap = MetadataSearchHelper.convertCriterias(criterias);
+        SearchToken token = new SearchToken();
+        token.setFacets(Collections.singletonList(parameterId));
+        token.setFrom(0);
+        token.setMaxResult(0);
+        token.setFacetLimit(50);
+        token.setFacetsMinCount(1);
+        token.setQueryString(value);
+        try {
+            Map<String, MetadataKey> captions = mds.findWidget(parameterId).getValuesAsMap();
+            SearchResultNodeRef search = searchFacets(
+                    mds, queryId, criteriasMap, token
+            );
+            if(search.getFacets().size() != 1) {
+                return Collections.emptyList();
+            }
+            return search.getFacets().get(0).getValues().stream().filter(s ->
+                    // if one document has i.e. multiple keywords, they will be shown in the facet
+                    // so, we filter for values which actually contain the given string
+                    s.getValue().toLowerCase().contains(value.toLowerCase())
+            ).map(s -> {
+                Suggestion suggestion = new Suggestion();
+                suggestion.setKey(s.getValue());
+                suggestion.setDisplayString(
+                        captions.containsKey(s.getValue()) ? captions.get(s.getValue()).getCaption() : s.getValue()
+                );
+                return suggestion;
+            }).distinct().collect(Collectors.toList());
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
 
+    }
 }

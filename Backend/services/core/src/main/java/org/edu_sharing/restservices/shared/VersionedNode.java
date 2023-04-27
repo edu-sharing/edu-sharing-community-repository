@@ -2,6 +2,8 @@ package org.edu_sharing.restservices.shared;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import java.io.Serializable;
+
 public class VersionedNode extends Node{
     @JsonProperty
     private Version version;
@@ -14,7 +16,7 @@ public class VersionedNode extends Node{
         this.version = version;
     }
 
-    public static class Version {
+    public static class Version implements Serializable {
         private String comment;
 
         public String getComment() {

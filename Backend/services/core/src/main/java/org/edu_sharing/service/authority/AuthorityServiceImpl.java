@@ -96,7 +96,6 @@ public class AuthorityServiceImpl implements AuthorityService {
 	}
 	@Override
 	public void deleteAuthority(String authorityName) {
-
 		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
 
                 new RetryingTransactionCallback<Void>()
@@ -105,6 +104,9 @@ public class AuthorityServiceImpl implements AuthorityService {
                     {
                 		String key =  authorityName;
                 		String groupType = (String) getAuthorityProperty(key,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
+						if(authorityName.equals(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) {
+							throw new AccessDeniedException("Not allowed to delete group " + CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS);
+						}
                 		if(groupType!=null && groupType.equals(CCConstants.ADMINISTRATORS_GROUP_TYPE) && !new MCAlfrescoAPIClient().isAdmin(AuthenticationUtil.getFullyAuthenticatedUser()))
                 			throw new AccessDeniedException("An admin group can not be deleted");
                 		authorityService.deleteAuthority(key, true);

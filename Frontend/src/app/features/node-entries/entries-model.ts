@@ -34,7 +34,6 @@ export enum InteractionType {
 
 export type ListOptions = { [key in Target]?: OptionItem[] };
 export type ListOptionsConfig = {
-    scope: Scope;
     actionbar?: ActionbarComponent;
     parent?: Node;
     customOptions?: CustomOptions;
@@ -82,8 +81,17 @@ export type FetchEvent = {
      */
     reset?: boolean;
 };
+export type GridLayout = 'grid' | 'scroll';
 export type GridConfig = {
+    /**
+     * max amount of rows that should be visible, unset for no limit
+     */
     maxRows?: number;
+    /**
+     * layout, defaults to 'grid'
+     * 'scroll' may only be used when maxRows is not set
+     */
+    layout?: GridLayout;
 };
 
 export interface ListEventInterface<T extends NodeEntriesDataType> {

@@ -1,5 +1,11 @@
 import { Injectable } from '@angular/core';
-import { CanDeactivate, NavigationStart, Router } from '@angular/router';
+import {
+    ActivatedRouteSnapshot,
+    CanDeactivate,
+    NavigationStart,
+    Router,
+    RouterStateSnapshot,
+} from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { CardDialogService } from './card-dialog/card-dialog.service';
 
@@ -22,8 +28,15 @@ export class DialogsNavigationGuard implements CanDeactivate<unknown> {
      *
      * @returns `false` when navigation should be canceled so we stay on the old page.
      */
-    canDeactivate(): boolean {
-        const openDialogs = this.cardDialog.openDialogs;
+    canDeactivate(
+        component: unknown,
+        currentRoute: ActivatedRouteSnapshot,
+        currentState: RouterStateSnapshot,
+        nextState?: RouterStateSnapshot,
+    ): boolean {
+        const openDialogs = this.cardDialog.openDialogs
+            // Disregard dialogs that are closing right now.
+            .filter((dialog) => dialog.getLifecycleState() === 'open');
         if (this.restoreState) {
             // The user tried to navigate back or forward.
             //
@@ -32,6 +45,12 @@ export class DialogsNavigationGuard implements CanDeactivate<unknown> {
             topMostDialog?.tryCancel('navigation');
             // Return `true` if there are no open dialogs.
             return !topMostDialog;
+        } else if (currentState.url.split('?')[0] === nextState.url.split('?')[0]) {
+            // Only the query params have changed.
+            //
+            // We have dialogs that can change the query params of a page. Just leave all dialogs
+            // open.
+            return true;
         } else {
             // We are navigating to a new page. Dialogs should not provide any options to navigate
             // to other pages. This should currently only happen when the user was auto logged out

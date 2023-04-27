@@ -666,7 +666,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		List<String> aspects = new ArrayList<>();
 		aspects.add(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
 		logger.debug("cmis helper start");
-		List<org.alfresco.service.cmr.repository.NodeRef> nodes = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO,map,aspects,null,100000);
+		List<org.alfresco.service.cmr.repository.NodeRef> nodes = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO,map,aspects,null,100000, null);
 		logger.debug("cmis helper finished");
 		return nodes;
 	}

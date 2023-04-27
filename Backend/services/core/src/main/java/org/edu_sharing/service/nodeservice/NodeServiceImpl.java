@@ -20,6 +20,8 @@ import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.security.AccessStatus;
+import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
@@ -128,6 +130,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public NodeRef copyNode(String nodeId, String toNodeId, boolean copyChildren) throws Throwable {
 		NodeRef result = serviceRegistry.getRetryingTransactionHelper().doInTransaction(()->{
 			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+			throwIfRestrictedAccessPresent(nodeRef);
 
 			CopyService copyService = serviceRegistry.getCopyService();
 
@@ -155,6 +158,15 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		});
 
 		return result;
+	}
+
+	private void throwIfRestrictedAccessPresent(NodeRef nodeRef) {
+		Boolean restrictedAccess = (Boolean) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CCM_PROP_RESTRICTED_ACCESS);
+		if(restrictedAccess != null && restrictedAccess) {
+			if(!serviceRegistry.getPermissionService().hasPermission(nodeRef, CCConstants.PERMISSION_CHANGEPERMISSIONS).equals(AccessStatus.ALLOWED)) {
+				throw new SecurityException("Node has restricted access and no permission " + CCConstants.PERMISSION_CHANGEPERMISSIONS + " available");
+			}
+		}
 	}
 
 	private void resetVersion(NodeRef nodeRef) throws Throwable {
@@ -766,26 +778,32 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 	}
 	@Override
-	public String getOrCreateUserInbox() {
+	public String getUserInbox(boolean createIfNotExists) {
 		NodeRef userhome=repositoryHelper.getUserHome(repositoryHelper.getPerson());
 		List<ChildAssociationRef> inbox = nodeService.getChildAssocsByPropertyValue(userhome, QName.createQName(CCConstants.CCM_PROP_MAP_TYPE), CCConstants.CCM_VALUE_MAP_TYPE_USERINBOX);
 		if(inbox!=null && inbox.size()>0)
 			return inbox.get(0).getChildRef().getId();
-		HashMap<String,Object> properties=new HashMap<>();
-		properties.put(CCConstants.CM_NAME,"Inbox");
-		properties.put(CCConstants.CCM_PROP_MAP_TYPE,CCConstants.CCM_VALUE_MAP_TYPE_USERINBOX);
-		return createNodeBasic(userhome.getId(),CCConstants.CCM_TYPE_MAP,properties);
+		if(createIfNotExists) {
+			HashMap<String, Object> properties = new HashMap<>();
+			properties.put(CCConstants.CM_NAME, "Inbox");
+			properties.put(CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_USERINBOX);
+			return createNodeBasic(userhome.getId(), CCConstants.CCM_TYPE_MAP, properties);
+		}
+		return null;
 	}
 	@Override
-	public String getOrCreateUserSavedSearch() {
+	public String getUserSavedSearch(boolean createIfNotExists) {
 		NodeRef userhome=repositoryHelper.getUserHome(repositoryHelper.getPerson());
 		List<ChildAssociationRef> savedSearch = nodeService.getChildAssocsByPropertyValue(userhome, QName.createQName(CCConstants.CCM_PROP_MAP_TYPE), CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH);
 		if(savedSearch!=null && savedSearch.size()>0)
 			return savedSearch.get(0).getChildRef().getId();
-		HashMap<String,Object> properties=new HashMap<>();
-		properties.put(CCConstants.CM_NAME,"SavedSearch");
-		properties.put(CCConstants.CCM_PROP_MAP_TYPE,CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH);
-		return createNodeBasic(userhome.getId(),CCConstants.CCM_TYPE_MAP,properties);
+		if(createIfNotExists) {
+			HashMap<String, Object> properties = new HashMap<>();
+			properties.put(CCConstants.CM_NAME, "SavedSearch");
+			properties.put(CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH);
+			return createNodeBasic(userhome.getId(), CCConstants.CCM_TYPE_MAP, properties);
+		}
+		return null;
 	}
 
 	/**
@@ -865,14 +883,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 prop1=cache.get(key1);
             }
             else{
-                prop1 = nodeServiceAlfresco.getProperty(n1, prop);
+                prop1 = getSortPropertyValue(n1, prop);
                 cache.put(key1,prop1);
             }
             if(cache.containsKey(key2)){
                 prop2=cache.get(key2);
             }
             else{
-                prop2 = nodeServiceAlfresco.getProperty(n2, prop);
+                prop2 = getSortPropertyValue(n2, prop);
                 cache.put(key2,prop2);
             }
             int compare=0;
@@ -903,8 +921,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 				if (compare == 0) {
 					// cast ml text to string
-					if(prop1 instanceof MLText && prop2 instanceof MLText) {
+					if(prop1 instanceof MLText) {
 						prop1 = ((MLText) prop1).getDefaultValue();
+					}
+					if(prop2 instanceof MLText) {
 						prop2 = ((MLText) prop2).getDefaultValue();
 					}
 					if (prop1 instanceof String && prop2 instanceof String) {
@@ -927,7 +947,20 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         return 0;
     }
 
-    @Override
+	private Serializable getSortPropertyValue(NodeRef ref, QName prop) {
+		Serializable value = nodeServiceAlfresco.getProperty(ref, prop);
+		//dbnodeservice returns mltext
+		if(value instanceof MLText){
+			value = ((MLText)value).getDefaultValue();
+		}
+
+		if(prop.toString().equals(CCConstants.LOM_PROP_GENERAL_TITLE) && StringUtils.isBlank((String)value)) {
+			return nodeServiceAlfresco.getProperty(ref, ContentModel.PROP_NAME);
+		}
+		return value;
+	}
+
+	@Override
 	public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String assocName, List<String> filter, SortDefinition sortDefinition){
 		NodeRef parentNodeRef = getParentRef(parentID);
         List<ChildAssociationRef> result;
@@ -935,6 +968,33 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             result=this.getChildAssocs(parentNodeRef);
 		}
 		else{
+			// special handling for series objects inside collections
+			if(assocName.equals(CCConstants.CCM_ASSOC_CHILDIO)) {
+				if(hasAspect(StoreRef.PROTOCOL_WORKSPACE,
+						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+						parentID,
+						CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)
+				) {
+					return AuthenticationUtil.runAsSystem(() -> {
+						try {
+							return sortNodeRefList(
+									this.getChildAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+													(String) getPropertyNative(StoreRef.PROTOCOL_WORKSPACE,
+															StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+															parentID,
+															CCConstants.CCM_PROP_IO_ORIGINAL
+													)),
+											QName.createQName(assocName), RegexQNamePattern.MATCH_ALL),
+									filter,
+									sortDefinition
+							);
+						}catch(Throwable ignored) {
+							// original might be deleted!
+						}
+						return Collections.emptyList();
+					});
+				}
+			}
             result=this.getChildAssocs(parentNodeRef,QName.createQName(assocName),RegexQNamePattern.MATCH_ALL);
 		}
         result=sortNodeRefList(result,filter,sortDefinition);
@@ -1067,6 +1127,18 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	@Override
 	public Serializable getPropertyNative(String storeProtocol, String storeId, String nodeId, String property){
 		return nodeService.getProperty(new NodeRef(new StoreRef(storeProtocol,storeId), nodeId), QName.createQName(property));
+	}
+
+	@Override
+	public void keepModifiedDate(String storeProtocol, String storeId, String nodeId, Runnable task) {
+		serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+			NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);
+			// disable behaviour so no version data is altered externally
+			policyBehaviourFilter.disableBehaviour(nodeRef, ContentModel.ASPECT_AUDITABLE);
+			task.run();
+			policyBehaviourFilter.enableBehaviour(nodeRef, ContentModel.ASPECT_AUDITABLE);
+			return null;
+		});
 	}
 
 	@Override

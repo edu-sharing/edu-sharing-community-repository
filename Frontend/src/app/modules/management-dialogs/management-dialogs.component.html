@@ -17,24 +17,14 @@
   [node]="nodeSidebar"
   (onRestore)="restoreVersion($event)"
   (onDisplay)="displayNode($event)"
-  (onEditMetadata)="nodeMetadata = [$event]"
+  (onEditMetadata)="openMdsEditor([$event])"
   (onClose)="closeSidebar()"
 ></es-workspace-metadata>
-<es-node-relation-manager
-  *ngIf="nodeRelations"
-  [nodes]="nodeRelations"
-  (close)="closeRelations($event)"
-></es-node-relation-manager>
-<es-add-material-feedback
-  *ngIf="materialWriteFeedback"
-  [node]="materialWriteFeedback"
-  (onClose)="closeCollectionWriteFeedback()"
-></es-add-material-feedback>
 <es-simple-edit-dialog
   *ngIf="_nodeSimpleEdit"
   [nodes]="_nodeSimpleEdit"
   [fromUpload]="_nodeFromUpload"
-  (onOpenMetadata)="reopenSimpleEdit = true; _nodeMetadata = $event"
+  (onOpenMetadata)="reopenSimpleEdit = true; openMdsEditor($event)"
   (onOpenInvite)="reopenSimpleEdit = true; openShareDialog($event)"
   (onOpenLicense)="reopenSimpleEdit = true; openLicenseDialog($event)"
   (onClose)="closeSimpleEdit($event)"
@@ -60,31 +50,6 @@
         height="xxxlarge">
     <qrcode [qrdata]="qr.data" elementType="img" [margin]="2" [width]="512" errorCorrectionLevel="M"></qrcode>
 </es-card> -->
-<es-card
-  *ngIf="_nodeDelete"
-  title="{{ nodeDeleteTitle | translate }}"
-  height="auto"
-  [isCancelable]="true"
-  (onCancel)="_nodeDelete = null"
-  [buttons]="nodeDeleteButtons"
-  [node]="_nodeDelete"
->
-  <div class="card-content-padding">
-    {{ nodeDeleteMessage | translate: nodeDeleteMessageParams }}
-    <div *ngIf="nodeDeleteBlock" class="delete-block-checkbox">
-      <mat-checkbox [(ngModel)]="nodeDeleteBlockStatus">
-        <es-multi-line-label>
-          <ng-container slot="label">
-            {{ 'WORKSPACE.DELETE_IMPORT_BLOCK' | translate }}
-          </ng-container>
-          <ng-container slot="description">
-            {{ 'WORKSPACE.DELETE_IMPORT_BLOCK_INFO' | translate }}
-          </ng-container>
-        </es-multi-line-label>
-      </mat-checkbox>
-    </div>
-  </div>
-</es-card>
 <es-workspace-workflow
   *ngIf="nodeWorkflow"
   [nodes]="nodeWorkflow"
@@ -99,12 +64,6 @@
   (onCancel)="closeVariant()"
   (onDone)="closeVariant()"
 ></es-node-variant>
-<es-map-link
-  *ngIf="linkMap"
-  [node]="linkMap"
-  (onCancel)="closeLinkMap()"
-  (onDone)="closeLinkMap($event)"
-></es-map-link>
 <es-collection-chooser
   class="dialog-right scrollWithBanner"
   *ngIf="addToCollection"
@@ -121,48 +80,7 @@
     ></ng-container>
   </ng-template>
 </es-collection-chooser>
-<es-workspace-lti-tools
-  *ngIf="showLtiTools"
-  [refresh]="ltiToolRefresh"
-  [(currentTool)]="currentLtiTool"
-  (onClose)="closeLtiTools()"
-  (onEdit)="editLti($event)"
-  (onCreateLtiObject)="createLtiObject($event)"
-  (onCreate)="createLti($event)"
-  (onOpenConfig)="openLtiConfig($event)"
-></es-workspace-lti-tools>
 
-<es-workspace-lti-tool-configs
-  *ngIf="ltiToolConfig"
-  [tool]="ltiToolConfig"
-  (onClose)="closeLtiToolConfig()"
-  (onEdit)="editLti($event)"
-  (onCreate)="createLti($event)"
-></es-workspace-lti-tool-configs>
-<es-workspace-create-lti
-  *ngIf="ltiObject"
-  [tool]="ltiObject"
-  [parent]="parent"
-  (onCancel)="ltiObject = null"
-  (onCreate)="createLtiNodeObject($event)"
-></es-workspace-create-lti>
-<es-mds-editor-wrapper
-  *ngIf="_nodeMetadata || createMetadata"
-  [nodes]="_nodeMetadata"
-  [create]="createMetadata"
-  [parentNode]="metadataParent"
-  [bulkBehaviour]="_nodeFromUpload ? BulkBehaviour.Replace : BulkBehaviour.Default"
-  (onCancel)="closeEditor(false)"
-  (onDone)="closeEditor(true, $any($event))"
-  (openLicense)="openLicenseDialog(_nodeMetadata); editorPending = true"
-  (openTemplate)="nodeTemplate = _nodeMetadata[0]"
-  (openContributor)="openContributorsDialog(_nodeMetadata[0]); editorPending = true"
-></es-mds-editor-wrapper>
-<es-node-template
-  *ngIf="nodeTemplate"
-  [nodeId]="nodeTemplate.ref.id"
-  (onClose)="closeTemplate()"
-></es-node-template>
 <es-workspace-file-upload
   *ngIf="filesToUpload"
   [current]="parent"

@@ -13,8 +13,6 @@ import { EditorMode } from '../../types/mds-types';
     styleUrls: ['./mds-editor-core.component.scss'],
 })
 export class MdsEditorCoreComponent {
-    /** Reference to the card component it is embedded in (if any). */
-    @Input() card: CardComponent;
     @ViewChildren('view') viewRef: QueryList<MdsEditorViewComponent>;
 
     views: MdsView[];
@@ -28,7 +26,7 @@ export class MdsEditorCoreComponent {
         this.editorMode = this.mdsEditorInstance.editorMode;
         this.mdsEditorInstance.mdsInitDone.subscribe(() => this.init());
         this.hasExtendedWidgets$ = this.mdsEditorInstance.widgets.pipe(
-            map((widgets) => widgets.some((widget) => widget.definition.isExtended)),
+            map((widgets) => widgets?.some((widget) => widget.definition.isExtended)),
         );
     }
 

@@ -8,9 +8,14 @@
     width: 100%;
     height: 100%;
 }
+
+.workspace-container {
+    // Prevent other elements from pushing the toolbar (position: fixed) further below the main nav.
+    display: flex;
+}
+
 .isBlocked {
     position: absolute;
-    top: var(--mainnavHeight);
     color: $noResultsColor;
     font-size: 150%;
     text-align: center;
@@ -92,7 +97,7 @@ es-user-quota {
     position: relative;
     display: block;
     left: 300px;
-    top: calc(var(--mainnavHeight) + #{$secondaryBarHeight});
+    top: $secondaryBarHeight;
     width: calc(100% - 300px);
     height: calc(100% - (var(--mainnavHeight) + #{$secondaryBarHeight}));
     transition: all $transitionNormal;
@@ -105,7 +110,6 @@ es-user-quota {
 .actionbarFrame {
     width: auto;
     position: fixed;
-    top: var(--mainnavHeight);
     right: 0;
     z-index: 62;
     > div {
@@ -124,7 +128,6 @@ es-user-quota {
 .viewType {
     position: fixed;
     color: $textLight;
-    top: var(--mainnavHeight);
     padding-top: 20px;
     padding-right: 25px;
     right: 0;
@@ -135,7 +138,6 @@ es-user-quota {
 }
 .breadcrumbFrame {
     position: fixed;
-    top: var(--mainnavHeight);
     left: 0;
     width: 100%;
     z-index: 60;
@@ -150,39 +152,6 @@ es-user-quota {
     }
 }
 :host ::ng-deep {
-    @media screen and (min-width: ($mobileWidth)) {
-        es-workspace-explorer es-listTable .list.list-type-card > .list-container {
-            padding-top: 20px;
-            padding-bottom: 20px;
-        }
-    }
-    @media screen and (min-width: ($mobileTabSwitchWidth)) {
-        es-workspace-explorer es-listTable .list {
-            overflow-y: auto;
-            position: relative;
-            &.list-type-card {
-                top: 0;
-                height: calc(100vh - (var(--mainnavHeight) + #{$secondaryBarHeight}));
-            }
-            &.list-type-table {
-                top: $listHeadingHeight;
-                height: calc(
-                    100vh - (var(--mainnavHeight) + #{$secondaryBarHeight+$listHeadingHeight})
-                );
-                .headingGroup {
-                    position: fixed !important;
-                    z-index: 1;
-                    top: calc(var(--mainnavHeight) + #{$workspaceBreadcrumbsHeight});
-                    width: calc(100% - #{$workspaceTreeWidth});
-                }
-            }
-        }
-    }
-    @media screen and (min-width: ($mobileWidth+$mobileStage*6)) {
-        workspace-explorer.explorerMetadata es-listTable .list-type-table .headingGroup {
-            width: calc(100% - #{$workspaceTreeWidth} - 300px);
-        }
-    }
     .breadcrumbFrame .breadcrumb {
         position: relative;
         top: 5px;

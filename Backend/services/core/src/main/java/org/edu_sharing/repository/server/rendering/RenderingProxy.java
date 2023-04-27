@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response;
 
-import com.benfante.jslideshare.App;
 import org.edu_sharing.generated.repository.backend.services.rest.client.model.RenderingDetailsEntry;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -21,12 +20,12 @@ import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpException;
@@ -45,9 +44,6 @@ import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
-import org.edu_sharing.webservices.usage2.Usage2;
-import org.edu_sharing.webservices.usage2.Usage2Result;
-import org.edu_sharing.webservices.usage2.Usage2ServiceLocator;
 
 public class RenderingProxy extends HttpServlet {
 
@@ -55,7 +51,7 @@ public class RenderingProxy extends HttpServlet {
 	private static final String[] ALLOWED_GET_PARAMS = new String[]{
 			"closeOnBack","childobject","childobject_order"
 	};
-	Logger logger = Logger.getLogger(RenderingProxy.class);
+	private static Logger logger = Logger.getLogger(RenderingProxy.class);
 	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -84,7 +80,7 @@ public class RenderingProxy extends HttpServlet {
 
 		String usernameDecrypted;
 		try {
-			usernameDecrypted=getDecryptedUsername(req);
+			usernameDecrypted= getUsername(req);
 		}catch(Exception e){
 			throw new RenderingException(HttpServletResponse.SC_BAD_REQUEST,e.getMessage(),RenderingException.I18N.encryption,e);
 		}
@@ -169,7 +165,7 @@ public class RenderingProxy extends HttpServlet {
 	private void updateUserRemoteRoles(HttpServletRequest req) throws Exception {
 		String[] roles = req.getParameterValues("role");
 		if(roles != null && roles.length > 0) {
-			final String username = getDecryptedUsername(req);
+			final String username = getUsername(req);
 			RunAsWork<Void> runAs = () -> {
 				MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
 				String personId = new MCAlfrescoAPIClient().getUserInfo(username).get(CCConstants.SYS_PROP_NODE_UID);
@@ -181,13 +177,23 @@ public class RenderingProxy extends HttpServlet {
 	}
 
 	/**
-	 * returns the encrypted username provided in the request, or fails and returns null
+	 * returns the decrypted username provided in the request,
+	 * when encrypted username not present it checks if it's a trusted auth call and returns proxy user
+	 * or fails and returns null
 	 */
-	private String getDecryptedUsername(HttpServletRequest req) throws Exception {
+	private String getUsername(HttpServletRequest req) throws Exception {
 		String uEncrypted = req.getParameter("u");
 		if(uEncrypted==null){
-			throw new Exception("Parameter \"u\" (username) is missing");
-        }
+			if(ContextManagementFilter.accessTool != null
+					&& ContextManagementFilter.accessTool.get() != null
+					&& AuthenticationUtil.getFullyAuthenticatedUser() != null
+					&& AuthenticationUtil.getFullyAuthenticatedUser().equals(CCConstants.PROXY_USER)){
+				logger.info("trusted application, validated usage access for app: " + ContextManagementFilter.accessTool.get().getAppId());
+				return CCConstants.PROXY_USER;
+			}else{
+				throw new Exception("Parameter \"u\" (username) is missing");
+			}
+		}
 		Encryption encryptionTool = new Encryption("RSA");
 
 		try {
@@ -394,7 +400,7 @@ public class RenderingProxy extends HttpServlet {
 
 	private void queryRendering(HttpServletRequest req, HttpServletResponse resp, String nodeId, Usage usage,
 			ApplicationInfo repoInfo) throws Exception {
-		String usernameDecrypted = getDecryptedUsername(req);
+		String usernameDecrypted = getUsername(req);
 		// it is a trusted app who requested and signature was verified, so we can
 		// render the node
 		RenderingServiceOptions options = RenderingServiceOptions.fromRequestParameters(req);
@@ -442,7 +448,7 @@ public class RenderingProxy extends HttpServlet {
 			//new AuthenticationToolAPI().authenticateUser(usernameDecrypted, session);
 			AuthenticationToolAPI authTool = new AuthenticationToolAPI();
 			if(authTool.validateTicket(ticket)) {
-				authTool.storeAuthInfoInSession(getDecryptedUsername(req), ticket,CCConstants.AUTH_TYPE_DEFAULT, req.getSession());
+				authTool.storeAuthInfoInSession(getUsername(req), ticket,CCConstants.AUTH_TYPE_DEFAULT, req.getSession());
 			}else {
 				logger.warn("ticket:" + ticket +" is not valid");
 				return;
@@ -535,7 +541,7 @@ public class RenderingProxy extends HttpServlet {
 					usage = new Usage2Service().getUsage(req.getParameter("app_id"), req.getParameter("course_id"), parentId, req.getParameter("resource_id"));
 				}
 				if(usage==null) {
-					boolean ccpublish=AuthenticationUtil.runAs(()->PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.PERMISSION_CC_PUBLISH),getDecryptedUsername(req));
+					boolean ccpublish=AuthenticationUtil.runAs(()->PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.PERMISSION_CC_PUBLISH), getUsername(req));
 					if(ccpublish){
 						throw new RenderingException(HttpServletResponse.SC_UNAUTHORIZED,"Usage fetching failed for node "+nodeId,RenderingException.I18N.usage_missing_permissions);
 					}

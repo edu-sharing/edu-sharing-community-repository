@@ -28,14 +28,13 @@ import { PermissionsRoutingComponent } from '../modules/permissions/permissions-
 import { PermissionsMainComponent } from '../modules/permissions/permissions.component';
 import { ProfilesComponent } from '../modules/profiles/profiles.component';
 import { RegisterComponent } from '../modules/register/register.component';
-import { SearchComponent } from '../modules/search/search.component';
 import { ServicesComponent } from '../modules/services/services.components';
 import { ShareAppComponent } from '../modules/share-app/share-app.component';
 import { SharingComponent } from '../modules/sharing/sharing.component';
 import { StartupComponent } from '../modules/startup/startup.component';
 import { StreamComponent } from '../modules/stream/stream.component';
 import { WorkspaceMainComponent } from '../modules/workspace/workspace.component';
-import { ActivatedRoute, NavigationEnd, Router, Routes, UrlTree } from '@angular/router';
+import { NavigationEnd, NavigationStart, Router, Routes } from '@angular/router';
 import { CookieInfoComponent } from '../common/ui/cookie-info/cookie-info.component';
 import { BridgeService } from '../core-bridge-module/bridge.service';
 import { extensionRoutes } from '../extension/extension-routes';
@@ -52,6 +51,8 @@ import { ThemeService } from '../common/services/theme.service';
 import * as rxjs from 'rxjs';
 import { LicenseAgreementService } from '../services/license-agreement.service';
 import { DialogsNavigationGuard } from '../features/dialogs/dialogs-navigation.guard';
+import { AuthenticationService } from 'ngx-edu-sharing-api';
+import { ConfigurationService, RestHelper } from '../core-module/core.module';
 
 @Component({
     selector: 'es-router',
@@ -121,8 +122,13 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
         private loadingScreen: LoadingScreenService,
         private licenseAgreement: LicenseAgreementService,
         private themeService: ThemeService,
+        private authentication: AuthenticationService,
+        private configuration: ConfigurationService,
     ) {
         this.injector.get(Router).events.subscribe((event) => {
+            // if (event instanceof NavigationStart) {
+            //     console.log('NavigationStart', event.url);
+            // }
             if (event instanceof NavigationEnd) {
                 RouterComponent.history.value.push(event.url);
                 RouterComponent.history.next(RouterComponent.history.value);
@@ -146,6 +152,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
             )
             .subscribe();
         this.setUserScale();
+        this.registerRedirectToLogin();
         this.registerContrastMode();
         this.licenseAgreement.setup();
     }
@@ -191,6 +198,24 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
             const viewport: HTMLMetaElement = document.head.querySelector('meta[name="viewport"]');
             viewport.content += ', user-scalable=no';
         }
+    }
+
+    /**
+     * Redirects the user to the login page in case they don't have a valid session.
+     */
+    private registerRedirectToLogin(): void {
+        this.authentication.observeLoginInfo().subscribe((loginInfo) => {
+            const router = this.injector.get(Router);
+            if (
+                !loginInfo.isValidLogin &&
+                !(
+                    router.url.startsWith('/' + UIConstants.ROUTER_PREFIX + 'login') ||
+                    router.url.startsWith('/' + UIConstants.ROUTER_PREFIX + 'register')
+                )
+            ) {
+                RestHelper.goToLogin(router, this.configuration);
+            }
+        });
     }
 
     private registerContrastMode(): void {
@@ -242,7 +267,11 @@ const childRoutes: Routes = [
         component: ApplyToLmsComponent,
     },
     // search
-    { path: UIConstants.ROUTER_PREFIX + 'search', component: SearchComponent },
+    {
+        path: UIConstants.ROUTER_PREFIX + 'search',
+        loadChildren: () =>
+            import('../pages/search-page/search-page.module').then((m) => m.SearchPageModule),
+    },
     // workspace
     { path: UIConstants.ROUTER_PREFIX + 'workspace', component: WorkspaceMainComponent },
     { path: UIConstants.ROUTER_PREFIX + 'workspace/:mode', component: WorkspaceMainComponent },

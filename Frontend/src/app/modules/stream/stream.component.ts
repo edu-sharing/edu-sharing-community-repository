@@ -43,6 +43,10 @@ import { OptionsHelperService } from '../../core-ui-module/options-helper.servic
 import { StreamEntry, StreamV1Service } from 'ngx-edu-sharing-api';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
+import {
+    SearchEvent,
+    SearchFieldService,
+} from '../../main/navigation/search-field/search-field.service';
 
 @Component({
     selector: 'es-stream',
@@ -100,8 +104,8 @@ export class StreamComponent implements OnInit, AfterViewInit, OnDestroy {
     private currentStreamObject: StreamEntry;
     private destroyed = new Subject<void>();
 
-    doSearch({ query }: { query: string; cleared: boolean }) {
-        this.searchQuery = query;
+    doSearch(event: SearchEvent) {
+        this.searchQuery = event.searchString;
         // TODO: Search for the given query doch nicht erledigt
     }
     constructor(
@@ -124,6 +128,7 @@ export class StreamComponent implements OnInit, AfterViewInit, OnDestroy {
         private loadingScreen: LoadingScreenService,
         private mainNavService: MainNavService,
         private translations: TranslationsService,
+        private searchField: SearchFieldService,
     ) {
         const loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
         this.translations.waitForInit().subscribe(() => {
@@ -168,11 +173,17 @@ export class StreamComponent implements OnInit, AfterViewInit, OnDestroy {
         this.mainNavService.setMainNavConfig({
             title: 'STREAM.TITLE',
             currentScope: 'stream',
-            searchEnabled: false,
-            searchPlaceholder: 'STREAM.SEARCH_PLACEHOLDER',
-            searchQueryChange: (searchQuery) => (this.searchQuery = searchQuery),
-            onSearch: (query, cleared) => this.doSearch({ query, cleared }),
         });
+        // const searchFieldInstance = this.searchField.enable(
+        //     {
+        //         placeholder: 'STREAM.SEARCH_PLACEHOLDER',
+        //     },
+        //     this.destroyed,
+        // );
+        // searchFieldInstance
+        //     .onSearchStringChanged()
+        //     .subscribe((searchString) => (this.searchQuery = searchString));
+        // searchFieldInstance.onSearchTriggered().subscribe((event) => this.doSearch(event));
     }
 
     async ngAfterViewInit() {

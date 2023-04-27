@@ -1,5 +1,6 @@
 import {
     AfterViewInit,
+    ChangeDetectorRef,
     Component,
     ComponentFactoryResolver,
     ComponentRef,
@@ -28,7 +29,7 @@ import {
 } from '../../core-module/core.module';
 import { NodeEntriesService } from '../../core-ui-module/node-entries.service';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
-import { OptionItem } from '../../core-ui-module/option-item';
+import { OptionItem, Scope } from '../../core-ui-module/option-item';
 import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { MainNavService } from '../../main/navigation/main-nav.service';
@@ -48,11 +49,14 @@ import {
 } from './entries-model';
 import { NodeDataSource } from './node-data-source';
 import { NodeDataSourceRemote } from './node-data-source-remote';
+import { Helper } from '../../core-module/rest/helper';
 
 @Component({
     selector: 'es-node-entries-wrapper',
-    template: ` <es-node-entries #nodeEntriesComponent *ngIf="!customNodeListComponent">
-    </es-node-entries>`,
+    template: `<es-node-entries
+        #nodeEntriesComponent
+        *ngIf="!customNodeListComponent"
+    ></es-node-entries>`,
     providers: [NodeEntriesService, OptionsHelperService, NodeEntriesTemplatesService],
 })
 export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
@@ -76,6 +80,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @ContentChild('overlay') overlayRef: TemplateRef<any>;
     @ViewChild('nodeEntriesComponent') nodeEntriesComponentRef: NodeEntriesComponent<T>;
     @Input() dataSource: NodeDataSource<T> | NodeDataSourceRemote<T>;
+    @Input() scope: Scope;
     @Input() columns: ListItem[];
     @Input() configureColumns: boolean;
     @Input() checkbox = true;
@@ -88,12 +93,19 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Input() dragDrop: ListDragGropConfig<T>;
     @Input() gridConfig: GridConfig;
     /**
-     * Handle page-wide keyboard shortcuts in this node-entries instance.
-     *
-     * This should be set to true if this instance represents the page's main content. Only set to
-     * true for one instance per page.
+     * this can be set instead of calling initOptionsGenerator()
      */
-    @Input() globalKeyboardShortcuts: boolean;
+    @Input() initConfig: ListOptionsConfig;
+    /**
+     * Whether this node-entries instance represents the page's main content.
+     *
+     * Only set to true for one instance per page.
+     *
+     * If true, this instance will
+     * - handle page-wide keyboard shortcuts
+     * - take control of the `page` and `pageSize` query parameters for pagination
+     */
+    @Input() primaryInstance: boolean;
     /**
      * UI hints for whether a single click will cause a dynamic action.
      *
@@ -112,13 +124,12 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      * Do not load more data on scroll.
      */
     @Input() disableInfiniteScroll = false;
+
     @Output() fetchData = new EventEmitter<FetchEvent>();
     @Output() clickItem = new EventEmitter<NodeClickEvent<T>>();
     @Output() dblClickItem = new EventEmitter<NodeClickEvent<T>>();
     @Output() sortChange = new EventEmitter<ListSortConfig>();
     @Output() virtualNodesAdded = this.optionsHelper.virtualNodesAdded;
-    @Output() nodesChanged = this.optionsHelper.nodesChanged;
-    @Output() nodesDeleted = this.optionsHelper.nodesDeleted;
     @Output() displayTypeChanged = this.optionsHelper.displayTypeChanged;
 
     customNodeListComponent: Type<NodeEntriesComponent<T>>;
@@ -136,6 +147,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         private nodeHelperService: NodeHelperService,
         private mainNav: MainNavService,
         private templatesService: NodeEntriesTemplatesService,
+        private changeDetectorRef: ChangeDetectorRef,
         private elementRef: ElementRef,
     ) {
         // regulary re-bind template since it might have updated without ngChanges trigger
@@ -157,7 +169,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     }
 
     ngOnInit(): void {
-        if (this.globalKeyboardShortcuts) {
+        if (this.primaryInstance) {
             this.optionsHelper.registerGlobalKeyboardShortcuts();
         }
     }
@@ -168,6 +180,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         }
         this.entriesService.list = this;
         this.entriesService.dataSource = this.dataSource;
+        this.entriesService.scope = this.scope;
         this.entriesService.columns = this.columns;
         this.entriesService.configureColumns = this.configureColumns;
         this.entriesService.checkbox = this.checkbox;
@@ -183,10 +196,13 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.clickItem = this.clickItem;
         this.entriesService.dblClickItem = this.dblClickItem;
         this.entriesService.fetchData = this.fetchData;
-        this.entriesService.globalKeyboardShortcuts = this.globalKeyboardShortcuts;
+        this.entriesService.primaryInstance = this.primaryInstance;
         this.entriesService.singleClickHint = this.singleClickHint;
         this.entriesService.disableInfiniteScroll = this.disableInfiniteScroll;
 
+        if (changes['initConfig']) {
+            this.initOptionsGenerator(this.initConfig);
+        }
         if (this.componentRef) {
             this.componentRef.instance.changeDetectorRef?.detectChanges();
         }
@@ -260,6 +276,18 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
                 this.nodeHelperService.copyDataToNode(d as Node, hits[0] as Node);
             }
         });
+        // trigger rebuild
+        if (this.dataSource instanceof NodeDataSource) {
+            (this.dataSource as NodeDataSource<T>).refresh();
+        }
+        const oldSelection = this.entriesService.selection.selected;
+        this.entriesService.selection.clear();
+        this.entriesService.selection.select(
+            ...oldSelection.map(
+                (o) => this.dataSource.getData().filter((d) => Helper.objectEquals(o, d))?.[0],
+            ),
+        );
+        this.changeDetectorRef.detectChanges();
     }
 
     showReorderColumnsDialog(): void {}
@@ -285,6 +313,8 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         });
         this.entriesService.selection.clear();
         this.entriesService.selection.select(...virtual);
+        this.virtualNodesAdded.emit(virtual as Node[]);
+        this.changeDetectorRef.detectChanges();
     }
 
     setOptions(options: ListOptions): void {
@@ -298,9 +328,8 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
 
     async initOptionsGenerator(config: ListOptionsConfig) {
         await this.optionsHelper.initComponents(config.actionbar, this);
-        this.entriesService.scope = config.scope;
         this.optionsHelper.setData({
-            scope: config.scope,
+            scope: this.entriesService.scope,
             activeObjects: this.entriesService.selection.selected,
             selectedObjects: this.entriesService.selection.selected,
             allObjects: this.dataSource.getData(),

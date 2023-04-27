@@ -42,6 +42,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.transaction.UserTransaction;
@@ -152,6 +153,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.PropertiesGetInterceptor;
 import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
 import org.edu_sharing.service.util.AlfrescoDaoHelper;
@@ -1336,14 +1338,31 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				properties.remove(CCConstants.KEY_PREVIEW_GENERATION_RUNS);
 			}
 			*/
-
-			List<NodeRef> usages = this.getChildrenByAssociationNodeIds(nodeRef.getStoreRef(),nodeRef.getId(), CCConstants.CCM_ASSOC_USAGEASPECT_USAGES);
-			if (usages != null) {
-				properties.put(CCConstants.VIRT_PROP_USAGECOUNT, "" + usages.size());
-			}
-			List<NodeRef> childs = this.getChildrenByAssociationNodeIds(nodeRef.getStoreRef(),nodeRef.getId(), CCConstants.CCM_ASSOC_CHILDIO);
-			if (childs != null) {
-				properties.put(CCConstants.VIRT_PROP_CHILDOBJECTCOUNT, "" + childs.size());
+			Consumer<NodeRef> fetchCounts = (ref) -> {
+				List<NodeRef> usages = this.getChildrenByAssociationNodeIds(ref.getStoreRef(), ref.getId(), CCConstants.CCM_ASSOC_USAGEASPECT_USAGES);
+				if (usages != null) {
+					properties.put(CCConstants.VIRT_PROP_USAGECOUNT, "" + usages.size());
+				}
+				List<NodeRef> childs = this.getChildrenByAssociationNodeIds(ref.getStoreRef(), ref.getId(), CCConstants.CCM_ASSOC_CHILDIO);
+				if (childs != null) {
+					properties.put(CCConstants.VIRT_PROP_CHILDOBJECTCOUNT, "" + childs.size());
+				}
+			};
+			if(aspects.contains(QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))) {
+				AuthenticationUtil.runAsSystem(() -> {
+					try {
+						fetchCounts.accept(
+								new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+										(String) service.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL))
+								)
+						);
+					}catch (Throwable ignored) {
+						// ignored, original might be deleted
+					}
+					return null;
+				});
+			} else {
+				fetchCounts.accept(nodeRef);
 			}
 			List<NodeRef> comments = this.getChildrenByAssociationNodeIds(nodeRef.getStoreRef(),nodeRef.getId(), CCConstants.CCM_ASSOC_COMMENT);
 			if (comments != null) {
@@ -1384,20 +1403,20 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		properties.put(CCConstants.REPOSITORY_CAPTION, appInfo.getAppCaption());
 
 		buildUpProperties(properties);
-
+		HashMap<String, Object> propertiesFinal = properties;
 		// cache
 		if (nodeRef.getStoreRef().equals(storeRef)) {
 			Date mdate = (Date) propMap.get(QName.createQName(CCConstants.CM_PROP_C_MODIFIED));
 			if (mdate != null) {
-				properties.put(CCConstants.CC_CACHE_MILLISECONDS_KEY, new Long(mdate.getTime()).toString());
+				propertiesFinal.put(CCConstants.CC_CACHE_MILLISECONDS_KEY, new Long(mdate.getTime()).toString());
 				for(PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
-					properties = new HashMap<>(i.beforeCacheProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef, properties,
+					propertiesFinal = new HashMap<>(i.beforeCacheProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef, propertiesFinal,
 									aspects.stream().map(QName::toString).collect(Collectors.toList()), null)));
 				}
-				repCache.put(nodeRef.getId(), properties);
+				repCache.put(nodeRef.getId(), propertiesFinal);
 			}
 		}
-		return properties;
+		return propertiesFinal;
 	}
 
 	public String getAlfrescoMimetype(NodeRef nodeRef) {
@@ -2622,34 +2641,27 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		PersonService personService = serviceRegistry.getPersonService();
 		
 		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-				
-        new RetryingTransactionCallback<Void>() {
-            public Void execute() throws Throwable {
-        		Throwable runAs = AuthenticationUtil.runAs(
-        				
-    				new AuthenticationUtil.RunAsWork<Throwable>() {
-    					
-    					@Override
-    					public Throwable doWork() throws Exception {
-    						try{
-    							addUserExtensionAspect(userName);
-    							personService.setPersonProperties(userName, transformPropMap(userInfo));
-    						} catch (Throwable e) {
-    							logger.error(e.getMessage(), e);
-    							return e;
-    						}
-    						return null;
-    					}
-    				}, 
-    				ApplicationInfoList.getHomeRepository().getUsername());
-        		
-        		if (runAs != null) {
-        			throw runAs;
-        		}
-        		return null;
-            }
-        }, 
-        false); 
+				(RetryingTransactionCallback<Void>) () -> {
+					Throwable runAs = AuthenticationUtil.runAs(
+							() -> {
+								try{
+									addUserExtensionAspect(userName);
+									personService.setPersonProperties(userName, transformPropMap(userInfo));
+								} catch (Throwable e) {
+									logger.error(e.getMessage(), e);
+									return e;
+								}
+								return null;
+							},
+						ApplicationInfoList.getHomeRepository().getUsername());
+
+					if (runAs != null) {
+						throw runAs;
+					}
+					return null;
+				},
+        false);
+		UserCache.refresh(userName);
 	}
 	
 	private void addUserExtensionAspect(String userName) {
@@ -3223,13 +3235,13 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 	@Override
 	public void createShare(String nodeId, String[] emails, long expiryDate) throws Exception {
-		ShareService shareService = new ShareServiceImpl();
+		ShareService shareService = new ShareServiceImpl(PermissionServiceFactory.getPermissionService(appInfo.getAppId()));
 		String locale = (String) Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.AUTH_LOCALE);
 		shareService.createShare(nodeId, emails, expiryDate, null, locale);
 	}
 
 	public Share[] getShares(String nodeId) {
-		ShareService shareService = new ShareServiceImpl();
+		ShareService shareService = new ShareServiceImpl(PermissionServiceFactory.getPermissionService(appInfo.getAppId()));
 		return shareService.getShares(nodeId);
 	}
 

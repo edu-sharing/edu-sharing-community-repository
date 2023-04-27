@@ -382,6 +382,9 @@ public class GroupDao {
 				NodeServiceHelper.removeProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD);
 				NodeServiceHelper.removeAspect(ref, CCConstants.CCM_ASPECT_GROUP_SIGNUP);
 			} else {
+				if(authorityName.equals(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) {
+					throw new DAOSecurityException(new AccessDeniedException("not allowed for group " + authorityName));
+				}
 				NodeServiceHelper.addAspect(ref, CCConstants.CCM_ASPECT_GROUP_SIGNUP);
 				NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD, details.getSignupMethod().toString(), false);
 				if (details.getSignupPassword() != null && !details.getSignupPassword().isEmpty()) {

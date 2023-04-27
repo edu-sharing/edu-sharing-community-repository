@@ -125,15 +125,15 @@ public class SignatureVerifier {
 		ApplicationInfo appResult = null;
 		SignatureVerifier.Result result = null;
 
-		if(httpReq.getHeader("X-Edu-App-Id") == null){
+		if(getHeaderOrParam("X-Edu-App-Id", httpReq) == null){
 			return result = new Result(HttpServletResponse.SC_BAD_REQUEST,"MISSING X-Edu-App-Id",null);
 		}
 
 
-		String appId=httpReq.getHeader("X-Edu-App-Id");
-		String sig=httpReq.getHeader("X-Edu-App-Sig");
-		String signed=httpReq.getHeader("X-Edu-App-Signed");
-		String ts=httpReq.getHeader("X-Edu-App-Ts");
+		String appId=getHeaderOrParam("X-Edu-App-Id",httpReq);
+		String sig=getHeaderOrParam("X-Edu-App-Sig",httpReq);
+		String signed=getHeaderOrParam("X-Edu-App-Signed",httpReq);
+		String ts=getHeaderOrParam("X-Edu-App-Ts",httpReq);
 		ApplicationInfo app = ApplicationInfoList.getRepositoryInfoById(appId);
 
 
@@ -152,5 +152,20 @@ public class SignatureVerifier {
 		}
 
 		return result;
+	}
+
+	/**
+	 * tries to get header value if null it uses fallback over request param
+	 *
+	 * @param key
+	 * @param httpReq
+	 * @return
+	 */
+	public static String getHeaderOrParam(String key, HttpServletRequest httpReq){
+		String value = httpReq.getHeader(key);
+		if(value == null){
+			value = httpReq.getParameter(key);
+		}
+		return value;
 	}
 }

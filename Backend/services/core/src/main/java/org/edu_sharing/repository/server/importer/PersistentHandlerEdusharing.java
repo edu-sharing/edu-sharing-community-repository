@@ -367,10 +367,10 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 
 		try {
-			mcAlfrescoBaseClient.updateNode(nodeId, simpleProps);
+			NodeServiceFactory.getLocalService().updateNodeNative(nodeId, simpleProps);
 		}catch(DuplicateChildNodeNameException e){
 			simpleProps.put(CCConstants.CM_NAME, EduSharingNodeHelper.makeUniqueName((String) simpleProps.get(CCConstants.CM_NAME)));
-			mcAlfrescoBaseClient.updateNode(nodeId, simpleProps);
+			NodeServiceFactory.getLocalService().updateNodeNative(nodeId, simpleProps);
 		}
 		createChildobjects(nodeId, nodeProps);
 	}
@@ -420,10 +420,10 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		// do not auto create versions (otherwise the node will get several versions e.g. during binary handler or preview)
 		simpleProps.put(CCConstants.CCM_PROP_IO_CREATE_VERSION,false);
 		try {
-			newNodeId = mcAlfrescoBaseClient.createNode(parentId, type, association, simpleProps);
+			newNodeId = NodeServiceFactory.getLocalService().createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId, type, association, simpleProps);
 		} catch (DuplicateChildNodeNameException e) {
 			simpleProps.put(CCConstants.CM_NAME, EduSharingNodeHelper.makeUniqueName((String)simpleProps.get(CCConstants.CM_NAME)));
-			newNodeId = mcAlfrescoBaseClient.createNode(parentId, type, association, simpleProps);
+			newNodeId = NodeServiceFactory.getLocalService().createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId, type, association, simpleProps);
 		}
 		if (aspects != null) {
 			for (String aspect : aspects) {
@@ -451,6 +451,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 				replIdMap = new HashMap<>();
 				replIdTimestampMap = new HashMap<>();
 				// fetch data parallel for faster build up
+				getLogger().info("Starting build of timestamp map...");
 				allNodes.parallelStream().forEach((entry)->{
 					AuthenticationUtil.runAs(()-> {
 						String replSource = NodeServiceHelper.getProperty(entry, CCConstants.CCM_PROP_IO_REPLICATIONSOURCE);

@@ -10,7 +10,7 @@ import {
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
-import { NodeEntriesDisplayType } from 'src/app/features/node-entries/entries-model';
+import { NodeEntriesDisplayType } from '../../features/node-entries/entries-model';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import * as EduData from '../../core-module/core.module';
 import {

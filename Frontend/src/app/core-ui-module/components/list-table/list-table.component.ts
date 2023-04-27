@@ -25,6 +25,7 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import { NetworkService } from 'ngx-edu-sharing-api';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import {
@@ -32,7 +33,7 @@ import {
     ListOptions,
     ListOptionsConfig,
     NodeEntriesDisplayType,
-} from 'src/app/features/node-entries/entries-model';
+} from '../../../features/node-entries/entries-model';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
@@ -67,6 +68,7 @@ import { NodeHelperService } from '../../node-helper.service';
 import { CustomOptions, OptionItem, Scope, Target } from '../../option-item';
 import { OptionsHelperService } from '../../options-helper.service';
 import { Toast } from '../../toast';
+import { LocalEventsService } from '../../../services/local-events.service';
 
 @Component({
     selector: 'es-listTable',
@@ -483,7 +485,7 @@ export class ListTableComponent
         private changes: ChangeDetectorRef,
         private storage: TemporaryStorageService,
         private sessionStorage: SessionStorageService,
-        private network: RestNetworkService,
+        private network: NetworkService,
         private connectors: RestConnectorsService,
         private locator: RestLocatorService,
         private sanitizer: DomSanitizer,
@@ -496,6 +498,7 @@ export class ListTableComponent
         private frame: FrameEventsService,
         private renderer: Renderer2,
         private mainnavService: MainNavService,
+        private localEvents: LocalEventsService,
     ) {
         this.optionsHelper.registerGlobalKeyboardShortcuts();
         this.nodeHelper.setViewContainerRef(this.viewContainerRef);
@@ -532,9 +535,9 @@ export class ListTableComponent
 
     ngAfterViewInit(): void {
         this.optionsHelper.initComponents(this.actionbar, this);
-        this.optionsHelper.nodesDeleted
+        this.localEvents.nodesDeleted
             .pipe(takeUntil(this.destroyed))
-            .subscribe((nodes) => this.removeNodes(nodes.error, nodes.objects));
+            .subscribe((nodes) => this.removeNodes(nodes));
     }
 
     ngOnDestroy(): void {
@@ -561,8 +564,8 @@ export class ListTableComponent
             return;
         }
         this.locator.setRoute(this.route).subscribe(() => {
-            this.network.getRepositories().subscribe((data: NetworkRepositories) => {
-                this.repositories = data.repositories;
+            this.network.getRepositories().subscribe((repositories) => {
+                this.repositories = repositories;
                 this.changeDetectorRef.detectChanges();
             });
         });
@@ -1184,12 +1187,9 @@ export class ListTableComponent
         this.optionsHelper.refreshComponents();
     }
 
-    removeNodes(error: boolean, objects: Node[] | any[]) {
-        if (error) {
-            return;
-        }
-        for (const object of objects) {
-            const p = RestHelper.getRestObjectPositionInArray(object, this._nodes);
+    removeNodes(nodes: Node[]) {
+        for (const node of nodes) {
+            const p = RestHelper.getRestObjectPositionInArray(node, this._nodes);
             if (p !== -1) {
                 this._nodes.splice(p, 1);
             }

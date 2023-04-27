@@ -78,6 +78,7 @@ public interface CollectionService {
 
 	void updateAndSetScope(Collection collection) throws Exception;
 
+    String getCollectionHomeParent();
     String getHomePath();
 
     Collection createAndSetScope(String parentId, Collection collection) throws Throwable;

@@ -652,6 +652,7 @@ public class PersonDao {
 			} catch(Exception e) {
 				throw new RuntimeException(e);
 	}
+			return null;
 		});
 	}
 	public List<NodeRef> getNodeList(String list) throws Exception {
@@ -715,6 +716,7 @@ public class PersonDao {
 			}catch(Exception e) {
 				throw new RuntimeException(e);
 			}
+			return null;
 		});
 }
 

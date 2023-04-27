@@ -6,10 +6,11 @@ import com.fasterxml.jackson.databind.AnnotationIntrospector.ReferenceProperty.T
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.Schema;;
 
+import java.io.Serializable;
 import java.util.Map;
 
 @Schema(description = "")
-public class Authority {
+public class Authority implements Serializable {
 
 	public static enum Type {USER, GROUP, OWNER, EVERYONE, GUEST;};
 

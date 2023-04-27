@@ -15,6 +15,7 @@ $imagePath: '../../../../assets/images/collections/';
         > div {
             position: relative;
             margin-bottom: 20px;
+            align-items: center;
         }
         .connection {
             height: 25px;
@@ -65,7 +66,6 @@ $imagePath: '../../../../assets/images/collections/';
         i {
             margin-right: 10px;
             position: relative;
-            top: -2px;
         }
         .circle {
             margin-right: 10px;
@@ -465,6 +465,10 @@ label {
 input[type='radio'] {
     margin: 0px 4px 8px 13px;
     cursor: pointer;
+}
+
+.dialog-color-group {
+    min-height: 140px;
 }
 
 .dialog-header-field {

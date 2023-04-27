@@ -74,7 +74,6 @@ export class SearchNodeStoreDialogComponent implements OnInit, AfterViewInit, On
         this.nodeEntries.initOptionsGenerator({
             actionbar: this.actionBar,
             customOptions: this.options,
-            scope: null,
         });
         this.nodeEntries
             .getSelection()

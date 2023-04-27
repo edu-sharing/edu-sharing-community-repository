@@ -12,18 +12,18 @@ import {
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, fromEvent, ReplaySubject } from 'rxjs';
-import { filter, startWith, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { startWith } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsWidgetType } from '../../../types/types';
 import { DisplayValue } from '../DisplayValues';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { MdsEditorWidgetTreeCoreComponent } from './mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
 import { Tree } from './tree';
-import { FocusOrigin } from '@angular/cdk/a11y';
 import { MatChip } from '@angular/material/chips';
 import { UIService } from '../../../../../core-module/rest/services/ui.service';
 import { MatButton } from '@angular/material/button';
+import { UIHelper } from '../../../../../core-ui-module/ui-helper';
 
 @Component({
     selector: 'es-mds-editor-widget-tree',
@@ -39,6 +39,7 @@ export class MdsEditorWidgetTreeComponent
     @ViewChild('treeRef') treeRef: MdsEditorWidgetTreeCoreComponent;
     @ViewChild('openButton') openButtonRef: MatButton;
     @ViewChild('inputElement') inputElement: ElementRef<HTMLInputElement>;
+    @ViewChild('box') boxRef: ElementRef<HTMLElement>;
     @ViewChild(MdsEditorWidgetTreeCoreComponent)
     treeCoreComponent: MdsEditorWidgetTreeCoreComponent;
     @ViewChildren('chip') chips: QueryList<MatChip>;
@@ -83,7 +84,8 @@ export class MdsEditorWidgetTreeComponent
         super(mdsEditorInstance, translate);
     }
 
-    ngOnInit(): void {
+    async ngOnInit() {
+        this.chipsControl = new FormControl(null, this.getStandardValidators());
         if (this.widget.definition.type === MdsWidgetType.SingleValueTree) {
             this.valueType = ValueType.String;
         } else if (this.widget.definition.type === MdsWidgetType.MultiValueTree) {
@@ -93,18 +95,18 @@ export class MdsEditorWidgetTreeComponent
         }
         this.tree = Tree.generateTree(
             this.widget.definition.values,
-            this.widget.getInitialValues()?.jointValues ?? [],
-            this.widget.getInitialValues()?.individualValues,
+            (await this.widget.getInitalValuesAsync()).jointValues ?? [],
+            (await this.widget.getInitalValuesAsync()).individualValues,
         );
         this.chipsControl = new FormControl(
             [
-                ...(this.widget.getInitialValues()?.jointValues ?? []),
-                ...(this.widget.getInitialValues()?.individualValues ?? []),
+                ...((await this.widget.getInitalValuesAsync()).jointValues ?? []),
+                ...((await this.widget.getInitalValuesAsync()).individualValues ?? []),
             ].map((value) => this.tree.idToDisplayValue(value)),
             this.getStandardValidators(),
         );
         this.indeterminateValues$ = new BehaviorSubject(
-            this.widget.getInitialValues()?.individualValues,
+            (await this.widget.getInitalValuesAsync()).individualValues,
         );
         this.chipsControl.valueChanges.subscribe((values: DisplayValue[]) => {
             this.setValue(values.map((value) => value.key));
@@ -139,12 +141,16 @@ export class MdsEditorWidgetTreeComponent
         this.openOverlay();
     }
     openOverlay(event?: FocusEvent): void {
-        // ignore if focus was lost from the button ref to allow back-navigation via keyboard
-        if (event?.relatedTarget === this.openButtonRef._elementRef.nativeElement) {
-            return;
-        }
         if (this.chipsControl.disabled) {
             return;
+        }
+        if (!event) {
+            if (this.overlayIsVisible) {
+                this.overlayIsVisible = false;
+                this.changeDetectorRef.detectChanges();
+                setTimeout(() => (document.activeElement as HTMLElement)?.blur());
+                return;
+            }
         }
         if (this.overlayIsVisible) {
             this.treeRef.input.nativeElement.focus();
@@ -157,7 +163,12 @@ export class MdsEditorWidgetTreeComponent
 
     closeOverlay(event?: FocusEvent): void {
         // prevent directly closing because cdk outside click might trigger
-        if (event?.target === this.inputElement.nativeElement) {
+        if (
+            UIHelper.isParentElementOfElement(
+                event?.target as HTMLElement,
+                this.boxRef.nativeElement,
+            )
+        ) {
             return;
         }
         this.overlayIsVisible = false;
@@ -200,5 +211,6 @@ export class MdsEditorWidgetTreeComponent
 
     onValuesChange(values: DisplayValue[]): void {
         this.chipsControl.setValue(values);
+        this.changeDetectorRef.detectChanges();
     }
 }

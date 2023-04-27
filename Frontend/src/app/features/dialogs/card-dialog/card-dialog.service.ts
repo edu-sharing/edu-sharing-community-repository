@@ -25,6 +25,7 @@ export class CardDialogService {
     private readonly openDialogsBeforeClosedSubject = new BehaviorSubject<readonly CardDialogRef[]>(
         [],
     );
+    // FIXME: Do we need this, or could we always use `openDialogsBeforeClosedSubject`?
     private readonly openDialogsSubject = new BehaviorSubject<readonly CardDialogRef[]>([]);
     get openDialogs(): readonly CardDialogRef[] {
         return this.openDialogsSubject.value;
@@ -53,7 +54,7 @@ export class CardDialogService {
         );
         containerRef.instance.dialogRef = dialogRef;
         const contentInjector = Injector.create({
-            parent: this.injector,
+            parent: containerRef.injector,
             providers: [
                 { provide: CARD_DIALOG_DATA, useValue: config.data },
                 { provide: CardDialogRef, useValue: dialogRef },

@@ -20,7 +20,7 @@
     #chipList
     *ngIf="chipsControl"
     [formControl]="chipsControl"
-    [attr.aria-labelledby]="chipsControl.value.length > 0 ? container.labelId : null"
+    [attr.aria-labelledby]="chipsControl.value?.length > 0 ? container.labelId : null"
     esOnAttributeChange="aria-describedby"
     (attributeChange)="input.setAttribute('aria-describedby', $event)"
     [multiple]="true"
@@ -38,8 +38,9 @@
       [class.indeterminate]="(indeterminateValues$ | async)?.includes(value.key)"
       [class.mat-chip-selected]="false"
       [matTooltip]="getTooltip(value)"
+      matTooltipPosition="above"
     >
-      <span class="mat-chip-label">{{ value.label }}</span>
+      <span class="mat-chip-label" [innerHTML]="value.label | escapeHtml"></span>
       <mat-icon matChipRemove>cancel</mat-icon>
     </mat-chip>
     <div class="input-wrapper">

@@ -1,6 +1,6 @@
 import { ValidatorFn, Validators } from '@angular/forms';
 import { MdsEditorWidgetCore } from '../mds-editor-instance.service';
-import { assertUnreachable, InputStatus, RequiredMode } from '../../types/types';
+import { InputStatus, RequiredMode } from '../../types/types';
 import { Directive, EventEmitter } from '@angular/core';
 
 export enum ValueType {
@@ -17,25 +17,6 @@ export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
      * triggered when the input focus is lost
      */
     onBlur = new EventEmitter<void>();
-
-    /**
-     * @deprecated use `widget.initialValues` directly
-     */
-    protected getInitialValue(): readonly string[] {
-        if (!this.widget.getInitialValues().individualValues) {
-            return this.widget.getInitialValues().jointValues;
-        } else {
-            switch (this.valueType) {
-                case ValueType.String:
-                    return [this.translate.instant('MDS.DIFFERENT_VALUES')];
-                case ValueType.MultiValue:
-                case ValueType.Range:
-                    return [];
-                default:
-                    assertUnreachable(this.valueType);
-            }
-        }
-    }
 
     /**
      * this method should set focus on the primary input of the widget

@@ -1,0 +1,65 @@
+<!-- For meaningful multi-item actions, we would need to share one actionbar with all
+NodeEntriesWrapper instances. Currently, however, each NodeEntriesWrapper instance will provide its
+own OptionsHelperService instance and take exclusive control of the actionbar. -->
+
+<!-- <es-actionbar #actionbar class="actionbar"></es-actionbar> -->
+
+<!-- [initConfig]="{ actionbar, customOptions: { removeOptions: ['OPTIONS.SWITCH_TO_LIST_VIEW']} }" -->
+
+<es-small-collection
+  *ngIf="addToCollectionMode.value as addToCollection"
+  class="add-to-collection-banner"
+  [collection]="addToCollection.collection"
+  [titleLabel]="'SEARCH.ADD_INTO_COLLECTION'"
+  [titleLabelShort]="'SEARCH.ADD_INTO_COLLECTION_SHORT'"
+>
+  <es-actionbar
+    [options]="[addToCollection.customOptions.addOptions[0]]"
+    backgroundType="primary"
+  ></es-actionbar>
+</es-small-collection>
+
+<es-node-entries-wrapper
+  *ngFor="let repo of repoData | async"
+  [class.display-none]="repo.dataSource.isEmpty()"
+  class="entries-wrapper"
+  [dataSource]="repo.dataSource"
+  [scope]="Scope.Search"
+  [columns]="repo.columns | async"
+  [disableInfiniteScroll]="true"
+  [displayType]="NodeEntriesDisplayType.Grid"
+  [gridConfig]="{ layout: 'scroll' }"
+  [checkbox]="false"
+  [initConfig]="{ customOptions: addToCollectionMode.value?.customOptions }"
+>
+  <ng-template #title>
+    <div class="title-container">
+      <h2 class="mat-heading-2">
+        {{ repo.title | titlecase }}
+        <ng-container *ngIf="!repo.dataSource.isLoading; else smallLoadingSpinner">
+          ({{ repo.dataSource.getTotal() }})
+        </ng-container>
+      </h2>
+      <a
+        *ngIf="repo.dataSource.getTotal() > repo.dataSource.getData().length"
+        mat-button
+        [routerLink]="['..']"
+        [queryParams]="getShowMoreQueryParams(repo.id)"
+      >
+        {{ 'SHOW_MORE' | translate }}
+        <i esIcon="keyboard_arrow_right"></i>
+      </a>
+    </div>
+  </ng-template>
+</es-node-entries-wrapper>
+
+<es-spinner *ngIf="(loadingProgress | async) < 100"></es-spinner>
+
+<div *ngIf="allEmpty" class="no-search-results-message">
+  <i esIcon="search"></i>
+  {{ 'SEARCH.QUERY_NO_RESULT' | translate }}
+</div>
+
+<ng-template #smallLoadingSpinner>
+  <mat-spinner diameter="24" class="small-progress-spinner"></mat-spinner>
+</ng-template>

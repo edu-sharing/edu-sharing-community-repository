@@ -7,9 +7,3 @@
     // An alternative would be to use `overflow-x: clip` when it is supported by Safari.
     padding: 0 var(--mds-editor-horizontal-padding, 0);
 }
-
-.clear-button {
-    display: block;
-    margin-left: auto;
-    margin-bottom: 50px;
-}

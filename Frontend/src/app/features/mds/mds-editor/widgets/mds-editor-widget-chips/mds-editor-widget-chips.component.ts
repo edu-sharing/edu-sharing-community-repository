@@ -1,7 +1,6 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import {
     AfterViewInit,
-    ChangeDetectorRef,
     Component,
     ElementRef,
     OnInit,
@@ -22,18 +21,20 @@ import * as rxjs from 'rxjs';
 import { BehaviorSubject, combineLatest, EMPTY, from, Observable, Subject, timer } from 'rxjs';
 import {
     debounce,
+    debounceTime,
     delay,
     distinctUntilChanged,
     filter,
     map,
+    shareReplay,
     startWith,
     switchMap,
     throttleTime,
 } from 'rxjs/operators';
-import { Toast, ToastType } from 'src/app/core-ui-module/toast';
+import { Toast, ToastType } from '../../../../../core-ui-module/toast';
 import { UIHelper } from '../../../../../core-ui-module/ui-helper';
-import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsWidgetType, MdsWidgetValue } from '../../../types/types';
+import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { DisplayValue } from '../DisplayValues';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
@@ -78,31 +79,32 @@ export class MdsEditorWidgetChipsComponent
     constructor(
         mdsEditorInstance: MdsEditorInstanceService,
         translate: TranslateService,
-        private changeDetectorRef: ChangeDetectorRef,
         private toast: Toast,
     ) {
         super(mdsEditorInstance, translate);
     }
 
-    ngOnInit(): void {
+    async ngOnInit() {
+        this.chipsControl = new FormControl(null, this.getStandardValidators());
         this.chipsControl = new FormControl(
             [
-                ...(this.widget.getInitialValues()?.jointValues ?? []),
-                ...(this.widget.getInitialValues()?.individualValues ?? []),
+                ...((await this.widget.getInitalValuesAsync()).jointValues ?? []),
+                ...((await this.widget.getInitalValuesAsync()).individualValues ?? []),
             ].map((value) => this.toDisplayValues(value)),
             this.getStandardValidators(),
         );
         this.indeterminateValues$ = new BehaviorSubject(
-            this.widget.getInitialValues()?.individualValues,
+            (await this.widget.getInitalValuesAsync()).individualValues,
         );
         if (
             this.widget.definition.type === MdsWidgetType.MultiValueBadges ||
             this.widget.definition.type === MdsWidgetType.MultiValueSuggestBadges
         ) {
-            this.widget.definition.bottomCaption =
-                this.widget.definition.bottomCaption ??
-                this.translate.instant('WORKSPACE.EDITOR.HINT_ENTER');
-            this.changeDetectorRef.detectChanges();
+            if (!this.widget.definition.bottomCaption) {
+                this.translate.get('WORKSPACE.EDITOR.HINT_ENTER').subscribe((bottomCaption) => {
+                    this.widget.definition.bottomCaption = bottomCaption;
+                });
+            }
         }
         this.chipsControl.valueChanges
             .pipe(distinctUntilChanged())
@@ -333,9 +335,14 @@ export class MdsEditorWidgetChipsComponent
                 distinctUntilChanged(),
             ),
         ]).pipe(
+            // When accepting a value, the chips' value and the input's value both change. Debounce
+            // to only trigger once in that case.
+            debounceTime(0),
             switchMap(([filterString, selectedValues]) =>
                 this.filter(filterString, selectedValues),
             ),
+            // Don't send multiple requests for multiple subscribers.
+            shareReplay(1),
         );
     }
 
@@ -345,10 +352,10 @@ export class MdsEditorWidgetChipsComponent
             if (!knownValue && this.widget.getInitialDisplayValues()) {
                 const ds = this.widget
                     .getInitialDisplayValues()
-                    .values?.find((v) => v.key === value).displayString;
+                    .values?.find((v) => v.key === value)?.displayString;
                 return {
                     key: value,
-                    label: ds,
+                    label: ds || value,
                 };
             }
             if (knownValue) {

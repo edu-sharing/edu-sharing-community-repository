@@ -4289,10 +4289,6 @@ em {
     font-style: italic;
 }
 
-strong {
-    font-weight: 500;
-}
-
 small {
     font-size: 75%;
 }
@@ -4880,7 +4876,6 @@ footer.page-footer .footer-copyright {
     height: 36px;
     line-height: 36px;
     padding: 0 2rem;
-    text-transform: uppercase;
     vertical-align: middle;
     -webkit-tap-highlight-color: transparent;
 }
@@ -7928,7 +7923,6 @@ input[type='range']:focus::-ms-fill-upper {
     top: 0;
     background: transparent;
     -ms-filter: 'progid:DXImageTransform.Microsoft.gradient(startColorstr=#1E000000,endColorstr=#1E000000)';
-    zoom: 1;
     background: rgba(0, 0, 0, 0.32);
     transition: background 0.15s ease-out;
 }

@@ -448,7 +448,7 @@ public class NodeApi  {
 		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	if("-inbox-".equals(node)){
-    			node = repoDao.getUserInbox();
+    			node = repoDao.getUserInbox(true);
     		}
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
 	    	
@@ -826,13 +826,15 @@ public class NodeApi  {
     		Filter propFilter = new Filter(propertyFilter);
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	node=NodeDao.mapNodeConstants(repoDao,node);
+	    	node=NodeDao.mapNodeConstants(repoDao,node, false);
 
 			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
 
 			NodeEntries response=null;
 			List<NodeRef> children=null;
-			if("-shared_files-".equals(node)){
+			if(node == null) {
+				response = new NodeEntries();
+			} else if("-shared_files-".equals(node)){
 		    	User person = PersonDao.getPerson(repoDao, PersonDao.ME).asPerson();
 		    	children = person.getSharedFolders();
 		    	List<org.alfresco.service.cmr.repository.NodeRef> converted=NodeDao.convertApiNodeRef(children);
@@ -2152,14 +2154,19 @@ public class NodeApi  {
 	    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
 	    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 	    	@Parameter(description = "property",required=true ) @QueryParam("property")  String property,
-	    	@Parameter(description = "value",required=false ) @QueryParam("value")  List<String> value,
+			@Parameter(description = "keepModifiedDate",required=false, schema = @Schema(defaultValue="false")) @QueryParam("keepModifiedDate") Boolean keepModifiedDate,
+			@Parameter(description = "value",required=false ) @QueryParam("value")  List<String> value,
 			@Context HttpServletRequest req) {
 	    
 	    	try {
 			
 		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-		    	nodeDao.setProperty(property, value == null || value.size() != 1? (Serializable) value : value.get(0));
+		    	nodeDao.setProperty(
+						property,
+						value == null || value.size() != 1? (Serializable) value : value.get(0),
+						keepModifiedDate != null && keepModifiedDate
+				);
 		    	return Response.status(Response.Status.OK).build();
 		
 	    	} catch (DAOValidationException t) {

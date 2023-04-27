@@ -21,6 +21,7 @@ import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.QueryUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
@@ -154,7 +155,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 	private void handleAppSignature(HttpServletRequest httpReq, HttpServletResponse httpRes) throws IOException {
 		accessTool.set(null);
 
-		String appId = httpReq.getHeader("X-Edu-App-Id");
+		String appId = SignatureVerifier.getHeaderOrParam("X-Edu-App-Id",httpReq);
 		if(appId != null) {
 			SignatureVerifier.Result result = new SignatureVerifier().verifyAppSignature(httpReq);
 			if (result.getStatuscode() != 200) {
@@ -165,9 +166,9 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 				ApplicationInfo appInfo = result.getAppInfo();
 				accessTool.set(appInfo);
 
-				String courseId = httpReq.getHeader("X-Edu-Usage-Course-Id");
-				String nodeId = httpReq.getHeader("X-Edu-Usage-Node-Id");
-				String resourceId = httpReq.getHeader("X-Edu-Usage-Resource-Id");
+				String courseId = SignatureVerifier.getHeaderOrParam("X-Edu-Usage-Course-Id",httpReq);
+				String nodeId = SignatureVerifier.getHeaderOrParam("X-Edu-Usage-Node-Id",httpReq);
+				String resourceId = SignatureVerifier.getHeaderOrParam("X-Edu-Usage-Resource-Id",httpReq);
 				if (courseId != null && nodeId != null && resourceId != null) {
 					Usage2Service u2 = new Usage2Service();
 					try {
@@ -175,6 +176,8 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 						if (usage != null) {
 							httpReq.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, nodeId);
 							authenticationComponent.setCurrentUser(CCConstants.PROXY_USER);
+							AuthenticationToolAPI authTool = new AuthenticationToolAPI();
+							authTool.storeAuthInfoInSession(CCConstants.PROXY_USER, authservice.getCurrentTicket(), CCConstants.AUTH_TYPE_SIGNATURE, httpReq.getSession());
 						}
 
 					} catch (Usage2Exception e) {

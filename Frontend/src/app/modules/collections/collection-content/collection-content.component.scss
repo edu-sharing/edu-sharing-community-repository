@@ -24,15 +24,17 @@
 
 .collection-nocontent-big {
     font-size: $fontSizeLarge;
-    color: $textLight;
-    margin: 40px 20px;
-    text-align: center;
+    color: $textMain;
+    margin: 20px 0;
+    // text-align: center;
     width: 100%;
 }
 
 .collection-nocontent-small {
     padding: 16px;
-    color: $textMediumLight;
+    padding-top: 0px;
+    padding-left: 0px;
+    color: $textLight;
 }
 
 .actionbarMaterials {
@@ -71,6 +73,27 @@
         i {
             position: relative;
             top: 7px;
+        }
+    }
+}
+.references-wrapper,
+.collections-wrapper {
+    &.wrapper-empty.wrapper-edit {
+        display: grid;
+        grid-template-columns: max-content auto;
+        grid-gap: 50px;
+        align-items: center;
+        &.wrapper-table {
+            es-node-entries-wrapper {
+                display: none;
+            }
+        }
+        @media only screen and (max-width: $mobileWidth+$mobileStage*1) {
+            grid-gap: 0;
+            grid-template-columns: auto;
+            .collection-nocontent-container {
+                padding: 0 20px;
+            }
         }
     }
 }

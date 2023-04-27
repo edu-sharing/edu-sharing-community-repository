@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { ListItem, RestConstants, Node } from 'src/app/core-module/core.module';
-import { NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
+import { ListItem, RestConstants, Node } from '../../../core-module/core.module';
+import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { ListWidget } from '../list-widget';
 
 @Component({

@@ -655,10 +655,12 @@ export class LicenseDialogContentComponent implements OnInit {
                 prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = [this.ccCountry];
             }
         }
-        prop = await this.author.getValues(
-            prop,
-            this.getNodes()?.length === 1 ? this.getNodes()[0] : null,
-        );
+        prop = this.author
+            ? await this.author.getValues(
+                  prop,
+                  this.getNodes()?.length === 1 ? this.getNodes()[0] : null,
+              )
+            : prop;
 
         if (this.type == 'CUSTOM') {
             prop[RestConstants.LOM_PROP_RIGHTS_DESCRIPTION] = [this.rightsDescription];
@@ -700,5 +702,42 @@ export class LicenseDialogContentComponent implements OnInit {
         if (a.toLowerCase() < b.toLowerCase()) return -1;
         if (a.toLowerCase() > b.toLowerCase()) return 1;
         return 0;
+    }
+
+    hasMixedAuthorValues() {
+        return (
+            this.getNodes() != null &&
+            (this.nodeHelper.hasMixedPropertyValues(
+                this.getNodes(),
+                RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR,
+            ) ||
+                this.nodeHelper.hasMixedPropertyValues(
+                    this.getNodes(),
+                    RestConstants.CCM_PROP_AUTHOR_FREETEXT,
+                ))
+        );
+    }
+
+    resetMixedAuthorValues() {
+        if (
+            this.nodeHelper.hasMixedPropertyValues(
+                this.getNodes(),
+                RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR,
+            )
+        ) {
+            this.getNodes().forEach(
+                (n) => (n.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = null),
+            );
+        }
+        if (
+            this.nodeHelper.hasMixedPropertyValues(
+                this.getNodes(),
+                RestConstants.CCM_PROP_AUTHOR_FREETEXT,
+            )
+        ) {
+            this.getNodes().forEach(
+                (n) => (n.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT] = null),
+            );
+        }
     }
 }

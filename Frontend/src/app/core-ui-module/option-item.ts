@@ -130,12 +130,15 @@ export class OptionItem {
      *
      * @param name the option name, which is used for the translation
      * @param icon A material icon name
-     * @param callback A function callback when this option is choosen. Will get the current node passed as an argument
+     * @param callback A function callback when this option is chosen. Will get the current node
+     * passed as an argument. If available, the relevant nodes are passed as second argument,
+     * i.e., the selection, if any, or the current node as single-item array otherwise.
      */
     constructor(
         public name: string,
         public icon: string,
-        public callback: (object?: Node | any) => void,
+        // TODO: Maybe switch to only providing the second parameter.
+        public callback: (object?: Node | any, objects?: (Node | any)[]) => void,
     ) {}
 }
 export class CustomOptions {
@@ -147,16 +150,16 @@ export class CustomOptions {
     /**
      * List of ids of options to explicitly support
      */
-    public supportedOptions?: string[] = [];
+    public supportedOptions?: string[];
     /**
      * List of ids of options to explicitly remove
      * Only supported if supportedOptions is empty
      */
-    public removeOptions?: string[] = [];
+    public removeOptions?: string[];
     /**
      * Options to add/insert into the menu
      */
-    public addOptions?: OptionItem[] = [];
+    public addOptions?: OptionItem[];
 }
 export enum HideMode {
     Disable,
@@ -165,9 +168,11 @@ export enum HideMode {
 export enum Scope {
     Render = 'Render',
     Search = 'Search',
+    SearchCollections = 'SearchCollections',
+    SavedSearches = 'SavedSearches',
     CollectionsReferences = 'CollectionsReferences',
-    CollectionsProposals = 'CollectionsReferences',
-    CollectionsCollection = 'CollectionsProposals',
+    CollectionsProposals = 'CollectionsProposals',
+    CollectionsCollection = 'CollectionsCollection',
     WorkspaceList = 'WorkspaceList',
     WorkspaceTree = 'WorkspaceTree',
     Sharing = 'Sharing',
@@ -175,6 +180,8 @@ export enum Scope {
     UserManagement = 'UserManagement',
     Stream = 'Stream',
     CreateMenu = 'CreateMenu',
+
+    MediacenterNodesList = 'MediacenterNodesList',
     Admin = 'Admin', // Admin Tools / Debugging
 }
 export enum ElementType {

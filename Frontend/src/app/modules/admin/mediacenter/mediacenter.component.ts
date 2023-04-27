@@ -16,14 +16,21 @@ import {
 } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { Toast } from '../../../core-ui-module/toast';
-import { CustomOptions, ElementType, OptionItem } from '../../../core-ui-module/option-item';
+import { CustomOptions, ElementType, OptionItem, Scope } from '../../../core-ui-module/option-item';
 import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { AuthoritySearchMode } from '../../../shared/components/authority-search-input/authority-search-input.component';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
-
-// Charts.js
-declare var Chart: any;
+import { MediacenterService } from 'ngx-edu-sharing-api';
+import { CsvHelper } from '../../../core-module/csv.helper';
+import { Values } from '../../../features/mds/types/types';
+import {
+    InteractionType,
+    ListSortConfig,
+    NodeEntriesDisplayType,
+} from '../../../features/node-entries/entries-model';
+import { NodeDataSource } from '../../../features/node-entries/node-data-source';
+import { NodeEntriesWrapperComponent } from '../../../features/node-entries/node-entries-wrapper.component';
 
 @Component({
     selector: 'es-admin-mediacenter',
@@ -32,8 +39,12 @@ declare var Chart: any;
 })
 export class AdminMediacenterComponent {
     readonly AuthoritySearchMode = AuthoritySearchMode;
+    readonly SCOPES = Scope;
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    readonly InteractionType = InteractionType;
     @ViewChild('mediacenterMds') mediacenterMds: MdsEditorWrapperComponent;
-    @Output() onOpenNode = new EventEmitter();
+    @ViewChild('nodeEntriesTable') nodeEntriesTable: NodeEntriesWrapperComponent<Node>;
+    @Output() onOpenNode = new EventEmitter<Node>();
     // @TODO: declare the mediacenter type when it is finalized in backend
     mediacenters: any[];
     // original link to mediacenter object (contained in mediacenters[])
@@ -43,14 +54,13 @@ export class AdminMediacenterComponent {
 
     addGroup: Group;
     mediacenterGroups: IamGroup[];
-    mediacenterNodes: Node[];
-    mediacenterNodesTotal = 0;
+    mediacenterNodesDataSource = new NodeDataSource<Node>();
     mediacenterNodesSearchWord = '';
-    hasMoreMediacenterNodes = true;
-    isLoadingMediacenterNodes = false;
-    mediacenterNodesSort = {
-        sortBy: RestConstants.LOM_PROP_TITLE,
-        sortAscending: true,
+    mediacenterNodesSort: ListSortConfig = {
+        columns: RestConstants.POSSIBLE_SORT_BY_FIELDS,
+        active: RestConstants.LOM_PROP_TITLE,
+        direction: 'asc',
+        allowed: true,
     };
 
     groupColumns: ListItem[];
@@ -58,7 +68,19 @@ export class AdminMediacenterComponent {
     groupActions: CustomOptions = {
         useDefaultOptions: false,
     };
-    currentTab = 0;
+    _currentTab = 0;
+    get currentTab() {
+        return this._currentTab;
+    }
+    set currentTab(currentTab: number) {
+        this._currentTab = currentTab;
+        this.nodeEntriesTable.initOptionsGenerator({
+            customOptions: {
+                useDefaultOptions: true,
+                supportedOptions: ['OPTIONS.DEBUG', 'OPTIONS.DOWNLOAD'],
+            },
+        });
+    }
     isAdmin: boolean;
     hasManagePermissions: boolean;
     public mediacentersFile: File;
@@ -69,7 +91,8 @@ export class AdminMediacenterComponent {
     public removeSchoolsFromMC = false;
 
     constructor(
-        private mediacenterService: RestMediacenterService,
+        private mediacenterServiceLegacy: RestMediacenterService,
+        private mediacenterService: MediacenterService,
         private mdsService: RestMdsService,
         private translate: TranslateService,
         private connector: RestConnectorService,
@@ -120,14 +143,12 @@ export class AdminMediacenterComponent {
         this.resetMediacenterNodes();
 
         if (mediacenter) {
-            this.mediacenterService
+            this.mediacenterServiceLegacy
                 .getManagedGroups(mediacenter.authorityName)
                 .subscribe((groups) => {
                     this.mediacenterGroups = groups;
                 });
-
-            this.mediacenterNodesTotal = 0;
-            this.mediacenterNodes = [];
+            this.mediacenterNodesDataSource.reset();
             UIHelper.waitForComponent(this.ngZone, this, 'mediacenterMds').subscribe(() =>
                 this.mediacenterMds.loadMds(),
             );
@@ -137,62 +158,65 @@ export class AdminMediacenterComponent {
     }
 
     async loadMediacenterNodes() {
-        if (!this.hasMoreMediacenterNodes) {
+        if (
+            !this.mediacenterNodesDataSource.isEmpty() &&
+            !this.mediacenterNodesDataSource.hasMore()
+        ) {
             return;
         }
         if (this.currentMediacenter) {
             const licensedNodeReq: RequestObject = {
-                offset: this.mediacenterNodes?.length,
-                count: this.mediacenterNodes?.length ? 50 : null,
+                offset: this.mediacenterNodesDataSource?.getData()?.length,
+                count: this.mediacenterNodesDataSource?.getData()?.length ? 50 : null,
                 propertyFilter: [RestConstants.ALL],
-                sortBy: [this.mediacenterNodesSort.sortBy],
-                sortAscending: [this.mediacenterNodesSort.sortAscending],
+                sortBy: [this.mediacenterNodesSort.active],
+                sortAscending: [this.mediacenterNodesSort.direction === 'asc'],
             };
-            this.isLoadingMediacenterNodes = true;
+            this.mediacenterNodesDataSource.isLoading = true;
 
-            let criterias: any = [];
-            if (this.mediacenterNodesSearchWord) {
-                criterias.push({
-                    property: RestConstants.PRIMARY_SEARCH_CRITERIA,
-                    values: [this.mediacenterNodesSearchWord],
-                });
-            }
-            criterias = criterias.concat(
-                RestSearchService.convertCritierias(
-                    await this.mediacenterMds.getValues(),
-                    this.mediacenterMds.currentWidgets,
-                ),
-            );
+            let criteria = await this.getMediacenterNodesCriteria();
 
-            this.mediacenterService
+            this.mediacenterServiceLegacy
                 .getLicensedNodes(
                     this.currentMediacenter.authorityName,
-                    criterias,
+                    criteria,
                     RestConstants.HOME_REPOSITORY,
                     licensedNodeReq,
                 )
                 .subscribe((data) => {
-                    this.mediacenterNodesTotal = data.pagination.total;
                     if (
-                        this.mediacenterNodes == null ||
+                        this.mediacenterNodesDataSource.isEmpty() ||
                         (this.mediacenterNodesSearchWord != null &&
                             this.mediacenterNodesSearchWord.trim().length > 0)
                     ) {
-                        this.mediacenterNodes = data.nodes;
+                        this.mediacenterNodesDataSource.setData(data.nodes, data.pagination);
                     } else {
-                        this.mediacenterNodes = this.mediacenterNodes.concat(data.nodes);
+                        this.mediacenterNodesDataSource.appendData(data.nodes);
                     }
-                    this.hasMoreMediacenterNodes =
-                        this.mediacenterNodes.length < this.mediacenterNodesTotal;
-                    this.isLoadingMediacenterNodes = false;
+                    this.mediacenterNodesDataSource.isLoading = false;
                 });
         }
     }
 
-    searchMediaCenterNodes() {
-        this.hasMoreMediacenterNodes = true;
-        this.mediacenterNodes = [];
-        this.loadMediacenterNodes();
+    private async getMediacenterNodesCriteria() {
+        let criteria: any = [];
+        if (this.mediacenterNodesSearchWord) {
+            criteria.push({
+                property: RestConstants.PRIMARY_SEARCH_CRITERIA,
+                values: [this.mediacenterNodesSearchWord],
+            });
+        }
+        return criteria.concat(
+            RestSearchService.convertCritierias(
+                await this.mediacenterMds.getValues(),
+                this.mediacenterMds.currentWidgets,
+            ),
+        );
+    }
+
+    async searchMediaCenterNodes() {
+        this.mediacenterNodesDataSource.reset();
+        await this.loadMediacenterNodes();
     }
 
     removeCatalog(catalog: any) {
@@ -228,10 +252,10 @@ export class AdminMediacenterComponent {
                         },
                     };
                     this.toast.showProgressDialog();
-                    this.mediacenterService.addMediacenter(id, profile).subscribe(
+                    this.mediacenterServiceLegacy.addMediacenter(id, profile).subscribe(
                         (result) => {
                             RestHelper.waitForResult(
-                                () => this.mediacenterService.getMediacenters(),
+                                () => this.mediacenterServiceLegacy.getMediacenters(),
                                 (list: Mediacenter[]) => {
                                     return (
                                         list.filter((r) => r.authorityName === result.authorityName)
@@ -260,7 +284,7 @@ export class AdminMediacenterComponent {
 
     saveChanges() {
         this.toast.showProgressDialog();
-        this.mediacenterService
+        this.mediacenterServiceLegacy
             .editMediacenter(
                 this.currentMediacenterCopy.authorityName,
                 this.currentMediacenterCopy.profile,
@@ -283,14 +307,14 @@ export class AdminMediacenterComponent {
 
     refresh() {
         this.mediacenters = null;
-        this.mediacenterService.getMediacenters().subscribe((m) => {
+        this.mediacenterServiceLegacy.getMediacenters().subscribe((m) => {
             this.mediacenters = m.filter((m) => m.administrationAccess);
         });
     }
 
     addCurrentGroup() {
         this.toast.showProgressDialog();
-        this.mediacenterService
+        this.mediacenterServiceLegacy
             .addManagedGroup(this.currentMediacenterCopy.authorityName, this.addGroup.authorityName)
             .subscribe(
                 (groups) => {
@@ -316,7 +340,7 @@ export class AdminMediacenterComponent {
                 () => this.toast.closeModalDialog(),
                 () => {
                     this.toast.showProgressDialog();
-                    this.mediacenterService
+                    this.mediacenterServiceLegacy
                         .deleteMediacenter(this.currentMediacenter.authorityName)
                         .subscribe(
                             () => {
@@ -342,7 +366,7 @@ export class AdminMediacenterComponent {
 
     private deleteGroup(authority: Group) {
         this.toast.showProgressDialog();
-        this.mediacenterService
+        this.mediacenterServiceLegacy
             .removeManagedGroup(this.currentMediacenterCopy.authorityName, authority.authorityName)
             .subscribe(
                 (groups) => {
@@ -377,7 +401,7 @@ export class AdminMediacenterComponent {
             return;
         }
         this.globalProgress = true;
-        this.mediacenterService.importMediacenters(this.mediacentersFile).subscribe(
+        this.mediacenterServiceLegacy.importMediacenters(this.mediacentersFile).subscribe(
             (data: any) => {
                 this.toast.toast('ADMIN.MEDIACENTER.IMPORT.IMPORTED', { rows: data.rows });
                 this.globalProgress = false;
@@ -396,7 +420,7 @@ export class AdminMediacenterComponent {
             return;
         }
         this.globalProgress = true;
-        this.mediacenterService.importOrganisations(this.organisationsFile).subscribe(
+        this.mediacenterServiceLegacy.importOrganisations(this.organisationsFile).subscribe(
             (data: any) => {
                 this.toast.toast('ADMIN.MEDIACENTER.ORGIMPORT.IMPORTED', { rows: data.rows });
                 this.globalProgress = false;
@@ -416,7 +440,7 @@ export class AdminMediacenterComponent {
             return;
         }
         this.globalProgress = true;
-        this.mediacenterService
+        this.mediacenterServiceLegacy
             .importMcOrgConnections(this.orgMcFile, this.removeSchoolsFromMC)
             .subscribe(
                 (data: any) => {
@@ -433,15 +457,38 @@ export class AdminMediacenterComponent {
             );
     }
 
-    setMediacenterNodesSort(sort: { sortBy: string; sortAscending: boolean }) {
+    setMediacenterNodesSort(sort: ListSortConfig) {
         this.mediacenterNodesSort = sort;
         this.resetMediacenterNodes();
         this.loadMediacenterNodes();
     }
 
     private resetMediacenterNodes() {
-        this.mediacenterNodes = null;
-        this.mediacenterNodesTotal = 0;
-        this.hasMoreMediacenterNodes = true;
+        this.mediacenterNodesDataSource.reset();
+    }
+
+    async exportNodes() {
+        const properties = this.nodeColumns.map((c) => c.name);
+        const propertiesLabel = properties.map((p) => this.translate.instant('NODE.' + p));
+        this.toast.showProgressDialog();
+        const data = await this.mediacenterService
+            .exportMediacenterLicensedNodes({
+                repository: RestConstants.HOME_REPOSITORY,
+                mediacenter: this.currentMediacenter.authorityName,
+                sortProperties: [this.mediacenterNodesSort.active],
+                sortAscending: [this.mediacenterNodesSort.direction === 'asc'],
+                body: {
+                    criteria: await this.getMediacenterNodesCriteria(),
+                },
+                properties,
+            })
+            .toPromise();
+        this.toast.closeModalDialog();
+        CsvHelper.download(
+            await this.translate.get('ADMIN.MEDIACENTER.NODES.CSV_FILENAME').toPromise(),
+            propertiesLabel,
+            data as unknown as Values,
+            properties,
+        );
     }
 }
