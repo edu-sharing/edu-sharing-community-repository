@@ -1,14 +1,17 @@
 package org.edu_sharing.service.search;
 
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.log4j.Logger;
+import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
+import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.json.JSONArray;
@@ -25,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class SearchServiceDDBImpl extends SearchServiceAdapter{
 	
@@ -139,9 +143,8 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		return id;
 	}
 
-
-	public List<? extends  Suggestion> getSuggestions(MetadataSet mds, String queryId, String parameterId, String value) {
-		
+	@Override
+	public List<? extends Suggestion> getSuggestions(MetadataSet mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
 		List<Suggestion> result = new ArrayList<Suggestion>();
 		
 		List<String> facets = mds.findQuery(queryId, MetadataReader.QUERY_SYNTAX_LUCENE).findParameterByName(parameterId).getFacets();
@@ -235,8 +238,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 
 		String[] searchWordCriteria=criterias.get(MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA);
 
-		List<String> extSearch = new ArrayList<String>();
-		
+
  		String searchWord = "";
  		if(searchWordCriteria!=null && searchWordCriteria.length>0) {
  			searchWord = searchWordCriteria[0];
@@ -244,44 +246,23 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		if (searchWord.equals("*") ){
 			searchWord="";
 		}
-
-		boolean retval;
-
- 		if(criterias.containsKey("title")) {
- 			String ddbTitle =criterias.get("title")[0];
- 			if (!ddbTitle.equals("") ){
- 				extSearch.add("title:("+ddbTitle+")");
- 			}
- 		}
-
- 		if(criterias.containsKey("place")) {
- 			String ddbPlace =criterias.get("place")[0];
- 			if (!ddbPlace.equals("") ){
- 				extSearch.add("place:("+ddbPlace+")");
- 			}
- 		}
-
- 		if(criterias.containsKey("affiliate")) {
- 			String ddbPerson =criterias.get("affiliate")[0];
- 			if (!ddbPerson.equals("") ){
- 				extSearch.add("affiliate:("+ddbPerson+")");
- 			}
- 		}
-		
+		List<String> extendedFilters = new ArrayList<>();
+		Stream.of(
+				"virtual:title",
+				"virtual:place",
+				"virtual:affiliate",
+				"virtual:keywords"
+		).forEach(
+				key -> {
+					if(criterias.get(key) != null) {
+						String ddbData = criterias.get(key)[0];
+						if (!ddbData.equals("")) {
+							extendedFilters.add(key.split(":")[1] +":" + QueryParser.escape(ddbData));
+						}
+					}
+				}
+		);
 		HttpsURLConnection connection=null;
-
-/*		if(searchToken.getFrom()%searchToken.getMaxResult()!=0)
-			throw new Exception("Pixabay only supports offsets which are dividable by the maxItems count");
-	*/
-		String ext = "";
-		for (String s : extSearch) {
-		    if (!s.equals("") && !extSearch.get(extSearch.size() - 1).equals(s)){
-		     ext = ext+s +" AND ";	
-		    }else{
-			     ext = ext+s;	
-		    }
-		}
-		
 
 		try {
 
@@ -289,12 +270,17 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			String oauth  = "/search?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
 			String offset = "&offset="+searchToken.getFrom();
 			String rows = "&rows="+searchToken.getMaxResult();
+			String solrQuery = QueryParser.escape(searchWord);
+			if(!extendedFilters.isEmpty()) {
+				solrQuery += " AND (";
+				solrQuery += StringUtils.join(extendedFilters, " AND ");
+				solrQuery += ")";
+			}
+			StringBuilder uri = new StringBuilder(oauth + "&query=" + org.springframework.extensions.surf.util.URLEncoder.encodeUriComponent(solrQuery) + offset + rows);
 
-			String uri=oauth+"&query="+org.springframework.extensions.surf.util.URLEncoder.encodeUriComponent(searchWord+" "+ext)+offset+rows;
+			searchToken.setQueryString(uri.toString());
 
-			searchToken.setQueryString(uri);
-
-			return searchDDB(repositoryId,APIKey,uri);
+			return searchDDB(repositoryId,APIKey, uri.toString());
 
 		}
 		catch(IOException e){
