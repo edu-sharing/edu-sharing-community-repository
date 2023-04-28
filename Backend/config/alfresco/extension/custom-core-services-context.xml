@@ -794,6 +794,12 @@
     </bean>
     <bean id="eduAuthorityServiceInterceptor" class="org.edu_sharing.alfresco.interceptors.AuthorityServiceGuestInterceptor">
     </bean>
-    
-    
+
+    <!-- disable unused services from alfresco to remove xmlrpc-dependencies -->
+    <bean id="blogIntegrationService" class="org.edu_sharing.alfresco.fixes.BlogServiceDisabled">
+    </bean>
+    <bean id="wordPressBlogIntegration" class="org.edu_sharing.alfresco.fixes.BlogIntegrationDisabled">
+    </bean>
+    <bean id="typePadBlogIntegration" class="org.edu_sharing.alfresco.fixes.BlogIntegrationDisabled">
+    </bean>
 </beans>
