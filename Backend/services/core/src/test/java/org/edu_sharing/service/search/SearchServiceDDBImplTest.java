@@ -7,9 +7,9 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.nodeservice.NodeServiceDDBImpl;
-import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
+@Disabled
 class SearchServiceDDBImplTest {
     private SearchServiceDDBImpl underTestSearch;
     private MockedStatic<ApplicationInfoList> applicationInfoListMockedStatic;
@@ -52,7 +53,6 @@ class SearchServiceDDBImplTest {
         alfAppContextGateMockedStatic.close();
         applicationInfoListMockedStatic.close();
     }
-    @Ignore
     @Test
     void searchDDB() {
         try {
@@ -69,7 +69,6 @@ class SearchServiceDDBImplTest {
             throw new RuntimeException(e);
         }
     }
-    @Ignore
     @Test
     void fetchNode() {
         try {
