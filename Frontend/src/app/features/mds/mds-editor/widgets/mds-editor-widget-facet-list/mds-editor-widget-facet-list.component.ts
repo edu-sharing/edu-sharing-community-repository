@@ -10,7 +10,7 @@ import { FormArray, FormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { FacetAggregation, FacetValue, SearchService } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { debounceTime, filter, finalize, first, switchMap, takeUntil } from 'rxjs/operators';
+import { debounceTime, filter, finalize, first, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
@@ -43,6 +43,7 @@ export class MdsEditorWidgetFacetListComponent
     private values: string[];
     private readonly destroyed$ = new Subject<void>();
     filter = new FormControl('');
+    isInitState$ = new BehaviorSubject<boolean>(true);
 
     constructor(
         mdsEditorInstance: MdsEditorInstanceService,
@@ -92,11 +93,15 @@ export class MdsEditorWidgetFacetListComponent
     }
 
     private registerFacetValuesSubject(): void {
+        this.isInitState$.next(true);
         this.search
             .observeFacet(this.widget.definition.id, {
                 includeActiveFilters: true,
             })
-            .pipe(takeUntil(this.destroyed$))
+            .pipe(
+                takeUntil(this.destroyed$),
+                tap((result) => this.isInitState$.next(result === null)),
+            )
             .subscribe((facetAggregation) => this.facetAggregationSubject.next(facetAggregation));
     }
 

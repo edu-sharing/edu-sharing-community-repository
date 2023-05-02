@@ -92,6 +92,12 @@ export class MdsEditorWidgetContainerComponent
      */
     @Input() wrapInGroup = true;
 
+    /**
+     * should a progress spinner be shown
+     * (only applicable for widgets with non-native material fields)
+     */
+    @Input() showSpinner: boolean;
+
     @ContentChild(MatFormFieldControl) formFieldControl: MatFormFieldControl<any>;
 
     @HostBinding('class.disabled') isDisabled = false;

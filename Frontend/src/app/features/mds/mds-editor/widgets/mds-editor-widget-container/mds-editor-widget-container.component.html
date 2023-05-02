@@ -7,6 +7,7 @@
       <i *ngIf="widget.definition.icon" [esIcon]="widget.definition.icon"></i>
       {{ label }}
     </mat-panel-title>
+    <es-spinner-small *ngIf="showSpinner"></es-spinner-small>
   </mat-expansion-panel-header>
   <ng-container *ngTemplateOutlet="body"></ng-container>
 </mat-expansion-panel>
