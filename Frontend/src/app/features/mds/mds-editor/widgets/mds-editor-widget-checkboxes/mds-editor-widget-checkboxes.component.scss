@@ -1,21 +1,58 @@
 :host ::ng-deep .mat-checkbox {
-    display: flex;
-    max-width: 100%;
     .mat-checkbox-layout {
-        flex-grow: 1; // Maximize clickable area
-        min-width: 0; // Cut overflowing labels
+        width: 100%;
         .mat-checkbox-label {
-            overflow: hidden;
-            text-overflow: ellipsis;
+            flex-grow: 1;
+            min-width: 0;
+        }
+    }
+}
+ul {
+    margin: 0;
+    li {
+        .mat-checkbox {
+            width: 100%;
+            padding: 3px 4px;
         }
     }
 }
 
 .checkboxes-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px 20px;
-    &.vertical {
-        flex-direction: column;
+    &:not(.vertical) {
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+        gap: 10px 20px;
+    }
+}
+:host ::ng-deep .mat-checkbox {
+    max-width: 100%;
+    .mat-checkbox-layout {
+        .mat-checkbox-layout {
+            width: 100%;
+        }
+        .mat-checkbox-label {
+            flex-grow: 1;
+            min-width: 0;
+        }
+    }
+}
+ul {
+    margin: 0;
+    li {
+        mat-checkbox {
+            width: 100%;
+            padding: 3px 4px;
+            .label {
+                display: flex;
+
+                .caption {
+                    flex-grow: 1;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    margin-right: 1em;
+                }
+            }
+        }
     }
 }
