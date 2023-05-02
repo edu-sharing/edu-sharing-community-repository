@@ -229,7 +229,7 @@ export class RenderHelperService {
             };
             videoElement.addEventListener('play', listener);
             target = document.createElement('div');
-            videoElement.parentElement.appendChild(target);
+            videoElement.parentElement.parentElement.appendChild(target);
         } catch (e) {
             // console.log("did not find video element, skipping controls",e);
             setTimeout(() => this.injectVideoControls(node), 1000 / 30);
