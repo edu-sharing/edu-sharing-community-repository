@@ -4,6 +4,7 @@ import {
     Component,
     OnDestroy,
     OnInit,
+    ViewChild,
 } from '@angular/core';
 import { FormArray, FormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
@@ -13,6 +14,7 @@ import { debounceTime, filter, finalize, first, switchMap, takeUntil } from 'rxj
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
+import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
 
 @Component({
     selector: 'es-mds-editor-widget-facet-list',
@@ -24,6 +26,7 @@ export class MdsEditorWidgetFacetListComponent
     extends MdsEditorWidgetBase
     implements OnInit, OnDestroy
 {
+    @ViewChild(MdsEditorWidgetContainerComponent) containerRef: MdsEditorWidgetContainerComponent;
     readonly MAX_FACET_COUNT = 50;
     readonly valueType: ValueType = ValueType.MultiValue;
     /** Available facet values being updated from `mdsEditorInstance.suggestions$`. */
@@ -104,6 +107,13 @@ export class MdsEditorWidgetFacetListComponent
                 this.facetValues = facetValues.values;
                 this.formArray = this.generateFormArray(facetValues.values);
                 this.updateFilteredValues();
+                // expand collapsed field if a value is active/selected
+                if (
+                    this.containerRef?.expandedState$.value === 'collapsed' &&
+                    this.values?.length
+                ) {
+                    this.containerRef.expandedState$.next('expanded');
+                }
             } else {
                 this.formArray = null;
                 this.facetValues = null;

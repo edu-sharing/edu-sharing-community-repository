@@ -95,6 +95,7 @@ export class MdsEditorWidgetContainerComponent
     @ContentChild(MatFormFieldControl) formFieldControl: MatFormFieldControl<any>;
 
     @HostBinding('class.disabled') isDisabled = false;
+    expandedState$ = new BehaviorSubject<'disabled' | 'expanded' | 'collapsed'>('disabled');
     @HostBinding('@showHideExtended') get showHideExtendedState(): string {
         return this.isHidden ? 'hidden' : 'shown';
     }
@@ -156,6 +157,7 @@ export class MdsEditorWidgetContainerComponent
         }
         this.wrapInFormField = this.wrapInFormField ?? !!this.control;
         if (this.widget) {
+            this.expandedState$.next(this.widget.definition?.expandable);
             this.widget.focusTrigger
                 .pipe(takeUntil(this.destroyed$))
                 .subscribe(() => this.injectedView?.focus());

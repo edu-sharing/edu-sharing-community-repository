@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormControl, ValidatorFn } from '@angular/forms';
 import { filter } from 'rxjs/operators';
 import { MdsWidgetType } from '../../../types/types';
 import { DisplayValues } from '../DisplayValues';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
 @Component({
     selector: 'es-mds-editor-widget-checkboxes',
     templateUrl: './mds-editor-widget-checkboxes.component.html',
@@ -11,6 +12,7 @@ import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 })
 export class MdsEditorWidgetCheckboxesComponent extends MdsEditorWidgetBase implements OnInit {
     readonly valueType: ValueType = ValueType.String;
+    @ViewChild(MdsEditorWidgetContainerComponent) containerRef: MdsEditorWidgetContainerComponent;
     values: DisplayValues;
     formArray: FormArray;
     mode: 'horizontal' | 'vertical';
@@ -34,6 +36,15 @@ export class MdsEditorWidgetCheckboxesComponent extends MdsEditorWidgetBase impl
                     .filter((_, index) => checkboxStates[index] === true)
                     .map((value) => value.key);
                 this.setValue(newValues);
+                setTimeout(() => {
+                    // expand collapsed field if a value is active/selected
+                    if (
+                        this.containerRef?.expandedState$.value === 'collapsed' &&
+                        newValues?.length
+                    ) {
+                        this.containerRef.expandedState$.next('expanded');
+                    }
+                });
             });
     }
 
