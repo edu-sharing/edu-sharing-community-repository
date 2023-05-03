@@ -394,7 +394,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				}
 
 			} else {
-				logger.info("username/authority: " + authority + " has no valid emailaddress:" + emailaddress);
+				if(_sendMail) {
+					logger.info("username/authority: " + authority + " has no valid emailaddress:" + emailaddress);
+				}
 			}
 
 		}
@@ -1457,8 +1459,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_HISTORY), new ArrayList(history));
 					fixSharedByMe(nodeRef);
 				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					logger.warn("Error setting permission history", e1);
 				}
 			}finally {
 				policyBehaviourFilter.enableBehaviour(nodeRef);
