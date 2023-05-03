@@ -21,6 +21,14 @@ Use the Ant-Tasks provided in "build.xml" and run `deploy` (to build all files a
 
 You may also use the task `reload`. This will cause a touch-event on the web.xml inside the edu-sharing webapp and will let tomcat reload the webapp while it's running.
 
+After install, please add the following part into the `tomcat/bin/setenv.sh`:
+```bash
+# log4j2
+CATALINA_OPTS="-Dorg.xml.sax.parser=com.sun.org.apache.xerces.internal.parsers.SAXParser $CATALINA_OPTS"
+CATALINA_OPTS="-Djavax.xml.parsers.DocumentBuilderFactory=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl $CATALINA_OPTS"
+CATALINA_OPTS="-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl $CATALINA_OPTS"
+```
+
 FAQ
 ---
 `java.lang.OutOfMemoryError: Java heap space` occurs on Deploy
