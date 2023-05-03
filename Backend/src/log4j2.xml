@@ -94,13 +94,13 @@
         <Logger name="org.edu_sharing.repository.server.tools.HttpQueryTool" level="debug"/>
         <Logger name="org.alfresco.repo.admin" level="info"/>
         <Logger name="org.edu_sharing.repository.server.jobs" level="info">
-            <AppenderRef ref="edu-sharing-jobs2"/>
+            <AppenderRef ref="edu-sharing-jobs"/>
         </Logger>
         <Logger name="org.edu_sharing.repository.server.monitoring" level="debug">
             <AppenderRef ref="edu-sharing-monitoring"/>
         </Logger>
         <Logger name="org.edu_sharing.repository.server.importer" level="debug">
-            <AppenderRef ref="edu-sharing-jobs2"/>
+            <AppenderRef ref="edu-sharing-jobs"/>
         </Logger>
         <Logger name="org.edu_sharing.repository.server.importer.ImportCleaner" level="info">
             <AppenderRef ref="edu-sharing-deletedobj"/>
