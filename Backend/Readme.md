@@ -31,6 +31,14 @@ CATALINA_OPTS="-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.in
 
 FAQ
 ---
+On Startup, I see errors like
+`SEVERE: Servlet [cmisws10] in web application [/alfresco] threw load() exception
+java.lang.ClassNotFoundException: org.apache.cxf.transport.servlet.CXFNonSpringServlet`
+
+These come from missing/unused libraries in alfresco core and can be ignored since these servlets are not used by edu-sharing.
+
+---
+
 `java.lang.OutOfMemoryError: Java heap space` occurs on Deploy
 
 This may happens when the Ant heap is set to low.
