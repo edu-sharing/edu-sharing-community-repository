@@ -11,34 +11,39 @@ import {
     TemplateRef,
     ViewChild,
 } from '@angular/core';
-import { AuthenticationService, MdsService, Node, UserService } from 'ngx-edu-sharing-api';
+import {
+    AuthenticationService,
+    ConfigService,
+    MdsService,
+    Node,
+    ProposalNode,
+    UserService,
+} from 'ngx-edu-sharing-api';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { filter, takeUntil } from 'rxjs/operators';
-import { UIConstants } from '../../../core-module/ui/ui-constants';
-import { NodeDataSource } from '../../../features/node-entries/node-data-source';
 import {
-    CollectionReference,
-    ListItemSort,
-    LoginResult,
-    NodesRightMode,
-    NodeWrapper,
-    Permission,
-    ProposalNode,
-} from '../../../core-module/rest/data-object';
-import { RestConstants } from '../../../core-module/rest/rest-constants';
-import { ListItem } from '../../../core-module/ui/list-item';
-import {
+    ActionbarComponent,
+    CanDrop,
+    DragData,
     DropSource,
     FetchEvent,
     InteractionType,
     ListEventInterface,
+    ListItem,
+    ListItemSort,
     ListSortConfig,
     NodeClickEvent,
+    NodeDataSource,
     NodeEntriesDisplayType,
-} from '../../../features/node-entries/entries-model';
+    NodesRightMode,
+    OptionItem,
+    OptionsHelperDataService,
+    Scope,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
+import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
-import { OptionItem, Scope } from '../../../core-ui-module/option-item';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
@@ -52,21 +57,22 @@ import { Helper } from '../../../core-module/rest/helper';
 import { UIService } from '../../../core-module/rest/services/ui.service';
 import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
 import * as EduData from '../../../core-module/core.module';
-import { ConfigurationHelper, ConfigurationService } from '../../../core-module/core.module';
+import {
+    CollectionReference,
+    ConfigurationHelper,
+    LoginResult,
+    NodeWrapper,
+    Permission,
+} from '../../../core-module/core.module';
 import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { TranslateService } from '@ngx-translate/core';
-import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
-import { ListTableComponent } from '../../../core-ui-module/components/list-table/list-table.component';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     ManagementEvent,
     ManagementEventType,
 } from '../../management-dialogs/management-dialogs.component';
-import { OptionsHelperService } from '../../../core-ui-module/options-helper.service';
 import { CollectionInfoBarComponent } from '../collection-info-bar/collection-info-bar.component';
 import { DialogType } from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
-import { DragData } from '../../../services/nodes-drag-drop.service';
-import { CanDrop } from '../../../shared/directives/nodes-drop-target.directive';
 
 @Component({
     selector: 'es-collection-content',
@@ -106,7 +112,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     @Output() clickItem = new EventEmitter<NodeClickEvent<Node | CollectionReference>>();
     @ContentChild('empty') emptyRef: TemplateRef<unknown>;
     @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
-    @ViewChild('listCollections') listCollections: ListTableComponent;
     @ViewChild('listReferences') listReferences: ListEventInterface<CollectionReference>;
     @ViewChild('listProposals') listProposals: ListEventInterface<ProposalNode>;
 
@@ -186,8 +191,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         private connector: RestConnectorService,
         private translation: TranslateService,
         private userService: UserService,
-        private configurationService: ConfigurationService,
-        private optionsService: OptionsHelperService,
+        private configurationService: ConfigService,
+        private optionsService: OptionsHelperDataService,
         private mdsService: MdsService,
         private mainNavService: MainNavService,
         private authenticationService: AuthenticationService,

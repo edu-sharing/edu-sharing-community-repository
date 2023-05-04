@@ -18,7 +18,6 @@ import {
     ConfigurationService,
     DialogButton,
     IamUser,
-    ListItem,
     Node,
     ParentList,
     RestConstants,
@@ -27,7 +26,7 @@ import {
     RestSearchService,
     SessionStorageService,
 } from '../../../core-module/core.module';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { ListItem, UIAnimation } from 'ngx-edu-sharing-ui';
 import { LinkData } from '../../../core-ui-module/node-helper.service';
 import { Toast } from '../../../core-ui-module/toast';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';

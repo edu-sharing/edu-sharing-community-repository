@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MaterialCssVariables, MaterialCssVarsService } from 'angular-material-css-vars';
 import { ConfigService } from 'ngx-edu-sharing-api';
-import { UIHelper } from '../../core-ui-module/ui-helper';
-import { ColorHelper } from '../../core-module/ui/color-helper';
 import { HueValue } from 'angular-material-css-vars/lib/model';
 
 export enum Variable {

@@ -1,17 +1,6 @@
-import {
-    Component,
-    Input,
-    Output,
-    EventEmitter,
-    OnInit,
-    HostListener,
-    ViewChild,
-    ElementRef,
-    QueryList,
-} from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { DialogButton, Node } from '../../../core-module/core.module';
 
 @Component({

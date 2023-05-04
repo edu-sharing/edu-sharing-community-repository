@@ -1,7 +1,7 @@
 import { trigger } from '@angular/animations';
 import { Component, OnInit } from '@angular/core';
 import { ConfigurationService, DialogButton } from '../../../core-module/core.module';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { CordovaService } from '../../services/cordova.service';
 
 @Component({

@@ -6,11 +6,11 @@ import {
     RestConstants,
     RestNodeService,
 } from '../../../../core-module/core.module';
-import { VCard } from '../../../../core-module/ui/VCard';
+import { LocalEventsService, VCard } from 'ngx-edu-sharing-ui';
 import { Toast } from '../../../../core-ui-module/toast';
 import {
-    CardDialogConfig,
     CARD_DIALOG_DATA,
+    CardDialogConfig,
     Closable,
     configForNode,
 } from '../../card-dialog/card-dialog-config';
@@ -23,7 +23,6 @@ import {
 } from '../contributor-edit-dialog/contributor-edit-dialog-data';
 import { YES_OR_NO } from '../generic-dialog/generic-dialog-data';
 import { ContributorsDialogData, ContributorsDialogResult } from './contributors-dialog-data';
-import { LocalEventsService } from '../../../../services/local-events.service';
 
 @Component({
     selector: 'es-contributors-dialog',

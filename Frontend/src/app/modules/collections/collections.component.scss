@@ -167,7 +167,7 @@ section {
         }
     }
 }
-@media all and (max-width: ($cardWidth*3)) {
+@media all and (max-width: (calc(var(--cardWidth) * 3))) {
     :host ::ng-deep .cardSmallList {
         width: calc(100% - 10px) !important;
     }

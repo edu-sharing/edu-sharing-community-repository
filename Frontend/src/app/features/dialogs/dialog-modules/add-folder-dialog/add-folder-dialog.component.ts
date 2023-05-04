@@ -3,7 +3,6 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
     ConfigurationHelper,
-    ConfigurationService,
     DialogButton,
     MdsInfo,
     MdsMetadatasets,
@@ -15,6 +14,7 @@ import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { AddFolderDialogData, AddFolderDialogResult } from './add-folder-dialog-data';
+import { ConfigService } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-add-folder-dialog',
@@ -33,7 +33,7 @@ export class AddFolderDialogComponent implements OnInit {
         private dialogRef: CardDialogRef<AddFolderDialogData, AddFolderDialogResult>,
         private mds: RestMdsService,
         private translate: TranslateService,
-        private config: ConfigurationService,
+        private config: ConfigService,
     ) {}
 
     ngOnInit(): void {

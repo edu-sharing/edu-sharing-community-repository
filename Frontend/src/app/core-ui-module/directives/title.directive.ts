@@ -10,7 +10,7 @@ import {
 import { Title } from '@angular/platform-browser';
 import { combineLatest, forkJoin, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { TranslationsService } from '../../translations/translations.service';
+import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { ConfigurationService } from '../../core-module/core.module';
 
 /**

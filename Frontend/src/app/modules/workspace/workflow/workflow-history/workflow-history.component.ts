@@ -1,18 +1,10 @@
-import { trigger } from '@angular/animations';
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
-import { forkJoin, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { DialogButton } from '../../../../core-module/ui/dialog-button';
-import {
-    Group,
-    UserSimple,
-    WorkflowDefinition,
-    WorkflowEntry,
-} from '../../../../core-module/rest/data-object';
+import { Component, Input } from '@angular/core';
+import { Group, User } from 'ngx-edu-sharing-api';
+import { WorkflowDefinition } from 'ngx-edu-sharing-ui';
 import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
+import { WorkflowEntry } from '../../../../core-module/rest/data-object';
 
-type WorkflowReceiver = UserSimple | Group;
+type WorkflowReceiver = User | Group;
 
 @Component({
     selector: 'es-workflow-list',

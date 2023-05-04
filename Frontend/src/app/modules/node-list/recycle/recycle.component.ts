@@ -4,28 +4,31 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import {
     ArchiveRestore,
-    GenericAuthority,
-    ListItem,
-    ListItemSort,
     Node,
     RestArchiveService,
     RestConstants,
     TemporaryStorageService,
 } from '../../../core-module/core.module';
-import { CustomOptions, ElementType, OptionItem, Scope } from '../../../core-ui-module/option-item';
-import { Toast } from '../../../core-ui-module/toast';
 import {
+    ActionbarComponent,
+    CustomOptions,
+    ElementType,
     FetchEvent,
     InteractionType,
+    ListItem,
+    ListItemSort,
     ListSortConfig,
     NodeClickEvent,
+    NodeDataSource,
     NodeEntriesDisplayType,
-} from '../../../features/node-entries/entries-model';
-import { NodeDataSource } from '../../../features/node-entries/node-data-source';
-import { NodeEntriesWrapperComponent } from '../../../features/node-entries/node-entries-wrapper.component';
+    NodeEntriesWrapperComponent,
+    OptionItem,
+    Scope,
+} from 'ngx-edu-sharing-ui';
+import { Toast } from '../../../core-ui-module/toast';
 import { SearchFieldService } from '../../../main/navigation/search-field/search-field.service';
-import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
 import { RecycleRestoreComponent } from './restore/restore.component';
+import { GenericAuthority } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-recycle',

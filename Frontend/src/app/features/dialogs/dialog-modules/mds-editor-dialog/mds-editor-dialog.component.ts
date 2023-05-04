@@ -4,7 +4,7 @@ import { delay, filter, first, map } from 'rxjs/operators';
 import { DialogButton, Node } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
 import { JumpMark } from '../../../../services/jump-marks.service';
-import { LocalEventsService } from '../../../../services/local-events.service';
+import { LocalEventsService } from 'ngx-edu-sharing-ui';
 import { MdsEditorCoreComponent } from '../../../mds/mds-editor/mds-editor-core/mds-editor-core.component';
 import { MdsEditorInstanceService } from '../../../mds/mds-editor/mds-editor-instance.service';
 import { EditorType } from '../../../mds/types/types';
@@ -13,10 +13,10 @@ import { JUMP_MARK_POSTFIX } from '../../card-dialog/card-dialog-container/jump-
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { FillTypeStatus } from './input-fill-progress/input-fill-progress.component';
 import {
-    MdsEditorDialogData,
-    MdsEditorDialogResult,
     hasNodes,
     hasValues,
+    MdsEditorDialogData,
+    MdsEditorDialogResult,
 } from './mds-editor-dialog-data';
 
 @Component({

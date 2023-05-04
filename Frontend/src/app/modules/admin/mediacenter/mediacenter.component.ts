@@ -1,8 +1,18 @@
 import { Component, EventEmitter, NgZone, Output, ViewChild } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Group, IamGroup, Mediacenter, Node } from '../../../core-module/rest/data-object';
-// import {NodeList} from "../../../core-module/core.module";
-import { ListItem } from '../../../core-module/ui/list-item';
+import {
+    CustomOptions,
+    ElementType,
+    InteractionType,
+    ListItem,
+    ListSortConfig,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
+    OptionItem,
+    Scope,
+} from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
 import {
@@ -16,7 +26,6 @@ import {
 } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { Toast } from '../../../core-ui-module/toast';
-import { CustomOptions, ElementType, OptionItem, Scope } from '../../../core-ui-module/option-item';
 import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { AuthoritySearchMode } from '../../../shared/components/authority-search-input/authority-search-input.component';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
@@ -24,13 +33,6 @@ import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-
 import { MediacenterService } from 'ngx-edu-sharing-api';
 import { CsvHelper } from '../../../core-module/csv.helper';
 import { Values } from '../../../features/mds/types/types';
-import {
-    InteractionType,
-    ListSortConfig,
-    NodeEntriesDisplayType,
-} from '../../../features/node-entries/entries-model';
-import { NodeDataSource } from '../../../features/node-entries/node-data-source';
-import { NodeEntriesWrapperComponent } from '../../../features/node-entries/node-entries-wrapper.component';
 
 @Component({
     selector: 'es-admin-mediacenter',

@@ -26,7 +26,7 @@ import {
 import { Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { DialogButton } from '../../../../core-module/core.module';
-import { UIAnimation } from '../../../../core-module/ui/ui-animation';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { JumpMark, JumpMarksService } from '../../../../services/jump-marks.service';
 import { CardDialogConfig, Closable } from '../card-dialog-config';
 import { CardDialogRef } from '../card-dialog-ref';

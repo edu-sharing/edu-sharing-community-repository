@@ -4,7 +4,6 @@ import {
     Component,
     Inject,
     OnInit,
-    SimpleChanges,
 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NodeService, RelationData, RelationService, UserService } from 'ngx-edu-sharing-api';
@@ -15,20 +14,17 @@ import { BridgeService } from '../../../../core-bridge-module/bridge.service';
 import {
     DialogButton,
     Node,
-    ListItem,
-    NodesRightMode,
     RestConstants,
     RestHelper,
     SearchRequestCriteria,
 } from '../../../../core-module/core.module';
-import { OPEN_URL_MODE } from '../../../../core-module/ui/ui-constants';
 import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
 import { Toast } from '../../../../core-ui-module/toast';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { NodeRelationsDialogData, NodeRelationsDialogResult } from './node-relations-dialog-data';
-import { LocalEventsService } from '../../../../services/local-events.service';
+import { ListItem, LocalEventsService, NodesRightMode, OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-node-relations-dialog',

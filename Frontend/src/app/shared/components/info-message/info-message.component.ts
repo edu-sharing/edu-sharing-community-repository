@@ -1,6 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { ListItem } from '../../../core-module/ui/list-item';
-import { RestConstants } from '../../../core-module/rest/rest-constants';
 
 @Component({
     selector: 'es-info-message',

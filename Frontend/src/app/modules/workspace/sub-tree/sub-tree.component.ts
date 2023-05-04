@@ -12,16 +12,19 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { DropSource } from '../../../features/node-entries/entries-model';
+import {
+    DragData,
+    DropdownComponent,
+    DropSource,
+    LocalEventsService,
+    OptionItem,
+    OptionsHelperDataService,
+    Scope,
+    UIAnimation,
+} from 'ngx-edu-sharing-ui';
 import { Node, NodeList, RestConstants, RestNodeService } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { OptionItem, Scope } from '../../../core-ui-module/option-item';
-import { OptionsHelperService } from '../../../core-ui-module/options-helper.service';
-import { DragData } from '../../../services/nodes-drag-drop.service';
-import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 import { canDropOnNode } from '../workspace-utils';
-import { LocalEventsService } from '../../../services/local-events.service';
 
 @Component({
     selector: 'es-workspace-sub-tree',
@@ -31,7 +34,7 @@ import { LocalEventsService } from '../../../services/local-events.service';
         trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST)),
         trigger('open', UIAnimation.openOverlay()),
     ],
-    providers: [OptionsHelperService],
+    providers: [OptionsHelperDataService],
 })
 export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
     private static MAX_FOLDER_COUNT = 100;
@@ -81,7 +84,7 @@ export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
 
     constructor(
         private nodeApi: RestNodeService,
-        private optionsService: OptionsHelperService,
+        private optionsService: OptionsHelperDataService,
         private localEvents: LocalEventsService,
     ) {}
 

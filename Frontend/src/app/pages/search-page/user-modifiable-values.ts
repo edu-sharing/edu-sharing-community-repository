@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, tap } from 'rxjs/operators';
-import { notNull } from '../../util/functions';
+import { notNull } from 'ngx-edu-sharing-ui';
 import { NavigationScheduler } from './navigation-scheduler';
 
 /**

@@ -2,17 +2,16 @@ import {
     AfterViewInit,
     Component,
     DoCheck,
-    NgZone,
-    ViewChild,
-    OnInit,
     HostListener,
     Injector,
-    EventEmitter,
+    NgZone,
+    OnInit,
+    ViewChild,
 } from '@angular/core';
 import { MdsTestComponent } from '../common/test/mds-test/mds-test.component';
 import { ApplyToLmsComponent } from '../common/ui/apply-to-lms/apply-to-lms.component';
 import { NodeRenderComponent } from '../common/ui/node-render/node-render.component';
-import { UIConstants } from '../core-module/ui/ui-constants';
+import { AccessibilityService, TranslationsService, UIConstants } from 'ngx-edu-sharing-ui';
 import { AdminComponent } from '../modules/admin/admin.component';
 import { CollectionNewComponent } from '../modules/collections/collection-new/collection-new.component';
 import { CollectionsMainComponent } from '../modules/collections/collections.component';
@@ -34,21 +33,19 @@ import { SharingComponent } from '../modules/sharing/sharing.component';
 import { StartupComponent } from '../modules/startup/startup.component';
 import { StreamComponent } from '../modules/stream/stream.component';
 import { WorkspaceMainComponent } from '../modules/workspace/workspace.component';
-import { NavigationEnd, NavigationStart, Router, Routes } from '@angular/router';
+import { NavigationEnd, Router, Routes } from '@angular/router';
 import { CookieInfoComponent } from '../common/ui/cookie-info/cookie-info.component';
 import { BridgeService } from '../core-bridge-module/bridge.service';
 import { extensionRoutes } from '../extension/extension-routes';
+import * as rxjs from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { AccessibilityService } from '../services/accessibility.service';
 import { LtiComponent } from '../modules/lti/lti.component';
 import { printCurrentTaskInfo } from './track-change-detection';
 import { environment } from '../../environments/environment';
-import { TranslationsService } from '../translations/translations.service';
 import { LoadingScreenService } from '../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';
 import { ThemeService } from '../common/services/theme.service';
-import * as rxjs from 'rxjs';
 import { LicenseAgreementService } from '../services/license-agreement.service';
 import { DialogsNavigationGuard } from '../features/dialogs/dialogs-navigation.guard';
 import { AuthenticationService } from 'ngx-edu-sharing-api';

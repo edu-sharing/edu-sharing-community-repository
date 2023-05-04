@@ -1,19 +1,10 @@
-import {
-    Component,
-    EventEmitter,
-    Input,
-    OnChanges,
-    Output,
-    SimpleChanges,
-    ViewChild,
-} from '@angular/core';
-import { ColorHelper, PreferredColor } from '../../../core-module/ui/color-helper';
+import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { Permission } from '../../../core-module/rest/data-object';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
-import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
+import { ActionbarComponent, ColorHelper, PreferredColor } from 'ngx-edu-sharing-ui';
 import { MdsViewerComponent } from '../../../features/mds/mds-viewer/mds-viewer.component';
 
 @Component({

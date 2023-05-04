@@ -2,8 +2,18 @@ import { TranslateService } from '@ngx-translate/core';
 import { Observable, Observer } from 'rxjs';
 import { Params, Router } from '@angular/router';
 import { Location } from '@angular/common';
-import { DefaultGroups, OptionGroup, OptionItem } from './option-item';
-import { UIConstants } from '../core-module/ui/ui-constants';
+import {
+    DefaultGroups,
+    ListItem,
+    NodeHelperService as NodeHelperServiceBase,
+    NodePersonNamePipe,
+    NodesRightMode,
+    OptionGroup,
+    OptionItem,
+    RepoUrlService,
+    TemporaryStorageService,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import { Helper } from '../core-module/rest/helper';
 import { HttpClient } from '@angular/common/http';
 import { MessageType } from '../core-module/ui/message-type';
@@ -14,32 +24,19 @@ import {
     AuthorityProfile,
     CollectionReference,
     DeepLinkResponse,
-    NodesRightMode,
     Permission,
-    ProposalNode,
     Repository,
     User,
-    WorkflowDefinition,
 } from '../core-module/rest/data-object';
-import { TemporaryStorageService } from '../core-module/rest/services/temporary-storage.service';
 import { RestConstants } from '../core-module/rest/rest-constants';
-import { ConfigurationService } from '../core-module/rest/services/configuration.service';
 import { RestHelper } from '../core-module/rest/rest-helper';
 import { RestConnectorService } from '../core-module/rest/services/rest-connector.service';
-import { ListItem } from '../core-module/ui/list-item';
-import { RestNetworkService } from '../core-module/rest/services/rest-network.service';
-import { NodePersonNamePipe } from '../shared/pipes/node-person-name.pipe';
 import { UniversalNode } from '../common/definitions';
 import { SessionStorageService } from '../core-module/rest/services/session-storage.service';
 import { map } from 'rxjs/operators';
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
-import { getRepoUrl } from '../util/repo-url';
-import { Node } from 'ngx-edu-sharing-api';
+import { ApiHelpersService, ConfigService, NetworkService, Node } from 'ngx-edu-sharing-api';
 
-export type WorkflowDefinitionStatus = {
-    current: WorkflowDefinition;
-    initial: WorkflowDefinition;
-};
 export interface ConfigEntry {
     name: string;
     icon: string;
@@ -66,12 +63,16 @@ export interface ConfigOptionItem extends ConfigEntry {
 }
 
 @Injectable()
-export class NodeHelperService {
+export class NodeHelperService extends NodeHelperServiceBase {
     private viewContainerRef: ViewContainerRef;
     constructor(
-        private translate: TranslateService,
+        translate: TranslateService,
+        apiHelpersService: ApiHelpersService,
+        networkService: NetworkService,
+        configService: ConfigService,
+        repoUrlService: RepoUrlService,
         private componentFactoryResolver: ComponentFactoryResolver,
-        private config: ConfigurationService,
+        private config: ConfigService,
         private rest: RestConnectorService,
         private bridge: BridgeService,
         private http: HttpClient,
@@ -82,7 +83,9 @@ export class NodeHelperService {
         private sessionStorage: SessionStorageService,
         private storage: TemporaryStorageService,
         private location: Location,
-    ) {}
+    ) {
+        super(translate, apiHelpersService, networkService, configService, repoUrlService);
+    }
     setViewContainerRef(viewContainerRef: ViewContainerRef) {
         this.viewContainerRef = viewContainerRef;
     }
@@ -151,39 +154,6 @@ export class NodeHelperService {
         return error.status;
     }
 
-    public getCollectionScopeInfo(node: Node): { icon: string; scopeName: string } {
-        const scope = node.collection ? node.collection.scope : null;
-        let icon = 'help';
-        let scopeName = 'UNKNOWN';
-        if (scope === RestConstants.COLLECTIONSCOPE_MY) {
-            icon = 'lock';
-            scopeName = 'MY';
-        }
-        if (
-            scope === RestConstants.COLLECTIONSCOPE_ORGA ||
-            scope === RestConstants.COLLECTIONSCOPE_CUSTOM
-        ) {
-            icon = 'group';
-            scopeName = 'SHARED';
-        }
-        if (
-            scope === RestConstants.COLLECTIONSCOPE_ALL ||
-            scope === RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC
-        ) {
-            icon = 'language';
-            scopeName = 'PUBLIC';
-        }
-        if (node.collection?.type === RestConstants.COLLECTIONTYPE_EDITORIAL) {
-            icon = 'star';
-            scopeName = 'TYPE_EDITORIAL';
-        }
-        if (node.collection?.type === RestConstants.COLLECTIONTYPE_MEDIA_CENTER) {
-            icon = 'business';
-            scopeName = 'TYPE_MEDIA_CENTER';
-        }
-        return { icon, scopeName };
-    }
-
     public downloadUrl(url: string, fileName = 'download') {
         if (this.bridge.isRunningCordova()) {
             this.bridge.showTemporaryMessage(MessageType.info, 'TOAST.DOWNLOAD_STARTED', {
@@ -232,7 +202,7 @@ export class NodeHelperService {
      */
     public downloadNode(node: any, version = RestConstants.NODE_VERSION_CURRENT, metadata = false) {
         this.downloadUrl(
-            getRepoUrl(node.downloadUrl, node) +
+            this.repoUrlService.getRepoUrl(node.downloadUrl, node) +
                 (version && version != RestConstants.NODE_VERSION_CURRENT
                     ? '&version=' + version
                     : '') +
@@ -249,7 +219,7 @@ export class NodeHelperService {
         return new Observable<Node>((observer: Observer<Node>) => {
             const options: any = this.rest.getRequestOptions();
             options.responseType = 'blob';
-            const url = getRepoUrl(node.preview.url, node);
+            const url = this.repoUrlService.getRepoUrl(node.preview.url, node);
             this.rest
                 .get(url + '&allowRedirect=false&quality=' + quality, options, false)
                 .subscribe(
@@ -269,91 +239,6 @@ export class NodeHelperService {
                     },
                 );
         });
-    }
-
-    /**
-     * Return the license icon of a node
-     * @param node
-     * @returns {string}
-     */
-    public getLicenseIcon(node: Node) {
-        // prefer manual mapping instead of backend data to support custom states from local edits
-        const license = node.properties?.[RestConstants.CCM_PROP_LICENSE]?.[0];
-        if (license) {
-            return this.getLicenseIconByString(license);
-        }
-        return node.license ? getRepoUrl(node.license.icon, node) : null;
-    }
-
-    /**
-     * Get a license icon by using the property value string
-     * @param string
-     * @param rest
-     * @returns {string}
-     */
-    public getLicenseIconByString(string: String, useNoneAsFallback = true) {
-        let icon = string.replace(/_/g, '-').toLowerCase();
-        if (icon == '') icon = 'none';
-
-        const LICENSE_ICONS = [
-            'cc-0',
-            'cc-by-nc',
-            'cc-by-nc-nd',
-            'cc-by-nc-sa',
-            'cc-by-nd',
-            'cc-by-sa',
-            'cc-by',
-            'copyright-free',
-            'copyright-license',
-            'custom',
-            'edu-nc-nd-noDo',
-            'edu-nc-nd',
-            'edu-p-nr-nd-noDo',
-            'edu-p-nr-nd',
-            'none',
-            'pdm',
-            'schulfunk',
-            'unterrichts-und-lehrmedien',
-        ];
-        if (LICENSE_ICONS.indexOf(icon) == -1 && !useNoneAsFallback) return null; // icon='none';
-        if (icon == 'none' && !useNoneAsFallback) return null;
-        return this.rest.getAbsoluteEndpointUrl() + '../ccimages/licenses/' + icon + '.svg';
-    }
-    /**
-     * Return a translated name of a license name for a node
-     * @param node
-     * @param translate
-     * @returns {string|any|string|any|string|any|string|any|string|any|string}
-     */
-    public getLicenseName(node: Node) {
-        let prop = node.properties[RestConstants.CCM_PROP_LICENSE]?.[0];
-        if (!prop) prop = '';
-        return this.getLicenseNameByString(prop);
-    }
-
-    /**
-     * Return a translated name for a license string
-     * @param string
-     * @param translate
-     * @returns {any}
-     */
-    public getLicenseNameByString(name: string) {
-        if (name == '') {
-            name = 'NONE';
-        }
-        return this.translate.instant('LICENSE.NAMES.' + name);
-        // return name.replace(/_/g,"-");
-    }
-
-    /**
-     * return the License URL (e.g. for CC_BY licenses) for a license string and version
-     * @param licenseProperty
-     * @param licenseVersion
-     */
-    public getLicenseUrlByString(licenseProperty: string, licenseVersion: string) {
-        const url = (RestConstants.LICENSE_URLS as any)[licenseProperty];
-        if (!url) return null;
-        return url.replace('#version', licenseVersion);
     }
 
     /**
@@ -622,52 +507,6 @@ export class NodeHelperService {
         if (repo.isHomeRepo) return this.getSourceIconPath('home');
         return this.getSourceIconPath(repo.repositoryType.toLowerCase());
     }
-    public getSourceIconPath(src: string) {
-        return 'assets/images/sources/' + src.toLowerCase() + '.png';
-    }
-    public getWorkflowStatusById(id: string): WorkflowDefinition {
-        const workflows = this.getWorkflows();
-        let pos = Helper.indexOfObjectArray(workflows, 'id', id);
-        if (pos == -1) pos = 0;
-        const workflow = workflows[pos];
-        return workflow;
-    }
-    public getWorkflowStatus(node: Node, useFromConfig = false): WorkflowDefinitionStatus {
-        let value = node.properties[RestConstants.CCM_PROP_WF_STATUS]?.[0];
-        if (!value) {
-            return this.getDefaultWorkflowStatus(useFromConfig);
-        }
-        return {
-            current: this.getWorkflowStatusById(value),
-            initial: this.getWorkflowStatusById(value),
-        };
-    }
-    getDefaultWorkflowStatus(useFromConfig = false): WorkflowDefinitionStatus {
-        const result = {
-            current: null as WorkflowDefinition,
-            initial: null as WorkflowDefinition,
-        };
-        result.initial = this.getWorkflows()[0];
-        let defaultStatus: string = null;
-        if (useFromConfig) {
-            defaultStatus = this.config.instant('workflow.defaultStatus');
-        }
-        if (defaultStatus) {
-            result.current = this.getWorkflows().find((w) => w.id === defaultStatus);
-        } else {
-            result.current = result.initial;
-        }
-        return result;
-    }
-    getWorkflows(): WorkflowDefinition[] {
-        return this.config.instant('workflow.workflows', [
-            RestConstants.WORKFLOW_STATUS_UNCHECKED,
-            RestConstants.WORKFLOW_STATUS_TO_CHECK,
-            RestConstants.WORKFLOW_STATUS_HASFLAWS,
-            RestConstants.WORKFLOW_STATUS_CHECKED,
-        ]);
-    }
-
     allFiles(nodes: any[]) {
         let allFiles = true;
         if (nodes) {
@@ -750,13 +589,6 @@ export class NodeHelperService {
         return node.hasOwnProperty('originalId') ? (node as any).originalId != null : true;
     }
 
-    isNodeCollection(node: UniversalNode | any) {
-        return (
-            (node.aspects && node.aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION) !== -1) ||
-            node.collection
-        );
-    }
-
     /**
      * returns true if the nodes have different values for the given property, false if all values of this property are identical
      */
@@ -827,54 +659,6 @@ export class NodeHelperService {
         return !!o.properties?.[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]?.[0];
     }
 
-    getNodeLink(mode: 'routerLink' | 'queryParams', node: UniversalNode) {
-        if (!node?.ref) {
-            return null;
-        }
-        let data: { routerLink: string; queryParams: Params } = null;
-        if (this.isNodeCollection(node)) {
-            data = {
-                routerLink: UIConstants.ROUTER_PREFIX + 'collections',
-                queryParams: { id: node.ref.id },
-            };
-        } else {
-            if (node.isDirectory) {
-                let path;
-                if (
-                    node.properties?.[RestConstants.CCM_PROP_EDUSCOPENAME]?.[0] ===
-                    RestConstants.SAFE_SCOPE
-                ) {
-                    path = UIConstants.ROUTER_PREFIX + 'workspace/safe';
-                } else {
-                    path = UIConstants.ROUTER_PREFIX + 'workspace';
-                }
-                data = {
-                    routerLink: path,
-                    queryParams: { id: node.ref.id },
-                };
-            } else if (node.ref) {
-                const fromHome = RestNetworkService.isFromHomeRepo(node);
-                data = {
-                    routerLink: UIConstants.ROUTER_PREFIX + 'render/' + node.ref.id,
-                    queryParams: {
-                        repository: fromHome ? null : node.ref.repo,
-                        proposal: (node as ProposalNode).proposal?.ref.id,
-                        proposalCollection: (node as ProposalNode).proposalCollection?.ref.id,
-                    },
-                };
-            }
-        }
-        if (data === null) {
-            return '';
-        }
-        if (mode === 'routerLink') {
-            return '/' + data.routerLink;
-        }
-        // enforce clearing of parameters which should only be consumed once
-        data.queryParams.redirectFromSSO = null;
-        return data.queryParams;
-    }
-
     /**
      * Returns the full URL to a node, including the server origin and base href.
      */
@@ -893,11 +677,6 @@ export class NodeHelperService {
         }
     }
 
-    copyDataToNode<T extends Node>(target: T, source: T) {
-        target.properties = source.properties;
-        target.name = source.name;
-        target.title = source.title;
-    }
     getDefaultInboxFolder() {
         return new Observable<Node>((subscriber) => {
             this.sessionStorage.get('defaultInboxFolder', RestConstants.INBOX).subscribe(

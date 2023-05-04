@@ -10,8 +10,6 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import {
-    GenericAuthority,
-    ListItem,
     Node,
     RestCollectionService,
     RestConnectorService,
@@ -19,14 +17,16 @@ import {
     RestIamService,
     RestNodeService,
 } from '../../../core-module/core.module';
+import { GenericAuthority } from 'ngx-edu-sharing-api';
 import { Toast } from '../../toast';
-import { OptionItem } from '../../option-item';
-import { NodeDataSource } from '../../../features/node-entries/node-data-source';
 import {
     InteractionType,
+    ListItem,
     ListSortConfig,
+    NodeDataSource,
     NodeEntriesDisplayType,
-} from '../../../features/node-entries/entries-model';
+    OptionItem,
+} from 'ngx-edu-sharing-ui';
 
 /**
  * An edu-sharing sidebar dialog for adding data to a collection

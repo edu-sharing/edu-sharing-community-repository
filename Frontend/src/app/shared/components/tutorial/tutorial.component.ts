@@ -9,7 +9,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 
 interface Dimensions {
     size: number;

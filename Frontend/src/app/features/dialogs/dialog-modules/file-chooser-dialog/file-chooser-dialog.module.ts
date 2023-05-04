@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { SharedModule } from '../../../../shared/shared.module';
-import { NodeEntriesModule } from '../../../node-entries/node-entries.module';
+import { NodeEntriesModule } from 'ngx-edu-sharing-ui';
 import { FileChooserDialogComponent } from './file-chooser-dialog.component';
 
 export { FileChooserDialogComponent };

@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { OptionItem } from '../../option-item';
+import { OptionItem } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-list-option-item',

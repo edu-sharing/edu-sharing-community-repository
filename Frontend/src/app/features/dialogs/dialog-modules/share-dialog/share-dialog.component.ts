@@ -32,13 +32,13 @@ import {
     UsageList,
 } from '../../../../core-module/core.module';
 import { Helper } from '../../../../core-module/rest/helper';
-import { UIConstants } from '../../../../core-module/ui/ui-constants';
+import { UIConstants } from 'ngx-edu-sharing-ui';
 import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
 import { Toast } from '../../../../core-ui-module/toast';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import {
-    CardDialogConfig,
     CARD_DIALOG_DATA,
+    CardDialogConfig,
     configForNodes,
 } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';

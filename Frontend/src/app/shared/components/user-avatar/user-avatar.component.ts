@@ -4,13 +4,12 @@
 
 import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
-import { UIConstants } from '../../../core-module/ui/ui-constants';
+import { UIConstants } from 'ngx-edu-sharing-ui';
 import { DomSanitizer } from '@angular/platform-browser';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { Group, RestConnectorService, UserSimple } from '../../../core-module/core.module';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthorityNamePipe } from '../../pipes/authority-name.pipe';
-import { isAsciiLetter, isDigit } from 'codelyzer/angular/styles/chars';
 
 @Component({
     selector: 'es-user-avatar',

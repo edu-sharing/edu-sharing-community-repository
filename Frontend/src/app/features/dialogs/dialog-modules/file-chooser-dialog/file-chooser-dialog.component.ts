@@ -6,7 +6,6 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, map, skip, switchMap, takeUntil, tap } from 'rxjs/operators';
 import {
     DialogButton,
-    ListItem,
     Node,
     NodeList,
     RestCollectionService,
@@ -17,16 +16,17 @@ import {
 import { Toast } from '../../../../core-ui-module/toast';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { WorkspaceExplorerComponent } from '../../../../modules/workspace/explorer/explorer.component';
-import {
-    InteractionType,
-    ListSortConfig,
-    NodeEntriesDisplayType,
-} from '../../../node-entries/entries-model';
-import { NodeDataSource } from '../../../node-entries/node-data-source';
-import { CardDialogConfig, CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
+import { CARD_DIALOG_DATA, CardDialogConfig } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { FileChooserDialogData, FileChooserDialogResult } from './file-chooser-dialog-data';
 import { BreadcrumbsService } from '../../../../shared/components/breadcrumbs/breadcrumbs.service';
+import {
+    InteractionType,
+    ListItem,
+    ListSortConfig,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+} from 'ngx-edu-sharing-ui';
 
 const SINGLE_COLUMN_WIDTH = 600;
 const MULTI_COLUMN_WIDTH = 900;

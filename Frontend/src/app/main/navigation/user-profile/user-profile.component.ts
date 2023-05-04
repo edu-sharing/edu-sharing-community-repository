@@ -1,16 +1,11 @@
 import {
     Component,
-    Input,
-    Output,
-    EventEmitter,
-    OnInit,
-    HostListener,
-    ViewChild,
     ElementRef,
-    QueryList,
+    EventEmitter,
+    HostListener,
+    Output,
+    ViewChild,
 } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { trigger } from '@angular/animations';
 import { Toast } from '../../../core-ui-module/toast';
 import {
@@ -20,6 +15,7 @@ import {
     RestIamService,
     User,
 } from '../../../core-module/core.module';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-user-profile',

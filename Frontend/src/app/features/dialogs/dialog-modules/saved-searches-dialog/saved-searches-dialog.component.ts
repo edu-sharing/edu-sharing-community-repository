@@ -11,17 +11,21 @@ import { FormControl } from '@angular/forms';
 import { Node, SavedSearch, SavedSearchesService } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { debounceTime, filter, first, map, startWith, switchMap, takeUntil } from 'rxjs/operators';
-import { DialogButton, ListItem } from '../../../../core-module/core.module';
+import { DialogButton } from '../../../../core-module/core.module';
 import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
-import { Scope } from '../../../../core-ui-module/option-item';
-import { notNull } from '../../../../util/functions';
-import { InteractionType, NodeEntriesDisplayType } from '../../../node-entries/entries-model';
-import { NodeDataSourceRemote } from '../../../node-entries/node-data-source-remote';
-import { NodeEntriesWrapperComponent } from '../../../node-entries/node-entries-wrapper.component';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { DialogsService } from '../../dialogs.service';
 import { SavedSearchesDialogData, SavedSearchesDialogResult } from './saved-searches-dialog-data';
+import {
+    InteractionType,
+    ListItem,
+    NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
+    notNull,
+    Scope,
+} from 'ngx-edu-sharing-ui';
+import { NodeDataSourceRemote } from 'src/app/pages/search-page/node-data-source-remote';
 
 @Component({
     selector: 'es-saved-searches-dialog',

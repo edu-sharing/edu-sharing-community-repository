@@ -15,14 +15,12 @@ import {
     RestHelper,
 } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
-import { UIAnimation } from '../../core-module/ui/ui-animation';
-import { OPEN_URL_MODE, UIConstants } from '../../core-module/ui/ui-constants';
 import { InputPasswordComponent } from '../../shared/components/input-password/input-password.component';
 import { RouterHelper } from '../../core-ui-module/router.helper';
 import { Toast } from '../../core-ui-module/toast';
-import { TranslationsService } from '../../translations/translations.service';
+import { OPEN_URL_MODE, TranslationsService, UIAnimation, UIConstants } from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../core-ui-module/ui-helper';
-import { LoginInfo, AuthenticationService } from 'ngx-edu-sharing-api';
+import { AuthenticationService, LoginInfo } from 'ngx-edu-sharing-api';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { Subject } from 'rxjs';

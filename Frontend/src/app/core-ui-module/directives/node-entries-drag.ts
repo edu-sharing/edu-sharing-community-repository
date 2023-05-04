@@ -1,6 +1,5 @@
 import { Directive, ElementRef, HostListener } from '@angular/core';
-import { dragNodesTransferType, readDraggedNodes } from './drag-nodes/drag-nodes';
-import { ConfigurationService } from '../../core-module/rest/services/configuration.service';
+import { dragNodesTransferType } from 'ngx-edu-sharing-ui';
 
 @Directive({
     selector: '[appNodesEntriesDrag]',

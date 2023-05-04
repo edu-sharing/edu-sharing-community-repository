@@ -2,7 +2,6 @@ import { trigger } from '@angular/animations';
 import {
     Component,
     EventEmitter,
-    HostListener,
     Input,
     OnDestroy,
     OnInit,
@@ -11,7 +10,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ConnectorService, LtiPlatformService, Tools, Tool } from 'ngx-edu-sharing-api';
+import { ConnectorService, LtiPlatformService, Tool, Tools } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { Observable, Subject } from 'rxjs';
 import { delay, take, takeUntil } from 'rxjs/operators';
@@ -31,23 +30,24 @@ import {
     RestIamService,
     RestNodeService,
     SessionStorageService,
-    TemporaryStorageService,
     UIConstants,
 } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { CardService } from '../../../core-ui-module/card.service';
-import { DateHelper } from '../../../core-ui-module/DateHelper';
-import { LinkData, NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import {
     Constrain,
+    DateHelper,
     DefaultGroups,
+    DropdownComponent,
     ElementType,
     OptionItem,
+    OptionsHelperDataService,
     Scope,
     Target,
-} from '../../../core-ui-module/option-item';
-import { OptionsHelperService } from '../../../core-ui-module/options-helper.service';
+    TemporaryStorageService,
+    UIAnimation,
+} from 'ngx-edu-sharing-ui';
+import { CardService } from '../../../core-ui-module/card.service';
+import { LinkData, NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { AddFolderDialogResult } from '../../../features/dialogs/dialog-modules/add-folder-dialog/add-folder-dialog-data';
@@ -58,14 +58,13 @@ import {
 } from '../../../modules/management-dialogs/management-dialogs.service';
 import { PasteService } from '../../../services/paste.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
-import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 
 @Component({
     selector: 'es-create-menu',
     templateUrl: 'create-menu.component.html',
     styleUrls: ['create-menu.component.scss'],
     animations: [trigger('dialog', UIAnimation.switchDialog(UIAnimation.ANIMATION_TIME_FAST))],
-    providers: [OptionsHelperService],
+    providers: [OptionsHelperDataService],
 })
 export class CreateMenuComponent implements OnInit, OnDestroy {
     @ViewChild('dropdown', { static: true }) dropdown: DropdownComponent;
@@ -131,7 +130,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         private sessionStorage: SessionStorageService,
         private temporaryStorage: TemporaryStorageService,
         private route: ActivatedRoute,
-        private optionsService: OptionsHelperService,
+        private optionsService: OptionsHelperDataService,
         private iam: RestIamService,
         private nodeHelper: NodeHelperService,
         private event: FrameEventsService,

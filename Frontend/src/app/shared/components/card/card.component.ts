@@ -23,7 +23,7 @@ import {
     UIService,
 } from '../../../core-module/core.module';
 import { KeyEvents } from '../../../core-module/ui/key-events';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { CardService } from '../../../core-ui-module/card.service';
 import { JumpMark, JumpMarksService } from '../../../services/jump-marks.service';
 import { AuthorityNamePipe } from '../../pipes/authority-name.pipe';

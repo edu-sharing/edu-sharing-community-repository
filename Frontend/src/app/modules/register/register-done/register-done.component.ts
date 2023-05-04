@@ -1,17 +1,16 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
-import { RestConnectorService } from '../../../core-module/core.module';
+import {
+    ConfigurationService,
+    RestConnectorService,
+    RestLocatorService,
+    RestRegisterService,
+} from '../../../core-module/core.module';
 import { Toast } from '../../../core-ui-module/toast';
 import { PlatformLocation } from '@angular/common';
-import { ActivatedRoute, Router, UrlSerializer } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
-import { ConfigurationService } from '../../../core-module/core.module';
-import { Title } from '@angular/platform-browser';
-import { SessionStorageService } from '../../../core-module/core.module';
-import { UIConstants } from '../../../core-module/ui/ui-constants';
-import { RestRegisterService } from '../../../core-module/core.module';
+import { Router } from '@angular/router';
+import { UIConstants } from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { CordovaService } from '../../../common/services/cordova.service';
-import { RestLocatorService } from '../../../core-module/core.module';
 
 @Component({
     selector: 'es-register-done',

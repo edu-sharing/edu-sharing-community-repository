@@ -4,20 +4,23 @@ import { map } from 'rxjs/operators';
 import { EventType, Node } from '../core-module/rest/data-object';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { RestUsageService } from '../core-module/rest/services/rest-usage.service';
-import { ListItem } from '../core-module/ui/list-item';
 import { CommentsListComponent } from '../modules/management-dialogs/node-comments/comments-list/comments-list.component';
-import { SpinnerComponent } from '../shared/components/spinner/spinner.component';
+import {
+    ListItem,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
+    OptionsHelperDataService,
+    Scope,
+    SpinnerComponent,
+    Target,
+} from 'ngx-edu-sharing-ui';
 import { UIHelper } from './ui-helper';
 import { MdsNodeRelationsWidgetComponent } from '../common/ui/node-render/node-relations/node-relations-widget.component';
 import { replaceElementWithDiv } from '../features/mds/mds-editor/util/replace-element-with-div';
 import { MdsEditorWrapperComponent } from '../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
-import { NodeEntriesDisplayType } from '../features/node-entries/entries-model';
-import { NodeDataSource } from '../features/node-entries/node-data-source';
-import { NodeEntriesWrapperComponent } from '../features/node-entries/node-entries-wrapper.component';
-import { OptionsHelperService } from './options-helper.service';
-import { Scope, Target } from './option-item';
-import { VideoControlsComponent } from './components/video-controls/video-controls.component';
 import { RestTrackingService } from '../core-module/rest/services/rest-tracking.service';
+import { VideoControlsComponent } from './components/video-controls/video-controls.component';
 
 @Injectable()
 export class RenderHelperService {
@@ -30,7 +33,7 @@ export class RenderHelperService {
     constructor(
         private componentFactoryResolver: ComponentFactoryResolver,
         private usageApi: RestUsageService,
-        private optionsHelperService: OptionsHelperService,
+        private optionsHelperService: OptionsHelperDataService,
         private tracking: RestTrackingService,
     ) {}
 

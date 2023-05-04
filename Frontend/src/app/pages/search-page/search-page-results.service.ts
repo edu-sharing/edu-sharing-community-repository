@@ -1,6 +1,12 @@
 import { Injectable, Injector, OnDestroy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { MdsDefinition, MdsQueryCriteria, MdsService, SearchService } from 'ngx-edu-sharing-api';
+import {
+    MdsDefinition,
+    MdsQueryCriteria,
+    MdsService,
+    Node,
+    SearchService,
+} from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import {
@@ -14,18 +20,17 @@ import {
     takeUntil,
     tap,
 } from 'rxjs/operators';
-import { ListItem, ListItemSort, Node, RestConstants } from '../../core-module/core.module';
+import { ListItem, ListItemSort, ListSortConfig, notNull } from 'ngx-edu-sharing-ui';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
-import { ListSortConfig } from '../../features/node-entries/entries-model';
 import {
     fromSearchResults,
     NodeDataSourceRemote,
     NodeRemote,
     NodeRequestParams,
-} from '../../features/node-entries/node-data-source-remote';
-import { notNull } from '../../util/functions';
+} from './node-data-source-remote';
 import { SearchPageRestoreService } from './search-page-restore.service';
 import { SearchPageService, SearchRequestParams } from './search-page.service';
+import { RestConstants } from '../../core-module/rest/rest-constants';
 
 export interface SearchPageResults {
     totalResults?: Observable<number>;

@@ -1,6 +1,5 @@
 import { Node, RestConstants } from '../../core-module/core.module';
-import { DragData } from '../../services/nodes-drag-drop.service';
-import { CanDrop } from '../../shared/directives/nodes-drop-target.directive';
+import { CanDrop, DragData } from 'ngx-edu-sharing-ui';
 
 export function canDropOnNode(dragData: DragData<Node>): CanDrop {
     if (dragData.draggedNodes.includes(dragData.target)) {

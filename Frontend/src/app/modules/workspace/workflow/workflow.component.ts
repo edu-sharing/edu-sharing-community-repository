@@ -15,16 +15,12 @@ import {
     RestIamService,
     RestNodeService,
     UserSimple,
-    WorkflowDefinition,
     WorkflowEntry,
 } from '../../../core-module/core.module';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { UIAnimation, WORKFLOW_STATUS_UNCHECKED, WorkflowDefinition } from 'ngx-edu-sharing-ui';
 import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
 import { Toast } from '../../../core-ui-module/toast';
-import {
-    NodeHelperService,
-    WorkflowDefinitionStatus,
-} from '../../../core-ui-module/node-helper.service';
+import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 
 type WorkflowReceiver = UserSimple | Group;
 
@@ -45,8 +41,8 @@ export class WorkspaceWorkflowComponent implements OnChanges {
     loading = true;
     node: Node;
     receivers: WorkflowReceiver[] = [];
-    status = RestConstants.WORKFLOW_STATUS_UNCHECKED;
-    initialStatus = RestConstants.WORKFLOW_STATUS_UNCHECKED;
+    status = WORKFLOW_STATUS_UNCHECKED;
+    initialStatus = WORKFLOW_STATUS_UNCHECKED;
     chooseStatus = false;
     comment: string;
     validStatus: WorkflowDefinition[];

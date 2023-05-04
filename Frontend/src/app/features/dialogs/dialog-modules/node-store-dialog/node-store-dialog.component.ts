@@ -5,24 +5,24 @@ import { Node, NodeListService, SortPolicy } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { switchMap, takeUntil } from 'rxjs/operators';
 import {
+    ActionbarComponent,
+    CustomOptions,
+    DefaultGroups,
+    InteractionType,
     ListItem,
     ListItemSort,
-    RestConstants,
+    ListSortConfig,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
+    OptionItem,
     UIConstants,
     UIService,
-} from '../../../../core-module/core.module';
-import { CustomOptions, DefaultGroups, OptionItem } from '../../../../core-ui-module/option-item';
+} from 'ngx-edu-sharing-ui';
 import { Toast } from '../../../../core-ui-module/toast';
-import { ActionbarComponent } from '../../../../shared/components/actionbar/actionbar.component';
-import {
-    InteractionType,
-    ListSortConfig,
-    NodeEntriesDisplayType,
-} from '../../../node-entries/entries-model';
-import { NodeDataSource } from '../../../node-entries/node-data-source';
-import { NodeEntriesWrapperComponent } from '../../../node-entries/node-entries-wrapper.component';
 import { configForNodes } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { RestConstants } from '../../../../core-module/rest/rest-constants';
 
 @Component({
     selector: 'es-search-node-store-dialog',

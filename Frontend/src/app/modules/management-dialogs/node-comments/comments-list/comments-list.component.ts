@@ -1,36 +1,19 @@
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import {
-    Component,
-    Input,
-    EventEmitter,
-    Output,
-    ViewChild,
-    ElementRef,
-    HostListener,
-} from '@angular/core';
-import {
-    NodeWrapper,
-    Node,
-    NodePermissions,
-    LocalPermissionsResult,
-    Permission,
-    LoginResult,
-    UserProfile,
-    Comments,
     Comment,
-    User,
-    RestCommentsService,
+    Comments,
     DialogButton,
-    RestIamService,
-    RestConstants,
-    RestNodeService,
+    LoginResult,
+    Node,
+    RestCommentsService,
     RestConnectorService,
+    RestConstants,
+    RestIamService,
+    RestNodeService,
+    User,
 } from '../../../../core-module/core.module';
-import { ConfigurationService } from '../../../../core-module/core.module';
-import { UIHelper } from '../../../../core-ui-module/ui-helper';
-import { TranslateService } from '@ngx-translate/core';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../../core-module/ui/ui-animation';
-import { OptionItem } from '../../../../core-ui-module/option-item';
+import { OptionItem, UIAnimation } from 'ngx-edu-sharing-ui';
 import { Toast } from '../../../../core-ui-module/toast';
 
 @Component({

@@ -1,30 +1,9 @@
-import {
-    Component,
-    Input,
-    EventEmitter,
-    Output,
-    ElementRef,
-    ViewChild,
-    OnInit,
-} from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Toast } from '../../../core-ui-module/toast';
-import { Router, Route, Params, ActivatedRoute, UrlSerializer } from '@angular/router';
-import { OAuthResult, LoginResult, AccessScope } from '../../../core-module/core.module';
-import { TranslateService } from '@ngx-translate/core';
-import { RestConnectorService } from '../../../core-module/core.module';
-import { RestConstants } from '../../../core-module/core.module';
-import { ConfigurationService } from '../../../core-module/core.module';
-import { FrameEventsService } from '../../../core-module/core.module';
-import { Title } from '@angular/platform-browser';
+import { Params, Router } from '@angular/router';
+import { RestConnectorService, RestRegisterService } from '../../../core-module/core.module';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { SessionStorageService } from '../../../core-module/core.module';
-import { UIConstants } from '../../../core-module/ui/ui-constants';
-import { Helper } from '../../../core-module/rest/helper';
-import { RestHelper } from '../../../core-module/core.module';
-import { PlatformLocation } from '@angular/common';
-
-import { CordovaService } from '../../../common/services/cordova.service';
-import { RestRegisterService } from '../../../core-module/core.module';
+import { UIConstants } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-register-reset-password',
