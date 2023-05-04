@@ -4,15 +4,17 @@ import {
     Component,
     OnDestroy,
     OnInit,
+    ViewChild,
 } from '@angular/core';
 import { FormArray, FormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { FacetAggregation, FacetValue, SearchService } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { debounceTime, filter, finalize, first, switchMap, takeUntil } from 'rxjs/operators';
+import { debounceTime, filter, finalize, first, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
+import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
 
 @Component({
     selector: 'es-mds-editor-widget-facet-list',
@@ -24,6 +26,7 @@ export class MdsEditorWidgetFacetListComponent
     extends MdsEditorWidgetBase
     implements OnInit, OnDestroy
 {
+    @ViewChild(MdsEditorWidgetContainerComponent) containerRef: MdsEditorWidgetContainerComponent;
     readonly MAX_FACET_COUNT = 50;
     readonly valueType: ValueType = ValueType.MultiValue;
     /** Available facet values being updated from `mdsEditorInstance.suggestions$`. */
@@ -40,6 +43,7 @@ export class MdsEditorWidgetFacetListComponent
     private values: string[];
     private readonly destroyed$ = new Subject<void>();
     filter = new FormControl('');
+    isInitState$ = new BehaviorSubject<boolean>(true);
 
     constructor(
         mdsEditorInstance: MdsEditorInstanceService,
@@ -89,11 +93,15 @@ export class MdsEditorWidgetFacetListComponent
     }
 
     private registerFacetValuesSubject(): void {
+        this.isInitState$.next(true);
         this.search
             .observeFacet(this.widget.definition.id, {
                 includeActiveFilters: true,
             })
-            .pipe(takeUntil(this.destroyed$))
+            .pipe(
+                takeUntil(this.destroyed$),
+                tap((result) => this.isInitState$.next(result === null)),
+            )
             .subscribe((facetAggregation) => this.facetAggregationSubject.next(facetAggregation));
     }
 
@@ -104,6 +112,13 @@ export class MdsEditorWidgetFacetListComponent
                 this.facetValues = facetValues.values;
                 this.formArray = this.generateFormArray(facetValues.values);
                 this.updateFilteredValues();
+                // expand collapsed field if a value is active/selected
+                if (
+                    this.containerRef?.expandedState$.value === 'collapsed' &&
+                    this.values?.length
+                ) {
+                    this.containerRef.expandedState$.next('expanded');
+                }
             } else {
                 this.formArray = null;
                 this.facetValues = null;

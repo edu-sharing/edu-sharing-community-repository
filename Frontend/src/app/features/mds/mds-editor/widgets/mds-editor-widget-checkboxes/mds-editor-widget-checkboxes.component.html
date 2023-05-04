@@ -6,17 +6,22 @@
   [control]="formArray"
   [wrapInFormField]="false"
 >
-  <div *ngIf="formArray" [formGroup]="$any(formArray)" class="checkboxes-group" [class]="mode">
-    <mat-checkbox
-      *ngFor="let control of formArray.controls; let i = index"
-      [formControlName]="i"
-      [indeterminate]="indeterminateValues[i]"
-      (indeterminateChange)="onIndeterminateChange($event, i)"
-      esCheckTextOverflow=".mat-checkbox-label"
-      #text="esCheckTextOverflow"
-      [matTooltip]="text.hasTextOverflow() ? values.values[i].label : null"
-    >
-      {{ values.values[i].label }}
-    </mat-checkbox>
-  </div>
+  <ul *ngIf="formArray" [formGroup]="$any(formArray)" class="checkboxes-group" [class]="mode">
+    <li *ngFor="let control of formArray.controls; let i = index">
+      <mat-checkbox
+        [formControlName]="i"
+        [indeterminate]="indeterminateValues[i]"
+        (indeterminateChange)="onIndeterminateChange($event, i)"
+        esCheckTextOverflow=".caption"
+        #text="esCheckTextOverflow"
+        [matTooltip]="text.hasTextOverflow() ? values.values[i].label : null"
+      >
+        <span class="label">
+          <span class="caption">
+            {{ values.values[i].label }}
+          </span>
+        </span>
+      </mat-checkbox>
+    </li>
+  </ul>
 </es-mds-editor-widget-container>

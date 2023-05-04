@@ -9,8 +9,13 @@
     box-shadow: none;
     border-bottom: 1px solid
         rgba(var(--palette-foreground-divider), var(--palette-foreground-divider-alpha));
-    .mat-expansion-panel-header i {
-        margin-right: 1rem;
+    .mat-expansion-panel-header {
+        es-spinner-small {
+            margin: 0 1.5rem;
+        }
+        i {
+            margin-right: 1rem;
+        }
     }
     .mat-expansion-panel-header,
     & ::ng-deep .mat-expansion-panel-body {
