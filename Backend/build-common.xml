@@ -102,7 +102,7 @@
 			<fileset dir="${lib.dir}" includes="${alfrescojars_prepare}"></fileset>
 		</copy>
 		<copy todir="${app.server.tomcat.webapps.alfresco.classes}">
-			<fileset dir="${src.dir}" includes="log4j2.xml"></fileset>
+			<fileset dir="${output.dir}" includes="log4j2.xml"></fileset>
 		</copy>
 	</target>
 
