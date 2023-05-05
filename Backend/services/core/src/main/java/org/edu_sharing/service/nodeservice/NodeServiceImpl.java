@@ -21,7 +21,6 @@ import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AccessStatus;
-import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
@@ -218,7 +217,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 								null,
 								propsConverted,
 								Collections.emptyList(),
-								null
+								null, null
 						)
 				);
 			} catch (Throwable e) {
@@ -673,7 +672,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					propsNotNull = i.beforeSetProperties(PropertiesInterceptorFactory.getPropertiesContext(
 									nodeRef,
 									propsNotNull,
-									Arrays.asList(getAspects(store.getProtocol(), store.getIdentifier(), nodeId)), null));
+									Arrays.asList(getAspects(store.getProtocol(), store.getIdentifier(), nodeId)), null, null));
 				} catch (Throwable e) {
 					logger.warn("Error while calling interceptor " + i.getClass().getName() + ": " + e.toString());
 				}
@@ -1526,7 +1525,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 						properties = i.beforeSetProperties(PropertiesInterceptorFactory.getPropertiesContext(
 										nodeRef,
 										properties,
-										Arrays.asList(getAspects(protocol, storeId, nodeId)), null)
+										Arrays.asList(getAspects(protocol, storeId, nodeId)), null, null)
 						);
 					} catch (Throwable e) {
 						logger.warn("Error while calling interceptors " + i.getClass().getName() + ": " + e);

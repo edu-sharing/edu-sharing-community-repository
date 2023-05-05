@@ -135,7 +135,6 @@ import org.edu_sharing.repository.server.tools.AuthenticatorRemoteRepository;
 import org.edu_sharing.repository.server.tools.DateTool;
 import org.edu_sharing.repository.server.tools.EduGroupTool;
 import org.edu_sharing.repository.server.tools.I18nServer;
-import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.repository.server.tools.ServerConstants;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
@@ -1153,7 +1152,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					nodeRef,
 					propsOutput,
 					Arrays.asList(aspects),
-					null)
+					null, null)
 			));
 		}
 
@@ -1411,7 +1410,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				propertiesFinal.put(CCConstants.CC_CACHE_MILLISECONDS_KEY, new Long(mdate.getTime()).toString());
 				for(PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
 					propertiesFinal = new HashMap<>(i.beforeCacheProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef, propertiesFinal,
-									aspects.stream().map(QName::toString).collect(Collectors.toList()), null)));
+									aspects.stream().map(QName::toString).collect(Collectors.toList()), null, null)));
 				}
 				repCache.put(nodeRef.getId(), propertiesFinal);
 			}

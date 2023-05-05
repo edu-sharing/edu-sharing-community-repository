@@ -24,8 +24,7 @@ public class PropertiesGetInterceptorPermissions extends PropertiesGetIntercepto
     }
     @Override
     public Map<String, Object> beforeDeliverProperties(PropertiesContext context) {
-        boolean write = PermissionServiceHelper.hasPermission(context.getNodeRef(), CCConstants.PERMISSION_WRITE);
-        if(!write) {
+        if(!context.hasPermission(CCConstants.PERMISSION_WRITE)) {
             PERMISSION_LIST.get(CCConstants.PERMISSION_WRITE).forEach((p) -> {
                 context.getProperties().remove(p);
             });
