@@ -13,6 +13,7 @@ import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
@@ -24,6 +25,7 @@ import org.edu_sharing.service.search.Suggestion;
 import org.edu_sharing.service.search.model.SharedToMeType;
 import org.springframework.context.ApplicationContext;
 
+import java.io.Serializable;
 import java.security.InvalidParameterException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -124,17 +126,21 @@ public class MetadataSearchHelper {
 	 * replaces globally supported variables for queries (like ${user.<property>} )
 	 */
 	public static String replaceCommonQueryVariables(String statement) {
-		NodeRef ref = AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(AuthenticationUtil.getFullyAuthenticatedUser());
 		try {
-			Map<String, Object> props = NodeServiceHelper.transformLongToShortProperties(NodeServiceHelper.getProperties(ref));
-			for(Map.Entry<String, Object> prop : props.entrySet()){
-				statement = statement.replace("${user."+prop.getKey() + "}", prop.getValue().toString());
-			}
-			Pattern pattern = Pattern.compile("(\\$\\{user\\.[a-zA-Z:.]+\\})");
+			Pattern pattern = Pattern.compile("(\\$\\{user\\.([a-zA-Z:.]+)\\})");
 			Matcher matcher = pattern.matcher(statement);
+			NodeRef ref = null;
 			while(matcher.find()) {
-				logger.warn("Statement had variable " + matcher.group(0) + " but the property was not set/found");
-				statement = statement.replace(matcher.group(0), "null");
+				if(ref == null) {
+					ref = AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(AuthenticationUtil.getFullyAuthenticatedUser());
+				}
+				Serializable value = NodeServiceHelper.getPropertyNative(ref, CCConstants.getValidGlobalName(matcher.group(2)));
+				if(value == null) {
+					logger.warn("Statement had variable " + matcher.group(0) + " but the property was not set/found");
+					statement = statement.replace(matcher.group(0), "null");
+				} else {
+					statement = statement.replace(matcher.group(0), value.toString());
+				}
 			}
 
 		} catch (Throwable t) {
