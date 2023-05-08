@@ -1,6 +1,12 @@
-<?xml version="1.0" ?>
-<Configuration name="Log4j1">
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+
     <Appenders>
+
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern=" %d %-5p [%X] [%c{3}] [%t] %m%n"/>
+        </Console>
+
         <RollingFile name="tomcat" fileName="logs/tomcat.log" filePattern="logs/tomcat.log.%i">
             <PatternLayout pattern="%v1Level %t %c - %m%n"/>
             <Policies>
@@ -68,10 +74,14 @@
             <DefaultRolloverStrategy max="2147483647"/>
         </RollingFile>
     </Appenders>
+
     <Loggers>
+
         <Root level="error">
             <AppenderRef ref="tomcat"/>
+            <AppenderRef ref="console"/>
         </Root>
+
         <Logger name="org.apache.myfaces" level="warn"/>
         <Logger name="org.edu_sharing.repository.server.tools.cache" level="debug"/>
         <Logger name="org.alfresco" level="info"/>
@@ -110,5 +120,7 @@
         <Logger name="org.edu_sharing.service.search.SearchLogger" level="info">
             <AppenderRef ref="edu-sharing-search"/>
         </Logger>
+
     </Loggers>
+
 </Configuration>
