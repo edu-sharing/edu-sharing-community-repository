@@ -101,9 +101,6 @@
 		<copy todir="${app.server.tomcat.webapps.alfresco.lib}">
 			<fileset dir="${lib.dir}" includes="${alfrescojars_prepare}"></fileset>
 		</copy>
-		<copy todir="${app.server.tomcat.webapps.alfresco.classes}">
-			<fileset dir="${output.dir}" includes="log4j2.xml"></fileset>
-		</copy>
 	</target>
 
 	<target name="prepare" depends="prepare-alfresco-config">
@@ -244,6 +241,9 @@
 				<copy todir="${app.server.tomcat.shared.lib}">
 					<fileset dir="${lib.dir}" includes="edu-sharing_classloaderstuff.jar"></fileset>
 				</copy>
+			<copy todir="${app.server.tomcat.webapps.alfresco.classes}">
+				<fileset dir="${output.dir}" includes="log4j2.xml"></fileset>
+			</copy>
 		</target>
 		
 		<target name="undeploy-gwt">
