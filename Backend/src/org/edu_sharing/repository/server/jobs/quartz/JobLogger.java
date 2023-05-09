@@ -1,18 +1,23 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.*;
-import org.apache.log4j.spi.LoggingEvent;
-import org.edu_sharing.repository.server.tools.cache.ShibbolethSessionsCache;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Core;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.plugins.Plugin;
+import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
+import org.apache.logging.log4j.core.config.plugins.PluginElement;
+import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public class JobLogger extends ConsoleAppender {
+@Plugin(
+        name = "JobLogger",
+        category = Core.CATEGORY_NAME,
+        elementType = Appender.ELEMENT_TYPE)
+public class JobLogger extends AbstractAppender {
 
     public static final List<String> IGNORABLE_JOBS = new ArrayList<>();
     static{
@@ -20,27 +25,19 @@ public class JobLogger extends ConsoleAppender {
         IGNORABLE_JOBS.add("org.edu_sharing.repository.server.jobs.quartz.ClusterInfoJob");
     }
 
-    public static String getLogsForJob(String className){
-        String result="";
-        //logs.get(className);
-        return result;
+    public JobLogger(String name, Filter filter) {
+        super(name, filter, null);
     }
 
-    public JobLogger() {
-        init();
-    }
-
-    public JobLogger(Layout layout) {
-        super(layout);
-        init();
-    }
-
-    private void init() {
+    @PluginFactory
+    public static JobLogger createAppender(
+            @PluginAttribute("name") String name,
+            @PluginElement("Filter") Filter filter) {
+        return new JobLogger(name, filter);
     }
 
     @Override
-    protected void subAppend(LoggingEvent event) {
-        //super.subAppend(event);
+    public void append(LogEvent event) {
         if(event.getLoggerName().equals(JobHandler.class.getName())){
             return;
         }
@@ -49,16 +46,16 @@ public class JobLogger extends ConsoleAppender {
                 if(!job.getStatus().equals(JobInfo.Status.Running))
                     continue;
                 String clazz=job.getJobDetail().getJobClass().getName();
-                String message=event.getRenderedMessage();
-                if(event.getThrowableStrRep()!=null){
-                    message+="\n\n" + StringUtils.join(event.getThrowableStrRep(),"\n");
+                String message=event.getMessage().getFormattedMessage();
+                if(event.getThrown()!=null){
+                    message+="\n\n" + StringUtils.join(event.getThrown().getStackTrace(),"\n");
                 }
                 if(clazz.equals(event.getLoggerName())){
-                    job.addLog(new JobInfo.LogEntry(event.getLevel(),event.timeStamp,event.getLoggerName(),message));
+                    job.addLog(new JobInfo.LogEntry(org.apache.log4j.Level.toLevel(event.getLevel().name()),event.getInstant().getEpochMillisecond(),event.getLoggerName(),message));
                 }
                 // importer job mapping
                 if(clazz.equals(ImporterJob.class.getName()) && event.getLoggerName().startsWith("org.edu_sharing.repository.server.importer")){
-                    job.addLog(new JobInfo.LogEntry(event.getLevel(),event.timeStamp,event.getLoggerName(),message));
+                    job.addLog(new JobInfo.LogEntry(org.apache.log4j.Level.toLevel(event.getLevel().name()),event.getInstant().getEpochMillisecond(),event.getLoggerName(),message));
                 }
             }
         } catch (Exception e) {
