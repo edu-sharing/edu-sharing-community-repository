@@ -30,8 +30,9 @@ CATALINA_OPTS="-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.in
 
 CATALINA_OPTS="-Djavax.xml.xpath.XPathFactory:http://java.sun.com/jaxp/xpath/dom=org.edu_sharing.xml.security.xpath.XPathFactory $CATALINA_OPTS"
 CATALINA_OPTS="-Dorg.xml.sax.driver=org.edu_sharing.xml.security.sax.XMLReader $CATALINA_OPTS"
-CATALINA_OPTS="-Djavax.xml.transform.TransformerFactory=org.edu_sharing.xml.security.transform.TransformerFactory $CATALINA_OPTS"
-
+#CATALINA_OPTS="-Djavax.xml.transform.TransformerFactory=org.edu_sharing.xml.security.transform.TransformerFactory $CATALINA_OPTS"
+CATALINA_OPTS="-Djavax.xml.transform.TransformerFactory=com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl $CATALINA_OPTS"
+CATALINA_OPTS="-Djavax.xml.validation.SchemaFactory:http://www.w3.org/2001/XMLSchema=com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory $CATALINA_OPTS"
 ```
 
 FAQ
