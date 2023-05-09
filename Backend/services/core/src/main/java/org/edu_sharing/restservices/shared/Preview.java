@@ -12,7 +12,9 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.PreviewServlet;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeService;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 
 
@@ -62,7 +64,21 @@ public class Preview implements Serializable {
 	  }
 	  */
   }
-/**
+
+  public Preview(String storeProtocol, String storeIdentifier, String nodeId, NodeRef.Preview previewData) {
+    setUrl(NodeServiceFactory.getLocalService().getPreviewUrl(
+            storeProtocol,
+            storeIdentifier,
+            nodeId,
+            null
+    ));
+    setIsIcon(previewData.getIcon());
+    setType(previewData.getType());
+    setMimetype(previewData.getMimetype());
+    setData(previewData.getData());
+  }
+
+  /**
    **/
   @Schema(required = true, description = "")
   @JsonProperty("url")
