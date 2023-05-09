@@ -201,6 +201,8 @@
 
         <!--END alfresco-->
 
+        <Logger name="org.edu_sharing.alfresco.cluster" level="warn"/>
+
         <Logger name="org.edu_sharing" level="info"/>
         <Logger name="org.edu_sharing.alfresco.jobs" level="warn"/>
         <Logger name="org.edu_sharing.repository.server.rendering.RenderingProxy" level="debug"/>
