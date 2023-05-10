@@ -215,6 +215,8 @@ export class LicenseDialogContentComponent implements OnInit {
     ccProfileUrl = '';
     copyrightType = 'COPYRIGHT_FREE';
     rightsDescription = '';
+
+    oerAvailable = true;
     _ccCountries: Array<{ key: string; name: string }> = [];
     licenseMainTypes: string[];
     private _primaryType = '';
@@ -279,6 +281,7 @@ export class LicenseDialogContentComponent implements OnInit {
                 this.loadConfig();
                 this.checkAllowRelease();
                 this.readLicense();
+                this.setDefaultModeState();
                 this.isLoading.emit(false);
                 this.updateCanSave();
                 this.releaseMulti = null;
@@ -304,6 +307,7 @@ export class LicenseDialogContentComponent implements OnInit {
         this.loadConfig();
         this._properties = properties;
         this.readLicense();
+        this.setDefaultModeState();
         this.mdsEditorInstanceService.initWithNodes(
             [
                 {
@@ -347,6 +351,9 @@ export class LicenseDialogContentComponent implements OnInit {
             } else {
                 this.licenseMainTypes = [];
                 this.allowedLicenses = data;
+                if (!this.oerAvailable) {
+                    this.oerMode = false;
+                }
                 for (const entry of data) {
                     if (entry.startsWith('CC_BY')) {
                         if (this.licenseMainTypes.indexOf('CC_BY') == -1)
@@ -487,7 +494,6 @@ export class LicenseDialogContentComponent implements OnInit {
             'true',
         );
         this.contact = contactState == 'true' || contactState == true;
-        this.oerMode = this.isOerLicense() || this.primaryType == 'NONE';
         UIHelper.invalidateMaterializeTextarea('authorFreetext');
         UIHelper.invalidateMaterializeTextarea('licenseRights');
         this.contactIndeterminate = contactState == 'multi';
@@ -739,5 +745,12 @@ export class LicenseDialogContentComponent implements OnInit {
                 (n) => (n.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT] = null),
             );
         }
+    }
+
+    private setDefaultModeState() {
+        this.oerAvailable =
+            !this.allowedLicenses || this.allowedLicenses.filter((e) => e !== 'NONE').length > 0;
+        this.oerMode = this.oerAvailable && (this.isOerLicense() || this.primaryType == 'NONE');
+        console.log(this.oerAvailable, this.oerMode);
     }
 }
