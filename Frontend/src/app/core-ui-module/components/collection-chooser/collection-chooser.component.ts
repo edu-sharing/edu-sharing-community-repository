@@ -22,6 +22,7 @@ import {
 import { Toast } from '../../toast';
 import { OptionItem } from '../../option-item';
 import { NodeDataSource } from '../../../features/node-entries/node-data-source';
+import { DEFAULT, HOME_REPOSITORY, PROPERTY_FILTER_ALL, SearchService } from 'ngx-edu-sharing-api';
 import {
     InteractionType,
     ListSortConfig,
@@ -91,6 +92,7 @@ export class CollectionChooserComponent implements OnInit {
         private router: Router,
         private iam: RestIamService,
         private collectionApi: RestCollectionService,
+        private searchService: SearchService,
         private node: RestNodeService,
         private toast: Toast,
     ) {
@@ -135,26 +137,49 @@ export class CollectionChooserComponent implements OnInit {
         };
         let requestCall;
         if (this.searchQuery) {
-            requestCall = this.collectionApi.search(this.searchQuery, request);
+            const criteria = [
+                { property: RestConstants.PRIMARY_SEARCH_CRITERIA, values: [this.searchQuery] },
+            ];
+            this.searchService
+                .search({
+                    repository: HOME_REPOSITORY,
+                    propertyFilter: [PROPERTY_FILTER_ALL],
+                    contentType: 'COLLECTIONS',
+                    metadataset: DEFAULT,
+                    query: 'collections',
+                    body: { criteria },
+                })
+                .subscribe(
+                    (data) => {
+                        this.dataSourceLatest.isLoading = false;
+                        this.hasMoreToLoad = data.nodes.length > 0;
+                        this.dataSourceLatest.appendData(data.nodes);
+                    },
+                    () => {
+                        this.dataSourceLatest.isLoading = false;
+                        this.hasMoreToLoad = false;
+                    },
+                );
         } else {
-            requestCall = this.collectionApi.getCollectionSubcollections(
-                RestConstants.ROOT,
-                RestConstants.COLLECTIONSCOPE_RECENT,
-                [],
-                request,
-            );
+            this.collectionApi
+                .getCollectionSubcollections(
+                    RestConstants.ROOT,
+                    RestConstants.COLLECTIONSCOPE_RECENT,
+                    [],
+                    request,
+                )
+                .subscribe(
+                    (data) => {
+                        this.dataSourceLatest.isLoading = false;
+                        this.hasMoreToLoad = data.collections.length > 0;
+                        this.dataSourceLatest.appendData(data.collections);
+                    },
+                    () => {
+                        this.dataSourceLatest.isLoading = false;
+                        this.hasMoreToLoad = false;
+                    },
+                );
         }
-        requestCall.subscribe(
-            (data) => {
-                this.dataSourceLatest.isLoading = false;
-                this.hasMoreToLoad = data.collections.length > 0;
-                this.dataSourceLatest.appendData(data.collections);
-            },
-            () => {
-                this.dataSourceLatest.isLoading = false;
-                this.hasMoreToLoad = false;
-            },
-        );
     }
 
     cancel() {
