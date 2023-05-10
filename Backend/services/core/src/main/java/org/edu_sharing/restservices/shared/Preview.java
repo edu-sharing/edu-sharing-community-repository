@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.PreviewServlet;
 
@@ -72,8 +73,16 @@ public class Preview implements Serializable {
             nodeId,
             null
     ));
-    setIsIcon(previewData.getIcon());
-    setType(previewData.getType());
+    if(previewData.getIcon() != null) {
+      setIsIcon(previewData.getIcon());
+    } else {
+      Logger.getLogger(Preview.class).warn("no preview icon info in elastic index for node " + nodeId);
+    }
+    if(previewData.getType() != null) {
+      setType(previewData.getType());
+    } else {
+      Logger.getLogger(Preview.class).warn("no preview type info in elastic index for node " + nodeId);
+    }
     setMimetype(previewData.getMimetype());
     setData(previewData.getData());
   }
