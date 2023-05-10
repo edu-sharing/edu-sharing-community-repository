@@ -751,6 +751,5 @@ export class LicenseDialogContentComponent implements OnInit {
         this.oerAvailable =
             !this.allowedLicenses || this.allowedLicenses.filter((e) => e !== 'NONE').length > 0;
         this.oerMode = this.oerAvailable && (this.isOerLicense() || this.primaryType == 'NONE');
-        console.log(this.oerAvailable, this.oerMode);
     }
 }
