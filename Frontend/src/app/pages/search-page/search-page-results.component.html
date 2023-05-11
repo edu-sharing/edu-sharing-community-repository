@@ -56,7 +56,8 @@
       </h2>
       <button
         *ngIf="nodeEntriesResults.getSelection().isEmpty()"
-        mat-button
+        mat-flat-button
+        color="primary"
         class="filters-button"
         [attr.aria-label]="'SEARCH.FILTERS' | translate"
         (click)="toggleFilters()"
