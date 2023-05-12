@@ -4,11 +4,11 @@
     <Appenders>
 
         <Console name="console" target="SYSTEM_OUT">
-            <PatternLayout pattern=" %d %-5p [%X] [%c{3}] [%t] %m%n"/>
+            <PatternLayout pattern="%d %-5p [%X] [%c{3}] [%t] %m%n"/>
         </Console>
 
         <RollingFile name="tomcat" fileName="${sys:catalina.home}/logs/tomcat.log" filePattern="${sys:catalina.home}/logs/tomcat.log.%i">
-            <PatternLayout pattern="%v1Level %t %c - %m%n"/>
+            <PatternLayout pattern="%d{ABSOLUTE} %-5p [%c.%M] %m%n"/>
             <Policies>
                 <SizeBasedTriggeringPolicy size="10MB"/>
             </Policies>
@@ -16,7 +16,7 @@
         </RollingFile>
         <RollingFile name="edu-sharing-sessions" fileName="${sys:catalina.home}/logs/edu-sharing-sessions.log" append="true"
                      filePattern="${sys:catalina.home}/logs/edu-sharing-sessions.log%d{'.'yyyy-MM-dd}">
-            <PatternLayout pattern="%d{ABSOLUTE} %-5 [%c.%M] %m%n"/>
+            <PatternLayout pattern="%d{ABSOLUTE} %-5p [%c.%M] %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy modulate="true"/>
             </Policies>
@@ -24,7 +24,7 @@
         </RollingFile>
         <RollingFile name="edu-sharing-monitoring" fileName="${sys:catalina.home}/logs/edu-sharing-monitoring.log" append="true"
                      filePattern="${sys:catalina.home}/logs/edu-sharing-monitoring.log%d{'.'yyyy-MM-dd}">
-            <PatternLayout pattern="%d{ABSOLUTE} %-5 [%c.%M] %m%n"/>
+            <PatternLayout pattern="%d{ABSOLUTE} %-5p [%c.%M] %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy modulate="true"/>
             </Policies>
@@ -32,7 +32,7 @@
         </RollingFile>
         <RollingFile name="edu-sharing-oai-validator" fileName="${sys:catalina.home}/logs/edu-sharing-oai-validator.log" append="true"
                      filePattern="${sys:catalina.home}/logs/edu-sharing-oai-validator.log%d{'.'yyyy-MM-dd}">
-            <PatternLayout pattern="%d{ISO8601} %-5 [%c{3}.%M] %m%n"/>
+            <PatternLayout pattern="%d{ISO8601} %-5p [%c{3}.%M] %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy modulate="true"/>
             </Policies>
@@ -40,7 +40,7 @@
         </RollingFile>
         <RollingFile name="edu-sharing-search" fileName="${sys:catalina.home}/logs/edu-sharing-search.log" append="true"
                      filePattern="${sys:catalina.home}/logs/edu-sharing-search.log%d{'.'yyyy-MM-dd}">
-            <PatternLayout pattern="%d{ABSOLUTE} %-5 [%c.%M] %m%n"/>
+            <PatternLayout pattern="%d{ABSOLUTE} %-5p [%c.%M] %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy modulate="true"/>
             </Policies>
@@ -48,7 +48,7 @@
         </RollingFile>
         <RollingFile name="edu-sharing-jobs" fileName="${sys:catalina.home}/logs/edu-sharing-jobs.log" append="true"
                      filePattern="${sys:catalina.home}/logs/edu-sharing-jobs.log%d{'.'yyyy-MM-dd}">
-            <PatternLayout pattern="%d{ISO8601} %-5 [%c{3}.%M] %m%n"/>
+            <PatternLayout pattern="%d{ISO8601} %-5p [%c{3}.%M] %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy modulate="true"/>
             </Policies>
@@ -56,7 +56,7 @@
         </RollingFile>
         <RollingFile name="File" fileName="${sys:catalina.home}/logs/edu-sharing.log" append="true"
                      filePattern="${sys:catalina.home}/logs/edu-sharing.log%d{'.'yyyy-MM-dd}">
-            <PatternLayout pattern="%d{ISO8601} %-5 [%c{3}.%M] %m%n"/>
+            <PatternLayout pattern="%d{ISO8601} %-5p [%c{3}.%M] %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy modulate="true"/>
             </Policies>
@@ -64,7 +64,7 @@
         </RollingFile>
         <RollingFile name="edu-sharing-deletedobj" fileName="${sys:catalina.home}/logs/edu-sharing-deletedobj.log" append="true"
                      filePattern="${sys:catalina.home}/logs/edu-sharing-deletedobj.log%d{'.'yyyy-MM-dd}">
-            <PatternLayout pattern="%d{ISO8601} %-5 [%c{3}.%M] %m%n"/>
+            <PatternLayout pattern="%d{ISO8601} %-5p [%c{3}.%M] %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy modulate="true"/>
             </Policies>
