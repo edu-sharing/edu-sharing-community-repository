@@ -189,7 +189,6 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
     }
 
     private _getSearchRemote(params: SearchRequestParams): NodeRemote<Node> {
-        console.log(params);
         // console.log('%cgetSearchRemote', 'font-weight: bold', params);
         return (request: NodeRequestParams) => {
             // console.log('search', request);
