@@ -1,6 +1,7 @@
-The xml factories and parsers in this project are loaded with java service loader.
+The xml factories and parsers in this project are loaded with java service loader defined in META-INF/services
+
 They can also be defined or overwritten with System properties.
-in `tomcat/bin/setenv.sh`.
+in `tomcat/bin/setenv.sh` i.e:.
 ```bash
 
 CATALINA_OPTS="-Dorg.xml.sax.parser=com.sun.org.apache.xerces.internal.parsers.SAXParser $CATALINA_OPTS"
