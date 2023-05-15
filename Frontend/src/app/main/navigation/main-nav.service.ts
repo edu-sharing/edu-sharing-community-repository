@@ -20,9 +20,13 @@ export class MainNavCreateConfig {
 
 export class MainNavConfig {
     /**
-     * Show or hide the complete navigation
+     * Show or hide the entire component including banner and navigation bar
      */
     show? = true;
+    /**
+     * Show or hide the navigation bar
+     */
+    showNavigation? = true;
     /**
      * Shows the current location
      */
