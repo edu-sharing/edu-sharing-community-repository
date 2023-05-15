@@ -6,6 +6,12 @@ import org.xml.sax.SAXNotSupportedException;
 /**
  * use with system property: -Dorg.xml.sax.driver=org.edu_sharing.xml.security.sax.XMLReader
  * or serviceloader file: org.xml.sax.XMLReader
+ *
+ * when using edu-sharing cluster plugin hazelcast tries to set
+ * Feature 'http://javax.xml.XMLConstants/feature/secure-processing' and a warning 'is not recognized' appears in log.
+ *
+ * we use the owasp recommandations here. FEATURE_SECURE_PROCESSING goes not far enough:
+ * https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
  */
 public class XMLReader extends org.apache.xerces.parsers.SAXParser{
     java.util.logging.Logger logger =  java.util.logging.Logger.getLogger(this.getClass().getName());
