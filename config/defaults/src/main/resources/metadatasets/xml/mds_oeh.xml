@@ -6,6 +6,7 @@
 		<widget>
 			<caption>Fachgebiet</caption>
 			<id>ccm:taxonid</id>
+			<id rel="graphql">lom.classification.taxon</id>
 			<type>multivalueFixedBadges</type>
 			<hideIfEmpty>true</hideIfEmpty>
 			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/discipline/index.json</valuespace>
@@ -13,13 +14,15 @@
 		<widget>
 			<caption>Zielgruppe</caption>
 			<id>ccm:educationalintendedenduserrole</id>
+			<id rel="graphql">lom.educational.0.intendedEndUserRole</id>
 			<type>multivalueFixedBadges</type>
 			<hideIfEmpty>true</hideIfEmpty>
 			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/intendedEndUserRole/index.json</valuespace>
 		</widget>
 		<widget>
-			<caption>Nicht erfüllte, rechtlichte Kriterien</caption>
+			<caption>Nicht erfüllte, rechtliche Kriterien</caption>
 			<id>ccm:unmetLegalCriteria</id>
+			<id rel="graphql">oeh.unmetLegalCriteria</id>
 			<type>checkboxVertical</type>
 			<values>
 				<value cap="Strafrecht">criminal_law</value>
@@ -32,6 +35,7 @@
 		<widget>
 			<caption>Bildungsumfeld</caption>
 			<id>ccm:educationalcontext</id>
+			<id rel="graphql">lom.educational.0.context</id>
 			<type>multivalueFixedBadges</type>
 			<hideIfEmpty>true</hideIfEmpty>
 			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/educationalContext/index.json</valuespace>
@@ -39,6 +43,7 @@
 		<widget>
 			<caption>Materialart (LOM)</caption>
 			<id>ccm:educationallearningresourcetype</id>
+			<id rel="graphql">lom.educational.0.learningResourceType</id>
 			<type>multivalueTree</type>
 			<hideIfEmpty>true</hideIfEmpty>
 			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/learningResourceType/index.json</valuespace>
@@ -67,6 +72,7 @@
 		<widget>
 			<caption>Zugangsbedingungen (Login)</caption>
 			<id>ccm:conditionsOfAccess</id>
+			<id rel="graphql">oeh.conditionsOfAccess</id>
 			<type>singleoption</type>
 			<allowempty>true</allowempty>
 			<hideIfEmpty>true</hideIfEmpty>
@@ -76,6 +82,7 @@
 		<widget>
 			<caption>Enthält Werbung</caption>
 			<id>ccm:containsAdvertisement</id>
+			<id rel="graphql">oeh.containsAdvertisement</id>
 			<type>singleoption</type>
 			<allowempty>true</allowempty>
 			<hideIfEmpty>true</hideIfEmpty>
@@ -84,6 +91,7 @@
 		<widget>
 			<caption>Kosten</caption>
 			<id>ccm:price</id>
+			<id rel="graphql">oeh.price</id>
 			<type>singleoption</type>
 			<allowempty>true</allowempty>
 			<hideIfEmpty>true</hideIfEmpty>
@@ -99,6 +107,7 @@
 		<widget>
 			<caption>DSGVO</caption>
 			<id>ccm:dataProtectionConformity</id>
+			<id rel="graphql">oeh.dataProtectionConformity</id>
 			<type>multivalueFixedBadges</type>
 			<hideIfEmpty>true</hideIfEmpty>
 			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/dataProtectionConformity/index.json</valuespace>
@@ -106,6 +115,7 @@
 		<widget>
 			<caption>FSK</caption>
 			<id>ccm:fskRating</id>
+			<id rel="graphql">oeh.fskRating</id>
 			<type>singleoption</type>
 			<allowempty>true</allowempty>
 			<hideIfEmpty>true</hideIfEmpty>
@@ -130,6 +140,7 @@
 		<widget>
 			<caption>Notizen / Bermerkungen (intern)</caption>
 			<id>ccm:notes</id>
+			<id rel="graphql">info.notes</id>
 			<type>textarea</type>
 			<hideIfEmpty>true</hideIfEmpty>
 			<toolpermission>TOOLPERMISSION_COLLECTION_EDITORIAL</toolpermission>
@@ -137,6 +148,7 @@
 		<widget>
 			<caption>Typ des Objekts</caption>
 			<id>ccm:objecttype</id>
+			<id rel="graphql">info.objectType</id>
 			<type>singleoption</type>
 			<values>
 					<value cap="Material">MATERIAL</value>
@@ -147,6 +159,7 @@
 		</widget>
 		<widget>
 			<id>ccm:replicationsource</id>
+			<id rel="graphql">remote.repository.id</id>
 			<type>multivalueFixedBadges</type>
 			<caption>Quelle</caption>
 			<hideIfEmpty>true</hideIfEmpty>
@@ -154,6 +167,7 @@
 		</widget>
 		<widget>
 			<id>cclom:location</id>
+			<id rel="graphql">lom.technical.location</id>
 			<caption>Link zur Themenseite</caption>
 			<bottomCaption>Nur bei Bedarf verändern, wird automatisch beim Erstellen generiert!</bottomCaption>
 			<type>text</type>
@@ -161,6 +175,7 @@
 		</widget>
 		<widget>
 			<id>cclom:general_keyword</id>
+			<id rel="graphql">lom.general.keyword</id>
 			<type>multivalueSuggestBadges</type>
 			<caption>Freie Schlagworte / Stichworte</caption>
 			<placeholder>Stichwort ergänzen...</placeholder>
@@ -169,6 +184,7 @@
 		</widget>
 		<widget>
 			<id>ccm:editorial_state</id>
+			<id rel="graphql">lom.editorial.state</id>
 			<caption>Redaktionsstatus / Sichtbarkeit</caption>
 			<bottomCaption>für Wordpress</bottomCaption>
 			<type>singleoption</type>
@@ -179,6 +195,7 @@
 		</widget>
 		<widget>
 			<id>ccm:collection_ordered_position</id>
+			<id rel="graphql">collection.position</id>
 			<caption>Reihenfolge</caption>
 			<bottomCaption>für Wordpress</bottomCaption>
 			<type>slider</type>
@@ -461,7 +478,7 @@
 			<property name="ccm:educationalcontext">
 				<multiple>true</multiple>
 				<multiplejoin>OR</multiplejoin>
-				<statement>{"term":{"properties.ccm:educationalcontext.keyword":"${value}"}}</statement>
+				<statement>{"term":{"properties.ccm:educationalcontext.keyword":"${valueRaw}"}}</statement>
 			</property>
 			<property name="cclom:general_keyword">
 				<multiple>true</multiple>

@@ -1,4 +1,4 @@
-import {filter} from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl, ValidatorFn, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
@@ -28,14 +28,17 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
         super(mdsEditorInstance, translate);
     }
 
-    ngOnInit(): void {
-        let initialValue = this.getInitialValue();
+    async ngOnInit() {
+        this.formControl = new FormControl(null, this.getValidators());
+        let initialValue = (await this.widget.getInitalValuesAsync()).jointValues;
         if (this.widget.definition.type === 'date') {
             initialValue = initialValue.map((v) => DateHelper.formatDateByPattern(v, 'y-M-d'));
         }
         this.formControl = new FormControl(initialValue[0] ?? null, this.getValidators());
-        this.formControl.valueChanges.pipe(
-            filter((value) => value !== null))
+        this.formControl.valueChanges
+            .pipe(
+                filter((value) => value !== null && this.mdsEditorInstance.editorMode !== 'search'),
+            )
             .subscribe((value) => {
                 this.setValue([value]);
             });
@@ -57,6 +60,7 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
     blur(): void {
         this.fileNameChecker?.check();
         this.onBlur.emit();
+        this.submit();
     }
 
     private getValidators(): ValidatorFn[] {
@@ -76,6 +80,20 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
             validators.push(Validators.maxLength(widgetDefinition.maxlength));
         }
         return validators;
+    }
+
+    showBulkMixedValues() {
+        return (
+            this.widget.getInitialValues()?.individualValues &&
+            this.mdsEditorInstance.editorBulkMode?.isBulk &&
+            this.widget.getBulkMode() === 'no-change'
+        );
+    }
+
+    submit() {
+        if (this.mdsEditorInstance.editorMode === 'search') {
+            this.setValue([this.formControl.value]);
+        }
     }
 }
 
@@ -164,15 +182,19 @@ class FileNameChecker {
         }
         const oldComponents = oldValue.split('.');
         const newComponents = newValue.split('.');
-        if (oldComponents.length === 1 && newComponents.length !== 1 ||
-            oldComponents.length !== 1 && newComponents.length === 1) {
+        if (
+            (oldComponents.length === 1 && newComponents.length !== 1) ||
+            (oldComponents.length !== 1 && newComponents.length === 1)
+        ) {
             return true;
-        } else if(oldComponents.length === 1 && newComponents.length === 1) {
+        } else if (oldComponents.length === 1 && newComponents.length === 1) {
             return false;
         } else {
             // Whether the extension has changed
-            return oldComponents[oldComponents.length - 1]?.toLowerCase() !==
-                newComponents[newComponents.length - 1]?.toLowerCase();
+            return (
+                oldComponents[oldComponents.length - 1]?.toLowerCase() !==
+                newComponents[newComponents.length - 1]?.toLowerCase()
+            );
         }
     }
 

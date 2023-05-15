@@ -1,8 +1,6 @@
-import {Component} from "@angular/core";
+import { Component } from '@angular/core';
 @Component({
-  selector: 'es-workspace',
-  template: '<router-outlet></router-outlet>'
+    selector: 'es-workspace',
+    template: '<router-outlet></router-outlet>',
 })
-export class WorkspaceRoutingComponent{
-
-}
+export class WorkspaceRoutingComponent {}

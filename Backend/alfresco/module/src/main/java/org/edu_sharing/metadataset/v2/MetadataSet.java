@@ -312,8 +312,11 @@ public class MetadataSet implements Serializable {
 			  }
 		  }
 		// no condition matched
-		if(result.size()==0) {
+		if(result.isEmpty()) {
 			return null;
+		}
+		if(found.isEmpty()) {
+			throw new IllegalArgumentException("Widget " + widgetId + " was not found in the mds " + id);
 		}
 		if (result.size() > 1) {
 			logger.warn("Widget " + widgetId + " has multiple candidates (" + result.size() + ") when rendered with template " + template + ", will use the first one that matches. Check the metadataset definitions for that widget to ensure only one candidate always matches.");

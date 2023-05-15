@@ -111,6 +111,8 @@ public class CCConstants {
 
 	public final static String AUTH_TYPE_DEFAULT = "AUTH_TYPE_DEFAULT";
 
+	public final static String AUTH_TYPE_SIGNATURE = "AUTH_TYPE_SIGNATURE";
+
 	public final static String AUTH_TYPE_SHIBBOLETH = "AUTH_TYPE_SHIBBOLETH";
 
 	public final static String AUTH_TYPE_CAS = "AUTH_TYPE_CAS";
@@ -156,6 +158,7 @@ public class CCConstants {
 	public static final String PROP_USER_ISSHADOWUSER = "{http://www.alfresco.org/model/content/1.0}isShadowUser";
 	public static final String PROP_USER_REPOSITORYID = "{http://www.alfresco.org/model/content/1.0}repositoryId";
 	public static final String PROP_USER_ESUID = "{http://www.alfresco.org/model/content/1.0}esuid";
+	public final static String PROP_USER_SECONDARY_IDS = "{http://www.alfresco.org/model/content/1.0}essecondaryIds";
 	public static final String PROP_USER_ESREMOTEROLES = "{http://www.alfresco.org/model/content/1.0}esremoteroles";
 	public static final String PROP_USER_ESSSOTYPE = "{http://www.alfresco.org/model/content/1.0}esssotype";
 	public static final String PROP_USER_ESLASTLOGIN = "{http://www.alfresco.org/model/content/1.0}esLastLogin";
@@ -208,6 +211,8 @@ public class CCConstants {
 	public final static String CCM_TYPE_COMMENT = "{http://www.campuscontent.de/model/1.0}comment";
 
 	public final static String CCM_TYPE_COLLECTION_FEEDBACK = "{http://www.campuscontent.de/model/1.0}collection_feedback";
+
+	public final static String CCM_TYPE_MATERIAL_FEEDBACK = "{http://www.campuscontent.de/model/1.0}material_feedback";
 
 	public final static String CCM_TYPE_RATING = "{http://www.campuscontent.de/model/1.0}rating";
 
@@ -398,6 +403,11 @@ public class CCConstants {
 
 	public final static String CCM_PROP_COLLECTION_FEEDBACK_DATA = "{http://www.campuscontent.de/model/1.0}collection_feedback_data";
 
+
+	public final static String CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY = "{http://www.campuscontent.de/model/1.0}material_feedback_authority";
+
+	public final static String CCM_PROP_MATERIAL_FEEDBACK_DATA = "{http://www.campuscontent.de/model/1.0}material_feedback_data";
+
 	public final static String CCM_PROP_RATING_VALUE = "{http://www.campuscontent.de/model/1.0}rating_value";
 	public final static String CCM_PROP_RATING_TEXT = "{http://www.campuscontent.de/model/1.0}rating_text";
 
@@ -506,6 +516,12 @@ public class CCConstants {
 
 	public static final String CCM_PROP_TRACKING_VIEWS = "{http://www.campuscontent.de/model/1.0}tracking_views";
 
+	public static final String CCM_ASPECT_LTITOOL_NODE = "{http://www.campuscontent.de/model/1.0}ltitool_node";
+
+	public static final String CCM_PROP_LTITOOL_NODE_RESOURCELINK = "{http://www.campuscontent.de/model/1.0}ltitool_resourcelink";
+
+	public static final String CCM_PROP_LTITOOL_NODE_TOOLURL = "{http://www.campuscontent.de/model/1.0}ltitool_url";
+
 	public static final int HTTP_INSUFFICIENT_STORAGE = 503;
 
     public static final List<String> CHILDOBJECT_IGNORED_PARENT_PROPERTIES = Arrays.asList(
@@ -515,6 +531,7 @@ public class CCConstants {
 			CCConstants.CCM_PROP_IO_LICENSE_DESCRIPTION,
 			CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE,
 			CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION,
+			CCConstants.LOM_PROP_LIFECYCLE_VERSION,
 			CCConstants.CCM_PROP_IO_WWWURL,
 			CCConstants.ALFRESCO_MIMETYPE,
 			CCConstants.LOM_PROP_TECHNICAL_FORMAT,
@@ -598,6 +615,8 @@ public class CCConstants {
 	public final static String CCM_ASSOC_RATING = "{http://www.campuscontent.de/model/1.0}childrating";
 
 	public final static String CCM_ASSOC_COLLECTION_FEEDBACK = "{http://www.campuscontent.de/model/1.0}childcollectionfeedback";
+
+	public final static String CCM_ASSOC_MATERIAL_FEEDBACK = "{http://www.campuscontent.de/model/1.0}childmaterialfeedback";
 	/**
 	 * update alfresco3stable auf alfresco34e
 	 *
@@ -895,6 +914,8 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK = "TOOLPERMISSION_COLLECTION_FEEDBACK";
 
+	public final static String CCM_VALUE_TOOLPERMISSION_MATERIAL_FEEDBACK = "TOOLPERMISSION_MATERIAL_FEEDBACK";
+
 	public final static String CCM_VALUE_TOOLPERMISSION_USAGE_STATISTIC = "TOOLPERMISSION_USAGE_STATISTIC";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_COMMENT_WRITE = "TOOLPERMISSION_COMMENT_WRITE";
@@ -903,8 +924,12 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_NODES = "TOOLPERMISSION_GLOBAL_STATISTICS_NODES";
 
-	public final static String CCM_VALUE_TOOLPERMISSION_RATE_READ = "TOOLPERMISSION_RATE_READ";
+	public final static String CCM_VALUE_TOOLPERMISSION_RATE = "TOOLPERMISSION_RATE";
 	public final static String CCM_VALUE_TOOLPERMISSION_RATE_WRITE = "TOOLPERMISSION_RATE_WRITE";
+	public final static String CCM_VALUE_TOOLPERMISSION_RATE_READ = "TOOLPERMISSION_RATE_READ";
+
+
+	public final static String CCM_VALUE_TOOLPERMISSION_MANAGE_RELATIONS = "TOOLPERMISSION_MANAGE_RELATIONS";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_VIDEO_AUDIO_CUT = "TOOLPERMISSION_VIDEO_AUDIO_CUT";
 
@@ -1681,6 +1706,8 @@ public class CCConstants {
 	public final static String PERMISSION_COMMENT = "Comment";
 
 	public final static String PERMISSION_RATE = "Rate";
+	public final static String PERMISSION_RATE_READ = "RateRead";
+	public final static String PERMISSION_RELATION = "Relation";
 
 	// collection feedback permission
 	public final static String PERMISSION_FEEDBACK = "Feedback";
@@ -1895,7 +1922,10 @@ public class CCConstants {
 			permission.add(PERMISSION_READ_PREVIEW);
 			permission.add(PERMISSION_READ_ALL);
 			permission.add(PERMISSION_COMMENT);
+			permission.add(PERMISSION_FEEDBACK);
 			permission.add(PERMISSION_RATE);
+			permission.add(PERMISSION_RATE_READ);
+			permission.add(PERMISSION_RELATION);
 			permission.add(PERMISSION_WRITE);
 			permission.add(PERMISSION_DELETE);
 			permission.add(PERMISSION_DELETE_CHILDREN);
@@ -2162,6 +2192,8 @@ public class CCConstants {
 
 	public static final String VERSION_COMMENT_BULK_CREATE = "BULK_CREATE";
 	public static final String VERSION_COMMENT_BULK_UPDATE = "BULK_UPDATE";
+
+	public static final String VERSION_COMMENT_BULK_MIGRATION = "BULK_MIGRATION";
 	public static final String VERSION_COMMENT_BULK_UPDATE_RESYNC = "BULK_UPDATE_RESYNC";
 	public static final String VERSION_COMMENT_REMOTE_OBJECT_INIT = "REMOTE_OBJECT_INIT";
 

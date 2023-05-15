@@ -1,34 +1,28 @@
 <es-card
-  title="{{'RECYCLE.RESTORE.NEW_LOCATION_TITLE' | translate }}"
-  subtitle="{{'RECYCLE.RESTORE.NEW_LOCATION_SUBTITLE' | translate }}"
+  title="{{ 'RECYCLE.RESTORE.NEW_LOCATION_TITLE' | translate }}"
+  subtitle="{{ 'RECYCLE.RESTORE.NEW_LOCATION_SUBTITLE' | translate }}"
   icon="undo"
   [isCancelable]="true"
   (onCancel)="confirm()"
   [buttons]="buttons"
-  >
+>
   <div class="card-content-padding">
     <div *ngIf="results.hasDuplicateNames">
-      <p>{{'RECYCLE.RESTORE.LIST_DUPLICATE_NAMES' | translate}}</p>
+      <p>{{ 'RECYCLE.RESTORE.LIST_DUPLICATE_NAMES' | translate }}</p>
       <div *ngFor="let result of results.results">
-        <div *ngIf="result.restoreStatus==0">
-          {{result.name}} <span class="message">({{result.message}})</span>
+        <div *ngIf="result.restoreStatus == 0">
+          {{ result.name }} <span class="message">({{ result.message }})</span>
         </div>
       </div>
     </div>
     <div *ngIf="results.hasParentFolderMissing">
-      <hr *ngIf="results.hasDuplicateNames">
-      <p>{{'RECYCLE.RESTORE.LIST_PARENT_FOLDER_MISSING' | translate}}</p>
+      <hr *ngIf="results.hasDuplicateNames" />
+      <p>{{ 'RECYCLE.RESTORE.LIST_PARENT_FOLDER_MISSING' | translate }}</p>
       <div *ngFor="let result of results.results">
-        <div *ngIf="result.restoreStatus==1">
-          {{result.name}} <span class="message">({{result.message}})</span>
+        <div *ngIf="result.restoreStatus == 1">
+          {{ result.name }} <span class="message">({{ result.message }})</span>
         </div>
       </div>
     </div>
   </div>
 </es-card>
-<es-file-chooser *ngIf="showFileChooser"
-  [isCancelable]="true"
-  [pickDirectory]="true"
-  (onChoose)="folderSelected($event)"
-  (onCancel)="closeFolder()"
-></es-file-chooser>

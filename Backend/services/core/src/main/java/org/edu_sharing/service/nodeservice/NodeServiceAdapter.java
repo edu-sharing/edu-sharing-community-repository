@@ -3,19 +3,17 @@ package org.edu_sharing.service.nodeservice;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
-import org.alfresco.service.cmr.repository.AssociationRef;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.NotImplementedException;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
@@ -81,7 +79,7 @@ public class NodeServiceAdapter implements NodeService {
         return null;
     }
 
-    @Override
+	@Override
 	public void setOwner(String nodeId, String username) {
 	}
 
@@ -91,7 +89,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public String getOrCreateUserInbox() {
+	public String getUserInbox(boolean createIfNotExists) {
 		return null;
 	}
 
@@ -137,7 +135,12 @@ public class NodeServiceAdapter implements NodeService {
 	public String[] getAspects(String storeProtocol, String storeId, String nodeId) {
 		return null;
 	}
-	
+
+	@Override
+	public ContentReader getContentReader(String storeProtocol, String storeId, String nodeId, String version, String contentProp) {
+		return null;
+	}
+
 	@Override
 	public void moveNode(String newParentId, String childAssocType, String nodeId) {
 	}
@@ -251,8 +254,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public String getOrCreateUserSavedSearch() {
-		// TODO Auto-generated method stub
+	public String getUserSavedSearch(boolean createIfNotExists) {
 		return null;
 	}
 
@@ -291,6 +293,11 @@ public class NodeServiceAdapter implements NodeService {
 	public boolean exists(String protocol, String store, String nodeId) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public String getPreviewUrl(String storeProtocol, String storeId, String nodeId, String version) {
+		return null;
 	}
 
 	@Override
@@ -334,7 +341,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value) {
+	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value, boolean skipDefinitionChecks) {
 		// TODO Auto-generated method stub
 
 	}
@@ -357,13 +364,18 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public List<NodeRef> getFrontpageNodes() throws Throwable {
+	public Collection<org.edu_sharing.service.model.NodeRef> getFrontpageNodes() throws Throwable {
 		return null;
 	}
 
 	@Override
 	public Serializable getPropertyNative(String storeProtocol, String storeId, String nodeId, String property) throws Throwable {
 		return null;
+	}
+
+	@Override
+	public void keepModifiedDate(String storeProtocol, String storeId, String nodeId, Runnable task) {
+		task.run();
 	}
 
 	@Override
@@ -374,6 +386,11 @@ public class NodeServiceAdapter implements NodeService {
 	@Override
 	public List<String> getPublishedCopies(String nodeId) {
 		throw new NotImplementedException("getPublishedCopies");
+	}
+
+	@Override
+	public NodeRef getOriginalNode(String nodeId) {
+		return null;
 	}
 
 	@Override

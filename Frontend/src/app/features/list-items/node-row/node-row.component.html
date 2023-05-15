@@ -1,0 +1,31 @@
+<div class="node-row" *ngIf="node">
+  <div class="icon-bg">
+    <img
+      [src]="node | esNodeIcon"
+      [alt]="
+        node.mediatype
+          ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
+          : ''
+      "
+      [matTooltip]="
+        node.mediatype
+          ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
+          : ''
+      "
+    />
+  </div>
+  <div class="node-data">
+    <div class="node-data-primary">
+      <es-list-text [node]="node" [item]="columns[0]"> </es-list-text>
+    </div>
+    <div class="node-data-secondary">
+      <es-list-text
+        *ngFor="let column of columns.slice(1)"
+        [node]="node"
+        [item]="column"
+        [provideLabel]="true"
+      ></es-list-text>
+      <ng-container *ngTemplateOutlet="customMetadataRef; context: { node: node }"></ng-container>
+    </div>
+  </div>
+</div>

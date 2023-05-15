@@ -15,11 +15,12 @@
     "generate-api": "npm run generate-api:generate-code && npm run generate-api:prettify-code"
   },
   "peerDependencies": {
-    "@angular/common": "^12.2.0 || ^13.0.0",
-    "@angular/core": "^12.2.0  || ^13.0.0",
-    "@apollo/client": "^3.6.5",
-    "apollo-angular": "^3.0.1",
-    "graphql": "^16.5.0",
+    "@angular/common": "^12.2.0 || ^13.0.0 || ^14.0.0",
+    "@angular/core": "^12.2.0  || ^13.0.0 || ^14.0.0",
+    "@apollo/client": "~3.7.14",
+    "apollo-angular": "~3.0.1",
+    "react": "~18.2.0",
+    "graphql": "^15.8.0",
     "tslib": "^2.3.0",
     "rxjs": "^6.6.3"
   },

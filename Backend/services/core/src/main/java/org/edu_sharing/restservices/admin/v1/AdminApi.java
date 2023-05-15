@@ -11,13 +11,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.alfresco.repo.bulkimport.impl.FileUtils;
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.edu_sharing.repository.client.rpc.cache.CacheCluster;
 import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -48,6 +51,8 @@ import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.edu_sharing.service.admin.model.ToolPermission;
+import org.edu_sharing.service.version.RepositoryVersionInfo;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.xcontent.ToXContent;
 import org.elasticsearch.xcontent.XContentBuilder;
@@ -95,6 +100,28 @@ public class AdminApi {
 		try {
 			AdminServiceFactory.getInstance().refreshApplicationInfo();
 			return Response.ok().build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+	@GET
+	@Path("/version")
+
+	@Operation(summary = "get detailed version information", description="detailed information about the running system version")
+
+	@ApiResponses(value = {
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = RepositoryVersionInfo.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+	public Response getVersion(@Context HttpServletRequest req){
+		try {
+			RepositoryVersionInfo result = AdminServiceFactory.getInstance().getVersion();
+			return Response.ok().entity(result).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}
@@ -230,7 +257,7 @@ public class AdminApi {
 				entry.setRepositoryType(appInfo.getRepositoryType());
 				entry.setSubtype(appInfo.getSubtype());
 				entry.setXml(appInfo.getXml());
-				entry.setFile(appInfo.getAppFile());
+				entry.setFile(appInfo.getAppFileName());
 				if (ApplicationInfo.TYPE_RENDERSERVICE.equals(entry.getType()) && entry.getContentUrl() != null) {
 					entry.setConfigUrl(appInfo.getContentUrl().replace("/application/esmain/index.php", "/admin"));
 				}
@@ -415,7 +442,6 @@ public class AdminApi {
 	@Path("/applications/xml")
 	@Consumes({ "multipart/form-data" })
 	@Operation(summary = "register/add an application via xml file", description = "register the xml file provided.")
-
 	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = HashMap.class))),
 			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -1403,7 +1429,7 @@ public class AdminApi {
 
 
     @POST
-    @Path("/log")
+    @Path("/log/config")
     @Operation(summary = "Change the loglevel for classes at runtime.", description = "Root appenders are used. Check the appender treshold.")
     @ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
             @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -1423,52 +1449,7 @@ public class AdminApi {
 			//check that there is an admin
 			AdminServiceFactory.getInstance();
 
-			if(name.startsWith("org.alfresco") ||
-					name.startsWith("org.edu_sharing.alfresco") ||
-					name.startsWith("org.edu_sharing.repository.server.tools.cache")) {
-				ClassLoader clAlf = AlfAppContextGate.getApplicationContext().getClassLoader();
-
-				Class<?> logManager = clAlf.loadClass("org.apache.log4j.LogManager");
-				Method methodGetLogger = logManager.getMethod("getLogger", String.class);
-				Object logger = methodGetLogger.invoke(null, name);
-
-				Class<?> logLevelClass = clAlf.loadClass("org.apache.log4j.Level");
-				Method methodToLevel = logLevelClass.getMethod("toLevel",String.class);
-				Method methodSetLevel = logger.getClass().getMethod("setLevel",logLevelClass);
-				methodSetLevel.invoke(logger, methodToLevel.invoke(null, loglevel));
-
-				/*Method methodGetRootLogger = logger.getClass().getMethod("getRootLogger", null);
-				Object rootLogger = methodGetRootLogger.invoke(null, null);
-
-				Method methodGetAppender = rootLogger.getClass().getMethod("getAppender", String.class);
-				Object appenderObj = methodGetAppender.invoke(rootLogger, appender);
-
-				Class<?> priorityClass = clAlf.loadClass("org.apache.log4j.Priority");
-				Method methodToPriority = priorityClass.getMethod("toPriority", String.class);
-				Object priorityObj = methodToPriority.invoke(null, loglevel);
-				Method methodSetTreshold = appenderObj.getClass().getMethod("setThreshold", priorityClass);
-				methodSetTreshold.invoke(appenderObj, priorityObj);
-
-				Method methodAddAppender = logger.getClass().getMethod("addAppender", clAlf.loadClass("org.apache.log4j.Appender"));
-				methodAddAppender.invoke(logger, appenderObj);*/
-            }else {
-                Logger logger = LogManager.getLogger(name);
-                logger.setLevel(Level.toLevel(loglevel));
-
-                /**
-                 * logger is auto added to root appender, so we don't need to do this, maybe we can check if the reshhold of the appender is enough for the logger
-                 */
-				/*Logger rootLogger = Logger.getRootLogger();
-				System.out.println("rootLogger:" + rootLogger.getName());
-				Appender appenderObj = rootLogger.getAppender(appender);
-				System.out.println("appenderObj:" + appenderObj.getName() + " " + ((AppenderSkeleton)appenderObj).getThreshold() +" appenders:"+ logger.getAllAppenders().hasMoreElements());
-				*/
-
-
-
-                //	((AppenderSkeleton)appenderObj).setThreshold(Priority.toPriority(loglevel, Priority.INFO));
-                //	logger.addAppender(appenderObj);
-            }
+			Configurator.setLevel(name, Level.toLevel(loglevel));
 
             return Response.status(Response.Status.OK).build();
         } catch (NotAnAdminException e) {
@@ -1478,6 +1459,68 @@ public class AdminApi {
         }
 
     }
+
+	@GET
+	@Path("/log/config")
+	@Operation(summary = "get the logger config")
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = LoggerConfigResult.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	public Response getLoggingRuntime(@Parameter(description = "filters") @QueryParam("filters") List<String> filters,
+									  @Parameter(description = "onlyConfig if true only loggers defined in log4j.xml or at runtime are returned") @QueryParam("onlyConfig") boolean onlyConfig){
+
+		try{
+
+			LoggerContext loggerContext = LoggerContext.getContext(false);
+			Collection<org.apache.logging.log4j.core.Logger> loggers = loggerContext.getLoggers();
+
+
+			//effective loggers (classes)
+			List<LoggerConfigResult> result = new ArrayList<>();
+			if(!onlyConfig) {
+				result.addAll(loggers.stream().map(rl -> {
+					if ((filters == null || filters.size() == 0) || filters.stream().anyMatch(f -> rl.getName().contains(f))) {
+						LoggerConfigResult lcr = new LoggerConfigResult();
+						lcr.setName(rl.getName());
+						lcr.setAppender(rl.getAppenders().keySet().stream().collect(Collectors.toList()));
+						lcr.setLevel(rl.getLevel().toString());
+						return lcr;
+					}
+					return null;
+				}).filter(r -> r != null).collect(Collectors.toList()));
+			}
+
+
+			//config loggers:
+			Configuration config = loggerContext.getConfiguration();
+			Map<String, LoggerConfig> confLoggers = config.getLoggers();
+			result.addAll(confLoggers.entrySet().stream().map(e -> {
+				if((filters == null || filters.size() == 0) || filters.stream().anyMatch( f -> e.getValue().getName().contains(f) )) {
+					LoggerConfigResult lcr = new LoggerConfigResult();
+					lcr.setName(e.getValue().getName());
+					lcr.setAppender(e.getValue().getAppenders().keySet().stream().collect(Collectors.toList()));
+					lcr.setLevel(e.getValue().getLevel().toString());
+					lcr.setConfig(true);
+					return lcr;
+				}
+				return null;
+			}).filter(r -> r != null).collect(Collectors.toList()));
+
+
+			result.sort(Comparator.comparing(lcr -> lcr.getName().toLowerCase()));
+
+			return Response.ok().entity(result).build();
+		}catch (Throwable t){
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+
+
 
 
 	@GET

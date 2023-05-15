@@ -51,17 +51,7 @@ import org.edu_sharing.repository.server.tracking.TrackingService.TrackingBuffer
 import org.edu_sharing.repository.server.tracking.buffer.FileRingBuffer;
 import org.edu_sharing.repository.server.tracking.buffer.MemoryRingBuffer;
 import org.edu_sharing.repository.server.tracking.buffer.TrackingBuffer;
-import org.edu_sharing.repository.update.Edu_SharingAuthoritiesUpdate;
-import org.edu_sharing.repository.update.KeyGenerator;
-import org.edu_sharing.repository.update.Release_1_7_SubObjectsToFlatObjects;
-import org.edu_sharing.repository.update.Release_1_7_UnmountGroupFolders;
-import org.edu_sharing.repository.update.Release_3_2_DefaultScope;
-import org.edu_sharing.repository.update.Release_3_2_FillOriginalId;
-import org.edu_sharing.repository.update.Release_3_2_PermissionInheritFalse;
-import org.edu_sharing.repository.update.Release_4_2_PersonStatusUpdater;
-import org.edu_sharing.repository.update.SQLUpdater;
-import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.authority.AuthorityServiceImpl;
+import org.edu_sharing.repository.update.*;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
@@ -104,7 +94,10 @@ public class MCAlfrescoManager implements ServletContextListener {
 			}
 			
 			logger.info("check for updates");
-			
+
+			// run this BEFORE any other update because it depends on checking if edu-sharing is already installed!
+			new Release_8_1_SetCompanyHomePermissions(null).execute();
+
 			//remove lom subobjects
 			new Release_1_7_SubObjectsToFlatObjects(null).execute();
 			
@@ -120,7 +113,9 @@ public class MCAlfrescoManager implements ServletContextListener {
 			new Release_3_2_FillOriginalId(null).execute();
 			
 			new Release_3_2_PermissionInheritFalse(null).execute();
-			
+
+			new Release_8_0_Migrate_Database_Scripts(null).execute();
+
 			new SQLUpdater().execute();
 			
 			new Release_4_2_PersonStatusUpdater(null).execute();
@@ -132,6 +127,7 @@ public class MCAlfrescoManager implements ServletContextListener {
 			// init the esuid for admin
 			createESUIDAdmin();
 
+			InitHelper.initProxyUser();
 			try {
 				InitHelper.initGroups();
 			}catch(Throwable t) {

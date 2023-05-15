@@ -15,6 +15,9 @@
       <includes>
         <include>projects/**</include>
         <include>src/**</include>
+        <include>tests/**</include>
+        <include>playwright/**</include>
+        <include>*.ts</include>
         <include>*.js</include>
         <include>*.json</include>
       </includes>

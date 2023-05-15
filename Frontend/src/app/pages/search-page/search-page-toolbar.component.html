@@ -1,0 +1,10 @@
+<button
+  mat-button
+  color="primary"
+  (click)="toggleFilterBar()"
+  class="toggle-filter-bar-button"
+  [class.toggle-filter-bar-button-active]="filterBarIsVisible"
+>
+  <span>{{ 'SEARCH.EXPANDED_SEARCH' | translate }}</span>
+  <i esIcon="keyboard_arrow_right"></i>
+</button>

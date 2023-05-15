@@ -1,18 +1,21 @@
 <es-info-message message="SIMPLE_EDIT.INVITE.ERROR_TOOLPERMISSION_MISSING" *ngIf="!tpInvite">
 </es-info-message>
 <es-info-message
-        message="SIMPLE_EDIT.INVITE.ERROR_PERMISSION_MISSING"
-        *ngIf="missingNodePermissions && tpInvite"
+  message="SIMPLE_EDIT.INVITE.ERROR_PERMISSION_MISSING"
+  *ngIf="missingNodePermissions && tpInvite"
 >
 </es-info-message>
 <es-info-message message="SIMPLE_EDIT.INVITE.ERROR_MULTIPLE_PARENTS" *ngIf="multipleParents">
   <div>{{ 'SIMPLE_EDIT.INVITE.ERROR_HELP' | translate }}</div>
 </es-info-message>
-<es-info-message message="SIMPLE_EDIT.INVITE.ERROR_INHERIT" *ngIf="inherited && parentAuthorities.length > 0">
+<es-info-message
+  message="SIMPLE_EDIT.INVITE.ERROR_INHERIT"
+  *ngIf="inherited && parentAuthorities.length > 0"
+>
   <div class="parent-authorities">
     <span *ngFor="let authority of parentAuthorities" class="authorities">{{
       authority | authorityName
-      }}</span>
+    }}</span>
   </div>
   <div>{{ 'SIMPLE_EDIT.INVITE.ERROR_HELP' | translate }}</div>
 </es-info-message>
@@ -26,43 +29,53 @@
     <div role="group" aria-labelledby="global-groups-label">
       <div>
         <mat-button-toggle-group
-                #orgGroup="matButtonToggleGroup"
-                class="toggle-full-size toggle-org"
-                (change)="updateValue('org')"
+          #orgGroup="matButtonToggleGroup"
+          class="toggle-full-size toggle-org"
+          (change)="updateValue('org')"
         >
-          <mat-button-toggle
-                  class="button-toggle-org"
-                  [value]="'unset'">
+          <mat-button-toggle class="button-toggle-org" [value]="'unset'">
             {{ 'SIMPLE_EDIT.INVITE.UNSET' | translate }}
           </mat-button-toggle>
           <ng-container *ngFor="let organization of organizations">
             <mat-button-toggle
-                    class="button-toggle-org"
-                    [value]="organization.groups[group]?.authorityName"
-                    [disabled]="!organization.groups[group]"
-                    *ngFor="let group of organizationGroups"
-            >{{ 'SIMPLE_EDIT.INVITE.GROUP_TYPES.' + group |
-                    translate:{school: organization.organization|authorityName} }}</mat-button-toggle>
+              class="button-toggle-org"
+              [value]="organization.groups[group]?.authorityName"
+              [disabled]="!organization.groups[group]"
+              *ngFor="let group of organizationGroups"
+              >{{
+                'SIMPLE_EDIT.INVITE.GROUP_TYPES.' + group
+                  | translate: { school: organization.organization | authorityName }
+              }}</mat-button-toggle
+            >
             <mat-button-toggle
-                    class="button-toggle-org"
-                    [value]="organization.organization.authorityName">{{ organization.organization | authorityName }}</mat-button-toggle>
+              class="button-toggle-org"
+              [value]="organization.organization.authorityName"
+              >{{ organization.organization | authorityName }}</mat-button-toggle
+            >
           </ng-container>
         </mat-button-toggle-group>
       </div>
       <div *ngIf="globalGroups.length > 0">
         <mat-button-toggle-group
-                class="toggle-full-size"
-                #globalGroup="matButtonToggleGroup"
-                (change)="updateValue('global')"
+          class="toggle-full-size"
+          #globalGroup="matButtonToggleGroup"
+          (change)="updateValue('global')"
         >
           <mat-button-toggle
-                  class="button-toggle-global"
-                  *ngFor="let group of globalGroups"
-                  [disabled]="group.authorityName === 'GROUP_EVERYONE' && !tpInviteEveryone"
-                  [value]="group.authorityName"
+            class="button-toggle-global"
+            *ngFor="let group of globalGroups"
+            [disabled]="
+              (group.authorityName === 'GROUP_EVERYONE' && !tpInviteEveryone) ||
+              (authenticationService.observeLoginInfo() | async)?.currentScope !== null
+            "
+            [value]="group.authorityName"
           >
-            <ng-container *ngIf="group.authorityName === 'GROUP_EVERYONE'">{{ 'SIMPLE_EDIT.INVITE.PUBLISH' | translate }}</ng-container>
-            <ng-container *ngIf="group.authorityName !== 'GROUP_EVERYONE'">{{ group | authorityName }}</ng-container>
+            <ng-container *ngIf="group.authorityName === 'GROUP_EVERYONE'">{{
+              'SIMPLE_EDIT.INVITE.PUBLISH' | translate
+            }}</ng-container>
+            <ng-container *ngIf="group.authorityName !== 'GROUP_EVERYONE'">{{
+              group | authorityName
+            }}</ng-container>
           </mat-button-toggle>
         </mat-button-toggle-group>
       </div>
@@ -71,13 +84,13 @@
   <div *ngIf="recentAuthorities && recentAuthorities.length" class="field-group">
     <label id="last-invitations-label">{{
       'SIMPLE_EDIT.INVITE.RECENT_AUTHORITIES' | translate
-      }}</label>
+    }}</label>
     <div class="tiles" aria-labelledby="last-invitations-label">
       <es-user-tile
-              *ngFor="let authority of recentAuthorities"
-              [user]="authority"
-              (click)="toggleInvitation(authority)"
-              [active]="isInvited(authority)"
+        *ngFor="let authority of recentAuthorities"
+        [user]="authority"
+        (click)="toggleInvitation(authority)"
+        [active]="isInvited(authority)"
       ></es-user-tile>
     </div>
   </div>

@@ -11,7 +11,8 @@ public class ArchiveServiceFactory {
 	
 	public static ArchiveService getArchiveService(String appId){
 		
-		if(!appId.equals(ApplicationInfoList.getHomeRepository().getAppId())){
+		if(!appId.equals(ApplicationInfoList.getHomeRepository().getAppId())
+			&& !ApplicationInfoList.getRepositoryInfoById(appId).getRepositoryType().equals(ApplicationInfo.REPOSITORY_TYPE_LOCAL)){
 			throw new RuntimeException("no remote version of ArchiveService implemented yet");
 		}
 		

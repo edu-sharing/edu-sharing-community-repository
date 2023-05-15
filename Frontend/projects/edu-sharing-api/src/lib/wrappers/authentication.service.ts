@@ -16,7 +16,7 @@ import {
 import { ApiRequestConfiguration } from '../api-request-configuration';
 import * as apiModels from '../api/models';
 import { AuthenticationV1Service as AuthenticationApiService } from '../api/services';
-import { switchReplay } from '../utils/switch-replay';
+import { switchReplay } from '../utils/rxjs-operators/switch-replay';
 
 export type LoginInfo = apiModels.Login;
 
@@ -112,6 +112,8 @@ export class AuthenticationService {
      * interaction to not reset the auto-logout timeout.'
      */
     private loginInfoNeedRefresh = false;
+    /** Timeout for scheduled logout-time checks. */
+    private logoutCheckTimeout: ReturnType<typeof setTimeout> | null = null;
 
     constructor(
         private authentication: AuthenticationApiService,
@@ -261,13 +263,48 @@ export class AuthenticationService {
         ])
             .pipe(map(([loginInfo]) => this.calculateAutoLogoutTimeAfterReset(loginInfo)))
             .subscribe((logoutTime) => this.autoLogoutTimeSubject.next(logoutTime));
-        this.autoLogoutTimeSubject
-            .pipe(debounce((logoutTime) => (logoutTime ? rxjs.timer(logoutTime) : rxjs.NEVER)))
-            .subscribe(() => {
+        this.autoLogoutTimeSubject.subscribe((autoLogoutTime) =>
+            this.scheduleLogoutTimeCheck(autoLogoutTime),
+        );
+        // `setTimeout` timers will be paused while the system is suspended. We use the `online`
+        // event to get notified of a resumed system and update the timeout.
+        window.addEventListener('online', () => this.checkLogoutTime());
+        this.autoLogoutSubject.subscribe(() => (this.loginInfoNeedRefresh = true));
+    }
+
+    /**
+     * Schedules a check of the auto-logout time at the given time.
+     *
+     * Only one check can be scheduled. Previous schedules will be overwritten each time this method
+     * is called.
+     */
+    private scheduleLogoutTimeCheck(timeOfCheck: Date | null) {
+        if (this.logoutCheckTimeout) {
+            clearTimeout(this.logoutCheckTimeout);
+            this.logoutCheckTimeout = null;
+        }
+        if (timeOfCheck) {
+            const delta = timeOfCheck.getTime() - new Date().getTime();
+            this.logoutCheckTimeout = setTimeout(() => this.checkLogoutTime(), delta);
+        }
+    }
+
+    /**
+     * Check the auto-logout time now.
+     *
+     * Either emit the `autoLogoutSubject` if the auto-logout time has been reached, or schedule
+     * another check at the time we expect it to be reached.
+     */
+    private checkLogoutTime() {
+        if (this.autoLogoutTimeSubject.value) {
+            const delta = this.autoLogoutTimeSubject.value.getTime() - new Date().getTime();
+            if (delta <= 0) {
                 this.autoLogoutTimeSubject.next(null);
                 this.autoLogoutSubject.next();
-            });
-        this.autoLogoutSubject.subscribe(() => (this.loginInfoNeedRefresh = true));
+            } else {
+                this.scheduleLogoutTimeCheck(this.autoLogoutTimeSubject.value);
+            }
+        }
     }
 
     /**

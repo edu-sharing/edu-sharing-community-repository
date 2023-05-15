@@ -1,0 +1,59 @@
+<es-dropdown
+  #dropdownRef
+  [options]="optionsMenu"
+  [showDisabled]="showDisabled"
+  [position]="dropdownPosition"
+></es-dropdown>
+<div
+  class="actionbar"
+  [class.actionbar-all-flat]="style === 'flat'"
+  [class.actionbar-background-dark]="backgroundType === 'dark'"
+  [class.actionbar-background-primary]="backgroundType === 'primary'"
+  [class.actionbar-round]="appearance === 'round'"
+>
+  <button
+    *ngFor="let option of optionsAlways; let i = index"
+    mat-button
+    color="primary"
+    [disabled]="!option.isEnabled"
+    [class.display-none]="!option.isEnabled && !showDisabled"
+    [class.mat-flat-button]="shouldHighlight(i, option)"
+    matTooltip="{{ option | optionTooltip }}"
+    [attr.aria-label]="option.name | translate"
+    (click)="click(option)"
+  >
+    <i [esIcon]="option.icon"></i>
+    <span class="action-always-caption" *ngIf="option.showName && appearance !== 'round'">
+      {{ option.name | translate }}</span
+    >
+  </button>
+  <button
+    mat-button
+    color="primary"
+    class="more button-icon"
+    [attr.aria-label]="'OPTIONS.SHOW_ALL_OPTIONS' | translate"
+    [matMenuTriggerFor]="dropdownRef.menu"
+    *ngIf="canShowDropdown()"
+    data-test="more-actions-button"
+  >
+    <i esIcon="more_vert" [aria]="false"></i>
+  </button>
+  <div
+    *ngIf="optionsToggle.length"
+    class="actionToggle"
+    [class.actionToggleDivider]="optionsAlways.length"
+  >
+    <button
+      *ngFor="let option of optionsToggle"
+      mat-icon-button
+      class="button-icon"
+      matTooltip="{{ option.name | translate }}"
+      [attr.aria-label]="option.name | translate"
+      (click)="click(option)"
+      [class.disabled]="!option.isEnabled"
+      attr.data-test="toggle-{{ option.name }}"
+    >
+      <i [esIcon]="option.icon" [aria]="false"></i>
+    </button>
+  </div>
+</div>

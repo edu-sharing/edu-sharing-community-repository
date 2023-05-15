@@ -1,5 +1,3 @@
-import {SharingComponent} from "./sharing.component";
+import { SharingComponent } from './sharing.component';
 
-export const DECLARATIONS_SHARING = [
-  SharingComponent
-];
+export const DECLARATIONS_SHARING = [SharingComponent];

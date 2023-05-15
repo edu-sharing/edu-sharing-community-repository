@@ -1,5 +1,2 @@
-
-import {MessagesComponent} from "./messages.component";
-export const DECLARATIONS_MESSAGES = [
-  MessagesComponent
-];
+import { MessagesComponent } from './messages.component';
+export const DECLARATIONS_MESSAGES = [MessagesComponent];

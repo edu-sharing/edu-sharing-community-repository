@@ -448,7 +448,7 @@ public class NodeApi  {
 		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	if("-inbox-".equals(node)){
-    			node = repoDao.getUserInbox();
+    			node = repoDao.getUserInbox(true);
     		}
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
 	    	
@@ -539,6 +539,46 @@ public class NodeApi  {
     		return ErrorResponse.createResponse(t);
     	}
     }
+
+	@PUT
+	@Path("/nodes/{repository}/{node}/metadata/copy/{from}")
+
+	@Operation(summary = "Copy metadata from another node.", description = "Copies all common metadata from one note to another. Current user needs write access to the target node and read access to the source node.")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+			})
+
+	public Response copyMetadata(
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@Parameter(description = "The node where to copy the metadata from",required=true ) @PathParam("from") String from,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+			NodeDao fromDao = NodeDao.getNode(repoDao, from);
+			NodeDao newNode = nodeDao.copyProperties(fromDao);
+
+			NodeEntry response = new NodeEntry();
+			response.setNode(newNode.asNode());
+
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
 
 	@GET
 	@Path("/nodes/{repository}/{node}/metadata/template")
@@ -786,13 +826,15 @@ public class NodeApi  {
     		Filter propFilter = new Filter(propertyFilter);
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	node=NodeDao.mapNodeConstants(repoDao,node);
+	    	node=NodeDao.mapNodeConstants(repoDao,node, false);
 
 			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
 
 			NodeEntries response=null;
 			List<NodeRef> children=null;
-			if("-shared_files-".equals(node)){
+			if(node == null) {
+				response = new NodeEntries();
+			} else if("-shared_files-".equals(node)){
 		    	User person = PersonDao.getPerson(repoDao, PersonDao.ME).asPerson();
 		    	children = person.getSharedFolders();
 		    	List<org.alfresco.service.cmr.repository.NodeRef> converted=NodeDao.convertApiNodeRef(children);
@@ -811,7 +853,7 @@ public class NodeApi  {
 				response = searchResultToResponse(NodeDao.getFilesSharedToMe(repoDao, SharedToMeType.Private, filter, propFilter,sortDefinition,skipCount,maxItems));
 			}
 	    	else if("-frontpage-".equals(node)){
-				children = NodeDao.getFrontpageNodes(repoDao);
+				response = searchResultToResponse(NodeDao.getFrontpageNodes(repoDao));
 			}
 	    	else{
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);
@@ -1124,7 +1166,7 @@ public class NodeApi  {
 	    @Parameter(description = "rename if the same node name exists", required = false, schema = @Schema(defaultValue="false")) @QueryParam("renameIfExists") Boolean renameIfExists,
 	    @Parameter(description = "comment, leave empty = no inital version", required=false ) @QueryParam("versionComment")  String versionComment,
 	    @Parameter(description = "properties, example: {\"{http://www.alfresco.org/model/content/1.0}name\": [\"test\"]}" , required=true ) HashMap<String, String[]> properties,	    
-	    @Parameter(description = "Association type, can be empty" , required=false ) @QueryParam("assocType") String assocType,	    
+	    @Parameter(description = "Association type, can be empty" , required=false ) @QueryParam("assocType") String assocType,
 		@Context HttpServletRequest req) {
 
     	try {
@@ -1137,7 +1179,7 @@ public class NodeApi  {
 	    	NodeDao child = nodeDao.createChild(type, aspects, properties,
 	    			renameIfExists==null ? false : renameIfExists.booleanValue(),
 					assocType!=null && !assocType.trim().isEmpty() ? assocType : null);
-	    	
+
 			if(versionComment!=null && !versionComment.isEmpty()){
 				child.createVersion(versionComment);
 			}
@@ -1402,6 +1444,7 @@ public class NodeApi  {
 	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 	    @FormDataParam("image") InputStream inputStream,
 	    @Parameter(description = "MIME-Type", required=true ) @QueryParam("mimetype")  String mimetype,
+		@Parameter(description = "create a node version", required = false, schema = @Schema(defaultValue="true")) @QueryParam("createVersion") Boolean createVersion,
 		@Context HttpServletRequest req) {
     	
     	try {
@@ -1409,7 +1452,7 @@ public class NodeApi  {
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 	    	
-	    	NodeDao newNode = nodeDao.changePreview(inputStream,mimetype);
+	    	NodeDao newNode = nodeDao.changePreview(inputStream,mimetype, createVersion==null || createVersion);
 	    	
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(newNode.asNode());
@@ -1495,7 +1538,8 @@ public class NodeApi  {
 	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 	    @Parameter(description = "comment, leave empty = no new version, otherwise new version is generated", required=false ) @QueryParam("versionComment")  String versionComment,
 	    @Parameter(description = "MIME-Type", required=true ) @QueryParam("mimetype")  String mimetype,
-	    @FormDataParam("file") InputStream inputStream,
+	    //@FormDataParam("file") InputStream inputStream,
+		@Parameter(description = "file upload", schema = @Schema( name = "file", type = "string", format = "binary")) @FormDataParam("file") InputStream inputStream,
 //	    @FormDataParam("file") FormDataContentDisposition fileDetail,
 		@Context HttpServletRequest req) {
     	
@@ -2110,14 +2154,19 @@ public class NodeApi  {
 	    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
 	    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 	    	@Parameter(description = "property",required=true ) @QueryParam("property")  String property,
-	    	@Parameter(description = "value",required=false ) @QueryParam("value")  List<String> value,
+			@Parameter(description = "keepModifiedDate",required=false, schema = @Schema(defaultValue="false")) @QueryParam("keepModifiedDate") Boolean keepModifiedDate,
+			@Parameter(description = "value",required=false ) @QueryParam("value")  List<String> value,
 			@Context HttpServletRequest req) {
 	    
 	    	try {
 			
 		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-		    	nodeDao.setProperty(property, value == null || value.size() != 1? (Serializable) value : value.get(0));
+		    	nodeDao.setProperty(
+						property,
+						value == null || value.size() != 1? (Serializable) value : value.get(0),
+						keepModifiedDate != null && keepModifiedDate
+				);
 		    	return Response.status(Response.Status.OK).build();
 		
 	    	} catch (DAOValidationException t) {

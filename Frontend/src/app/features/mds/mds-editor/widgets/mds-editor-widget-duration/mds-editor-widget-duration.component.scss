@@ -1,20 +1,20 @@
-.duration-group{
+.duration-group {
     width: 100%;
     display: flex;
     align-items: center;
     margin-top: 10px;
-    >*{
-        margin:0 5px;
+    > * {
+        margin: 0 5px;
     }
-    >mat-form-field{
+    > mat-form-field {
         min-width: 50px;
         flex-grow: 0;
     }
-    >ngx-slider{
+    > ngx-slider {
         flex-grow: 1;
     }
 }
-:host ::ng-deep{
+:host ::ng-deep {
     .duration-group {
         .mat-form-field-wrapper {
             padding-bottom: 0;

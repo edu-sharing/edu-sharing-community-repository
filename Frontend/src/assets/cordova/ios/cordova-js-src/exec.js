@@ -17,7 +17,7 @@
  * specific language governing permissions and limitations
  * under the License.
  *
-*/
+ */
 
 /*global require, module, atob, document */
 
@@ -38,11 +38,11 @@ function massageArgsJsToNative(args) {
         return args;
     }
     var ret = [];
-    args.forEach(function(arg, i) {
+    args.forEach(function (arg, i) {
         if (utils.typeName(arg) == 'ArrayBuffer') {
             ret.push({
-                'CDVType': 'ArrayBuffer',
-                'data': base64.fromArrayBuffer(arg)
+                CDVType: 'ArrayBuffer',
+                data: base64.fromArrayBuffer(arg),
             });
         } else {
             ret.push(arg);
@@ -53,14 +53,14 @@ function massageArgsJsToNative(args) {
 
 function massageMessageNativeToJs(message) {
     if (message.CDVType == 'ArrayBuffer') {
-        var stringToArrayBuffer = function(str) {
+        var stringToArrayBuffer = function (str) {
             var ret = new Uint8Array(str.length);
             for (var i = 0; i < str.length; i++) {
                 ret[i] = str.charCodeAt(i);
             }
             return ret.buffer;
         };
-        var base64ToArrayBuffer = function(b64) {
+        var base64ToArrayBuffer = function (b64) {
             return stringToArrayBuffer(atob(b64));
         };
         message = base64ToArrayBuffer(message.data);
@@ -73,7 +73,7 @@ function convertMessageToArgsNativeToJs(message) {
     if (!message || !message.hasOwnProperty('CDVType')) {
         args.push(message);
     } else if (message.CDVType == 'MultiPart') {
-        message.messages.forEach(function(e) {
+        message.messages.forEach(function (e) {
             args.push(massageMessageNativeToJs(e));
         });
     } else {
@@ -83,7 +83,6 @@ function convertMessageToArgsNativeToJs(message) {
 }
 
 function iOSExec() {
-
     var successCallback, failCallback, service, action, actionArgs;
     var callbackId = null;
     if (typeof arguments[0] !== 'string') {
@@ -100,8 +99,9 @@ function iOSExec() {
         // an invalid callbackId and passes it even if no callbacks were given.
         callbackId = 'INVALID';
     } else {
-        throw new Error('The old format of this exec call has been removed (deprecated since 2.1). Change to: ' +
-            'cordova.exec(null, null, \'Service\', \'action\', [ arg1, arg2 ]);'
+        throw new Error(
+            'The old format of this exec call has been removed (deprecated since 2.1). Change to: ' +
+                "cordova.exec(null, null, 'Service', 'action', [ arg1, arg2 ]);",
         );
     }
 
@@ -112,8 +112,7 @@ function iOSExec() {
     // arguments if given.
     if (successCallback || failCallback) {
         callbackId = service + cordova.callbackId++;
-        cordova.callbacks[callbackId] =
-            {success:successCallback, fail:failCallback};
+        cordova.callbacks[callbackId] = { success: successCallback, fail: failCallback };
     }
 
     actionArgs = massageArgsJsToNative(actionArgs);
@@ -137,31 +136,32 @@ function iOSExec() {
 // CB-10530
 function proxyChanged() {
     var cexec = cordovaExec();
-       
-    return (execProxy !== cexec && // proxy objects are different
-            iOSExec !== cexec      // proxy object is not the current iOSExec
-            );
+
+    return (
+        execProxy !== cexec && // proxy objects are different
+        iOSExec !== cexec // proxy object is not the current iOSExec
+    );
 }
 
 // CB-10106
 function handleBridgeChange() {
     if (proxyChanged()) {
         var commandString = commandQueue.shift();
-        while(commandString) {
+        while (commandString) {
             var command = JSON.parse(commandString);
             var callbackId = command[0];
             var service = command[1];
             var action = command[2];
             var actionArgs = command[3];
             var callbacks = cordova.callbacks[callbackId] || {};
-            
+
             execProxy(callbacks.success, callbacks.fail, service, action, actionArgs);
-            
+
             commandString = commandQueue.shift();
-        };
+        }
         return true;
     }
-    
+
     return false;
 }
 
@@ -171,7 +171,7 @@ function pokeNative() {
         setTimeout(pokeNative);
         return;
     }
-    
+
     // Check if they've removed it from the DOM, and put it back if so.
     if (execIframe && execIframe.contentWindow) {
         execIframe.contentWindow.location = 'gap://ready';
@@ -188,17 +188,17 @@ function pokeNative() {
     // created, but since unload events fire only once, it doesn't work in the normal
     // case of iframe reuse (where unload will have already fired due to the attempted
     // navigation of the page).
-    failSafeTimerId = setTimeout(function() {
+    failSafeTimerId = setTimeout(function () {
         if (commandQueue.length) {
             // CB-10106 - flush the queue on bridge change
             if (!handleBridgeChange()) {
                 pokeNative();
-             }
+            }
         }
     }, 50); // Making this > 0 improves performance (marginally) in the normal case (where it doesn't fire).
 }
 
-iOSExec.nativeFetchMessages = function() {
+iOSExec.nativeFetchMessages = function () {
     // Stop listing for window detatch once native side confirms poke.
     if (failSafeTimerId) {
         clearTimeout(failSafeTimerId);
@@ -213,8 +213,8 @@ iOSExec.nativeFetchMessages = function() {
     return json;
 };
 
-iOSExec.nativeCallback = function(callbackId, status, message, keepCallback, debug) {
-    return iOSExec.nativeEvalAndFetch(function() {
+iOSExec.nativeCallback = function (callbackId, status, message, keepCallback, debug) {
+    return iOSExec.nativeEvalAndFetch(function () {
         var success = status === 0 || status === 1;
         var args = convertMessageToArgsNativeToJs(message);
         function nc2() {
@@ -224,7 +224,7 @@ iOSExec.nativeCallback = function(callbackId, status, message, keepCallback, deb
     });
 };
 
-iOSExec.nativeEvalAndFetch = function(func) {
+iOSExec.nativeEvalAndFetch = function (func) {
     // This shouldn't be nested, but better to be safe.
     isInContextOfEvalJs++;
     try {
@@ -239,23 +239,26 @@ iOSExec.nativeEvalAndFetch = function(func) {
 
 function cordovaExec() {
     var cexec = require('cordova/exec');
-    var cexec_valid = (typeof cexec.nativeFetchMessages === 'function') && (typeof cexec.nativeEvalAndFetch === 'function') && (typeof cexec.nativeCallback === 'function');
-    return (cexec_valid && execProxy !== cexec)? cexec : iOSExec;
+    var cexec_valid =
+        typeof cexec.nativeFetchMessages === 'function' &&
+        typeof cexec.nativeEvalAndFetch === 'function' &&
+        typeof cexec.nativeCallback === 'function';
+    return cexec_valid && execProxy !== cexec ? cexec : iOSExec;
 }
 
 function execProxy() {
     cordovaExec().apply(null, arguments);
-};
+}
 
-execProxy.nativeFetchMessages = function() {
+execProxy.nativeFetchMessages = function () {
     return cordovaExec().nativeFetchMessages.apply(null, arguments);
 };
 
-execProxy.nativeEvalAndFetch = function() {
+execProxy.nativeEvalAndFetch = function () {
     return cordovaExec().nativeEvalAndFetch.apply(null, arguments);
 };
 
-execProxy.nativeCallback = function() {
+execProxy.nativeCallback = function () {
     return cordovaExec().nativeCallback.apply(null, arguments);
 };
 

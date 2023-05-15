@@ -20,6 +20,7 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.repository.server.tools.EduSharingLockHelper;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.ImageTool;
 import org.edu_sharing.repository.server.tools.Mail;
@@ -53,13 +54,15 @@ public class PersonDao {
 	Logger logger = Logger.getLogger(PersonDao.class);
 	public static final String ME = "-me-";
 
+	private final ArrayList<EduGroup> parentOrganizations;
+
 	public static PersonDao getPerson(RepositoryDao repoDao, String userName) throws DAOException {
-		
+
 		try {
-			String currentUser = AuthenticationUtil.getFullyAuthenticatedUser(); 
-			
+			String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+
 			if (ME.equals(userName)) {
-	
+
 				userName = currentUser;
 			}
 	
@@ -74,7 +77,7 @@ public class PersonDao {
 			*/
 
 			return new PersonDao(repoDao, userName);
-			
+
 		} catch (Exception e) {
 
 			throw DAOException.mapping(e);
@@ -96,18 +99,18 @@ public class PersonDao {
 		return true;
 	}
 	public static PersonDao createPerson(RepositoryDao repoDao, String userName,String password, UserProfileEdit profile) throws DAOException {
-		
+
 		try {
 
 			try {
-				
+
 				repoDao.getBaseClient().getUserInfo(userName);
 
 				throw new DAOValidationException(
 						new IllegalArgumentException("Username already exists."));
-				
+
 			} catch (NoSuchPersonException e) {
-				
+
 				HashMap<String, Serializable> userInfo = profileToMap(profile);
 				userInfo.put(CCConstants.PROP_USERNAME, userName);
 
@@ -116,18 +119,18 @@ public class PersonDao {
 				if(password!=null)
 					result.changePassword(null,password);
 				return result;
-			}			
-			
+			}
+
 		} catch (Exception e) {
 
 			throw DAOException.mapping(e);
 		}
 	}
-	
+
 	private final MCAlfrescoBaseClient baseClient;
 
 	private final RepositoryDao repoDao;
-	
+
 	private final Map<String, Serializable> userInfo;
 	private String homeFolderId;
 	private final List<String> sharedFolderIds = new ArrayList<String>();
@@ -141,7 +144,7 @@ public class PersonDao {
 	public PersonDao(RepositoryDao repoDao, String userName) throws DAOException  {
 
 		try {
-			
+
 			this.baseClient = repoDao.getBaseClient();
 			this.nodeService = NodeServiceFactory.getNodeService(repoDao.getId());
 			this.searchService = SearchServiceFactory.getSearchService(repoDao.getId());
@@ -150,6 +153,16 @@ public class PersonDao {
 			this.repoDao = repoDao;
 
 			this.userInfo = authorityService.getUserInfo(userName);
+
+			if(this.userInfo == null){
+				throw new DAOMissingException(new Exception("user "+ userName + " not found"));
+			}
+
+			// may causes performance penalties!
+			this.parentOrganizations = AuthenticationUtil.runAsSystem(() ->
+					authorityService.getEduGroups(userName, NodeServiceInterceptor.getEduSharingScope())
+			);
+
 
 			try{
 
@@ -163,36 +176,36 @@ public class PersonDao {
 				if(getGroupFolder && userName!=null) {
 					String groupFolderId = ((MCAlfrescoAPIClient)baseClient).getGroupFolderId(userName);
 					if (groupFolderId != null) {
-						
+
 						HashMap<String, HashMap<String, Object>> children = baseClient.getChildren(groupFolderId);
-						
+
 						for (Object key : children.keySet()) {
-		
+
 							sharedFolderIds.add(key.toString());
-						}				
+						}
 					}
 				}
 			}catch(InvalidNodeRefException e){
-				
+
 			}
 			catch(AccessDeniedException e){
-			
+
 			}
-			
+
 		} catch (Throwable t) {
 			throw DAOException.mapping(t);
 		}
 	}
-	
+
 	public void changeProfile(UserProfileEdit profile) throws DAOException {
-		
+
 		try {
 
 			HashMap<String, Serializable> newUserInfo = profileToMap(profile);
 			newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
 			authorityService.createOrUpdateUser(newUserInfo);
 		} catch (Throwable t) {
-			
+
 			throw DAOException.mapping(t);
 		}
 
@@ -203,14 +216,17 @@ public class PersonDao {
 		newUserInfo.put(CCConstants.PROP_USER_FIRSTNAME, profile.getFirstName());
 		newUserInfo.put(CCConstants.PROP_USER_LASTNAME, profile.getLastName());
 		newUserInfo.put(CCConstants.PROP_USER_EMAIL, profile.getEmail());
-        newUserInfo.put(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION, profile.getPrimaryAffiliation());
         newUserInfo.put(CCConstants.CM_PROP_PERSON_ABOUT, profile.getAbout());
         newUserInfo.put(CCConstants.CM_PROP_PERSON_SKILLS, profile.getSkills());
         newUserInfo.put(CCConstants.CM_PROP_PERSON_VCARD, profile.getVCard());
-		if(profile.getSizeQuota()>0)
-			newUserInfo.put(CCConstants.CM_PROP_PERSON_SIZE_QUOTA, ""+profile.getSizeQuota());
-		else
-			newUserInfo.put(CCConstants.CM_PROP_PERSON_SIZE_QUOTA, null);
+		if(AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
+			newUserInfo.put(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION, profile.getPrimaryAffiliation());
+			if (profile.getSizeQuota() > 0) {
+				newUserInfo.put(CCConstants.CM_PROP_PERSON_SIZE_QUOTA, "" + profile.getSizeQuota());
+			} else {
+				newUserInfo.put(CCConstants.CM_PROP_PERSON_SIZE_QUOTA, null);
+			}
+		}
 		return newUserInfo;
 	}
 
@@ -237,26 +253,26 @@ public class PersonDao {
 	}
 
 	public void changePassword(String oldPassword, String newPassword) throws DAOException {
-		
+
 		try {
-			
+
 			if (oldPassword == null) {
-			
+
 				((MCAlfrescoAPIClient)this.baseClient).setUserPassword(getUserName(), newPassword);
-				
+
 			} else {
 
 				((MCAlfrescoAPIClient)this.baseClient).updateUserPassword(getUserName(), oldPassword, newPassword);
-				
+
 			}
-				
+
 		} catch (Throwable t) {
-			
+
 			throw DAOException.mapping(t);
 		}
 
 	}
-	
+
 	public void delete(boolean force) throws DAOException {
 		try {
 			String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
@@ -269,7 +285,7 @@ public class PersonDao {
 						PersonLifecycleService.PersonStatus.todelete + ", got " + getStatus().getStatus());
 			}
 			((MCAlfrescoAPIClient)this.baseClient).deleteUser(getUserName());
-			
+
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
 		}
@@ -279,12 +295,12 @@ public class PersonDao {
 		return (String) this.userInfo.get(CCConstants.SYS_PROP_NODE_UID);
 	}
 	public User asPerson() throws DAOException {
-		
+
     	User data = new User();
-    	
+
     	data.setAuthorityName(getAuthorityName());
     	data.setAuthorityType(Authority.Type.USER);
-    	
+
     	data.setUserName(getUserName());
 
 		data.setOrganizations(OrganizationDao.mapOrganizations(getParentOrganizations()));
@@ -463,10 +479,10 @@ public class PersonDao {
 		}
 	}
 	public UserSimple asPersonSimple() {
-		UserSimple data = new UserSimple();    	
+		UserSimple data = new UserSimple();
     	data.setAuthorityName(getAuthorityName());
-    	data.setAuthorityType(Authority.Type.USER);    	
-    	data.setUserName(getUserName());    	
+    	data.setAuthorityType(Authority.Type.USER);
+    	data.setUserName(getUserName());
     	data.setProfile(getProfile());
 		data.setStatus(getStatus());
 		if(isCurrentUserOrAdmin()){
@@ -481,7 +497,9 @@ public class PersonDao {
     	return data;
 	}
 	public UserRender asPersonRender() {
+		org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
 		UserRender data = new UserRender();
+		data.setIsGuest(authorityService.isGuest());
 		data.setAuthorityName(getAuthorityName());
 		data.setAuthorityType(Authority.Type.USER);
 		data.setUserName(getUserName());
@@ -493,19 +511,18 @@ public class PersonDao {
 	public String getId() {
 		return getNodeId();
 	}
-	
+
 	public String getAuthorityName() {
-		
+
 		return getUserName();
 	}
-	
+
 	public String getUserName() {
-		
 		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_USERNAME);
 	}
-	
+
 	public String getFirstName() {
-		
+
 		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
 	}
 
@@ -533,14 +550,14 @@ public class PersonDao {
 			}
 		});
 	}
-	
+
 	public String getLastName() {
-		
+
 		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
 	}
-	
+
 	public String getEmail() {
-		
+
 		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
 	}
 	public String getAbout() {
@@ -572,8 +589,8 @@ public class PersonDao {
 		// validate json
 		new JSONObject(preferences);
 		HashMap<String, String> newUserInfo = new HashMap<String, String>();
-		newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());		
-		newUserInfo.put(CCConstants.CCM_PROP_PERSON_PREFERENCES, preferences);		
+		newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
+		newUserInfo.put(CCConstants.CCM_PROP_PERSON_PREFERENCES, preferences);
 		((MCAlfrescoAPIClient)this.baseClient).updateUser(newUserInfo);
 	}
 
@@ -603,23 +620,26 @@ public class PersonDao {
 	}
 
 	public void addNodeList(String list,String nodeId) throws Exception {
+		EduSharingLockHelper.runSingleton(PersonDao.class, this.getAuthorityName() + "_nodeList", () -> {
+			try {
 		// Simply check if node is valid
-		NodeDao node=NodeDao.getNode(repoDao, nodeId);
+				NodeDao node = NodeDao.getNode(this.repoDao, nodeId);
 		if(node.isDirectory())
 			throw new IllegalArgumentException("The node "+nodeId+" is a directory. Only files are allowed for this list");
-		String data=getCurrentNodeListJson();
+				String data = getCurrentNodeListJson();
 		JSONObject json=new JSONObject();
 		if(data!=null)
 			json=new JSONObject(data);
-		
+
 		JSONArray array=null;
 		if(json.has(list))
 			array=json.getJSONArray(list);
 		List<JSONObject> nodes=new ArrayList<>();
 		if(array!=null){
 			for(int i=0;i<array.length();i++){
-				if(array.getJSONObject(i).getString("id").equals(nodeId))
-					throw new IllegalAccessException("Node is already in list: "+nodeId);
+				if(array.getJSONObject(i).getString("id").equals(nodeId)) {
+					throw new DAODuplicateNodeException(new Exception("Node is already in list"), nodeId);
+				}
 				nodes.add(array.getJSONObject(i));
 			}
 		}
@@ -628,19 +648,12 @@ public class PersonDao {
 		object.put("dateAdded",System.currentTimeMillis());
 		nodes.add(object);
 		json.put(list,new JSONArray(nodes));
-		updateNodeList(json);
+				updateNodeList(json);
+			} catch(Exception e) {
+				throw new RuntimeException(e);
 	}
-	private String getCurrentNodeListJson(){
-		org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
-		HttpSession session = Context.getCurrentInstance().getRequest().getSession();
-		String data;
-		if(service.isGuest()){
-			data=(String) session.getAttribute(CCConstants.CCM_PROP_PERSON_NODE_LISTS);
-		}
-		else{
-			data=(String) this.userInfo.get(CCConstants.CCM_PROP_PERSON_NODE_LISTS);
-		}
-		return data;
+			return null;
+		});
 	}
 	public List<NodeRef> getNodeList(String list) throws Exception {
 		String data=getCurrentNodeListJson();
@@ -655,18 +668,32 @@ public class PersonDao {
 			String nodeId=array.getJSONObject(i).getString("id");
 			try{
 				// causes invalid nodes to fire throwable -> delete them
-				NodeDao.getNode(repoDao, nodeId);
-				result.add(new NodeRef(repoDao.getId(), nodeId));
+				NodeDao.getNode(this.repoDao, nodeId);
+				result.add(new NodeRef(this.repoDao.getId(), nodeId));
 			}
 			catch(Throwable t){
 				removeNodeList(list,nodeId);
 			}
 		}
-		return result;			
+		return result;
+	}
+	private String getCurrentNodeListJson() throws Exception {
+		org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+		HttpSession session = Context.getCurrentInstance().getRequest().getSession();
+		String data;
+		if(service.isGuest()){
+			data=(String) session.getAttribute(CCConstants.CCM_PROP_PERSON_NODE_LISTS);
+		}
+		else{
+			data=(String) AuthorityServiceFactory.getLocalService().getAuthorityProperty(this.getUserName(), CCConstants.CCM_PROP_PERSON_NODE_LISTS);
+		}
+		return data;
 	}
 
 	public void removeNodeList(String list, String nodeId) throws Exception {
-		String data=getCurrentNodeListJson();
+		EduSharingLockHelper.runSingleton(PersonDao.class, this.getAuthorityName() + "_nodeList", () -> {
+			try {
+				String data = getCurrentNodeListJson();
 		if(data==null)
 			throw new IllegalArgumentException("Node list not found: "+list);
 		JSONObject json=new JSONObject(data);
@@ -685,7 +712,12 @@ public class PersonDao {
 		if(!found)
 			throw new IllegalArgumentException("Node not found in list: "+nodeId);
 		json.put(list, new JSONArray(result));
-		updateNodeList(json);
+				updateNodeList(json);
+			}catch(Exception e) {
+				throw new RuntimeException(e);
+			}
+			return null;
+		});
 }
 
 	private void updateNodeList(JSONObject json) throws Exception {
@@ -695,10 +727,7 @@ public class PersonDao {
 			session.setAttribute(CCConstants.CCM_PROP_PERSON_NODE_LISTS,json.toString());
 		}
 		else{
-			HashMap<String, String> newUserInfo = new HashMap<String, String>();
-			newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
-			newUserInfo.put(CCConstants.CCM_PROP_PERSON_NODE_LISTS, json.toString());
-			((MCAlfrescoAPIClient)this.baseClient).updateUser(newUserInfo);
+			AuthorityServiceFactory.getLocalService().setAuthorityProperty(this.getUserName(), CCConstants.CCM_PROP_PERSON_NODE_LISTS, json.toString());
 		}
 	}
 
@@ -709,8 +738,8 @@ public class PersonDao {
 			);
 		}
 		String oldStatus= (String) userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS);
-		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUS,status.name());
-		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE,new Date());
+		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUS,status.name(), false);
+		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE,new Date(), false);
 		if(notifyMail){
 			Mail mail=new Mail();
 			Map<String, String> replace=new HashMap<>();

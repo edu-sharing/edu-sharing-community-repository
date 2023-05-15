@@ -2,10 +2,9 @@ import { trigger } from '@angular/animations';
 import { HttpClient } from '@angular/common/http';
 import {
     AfterViewInit,
-    ChangeDetectionStrategy,
-    ChangeDetectorRef,
     Component,
     ElementRef,
+    HostBinding,
     HostListener,
     NgZone,
     OnDestroy,
@@ -23,36 +22,31 @@ import {
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { Observable, ReplaySubject, Subject } from 'rxjs';
-import { map, take, takeUntil, tap, delay } from 'rxjs/operators';
-import { NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
+import { delay, filter, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
+import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { RocketChatService } from '../../../common/ui/global-container/rocketchat/rocket-chat.service';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
-    DialogButton,
     FrameEventsService,
-    Node,
-    NodeTextContent,
-    NodeWrapper,
     RestConnectorService,
     RestConstants,
     RestHelper,
     RestIamService,
-    RestNodeService,
-    SessionStorageService,
     TemporaryStorageService,
     UIService,
 } from '../../../core-module/core.module';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { OPEN_URL_MODE, UIConstants } from '../../../core-module/ui/ui-constants';
 import { OptionGroup, OptionItem } from '../../../core-ui-module/option-item';
-import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { NodeStoreService } from '../../../modules/search/node-store/node-store.service';
-import { TranslationsService } from '../../../translations/translations.service';
+import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
+import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { LicenseAgreementService } from '../../../services/license-agreement.service';
 import { MainMenuEntriesService } from '../main-menu-entries.service';
 import { MainNavConfig, MainNavService } from '../main-nav.service';
-import { SearchFieldComponent } from '../search-field/search-field.component';
+import { SearchFieldService } from '../search-field/search-field.service';
 import { TopBarComponent } from '../top-bar/top-bar.component';
 
 /**
@@ -74,20 +68,16 @@ import { TopBarComponent } from '../top-bar/top-bar.component';
 export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     private static readonly ID_ATTRIBUTE_NAME = 'data-banner-id';
 
-    @ViewChild(SearchFieldComponent) searchField: SearchFieldComponent;
     @ViewChild(TopBarComponent) topBar: TopBarComponent;
-    @ViewChild('userRef') userRef: ElementRef;
     @ViewChild('tabNav') tabNav: ElementRef;
 
     private shouldAlwaysHide = this.storage.get(TemporaryStorageService.OPTION_HIDE_MAINNAV, false);
 
-    visible = !this.shouldAlwaysHide;
+    @HostBinding('class.main-nav-visible') visible = !this.shouldAlwaysHide;
     autoLogoutTimeout$: Observable<string>;
     config: any = {};
-    isNodeStoreOpen = false;
-    acceptLicenseAgreement: boolean;
-    licenseAgreement: boolean;
-    licenseAgreementHTML: string;
+    nodeStoreIsOpen = false;
+    nodeStoreDialogRef: CardDialogRef<void, void> | null = null;
     canEditProfile: boolean;
     userMenuOptions: OptionItem[];
     tutorialElement: ElementRef;
@@ -95,18 +85,15 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     showEditProfile: boolean;
     showProfile: boolean;
     showUser = false;
-    licenseDialog: boolean;
-    licenseDetails: string;
     mainMenuStyle: 'sidebar' | 'dropdown' = 'sidebar';
     currentUser: User;
     canOpen: boolean;
     mainNavConfig: MainNavConfig;
-    searchQuery: string;
+    searchFieldEnabled: boolean;
 
     private readonly initDone$ = new ReplaySubject<void>();
     private readonly destroyed$ = new Subject<void>();
     private editUrl: string;
-    private licenseAgreementNode: Node;
     private scrollInitialPositions: any[] = [];
     private lastScroll = -1;
     private elementsTopY = 0;
@@ -119,35 +106,34 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         public iam: RestIamService,
         public connector: RestConnectorService,
         private bridge: BridgeService,
-        private event: FrameEventsService,
-        private nodeService: RestNodeService,
         private configService: ConfigurationService,
         private aboutService: AboutService,
         private uiService: UIService,
         private mainNavService: MainNavService,
         private storage: TemporaryStorageService,
-        private session: SessionStorageService,
         private http: HttpClient,
         private router: Router,
         private route: ActivatedRoute,
-        private toast: Toast,
         private nodeHelper: NodeHelperService,
         private authentication: AuthenticationService,
         private user: UserService,
         private ngZone: NgZone,
-        private translations: TranslationsService,
         // private changeDetectorRef: ChangeDetectorRef,
-        private nodeStore: NodeStoreService,
         private rocketChat: RocketChatService,
+        private dialogs: DialogsService,
+        private licenseAgreement: LicenseAgreementService,
+        private searchField: SearchFieldService,
     ) {}
 
     ngOnInit(): void {
         this.init();
         this.registerMainNavConfig();
+        this.registerSearchField();
         this.registerCurrentUser();
         this.registerAutoLogoutDialog();
         this.registerAutoLogoutTimeout();
         this.registerHandleScroll();
+        this.showLicenseAgreement();
     }
 
     ngAfterViewInit() {
@@ -176,7 +162,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.initDone$.complete();
             });
         });
-        this.event.addListener(this);
     }
 
     private registerMainNavConfig() {
@@ -197,6 +182,13 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             });
     }
 
+    private registerSearchField() {
+        this.searchField
+            .observeEnabled()
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((searchFieldEnabled) => (this.searchFieldEnabled = searchFieldEnabled));
+    }
+
     private updateConfig(
         mainNavConfig: MainNavConfig,
         userInfo: CurrentUserInfo,
@@ -204,7 +196,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     ): void {
         this.visible = this.getIsVisible(mainNavConfig, queryParams);
         this.canOpen = mainNavConfig.canOpen;
-        this.searchQuery = mainNavConfig.searchQuery;
         if (!userInfo.loginInfo.isValidLogin) {
             this.canOpen = userInfo.loginInfo.isGuest;
             this.checkConfig();
@@ -223,21 +214,38 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         if (queryParams.nodeStore === 'true') {
             this.openNodeStore();
+        } else {
+            this.closeNodeStore();
         }
         this.showUser = mainNavConfig.currentScope !== 'login' && mainNavConfig.showUser;
         this.checkConfig();
         this.canEditProfile = userInfo.user.editProfile;
     }
 
-    private openNodeStore(): void {
-        if (this.isNodeStoreOpen) {
+    private async openNodeStore(): Promise<void> {
+        if (this.nodeStoreIsOpen) {
             return;
         }
-        this.isNodeStoreOpen = true;
-        this.nodeStore.open(() => {
-            this.isNodeStoreOpen = false;
-            this.setNodeStore(false);
+        this.nodeStoreIsOpen = true;
+        this.nodeStoreDialogRef = await this.dialogs.openNodeStoreDialog();
+        this.nodeStoreDialogRef.afterClosed().subscribe(() => {
+            this.nodeStoreIsOpen = false;
+            this.nodeStoreDialogRef = null;
+            // Remove the query parameter only if it wasn't already removed by navigation (and the
+            // dialog closed because of that).
+            this.route.queryParams
+                .pipe(
+                    take(1),
+                    filter(({ nodeStore }) => nodeStore === 'true'),
+                )
+                .subscribe(() => this.setNodeStore(false));
         });
+    }
+
+    private closeNodeStore(): void {
+        if (this.nodeStoreDialogRef) {
+            this.nodeStoreDialogRef.close();
+        }
     }
 
     private getIsVisible(mainNavConfig: MainNavConfig, queryParams: Params): boolean {
@@ -365,13 +373,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     setNodeStore(value: boolean) {
-        UIHelper.changeQueryParameter(this.router, this.route, 'nodeStore', value);
-    }
-
-    onEvent(event: string, data: any) {
-        if (event === FrameEventsService.EVENT_PARENT_SEARCH) {
-            this.doSearch(data, false);
-        }
+        UIHelper.changeQueryParameter(this.router, this.route, 'nodeStore', value || null);
     }
 
     openProfileDialog() {
@@ -399,31 +401,22 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         UIHelper.openUrl(url, this.bridge, OPEN_URL_MODE.BlankSystemBrowser);
     }
 
-    saveLicenseAgreement() {
-        this.licenseAgreement = false;
-        if (this.licenseAgreementNode) {
-            this.session.set('licenseAgreement', this.licenseAgreementNode.content.version);
-        } else {
-            this.session.set('licenseAgreement', '0.0');
-        }
-        this.startTutorial();
-    }
-
     startTutorial() {
         this.user
             .observeCurrentUserInfo()
-            .pipe(take(1))
-            .subscribe(({ user, loginInfo }) => {
-                if (
-                    loginInfo.statusCode === RestConstants.STATUS_CODE_OK &&
-                    user.editProfile &&
-                    this.configService.instant('editProfile', false)
-                ) {
-                    this.uiService.waitForComponent(this, 'userRef').subscribe(() => {
-                        this.tutorialElement = this.userRef;
-                    });
-                }
-            });
+            .pipe(
+                filter(({ user }) => user != null),
+                filter(
+                    ({ user, loginInfo }) =>
+                        loginInfo.statusCode === RestConstants.STATUS_CODE_OK &&
+                        user?.editProfile &&
+                        this.configService.instant('editProfile', false),
+                ),
+                take(1),
+                switchMap(() => this.uiService.waitForComponent(this, 'topBar')),
+                switchMap(() => this.uiService.waitForComponent(this.topBar, 'userRef')),
+            )
+            .subscribe(() => (this.tutorialElement = this.topBar.userRef));
     }
 
     setFixMobileElements(fix: boolean) {
@@ -439,15 +432,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     showLicenses() {
-        this.licenseDialog = true;
-        this.http.get('assets/licenses/en.html', { responseType: 'text' }).subscribe(
-            (text) => {
-                this.licenseDetails = text as any;
-            },
-            (error) => {
-                console.error(error);
-            },
-        );
+        void this.dialogs.openThirdPartyLicensesDialog();
     }
 
     showChat() {
@@ -459,8 +444,8 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     openChat() {
-       this.rocketChat.opened = true;
-       this.rocketChat.unread = 0;
+        this.rocketChat.opened = true;
+        this.rocketChat.unread = 0;
     }
 
     isCreateAllowed() {
@@ -470,10 +455,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             !this.connector.getCurrentLogin()?.isGuest &&
             this.queryParams?.reurlCreate !== 'false'
         );
-    }
-
-    clearSearch() {
-        this.mainNavConfig.onSearch('', true);
     }
 
     logout() {
@@ -488,13 +469,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             '',
             reurl ? window.location.href : '',
         );
-    }
-
-    doSearch(value = this.searchQuery, broadcast = true) {
-        if (broadcast) {
-            this.event.broadcastEvent(FrameEventsService.EVENT_GLOBAL_SEARCH, value);
-        }
-        this.mainNavConfig.onSearch?.(value, false);
     }
 
     openImprint() {
@@ -514,7 +488,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             this.config = data;
             this.editUrl = data.editProfileUrl;
             this.showEditProfile = data.editProfile;
-            this.showLicenseAgreement();
             this.updateUserOptions();
         });
     }
@@ -549,54 +522,8 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private showLicenseAgreement() {
-        if (
-            !this.config.licenseAgreement ||
-            this.connector.getCurrentLogin()?.isGuest ||
-            !this.connector.getCurrentLogin().isValidLogin
-        ) {
+        this.licenseAgreement.waitForAgreementCleared().subscribe(() => {
             this.startTutorial();
-            return;
-        }
-        this.session.get('licenseAgreement', false).subscribe((version: string) => {
-            this.licenseAgreementHTML = null;
-            let nodeId: string = null;
-            for (const node of this.config.licenseAgreement.nodeId) {
-                if (node.language == null) nodeId = node.value;
-                if (node.language === this.translations.getLanguage()) {
-                    nodeId = node.value;
-                    break;
-                }
-            }
-            this.nodeService.getNodeMetadata(nodeId).subscribe(
-                (data: NodeWrapper) => {
-                    this.licenseAgreementNode = data.node;
-                    if (version === data.node.content.version) {
-                        this.startTutorial();
-                        return;
-                    }
-                    this.licenseAgreement = true;
-                    this.nodeService.getNodeTextContent(nodeId).subscribe(
-                        (data: NodeTextContent) => {
-                            this.licenseAgreementHTML = data.html
-                                ? data.html
-                                : data.raw
-                                ? data.raw
-                                : data.text;
-                        },
-                        (error: any) => {
-                            this.licenseAgreementHTML = `Error loading content for license agreement node '${nodeId}'`;
-                        },
-                    );
-                },
-                (error: any) => {
-                    if (version === '0.0') {
-                        this.startTutorial();
-                        return;
-                    }
-                    this.licenseAgreement = true;
-                    this.licenseAgreementHTML = `Error loading metadata for license agreement node '${nodeId}'`;
-                },
-            );
         });
     }
 
@@ -648,7 +575,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             'OPTIONS.ACCESSIBILITY',
             'accessibility',
             () => {
-                this.mainNavService.getAccessibility().show();
+                void this.dialogs.openAccessibilityDialog();
             },
         );
         this.userMenuOptions.push(accessibilityOptions);
@@ -821,11 +748,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             .observeCurrentUserInfo()
             .pipe(takeUntil(this.destroyed$))
             .subscribe(async ({ user, loginInfo }) => {
-                if (loginInfo.isGuest) {
-                    this.currentUser = null;
-                } else {
-                    this.currentUser = user.person;
-                }
+                this.currentUser = user?.person;
             });
     }
 
@@ -841,24 +764,22 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             this.authentication
                 .observeAutoLogout()
                 .pipe(takeUntil(this.destroyed$))
-                .subscribe(() => {
-                    this.toast.showModalDialog(
-                        'WORKSPACE.AUTOLOGOUT',
-                        'WORKSPACE.AUTOLOGOUT_INFO',
-                        [
-                            new DialogButton('WORKSPACE.RELOGIN', { color: 'primary' }, () => {
-                                RestHelper.goToLogin(
-                                    this.router,
-                                    this.configService,
-                                    this.isSafe() ? RestConstants.SAFE_SCOPE : null,
-                                    null,
-                                );
-                                this.toast.closeModalDialog();
-                            }),
-                        ],
-                        false,
-                        null,
-                        { minutes: Math.round(this.connector.logoutTimeout / 60) },
+                .subscribe(async () => {
+                    this.topBar?.mainMenuSidebar?.close();
+                    const dialogRef = await this.dialogs.openGenericDialog({
+                        title: 'WORKSPACE.AUTOLOGOUT',
+                        messageText: 'WORKSPACE.AUTOLOGOUT_INFO',
+                        messageParameters: {
+                            minutes: Math.round(this.connector.logoutTimeout / 60).toString(),
+                        },
+                        buttons: [{ label: 'WORKSPACE.RELOGIN', config: { color: 'primary' } }],
+                        closable: Closable.Disabled,
+                    });
+                    await dialogRef.afterClosed().toPromise();
+                    RestHelper.goToLogin(
+                        this.router,
+                        this.configService,
+                        this.isSafe() ? RestConstants.SAFE_SCOPE : null,
                     );
                 });
         }

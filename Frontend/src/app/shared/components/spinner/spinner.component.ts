@@ -1,15 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostBinding, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'es-spinner',
-  templateUrl: 'spinner.component.html',
-  styleUrls: ['spinner.component.scss']
+    selector: 'es-spinner',
+    templateUrl: 'spinner.component.html',
+    styleUrls: ['spinner.component.scss'],
 })
-export class SpinnerComponent implements OnInit {
+export class SpinnerComponent {
+    @HostBinding('attr.data-test') readonly dataTest = 'loading-spinner';
 
-  constructor() { }
-
-  ngOnInit() {
-  }
-
+    constructor() {}
 }

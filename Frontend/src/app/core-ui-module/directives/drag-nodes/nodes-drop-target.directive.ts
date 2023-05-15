@@ -1,10 +1,4 @@
-import {
-    Directive,
-    EventEmitter,
-    HostListener,
-    Input,
-    Output,
-} from '@angular/core';
+import { Directive, EventEmitter, HostListener, Input, Output } from '@angular/core';
 import {
     DragData,
     dragNodesTransferType,
@@ -25,7 +19,7 @@ import { UIService } from '../../../core-module/core.module';
  * events are filtered to not trigger unnecessarily.
  */
 @Directive({
-    selector: '[esNodesDropTarget]',
+    selector: '[esLegacyNodesDropTarget]',
 })
 export class NodesDropTargetDirective {
     /**
@@ -49,9 +43,7 @@ export class NodesDropTargetDirective {
      *
      * Output events are *only* fired, when this function evaluates to `true`.
      */
-    @Input('esNodesDropTarget') canDrop:
-        | boolean
-        | ((dragData: DragData) => boolean);
+    @Input('esLegacyNodesDropTarget') canDrop: boolean | ((dragData: DragData) => boolean);
     @Input() nodesDragAllowedActions: DropAction[] = ['move', 'copy'];
 
     @Output() nodesDragEnter = new EventEmitter<DragEvent>();
@@ -154,15 +146,9 @@ export class NodesDropTargetDirective {
     }
 
     private getDropAction(event: DragEvent): DropAction {
-        if (
-            this.nodesDragAllowedActions.includes('copy') &&
-            (event.ctrlKey || this.ui.isShiftCmd())
-        ) {
+        if (this.nodesDragAllowedActions.includes('copy') && event.ctrlKey) {
             return 'copy';
-        } else if (
-            this.nodesDragAllowedActions.includes('link') &&
-            event.altKey
-        ) {
+        } else if (this.nodesDragAllowedActions.includes('link') && event.altKey) {
             return 'link';
         } else {
             return 'move';

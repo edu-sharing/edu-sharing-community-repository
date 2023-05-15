@@ -35,8 +35,8 @@
             </goals>
             <phase>prepare-package</phase>
             <configuration>
-              <outputDirectory>src/main/webapp</outputDirectory>
-              <thirdPartyFilename>THIRD-PARTY.txt</thirdPartyFilename>
+              <outputDirectory>src/main/webapp/WEB-INF/licenses</outputDirectory>
+              <thirdPartyFilename>THIRD-PARTY-${project.artifactId}.txt</thirdPartyFilename>
             </configuration>
           </execution>
         </executions>
@@ -67,6 +67,12 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>edu_sharing-community-repository-backend-services-rest-webapp</artifactId>
+      <type>war</type>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-services-graphql-webapp</artifactId>
       <type>war</type>
     </dependency>
 

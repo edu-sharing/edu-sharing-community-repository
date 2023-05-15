@@ -29,6 +29,7 @@ export class TopBarComponent {
     @ViewChild('dropdownTriggerDummy') createMenuTrigger: MatMenuTrigger;
     @ViewChild('mainMenuDropdown') mainMenuDropdown: MainMenuDropdownComponent;
     @ViewChild('mainMenuSidebar') mainMenuSidebar: MainMenuSidebarComponent;
+    @ViewChild('userRef') userRef: ElementRef;
 
     @Input() autoLogoutTimeout$: Observable<string>;
     @Input() canOpen = true;
@@ -76,6 +77,10 @@ export class TopBarComponent {
                 this.mainMenuDropdown.dropdown.menuTrigger.openMenu();
             }
         }
+    }
+
+    isSidenavOpen() {
+        return this.mainMenuSidebar?.show;
     }
 
     openCreateMenu(x: number, y: number) {

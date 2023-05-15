@@ -8,10 +8,10 @@ import {
     RestNodeService,
 } from '../../../core-module/core.module';
 import { MdsDefinition, MdsType, Values } from '../types/types';
-import {Metadata, BaseMetadataFragment} from 'ngx-edu-sharing-graphql';
-import {Meta} from '@angular/platform-browser';
-import {Apollo} from 'apollo-angular';
-import {DocumentNode} from '@apollo/client/link/core/types';
+import { Metadata, BaseMetadataFragment } from 'ngx-edu-sharing-graphql';
+import { Meta } from '@angular/platform-browser';
+import { Apollo } from 'apollo-angular';
+import { DocumentNode } from '@apollo/client/link/core/types';
 
 /** Error with a translatable message that is suitable to be shown to the user. */
 export class UserPresentableError extends Error {
@@ -59,7 +59,7 @@ export class MdsEditorCommonService {
     ): Promise<Node[]> {
         console.log(pairs);
         return forkJoin(
-            pairs.map(({id, node, values }) => {
+            pairs.map(({ id, node, values }) => {
                 if (versionComment) {
                     return this.restNode
                         .editNodeMetadataNewVersion(node?.ref?.id || id, versionComment, values)
@@ -72,10 +72,7 @@ export class MdsEditorCommonService {
             }),
         ).toPromise();
     }
-    async saveGraphqlMetadata(
-        pairs: Metadata[],
-        versionComment?: string,
-    ): Promise<Node[]> {
+    async saveGraphqlMetadata(pairs: Metadata[], versionComment?: string): Promise<Node[]> {
         return forkJoin(
             pairs.map((metadata) => {
                 console.log('graphql target metadata', metadata);
@@ -103,11 +100,10 @@ export class MdsEditorCommonService {
     async saveNodeProperty(
         node: Node,
         property: string,
-        values: string[]
+        values: string[],
         //versionComment?: string,
     ): Promise<void> {
         this.restNode.editNodeProperty(node.ref.id, property, values).toPromise();
-
     }
 
     /**
@@ -115,18 +111,25 @@ export class MdsEditorCommonService {
      *
      * Throws with a translatable error message if the given nodes cannot be handled by an MDS.
      */
-    getMdsId(nodes: Node[]|BaseMetadataFragment[]): string {
+    getMdsId(nodes: Node[] | BaseMetadataFragment[]): string {
         const types = nodes.map((node) => (node as Node).type || (node as Metadata).nodeType);
         if (!areAllEqual(types)) {
             throw new UserPresentableError('MDS.ERROR_INVALID_TYPE_COMBINATION');
         }
-        const requestedMdsIds = nodes.map((node) => (node as Node).metadataset || (node as Metadata).info.metadataSet || RestConstants.DEFAULT);
+        const requestedMdsIds = nodes.map(
+            (node) =>
+                (node as Node).metadataset ||
+                (node as Metadata).info.metadataSet ||
+                RestConstants.DEFAULT,
+        );
         if (!areAllEqual(requestedMdsIds)) {
             throw new UserPresentableError('MDS.ERROR_INVALID_MDS_COMBINATION');
         }
-        if (nodes[0] instanceof Node &&
+        if (
+            nodes[0] instanceof Node &&
             (nodes as Node[]).filter(
-                (n) => !!n.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]).length >0
+                (n) => !!n.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL],
+            ).length > 0
         ) {
             throw new UserPresentableError('MDS.ERROR_ELEMENT_TYPE_UNSUPPORTED');
         }
@@ -134,7 +137,8 @@ export class MdsEditorCommonService {
     }
     getGroupIdGraphql(nodes: BaseMetadataFragment[]): MdsType {
         const node = nodes[0];
-        let nodeGroup: MdsType = node.nodeType === RestConstants.CCM_TYPE_MAP ? MdsType.Map : MdsType.Io;
+        let nodeGroup: MdsType =
+            node.nodeType === RestConstants.CCM_TYPE_MAP ? MdsType.Map : MdsType.Io;
         if (node.info.objectType?.id === 'folder-link') {
             nodeGroup = MdsType.MapRef;
         }

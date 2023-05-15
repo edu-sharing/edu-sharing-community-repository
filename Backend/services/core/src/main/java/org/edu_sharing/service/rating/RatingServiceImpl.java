@@ -5,10 +5,12 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.EduSharingRatingCache;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityService;
@@ -19,14 +21,19 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class RatingServiceImpl implements RatingService {
+/**
+ * Deprecated, use the new mongo service instead!
+ */
+@Deprecated
+public class RatingServiceImpl extends RatingServiceAdapter {
 
-    private Logger logger= Logger.getLogger(RatingServiceImpl.class);
+    private final Logger logger= Logger.getLogger(RatingServiceImpl.class);
 
     ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
     ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
@@ -36,6 +43,10 @@ public class RatingServiceImpl implements RatingService {
     private NodeService nodeService;
 
     public RatingServiceImpl() {
+        super(ApplicationInfoList.getHomeRepository().getAppId());
+    }
+
+    public void init(){
         this.nodeService=NodeServiceFactory.getLocalService();
         this.authorityService=AuthorityServiceFactory.getLocalService();
         this.permissionService=PermissionServiceFactory.getLocalService();
@@ -109,7 +120,6 @@ public class RatingServiceImpl implements RatingService {
      * Get the accumulated ratings data
      * @param nodeId the id of the node
      * @param after the date which the ratings should have at least. Use null (default) to use ratings of all times and also use the cache
-     * @return
      */
     @Override
     public RatingDetails getAccumulatedRatings(String nodeId, Date after){
@@ -130,7 +140,7 @@ public class RatingServiceImpl implements RatingService {
         Rating userRating = this.getRatingForUser(nodeId);
 
         RatingsCache accumulated = new RatingsCache();
-        accumulated.setOverall(new RatingsCache.RatingData(ratings.stream().map(Rating::getRating).reduce((a, b)->a+b).orElse(0.),ratings.size()));
+        accumulated.setOverall(new RatingsCache.RatingData(ratings.stream().map(Rating::getRating).reduce(Double::sum).orElse(0.),ratings.size()));
         accumulated.setUsers(new HashMap<>(ratings.stream().collect(Collectors.toMap(Rating::getAuthority, Rating::getRating))));
         HashMap<String, RatingsCache.RatingData> affiliation = new HashMap<>();
         // collect counts for each affiliation group
@@ -148,6 +158,16 @@ public class RatingServiceImpl implements RatingService {
             EduSharingRatingCache.put(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),accumulated);
         }
         return cacheToDetail(accumulated);
+    }
+
+    @Override
+    public List<String> getAlteredNodeIds(@NotNull Date after) {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public List<RatingHistory> getAccumulatedRatingHistory(String nodeId, Date after) {
+        throw new NotImplementedException();
     }
 
     private RatingDetails cacheToDetail(RatingsCache cache) {

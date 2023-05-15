@@ -75,7 +75,7 @@ public class ClientUtilsService {
 			for (int i = 0; i < list.size(); i++) {
 				TitleTag titleTag = (TitleTag) list.elementAt(i);
 				String rawTagName = titleTag.getRawTagName().toLowerCase();
-				if (rawTagName != null) {
+				if (titleTag.getParent() != null && "head".equals(titleTag.getParent().getText())) {
 
 					String title = titleTag.getTitle();
 					if (title != null)
@@ -106,9 +106,9 @@ public class ClientUtilsService {
 				String content = metaTag.getAttribute("content");
 				if (name != null && content != null) {
 					if (name.equals("description"))
-						info.setDescription(content);
+						info.setDescription(StringEscapeUtils.unescapeHtml(content));
 					if (name.equals("keywords"))
-						info.setKeywords(content.split(","));
+						info.setKeywords(StringEscapeUtils.unescapeHtml(content).split(","));
 				}
 
 			}
@@ -135,13 +135,16 @@ public class ClientUtilsService {
 					}
 				}
 			}
-			addDuplicateNodes(url, info);
 			return info;
-
 		} catch (Throwable e) {
 			logger.info(e.getMessage());
+			try {
+				addDuplicateNodes(url, info);
+			} catch (Throwable e2) {
+				logger.info(e2.getMessage());
+			}
+			return info;
 		}
-		return null;
 	}
 
 	private static void addDuplicateNodes(String url, WebsiteInformation info) throws DAOException {

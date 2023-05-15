@@ -110,6 +110,7 @@ public class VCardConverter {
 						VCardVersion.V3_0.equals(vcard.getVersion().getVersion()) ||
 								VCardVersion.V4_0.equals(vcard.getVersion().getVersion())
 				)) {
+					vcardMap = new HashMap<>(vcardMap.entrySet().stream().filter(e -> ( e.getKey() != null && e.getValue() != null)).collect(Collectors.toMap(e -> e.getKey(), e-> e.getValue())));
 					vcardMap = new HashMap<>(vcardMap.entrySet()
 							.stream()
 							.collect(Collectors.toMap(
@@ -132,6 +133,8 @@ public class VCardConverter {
 	public static String getNameForVCard(String prefix,HashMap<String,Object> data){
 		if(isPersonVCard(prefix,data)){
 			String name="";
+			if(data.containsKey(prefix+CCConstants.VCARD_TITLE))
+				name+=data.get(prefix+CCConstants.VCARD_TITLE)+" ";
 			if(data.containsKey(prefix+CCConstants.VCARD_GIVENNAME))
 				name+=data.get(prefix+CCConstants.VCARD_GIVENNAME)+" ";
 			if(data.containsKey(prefix+CCConstants.VCARD_SURNAME))

@@ -1,328 +1,339 @@
-@import "../../core-ui-module/styles/variables";
-$path:'../../../assets/images/';
+@import '../../core-ui-module/styles/variables';
+$path: '../../../assets/images/';
 
-.profile-bg{
-  div{
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
-    img {
-      position: fixed;
-      display: block;
-      width: 100vw;
-      height: 100vh;
-      object-fit: cover;
+.profile-bg {
+    div {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
     }
-  .avatar-default{
-    background: url($path + 'layout/register.jpg') no-repeat;
-    background-size: cover;
-  }
+    img {
+        position: fixed;
+        display: block;
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
+    }
+    .avatar-default {
+        background: url($path + 'layout/register.jpg') no-repeat;
+        background-size: cover;
+    }
 }
 .profiles-wrapper {
-  display: flex;
-  padding-top: $mainnavHeight;
-  height: calc(100% - #{$mainnavHeight});
-  align-items: center;
-  .profiles {
-    position: relative;
-    width: 480px;
-    margin: auto;
     display: flex;
-    flex-direction: column;
-    padding-bottom: 20px;
-    background: white;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-
-    .name {
-      font-size: 140%;
-      font-weight: bold;
-      margin-top: 5px;
-    }
-
-    .profile {
-      white-space: pre-line;
-    }
-
-    .top {
-      position: relative;
-      padding-top: 40px;
-      padding-bottom: 20px;
-      padding-left: 20px;
-      padding-right: 20px;
-      text-align: center;
-      color: $textOnPrimary;
-      z-index: 2;
-      overflow: hidden;
-
-      a {
-        color: $textOnPrimary;
-      }
-
-      a, .name, .mail, es-user-avatar, input, .editAvatar {
+    height: calc(100vh - var(--mainnavHeight));
+    align-items: center;
+    .profiles {
         position: relative;
-        z-index: 2;
-      }
-
-      .mail {
-        opacity: 0.75;
-      }
-
-      es-user-avatar {
+        width: 480px;
+        margin: auto;
         display: flex;
-        justify-content: center;
-      }
+        flex-direction: column;
+        padding-bottom: 20px;
+        background: white;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 
-      mat-form-field {
-        width: auto;
-        margin: 10px;
-        z-index: 2;
-        //background-color: rgba(255,255,255,0.1);
-      }
-
-      .edit, es-actionbar {
-        position: absolute;
-        right: 20px;
-        top: 20px;
-        z-index: 10;
-      }
-      ::ng-deep {
-        .mat-flat-button, .mat-button {
-          background-color: transparent;
-          color: #fff;
-          &:disabled{
-            opacity: 0.25;
-          }
-          transition: all $transitionNormal;
-          &:hover{
-            background-color: rgba(0,0,0,.1);
-          }
-        }
-      }
-
-      .editAvatar {
-        position: absolute;
-        left: calc(50% + 60px);
-        top: 82px;
-        user-select: none;
-
-        > button {
-          padding: 10px;
+        .name {
+            font-size: 140%;
+            font-weight: bold;
+            margin-top: 5px;
         }
 
-        .new-avatar-button {
-          left: -118px;
-          border-radius: 50%;
-          position: absolute;
-          top: -45px;
-          height: 120px;
-          width: 116px;
-          cursor: pointer;
-          overflow: hidden;
+        .profile {
+            white-space: pre-line;
+        }
 
-          span {
-            background: rgba(0, 0, 0, 0.7);
-            bottom: 0;
-            color: #fff;
-            font-size: 9pt;
-            left: 0;
-            position: absolute;
-            padding-top: 7px;
-            padding-bottom: 10px;
+        .top {
+            position: relative;
+            padding-top: 40px;
+            padding-bottom: 20px;
+            padding-left: 20px;
+            padding-right: 20px;
             text-align: center;
+            color: $textOnPrimary;
+            z-index: 2;
+            overflow: hidden;
+
+            a {
+                color: $textOnPrimary;
+            }
+
+            a,
+            .name,
+            .mail,
+            es-user-avatar,
+            input,
+            .editAvatar {
+                position: relative;
+                z-index: 2;
+            }
+
+            .mail {
+                opacity: 0.75;
+            }
+
+            es-user-avatar {
+                display: flex;
+                justify-content: center;
+            }
+
+            mat-form-field {
+                width: auto;
+                margin: 10px;
+                z-index: 2;
+                //background-color: rgba(255,255,255,0.1);
+            }
+
+            .edit,
+            es-actionbar {
+                position: absolute;
+                right: 20px;
+                top: 20px;
+                z-index: 10;
+            }
+            ::ng-deep {
+                .mat-flat-button,
+                .mat-button {
+                    background-color: transparent;
+                    color: #fff;
+                    &:disabled {
+                        opacity: 0.25;
+                    }
+                    transition: all $transitionNormal;
+                    &:hover {
+                        background-color: rgba(0, 0, 0, 0.1);
+                    }
+                }
+            }
+
+            .editAvatar {
+                position: absolute;
+                left: calc(50% + 60px);
+                top: 82px;
+                user-select: none;
+
+                > button {
+                    padding: 10px;
+                }
+
+                .new-avatar-button {
+                    left: -118px;
+                    border-radius: 50%;
+                    position: absolute;
+                    top: -45px;
+                    height: 120px;
+                    width: 116px;
+                    cursor: pointer;
+                    overflow: hidden;
+
+                    span {
+                        background: rgba(0, 0, 0, 0.7);
+                        bottom: 0;
+                        color: #fff;
+                        font-size: 9pt;
+                        left: 0;
+                        position: absolute;
+                        padding-top: 7px;
+                        padding-bottom: 10px;
+                        text-align: center;
+                        width: 100%;
+                    }
+                }
+            }
+        }
+
+        .about,
+        .stats,
+        .authorityName,
+        .changePassword,
+        .persistent-id {
+            max-width: 500px;
+            margin: auto;
+            padding: 0 25px;
+        }
+
+        .changePassword,
+        .persistent-id {
+            display: flex;
+            flex-direction: column;
+            padding-top: 40px;
+
+            .toggle {
+                color: $primary;
+                text-transform: uppercase;
+                float: left;
+                margin-bottom: 20px;
+                width: 100%;
+
+                div {
+                    float: left;
+                    display: flex;
+                    align-items: center;
+                }
+
+                i {
+                    margin-right: 10px;
+                }
+            }
+        }
+
+        .change-buttons {
             width: 100%;
-          }
+            text-align: right;
         }
-      }
-    }
+        .persistent-id {
+            > .persistent-id-inputs {
+                display: flex;
+                flex-direction: column;
+                mat-form-field {
+                    padding-bottom: 20px;
+                }
+                es-info-message {
+                    display: flex;
+                    width: 100%;
+                    margin-bottom: 20px;
+                }
+            }
+        }
+        .about {
+            position: relative;
 
-    .about, .stats, .authorityName, .changePassword, .persistent-id {
-      max-width: 500px;
-      margin: auto;
-      padding: 0 25px;
-    }
+            .about-edit {
+                padding-top: 10px;
+            }
+            .about {
+                padding-top: 25px;
+                > div {
+                    padding: 0 15px;
+                }
+            }
 
-    .changePassword, .persistent-id {
-      display: flex;
-      flex-direction: column;
-      padding-top: 40px;
+            mat-form-field {
+                width: 100%;
+            }
 
-      .toggle {
-        color: $primary;
-        text-transform: uppercase;
-        float: left;
-        margin-bottom: 20px;
-        width: 100%;
+            .about-buttons {
+                padding-top: 10px;
+                text-align: right;
+            }
 
-        div {
-          float: left;
-          display: flex;
-          align-items: center;
+            .profiles,
+            .empty {
+                white-space: pre-line;
+            }
+
+            .empty {
+                color: $textVeryLight;
+            }
+
+            /* background: url($path + 'quotes.svg') 10px 0 no-repeat; */
         }
 
-        i {
-          margin-right: 10px;
+        .quotes {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            color: $textMain;
         }
-      }
-    }
 
-    .change-buttons {
-      width: 100%;
-      text-align: right;
-    }
-    .persistent-id{
-      >.persistent-id-inputs {
-        display: flex;
-        flex-direction: column;
-        mat-form-field {
-          padding-bottom: 20px;
+        .statsBackground {
+            background-color: #fff;
+            width: 100%;
+            @include materialShadow();
         }
-        es-info-message {
-          display: flex;
-          width: 100%;
-          margin-bottom: 20px;
+
+        .stats {
+            padding-top: 20px;
+            padding-bottom: 10px;
+            display: flex;
+            text-align: center;
+            flex-direction: row;
+
+            > div {
+                display: flex;
+                flex-direction: column;
+                flex-grow: 1;
+                align-items: center;
+                padding: 0 10px;
+
+                > div {
+                    display: flex;
+                }
+            }
+
+            .stat {
+                color: $textLight;
+            }
+
+            .value {
+                font-size: 30pt;
+            }
         }
-      }
-    }
-    .about {
-      position: relative;
 
-      .about-edit {
-        padding-top: 10px;
-      }
-      .about {
-        padding-top: 25px;
-        > div{
-          padding:0 15px;
+        .authorityName {
+            padding-top: 20px;
         }
-      }
 
-      mat-form-field {
-        width: 100%;
-      }
-
-      .about-buttons {
-        padding-top: 10px;
-        text-align: right;
-      }
-
-      .profiles, .empty {
-        white-space: pre-line;
-      }
-
-      .empty {
-        color: $textVeryLight;
-      }
-
-      /* background: url($path + 'quotes.svg') 10px 0 no-repeat; */
-    }
-
-    .quotes {
-      position: absolute;
-      top: 20px;
-      left: 30px;
-      color: $textMain;
-    }
-
-    .statsBackground {
-      background-color: #fff;
-      width: 100%;
-      @include materialShadow();
-    }
-
-    .stats {
-      padding-top: 20px;
-      padding-bottom: 10px;
-      display: flex;
-      text-align: center;
-      flex-direction: row;
-
-      > div {
-        display: flex;
-        flex-direction: column;
-        flex-grow: 1;
-        align-items: center;
-        padding: 0 10px;
-
-        > div {
-          display: flex;
+        .main {
+            flex-grow: 1;
         }
-      }
 
-      .stat {
-        color: $textLight;
-      }
+        .save {
+            position: relative;
+            z-index: 2;
+            width: 100%;
 
-      .value {
-        font-size: 30pt;
-      }
+            .btn-flat:hover {
+                background-color: #eee;
+            }
+
+            button {
+                float: right;
+            }
+        }
     }
-
-    .authorityName {
-      padding-top: 20px;
-    }
-
-    .main {
-      flex-grow: 1;
-    }
-
-    .save {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-
-      .btn-flat:hover {
-        background-color: #eee;
-      }
-
-      button {
-        float: right;
-      }
-    }
-  }
 }
 
-.email-group-form{
+.email-group-form {
     display: flow-root;
-    mat-slide-toggle{
+    mat-slide-toggle {
         position: relative;
         z-index: 1;
     }
 }
 
-:host ::ng-deep{
-  es-input-password mat-form-field{
-    width: 100%;
-  }
+:host ::ng-deep {
+    es-input-password mat-form-field {
+        width: 100%;
+    }
 }
 @media screen and (max-width: ($mobileTabSwitchWidth)) {
-  .profiles-wrapper .profiles {
-    width: 100%;
-    left: 0;
-    padding-bottom: 20px + $mobileTabNavHeight;
-  }
+    .profiles-wrapper .profiles {
+        width: 100%;
+        left: 0;
+        padding-bottom: 20px + $mobileTabNavHeight;
+    }
 
-  .email-group-form{
-    margin-bottom: calc(#{$mobileTabNavHeight} / 2);
-  }
+    .email-group-form {
+        margin-bottom: calc(#{$mobileTabNavHeight} / 2);
+    }
 }
 @media only screen and (max-width: $mobileWidth - $mobileStage*2) {
-
-  .profiles {
-    margin-bottom: 40px;
-    .stats{
-      padding-left: 8px;
-      padding-right: 8px;
-      font-size: smaller;
-    }
-    .top {
-      .edit {
-        span{
-          display:none;
+    .profiles {
+        margin-bottom: 40px;
+        .stats {
+            padding-left: 8px;
+            padding-right: 8px;
+            font-size: smaller;
         }
-      }
+        .top {
+            .edit {
+                span {
+                    display: none;
+                }
+            }
+        }
     }
-  }
 }

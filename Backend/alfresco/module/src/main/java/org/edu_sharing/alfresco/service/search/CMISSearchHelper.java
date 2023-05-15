@@ -25,13 +25,13 @@ public class CMISSearchHelper {
 
     private static Logger logger= Logger.getLogger(CMISSearchHelper.class);
 
-    public static ResultSet fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters,List<String> aspects, CMISSearchData data, int from, int pageSize, int maxPermissionChecks){
-    	logger.info("from: "+from+ " pageSize:"+ pageSize);
+    public static ResultSet fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters,List<String> aspects, CMISSearchData data, int from, int pageSize, int maxPermissionChecks, StoreRef storeRef){
+    	logger.debug("from: "+from+ " pageSize:"+ pageSize);
     	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
         ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
         SearchParameters params=new SearchParameters();
-        params.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+        params.addStore((storeRef == null) ? StoreRef.STORE_REF_WORKSPACE_SPACESSTORE : storeRef);
         // will use the database
         params.setLanguage(SearchService.LANGUAGE_CMIS_ALFRESCO);
 
@@ -100,7 +100,7 @@ public class CMISSearchHelper {
         String query="SELECT "+tableNameAlias+".cmis:name FROM "+ tableName + " AS " + tableNameAlias + " " + join + where;
         params.setQuery(query);
         ResultSet result = serviceRegistry.getSearchService().query(params);
-        logger.info(query+": "+result.getNumberFound() +" "+ result.length() +" "+ result.getClass().getName() +" getBulkFetchSize: "+ result.getBulkFetchSize()+" "+result);
+        logger.debug(query+": "+result.getNumberFound() +" "+ result.length() +" "+ result.getClass().getName() +" getBulkFetchSize: "+ result.getBulkFetchSize()+" "+result);
         return result;
     }
 
@@ -112,7 +112,7 @@ public class CMISSearchHelper {
         }
     }
 
-    public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters, List<String> aspects, CMISSearchData data, int maxPermissionChecks){
+    public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters, List<String> aspects, CMISSearchData data, int maxPermissionChecks, StoreRef storeRef){
     	List<NodeRef> result = new ArrayList<NodeRef>();
 
         int from = 0;
@@ -121,21 +121,25 @@ public class CMISSearchHelper {
 
         ResultSet resultSet = null;
         do {
-     	   resultSet = fetchNodesByTypeAndFilters(nodeType, filters,aspects, data, from, pageSize, maxPermissionChecks);
+     	   resultSet = fetchNodesByTypeAndFilters(nodeType, filters,aspects, data, from, pageSize, maxPermissionChecks, storeRef);
      	   result.addAll(resultSet.getNodeRefs());
      	   from += pageSize;
         }while(resultSet.length() > 0);
 
-        logger.info("result:" + result.size());
+        logger.debug("result:" + result.size());
         return result;
     }
 
     public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters, CMISSearchData data){
-       return fetchNodesByTypeAndFilters(nodeType,filters,null, data,1000);
+       return fetchNodesByTypeAndFilters(nodeType,filters,null, data,1000, null);
     }
 
     public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters){
-        return fetchNodesByTypeAndFilters(nodeType,filters,null, null,1000);
+        return fetchNodesByTypeAndFilters(nodeType,filters,(StoreRef)null);
+    }
+
+    public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters, StoreRef storeRef){
+        return fetchNodesByTypeAndFilters(nodeType,filters,null, null,1000,storeRef);
     }
 
     /**
@@ -184,7 +188,7 @@ public class CMISSearchHelper {
 
         sp.setQuery("SELECT * FROM ccm:iometadata WHERE ccm:replicationsourceid = '"+replicationSourceId+"'");
         ResultSet resultSet = serviceRegistry.getSearchService().query(sp);
-        logger.info("found "+ resultSet.getNodeRefs().size() +" for:" + replicationSourceId);
+        logger.debug("found "+ resultSet.getNodeRefs().size() +" for:" + replicationSourceId);
         if(resultSet.getNodeRefs().size() == 0) return null;
         return resultSet.getNodeRefs().get(0);
     }

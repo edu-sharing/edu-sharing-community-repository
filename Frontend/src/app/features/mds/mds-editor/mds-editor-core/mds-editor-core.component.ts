@@ -1,10 +1,10 @@
-import {Component, Input, QueryList, ViewChildren} from '@angular/core';
+import { Component, Input, QueryList, ViewChildren } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CardComponent } from '../../../../shared/components/card/card.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import { MdsView } from '../../types/types';
-import {MdsEditorViewComponent} from '../mds-editor-view/mds-editor-view.component';
+import { MdsEditorViewComponent } from '../mds-editor-view/mds-editor-view.component';
 import { EditorMode } from '../../types/mds-types';
 
 @Component({
@@ -13,8 +13,6 @@ import { EditorMode } from '../../types/mds-types';
     styleUrls: ['./mds-editor-core.component.scss'],
 })
 export class MdsEditorCoreComponent {
-    /** Reference to the card component it is embedded in (if any). */
-    @Input('card') card: CardComponent;
     @ViewChildren('view') viewRef: QueryList<MdsEditorViewComponent>;
 
     views: MdsView[];
@@ -23,12 +21,12 @@ export class MdsEditorCoreComponent {
     readonly editorMode: EditorMode;
     readonly shouldShowExtendedWidgets$: BehaviorSubject<boolean>;
 
-    constructor(private mdsEditorInstance: MdsEditorInstanceService) {
+    constructor(public mdsEditorInstance: MdsEditorInstanceService) {
         this.shouldShowExtendedWidgets$ = this.mdsEditorInstance.shouldShowExtendedWidgets$;
         this.editorMode = this.mdsEditorInstance.editorMode;
         this.mdsEditorInstance.mdsInitDone.subscribe(() => this.init());
         this.hasExtendedWidgets$ = this.mdsEditorInstance.widgets.pipe(
-            map((widgets) => widgets.some((widget) => widget.definition.isExtended)),
+            map((widgets) => widgets?.some((widget) => widget.definition.isExtended)),
         );
     }
 

@@ -10,7 +10,7 @@ table, div {
 mat-tab-group {
     margin-bottom: 0;
     position: fixed;
-    top: $mainnavHeight;
+    top: var(--mainnavHeight);
     width: 100%;
     z-index: 15;
 }
@@ -23,27 +23,22 @@ mat-tab-group {
     position: relative;
     // Use `margin-top` instead of `top` to not create a negative position offset at the bottom of
     // the container, which could be overlapped by a custom footer.
-    margin-top: $mainnavHeight;
-    min-height: calc(100vh - #{$mainnavHeight});
+    min-height: calc(100vh - var(--mainnavHeight));
 
-    .collections-right {
-        > es-spinner {
-            text-align: center;
-        }
-    }
     &.collectionsContainerTabs {
-        margin-top: $mainnavHeight + 48px;
+        margin-top: 48px;
+        min-height: calc(100vh - (var(--mainnavHeight) + 48px));
     }
+
+    es-collection-content {
+        display: block;
+        padding-top: 30px;
+    }
+
     &.collectionsContainerNoSidebar {
-        padding:0 10%;
+        padding: 0 10%;
         grid-template-columns: auto;
     }
-}
-.collection-new-preview-headline {
-    word-break: normal;
-    overflow-wrap: break-word;
-    line-height: normal;
-    margin: 0;
 }
 .switchToSearch {
     position: relative;
@@ -93,81 +88,15 @@ section {
 .collections-master-div {
     width: 100%;
 }
-
-.collections-header-textarea {
-    position: relative;
-    padding: 50px 20px 30px 20px;
-}
-
-.collections-header-texttop {
-    text-align: left;
-}
 .noAddPermissions {
     color: $textLight;
     padding-top: 10px;
-}
-.collection-new-preview-infoarea {
-    min-height: 120px;
-    padding: 16px;
-    color: white;
-}
-.card-image-icon-circle {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    background-color: rgba(0,0,0,.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    @include unselectableText();
-    > i {
-        color:#fff;
-        font-size: 45px;
-    }
 }
 .collection-header-image {
     position: relative;
     width: 100%;
     height: 100%;
     object-fit: cover;
-}
-.collection-new-preview-headline {
-    font-size: 150%;
-    padding-bottom: 15px;
-}
-
-.collection-new-preview-subline {
-    //font-size: 120%;
-    opacity: 0.85;
-}
-
-.collection-new-preview-infoline {
-    display: flex;
-    align-items: center;
-    opacity: 0.85;
-    margin-top: 16px;
-    margin-left: -2px;
-    margin-bottom: 4px;
-}
-
-.collection-nocontent-container {
-    text-align: left;
-    float: left;
-    width: 100%;
-}
-
-.collection-nocontent-big {
-    font-size: $fontSizeLarge;
-    color:$textLight;
-    margin-top: 20px;
-    text-align: center;
-    width: 100%;
-}
-
-.collection-nocontent-small {
-    padding: 16px;
-    padding-top: 0px;
-    padding-left: 0px;
 }
 
 .icon-bottom {
@@ -194,103 +123,12 @@ section {
     height: 25px;
     padding: 4px;
 }
-
-.card-collection-image-container {
-    position: relative;
-    text-align: center;
-    vertical-align: middle;
-    height: 200px;
-}
-
-.card-image-icon-container {
-    position: relative;
-    height: 200px;
-    width: 100%;
-    overflow: hidden;
-    margin: auto;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.big-edit-button {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    cursor: pointer;
-    border-radius: 50%;
-    opacity: 0;
-    //background: #ff000042;
-}
-.collection-option {
-    position: absolute;
-    top: -23px;
-    left:0;
-    right:0;
-    display: flex;
-    justify-content: center;
-    z-index: 1;
-    & ::ng-deep .actionbar > button.mat-button.cdk-keyboard-focused {
-        outline-color: white;
-    }
-}
-
-.collections-header {
-    background-color: $primary;
-    color: #fff;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    position: relative;
-    z-index: 1;
-    .collection-loading {
-        position: absolute;
-        z-index: 10;
-        display: flex;
-        width: 100%;
-        height: 100%;
-        align-items: center;
-        justify-content: center;
-        background-color: rgba(255,255,255,0.75);
-        backdrop-filter: blur(10px);
-    }
-}
-.dark-color {
-    color: #000;
-}
 .collections-master-div-notabs {
     padding: 0 35px;
 }
 
 .table-tab-title-short {
     display: none;
-}
-.collections-cards-div {
-    display: flex;
-    flex-direction: column;
-    .heading-group {
-        display: flex;
-        align-items: center;
-        > h2 {
-            flex-grow: 1;
-            margin: 5px 10px 0 0;
-        }
-        mat-slide-toggle {
-            margin-right: 20px;
-        }
-    }
-}
-.actionbarMaterials {
-    position: sticky;
-    top: $mainnavHeight;
-    display: flex;
-    justify-content: flex-end;
-    padding: 20px 30px;
-    margin: -20px -20px 0;
-    z-index: 2;
-    background-color: $backgroundColor;
 }
 .content-header {
     display: flex;
@@ -304,50 +142,27 @@ section {
         float: left;
         width: 100%;
     }
+    es-collection-content {
+        .actionbarMaterials {
+            position: sticky;
+            top: var(--mainnavHeight);
+            z-index: 2;
+            background-color: $backgroundColor;
+        }
+    }
 }
 .breadcrumb-space {
     padding: 15px 30px;
     background: #fff;
     @include materialShadow();
 }
-.collections-header-textarea{
-    background-color: rgba(0,0,0,0.15);
-    &.collections-header-textarea-bright{
-        background-color: rgba(255, 255, 255, 0.15);
-    }
-    .collection-label,.collection-metadata{
-        margin: 18px 0 0;
-        padding-top: 18px;
-        border-top: 1px solid rgba(0,0,0,.25);
-        opacity: 0.8;
-        font-size: 90%;
-    }
-    .collection-content{
-        margin-top:5px;
-    }
-    .collection-permissions.collection-content{
-        display: flex;
-        flex-direction: column;
-        > div{
-            display: flex;
-            align-items: center;
-            padding:3px 0;
-            >es-user-avatar{
-                height: 24px;
-                margin-right: 9px;
-            }
-            >span{
-                @include limitLineCount(2, 1.25);
-            }
-        }
-    }
-}
+
 @media only screen and (max-width: $mobileWidth+$mobileStage*3) {
     :host ::ng-deep {
         .tab-label {
             display: none;
         }
-        .mat-tab-label-active .tab-label{
+        .mat-tab-label-active .tab-label {
             display: flex;
         }
     }

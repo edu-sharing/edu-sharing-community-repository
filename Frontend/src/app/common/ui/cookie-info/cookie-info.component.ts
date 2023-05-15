@@ -15,9 +15,7 @@ import { CordovaService } from '../../services/cordova.service';
 })
 export class CookieInfoComponent implements OnInit {
     readonly buttons = [
-        new DialogButton('COOKIE_INFO.DECLINE', { color: 'standard' }, () =>
-            window.history.back(),
-        ),
+        new DialogButton('COOKIE_INFO.DECLINE', { color: 'standard' }, () => window.history.back()),
         new DialogButton('COOKIE_INFO.ACCEPT', { color: 'primary' }, () => this.accept()),
     ];
     show = false;

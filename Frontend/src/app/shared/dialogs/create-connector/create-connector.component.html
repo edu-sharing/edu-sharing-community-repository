@@ -1,28 +1,45 @@
 <es-card
   *ngIf="_connector"
-  title="{{'CONNECTOR.'+_connector.id+'.TITLE' | translate }}"
-  subtitle="{{'CONNECTOR.'+_connector.id+'.NAME' | translate }}"
+  title="{{ 'CONNECTOR.' + _connector.id + '.TITLE' | translate }}"
+  subtitle="{{ 'CONNECTOR.' + _connector.id + '.NAME' | translate }}"
   height="auto"
   [icon]="_connector.icon"
   [buttons]="buttons"
   [isCancelable]="true"
-  (onCancel)="cancel()">
+  (onCancel)="cancel()"
+>
   <div class="card-content-padding">
     <form (ngSubmit)="create()">
       <mat-form-field>
-        <mat-label>{{'CONNECTOR.'+_connector.id+'.PLACEHOLDER' | translate }}</mat-label>
+        <mat-label>{{ 'CONNECTOR.' + _connector.id + '.PLACEHOLDER' | translate }}</mat-label>
         <input matInput type="text" #input [(ngModel)]="_name" name="filename" autofocus />
       </mat-form-field>
-      <mat-form-field [class.hide]="_connector.filetypes.length==1" >
-        <mat-label>{{'CONNECTOR_FORMAT_LABEL' | translate}}</mat-label>
-        <mat-select [(ngModel)]="type" name="filetype" [disabled]="_connector.filetypes.length==1">
-          <mat-option *ngFor="let filetype of _connector.filetypes;let i=index;" [value]="i">
-            {{('CONNECTOR.MIMETYPE.'+(filetype.mimetype=='application/zip' ? filetype.ccressourcetype+'_'+filetype.ccressourceversion+'_'+filetype.ccresourcesubtype : filetype.mimetype)) | translate}}</mat-option>
+      <mat-form-field [class.hide]="_connector.filetypes.length == 1">
+        <mat-label>{{ 'CONNECTOR_FORMAT_LABEL' | translate }}</mat-label>
+        <mat-select
+          [(ngModel)]="type"
+          name="filetype"
+          [disabled]="_connector.filetypes.length == 1"
+        >
+          <mat-option *ngFor="let filetype of _connector.filetypes; let i = index" [value]="i">
+            {{
+              'CONNECTOR.MIMETYPE.' +
+                (filetype.mimetype === 'application/zip'
+                  ? filetype.ccressourcetype +
+                    '_' +
+                    filetype.ccressourceversion +
+                    '_' +
+                    filetype.ccresourcesubtype
+                  : filetype.mimetype) | translate
+            }}</mat-option
+          >
         </mat-select>
       </mat-form-field>
     </form>
     <div class="name" *ngIf="_name.trim()">
-      {{'CONNECTOR.'+_connector.id+'.FILENAME' |translate}}: {{_name}}.{{getType().filetype}}
+      {{ 'CONNECTOR.' + _connector.id + '.FILENAME' | translate }}: {{ _name }}.{{
+        getType().filetype
+      }}
     </div>
   </div>
 </es-card>

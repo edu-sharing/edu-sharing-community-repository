@@ -1,12 +1,29 @@
 <div
   class="grid-card"
-  [class.grid-card-collection]="nodeHelper.isNodeCollection(node)"
+  [class.grid-card-collection]="isCollection"
   [class.grid-card-virtual]="node.virtual"
-  [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
+  [style.background-color]="isCollection ? node.collection.color : null"
+  [class.dynamic-single-click]="entriesService.singleClickHint === 'dynamic'"
+  [class.selected]="entriesService.selection.isSelected(node)"
   (contextmenu)="openContextmenu($event)"
   (keydown.ContextMenu)="openContextmenu($event)"
 >
+  <div
+    *ngIf="templatesService.overlay"
+    class="card-overlay"
+    (click)="
+      entriesService.clickItem.emit({
+        element: node,
+        source: ClickSource.Overlay
+      })
+    "
+  >
+    <ng-container
+      *ngTemplateOutlet="templatesService.overlay; context: { element: node }"
+    ></ng-container>
+  </div>
   <button
+    *ngIf="dropdown"
     #menuTrigger="matMenuTrigger"
     mat-button
     class="dropdown-dummy cdk-visually-hidden"
@@ -16,9 +33,10 @@
     tabindex="-1"
     aria-hidden="true"
   ></button>
-  <div class="card-top-bar">
+  <div class="card-top-bar" [style.background-color]="isCollection ? node.collection.color : null">
+    <div class="card-top-bar-collection-color" *ngIf="nodeHelper.isNodeCollection(node)"></div>
     <div class="card-top-bar-type">
-      <ng-container *ngIf="nodeHelper.isNodeCollection(node)">
+      <ng-container *ngIf="isCollection">
         <i
           [matTooltip]="
             'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName
@@ -31,35 +49,34 @@
           [esIcon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"
         ></i>
       </ng-container>
-      <ng-container *ngIf="!nodeHelper.isNodeCollection(node)">
-        <img
-          [src]="node.iconURL"
-          [alt]="
-            node.mediatype
-              ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
-              : ''
-          "
-          [matTooltip]="
-            node.mediatype
-              ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
-              : ''
-          "
-        />
+      <ng-container *ngIf="!isCollection">
+        <ng-container *ngTemplateOutlet="type; context: { node: this.node }"></ng-container>
       </ng-container>
     </div>
-    <div
-      *ngIf="nodeHelper.isNodeCollection(node) && node.collection.pinned"
-      class="card-top-bar-flag"
-    >
+    <div *ngIf="isCollection && node.collection.pinned" class="card-top-bar-flag">
       <i esIcon="edu-pin"></i>
     </div>
     <div class="card-top-bar-empty"></div>
+    <!--
+    <div
+      *ngIf="node.aspects?.includes('ccm:published')"
+      class="card-top-bar-published-copy"
+    >
+      <div class="node-published-copy">
+        <i
+          esIcon="content_copy"
+          [matTooltip]="'PUBLISHED_COPY_TOOLTIP' | translate"
+        ></i>
+      </div>
+    </div>
+    -->
     <div class="card-top-bar-comments">
       <div
         class="node-comments"
         *ngIf="node.type === 'ccm:io'"
-        (esDistinctClick)="
-          entriesService.clickItem.emit({
+        (click)="
+          entriesService.onClicked({
+            event: $event,
             element: node,
             source: ClickSource.Comments
           })
@@ -85,10 +102,10 @@
         ><i esIcon="filter_none"></i>
       </div>
     </div>
-    <div class="card-top-bar-checkbox">
+    <div class="card-top-bar-checkbox" *ngIf="entriesService.checkbox">
       <mat-checkbox
         [checked]="entriesService.selection.isSelected(node)"
-        (change)="entriesService.handleSelectionEvent(node)"
+        (change)="entriesService.onCheckboxChanged(node, $event.checked)"
         aria-label="{{ 'SELECT' | translate: { element: (node | nodeTitle) } }}"
       ></mat-checkbox>
     </div>
@@ -110,9 +127,10 @@
   </es-node-url>
   <div
     *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
-    class="clickable"
+    matRipple
     (click)="
-      entriesService.clickItem.emit({
+      entriesService.onClicked({
+        event: $event,
         element: node,
         source: ClickSource.Metadata
       })
@@ -147,53 +165,84 @@
       ></es-option-button>
       <div class="card-options-spacer"></div>
       <button
+        *ngIf="dropdown"
         mat-icon-button
         color="primary"
         (click)="openMenu(node)"
         [matMenuTriggerFor]="dropdown.menu"
         [attr.aria-label]="'OPTIONS_FOR' | translate: { element: (node | nodeTitle) }"
+        data-test="card-options-button"
       >
         <i esIcon="more_vert"></i>
       </button>
     </div>
   </div>
-</div>
-<ng-template #image let-playAnimation="playAnimation">
-  <div class="card-image-area">
-    <es-preview-image
-      *ngIf="!(nodeHelper.isNodeCollection(node) && node.preview.isIcon)"
-      [node]="node"
-      [playAnimation]="playAnimation"
-    ></es-preview-image>
+  <ng-template #image let-playAnimation="playAnimation">
     <div
-      *ngIf="nodeHelper.isNodeCollection(node) && node.preview.isIcon"
-      class="card-collection-image"
+      class="card-image-area"
+      [style.background-color]="isCollection ? node.collection.color : null"
     >
-      <i esIcon="layers"></i>
-    </div>
-  </div>
-</ng-template>
-<ng-template #meta let-link="link">
-  <div class="card-meta">
-    <div *ngFor="let displayPart of getVisibleColumns(); let first = first" class="card-meta-row">
-      <ng-container *ngIf="first">
-        <es-node-url
-          *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
+      <ng-container *ngIf="getTemplate(CustomFieldSpecialType.preview) as ref">
+        <ng-container *ngTemplateOutlet="ref; context: { node: this.node }"></ng-container>
+      </ng-container>
+      <ng-container *ngIf="!getTemplate(CustomFieldSpecialType.preview)">
+        <es-preview-image
+          *ngIf="!(isCollection && node.preview.isIcon)"
           [node]="node"
-          #link
-        >
-          <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
-        </es-node-url>
-        <div *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink">
-          <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
+          [playAnimation]="playAnimation"
+        ></es-preview-image>
+        <div *ngIf="isCollection && node.preview.isIcon" class="card-collection-image">
+          <i esIcon="layers"></i>
         </div>
       </ng-container>
-      <ng-container *ngIf="!first">
-        <label>
-          {{ displayPart | appListItemLabel }}
-        </label>
-        <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
-      </ng-container>
     </div>
-  </div>
-</ng-template>
+  </ng-template>
+  <ng-template #meta let-link="link">
+    <div class="card-meta">
+      <div
+        *ngFor="let displayPart of getVisibleColumns(); let first = first"
+        class="card-meta-row card-meta-row-{{ displayPart.name | lowercase }}"
+        [class.card-meta-row-primary]="first"
+      >
+        <ng-container *ngIf="first">
+          <es-node-url
+            *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
+            [node]="node"
+            #link
+          >
+            <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
+          </es-node-url>
+          <div *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink">
+            <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="!first">
+          <label>
+            {{ displayPart | esListItemLabel | async }}
+          </label>
+          <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
+        </ng-container>
+      </div>
+    </div>
+  </ng-template>
+  <ng-template #type let-node="node">
+    <ng-container *ngIf="getTemplate(CustomFieldSpecialType.type) as ref">
+      <ng-container *ngTemplateOutlet="ref; context: { node: this.node }"></ng-container>
+    </ng-container>
+    <ng-container *ngIf="!getTemplate(CustomFieldSpecialType.type)">
+      <img
+        [src]="node | esNodeIcon"
+        [alt]="
+          node.mediatype
+            ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
+            : ''
+        "
+        [matTooltip]="
+          node.mediatype
+            ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
+            : ''
+        "
+      />
+    </ng-container>
+  </ng-template>
+</div>

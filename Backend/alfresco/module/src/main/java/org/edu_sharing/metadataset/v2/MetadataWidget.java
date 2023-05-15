@@ -16,9 +16,22 @@ public class MetadataWidget extends MetadataTranslatable{
 		optional,
 		ignore
 	}
+	public enum IdRelation{
+		graphql,
+	}
 	public enum InteractionType {
 		Input,
 		None
+	}
+	public enum WidgetExpandable {
+		disabled,
+		expanded,
+		collapsed
+	}
+	public enum WidgetFilterMode {
+		disabled,
+		auto,
+		always
 	}
 	public enum TextEscapingPolicy{
 		// no escaping, strongly discouraged since it can allow XSS vulnerabilities if the data comes from untrusted sources
@@ -53,6 +66,7 @@ public class MetadataWidget extends MetadataTranslatable{
 			"multivalueCombined"
 	};
 
+	private Map<IdRelation, String> ids = new HashMap<>();
 	private String id,type,caption,bottomCaption,icon,
 	placeholder,defaultvalue,template,
 	suggestionSource,suggestionQuery,suggestDisplayProperty,unit,format,
@@ -65,6 +79,8 @@ public class MetadataWidget extends MetadataTranslatable{
 	private int maxlength;
 	private TextEscapingPolicy textEscapingPolicy = TextEscapingPolicy.htmlBasic;
 	private InteractionType interactionType = InteractionType.Input;
+	private WidgetFilterMode filterMode = WidgetFilterMode.disabled;
+	private WidgetExpandable expandable = WidgetExpandable.disabled;
 	/**
 	 * hint for the client if this widget creates a link to the search
 	 * so e.g. if you click a keyword, you can be directed to the search with this keyword as filter
@@ -171,6 +187,9 @@ public class MetadataWidget extends MetadataTranslatable{
 	}
 	public void setPlaceholder(String placeholder) {
 		this.placeholder = placeholder;
+	}
+	public Map<IdRelation, String> getIds() {
+		return ids;
 	}
 	public String getId() {
 		return id;
@@ -306,6 +325,22 @@ public class MetadataWidget extends MetadataTranslatable{
 
 	public InteractionType getInteractionType() {
 		return interactionType;
+	}
+
+	public WidgetFilterMode getFilterMode() {
+		return filterMode;
+	}
+
+	public void setFilterMode(WidgetFilterMode filterMode) {
+		this.filterMode = filterMode;
+	}
+
+	public WidgetExpandable getExpandable() {
+		return expandable;
+	}
+
+	public void setExpandable(WidgetExpandable expandable) {
+		this.expandable = expandable;
 	}
 
 	@Override

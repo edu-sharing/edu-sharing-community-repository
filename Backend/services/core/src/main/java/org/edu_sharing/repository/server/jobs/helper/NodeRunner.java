@@ -18,6 +18,7 @@ import javax.transaction.NotSupportedException;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -50,6 +51,8 @@ public class NodeRunner {
      * The start folder, defaults to company home
      */
     private String startFolder=nodeService.getCompanyHome();
+
+    private StoreRef startFolderStore = StoreRef.STORE_REF_WORKSPACE_SPACESSTORE;
 
     /**
      * The types of nodes that should be processed (or null for all)
@@ -99,6 +102,10 @@ public class NodeRunner {
 
     private String lucene = null;
     private StoreRef luceneStore = StoreRef.STORE_REF_WORKSPACE_SPACESSTORE;
+    /**
+     * custom nodes list to iterate over
+     */
+    private Collection<NodeRef> nodesList;
 
     public NodeRunner() {
 	}
@@ -183,12 +190,13 @@ public class NodeRunner {
         try {
             List<NodeRef> nodes;
 
-
-            if(lucene == null || lucene.trim().equals("")) {
+            if(nodesList != null) {
+                nodes = new ArrayList<>(nodesList);
+            } else if(lucene == null || lucene.trim().equals("")) {
                 if (runAsSystem)
-                    nodes = AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types, recurseMode));
+                    nodes = AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenRecursive(startFolderStore, startFolder, types, recurseMode));
                 else
-                    nodes = nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types, recurseMode);
+                    nodes = nodeService.getChildrenRecursive(startFolderStore, startFolder, types, recurseMode);
             }else{
                 logger.info("collection nodes by lucene:"+lucene);
                 if (runAsSystem)
@@ -282,6 +290,10 @@ public class NodeRunner {
     }
 
     private void runTask(NodeRef ref) {
+        if(ref == null){
+            logger.error("nodeRef is null");
+            return;
+        }
         try {
             if (keepModifiedDate)
                 policyBehaviourFilter.disableBehaviour(ref);
@@ -330,6 +342,22 @@ public class NodeRunner {
 
     public StoreRef getLuceneStore() {
         return luceneStore;
+    }
+
+    public Collection<NodeRef> getNodesList() {
+        return nodesList;
+    }
+
+    public void setNodesList(Collection<NodeRef> nodesList) {
+        this.nodesList = nodesList;
+    }
+
+    public void setStartFolderStore(StoreRef startFolderStore) {
+        this.startFolderStore = startFolderStore;
+    }
+
+    public StoreRef getStartFolderStore() {
+        return startFolderStore;
     }
 
     public enum TransactionMode{

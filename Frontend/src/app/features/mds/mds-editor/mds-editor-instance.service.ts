@@ -1,5 +1,5 @@
-import {EventEmitter, Injectable, OnDestroy} from '@angular/core';
-import {ConfigService, FacetsDict, MdsService, MdsViewRelation} from 'ngx-edu-sharing-api';
+import { EventEmitter, Injectable, OnDestroy } from '@angular/core';
+import { ConfigService, FacetsDict, MdsService, MdsViewRelation } from 'ngx-edu-sharing-api';
 import {
     BehaviorSubject,
     combineLatest,
@@ -11,7 +11,19 @@ import {
     Subject,
     zip,
 } from 'rxjs';
-import {filter, first, map, shareReplay, skip, switchMap, takeUntil, tap} from 'rxjs/operators';
+import {
+    distinctUntilChanged,
+    filter,
+    first,
+    map,
+    shareReplay,
+    skip,
+    startWith,
+    switchMap,
+    take,
+    takeUntil,
+    tap,
+} from 'rxjs/operators';
 import {
     ConfigurationHelper,
     ConfigurationService,
@@ -22,14 +34,12 @@ import {
     RestMdsService,
     RestSearchService,
 } from '../../../core-module/core.module';
-import {SearchService} from '../../../modules/search/search.service';
-import {MdsEditorCommonService} from './mds-editor-common.service';
 import {
     EditorMode,
     GeneralWidget,
     NativeWidget,
-    NativeWidgetComponent,
-    NativeWidgets, WidgetComponents
+    NativeWidgets,
+    WidgetComponents,
 } from '../types/mds-types';
 import {
     BulkBehavior,
@@ -37,7 +47,8 @@ import {
     EditorBulkMode,
     EditorType,
     InputStatus,
-    MdsDefinition, MdsEditorWidgetComponent,
+    MdsDefinition,
+    MdsEditorWidgetComponent,
     MdsGroup,
     MdsView,
     MdsWidget,
@@ -48,20 +59,30 @@ import {
     RequiredMode,
     Values,
 } from '../types/types';
-import {parseAttributes} from './util/parse-attributes';
+import { MdsEditorCommonService } from './mds-editor-common.service';
+import { NativeWidgetComponent } from './mds-editor-view/mds-editor-view.component';
+import { parseAttributes } from './util/parse-attributes';
+import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
+import { Apollo } from 'apollo-angular';
 import {
-    MdsEditorWidgetVersionComponent
-} from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
-import {Apollo} from 'apollo-angular';
-import {Metadata, Query, Suggestion, StringSuggestionData, SuggestionStatus, SuggestionInput, SuggestionsGQL} from 'ngx-edu-sharing-graphql';
-import {gql} from '@apollo/client';
-import {Helper} from '../../../core-module/rest/helper';
-import {MdsEditorWidgetCore} from './mds-editor-widget-core.directive';
-import {isNull} from '@angular/compiler/src/output/output_ast';
-import {isNumeric} from 'rxjs/util/isNumeric';
-import {RangedValue, RangedValueSuggestionData, MetadatasGQL} from 'ngx-edu-sharing-graphql';
-import {DisplayValue} from './widgets/DisplayValues';
-import {MdsEditorWidgetBase} from "./widgets/mds-editor-widget-base";
+    Metadata,
+    MetadatasGQL,
+    Query,
+    RangedValue,
+    RangedValueSuggestionData,
+    StringSuggestionData,
+    Suggestion,
+    SuggestionInput,
+    SuggestionsGQL,
+    SuggestionStatus,
+} from 'ngx-edu-sharing-graphql';
+import { gql } from '@apollo/client/core';
+import { Helper } from '../../../core-module/rest/helper';
+import { MdsEditorWidgetCore } from './mds-editor-widget-core.directive';
+import { isNumeric } from 'rxjs/util/isNumeric';
+import { DisplayValue } from './widgets/DisplayValues';
+import { MdsEditorWidgetBase } from './widgets/mds-editor-widget-base';
+
 export interface CompletionStatusField {
     widget: Widget;
     isCompleted: boolean;
@@ -73,12 +94,12 @@ export interface CompletionStatusEntry {
 }
 
 export type SuggestionGroup = {
-    suggestion: Suggestion,
-    data: RangedValueSuggestionData|StringSuggestionData,
-    path: string,
-    displayValue?: DisplayValue,
+    suggestion: Suggestion;
+    data: RangedValueSuggestionData | StringSuggestionData;
+    path: string;
+    displayValue?: DisplayValue;
     // the new status (if it has changed)
-    status?: SuggestionStatus
+    status?: SuggestionStatus;
 };
 export type Widget = InstanceType<typeof MdsEditorInstanceService.Widget>;
 
@@ -126,6 +147,8 @@ export class MdsEditorInstanceService implements OnDestroy {
         private readonly bulkMode = new BehaviorSubject<BulkMode>(null); // only when `isBulk`
         private showMissingRequiredFunction: (shouldScrollIntoView: boolean) => boolean;
         private readonly ready = new Subject<void>();
+        readonly initialValuesSubject = new BehaviorSubject<InitialValues>(null);
+        private suggestionValues: SuggestionGroup[];
 
         /**
          * An observable of the values that are common between all nodes if the property was to be
@@ -136,20 +159,20 @@ export class MdsEditorInstanceService implements OnDestroy {
             shareReplay(1),
         );
 
-        private readonly _new_inputValues$ =
-            this.mdsEditorInstanceService._new_inputValuesSubject.pipe(
-                map((values) => values[this.definition.id]),
-            );
-        private suggestionValues: SuggestionGroup[];
+        get definition() {
+            return this._definition;
+        }
 
         constructor(
             private mdsEditorInstanceService: MdsEditorInstanceService,
-            public readonly definition: MdsWidget,
+            private _definition: MdsWidget,
             public readonly viewId: string,
             public readonly repositoryId: string,
             public readonly relation: MdsViewRelation = null,
             public readonly variables: { [key: string]: string } = null,
         ) {
+            // deep copy to prevent persistence from inline overrides
+            this._definition = Helper.deepCopy(this._definition);
             this.replaceVariables();
             combineLatest([this.value$, this.bulkMode, this.ready])
                 .pipe(
@@ -180,7 +203,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             const pattern = condition.pattern ? new RegExp(`^(?:${condition.pattern})$`) : null;
             return this.jointProperty.pipe(
                 map((jointProperty) => {
-                    jointProperty = this.getJointProperty()
+                    jointProperty = this.getJointProperty();
                     if (pattern) {
                         return (
                             jointProperty &&
@@ -236,7 +259,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             return str;
         }
 
-        initWithNodes(nodes: Node[]|Metadata[]): void {
+        initWithNodes(nodes: Node[] | Metadata[]): void {
             const nodeValues = nodes.map((node) => this.readNodeValue(node, this.definition));
             if (nodeValues.every((nodeValue) => nodeValue === undefined)) {
                 const defaultValue = this.definition.defaultvalue
@@ -247,25 +270,34 @@ export class MdsEditorInstanceService implements OnDestroy {
             } else {
                 this.initialValues = this.calculateInitialValues(nodeValues as string[][]);
             }
-            if((nodes[0] as Node)?.ref?.id) {
+            if ((nodes[0] as Node)?.ref?.id) {
                 console.warn('Suggestions are not supported without graphql');
             } else {
-                this.suggestionValues = [].concat(...(nodes as Metadata[]).map(m => [].concat(...((m.generated || []).map(suggestion =>
-                        this.readNodeValue(suggestion, this.definition).map((v) => ({
-                                suggestion,
-                                // @TODO fix types
-                                path: (this.definition as any).ids.graphql,
-                                // copy from cache to prevent readonly issues
-                                data: {...(v as RangedValueSuggestionData)}
-                            } as SuggestionGroup)
-                        ))
-                ))));
+                this.suggestionValues = [].concat(
+                    ...(nodes as Metadata[]).map((m) =>
+                        [].concat(
+                            ...(m.generated || []).map((suggestion) =>
+                                this.readNodeValue(suggestion, this.definition).map(
+                                    (v) =>
+                                        ({
+                                            suggestion,
+                                            // @TODO fix types
+                                            path: (this.definition as any).ids.graphql,
+                                            // copy from cache to prevent readonly issues
+                                            data: { ...(v as RangedValueSuggestionData) },
+                                        } as SuggestionGroup),
+                                ),
+                            ),
+                        ),
+                    ),
+                );
             }
             // Set initial values, so the initial completion status is calculated correctly.
             this.value$.next([...this.initialValues.jointValues]);
             if (this.mdsEditorInstanceService.getIsBulk(nodes)) {
                 this.bulkMode.next('no-change');
             }
+            this.initialValuesSubject.next(this.initialValues);
             this.ready.next();
             this.ready.complete();
         }
@@ -282,15 +314,31 @@ export class MdsEditorInstanceService implements OnDestroy {
             }
             // Set initial values, so the initial completion status is calculated correctly.
             this.value$.next([...this.initialValues.jointValues]);
+            this.initialValuesSubject.next(this.initialValues);
             this.ready.next();
             this.ready.complete();
         }
 
+        /**
+         *  @deprecated
+         *  prefer to subscribe the initialValuesSubject instead, because the initial values might
+         *  not be ready when the widget gets loaded
+         * */
         getInitialValues(): InitialValues {
             return this.initialValues;
         }
         getSuggestions() {
             return this.suggestionValues;
+        }
+
+        getInitalValuesAsync(): Promise<InitialValues> {
+            return this.initialValuesSubject
+                .pipe(
+                    startWith(this.initialValuesSubject.value),
+                    filter((v) => !!v),
+                    take(1),
+                )
+                .toPromise();
         }
 
         getHasUnsavedDefault(): boolean {
@@ -455,11 +503,11 @@ export class MdsEditorInstanceService implements OnDestroy {
             }
             let criteria: any[] = [];
             if (this.mdsEditorInstanceService.editorMode === 'search') {
-                const values = await this.mdsEditorInstanceService.getValues();
+                const values = {
+                    ...(await this.mdsEditorInstanceService.getValues()),
+                    ...(this.mdsEditorInstanceService.externalFilters ?? {}),
+                };
                 delete values[this.definition.id];
-                values[RestConstants.PRIMARY_SEARCH_CRITERIA] = [
-                    this.mdsEditorInstanceService.searchService.searchTerm,
-                ];
                 criteria = RestSearchService.convertCritierias(
                     values,
                     this.mdsEditorInstanceService.widgets.value.map((w) => w.definition),
@@ -509,8 +557,11 @@ export class MdsEditorInstanceService implements OnDestroy {
             return mdsvl;
         }
 
-        private readNodeValue(node: Node|Metadata|Suggestion, definition: MdsWidget): string[]|RangedValueSuggestionData[] {
-            if((node as Node).properties) {
+        private readNodeValue(
+            node: Node | Metadata | Suggestion,
+            definition: MdsWidget,
+        ): string[] | RangedValueSuggestionData[] {
+            if ((node as Node).properties) {
                 if (definition.type === MdsWidgetType.Range) {
                     const from: string[] = (node as Node).properties[`${definition.id}_from`];
                     const to: string[] = (node as Node).properties[`${definition.id}_to`];
@@ -525,21 +576,24 @@ export class MdsEditorInstanceService implements OnDestroy {
             } else {
                 // @TODO: make types!
                 const graphqlId = (definition as any).ids?.graphql;
-                if(graphqlId) {
-                    let value = Helper.getDotPathFromNestedObject(
-                        node,
-                        graphqlId,
-                    );
-                    if(!value) {
+                if (graphqlId) {
+                    let value = Helper.getDotPathFromNestedObject(node, graphqlId);
+                    if (!value) {
                         return [];
                     }
-                    if(!Array.isArray(value)) {
+                    if (!Array.isArray(value)) {
                         value = [value];
                     }
-                    value = value.map((v: any) => v.__typename === 'RangedValue' ? (v as RangedValue).value : v);
+                    value = value.map((v: any) =>
+                        v.__typename === 'RangedValue' ? (v as RangedValue).value : v,
+                    );
                     return value;
-                } else if(!NativeWidgets[definition.id as NativeWidgetType]) {
-                    console.warn('Widget ' + definition.id + ' has no graphql mapping, returning empty value');
+                } else if (!NativeWidgets[definition.id as NativeWidgetType]) {
+                    console.warn(
+                        'Widget ' +
+                            definition.id +
+                            ' has no graphql mapping, returning empty value',
+                    );
                 }
                 return [];
             }
@@ -629,6 +683,8 @@ export class MdsEditorInstanceService implements OnDestroy {
      * Will be appended on init depending if they exist in the currently rendered group.
      */
     nativeWidgets = new BehaviorSubject<NativeWidget[]>([]);
+    /** Input to `MdsEditorWrapper`. */
+    externalFilters: Values;
 
     // Mutable state
     private readonly completionStatus$ = new BehaviorSubject<CompletionStatus>(null);
@@ -684,7 +740,6 @@ export class MdsEditorInstanceService implements OnDestroy {
         private restMdsService: RestMdsService,
         private configService: ConfigurationService,
         private restConnector: RestConnectorService,
-        private searchService: SearchService,
         private config: ConfigService,
     ) {
         this.registerInitMds();
@@ -744,9 +799,14 @@ export class MdsEditorInstanceService implements OnDestroy {
                                 widget.definition.interactionType !== 'None',
                         )
                         // only require widgets that meet conditions and are currently displayed
-                        .filter(
-                            (widget) =>
-                                this.meetsCondition(widget.definition, this.nodes$.value, this.graphqlMetadata$.value, this.values$.value, true)
+                        .filter((widget) =>
+                            this.meetsCondition(
+                                widget.definition,
+                                this.nodes$.value,
+                                this.graphqlMetadata$.value,
+                                this.values$.value,
+                                true,
+                            ),
                         );
                     return combineLatest(
                         filteredWidgets.map((widget) =>
@@ -829,14 +889,21 @@ export class MdsEditorInstanceService implements OnDestroy {
      *
      * @throws UserPresentableError
      */
+    // TODO: provide high-level functions (also `initWithValues`) that resolve when the mds is
+    // inflated.
     async initWithNodes(
         nodes: Node[],
         {
             groupId = null,
             refetch = true,
             bulkBehavior = BulkBehavior.Default,
-            editorMode = 'nodes'
-        }: { groupId?: string; refetch?: boolean; bulkBehavior?: BulkBehavior, editorMode?: EditorMode } = {},
+            editorMode = 'nodes',
+        }: {
+            groupId?: string;
+            refetch?: boolean;
+            bulkBehavior?: BulkBehavior;
+            editorMode?: EditorMode;
+        } = {},
     ): Promise<EditorType> {
         this.editorMode = editorMode;
         if (refetch) {
@@ -853,7 +920,10 @@ export class MdsEditorInstanceService implements OnDestroy {
             groupId = this.mdsEditorCommonService.getGroupId(this.nodes$.value);
         }
         const mdsId = this.mdsEditorCommonService.getMdsId(this.nodes$.value);
-        await this.initMds(groupId, mdsId, undefined, this.nodes$.value);
+        const wasInitialized = await this.initMds(groupId, mdsId, undefined, this.nodes$.value);
+        if (!wasInitialized) {
+            return null;
+        }
         for (const widget of this.widgets.value) {
             widget.initWithNodes(this.nodes$.value);
             if (
@@ -869,9 +939,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                 }
             }
         }
-        setTimeout(() =>
-                this.widgets.next(this.widgets.value.slice())
-            , 5000);
+        setTimeout(() => this.widgets.next(this.widgets.value.slice()), 5000);
         // to lower case because of remote repos wrong mapping
         return this.getGroup(
             this.mdsDefinition$.value,
@@ -879,10 +947,8 @@ export class MdsEditorInstanceService implements OnDestroy {
         ).rendering?.toLowerCase() as EditorType;
     }
 
-    mapGraphqlField(id: string, modify: (a: string[]) => string[]){
-        let path = id.split('.').filter(key =>
-            !isNumeric(key)
-        );
+    mapGraphqlField(id: string, modify: (a: string[]) => string[]) {
+        let path = id.split('.').filter((key) => !isNumeric(key));
         path = modify(path);
         const count = path.length;
         return path.join('{') + '}'.repeat(count - 1);
@@ -898,8 +964,13 @@ export class MdsEditorInstanceService implements OnDestroy {
             groupId = null,
             refetch = true,
             bulkBehavior = BulkBehavior.Default,
-            editorMode = 'nodes'
-        }: { groupId?: string; refetch?: boolean; bulkBehavior?: BulkBehavior, editorMode?: EditorMode } = {},
+            editorMode = 'nodes',
+        }: {
+            groupId?: string;
+            refetch?: boolean;
+            bulkBehavior?: BulkBehavior;
+            editorMode?: EditorMode;
+        } = {},
     ): Promise<EditorType> {
         this.editorMode = editorMode;
         if (refetch) {
@@ -913,11 +984,11 @@ export class MdsEditorInstanceService implements OnDestroy {
             this.editorBulkMode = { isBulk: false };
         }
         const query = this.metadatasGQL.fetch({
-            ids: graphqlIds
+            ids: graphqlIds,
         });
         const metadataSets = await query.toPromise();
         if (!groupId) {
-            metadataSets.data.metadatas
+            metadataSets.data.metadatas;
             groupId = this.mdsEditorCommonService.getGroupIdGraphql(metadataSets.data.metadatas);
         }
         const mdsId = this.mdsEditorCommonService.getMdsId(metadataSets.data.metadatas);
@@ -925,80 +996,100 @@ export class MdsEditorInstanceService implements OnDestroy {
             .getMetadataSet({ metadataSet: mdsId, repository: this.repository })
             .toPromise();
         const widgets = this.getWidgetsForGroup(groupId, mdsDefinition);
-        const graphqlRequests = new Set(widgets.map((w)  => {
-            let id: string[];
-            if(Object.values(NativeWidgetType).includes(w.id as NativeWidgetType)) {
-                id = NativeWidgets[w.id as NativeWidgetType]?.graphqlIds;
-            } else {
-                const componentClass: MdsEditorWidgetComponent = WidgetComponents[w.type as MdsWidgetType];
-                id = componentClass.mapGraphqlId(w);
-            }
-            if (!id) {
-                console.error(w.id + ' does not have a id for graphql, data will be missing! Please specify the graphql id in the widget definition', w);
-                id = [];
-            }
-            return id;
-        })
-            .reduce((acc, arr) => [...acc, ...arr])
-            .filter((id) => !!id)
-        );
-        const combined = Array.from(graphqlRequests).map((id) => this.mapGraphqlField(id,a => a)).join('\n');
-        const graphqlSuggestionRequests = new Set(widgets.map((w)  => {
-                let id: string[];
-                if(!Object.values(NativeWidgetType).includes(w.id as NativeWidgetType)) {
-                    // const componentClass: MdsEditorWidgetComponent = WidgetComponents[w.type as MdsWidgetType];
-                    // use the base class for mapping
-                    const baseId = MdsEditorWidgetBase.mapGraphqlId(w);
-                    if(!(baseId[0].startsWith('lom') && !baseId[0].startsWith('lom.lifecycle'))) {
-                        return [];
+        const graphqlRequests = new Set(
+            widgets
+                .map((w) => {
+                    let id: string[];
+                    if (Object.values(NativeWidgetType).includes(w.id as NativeWidgetType)) {
+                        id = NativeWidgets[w.id as NativeWidgetType]?.graphqlIds;
+                    } else {
+                        const componentClass: MdsEditorWidgetComponent =
+                            WidgetComponents[w.type as MdsWidgetType];
+                        id = componentClass.mapGraphqlId(w);
                     }
-                    // map into the "value" structure of the suggestion element
-                    baseId[0] += '.value';
-                }
-                if (!id) {
-                    id = [];
-                }
-                return id;
-            })
+                    if (!id) {
+                        console.error(
+                            w.id +
+                                ' does not have a id for graphql, data will be missing! Please specify the graphql id in the widget definition',
+                            w,
+                        );
+                        id = [];
+                    }
+                    return id;
+                })
                 .reduce((acc, arr) => [...acc, ...arr])
-                .filter((id) => !!id)
+                .filter((id) => !!id),
+        );
+        const combined = Array.from(graphqlRequests)
+            .map((id) => this.mapGraphqlField(id, (a) => a))
+            .join('\n');
+        const graphqlSuggestionRequests = new Set(
+            widgets
+                .map((w) => {
+                    let id: string[];
+                    if (!Object.values(NativeWidgetType).includes(w.id as NativeWidgetType)) {
+                        // const componentClass: MdsEditorWidgetComponent = WidgetComponents[w.type as MdsWidgetType];
+                        // use the base class for mapping
+                        const baseId = MdsEditorWidgetBase.mapGraphqlId(w);
+                        if (
+                            !(baseId[0].startsWith('lom') && !baseId[0].startsWith('lom.lifecycle'))
+                        ) {
+                            return [];
+                        }
+                        // map into the "value" structure of the suggestion element
+                        baseId[0] += '.value';
+                    }
+                    if (!id) {
+                        id = [];
+                    }
+                    return id;
+                })
+                .reduce((acc, arr) => [...acc, ...arr])
+                .filter((id) => !!id),
         );
         // This is a bit hacky, may we find an easier way to dynamically fetch the suggestions?
-        const combinedSuggestions = [].concat(...Array.from(graphqlSuggestionRequests).map((id) =>
-            [
-                this.mapGraphqlField(id, a => {
-                    a.push('value')
-                    return a;
-                }),
-                this.mapGraphqlField(id, a => {
-                    a.push('info')
-                    a.push('status')
-                    return a;
-                }),
-                this.mapGraphqlField(id, a => {
-                    a.push('version')
-                    return a;
-                }),
-                this.mapGraphqlField(id, a => {
-                    a.push('info')
-                    a.push('editor')
-                    return a;
-                })
-            ]
-        )).join('\n');
-        const metaQueryQgl = `query($ids: [ID!]) {
+        const combinedSuggestions = []
+            .concat(
+                ...Array.from(graphqlSuggestionRequests).map((id) => [
+                    this.mapGraphqlField(id, (a) => {
+                        a.push('value');
+                        return a;
+                    }),
+                    this.mapGraphqlField(id, (a) => {
+                        a.push('info');
+                        a.push('status');
+                        return a;
+                    }),
+                    this.mapGraphqlField(id, (a) => {
+                        a.push('version');
+                        return a;
+                    }),
+                    this.mapGraphqlField(id, (a) => {
+                        a.push('info');
+                        a.push('editor');
+                        return a;
+                    }),
+                ]),
+            )
+            .join('\n');
+        const metaQueryQgl =
+            `query($ids: [ID!]) {
              metadatas(
                     input: {
                         ids: $ids
                     }
                   ) {
                   id,
-                ` + combined + `
+                ` +
+            combined +
+            `
                     generated {
                         id,
                         nodeId,
                         type,
-                         ` + combinedSuggestions + `
+                         ` +
+            combinedSuggestions +
+            `
                     }
                 }
             }`;
@@ -1006,16 +1097,14 @@ export class MdsEditorInstanceService implements OnDestroy {
         const metaQuery = this.apollo.query<Query>({
             query: gql(metaQueryQgl),
             variables: {
-                ids: graphqlIds
-            }
+                ids: graphqlIds,
+            },
         });
         // request from graphql
         const metadata = await metaQuery.toPromise();
         this.graphqlMetadata$.next(metadata.data.metadatas);
         console.log('graphql meta done', this.graphqlMetadata$.value);
-        setTimeout(() =>
-                this.widgets.next(this.widgets.value.slice())
-            , 5000);
+        setTimeout(() => this.widgets.next(this.widgets.value.slice()), 5000);
         await this.initMds(groupId, mdsId, undefined, null, null, this.graphqlMetadata$.value);
         for (const widget of this.widgets.value) {
             widget.initWithNodes(this.graphqlMetadata$.value);
@@ -1048,17 +1137,18 @@ export class MdsEditorInstanceService implements OnDestroy {
         this.editorMode = editorMode;
         this.editorBulkMode = { isBulk: false };
         this.values$.next(initialValues);
-        if(mdsId === null) {
+        if (mdsId === null) {
             try {
                 const sets = ConfigurationHelper.filterValidMds(
                     repository,
-                    (await this.restMdsService.getSets().toPromise()).metadatasets,
-                    this.configService);
+                    await this.mdsService.getAvailableMetadataSets().toPromise(),
+                    this.configService,
+                );
                 mdsId = sets[0]?.id;
-            } catch(e) {
+            } catch (e) {
                 console.warn('Error while resolving primary mds', e);
             }
-            if(!mdsId) {
+            if (!mdsId) {
                 mdsId = RestConstants.DEFAULT;
             }
         }
@@ -1114,6 +1204,10 @@ export class MdsEditorInstanceService implements OnDestroy {
 
     getHasUserChanges(): boolean {
         return this.hasUserChanges$.value;
+    }
+
+    observeHasUserChanges(): Observable<boolean> {
+        return this.hasUserChanges$.asObservable();
     }
 
     getCanSave(): boolean {
@@ -1195,9 +1289,9 @@ export class MdsEditorInstanceService implements OnDestroy {
         let newValues: {
             id?: string;
             node?: Node;
-            values: Values
+            values: Values;
         }[];
-        if(this.graphqlMetadata$.value) {
+        if (this.graphqlMetadata$.value) {
             newValues = await this.getGraphqlValues();
         } else if (!this.nodes$.value) {
             return this.getValues();
@@ -1228,7 +1322,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             newValues,
             versionWidget?.comment || RestConstants.COMMENT_METADATA_UPDATE,
         );
-        if(this.graphqlMetadata$.value) {
+        if (this.graphqlMetadata$.value) {
             await this.saveGraphqlSuggestions();
         }
         return updatedNodes;
@@ -1287,11 +1381,16 @@ export class MdsEditorInstanceService implements OnDestroy {
                 // @TODO: Remove any cast
                 const property = (widget.definition as any).ids?.graphql;
                 const propertyOld = widget.definition.id;
-                if(!property) {
-                    console.warn('widget "' + propertyOld + '" has no graphql id, it will not be stored!');
+                if (!property) {
+                    console.warn(
+                        'widget "' + propertyOld + '" has no graphql id, it will not be stored!',
+                    );
                     return acc;
                 }
-                const newValue = this.getNewPropertyValue(widget, Helper.getDotPathFromNestedObject(node, property));
+                const newValue = this.getNewPropertyValue(
+                    widget,
+                    Helper.getDotPathFromNestedObject(node, property),
+                );
                 // filter null values in search
                 if (newValue) {
                     if (widget.definition.type === MdsWidgetType.Range) {
@@ -1341,7 +1440,9 @@ export class MdsEditorInstanceService implements OnDestroy {
             }, {} as { [key: string]: string[] });
     }
     getRegisteredWidgets(): Observable<GeneralWidget[]> {
-        return zip(this.widgets, this.nativeWidgets).pipe(map(x => (x[0] as GeneralWidget[]).concat(x[1])));
+        return zip(this.widgets, this.nativeWidgets).pipe(
+            map((x) => (x[0] as GeneralWidget[]).concat(x[1])),
+        );
     }
 
     registerNativeWidget(component: NativeWidgetComponent, viewId: string): void {
@@ -1462,7 +1563,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         return { mdsId, repository, groupId, mdsDefinition, views, widgets };
     }
 
-    private getIsBulk(nodes: Node[]|any[]): boolean {
+    private getIsBulk(nodes: Node[] | any[]): boolean {
         return nodes?.length > 1;
     }
 
@@ -1502,10 +1603,7 @@ export class MdsEditorInstanceService implements OnDestroy {
     ) {
         return new MdsEditorInstanceService.Widget(this, widgetDefinition, viewId, repository);
     }
-    private getWidgetsForGroup(
-        groupId: string,
-        mdsDefinition = this.mdsDefinition$.value
-    ) {
+    private getWidgetsForGroup(groupId: string, mdsDefinition = this.mdsDefinition$.value) {
         const group = this.getGroup(mdsDefinition, groupId);
         if (!group) {
             throw new Error(`no such group "${groupId}"`);
@@ -1516,16 +1614,24 @@ export class MdsEditorInstanceService implements OnDestroy {
     private getAllAvailableWidgets(
         mdsDefinition: MdsDefinition,
         views: MdsView[],
-        filterByConditions = true
+        filterByConditions = true,
     ) {
         const availableWidgets = mdsDefinition.widgets
             .filter((widget) => views.some((view) => view.html.indexOf(widget.id) !== -1))
-            .filter(
-                (widget) => filterByConditions ? this.meetsCondition(widget, this.nodes$.value, this.graphqlMetadata$.value, this.values$.value, false) : true
+            .filter((widget) =>
+                filterByConditions
+                    ? this.meetsCondition(
+                          widget,
+                          this.nodes$.value,
+                          this.graphqlMetadata$.value,
+                          this.values$.value,
+                          false,
+                      )
+                    : true,
             );
         // add all native widgets so they get parsed properly if they have inline attributes
-        for(const key of Object.keys(NativeWidgetType)) {
-            if(!availableWidgets.find(w => w.id === (NativeWidgetType as any)[key])) {
+        for (const key of Object.keys(NativeWidgetType)) {
+            if (!availableWidgets.find((w) => w.id === (NativeWidgetType as any)[key])) {
                 availableWidgets.push({
                     id: (NativeWidgetType as any)[key],
                 });
@@ -1614,12 +1720,12 @@ export class MdsEditorInstanceService implements OnDestroy {
                 }
                 const condition = widget.condition;
                 const pattern = condition.pattern ? new RegExp(`^(?:${condition.pattern})$`) : null;
-                return (
-                    nodes ? nodes.some((n) => pattern.test(n.properties[condition.value])) !==
-                    condition.negate :
-                        values ? widget.condition.negate === !values[widget.condition.value]
-                            : true
-                );
+                return nodes
+                    ? nodes.some((n) => pattern.test(n.properties[condition.value])) !==
+                          condition.negate
+                    : values
+                    ? widget.condition.negate === !values[widget.condition.value]
+                    : true;
             }
             if (nodes) {
                 return nodes.every(
@@ -1627,9 +1733,11 @@ export class MdsEditorInstanceService implements OnDestroy {
                 );
             } else if (values) {
                 return widget.condition.negate === !values[widget.condition.value];
-            } else if(metadata) {
-                return metadata.every(m =>
-                     widget.condition.negate === !Helper.getDotPathFromNestedObject(m, (widget as any).ids?.graphql)
+            } else if (metadata) {
+                return metadata.every(
+                    (m) =>
+                        widget.condition.negate ===
+                        !Helper.getDotPathFromNestedObject(m, (widget as any).ids?.graphql),
                 );
             } else {
                 throw new Error(`Condition check was called without data provided: ${widget.id}`);
@@ -1663,17 +1771,19 @@ export class MdsEditorInstanceService implements OnDestroy {
     }
     private async getGraphqlValues(): Promise<{ id: string; values: Values }[]> {
         return Promise.all(
-            this.graphqlMetadata$.value.map(async (metadata) =>({
-                id: (metadata.id),
+            this.graphqlMetadata$.value.map(async (metadata) => ({
+                id: metadata.id,
                 values: await this.getValuesGraphql(metadata),
             })),
         );
     }
     private async saveGraphqlSuggestions() {
-        return this.suggestions.map(s => {
-            return this.suggestionsGQL.mutate({
-                suggestion: s
-            }).toPromise();
+        return this.suggestions.map((s) => {
+            return this.suggestionsGQL
+                .mutate({
+                    suggestion: s,
+                })
+                .toPromise();
         });
     }
 
@@ -1721,7 +1831,13 @@ export class MdsEditorInstanceService implements OnDestroy {
         const total = widgets.filter(
             (widget) =>
                 widget.definition.isRequired === requiredMode &&
-                this.meetsCondition(widget.definition, this.nodes$.value, this.graphqlMetadata$.value, this.values$.value, true),
+                this.meetsCondition(
+                    widget.definition,
+                    this.nodes$.value,
+                    this.graphqlMetadata$.value,
+                    this.values$.value,
+                    true,
+                ),
         );
         const completed = total.filter((widget) => widget.getValue() && widget.getValue()[0]);
         const widgetCompletion: CompletionStatusField[] = total.map((widget) => {
@@ -1763,9 +1879,20 @@ export class MdsEditorInstanceService implements OnDestroy {
      * Returns a list of properties for which the MDS editor requires facet values.
      *
      * The observable continues to emit updates as long as the mds editor is alive.
+     *
+     * Emits `null` while the mds editor is (re-)initializing.
      */
     getNeededFacets(): Observable<string[]> {
-        return this.mdsInitDone.pipe(map(() => this.getNeededFacetsInstant()));
+        return this._new_initializingStateSubject.pipe(
+            map((state) => {
+                if (state === 'complete') {
+                    return this.getNeededFacetsInstant();
+                } else {
+                    return null;
+                }
+            }),
+            distinctUntilChanged(),
+        );
     }
 
     // TODO: The facet subscriptions could be registered by the widgets themselves, but since the
@@ -1827,7 +1954,9 @@ export class MdsEditorInstanceService implements OnDestroy {
             ...values,
         });
     }
-
+    focusWidget(id: string): void {
+        this.widgets.value.filter((w) => w.definition.id === id)?.[0]?.focusTrigger?.next();
+    }
     focusFirstWidget(): void {
         for (const widget of this.widgets.value) {
             if (widget.focusTrigger.observers.length > 0) {
@@ -1839,15 +1968,15 @@ export class MdsEditorInstanceService implements OnDestroy {
 
     async saveWidgetValue(widget: Widget) {
         const nodes = this.nodes$.value;
-        if(nodes?.length !== 1) {
+        if (nodes?.length !== 1) {
             throw new Error('saveWidgetValue can not be called without exactly one node present!');
         }
         await this.mdsEditorCommonService.saveNodeProperty(
             nodes[0],
             widget.definition.id,
-            widget.getValue()
+            widget.getValue(),
         );
-        if(widget.getValue()?.length) {
+        if (widget.getValue()?.length) {
             nodes[0].properties[widget.definition.id] = widget.getValue();
         } else {
             delete nodes[0].properties[widget.definition.id];
@@ -1856,8 +1985,10 @@ export class MdsEditorInstanceService implements OnDestroy {
     }
 
     updateSuggestionState(modified: SuggestionGroup) {
-        let suggestion = this.suggestions.find(s => s.id === modified.suggestion.id && s.nodeId === modified.suggestion.nodeId);
-        if(!suggestion) {
+        let suggestion = this.suggestions.find(
+            (s) => s.id === modified.suggestion.id && s.nodeId === modified.suggestion.nodeId,
+        );
+        if (!suggestion) {
             const suggestionCopy = Helper.deepCopy(modified.suggestion) as Suggestion;
             //const suggestion = graphqlFilter(SuggestionInput, suggestion);
             //@TODO: find an automatic way to reduce the object
@@ -1866,12 +1997,14 @@ export class MdsEditorInstanceService implements OnDestroy {
             suggestion = suggestionCopy as SuggestionInput;
             this.suggestions.push(suggestion);
 
-
             // clean up the object to use it as the input model
         }
-        const obj = Helper.getDotPathFromNestedObject(suggestion, modified.path.split('.').join('.'));
+        const obj = Helper.getDotPathFromNestedObject(
+            suggestion,
+            modified.path.split('.').join('.'),
+        );
         (obj as RangedValueSuggestionData[]).find(
-            s => s.value.value === (modified.data.value as RangedValue).value
+            (s) => s.value.value === (modified.data.value as RangedValue).value,
         ).info.status = modified.status;
     }
 }

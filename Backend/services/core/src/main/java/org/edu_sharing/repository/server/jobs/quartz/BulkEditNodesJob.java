@@ -27,8 +27,10 @@
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
+import org.alfresco.repo.version.Version2Model;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -36,10 +38,8 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.RecurseMode;
-import org.edu_sharing.service.provider.Provider;
 import org.edu_sharing.service.util.CSVTool;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -49,6 +49,7 @@ import java.io.BufferedReader;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +81,7 @@ public class BulkEditNodesJob extends AbstractJob{
 	private String property;
 	@JobFieldDescription(description = "Value to replace target property with")
 	private Serializable value;
-	@JobFieldDescription(description = "property to copy value from, if mode == Replace. Hint: use \"parent::\" prefix to copy data from the primary parent", sampleValue = "cclom:title")
+	@JobFieldDescription(description = "property to copy value from, if mode == Replace. Hint: use \"parent::\" prefix to copy data from the primary parent. Also supports special attributes like _DISPLAYNAME (if available for the source property)", sampleValue = "cclom:title")
 	private String copy;
 	private boolean copyParent;
 	@JobFieldDescription(description = "token to replace, if mode == ReplaceToken")
@@ -97,6 +98,12 @@ public class BulkEditNodesJob extends AbstractJob{
 	@JobFieldDescription(description = "classname, if mode == Custom. Must be a subclass of java.util.function.Consumer<NodeRef>")
 	private String customClass;
 
+	@JobFieldDescription(description = "use archive. default is \"false\"")
+	private String archive;
+
+	@JobFieldDescription(description = "use versionStore. default is \"false\". overwrites archive param.")
+	private String versionStore;
+
 	private enum Mode{
 		@JobFieldDescription(description = "Replace a property with a fixed string")
 		Replace,
@@ -108,6 +115,8 @@ public class BulkEditNodesJob extends AbstractJob{
 		Append,
 		@JobFieldDescription(description = "Remove the property. Use with searchtoken: one value must be equal, than the property is removed.")
 		Remove,
+		@JobFieldDescription(description = "Remove the property. Use with searchtoken: if a found value is equal, than it is removed, but other values will stay stored (useful for multivalue fields).")
+		RemoveSingle,
 		@JobFieldDescription(description = "Remove Duplicates in multivalue properties.")
 		RemoveDuplicates,
 		@JobFieldDescription(description = "Use a class that implements custom handling. defined by customClass param")
@@ -128,6 +137,7 @@ public class BulkEditNodesJob extends AbstractJob{
 		} catch (Throwable t) {
 			throw new IllegalArgumentException("Missing or invalid value for required parameter 'mode'", t);
 		}
+
 
 		if(!mode.equals(Mode.Custom)) {
 			property = prepareParam(context, "property", true);
@@ -158,18 +168,21 @@ public class BulkEditNodesJob extends AbstractJob{
 			replaceToken = prepareParam(context, "replaceToken", true);
 		}
 
-		if (mode.equals(Mode.Remove)) {
+		if (mode.equals(Mode.Remove) || mode.equals(Mode.RemoveSingle)) {
 			searchToken = prepareParam(context, "searchToken", true);
 		}
 
 		lucene = prepareParam(context, "lucene", false);
 
 		startFolder = prepareParam(context, "startFolder", true);
+		archive = prepareParam(context, "archive", false);
+		versionStore = prepareParam(context,"versionStore", false);
+
 		try {
 			types = Arrays.stream(((String) context.getJobDetail().getJobDataMap().get("types")).
 					split(",")).map(String::trim).map(CCConstants::getValidGlobalName).
 					collect(Collectors.toList());
-		} catch (Throwable t) {
+		} catch (Throwable ignored) {
 		}
 		if (types == null || types.isEmpty()) {
 			throwMissingParam("types");
@@ -204,17 +217,21 @@ public class BulkEditNodesJob extends AbstractJob{
 				org.alfresco.service.cmr.repository.NodeRef nodeRef = new org.alfresco.service.cmr.repository.NodeRef(ref.getStoreRef(), ref.getId());
 				logger.info("Bulk edit metadata for node " + ref.getId());
 				if (copy != null) {
-					if(copyParent) {
-						value = nodeService.getProperty(
-								nodeService.getPrimaryParent(nodeRef).getParentRef(),
-								QName.createQName(copy)
-						);
-					} else {
-						value = nodeService.getProperty(nodeRef, QName.createQName(copy));
+					try {
+						if (copyParent) {
+							value = NodeServiceHelper.getPropertyNativeWithMapping(
+									nodeService.getPrimaryParent(nodeRef).getParentRef(),
+									copy
+							);
+						} else {
+							value = NodeServiceHelper.getPropertyNativeWithMapping(nodeRef, copy);
+						}
+					} catch (Throwable t) {
+						logger.warn("Could not read copy property from source node: "+ t.getMessage());
 					}
 				}
 				if (mode.equals(Mode.Replace)) {
-					nodeService.setProperty(nodeRef, QName.createQName(property), value);
+					setProperty(nodeRef, QName.createQName(property), value);
 				} else if (mode.equals(Mode.Remove)) {
 					if (searchToken != null) {
 						Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
@@ -226,25 +243,46 @@ public class BulkEditNodesJob extends AbstractJob{
 								}
 							} else if (current instanceof List) {
 								for (Object o : (List) current) {
-									if (searchToken.equals(0)) {
+									if (searchToken.equals(o)) {
 										remove = true;
 									}
 								}
 							}
 							if (remove) {
-								nodeService.removeProperty(nodeRef, QName.createQName(property));
+								removeProperty(nodeRef, QName.createQName(property));
 							}
 						}
 					} else {
-						nodeService.removeProperty(nodeRef, QName.createQName(property));
+						removeProperty(nodeRef, QName.createQName(property));
+					}
+				} else if (mode.equals(Mode.RemoveSingle)) {
+					Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
+					if (current != null) {
+						if (current instanceof String) {
+							if (searchToken.equals(current)) {
+								removeProperty(nodeRef, QName.createQName(property));
+							}
+						} else if (current instanceof List) {
+							ArrayList<String> newList = new ArrayList<>((List<String>) current);
+							newList.removeIf((entry) -> entry.equals(searchToken));
+							if(((List<?>) current).size() != newList.size()) {
+								if(newList.size() == 0) {
+									NodeServiceHelper.removeProperty(nodeRef, property);
+								} else {
+									setProperty(nodeRef,QName.createQName(property),newList);
+								}
+							}
+						} else {
+							logger.error("Could not process property of node " + nodeRef + ": Unsupported type " + current.getClass().getName());
+						}
 					}
 				} else if (mode.equals(Mode.ReplaceToken) || mode.equals(Mode.ReplaceMapping)) {
 					Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
 					if (current != null) {
 						if (current instanceof String) {
-							nodeService.setProperty(nodeRef, QName.createQName(property), processPropertyValue((String) current));
+							setProperty(nodeRef, QName.createQName(property), processPropertyValue((String) current));
 						} else if (current instanceof List) {
-							nodeService.setProperty(nodeRef, QName.createQName(property), (Serializable) ((List) current).stream().map((v) -> {
+							setProperty(nodeRef, QName.createQName(property), (Serializable) ((List) current).stream().map((v) -> {
 								if (v instanceof String) {
 									return processPropertyValue((String) v);
 								} else {
@@ -259,7 +297,7 @@ public class BulkEditNodesJob extends AbstractJob{
 					Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
 					if (current != null && current instanceof List) {
 						if (((List) current).stream().distinct().count() != ((List) current).size()) {
-							nodeService.setProperty(nodeRef, QName.createQName(property), (Serializable) ((List) current).stream().distinct().collect(Collectors.toList()));
+							setProperty(nodeRef, QName.createQName(property), (Serializable) ((List) current).stream().distinct().collect(Collectors.toList()));
 						}
 					}
 				} else {
@@ -275,6 +313,14 @@ public class BulkEditNodesJob extends AbstractJob{
 		runner.setLucene(lucene);
 		runner.setKeepModifiedDate(true);
 		runner.setTransaction(NodeRunner.TransactionMode.Local);
+		if(new Boolean(archive)){
+			runner.setStartFolderStore(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE);
+			runner.setLuceneStore(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE);
+		}
+		if(new Boolean(versionStore)){
+			runner.setStartFolderStore(new StoreRef("workspace","version2Store"));
+			if(lucene != null && !lucene.trim().isEmpty()) throw new IllegalArgumentException("lucene can not be used with version store");
+		}
 		int count=runner.run();
 		logger.info("Processed "+count+" nodes");
 	}
@@ -333,5 +379,23 @@ public class BulkEditNodesJob extends AbstractJob{
 	@Override
 	public Class[] getJobClasses() {
 		return allJobs;
+	}
+
+	private void setProperty(NodeRef nodeRef,QName qName, Serializable serializable){
+		NodeServiceHelper.setProperty(nodeRef, qName.toString(), serializable, true);
+
+		if(new Boolean(versionStore)){
+			QName qnameV = QName.createQName(Version2Model.NAMESPACE_URI, Version2Model.PROP_METADATA_PREFIX+qName.toString());
+			nodeService.setProperty(nodeRef,qnameV,serializable);
+		}
+	}
+
+
+	private void removeProperty(NodeRef nodeRef,QName qName){
+		nodeService.removeProperty(nodeRef,qName);
+		if(new Boolean(versionStore)){
+			QName qnameV = QName.createQName(Version2Model.NAMESPACE_URI, Version2Model.PROP_METADATA_PREFIX+qName.toString());
+			nodeService.removeProperty(nodeRef,qnameV);
+		}
 	}
 }

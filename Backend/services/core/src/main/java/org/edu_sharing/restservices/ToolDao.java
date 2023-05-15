@@ -83,7 +83,7 @@ public class ToolDao {
 				node = repoDao.getUserHome();
 			}
 			if ("-inbox-".equals(node)) {
-				node = repoDao.getUserInbox();
+				node = repoDao.getUserInbox(true);
 			}
 			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 			new NodeApi().resolveURLTitle(properties);

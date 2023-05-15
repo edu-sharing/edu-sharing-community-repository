@@ -15,7 +15,6 @@ import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.DateTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
@@ -24,6 +23,8 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.jsoup.Jsoup;
+import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 
@@ -42,6 +43,9 @@ import java.util.stream.Collectors;
  *
  */
 public class MetadataTemplateRenderer {
+
+	private final HashMap<String, String[]> propertiesNative;
+
 	public enum RenderingMode{
 		HTML,
 		TEXT
@@ -60,14 +64,16 @@ public class MetadataTemplateRenderer {
 		this.mds = mds;
 		this.nodeRef = nodeRef;
 		this.userName = userName;
-		this.properties = cleanupTextMultivalueProperties(
-				convertProps(
-						NodeServiceHelper.addVirtualProperties(
-								type,
-								aspects,
-								properties
-						)
+
+		propertiesNative = convertProps(
+				NodeServiceHelper.addVirtualProperties(
+						type,
+						aspects,
+						properties
 				)
+		);
+		this.properties = cleanupTextMultivalueProperties(
+				propertiesNative, renderingMode.equals(RenderingMode.HTML)
 		);
 	}
 
@@ -87,15 +93,18 @@ public class MetadataTemplateRenderer {
 		return propsConverted;
 	}
 
-    public RenderingMode getRenderingMode() {
-        return renderingMode;
-    }
+	public RenderingMode getRenderingMode() {
+		return renderingMode;
+	}
 
-    public void setRenderingMode(RenderingMode renderingMode) {
-        this.renderingMode = renderingMode;
-    }
+	public void setRenderingMode(RenderingMode renderingMode) {
+		this.renderingMode = renderingMode;
+		this.properties = cleanupTextMultivalueProperties(
+				propertiesNative, renderingMode.equals(RenderingMode.HTML)
+		);
+	}
 
-    public String render(String groupName) throws IllegalArgumentException {
+	public String render(String groupName) throws IllegalArgumentException {
 		if(userName == null || userName.isEmpty()){
 			throw new IllegalArgumentException("No username was given. Can't continue rendering metadata template");
 		}
@@ -158,6 +167,14 @@ public class MetadataTemplateRenderer {
 					values = new String[]{"-"};
 					wasEmpty = true;
 				}
+				if("range".equals(widget.getType()) && wasEmpty) {
+					String[] from = properties.get(srcWidget.getId() + "_from");
+					String[] to = properties.get(srcWidget.getId() + "_to");
+					if(from != null && to != null && from.length > 0 && to.length > 0) {
+						values = new String[]{from[0] + "-" + to[0]};
+						wasEmpty = false;
+					}
+				}
 				if (renderingMode.equals(RenderingMode.HTML)) {
 					widgetHtml.append("<div data-widget-id='").append(widget.getId()).append("' class='mdsWidget");
 					if (widget.getType() != null) {
@@ -169,10 +186,10 @@ public class MetadataTemplateRenderer {
 					}
 					String innerContainerTag = widget.isMultivalue() ? "ul" : "div";
 					widgetHtml
-						.append("<")
-						.append(innerContainerTag)
-						.append(" class='mdsWidgetContent mds_")
-						.append(widget.getId().replace(":", "_"));
+							.append("<")
+							.append(innerContainerTag)
+							.append(" class='mdsWidgetContent mds_")
+							.append(widget.getId().replace(":", "_"));
 					if (widget.isMultivalue()) {
 						widgetHtml.append(" mdsWidgetMultivalue");
 					}
@@ -187,8 +204,8 @@ public class MetadataTemplateRenderer {
 				} else if ("multivalueCombined".equals(widget.getType())) {
 					empty = renderWidgetSubwidgets(widget, widgetHtml);
 					wasEmpty = empty;
-				} else if ("collection_feedback".equals(widget.getType())) {
-					empty = renderCollectionFeedback(widget, widgetHtml);
+				} else if ("material_feedback".equals(widget.getType())) {
+					empty = renderMaterialFeedback(widget, widgetHtml);
 					wasEmpty = empty;
 				} else {
 					int i = 0;
@@ -196,7 +213,10 @@ public class MetadataTemplateRenderer {
 						String rawValue = value;
 						HashMap<String, Object> vcardData = null;
 						if ("vcard".equals(widget.getType())) {
-							ArrayList<HashMap<String, Object>> map = VCardConverter.vcardToHashMap(value);
+							ArrayList<HashMap<String, Object>> map = VCardConverter.vcardToHashMap(
+									// html in vcards gets escaped beforehand for security reason, unescape special chars to not break the format
+									org.apache.commons.lang.StringEscapeUtils.unescapeHtml(value)
+							);
 							if (map.size() > 0) {
 								vcardData = map.get(0);
 							}
@@ -254,7 +274,10 @@ public class MetadataTemplateRenderer {
 									value += getLicenseDescription(licenseName).replaceAll("((<br \\/>)|(\\n))", TEXT_LICENSE_SEPERATOR);
 								}
 							}
-							if (renderingMode.equals(RenderingMode.HTML) && properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK)) != null) {
+							if (renderingMode.equals(RenderingMode.HTML) && (
+									properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK)) != null
+											|| properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL)) != null
+							)) {
 								value += "<div class='licenseTitleOfWork'>";
 								value += "<div class='mdsWidgetCaptionChild'>" +
 										I18nAngular.getTranslationAngular("common", "LICENSE.TITLE_OF_WORK")
@@ -263,13 +286,24 @@ public class MetadataTemplateRenderer {
 								if (source) {
 									value += "<a href='" + properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_SOURCE_URL))[0] + "'>";
 								}
-								value += properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK))[0];
+								String[] title = properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK));
+								if(title != null) {
+									value += cleanupText(MetadataWidget.TextEscapingPolicy.all, title[0]);
+								} else {
+									value += cleanupText(MetadataWidget.TextEscapingPolicy.all,
+											I18nAngular.getTranslationAngular("common", "MDS.AUTHOR_UNSET")
+									);
+								}
 								if (source) {
 									value += "</a>";
 								}
 								if (properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL)) != null) {
+									String url = properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL))[0];
+									if (!url.contains("://")) {
+										url = "http://" + url;
+									}
 									value += " (<a href='" +
-											properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL))[0] + "'>" +
+											url + "'>" +
 											I18nAngular.getTranslationAngular("common", "LICENSE.LINK_AUTHOR")
 											+ "</a>)";
 								}
@@ -290,8 +324,8 @@ public class MetadataTemplateRenderer {
 						}
 						if (renderingMode.equals(RenderingMode.HTML)) {
 							widgetHtml
-								.append(widget.isMultivalue() ? "<li " : "<div ")
-								.append("class='mdsValue' data-value-key='" + rawValue + "'>");
+									.append(widget.isMultivalue() ? "<li " : "<div ")
+									.append("class='mdsValue' data-value-key='" + rawValue + "'>");
 							if (widget.getIcon() != null) {
 								widgetHtml.append(insertIcon(widget.getIcon()));
 							}
@@ -391,7 +425,7 @@ public class MetadataTemplateRenderer {
 		return html;
 	}
 
-	private boolean renderCollectionFeedback(MetadataWidget widget, StringBuffer widgetHtml) {
+	private boolean renderMaterialFeedback(MetadataWidget widget, StringBuffer widgetHtml) {
 		boolean empty=true;
 		String parent = NodeServiceFactory.getLocalService().getPrimaryParent(nodeRef.getId());
 		if(parent!=null){
@@ -402,26 +436,22 @@ public class MetadataTemplateRenderer {
 				- the user has the PERMISSION_FEEDBACK permission
 				- the user is not administrator (PERMISSION_DELETE) of the collection
 			 */
-			logger.info(ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK)+" "+PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_FEEDBACK)
+			logger.info(ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_MATERIAL_FEEDBACK)+" "+PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_FEEDBACK)
 					+" "+PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_DELETE));
-			boolean isInsideCollection = false;
-			try{
-				isInsideCollection = NodeServiceHelper.hasAspect(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parent),CCConstants.CCM_ASPECT_COLLECTION);
-			}catch(Throwable ignored){
-
-			}
-			if( isInsideCollection &&
-				ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK) &&
-				!GuestCagePolicy.getGuestUsers().contains(userName) &&
-				PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_FEEDBACK) &&
-				!PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_DELETE)
+			if(
+					ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_MATERIAL_FEEDBACK) &&
+							!GuestCagePolicy.getGuestUsers().contains(userName) &&
+							PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeRef.getId(),CCConstants.PERMISSION_FEEDBACK) &&
+							!PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeRef.getId(),CCConstants.PERMISSION_DELETE)
 			){
 				try {
 					widgetHtml.
 							append("<div class=\"mdsValue\">").
 							append("<a href=\"").
-							append(URLTool.getNgComponentsUrl()).append("collections?id=").append(parent).append("&feedback=true&feedbackClose=true").
-							append("\" data-es-auth-required=\"true\"");
+							append(URLTool.getNgRenderNodeUrl(nodeRef.getId(), null)).
+							append("?action=OPTIONS.MATERIAL_FEEDBACK&feedbackClose=true\"").
+							append(" data-es-auth-required=\"true\"").
+							append(" data-es-action=\"OPTIONS.MATERIAL_FEEDBACK\"");
 					if(widget.getLink()!=null){
 						widgetHtml.append(" target=\"").append(widget.getLink()).append("\"");
 					}
@@ -429,7 +459,7 @@ public class MetadataTemplateRenderer {
 					if(widget.getIcon()!=null){
 						widgetHtml.append(insertIcon(widget.getIcon()));
 					}
-					widgetHtml.append(MetadataHelper.getTranslation("collection_feedback_button")).append("</a></div>");
+					widgetHtml.append(MetadataHelper.getTranslation("material_feedback_button")).append("</a></div>");
 					empty=false;
 				} catch (Exception e) {
 					logger.warn(e.getMessage(),e);
@@ -488,7 +518,7 @@ public class MetadataTemplateRenderer {
 				path = Lists.reverse(path);
 				int j = 0;
 				if (renderingMode.equals(RenderingMode.HTML)) {
-					widgetHtml.append("<li class='mdsValue'>");
+					widgetHtml.append("<li class='mdsValue' data-value-key='").append(value).append("'>");
 				} else if (renderingMode.equals(RenderingMode.TEXT)) {
 					if(i > 0) {
 						widgetHtml.append(TEXT_MULTIVALUE_SEPERATOR);
@@ -586,7 +616,7 @@ public class MetadataTemplateRenderer {
 		return cleaned;
 	}
 	*/
-	public HashMap<String, String[]> cleanupTextMultivalueProperties(Map<String, String[]> properties) {
+	public HashMap<String, String[]> cleanupTextMultivalueProperties(Map<String, String[]> properties, boolean htmlMode) {
 		HashMap<String,String[]> cleaned=new HashMap<>();
 		for(Map.Entry<String,String[]> entry : properties.entrySet()){
 			if(entry.getValue()==null) {
@@ -600,9 +630,19 @@ public class MetadataTemplateRenderer {
 				}
 				MetadataWidget.TextEscapingPolicy textEscapingPolicy = widget == null ?
 						MetadataWidget.TextEscapingPolicy.htmlBasic : widget.getTextEscapingPolicy();
-				cleaned.put(entry.getKey(),
-						Arrays.stream(entry.getValue()).map((String v) -> cleanupText(textEscapingPolicy, v)).toArray(String[]::new)
-				);
+				if(htmlMode) {
+					cleaned.put(entry.getKey(),
+							Arrays.stream(entry.getValue()).map((String v) -> cleanupText(textEscapingPolicy, v)).toArray(String[]::new)
+					);
+				} else {
+					if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.none)) {
+						cleaned.put(entry.getKey(),entry.getValue());
+					} else {
+						cleaned.put(entry.getKey(),
+								Arrays.stream(entry.getValue()).map((String v) -> Jsoup.parse(v).text()).toArray(String[]::new)
+						);
+					}
+				}
 			}
 		}
 		return cleaned;
@@ -610,10 +650,15 @@ public class MetadataTemplateRenderer {
 
 	private static String cleanupText(MetadataWidget.TextEscapingPolicy textEscapingPolicy, String untrustedHTML) {
 		if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.htmlBasic)) {
-			PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.BLOCKS).and(Sanitizers.LINKS);
+			PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.BLOCKS).and(
+					new HtmlPolicyBuilder()
+							.allowStandardUrlProtocols().allowElements("a")
+							.allowAttributes("href", "target").onElements("a").requireRelNofollowOnLinks()
+							.toFactory()
+			);
 			return policy.sanitize(untrustedHTML);
 		} else if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.all)){
-			return StringEscapeUtils.escapeHtml4(untrustedHTML);
+			return StringEscapeUtils.escapeHtml4(untrustedHTML).replaceAll("[\\u0000-\\u001F\\u007F-\\u009F]","");
 		} else if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.none)){
 			return untrustedHTML;
 		} else {
@@ -628,7 +673,7 @@ public class MetadataTemplateRenderer {
 		if(CCConstants.COMMON_LICENSE_CUSTOM.equals(licenseName) && description != null) {
 			return description[0];
 		}
-			List<String> supported=Arrays.asList(CCConstants.COMMON_LICENSE_CC_ZERO,CCConstants.COMMON_LICENSE_PDM);
+		List<String> supported=Arrays.asList(CCConstants.COMMON_LICENSE_CC_ZERO,CCConstants.COMMON_LICENSE_PDM);
 		if(licenseName.startsWith(CCConstants.COMMON_LICENSE_CC_BY) || supported.contains(licenseName)) {
 			String name=I18nAngular.getTranslationAngular("common","LICENSE.NAMES."+licenseName);
 			if(licenseName.startsWith(CCConstants.COMMON_LICENSE_CC_BY)){
@@ -640,9 +685,9 @@ public class MetadataTemplateRenderer {
 							String[] locale=properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE));
 							if(locale!=null && locale.length>0 && locale[0]!=null && !locale[0].isEmpty()) {
 								if (locale[0].equals(locale[0].toUpperCase()))
-								  name += " - " + I18nAngular.getTranslationAngular("common","COUNTRY_CODE."+locale[0]);
+									name += " - " + I18nAngular.getTranslationAngular("common","COUNTRY_CODE."+locale[0]);
 								else
-								  name += " - " + I18nAngular.getTranslationAngular("common","LANGUAGE."+locale[0]);
+									name += " - " + I18nAngular.getTranslationAngular("common","LANGUAGE."+locale[0]);
 							}
 						}
 					}catch(Throwable t){}
@@ -720,31 +765,31 @@ public class MetadataTemplateRenderer {
 		}catch(Throwable t) {
 			throw new RuntimeException("Failed to serialize MetadataWidget class, check if all attributes are serializable",t);
 		}
-	    while(true){
-	      str=str.substring(str.indexOf(" ")+1);
-	      int pos=str.indexOf("=");
-	      if(pos==-1) {
-	        break;
-	      }
-	      String name=str.substring(0,pos).trim();
-	      str=str.substring(pos+1);
-	      String search=" ";
-	      if(str.charAt(0)=='\''){
-	        search="'";
-	      }
-	      if(str.charAt(0)=='"'){
-	        search="\"";
-	      }
-	      if(!search.equals(" "))
-	        str=str.substring(1);
-	      int end=str.indexOf(search);
-	      String value=str.substring(0,end);
-	      str=str.substring(end+1);
-	      try{
-	    		Field field = widget.getClass().getDeclaredField(name);
-	    		field.setAccessible(true);
-	    		if(field.getType().getSimpleName().equalsIgnoreCase("boolean")) {
-	    			field.set(widget, Boolean.parseBoolean(value));
+		while(true){
+			str=str.substring(str.indexOf(" ")+1);
+			int pos=str.indexOf("=");
+			if(pos==-1) {
+				break;
+			}
+			String name=str.substring(0,pos).trim();
+			str=str.substring(pos+1);
+			String search=" ";
+			if(str.charAt(0)=='\''){
+				search="'";
+			}
+			if(str.charAt(0)=='"'){
+				search="\"";
+			}
+			if(!search.equals(" "))
+				str=str.substring(1);
+			int end=str.indexOf(search);
+			String value=str.substring(0,end);
+			str=str.substring(end+1);
+			try{
+				Field field = widget.getClass().getDeclaredField(name);
+				field.setAccessible(true);
+				if(field.getType().getSimpleName().equalsIgnoreCase("boolean")) {
+					field.set(widget, Boolean.parseBoolean(value));
 				} else if(field.getType().isEnum()) {
 					try {
 						field.set(widget, field.getType().getDeclaredMethod("valueOf", String.class).invoke(null, value));
@@ -756,12 +801,12 @@ public class MetadataTemplateRenderer {
 				} else {
 					field.set(widget, value);
 				}
-	    	}catch(Throwable t){
-	    		logger.warn("Invalid attribute found for widget "+widget.getId()+", attribute "+name+" is unknown: " + t.getMessage());
-	    		//throw new IllegalArgumentException("Invalid attribute found for widget "+widget.getId()+", attribute "+name+" is unknown",t);
-	    	}
-	      }
-	    return widget;
+			}catch(Throwable t){
+				logger.warn("Invalid attribute found for widget "+widget.getId()+", attribute "+name+" is unknown: " + t.getMessage());
+				//throw new IllegalArgumentException("Invalid attribute found for widget "+widget.getId()+", attribute "+name+" is unknown",t);
+			}
+		}
+		return widget;
 	}
 	private String formatFileSize(long size) {
 		String[] sizes=new String[]{"Bytes","KB","MB","GB","TB"};

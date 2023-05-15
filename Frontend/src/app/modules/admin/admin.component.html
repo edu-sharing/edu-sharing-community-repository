@@ -1,178 +1,181 @@
-<div class="main-nav-placeholder"></div>
 <es-modal-dialog
   [title]="showWarning ? 'ADMIN.WARNING_TITLE' : null"
   [message]="'ADMIN.WARNING_INFO'"
   [buttons]="warningButtons"
   [isCancelable]="false"
 ></es-modal-dialog>
-<es-card width="normal" height="xxlarge" [buttons]="xmlCardButtons" [isCancelable]="true" (onCancel)="xmlAppProperties=null" title="{{'ADMIN.APPLICATIONS.EDIT_APP' | translate:{xml:currentAppXml} }}" *ngIf="xmlAppProperties">
-  <div class="card-content-padding card-xml">
-    <div class="warning">{{'ADMIN.APPLICATIONS.APP_XML_WARNING' | translate}}</div>
-    <div *ngFor="let value of xmlAppKeys;let i=index;" class="appEditor">
-      <mat-form-field class="mat-input-group">
-        <mat-label>{{value}}</mat-label>
-        <textarea matInput
-                  cdkTextareaAutosize
-                  cdkAutosizeMinRows="2"
-                  cdkAutosizeMaxRows="5" *ngIf="isMultilineProperty(value)" class="materialize-textarea" [(ngModel)]="xmlAppProperties[value]"></textarea>
-        <input matInput *ngIf="!isMultilineProperty(value)" type="text" [(ngModel)]="xmlAppProperties[value]">
-        <!-- Api does currently not support deleting -->
-        <i class="material-icons clickable" (click)="removeAppProperty(i)" *ngIf="false">delete</i>
-        <mat-hint *ngIf="currentApp">{{'ADMIN.APPLICATIONS.'+currentApp+"."+value | translate:{fallback:''} }}</mat-hint>
-      </mat-form-field>
-    </div>
-    <div class="add-property">
-      <h4 class="property mat-heading-4 mat-heading-underline">{{'ADMIN.APPLICATIONS.ADD_PROPERTY' | translate}}</h4>
-      <mat-form-field>
-        <mat-label>{{'ADMIN.APPLICATIONS.PROPERTY_NAME_PLACEHOLDER' | translate}}</mat-label>
-        <input matInput type="text" id="additionalProperty" [(ngModel)]="xmlAppAdditionalPropertyName">
-        <mat-hint *ngIf="currentApp">{{'ADMIN.APPLICATIONS.'+currentApp+"."+xmlAppAdditionalPropertyName | translate:{fallback:''} }}</mat-hint>
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>{{'ADMIN.APPLICATIONS.PROPERTY_VALUE_PLACEHOLDER' | translate}}</mat-label>
-        <input matInput type="text" [(ngModel)]="xmlAppAdditionalPropertyValue">
-      </mat-form-field>
-    </div>
-  </div>
-</es-card>
 <es-modal-dialog
   [title]="dialogTitle"
   [message]="dialogMessage"
   [buttons]="dialogButtons"
   [messageParameters]="dialogParameters"
   [isCancelable]="true"
-  (onCancel)="dialogTitle=null"
+  (onCancel)="dialogTitle = null"
 ></es-modal-dialog>
-<es-file-chooser *ngIf="chooseDirectory"
-              [isCancelable]="true"
-              [title]="'ADMIN.IMPORT.CHOOSE_DIRECTORY'"
-              [pickDirectory]="true"
-              (onCancel)="chooseDirectory=false"
-              (onChoose)="pickDirectory($event)"
-></es-file-chooser>
-<es-file-chooser *ngIf="chooseCollection"
-              [isCancelable]="true"
-              [title]="'ADMIN.IMPORT.CHOOSE_COLLECTION'"
-              [collections]="true"
-              (onCancel)="chooseCollection=false"
-              (onChoose)="pickCollection($event)"
-></es-file-chooser>
 <div class="main">
   <div class="main-nav">
     <div>
-      <div matRipple matRippleColor="primary" *ngFor="let button of buttons" class="button clickable" [class.active]="mode==button.id" tabindex="0" (click)="setMode(button.id)" (keyup.enter)="setMode(button.id)">
-        <i [esIcon]="button.icon"></i><span>{{('ADMIN.MODE.'+button.id) | translate }}</span>
+      <div
+        matRipple
+        matRippleColor="primary"
+        *ngFor="let button of buttons"
+        class="button clickable"
+        [class.active]="mode == button.id"
+        tabindex="0"
+        (click)="setMode(button.id)"
+        (keyup.enter)="setMode(button.id)"
+      >
+        <i [esIcon]="button.icon"></i><span>{{ 'ADMIN.MODE.' + button.id | translate }}</span>
       </div>
     </div>
   </div>
   <div
     role="main"
     esSkipTarget="MAIN_CONTENT"
-    class="main-content main-content-{{mode ? mode.toLowerCase() : 'default'}}"
+    class="main-content main-content-{{ mode ? mode.toLowerCase() : 'default' }}"
   >
     <h1 esTitle class="cdk-visually-hidden">{{ 'ADMIN.TITLE' | translate }}</h1>
     <!-- for dynamically added components from extensions -->
     <ng-template *ngIf="getModeButton() && getModeButton().factory" #dynamic></ng-template>
     <div *ngIf="modeIsActive('INFO')" class="content info">
-      <div class="heading">{{'ADMIN.INFO.REPOSITORY' | translate}}</div>
+      <div class="heading">{{ 'ADMIN.INFO.REPOSITORY' | translate }}</div>
       <div class="version">{{ repositoryVersion }}</div>
-      <div class="heading">{{'ADMIN.INFO.SYSTEM_CHECKS' | translate}}</div>
+      <div class="heading">{{ 'ADMIN.INFO.SYSTEM_CHECKS' | translate }}</div>
       <div class="checks">
-        <div class="reload"><i class="material-icons clickable" (click)="runChecks()">refresh</i></div>
-        <div *ngFor="let check of getChecks(systemChecks)" class="check"
-             [class.check-fail]="check.status=='FAIL'"
-             [class.check-ok]="check.status=='OK'"
-             [class.check-info]="check.status=='INFO'"
-             [class.check-warn]="check.status=='WARN'">
+        <div class="reload">
+          <i class="material-icons clickable" (click)="runChecks()">refresh</i>
+        </div>
+        <div
+          *ngFor="let check of getChecks(systemChecks)"
+          class="check"
+          [class.check-fail]="check.status === 'FAIL'"
+          [class.check-ok]="check.status === 'OK'"
+          [class.check-info]="check.status === 'INFO'"
+          [class.check-warn]="check.status === 'WARN'"
+        >
           <div class="data">
-            <div class="title">{{('ADMIN.INFO.CHECK.'+check.name+'.TITLE') | translate:check.translate }}</div>
-            <div class="description">{{('ADMIN.INFO.CHECK.'+check.name+'.STATUS_'+check.status) | translate:check.translate }}</div>
-            <div *ngIf="check.status!='OK' && check.status!='INFO'" class="solution">
+            <div class="title">
+              {{ 'ADMIN.INFO.CHECK.' + check.name + '.TITLE' | translate: check.translate }}
+            </div>
+            <div class="description">
+              {{
+                'ADMIN.INFO.CHECK.' + check.name + '.STATUS_' + check.status
+                  | translate: check.translate
+              }}
+            </div>
+            <div *ngIf="check.status !== 'OK' && check.status !== 'INFO'" class="solution">
               <i class="material-icons">forward</i>
               <div>
-                {{('ADMIN.INFO.CHECK.'+check.name+'.SOLUTION') | translate:check.translate }}
+                {{ 'ADMIN.INFO.CHECK.' + check.name + '.SOLUTION' | translate: check.translate }}
                 <div>
-                  <button mat-button color="primary" *ngIf="check.status!='OK' && check.callback" class="solution-link clickable" (click)="check.callback()">
-                    {{('ADMIN.INFO.CHECK.'+check.name+'.SOLUTION_LINK') | translate:check.translate }}
+                  <button
+                    mat-button
+                    color="primary"
+                    *ngIf="check.status !== 'OK' && check.callback"
+                    class="solution-link clickable"
+                    (click)="check.callback()"
+                  >
+                    {{
+                      'ADMIN.INFO.CHECK.' + check.name + '.SOLUTION_LINK'
+                        | translate: check.translate
+                    }}
                   </button>
                 </div>
               </div>
             </div>
           </div>
-          <i class="material-icons">{{check.status=='OK' ? 'check' : 'error_outline'}}</i>
+          <i class="material-icons">{{ check.status === 'OK' ? 'check' : 'error_outline' }}</i>
         </div>
       </div>
-      <div class="heading">{{'ADMIN.INFO.SYSTEM_TP_CHECKS' | translate}}</div>
+      <div class="heading">{{ 'ADMIN.INFO.SYSTEM_TP_CHECKS' | translate }}</div>
       <div class="checks-toolpermissions">
-        <div class="reload"><i class="material-icons clickable" (click)="runTpChecks()">refresh</i></div>
-        <div class="info">{{('ADMIN.INFO.TP_CHECK.INFO') | translate }}</div>
-        <div *ngFor="let check of getChecks(tpChecks)" class="check"
-             [class.check-fail]="check.status=='FAIL'"
-             [class.check-ok]="check.status=='OK'"
-             [class.check-info]="check.status=='INFO'"
-             [class.check-warn]="check.status=='WARN'">
+        <div class="reload">
+          <i class="material-icons clickable" (click)="runTpChecks()">refresh</i>
+        </div>
+        <div class="info">{{ 'ADMIN.INFO.TP_CHECK.INFO' | translate }}</div>
+        <div
+          *ngFor="let check of getChecks(tpChecks)"
+          class="check"
+          [class.check-fail]="check.status === 'FAIL'"
+          [class.check-ok]="check.status === 'OK'"
+          [class.check-info]="check.status === 'INFO'"
+          [class.check-warn]="check.status === 'WARN'"
+        >
           <div class="data">
             <div class="title">{{ 'TOOLPERMISSION.' + check.name | translate }}</div>
             <div class="tp-name">{{ check.name | translate }}</div>
-            <div *ngIf="check.status!='OK' && check.status!='INFO'" class="solution">
+            <div *ngIf="check.status !== 'OK' && check.status !== 'INFO'" class="solution">
               <div>
-                {{('ADMIN.INFO.TP_CHECK.AUTO_FIX') | translate }}
+                {{ 'ADMIN.INFO.TP_CHECK.AUTO_FIX' | translate }}
                 <div>
-                  <button mat-button color="primary" class="solution-link clickable" (click)="fixTp(check)">
-                    {{('ADMIN.INFO.TP_CHECK.AUTO_FIX_LINK') | translate }}
+                  <button
+                    mat-button
+                    color="primary"
+                    class="solution-link clickable"
+                    (click)="fixTp(check)"
+                  >
+                    {{ 'ADMIN.INFO.TP_CHECK.AUTO_FIX_LINK' | translate }}
                   </button>
                 </div>
               </div>
             </div>
           </div>
-          <i class="material-icons">{{check.status=='OK' ? 'check' : 'error_outline'}}</i>
+          <i class="material-icons">{{ check.status === 'OK' ? 'check' : 'error_outline' }}</i>
         </div>
       </div>
     </div>
     <div *ngIf="modeIsActive('CONFIG')" class="content config">
-      <div class="heading"><i class="material-icons">build</i><span>{{'ADMIN.CONFIG.XML_CONFIG' | translate}}</span></div>
+      <div class="heading">
+        <i class="material-icons">build</i><span>{{ 'ADMIN.CONFIG.XML_CONFIG' | translate }}</span>
+      </div>
       <div class="group xml">
         <div *ngFor="let xml of editableXmls">
-          <button mat-raised-button color="primary"
-                  (click)="editApp(xml)">{{'ADMIN.APPLICATIONS.EDIT_APP' | translate:{xml:xml.file} }}</button>
+          <button mat-raised-button color="primary" (click)="editApp(xml)">
+            {{ 'ADMIN.APPLICATIONS.EDIT_APP' | translate: { xml: xml.file } }}
+          </button>
         </div>
       </div>
-      <div class="heading"><i class="material-icons">mail</i><span>{{'ADMIN.CONFIG.TEST_MAIL' | translate}}</span></div>
+      <div class="heading">
+        <i class="material-icons">mail</i><span>{{ 'ADMIN.CONFIG.TEST_MAIL' | translate }}</span>
+      </div>
       <div class="group">
         <form (ngSubmit)="testMail()" #mailForm>
           <div class="inputGroupGrow">
-            <div class="info">{{'ADMIN.CONFIG.TEST_MAIL_RECEIVER' | translate }}</div>
+            <div class="info">{{ 'ADMIN.CONFIG.TEST_MAIL_RECEIVER' | translate }}</div>
             <mat-form-field>
-              <mat-label>{{'ADMIN.CONFIG.TEST_MAIL_RECEIVER_LABEL' | translate}}</mat-label>
-              <input matInput type="email" name="receiver" [(ngModel)]="mailReceiver">
+              <mat-label>{{ 'ADMIN.CONFIG.TEST_MAIL_RECEIVER_LABEL' | translate }}</mat-label>
+              <input matInput type="email" name="receiver" [(ngModel)]="mailReceiver" />
             </mat-form-field>
           </div>
           <div class="inputGroupGrow">
-            <div class="info">{{'ADMIN.CONFIG.TEST_MAIL_TEMPLATE' | translate }}</div>
+            <div class="info">{{ 'ADMIN.CONFIG.TEST_MAIL_TEMPLATE' | translate }}</div>
             <mat-form-field>
-              <mat-label>{{'ADMIN.CONFIG.TEST_MAIL_TEMPLATE_LABEL' | translate}}</mat-label>
+              <mat-label>{{ 'ADMIN.CONFIG.TEST_MAIL_TEMPLATE_LABEL' | translate }}</mat-label>
               <mat-select name="template" [(ngModel)]="mailTemplate">
-                <mat-option *ngFor="let template of mailTemplates" [value]="template">{{template}}</mat-option>
+                <mat-option *ngFor="let template of mailTemplates" [value]="template">{{
+                  template
+                }}</mat-option>
               </mat-select>
             </mat-form-field>
           </div>
-          <button mat-raised-button color="primary" [class.disabled]="!mailReceiver || !mailTemplate">{{'ADMIN.CONFIG.TEST_MAIL_SEND' | translate }}</button>
+          <button
+            mat-raised-button
+            color="primary"
+            [class.disabled]="!mailReceiver || !mailTemplate"
+          >
+            {{ 'ADMIN.CONFIG.TEST_MAIL_SEND' | translate }}
+          </button>
         </form>
       </div>
     </div>
     <div *ngIf="modeIsActive('STATISTICS')" class="content statistics">
-      <es-admin-statistics
-        (onOpenNode)="debugNode($event)"
-      ></es-admin-statistics>
+      <es-admin-statistics (onOpenNode)="openNodeRender($event)"></es-admin-statistics>
     </div>
     <div *ngIf="modeIsActive('MEDIACENTER')" class="content mediacenter">
-      <es-admin-mediacenter
-      ></es-admin-mediacenter>
+      <es-admin-mediacenter (onOpenNode)="openNodeRender($event)"></es-admin-mediacenter>
     </div>
     <div *ngIf="modeIsActive('FRONTPAGE')" class="content frontpage">
-      <es-admin-frontpage
-        (onOpenNode)="debugNode($event)"
-      ></es-admin-frontpage>
+      <es-admin-frontpage (onOpenNode)="openNodeRender($event)"></es-admin-frontpage>
     </div>
     <div *ngIf="modeIsActive('GLOBAL_CONFIG')" class="content global-config">
       <es-admin-config></es-admin-config>
@@ -181,212 +184,339 @@
       <app-admin-plugins></app-admin-plugins>
     </div>
     <div *ngIf="modeIsActive('APPLICATIONS')" class="content applications">
-      <input #xmlSelect type="file" style="display:none" id="xmlSelect" accept="application/xml" (change)="registerAppXml($event)" />
+      <input
+        #xmlSelect
+        type="file"
+        style="display: none"
+        id="xmlSelect"
+        accept="application/xml"
+        (change)="registerAppXml($event)"
+      />
       <form class="register-app">
         <h4 class="mat-heading-4 mat-heading-underline">
-          <span>{{'ADMIN.APPLICATIONS.ADD_APPLICATION' | translate}}</span>
+          <span>{{ 'ADMIN.APPLICATIONS.ADD_APPLICATION' | translate }}</span>
         </h4>
         <div>
           <mat-form-field>
-            <mat-label>{{'ADMIN.APPLICATIONS.URL' | translate}}</mat-label>
-            <input matInput type="text" name="appUrl" [(ngModel)]="appUrl">
-            <mat-hint>{{'ADMIN.APPLICATIONS.URL_HINT' | translate}}</mat-hint>
+            <mat-label>{{ 'ADMIN.APPLICATIONS.URL' | translate }}</mat-label>
+            <input matInput type="text" name="appUrl" [(ngModel)]="appUrl" />
+            <mat-hint>{{ 'ADMIN.APPLICATIONS.URL_HINT' | translate }}</mat-hint>
           </mat-form-field>
-          <div><button mat-raised-button color="primary" (click)="registerApp()">{{'ADMIN.APPLICATIONS.ADD_URL' | translate}}</button></div>
+          <div>
+            <button mat-raised-button color="primary" (click)="registerApp()">
+              {{ 'ADMIN.APPLICATIONS.ADD_URL' | translate }}
+            </button>
+          </div>
         </div>
-        <div><button mat-raised-button (click)="xmlSelect.click()">{{'ADMIN.APPLICATIONS.SELECT_XML' | translate}}</button></div>
-        <div class="useFile">{{'ADMIN.APPLICATIONS.USE_FILE' | translate}}</div>
+        <div>
+          <button mat-raised-button (click)="xmlSelect.click()">
+            {{ 'ADMIN.APPLICATIONS.SELECT_XML' | translate }}
+          </button>
+        </div>
+        <div class="useFile">{{ 'ADMIN.APPLICATIONS.USE_FILE' | translate }}</div>
       </form>
       <form class="register-app">
         <h4 class="mat-heading-4 mat-heading-underline">
-          <span>{{'ADMIN.APPLICATIONS.USE_OWN_URL' | translate}}</span>
+          <span>{{ 'ADMIN.APPLICATIONS.USE_OWN_URL' | translate }}</span>
         </h4>
-        <mat-label>{{'ADMIN.APPLICATIONS.CHOOSE_APP_MODE' | translate}}</mat-label>
+        <mat-label>{{ 'ADMIN.APPLICATIONS.CHOOSE_APP_MODE' | translate }}</mat-label>
         <mat-radio-group name="ownAppMode" [(ngModel)]="ownAppMode">
-          <mat-radio-button value="repository">{{'ADMIN.APPLICATIONS.APP_MODE.REPOSITORY' | translate}}</mat-radio-button>
-          <mat-radio-button value="render">{{'ADMIN.APPLICATIONS.APP_MODE.RENDER' | translate}}</mat-radio-button>
-          <mat-radio-button value="lms">{{'ADMIN.APPLICATIONS.APP_MODE.LMS' | translate}}</mat-radio-button>
+          <mat-radio-button value="repository">{{
+            'ADMIN.APPLICATIONS.APP_MODE.REPOSITORY' | translate
+          }}</mat-radio-button>
+          <mat-radio-button value="render">{{
+            'ADMIN.APPLICATIONS.APP_MODE.RENDER' | translate
+          }}</mat-radio-button>
+          <mat-radio-button value="lms">{{
+            'ADMIN.APPLICATIONS.APP_MODE.LMS' | translate
+          }}</mat-radio-button>
         </mat-radio-group>
         <div>
           <mat-form-field>
-            <mat-label>{{'ADMIN.APPLICATIONS.OWN_URL' | translate}}</mat-label>
-            <input matInput type="text" name="ownAppUrl" [ngModel]="getOwnAppUrl()" readonly>
-            <mat-hint>{{'ADMIN.APPLICATIONS.OWN_URL_HINT' | translate}}</mat-hint>
+            <mat-label>{{ 'ADMIN.APPLICATIONS.OWN_URL' | translate }}</mat-label>
+            <input matInput type="text" name="ownAppUrl" [ngModel]="getOwnAppUrl()" readonly />
+            <mat-hint>{{ 'ADMIN.APPLICATIONS.OWN_URL_HINT' | translate }}</mat-hint>
           </mat-form-field>
-          <button mat-raised-button (click)="copyOwnApp()">{{'ADMIN.APPLICATIONS.COPY' | translate}}</button></div>
-          <div>
+          <button mat-raised-button (click)="copyOwnApp()">
+            {{ 'ADMIN.APPLICATIONS.COPY' | translate }}
+          </button>
         </div>
+        <div></div>
       </form>
       <h4 class="mat-heading-4 mat-heading-underline">
-        <span>{{'ADMIN.LTI.HEADER' | translate }}</span>
+        <span>{{ 'ADMIN.LTI.HEADER' | translate }}</span>
       </h4>
       <es-lti-admin (onRefreshAppList)="refreshAppList()"></es-lti-admin>
       <h4 class="mat-heading-4 mat-heading-underline">
-        <span>{{'ADMIN.APPLICATIONS.LIST' | translate }}</span>
+        <span>{{ 'ADMIN.LTITOOL.HEADER' | translate }}</span>
+      </h4>
+      <es-ltitool-admin (onRefreshAppList)="refreshAppList()"></es-ltitool-admin>
+      <h4 class="mat-heading-4 mat-heading-underline">
+        <span>{{ 'ADMIN.APPLICATIONS.LIST' | translate }}</span>
       </h4>
       <div *ngFor="let type of getAppTypes()">
         <div class="app-type">
-          <h6 class="mat-heading-6">
-            {{type}} ({{getApplications(type).length}})
-          </h6>
+          <h6 class="mat-heading-6">{{ type }} ({{ getApplications(type).length }})</h6>
           <button mat-icon-button color="primary">
-            <i [esIcon]="applicationsOpen[type] ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
-               (click)="applicationsOpen[type]=!applicationsOpen[type]">
+            <i
+              [esIcon]="applicationsOpen[type] ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
+              (click)="applicationsOpen[type] = !applicationsOpen[type]"
+            >
             </i>
           </button>
         </div>
-        <div class="app-list" *ngIf="applicationsOpen[type]" [@openOverlay]="applicationsOpen[type]">
+        <div
+          class="app-list"
+          *ngIf="applicationsOpen[type]"
+          [@openOverlay]="applicationsOpen[type]"
+        >
           <div class="header">
-
-            <div class="id">{{'ADMIN.APPLICATIONS.ID' | translate}}</div>
-            <div class="title">{{'ADMIN.APPLICATIONS.TITLE' | translate}}</div>
-            <div class="file">{{'ADMIN.APPLICATIONS.FILE' | translate}}</div>
-            <div class="repoType">{{'ADMIN.APPLICATIONS.REPOTYPE' | translate}}</div>
-            <div class="subtype">{{'ADMIN.APPLICATIONS.SUBTYPE' | translate}}</div>
+            <div class="id">{{ 'ADMIN.APPLICATIONS.ID' | translate }}</div>
+            <div class="title">{{ 'ADMIN.APPLICATIONS.TITLE' | translate }}</div>
+            <div class="file">{{ 'ADMIN.APPLICATIONS.FILE' | translate }}</div>
+            <div class="repoType">{{ 'ADMIN.APPLICATIONS.REPOTYPE' | translate }}</div>
+            <div class="subtype">{{ 'ADMIN.APPLICATIONS.SUBTYPE' | translate }}</div>
             <div class="config">&nbsp;</div>
             <div class="edit">&nbsp;</div>
             <div class="download">&nbsp;</div>
             <div class="delete">&nbsp;</div>
           </div>
           <div *ngFor="let app of getApplications(type)">
-            <div class="id">{{app.id}}</div>
-            <div class="title">{{app.title}}</div>
-            <div class="file">{{app.file}}</div>
-            <div class="repoType">{{app.repositoryType}}</div>
-            <div class="subtype">{{app.subtype}}</div>
-            <div class="config"><button mat-icon-button color="primary" *ngIf="app.configUrl" (click)="configApp(app)"><i esIcon="settings" class="clickable"></i></button></div>
-            <div class="edit"><button mat-icon-button color="primary" (click)="editApp(app)"><i esIcon="edit" class="clickable" ></i></button></div>
-            <div class="download"><button mat-icon-button color="primary" (click)="downloadApp(app)"><i esIcon="cloud_download" class="clickable"></i></button></div>
-            <div class="delete"><button mat-icon-button color="primary" (click)="removeApp(app)"><i esIcon="delete" class="clickable"></i></button></div>
+            <div class="id">{{ app.id }}</div>
+            <div class="title">{{ app.title }}</div>
+            <div class="file">{{ app.file }}</div>
+            <div class="repoType">{{ app.repositoryType }}</div>
+            <div class="subtype">{{ app.subtype }}</div>
+            <div class="config">
+              <button
+                mat-icon-button
+                color="primary"
+                *ngIf="app.configUrl"
+                (click)="configApp(app)"
+              >
+                <i esIcon="settings" class="clickable"></i>
+              </button>
+            </div>
+            <div class="edit">
+              <button mat-icon-button color="primary" (click)="editApp(app)">
+                <i esIcon="edit" class="clickable"></i>
+              </button>
+            </div>
+            <div class="download">
+              <button mat-icon-button color="primary" (click)="downloadApp(app)">
+                <i esIcon="cloud_download" class="clickable"></i>
+              </button>
+            </div>
+            <div class="delete">
+              <button mat-icon-button color="primary" (click)="removeApp(app)">
+                <i esIcon="delete" class="clickable"></i>
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
     <div *ngIf="modeIsActive('UPDATE')" class="content update">
       <div class="hint">
-        {{'ADMIN.UPDATE.HINT' | translate}}
+        {{ 'ADMIN.UPDATE.HINT' | translate }}
       </div>
       <div class="table">
         <div class="tableRow header">
-          <div class="id">{{'ADMIN.UPDATE.ID' | translate}}</div>
-          <div class="description">{{'ADMIN.UPDATE.DESCRIPTION' | translate}}</div>
-          <div class="date">{{'ADMIN.UPDATE.DATE' | translate}}</div>
-          <div class="test">{{'ADMIN.UPDATE.TEST' | translate}}</div>
-          <div class="run">{{'ADMIN.UPDATE.RUN' | translate}}</div>
+          <div class="id">{{ 'ADMIN.UPDATE.ID' | translate }}</div>
+          <div class="description">{{ 'ADMIN.UPDATE.DESCRIPTION' | translate }}</div>
+          <div class="date">{{ 'ADMIN.UPDATE.DATE' | translate }}</div>
+          <div class="test">{{ 'ADMIN.UPDATE.TEST' | translate }}</div>
+          <div class="run">{{ 'ADMIN.UPDATE.RUN' | translate }}</div>
         </div>
-        <div *ngFor="let update of updates" class="tableRow" [class.table-not-executed]="!update.executedAt">
-          <div class="id">{{update.id}}</div>
-          <div class="description">{{update.description}}</div>
-          <div class="date" *ngIf="!update.executedAt">{{'ADMIN.UPDATE.NOT_EXECUTED' | translate}}</div>
-          <div class="date" *ngIf="update.executedAt">{{update.executedAt | formatDate}}</div>
-          <div class="test"><button mat-button color="primary" (click)="runUpdate(update,false)">{{'ADMIN.UPDATE.TEST' | translate}}</button></div>
-          <div class="run"><button mat-raised-button [class.disabled]="update.executedAt" (click)="runUpdate(update,true)">{{'ADMIN.UPDATE.RUN' | translate}}</button></div>
+        <div
+          *ngFor="let update of updates"
+          class="tableRow"
+          [class.table-not-executed]="!update.executedAt"
+        >
+          <div class="id">{{ update.id }}</div>
+          <div class="description">{{ update.description }}</div>
+          <div class="date" *ngIf="!update.executedAt">
+            {{ 'ADMIN.UPDATE.NOT_EXECUTED' | translate }}
+          </div>
+          <div class="date" *ngIf="update.executedAt">{{ update.executedAt | formatDate }}</div>
+          <div class="test">
+            <button mat-button color="primary" (click)="runUpdate(update, false)">
+              {{ 'ADMIN.UPDATE.TEST' | translate }}
+            </button>
+          </div>
+          <div class="run">
+            <button
+              mat-raised-button
+              [class.disabled]="update.executedAt"
+              (click)="runUpdate(update, true)"
+            >
+              {{ 'ADMIN.UPDATE.RUN' | translate }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
     <div *ngIf="modeIsActive('IMPORT')" class="content import">
-      <div class="heading"><i class="material-icons">layers</i><span>{{'ADMIN.IMPORT.COLLECTION' | translate}}</span></div>
+      <div class="heading">
+        <i class="material-icons">layers</i><span>{{ 'ADMIN.IMPORT.COLLECTION' | translate }}</span>
+      </div>
       <div class="collections">
-        <input #xmlCollectionsSelect type="file" style="display:none" id="xmlCollectionsSelect" accept=".xml, .zip" (change)="updateCollectionsFile($event)">
+        <input
+          #xmlCollectionsSelect
+          type="file"
+          style="display: none"
+          id="xmlCollectionsSelect"
+          accept=".xml, .zip"
+          (change)="updateCollectionsFile($event)"
+        />
         <div class="inputGroup">
-          <button mat-raised-button (click)="xmlCollectionsSelect.click()">{{'ADMIN.IMPORT.CHOOSE_COLLECTIONS_XML' | translate}}</button>
-          <div class="file">{{ (collectionsFile ? collectionsFile.name : '') }}</div>
+          <button mat-raised-button (click)="xmlCollectionsSelect.click()">
+            {{ 'ADMIN.IMPORT.CHOOSE_COLLECTIONS_XML' | translate }}
+          </button>
+          <div class="file">{{ collectionsFile ? collectionsFile.name : '' }}</div>
         </div>
         <mat-radio-group class="inputGroup" [(ngModel)]="parentCollectionType">
-          <mat-radio-button name="parentCollection" id="parentCollectionRoot" value="root">{{'ADMIN.IMPORT.PARENT_COLLECTION_ROOT' | translate}}</mat-radio-button>
-          <mat-radio-button name="parentCollection" id="parentCollectionChoose" value="choose">{{'ADMIN.IMPORT.PARENT_COLLECTION_CHOOSE' | translate}}</mat-radio-button>
+          <mat-radio-button name="parentCollection" id="parentCollectionRoot" value="root">{{
+            'ADMIN.IMPORT.PARENT_COLLECTION_ROOT' | translate
+          }}</mat-radio-button>
+          <mat-radio-button name="parentCollection" id="parentCollectionChoose" value="choose">{{
+            'ADMIN.IMPORT.PARENT_COLLECTION_CHOOSE' | translate
+          }}</mat-radio-button>
         </mat-radio-group>
-        <div class="inputGroup" *ngIf="parentCollectionType=='choose'">
-          <button mat-raised-button (click)="chooseCollection=true">{{'ADMIN.IMPORT.CHOOSE_COLLECTION' | translate}}</button>
-          <div class="directory"><div *ngIf="parentCollection">{{ parentCollection.title}} ({{parentCollection.ref.id}})</div></div>
+        <div class="inputGroup" *ngIf="parentCollectionType === 'choose'">
+          <button mat-raised-button (click)="chooseCollection()">
+            {{ 'ADMIN.IMPORT.CHOOSE_COLLECTION' | translate }}
+          </button>
+          <div class="directory">
+            <div *ngIf="parentCollection">
+              {{ parentCollection.title }} ({{ parentCollection.ref.id }})
+            </div>
+          </div>
         </div>
-        <button mat-raised-button color="primary" (click)="importCollections()">{{'ADMIN.IMPORT.COLLECTION_START' | translate}}</button>
+        <button mat-raised-button color="primary" (click)="importCollections()">
+          {{ 'ADMIN.IMPORT.COLLECTION_START' | translate }}
+        </button>
       </div>
-      <div class="heading"><i class="material-icons">table_chart</i><span>{{'ADMIN.IMPORT.EXCEL' | translate}}</span></div>
+      <div class="heading">
+        <i class="material-icons">table_chart</i><span>{{ 'ADMIN.IMPORT.EXCEL' | translate }}</span>
+      </div>
       <div class="csv">
-        <input #csvSelect type="file" style="display:none" id="csvSelect" accept=".xls, .xlsx" (change)="updateExcelFile($event)">
+        <input
+          #csvSelect
+          type="file"
+          style="display: none"
+          id="csvSelect"
+          accept=".xls, .xlsx"
+          (change)="updateExcelFile($event)"
+        />
         <div class="inputGroup">
-          <button mat-raised-button (click)="csvSelect.click()">{{'ADMIN.IMPORT.CHOOSE_EXCEL' | translate}}</button>
-          <div class="file">{{ (excelFile ? excelFile.name : '') }}</div>
+          <button mat-raised-button (click)="csvSelect.click()">
+            {{ 'ADMIN.IMPORT.CHOOSE_EXCEL' | translate }}
+          </button>
+          <div class="file">{{ excelFile ? excelFile.name : '' }}</div>
         </div>
         <div class="inputGroup">
-          <button mat-raised-button (click)="chooseDirectory=true">{{'ADMIN.IMPORT.CHOOSE_DIRECTORY' | translate}}</button>
-          <div class="directory"><div *ngIf="parentNode">{{ parentNode.name}} ({{parentNode.ref.id}})</div></div>
+          <button mat-raised-button (click)="chooseDirectory()">
+            {{ 'ADMIN.IMPORT.CHOOSE_DIRECTORY' | translate }}
+          </button>
+          <div class="directory">
+            <div *ngIf="parentNode">{{ parentNode.name }} ({{ parentNode.ref.id }})</div>
+          </div>
         </div>
-        <button mat-raised-button color="primary" (click)="importExcel()">{{'ADMIN.IMPORT.EXCEL_START' | translate}}</button>
+        <button mat-raised-button color="primary" (click)="importExcel()">
+          {{ 'ADMIN.IMPORT.EXCEL_START' | translate }}
+        </button>
       </div>
-      <div class="heading"><i class="material-icons">description</i><span>{{'ADMIN.IMPORT.OAI' | translate}}</span></div>
+      <div class="heading">
+        <i class="material-icons">description</i><span>{{ 'ADMIN.IMPORT.OAI' | translate }}</span>
+      </div>
       <div class="oai">
-        <label>{{'ADMIN.IMPORT.OAI_XML' | translate}}</label>
-        <input #uploadOaiSelect type="file" style="display:none" id="uploadOaiSelect" (change)="updateUploadOaiFile($event)">
+        <label>{{ 'ADMIN.IMPORT.OAI_XML' | translate }}</label>
+        <input
+          #uploadOaiSelect
+          type="file"
+          style="display: none"
+          id="uploadOaiSelect"
+          (change)="updateUploadOaiFile($event)"
+        />
         <div class="inputGroup">
-          <button mat-raised-button (click)="uploadOaiSelect.click()">{{'ADMIN.TOOLKIT.CHOOSE_UPLOAD_TEMP' | translate}}</button>
-          <div class="file">{{ (uploadOaiFile ? uploadOaiFile.name : '') }}</div>
+          <button mat-raised-button (click)="uploadOaiSelect.click()">
+            {{ 'ADMIN.TOOLKIT.CHOOSE_UPLOAD_TEMP' | translate }}
+          </button>
+          <div class="file">{{ uploadOaiFile ? uploadOaiFile.name : '' }}</div>
         </div>
         <div *ngIf="!uploadOaiFile">
           <mat-form-field>
-            <mat-label>{{'ADMIN.IMPORT.OAI_URL' | translate}}</mat-label>
-            <input matInput type="text" [(ngModel)]="oai.url">
-            <mat-hint>{{'ADMIN.IMPORT.OAI_URL_EXAMPLE' | translate}}</mat-hint>
+            <mat-label>{{ 'ADMIN.IMPORT.OAI_URL' | translate }}</mat-label>
+            <input matInput type="text" [(ngModel)]="oai.url" />
+            <mat-hint>{{ 'ADMIN.IMPORT.OAI_URL_EXAMPLE' | translate }}</mat-hint>
           </mat-form-field>
           <mat-form-field>
-            <mat-label>{{'ADMIN.IMPORT.OAI_SET' | translate}}</mat-label>
-            <input matInput type="text" [(ngModel)]="oai.set">
+            <mat-label>{{ 'ADMIN.IMPORT.OAI_SET' | translate }}</mat-label>
+            <input matInput type="text" [(ngModel)]="oai.set" />
           </mat-form-field>
           <mat-form-field>
-            <mat-label>{{'ADMIN.IMPORT.OAI_PREFIX' | translate}}</mat-label>
-            <input matInput type="text" [(ngModel)]="oai.prefix">
+            <mat-label>{{ 'ADMIN.IMPORT.OAI_PREFIX' | translate }}</mat-label>
+            <input matInput type="text" [(ngModel)]="oai.prefix" />
           </mat-form-field>
           <mat-form-field>
-            <mat-label>{{'ADMIN.IMPORT.OAI_METADATA' | translate}}</mat-label>
-            <input matInput type="text" [(ngModel)]="oai.metadata">
+            <mat-label>{{ 'ADMIN.IMPORT.OAI_METADATA' | translate }}</mat-label>
+            <input matInput type="text" [(ngModel)]="oai.metadata" />
           </mat-form-field>
           <mat-form-field>
-            <mat-label>{{'ADMIN.IMPORT.OAI_FILE' | translate}}</mat-label>
-            <input matInput type="text" [(ngModel)]="oai.file">
+            <mat-label>{{ 'ADMIN.IMPORT.OAI_FILE' | translate }}</mat-label>
+            <input matInput type="text" [(ngModel)]="oai.file" />
           </mat-form-field>
           <mat-form-field>
-            <mat-label>{{'ADMIN.IMPORT.OAI_IDS' | translate}}</mat-label>
-            <input matInput type="text" [(ngModel)]="oai.ids">
+            <mat-label>{{ 'ADMIN.IMPORT.OAI_IDS' | translate }}</mat-label>
+            <input matInput type="text" [(ngModel)]="oai.ids" />
           </mat-form-field>
           <mat-form-field>
-            <mat-label>{{'ADMIN.IMPORT.OAI_FROM' | translate}} (yyyy-MM-dd)</mat-label>
-            <input matInput type="text" [(ngModel)]="oai.from">
+            <mat-label>{{ 'ADMIN.IMPORT.OAI_FROM' | translate }} (yyyy-MM-dd)</mat-label>
+            <input matInput type="text" [(ngModel)]="oai.from" />
           </mat-form-field>
           <mat-form-field>
-            <mat-label>{{'ADMIN.IMPORT.OAI_UNTIL' | translate}} (yyyy-MM-dd)</mat-label>
-            <input matInput type="text" [(ngModel)]="oai.until">
+            <mat-label>{{ 'ADMIN.IMPORT.OAI_UNTIL' | translate }} (yyyy-MM-dd)</mat-label>
+            <input matInput type="text" [(ngModel)]="oai.until" />
           </mat-form-field>
           <mat-form-field>
-            <mat-label>{{'ADMIN.IMPORT.OAI_PERIOD_IN_DAYS' | translate}}</mat-label>
-            <input matInput type="text" [(ngModel)]="oai.periodInDays">
+            <mat-label>{{ 'ADMIN.IMPORT.OAI_PERIOD_IN_DAYS' | translate }}</mat-label>
+            <input matInput type="text" [(ngModel)]="oai.periodInDays" />
           </mat-form-field>
           <mat-form-field>
-            <mat-label>{{'ADMIN.IMPORT.OAI_CLASS_NAME' | translate}}</mat-label>
+            <mat-label>{{ 'ADMIN.IMPORT.OAI_CLASS_NAME' | translate }}</mat-label>
             <mat-select [(ngModel)]="oai.className">
-              <mat-option *ngFor="let option of oaiClasses" [value]="option">{{ option }}</mat-option>
+              <mat-option *ngFor="let option of oaiClasses" [value]="option">{{
+                option
+              }}</mat-option>
             </mat-select>
           </mat-form-field>
         </div>
         <mat-form-field>
-          <mat-label>{{'ADMIN.IMPORT.OAI_IMPORTER_CLASS_NAME' | translate}}</mat-label>
-          <input matInput type="text" [(ngModel)]="oai.importerClassName">
-          <mat-hint>{{'ADMIN.IMPORT.OAI_IMPORTER_CLASS_NAME_EXAMPLE' | translate}}</mat-hint>
+          <mat-label>{{ 'ADMIN.IMPORT.OAI_IMPORTER_CLASS_NAME' | translate }}</mat-label>
+          <input matInput type="text" [(ngModel)]="oai.importerClassName" />
+          <mat-hint>{{ 'ADMIN.IMPORT.OAI_IMPORTER_CLASS_NAME_EXAMPLE' | translate }}</mat-hint>
         </mat-form-field>
         <mat-form-field>
-          <mat-label>{{'ADMIN.IMPORT.OAI_RECORD_HANDLER_CLASS_NAME' | translate}}</mat-label>
-          <input matInput type="text" [(ngModel)]="oai.recordHandlerClassName">
-          <mat-hint>{{'ADMIN.IMPORT.OAI_RECORD_HANDLER_CLASS_NAME_EXAMPLE' | translate}}</mat-hint>
+          <mat-label>{{ 'ADMIN.IMPORT.OAI_RECORD_HANDLER_CLASS_NAME' | translate }}</mat-label>
+          <input matInput type="text" [(ngModel)]="oai.recordHandlerClassName" />
+          <mat-hint>{{
+            'ADMIN.IMPORT.OAI_RECORD_HANDLER_CLASS_NAME_EXAMPLE' | translate
+          }}</mat-hint>
         </mat-form-field>
         <mat-form-field>
-          <mat-label>{{'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME' | translate}}</mat-label>
-          <input matInput type="text" [(ngModel)]="oai.binaryHandlerClassName">
-          <mat-hint>{{'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME_EXAMPLE' | translate}}</mat-hint>
+          <mat-label>{{ 'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME' | translate }}</mat-label>
+          <input matInput type="text" [(ngModel)]="oai.binaryHandlerClassName" />
+          <mat-hint>{{
+            'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME_EXAMPLE' | translate
+          }}</mat-hint>
         </mat-form-field>
         <mat-form-field>
-          <mat-label>{{'ADMIN.IMPORT.OAI_PERSISTENT_HANDLER_CLASS_NAME' | translate}}</mat-label>
-          <input matInput type="text" [(ngModel)]="oai.persistentHandlerClassName">
-          <mat-hint>{{'ADMIN.IMPORT.OAI_PERSISTENT_HANDLER_CLASS_NAME_EXAMPLE' | translate}}</mat-hint>
+          <mat-label>{{ 'ADMIN.IMPORT.OAI_PERSISTENT_HANDLER_CLASS_NAME' | translate }}</mat-label>
+          <input matInput type="text" [(ngModel)]="oai.persistentHandlerClassName" />
+          <mat-hint>{{
+            'ADMIN.IMPORT.OAI_PERSISTENT_HANDLER_CLASS_NAME_EXAMPLE' | translate
+          }}</mat-hint>
         </mat-form-field>
         <!--
         <label for="OAI_URL">{{'ADMIN.IMPORT.OAI_URL' | translate}}</label>
@@ -418,23 +548,33 @@
     <div class="input-hint-bottom">{{'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME_EXAMPLE' | translate}}</div>
     -->
         <div class="oaiForce" *ngIf="!uploadOaiFile">
-          <mat-checkbox [(ngModel)]="oai.forceUpdate">{{'ADMIN.IMPORT.OAI_FORCE_UPDATE' | translate}}</mat-checkbox>
+          <mat-checkbox [(ngModel)]="oai.forceUpdate">{{
+            'ADMIN.IMPORT.OAI_FORCE_UPDATE' | translate
+          }}</mat-checkbox>
         </div>
         <div class="oaiSave">
-          <mat-checkbox [(ngModel)]="oaiSave">{{'ADMIN.IMPORT.OAI_SAVE' | translate}}</mat-checkbox>
+          <mat-checkbox [(ngModel)]="oaiSave">{{
+            'ADMIN.IMPORT.OAI_SAVE' | translate
+          }}</mat-checkbox>
         </div>
         <div class="actions">
-          <button mat-raised-button (click)="removeImports()">{{'ADMIN.IMPORT.REMOVE_IMPORTS' | translate}}</button>
-          <button mat-raised-button color="primary" (click)="oaiImport()">{{'ADMIN.IMPORT.OAI_START' | translate}}</button>
+          <button mat-raised-button (click)="removeImports()">
+            {{ 'ADMIN.IMPORT.REMOVE_IMPORTS' | translate }}
+          </button>
+          <button mat-raised-button color="primary" (click)="oaiImport()">
+            {{ 'ADMIN.IMPORT.OAI_START' | translate }}
+          </button>
         </div>
       </div>
     </div>
     <div *ngIf="modeIsActive('JOBS')" class="content jobs">
-      <div class="heading"><i class="material-icons">done</i><span>{{'ADMIN.JOBS.START_JOB' | translate}}</span></div>
+      <div class="heading">
+        <i class="material-icons">done</i><span>{{ 'ADMIN.JOBS.START_JOB' | translate }}</span>
+      </div>
       <section class="group">
         <form>
           <div class="inputGroupGrow">
-            <div class="info">{{'ADMIN.JOBS.JOB_CLASS' | translate }}</div>
+            <div class="info">{{ 'ADMIN.JOBS.JOB_CLASS' | translate }}</div>
             <div class="autocomplete">
               <es-autocomplete
                 [suggestions]="jobClassesSuggested"
@@ -443,125 +583,181 @@
                 [maxSuggestions]="1000"
                 (updateInput)="updateJobSuggestions($event)"
                 (addItem)="setJob($event)"
-                (addAny)="job.name='';job.class=$event"></es-autocomplete>
-              <div class="job-title" *ngIf="job && job.name">{{job.name | translate}}</div>
-              <div class="job-class" *ngIf="job && job.class">{{job.class}}</div>
+                (addAny)="job.name = ''; job.class = $event"
+              ></es-autocomplete>
+              <div class="job-title" *ngIf="job && job.name">{{ job.name | translate }}</div>
+              <div class="job-class" *ngIf="job && job.class">{{ job.class }}</div>
             </div>
           </div>
           <div class="inputGroupRow params" *ngIf="job.object?.params?.length">
-            <h5 class="mat-heading-5">{{'ADMIN.JOBS.PARAMETERS' | translate}}</h5>
+            <h5 class="mat-heading-5">{{ 'ADMIN.JOBS.PARAMETERS' | translate }}</h5>
             <div class="param-table">
               <div class="param-row" *ngFor="let param of job.object.params">
                 <div class="param-name">
-                  {{param.name}}
+                  {{ param.name }}
                   <span *ngIf="param.array">[]</span>
-                  <span *ngIf="param.file">(file)</span></div>
-                <div>{{param.description}}</div>
+                  <span *ngIf="param.file">(file)</span>
+                </div>
+                <div>{{ param.description }}</div>
                 <div class="param-value">
                   <ng-container *ngIf="param.values">
                     <div class="param-table">
                       <div class="param-row" *ngFor="let value of param.values">
                         <div>
-                          {{value.name}}
+                          {{ value.name }}
                         </div>
-                        <div>{{value.description}}</div>
+                        <div>{{ value.description }}</div>
                       </div>
                     </div>
                   </ng-container>
                   <ng-container *ngIf="!param.values">
-                    <ng-container *ngIf="param.file">
-                      File
-                    </ng-container>
+                    <ng-container *ngIf="param.file"> File </ng-container>
                     <ng-container *ngIf="!param.file">
-                      {{param.type.replace("java.lang.","")}}
+                      {{ param.type.replace('java.lang.', '') }}
                     </ng-container>
                   </ng-container>
                 </div>
               </div>
             </div>
             <div>
-              <button mat-raised-button (click)="setJobParamsTemplate()">{{'ADMIN.JOBS.APPLY_TEMPLATE' | translate}}</button>
+              <button mat-raised-button (click)="setJobParamsTemplate()">
+                {{ 'ADMIN.JOBS.APPLY_TEMPLATE' | translate }}
+              </button>
             </div>
           </div>
-          <ngx-monaco-editor [options]="jobCodeOptions"
-                             [(ngModel)]="job.params"
-                             [ngModelOptions]="{standalone: true}"
-                             name="jobParams"
-                             class="jobParams materialize-textarea"
+          <ngx-monaco-editor
+            [options]="jobCodeOptions"
+            [(ngModel)]="job.params"
+            [ngModelOptions]="{ standalone: true }"
+            name="jobParams"
+            class="jobParams materialize-textarea"
           ></ngx-monaco-editor>
           <div class="inputGroupGrow" *ngIf="supportsUpload(job.object)">
-            <input #uploadJobSelect type="file" style="display:none" (change)="updateUploadFile($event, 'uploadJobsFile')">
+            <input
+              #uploadJobSelect
+              type="file"
+              style="display: none"
+              (change)="updateUploadFile($event, 'uploadJobsFile')"
+            />
             <label>{{ 'ADMIN.JOBS.UPLOAD_FILE_LABEL' | translate }}</label>
             <div class="inputGroup">
-              <button mat-raised-button (click)="uploadJobSelect.click()">{{'ADMIN.JOBS.CHOOSE_UPLOAD_FILE' | translate}}</button>
+              <button mat-raised-button (click)="uploadJobSelect.click()">
+                {{ 'ADMIN.JOBS.CHOOSE_UPLOAD_FILE' | translate }}
+              </button>
               <div class="file">{{ uploadJobsFile?.name }}</div>
             </div>
           </div>
-          <button mat-raised-button (click)="startJob()">{{'ADMIN.JOBS.START_JOB' | translate }}</button>
+          <button mat-raised-button (click)="startJob()">
+            {{ 'ADMIN.JOBS.START_JOB' | translate }}
+          </button>
         </form>
       </section>
-      <div class="heading"><i class="material-icons">history</i><span>{{'ADMIN.JOBS.LIST' | translate}}</span></div>
+      <div class="heading">
+        <i class="material-icons">history</i><span>{{ 'ADMIN.JOBS.LIST' | translate }}</span>
+      </div>
       <div class="group">
-        <div class="reload"><i class="material-icons clickable" (click)="reloadJobStatus()">refresh</i></div>
-        <div class="no-jobs" *ngIf="!jobs || !jobs.length">{{'ADMIN.JOBS.NO_JOBS' | translate}}</div>
-        <div *ngFor="let job of jobs;let i=index" class="job">
+        <div class="reload">
+          <i class="material-icons clickable" (click)="reloadJobStatus()">refresh</i>
+        </div>
+        <div class="no-jobs" *ngIf="!jobs || !jobs.length">
+          {{ 'ADMIN.JOBS.NO_JOBS' | translate }}
+        </div>
+        <div *ngFor="let job of jobs; let i = index" class="job">
           <div class="job-col">
-            <div class="job-row job-main"
-                 [class.status-error]="job.worstLevel.syslogEquivalent<=3"
-                 [class.status-warning]="job.worstLevel.syslogEquivalent<=4"
-                 [class.status-fine]="job.worstLevel.syslogEquivalent>=6"
-                 [class.status-aborted]="job.status=='Aborted'">
+            <div
+              class="job-row job-main"
+              [class.status-error]="job.worstLevel.syslogEquivalent <= 3"
+              [class.status-warning]="job.worstLevel.syslogEquivalent <= 4"
+              [class.status-fine]="job.worstLevel.syslogEquivalent >= 6"
+              [class.status-aborted]="job.status === 'Aborted'"
+            >
               <div class="job-col col-name">
-                <div class="name">{{job.jobDetail.name}}</div>
-                <div class="class">{{job.jobDetail.jobClass}}</div>
+                <div class="name">{{ job.jobDetail.name }}</div>
+                <div class="class">{{ job.jobDetail.jobClass }}</div>
               </div>
               <div class="job-col col-time">
                 <div class="date">
-                  {{job.startTime | formatDate:{time:true,relative:false} }}
+                  {{ job.startTime | formatDate: { time: true, relative: false } }}
                   <span *ngIf="job.finishTime">
-                                - {{job.finishTime | formatDate:{time:true,relative:false} }}
-                            </span>
+                    - {{ job.finishTime | formatDate: { time: true, relative: false } }}
+                  </span>
                 </div>
-                <div class="job-status {{job.status.toLowerCase()}}">
-                            <span>
-                                {{'ADMIN.JOBS.'+job.status | translate}}
-                              <span *ngIf="job.worstLevel.syslogEquivalent==4">{{'ADMIN.JOBS.WITH_WARNINGS' | translate}}</span>
-                                <span *ngIf="job.worstLevel.syslogEquivalent<4">{{'ADMIN.JOBS.WITH_ERRORS' | translate}}</span>
-                            </span>
-                  <es-spinner-small *ngIf="job.status=='Running'"></es-spinner-small>
-                  <button mat-icon-button *ngIf="job.status=='Running'" (click)="cancelJob(job)" class="close"><i esIcon="close"></i></button>
+                <div class="job-status {{ job.status.toLowerCase() }}">
+                  <span>
+                    {{ 'ADMIN.JOBS.' + job.status | translate }}
+                    <span *ngIf="job.worstLevel.syslogEquivalent == 4">{{
+                      'ADMIN.JOBS.WITH_WARNINGS' | translate
+                    }}</span>
+                    <span *ngIf="job.worstLevel.syslogEquivalent < 4">{{
+                      'ADMIN.JOBS.WITH_ERRORS' | translate
+                    }}</span>
+                  </span>
+                  <es-spinner-small *ngIf="job.status === 'Running'"></es-spinner-small>
+                  <button
+                    mat-icon-button
+                    *ngIf="job.status === 'Running'"
+                    (click)="cancelJob(job)"
+                    class="close"
+                  >
+                    <i esIcon="close"></i>
+                  </button>
                 </div>
               </div>
-              <div class="job-col col-more" [class.clickable]="job.log && job.log.length" (click)="job.log && job.log.length ? jobsOpen[i]=jobsOpen[i] ? false : true : null">
-                <i class="material-icons" *ngIf="job.log && job.log.length">{{jobsOpen[i] ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}}</i>
+              <div
+                class="job-col col-more"
+                [class.clickable]="job.log && job.log.length"
+                (click)="
+                  job.log && job.log.length ? (jobsOpen[i] = jobsOpen[i] ? false : true) : null
+                "
+              >
+                <i class="material-icons" *ngIf="job.log && job.log.length">{{
+                  jobsOpen[i] ? 'keyboard_arrow_up' : 'keyboard_arrow_down'
+                }}</i>
               </div>
             </div>
             <div class="job-col row-detail" *ngIf="jobsOpen[i]">
               <div class="job-row log-filters">
                 <mat-form-field class="job-row log-filter">
-                  <mat-label>{{'ADMIN.JOBS.LOG_FILTER' | translate}}</mat-label>
-                  <input matInput type="text" [(ngModel)]="jobsLogFilter[i]" (ngModelChange)="updateJobLogs()">
+                  <mat-label>{{ 'ADMIN.JOBS.LOG_FILTER' | translate }}</mat-label>
+                  <input
+                    matInput
+                    type="text"
+                    [(ngModel)]="jobsLogFilter[i]"
+                    (ngModelChange)="updateJobLogs()"
+                  />
                 </mat-form-field>
                 <mat-form-field class="job-row log-level">
-                  <mat-label for="logLevel">{{'ADMIN.JOBS.LOG_LEVEL' | translate}}</mat-label>
-                  <mat-select id="logLevel" [(ngModel)]="jobsLogLevel[i]" (ngModelChange)="updateJobLogs()">
+                  <mat-label for="logLevel">{{ 'ADMIN.JOBS.LOG_LEVEL' | translate }}</mat-label>
+                  <mat-select
+                    id="logLevel"
+                    [(ngModel)]="jobsLogLevel[i]"
+                    (ngModelChange)="updateJobLogs()"
+                  >
                     <mat-option value="">Alles</mat-option>
-                    <mat-option value="4">{{'ADMIN.JOBS.LOG_LEVEL_4' | translate}}</mat-option>
-                    <mat-option value="3">{{'ADMIN.JOBS.LOG_LEVEL_3' | translate}}</mat-option>
+                    <mat-option value="4">{{ 'ADMIN.JOBS.LOG_LEVEL_4' | translate }}</mat-option>
+                    <mat-option value="3">{{ 'ADMIN.JOBS.LOG_LEVEL_3' | translate }}</mat-option>
                   </mat-select>
                 </mat-form-field>
               </div>
               <div class="job-col">
-                <div class="log">{{'ADMIN.JOBS.LOG' | translate}}</div>
+                <div class="log">{{ 'ADMIN.JOBS.LOG' | translate }}</div>
                 <div class="log-data">
-                  <div *ngFor="let entry of jobsLogData[i]" class="job-row"
-                       [class.status-error]="entry.level.syslogEquivalent<=3"
-                       [class.status-warning]="entry.level.syslogEquivalent<=4"
+                  <div
+                    *ngFor="let entry of jobsLogData[i]"
+                    class="job-row"
+                    [class.status-error]="entry.level.syslogEquivalent <= 3"
+                    [class.status-warning]="entry.level.syslogEquivalent <= 4"
                   >
-                    <div class="log-level">{{'ADMIN.JOBS.LOG_LEVEL_'+entry.level.syslogEquivalent | translate}}</div>
-                    <div class="log-date">{{entry.date | formatDate:{time:true,date:false,relative:false} }}</div>
-                    <div class="log-class">{{ entry.className.split(".")[entry.className.split(".").length-1] }}</div>
-                    <div class="log-message">{{entry.message}}</div>
+                    <div class="log-level">
+                      {{ 'ADMIN.JOBS.LOG_LEVEL_' + entry.level.syslogEquivalent | translate }}
+                    </div>
+                    <div class="log-date">
+                      {{ entry.date | formatDate: { time: true, date: false, relative: false } }}
+                    </div>
+                    <div class="log-class">
+                      {{ entry.className.split('.')[entry.className.split('.').length - 1] }}
+                    </div>
+                    <div class="log-message">{{ entry.message }}</div>
                   </div>
                 </div>
               </div>
@@ -571,64 +767,115 @@
       </div>
     </div>
     <div *ngIf="modeIsActive('TOOLKIT')" class="content toolkit">
-      <div class="heading"><i class="material-icons">refresh</i><span>{{'ADMIN.TOOLKIT.REFRESH_APP' | translate}}</span></div>
-      <div class="group">
-        <div class="info">{{'ADMIN.TOOLKIT.REFRESH_APP_INFO' | translate }}</div>
-        <button mat-raised-button (click)="refreshAppInfo()">{{'ADMIN.TOOLKIT.REFRESH_APP' | translate }}</button>
+      <div class="heading">
+        <i class="material-icons">refresh</i
+        ><span>{{ 'ADMIN.TOOLKIT.REFRESH_APP' | translate }}</span>
       </div>
       <div class="group">
-        <div class="heading"><i class="material-icons">person</i><span>{{'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER' | translate}}</span></div>
+        <div class="info">{{ 'ADMIN.TOOLKIT.REFRESH_APP_INFO' | translate }}</div>
+        <button mat-raised-button (click)="refreshAppInfo()">
+          {{ 'ADMIN.TOOLKIT.REFRESH_APP' | translate }}
+        </button>
+      </div>
+      <div class="group">
+        <div class="heading">
+          <i class="material-icons">person</i
+          ><span>{{ 'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER' | translate }}</span>
+        </div>
         <es-authority-search-input
           [mode]="AuthoritySearchMode.Users"
           [globalSearchAllowed]="true"
-          label="{{'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER' | translate}}"
+          label="{{ 'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER' | translate }}"
           [showRecent]="false"
-          (onChooseAuthority)="authenticateAuthority = $event"></es-authority-search-input>
+          (onChooseAuthority)="authenticateAuthority = $event"
+        ></es-authority-search-input>
         <mat-chip-list>
           <mat-chip *ngIf="authenticateAuthority" (removed)="authenticateAuthority = null">
-            <span>{{authenticateAuthority | authorityName}}</span>
+            <span>{{ authenticateAuthority | authorityName }}</span>
             <i matChipRemove esIcon="cancel"></i>
           </mat-chip>
         </mat-chip-list>
-        <button mat-raised-button
-                [disabled]="!authenticateAuthority"
-                (click)="authenticateAsUser()">{{'ADMIN.TOOLKIT.AUTHENTICATE' | translate }}</button>
+        <button
+          mat-raised-button
+          [disabled]="!authenticateAuthority"
+          (click)="authenticateAsUser()"
+        >
+          {{ 'ADMIN.TOOLKIT.AUTHENTICATE' | translate }}
+        </button>
       </div>
       <div class="group">
-        <div class="info">{{'ADMIN.TOOLKIT.REFRESH_EDU_GROUP_CACHE' | translate }}</div>
-        <button mat-raised-button (click)="refreshEduGroupCache()">{{'ADMIN.TOOLKIT.REFRESH_EDU_GROUP_CACHE' | translate }}</button>
+        <div class="info">{{ 'ADMIN.TOOLKIT.REFRESH_EDU_GROUP_CACHE' | translate }}</div>
+        <button mat-raised-button (click)="refreshEduGroupCache()">
+          {{ 'ADMIN.TOOLKIT.REFRESH_EDU_GROUP_CACHE' | translate }}
+        </button>
       </div>
-      <div class="heading"><i class="material-icons">cached</i><span>{{'ADMIN.TOOLKIT.CACHE' | translate}}</span></div>
+      <div class="heading">
+        <i class="material-icons">cached</i><span>{{ 'ADMIN.TOOLKIT.CACHE' | translate }}</span>
+      </div>
       <div class="group">
         <form (ngSubmit)="getCacheInfo()">
-          <input type="text" name="cacheInfo" class="cacheInfo" [(ngModel)]="cacheInfo" placeholder="{{'ADMIN.TOOLKIT.CACHE_NAME' | translate }}">
-          <button mat-raised-button (click)="getCacheInfo()">{{'ADMIN.TOOLKIT.CACHE_INFO' | translate }}</button>
+          <input
+            type="text"
+            name="cacheInfo"
+            class="cacheInfo"
+            [(ngModel)]="cacheInfo"
+            placeholder="{{ 'ADMIN.TOOLKIT.CACHE_NAME' | translate }}"
+          />
+          <button mat-raised-button (click)="getCacheInfo()">
+            {{ 'ADMIN.TOOLKIT.CACHE_INFO' | translate }}
+          </button>
         </form>
       </div>
       <div class="group caches">
         <div class="inputGroup">
-          <button mat-raised-button (click)="chooseDirectory=true">{{'ADMIN.TOOLKIT.CACHE_ROOT_FOLDER' | translate}}</button>
-          <div class="directory"><div *ngIf="parentNode">{{ parentNode.name}} ({{parentNode.ref.id}})</div></div>
+          <button mat-raised-button (click)="chooseDirectory()">
+            {{ 'ADMIN.TOOLKIT.CACHE_ROOT_FOLDER' | translate }}
+          </button>
+          <div class="directory">
+            <div *ngIf="parentNode">{{ parentNode.name }} ({{ parentNode.ref.id }})</div>
+          </div>
         </div>
         <div class="group">
           <div class="inputGroup">
-            <button mat-raised-button (click)="refreshCache(false)">{{'ADMIN.TOOLKIT.REFRESH_CACHE' | translate}}</button>
-            <button mat-raised-button (click)="refreshCache(true)">{{'ADMIN.TOOLKIT.STICKY_REFRESH_CACHE' | translate}}</button>
+            <button mat-raised-button (click)="refreshCache(false)">
+              {{ 'ADMIN.TOOLKIT.REFRESH_CACHE' | translate }}
+            </button>
+            <button mat-raised-button (click)="refreshCache(true)">
+              {{ 'ADMIN.TOOLKIT.STICKY_REFRESH_CACHE' | translate }}
+            </button>
           </div>
         </div>
         <div class="propertyGroup">
-          <input type="text" [(ngModel)]="propertyName" placeholder="{{'ADMIN.TOOLKIT.PROPERTY_NAME' | translate}}">
-          <button mat-raised-button (click)="getPropertyValues()">{{'ADMIN.TOOLKIT.PROPERTY_VALUESPACE' | translate}}</button>
+          <input
+            type="text"
+            [(ngModel)]="propertyName"
+            placeholder="{{ 'ADMIN.TOOLKIT.PROPERTY_NAME' | translate }}"
+          />
+          <button mat-raised-button (click)="getPropertyValues()">
+            {{ 'ADMIN.TOOLKIT.PROPERTY_VALUESPACE' | translate }}
+          </button>
         </div>
       </div>
-      <div class="heading"><i class="material-icons">file_upload</i><span>{{'ADMIN.TOOLKIT.UPLOAD_TEMP' | translate}}</span></div>
+      <div class="heading">
+        <i class="material-icons">file_upload</i
+        ><span>{{ 'ADMIN.TOOLKIT.UPLOAD_TEMP' | translate }}</span>
+      </div>
       <div class="group">
-        <input #uploadTempSelect type="file" style="display:none" (change)="updateUploadFile($event, 'uploadTempFile')">
+        <input
+          #uploadTempSelect
+          type="file"
+          style="display: none"
+          (change)="updateUploadFile($event, 'uploadTempFile')"
+        />
         <div class="inputGroup">
-          <button mat-raised-button (click)="uploadTempSelect.click()">{{'ADMIN.TOOLKIT.CHOOSE_UPLOAD_TEMP' | translate}}</button>
-          <div class="file">{{ (uploadTempFile ? uploadTempFile.name : '') }}</div>
+          <button mat-raised-button (click)="uploadTempSelect.click()">
+            {{ 'ADMIN.TOOLKIT.CHOOSE_UPLOAD_TEMP' | translate }}
+          </button>
+          <div class="file">{{ uploadTempFile ? uploadTempFile.name : '' }}</div>
         </div>
-        <button mat-flat-button color="primary" (click)="startUploadTempFile()">{{'ADMIN.TOOLKIT.UPLOAD_TEMP_START' | translate}}</button>
+        <button mat-flat-button color="primary" (click)="startUploadTempFile()">
+          {{ 'ADMIN.TOOLKIT.UPLOAD_TEMP_START' | translate }}
+        </button>
       </div>
       <!--
       <div class="heading"><i class="material-icons">textsms</i><span>{{'ADMIN.TOOLKIT.CATALINA' | translate}}</span></div>
@@ -641,9 +888,12 @@
       -->
     </div>
     <div *ngIf="modeIsActive('BROWSER')" class="content browser">
-      <div class="heading"><i class="material-icons">search</i><span>{{'ADMIN.BROWSER.NODE_BROWSER' | translate}}</span></div>
+      <div class="heading">
+        <i class="material-icons">search</i
+        ><span>{{ 'ADMIN.BROWSER.NODE_BROWSER' | translate }}</span>
+      </div>
       <div class="inputGroupGrow">
-        <div class="info">{{'ADMIN.BROWSER.MODE' | translate }}</div>
+        <div class="info">{{ 'ADMIN.BROWSER.MODE' | translate }}</div>
         <mat-form-field>
           <mat-select [(ngModel)]="lucene.mode">
             <mat-option value="NODEREF">Node-Ref / Node-Id</mat-option>
@@ -652,137 +902,179 @@
           </mat-select>
         </mat-form-field>
       </div>
-      <div *ngIf="lucene.mode==='NODEREF'" class="group">
+      <div *ngIf="lucene.mode === 'NODEREF'" class="group">
         <div class="inputGroupGrow">
           <mat-form-field>
-            <mat-label>{{'ADMIN.BROWSER.NODEREF' | translate }}</mat-label>
-            <input matInput type="text" name="noderef" [(ngModel)]="lucene.noderef" placeholder='aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"'>
+            <mat-label>{{ 'ADMIN.BROWSER.NODEREF' | translate }}</mat-label>
+            <input
+              matInput
+              type="text"
+              name="noderef"
+              [(ngModel)]="lucene.noderef"
+              placeholder='aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"'
+            />
           </mat-form-field>
         </div>
-        <button mat-flat-button color="primary" (click)="searchNoderef()">{{'ADMIN.BROWSER.LUCENE_START' | translate}}</button>
+        <button mat-flat-button color="primary" (click)="searchNoderef()">
+          {{ 'ADMIN.BROWSER.LUCENE_START' | translate }}
+        </button>
       </div>
       <div *ngIf="lucene.mode === 'SOLR' || lucene.mode === 'ELASTIC'" class="group">
         <div class="inputGroupGrow">
           <mat-form-field *ngIf="lucene.mode === 'SOLR'">
-            <mat-label>{{'ADMIN.BROWSER.LUCENE_QUERY' | translate }}</mat-label>
-            <textarea matInput
-                      cdkTextareaAutosize
-                      cdkAutosizeMinRows="2"
-                      cdkAutosizeMaxRows="5"
-                      name="luceneQuery" [(ngModel)]="lucene.query" placeholder='@cm\:name:"*"'></textarea>
+            <mat-label>{{ 'ADMIN.BROWSER.LUCENE_QUERY' | translate }}</mat-label>
+            <textarea
+              matInput
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="2"
+              cdkAutosizeMaxRows="5"
+              name="luceneQuery"
+              [(ngModel)]="lucene.query"
+              placeholder='@cm\:name:"*"'
+            ></textarea>
           </mat-form-field>
           <div *ngIf="lucene.mode === 'ELASTIC'" class="dsl-query">
-            <label for="dslQuery">{{'ADMIN.BROWSER.DSL_QUERY' | translate }}</label>
-            <ngx-monaco-editor [options]="dslCodeOptions"
-                               [(ngModel)]="lucene.query"
-                               [ngModelOptions]="{standalone: true}"
-                               id="dslQuery"
+            <label for="dslQuery">{{ 'ADMIN.BROWSER.DSL_QUERY' | translate }}</label>
+            <ngx-monaco-editor
+              [options]="dslCodeOptions"
+              [(ngModel)]="lucene.query"
+              [ngModelOptions]="{ standalone: true }"
+              id="dslQuery"
             ></ngx-monaco-editor>
           </div>
         </div>
-        <div *ngIf="lucene.mode==='SOLR'" class="inputGroupGrow">
-          <div class="info">{{'ADMIN.BROWSER.STORE' | translate }}</div>
+        <div *ngIf="lucene.mode === 'SOLR'" class="inputGroupGrow">
+          <div class="info">{{ 'ADMIN.BROWSER.STORE' | translate }}</div>
           <mat-radio-group [(ngModel)]="lucene.store">
             <mat-radio-button name="solrStore" value="Workspace">Workspace</mat-radio-button>
             <mat-radio-button name="solrStore" value="Archive">Archive</mat-radio-button>
           </mat-radio-group>
         </div>
         <div class="inputGroupGrow" *ngIf="lucene.mode === 'SOLR'">
-          <div class="info">{{'ADMIN.BROWSER.OUTPUT_MODE' | translate }}</div>
+          <div class="info">{{ 'ADMIN.BROWSER.OUTPUT_MODE' | translate }}</div>
           <mat-radio-group [(ngModel)]="lucene.outputMode">
-            <mat-radio-button name="solrMode" value="view">{{'ADMIN.BROWSER.OUTPUT_MODE_VIEW' | translate}}</mat-radio-button>
-            <mat-radio-button name="solrMode" value="export">{{'ADMIN.BROWSER.OUTPUT_MODE_EXPORT' | translate}}</mat-radio-button>
+            <mat-radio-button name="solrMode" value="view">{{
+              'ADMIN.BROWSER.OUTPUT_MODE_VIEW' | translate
+            }}</mat-radio-button>
+            <mat-radio-button name="solrMode" value="export">{{
+              'ADMIN.BROWSER.OUTPUT_MODE_EXPORT' | translate
+            }}</mat-radio-button>
           </mat-radio-group>
         </div>
-        <ng-container *ngIf="lucene.outputMode=='export'">
+        <ng-container *ngIf="lucene.outputMode === 'export'">
           <div class="inputGroupGrow">
             <mat-form-field>
-              <mat-label>{{'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES' | translate }}</mat-label>
-              <textarea matInput
-                        cdkTextareaAutosize
-                        cdkAutosizeMinRows="2"
-                        cdkAutosizeMaxRows="5"
-                        class="export-properties" [(ngModel)]="lucene.properties"></textarea>
-              <mat-hint>{{'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES_HINT' | translate }}</mat-hint>
+              <mat-label>{{ 'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES' | translate }}</mat-label>
+              <textarea
+                matInput
+                cdkTextareaAutosize
+                cdkAutosizeMinRows="2"
+                cdkAutosizeMaxRows="5"
+                class="export-properties"
+                [(ngModel)]="lucene.properties"
+              ></textarea>
+              <mat-hint>{{ 'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES_HINT' | translate }}</mat-hint>
             </mat-form-field>
           </div>
           <div class="inputGroupGrow">
-            <div class="info">{{'ADMIN.BROWSER.OUTPUT_MODE' | translate }}</div>
+            <div class="info">{{ 'ADMIN.BROWSER.OUTPUT_MODE' | translate }}</div>
             <div>
               <mat-radio-group [(ngModel)]="lucene.exportFormat">
-                <mat-radio-button name="exportFormat" value="csv">{{'ADMIN.BROWSER.EXPORT_FORMAT_CSV' | translate}}</mat-radio-button>
-                <mat-radio-button name="exportFormat" value="json">{{'ADMIN.BROWSER.EXPORT_FORMAT_JSON' | translate}}</mat-radio-button>
+                <mat-radio-button name="exportFormat" value="csv">{{
+                  'ADMIN.BROWSER.EXPORT_FORMAT_CSV' | translate
+                }}</mat-radio-button>
+                <mat-radio-button name="exportFormat" value="json">{{
+                  'ADMIN.BROWSER.EXPORT_FORMAT_JSON' | translate
+                }}</mat-radio-button>
               </mat-radio-group>
             </div>
           </div>
           <div class="inputGroupGrow">
-            <div><button mat-flat-button color="primary" (click)="exportLucene()">{{'ADMIN.BROWSER.LUCENE_EXPORT_START' | translate}}</button></div>
+            <div>
+              <button mat-flat-button color="primary" (click)="exportLucene()">
+                {{ 'ADMIN.BROWSER.LUCENE_EXPORT_START' | translate }}
+              </button>
+            </div>
           </div>
         </ng-container>
         <ng-container *ngIf="lucene.mode === 'SOLR'">
           <div class="inputGroupGrow">
-            <div class="info">{{'ADMIN.BROWSER.LUCENE_AUTHORITIES' | translate }}</div>
-            <es-authority-search-input [globalSearchAllowed]="true" [placeholder]="'ADMIN.BROWSER.ADD_AUTHORITY'" [allowAny]="true" (onChooseAuthority)="addLuceneAuthority($event)"></es-authority-search-input>
+            <div class="info">{{ 'ADMIN.BROWSER.LUCENE_AUTHORITIES' | translate }}</div>
+            <es-authority-search-input
+              [globalSearchAllowed]="true"
+              [placeholder]="'ADMIN.BROWSER.ADD_AUTHORITY'"
+              [allowAny]="true"
+              (onChooseAuthority)="addLuceneAuthority($event)"
+            ></es-authority-search-input>
           </div>
-          <div class="inputGroupGrow luceneAuthorities" *ngIf="lucene.authorities && lucene.authorities.length">
+          <div
+            class="inputGroupGrow luceneAuthorities"
+            *ngIf="lucene.authorities && lucene.authorities.length"
+          >
             <div></div>
             <mat-chip-list>
-              <mat-chip *ngFor="let authority of lucene.authorities" (removed)="removeLuceneAuthority(authority)">
-                <span>{{authority | authorityName}}</span>
+              <mat-chip
+                *ngFor="let authority of lucene.authorities"
+                (removed)="removeLuceneAuthority(authority)"
+              >
+                <span>{{ authority | authorityName }}</span>
                 <i matChipRemove esIcon="cancel"></i>
               </mat-chip>
             </mat-chip-list>
           </div>
         </ng-container>
-        <div class="inputGroupGrow lucenePaging" *ngIf="lucene.outputMode=='view'">
+        <div class="inputGroupGrow lucenePaging" *ngIf="lucene.outputMode === 'view'">
           <ng-container *ngIf="lucene.mode === 'SOLR'">
             <mat-form-field>
-              <mat-label>{{'ADMIN.BROWSER.LUCENE_OFFSET' | translate }}</mat-label>
-              <input matInput type="number" name="luceneOffset" [(ngModel)]="lucene.offset">
+              <mat-label>{{ 'ADMIN.BROWSER.LUCENE_OFFSET' | translate }}</mat-label>
+              <input matInput type="number" name="luceneOffset" [(ngModel)]="lucene.offset" />
             </mat-form-field>
             <mat-form-field>
-              <mat-label>{{'ADMIN.BROWSER.LUCENE_COUNT' | translate }}</mat-label>
-              <input matInput type="number" name="luceneCount" [(ngModel)]="lucene.count">
+              <mat-label>{{ 'ADMIN.BROWSER.LUCENE_COUNT' | translate }}</mat-label>
+              <input matInput type="number" name="luceneCount" [(ngModel)]="lucene.count" />
             </mat-form-field>
           </ng-container>
           <div>
-            <button mat-flat-button color="primary" (click)="searchNodes()">{{'ADMIN.BROWSER.LUCENE_START' | translate}}</button>
+            <button mat-flat-button color="primary" (click)="searchNodes()">
+              {{ 'ADMIN.BROWSER.LUCENE_START' | translate }}
+            </button>
           </div>
         </div>
       </div>
-      <div *ngIf="lucene.mode === 'ELASTIC' && searchResponse" class="elastic-response">
-          <label for="elasticResponse">{{'ADMIN.BROWSER.ELASTIC_RESPONSE' | translate }}</label>
-          <ngx-monaco-editor [options]="elasticResponseCodeOptions"
-                             [ngModel]="$any(searchResponse)?.elasticResponse"
-                             [ngModelOptions]="{standalone: true}"
-                             id="elasticResponse"
-          ></ngx-monaco-editor>
+      <div *ngIf="lucene.mode === 'ELASTIC' && elasticResponse" class="elastic-response">
+        <label for="elasticResponseLabel">{{ 'ADMIN.BROWSER.ELASTIC_RESPONSE' | translate }}</label>
+        <ngx-monaco-editor
+          [options]="elasticResponseCodeOptions"
+          [ngModel]="elasticResponse.elasticResponse"
+          [ngModelOptions]="{ standalone: true }"
+          id="elasticResponseLabel"
+        ></ngx-monaco-editor>
       </div>
-      <div *ngIf="lucene.mode=='NODEREF' || lucene.outputMode=='view'" class="search-list">
+      <div *ngIf="lucene.mode === 'NODEREF' || lucene.outputMode === 'view'" class="search-list">
         <es-actionbar #actionbarComponent></es-actionbar>
-        <es-listTable *ngIf="searchResponse?.nodes?.length"
-                   [viewType]="0"
-                   [columns]="searchColumns"
-                   [scope]="SCOPES.Admin"
-                   [actionbar]="actionbarComponent"
-                   [hasHeading]="true"
-                   [nodes]="searchResponse.nodes"
-                   [hasCheckbox]="true"
-                   [hasIcon]="true"
-                   [totalCount]="searchResponse.pagination.total"
-                   [isClickable]="true"
-                   (clickRow)="debugNode($event.node)"
-        ></es-listTable>
-        <div class="no-results" *ngIf="!searchResponse?.nodes?.length">
-          {{'WORKSPACE.NO_MATCHING_ITEMS' | translate}}
-        </div>
+        <es-node-entries-wrapper
+          #searchResults
+          [dataSource]="searchResponse"
+          [scope]="SCOPES.Admin"
+          [columns]="searchColumns"
+          [configureColumns]="true"
+          [displayType]="NodeEntriesDisplayType.Table"
+          [elementInteractionType]="InteractionType.Emitter"
+          (clickItem)="debugNode($event.element)"
+        >
+          <ng-template #empty>
+            <div class="no-results">
+              {{ 'WORKSPACE.NO_MATCHING_ITEMS' | translate }}
+            </div>
+          </ng-template>
+        </es-node-entries-wrapper>
       </div>
       <es-lucene-template-memory
         [(query)]="lucene.query"
         [(properties)]="lucene.properties"
       ></es-lucene-template-memory>
     </div>
-    <div *ngIf="mode=='FOLDERTEMPLATES'" class="content foldertemplates">
+    <div *ngIf="mode === 'FOLDERTEMPLATES'" class="content foldertemplates">
       <form>
         <es-autocomplete
           [inputMinLength]="2"
@@ -793,32 +1085,52 @@
         ></es-autocomplete>
         <div class="eduGroupsSelected">
           <div class="badge" *ngFor="let eduGroup of eduGroupsSelected">
-            <span>{{eduGroup.title}}</span>
+            <span>{{ eduGroup.title }}</span>
             <i class="material-icons clickable" (click)="removeEduGroup(eduGroup)">cancel</i>
           </div>
         </div>
         <div class="inputGroupGrow">
           <mat-form-field>
             <mat-select [(ngModel)]="selectedTemplate" name="template">
-              <mat-option *ngFor="let option of templates" [value]="option">{{ option }}</mat-option>
+              <mat-option *ngFor="let option of templates" [value]="option">{{
+                option
+              }}</mat-option>
             </mat-select>
           </mat-form-field>
           <div>
-            <button mat-raised-button class="btnXml" (click)="templateSelect.click()">{{'ADMIN.FOLDERTEMPLATES.UPLOAD_TEMPLATE' | translate}}</button>
+            <button mat-raised-button class="btnXml" (click)="templateSelect.click()">
+              {{ 'ADMIN.FOLDERTEMPLATES.UPLOAD_TEMPLATE' | translate }}
+            </button>
           </div>
         </div>
         <div class="inputGroupGrow">
           <div>
-            <button mat-button color="primary" class="goto-folder" (click)="gotoFoldertemplateFolder()">{{'ADMIN.FOLDERTEMPLATES.GOTO_FOLDERTEMPLATES' | translate }}</button>
+            <button
+              mat-button
+              color="primary"
+              class="goto-folder"
+              (click)="gotoFoldertemplateFolder()"
+            >
+              {{ 'ADMIN.FOLDERTEMPLATES.GOTO_FOLDERTEMPLATES' | translate }}
+            </button>
           </div>
           <div>
-            <button mat-raised-button (click)="applyTemplate()">{{'ADMIN.FOLDERTEMPLATES.APPLYTEMPLATE' | translate }}</button>
+            <button mat-raised-button (click)="applyTemplate()">
+              {{ 'ADMIN.FOLDERTEMPLATES.APPLYTEMPLATE' | translate }}
+            </button>
           </div>
         </div>
       </form>
       <div class="group">
-        <input #templateSelect type="file" style="display:none" id="templateSelect" accept="application/xml" (change)="uploadTemplate($event)" />
-        <div class="upload-hint">{{'ADMIN.FOLDERTEMPLATES.UPLOAD_HINT' | translate}}</div>
+        <input
+          #templateSelect
+          type="file"
+          style="display: none"
+          id="templateSelect"
+          accept="application/xml"
+          (change)="uploadTemplate($event)"
+        />
+        <div class="upload-hint">{{ 'ADMIN.FOLDERTEMPLATES.UPLOAD_HINT' | translate }}</div>
       </div>
     </div>
   </div>

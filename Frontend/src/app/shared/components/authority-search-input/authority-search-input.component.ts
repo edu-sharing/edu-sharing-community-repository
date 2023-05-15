@@ -1,29 +1,42 @@
-import {Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {
+    ChangeDetectorRef,
+    Component,
+    ElementRef,
+    EventEmitter,
+    Input,
+    Output,
+    ViewChild,
+} from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete/autocomplete';
-import { forkJoin, Observable, of } from 'rxjs';
-import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
+import { BehaviorSubject, forkJoin, Observable, of } from 'rxjs';
+import { catchError, debounceTime, filter, map, startWith, switchMap, tap } from 'rxjs/operators';
 import {
     Authority,
     AuthorityProfile,
-    Group, GroupProfile, Organization, RestConnectorService,
+    Group,
+    GroupProfile,
+    Organization,
+    RestConnectorService,
     RestConstants,
     RestIamService,
-    RestOrganizationService, User,
+    RestOrganizationService,
+    User,
 } from '../../../core-module/core.module';
-import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
-import { PermissionNamePipe } from '../../../core-ui-module/pipes/permission-name.pipe';
+import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
+import { PermissionNamePipe } from '../../pipes/permission-name.pipe';
 import { SuggestItem } from '../../../common/ui/autocomplete/autocomplete.component';
 
 interface SuggestionGroup {
-    label: string,
-    values: SuggestItem[],
+    label: string;
+    values: SuggestItem[];
 }
 
 @Component({
     selector: 'es-authority-search-input',
     templateUrl: 'authority-search-input.component.html',
     styleUrls: ['authority-search-input.component.scss'],
+    providers: [PermissionNamePipe],
 })
 export class AuthoritySearchInputComponent {
     @ViewChild('inputElement') inputElement: ElementRef<HTMLInputElement>;
@@ -46,7 +59,7 @@ export class AuthoritySearchInputComponent {
      */
     @Input() showRecent = true;
     @Input() mode = AuthoritySearchMode.UsersAndGroups;
-    @Input() set disabled(disabled: boolean){
+    @Input() set disabled(disabled: boolean) {
         disabled ? this.input.disable() : this.input.enable();
     }
     @Input() maxSuggestions = 10;
@@ -58,10 +71,11 @@ export class AuthoritySearchInputComponent {
     @Input() placeholder = 'WORKSPACE.INVITE_FIELD';
     @Input() hint = '';
 
-    @Output() onChooseAuthority = new EventEmitter<Authority|any>();
+    @Output() onChooseAuthority = new EventEmitter<Authority | any>();
 
     input = new FormControl('');
     suggestionGroups$: Observable<SuggestionGroup[]>;
+    suggestionLoading = new BehaviorSubject<boolean>(false);
 
     constructor(
         private iam: RestIamService,
@@ -69,11 +83,21 @@ export class AuthoritySearchInputComponent {
         private restConnector: RestConnectorService,
         private namePipe: PermissionNamePipe,
         private nodeHelper: NodeHelperService,
+        private changeDetectorRef: ChangeDetectorRef,
     ) {
         this.suggestionGroups$ = this.input.valueChanges.pipe(
             startWith(''),
-            debounceTime(200),
+            debounceTime(500),
+            filter(() => {
+                if (this.input.value?.length < 2) {
+                    this.suggestionLoading.next(false);
+                    return false;
+                }
+                return true;
+            }),
+            tap(() => this.suggestionLoading.next(true)),
             switchMap((value) => this.getSuggestions(value)),
+            tap(() => this.suggestionLoading.next(false)),
         );
     }
 
@@ -120,37 +144,52 @@ export class AuthoritySearchInputComponent {
 
     private getRecentSuggestions(): Observable<SuggestionGroup[]> {
         return this.iam.getRecentlyInvited().pipe(
-            map(({ authorities }) => [
-                {
-                    label: 'WORKSPACE.INVITE_RECENT_AUTHORITIES',
-                    values: this.convertData(authorities),
-                },
-            ]),
+            map(({ authorities }) => {
+                if (authorities.length > 0) {
+                    return [
+                        {
+                            label: 'WORKSPACE.INVITE_RECENT_AUTHORITIES',
+                            values: this.convertData(authorities),
+                        },
+                    ];
+                } else {
+                    return [];
+                }
+            }),
         );
     }
 
     private getUsersAndGroupsSuggestions(inputValue: string): Observable<SuggestionGroup[]> {
         const observables: Observable<SuggestionGroup>[] = [];
         observables.push(
-            this.iam.searchAuthorities(inputValue, false, this.groupType, '', {
-                count: 50,
-            }).pipe(
-                map(({ authorities }) => ({
-                    label: 'WORKSPACE.INVITE_LOCAL_RESULTS',
-                    values: this.convertData(authorities),
-                })),
-            ),
+            this.iam
+                .searchAuthorities(inputValue, false, this.groupType, '', {
+                    count: 50,
+                })
+                .pipe(
+                    map(({ authorities }) => ({
+                        label: 'WORKSPACE.INVITE_LOCAL_RESULTS',
+                        values: this.convertData(authorities),
+                    })),
+                    catchError((err) =>
+                        of({
+                            values: [],
+                        } as SuggestionGroup),
+                    ),
+                ),
         );
         if (this.globalSearchAllowed) {
             observables.push(
-                this.iam.searchAuthorities(inputValue, true, this.groupType, '', {
-                    count: 100,
-                }).pipe(
-                    map(({ authorities }) => ({
-                        label: 'WORKSPACE.INVITE_GLOBAL_RESULTS',
-                        values: this.convertData(authorities),
-                    })),
-                ),
+                this.iam
+                    .searchAuthorities(inputValue, true, this.groupType, '', {
+                        count: 100,
+                    })
+                    .pipe(
+                        map(({ authorities }) => ({
+                            label: 'WORKSPACE.INVITE_GLOBAL_RESULTS',
+                            values: this.convertData(authorities),
+                        })),
+                    ),
             );
         }
         return forkJoin(observables).pipe(
@@ -208,17 +247,50 @@ export class AuthoritySearchInputComponent {
         );
     }
     private getOrganizationsSuggestions(inputValue: string): Observable<SuggestionGroup[]> {
-        return this.organization.getOrganizations(inputValue).pipe(
-            map(({ organizations }) => [
-                {
-                    label: 'WORKSPACE.INVITE_LOCAL_RESULTS',
-                    values: this.convertData(organizations),
-                },
-            ]),
+        const observables: Observable<SuggestionGroup>[] = [];
+        observables.push(
+            this.organization.getOrganizations(inputValue).pipe(
+                map(({ organizations }) => {
+                    return {
+                        label: 'WORKSPACE.INVITE_LOCAL_RESULTS',
+                        values: this.convertData(organizations),
+                    };
+                }),
+            ),
+        );
+        if (this.globalSearchAllowed) {
+            observables.push(
+                this.organization.getOrganizations(inputValue, false).pipe(
+                    map(({ organizations }) => {
+                        return {
+                            label: 'WORKSPACE.INVITE_GLOBAL_RESULTS',
+                            values: this.convertData(organizations),
+                        };
+                    }),
+                ),
+            );
+        }
+        return forkJoin(observables).pipe(
+            // Filter double entries from global results
+            map((suggestionGroups) => {
+                if (suggestionGroups.length === 2) {
+                    suggestionGroups[1].values = suggestionGroups[1].values.filter(
+                        (globalSuggestion) =>
+                            suggestionGroups[0].values.every(
+                                (localSuggestion) => localSuggestion.id !== globalSuggestion.id,
+                            ),
+                    );
+                }
+                return suggestionGroups;
+            }),
+            // Filter empty lists
+            map((suggestionGroups) => suggestionGroups.filter((group) => group.values.length > 0)),
         );
     }
 
-    private convertData(authorities: Organization[] | AuthorityProfile[] | Group[] | User[]): SuggestItem[] {
+    private convertData(
+        authorities: Organization[] | AuthorityProfile[] | Group[] | User[],
+    ): SuggestItem[] {
         const result: SuggestItem[] = [];
         for (const user of authorities) {
             const group = (user.profile as GroupProfile).displayName != null;

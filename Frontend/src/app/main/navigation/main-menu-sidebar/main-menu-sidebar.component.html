@@ -9,7 +9,7 @@
     <div
       *ngIf="loginInfo"
       class="top"
-      style.background-color="{{ (currentUser || null) | authorityColor }}"
+      style.background-color="{{ currentUser || null | authorityColor }}"
     >
       <div class="profile-gradient"></div>
       <img
@@ -19,14 +19,13 @@
       />
       <div *ngIf="currentUser" class="profile">
         <ng-template #userAvatar>
-            <es-user-avatar
-              [user]="currentUser"
-              size="medium"
-            ></es-user-avatar>
-            <div id="main-menu-sidebar-username" class="username">
-              <ng-container *ngIf="currentUser && !loginInfo.isGuest">{{ currentUser | authorityName }}</ng-container>
-              <ng-container *ngIf="loginInfo.isGuest">{{ 'USER_GUEST' | translate }}</ng-container>
-            </div>
+          <es-user-avatar [user]="currentUser" size="medium"></es-user-avatar>
+          <div id="main-menu-sidebar-username" class="username">
+            <ng-container *ngIf="currentUser && !loginInfo.isGuest">{{
+              currentUser | authorityName
+            }}</ng-container>
+            <ng-container *ngIf="loginInfo.isGuest">{{ 'USER_GUEST' | translate }}</ng-container>
+          </div>
         </ng-template>
         <a
           *ngIf="!loginInfo.isGuest; else userAvatar"
@@ -34,10 +33,14 @@
           [attr.aria-label]="'PROFILES.TITLE_NAV' | translate"
           aria-describedby="main-menu-sidebar-username"
           (click)="hide()"
-        ><ng-container *ngTemplateOutlet="userAvatar"></ng-container></a>
+          ><ng-container *ngTemplateOutlet="userAvatar"></ng-container
+        ></a>
       </div>
     </div>
-    <es-main-menu-buttons [currentScope]="currentScope" (entryClicked)="hide()"></es-main-menu-buttons>
+    <es-main-menu-buttons
+      [currentScope]="currentScope"
+      (entryClicked)="hide()"
+    ></es-main-menu-buttons>
   </div>
   <div class="license-info">
     <button mat-button class="mat-button-no-uppercase" (click)="onShowLicenses()">

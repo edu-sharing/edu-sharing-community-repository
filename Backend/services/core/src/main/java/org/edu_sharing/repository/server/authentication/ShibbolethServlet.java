@@ -29,7 +29,7 @@ package org.edu_sharing.repository.server.authentication;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
+import org.springframework.extensions.surf.util.URLDecoder;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -63,7 +63,7 @@ import org.springframework.security.saml.SAMLCredential;
 
 public class ShibbolethServlet extends HttpServlet {
 
-	Logger logger = Logger.getLogger(ShibbolethServlet.class);
+	private static Logger logger = Logger.getLogger(ShibbolethServlet.class);
 
 	Boolean useHeaders = null;
 	private String redirectUrl;
@@ -77,12 +77,11 @@ public class ShibbolethServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-		logger.info("req.getRemoteUser():"+req.getRemoteUser());
-
 
 		ApplicationContext eduApplicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
 
 		SSOAuthorityMapper ssoMapper = (SSOAuthorityMapper)eduApplicationContext.getBean("ssoAuthorityMapper");
+		logger.info("req.getRemoteUser():"+req.getRemoteUser() +" isPreferRemoteUser:" + ssoMapper.isPreferRemoteUser());
 
 		List<String> additionalAttributes = null;
 		try {
@@ -104,7 +103,9 @@ public class ShibbolethServlet extends HttpServlet {
 
 		String headerUserName = getShibValue(ssoMapper.getSSOUsernameProp(), req);//transform(req.getHeader(authMethodShibboleth.getShibbolethUsername()));
 
-		if (req.getRemoteUser() != null && !req.getRemoteUser().trim().isEmpty()) {
+		if (req.getRemoteUser() != null
+				&& !req.getRemoteUser().trim().isEmpty()
+				&& ssoMapper.isPreferRemoteUser()) {
 			headerUserName = req.getRemoteUser();
 		}
 
@@ -173,7 +174,9 @@ public class ShibbolethServlet extends HttpServlet {
 			/**
 			 * overwrite user name with the remoteUser when set
 			 */
-			if(req.getRemoteUser() != null && !req.getRemoteUser().trim().isEmpty()) {
+			if(req.getRemoteUser() != null
+					&& !req.getRemoteUser().trim().isEmpty()
+					&& ssoMapper.isPreferRemoteUser()) {
 
 				logger.info("putting remoteuser:" + ssoMapper.getSSOUsernameProp() + " " +req.getRemoteUser());
 				ssoMap.put(ssoMapper.getSSOUsernameProp(),req.getRemoteUser());
@@ -304,11 +307,11 @@ public class ShibbolethServlet extends HttpServlet {
 	    		try {
 
 	        		// see https://wiki.shibboleth.net/confluence/display/SHIB2/NativeSPAttributeAccess#NativeSPAttributeAccess-Tool-SpecificExamples
-				attValue= new String( attValue.getBytes("ISO-8859-1"), "UTF-8");
+					attValue= new String( attValue.getBytes("ISO-8859-1"), "UTF-8");
 
-			} catch (UnsupportedEncodingException e) {
-				logger.error(e.getMessage(), e);
-			}
+				} catch (UnsupportedEncodingException e) {
+					logger.error(e.getMessage(), e);
+				}
 
 	    		attValue = URLDecoder.decode(attValue);
 	    	}

@@ -8,6 +8,7 @@ import javax.servlet.ServletContext;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
+import org.alfresco.repo.search.impl.lucene.LuceneQueryParser;
 import org.alfresco.repo.search.impl.lucene.SolrJSONResultSet;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -34,7 +35,6 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.service.OrganisationService;
-import org.edu_sharing.alfresco.service.handleservice.HandleService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
@@ -56,12 +56,12 @@ import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
-import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.oai.OAIExporterService;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
+import org.edu_sharing.service.share.ShareService;
+import org.edu_sharing.service.share.ShareServiceImpl;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
-import org.edu_sharing.service.version.VersionTool;
 import org.springframework.context.ApplicationContext;
 
 import com.google.gson.Gson;
@@ -74,6 +74,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public static final String NODE_PUBLISHED = "NODE_PUBLISHED";
 	// the maximal number of "notify" entries in the PH_HISTORY field that are serialized
 	private static final int MAX_NOTIFY_HISTORY_LENGTH = 100;
+	private ShareService shareService = null;
 	private NodeService nodeService = null;
 	private PersonService personService;
 	private ApplicationInfo appInfo;
@@ -95,6 +96,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
 		nodeService = serviceRegistry.getNodeService();
+		shareService = new ShareServiceImpl(this);
 		permissionService = serviceRegistry.getPermissionService();
 
 		personService = serviceRegistry.getPersonService();
@@ -346,7 +348,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				sender.applyToMap("inviter.", replace);
 				MailTemplate.applyNodePropertiesToMap("node.", props, replace);
 				replace.put("name", name.trim());
-				replace.put("message", _mailText.trim());
+				replace.put("message", _mailText.replace("\n", "<br />").trim());
 				replace.put("permissions", permText.trim());
 				MailTemplate.addContentLinks(appInfo, _nodeId, replace, "link");
 				String template="invited";
@@ -1078,10 +1080,19 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 						//subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityName:").append("\"")
 						//		.append(token).append("\"").append(" OR @cm\\:authorityDisplayName:").append("\"")
 
-						subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityDisplayName:")
-								.append("\"").append(token).append("\"").
+						subQuery.append((furtherToken ? " AND( " : "("))
+								.append("@cm\\:authorityDisplayName:")
+								.append("\"").append(LuceneQueryParser.escape(token)).append("\"").
 								// boost groups so that they'll appear before users
-								append("^10");
+								append("^10 OR ")
+								.append("@ccm\\:groupEmail:")
+								.append("\"").append(LuceneQueryParser.escape(token)).append("\"");
+						// allow global admins to find groups based on authority name (e.g. default system groups)
+						if(isAdminOrSystem()) {
+							subQuery.append(" OR ")
+									.append("@cm\\:authorityName:")
+									.append("\"").append(LuceneQueryParser.escape(token)).append("\"");
+						}
 						subQuery.append(")");
 	
 					}
@@ -1155,9 +1166,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				searchQuery.append(" AND (").append(groupPathQuery).append(")");
 			}
 		}
-
-		searchQuery.append(" AND NOT (@cm\\:authorityName:" + CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS
-				+ " or @cm\\:authorityName:" + CCConstants.AUTHORITY_GROUP_EMAIL_CONTRIBUTORS + ")");
+		if(!isAdminOrSystem()) {
+			searchQuery.append(" AND NOT (@cm\\:authorityName:" + CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS
+					+ " or @cm\\:authorityName:" + CCConstants.AUTHORITY_GROUP_EMAIL_CONTRIBUTORS + ")");
+		}
 
 		logger.info("findGroups: " + searchQuery);
 
@@ -1388,12 +1400,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_ACTION), action);
 
-				ArrayList<String> phUsers = (ArrayList<String>) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
-				if (phUsers == null) phUsers = new ArrayList<String>();
-				if (!phUsers.contains(user)) phUsers.add(user);
-				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS), phUsers);
 				Date created = new Date();
-				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED), created);
+				addUserToSharedList(user, nodeRef, created);
 
 
 				//ObjectMapper jsonMapper = new ObjectMapper();
@@ -1425,7 +1433,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					}
 					history.add(jsonStringACL);
 					nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_HISTORY), new ArrayList(history));
-					fixSharedByMe(nodeRef);
+					cleanUpSharedList(nodeRef);
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -1437,7 +1445,21 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		});
 	}
 
-	private void fixSharedByMe(NodeRef nodeRef){
+	@Override
+	public void addUserToSharedList(String user, NodeRef nodeRef){
+		addUserToSharedList(user, nodeRef, new Date());
+	}
+
+	private void addUserToSharedList(String user, NodeRef nodeRef, Date created) {
+		ArrayList<String> phUsers = (ArrayList<String>) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
+		if (phUsers == null) phUsers = new ArrayList<String>();
+		if (!phUsers.contains(user)) phUsers.add(user);
+		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS), phUsers);
+		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED), created);
+	}
+
+	@Override
+	public void cleanUpSharedList(NodeRef nodeRef){
 
 		try {
 			ArrayList<String> phUsers = (ArrayList<String>) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
@@ -1481,35 +1503,42 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			 * find out if current aces still contains at least one user added ace
 			 * if not collect the user in remove list
 			 */
-			Notify currentNotify = notifyList.get(notifyList.size() - 1);
 			Set<String> removePhUsers = new HashSet<>();
-			for(Map.Entry<String, List<ACE>> entry: userAddAcesList.entrySet()){
-				if(entry.getValue() == null || entry.getValue().size() == 0){
-					removePhUsers.add(entry.getKey());
-					continue;
-				}
-				if(currentNotify.getAcl() == null
-						|| currentNotify.getAcl().getAces() == null
-						|| currentNotify.getAcl().getAces().length == 0){
-					removePhUsers.add(entry.getKey());
-					continue;
-				}
+			if(notifyList.size() > 0) {
+				Notify currentNotify = notifyList.get(notifyList.size() - 1);
+				for (Map.Entry<String, List<ACE>> entry : userAddAcesList.entrySet()) {
+					if (entry.getValue() == null || entry.getValue().size() == 0) {
+						removePhUsers.add(entry.getKey());
+						continue;
+					}
+					if (currentNotify.getAcl() == null
+							|| currentNotify.getAcl().getAces() == null
+							|| currentNotify.getAcl().getAces().length == 0) {
+						removePhUsers.add(entry.getKey());
+						continue;
+					}
 
-				List<ACE> userAddedAces = entry.getValue();
-				List<ACE> remainingUserAddedAces = (List<ACE>)new ArrayList(Arrays.asList(currentNotify.getAcl().getAces()))
-						.stream()
-						.filter(userAddedAces::contains)
-						.collect(toList());
-				if(remainingUserAddedAces == null || remainingUserAddedAces.size() == 0){
-					removePhUsers.add(entry.getKey());
+					List<ACE> userAddedAces = entry.getValue();
+					List<ACE> remainingUserAddedAces = (List<ACE>) new ArrayList(Arrays.asList(currentNotify.getAcl().getAces()))
+							.stream()
+							.filter(userAddedAces::contains)
+							.collect(toList());
+					if (remainingUserAddedAces == null || remainingUserAddedAces.size() == 0) {
+						removePhUsers.add(entry.getKey());
+					}
 				}
 			}
 			/**
 			 * remove users that are in ph_users but never added an permission.
 			 * i.e. only did "change permission", "remove permission"
 			 */
-			removePhUsers.addAll(phUsers.stream().filter(u -> !userAddAcesList.keySet().contains(u)).collect(Collectors.toList()));
+		    boolean hasShares = Arrays.stream(shareService.getShares(nodeRef.getId()))
+					.anyMatch(x->x.getExpiryDate() >= new Date().getTime());
 
+			if(!hasShares) {
+				removePhUsers.addAll(phUsers.stream().filter(u -> !userAddAcesList.containsKey(u))
+						.collect(Collectors.toList()));
+			}
 			/**
 			 * remove users from PH_USERS property
 			 */
@@ -1569,7 +1598,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		return repoClient.getPermissions(nodeId);
 	}
 	private boolean isAdminOrSystem(){
-		return Arrays.asList(AuthenticationUtil.SYSTEM_USER_NAME,ApplicationInfoList.getHomeRepository().getUsername()).contains(AuthenticationUtil.getFullyAuthenticatedUser());
+		return Arrays.asList(AuthenticationUtil.SYSTEM_USER_NAME,ApplicationInfoList.getHomeRepository().getUsername()).contains(AuthenticationUtil.getFullyAuthenticatedUser()) || AuthenticationUtil.isRunAsUserTheSystemUser();
 	}
 
 	@Override

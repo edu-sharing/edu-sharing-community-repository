@@ -36,7 +36,7 @@
     },
     "declaration": false,
     "experimentalDecorators": true,
-    "lib": ["es2018", "dom", "dom.iterable"],
+    "lib": ["es2019", "dom", "dom.iterable"],
     "module": "es2020",
     "moduleResolution": "node",
     "outDir": "./dist/out-tsc",

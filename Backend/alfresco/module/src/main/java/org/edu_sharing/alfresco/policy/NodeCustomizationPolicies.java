@@ -2,6 +2,8 @@ package org.edu_sharing.alfresco.policy;
 
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -36,6 +38,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -44,6 +47,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
+import org.json.JSONObject;
 import org.quartz.Scheduler;
 import org.springframework.security.crypto.codec.Base64;
 
@@ -554,6 +558,16 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			props.addAll(MetadataReader.getWidgetsByNode(ref,"de_DE").stream().
 					map(MetadataWidget::getId).map(CCConstants::getValidGlobalName).
 					collect(Collectors.toList()));
+
+			if(after != null){
+				for(Map.Entry<QName,Serializable> entry : after.entrySet()){
+					if(entry.getKey().getLocalName().startsWith("lifecyclecontributer")
+							|| entry.getKey().getLocalName().startsWith("metadatacontributer")){
+						props.add(entry.getKey().toString());
+					}
+				}
+			}
+
 			for (QName prop : after.keySet()) {
 				// the prop is contained in the mds of the node or a SAFE_PROP, than check if it still the original one -> replace it on the ref
 				if (props.contains(prop.toString())) {
@@ -566,8 +580,31 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 					}
 				}
 			}
-			nodeService.setProperties(ref, ioColRefProperties);
+			try {
+				nodeService.setProperties(ref, ioColRefProperties);
+			}catch(DuplicateChildNodeNameException e){
+				logger.error(e.getMessage() +" try to rename");
+				String originalName = (String)ioColRefProperties.get(ContentModel.PROP_NAME);
+				for(int i = 2; i < 42;i++){
+					ioColRefProperties.put(ContentModel.PROP_NAME, renameNode(originalName,i));
+					try{
+						nodeService.setProperties(ref, ioColRefProperties);
+						break;
+					}catch (DuplicateChildNodeNameException ex){
+						logger.debug(e.getMessage()+" - will rename " +originalName +" "+i);
+					}
+				}
+			}
+
 			new RepositoryCache().remove(ref.getId());
+	}
+
+	public static String renameNode(String oldName,int number){
+		String[] split=oldName.split("\\.");
+		int i=split.length-2;
+		i=Math.max(0, i);
+		split[i]+=" - "+number;
+		return String.join(".",split);
 	}
 
 	private static String propertyToString(Object p){
@@ -629,7 +666,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		List<String> aspects = new ArrayList<>();
 		aspects.add(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
 		logger.debug("cmis helper start");
-		List<org.alfresco.service.cmr.repository.NodeRef> nodes = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO,map,aspects,null,100000);
+		List<org.alfresco.service.cmr.repository.NodeRef> nodes = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO,map,aspects,null,100000, null);
 		logger.debug("cmis helper finished");
 		return nodes;
 	}
@@ -699,7 +736,10 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		if(previewImageBase64 != null) {
 			writeBase64Image(nodeRef, previewImageBase64);
 		} else {
-			byte[] previewImage = getPreviewFromURLSplash(url);
+			byte[] previewImage = getPreviewFromURLPlaywright(url);
+			if(previewImage == null) {
+				previewImage = getPreviewFromURLSplash(url);
+			}
 			if(previewImage != null){
 				writeImage(nodeRef, previewImage);
 			}
@@ -824,6 +864,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 				GetMethod method = new GetMethod(url.toString());
 				int timeout = (int) ((splash.getDouble("wait") + splash.getDouble("timeout")) * 1000);
 				client.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
+				client.getHttpConnectionManager().getParams().setSoTimeout(timeout);
 				int statusCode = client.executeMethod(method);
 				if (statusCode == HttpStatus.SC_OK) {
 					return method.getResponseBody();
@@ -832,6 +873,34 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 				}
 			}catch(Exception e) {
 				logger.warn("Calling Splash service failed: " + e.getMessage(), e);
+			}
+		}
+		return null;
+	}
+	private static byte[] getPreviewFromURLPlaywright(String httpURL) {
+		Config playwright = LightbendConfigLoader.get().getConfig("repository.communication.playwright");
+		if(playwright != null && playwright.hasPath("url")) {
+			try {
+				final StringBuilder url = new StringBuilder(playwright.getString("url") + "/v1/website?url=" + java.net.URLEncoder.encode(httpURL, "ISO-8859-1"));
+				playwright.entrySet().stream().filter((e) -> !"url".equals(e.getKey())).forEach((e) -> {
+					try {
+						url.append("&").append(e.getKey()).append("=").append(java.net.URLEncoder.encode(e.getValue().unwrapped().toString(), "ISO-8859-1"));
+					}catch(UnsupportedEncodingException ignored) {}
+				});
+				HttpClient client = new HttpClient();
+				GetMethod method = new GetMethod(url.toString());
+				int timeout = (int) (playwright.getDouble("timeout") * 1000);
+				client.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
+				client.getHttpConnectionManager().getParams().setSoTimeout(timeout);
+				int statusCode = client.executeMethod(method);
+				if (statusCode == HttpStatus.SC_OK) {
+					JSONObject result = new JSONObject(method.getResponseBodyAsString());
+					return Base64.decode(result.getString("preview").getBytes(StandardCharsets.UTF_8));
+				} else {
+					logger.warn("Playwright returned non-okay error code " + statusCode + ", " + url.toString());
+				}
+			}catch(Exception e) {
+				logger.warn("Calling Playwright service failed: " + e.getMessage(), e);
 			}
 		}
 		return null;

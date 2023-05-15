@@ -1,100 +1,143 @@
-<es-info-message *ngIf="!(configService.get('frontpage.enabled', true) | async)" class="info-disabled">
-  {{'ADMIN.FRONTPAGE.DISABLED' | translate }}
+<es-info-message
+  *ngIf="!(configService.get('frontpage.enabled', true) | async)"
+  class="info-disabled"
+>
+  {{ 'ADMIN.FRONTPAGE.DISABLED' | translate }}
 </es-info-message>
 <es-collection-chooser
   class="dialog-right scrollWithBanner"
   *ngIf="chooseCollection"
   [@fromRight]="chooseCollection"
   title="WORKSPACE.SELECT_COLLECTION"
-  (onCancel)="chooseCollection=false"
+  (onCancel)="chooseCollection = false"
   (onChoose)="setCollection($event)"
 ></es-collection-chooser>
 <div class="frontpage" *ngIf="configService.get('frontpage.enabled', true) | async">
   <form *ngIf="config" [formGroup]="form">
-    <h4 class="mat-heading-4 mat-heading-underline"><i esIcon="settings"></i>{{'ADMIN.FRONTPAGE.GENERAL' | translate}}</h4>
+    <h4 class="mat-heading-4 mat-heading-underline">
+      <i esIcon="settings"></i>{{ 'ADMIN.FRONTPAGE.GENERAL' | translate }}
+    </h4>
     <div class="group">
       <div>
         <mat-form-field>
-          <mat-label>{{'ADMIN.FRONTPAGE.MODE_LABEL' | translate}}</mat-label>
-          <mat-hint>{{'ADMIN.FRONTPAGE.MODE_HINT' | translate}}</mat-hint>
-          <mat-select id="mode" [(ngModel)]="config.frontpage.mode" [ngModelOptions]="{standalone: true}">
-            <mat-option *ngFor="let mode of modes" [value]="mode">{{'ADMIN.FRONTPAGE.MODE.'+mode | translate}}</mat-option>
+          <mat-label>{{ 'ADMIN.FRONTPAGE.MODE_LABEL' | translate }}</mat-label>
+          <mat-hint>{{ 'ADMIN.FRONTPAGE.MODE_HINT' | translate }}</mat-hint>
+          <mat-select
+            id="mode"
+            [(ngModel)]="config.frontpage.mode"
+            [ngModelOptions]="{ standalone: true }"
+          >
+            <mat-option *ngFor="let mode of modes" [value]="mode">{{
+              'ADMIN.FRONTPAGE.MODE.' + mode | translate
+            }}</mat-option>
           </mat-select>
         </mat-form-field>
       </div>
       <div class="mode-collection" *ngIf="config.frontpage.mode === 'collection'">
-        <mat-form-field >
-          <mat-label>{{'ADMIN.FRONTPAGE.COLLECTION_LABEL' | translate}}</mat-label>
-          <mat-hint>{{'ADMIN.FRONTPAGE.COLLECTION_HINT' | translate}}</mat-hint>
-          <input matInput id="collection" [(ngModel)]="collectionName" [ngModelOptions]="{standalone: true}" type="text" readonly="true">
+        <mat-form-field>
+          <mat-label>{{ 'ADMIN.FRONTPAGE.COLLECTION_LABEL' | translate }}</mat-label>
+          <mat-hint>{{ 'ADMIN.FRONTPAGE.COLLECTION_HINT' | translate }}</mat-hint>
+          <input
+            matInput
+            id="collection"
+            [(ngModel)]="collectionName"
+            [ngModelOptions]="{ standalone: true }"
+            type="text"
+            readonly="true"
+          />
         </mat-form-field>
       </div>
 
       <div class="config-timespan" *ngIf="config.frontpage.mode !== 'collection'">
         <mat-form-field>
-          <mat-label>{{'ADMIN.FRONTPAGE.TIMESPAN_LABEL' | translate}}</mat-label>
-          <mat-hint>{{'ADMIN.FRONTPAGE.TIMESPAN_HINT' | translate}}</mat-hint>
-          <span matSuffix>{{'ADMIN.FRONTPAGE.TIMESPAN_DAYS' | translate}}</span>
-          <input matInput
-                 id="timespan"
-                 type="number"
-                 min="1"
-                 formControlName="timespan"
-          >
+          <mat-label>{{ 'ADMIN.FRONTPAGE.TIMESPAN_LABEL' | translate }}</mat-label>
+          <mat-hint>{{ 'ADMIN.FRONTPAGE.TIMESPAN_HINT' | translate }}</mat-hint>
+          <span matSuffix>{{ 'ADMIN.FRONTPAGE.TIMESPAN_DAYS' | translate }}</span>
+          <input matInput id="timespan" type="number" min="1" formControlName="timespan" />
         </mat-form-field>
-        <mat-checkbox
-          formControlName="timespanAll"
-        >
-          {{'ADMIN.FRONTPAGE.TIMESPAN.all' | translate}}
+        <mat-checkbox formControlName="timespanAll">
+          {{ 'ADMIN.FRONTPAGE.TIMESPAN.all' | translate }}
         </mat-checkbox>
       </div>
     </div>
     <div class="group" *ngIf="config.frontpage.mode === 'collection'">
-      <div class="select-collection"><button mat-raised-button color="primary"
-                                             (click)="chooseCollection=true">{{'ADMIN.FRONTPAGE.CHOOSE_COLLECTION' | translate}}</button>
+      <div class="select-collection">
+        <button mat-raised-button color="primary" (click)="chooseCollection = true">
+          {{ 'ADMIN.FRONTPAGE.CHOOSE_COLLECTION' | translate }}
+        </button>
       </div>
     </div>
-    <div *ngIf="config.frontpage.mode!='collection'">
+    <div *ngIf="config.frontpage.mode !== 'collection'">
       <div class="group">
         <mat-form-field>
-          <mat-label>{{'ADMIN.FRONTPAGE.TOTAL_COUNT_LABEL' | translate}}</mat-label>
-          <mat-hint>{{'ADMIN.FRONTPAGE.TOTAL_COUNT_HINT' | translate}}</mat-hint>
-          <input matInput id="totalCount" formControlName="totalCount" type="number">
+          <mat-label>{{ 'ADMIN.FRONTPAGE.TOTAL_COUNT_LABEL' | translate }}</mat-label>
+          <mat-hint>{{ 'ADMIN.FRONTPAGE.TOTAL_COUNT_HINT' | translate }}</mat-hint>
+          <input matInput id="totalCount" formControlName="totalCount" type="number" />
           <mat-error *ngIf="form.get('totalCount').errors">
-            <span *ngIf="form.get('totalCount').errors.required">{{'FIELD_REQUIRED' | translate}}</span>
-            <span *ngIf="form.get('totalCount').errors.pattern">{{'FIELD_VALIDATION_ERROR_INTEGER' | translate}}</span>
-            <span *ngIf="form.get('totalCount').errors.outOfRange">{{'ADMIN.FRONTPAGE.TOTAL_COUNT_OUT_OF_RANGE' | translate}}</span>
+            <span *ngIf="form.get('totalCount').errors.required">{{
+              'FIELD_REQUIRED' | translate
+            }}</span>
+            <span *ngIf="form.get('totalCount').errors.pattern">{{
+              'FIELD_VALIDATION_ERROR_INTEGER' | translate
+            }}</span>
+            <span *ngIf="form.get('totalCount').errors.outOfRange">{{
+              'ADMIN.FRONTPAGE.TOTAL_COUNT_OUT_OF_RANGE' | translate
+            }}</span>
           </mat-error>
         </mat-form-field>
         <mat-form-field>
-          <mat-label>{{'ADMIN.FRONTPAGE.DISPLAY_COUNT_LABEL' | translate}}</mat-label>
-          <mat-hint>{{'ADMIN.FRONTPAGE.DISPLAY_COUNT_HINT' | translate}}</mat-hint>
-          <input matInput id="displayCount" type="number" formControlName="displayCount" [(ngModel)]="config.frontpage.displayCount">
+          <mat-label>{{ 'ADMIN.FRONTPAGE.DISPLAY_COUNT_LABEL' | translate }}</mat-label>
+          <mat-hint>{{ 'ADMIN.FRONTPAGE.DISPLAY_COUNT_HINT' | translate }}</mat-hint>
+          <input
+            matInput
+            id="displayCount"
+            type="number"
+            formControlName="displayCount"
+            [(ngModel)]="config.frontpage.displayCount"
+          />
         </mat-form-field>
       </div>
       <div class="group-info">
-        <es-info-message *ngIf="form.get('totalCount').value>form.get('displayCount').value">
-          {{'ADMIN.FRONTPAGE.TOTAL_COUNT_LARGER_HINT' | translate }}
+        <es-info-message *ngIf="form.get('totalCount').value > form.get('displayCount').value">
+          {{ 'ADMIN.FRONTPAGE.TOTAL_COUNT_LARGER_HINT' | translate }}
         </es-info-message>
       </div>
       <div class="group queries" *ngFor="let query of config.frontpage.queries">
         <div class="condition">
           <mat-form-field>
-            <mat-label>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_TYPE' | translate}}</mat-label>
-            <mat-hint>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_TYPE_HINT' | translate}}</mat-hint>
-            <mat-select id="conditionType" [(ngModel)]="query.condition.type" [ngModelOptions]="{standalone: true}">
-              <mat-option *ngFor="let type of conditionTypes" [value]="type">{{'ADMIN.FRONTPAGE.CONDITION_TYPE.'+type | translate}}</mat-option>
+            <mat-label>{{ 'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_TYPE' | translate }}</mat-label>
+            <mat-hint>{{
+              'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_TYPE_HINT' | translate
+            }}</mat-hint>
+            <mat-select
+              id="conditionType"
+              [(ngModel)]="query.condition.type"
+              [ngModelOptions]="{ standalone: true }"
+            >
+              <mat-option *ngFor="let type of conditionTypes" [value]="type">{{
+                'ADMIN.FRONTPAGE.CONDITION_TYPE.' + type | translate
+              }}</mat-option>
             </mat-select>
           </mat-form-field>
-          <mat-form-field *ngIf="query.condition.type == 'TOOLPERMISSION'">
-            <mat-label>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_VALUE' | translate}}</mat-label>
-            <mat-hint>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_VALUE_HINT' | translate}}</mat-hint>
-            <mat-select id="conditionValue" [(ngModel)]="query.condition.value" [ngModelOptions]="{standalone: true}">
-              <mat-option *ngFor="let p of toolpermissions" [value]="p">{{p}}</mat-option>
+          <mat-form-field *ngIf="query.condition.type === 'TOOLPERMISSION'">
+            <mat-label>{{ 'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_VALUE' | translate }}</mat-label>
+            <mat-hint>{{
+              'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_VALUE_HINT' | translate
+            }}</mat-hint>
+            <mat-select
+              id="conditionValue"
+              [(ngModel)]="query.condition.value"
+              [ngModelOptions]="{ standalone: true }"
+            >
+              <mat-option *ngFor="let p of toolpermissions" [value]="p">{{ p }}</mat-option>
             </mat-select>
           </mat-form-field>
-          <mat-radio-group class="negate" [(ngModel)]="query.condition.negate" [ngModelOptions]="{standalone: true}">
-            <mat-label>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_NEGATE' | translate}}</mat-label>
+          <mat-radio-group
+            class="negate"
+            [(ngModel)]="query.condition.negate"
+            [ngModelOptions]="{ standalone: true }"
+          >
+            <mat-label>{{ 'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_NEGATE' | translate }}</mat-label>
             <mat-radio-button [value]="false">true</mat-radio-button>
             <mat-radio-button [value]="true">false</mat-radio-button>
           </mat-radio-group>
@@ -108,43 +151,65 @@
               </div>
           </div>
           -->
-          <button mat-raised-button color="warn" (click)="removeQueryCondition(query)">{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_REMOVE_CONDITION' | translate}}</button>
+          <button mat-raised-button color="warn" (click)="removeQueryCondition(query)">
+            {{ 'ADMIN.FRONTPAGE.CUSTOM_QUERY_REMOVE_CONDITION' | translate }}
+          </button>
         </div>
         <div class="monaco-editor">
-          <mat-label>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_LABEL' | translate}}</mat-label>
-          <ngx-monaco-editor [options]="codeOptions" [(ngModel)]="query.query" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
-          <mat-hint><div>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_HINT' | translate}}</div><button mat-button (click)="queryHelp()">{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_HINT_HELP' | translate}}</button></mat-hint>
+          <mat-label>{{ 'ADMIN.FRONTPAGE.CUSTOM_QUERY_LABEL' | translate }}</mat-label>
+          <ngx-monaco-editor
+            [options]="codeOptions"
+            [(ngModel)]="query.query"
+            [ngModelOptions]="{ standalone: true }"
+          ></ngx-monaco-editor>
+          <mat-hint
+            ><div>{{ 'ADMIN.FRONTPAGE.CUSTOM_QUERY_HINT' | translate }}</div>
+            <button mat-button (click)="queryHelp()">
+              {{ 'ADMIN.FRONTPAGE.CUSTOM_QUERY_HINT_HELP' | translate }}
+            </button></mat-hint
+          >
         </div>
       </div>
       <div class="group">
         <div>
-          <button mat-raised-button color="primary" (click)="addQueryCondition()">{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_ADD_CONDITION' | translate}}</button>
+          <button mat-raised-button color="primary" (click)="addQueryCondition()">
+            {{ 'ADMIN.FRONTPAGE.CUSTOM_QUERY_ADD_CONDITION' | translate }}
+          </button>
         </div>
       </div>
     </div>
     <div class="group">
       <div class="save">
-        <button mat-raised-button color="primary" (click)="save()" [disabled]="!form.valid">{{'SAVE' | translate}}</button>
+        <button mat-raised-button color="primary" (click)="save()" [disabled]="!form.valid">
+          {{ 'SAVE' | translate }}
+        </button>
       </div>
     </div>
   </form>
-  <h4 class="mat-heading-4 mat-heading-underline preview-heading"><i esIcon="apps"></i>{{'ADMIN.FRONTPAGE.PREVIEW' | translate}}
-    <div class="reload"><button mat-icon-button (click)="updatePreviews()"><i esIcon="refresh"></i></button></div>
+  <h4 class="mat-heading-4 mat-heading-underline preview-heading">
+    <i esIcon="apps"></i>{{ 'ADMIN.FRONTPAGE.PREVIEW' | translate }}
+    <div class="reload">
+      <button mat-icon-button (click)="updatePreviews()"><i esIcon="refresh"></i></button>
+    </div>
   </h4>
   <div class="group preview">
-    <h5 class="mat-heading-5 preview-error" *ngIf="previewError">{{'ADMIN.FRONTPAGE.PREVIEW_ERROR.'+previewError | translate}}</h5>
-    <es-custom-node-list-wrapper *ngIf="!previewError"
-               [isLoading]="previewLoading"
-               [nodes]="previewNodes"
-               [columns]="previewColumns"
-               [hasCheckbox]="false"
-               [hasIcon]="true"
-               [viewType]="1"
-               [isClickable]="true"
-               [createLink]="false"
-               (clickRow)="openNode($event)"
-               (doubleClickRow)="openNode($event)"
-    ></es-custom-node-list-wrapper>
+    <h5 class="mat-heading-5 preview-error" *ngIf="previewError">
+      {{ 'ADMIN.FRONTPAGE.PREVIEW_ERROR.' + previewError | translate }}
+    </h5>
+    <es-node-entries-wrapper
+      *ngIf="!previewError"
+      [columns]="previewColumns"
+      [dataSource]="previewNodesDataSource"
+      [checkbox]="false"
+      [displayType]="NodeEntriesDisplayType.Grid"
+      [elementInteractionType]="InteractionType.Emitter"
+      (clickItem)="this.onOpenNode.emit($event.element)"
+      (dblClickItem)="this.onOpenNode.emit($event.element)"
+    ></es-node-entries-wrapper>
   </div>
-  <h5 class="mat-heading-5 preview-hint" *ngIf="!previewLoading && !previewError" innerHTML="{{'ADMIN.FRONTPAGE.PREVIEW_HINT' | translate}}"></h5>
+  <h5
+    class="mat-heading-5 preview-hint"
+    *ngIf="!previewLoading && !previewError"
+    innerHTML="{{ 'ADMIN.FRONTPAGE.PREVIEW_HINT' | translate }}"
+  ></h5>
 </div>

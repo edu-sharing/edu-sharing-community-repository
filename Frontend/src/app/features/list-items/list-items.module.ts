@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { SharedModule } from 'src/app/shared/shared.module';
+import { SharedModule } from '../../shared/shared.module';
 import { FormatDurationPipe } from './format-duration.pipe';
 import { ListBaseComponent } from './list-base/list-base.component';
 import { ListCollectionInfoComponent } from './list-collection-info/list-collection-info.component';
@@ -8,6 +8,7 @@ import { ListNodeLicenseComponent } from './list-node-license/list-node-license.
 import { ListNodeReplicationSourceComponent } from './list-node-replication-source/list-node-replication-source.component';
 import { ListNodeWorkflowComponent } from './list-node-workflow/list-node-workflow.component';
 import { ListTextComponent } from './list-text/list-text.component';
+import { NodeRowComponent } from './node-row/node-row.component';
 import { NodeSourcePipe } from './node-source.pipe';
 
 @NgModule({
@@ -21,11 +22,9 @@ import { NodeSourcePipe } from './node-source.pipe';
         ListCountsComponent,
         NodeSourcePipe,
         FormatDurationPipe,
+        NodeRowComponent,
     ],
     imports: [SharedModule],
-    exports: [
-        ListBaseComponent,
-        ListTextComponent,
-    ]
+    exports: [ListBaseComponent, ListTextComponent, FormatDurationPipe, NodeRowComponent],
 })
 export class ListItemsModule {}

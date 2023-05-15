@@ -1,27 +1,38 @@
 package org.edu_sharing.service.lti13;
 
+import com.google.gson.Gson;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.AsymmetricJWK;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import io.jsonwebtoken.*;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.catalina.session.StandardSession;
+import org.apache.catalina.session.StandardSessionFacade;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.security.AllSessions;
 import org.edu_sharing.repository.server.tools.security.Signing;
+import org.edu_sharing.restservices.lti.v13.ApiTool;
+import org.edu_sharing.restservices.ltiplatform.v13.LTIPlatformConstants;
+import org.edu_sharing.restservices.ltiplatform.v13.model.LoginInitiationSessionObject;
+import org.edu_sharing.restservices.ltiplatform.v13.model.ValidationException;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.service.lti13.model.LTISessionObject;
 import org.edu_sharing.service.lti13.model.LoginInitiationDTO;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
@@ -103,8 +114,18 @@ public class LTIJWTUtil {
                 String tmpDeploymentId = deploymentId;
                 try {
 
-
-                    if(tmpClientId == null) tmpClientId = claims.getAudience();
+                    /**
+                     * @TODO: why this fallback is used
+                     * clientId vs audience (" audience of a token is the intended recipient of the token.")
+                     */
+                    if(tmpClientId == null){
+                        tmpClientId = claims.getAudience();
+                        //aud is a list, there is a bug in DefaultClaims implementation which returns the list as a string with surrounding []
+                        if(tmpClientId.startsWith("[") && tmpClientId.endsWith("]")){
+                            tmpClientId = tmpClientId.replace("[","").replace("]","");
+                            tmpClientId = tmpClientId.split(",")[0];
+                        }
+                    }
                     if(tmpDeploymentId == null) tmpDeploymentId = claims.get(LTIConstants.LTI_DEPLOYMENT_ID, String.class);
                     // We are dealing with RS256 encryption, so we have some Oauth utils to manage the keys and
                     // convert them to keys from the string stored in DB. There are for sure other ways to manage this.
@@ -177,6 +198,56 @@ public class LTIJWTUtil {
         return jwt;
     }
 
+    public static String sign(String string, ApplicationInfo appInfo){
+        Key privateKey = null;
+        try {
+            privateKey = new Signing().getPemPrivateKey(appInfo.getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException(e);
+        }
+
+
+
+        return Jwts.builder().setPayload(string).signWith(privateKey).compact();
+    }
+
+    public static Jws<Claims> validateJWT(String jwt, ApplicationInfo appInfo){
+        return Jwts.parser().setSigningKeyResolver(new SigningKeyResolverAdapter(){
+            @Override
+            public Key resolveSigningKey(JwsHeader header, Claims claims) {
+                try {
+                    /*return new Signing().getPemPublicKey(
+                            appInfo.getPublicKey(),
+                            CCConstants.SECURITY_KEY_ALGORITHM);*/
+                    String keysetUrl = appInfo.getLtiKeysetUrl();
+                    if(keysetUrl == null){
+                        if(appInfo.ishomeNode()){
+                            keysetUrl = appInfo.getBaseUrl() + "/edu-sharing/rest/lti/v13/jwks";
+                        }else {
+                            throw new RuntimeException("keyset url is null");
+                        }
+                    }
+                    JWKSet publicKeys = JWKSet.load(new URL(keysetUrl));
+                    String keyId = header.getKeyId();
+                    if(keyId == null) throw new RuntimeException("missing keyid");
+                    JWK jwk = publicKeys.getKeyByKeyId(keyId);
+                    if(jwk == null) throw new RuntimeException("no public key found for key: "+keyId);
+                    return ((AsymmetricJWK) jwk).toPublicKey();
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                } catch (JOSEException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).parseClaimsJws(jwt);
+    }
+
+
+
     private List<Map<String, Object>> generateContentItems(Node[] nodes){
         List<Map<String, Object>> deepLinks = new ArrayList<>();
         for(Node node : nodes){
@@ -186,6 +257,12 @@ public class LTIJWTUtil {
             deepLink.put(LTIConstants.DEEP_LINK_TITLE, node.getTitle() != null ? node.getTitle() : node.getName());
             //deepLink.put(LTIConstants.DEEP_LINK_URL, ApplicationInfoList.getHomeRepository().getClientBaseUrl() + "/components/render/"+node.getRef().getId()+"?closeOnBack=true");
             deepLink.put(LTIConstants.DEEP_LINK_URL, ApplicationInfoList.getHomeRepository().getClientBaseUrl() + "/rest/lti/v13/"+LTIConstants.LTI_TOOL_REDIRECTURL_PATH+"/"+node.getRef().getId());
+
+            //@TODO must custom part always be send? is only need when platform is also a tool that has customcontent option
+            HashMap<String,String> custom = new HashMap<>();
+            custom.put("nodeId",node.getRef().getId());
+            custom.put("repositoryId",node.getRef().getRepo());
+            deepLink.put("custom",custom);
 
             try {
                 HashMap<String,String> thumbnail = new HashMap<>();
@@ -235,7 +312,216 @@ public class LTIJWTUtil {
         return deepLink;
     }
 
-    public ApplicationInfo getPlatform() {
+    public ApplicationInfo getApplicationInfo() {
         return platform;
+    }
+
+    /**
+     * validate jwt data to decide if api caller is allowed
+     *
+     * @param jwt
+     * @param validateNodeId
+     * @return
+     * @throws Exception
+     */
+    public Jws<Claims> validateForCustomContent(String jwt, boolean validateNodeId) throws Exception{
+        /**
+         * decode without validating signature to get appId
+         */
+        String appId = LTIJWTUtil.getValue(jwt,"appId");
+
+        logger.info("appId tool:" + appId);
+        if(appId == null) throw new Exception("missing "+ LTIPlatformConstants.CUSTOM_CLAIM_APP_ID);
+        ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
+        if(appInfo == null || !appInfo.isLtiTool()){
+            throw new ValidationException("application is no lti tool");
+        }
+
+        /**
+         * validate that this message was signed by the tool
+         */
+        Jws<Claims> jwtObj = LTIJWTUtil.validateJWT(jwt,appInfo);
+        //maybe obsolet:
+        String validatedAppId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID,String.class);
+        if(!appId.equals(validatedAppId)){
+            throw new ValidationException("mismatch appId");
+        }
+
+        String user = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_USER, String.class);
+        if(user == null){
+            throw new ValidationException("missing "+LTIPlatformConstants.CUSTOM_CLAIM_USER);
+        }
+
+        String nodeId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_NODEID, String.class);
+        if(validateNodeId && nodeId == null){
+            throw new ValidationException("missing "+LTIPlatformConstants.CUSTOM_CLAIM_NODEID);
+        }
+
+        String token = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_TOKEN, String.class);
+        if(token == null){
+            throw new ValidationException("missing "+LTIPlatformConstants.CUSTOM_CLAIM_TOKEN);
+        }
+
+        /**
+         * this is a backend call so we con not use this: req.getSession().getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
+         */
+        HttpSession session = AllSessions.userLTISessions.get(token);
+        if(session == null){
+            throw new ValidationException("no session found");
+        }
+
+        LoginInitiationSessionObject sessionObject = getLoginInitiationSessionObject(token, session);
+
+
+        if(!appId.equals(sessionObject.getAppId())){
+            throw new ValidationException("wrong appId");
+        }
+
+
+        if(!user.equals(session.getAttribute(CCConstants.AUTH_USERNAME))){
+            throw new ValidationException("wrong user");
+        }
+
+        if(validateNodeId && !nodeId.equals(sessionObject.getContentUrlNodeId())){
+            throw new ValidationException("wrong nodeId");
+        }
+
+        HashMap<String,String> tokenData = new Gson().fromJson(ApiTool.decrpt(token), HashMap.class);
+        if(!appId.equals(tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID))){
+            throw new ValidationException("mismatch appId");
+        }
+        if(!user.equals(tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_USER))){
+            throw new ValidationException("mismatch user");
+        }
+        if(validateNodeId && !nodeId.equals(tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_NODEID))){
+            throw new ValidationException("mismatch nodeId");
+        }
+
+
+        /**
+         * extend session runtime
+         */
+        Field facadeSessionField = StandardSessionFacade.class.getDeclaredField("session");
+        facadeSessionField.setAccessible(true);
+        StandardSession stdSession = (StandardSession) facadeSessionField.get(session);
+        stdSession.endAccess();
+        logger.info("last AccessTime:" + new Date(session.getLastAccessedTime()));
+
+        return jwtObj;
+    }
+
+    private static LoginInitiationSessionObject getLoginInitiationSessionObject(String token, HttpSession session) throws Exception {
+        Map<String,LoginInitiationSessionObject> loginInitiationSessionObjectMap = (
+                Map<String,LoginInitiationSessionObject>) session.getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
+
+        if(loginInitiationSessionObjectMap == null){
+            throw new Exception(LTIPlatformConstants.ERROR_MISSING_SESSIONOBJECTS);
+        }
+
+        LoginInitiationSessionObject sessionObject = loginInitiationSessionObjectMap.entrySet().stream()
+                .filter(e -> token.equals(e.getValue().getToken()))
+                .findFirst()
+                .orElseThrow(() -> new Exception(LTIPlatformConstants.ERROR_MISSING_SESSIONOBJECT)).getValue();
+        return sessionObject;
+    }
+
+    /**
+     * 1.validates that jwt was signed by platform
+     *
+     * 2. prevents that a trusted platform can use api endpoints with any user (scoping of username is disabled)
+     * by checking that an initial edu-sharing authentication exists that caused an lti tool session.
+     *
+     * usecase is when an application is registered with both roles: tool and platform.
+     * example is an editor registered as a tool that wants to integrate edu-sharing objects as a platform
+     *
+     *
+     * @TODO check that tool and platform are in reality the same system
+     *
+     * @param jwt
+     * @return
+     * @throws ValidationException
+     * @throws org.json.simple.parser.ParseException
+     */
+    public Jws<Claims> validateForInitialToolSession(String jwt) throws ValidationException, org.json.simple.parser.ParseException {
+        String clientId = LTIJWTUtil.getValue(jwt,"aud");
+        if(clientId == null){
+            throw new ValidationException("missing clientId");
+        }
+        String deploymentId = LTIJWTUtil.getValue(jwt, LTIConstants.LTI_DEPLOYMENT_ID);
+        if(deploymentId == null){
+            throw new ValidationException("missing deploymentId");
+        }
+        String appId = new RepoTools().getAppId(null,clientId,deploymentId);
+        ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
+        if(appInfo == null){
+            throw new ValidationException("no application found for clientId:" + clientId + " deploymentId:"+deploymentId);
+        }
+
+        if(!ApplicationInfo.TYPE_LTIPLATFORM.equals(appInfo.getType())){
+            throw new ValidationException("application:" + appId + " is no ltiplatform");
+        }
+
+        //validate jwt is signed by platform
+        Jws<Claims> claims = LTIJWTUtil.validateJWT(jwt,appInfo);
+
+        String token = claims.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_TOKEN, String.class);
+        if(token == null){
+            throw new ValidationException("missing "+LTIPlatformConstants.CUSTOM_CLAIM_TOKEN);
+        }
+
+        HttpSession session = AllSessions.userLTISessions.get(token);
+        if(session == null){
+            throw new ValidationException("no session found");
+        }
+
+        //validate that there a tool session exists for the token
+        LoginInitiationSessionObject sessionObject = null;
+        try {
+            sessionObject = getLoginInitiationSessionObject(token, session);
+        } catch (Exception e) {
+            throw new ValidationException(e.getMessage());
+        }
+
+
+        /**
+         *  validate token was originally created with tool session
+         *
+         *  prevent platform can use this api endpoint without an initially created tool session.
+         *  ordinarily username scoping is disabled by apps that use this endpoint
+         *
+         */
+        //validate that token appId (tool) is the same as the session appId (tool)
+        HashMap<String,String> tokenData = new Gson().fromJson(ApiTool.decrpt(token), HashMap.class);
+        if(!sessionObject.getAppId().equals(tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID))){
+            throw new ValidationException("mismatch appId");
+        }
+
+        String tokenUser = tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_USER);
+        String sessionUser = (String)session.getAttribute(CCConstants.AUTH_USERNAME);
+
+        //validate that tokenuser is the same as session user
+        if(!sessionUser.equals(tokenUser)){
+            throw new ValidationException("mismatch user");
+        }
+        return claims;
+    }
+
+    /**
+     * returns a value of an jwt body without validating jwt
+     *
+     * @param jwt
+     * @param claim
+     * @return
+     * @param <T>
+     * @throws org.json.simple.parser.ParseException
+     */
+    public static <T> T getValue(String jwt, String claim) throws org.json.simple.parser.ParseException {
+        String[] chunks = jwt.split("\\.");
+        Base64.Decoder decoder = Base64.getUrlDecoder();
+
+        String header = new String(decoder.decode(chunks[0]));
+        String payload = new String(decoder.decode(chunks[1]));
+        JSONObject jsonObject = (JSONObject)new JSONParser().parse(payload);
+        return (T)jsonObject.get(claim);
     }
 }

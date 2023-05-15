@@ -1,37 +1,29 @@
-@import "../../../core-ui-module/styles/variables";
+@import '../../../core-ui-module/styles/variables';
 
-.rootNode{
-  @include clickable();
-  padding-left:10px;
-  padding-top:10px;
-  padding-bottom:10px;
+.rootNode {
+    display: flex;
+    align-items: center;
+    @include clickable();
+    padding-left: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
-.typeIcon{
-  margin-right:7px;
+.typeIcon {
+    margin-right: 7px;
 }
-.arrow{
-  padding-left:3px;
+.arrow {
+    padding-left: 3px;
 }
-.rootNode i{
-  padding-right:9px;
-  color:$textLight;
-  position: relative;
-  top: 7px;
+.rootNode i {
+    padding-right: 9px;
+    color: $textLight;
+    position: relative;
 }
 
-.rootNodeSelected{
-  color:$primary;
-  font-weight: bold;
-
-}
-.rootNodeSelected i{
-  color:$primary;
-}
-.hover{
-  color: $primary;
-  background-color: rgba($primary,0.2)!important;
-  outline: 2px $primary dashed;
-  i{
+.rootNodeSelected {
     color: $primary;
-  }
+    font-weight: bold;
+}
+.rootNodeSelected i {
+    color: $primary;
 }

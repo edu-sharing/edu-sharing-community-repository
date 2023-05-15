@@ -1,21 +1,38 @@
 <es-global-progress *ngIf="visible && progressType"></es-global-progress>
-<es-card *ngIf="visible && !progressType"
-      title="{{title | translate:messageParameters }}"
-      (onCancel)="cancel()"
-      [isCancelable]="isCancelable"
-      [buttons]="buttons"
-      [priority]="priority"
-      [type]="dialogType"
-      [node]="node"
-      height="auto"
-      [captureFocus]="!!input"
+<es-infobar
+  *ngIf="dialogType === DialogType.Infobar"
+  [title]="title"
+  [message]="message"
+  [messageParameters]="messageParameters"
+  [buttons]="buttons"
+  [isCancelable]="isCancelable"
+  (onCancel)="cancel()"
+>
+</es-infobar>
+<es-card
+  *ngIf="visible && !progressType && dialogType === DialogType.ModalCard"
+  title="{{ title | translate: messageParameters }}"
+  (onCancel)="cancel()"
+  [isCancelable]="isCancelable"
+  [buttons]="buttons"
+  [priority]="priority"
+  [type]="cardType"
+  [node]="node"
+  height="auto"
+  [captureFocus]="!!input"
 >
   <div class="modal-dialog-toast">
-    <span class="modal-dialog-toast-message" *ngIf="messageType === 'text'">{{message | translate: messageParameters }}</span>
-    <span class="modal-dialog-toast-message" *ngIf="messageType === 'html'" innerHTML="{{message | translate: messageParameters }}"></span>
+    <span class="modal-dialog-toast-message" *ngIf="messageType === 'text'">{{
+      message | translate: messageParameters
+    }}</span>
+    <span
+      class="modal-dialog-toast-message"
+      *ngIf="messageType === 'html'"
+      innerHTML="{{ message | translate: messageParameters }}"
+    ></span>
     <mat-form-field *ngIf="input">
-      <mat-label>{{input | translate}}</mat-label>
-      <input matInput autofocus [(ngModel)]="toast.dialogInputValue">
+      <mat-label>{{ input | translate }}</mat-label>
+      <input matInput autofocus [(ngModel)]="toast.dialogInputValue" />
     </mat-form-field>
   </div>
   <mat-progress-bar *ngIf="progressType" [mode]="progressType"></mat-progress-bar>

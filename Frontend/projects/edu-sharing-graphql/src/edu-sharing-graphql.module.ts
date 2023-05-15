@@ -1,7 +1,7 @@
-import {Inject, ModuleWithProviders, NgModule} from '@angular/core';
-import {HttpLink, Options} from 'apollo-angular/http';
-import {Apollo, APOLLO_OPTIONS} from 'apollo-angular';
-import {ApolloLink, InMemoryCache} from '@apollo/client';
+import { Inject, NgModule } from '@angular/core';
+import { HttpLink, Options } from 'apollo-angular/http';
+import { Apollo, APOLLO_OPTIONS } from 'apollo-angular';
+import { ApolloLink, InMemoryCache } from '@apollo/client/core';
 
 @NgModule({
     declarations: [],
@@ -9,17 +9,16 @@ import {ApolloLink, InMemoryCache} from '@apollo/client';
     exports: [],
 })
 export class EduSharingGraphqlModule {
-    constructor(
-        apollo: Apollo,
-        @Inject(APOLLO_OPTIONS) options: Options,
-        httpLink: HttpLink
-    ) {
+    constructor(apollo: Apollo, @Inject(APOLLO_OPTIONS) options: Options, httpLink: HttpLink) {
         const http = httpLink.create(options);
         const typenameMiddleware = new ApolloLink((operation, forward) => {
             if (operation.variables) {
-                operation.variables = JSON.parse(JSON.stringify(operation.variables), EduSharingGraphqlModule.omitTypename)
+                operation.variables = JSON.parse(
+                    JSON.stringify(operation.variables),
+                    EduSharingGraphqlModule.omitTypename,
+                );
             }
-            return forward(operation)
+            return forward(operation);
         });
         const myAppLink = ApolloLink.from([typenameMiddleware, http]);
         // remove the default injected client
@@ -27,7 +26,7 @@ export class EduSharingGraphqlModule {
         // create a new one using the custom middleware
         apollo.create({
             link: myAppLink,
-            cache: new InMemoryCache()
+            cache: new InMemoryCache(),
         });
         // @TODO: check if this is feasible for resolving types of elements
         /*
@@ -59,6 +58,6 @@ export class EduSharingGraphqlModule {
          */
     }
     private static omitTypename(key: string, value: any) {
-        return key === '__typename' ? undefined : value
+        return key === '__typename' ? undefined : value;
     }
 }

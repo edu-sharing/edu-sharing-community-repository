@@ -1,0 +1,45 @@
+type EduSharingInfo {
+    git: GitVersion
+    maven: MavenInfo
+    version: EduSharingVersionInfo
+}
+
+
+type GitVersion {
+    branch: String
+    closest: GitTagInfo
+    commit: GitCommitInfo
+    dirty: Boolean
+}
+
+type GitTagInfo {
+    tag: GitTagDetailedInfo
+}
+
+type GitTagDetailedInfo {
+    name: String
+}
+
+type GitCommitInfo {
+    id: String
+}
+
+type MavenInfo {
+    project:MavenProjectInfo
+}
+
+type MavenProjectInfo {
+    groupId: String
+    artifactId: String
+    version: String
+}
+
+
+type EduSharingVersionInfo {
+    full: String
+    major: String
+    minor: String
+    patch: String
+    qualifier: String
+    build: String
+}

@@ -1,25 +1,26 @@
 package org.edu_sharing.service.provider;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCBaseClient;
 import org.edu_sharing.service.collection.CollectionService;
-import org.edu_sharing.service.collection.CollectionServiceConfig;
-import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.collection.CollectionServiceImpl;
 import org.edu_sharing.service.comment.CommentService;
 import org.edu_sharing.service.comment.CommentServiceAdapter;
+import org.edu_sharing.service.feedback.FeedbackService;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceAdapter;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceReadOnly;
 import org.edu_sharing.service.rating.RatingService;
 import org.edu_sharing.service.rating.RatingServiceAdapter;
+import org.edu_sharing.service.relations.RelationService;
+import org.edu_sharing.service.relations.RelationServiceAdadapter;
 import org.edu_sharing.service.rendering.RenderingService;
 import org.edu_sharing.service.rendering.RenderingServiceImpl;
 import org.edu_sharing.service.search.SearchService;
-import org.edu_sharing.spring.ApplicationContextFactory;
 
 import java.util.HashMap;
 
@@ -35,6 +36,9 @@ public abstract class Provider {
     }
     public RatingService getRatingService(){
         return new RatingServiceAdapter(appId);
+    }
+    public RelationService getRelationService(){
+        return new RelationServiceAdadapter(appId);
     }
     public CommentService getCommentService(){
         return new CommentServiceAdapter(appId);
@@ -59,4 +63,8 @@ public abstract class Provider {
         return new MCAlfrescoAPIClient(appId, auth);
     }
     public abstract SearchService getSearchService();
+
+    public FeedbackService getFeedbackService() {
+        throw new NotImplementedException("remote FeedbackService not implemented");
+    }
 }

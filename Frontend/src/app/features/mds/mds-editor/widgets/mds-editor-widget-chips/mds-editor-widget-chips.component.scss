@@ -3,7 +3,7 @@
 mat-form-field {
     width: 100%;
 }
-.mat-chip-label{
+.mat-chip-label {
     @include limitLineLength(200px);
 }
 
@@ -21,13 +21,7 @@ mat-form-field {
         line-height: normal;
     }
     color: $textLight;
-    background: repeating-linear-gradient(
-        -45deg,
-        #f2f2f2,
-        #f2f2f2 5px,
-        #fff 5px,
-        #fff 10px
-    );
+    background: repeating-linear-gradient(-45deg, #f2f2f2, #f2f2f2 5px, #fff 5px, #fff 10px);
     .accept {
         color: $colorStatusPositive;
     }

@@ -1,5 +1,5 @@
-import {Type} from '@angular/core';
-import {MdsEditorWidgetBase} from '../mds-editor/widgets/mds-editor-widget-base';
+import { Type } from '@angular/core';
+import { MdsEditorWidgetBase } from '../mds-editor/widgets/mds-editor-widget-base';
 import { MdsWidget } from 'ngx-edu-sharing-api';
 
 export {
@@ -28,7 +28,7 @@ export interface Constraints {
     supportsBulk?: boolean;
 }
 
-export type Values = { [property: string]: (string[] | null) };
+export type Values = { [property: string]: string[] | null };
 
 /** User-selectable Bulk mode per field */
 export type BulkMode = 'no-change' | 'replace';
@@ -87,6 +87,7 @@ export enum MdsWidgetType {
     Range = 'range',
     Duration = 'duration',
     SingleValueTree = 'singlevalueTree',
+    SingleValueSuggestBadges = 'singlevalueSuggestBadges',
     MultiValueTree = 'multivalueTree',
     DefaultValue = 'defaultvalue',
     FacetList = 'facetList',
@@ -107,7 +108,7 @@ export enum NativeWidgetType {
 
 export type MdsEditorWidgetComponent = {
     mapGraphqlId: (definition: MdsWidget) => string[] | null;
-}& Type<MdsEditorWidgetBase>
+} & Type<MdsEditorWidgetBase>;
 
 export type EditorType = 'angular' | 'legacy';
 

@@ -1,11 +1,14 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
+import * as rxjs from 'rxjs';
+import { Observable } from 'rxjs';
 import { ListItem } from '../../core-module/core.module';
 
-@Pipe({ name: 'appListItemLabel' })
+@Pipe({ name: 'esListItemLabel' })
 export class ListItemLabelPipe implements PipeTransform {
     constructor(private translate: TranslateService) {}
-    transform(item: ListItem, args = { fallback: item.name }) {
+
+    transform(item: ListItem, args = { fallback: item.name }): Observable<string> {
         const mapping = {
             NODE: 'NODE',
             COLLECTION: 'NODE',
@@ -14,11 +17,12 @@ export class ListItemLabelPipe implements PipeTransform {
             GROUP: 'GROUP',
             USER: 'USER',
         };
-        return (
-            item.label ||
-            this.translate.instant(mapping[item.type] + '.' + item.name, {
+        if (item.label) {
+            return rxjs.of(item.label);
+        } else {
+            return this.translate.get(mapping[item.type] + '.' + item.name, {
                 fallback: args.fallback,
-            })
-        );
+            });
+        }
     }
 }

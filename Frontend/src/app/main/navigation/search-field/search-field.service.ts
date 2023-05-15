@@ -1,157 +1,171 @@
-import { EventEmitter, Injectable } from '@angular/core';
-import {
-    FacetsDict,
-    LabeledValue,
-    LabeledValuesDict,
-    MdsIdentifier,
-    MdsLabelService,
-    RawValuesDict,
-    SearchConfig,
-    SearchService,
-} from 'ngx-edu-sharing-api';
-import { BehaviorSubject, combineLatest, EMPTY, Observable, of, ReplaySubject, timer } from 'rxjs';
-import { debounce, filter, map, switchMap, tap } from 'rxjs/operators';
+import { ElementRef, Injectable } from '@angular/core';
+import { RawValuesDict, SearchConfig } from 'ngx-edu-sharing-api';
+import { Observable, Subject } from 'rxjs';
+import { delay, map, take, takeUntil } from 'rxjs/operators';
+import { notNull } from '../../../util/functions';
+import { SearchFieldInternalService } from './search-field-internal.service';
 
-const NUMBER_OF_FACET_SUGGESTIONS = 5;
-
-type MdsInfo = Pick<SearchConfig, 'repository' | 'metadataSet'>;
-
-@Injectable({
-    providedIn: 'root',
-})
-export class SearchFieldService {
-    /** Properties for which to fetch suggestions. */
-    readonly categoriesSubject = new BehaviorSubject<string[]>(null);
-    /** Active filters for use by search field. */
-    readonly filters$: Observable<LabeledValuesDict | null>;
-    /** Active suggestions for use by search field. */
-    readonly suggestions$: Observable<FacetsDict>;
-    /** Emits when the user added or removed filters through the search field. */
-    readonly filterValuesChange = new EventEmitter<RawValuesDict>();
-
-    private readonly mdsInfoSubject = new BehaviorSubject<MdsInfo>(null);
-    private readonly enableFiltersAndSuggestionsSubject = new BehaviorSubject(false);
-    private readonly filtersSubject = new BehaviorSubject<LabeledValuesDict>({});
-    private readonly suggestionsInputStringSubject = new ReplaySubject<string>(1);
-    private readonly suggestionsSubject = new BehaviorSubject<FacetsDict>(null);
-
-    readonly mdsInfo$ = this.mdsInfoSubject.pipe(filter((config) => config !== null));
-    readonly rawFilters$ = this.filtersSubject.pipe(
-        map((filters) => this.mdsLabel.getRawValuesDict(filters)),
-    );
-
-    constructor(private search: SearchService, private mdsLabel: MdsLabelService) {
-        this.filters$ = this.enableFiltersAndSuggestionsSubject.pipe(
-            switchMap((enabled) => (enabled ? this.filtersSubject : of(null))),
-        );
-        this.suggestions$ = this.suggestionsSubject.asObservable();
-        this.registerSuggestionsSubject();
-    }
-
+export class SearchFieldConfig {
+    /** The placeholder text for the search field, will be translated. */
+    placeholder: string;
     /**
-     * Enables or disables the filters and suggestions functions.
-     *
-     * When disabled, `filters$` and `suggestions$` will not emit values and suggestions will not be
-     * fetched.
-     *
-     * To be called by the search-field component.
+     * Shows a filter button inside the search field. Handle `onFiltersButtonClicked` when enabling.
      */
-    setEnableFiltersAndSuggestions(enabled: boolean): void {
-        this.enableFiltersAndSuggestionsSubject.next(enabled);
-        if (!enabled) {
-            this.suggestionsInputStringSubject.next('');
-            this.filtersSubject.next({});
-        }
-    }
-
+    showFiltersButton = false;
     /**
-     * Updates the input string as the user types to fetch matching as-you-type suggestions.
+     * If enabled, shows filters as chips inside the search field and suggests additional filters in
+     * an overlay as the user types into the search field.
      *
-     * To be called by the search-field component.
+     * Relies on active filters values being provided via `setFilterValues` and `filterValuesChange`
+     * being handled.
      */
-    updateSuggestions(inputString: string): void {
-        this.suggestionsInputStringSubject.next(inputString);
-    }
+    enableFiltersAndSuggestions = false;
+    /** Focus the search field input when it initially becomes available. */
+    autoFocus = false;
+}
 
+export type MdsInfo = Pick<SearchConfig, 'repository' | 'metadataSet'>;
+export type SearchEvent = {
+    /** The content of the search field at the time the search was triggered. */
+    searchString: string;
     /**
-     * Removes a filter from the active-filters dictionary as the user clicks on a chip's remove
+     * Whether the search was triggered because the user cleared the search field using the 'X'
      * button.
-     *
-     * To be called by the search-field component.
      */
-    removeFilter(property: string, filter: LabeledValue): void {
-        const filterList = this.filtersSubject.value[property];
-        const index = filterList?.findIndex((f) => f.value === filter.value);
-        if (index >= 0) {
-            const filterCopy = filterList.slice();
-            filterCopy.splice(index, 1);
-            const newFilters = { ...this.filtersSubject.value, [property]: filterCopy };
-            this.filtersSubject.next(newFilters);
-            this.filterValuesChange.emit(this.mdsLabel.getRawValuesDict(newFilters));
-        }
+    cleared: boolean;
+};
+
+export class SearchFieldInstance {
+    constructor(private _until: Observable<void>, private _internal: SearchFieldInternalService) {}
+
+    patchConfig(config: Partial<SearchFieldConfig>) {
+        const newConfig = { ...this._internal.config.value, ...config };
+        this._internal.config.next(newConfig);
     }
 
-    /**
-     * Sets the active filters to be displayed as chips.
-     *
-     * To be called  by the search-field component and by the component or service controlling the
-     * search logic.
-     */
-    setFilterValues(values: RawValuesDict, { emitValuesChange = false } = {}): void {
-        const mdsId = this.getCurrentMdsIdentifier();
-        if (mdsId) {
-            this.mdsLabel.labelValuesDict(mdsId, values).subscribe((filterValues) => {
-                this.filtersSubject.next(filterValues);
-                if (emitValuesChange) {
-                    this.filterValuesChange.emit(values);
-                }
-            });
-        } else {
-            console.warn('Called setFilterValues when mds was not configured.');
-        }
+    /** Emits when the user clicked the filters button inside the search field. */
+    onFiltersButtonClicked(): Observable<void> {
+        return this._internal.filtersButtonClicked.pipe(takeUntil(this._until));
+    }
+
+    /** Emits when the user triggered a search using the search field. */
+    onSearchTriggered(): Observable<SearchEvent> {
+        return this._internal.searchTriggered.pipe(takeUntil(this._until));
+    }
+
+    /** Emits when the user changed the search string by typing into the search field. */
+    onSearchStringChanged(): Observable<string> {
+        return this._internal.searchStringChanged.pipe(takeUntil(this._until));
+    }
+
+    /** Emits when the user added or removed filters through the search field. */
+    onFilterValuesChanged(): Observable<RawValuesDict> {
+        return this._internal.filterValuesChanged.pipe(takeUntil(this._until));
+    }
+
+    setSearchString(value: string): void {
+        this._internal.searchString.next(value);
+    }
+
+    getSearchString(): string {
+        return this._internal.searchString.value;
     }
 
     /**
      * Sets the repository and metadata set to be used for suggestions and value lookups.
-     *
-     * To be called by the component or service controlling the search logic.
      */
     setMdsInfo(mdsInfo: MdsInfo): void {
-        this.mdsInfoSubject.next(mdsInfo);
+        this._internal.mdsInfoSubject.next(mdsInfo);
     }
 
-    private registerSuggestionsSubject(): void {
-        combineLatest([
-            this.enableFiltersAndSuggestionsSubject,
-            this.categoriesSubject,
-            this.filtersSubject,
-        ]).subscribe(() => this.suggestionsSubject.next(null));
-        this.suggestionsInputStringSubject
-            .pipe(
-                map((inputString) =>
-                    this.enableFiltersAndSuggestionsSubject.value ? inputString : null,
-                ),
-                map((inputString) => (inputString?.length >= 3 ? inputString : null)),
-                debounce((inputString) => (inputString ? timer(200) : EMPTY)),
-                switchMap((inputString) =>
-                    inputString
-                        ? this.search.getAsYouTypeFacetSuggestions(
-                              inputString,
-                              this.categoriesSubject.value,
-                              NUMBER_OF_FACET_SUGGESTIONS,
-                          )
-                        : of(null),
-                ),
-            )
-            .subscribe((suggestions) => this.suggestionsSubject.next(suggestions));
+    /**
+     * Sets the active filters to be displayed as chips.
+     */
+    setFilterValues(values: RawValuesDict): void {
+        this._internal.setFilterValues(values);
     }
 
-    private getCurrentMdsIdentifier(): MdsIdentifier | null {
-        const { repository, metadataSet } = this.mdsInfoSubject.value;
-        if (repository && metadataSet) {
-            return { repository, metadataSet };
-        } else {
-            return null;
-        }
+    /**
+     * Returns a reference to the search field's input element.
+     *
+     * Use only for positioning, not for data.
+     */
+    getInputElement(): ElementRef {
+        return this._internal.searchFieldComponent.value.input;
+    }
+}
+
+/**
+ * Provides an interface between search implementations and the search-field component and its
+ * internal logic.
+ */
+@Injectable({
+    providedIn: 'root',
+})
+export class SearchFieldService {
+    private _currentInstance: SearchFieldInstance | null = null;
+    private _resetInstance = new Subject<void>();
+
+    constructor(private _internal: SearchFieldInternalService) {
+        this._resetInstance.subscribe(() => {
+            this._currentInstance = null;
+            this._internal.config.next(null);
+        });
+    }
+
+    observeEnabled(): Observable<boolean> {
+        return this._internal.config.pipe(map(notNull));
+    }
+
+    /**
+     * Enables the search field.
+     *
+     * The search field and the returned search field instance will stay active until (whatever
+     * happens first):
+     * - the given `until` subject fires
+     * - `enable` is called again
+     * - `disable` is called.
+     */
+    enable(config: Partial<SearchFieldConfig>, until: Subject<void>): SearchFieldInstance {
+        this._resetInstance.next();
+        const configWithDefaults = { ...new SearchFieldConfig(), ...config };
+        this._internal.config.next(configWithDefaults);
+        until.subscribe(() => this._resetInstance.next());
+        return this._createInstance();
+    }
+
+    disable() {
+        this._resetInstance.next();
+    }
+
+    /**
+     * Returns the current search-field instance or null if the search field is disabled.
+     *
+     * The returned instance's lifetime is determined by the `until` subject given when `enable` was
+     * called. Use this method if you want to use a search field instance, that has been enabled
+     * someplace else and you are sure that it will stay enabled for the time you intend to use it.
+     * A good example would be a sub-component of the component that called `enable`.
+     */
+    getCurrentInstance(): SearchFieldInstance | null {
+        return this._currentInstance;
+    }
+
+    /**
+     * Returns an updated observable of the current search-field instance or null if the search
+     * field is disabled.
+     *
+     * Use this to monitor how other components interact with the search field.
+     */
+    observeCurrentInstance(): Observable<SearchFieldInstance | null> {
+        return this.observeEnabled().pipe(
+            delay(0),
+            map(() => this._currentInstance),
+        );
+    }
+
+    private _createInstance(): SearchFieldInstance {
+        const until = this._resetInstance.pipe(take(1));
+        this._currentInstance = new SearchFieldInstance(until, this._internal);
+        return this._currentInstance;
     }
 }

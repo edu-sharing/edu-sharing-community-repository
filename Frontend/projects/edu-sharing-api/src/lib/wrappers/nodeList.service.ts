@@ -6,11 +6,11 @@ import { NodeEntries } from '../api/models';
 import { IamV1Service } from '../api/services';
 import { HOME_REPOSITORY, ME } from '../constants';
 import { ApiErrorResponse } from '../models';
-import { switchReplay } from '../utils/switch-replay';
+import { switchReplay } from '../utils/rxjs-operators/switch-replay';
 import { AuthenticationService } from './authentication.service';
 
 export interface SortPolicy {
-    property: string;
+    active: string;
     direction: 'asc' | 'desc';
 }
 
@@ -181,7 +181,7 @@ function mapSortPolicies(sortPolicies?: SortPolicy[]): {
         sortAscending: [] as boolean[],
     };
     for (const sortPolicy of sortPolicies) {
-        result.sortProperties.push(sortPolicy.property);
+        result.sortProperties.push(sortPolicy.active);
         result.sortAscending.push(sortPolicy.direction === 'asc');
     }
     return result;

@@ -114,7 +114,9 @@ public class ApplicationInfoList {
 	public static Map<String, ApplicationInfo> getApplicationInfos(){
 		if(appInfos.getKeys().size() == 0){
 			logger.debug("appInfos size is 0");
-			initAppInfos();
+			synchronized(appInfos) {
+				initAppInfos();
+			}
 		}else{
 			logger.debug("appInfos size not 0");
 		}
@@ -150,6 +152,7 @@ public class ApplicationInfoList {
 			return;
 		}
 
+		List<ApplicationInfo> tmpAppInfos = new ArrayList<>();
 		for(String appFile: appFileArray){
 
 			appFile = appFile.trim();
@@ -161,8 +164,8 @@ public class ApplicationInfoList {
 			try{
 				ApplicationInfo repInfo = new ApplicationInfo(appFile);
 				logger.debug("put:"+appFile+" "+repInfo);
-				synchronized(appInfos) {
-					appInfos.put(repInfo.getAppId(), repInfo);
+				synchronized(tmpAppInfos) {
+					tmpAppInfos.add(repInfo);
 					if(repInfo.ishomeNode()) {
 						appInfoHome = repInfo;
 					}
@@ -173,7 +176,12 @@ public class ApplicationInfoList {
 
 		}
 
-
+		for (ApplicationInfo appInfo : tmpAppInfos) {
+			if(logger.isDebugEnabled()) {
+				logger.debug("put:" + appInfo.getAppFile() + " " + appInfo + " size:" + appInfos.getKeys().size());
+			}
+			appInfos.put(appInfo.getAppId(), appInfo);
+		}
 	}
 	
 	/**

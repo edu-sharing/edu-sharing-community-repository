@@ -1,34 +1,57 @@
 <ng-container *ngIf="history">
-  <div class="no-history" *ngIf="!history.length">{{'WORKSPACE.WORKFLOW.NO_HISTORY' | translate}}</div>
+  <div class="no-history" *ngIf="!history.length">
+    {{ 'WORKSPACE.WORKFLOW.NO_HISTORY' | translate }}
+  </div>
   <div class="history">
-    <div *ngFor="let entry of history;let i=index">
-      <div class="user">{{ entry.editor | authorityName }}</div><div class="date">{{entry.time | formatDate:{time:true,relative:true} }}</div>
+    <div *ngFor="let entry of history; let i = index">
+      <div class="user">{{ entry.editor | authorityName }}</div>
+      <div class="date">{{ entry.time | formatDate: { time: true, relative: true } }}</div>
       <div class="box">
         <div class="row origin">
           <div class="receivers">
-            <label>{{'WORKSPACE.WORKFLOW.RECEIVERS' | translate}}</label>
-            <mat-chip-list *ngIf="(i==history.length-1 || !getWorkflowForId(history[i+1].status).hasReceiver)">
+            <label>{{ 'WORKSPACE.WORKFLOW.RECEIVERS' | translate }}</label>
+            <mat-chip-list
+              *ngIf="
+                i == history.length - 1 || !getWorkflowForId(history[i + 1].status).hasReceiver
+              "
+            >
               <mat-chip>
                 {{ 'WORKSPACE.WORKFLOW.NOBODY' | translate }}
               </mat-chip>
             </mat-chip-list>
-            <mat-chip-list *ngIf="!(i==history.length-1 || !getWorkflowForId(history[i+1].status).hasReceiver)">
-              <mat-chip *ngFor="let receiver of history[i+1].receiver" class="badge">
-                <i class="badgeIconLeft" [esIcon]="receiver.authorityType=='USER' ? 'person' : 'group'"></i>
+            <mat-chip-list
+              *ngIf="
+                !(i == history.length - 1 || !getWorkflowForId(history[i + 1].status).hasReceiver)
+              "
+            >
+              <mat-chip *ngFor="let receiver of history[i + 1].receiver" class="badge">
+                <i
+                  class="badgeIconLeft"
+                  [esIcon]="receiver.authorityType === 'USER' ? 'person' : 'group'"
+                ></i>
                 <div class="mat-chip-group">
-                  <span class="primary">{{receiver | authorityName}}</span>
-                  <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
+                  <span class="primary">{{ receiver | authorityName }}</span>
+                  <span class="secondary">{{
+                    receiver | permissionName: { field: 'secondary' }
+                  }}</span>
                 </div>
               </mat-chip>
             </mat-chip-list>
           </div>
-          <div class="status" *ngIf="i<history.length-1">
-            <label>{{'WORKSPACE.WORKFLOW.OLD_STATUS' | translate}}</label>
-            <div class="workflowStatus" [style.background-color]="getWorkflowForId(history[i+1].status).color">{{'WORKFLOW.'+history[i+1].status | translate}}</div>
+          <div class="status" *ngIf="i < history.length - 1">
+            <label>{{ 'WORKSPACE.WORKFLOW.OLD_STATUS' | translate }}</label>
+            <div
+              class="workflowStatus"
+              [style.background-color]="getWorkflowForId(history[i + 1].status).color"
+            >
+              {{ 'WORKFLOW.' + history[i + 1].status | translate }}
+            </div>
           </div>
-          <div class="status" *ngIf="i==history.length-1">
-            <label>{{'WORKSPACE.WORKFLOW.OLD_STATUS' | translate}}</label>
-            <div class="workflowStatus" [style.background-color]="defaultStatus.color">{{'WORKFLOW.'+defaultStatus.id | translate}}</div>
+          <div class="status" *ngIf="i == history.length - 1">
+            <label>{{ 'WORKSPACE.WORKFLOW.OLD_STATUS' | translate }}</label>
+            <div class="workflowStatus" [style.background-color]="defaultStatus.color">
+              {{ 'WORKFLOW.' + defaultStatus.id | translate }}
+            </div>
           </div>
         </div>
         <div class="row arrow">
@@ -36,30 +59,42 @@
         </div>
         <div class="row target">
           <div class="receivers">
-            <label>{{'WORKSPACE.WORKFLOW.RECEIVERS_NEXT' | translate}}</label>
+            <label>{{ 'WORKSPACE.WORKFLOW.RECEIVERS_NEXT' | translate }}</label>
             <mat-chip-list *ngIf="!getWorkflowForId(history[i].status).hasReceiver">
               <mat-chip>
                 {{ 'WORKSPACE.WORKFLOW.NOBODY' | translate }}
               </mat-chip>
             </mat-chip-list>
-            <mat-chip-list *ngIf="getWorkflowForId(history[i].status).hasReceiver && entry.receiver?.length">
+            <mat-chip-list
+              *ngIf="getWorkflowForId(history[i].status).hasReceiver && entry.receiver?.length"
+            >
               <mat-chip *ngFor="let receiver of entry.receiver" class="badge">
-                <i class="badgeIconLeft" [esIcon]="receiver.authorityType=='USER' ? 'person' : 'group'"></i>
+                <i
+                  class="badgeIconLeft"
+                  [esIcon]="receiver.authorityType === 'USER' ? 'person' : 'group'"
+                ></i>
                 <div class="mat-chip-group">
-                  <span class="primary">{{receiver | authorityName}}</span>
-                  <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
+                  <span class="primary">{{ receiver | authorityName }}</span>
+                  <span class="secondary">{{
+                    receiver | permissionName: { field: 'secondary' }
+                  }}</span>
                 </div>
               </mat-chip>
             </mat-chip-list>
           </div>
           <div class="status">
-            <label>{{'WORKSPACE.WORKFLOW.NEW_STATUS' | translate}}</label>
-            <div class="workflowStatus" [style.background-color]="getWorkflowForId(entry.status).color">{{'WORKFLOW.'+entry.status | translate}}</div>
+            <label>{{ 'WORKSPACE.WORKFLOW.NEW_STATUS' | translate }}</label>
+            <div
+              class="workflowStatus"
+              [style.background-color]="getWorkflowForId(entry.status).color"
+            >
+              {{ 'WORKFLOW.' + entry.status | translate }}
+            </div>
           </div>
         </div>
       </div>
       <div class="comment" *ngIf="entry.comment">
-        <label>{{'WORKSPACE.WORKFLOW.COMMENT' | translate}}</label>
+        <label>{{ 'WORKSPACE.WORKFLOW.COMMENT' | translate }}</label>
         <div>{{ entry.comment }}</div>
       </div>
     </div>

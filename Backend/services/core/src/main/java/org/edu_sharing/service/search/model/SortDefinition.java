@@ -6,20 +6,27 @@ import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.Pair;
+import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.elasticsearch.script.Script;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.ScoreSortBuilder;
-import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.search.sort.*;
 import org.springframework.context.ApplicationContext;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 
 public class SortDefinition implements Serializable {
+	static Logger logger = Logger.getLogger(SortDefinition.class);
 
+	private static final List<String> ALLOWED_SORT_MAIN_PROPERTIES = Collections.singletonList(
+			"fullpath"
+	);
 	transient ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	transient ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	
@@ -126,23 +133,33 @@ public class SortDefinition implements Serializable {
 			SortOrder sortOrder = sortDefintionEntry.ascending ? SortOrder.ASC : SortOrder.DESC;
 			if(sortDefintionEntry.getProperty().equalsIgnoreCase("score")) {
 				searchSourceBuilder.sort(new ScoreSortBuilder().order(sortOrder));
-			} else {
-
-				boolean addKeywordSuffix = false;
+			} else if(sortDefintionEntry.getProperty().equalsIgnoreCase("tree")) {
+				searchSourceBuilder.sort(SortBuilders.scriptSort(
+						new Script("doc['fullpath'].value + '/' + doc['nodeRef.id'].value"),//(doc['properties.cm:name.keyword'].size() == 0 ? doc['properties.cm:name.keyword'].value : doc['properties.cm:name.keyword'].value)
+						ScriptSortBuilder.ScriptSortType.STRING
+				));
+			}else if(ALLOWED_SORT_MAIN_PROPERTIES.contains(sortDefintionEntry.getProperty())) {
+				searchSourceBuilder.sort(sortDefintionEntry.getProperty(), sortOrder);
+			}else {
+				String addSuffix = "";
 				String property = CCConstants.getValidGlobalName(sortDefintionEntry.getProperty());
 				if(property != null){
 					PropertyDefinition propDef = serviceRegistry.getDictionaryService().getProperty(QName.createQName(property));
 					if(propDef != null) {
-						if (DataTypeDefinition.TEXT.equals(propDef.getDataType().getName())
-								|| DataTypeDefinition.MLTEXT.equals(propDef.getDataType().getName())
-								|| DataTypeDefinition.DATE.equals(propDef.getDataType().getName())
-								|| DataTypeDefinition.DATETIME.equals(propDef.getDataType().getName())) {
-							addKeywordSuffix = true;
+						if (Stream.of(DataTypeDefinition.TEXT, DataTypeDefinition.MLTEXT, DataTypeDefinition.DATE, DataTypeDefinition.DATETIME, DataTypeDefinition.BOOLEAN).anyMatch(qName -> qName.equals(propDef.getDataType().getName()))) {
+							addSuffix = "keyword";
+						} else if (Stream.of(DataTypeDefinition.INT, DataTypeDefinition.LONG, DataTypeDefinition.FLOAT, DataTypeDefinition.DOUBLE).anyMatch(qName -> qName.equals(propDef.getDataType().getName()))) {
+							addSuffix = "number";
+						} else {
+							logger.warn("Could not detect field type for elastic: " + propDef.getDataType() + ", " + property);
 						}
 					}
 				}
-				String name = "properties." + sortDefintionEntry.getProperty() + ((addKeywordSuffix) ? ".keyword" :"" );
-				searchSourceBuilder.sort(name, sortOrder);
+				String name = "properties." + sortDefintionEntry.getProperty() + ((!addSuffix.isEmpty()) ? ("." + addSuffix) :"" );
+				// currently, we use a dynamic model which might cause that fields not yet exists. We want to ignore this errors to let the request
+				searchSourceBuilder.sort(
+						SortBuilders.fieldSort(name).order(sortOrder).unmappedType("string")
+				);
 			}
 		}
 	}

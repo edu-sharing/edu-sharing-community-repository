@@ -1,45 +1,41 @@
-@import "../../core-ui-module/styles/variables";
+@import '../../core-ui-module/styles/variables';
 
-es-workspace-lti-tools{
-  display:inherit!important;
+.metadata-sidebar {
+    min-width: 350px;
+    max-width: 350px;
+    position: fixed;
+    @include iosScrolling();
+    @include materialShadow();
+    height: calc(100% - (var(--mainnavHeight) + #{$workspaceBreadcrumbsHeight}));
+    top: calc(var(--mainnavHeight) + #{$workspaceBreadcrumbsHeight});
+    right: 0;
+    z-index: 5;
+    background-color: #fff;
+    @media screen and (max-width: ($mobileTabSwitchWidth)) {
+        height: calc(
+            100% - (var(--mainnavHeight) + #{$workspaceBreadcrumbsHeight+$mobileTabNavHeight})
+        );
+    }
 }
-.delete-block-checkbox{
-  margin-top: 20px;
-}
-.metadata-sidebar{
-  min-width:300px;
-  max-width:300px;
-  position:fixed;
-  @include iosScrolling();
-  @include materialShadow();
-  height:calc(100% - #{$mainnavHeight+$workspaceBreadcrumbsHeight});
-  top: $mainnavHeight+$workspaceBreadcrumbsHeight;
-  right:0;
-  z-index: 5;
-  background-color: #fff;
-  @media screen and (max-width: ($mobileTabSwitchWidth)) {
-    height:calc(100% - #{$mainnavHeight+$workspaceBreadcrumbsHeight+$mobileTabNavHeight});
-  }
-}
-.card-title-actionbar{
-  .material-icons{
-    position: absolute;
-    top: 18px;
-    left: 10px;
-    color:$textLight;
-  }
-  input{
-    padding-left:40px;
-  }
-  div{
-    display:table-cell;
-  }
-  .search{
-    width:100%;
-    position: relative;
-    top:-19px;
-  }
-  .actionbar{
-    min-width: 220px;
-  }
+.card-title-actionbar {
+    .material-icons {
+        position: absolute;
+        top: 18px;
+        left: 10px;
+        color: $textLight;
+    }
+    input {
+        padding-left: 40px;
+    }
+    div {
+        display: table-cell;
+    }
+    .search {
+        width: 100%;
+        position: relative;
+        top: -19px;
+    }
+    .actionbar {
+        min-width: 220px;
+    }
 }

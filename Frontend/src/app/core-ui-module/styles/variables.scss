@@ -1,13 +1,14 @@
-@use "sass:map";
+@use 'sass:map';
+@use 'sass:color';
 @import 'branding';
 
 // All variables can be overridden in `branding.scss`.
 /* replace variables which are may not defined in the branding */
-$primaryVeryLight: lighten($primaryLight, 5%) !default;
-$primaryMediumDark: lighten($primaryDark, 10%) !default;
+$primaryVeryLight: rgb(var(--palette-primary-50)) !default;
+$primaryMediumDark: rgb(var(--palette-primary-700)) !default;
 
-$tabColor: $primary !default;
-$tabColorDark: $primary !default;
+$tabColor: var(--primary) !default;
+$tabColorDark: var(--primary) !default;
 $tabColorLight: $primaryMediumLight !default;
 $warning: #cd2457 !default;
 $warningMedium: #e98c1b !default;
@@ -17,6 +18,7 @@ $textLight: #585858 !default;
 $textMediumLight: #888 !default;
 $textVeryLight: #aaa !default;
 $textMain: #383838 !default;
+$textRenderingLabels: #6f6f6f !default;
 $fontSizeXLarge: 120% !default;
 $fontSizeLarge: 110% !default;
 $fontSizeSmall: 90% !default;
@@ -28,37 +30,36 @@ $nodeVirtualColor: #42ca8d !default;
 $editorialCollectionsBackground: #f5ec19 !default;
 $itemSelectedBackground: $primaryVeryLight !default;
 $itemSelectedTextColor: $primaryMediumDark !default;
-$buttonHoverBackground: rgba(red($primary), green($primary), blue($primary), 0.08) !default;
+$buttonHoverBackground: rgb(var(--palette-primary-500), 0.08) !default;
 $workspaceNewBackground: $itemSelectedBackground !default;
 // the white bar height in search and es-workspace
 $secondaryBarHeight: 65px !default;
-$listItemSelectedBackground: #f1f6fa !default;
+$listItemSelectedBackground: rgb(var(--palette-primary-50)) !default;
 $workspaceSelectedBackgroundEffect: linear-gradient(
         to right,
-        $primary 0,
-        $primary 5px,
+        var(--primary) 0,
+        var(--primary) 5px,
         rgba(0, 0, 0, 0) 5px,
         rgba(0, 0, 0, 0) 5px
     )
     no-repeat !default;
 $listItemSelectedBackgroundEffect: linear-gradient(
         to right,
-        $primary 0,
-        $primary 5px,
-        rgba(red($primary), green($primary), blue($primary), 0.15) 5px,
-        rgba(red($primary), green($primary), blue($primary), 0.15) 5px
+        var(--primary) 0,
+        var(--primary) 5px,
+        rgb(var(--palette-primary-50)) 5px,
+        rgb(var(--palette-primary-50)) 5px
     )
     no-repeat !default;
 $workspaceTreeBackground: #f7f7f7 !default;
-$mainnavHeight: 70px !default;
 $dialogRightWidth: 320px !default;
 $workspaceTreeSelectedBackground: #fff !default;
 $workspaceTreeWidth: 300px !default;
 $workspaceBreadcrumbsHeight: $secondaryBarHeight !default;
 $workspaceTreeSelectedBackgroundEffect: linear-gradient(
     to right,
-    $primary 0,
-    $primary 5px,
+    var(--primary) 0,
+    var(--primary) 5px,
     rgba(0, 0, 0, 0) 5px,
     rgba(0, 0, 0, 0) 5px
 ) !default;
@@ -82,10 +83,10 @@ $colorStatusRecommended: #acd331 !default;
 $colorStatusNeutral: #777 !default;
 $colorStatusNegative: $warning !default;
 $colorStarActive: #ba7c00 !default;
-$focusColor: darken($primaryMediumLight, 10%) !default;
+$focusColor: rgb(var(--palette-primary-300)) !default;
 $placeholderColor: #767676 !default;
 $focusWidth: 2px !default;
-$cardWidth: 200px !default;
+$cardWidth: 220px !default;
 $cardHeight: 300px !default;
 $listItemHeight: 70px !default;
 $listCardSmallHeight: 100px !default;
@@ -99,9 +100,9 @@ $mobileHeightLandscape: 400px !default;
 $mobileWidthPortrait: 400px !default;
 // this factor should be multiplied by a natural number, e.g. *3 means stage 3 (relatively early)
 $mobileStage: 100px !default;
-$dialogZIndex: 120 !default;
+$dialogZIndex: 130 !default;
 // before the top bar on mobile, but behind the mobile tabs and the top bar on desktop
-$dialogNonModalZIndex: 90 !default;
+$dialogNonModalZIndex: 90 !default; // before the top bar on mobile, but behind the mobile tabs and the top bar on desktop
 $topBarZIndex: 98 !default;
 $topBarMobileZIndex: 80 !default;
 $workspaceTopBarInputBackground: #eee !default;
@@ -110,6 +111,7 @@ $mobileTabsZIndex: 110 !default;
 $mobileTabSwitchWidth: $mobileWidth + $mobileStage * 2 !default;
 $mobileTabNavHeight: 62px !default;
 $primaryFontFamily: 'open_sansregular' !default;
+$primaryFontSize: 10pt !default;
 
 $default-chip-colors: (
     'cclom_general_keyword': rgb(166, 214, 208),

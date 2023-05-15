@@ -22,6 +22,11 @@ public interface PropertiesGetInterceptor {
          * this can be useful because you might don't want to do "expensive" taks e.g. in the search context
          */
         private CallSourceHelper.CallSource source;
+        /**
+         * The elasticsearch source map
+         * Hint: Only Non-Null if data was fetched via elasticsearch!
+         */
+        private Map<String, Object> elasticsearchSource;
 
         public NodeRef getNodeRef() {
             return nodeRef;
@@ -53,6 +58,14 @@ public interface PropertiesGetInterceptor {
 
         public void setSource(CallSourceHelper.CallSource source) {
             this.source = source;
+        }
+
+        public void setElasticsearchSource(Map<String, Object> elasticsearchSource) {
+            this.elasticsearchSource = elasticsearchSource;
+        }
+
+        public Map<String, Object> getElasticsearchSource() {
+            return elasticsearchSource;
         }
     }
 

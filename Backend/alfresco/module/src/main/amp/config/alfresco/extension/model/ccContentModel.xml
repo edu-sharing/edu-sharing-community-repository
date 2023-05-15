@@ -360,6 +360,11 @@
 		           <tokenised>false</tokenised>
 		       </index>
             </property>
+            <!-- edu-sharing customization: custom, secondary/alternative ids the user is also known as -->
+            <property name="cm:essecondaryIds">
+               <type>d:text</type>
+               <multiple>true</multiple>
+            </property>
             <!-- edu-sharing customization: current roles of an lms course -->
             <property name="cm:esremoteroles">
                <type>d:text</type>

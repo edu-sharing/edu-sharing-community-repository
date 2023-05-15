@@ -16,10 +16,12 @@
           }}"
           matTooltip="{{ option | optionTooltip }}"
           matTooltipPosition="right"
+          matTooltipTouchGestures="off"
           [class.mat-menu-item-separate]="option.isSeparate || isNewGroup(i)"
           [class.mat-menu-item-selected]="option.isSelected"
           [disabled]="!option.isEnabled"
           (click)="click(option)"
+          attr.data-test="menu-item-{{ option.name }}"
         >
           <i [esIcon]="option.icon"></i> {{ option.name | translate }}
         </button>

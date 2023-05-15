@@ -1,0 +1,336 @@
+@import '../../../../core-ui-module/styles/variables';
+@import '../../../../shared/components/card/variables';
+
+:host {
+    display: flex;
+    flex-direction: column;
+}
+
+:host ::ng-deep {
+    mat-checkbox .mat-checkbox-layout,
+    mat-radio-button .mat-radio-label {
+        white-space: normal;
+    }
+    .mat-tab-body-wrapper {
+        flex-grow: 1;
+    }
+}
+
+.mat-tab-group {
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.advancedPermission {
+    float: left;
+    width: 33.33%;
+}
+
+.hintNoFuzzy {
+    margin-top: -10px;
+    margin-bottom: 10px;
+    padding: 0 10px;
+    color: $textLight;
+}
+
+.group {
+    position: relative;
+    display: flex;
+    width: 100%;
+    padding: 10px 20px;
+}
+
+.groupInvite {
+    padding: 10px 20px;
+    padding-top: 26px;
+    //background-color: $actionDialogBackground;
+    flex-direction: column;
+}
+
+.invited,
+.advanced {
+    padding: 20px $cardPadding;
+}
+
+.advanced {
+    h4 {
+        justify-content: center;
+    }
+}
+
+.advancedAuthority {
+    color: $textLight;
+    float: left;
+    width: 100%;
+    font-weight: bold;
+    padding: 10px 0;
+    i {
+        position: relative;
+        top: 5px;
+        padding-right: 10px;
+    }
+}
+
+.history {
+    padding-right: 20px;
+    float: right;
+}
+
+.groupMessage {
+    padding: 0 20px;
+    mat-form-field {
+        width: 100%;
+    }
+}
+
+.invite-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.publish-bulk {
+    margin-top: 20px;
+    margin-left: -$cardPadding;
+    width: calc(100% + #{$cardPadding * 2});
+    padding: 20px $cardPadding;
+    background-color: $actionDialogBackground;
+}
+
+.bulk-config {
+    padding: 20px $cardPadding;
+    .mat-heading-4 {
+        padding-bottom: 15px;
+    }
+    .mat-radio-button {
+        padding: 5px 10px;
+    }
+}
+
+.groupToInvite {
+    display: flex;
+    margin-top: 35px;
+    padding-bottom: 45px;
+    padding-right: 20px;
+    align-items: center;
+    .toInvite {
+        overflow: hidden;
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+    .typeButton {
+        display: flex;
+        .material-icons {
+            padding: 0 4px;
+            display: inline;
+        }
+        button {
+            height: 40px;
+        }
+    }
+}
+
+.crossed {
+    text-decoration: line-through;
+}
+
+.groupEntry,
+.usageEntry {
+    width: 100%;
+    display: flex;
+    background: #eee;
+    border-radius: 25px;
+    padding-left: 15px;
+    padding-right: 5px;
+    margin-bottom: 6px;
+    align-items: center;
+    es-share-dialog-permission {
+        width: 100%;
+    }
+    border: 2px dashed transparent;
+}
+
+.groupEntry {
+    min-height: 35px;
+}
+
+.added {
+    background: transparent;
+    border-color: $workspaceInheritColor;
+}
+
+.inherit {
+    color: $textLight;
+    min-height: 50px;
+}
+.inherit .groupEntry {
+    border: 1px solid $workspaceInheritColor;
+    cursor: default;
+}
+
+.normal {
+    cursor: default;
+}
+
+.owner {
+    cursor: default;
+}
+
+.groupHeading {
+    display: flex;
+    align-items: baseline;
+    padding-bottom: 10px;
+}
+
+.groupName {
+    color: $textLight;
+    font-size: 90%;
+    padding-top: 15px;
+    padding-bottom: 5px;
+    float: left;
+}
+
+.inheritDisabled,
+.inheritEmpty {
+    font-size: 90%;
+    color: $textLight;
+    padding: 0 10px 20px 10px;
+    font-style: italic;
+    width: 100%;
+    text-align: center;
+    white-space: pre-wrap;
+}
+
+.tabContentInvite {
+    padding-top: 0;
+}
+
+.inheritCheck {
+    float: left;
+    padding-left: 20px;
+}
+
+.manageLink {
+    float: right;
+    padding-right: 15px;
+    position: relative;
+    top: 14px;
+}
+
+.typeAdd {
+    position: absolute;
+    right: 20px;
+    width: 310px !important;
+    top: -60px;
+}
+
+.notify-info {
+    color: $textLight;
+}
+
+.share-link-button {
+    i {
+        margin-right: 8px;
+    }
+}
+
+.state {
+    font-size: 9pt;
+    i {
+        color: $textLight;
+        vertical-align: bottom;
+        font-size: 14pt;
+        margin-right: 3px;
+    }
+    .show-state {
+        display: flex;
+        align-items: center;
+        position: relative;
+        border: 2px dashed transparent;
+        border-radius: 15px;
+        padding: 6px 10px;
+    }
+
+    .state-changed {
+        border-color: $workspaceInheritColor;
+        i {
+            color: $textLight;
+        }
+    }
+}
+
+// .publish-grey {
+//     background: $backgroundColor;
+// }
+
+// .search,
+// .search div input {
+//     margin-bottom: 0;
+//     width: 95%;
+// }
+
+// .share-type-mobile {
+//     display: none;
+// }
+
+@media screen and (max-width: $mobileWidth) {
+    .typeButton button {
+        min-width: auto;
+        width: 76px;
+        span {
+            display: none;
+        }
+    }
+    .advancedPermission {
+        width: 50%;
+    }
+    .publish .doi span {
+        margin-right: 0;
+    }
+    .publish .type {
+        display: none;
+    }
+    .groupToInvite {
+        padding-bottom: 60px;
+    }
+    .typeButton {
+        .material-icons {
+            left: 0;
+        }
+    }
+    .groupToInvite {
+        padding-bottom: 60px;
+    }
+    .share-type-mobile {
+        position: absolute;
+        top: 58px;
+        right: 25px;
+        color: $textLight;
+        display: block;
+    }
+}
+@media screen and (max-width: ($mobileWidth - $mobileStage*2)) {
+    .groupHeading {
+        flex-direction: column;
+        padding-bottom: 5px;
+    }
+    .inheritCheck {
+        padding-left: 5px;
+    }
+
+    .state {
+        .show-state > span {
+            display: none;
+        }
+
+        .state-changed {
+            border-color: transparent;
+            i {
+                color: $workspaceInheritColor;
+            }
+        }
+    }
+    // .share-type-mobile {
+    //     right: 20px;
+    // }
+}

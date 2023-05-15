@@ -2,7 +2,6 @@ package org.edu_sharing.repository.server.authentication;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.Map;
 
 import javax.servlet.*;
@@ -13,10 +12,7 @@ import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.AuthenticationService;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.log4j.Logger;
-import org.apache.log4j.MDC;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
@@ -25,6 +21,7 @@ import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.QueryUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
@@ -44,47 +41,8 @@ import org.springframework.context.ApplicationContext;
 
 
 public class ContextManagementFilter implements javax.servlet.Filter {
-	public static class B3 {
-		private final HttpServletRequest req;
-
-		public B3(HttpServletRequest req) {
-			this.req = req;
-		}
-
-		public String getTraceId() {
-			return req.getHeader("X-B3-TraceId");
-		}
-
-		public String getSpanId() {
-			return req.getHeader("X-B3-SpanId");
-		}
-
-		public boolean isSampled() {
-			return "1".equals(req.getHeader("X-B3-Sampled"));
-		}
-
-		public String toString() {
-			if(getTraceId() != null) {
-				return "TraceId: " + getTraceId();
-			}
-			return "";
-		}
-
-		public void addToRequest(HttpRequestBase request) {
-			for(String header : Collections.list(req.getHeaderNames())) {
-				if(
-						header.toUpperCase().startsWith("X-B3-") ||
-						header.toUpperCase().startsWith("X-OT-") ||
-						header.equalsIgnoreCase("X-Request-Id")
-				) {
-				request.setHeader(header, req.getHeader(header));
-			}
-			}
-		}
-	}
 	// stores the currently accessing tool type, e.g. CONNECTOR
 	public static ThreadLocal<ApplicationInfo> accessTool = new ThreadLocal<>();
-	public static ThreadLocal<B3> b3 = new ThreadLocal<>();
 
 	Logger logger = Logger.getLogger(ContextManagementFilter.class);
 
@@ -110,15 +68,10 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 		logger.debug("thread:"+Thread.currentThread().getId() +" "+((HttpServletRequest)req).getServletPath()+" starting");
 
 		try {
+			final HttpServletRequest http = (HttpServletRequest) req;
 
-			Context.newInstance((HttpServletRequest)req , (HttpServletResponse)res, context);
-			b3.set(new B3((HttpServletRequest)req));
-			if(b3.get().getTraceId() != null) {
-				MDC.put("TraceId", b3.get().getTraceId());
-			}
-			if(b3.get().getSpanId() != null) {
-				MDC.put("SpanId", b3.get().getSpanId());
-			}
+			Context.newInstance(http , (HttpServletResponse)res, context);
+
 			ScopeAuthenticationServiceFactory.getScopeAuthenticationService().setScopeForCurrentThread();
 
 			try{
@@ -202,7 +155,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 	private void handleAppSignature(HttpServletRequest httpReq, HttpServletResponse httpRes) throws IOException {
 		accessTool.set(null);
 
-		String appId = httpReq.getHeader("X-Edu-App-Id");
+		String appId = SignatureVerifier.getHeaderOrParam("X-Edu-App-Id",httpReq);
 		if(appId != null) {
 			SignatureVerifier.Result result = new SignatureVerifier().verifyAppSignature(httpReq);
 			if (result.getStatuscode() != 200) {
@@ -213,9 +166,9 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 				ApplicationInfo appInfo = result.getAppInfo();
 				accessTool.set(appInfo);
 
-				String courseId = httpReq.getHeader("X-Edu-Usage-Course-Id");
-				String nodeId = httpReq.getHeader("X-Edu-Usage-Node-Id");
-				String resourceId = httpReq.getHeader("X-Edu-Usage-Resource-Id");
+				String courseId = SignatureVerifier.getHeaderOrParam("X-Edu-Usage-Course-Id",httpReq);
+				String nodeId = SignatureVerifier.getHeaderOrParam("X-Edu-Usage-Node-Id",httpReq);
+				String resourceId = SignatureVerifier.getHeaderOrParam("X-Edu-Usage-Resource-Id",httpReq);
 				if (courseId != null && nodeId != null && resourceId != null) {
 					Usage2Service u2 = new Usage2Service();
 					try {
@@ -223,6 +176,8 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 						if (usage != null) {
 							httpReq.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, nodeId);
 							authenticationComponent.setCurrentUser(CCConstants.PROXY_USER);
+							AuthenticationToolAPI authTool = new AuthenticationToolAPI();
+							authTool.storeAuthInfoInSession(CCConstants.PROXY_USER, authservice.getCurrentTicket(), CCConstants.AUTH_TYPE_SIGNATURE, httpReq.getSession());
 						}
 
 					} catch (Usage2Exception e) {

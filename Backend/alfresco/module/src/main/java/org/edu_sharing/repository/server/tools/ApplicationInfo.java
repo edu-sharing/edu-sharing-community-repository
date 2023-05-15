@@ -144,6 +144,27 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	public static final String KEY_LTI_SYNCREADERS = "lti_sync_readers";
 
+	public static final String KEY_LTITOOL_LOGININITIATIONS_URL = "ltitool_initiate_login_uri";
+
+	public static final String KEY_LTITOOL_REDIRECT_URLS = "ltitool_redirect_urls";
+
+	public static final String KEY_LTITOOL_TARGET_LINK_URI = "ltitool_target_link_uri";
+
+
+	public static final String KEY_LTITOOL_TARGET_LINK_URI_DEEPLINK = "ltitool_target_link_uri_deeplink";
+
+	public static final String KEY_LTITOOL_CUSTOM_PARAMETERS = "ltitool_custom_parameters";
+
+	public static final String KEY_LTITOOL_DESCRIPTION = "ltitool_description";
+
+	//custom allow too to write content to edu-sharing
+	public static final String KEY_LTITOOL_CUSTOMCONTENT_OPTION = "ltitool_customcontent_option";
+
+	//used to identify applications by resourcelinks
+	public static final String KEY_LTITOOL_URL = "ltitool_url";
+
+	public static final String KEY_LTI_SCOPEUSERNAME = "lti_scope_username";
+
 
 	/**
 	 * property file vals
@@ -151,6 +172,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	public static final String TYPE_REPOSITORY = "REPOSITORY";
 	public static final String TYPE_LMS = "LMS";
 	public static final String TYPE_CMS = "CMS";
+	public static final String TYPE_LTIPLATFORM = "lti";
+	public static final String TYPE_LTITOOL = "ltitool";
+
 
 	/**
 	 * SERVICE = renderservice -> reserved, no other system can use this
@@ -206,6 +230,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	public static final String PROPERTY_VALIDATOR_REGEX_CM_NAME = "property_validator_regex_cm_name";
 
 	private final Properties properties;
+	private final String appFileName;
 
 	private String host = null;
 	
@@ -365,6 +390,24 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	private String ltiSyncReaders;
 
+	private String ltitoolLoginInitiationsUrl;
+
+	private String ltitoolRedirectUrls;
+
+	private String ltitoolTargetLinkUri;
+
+	private String ltitoolTargetLinkUriDeepLink;
+
+	private String ltitoolCustomParameters;
+
+	private String ltitoolDescription;
+
+	private String ltitoolCustomContentOption;
+
+	private String ltitoolUrl;
+
+	private final boolean ltiScopeUsername;
+
 
 	/**
 	 * der Anfangsteil des alfresco Intergity Pattern:
@@ -379,8 +422,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	public ApplicationInfo(String _appFile) throws Exception{
 		if(_appFile == null) throw new Exception("Application Filename was null!");
+		appFileName = _appFile;
 		appFile = PropertiesHelper.Config.getPropertyFilePath(_appFile);
-		
+
 		ClassLoader classLoader = Thread.currentThread()
 				.getContextClassLoader();
 		URL url = classLoader.getResource(appFile);
@@ -528,6 +572,18 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		ltiKid = properties.getProperty(KEY_LTI_KID);
 		ltiUsagesEnabled = properties.getProperty(KEY_LTI_USAGES_ENABLED);
 		ltiSyncReaders = properties.getProperty(KEY_LTI_SYNCREADERS);
+
+		ltitoolRedirectUrls = properties.getProperty(KEY_LTITOOL_REDIRECT_URLS);
+		ltitoolLoginInitiationsUrl = properties.getProperty(KEY_LTITOOL_LOGININITIATIONS_URL);
+		ltitoolTargetLinkUri = properties.getProperty(KEY_LTITOOL_TARGET_LINK_URI);
+		ltitoolTargetLinkUriDeepLink = properties.getProperty(KEY_LTITOOL_TARGET_LINK_URI_DEEPLINK);
+		ltitoolCustomParameters = properties.getProperty(KEY_LTITOOL_CUSTOM_PARAMETERS);
+		ltitoolDescription = properties.getProperty(KEY_LTITOOL_DESCRIPTION);
+		ltitoolCustomContentOption = properties.getProperty(KEY_LTITOOL_CUSTOMCONTENT_OPTION);
+		ltitoolUrl = properties.getProperty(KEY_LTITOOL_URL);
+		ltiScopeUsername = (properties.getProperty(KEY_LTI_SCOPEUSERNAME) == null)
+				? true
+				: new Boolean(properties.getProperty(KEY_LTI_SCOPEUSERNAME));
 	}
 	
 	public String getXml() {
@@ -670,8 +726,18 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		return appCaption;
 	}
 
+	/**
+	 * @return the full app file path
+	 */
 	public String getAppFile() {
 		return appFile;
+	}
+
+	/**
+	 * @return only the file name
+	 */
+	public String getAppFileName() {
+		return appFileName;
 	}
 
 	public String getAppId() {
@@ -1040,4 +1106,37 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		else return new Boolean(this.ltiSyncReaders);
 	}
 
+	public String getLtitoolLoginInitiationsUrl() {
+		return ltitoolLoginInitiationsUrl;
+	}
+
+	public String getLtitoolTargetLinkUri() {
+		return ltitoolTargetLinkUri == null ? ltitoolTargetLinkUriDeepLink : ltitoolTargetLinkUri;
+	}
+
+	public String getLtitoolTargetLinkUriDeepLink() {return ltitoolTargetLinkUriDeepLink;}
+
+	public String getLtitoolRedirectUrls() {
+		return ltitoolRedirectUrls;
+	}
+
+	public String getLtitoolCustomParameters() {return ltitoolCustomParameters;}
+
+	public boolean isLtiTool(){
+		return ltitoolLoginInitiationsUrl != null && ltitoolRedirectUrls != null;
+	}
+
+	public String getLtitoolDescription() {return ltitoolDescription;}
+
+	public boolean hasLtiToolCustomContentOption(){
+		return new Boolean(ltitoolCustomContentOption);
+	}
+
+	public String getLtitoolUrl(){
+		return ltitoolUrl;
+	}
+
+	public boolean isLtiScopeUsername() {
+		return ltiScopeUsername;
+	}
 }

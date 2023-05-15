@@ -1,0 +1,7 @@
+<span class="message" *ngIf="data.messageText">{{
+  data.messageText | translate: data.messageParameters
+}}</span>
+
+<ng-container *ngIf="data.contentTemplate">
+  <ng-container *ngTemplateOutlet="data.contentTemplate"></ng-container>
+</ng-container>

@@ -5,11 +5,12 @@ import {
     NgZone,
     ViewChild,
     OnInit,
-    HostListener, Injector, EventEmitter
+    HostListener,
+    Injector,
+    EventEmitter,
 } from '@angular/core';
 import { MdsTestComponent } from '../common/test/mds-test/mds-test.component';
 import { ApplyToLmsComponent } from '../common/ui/apply-to-lms/apply-to-lms.component';
-import { EmbedComponent } from '../common/ui/embed/embed.component';
 import { NodeRenderComponent } from '../common/ui/node-render/node-render.component';
 import { UIConstants } from '../core-module/ui/ui-constants';
 import { AdminComponent } from '../modules/admin/admin.component';
@@ -27,20 +28,18 @@ import { PermissionsRoutingComponent } from '../modules/permissions/permissions-
 import { PermissionsMainComponent } from '../modules/permissions/permissions.component';
 import { ProfilesComponent } from '../modules/profiles/profiles.component';
 import { RegisterComponent } from '../modules/register/register.component';
-import { SearchComponent } from '../modules/search/search.component';
 import { ServicesComponent } from '../modules/services/services.components';
 import { ShareAppComponent } from '../modules/share-app/share-app.component';
 import { SharingComponent } from '../modules/sharing/sharing.component';
 import { StartupComponent } from '../modules/startup/startup.component';
 import { StreamComponent } from '../modules/stream/stream.component';
 import { WorkspaceMainComponent } from '../modules/workspace/workspace.component';
-import {ActivatedRoute, NavigationEnd, Router, Routes, UrlTree} from '@angular/router';
+import { NavigationEnd, NavigationStart, Router, Routes } from '@angular/router';
 import { CookieInfoComponent } from '../common/ui/cookie-info/cookie-info.component';
 import { BridgeService } from '../core-bridge-module/bridge.service';
-import {AccessibilityComponent} from '../common/ui/accessibility/accessibility.component';
 import { extensionRoutes } from '../extension/extension-routes';
-import {BehaviorSubject} from 'rxjs';
-import { AccessibilityService } from '../common/ui/accessibility/accessibility.service';
+import { BehaviorSubject } from 'rxjs';
+import { AccessibilityService } from '../services/accessibility.service';
 import { LtiComponent } from '../modules/lti/lti.component';
 import { printCurrentTaskInfo } from './track-change-detection';
 import { environment } from '../../environments/environment';
@@ -48,6 +47,12 @@ import { TranslationsService } from '../translations/translations.service';
 import { LoadingScreenService } from '../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';
+import { ThemeService } from '../common/services/theme.service';
+import * as rxjs from 'rxjs';
+import { LicenseAgreementService } from '../services/license-agreement.service';
+import { DialogsNavigationGuard } from '../features/dialogs/dialogs-navigation.guard';
+import { AuthenticationService } from 'ngx-edu-sharing-api';
+import { ConfigurationService, RestHelper } from '../core-module/core.module';
 
 @Component({
     selector: 'es-router',
@@ -61,15 +66,16 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
 
     public static isRedirectedFromLogin() {
         const history = RouterComponent.history.value;
-        if(history.length < 2) {
+        if (history.length < 2) {
             return false;
         }
-        return history[history.length-1].indexOf(UIConstants.ROUTER_PREFIX + 'login') !== -1 ||
-            history[history.length-1].indexOf(UIConstants.ROUTER_PREFIX) === -1;
+        return (
+            history[history.length - 1].indexOf(UIConstants.ROUTER_PREFIX + 'login') !== -1 ||
+            history[history.length - 1].indexOf(UIConstants.ROUTER_PREFIX) === -1
+        );
     }
 
     @ViewChild('management') management: WorkspaceManagementDialogsComponent;
-    @ViewChild('accessibility') accessibility: AccessibilityComponent;
     @ViewChild('cookie') cookie: CookieInfoComponent;
 
     private numberOfChecks = 0;
@@ -93,6 +99,13 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
         }
         return result;
     }
+
+    // FIXME: should we really do this?
+    // > Warning: The beforeunload event should only be used to alert the user of unsaved changes.
+    // > Once those changes are saved, the event should be removed. It should never be added
+    // > unconditionally to the page, as doing so can hurt performance in some cases. See the legacy
+    // > APIs section for details.
+    // --- https://developer.chrome.com/blog/page-lifecycle-api/
     @HostListener('window:beforeunload', ['$event'])
     interceptRoute(event: BeforeUnloadEvent) {
         console.log(event);
@@ -107,8 +120,15 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
         private accessibilityService: AccessibilityService,
         private translations: TranslationsService,
         private loadingScreen: LoadingScreenService,
+        private licenseAgreement: LicenseAgreementService,
+        private themeService: ThemeService,
+        private authentication: AuthenticationService,
+        private configuration: ConfigurationService,
     ) {
-        this.injector.get(Router).events.subscribe(event => {
+        this.injector.get(Router).events.subscribe((event) => {
+            // if (event instanceof NavigationStart) {
+            //     console.log('NavigationStart', event.url);
+            // }
             if (event instanceof NavigationEnd) {
                 RouterComponent.history.value.push(event.url);
                 RouterComponent.history.next(RouterComponent.history.value);
@@ -121,11 +141,20 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
     }
 
     ngOnInit(): void {
-        this.translations.initialize().pipe(
-            this.loadingScreen.showUntilFinished(),
-        ).subscribe();
+        this.translations
+            .initialize()
+            .pipe(
+                this.loadingScreen.showUntilFinished({
+                    // The router component lives as long as the application, so we don't need to
+                    // set `until` to anything meaningful.
+                    until: rxjs.EMPTY,
+                }),
+            )
+            .subscribe();
         this.setUserScale();
+        this.registerRedirectToLogin();
         this.registerContrastMode();
+        this.licenseAgreement.setup();
     }
 
     ngDoCheck(): void {
@@ -138,7 +167,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
     ngAfterViewInit(): void {
         this.dialogs.registerDialogsComponent(this.management);
         this.mainNavService.registerCookieInfo(this.cookie);
-        this.mainNavService.registerAccessibility(this.accessibility);
+        this.mainNavService.registerAccessibility();
     }
 
     private monitorChecks(): void {
@@ -169,6 +198,24 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
             const viewport: HTMLMetaElement = document.head.querySelector('meta[name="viewport"]');
             viewport.content += ', user-scalable=no';
         }
+    }
+
+    /**
+     * Redirects the user to the login page in case they don't have a valid session.
+     */
+    private registerRedirectToLogin(): void {
+        this.authentication.observeLoginInfo().subscribe((loginInfo) => {
+            const router = this.injector.get(Router);
+            if (
+                !loginInfo.isValidLogin &&
+                !(
+                    router.url.startsWith('/' + UIConstants.ROUTER_PREFIX + 'login') ||
+                    router.url.startsWith('/' + UIConstants.ROUTER_PREFIX + 'register')
+                )
+            ) {
+                RestHelper.goToLogin(router, this.configuration);
+            }
+        });
     }
 
     private registerContrastMode(): void {
@@ -203,7 +250,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
  */
 
 // Due to ahead of time, we need to create all routes manually.
-export const ROUTES: Routes = [
+const childRoutes: Routes = [
     // overrides and additional routes
     ...extensionRoutes,
 
@@ -220,7 +267,11 @@ export const ROUTES: Routes = [
         component: ApplyToLmsComponent,
     },
     // search
-    { path: UIConstants.ROUTER_PREFIX + 'search', component: SearchComponent },
+    {
+        path: UIConstants.ROUTER_PREFIX + 'search',
+        loadChildren: () =>
+            import('../pages/search-page/search-page.module').then((m) => m.SearchPageModule),
+    },
     // workspace
     { path: UIConstants.ROUTER_PREFIX + 'workspace', component: WorkspaceMainComponent },
     { path: UIConstants.ROUTER_PREFIX + 'workspace/:mode', component: WorkspaceMainComponent },
@@ -273,10 +324,24 @@ export const ROUTES: Routes = [
     { path: UIConstants.ROUTER_PREFIX + 'services', component: ServicesComponent },
 
     // embed
-    { path: UIConstants.ROUTER_PREFIX + 'embed/:component', component: EmbedComponent },
+    {
+        path: UIConstants.ROUTER_PREFIX + 'embed/:component',
+        loadChildren: () => import('../common/ui/embed/embed.module').then((m) => m.EmbedModule),
+    },
 
     { path: UIConstants.ROUTER_PREFIX + 'lti', component: LtiComponent },
 
     // wildcard 404
-    { path: '**', component: MessagesComponent, data: {message: 404} },
+    { path: '**', component: MessagesComponent, data: { message: 404 } },
+];
+
+export const ROUTES: Routes = [
+    // Add a `canDeactivate` guard to all routes, that closes any open dialogs before allowing
+    // navigation.
+    {
+        path: '',
+        canDeactivate: [DialogsNavigationGuard],
+        children: childRoutes,
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
+    },
 ];

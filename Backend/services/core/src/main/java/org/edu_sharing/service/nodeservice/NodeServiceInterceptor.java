@@ -8,9 +8,11 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.namespace.QName;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
@@ -25,12 +27,17 @@ import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.stream.StreamServiceFactory;
 import org.edu_sharing.service.stream.StreamServiceHelper;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.springframework.context.ApplicationContext;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 
 public class NodeServiceInterceptor implements MethodInterceptor {
+    ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+    ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+
     static Logger logger = Logger.getLogger(NodeServiceInterceptor.class);
     public void init(){
         
@@ -68,7 +75,31 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         if(argumentId==-1)
             return invocation.proceed();
         String nodeId = (String) invocation.getArguments()[argumentId];
+        if(Arrays.asList("getProperty", "getProperties").contains(methodName)) {
+            checkReadMetadataPermissions(nodeId, invocation);
+        }
         return handleInvocation(nodeId, invocation,true);
+    }
+
+    private void checkReadMetadataPermissions(String nodeId, MethodInvocation invocation) {
+        try {
+            NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+            if(serviceRegistry.getNodeService().hasAspect(nodeRef, QName.createQName(
+                    CCConstants.CCM_ASPECT_REMOTEREPOSITORY
+            ))) {
+                String remoteId = (String) serviceRegistry.getNodeService().getProperty(nodeRef, QName.createQName(
+                        CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID
+                ));
+                if(remoteId != null) {
+                    String tpId = CCConstants.CCM_VALUE_TOOLPERMISSION_REPOSITORY_PREFIX + remoteId;
+                    ToolPermissionHelper.throwIfToolpermissionMissing(tpId);
+                }
+            }
+        } catch(ToolPermissionException e) {
+            throw e;
+        } catch(Throwable t) {
+            logger.info("Unexpected error while verifying if object is remote object: " + t.getMessage());
+        }
     }
 
     /**
@@ -150,7 +181,11 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         NodeService nodeService = serviceRegistry.getNodeService();
         int i = 0;
         while(nodeId!=null) {
-            if (hasSignature(nodeId) || hasUsage(nodeId) || accessibleViaStream(nodeId) || hasCollectionPermissions(nodeId)) {
+            if (
+                    (hasSignature(nodeId) || hasUsage(nodeId)) ||
+                    // direct permissions only valid for current node, NOT for parent!
+                    (accessibleViaStream(nodeId) || hasCollectionPermissions(nodeId) && i == 0)
+            ) {
                 logger.debug("Node "+nodeId+" -> will run as system");
                 return AuthenticationUtil.runAsSystem(() -> {
                     try {
@@ -213,7 +248,8 @@ public class NodeServiceInterceptor implements MethodInterceptor {
             return false;
         }
         if(!CallSourceHelper.getCallSource().equals(CallSourceHelper.CallSource.Render)
-                && !CallSourceHelper.getCallSource().equals(CallSourceHelper.CallSource.Preview)){
+                && !CallSourceHelper.getCallSource().equals(CallSourceHelper.CallSource.Preview)
+                && !CallSourceHelper.getCallSource().equals(CallSourceHelper.CallSource.Sitemap)){
             logger.info("took:"+(System.currentTimeMillis() - test) +"ms");
             return false;
         }

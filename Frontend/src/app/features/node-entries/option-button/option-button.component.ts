@@ -10,13 +10,16 @@ import { OptionItem } from '../../../core-ui-module/option-item';
 @Component({
     selector: 'es-option-button',
     template: `
-        <button mat-icon-button
-                color="primary"
-                matTooltip="{{option.name | translate}}"
-                [class.display-none]="!optionIsShown(option, node)"
-                [disabled]="!optionIsValid(option, node)"
-                (click)="optionIsShown(option, node) ? option.callback(node) : null">
-            <i esIcon="{{option.icon}}" [aria]="false"></i>
+        <button
+            mat-icon-button
+            color="primary"
+            matTooltip="{{ option.name | translate }}"
+            [class.display-none]="!optionIsShown(option, node)"
+            [disabled]="!optionIsValid(option, node)"
+            (click)="optionIsShown(option, node) ? option.callback(node) : null"
+            attr.data-test="option-button-{{ option.name }}"
+        >
+            <i esIcon="{{ option.icon }}" [aria]="false"></i>
         </button>
     `,
 })
@@ -37,5 +40,4 @@ export class OptionButtonComponent {
         }
         return true;
     }
-
 }

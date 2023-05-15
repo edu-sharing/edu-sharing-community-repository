@@ -7,9 +7,9 @@
 		<branding>true</branding>
 		<editProfile>true</editProfile>
 		<nodeReport>true</nodeReport>
-		<services>
-			<visualization>https://appserver7.metaventis.com/stat/</visualization>
-		</services>
+		<register>
+			<local>false</local>
+		</register>
 		<helpMenuOptions>
 			<key>ONLINE_HELP</key>
 			<icon>help_outline</icon>

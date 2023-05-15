@@ -1,5 +1,5 @@
-@import "../../../core-ui-module/styles/variables";
-.info-disabled{
+@import '../../../core-ui-module/styles/variables';
+.info-disabled {
     display: flex;
     justify-content: center;
     margin-top: 20%;
@@ -7,29 +7,29 @@
 .frontpage {
     width: 100%;
     max-width: 1300px;
-    .save{
+    .save {
         justify-content: flex-end;
     }
-    .group-info{
+    .group-info {
         margin: 0 10%;
     }
     .group {
         display: flex;
         margin: 50px 10%;
-        .select-collection{
+        .select-collection {
             justify-content: flex-end;
         }
-        .config-timespan{
+        .config-timespan {
             display: flex;
             flex-direction: column;
             > mat-form-field {
                 padding-bottom: 15px;
             }
         }
-        &.queries{
-            margin:30px 12%;
+        &.queries {
+            margin: 30px 12%;
         }
-        .monaco-editor{
+        .monaco-editor {
             display: flex;
             flex-direction: column;
         }
@@ -45,31 +45,34 @@
                 width: 100%;
             }
         }
-        > .mode-collection{
+        > .mode-collection {
             flex-direction: column;
-            >button{
+            > button {
                 margin-top: 20px;
             }
         }
-        >.condition{
+        > .condition {
             flex-direction: column;
-            .negate{
+            .negate {
                 margin-top: 30px;
                 display: flex;
                 flex-wrap: wrap;
-                mat-label{
+                mat-label {
                     width: 100%;
                 }
-                mat-radio-button{
-                    padding:5px 10px;
+                mat-radio-button {
+                    padding: 5px 10px;
                 }
             }
-            button{
+            button {
                 margin-top: 15px;
             }
         }
         &.preview {
             margin: 20px 20px 10px 20px;
+            es-node-entries-wrapper {
+                display: inline;
+            }
         }
     }
 
@@ -78,20 +81,20 @@
         flex-grow: 1;
     }
 }
-:host ::ng-deep{
-    .group .mat-form-field-wrapper{
+:host ::ng-deep {
+    .group .mat-form-field-wrapper {
         width: 100%;
     }
-    h5.preview-error{
+    h5.preview-error {
         display: flex;
         justify-content: center;
     }
-    h5.preview-hint{
-        padding:10px 10%;
+    h5.preview-hint {
+        padding: 10px 10%;
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-        li{
+        li {
             list-style: square;
         }
     }

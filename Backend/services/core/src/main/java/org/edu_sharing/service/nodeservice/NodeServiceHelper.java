@@ -11,6 +11,7 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
@@ -119,8 +120,8 @@ public class NodeServiceHelper {
     public static String getProperty(NodeRef nodeRef,String key){
 		return NodeServiceFactory.getLocalService().getProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key);
 	}
-	public static void setProperty(NodeRef nodeRef,String key, Serializable value){
-		NodeServiceFactory.getLocalService().setProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key,value);
+	public static void setProperty(NodeRef nodeRef, String key, Serializable value, boolean skipDefinitionChecks){
+		NodeServiceFactory.getLocalService().setProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key,value, skipDefinitionChecks);
 	}
 	public static void addAspect(NodeRef nodeRef,String aspect){
 		NodeServiceFactory.getLocalService().addAspect(nodeRef.getId(),aspect);
@@ -130,6 +131,10 @@ public class NodeServiceHelper {
 	}
 	public static void removeProperty(NodeRef nodeRef,String key){
 		NodeServiceFactory.getLocalService().removeProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key);
+	}
+
+	public static void removeNode(NodeRef nodeRef,boolean recycle){
+		NodeServiceFactory.getLocalService().removeNode(nodeRef.getId(), null, recycle);
 	}
 
 	/**
@@ -157,7 +162,24 @@ public class NodeServiceHelper {
 			return true;
 		}
 	}
-	public static Serializable getPropertyNative(NodeRef nodeRef, String key){
+
+	/**
+	 * gets the native property
+	 * if a special runtime property (e.g. _DISPLAYNAME) is requested, it will also resolve it
+	 * WARNING: this method is not optimized for performance!
+	 */
+	public static Serializable getPropertyNativeWithMapping(NodeRef nodeRef, String key) throws Throwable {
+		if(key.endsWith(CCConstants.DISPLAYNAME_SUFFIX)) {
+			HashMap<String, Object> props = getProperties(nodeRef);
+			MetadataHelper.addVirtualDisplaynameProperties(
+					MetadataHelper.getMetadataset(nodeRef),
+					props
+			);
+			return (Serializable) props.get(key);
+		}
+		return getPropertyNative(nodeRef, key);
+	}
+		public static Serializable getPropertyNative(NodeRef nodeRef, String key){
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		return serviceRegistry.getNodeService().getProperty(nodeRef,QName.createQName(key));
@@ -333,7 +355,7 @@ public class NodeServiceHelper {
 		return NodeServiceFactory.getLocalService().getChild(parent.getStoreRef(), parent.getId(), type, CCConstants.CM_NAME, name);
 	}
 	public static void blockImport(NodeRef node) throws Exception {
-		setProperty(node, CCConstants.CCM_PROP_IO_IMPORT_BLOCKED, true);
+		setProperty(node, CCConstants.CCM_PROP_IO_IMPORT_BLOCKED, true, false);
 		PermissionServiceFactory.getLocalService().setPermissions(node.getId(), new ArrayList<>(), false);
 	}
 
@@ -486,7 +508,11 @@ public class NodeServiceHelper {
 	}
 
 	public static void copyProperty(NodeRef sourceNode, NodeRef targetNode, String property) {
-		NodeServiceHelper.setProperty(targetNode, property, NodeServiceHelper.getProperty(sourceNode, property));
+		NodeServiceHelper.setProperty(targetNode, property, NodeServiceHelper.getProperty(sourceNode, property), false);
+	}
+
+	public static boolean exists(NodeRef node) {
+		return NodeServiceFactory.getLocalService().exists(node.getStoreRef().getProtocol(), node.getStoreRef().getIdentifier(), node.getId());
 	}
 
 	/**
@@ -502,12 +528,7 @@ public class NodeServiceHelper {
 		return properties;
 	}
 
-    public static boolean exists(NodeRef ref) {
-		return NodeServiceFactory.getLocalService().exists(ref.getStoreRef().getProtocol(),
-				ref.getStoreRef().getIdentifier(), ref.getId());
-    }
-
 	public static void renameNode(NodeRef node, String newName) {
-		NodeServiceHelper.setProperty(node, CCConstants.CM_NAME, newName);
+		NodeServiceHelper.setProperty(node, CCConstants.CM_NAME, newName, false);
 	}
 }

@@ -1,40 +1,39 @@
-import {Component, Input, EventEmitter, Output, ViewChild} from '@angular/core';
-import { RestNodeService } from '../../../core-module/core.module';
-import { TranslateService } from '@ngx-translate/core';
-import { RestConstants } from '../../../core-module/core.module';
-import { Node, NodeList } from '../../../core-module/core.module';
-import { TemporaryStorageService } from '../../../core-module/core.module';
-import {OptionItem, Scope} from '../../../core-ui-module/option-item';
-import { UIService } from '../../../core-module/core.module';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { trigger } from '@angular/animations';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnDestroy,
+    OnInit,
+    Output,
+    ViewChild,
+} from '@angular/core';
+import { MatMenuTrigger } from '@angular/material/menu';
+import * as rxjs from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { DropSource } from '../../../features/node-entries/entries-model';
+import { Node, NodeList, RestConstants, RestNodeService } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { DropData, DragData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
-import {MatMenuTrigger} from '@angular/material/menu';
-import {DropdownComponent} from '../../../shared/components/dropdown/dropdown.component';
-import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../../core-ui-module/options-helper.service';
-import {MainNavComponent} from '../../../main/navigation/main-nav/main-nav.component';
-import {CdkDragDrop, CdkDragEnter, CdkDragExit} from '@angular/cdk/drag-drop';
-import {DragCursorDirective} from '../../../core-ui-module/directives/drag-cursor.directive';
-import { DropSource } from 'src/app/features/node-entries/entries-model';
+import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { OptionItem, Scope } from '../../../core-ui-module/option-item';
+import { OptionsHelperService } from '../../../core-ui-module/options-helper.service';
+import { DragData } from '../../../services/nodes-drag-drop.service';
+import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
+import { canDropOnNode } from '../workspace-utils';
+import { LocalEventsService } from '../../../services/local-events.service';
 
 @Component({
     selector: 'es-workspace-sub-tree',
     templateUrl: 'sub-tree.component.html',
     styleUrls: ['sub-tree.component.scss'],
     animations: [
-        trigger(
-            'openOverlay',
-            UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST),
-        ),
+        trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST)),
         trigger('open', UIAnimation.openOverlay()),
     ],
-    providers: [OptionsHelperService, {provide: OPTIONS_HELPER_CONFIG, useValue: {
-            subscribeEvents: false
-        }}]
+    providers: [OptionsHelperService],
 })
-export class WorkspaceSubTreeComponent {
+export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
     private static MAX_FOLDER_COUNT = 100;
 
     @ViewChild('dropdown') dropdown: DropdownComponent;
@@ -42,16 +41,18 @@ export class WorkspaceSubTreeComponent {
     dropdownLeft: string;
     dropdownTop: string;
 
-    @Input() openPath: string[][] = [];
-    @Input() set reload(reload: Boolean) {
-        if (reload) {
-            this.refresh();
-        }
+    private _currentPath: string[] = [];
+    /** Parent hierarchy of the currently selected node. */
+    @Input()
+    get currentPath(): string[] {
+        return this._currentPath;
     }
-    @Input() selectedPath: string[] = [];
-    @Input() parentPath: string[] = [];
-    @Input() depth = 1;
-    @Input() selectedNode: string;
+    set currentPath(value: string[]) {
+        this._currentPath = value;
+        this.expandCurrentPath();
+    }
+    @Input() depth = 0;
+    /** The node rendered by this sub tree. */
     @Input() set node(node: string) {
         this._node = node;
         if (node == null) {
@@ -60,29 +61,57 @@ export class WorkspaceSubTreeComponent {
         this.refresh();
     }
 
-    @Output() onClick = new EventEmitter();
-    @Output() onToggleTree = new EventEmitter();
+    @Output() onClick = new EventEmitter<Node>();
     @Output() onLoading = new EventEmitter();
-    @Output() onDrop = new EventEmitter<{target: Node, source: DropSource<Node>}>();
-    @Output() hasChilds = new EventEmitter();
+    @Output() onDrop = new EventEmitter<{ target: Node; source: DropSource<Node> }>();
+    @Output() hasChildren = new EventEmitter<boolean>();
     @Output() onUpdateOptions = new EventEmitter();
 
     _node: string;
     loading = true;
     _nodes: Node[];
-    dragHover: Node;
-    _hasChilds: boolean[] = [];
+    _hasChildren: { [nodeId: string]: boolean } = {};
     moreItems: number;
     loadingMore: boolean;
-
     loadingStates: boolean[] = [];
 
+    /** IDs of child nodes of the node rendered by this sub tree, that should be expanded. */
+    private expandedNodes: string[] = [];
+    private destroyed = new Subject<void>();
+
     constructor(
-        private ui: UIService,
         private nodeApi: RestNodeService,
-        private storage: TemporaryStorageService,
         private optionsService: OptionsHelperService,
+        private localEvents: LocalEventsService,
     ) {}
+
+    ngOnInit(): void {
+        rxjs.merge(this.localEvents.nodesChanged, this.localEvents.nodesDeleted)
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((nodes) => {
+                const nodeIds = this._nodes.map((node) => node.ref.id);
+                if (nodes.some((node) => nodeIds.includes(node.ref.id))) {
+                    this.refresh();
+                }
+            });
+    }
+
+    /**
+     * Resets expanded nodes to the parent hierarchy of the currently selected node.
+     */
+    private expandCurrentPath() {
+        const currentChildNode = this._nodes?.find(
+            (node) => node.ref.id === this.currentPath[this.depth],
+        );
+        if (currentChildNode) {
+            this.expandedNodes = [currentChildNode.ref.id];
+        }
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
+    }
 
     setLoadingState(state: boolean, pos: number) {
         this.loadingStates[pos] = state;
@@ -109,30 +138,11 @@ export class WorkspaceSubTreeComponent {
             });
     }
 
-    onNodesHoveringChange(nodesHovering: boolean, target: Node) {
-        if (nodesHovering) {
-            this.dragHover = target;
-        } else {
-            // The enter event of another node might have fired before this leave
-            // event and already updated `dragHover`. Only set it to null if that is
-            // not the case.
-            if (this.dragHover === target) {
-                this.dragHover = null;
-            }
-        }
-    }
-
     contextMenu(event: any, node: Node) {
         event.preventDefault();
         event.stopPropagation();
 
         this.showDropdown(event, node);
-    }
-
-    private callOption(option: OptionItem, node: Node) {
-        if (!option.isEnabled) return;
-        option.callback(node);
-        this.dropdown = null;
     }
 
     updateOptions(event: Node) {
@@ -146,13 +156,9 @@ export class WorkspaceSubTreeComponent {
         this.dropdownTop = event.clientY + 'px';
         this.optionsService.setData({
             activeObjects: [node],
-            scope: Scope.WorkspaceTree
+            scope: Scope.WorkspaceTree,
         });
         this.optionsService.initComponents(null, null, this.dropdown);
-        this.optionsService.setListener({
-            onRefresh: () => this.refresh(),
-            onDelete: () => this.refresh()
-        });
         this.optionsService.refreshComponents();
         this.dropdownTrigger.openMenu();
     }
@@ -161,68 +167,36 @@ export class WorkspaceSubTreeComponent {
         this.onDrop.emit(event);
     }
 
-    isSelected(node: Node) {
-        return (
-            this.selectedNode == node.ref.id ||
-            (this.isOpen(node) &&
-                this.selectedPath[this.selectedPath.length - 1] ==
-                    node.ref.id &&
-                this.selectedNode == null)
-        );
+    isSelected(node: Node): boolean {
+        return this.currentPath[this.currentPath.length - 1] === node.ref.id;
     }
 
-    getFullPath(node: Node): string[] {
-        let path = this.parentPath.slice();
-        path.push(node.ref.id);
-        return path;
-    }
-
-    openPathEvent(event: string[]): void {
-        this.onClick.emit(event);
-    }
-
-    toggleTreeEvent(event: string[]): void {
-        this.onToggleTree.emit(event);
-    }
-
-    getPathOpen(node: Node) {
-        for (let i = 0; i < this.openPath.length; i++) {
-            if (this.openPath[i].indexOf(node.ref.id) != -1) return i;
-        }
-        return -1;
-    }
-
-    isOpen(node: Node): boolean {
-        return this.getPathOpen(node) != -1;
-    }
-
-    openOrCloseNode(node: Node): void {
-        /*
-    let pos = this.openPath.indexOf(node.ref.id);
-
-    let path =  this.parentPath.slice();
-    if (pos == -1 || pos!=this.openPath.length-1) {
-      path.push(node.ref.id);
-    }
-    this.onClick.emit(path);
-    */
+    openPathEvent(node: Node): void {
         this.onClick.emit(node);
     }
 
-    openOrCloseTree(node: Node): void {
-        /*
-     let pos = this.openPath.indexOf(node.ref.id);
-
-     let path =  this.parentPath.slice();
-     if (pos == -1 || pos!=this.openPath.length-1) {
-     path.push(node.ref.id);
-     }
-     this.onClick.emit(path);
-     */
-        this.onToggleTree.emit({ node: node, parent: this.parentPath });
+    isOpen(node: Node): boolean {
+        return this.expandedNodes.includes(node.ref.id);
     }
 
-    private refresh() {
+    openOrCloseNode(node: Node): void {
+        this.onClick.emit(node);
+    }
+
+    toggleNodeExpansion(event: MouseEvent, node: Node): void {
+        if (this._hasChildren[node.ref.id] === false) {
+            return;
+        }
+        event.stopPropagation();
+        const index = this.expandedNodes.indexOf(node.ref.id);
+        if (index < 0) {
+            this.expandedNodes.push(node.ref.id);
+        } else {
+            this.expandedNodes.splice(index, 1);
+        }
+    }
+
+    refresh() {
         if (!this._node) return;
         this.nodeApi
             .getChildren(this._node, [RestConstants.FILTER_FOLDERS], {
@@ -232,31 +206,21 @@ export class WorkspaceSubTreeComponent {
                 this._nodes = data.nodes;
                 this.moreItems = data.pagination.total - data.pagination.count;
                 this.loadingStates = Helper.initArray(this._nodes.length, true);
-                this.hasChilds.emit(this._nodes && this._nodes.length);
+                this.hasChildren.emit(this._nodes?.length > 0);
                 this.onLoading.emit(false);
                 this.loading = false;
+                this.expandCurrentPath();
             });
     }
-    getDragState() {
-        return DragCursorDirective.dragState;
-    }
-    dragExit(event: CdkDragExit<any>) {
-        DragCursorDirective.dragState.element = null;
-    }
 
-    dragEnter(event: CdkDragEnter<any>) {
-        DragCursorDirective.dragState.element = event.container.data;
-        DragCursorDirective.dragState.dropAllowed = true;
-    }
-    drop(event: CdkDragDrop<Node, any>) {
+    canDropOnNode = canDropOnNode;
+    onDropped(dragData: DragData<Node>) {
         this.onDrop.emit({
-            target: event.container.data,
+            target: dragData.target,
             source: {
-                element: [event.item.data || event.previousContainer.data],
-                sourceList: null,
-                mode: DragCursorDirective.dragState.mode
-            }
+                element: dragData.draggedNodes,
+                mode: dragData.action,
+            },
         });
-        DragCursorDirective.dragState.element = null;
     }
 }

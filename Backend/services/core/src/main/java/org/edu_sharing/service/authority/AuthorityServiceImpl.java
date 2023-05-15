@@ -1,11 +1,7 @@
 package org.edu_sharing.service.authority;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.transaction.UserTransaction;
@@ -100,7 +96,6 @@ public class AuthorityServiceImpl implements AuthorityService {
 	}
 	@Override
 	public void deleteAuthority(String authorityName) {
-
 		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
 
                 new RetryingTransactionCallback<Void>()
@@ -109,6 +104,9 @@ public class AuthorityServiceImpl implements AuthorityService {
                     {
                 		String key =  authorityName;
                 		String groupType = (String) getAuthorityProperty(key,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
+						if(authorityName.equals(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) {
+							throw new AccessDeniedException("Not allowed to delete group " + CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS);
+						}
                 		if(groupType!=null && groupType.equals(CCConstants.ADMINISTRATORS_GROUP_TYPE) && !new MCAlfrescoAPIClient().isAdmin(AuthenticationUtil.getFullyAuthenticatedUser()))
                 			throw new AccessDeniedException("An admin group can not be deleted");
                 		authorityService.deleteAuthority(key, true);
@@ -687,6 +685,16 @@ public EduGroup getEduGroup(String authority){
 		return result;
 	}
 
+	@Override
+	public String getSubgroupByType(String parentGroup, String groupType){
+		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
+			Optional<String> first = authorityService.getContainedAuthorities(AuthorityType.GROUP, parentGroup, true).stream().filter(
+					(g) -> groupType.equals(nodeService.getProperty(getAuthorityNodeRef(g), QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE))
+					)
+			).findFirst();
+			return first.orElse(null);
+		});
+	}
 	public void createProxyUser(){
 		PersonService personService = serviceRegistry.getPersonService();
 

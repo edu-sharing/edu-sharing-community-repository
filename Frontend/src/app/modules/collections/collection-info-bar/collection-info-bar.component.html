@@ -1,0 +1,133 @@
+<div
+  role="complementary"
+  [attr.aria-label]="'COLLECTIONS.DETAILS' | translate"
+  class="collections-header"
+  [class.dark-color]="isBrightColor()"
+  [style.background-color]="collection?.collection?.color"
+>
+  <div
+    class="card-collection-image-container"
+    [class.card-collection-icon-container]="!hasNonIconPreview()"
+    style="width: 100%"
+  >
+    <div
+      *ngIf="!hasNonIconPreview()"
+      style="width: 250px; height: 200px; margin-left: auto; margin-right: auto"
+    >
+      <div class="card-image-icon-container">
+        <div
+          class="card-image-icon-circle"
+          [style.cursor]="isAllowedToEditCollection() ? 'pointer' : 'auto'"
+          (click)="edit.emit()"
+        >
+          <i esIcon="layers"></i>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="hasNonIconPreview()" class="card-image-icon-container">
+      <img
+        *ngIf="collection?.preview?.url"
+        class="collection-header-image"
+        [src]="collection | esNodeImage: { crop: true, width: 400, height: 350 } | async"
+        role="presentation"
+      />
+    </div>
+    <!-- Making the image area clickable poses a violation of accessibility rules. Merge
+    christopher/fix/image-click-areas to remove. -->
+    <div
+      *ngIf="isAllowedToEditCollection()"
+      (click)="edit.emit()"
+      role="presentation"
+      class="big-edit-button"
+    ></div>
+  </div>
+  <div
+    class="collections-header-textarea"
+    [class.collections-header-textarea-bright]="isBrightColor()"
+  >
+    <div class="collection-option">
+      <es-actionbar
+        #actionbar
+        [numberOfAlwaysVisibleOptions]="1"
+        [numberOfAlwaysVisibleOptionsMobile]="1"
+        appearance="round"
+        [style]="'flat'"
+        [dropdownPosition]="'right'"
+      ></es-actionbar>
+    </div>
+    <h1
+      esTitle
+      class="collection-new-preview-headline collections-header-texttop"
+      style="overflow: hidden"
+    >
+      {{ collection?.title }}
+    </h1>
+
+    <div
+      *ngIf="collection?.collection?.childCollectionsCount"
+      class="collection-new-preview-subline collections-header-texttop"
+    >
+      {{ collection.collection.childCollectionsCount }}
+      {{ 'COLLECTION.INFO_REFERENCES_MULTI' | translate }}
+    </div>
+    <div
+      *ngIf="collection?.collection?.childReferencesCount"
+      class="collection-new-preview-subline collections-header-texttop"
+    >
+      {{ collection.collection.childReferencesCount }}
+      {{ 'COLLECTION.INFO_CHILDS_MULTI' | translate }}
+    </div>
+
+    <div class="collection-new-preview-infoline">
+      <i
+        esIcon="person"
+        class="icon-bottom"
+        [altText]="('COLLECTIONS.CREATOR' | translate) + ': '"
+      ></i>
+      &nbsp;
+      <span *ngIf="!collection?.collection?.authorFreetext">{{
+        collection.owner | authorityName
+      }}</span>
+      <span *ngIf="collection?.collection?.authorFreetext">{{
+        collection.collection.authorFreetext
+      }}</span>
+    </div>
+
+    <div class="collection-new-preview-infoline">
+      <i
+        [esIcon]="getScopeInfo().icon"
+        class="icon-bottom"
+        [altText]="('COLLECTIONS.SHARING_STATE' | translate) + ': '"
+      ></i>
+      &nbsp;{{ 'COLLECTION.SCOPE.' + getScopeInfo().scopeName | translate }}
+    </div>
+    <div class="collection-permissions collection-label"></div>
+    <div class="collections-metadata">
+      <es-mds-viewer
+        #mds
+        *ngIf="collection?.properties"
+        groupId="collection_sidebar"
+        [data]="collection.properties"
+        [headingLevel]="2"
+      ></es-mds-viewer>
+    </div>
+
+    <ng-container *ngIf="collection?.access?.indexOf('ChangePermissions') !== -1 && permissions">
+      <h2 class="collection-permissions collection-label">
+        {{ 'COLLECTIONS.PERMISSIONS' | translate }}
+      </h2>
+      <div class="collection-permissions collection-content">
+        <div *ngFor="let permission of permissions">
+          <ng-container *ngIf="permission.authority.authorityType !== 'EVERYONE'">
+            <es-user-avatar [user]="permission" size="xsmall"></es-user-avatar>
+            <span>{{
+              (permission.authority.authorityType === 'GROUP' ? permission.group : permission.user)
+                | authorityName
+            }}</span>
+          </ng-container>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>

@@ -1,10 +1,9 @@
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { NgModule } from '@angular/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { EditorModule } from '@tinymce/tinymce-angular';
 import { SharedModule } from '../../shared/shared.module';
 import { MdsComponent } from './legacy/mds/mds.component';
-import { InputFillProgressComponent } from './mds-editor/input-fill-progress/input-fill-progress.component';
-import { MdsEditorCardComponent } from './mds-editor/mds-editor-card/mds-editor-card.component';
 import { MdsEditorCoreComponent } from './mds-editor/mds-editor-core/mds-editor-core.component';
 import { MdsEditorEmbeddedComponent } from './mds-editor/mds-editor-embedded/mds-editor-embedded.component';
 import { MdsEditorViewComponent } from './mds-editor/mds-editor-view/mds-editor-view.component';
@@ -21,7 +20,7 @@ import { MdsEditorWidgetCheckboxesComponent } from './mds-editor/widgets/mds-edi
 import { MdsEditorWidgetChildobjectsComponent } from './mds-editor/widgets/mds-editor-widget-childobjects/mds-editor-widget-childobjects.component';
 import {
     MdsEditorWidgetChipsComponent,
-    MdsEditorWidgetChipsRangedValueComponent
+    MdsEditorWidgetChipsRangedValueComponent,
 } from './mds-editor/widgets/mds-editor-widget-chips/mds-editor-widget-chips.component';
 import { MdsEditorWidgetContainerComponent } from './mds-editor/widgets/mds-editor-widget-container/mds-editor-widget-container.component';
 import { RegisterFormFieldDirective } from './mds-editor/widgets/mds-editor-widget-container/register-form-field.directive';
@@ -36,7 +35,10 @@ import { MdsEditorWidgetPreviewComponent } from './mds-editor/widgets/mds-editor
 import { MdsEditorWidgetRadioButtonComponent } from './mds-editor/widgets/mds-editor-widget-radio-button/mds-editor-widget-radio-button.component';
 import { MdsEditorWidgetSearchSuggestionsComponent } from './mds-editor/widgets/mds-editor-widget-search-suggestions/mds-editor-widget-search-suggestions.component';
 import { MdsEditorWidgetSelectComponent } from './mds-editor/widgets/mds-editor-widget-select/mds-editor-widget-select.component';
-import { MdsEditorWidgetSliderComponent, MdsEditorWidgetSliderRangeComponent } from './mds-editor/widgets/mds-editor-widget-slider/mds-editor-widget-slider.component';
+import {
+    MdsEditorWidgetSliderComponent,
+    MdsEditorWidgetSliderRangeComponent,
+} from './mds-editor/widgets/mds-editor-widget-slider/mds-editor-widget-slider.component';
 import { MdsEditorWidgetSuggestionChipsComponent } from './mds-editor/widgets/mds-editor-widget-suggestion-chips/mds-editor-widget-suggestion-chips.component';
 import { MdsEditorWidgetTextComponent } from './mds-editor/widgets/mds-editor-widget-text/mds-editor-widget-text.component';
 import { HighlightPipe } from './mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree-core/highlight.pipe';
@@ -51,11 +53,9 @@ import { MdsWidgetComponent } from './mds-viewer/widget/mds-widget.component';
 @NgModule({
     declarations: [
         HighlightPipe,
-        InputFillProgressComponent,
         LabelPipe,
         LicenseDetailsComponent,
         MdsComponent,
-        MdsEditorCardComponent,
         MdsEditorComponent,
         MdsEditorCoreComponent,
         MdsEditorEmbeddedComponent,
@@ -95,12 +95,15 @@ import { MdsWidgetComponent } from './mds-viewer/widget/mds-widget.component';
         SearchFieldFacetsComponent,
         MdsDurationPipe,
     ],
-    imports: [SharedModule, NgxSliderModule, EditorModule],
+    imports: [SharedModule, NgxSliderModule, EditorModule, MatFormFieldModule],
     exports: [
         MdsComponent,
         MdsEditorWidgetAuthorComponent,
         MdsEditorWrapperComponent,
         MdsViewerComponent,
+        MdsEditorCoreComponent,
+        SearchFieldFacetsComponent,
+        PropertySlugPipe,
     ],
 })
 export class MdsModule {}

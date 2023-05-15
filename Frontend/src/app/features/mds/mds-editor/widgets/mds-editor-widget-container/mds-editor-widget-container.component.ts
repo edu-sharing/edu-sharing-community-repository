@@ -26,8 +26,8 @@ import { ViewInstanceService } from '../../mds-editor-view/view-instance.service
 import { BulkBehavior, BulkMode, EditorBulkMode, InputStatus } from '../../../types/types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { FormFieldRegistrationService } from './form-field-registration.service';
-import {UIService} from '../../../../../core-module/rest/services/ui.service';
-import {NativeWidgetComponent} from '../../../types/mds-types';
+import { UIService } from '../../../../../core-module/rest/services/ui.service';
+import { NativeWidgetComponent } from '../../../types/mds-types';
 
 @Component({
     selector: 'es-mds-editor-widget-container',
@@ -92,9 +92,16 @@ export class MdsEditorWidgetContainerComponent
      */
     @Input() wrapInGroup = true;
 
+    /**
+     * should a progress spinner be shown
+     * (only applicable for widgets with non-native material fields)
+     */
+    @Input() showSpinner: boolean;
+
     @ContentChild(MatFormFieldControl) formFieldControl: MatFormFieldControl<any>;
 
     @HostBinding('class.disabled') isDisabled = false;
+    expandedState$ = new BehaviorSubject<'disabled' | 'expanded' | 'collapsed'>('disabled');
     @HostBinding('@showHideExtended') get showHideExtendedState(): string {
         return this.isHidden ? 'hidden' : 'shown';
     }
@@ -111,7 +118,7 @@ export class MdsEditorWidgetContainerComponent
     constructor(
         private elementRef: ElementRef,
         private uiService: UIService,
-        private mdsEditorInstance: MdsEditorInstanceService,
+        public mdsEditorInstance: MdsEditorInstanceService,
         private cdr: ChangeDetectorRef,
         private formFieldRegistration: FormFieldRegistrationService,
         private viewInstance: ViewInstanceService,
@@ -156,6 +163,7 @@ export class MdsEditorWidgetContainerComponent
         }
         this.wrapInFormField = this.wrapInFormField ?? !!this.control;
         if (this.widget) {
+            this.expandedState$.next(this.widget.definition?.expandable);
             this.widget.focusTrigger
                 .pipe(takeUntil(this.destroyed$))
                 .subscribe(() => this.injectedView?.focus());
@@ -236,7 +244,7 @@ export class MdsEditorWidgetContainerComponent
                 block: 'start',
             });*/
             console.log(this.injectedView, this.widget.definition.id);
-            setTimeout(() => this.injectedView?.focus(), );
+            setTimeout(() => this.injectedView?.focus());
         });
     }
 

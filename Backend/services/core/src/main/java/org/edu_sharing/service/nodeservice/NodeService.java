@@ -7,10 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
-import org.alfresco.service.cmr.repository.AssociationRef;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.repository.*;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
@@ -55,9 +52,9 @@ public interface NodeService {
 	
 	public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission) throws Exception;
 
-	public String getOrCreateUserInbox();
-	
-	public String getOrCreateUserSavedSearch();
+	public String getUserInbox(boolean createIfNotExists);
+
+	public String getUserSavedSearch(boolean createIfNotExists);
 
 	public String getPrimaryParent(String nodeId);
 
@@ -99,7 +96,9 @@ public interface NodeService {
 	}
 	public String[] getAspects(String storeProtocol, String storeId, String nodeId);
 
-	InputStream getContent(String storeProtocol, String storeId, String nodeId, String version, String contentProp) throws Throwable;
+    ContentReader getContentReader(String storeProtocol, String storeId, String nodeId, String version, String contentProp);
+
+    InputStream getContent(String storeProtocol, String storeId, String nodeId, String version, String contentProp) throws Throwable;
 
 	String getContentHash(String storeProtocol, String storeId, String nodeId, String version, String contentProp);
 
@@ -146,7 +145,9 @@ public interface NodeService {
     };
 
 
-	String getTemplateNode(String nodeId,boolean createIfNotExists) throws Throwable;
+	String getPreviewUrl(String storeProtocol, String storeId, String nodeId, String version);
+
+	String getTemplateNode(String nodeId, boolean createIfNotExists) throws Throwable;
 
 	/**
 	 * Sets the properties for this node's template (inherit metadata to child nodes)
@@ -169,13 +170,15 @@ public interface NodeService {
 
 	List<AssociationRef> getNodesByAssoc(String nodeId, AssocInfo assoc);
 
-	void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value);
+	void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value, boolean skipDefinitionChecks);
 
     GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId, HashMap<String, Object> nodeProps, String version);
 
-    Collection<NodeRef> getFrontpageNodes() throws Throwable;
+    Collection<org.edu_sharing.service.model.NodeRef> getFrontpageNodes() throws Throwable;
 
     Serializable getPropertyNative(String storeProtocol, String storeId, String nodeId, String property) throws Throwable;
+
+	void keepModifiedDate(String storeProtocol, String storeId, String nodeId, Runnable task);
 
 	/**
 	 * create a published copy of the node
@@ -188,4 +191,13 @@ public interface NodeService {
 	 * @return
 	 */
 	List<String> getPublishedCopies(String nodeId);
+
+
+	/**
+	 * Returns the original NodeRef of the given node id
+	 * This is used to return the original node of a linked node
+	 * @param nodeId
+	 * @return
+	 */
+    NodeRef getOriginalNode(String nodeId);
 }

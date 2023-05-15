@@ -1,13 +1,17 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
-import { RestConstants } from '../../core-module/rest/rest-constants';
-import { RestNetworkService } from '../../core-module/rest/services/rest-network.service';
+import { NetworkService } from 'ngx-edu-sharing-api';
+import { Repository } from '../../core-module/core.module';
+import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 
 @Pipe({ name: 'appNodeSource' })
 export class NodeSourcePipe implements PipeTransform {
-    constructor(
-        private nodeHelper: NodeHelperService,
-    ) {}
+    private homeRepository: Repository;
+
+    constructor(private nodeHelper: NodeHelperService, private networkApi: NetworkService) {
+        this.networkApi.getHomeRepository().subscribe((homeRepository) => {
+            this.homeRepository = homeRepository;
+        });
+    }
 
     transform(
         replicationSource: string,
@@ -18,10 +22,9 @@ export class NodeSourcePipe implements PipeTransform {
         const rawSrc = replicationSource ? replicationSource.toString().trim() : 'home';
         if (args.mode === 'text') {
             if (rawSrc === 'home') {
-                return (
-                    RestNetworkService.getRepositoryById(RestConstants.HOME_REPOSITORY)?.title ||
-                    'home'
-                );
+                // FIXME: This will fix the pipe's return value to 'home' for calls before
+                // `this.homeRepository` was populated (although that doesn't seem to happen).
+                return this.homeRepository?.title || 'home';
             }
             return rawSrc;
         } else if (args.mode === 'url') {

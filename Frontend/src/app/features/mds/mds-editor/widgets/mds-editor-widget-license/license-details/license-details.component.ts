@@ -5,8 +5,7 @@ import { Node } from 'ngx-edu-sharing-api';
 import { RestConnectorService, RestConstants } from '../../../../../../core-module/core.module';
 import { NodeHelperService } from '../../../../../../core-ui-module/node-helper.service';
 import { Values } from '../../../../types/types';
-import {Helper} from '../../../../../../core-module/rest/helper';
-
+import { Helper } from '../../../../../../core-module/rest/helper';
 
 @Component({
     selector: 'es-license-details',
@@ -16,7 +15,7 @@ import {Helper} from '../../../../../../core-module/rest/helper';
 export class LicenseDetailsComponent implements OnChanges {
     static PROPERTIES_MAPPING_GRAPHQL: { [key: string]: string } = {
         [RestConstants.CCM_PROP_LICENSE]: 'lom.rights.internal',
-        [RestConstants.LOM_PROP_RIGHTS_DESCRIPTION]: 'lom.rights.description'
+        [RestConstants.LOM_PROP_RIGHTS_DESCRIPTION]: 'lom.rights.description',
     };
 
     @Input() nodes: Node[];
@@ -33,11 +32,10 @@ export class LicenseDetailsComponent implements OnChanges {
     rightsDescription: string;
 
     constructor(
-        private connector:RestConnectorService,
-        private translate:TranslateService,
+        private connector: RestConnectorService,
+        private translate: TranslateService,
         private nodeHelper: NodeHelperService,
-    ) {
-    }
+    ) {}
     ngOnChanges(changes: SimpleChanges) {
         // Set the `draggable` attribute when this directive is active.
         if (changes.nodes?.currentValue || changes.metadata?.currentValue) {
@@ -45,58 +43,74 @@ export class LicenseDetailsComponent implements OnChanges {
         }
     }
     private readLicense() {
-        let license=this.getValueForAll(RestConstants.CCM_PROP_LICENSE,'MULTI','NONE');
-        if(!license)
-            license='NONE';
-        this.type=license;
-        if(license.startsWith('CC_BY')) {
-            this.type='CC_BY';
-            if(license.indexOf('SA')!==-1)
-                this.ccShare='SA';
-            if(license.indexOf('ND')!==-1)
-                this.ccShare='ND';
-            if(license.indexOf('NC')!==-1)
-                this.ccCommercial='NC';
+        let license = this.getValueForAll(RestConstants.CCM_PROP_LICENSE, 'MULTI', 'NONE');
+        if (!license) license = 'NONE';
+        this.type = license;
+        if (license.startsWith('CC_BY')) {
+            this.type = 'CC_BY';
+            if (license.indexOf('SA') !== -1) this.ccShare = 'SA';
+            if (license.indexOf('ND') !== -1) this.ccShare = 'ND';
+            if (license.indexOf('NC') !== -1) this.ccCommercial = 'NC';
 
-            this.ccVersion=this.getValueForAll(RestConstants.CCM_PROP_LICENSE_CC_VERSION,this.ccVersion);
-            this.ccCountry=this.getValueForAll(RestConstants.CCM_PROP_LICENSE_CC_LOCALE);
+            this.ccVersion = this.getValueForAll(
+                RestConstants.CCM_PROP_LICENSE_CC_VERSION,
+                this.ccVersion,
+            );
+            this.ccCountry = this.getValueForAll(RestConstants.CCM_PROP_LICENSE_CC_LOCALE);
         }
-        if(license==='CC_0') {
-            this.type='CC_0';
+        if (license === 'CC_0') {
+            this.type = 'CC_0';
         }
-        if(license==='PDM') {
-            this.type='PDM';
+        if (license === 'PDM') {
+            this.type = 'PDM';
         }
-        if(license.startsWith('COPYRIGHT')) {
-            this.type='COPYRIGHT';
-            this.copyrightType=license;
+        if (license.startsWith('COPYRIGHT')) {
+            this.type = 'COPYRIGHT';
+            this.copyrightType = license;
         }
-        if(license==='SCHULFUNK') {
-            this.type=license;
+        if (license === 'SCHULFUNK') {
+            this.type = license;
         }
-        if(license.startsWith('EDU')) {
-            this.type='EDU';
-            if(license.indexOf('P_NR')!==-1)
-                this.eduType='P_NR';
-            if(license.indexOf('NC')!==-1)
-                this.eduType='NC';
-            this.eduDownload=license.indexOf('ND')===-1;
+        if (license.startsWith('EDU')) {
+            this.type = 'EDU';
+            if (license.indexOf('P_NR') !== -1) this.eduType = 'P_NR';
+            if (license.indexOf('NC') !== -1) this.eduType = 'NC';
+            this.eduDownload = license.indexOf('ND') === -1;
         }
-        if(license === 'CUSTOM')
-            this.type=license;
+        if (license === 'CUSTOM') this.type = license;
 
-        this.rightsDescription=this.getValueForAll(RestConstants.LOM_PROP_RIGHTS_DESCRIPTION);
-
+        this.rightsDescription = this.getValueForAll(RestConstants.LOM_PROP_RIGHTS_DESCRIPTION);
     }
 
-    private getValueForAll(prop:string,fallbackNotIdentical:any='',fallbackIsEmpty=fallbackNotIdentical) {
-        if(this.properties) {
+    private getValueForAll(
+        prop: string,
+        fallbackNotIdentical: any = '',
+        fallbackIsEmpty = fallbackNotIdentical,
+    ) {
+        if (this.properties) {
             return this.properties[prop] ? this.properties[prop][0] : fallbackIsEmpty;
-        } else if(this.metadata) {
-            const data = this.metadata.map(m => Helper.getDotPathFromNestedObject(m, LicenseDetailsComponent.PROPERTIES_MAPPING_GRAPHQL[prop]) as string);
-            return this.nodeHelper.getValueForAllString(data, fallbackNotIdentical, fallbackIsEmpty, false);
-        } else if(this.nodes) {
-            return this.nodeHelper.getValueForAll(this.nodes, prop, fallbackNotIdentical, fallbackIsEmpty, false);
+        } else if (this.metadata) {
+            const data = this.metadata.map(
+                (m) =>
+                    Helper.getDotPathFromNestedObject(
+                        m,
+                        LicenseDetailsComponent.PROPERTIES_MAPPING_GRAPHQL[prop],
+                    ) as string,
+            );
+            return this.nodeHelper.getValueForAllString(
+                data,
+                fallbackNotIdentical,
+                fallbackIsEmpty,
+                false,
+            );
+        } else if (this.nodes) {
+            return this.nodeHelper.getValueForAll(
+                this.nodes,
+                prop,
+                fallbackNotIdentical,
+                fallbackIsEmpty,
+                false,
+            );
         } else {
             // console.warn('license has no data to display');
             return fallbackIsEmpty;
@@ -106,8 +120,12 @@ export class LicenseDetailsComponent implements OnChanges {
         return this.nodeHelper.getLicenseIconByString(this.getLicenseProperty());
     }
     isOerLicense() {
-        return this.getLicenseProperty()==='CC_0' || this.getLicenseProperty()==='PDM'
-            || this.getLicenseProperty()==='CC_BY' || this.getLicenseProperty()==='CC_BY_SA';
+        return (
+            this.getLicenseProperty() === 'CC_0' ||
+            this.getLicenseProperty() === 'PDM' ||
+            this.getLicenseProperty() === 'CC_BY' ||
+            this.getLicenseProperty() === 'CC_BY_SA'
+        );
     }
 
     getLicenseProperty() {
@@ -117,6 +135,6 @@ export class LicenseDetailsComponent implements OnChanges {
         return this.nodeHelper.getLicenseNameByString(this.getLicenseProperty());
     }
     getLicenseUrl() {
-        return this.nodeHelper.getLicenseUrlByString(this.getLicenseProperty(),this.ccVersion);
+        return this.nodeHelper.getLicenseUrlByString(this.getLicenseProperty(), this.ccVersion);
     }
 }

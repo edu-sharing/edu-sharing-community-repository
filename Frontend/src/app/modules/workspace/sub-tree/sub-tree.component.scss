@@ -1,108 +1,79 @@
 @use 'sass:math';
-@import "../../../core-ui-module/styles/variables";
-.dropdown-dummy{
+@import '../../../core-ui-module/styles/variables';
+
+.dropdown-dummy {
     position: fixed;
 }
-.node{
+.sub-tree-element {
+    display: flex;
+    align-items: center;
     @include clickable();
-    padding-top:10px;
-    padding-bottom:10px;
-    width:100%;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    width: 100%;
     white-space: nowrap;
-    img{
-        z-index: 1;
+    margin: 4px 0;
+    &.cdk-drag-preview {
+        background-color: $workspaceTreeSelectedBackground;
     }
 }
-:host ::ng-deep{
-    es-spinner-small .preloader-wrapper.small{
-        width:14px;
-        height:14px;
-    }
-    .sub-tree-element {
-        height: 52px;
-        &.drop-target {
-            border: 2px dashed $colorStatusPositive;
-        }
-        &.cdk-drop-list-dragging {
-            > *:first-child {
-                display: none;
-            }
-        }
+
+:host ::ng-deep {
+    es-spinner-small .preloader-wrapper.small {
+        width: 14px;
+        height: 14px;
     }
 }
-.spinner{
+
+.spinner {
     position: absolute;
-    top:-40px;
-    right:0;
+    top: -40px;
+    right: 0;
     z-index: 10;
-    padding:10px;
+    padding: 10px;
 }
-i.arrow{
-    width:20px;
+.expand-toggle {
+    @include removeButtonDefaultStyles();
+    display: flex;
+    align-items: center;
+    color: $textLight;
+    flex-shrink: 0;
+    width: 25px;
 }
-.fade-right{
-    top:-5px;
-    position: absolute;
-    right:0;
-    width:60px;
-    height:55px;
-    z-index: 9;
-    @include fadeRight($workspaceTreeBackground,70%);
-}
-.fade-right-selected{
-    @include fadeRight($workspaceTreeSelectedBackground,70%);
-}
-.moreOpen{
+.moreOpen {
     left: math.div($workspaceSidebarWidth - $contextMenuWidth, 2);
-    width:$contextMenuWidth;
+    width: $contextMenuWidth;
 }
-.node:hover{
+.sub-tree-element:hover {
     background-color: $workspaceTreeSelectedBackground;
-    .fade-right{
-        /*@include fadeRight($workspaceTreeSelectedBackground,70%);*/
-    }
 }
-.nodeSelected{
-    background-color: $workspaceTreeSelectedBackground!important;
+.sub-tree-element-selected {
+    background-color: $workspaceTreeSelectedBackground !important;
     background: $workspaceTreeSelectedBackgroundEffect;
-    font-weight:bold;
+    font-weight: bold;
 }
-.hover{
-    background-color: rgba($primary,0.2)!important;
-    outline: 2px $primary dashed;
+.name {
+    flex-grow: 1;
+    overflow: hidden;
+    mask-image: linear-gradient(to left, transparent 0 18px, black 60px);
 }
-.node i{
-    color:$textLight;
-    margin-right:5px;
+.node-icon {
+    padding-right: 10px;
+    width: 30px;
+    height: 20px; /* ie fix */
 }
-.arrow{
-    position: relative;
-    top: 4px;
-}
-.name{
-    position:absolute;
-    top:0px;
-    line-height: 3.7em;
-    width:100%;
-    display: inline-block;
-}
-.node img{
-    padding-right:10px;
-    width:30px;
-    height:20px; /* ie fix */
-}
-.sub-tree-wrapper{
+.sub-tree-wrapper {
     position: relative;
 }
-.empty{
+.empty {
     font-style: italic;
-    padding-top:10px;
+    padding-top: 10px;
 }
-.more-items{
+.more-items {
     color: $primary;
     background-color: transparent;
 }
-.more-items-loading{
+.more-items-loading {
     position: relative;
     top: -15px;
 }

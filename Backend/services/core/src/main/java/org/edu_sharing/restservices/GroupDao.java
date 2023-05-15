@@ -3,7 +3,6 @@ package org.edu_sharing.restservices;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
-import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
@@ -14,7 +13,6 @@ import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
@@ -34,7 +32,6 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.springframework.context.ApplicationContext;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
-import org.springframework.security.core.Authentication;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -371,17 +368,9 @@ public class GroupDao {
 	}
 
 	public GroupDao getSubgroupByType(String type) throws DAOException {
-		Optional<String> authority = searchService.searchGroupMembers(authorityName, "", AuthorityType.GROUP.name(), 0, Integer.MAX_VALUE, new SortDefinition())
-				.getData().stream().filter((a) -> {
-					try {
-						return type.equals(new GroupDao(repoDao, a).groupType);
-					} catch (DAOException e) {
-						e.printStackTrace();
-						return false;
-					}
-				}).findFirst();
-		if(authority.isPresent()){
-			return new GroupDao(repoDao, authority.get());
+		String authority = authorityService.getSubgroupByType(authorityName, type);
+		if(authority != null){
+			return new GroupDao(repoDao, authority);
 		}
 		throw new IllegalArgumentException("Group does not contain sub group of type " + type);
 	}
@@ -393,12 +382,15 @@ public class GroupDao {
 				NodeServiceHelper.removeProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD);
 				NodeServiceHelper.removeAspect(ref, CCConstants.CCM_ASPECT_GROUP_SIGNUP);
 			} else {
+				if(authorityName.equals(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) {
+					throw new DAOSecurityException(new AccessDeniedException("not allowed for group " + authorityName));
+				}
 				NodeServiceHelper.addAspect(ref, CCConstants.CCM_ASPECT_GROUP_SIGNUP);
-				NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD, details.getSignupMethod().toString());
+				NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD, details.getSignupMethod().toString(), false);
 				if (details.getSignupPassword() != null && !details.getSignupPassword().isEmpty()) {
 					NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_PASSWORD,
-							DigestUtils.sha1Hex(details.getSignupPassword())
-					);
+							DigestUtils.sha1Hex(details.getSignupPassword()),
+                            false);
 				}
 			}
 			return null;
@@ -427,7 +419,7 @@ public class GroupDao {
 						return GroupSignupResult.AlreadyInList;
 					}
 					list.add(userRef);
-					NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_LIST, list);
+					NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_LIST, list, false);
 					HashMap<String, String> replace = new HashMap<>();
 					replace.put("group", getDisplayName());
 					replace.put("firstName", NodeServiceHelper.getProperty(userRef, CCConstants.CM_PROP_PERSON_FIRSTNAME));
@@ -499,7 +491,7 @@ public class GroupDao {
 			userRefs = userRefs.stream().
 					filter((r) -> !r.equals(userRef.get())).
 					collect(Collectors.toCollection(ArrayList::new));
-			NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_LIST, userRefs);
+			NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_LIST, userRefs, false);
 			if(add) {
 				addMember(user);
 			}

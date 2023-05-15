@@ -23,7 +23,7 @@
     -->
     <mat-chip-list
       #chipList
-      [attr.aria-labelledby]="chipsControl?.value.length > 0 ? container.labelId : null"
+      [attr.aria-labelledby]="chipsControl?.value?.length > 0 ? container.labelId : null"
       (click)="$event.stopPropagation(); $event.preventDefault()"
       [multiple]="true"
       [formControl]="chipsControl"
@@ -36,6 +36,7 @@
         [value]="value"
         [removable]="true"
         [matTooltip]="value.label + ' (' + ('MDS.DELETE_KEY_NOTICE' | translate) + ')'"
+        matTooltipPosition="above"
         [class.indeterminate]="(this.indeterminateValues$ | async)?.includes(value.key)"
         [class.mat-chip-selected]="false"
         (click)="revealInTree(value)"
@@ -48,18 +49,19 @@
       <div class="input-wrapper">
         <input
           autocomplete="off"
+          readonly
+          #inputElement
           [placeholder]="chipsControl?.value?.length ? null : widget.definition.placeholder"
           [matChipInputFor]="chipList"
-          (click)="openOverlay()"
-          cdkMonitorElementFocus
-          (cdkFocusChange)="onInputFocusChange($event)"
+          (focus)="openOverlay($event)"
         />
         <button
           matSuffix
           mat-icon-button
           class="mat-button-select-arrow"
           cdkMonitorElementFocus
-          (click)="toggleOverlay()"
+          #openButton
+          (click)="openOverlay()"
           [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
           (keydown.tab)="chipList._allowFocusEscape()"
           [disabled]="chipsControl.disabled"
@@ -79,17 +81,19 @@
   [cdkConnectedOverlayWidth]="triggerBorderBox.width$ | async"
   [cdkConnectedOverlayOpen]="overlayIsVisible"
   (overlayKeydown)="onOverlayKeydown($event)"
-  (overlayOutsideClick)="closeOverlay()"
+  (overlayOutsideClick)="closeOverlay($event)"
 >
+  <!--     *ngIf="overlayIsVisible" -->
   <div
     *ngIf="overlayIsVisible"
     class="suggestion-card"
     role="dialog"
+    #overlay
     [attr.aria-labelledby]="container.labelId"
   >
     <es-mds-editor-widget-tree-core
       cdkTrapFocus
-      [cdkTrapFocusAutoCapture]="true"
+      [cdkTrapFocusAutoCapture]="false"
       #treeRef
       [widget]="widget"
       [tree]="tree"

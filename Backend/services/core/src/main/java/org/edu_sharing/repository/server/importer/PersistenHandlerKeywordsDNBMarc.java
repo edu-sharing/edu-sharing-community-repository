@@ -44,6 +44,8 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
 
     static String STATEMENT_TRIGGER_ENABLED = "select tgenabled from pg_trigger where tgname='update_edu_factual_term_modtime'";
 
+    static String STATEMENT_COUNT = "SELECT count(*) FROM edu_factual_term";
+
     static String COL_ID = "factual_term_id";
     static String COL_IDENT = "factual_term_ident";
     static String COL_VALUE = "factual_term_value";
@@ -241,6 +243,26 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
             dbAlf.cleanUp(con, statement);
         }
         return result;
+    }
+
+    public long countEntries(){
+        Connection con = null;
+        PreparedStatement statement = null;
+        ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
+        try{
+            con = dbAlf.getConnection();
+            statement = con.prepareStatement(STATEMENT_COUNT);
+            java.sql.ResultSet resultSet = statement.executeQuery();
+            if(resultSet.next()){
+                Long result = resultSet.getLong(1);
+                return result;
+            }
+        } catch (SQLException e) {
+            logger.error(e.getMessage(),e);
+        } finally {
+            dbAlf.cleanUp(con, statement);
+        }
+        return -1;
     }
 
 

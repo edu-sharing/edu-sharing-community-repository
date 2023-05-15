@@ -15,9 +15,9 @@
   >
     <div class="column-chooser-item" *ngFor="let column of columns; index as index" cdkDrag>
       <mat-checkbox [checked]="column.visible" (change)="columnChooserToggle(index)">
-        {{ column | appListItemLabel }}
+        {{ column | esListItemLabel | async }}
       </mat-checkbox>
-      <i esIcon="drag_handle" class="drag-handle"></i>
+      <i esIcon="drag_handle" class="drag-handle" cdkDragHandle></i>
     </div>
   </div>
 </ng-template>

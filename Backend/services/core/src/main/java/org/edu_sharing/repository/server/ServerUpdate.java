@@ -27,15 +27,6 @@
  */
 package org.edu_sharing.repository.server;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import javax.servlet.ServletException;
-import javax.servlet.SingleThreadModel;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.service.ServiceRegistry;
 import org.apache.commons.logging.Log;
@@ -45,13 +36,21 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.update.*;
 import org.springframework.context.ApplicationContext;
 
+import javax.servlet.ServletException;
+import javax.servlet.SingleThreadModel;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+
 public class ServerUpdate extends HttpServlet implements SingleThreadModel {
 
 	private String ticket = null;
 
 	private static Log logger = LogFactory.getLog(ServerUpdate.class);
 
-	PrintWriter out = null;
+	transient PrintWriter out = null;
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -124,7 +123,10 @@ public class ServerUpdate extends HttpServlet implements SingleThreadModel {
 					new Release_4_1_FixClassificationKeywordPrefix(out),
 					new Release_4_2_PersonStatusUpdater(out),
 					new Release_5_0_NotifyRefactoring(out),
-					new Release_5_0_Educontext_Default(out)
+					new Release_5_0_Educontext_Default(out),
+					new Release_8_0_Migrate_Database_Scripts(out),
+					new Release_8_1_CleanupCollectionSeriesObject(out),
+					new Release_8_1_SetCompanyHomePermissions(out)
 			};
 	}
 }

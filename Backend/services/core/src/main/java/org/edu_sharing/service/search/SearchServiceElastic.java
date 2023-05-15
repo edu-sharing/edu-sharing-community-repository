@@ -12,11 +12,13 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repackaged.elasticsearch.org.apache.http.HttpHost;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
@@ -26,7 +28,9 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.restservices.shared.Contributor;
+import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.restservices.shared.NodeSearch;
+import org.edu_sharing.service.admin.SystemFolder;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.model.CollectionRef;
 import org.edu_sharing.service.model.CollectionRefImpl;
@@ -37,14 +41,20 @@ import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SearchVCard;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.delete.DeleteResponse;
+import org.elasticsearch.action.search.*;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.xcontent.*;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.SearchModule;
@@ -62,6 +72,8 @@ import org.elasticsearch.search.suggest.SuggestBuilder;
 import org.elasticsearch.search.suggest.SuggestBuilders;
 import org.elasticsearch.search.suggest.phrase.DirectCandidateGeneratorBuilder;
 import org.elasticsearch.search.suggest.phrase.PhraseSuggestion;
+import org.elasticsearch.xcontent.*;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
@@ -107,7 +119,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             searchSourceBuilder.parseXContent(parser);
         }
         searchRequest.source(searchSourceBuilder);
-        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+        SearchResponse searchResponse = client.search(searchRequest, getRequestOptions());
 
         SearchResultNodeRefElastic sr = new SearchResultNodeRefElastic();
         List<NodeRef> data = new ArrayList<>();
@@ -122,6 +134,19 @@ public class SearchServiceElastic extends SearchServiceImpl {
             data.add(transformSearchHit(authorities, user, hit, false));
         }
         return sr;
+    }
+
+    private RequestOptions getRequestOptions() {
+        RequestOptions.Builder b = RequestOptions.DEFAULT.toBuilder();
+
+        // add trace headers to elastic request
+        Context context = Context.getCurrentInstance();
+        if(context != null) {
+            for(Map.Entry<String, String> header: context.getB3().getX3Headers().entrySet()) {
+                b.addHeader(header.getKey(), header.getValue());
+            }
+        }
+        return b.build();
     }
 
     public BoolQueryBuilder getPermissionsQuery(String field){
@@ -148,7 +173,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         //enhance to collection permissions
         MatchQueryBuilder collectionTypeProposal = QueryBuilders.matchQuery("collections.relation.type", "ccm:collection_proposal");
-        BoolQueryBuilder collectionPermissions = getPermissionsQuery("collections.permissions.read");
+        // @TODO: FIX after DESP-840
+        BoolQueryBuilder collectionPermissions = getPermissionsQuery("collections.permissions.read.keyword");
         collectionPermissions.should(QueryBuilders.matchQuery("collections.owner", user));
         collectionPermissions.mustNot(collectionTypeProposal);
 
@@ -170,7 +196,6 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     public SearchResultNodeRef searchFacets(MetadataSet mds, String query, Map<String,String[]> criterias, SearchToken searchToken) throws Throwable {
-        List<NodeSearch.Facet> facetsResult = new ArrayList<>();
         BoolQueryBuilder globalConditions = getGlobalConditions(searchToken.getAuthorityScope(),searchToken.getPermissions());
 
         MetadataQuery queryData = mds.findQuery(query, MetadataReader.QUERY_SYNTAX_DSL);
@@ -184,6 +209,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 globalConditions,
                 searchToken);
 
+        return parseAggregations(searchToken, aggregations);
+    }
+
+    @NotNull
+    private SearchResultNodeRef parseAggregations(SearchToken searchToken, List<AggregationBuilder> aggregations) throws Exception {
         SearchRequest searchRequestAggs = new SearchRequest("workspace");
         SearchSourceBuilder searchSourceBuilderAggs = new SearchSourceBuilder();
         searchSourceBuilderAggs.from(0);
@@ -196,18 +226,19 @@ public class SearchServiceElastic extends SearchServiceImpl {
         logger.info("query aggs: "+searchSourceBuilderAggs.toString());
         SearchResponse resp = LogTime.log("Searching elastic for facets", () -> client.search(searchRequestAggs, RequestOptions.DEFAULT));
 
-
+        List<NodeSearch.Facet> facetsResult = new ArrayList<>();
         for(Aggregation a : resp.getAggregations()) {
             if(a instanceof ParsedFilter){
                 ParsedFilter pf = (ParsedFilter)a;
                 for(Aggregation aggregation : pf.getAggregations().asList()){
                     if(aggregation instanceof ParsedStringTerms){
+                        AggregationBuilder definition = aggregations.stream().filter(agg -> agg.getName().equalsIgnoreCase(a.getName())).findAny().get();
                         ParsedStringTerms pst = (ParsedStringTerms) aggregation;
-                        facetsResult.add(getFacet(pst));
+                        facetsResult.add(getFacet(pst ,definition));
                     }
                 }
             }else{
-                logger.error("non supported aggreagtion " + a.getName());
+                logger.error("non supported aggregation " + a.getName());
             }
         }
 
@@ -243,6 +274,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
             SearchRequest searchRequest = new SearchRequest("workspace");
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+            searchSourceBuilder.fetchSource(null,searchToken.getExcludes().toArray(new String[]{}));
 
 
             QueryBuilder metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL),queryData,criterias,true);
@@ -339,128 +371,134 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
 
 
+            // logger.info("query: "+searchSourceBuilder.toString());
+            try {
+                SearchResponse searchResponse = LogTime.log("Searching elastic", () -> client.search(searchRequest, getRequestOptions()));
 
-            SearchResponse searchResponse = LogTime.log("Searching elastic", () -> client.search(searchRequest, RequestOptions.DEFAULT));
+                SearchHits hits = searchResponse.getHits();
+                logger.info("result count: "+hits.getTotalHits());
 
+                long millisPerm = System.currentTimeMillis();
+                for (SearchHit hit : hits) {
+                    data.add(transformSearchHit(authorities, user, hit, searchToken.isResolveCollections()));
+                }
+                logger.info("permission stuff took:"+(System.currentTimeMillis() - millisPerm));
 
-            logger.info("query: "+searchSourceBuilder.toString());
-            SearchHits hits = searchResponse.getHits();
-            logger.info("result count: "+hits.getTotalHits());
+                List<NodeSearch.Facet> facetsResult = new ArrayList<>();
+                List<NodeSearch.Facet> facetsResultSelected = new ArrayList<>();
 
-            long millisPerm = System.currentTimeMillis();
-            for (SearchHit hit : hits) {
-                data.add(transformSearchHit(authorities, user, hit, searchToken.isResolveCollections()));
-            }
-            logger.info("permission stuff took:"+(System.currentTimeMillis() - millisPerm));
+                Long total = null;
 
-            List<NodeSearch.Facet> facetsResult = new ArrayList<>();
-            List<NodeSearch.Facet> facetsResultSelected = new ArrayList<>();
+                List<Aggregation> aggregations = new ArrayList<>();
+                if(searchResponseAggregations != null){
+                    aggregations.addAll(searchResponseAggregations.getAggregations().asList());
+                }
+                if(searchResponse.getAggregations() != null) aggregations.addAll(searchResponse.getAggregations().asList());
 
-            Long total = null;
+                for(Aggregation a : aggregations){
+                    if(a instanceof  ParsedStringTerms) {
+                        ParsedStringTerms pst = (ParsedStringTerms) a;
+                        facetsResult.add(getFacet(pst, null));
+                    }else if (a instanceof ParsedCardinality){
+                        ParsedCardinality pc = (ParsedCardinality)a;
+                        if (a.getName().equals("original_count")) {
+                            total = pc.getValue();
+                        }else{
+                            logger.error("unknown cardinality aggregation");
+                        }
 
-            List<Aggregation> aggregations = new ArrayList<>();
-            if(searchResponseAggregations != null){
-                aggregations.addAll(searchResponseAggregations.getAggregations().asList());
-            }
-            if(searchResponse.getAggregations() != null) aggregations.addAll(searchResponse.getAggregations().asList());
-
-           for(Aggregation a : aggregations){
-               if(a instanceof  ParsedStringTerms) {
-                   ParsedStringTerms pst = (ParsedStringTerms) a;
-                   facetsResult.add(getFacet(pst));
-               }else if (a instanceof ParsedCardinality){
-                   ParsedCardinality pc = (ParsedCardinality)a;
-                   if (a.getName().equals("original_count")) {
-                       total = pc.getValue();
-                   }else{
-                       logger.error("unknown cardinality aggregation");
-                   }
-
-               }else if(a instanceof ParsedFilter){
-                   ParsedFilter pf = (ParsedFilter)a;
-                   for(Aggregation aggregation : pf.getAggregations().asList()){
-                      if(aggregation instanceof ParsedStringTerms){
-                          ParsedStringTerms pst = (ParsedStringTerms) aggregation;
-                          if(a.getName().endsWith("_selected")){
-                              facetsResultSelected.add(getFacet(pst));
-                          }else{
-                              facetsResult.add(getFacet(pst));
-                          }
-                      }
-                   }
-               }else{
-                   logger.error("non supported aggreagtion "+a.getName());
-               }
-           }
-            /**
-             * add selected when missing
-             */
-            if(searchToken != null && searchToken.getFacets() != null && searchToken.getFacets().size() > 0) {
-                for (String facet : searchToken.getFacets()) {
-                    if (!criterias.containsKey(facet)) {
-                        continue;
-                    }
-                    for (String value : criterias.get(facet)) {
-                        Optional<NodeSearch.Facet> facetResult = facetsResult.stream()
-                                .filter(f -> f.getProperty().equals(facet)).findFirst();
-                        Optional<NodeSearch.Facet> selected = facetsResultSelected
-                                .stream()
-                                .filter(f ->
-                                        f.getProperty().equals(facet))
-                                .findFirst();
-                        if (selected.isPresent()) {
-                            if (facetResult.isPresent()) {
-                                if (!facetResult.get().getValues().stream().anyMatch(v -> v.getValue().equals(value))) {
-                                    if (selected.get().getValues().stream().anyMatch(v -> value.equals(v.getValue()))) {
-                                        facetResult.get().getValues().add(selected.get().getValues().stream()
-                                                .filter(v -> value.equals(v.getValue()))
-                                                .findFirst()
-                                                .get()
-                                        );
-                                    }
+                    }else if(a instanceof ParsedFilter){
+                        ParsedFilter pf = (ParsedFilter)a;
+                        for(Aggregation aggregation : pf.getAggregations().asList()){
+                            if(aggregation instanceof ParsedStringTerms){
+                                ParsedStringTerms pst = (ParsedStringTerms) aggregation;
+                                if(a.getName().endsWith("_selected")){
+                                    facetsResultSelected.add(getFacet(pst, null));
+                                }else{
+                                    facetsResult.add(getFacet(pst, null));
                                 }
-                            } else {
-                                if (selected.get().getValues().stream().anyMatch(v -> value.equals(v.getValue()))) {
-                                    facetsResult.add(selected.get());
+                            }
+                        }
+                    }else{
+                        logger.error("non supported aggreagtion "+a.getName());
+                    }
+                }
+                /**
+                 * add selected when missing
+                 */
+                if(searchToken != null && searchToken.getFacets() != null && searchToken.getFacets().size() > 0) {
+                    for (String facet : searchToken.getFacets()) {
+                        if (!criterias.containsKey(facet)) {
+                            continue;
+                        }
+                        for (String value : criterias.get(facet)) {
+                            Optional<NodeSearch.Facet> facetResult = facetsResult.stream()
+                                    .filter(f -> f.getProperty().equals(facet)).findFirst();
+                            Optional<NodeSearch.Facet> selected = facetsResultSelected
+                                    .stream()
+                                    .filter(f ->
+                                            f.getProperty().equals(facet))
+                                    .findFirst();
+                            if (selected.isPresent()) {
+                                if (facetResult.isPresent()) {
+                                    if (!facetResult.get().getValues().stream().anyMatch(v -> v.getValue().equals(value))) {
+                                        if (selected.get().getValues().stream().anyMatch(v -> value.equals(v.getValue()))) {
+                                            facetResult.get().getValues().add(selected.get().getValues().stream()
+                                                    .filter(v -> value.equals(v.getValue()))
+                                                    .findFirst()
+                                                    .get()
+                                            );
+                                        }
+                                    }
+                                } else {
+                                    if (selected.get().getValues().stream().anyMatch(v -> value.equals(v.getValue()))) {
+                                        facetsResult.add(selected.get());
+                                    }
                                 }
                             }
                         }
                     }
                 }
+
+                if(searchResponse.getSuggest() != null) {
+                    PhraseSuggestion phraseSuggestion = searchResponse.getSuggest().getSuggestion("ngsearchword");
+                    if (phraseSuggestion.getEntries() != null && phraseSuggestion.getEntries().size() > 0) {
+                        List<PhraseSuggestion.Entry> entries = phraseSuggestion.getEntries();
+
+                        List<NodeSearch.Suggest> suggests = new ArrayList<>();
+                        for (PhraseSuggestion.Entry entry : entries) {
+                            if(entry.getOptions() == null || entry.getOptions().size() == 0) continue;
+                            logger.info("phrase:" +entry.getCutoffScore());
+                            for(PhraseSuggestion.Entry.Option option: entry.getOptions()){
+                                NodeSearch.Suggest suggest = new NodeSearch.Suggest();
+                                suggest.setText(option.getText().string());
+                                suggest.setHighlighted((option.getHighlighted().hasString())
+                                        ? option.getHighlighted().string() : null);
+                                suggest.setScore(option.getScore());
+                                suggests.add(suggest);
+                                logger.info("SUGGEST:" + option.getText() +" " + option.getScore() +" "+ option.getHighlighted());
+                            }
+
+                        }
+                        sr.setSuggests(suggests);
+
+                    }
+                }
+
+                if(total == null){
+                    total = hits.getTotalHits().value;
+                }
+                sr.setFacets(facetsResult);
+                sr.setStartIDX(searchToken.getFrom());
+                sr.setNodeCount((int)total.longValue());
+                //client.close();
+            } catch(ElasticsearchException e) {
+                logger.error("Error running query. The query is logged below for debugging reasons");
+                logger.error(e.getMessage(), e);
+                logger.error(queryBuilder.toString());
+                throw e;
             }
 
-           if(searchResponse.getSuggest() != null) {
-               PhraseSuggestion phraseSuggestion = searchResponse.getSuggest().getSuggestion("ngsearchword");
-               if (phraseSuggestion.getEntries() != null && phraseSuggestion.getEntries().size() > 0) {
-                   List<PhraseSuggestion.Entry> entries = phraseSuggestion.getEntries();
-
-                   List<NodeSearch.Suggest> suggests = new ArrayList<>();
-                   for (PhraseSuggestion.Entry entry : entries) {
-                       if(entry.getOptions() == null || entry.getOptions().size() == 0) continue;
-                       logger.info("phrase:" +entry.getCutoffScore());
-                       for(PhraseSuggestion.Entry.Option option: entry.getOptions()){
-                           NodeSearch.Suggest suggest = new NodeSearch.Suggest();
-                           suggest.setText(option.getText().string());
-                           suggest.setHighlighted((option.getHighlighted().hasString())
-                                   ? option.getHighlighted().string() : null);
-                           suggest.setScore(option.getScore());
-                           suggests.add(suggest);
-                           logger.info("SUGGEST:" + option.getText() +" " + option.getScore() +" "+ option.getHighlighted());
-                       }
-
-                   }
-                   sr.setSuggests(suggests);
-
-               }
-           }
-
-            if(total == null){
-               total = hits.getTotalHits().value;
-           }
-            sr.setFacets(facetsResult);
-            sr.setStartIDX(searchToken.getFrom());
-            sr.setNodeCount((int)total.longValue());
-            //client.close();
         } catch (IOException e) {
             logger.error(e.getMessage(),e);
         }
@@ -470,19 +508,30 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return sr;
     }
 
-    private NodeSearch.Facet getFacet(ParsedStringTerms pst){
+    private NodeSearch.Facet getFacet(ParsedStringTerms pst, AggregationBuilder builder){
         NodeSearch.Facet facet = new NodeSearch.Facet();
         facet.setProperty(pst.getName());
         List<NodeSearch.Facet.Value> values = new ArrayList<>();
         facet.setValues(values);
 
         for (Terms.Bucket b : pst.getBuckets()) {
-            String key = b.getKeyAsString();
-            long count = b.getDocCount();
-            NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
-            value.setValue(key);
-            value.setCount((int)count);
-            values.add(value);
+            if(builder != null && "multi_terms".equals(builder.getMetadata().get("type"))) {
+                String[] key = b.getKeyAsString().split("\\|");
+                for (String k : key) {
+                    long count = b.getDocCount();
+                    NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
+                    value.setValue(k);
+                    value.setCount((int) count);
+                    values.add(value);
+                }
+            } else {
+                String key = b.getKeyAsString();
+                long count = b.getDocCount();
+                NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
+                value.setValue(key);
+                value.setCount((int) count);
+                values.add(value);
+            }
         }
 
         facet.setSumOtherDocCount(pst.getSumOfOtherDocCounts());
@@ -501,9 +550,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 : getReadPermissionsQuery();
         queryBuilderGlobalConditions = queryBuilderGlobalConditions.must(QueryBuilders.matchQuery("nodeRef.storeRef.protocol", "workspace"));
         if(permissions != null){
+            BoolQueryBuilder permissionsFilter = QueryBuilders.boolQuery().must(queryBuilderGlobalConditions);
+            String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
+            permissionsFilter.should(QueryBuilders.matchQuery("owner", user));
             for(String permission : permissions){
-                queryBuilderGlobalConditions = QueryBuilders.boolQuery().must(queryBuilderGlobalConditions).must(getPermissionsQuery("permissions." + permission));
+                permissionsFilter.should(getPermissionsQuery("permissions." + permission));
+                // queryBuilderGlobalConditions = QueryBuilders.boolQuery().must(queryBuilderGlobalConditions).must(getPermissionsQuery("permissions." + permission));
             }
+            queryBuilderGlobalConditions = permissionsFilter;
         }
 
         if(NodeServiceInterceptor.getEduSharingScope() == null){
@@ -511,6 +565,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }else{
             queryBuilderGlobalConditions = queryBuilderGlobalConditions.must(QueryBuilders.termQuery("properties.ccm:eduscopename.keyword",NodeServiceInterceptor.getEduSharingScope()));
         }
+        queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + SystemFolder.getSystemFolderBase().getId() + "*"));
+        queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + SystemFolder.getSitesFolder().getId() + "*"));
         return queryBuilderGlobalConditions;
     }
 
@@ -536,7 +592,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         SearchRequest request = new SearchRequest("workspace");
         request.source(searchSourceBuilder);
         try {
-            SearchResponse searchResult = client.search(request, RequestOptions.DEFAULT);
+            SearchResponse searchResult = client.search(request, getRequestOptions());
             boolean isChildObject = searchResult.getHits().getTotalHits().value > 0;
             if(!isChildObject) return false;
 
@@ -559,7 +615,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             searchSourceBuilder.size(0);
             SearchRequest request = new SearchRequest("workspace");
             request.source(searchSourceBuilder);
-            SearchResponse searchResult = client.search(request, RequestOptions.DEFAULT);
+            SearchResponse searchResult = client.search(request, getRequestOptions());
             return searchResult.getHits().getTotalHits().value > 0;
 
         } catch (IOException e) {
@@ -583,6 +639,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         Map nodeRef = (Map) sourceAsMap.get("nodeRef");
         String nodeId = (String) nodeRef.get("id");
+
+        Map parentRef = (Map) sourceAsMap.get("parentRef");
+        String parentId = (parentRef != null) ? (String)parentRef.get("id") :null;
+
+
         Map storeRef = (Map) nodeRef.get("storeRef");
         String protocol = (String) storeRef.get("protocol");
         String identifier = (String) storeRef.get("identifier");
@@ -698,6 +759,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
             props.put(CCConstants.DOWNLOADURL, URLTool.getDownloadServletUrl(alfNodeRef.getId(), null, true));
         }
 
+        if(parentId != null){
+            props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID,parentId);
+        }
+
         T eduNodeRef = clazz.newInstance();
         eduNodeRef.setRepositoryId(ApplicationInfoList.getHomeRepository().getAppId());;
         eduNodeRef.setStoreProtocol(protocol);
@@ -709,7 +774,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         // @TODO: remove all of this from/to multivalue
         ValueTool.getMultivalue(props);
-        PropertiesGetInterceptor.PropertiesContext propertiesContext = PropertiesInterceptorFactory.getPropertiesContext(alfNodeRef,props,eduNodeRef.getAspects());
+        PropertiesGetInterceptor.PropertiesContext propertiesContext = PropertiesInterceptorFactory.getPropertiesContext(
+                alfNodeRef,props,eduNodeRef.getAspects(),
+                sourceAsMap
+        )
+                ;
         for (PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
             props = new HashMap<>(i.beforeDeliverProperties(propertiesContext));
         }
@@ -903,7 +972,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         searchSourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
         searchSourceBuilder.aggregation(AggregationBuilders.terms("vcard").field("contributor.vcard.keyword").size(10000));
         searchRequest.source(searchSourceBuilder);
-        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+        SearchResponse searchResponse = client.search(searchRequest, getRequestOptions());
         ParsedStringTerms aggregation = searchResponse.getAggregations().get("vcard");
         /*
         for (Terms.Bucket bucket : aggregation.getBuckets()) {
@@ -985,8 +1054,23 @@ public class SearchServiceElastic extends SearchServiceImpl {
         checkClient();
         return client;
     }
+    public DeleteResponse deleteNative(DeleteRequest deleteRequest) throws IOException {
+        return getClient().delete(deleteRequest, getRequestOptions());
+    }
+    public SearchResponse searchNative(SearchRequest searchRequest) throws IOException {
+        return getClient().search(searchRequest, getRequestOptions());
+    }
+    public UpdateResponse updateNative(UpdateRequest updateRequest) throws IOException {
+        return getClient().update(updateRequest, getRequestOptions());
+    }
+    public SearchResponse scrollNative(SearchScrollRequest searchScrollRequest) throws IOException {
+        return getClient().scroll(searchScrollRequest, getRequestOptions());
+    }
+    public ClearScrollResponse clearScrollNative(ClearScrollRequest clearScrollRequest) throws IOException {
+        return getClient().clearScroll(clearScrollRequest, getRequestOptions());
+    }
     public void checkClient() throws IOException {
-        if(client == null || !client.ping(RequestOptions.DEFAULT)){
+        if(client == null || !client.ping(getRequestOptions())){
              if(client != null){
                  try {
                      client.close();
@@ -994,7 +1078,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                      logger.error("ping failed, close failed:" + e.getMessage()+" creating new");
                  }
              }
-             client = new RestHighLevelClient(RestClient.builder(getConfiguredHosts()));
+             client = new ESRestHighLevelClient(RestClient.builder(getConfiguredHosts()));
         }
     }
 
@@ -1036,5 +1120,39 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return sr;
     }
 
+    @Override
+    public List<? extends Suggestion> getSuggestions(MetadataSet mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
+        Map<String,String[]> criteriasMap = MetadataSearchHelper.convertCriterias(criterias);
+        SearchToken token = new SearchToken();
+        token.setFacets(Collections.singletonList(parameterId));
+        token.setFrom(0);
+        token.setMaxResult(0);
+        token.setFacetLimit(50);
+        token.setFacetsMinCount(1);
+        token.setQueryString(value);
+        try {
+            Map<String, MetadataKey> captions = mds.findWidget(parameterId).getValuesAsMap();
+            SearchResultNodeRef search = searchFacets(
+                    mds, queryId, criteriasMap, token
+            );
+            if(search.getFacets().size() != 1) {
+                return Collections.emptyList();
+            }
+            return search.getFacets().get(0).getValues().stream().filter(s ->
+                    // if one document has i.e. multiple keywords, they will be shown in the facet
+                    // so, we filter for values which actually contain the given string
+                    s.getValue().toLowerCase().contains(value.toLowerCase())
+            ).map(s -> {
+                Suggestion suggestion = new Suggestion();
+                suggestion.setKey(s.getValue());
+                suggestion.setDisplayString(
+                        captions.containsKey(s.getValue()) ? captions.get(s.getValue()).getCaption() : s.getValue()
+                );
+                return suggestion;
+            }).distinct().collect(Collectors.toList());
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
 
+    }
 }

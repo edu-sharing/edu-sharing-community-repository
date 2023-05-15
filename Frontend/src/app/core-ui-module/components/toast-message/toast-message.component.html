@@ -1,15 +1,32 @@
 <div class="toast-group">
-  <span class="mat-simple-snackbar-message" *ngIf="data.html" [innerHTML]="data.message"></span>
-  <span class="mat-simple-snackbar-message" *ngIf="!data.html">{{data.message}}</span>
-  <button mat-button
-          class="mat-simple-snackbar-action"
-          *ngIf="data.action"
-          (click)="data.action.callback()">{{data.action.label}}</button>
+  <span
+    class="mat-simple-snackbar-message"
+    *ngIf="data.html"
+    [innerHTML]="data.message"
+    data-test="toast-message"
+  ></span>
+  <span
+    class="mat-simple-snackbar-message mat-simple-snackbar-message-plain"
+    *ngIf="!data.html"
+    data-test="toast-message"
+    >{{ data.message }}</span
+  >
+  <button
+    mat-button
+    class="mat-simple-snackbar-action"
+    *ngIf="data.action"
+    (click)="data.action.callback()"
+  >
+    {{ data.action.label }}
+  </button>
 </div>
 <div class="toast-group">
-  <button mat-button
-          class="dismiss mat-simple-snackbar-action"
-          *ngIf="toast.duration == TOAST_DURATION.Infinite"
-          (click)="snackBar.dismiss()">{{'ACCESSIBILITY.DISMISS_TOAST' | translate}}
+  <button
+    mat-button
+    class="dismiss mat-simple-snackbar-action"
+    *ngIf="toast.duration === TOAST_DURATION.Infinite"
+    (click)="snackBar.dismiss()"
+  >
+    {{ 'ACCESSIBILITY.DISMISS_TOAST' | translate }}
   </button>
 </div>

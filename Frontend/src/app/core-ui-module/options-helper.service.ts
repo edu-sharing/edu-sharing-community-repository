@@ -1,77 +1,86 @@
-import {forkJoin as observableForkJoin, fromEvent, of, Subscription} from 'rxjs';
-import {RestNetworkService} from '../core-module/rest/services/rest-network.service';
-import {RestConnectorsService} from '../core-module/rest/services/rest-connectors.service';
-import {RestConstants} from '../core-module/rest/rest-constants';
-import {ActionbarComponent} from '../common/ui/actionbar/actionbar.component';
+import { EventEmitter, Injectable, NgZone, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
+import { NodeListErrorResponses, NodeListService } from 'ngx-edu-sharing-api';
 import {
-    Constrain,
-    CustomOptions,
-    DefaultGroups,
-    ElementType,
-    HideMode,
-    KeyCombination,
-    OptionItem,
-    Scope,
-    Target
-} from './option-item';
-import {UIHelper} from './ui-helper';
-import {UIService} from '../core-module/rest/services/ui.service';
-import {WorkspaceManagementDialogsComponent} from '../modules/management-dialogs/management-dialogs.component';
-import {
-    Connector,
-    Filetype,
-    Node,
-    NodesRightMode,
-    NodeWrapper,
-    ProposalNode
-} from '../core-module/rest/data-object';
-import {Helper} from '../core-module/rest/helper';
-import {
-    ClipboardObject,
-    TemporaryStorageService
-} from '../core-module/rest/services/temporary-storage.service';
-import {BridgeService} from '../core-bridge-module/bridge.service';
-import {MessageType} from '../core-module/ui/message-type';
-import {Inject, Injectable, InjectionToken, OnDestroy, Optional} from '@angular/core';
-import {CardComponent} from '../shared/components/card/card.component';
-import {TranslateService} from '@ngx-translate/core';
-import {RestNodeService} from '../core-module/rest/services/rest-node.service';
+    forkJoin,
+    forkJoin as observableForkJoin,
+    fromEvent,
+    Observable,
+    of,
+    Subject,
+    Subscription,
+} from 'rxjs';
+import { isArray } from 'rxjs/internal/util/isArray';
+import { catchError, map, takeUntil, tap } from 'rxjs/operators';
+import { BridgeService } from '../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
     FrameEventsService,
     RestCollectionService,
     RestConnectorService,
     RestHelper,
-    RestIamService
+    RestIamService,
 } from '../core-module/core.module';
-import {Toast} from './toast';
-import {HttpClient} from '@angular/common/http';
-import {ActivatedRoute, Params, Router} from '@angular/router';
-import {DropdownComponent} from '../shared/components/dropdown/dropdown.component';
-import {ConfigOptionItem, NodeHelperService} from './node-helper.service';
-import {PlatformLocation} from '@angular/common';
-import { NodeStoreService } from '../modules/search/node-store/node-store.service';
-import {isArray} from 'rxjs/internal/util/isArray';
-import { MainNavService } from '../main/navigation/main-nav.service';
+import {
+    Connector,
+    Filetype,
+    Node,
+    NodesRightMode,
+    NodeWrapper,
+} from '../core-module/rest/data-object';
+import { Helper } from '../core-module/rest/helper';
+import { RestConstants } from '../core-module/rest/rest-constants';
+import { RestConnectorsService } from '../core-module/rest/services/rest-connectors.service';
+import { RestNetworkService } from '../core-module/rest/services/rest-network.service';
+import { RestNodeService } from '../core-module/rest/services/rest-node.service';
+import {
+    ClipboardObject,
+    TemporaryStorageService,
+} from '../core-module/rest/services/temporary-storage.service';
+import { UIService } from '../core-module/rest/services/ui.service';
+import { MessageType } from '../core-module/ui/message-type';
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { ListEventInterface, NodeEntriesDisplayType } from '../features/node-entries/entries-model';
 import { NodeEntriesDataType } from '../features/node-entries/node-entries.component';
-
-
-export class OptionsHelperConfig {
-    subscribeEvents? = true;
-}
-export const OPTIONS_HELPER_CONFIG = new InjectionToken<OptionsHelperConfig>('OptionsHelperConfig');
+import { MainNavService } from '../main/navigation/main-nav.service';
+import { WorkspaceManagementDialogsComponent } from '../modules/management-dialogs/management-dialogs.component';
+import {
+    KeyboardShortcutsService,
+    matchesShortcutCondition,
+} from '../services/keyboard-shortcuts.service';
+import { LocalEventsService } from '../services/local-events.service';
+import { ActionbarComponent } from '../shared/components/actionbar/actionbar.component';
+import { DropdownComponent } from '../shared/components/dropdown/dropdown.component';
+import { forkJoinWithErrors } from '../util/rxjs/forkJoinWithErrors';
+import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
+import {
+    Constrain,
+    CustomOptions,
+    DefaultGroups,
+    ElementType,
+    HideMode,
+    OptionItem,
+    Scope,
+    Target,
+} from './option-item';
+import { Toast } from './toast';
+import { UIHelper } from './ui-helper';
 
 @Injectable()
 export class OptionsHelperService implements OnDestroy {
-    static DownloadElementTypes = [ElementType.Node, ElementType.NodeChild, ElementType.NodeProposal, ElementType.NodePublishedCopy];
+    static DownloadElementTypes = [
+        ElementType.Node,
+        ElementType.NodeChild,
+        ElementType.NodeProposal,
+        ElementType.NodePublishedCopy,
+    ];
     static ElementTypesAddToCollection = [ElementType.Node, ElementType.NodePublishedCopy];
-    private static subscriptionUp: Subscription[] = [];
-    private static subscriptionDown: Subscription[] = [];
-    private localSubscripitionUp: Subscription;
-    private localSubscripitionDown: Subscription;
-    private appleCmd: boolean;
+
+    readonly virtualNodesAdded = new EventEmitter<Node[]>();
+    readonly displayTypeChanged = new EventEmitter<NodeEntriesDisplayType>();
+
+    private keyboardShortcutsSubscription: Subscription;
     private globalOptions: OptionItem[];
     private list: ListEventInterface<NodeEntriesDataType>;
     private subscriptions: Subscription[] = [];
@@ -79,59 +88,8 @@ export class OptionsHelperService implements OnDestroy {
     private dropdown: DropdownComponent;
     private queryParams: Params;
     private data: OptionData;
-    private listener: OptionsListener;
+    private destroyed = new Subject<void>();
 
-    handleKeyboardEventUp(event: any) {
-        if (event.keyCode === 91 || event.keyCode === 93) {
-            this.appleCmd = false;
-        }
-    }
-    handleKeyboardEvent(event: KeyboardEvent) {
-        if (event.keyCode === 91 || event.keyCode === 93) {
-            this.appleCmd = true;
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
-        // do nothing if a modal dialog is still open
-        if (CardComponent.getNumberOfOpenCards() > 0) {
-            return;
-        }
-        // check if it was triggered from a valid component
-        if (!event.composedPath().some(
-            (t) => {
-                const name = (t as HTMLElement)?.nodeName;
-                return ['LISTTABLE', 'ACTIONBAR', 'APP-NODE-ENTRIES'].indexOf(name) !== -1;
-            })) {
-            return;
-        }
-        if (this.globalOptions) {
-            const option = this.globalOptions.filter((o: OptionItem) => {
-                if (!o.isEnabled) {
-                    return false;
-                }
-                if (o.key !== event.code && o.key !== event.key) {
-                    return false;
-                }
-                if (o.keyCombination) {
-                    if (o.keyCombination.indexOf(KeyCombination.CtrlOrAppleCmd) !== -1) {
-                        if (!(event.ctrlKey || this.appleCmd)) {
-                            return false;
-                        }
-                    }
-                }
-                return true;
-            });
-            if (option.length === 1) {
-                option[0].callback(null);
-                event.preventDefault();
-                event.stopPropagation();
-            }
-        }
-    }
-    ngOnDestroy(): void {
-        this.clearSubscription();
-    }
     constructor(
         private networkService: RestNetworkService,
         private connector: RestConnectorService,
@@ -141,30 +99,56 @@ export class OptionsHelperService implements OnDestroy {
         private nodeHelper: NodeHelperService,
         private route: ActivatedRoute,
         private eventService: FrameEventsService,
-        private http: HttpClient,
         private ui: UIService,
         private toast: Toast,
         private translate: TranslateService,
-        private platformLocation: PlatformLocation,
         private nodeService: RestNodeService,
         private collectionService: RestCollectionService,
         private configService: ConfigurationService,
         private mainNavService: MainNavService,
         private storage: TemporaryStorageService,
         private bridge: BridgeService,
-        private nodeStore: NodeStoreService,
+        private nodeList: NodeListService,
         private dialogs: DialogsService,
-        @Optional() @Inject(OPTIONS_HELPER_CONFIG) config: OptionsHelperConfig,
+        private keyboardShortcuts: KeyboardShortcutsService,
+        private ngZone: NgZone,
+        private localEvents: LocalEventsService,
     ) {
-        if (config == null) {
-            config = new OptionsHelperConfig();
-        }
-        this.route.queryParams.subscribe((queryParams) => this.queryParams = queryParams);
-        // @HostListener decorator unfortunately does not work in services
-        if (config.subscribeEvents) {
-            this.initSubscription();
+        this.registerStaticSubscriptions();
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
+    }
+
+    /** Performs subscriptions that don't have to be refreshed. */
+    private registerStaticSubscriptions(): void {
+        this.route.queryParams.subscribe((queryParams) => (this.queryParams = queryParams));
+        this.localEvents.nodesDeleted
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((nodes) => this.list?.deleteNodes(nodes));
+        this.localEvents.nodesChanged
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((nodes) => this.list?.updateNodes(nodes));
+    }
+
+    private handleKeyboardEvent(event: KeyboardEvent) {
+        if (this.globalOptions && !this.keyboardShortcuts.shouldIgnoreShortcut(event)) {
+            const matchedOption = this.globalOptions.find(
+                (option: OptionItem) =>
+                    option.isEnabled &&
+                    option.keyboardShortcut &&
+                    matchesShortcutCondition(event, option.keyboardShortcut),
+            );
+            if (matchedOption) {
+                event.preventDefault();
+                event.stopPropagation();
+                this.ngZone.run(() => matchedOption.callback(null));
+            }
         }
     }
+
     private cutCopyNode(node: Node, copy: boolean) {
         let list = this.getObjects(node);
         if (!list || !list.length) {
@@ -173,10 +157,13 @@ export class OptionsHelperService implements OnDestroy {
         list = Helper.deepCopy(list);
         const clip: ClipboardObject = { sourceNode: this.data.parent, nodes: list, copy };
         this.storage.set('workspace_clipboard', clip);
-        this.bridge.showTemporaryMessage(MessageType.info, 'WORKSPACE.TOAST.CUT_COPY', { count: list.length });
+        this.bridge.showTemporaryMessage(MessageType.info, 'WORKSPACE.TOAST.CUT_COPY', {
+            count: list.length,
+        });
     }
+
     pasteNode(nodes: Node[] = []) {
-        const clip = (this.storage.get('workspace_clipboard') as ClipboardObject);
+        const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
         if (!this.canAddObjects()) {
             return;
         }
@@ -184,10 +171,14 @@ export class OptionsHelperService implements OnDestroy {
             this.bridge.closeModalDialog();
             this.storage.remove('workspace_clipboard');
             const info: any = {
-                from: clip.sourceNode ? clip.sourceNode.name : this.translate.instant('WORKSPACE.COPY_SEARCH'),
+                from: clip.sourceNode
+                    ? clip.sourceNode.name
+                    : this.translate.instant('WORKSPACE.COPY_SEARCH'),
                 to: this.data.parent.name,
                 count: clip.nodes.length,
-                mode: this.translate.instant('WORKSPACE.' + (clip.copy ? 'PASTE_COPY' : 'PASTE_MOVE'))
+                mode: this.translate.instant(
+                    'WORKSPACE.' + (clip.copy ? 'PASTE_COPY' : 'PASTE_MOVE'),
+                ),
             };
             this.bridge.showTemporaryMessage(MessageType.info, 'WORKSPACE.TOAST.PASTE', info);
             this.addVirtualObjects(nodes);
@@ -207,26 +198,25 @@ export class OptionsHelperService implements OnDestroy {
                         this.nodeHelper.handleNodeError(clip.nodes[nodes.length].name, error);
                     }
                     this.bridge.closeModalDialog();
-                });
-        }
-        else {
+                },
+            );
+        } else {
             this.nodeService.moveNode(target, source).subscribe(
                 (data: NodeWrapper) => this.pasteNode(nodes.concat(data.node)),
                 (error: any) => {
                     this.nodeHelper.handleNodeError(clip.nodes[nodes.length].name, error);
                     this.bridge.closeModalDialog();
-                }
+                },
             );
         }
-
     }
+
     /**
      * shortcut to simply disable all options on the given compoennts
      * @param actionbar
      * @param list
      */
-    clearComponents(actionbar: ActionbarComponent,
-                    list: ListEventInterface<Node> = null) {
+    clearComponents(actionbar: ActionbarComponent, list: ListEventInterface<Node> = null) {
         if (list) {
             list.setOptions(null);
         }
@@ -234,42 +224,34 @@ export class OptionsHelperService implements OnDestroy {
             actionbar.options = [];
         }
     }
-    async initComponents(actionbar: ActionbarComponent = null,
-                         list: ListEventInterface<NodeEntriesDataType> = null,
-                         dropdown: DropdownComponent = null) {
-        if(!this.mainNavService.getMainNav()) {
+
+    async initComponents(
+        actionbar: ActionbarComponent = null,
+        list: ListEventInterface<NodeEntriesDataType> = null,
+        dropdown: DropdownComponent = null,
+    ) {
+        if (!this.mainNavService.getMainNav()) {
             console.warn('mainnav was not available via singleton service');
         }
         this.actionbar = actionbar;
         this.list = list;
         this.dropdown = dropdown;
-        await this.networkService.getRepositories().toPromise();
+        if ((await this.iamService.getCurrentUserAsync()).person.authorityName) {
+            await this.networkService.getRepositories().toPromise();
+        }
     }
-    setListener(listener: OptionsListener) {
-        this.listener = listener;
-    }
+
     /**
      * refresh all bound components with available menu options
      */
     refreshComponents(refreshListOptions = true) {
         if (this.data == null) {
-            console.warn('options helper refresh called but no data previously bound');
+            console.info('options helper refresh called but no data previously bound');
             return;
         }
         if (this.subscriptions?.length) {
             this.subscriptions.forEach((s) => s.unsubscribe());
             this.subscriptions = [];
-        }
-        if (this.mainNavService.getMainNav()) {
-            this.subscriptions.push(this.mainNavService.getDialogs().onRefresh.subscribe((nodes: void | Node[]) => {
-                this.listener?.onRefresh(nodes);
-                if (this.list) {
-                    this.list.updateNodes(nodes);
-                }
-            }));
-            this.subscriptions.push(this.mainNavService.getDialogs()?.onDelete?.subscribe(
-                (result: { objects: any; count: number; error: boolean; }) => this.listener?.onDelete(result)
-            ));
         }
 
         this.globalOptions = this.getAvailableOptions(Target.Actionbar);
@@ -286,9 +268,13 @@ export class OptionsHelperService implements OnDestroy {
             this.actionbar.options = this.globalOptions;
         }
     }
-    private isOptionEnabled(option: OptionItem, objects: Node[]|any) {
-        if (option.permissionsMode === HideMode.Disable &&
-            option.permissions && !this.validatePermissions(option, objects)) {
+
+    private isOptionEnabled(option: OptionItem, objects: Node[] | any) {
+        if (
+            option.permissionsMode === HideMode.Disable &&
+            option.permissions &&
+            !this.validatePermissions(option, objects)
+        ) {
             return false;
         }
         if (option.toolpermissions != null) {
@@ -302,7 +288,7 @@ export class OptionsHelperService implements OnDestroy {
         return true;
     }
 
-    public getAvailableOptions(target: Target, objects: Node[] = null) {
+    getAvailableOptions(target: Target, objects: Node[] = null) {
         if (target === Target.List) {
             if (objects == null) {
                 // fetch ALL options of ALL items inside list
@@ -310,7 +296,7 @@ export class OptionsHelperService implements OnDestroy {
                 objects = null;
             }
         } else if (target === Target.Actionbar) {
-            objects = this.data.selectedObjects || (this.data.activeObjects);
+            objects = this.data.selectedObjects || this.data.activeObjects;
         } else if (target === Target.ListDropdown) {
             if (this.data.activeObjects) {
                 objects = this.data.activeObjects;
@@ -322,7 +308,9 @@ export class OptionsHelperService implements OnDestroy {
         if (this.mainNavService.getMainNav()) {
             options = this.prepareOptions(this.mainNavService.getDialogs(), objects);
         } else {
-            console.warn('options helper was called without main nav. Can not load default options');
+            console.warn(
+                'options helper was called without main nav. Can not load default options',
+            );
         }
         /*
          // DO NOT DELETE
@@ -346,25 +334,32 @@ export class OptionsHelperService implements OnDestroy {
         if (target !== Target.Actionbar) {
             options = options.filter((o) => !o.isToggle);
             // do not show any actions in the dropdown for no selection, these are reserved for actionbar
-            options = options.filter((o) =>  !o.constrains || o.constrains.indexOf(Constrain.NoSelection) === -1);
+            options = options.filter(
+                (o) => !o.constrains || o.constrains.indexOf(Constrain.NoSelection) === -1,
+            );
         }
-        return (UIHelper.filterValidOptions(this.ui, options) as OptionItem[]);
+        return UIHelper.filterValidOptions(this.ui, options) as OptionItem[];
     }
 
-    private handleCallbackStates(options: OptionItem[],
-                                 target: Target,
-                                 objects: Node[] | any[] = null) {
+    private handleCallbackStates(
+        options: OptionItem[],
+        target: Target,
+        objects: Node[] | any[] = null,
+    ) {
         this.handleCallbacks(options, objects);
         options = options.filter((o) =>
-            o.showCallback(target === Target.List && objects && objects[0] ? objects[0] : null)
+            o.showCallback(target === Target.List && objects && objects[0] ? objects[0] : null),
         );
-        options.filter((o) => !o.enabledCallback(target === Target.List && objects && objects[0] ? objects[0] : null)).forEach((o) =>
-            o.isEnabled = false
+        options.forEach(
+            (o) =>
+                (o.isEnabled = o.enabledCallback(
+                    target === Target.List && objects && objects[0] ? objects[0] : null,
+                )),
         );
         return options;
     }
 
-    private isOptionAvailable(option: OptionItem, objects: Node[]|any[]) {
+    private isOptionAvailable(option: OptionItem, objects: Node[] | any[]) {
         if (option.elementType.indexOf(this.getType(objects)) === -1) {
             // console.log('types not matching', objects, this.getType(objects), option);
             return false;
@@ -411,6 +406,7 @@ export class OptionsHelperService implements OnDestroy {
     private hasSelection() {
         return this.data.selectedObjects && this.data.selectedObjects.length;
     }
+
     private getType(objects: Node[]): ElementType {
         if (objects) {
             const types = Array.from(new Set(objects.map((o) => this.getTypeSingle(o))));
@@ -420,6 +416,7 @@ export class OptionsHelperService implements OnDestroy {
         }
         return ElementType.Unknown;
     }
+
     private getTypeSingle(object: Node | any) {
         if (object.authorityType === RestConstants.AUTHORITY_TYPE_GROUP) {
             return ElementType.Group;
@@ -437,7 +434,9 @@ export class OptionsHelperService implements OnDestroy {
             } else {
                 if (this.nodeHelper.isNodePublishedCopy(object)) {
                     return ElementType.NodePublishedCopy;
-                } else if (object.properties?.[RestConstants.CCM_PROP_IMPORT_BLOCKED]?.[0] === 'true') {
+                } else if (
+                    object.properties?.[RestConstants.CCM_PROP_IMPORT_BLOCKED]?.[0] === 'true'
+                ) {
                     return ElementType.NodeBlockedImport;
                 }
                 return ElementType.Node;
@@ -447,17 +446,26 @@ export class OptionsHelperService implements OnDestroy {
     }
 
     private validateToolpermissions(option: OptionItem) {
-        return option.toolpermissions.filter((p) =>
-            !this.connector.hasToolPermissionInstant(p)
-        ).length === 0;
-    }
-    private validatePermissions(option: OptionItem, objects: Node[] | any[]) {
-        return option.permissions.filter((p) =>
-            this.nodeHelper.getNodesRight(objects, p, option.permissionsRightMode) === false
-        ).length === 0;
+        return (
+            option.toolpermissions.filter((p) => !this.connector.hasToolPermissionInstant(p))
+                .length === 0
+        );
     }
 
-    private prepareOptions(management: WorkspaceManagementDialogsComponent, objects: Node[] | any[]) {
+    private validatePermissions(option: OptionItem, objects: Node[] | any[]) {
+        return (
+            option.permissions.filter(
+                (p) =>
+                    this.nodeHelper.getNodesRight(objects, p, option.permissionsRightMode) ===
+                    false,
+            ).length === 0
+        );
+    }
+
+    private prepareOptions(
+        management: WorkspaceManagementDialogsComponent,
+        objects: Node[] | any[],
+    ) {
         const options: OptionItem[] = [];
 
         /*
@@ -471,7 +479,7 @@ export class OptionsHelperService implements OnDestroy {
          */
 
         const applyNode = new OptionItem('APPLY', 'redo', (object) =>
-            this.nodeHelper.addNodeToLms(this.getObjects(object)[0], this.queryParams.reurl)
+            this.nodeHelper.addNodeToLms(this.getObjects(object)[0], this.queryParams.reurl),
         );
 
         applyNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
@@ -483,10 +491,9 @@ export class OptionsHelperService implements OnDestroy {
         applyNode.showAlways = true;
         applyNode.group = DefaultGroups.Primary;
         applyNode.priority = 10;
-        applyNode.customShowCallback = ((nodes) => {
-            return (this.queryParams.applyDirectories === 'true' ||
-                (nodes && !nodes[0].isDirectory));
-        });
+        applyNode.customShowCallback = (nodes) => {
+            return this.queryParams.applyDirectories === 'true' || (nodes && !nodes[0].isDirectory);
+        };
 
         /*
        if(nodes && nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)==-1) {
@@ -497,19 +504,26 @@ export class OptionsHelperService implements OnDestroy {
      }
         */
         const debugNode = new OptionItem('OPTIONS.DEBUG', 'build', async (object) => {
-            let node = this.getObjects(object)[0];
-            if (node.authorityName) {
+            let nodes = this.getObjects(object);
+            console.info(nodes);
+            if (nodes.some((n) => n.authorityName)) {
                 try {
-                    node = (await this.nodeService.getNodeMetadata(
-                        node.ref?.id || node.properties?.[RestConstants.NODE_ID]?.[0],
-                        [RestConstants.ALL]
-                    ).toPromise()).node;
+                    nodes = (
+                        await forkJoin(
+                            nodes.map((n) =>
+                                this.nodeService.getNodeMetadata(
+                                    n.ref?.id || n.properties?.[RestConstants.NODE_ID]?.[0],
+                                    [RestConstants.ALL],
+                                ),
+                            ),
+                        ).toPromise()
+                    ).map((n) => n.node);
                 } catch (e) {
-                    console.info(node);
+                    console.info(nodes);
                     console.warn(e);
                 }
             }
-            this.dialogs.openNodeInfoDialog({ node });
+            this.dialogs.openNodeInfoDialog({ nodes });
         });
         debugNode.elementType = [
             ElementType.Node,
@@ -520,28 +534,30 @@ export class OptionsHelperService implements OnDestroy {
             ElementType.SavedSearch,
             ElementType.NodeChild,
             ElementType.NodeProposal,
-            ElementType.MapRef
+            ElementType.MapRef,
         ];
         debugNode.onlyDesktop = true;
-        debugNode.constrains = [Constrain.AdminOrDebug, Constrain.NoBulk];
+        debugNode.constrains = [Constrain.AdminOrDebug];
         debugNode.group = DefaultGroups.View;
         debugNode.priority = 10;
 
-        const acceptProposal = new OptionItem('OPTIONS.COLLECTION_PROPOSAL_ACCEPT', 'check', (object) =>
-            management.addProposalsToCollection(this.getObjects(object))
+        const acceptProposal = new OptionItem(
+            'OPTIONS.COLLECTION_PROPOSAL_ACCEPT',
+            'check',
+            (object) => management.addProposalsToCollection(this.getObjects(object)),
         );
-        acceptProposal.customEnabledCallback = ((nodes) =>
-                nodes.every((n) => (n as ProposalNode).accessible)
-        );
+        /*acceptProposal.customEnabledCallback = (nodes) =>
+            nodes.every((n) => (n as ProposalNode).accessible);*/
         acceptProposal.elementType = [ElementType.NodeProposal];
         acceptProposal.constrains = [Constrain.User];
         acceptProposal.group = DefaultGroups.Primary;
         acceptProposal.showAsAction = true;
         acceptProposal.priority = 10;
 
-
-        const declineProposal = new OptionItem('OPTIONS.COLLECTION_PROPOSAL_DECLINE', 'clear', (object) =>
-            management.declineProposals(this.getObjects(object))
+        const declineProposal = new OptionItem(
+            'OPTIONS.COLLECTION_PROPOSAL_DECLINE',
+            'clear',
+            (object) => management.declineProposals(this.getObjects(object)),
         );
         declineProposal.elementType = [ElementType.NodeProposal];
         declineProposal.constrains = [Constrain.User];
@@ -563,10 +579,56 @@ export class OptionsHelperService implements OnDestroy {
             options.push(openFolder);
          */
 
-        const openParentNode = new OptionItem('OPTIONS.SHOW_IN_FOLDER', 'folder', async (object) =>
-            this.goToWorkspace((await this.getObjectsAsync(object, true))[0])
+        const openOriginalNode = new OptionItem(
+            'OPTIONS.OPEN_ORIGINAL_NODE',
+            'description',
+            async (object) => {
+                const nodeId = RestHelper.removeSpacesStoreRef(
+                    this.getObjects(object)[0].properties[
+                        RestConstants.CCM_PROP_PUBLISHED_ORIGINAL
+                    ][0],
+                );
+                UIHelper.goToNode(this.router, new Node(nodeId));
+            },
         );
-        openParentNode.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository, Constrain.User];
+        openOriginalNode.constrains = [
+            Constrain.Files,
+            Constrain.NoBulk,
+            Constrain.HomeRepository,
+            Constrain.User,
+        ];
+        openOriginalNode.toolpermissions = [RestConstants.TOOLPERMISSION_WORKSPACE];
+        openOriginalNode.scopes = [Scope.CollectionsReferences, Scope.Search, Scope.Render];
+        openOriginalNode.customEnabledCallback = (nodes) => {
+            if (nodes && nodes.length === 1) {
+                openOriginalNode.customEnabledCallback = null;
+                let nodeId = RestHelper.removeSpacesStoreRef(
+                    nodes[0].properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL][0],
+                );
+                this.nodeService.getNodeMetadata(nodeId).subscribe(
+                    () => {
+                        openOriginalNode.isEnabled = true;
+                    },
+                    () => {
+                        openOriginalNode.isEnabled = false;
+                    },
+                );
+            }
+            return false;
+        };
+        openOriginalNode.elementType = [ElementType.NodePublishedCopy];
+        openOriginalNode.group = DefaultGroups.View;
+        openOriginalNode.priority = 13;
+
+        const openParentNode = new OptionItem('OPTIONS.SHOW_IN_FOLDER', 'folder', async (object) =>
+            this.goToWorkspace((await this.getObjectsAsync(object, true))[0]),
+        );
+        openParentNode.constrains = [
+            Constrain.Files,
+            Constrain.NoBulk,
+            Constrain.HomeRepository,
+            Constrain.User,
+        ];
         openParentNode.toolpermissions = [RestConstants.TOOLPERMISSION_WORKSPACE];
         openParentNode.scopes = [Scope.CollectionsReferences, Scope.Search, Scope.Render];
         openParentNode.customEnabledCallback = (nodes) => {
@@ -576,11 +638,14 @@ export class OptionsHelperService implements OnDestroy {
                 if (nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1) {
                     nodeId = nodes[0].properties[RestConstants.CCM_PROP_IO_ORIGINAL][0];
                 }
-                this.nodeService.getNodeParents(nodeId, false, []).subscribe(() => {
-                    openParentNode.isEnabled = true;
-                }, (error) => {
-                    openParentNode.isEnabled = false;
-                });
+                this.nodeService.getNodeParents(nodeId, false, []).subscribe(
+                    () => {
+                        openParentNode.isEnabled = true;
+                    },
+                    (error) => {
+                        openParentNode.isEnabled = false;
+                    },
+                );
             }
             return false;
         };
@@ -588,24 +653,36 @@ export class OptionsHelperService implements OnDestroy {
         openParentNode.priority = 15;
 
         const openNode = new OptionItem('OPTIONS.SHOW', 'remove_red_eye', (object) =>
-            UIHelper.goToNode(this.router, this.getObjects(object)[0])
+            UIHelper.goToNode(this.router, this.getObjects(object)[0]),
         );
         openNode.constrains = [Constrain.Files, Constrain.NoBulk];
         openNode.scopes = [Scope.WorkspaceList];
         openNode.group = DefaultGroups.View;
         openNode.priority = 30;
 
-        const editConnectorNode = new OptionItem('OPTIONS.OPEN', 'launch', (node) =>
-            this.editConnector(this.getObjects(node)[0])
-        );
+        const editConnectorNode = new OptionItem('OPTIONS.OPEN', 'launch', (node) => {
+            this.editConnector(this.getObjects(node)[0]);
+        });
         editConnectorNode.customShowCallback = (nodes) => {
-            return this.connectors.connectorSupportsEdit(nodes ? nodes[0] : null) != null;
+            let n = nodes ? nodes[0] : null;
+            if (n?.aspects?.includes('ccm:ltitool_node')) {
+                return true;
+            }
+            return this.connectors.connectorSupportsEdit(n) != null;
         };
-        editConnectorNode.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodeProposal];
+        editConnectorNode.elementType = [
+            ElementType.Node,
+            ElementType.NodeChild,
+            ElementType.NodeProposal,
+        ];
         editConnectorNode.group = DefaultGroups.View;
         editConnectorNode.priority = 20;
         editConnectorNode.showAsAction = true;
-        editConnectorNode.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository];
+        editConnectorNode.constrains = [
+            Constrain.Files,
+            Constrain.NoBulk,
+            Constrain.HomeRepository,
+        ];
 
         /**
          if (this.connector.getCurrentLogin() && !this.connector.getCurrentLogin().isGuest) {
@@ -628,15 +705,19 @@ export class OptionsHelperService implements OnDestroy {
       }
          */
 
-        const addNodeToCollection = new OptionItem('OPTIONS.COLLECTION', 'layers', (object) =>
-            management.addToCollection =  this.getObjects(object)
+        const addNodeToCollection = new OptionItem(
+            'OPTIONS.COLLECTION',
+            'layers',
+            (object) => (management.addToCollection = this.getObjects(object)),
         );
         addNodeToCollection.elementType = OptionsHelperService.ElementTypesAddToCollection;
         addNodeToCollection.showAsAction = true;
-        addNodeToCollection.constrains = [Constrain.Files, Constrain.User];
+        addNodeToCollection.constrains = [Constrain.Files, Constrain.User, Constrain.NoScope];
         addNodeToCollection.customShowCallback = (nodes) => {
-            addNodeToCollection.name = this.data.scope === Scope.CollectionsReferences ?
-                'OPTIONS.COLLECTION_OTHER' : 'OPTIONS.COLLECTION';
+            addNodeToCollection.name =
+                this.data.scope === Scope.CollectionsReferences
+                    ? 'OPTIONS.COLLECTION_OTHER'
+                    : 'OPTIONS.COLLECTION';
             return this.nodeHelper.referenceOriginalExists(nodes ? nodes[0] : null);
         };
         addNodeToCollection.permissions = [RestConstants.ACCESS_CC_PUBLISH];
@@ -647,10 +728,9 @@ export class OptionsHelperService implements OnDestroy {
         addNodeToCollection.priority = 10;
 
         const addNodeToLTIPlatform = new OptionItem('OPTIONS.LTI', 'input', (object) => {
-                const nodes: Node[] = this.getObjects(object);
-                this.nodeHelper.addNodesToLTIPlatform(nodes);
-            }
-        );
+            const nodes: Node[] = this.getObjects(object);
+            this.nodeHelper.addNodesToLTIPlatform(nodes);
+        });
         addNodeToLTIPlatform.elementType = OptionsHelperService.ElementTypesAddToCollection;
         addNodeToLTIPlatform.showAsAction = true;
         addNodeToLTIPlatform.showAlways = true;
@@ -668,14 +748,41 @@ export class OptionsHelperService implements OnDestroy {
                     return false;
                 }
             }
+            /**
+             * prevent lti editor as tool with custom content option, embedding nodes as platform created by the same tool
+             */
+
+            let customContentNodeLtiToolUrl =
+                ltiSession.customContentNode.properties['ccm:ltitool_url'][0];
+            if (ltiSession.customContentNode) {
+                return nodes.some((n) => {
+                    let nLtiToolUrlArr = ltiSession.customContentNode.properties['ccm:ltitool_url'];
+                    if (!isArray(nLtiToolUrlArr) || nLtiToolUrlArr.length == 0) {
+                        return true;
+                    }
+                    let nLtiToolUrl = nLtiToolUrlArr[0];
+
+                    if (
+                        n.aspects.includes('ccm:ltitool_node') &&
+                        nLtiToolUrl === customContentNodeLtiToolUrl
+                    ) {
+                        console.log(
+                            "don't allow nodes created for tool " +
+                                n.properties['ccm:ltitool_url'] +
+                                ' become embedded by the same tool',
+                        );
+                        return false;
+                    } else return true;
+                });
+            }
             return true;
         };
 
         const bookmarkNode = new OptionItem('OPTIONS.ADD_NODE_STORE', 'bookmark_border', (object) =>
-            this.bookmarkNodes(this.getObjects(object))
+            this.bookmarkNodes(this.getObjects(object)),
         );
         bookmarkNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
-        bookmarkNode.constrains = [Constrain.Files, Constrain.HomeRepository];
+        bookmarkNode.constrains = [Constrain.Files, Constrain.HomeRepository, Constrain.NoScope];
         bookmarkNode.group = DefaultGroups.Reuse;
         bookmarkNode.priority = 20;
         bookmarkNode.customShowCallback = (nodes) => {
@@ -685,22 +792,38 @@ export class OptionsHelperService implements OnDestroy {
             return true;
         };
 
-        const createNodeVariant = new OptionItem('OPTIONS.VARIANT', 'call_split', (object) =>
-            management.nodeVariant =  this.getObjects(object)[0]
+        const createNodeVariant = new OptionItem(
+            'OPTIONS.VARIANT',
+            'call_split',
+            (object) => (management.nodeVariant = this.getObjects(object)[0]),
         );
-        createNodeVariant.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository, Constrain.User];
+        createNodeVariant.constrains = [
+            Constrain.Files,
+            Constrain.NoBulk,
+            Constrain.HomeRepository,
+            Constrain.User,
+        ];
         createNodeVariant.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES];
         createNodeVariant.customEnabledCallback = (nodes) => {
             if (nodes) {
                 // do not show variant if it's a licensed material and user doesn't has change permission rights
-                return nodes[0].properties?.[RestConstants.CCM_PROP_RESTRICTED_ACCESS]?.[0] !== 'true' ||
-                    this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS, NodesRightMode.Original);
+                return (
+                    nodes[0].properties?.[RestConstants.CCM_PROP_RESTRICTED_ACCESS]?.[0] !==
+                        'true' ||
+                    this.nodeHelper.getNodesRight(
+                        nodes,
+                        RestConstants.ACCESS_CHANGE_PERMISSIONS,
+                        NodesRightMode.Original,
+                    )
+                );
             }
             return true;
         };
         createNodeVariant.customShowCallback = (nodes) => {
             if (nodes) {
-                createNodeVariant.name = 'OPTIONS.VARIANT' + (this.connectors.connectorSupportsEdit(nodes[0]) ? '_OPEN' : '');
+                createNodeVariant.name =
+                    'OPTIONS.VARIANT' +
+                    (this.connectors.connectorSupportsEdit(nodes[0]) ? '_OPEN' : '');
                 return this.nodeHelper.referenceOriginalExists(nodes[0]);
             }
             return false;
@@ -709,7 +832,7 @@ export class OptionsHelperService implements OnDestroy {
         createNodeVariant.priority = 30;
 
         const inviteNode = new OptionItem('OPTIONS.INVITE', 'group_add', async (object) =>
-            management.nodeShare = await this.getObjectsAsync(object, true)
+            this.dialogs.openShareDialog({ nodes: await this.getObjectsAsync(object, true) }),
         );
         inviteNode.elementType = [ElementType.Node, ElementType.SavedSearch];
         inviteNode.showAsAction = true;
@@ -722,31 +845,42 @@ export class OptionsHelperService implements OnDestroy {
         inviteNode.group = DefaultGroups.Edit;
         inviteNode.priority = 10;
         // invite is not allowed for collections of type editorial
-        inviteNode.customShowCallback = ((objects) =>
-            objects[0].collection ?
-                objects[0].collection.type !== RestConstants.COLLECTIONTYPE_EDITORIAL :
-                objects[0].type !== RestConstants.SYS_TYPE_CONTAINER
-        );
+        inviteNode.customShowCallback = (objects) =>
+            objects[0].collection
+                ? objects[0].collection.type !== RestConstants.COLLECTIONTYPE_EDITORIAL
+                : objects[0].type !== RestConstants.SYS_TYPE_CONTAINER;
 
-        const streamNode = new OptionItem('OPTIONS.STREAM', 'event',(object) =>
-            management.addNodesStream = this.getObjects(object)
+        const streamNode = new OptionItem(
+            'OPTIONS.STREAM',
+            'event',
+            (object) => (management.addNodesStream = this.getObjects(object)),
         );
         streamNode.elementType = [ElementType.Node];
         streamNode.permissions = [RestConstants.ACCESS_CC_PUBLISH];
         streamNode.permissionsMode = HideMode.Hide;
-        streamNode.constrains = [Constrain.Files, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
+        streamNode.constrains = [
+            Constrain.Files,
+            Constrain.NoCollectionReference,
+            Constrain.HomeRepository,
+            Constrain.User,
+        ];
         streamNode.toolpermissions = [RestConstants.TOOLPERMISSION_INVITE_STREAM];
         streamNode.group = DefaultGroups.Edit;
         streamNode.priority = 15;
-        streamNode.customShowCallback = ((objects) =>
-                this.configService.instant('stream.enabled', false)
-        );
+        streamNode.customShowCallback = (objects) =>
+            this.configService.instant('stream.enabled', false);
 
-        const licenseNode = new OptionItem('OPTIONS.LICENSE', 'copyright', (object) =>
-            management.nodeLicense = this.getObjects(object)
-        );
+        const licenseNode = new OptionItem('OPTIONS.LICENSE', 'copyright', (object) => {
+            const nodes = this.getObjects(object);
+            void this.dialogs.openLicenseDialog({ kind: 'nodes', nodes });
+        });
         licenseNode.elementType = [ElementType.Node, ElementType.NodeChild];
-        licenseNode.constrains = [Constrain.Files, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
+        licenseNode.constrains = [
+            Constrain.Files,
+            Constrain.NoCollectionReference,
+            Constrain.HomeRepository,
+            Constrain.User,
+        ];
         licenseNode.permissions = [RestConstants.ACCESS_WRITE];
         licenseNode.permissionsMode = HideMode.Disable;
         licenseNode.toolpermissions = [RestConstants.TOOLPERMISSION_LICENSE];
@@ -754,16 +888,23 @@ export class OptionsHelperService implements OnDestroy {
         licenseNode.group = DefaultGroups.Edit;
         licenseNode.priority = 30;
 
-        const contributorNode = new OptionItem('OPTIONS.CONTRIBUTOR', 'group', (object) =>
-            management.nodeContributor = this.getObjects(object)[0]
-        );
-        contributorNode.constrains = [Constrain.Files, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.NoBulk, Constrain.User];
+        const contributorNode = new OptionItem('OPTIONS.CONTRIBUTOR', 'group', (object) => {
+            void this.dialogs.openContributorsDialog({
+                node: this.getObjects(object)[0],
+            });
+        });
+        contributorNode.constrains = [
+            Constrain.Files,
+            Constrain.NoCollectionReference,
+            Constrain.HomeRepository,
+            Constrain.NoBulk,
+            Constrain.User,
+        ];
         contributorNode.permissions = [RestConstants.ACCESS_WRITE];
         contributorNode.permissionsMode = HideMode.Disable;
         contributorNode.onlyDesktop = true;
         contributorNode.group = DefaultGroups.Edit;
         contributorNode.priority = 40;
-
 
         /*
         if (nodes && nodes.length==1 && !nodes[0].isDirectory  && nodes[0].type!=RestConstants.CCM_TYPE_SAVED_SEARCH && nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)==-1) {
@@ -771,10 +912,17 @@ export class OptionsHelperService implements OnDestroy {
             option.isEnabled = this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS);
         }
          */
-        const workflowNode = new OptionItem('OPTIONS.WORKFLOW', 'swap_calls', (object) =>
-            management.nodeWorkflow = this.getObjects(object)
+        const workflowNode = new OptionItem(
+            'OPTIONS.WORKFLOW',
+            'swap_calls',
+            (object) => (management.nodeWorkflow = this.getObjects(object)),
         );
-        workflowNode.constrains = [Constrain.Files, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
+        workflowNode.constrains = [
+            Constrain.Files,
+            Constrain.NoCollectionReference,
+            Constrain.HomeRepository,
+            Constrain.User,
+        ];
         workflowNode.permissions = [RestConstants.ACCESS_CHANGE_PERMISSIONS];
         workflowNode.permissionsMode = HideMode.Disable;
         workflowNode.group = DefaultGroups.Edit;
@@ -796,7 +944,7 @@ export class OptionsHelperService implements OnDestroy {
             return isAllowed;
          */
         const downloadNode = new OptionItem('OPTIONS.DOWNLOAD', 'cloud_download', (object) =>
-            this.nodeHelper.downloadNodes(this.getObjects(object))
+            this.nodeHelper.downloadNodes(this.getObjects(object)),
         );
         downloadNode.elementType = OptionsHelperService.DownloadElementTypes;
         downloadNode.constrains = [Constrain.Files];
@@ -809,8 +957,11 @@ export class OptionsHelperService implements OnDestroy {
             }
             for (const item of nodes) {
                 // if at least one is allowed -> allow download (download servlet will later filter invalid files)
-                if (item.downloadUrl != null && item.properties &&
-                    (!item.properties[RestConstants.CCM_PROP_IO_WWWURL] || !RestNetworkService.isFromHomeRepo(item)) &&
+                if (
+                    item.downloadUrl != null &&
+                    item.properties &&
+                    (!item.properties[RestConstants.CCM_PROP_IO_WWWURL] ||
+                        !RestNetworkService.isFromHomeRepo(item)) &&
                     this.nodeHelper.referenceOriginalExists(item)
                 ) {
                     // bulk upload is not supported for remote nodes
@@ -822,10 +973,21 @@ export class OptionsHelperService implements OnDestroy {
             }
             return false;
         };
-        const downloadMetadataNode = new OptionItem('OPTIONS.DOWNLOAD_METADATA', 'format_align_left', (object) =>
-            this.nodeHelper.downloadNode(this.getObjects(object)[0], RestConstants.NODE_VERSION_CURRENT, true)
+        const downloadMetadataNode = new OptionItem(
+            'OPTIONS.DOWNLOAD_METADATA',
+            'format_align_left',
+            (object) =>
+                this.nodeHelper.downloadNode(
+                    this.getObjects(object)[0],
+                    RestConstants.NODE_VERSION_CURRENT,
+                    true,
+                ),
         );
-        downloadMetadataNode.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodePublishedCopy];
+        downloadMetadataNode.elementType = [
+            ElementType.Node,
+            ElementType.NodeChild,
+            ElementType.NodePublishedCopy,
+        ];
         downloadMetadataNode.constrains = [Constrain.Files, Constrain.NoBulk];
         downloadMetadataNode.scopes = [Scope.Render];
         downloadMetadataNode.group = DefaultGroups.View;
@@ -836,8 +998,11 @@ export class OptionsHelperService implements OnDestroy {
             }
             return nodes[0].downloadUrl != null;
         };
-        const simpleEditNode = new OptionItem('OPTIONS.EDIT_SIMPLE', 'edu-quick_edit', async (object) =>
-            management.nodeSimpleEdit = await this.getObjectsAsync(object, true)
+        const simpleEditNode = new OptionItem(
+            'OPTIONS.EDIT_SIMPLE',
+            'edu-quick_edit',
+            async (object) =>
+                (management.nodeSimpleEdit = await this.getObjectsAsync(object, true)),
         );
         simpleEditNode.constrains = [Constrain.Files, Constrain.HomeRepository, Constrain.User];
         simpleEditNode.permissions = [RestConstants.ACCESS_WRITE];
@@ -846,11 +1011,16 @@ export class OptionsHelperService implements OnDestroy {
         simpleEditNode.group = DefaultGroups.Edit;
         simpleEditNode.priority = 15;
 
-        const editNode = new OptionItem('OPTIONS.EDIT', 'edit', async (object) =>
-            management.nodeMetadata = await this.getObjectsAsync(object, true)
-        );
+        const editNode = new OptionItem('OPTIONS.EDIT', 'edit', async (object) => {
+            const nodes = await this.getObjectsAsync(object, true);
+            void this.dialogs.openMdsEditorDialogForNodes({ nodes });
+        });
         editNode.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.MapRef];
-        editNode.constrains = [Constrain.FilesAndDirectories, Constrain.HomeRepository, Constrain.User];
+        editNode.constrains = [
+            Constrain.FilesAndDirectories,
+            Constrain.HomeRepository,
+            Constrain.User,
+        ];
         editNode.permissions = [RestConstants.ACCESS_WRITE];
         editNode.permissionsMode = HideMode.Disable;
         editNode.permissionsRightMode = NodesRightMode.Original;
@@ -858,7 +1028,7 @@ export class OptionsHelperService implements OnDestroy {
         editNode.priority = 20;
 
         const templateNode = new OptionItem('OPTIONS.TEMPLATE', 'assignment_turned_in', (object) =>
-            management.nodeTemplate = this.getObjects(object)[0]
+            this.dialogs.openNodeTemplateDialog({ node: this.getObjects(object)[0] }),
         );
         templateNode.constrains = [Constrain.NoBulk, Constrain.Directory, Constrain.User];
         templateNode.permissions = [RestConstants.ACCESS_WRITE];
@@ -866,11 +1036,15 @@ export class OptionsHelperService implements OnDestroy {
         templateNode.onlyDesktop = true;
         templateNode.group = DefaultGroups.Edit;
 
-
         const linkMap = new OptionItem('OPTIONS.LINK_MAP', 'link', (node) =>
-            management.linkMap = this.getObjects(node)[0]
+            this.dialogs.openCreateMapLinkDialog({ node: this.getObjects(node)[0] }),
         );
-        linkMap.constrains = [Constrain.NoBulk, Constrain.HomeRepository, Constrain.User, Constrain.Directory];
+        linkMap.constrains = [
+            Constrain.NoBulk,
+            Constrain.HomeRepository,
+            Constrain.User,
+            Constrain.Directory,
+        ];
         linkMap.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_MAP_LINK];
         linkMap.toolpermissionsMode = HideMode.Hide;
         linkMap.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
@@ -887,54 +1061,76 @@ export class OptionsHelperService implements OnDestroy {
          options.push(new OptionItem('OPTIONS.COPY', 'content_copy', (node: Node) => this.cutCopyNode(node, true)));
          */
         const cutNodes = new OptionItem('OPTIONS.CUT', 'content_cut', (node) =>
-            this.cutCopyNode(node, false)
+            this.cutCopyNode(node, false),
         );
         cutNodes.elementType = [ElementType.Node, ElementType.SavedSearch, ElementType.MapRef];
         cutNodes.constrains = [Constrain.HomeRepository, Constrain.User];
         cutNodes.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
         cutNodes.permissions = [RestConstants.ACCESS_WRITE];
         cutNodes.permissionsMode = HideMode.Disable;
-        cutNodes.key = 'KeyX';
-        cutNodes.keyCombination = [KeyCombination.CtrlOrAppleCmd];
+        cutNodes.keyboardShortcut = {
+            keyCode: 'KeyX',
+            modifiers: ['Ctrl/Cmd'],
+        };
         cutNodes.group = DefaultGroups.FileOperations;
         cutNodes.priority = 10;
 
         const copyNodes = new OptionItem('OPTIONS.COPY', 'content_copy', (node) =>
-            this.cutCopyNode(node, true)
+            this.cutCopyNode(node, true),
         );
         // do not allow copy of map links if tp is missing
-        copyNodes.customEnabledCallback = ((node) =>
-                node?.some((n) => this.getTypeSingle(n) === ElementType.MapRef) ?
-                    this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_MAP_LINK) : true
-        );
+        copyNodes.customEnabledCallback = (node) =>
+            node?.some((n) => this.getTypeSingle(n) === ElementType.MapRef)
+                ? this.connector.hasToolPermissionInstant(
+                      RestConstants.TOOLPERMISSION_CREATE_MAP_LINK,
+                  )
+                : true;
 
         copyNodes.elementType = [ElementType.Node, ElementType.SavedSearch, ElementType.MapRef];
         copyNodes.constrains = [Constrain.HomeRepository, Constrain.User];
         copyNodes.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
-        copyNodes.key = 'KeyC';
-        copyNodes.keyCombination = [KeyCombination.CtrlOrAppleCmd];
+        copyNodes.keyboardShortcut = {
+            keyCode: 'KeyC',
+            modifiers: ['Ctrl/Cmd'],
+        };
         copyNodes.group = DefaultGroups.FileOperations;
         copyNodes.priority = 20;
 
         const pasteNodes = new OptionItem('OPTIONS.PASTE', 'content_paste', (node) =>
-            this.pasteNode()
+            this.pasteNode(),
         );
         pasteNodes.elementType = [ElementType.Unknown];
-        pasteNodes.constrains = [Constrain.NoSelection, Constrain.ClipboardContent, Constrain.AddObjects, Constrain.User];
-        pasteNodes.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS, RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES];
+        pasteNodes.constrains = [
+            Constrain.NoSelection,
+            Constrain.ClipboardContent,
+            Constrain.AddObjects,
+            Constrain.User,
+        ];
+        pasteNodes.toolpermissions = [
+            RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS,
+            RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,
+        ];
         pasteNodes.scopes = [Scope.WorkspaceList];
-        pasteNodes.key = 'KeyV';
-        pasteNodes.keyCombination = [KeyCombination.CtrlOrAppleCmd];
+        pasteNodes.keyboardShortcut = {
+            keyCode: 'KeyV',
+            modifiers: ['Ctrl/Cmd'],
+        };
         pasteNodes.group = DefaultGroups.FileOperations;
 
         const deleteNode = new OptionItem('OPTIONS.DELETE', 'delete', (object) => {
-            management.nodeDelete = this.getObjects(object);
+            void this.dialogs.openDeleteNodesDialog({ nodes: this.getObjects(object) });
         });
         deleteNode.elementType = [ElementType.Node, ElementType.SavedSearch, ElementType.MapRef];
-        deleteNode.constrains = [Constrain.HomeRepository, Constrain.NoCollectionReference, Constrain.User];
+        deleteNode.constrains = [
+            Constrain.HomeRepository,
+            Constrain.NoCollectionReference,
+            Constrain.User,
+        ];
         deleteNode.permissions = [RestConstants.PERMISSION_DELETE];
         deleteNode.permissionsMode = HideMode.Hide;
-        deleteNode.key = 'Delete';
+        deleteNode.keyboardShortcut = {
+            keyCode: 'Delete',
+        };
         deleteNode.group = DefaultGroups.Delete;
         deleteNode.priority = 10;
 
@@ -942,29 +1138,41 @@ export class OptionsHelperService implements OnDestroy {
             management.nodeImportUnblock = this.getObjects(object);
         });
         unblockNode.elementType = [ElementType.NodeBlockedImport];
-        unblockNode.constrains = [Constrain.HomeRepository, Constrain.NoCollectionReference, Constrain.User];
+        unblockNode.constrains = [
+            Constrain.HomeRepository,
+            Constrain.NoCollectionReference,
+            Constrain.User,
+        ];
         unblockNode.permissions = [RestConstants.PERMISSION_DELETE];
         unblockNode.permissionsMode = HideMode.Hide;
         unblockNode.group = DefaultGroups.Edit;
         unblockNode.priority = 10;
 
-
         const unpublishNode = new OptionItem('OPTIONS.UNPUBLISH', 'cloud_off', (object) => {
-            management.nodeDelete = this.getObjects(object);
+            void this.dialogs.openDeleteNodesDialog({ nodes: this.getObjects(object) });
         });
         unpublishNode.elementType = [ElementType.NodePublishedCopy];
-        unpublishNode.constrains = [Constrain.HomeRepository, Constrain.NoCollectionReference, Constrain.User];
+        unpublishNode.constrains = [
+            Constrain.HomeRepository,
+            Constrain.NoCollectionReference,
+            Constrain.User,
+        ];
         unpublishNode.permissions = [RestConstants.PERMISSION_DELETE];
         unpublishNode.permissionsMode = HideMode.Hide;
         unpublishNode.group = DefaultGroups.Delete;
         unpublishNode.priority = 10;
 
-
-        const removeNodeRef =  new OptionItem('OPTIONS.REMOVE_REF', 'remove_circle_outline', (object) =>
-            this.removeFromCollection(this.getObjects(object))
+        const removeNodeRef = new OptionItem(
+            'OPTIONS.REMOVE_REF',
+            'remove_circle_outline',
+            (object) => this.removeFromCollection(this.getObjects(object)),
         );
         removeNodeRef.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
-        removeNodeRef.constrains = [Constrain.HomeRepository, Constrain.CollectionReference, Constrain.User];
+        removeNodeRef.constrains = [
+            Constrain.HomeRepository,
+            Constrain.CollectionReference,
+            Constrain.User,
+        ];
         removeNodeRef.permissions = [RestConstants.PERMISSION_DELETE];
         removeNodeRef.permissionsMode = HideMode.Disable;
         removeNodeRef.scopes = [Scope.CollectionsReferences, Scope.Render];
@@ -982,12 +1190,12 @@ export class OptionsHelperService implements OnDestroy {
         options.push(report);
          */
         const reportNode = new OptionItem('OPTIONS.NODE_REPORT', 'flag', (node) =>
-            this.dialogs.openNodeReportDialog({ node: this.getObjects(node)[0] })
+            this.dialogs.openNodeReportDialog({ node: this.getObjects(node)[0] }),
         );
         reportNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         reportNode.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository];
         reportNode.scopes = [Scope.Search, Scope.CollectionsReferences, Scope.Render];
-        reportNode.customShowCallback = (() => this.configService.instant('nodeReport', false));
+        reportNode.customShowCallback = () => this.configService.instant('nodeReport', false);
         reportNode.group = DefaultGroups.View;
         reportNode.priority = 60;
 
@@ -1009,6 +1217,19 @@ export class OptionsHelperService implements OnDestroy {
         embedNode.group = DefaultGroups.View;
         embedNode.priority = 80;
 
+        const relationNode = new OptionItem('OPTIONS.RELATIONS', 'swap_horiz', async (node) => {
+            const nodes = await this.getObjectsAsync(node, true);
+            void this.dialogs.openNodeRelationsDialog({ node: nodes[0] });
+        });
+        relationNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
+        relationNode.constrains = [Constrain.NoBulk, Constrain.User];
+        relationNode.scopes = [Scope.Render];
+        relationNode.toolpermissions = [RestConstants.TOOLPERMISSION_MANAGE_RELATIONS];
+        relationNode.permissions = [RestConstants.PERMISSION_WRITE];
+        relationNode.permissionsRightMode = NodesRightMode.Original;
+        relationNode.group = DefaultGroups.Edit;
+        relationNode.priority = 70;
+
         /**
          * if (this.isAllowedToEditCollection()) {
             this.optionsCollection.push(
@@ -1018,9 +1239,14 @@ export class OptionsHelperService implements OnDestroy {
             );
         }*/
         const editCollection = new OptionItem('OPTIONS.COLLECTION_EDIT', 'edit', (object) =>
-            this.editCollection(this.getObjects(object)[0])
+            this.editCollection(this.getObjects(object)[0]),
         );
-        editCollection.constrains = [Constrain.HomeRepository, Constrain.Collections, Constrain.NoBulk, Constrain.User];
+        editCollection.constrains = [
+            Constrain.HomeRepository,
+            Constrain.Collections,
+            Constrain.NoBulk,
+            Constrain.User,
+        ];
         editCollection.permissions = [RestConstants.ACCESS_WRITE];
         editCollection.permissionsMode = HideMode.Hide;
         editCollection.showAsAction = true;
@@ -1036,55 +1262,67 @@ export class OptionsHelperService implements OnDestroy {
             );
         }
         */
-        const pinCollection = new OptionItem('OPTIONS.COLLECTION_PIN', 'edu-pin', (object) =>
-            management.addPinnedCollection = this.getObjects(object)[0]
+        const pinCollection = new OptionItem(
+            'OPTIONS.COLLECTION_PIN',
+            'edu-pin',
+            (object) => (management.addPinnedCollection = this.getObjects(object)[0]),
         );
-        pinCollection.constrains = [Constrain.HomeRepository, Constrain.Collections, Constrain.NoBulk, Constrain.User];
+        pinCollection.constrains = [
+            Constrain.HomeRepository,
+            Constrain.Collections,
+            Constrain.NoBulk,
+            Constrain.User,
+        ];
         pinCollection.permissions = [RestConstants.ACCESS_WRITE];
         pinCollection.permissionsMode = HideMode.Hide;
         pinCollection.toolpermissions = [RestConstants.TOOLPERMISSION_COLLECTION_PINNING];
         pinCollection.group = DefaultGroups.Edit;
         pinCollection.priority = 20;
 
-        const feedbackCollection = new OptionItem('OPTIONS.COLLECTION_FEEDBACK', 'chat_bubble', (object) =>
-            management.collectionWriteFeedback = this.getObjects(object)[0]
+        const feedbackMaterial = new OptionItem(
+            'OPTIONS.MATERIAL_FEEDBACK',
+            'chat_bubble',
+            (object) => this.dialogs.openSendFeedbackDialog({ node: this.getObjects(object)[0] }),
         );
-        feedbackCollection.constrains = [Constrain.HomeRepository, Constrain.Collections, Constrain.NoBulk, Constrain.User];
-        feedbackCollection.permissions = [RestConstants.PERMISSION_FEEDBACK];
-        feedbackCollection.permissionsMode = HideMode.Hide;
-        feedbackCollection.toolpermissions = [RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK];
-        feedbackCollection.group = DefaultGroups.View;
-        feedbackCollection.priority = 10;
+        feedbackMaterial.constrains = [
+            Constrain.HomeRepository,
+            Constrain.Files,
+            Constrain.NoBulk,
+            Constrain.User,
+        ];
+        feedbackMaterial.permissions = [RestConstants.PERMISSION_FEEDBACK];
+        feedbackMaterial.permissionsRightMode = NodesRightMode.Original;
+        feedbackMaterial.scopes = [Scope.Render];
+        feedbackMaterial.permissionsMode = HideMode.Hide;
+        feedbackMaterial.toolpermissions = [RestConstants.TOOLPERMISSION_MATERIAL_FEEDBACK];
+        feedbackMaterial.group = DefaultGroups.View;
+        feedbackMaterial.priority = 15;
         // feedback is only shown for non-managers
-        feedbackCollection.customShowCallback = ((objects) =>
-                objects && objects[0].access && objects[0].access.indexOf(RestConstants.ACCESS_WRITE) === -1
-        );
-        /*
-         if (
-         this.feedbackAllowed() &&
-         !this.isAllowedToDeleteCollection() &&
-         this.connector.hasToolPermissionInstant(
-         RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK,
-         )
-         ) {
-            this.optionsCollection.push(
-                new OptionItem(
-                    'COLLECTIONS.ACTIONBAR.FEEDBACK',
-                    'chat_bubble',
-                    () => this.collectionFeedback(true),
-                ),
+        feedbackMaterial.customShowCallback = (objects) =>
+            !this.nodeHelper.getNodesRight(
+                objects,
+                RestConstants.ACCESS_WRITE,
+                NodesRightMode.Original,
             );
-        }
-         */
-        const feedbackCollectionView = new OptionItem('OPTIONS.COLLECTION_FEEDBACK_VIEW', 'speaker_notes', (object) =>
-            management.collectionViewFeedback = this.getObjects(object)[0]
+
+        const feedbackMaterialView = new OptionItem(
+            'OPTIONS.MATERIAL_FEEDBACK_VIEW',
+            'speaker_notes',
+            (object) => (management.materialViewFeedback = this.getObjects(object)[0]),
         );
-        feedbackCollectionView.constrains = [Constrain.HomeRepository, Constrain.Collections, Constrain.NoBulk, Constrain.User];
-        feedbackCollectionView.permissions = [RestConstants.ACCESS_DELETE];
-        feedbackCollectionView.permissionsMode = HideMode.Hide;
-        feedbackCollectionView.toolpermissions = [RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK];
-        feedbackCollectionView.group = DefaultGroups.View;
-        feedbackCollectionView.priority = 20;
+        feedbackMaterialView.constrains = [
+            Constrain.HomeRepository,
+            Constrain.Files,
+            Constrain.NoBulk,
+            Constrain.User,
+        ];
+        feedbackMaterialView.scopes = [Scope.Render];
+        feedbackMaterialView.permissions = [RestConstants.ACCESS_DELETE];
+        feedbackMaterialView.permissionsRightMode = NodesRightMode.Original;
+        feedbackMaterialView.permissionsMode = HideMode.Hide;
+        feedbackMaterialView.toolpermissions = [RestConstants.TOOLPERMISSION_MATERIAL_FEEDBACK];
+        feedbackMaterialView.group = DefaultGroups.View;
+        feedbackMaterialView.priority = 20;
 
         const setDisplayType = (viewType: number, emit = true) => {
             switch (viewType) {
@@ -1099,14 +1337,18 @@ export class OptionsHelperService implements OnDestroy {
                     toggleViewType.icon = 'list';
                     break;
             }
-            if(emit) {
-                this.listener?.onDisplayTypeChange?.(this.list.getDisplayType());
+            if (emit) {
+                this.displayTypeChanged.emit(this.list.getDisplayType());
             }
         };
         const toggleViewType = new OptionItem('', '', () => {
             switch (this.list.getDisplayType()) {
-                case NodeEntriesDisplayType.Table: setDisplayType(NodeEntriesDisplayType.Grid); break;
-                case NodeEntriesDisplayType.Grid: setDisplayType(NodeEntriesDisplayType.Table); break;
+                case NodeEntriesDisplayType.Table:
+                    setDisplayType(NodeEntriesDisplayType.Grid);
+                    break;
+                case NodeEntriesDisplayType.Grid:
+                    setDisplayType(NodeEntriesDisplayType.Table);
+                    break;
             }
         });
         setDisplayType(this.list?.getDisplayType(), false);
@@ -1140,14 +1382,35 @@ export class OptionsHelperService implements OnDestroy {
             this.infoToggle.isToggle = true;
             options.push(this.infoToggle);
          */
-        const metadataSidebar = new OptionItem('OPTIONS.METADATA_SIDEBAR', 'info_outline', (object) => {
-            management.nodeSidebarChange.subscribe((change: Node) => {
-                metadataSidebar.icon = change ? 'info' : 'info_outline';
-            });
-            management.nodeSidebar = management.nodeSidebar ? null : this.getObjects(object)[0];
-            management.nodeSidebarChange.emit(management.nodeSidebar);
-
-        });
+        let metadataSidebarSubscription: Subscription;
+        const metadataSidebar = new OptionItem(
+            'OPTIONS.METADATA_SIDEBAR',
+            'info_outline',
+            (object) => {
+                management.nodeSidebarChange.subscribe((change: Node) => {
+                    metadataSidebar.icon = change ? 'info' : 'info_outline';
+                });
+                management.nodeSidebar = management.nodeSidebar ? null : this.getObjects(object)[0];
+                if (management.nodeSidebar == null) {
+                    metadataSidebarSubscription?.unsubscribe();
+                } else {
+                    metadataSidebarSubscription = this.list
+                        ?.getSelection()
+                        .changed.subscribe((selection) => {
+                            if (selection.source.selected.length === 0) {
+                                return;
+                            }
+                            if (management.nodeSidebar == null) {
+                                metadataSidebarSubscription?.unsubscribe();
+                                return;
+                            }
+                            management.nodeSidebar = selection.source.selected[0] as Node;
+                            management.nodeSidebarChange.emit(management.nodeSidebar);
+                        });
+                }
+                management.nodeSidebarChange.emit(management.nodeSidebar);
+            },
+        );
         metadataSidebar.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         metadataSidebar.scopes = [Scope.WorkspaceList];
         metadataSidebar.constrains = [Constrain.NoBulk];
@@ -1158,14 +1421,15 @@ export class OptionsHelperService implements OnDestroy {
         options.push(debugNode);
         options.push(acceptProposal);
         options.push(declineProposal);
+        options.push(openOriginalNode);
         options.push(openParentNode);
         options.push(openNode);
         options.push(editConnectorNode);
         options.push(bookmarkNode);
         options.push(editCollection);
         options.push(pinCollection);
-        options.push(feedbackCollection);
-        options.push(feedbackCollectionView);
+        options.push(feedbackMaterial);
+        options.push(feedbackMaterialView);
         options.push(simpleEditNode);
         options.push(editNode);
         // add to collection
@@ -1182,6 +1446,7 @@ export class OptionsHelperService implements OnDestroy {
         options.push(downloadNode);
         options.push(downloadMetadataNode);
         options.push(qrCodeNode);
+        options.push(relationNode);
         options.push(embedNode);
         options.push(linkMap);
         options.push(cutNodes);
@@ -1195,14 +1460,39 @@ export class OptionsHelperService implements OnDestroy {
         options.push(toggleViewType);
         options.push(metadataSidebar);
 
+        if (this.data.postPrepareOptions) {
+            this.data.postPrepareOptions(options, objects);
+        }
         return options;
     }
 
-    private editConnector(node: Node|any, type: Filetype = null, win: any = null, connectorType: Connector = null) {
-        UIHelper.openConnector(this.connectors, this.iamService, this.eventService, this.toast, node, type, win, connectorType);
+    private editConnector(
+        node: Node | any,
+        type: Filetype = null,
+        win: any = null,
+        connectorType: Connector = null,
+    ) {
+        if (node.aspects?.includes('ccm:ltitool_node')) {
+            UIHelper.openLTIResourceLink(node);
+        } else {
+            UIHelper.openConnector(
+                this.connectors,
+                this.iamService,
+                this.eventService,
+                this.toast,
+                node,
+                type,
+                win,
+                connectorType,
+            );
+        }
     }
+
     private canAddObjects() {
-        return this.data.parent && this.nodeHelper.getNodesRight([this.data.parent], RestConstants.ACCESS_ADD_CHILDREN);
+        return (
+            this.data.parent &&
+            this.nodeHelper.getNodesRight([this.data.parent], RestConstants.ACCESS_ADD_CHILDREN)
+        );
     }
 
     private addVirtualObjects(objects: any[]) {
@@ -1210,9 +1500,7 @@ export class OptionsHelperService implements OnDestroy {
             o.virtual = true;
             return o;
         });
-        if (this.listener && this.listener.onVirtualNodes) {
-            this.listener.onVirtualNodes(objects);
-        }
+        this.virtualNodesAdded.emit(objects);
         if (this.list) {
             this.list.addVirtualNodes(objects);
         }
@@ -1220,84 +1508,143 @@ export class OptionsHelperService implements OnDestroy {
 
     private bookmarkNodes(nodes: Node[]) {
         this.bridge.showProgressDialog();
-        this.nodeStore.add(nodes).subscribe(() => {
-            this.bridge.closeModalDialog()
+        this.addToNodeStore(nodes).subscribe(() => {
+            this.bridge.closeModalDialog();
         });
+    }
+
+    private addToNodeStore(nodes: Node[]): Observable<void> {
+        return this.nodeList
+            .addToNodeList(
+                RestConstants.NODE_STORE_LIST,
+                nodes.map((node) => node.ref.id),
+            )
+            .pipe(
+                tap(() => {
+                    this.toast.toast('SEARCH.ADDED_TO_NODE_STORE', {
+                        count: nodes.length,
+                    });
+                }),
+                catchError((errors: NodeListErrorResponses) => {
+                    const numberSuccessful = nodes.length - errors.length;
+                    if (numberSuccessful > 0) {
+                        this.toast.toast('SEARCH.ADDED_TO_NODE_STORE', {
+                            count: numberSuccessful,
+                        });
+                    }
+                    for (const { nodeId, error } of errors) {
+                        if (error.status === RestConstants.DUPLICATE_NODE_RESPONSE) {
+                            this.toast.error(null, 'SEARCH.ADDED_TO_NODE_STORE_EXISTS', {
+                                name: RestHelper.getTitle(
+                                    nodes.find((node) => node.ref.id === nodeId),
+                                ),
+                            });
+                            error.preventDefault();
+                        }
+                    }
+                    return of(void 0);
+                }),
+            );
     }
 
     /**
      * overwrite all the show callbacks by using the internal constrains + permission handlers
      * isOptionAvailable will check if customShowCallback exists and will also call it
      */
-    private handleCallbacks(options: OptionItem[], objects: Node[]|any) {
+    private handleCallbacks(options: OptionItem[], objects: Node[] | any) {
         options.forEach((o) => {
-            o.showCallback = ((object) => {
+            o.showCallback = (object) => {
                 const list = NodeHelperService.getActionbarNodes(objects, object);
                 return this.isOptionAvailable(o, list);
-            });
-            o.enabledCallback = ((object) => {
+            };
+            o.enabledCallback = (object) => {
                 const list = NodeHelperService.getActionbarNodes(objects, object);
                 return this.isOptionEnabled(o, list);
-            });
+            };
         });
     }
 
     private goToWorkspace(node: Node | any) {
-        if (node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1) {
-            this.nodeService.getNodeMetadata(node.properties[RestConstants.CCM_PROP_IO_ORIGINAL][0]).subscribe((org) =>
-                UIHelper.goToWorkspace(this.nodeService, this.router, this.connector.getCurrentLogin(), org.node)
-            );
+        if (node.aspects.includes(RestConstants.CCM_ASPECT_IO_REFERENCE)) {
+            this.nodeService
+                .getNodeMetadata(node.properties[RestConstants.CCM_PROP_IO_ORIGINAL][0])
+                .subscribe((org) =>
+                    UIHelper.goToWorkspace(
+                        this.nodeService,
+                        this.router,
+                        this.connector.getCurrentLogin(),
+                        org.node,
+                    ),
+                );
         } else {
-            UIHelper.goToWorkspace(this.nodeService, this.router, this.connector.getCurrentLogin(), node);
+            UIHelper.goToWorkspace(
+                this.nodeService,
+                this.router,
+                this.connector.getCurrentLogin(),
+                node,
+            );
         }
     }
+
     async getObjectsAsync(object: Node | any, resolveOriginals = false) {
-        const nodes = NodeHelperService.getActionbarNodes(this.data.selectedObjects || this.data.activeObjects, object);
-        if(resolveOriginals) {
+        const nodes = NodeHelperService.getActionbarNodes(
+            this.data.selectedObjects || this.data.activeObjects,
+            object,
+        );
+        if (resolveOriginals) {
             const originals = await observableForkJoin(
                 nodes.map((n) => {
-                    if(n.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1) {
-                        return this.nodeService.getNodeMetadata(n.properties[RestConstants.CCM_PROP_IO_ORIGINAL][0])
-                    } else if(n.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL) {
+                    if (n.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1) {
+                        return this.nodeService.getNodeMetadata(
+                            n.properties[RestConstants.CCM_PROP_IO_ORIGINAL][0],
+                            [RestConstants.ALL],
+                        );
+                    } else if (n.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL) {
                         return this.nodeService.getNodeMetadata(
                             RestHelper.removeSpacesStoreRef(
-                                n.properties[RestConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET][0]
-                            )
+                                n.properties[RestConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET][0],
+                            ),
+                            [RestConstants.ALL],
                         );
                     } else {
                         return of({
-                            node: n
+                            node: n,
                         });
                     }
-                })
+                }),
             ).toPromise();
             return originals.map((o) => o.node);
         }
         return nodes;
     }
-    public getObjects(object: Node | any) {
-        return NodeHelperService.getActionbarNodes(this.data.selectedObjects || this.data.activeObjects, object);
+
+    getObjects(object: Node | any) {
+        return NodeHelperService.getActionbarNodes(
+            this.data.selectedObjects || this.data.activeObjects,
+            object,
+        );
     }
 
     applyExternalOptions(options: OptionItem[]) {
         if (!this.data.customOptions) {
             return options;
         }
-        if (!this.data.customOptions.useDefaultOptions) {
+        const customOptions = { ...new CustomOptions(), ...this.data.customOptions };
+        if (!customOptions.useDefaultOptions) {
             options = [];
         }
-        if (this.data.customOptions.supportedOptions && isArray(this.data.customOptions.supportedOptions)) {
-            options = options.filter((o) => this.data.customOptions.supportedOptions.indexOf(o.name) !== -1);
-        } else if (this.data.customOptions.removeOptions) {
-            for (const option of this.data.customOptions.removeOptions) {
+        if (customOptions.supportedOptions && isArray(customOptions.supportedOptions)) {
+            options = options.filter((o) => customOptions.supportedOptions.indexOf(o.name) !== -1);
+        } else if (customOptions.removeOptions) {
+            for (const option of customOptions.removeOptions) {
                 const index = options.findIndex((o) => o.name === option);
                 if (index !== -1) {
                     options.splice(index, 1);
                 }
             }
         }
-        if (this.data.customOptions.addOptions) {
-            for (const option of this.data.customOptions.addOptions) {
+        if (customOptions.addOptions) {
+            for (const option of customOptions.addOptions) {
                 const existing = options.filter((o) => o.name === option.name);
                 if (existing.length === 1) {
                     // only replace changed values
@@ -1311,38 +1658,58 @@ export class OptionsHelperService implements OnDestroy {
         }
         return options;
     }
+
     getData() {
         return this.data;
     }
+
     setData(data: OptionData) {
         this.data = data;
+        this.wrapOptionCallbacks();
     }
+
+    private wrapOptionCallbacks(): void {
+        if (this.data.customOptions?.addOptions) {
+            for (const option of this.data.customOptions.addOptions) {
+                const callback = option.callback;
+                option.callback = (node) => callback(node, this.getObjects(node));
+            }
+        }
+    }
+
     private sortOptionsByGroup(options: OptionItem[]) {
         if (!options) {
             return null;
         }
         let result: OptionItem[] = [];
         let groups = Array.from(new Set(options.map((o) => o.group)));
-        groups = groups.sort((o1, o2) => o1.priority > o2.priority ? 1 : -1);
+        groups = groups.sort((o1, o2) => (o1.priority > o2.priority ? 1 : -1));
         for (const group of groups) {
             const groupOptions = options.filter((o) => o.group === group);
             if (group == null) {
-                console.warn('There are options not assigned to a group. All options should be assigned to a group', groupOptions);
+                console.warn(
+                    'There are options not assigned to a group. All options should be assigned to a group',
+                    groupOptions,
+                );
             }
-            groupOptions.sort((o1, o2) => o1.priority > o2.priority ? 1 : -1);
+            groupOptions.sort((o1, o2) => (o1.priority > o2.priority ? 1 : -1));
             result = result.concat(groupOptions);
         }
         return result;
     }
 
-    private objectsMatchesConstrains(constrains: Constrain[], objects: Node[]|any[]) {
+    private objectsMatchesConstrains(constrains: Constrain[], objects: Node[] | any[]) {
         if (constrains.indexOf(Constrain.NoCollectionReference) !== -1) {
-            if (objects.some((o) => o.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1)) {
+            if (
+                objects.some((o) => o.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1)
+            ) {
                 return Constrain.NoCollectionReference;
             }
         }
         if (constrains.indexOf(Constrain.CollectionReference) !== -1) {
-            if (objects.some((o) => o.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) === -1)) {
+            if (
+                objects.some((o) => o.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) === -1)
+            ) {
                 return Constrain.CollectionReference;
             }
         }
@@ -1357,7 +1724,12 @@ export class OptionsHelperService implements OnDestroy {
             }
         }
         if (constrains.indexOf(Constrain.Collections) !== -1) {
-            if (objects.some((o) => !(o.collection && o.aspects?.includes(RestConstants.CCM_ASPECT_COLLECTION)))) {
+            if (
+                objects.some(
+                    (o) =>
+                        !(o.collection && o.aspects?.includes(RestConstants.CCM_ASPECT_COLLECTION)),
+                )
+            ) {
                 return Constrain.Collections;
             }
         }
@@ -1367,7 +1739,14 @@ export class OptionsHelperService implements OnDestroy {
             }
         }
         if (constrains.indexOf(Constrain.FilesAndDirectories) !== -1) {
-            if (objects.some((o) => o.collection || o.type !== RestConstants.CCM_TYPE_IO && o.type !== RestConstants.CCM_TYPE_MAP)) {
+            if (
+                objects.some(
+                    (o) =>
+                        o.collection ||
+                        (o.type !== RestConstants.CCM_TYPE_IO &&
+                            o.type !== RestConstants.CCM_TYPE_MAP),
+                )
+            ) {
                 return Constrain.FilesAndDirectories;
             }
         }
@@ -1377,20 +1756,33 @@ export class OptionsHelperService implements OnDestroy {
             }
         }
         if (constrains.indexOf(Constrain.AdminOrDebug) !== -1) {
-            if (!this.connectors.getRestConnector().getCurrentLogin().isAdmin &&
-                !(window as any).esDebug) {
+            if (
+                !this.connectors.getRestConnector().getCurrentLogin().isAdmin &&
+                !(window as any).esDebug
+            ) {
                 return Constrain.AdminOrDebug;
             }
         }
         if (constrains.indexOf(Constrain.User) !== -1) {
-            if (this.connectors.getRestConnector().getCurrentLogin() &&
-                this.connectors.getRestConnector().getCurrentLogin().statusCode !== RestConstants.STATUS_CODE_OK) {
+            if (
+                this.connectors.getRestConnector().getCurrentLogin() &&
+                this.connectors.getRestConnector().getCurrentLogin().statusCode !==
+                    RestConstants.STATUS_CODE_OK
+            ) {
                 return Constrain.User;
             }
         }
         if (constrains.indexOf(Constrain.LTIMode) !== -1) {
             if (!this.connectors.getRestConnector().getCurrentLogin().ltiSession) {
                 return Constrain.LTIMode;
+            }
+        }
+        if (constrains.indexOf(Constrain.NoScope) !== -1) {
+            if (
+                this.connectors.getRestConnector().getCurrentLogin() &&
+                !!this.connectors.getRestConnector().getCurrentLogin().currentScope
+            ) {
+                return Constrain.NoScope;
             }
         }
         if (constrains.indexOf(Constrain.NoSelection) !== -1) {
@@ -1421,17 +1813,26 @@ export class OptionsHelperService implements OnDestroy {
         return null;
     }
 
-    private removeFromCollection(objects: Node[] | any) {
-        observableForkJoin(objects.map((o: Node|any) =>
-            this.collectionService.removeFromCollection(o.ref.id, this.data.parent.ref.id)
-        )).subscribe(() =>
-                this.listener.onDelete({objects, error: false, count: objects.length})
-            , (error) =>
-                this.listener.onDelete({objects, error: true, count: objects.length})
-        );
+    private removeFromCollection(nodes: Node[]) {
+        forkJoinWithErrors(
+            nodes.map((node: Node) =>
+                this.collectionService
+                    .removeFromCollection(node.ref.id, this.data.parent.ref.id)
+                    .pipe(map(() => node)),
+            ),
+        ).subscribe(({ successes: deletedNodes, errors }) => {
+            if (errors.length > 0) {
+                this.toast.error(errors[0]);
+            } else {
+                this.toast.toast('COLLECTIONS.REMOVED_FROM_COLLECTION');
+            }
+            if (deletedNodes.length > 0) {
+                this.localEvents.nodesDeleted.emit(deletedNodes);
+            }
+        });
     }
 
-    private editCollection(object: Node|any) {
+    private editCollection(object: Node | any) {
         UIHelper.goToCollection(this.router, object, 'edit');
     }
 
@@ -1441,7 +1842,7 @@ export class OptionsHelperService implements OnDestroy {
      * @param target
      * @param objects
      */
-    public filterOptions(options: OptionItem[], target: Target, objects: Node[]|any = null) {
+    filterOptions(options: OptionItem[], target: Target, objects: Node[] | any = null) {
         if (target === Target.List) {
             /*let optionsAlways = options.filter((o) => o.showAlways);
             const optionsOthers = options.filter((o) => !o.showAlways);
@@ -1455,38 +1856,27 @@ export class OptionsHelperService implements OnDestroy {
         options = this.sortOptionsByGroup(options);
         return options;
     }
-    clearSubscription() {
-        if (this.localSubscripitionDown) {
-            this.localSubscripitionDown.unsubscribe();
-            this.localSubscripitionUp.unsubscribe();
-        }
-        OptionsHelperService.subscriptionDown = OptionsHelperService.subscriptionDown.filter((s) => s !== this.localSubscripitionDown);
-        OptionsHelperService.subscriptionUp = OptionsHelperService.subscriptionUp.filter((s) => s !== this.localSubscripitionUp);
+
+    registerGlobalKeyboardShortcuts() {
+        this.ngZone.runOutsideAngular(() => {
+            if (!this.keyboardShortcutsSubscription) {
+                this.keyboardShortcutsSubscription = fromEvent(document, 'keydown')
+                    .pipe(takeUntil(this.destroyed))
+                    .subscribe((event: KeyboardEvent) => this.handleKeyboardEvent(event));
+            }
+        });
     }
-    initSubscription() {
-        this.clearSubscription();
-        this.localSubscripitionUp = fromEvent(document, 'keyup').subscribe((event) =>
-            this.handleKeyboardEventUp(event)
-        );
-        OptionsHelperService.subscriptionUp.push(this.localSubscripitionUp);
-        this.localSubscripitionDown = fromEvent(document, 'keydown').subscribe((event: KeyboardEvent) =>
-            this.handleKeyboardEvent(event)
-        );
-        OptionsHelperService.subscriptionDown.push(this.localSubscripitionDown);
-    }
-}
-export interface OptionsListener {
-    onVirtualNodes?: (nodes: Node[]) => void;
-    onRefresh?: (nodes: Node[]|void) => void;
-    onDelete?: (result: { objects: Node[] | any; count: number; error: boolean }) => void;
-    onDisplayTypeChange?: (displayType: NodeEntriesDisplayType) => void;
-}
-export interface OptionData {
-    scope: Scope;
-    activeObjects?: Node[]|any[];
-    selectedObjects?: Node[] | any[];
-    allObjects?: Node[] | any[];
-    parent?: Node|any;
-    customOptions?: CustomOptions;
 }
 
+export interface OptionData {
+    scope: Scope;
+    activeObjects?: Node[] | any[];
+    selectedObjects?: Node[] | any[];
+    allObjects?: Node[] | any[];
+    parent?: Node | any;
+    customOptions?: CustomOptions;
+    /**
+     * custom interceptor to modify the default options array
+     */
+    postPrepareOptions?: (options: OptionItem[], objects: Node[]) => void;
+}

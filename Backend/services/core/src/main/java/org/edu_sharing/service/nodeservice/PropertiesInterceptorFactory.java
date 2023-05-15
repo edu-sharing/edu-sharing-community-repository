@@ -21,7 +21,7 @@ public class PropertiesInterceptorFactory {
         synchronized (PropertiesInterceptorFactory.class) {
             try {
                 List<String> className = new ArrayList<>(LightbendConfigLoader.get().getStringList(key));
-                ArrayList<Class<?>> clazz = className.stream().map((String className1) -> {
+                ArrayList<Class<?>> clazz = (ArrayList<Class<?>>)className.stream().map((String className1) -> {
                     try {
                         return Class.forName(className1);
                     } catch (ClassNotFoundException e) {
@@ -82,11 +82,12 @@ public class PropertiesInterceptorFactory {
         propertiesSetInterceptors = null;
     }
 
-    public static PropertiesGetInterceptor.PropertiesContext getPropertiesContext(NodeRef nodeRef, Map<String,Object> properties, List<String> aspects){
+    public static PropertiesGetInterceptor.PropertiesContext getPropertiesContext(NodeRef nodeRef, Map<String,Object> properties, List<String> aspects, Map<String, Object> elasticsearchSource){
         PropertiesGetInterceptor.PropertiesContext propertiesContext = new PropertiesGetInterceptor.PropertiesContext();
         propertiesContext.setProperties(properties);
         propertiesContext.setAspects(aspects);
         propertiesContext.setNodeRef(nodeRef);
+        propertiesContext.setElasticsearchSource(elasticsearchSource);
         propertiesContext.setSource(CallSourceHelper.getCallSource());
         return propertiesContext;
     }

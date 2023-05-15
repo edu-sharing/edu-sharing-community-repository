@@ -1,41 +1,41 @@
-@import "../../core-ui-module/styles/variables";
+@import '../../core-ui-module/styles/variables';
 
-.stream-container{
-    padding-top: $mainnavHeight;
+.stream-container {
+    padding-top: var(--mainnavHeight);
 }
-.stream-boxes{
+.stream-boxes {
     display: flex;
     flex-wrap: wrap;
     margin-top: 10px;
 }
-.stream-title{
+.stream-title {
     font-weight: bold;
     font-size: 180%;
     padding-bottom: 5px;
 }
-.tabs > li{
-    width:auto;
+.tabs > li {
+    width: auto;
 }
 .table-tab-title-short {
-    display: flex!important;
+    display: flex !important;
     align-items: center;
     justify-content: center;
-    >span{
-        display:none;
+    > span {
+        display: none;
     }
-    &.active > span{
-        display:flex;
+    &.active > span {
+        display: flex;
     }
-    >i{
+    > i {
         display: flex;
     }
 }
-@media screen and (max-width: 330px){
-    .stream-title{
+@media screen and (max-width: 330px) {
+    .stream-title {
         font-size: 140%;
     }
-    .margin-show{
-        padding:0 15px;
+    .margin-show {
+        padding: 0 15px;
     }
     .choose-menu-main {
         padding-left: 0 !important;
@@ -51,22 +51,21 @@
     .remove-horizontal-padding {
         padding: 0;
     }
-    .stream-container{
-        padding-top: $mainnavHeight;
-        padding-bottom: $mainnavHeight;
+    .stream-container {
+        padding-top: var(--mainnavHeight);
+        padding-bottom: var(--mainnavHeight);
     }
     .hideMenu {
         display: none;
     }
 }
 
-
 @media screen and (min-width: 331px) and (max-width: 600px) {
-    .stream-title{
+    .stream-title {
         font-size: 165%;
     }
-    .margin-show{
-        padding:0 15px;
+    .margin-show {
+        padding: 0 15px;
     }
     .choose-menu-main {
         padding-left: 0 !important;
@@ -82,9 +81,9 @@
     .remove-horizontal-padding {
         padding: 0;
     }
-    .stream-container{
-        padding-top: $mainnavHeight;
-        padding-bottom: $mainnavHeight;
+    .stream-container {
+        padding-top: var(--mainnavHeight);
+        padding-bottom: var(--mainnavHeight);
     }
     .hideMenu {
         display: none;
@@ -92,11 +91,11 @@
 }
 
 @media screen and (min-width: 601px) {
-    .choose-menu-main{
-        width: 220px!important;
+    .choose-menu-main {
+        width: 220px !important;
     }
-    .remove-horizontal-padding{
-        width: calc(100% - 220px)!important;
+    .remove-horizontal-padding {
+        width: calc(100% - 220px) !important;
         padding-right: 40px;
     }
     .arrow-menu-arrow {
@@ -114,56 +113,55 @@
     cursor: pointer;
 }
 
-.stream-emptytxt{
+.stream-emptytxt {
     padding-top: 40px;
     font-size: 20px;
     padding-left: 20px;
     color: gray;
 }
 
-.choose-menu{
-    padding-left: 1.0rem;
+.choose-menu {
+    padding-left: 1rem;
     padding-right: 2.5rem;
     padding-top: 0.5rem;
-    padding-bottom: 0.5rem;   
+    padding-bottom: 0.5rem;
     cursor: pointer;
     max-width: 200px;
     line-height: 1.8;
     position: relative;
-    &:focus{
+    &:focus {
         @include setGlobalInsetFocus();
     }
 }
 
-.m-inactive{
+.m-inactive {
     border-left: 4px solid #f6f6f6;
     color: #888;
 }
 
-.m-active{
+.m-active {
     border-left: 4px solid #48708e;
     background-color: white;
     color: #48708e;
     font-weight: bold;
 }
 
-.margin-show{
-
+.margin-show {
     padding-top: 15px;
 }
 
-.customfloat{
+.customfloat {
     float: left;
 }
 
-.menu-icon-text{
+.menu-icon-text {
     display: inline-block;
     position: relative;
     left: 10px;
     bottom: 3px;
 }
 
-.stream-box{
+.stream-box {
     background-color: white;
     margin: 15px;
     box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
@@ -171,34 +169,33 @@
     width: 460px;
 }
 
-.stream-title-date{
+.stream-title-date {
     font-size: 12px;
     color: grey;
 }
 
-.stream-box-title{
+.stream-box-title {
     padding: 15px 15px 0px 20px;
     font-weight: bold;
     font-size: 18px;
     cursor: pointer;
-    min-height:64px;
+    min-height: 64px;
 }
 
-.stream-box-icon{
+.stream-box-icon {
     padding-top: 15px;
     padding-left: 5px;
 }
 
-.stream-icon{
+.stream-icon {
     height: 25px;
     width: 45px;
 }
 
-.stream-box-main{
+.stream-box-main {
     display: inline-block;
 }
-.stream-box-main-vert{
-   
+.stream-box-main-vert {
     float: right;
     padding-top: 15px;
 }
@@ -207,24 +204,23 @@
     border-bottom: 0;
 }
 
-.stream-box-desc{
+.stream-box-desc {
     padding-top: 15px;
     padding-left: 20px;
     height: 40px;
 }
 
-.stream-box-nonodes{
+.stream-box-nonodes {
     text-align: center;
     padding-bottom: 15px;
     color: red;
 }
 
-
-.stream-box-kompetenzen{
-    padding: 20px;  
+.stream-box-kompetenzen {
+    padding: 20px;
 }
 
-.stream-box-image{
+.stream-box-image {
     width: 100%;
     position: relative;
     text-align: center;
@@ -234,12 +230,12 @@
     padding-top: 67%;
     background-size: cover;
     background-position: 50%;
-    &:focus{
+    &:focus {
         @include setGlobalDashedFocus();
     }
 }
 
-.stream-box-image::before{
+.stream-box-image::before {
     display: block;
     position: relative;
     background-image: linear-gradient(to bottom, transparent 70%, black 115%);
@@ -251,8 +247,8 @@
 
 .mask1 {
     background: black;
-    -webkit-mask-image: linear-gradient(to top,black, transparent);
-  }
+    -webkit-mask-image: linear-gradient(to top, black, transparent);
+}
 
 .bottom-left {
     position: absolute;
@@ -272,43 +268,43 @@
     right: 16px;
 }
 
-.menuic{
+.menuic {
     font-size: 18px;
     line-height: 1.8;
     position: relative;
 }
 
-.stream-box-footer{
+.stream-box-footer {
     border-top: 2px solid black;
     padding: 5px 15px 5px 15px;
 }
 
-.stream-box-comment{
+.stream-box-comment {
     width: 8%;
     display: inline-block;
     font-size: 18px;
 }
 
-.stream-box-imgname{
+.stream-box-imgname {
     width: 60%;
     display: inline-block;
 }
 
-.stream-box-rating{
+.stream-box-rating {
     width: 32%;
     display: inline-block;
 }
 
-.stic{
+.stic {
     font-size: 18px;
 }
 
-.stream-header-left{
+.stream-header-left {
     display: inline-block;
-    margin-left:15px;
+    margin-left: 15px;
 }
 
-.stream-header-right{
+.stream-header-right {
     display: inline-block;
 }
 
@@ -316,44 +312,44 @@
     margin-bottom: 1px !important;
 }
 
-.stream-uppericon{
+.stream-uppericon {
     font-size: 19px;
     display: inline-block;
 }
 
-.stream-uppertext{
+.stream-uppertext {
     font-size: 19px;
     padding-left: 10px;
     display: inline-block;
     text-decoration: underline;
 }
 
-.fix-up{
+.fix-up {
     padding-top: 10px;
 }
 
-.row-nomargin{
+.row-nomargin {
     margin-bottom: 0;
 }
-.create{
-    z-index:85;
-    position:fixed;
-    right:25px;
-    bottom:25px+$mobileTabNavHeight;
-    &:focus{
+.create {
+    z-index: 85;
+    position: fixed;
+    right: 25px;
+    bottom: 25px + $mobileTabNavHeight;
+    &:focus {
         @include setGlobalFocus();
     }
 }
-.dialogCreate{
-    z-index:100;
+.dialogCreate {
+    z-index: 100;
 }
-.createMenu{
+.createMenu {
     position: fixed;
     width: 200px;
-    right:53px;
-    bottom:38px+$mobileTabNavHeight;
-    z-index:105;
-    .connectorBeta{
+    right: 53px;
+    bottom: 38px + $mobileTabNavHeight;
+    z-index: 105;
+    .connectorBeta {
         height: auto;
         float: right;
         position: absolute;

@@ -1,12 +1,6 @@
 package org.edu_sharing.service.lifecycle;
 
 
-
-import java.io.Serializable;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
@@ -15,26 +9,35 @@ import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.security.*;
+import org.alfresco.service.cmr.security.AuthorityService;
+import org.alfresco.service.cmr.security.OwnableService;
+import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.VCardConverter;
-import org.edu_sharing.repository.server.tools.cache.EduSharingRatingCache;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.authentication.ScopeUserHomeService;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
+import org.edu_sharing.service.feedback.FeedbackServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.RecurseMode;
-import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
+import org.edu_sharing.service.rating.RatingServiceFactory;
 import org.edu_sharing.service.stream.StreamServiceFactory;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.springframework.context.ApplicationContext;
+
+import java.io.Serializable;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 
 /**
@@ -66,19 +69,7 @@ import org.springframework.context.ApplicationContext;
  * 
  * cause of owner (first/lastname) remove file from properties cache
  * 
- * 
- * @TODO find out instance owner
- * 
- * @TODO delete userhome keep CC
- * @TODO instanceowner instead of creator in gui (workspace column)
- * @TODO Collections (only level 0?)
- * @TODO shared content config ROLE_GROUP_REMOVE_SHARED delete cc vs not delete cc
- * @TODO function for changing owner of collection to another user (asking new user?)
- * @TODO check if Folders must be deleted in shared area, check if basket is necessary
- * 
- * Test
- * @TODO filter for TODELETE_STATUS already in search query
- * @TODO changing owner to instanceowner, remove old contributer
+ *
  * --> no username use firstName and lastName
  * 		Problems: user with same name, and marriage
  */
@@ -100,14 +91,14 @@ public class PersonLifecycleService {
 			QName.createQName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT),
 			QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)
 	);
-	private static final List<QName> SKIP_TYPES = Arrays.asList(
+	private static final List<QName> SKIP_TYPES = Collections.singletonList(
 			QName.createQName(CCConstants.CCM_TYPE_TOOLPERMISSION)
 	);
 	public static final List<String> USER_GENERATED_TYPES = Arrays.asList(
 			CCConstants.CCM_TYPE_IO,
 			CCConstants.CCM_TYPE_MAP,
 			CCConstants.CCM_TYPE_COLLECTION_PROPOSAL,
-			CCConstants.CCM_TYPE_COLLECTION_FEEDBACK,
+			CCConstants.CCM_TYPE_MATERIAL_FEEDBACK,
 			CCConstants.CCM_TYPE_COMMENT,
 			CCConstants.CCM_TYPE_RATING
 	);
@@ -221,18 +212,9 @@ public class PersonLifecycleService {
 			else{
 				result.comments=assignUserToType(personNodeRef, deletedUsername, CCConstants.CCM_TYPE_COMMENT,null).size();
 			}
-			if(options.ratings.delete) {
-				deleteRatings(result, userName);
-			}
-			else{
-				result.ratings=assignUserToType(personNodeRef, deletedUsername, CCConstants.CCM_TYPE_RATING,null).size();
-			}
-			if(options.collectionFeedback.delete){
-				result.collectionFeedback=deleteAllOfType(personNodeRef, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK,null).size();
-			}
-			else{
-				result.collectionFeedback=assignUserToType(personNodeRef, deletedUsername, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK,null).size();
-			}
+			processRatings(result, userName, options.ratings.delete);
+			processFeedback(result, userName, options.collectionFeedback.delete);
+
 			handleStatistics(personNodeRef, deletedUsername,options);
 
 			logger.info("deleting person");
@@ -249,11 +231,19 @@ public class PersonLifecycleService {
 		return CCConstants.AUTHORITY_DELETED_USER+"_"+System.currentTimeMillis();
 	}
 
-	public void deleteRatings(PersonDeleteResult result, String userName) {
-		List<NodeRef> ratings = getAllNodeRefs(userName, CCConstants.CCM_TYPE_RATING,null);
-		ratings.forEach((ref)-> EduSharingRatingCache.delete(nodeService.getPrimaryParent(ref).getParentRef()));
-		deleteAllRefs(ratings);
-		result.ratings=ratings.size();
+	public void processRatings(PersonDeleteResult result, String userName, boolean delete) {
+		if(delete) {
+			RatingServiceFactory.getLocalService().deleteUserData(userName);
+		} else {
+			RatingServiceFactory.getLocalService().changeUserData(userName, result.deletedName);
+		}
+	}
+	public void processFeedback(PersonDeleteResult result, String userName, boolean delete) {
+		if(delete) {
+			FeedbackServiceFactory.getLocalService().deleteUserData(userName);
+		} else {
+			FeedbackServiceFactory.getLocalService().changeUserData(userName, result.deletedName);
+		}
 	}
 
 	public List<NodeRef> getAllNodeRefs(String username, String type, String scope){
@@ -296,9 +286,6 @@ public class PersonLifecycleService {
 
 	/**
 	 * Deletes all nodes from the given person + type in the repository
-	 * @param personNodeRef
-	 * @param type
-	 * @return
 	 */
 	private List<NodeRef> deleteAllOfType(NodeRef personNodeRef,String type,String scope) {
 			String username = (String)nodeService.getProperty(personNodeRef,
@@ -311,9 +298,6 @@ public class PersonLifecycleService {
 
 	/**
 	 * assigns the given user to all nodes from the given person + type in the repository
-	 * @param personNodeRef
-	 * @param type
-	 * @return
 	 */
 	public List<NodeRef> assignUserToType(NodeRef personNodeRef,String newUsername,String type,String scope) {
 		String username = (String)nodeService.getProperty(personNodeRef,
@@ -325,21 +309,19 @@ public class PersonLifecycleService {
 
 	private List<NodeRef> assignUserToNodes(String newUsername, String username, List<NodeRef> refs) {
 		RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
-		refs.forEach((nodeRef)->{
-			rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
-				policyBehaviourFilter.disableBehaviour(nodeRef);
-				ownableService.setOwner(nodeRef, newUsername);
-				if (username.equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_CREATOR)))) {
-					nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_CREATOR), newUsername);
-				}
-				if (username.equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_MODIFIER)))) {
-					nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_MODIFIER), newUsername);
-				}
-				new RepositoryCache().remove(nodeRef.getId());
-				policyBehaviourFilter.enableBehaviour(nodeRef);
-				return null;
-			});
-		});
+		refs.forEach((nodeRef)-> rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
+			policyBehaviourFilter.disableBehaviour(nodeRef);
+			ownableService.setOwner(nodeRef, newUsername);
+			if (username.equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_CREATOR)))) {
+				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_CREATOR), newUsername);
+			}
+			if (username.equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_MODIFIER)))) {
+				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_MODIFIER), newUsername);
+			}
+			new RepositoryCache().remove(nodeRef.getId());
+			policyBehaviourFilter.enableBehaviour(nodeRef);
+			return null;
+		}));
 		return refs;
 	}
 
@@ -363,7 +345,7 @@ public class PersonLifecycleService {
 	private List<ChildAssociationRef> getAllSharedFolders(NodeRef personNodeRef, String scope) {
 		String username = (String)nodeService.getProperty(personNodeRef,
 				QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
-		NodeRef homeFolder = null;
+		NodeRef homeFolder;
 		if(scope == null) {
 			homeFolder = getHomeFolder(personNodeRef);
 		}else {
@@ -433,7 +415,7 @@ public class PersonLifecycleService {
 		List<NodeRef> refsMaps = getAllNodeRefs(userName, CCConstants.CCM_TYPE_MAP,scope).stream().
 				filter((ref)->!filesToIgnore.contains(ref)).
 				filter((ref)->!nodeService.hasAspect(ref, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION))).
-				collect(Collectors.toList());;
+				collect(Collectors.toList());
 
 		// split the files by their license type
 		List<NodeRef> filesPrivate = refsIO.stream().filter((ref) -> !hasCCLicense(ref)).collect(Collectors.toList());
@@ -849,18 +831,10 @@ public class PersonLifecycleService {
 		QName qnameMetadata = QName.createQName(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR);
 		List<String> contributerAuthor = (List<String>)nodeService.getProperty(nodeRef, qnameAuthor);
 		List<String> contributerMetadata = (List<String>)nodeService.getProperty(nodeRef,qnameMetadata);
-		for(String author : contributerAuthor) {
-			if(contains(VCardConverter.vcardToHashMap(author),firstName,lastName) ) {
-				contributerAuthor.remove(author);
-			}
-		}
+		contributerAuthor.removeIf(author -> contains(VCardConverter.vcardToHashMap(author), firstName, lastName));
 		nodeService.setProperty(nodeRef, qnameAuthor, (ArrayList)contributerAuthor);
-		
-		for(String metadataContributer : contributerMetadata) {
-			if(contains(VCardConverter.vcardToHashMap(metadataContributer),firstName,lastName) ) {
-				contributerMetadata.remove(metadataContributer);
-			}
-		}
+
+		contributerMetadata.removeIf(metadataContributer -> contains(VCardConverter.vcardToHashMap(metadataContributer), firstName, lastName));
 		nodeService.setProperty(nodeRef, qnameMetadata, (ArrayList)contributerMetadata);
 		
 	}
@@ -871,10 +845,8 @@ public class PersonLifecycleService {
 			Map<String,Object> vcard = vcardList.iterator().next();
 			String vcFirstName = (String)vcard.get(CCConstants.VCARD_GIVENNAME);
 			String vcLastName = (String)vcard.get(CCConstants.VCARD_SURNAME);
-			
-			if(firstName.equals(vcFirstName) && lastName.equals(vcLastName)) {
-				return true;
-			}
+
+			return firstName.equals(vcFirstName) && lastName.equals(vcLastName);
 		}
 		
 		return false;
@@ -897,30 +869,10 @@ public class PersonLifecycleService {
 			nodeService.deleteNode(nodeRef);
 		}
 	}
-	
-	private void deleteScopeUserHome(String username, String scope, boolean keepCC) {
-		ScopeUserHomeService scopeUserHomeService = ScopeUserHomeServiceFactory.getScopeUserHomeService();
-		NodeRef homeFolder = scopeUserHomeService.getUserHome(username, scope, false);
-		if(homeFolder == null) {
-			return;
-		}
-		if(keepCC) {
-			//@TODO
-			logger.info("not implemented yet");
-			return;
-		}else {
-			/**
-			 * remove without archiving
-			 */
-			nodeService.addAspect(homeFolder, ContentModel.ASPECT_TEMPORARY, null);
-			nodeService.deleteNode(homeFolder);
-		}
-	}
-	
+
 	private NodeRef getHomeFolder(NodeRef personNodeRef) {
-		NodeRef homeFolder = (NodeRef)nodeService.getProperty(personNodeRef, 
+		return (NodeRef)nodeService.getProperty(personNodeRef,
 				QName.createQName(CCConstants.CM_PROP_PERSON_HOME_FOLDER));
-		return homeFolder;
 	}
 
 }

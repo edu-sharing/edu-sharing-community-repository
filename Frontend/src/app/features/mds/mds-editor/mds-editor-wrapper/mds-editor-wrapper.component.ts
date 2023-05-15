@@ -8,6 +8,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { SearchService } from 'ngx-edu-sharing-api';
+import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
 import { first, map, switchMap, takeUntil } from 'rxjs/operators';
 import { Node, RestConstants } from '../../../../core-module/core.module';
@@ -15,7 +16,14 @@ import { Toast } from '../../../../core-ui-module/toast';
 import { MdsComponent } from '../../legacy/mds/mds.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import { EditorMode } from '../../types/mds-types';
-import { BulkBehavior, EditorType, MdsWidget, MdsWidgetValue, UserPresentableError, Values } from '../../types/types';
+import {
+    BulkBehavior,
+    EditorType,
+    MdsWidget,
+    MdsWidgetValue,
+    UserPresentableError,
+    Values,
+} from '../../types/types';
 import { valuesDictIsEquivalent } from './values-dict-is-equivalent';
 
 /**
@@ -50,6 +58,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
     @Input() invalidate: boolean;
     @Input() labelNegative = 'CANCEL';
     @Input() labelPositive = 'SAVE';
+    @Input() toastOnSave = 'WORKSPACE.EDITOR.UPDATED';
     @Input() mode: 'search' | 'default' = 'default';
     @Input() nodes: Node[];
     @Input() graphqlIds: string[];
@@ -58,12 +67,24 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
     @Input() repository = RestConstants.HOME_REPOSITORY;
     @Input() editorMode: EditorMode;
     @Input() setId: string;
+    /**
+     * Filters that should be applied in addition to the MDS's own values when fetching remote
+     * values to be suggested to the user.
+     *
+     * Currently applied only if `editorMode === 'search'`.
+     */
+    @Input() set externalFilters(values: Values) {
+        this.mdsEditorInstance.externalFilters = values;
+    }
 
     @Output() extendedChange = new EventEmitter();
     @Output() onCancel = new EventEmitter();
     @Output() onDone = new EventEmitter<Node[] | Values>();
     @Output() onMdsLoaded = new EventEmitter();
     @Output() openContributor = new EventEmitter();
+    /**
+     * @DEPRECATED old mds only
+     */
     @Output() openLicense = new EventEmitter();
     @Output() openTemplate = new EventEmitter();
 
@@ -97,6 +118,13 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
             this.init();
         }
         this.mdsEditorInstance.values.subscribe((values) => (this.values = values));
+
+        if (!this.embedded) {
+            throw new Error(
+                'Non-embedded use of mds-editor-wrapper has been deprecated in favor of mds-editor-dialog. ' +
+                    'Please migrate.',
+            );
+        }
     }
 
     ngOnDestroy(): void {
@@ -229,7 +257,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
                 return;
             }
             const updatedNodes = await this.mdsEditorInstance.save();
-            this.toast.toast('WORKSPACE.EDITOR.UPDATED');
+            this.toast.toast(this.toastOnSave);
             this.onDone.emit(updatedNodes);
         } catch (error) {
             this.handleError(error);
@@ -254,7 +282,10 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
                 editorMode: this.editorMode ?? 'nodes',
             };
             if (this.graphqlIds) {
-                this.editorType = await this.mdsEditorInstance.initWithGraphqlData(this.graphqlIds, config);
+                this.editorType = await this.mdsEditorInstance.initWithGraphqlData(
+                    this.graphqlIds,
+                    config,
+                );
             } else if (this.nodes) {
                 this.editorType = await this.mdsEditorInstance.initWithNodes(this.nodes, config);
             } else {
@@ -268,13 +299,14 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
             }
             if (!this.editorType) {
                 console.warn(
-                    'mds ' +
-                        this.setId +
-                        ' at ' +
-                        this.repository +
-                        ' did not specify any rendering type',
+                    `mds ${this.setId} at ${this.repository} did not specify any rendering type`,
                 );
                 this.editorType = 'legacy';
+            }
+            if (this.editorType === 'legacy') {
+                console.warn(
+                    `mds ${this.setId} at ${this.repository} is configured for legacy rendering`,
+                );
             }
             if (this.editorType === 'legacy' && !this.legacySuggestionsRegistered) {
                 this.registerLegacySuggestions();
@@ -288,11 +320,25 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
     }
 
     private registerLegacySuggestions(): void {
+        // FIXME: Using `search.observeFacets`, we register the needed facets with the search
+        // service, so when a search is requested, the needed facets are fetched as well. By doing
+        // this, we race whichever module does the search request. We might be in time to register
+        // our facets but we don't know if we are. The result is, that modules that do search
+        // requests need to explicitly wait for `getNeededFacets` to provide a value.
+        //
+        // Possible solutions:
+        //  1. Don't do the implicit registration on facets at all and require modules doing search
+        //     requests to explicitly get needed facets from here.
+        //  2. When registering with the search service, pass and handle the information that we
+        //     will have needed facets but we don't know their values yet, so the search service can
+        //     block requests until we provide the values.
         this.mdsEditorInstance
             .getNeededFacets()
             .pipe(
                 takeUntil(this.destroyed$),
-                switchMap((neededFacets) => this.search.observeFacets(neededFacets)),
+                switchMap((neededFacets) =>
+                    neededFacets ? this.search.observeFacets(neededFacets) : rxjs.of({}),
+                ),
                 map((facets) => {
                     if (facets) {
                         return Object.entries(facets).reduce(

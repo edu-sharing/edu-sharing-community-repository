@@ -1,60 +1,97 @@
 <es-global-progress *ngIf="loading"></es-global-progress>
 <h1 esTitle class="cdk-visually-hidden">{{ 'SHARING.TITLE' | translate }}</h1>
 <div *ngIf="!loading && sharingInfo" class="container">
-
-    <div class="container-inside">
-        <div class="branding"><img src="assets/images/logo.svg" esImage-config alt="logo"></div>
-        <div class="details" [ngClass]="{'details-opacity' : !(!sharingInfo.password || sharingInfo.passwordMatches)}">
-            <div class="details-type">
-                <img class="icon" [src]="sharingInfo.node.iconURL" />
-                <div>
-                    <div class="name">{{sharingInfo.node.name}}</div>
-                    <div class="subobjects" *ngIf="childCount() > 0">
-                      {{('SHARING.SUBELEMENT_' + (childCount() === 1 ? 'SINGLE' : 'MULTI')) | translate:{count: childCount()} }}
-                    </div>
-                    <div *ngIf="inviterIsAuthor()">{{'SHARING.INVITED_AND_CREATED_BY' | translate:{inviter:getPersonName(sharingInfo.invitedBy)} }}</div>
-                    <div *ngIf="!inviterIsAuthor()">{{'SHARING.INVITED_PLUS_CREATED_BY' | translate:{inviter:getPersonName(sharingInfo.invitedBy),creator:getPersonName(sharingInfo.node.createdBy)} }}</div>
-                </div>
-            </div>
+  <div class="container-inside">
+    <div class="branding"><img src="assets/images/logo.svg" esImage-config alt="logo" /></div>
+    <div
+      class="details"
+      [ngClass]="{ 'details-opacity': !(!sharingInfo.password || sharingInfo.passwordMatches) }"
+    >
+      <div class="details-type">
+        <img class="icon" [src]="sharingInfo.node | esNodeIcon" />
+        <div>
+          <div class="name">{{ sharingInfo.node.name }}</div>
+          <div class="subobjects" *ngIf="childCount() > 0">
+            {{
+              'SHARING.SUBELEMENT_' + (childCount() === 1 ? 'SINGLE' : 'MULTI')
+                | translate: { count: childCount() }
+            }}
+          </div>
+          <div *ngIf="inviterIsAuthor()">
+            {{
+              'SHARING.INVITED_AND_CREATED_BY'
+                | translate: { inviter: getPersonName(sharingInfo.invitedBy) }
+            }}
+          </div>
+          <div *ngIf="!inviterIsAuthor()">
+            {{
+              'SHARING.INVITED_PLUS_CREATED_BY'
+                | translate
+                  : {
+                      inviter: getPersonName(sharingInfo.invitedBy),
+                      creator: getPersonName(sharingInfo.node.createdBy)
+                    }
+            }}
+          </div>
         </div>
-        <div *ngIf="!(!sharingInfo.password || sharingInfo.passwordMatches)" class="password-required">
-            <form (ngsubmit)="validatePassword()">
-                <es-input-password label="{{'SHARING.PASSWORD' | translate}}" [required]="true" inputId="password" (keydown.enter)="validatePassword()" [(value)]="passwordInput" placeholder="{{'SHARING.PASSWORD_PLACEHOLDER' | translate}}"></es-input-password>
-                <button mat-raised-button color="primary" (click)="validatePassword()">{{'SHARING.ENTER_PASSWORD' | translate}}</button>
-            </form>
-        </div>
-        <div *ngIf="!sharingInfo.password || sharingInfo.passwordMatches" class="password-valid">
-            <div *ngIf="sharingInfo.password && sharingInfo.passwordMatches && !sharingInfo.node.isDirectory" class="password-correct"><i class="material-icons">done</i>{{'SHARING.PASSWORD_CORRECT' | translate}}</div>
-            <div *ngIf="sharingInfo.node.isDirectory">
-                <div class="download-top">
-                    <button mat-raised-button color="primary" (click)="download()">
-                        <i class="material-icons">cloud_download</i>{{'SHARING.DOWNLOAD_ZIP' | translate}}
-                    </button>
-                </div>
-                <div class="folder">
-                    <es-listTable
-                            [nodes]="childs"
-                            [columns]="columns"
-                            [hasIcon]="true"
-                            [hasCheckbox]="false"
-                            [reorderColumns]="false"
-                            [sortBy]="sort.sortBy"
-                            [loadRepositories]="false"
-                            [sortAscending]="sort.sortAscending"
-                            [isClickable]="false"
-                            [isLoading]="loadingChildren"
-                            [customOptions]="options"
-                            (sortListener)="changeSort($event)"
-                    ></es-listTable>
-                </div>
-
-            </div>
-            <div class="download">
-                <button mat-raised-button color="primary" (click)="download()">
-                    <i class="material-icons">cloud_download</i>{{('SHARING.'+(sharingInfo.node.mediatype=='link' ? 'LINK' : (sharingInfo.node.isDirectory && childs.length > 1 ? 'DOWNLOAD_ZIP' : 'DOWNLOAD'))) | translate}}
-                </button>
-            </div>
-        </div>
+      </div>
     </div>
-    <es-powered-by mode="color"></es-powered-by>
+    <div *ngIf="!(!sharingInfo.password || sharingInfo.passwordMatches)" class="password-required">
+      <form (ngsubmit)="validatePassword()">
+        <es-input-password
+          label="{{ 'SHARING.PASSWORD' | translate }}"
+          [required]="true"
+          inputId="password"
+          (keydown.enter)="validatePassword()"
+          [(value)]="passwordInput"
+          placeholder="{{ 'SHARING.PASSWORD_PLACEHOLDER' | translate }}"
+        ></es-input-password>
+        <button mat-raised-button color="primary" (click)="validatePassword()">
+          {{ 'SHARING.ENTER_PASSWORD' | translate }}
+        </button>
+      </form>
+    </div>
+    <div *ngIf="!sharingInfo.password || sharingInfo.passwordMatches" class="password-valid">
+      <div
+        *ngIf="sharingInfo.password && sharingInfo.passwordMatches && !sharingInfo.node.isDirectory"
+        class="password-correct"
+      >
+        <i class="material-icons">done</i>{{ 'SHARING.PASSWORD_CORRECT' | translate }}
+      </div>
+      <div *ngIf="sharingInfo.node.isDirectory">
+        <div class="download-top">
+          <button mat-raised-button color="primary" (click)="download()">
+            <i class="material-icons">cloud_download</i>{{ 'SHARING.DOWNLOAD_ZIP' | translate }}
+          </button>
+        </div>
+        <div class="folder">
+          <es-node-entries-wrapper
+            #nodeEntries
+            [dataSource]="nodesDataSource"
+            [scope]="Scope.Sharing"
+            [columns]="columns"
+            [checkbox]="false"
+            [sort]="sort"
+            [elementInteractionType]="InteractionType.None"
+            [displayType]="NodeEntriesDisplayType.Table"
+            (sortChange)="changeSort($event)"
+          ></es-node-entries-wrapper>
+        </div>
+      </div>
+      <div class="download">
+        <button mat-raised-button color="primary" (click)="download()">
+          <i class="material-icons">cloud_download</i
+          >{{
+            'SHARING.' +
+              (sharingInfo.node.mediatype === 'link'
+                ? 'LINK'
+                : sharingInfo.node.isDirectory && nodesDataSource.getData()?.length > 1
+                ? 'DOWNLOAD_ZIP'
+                : 'DOWNLOAD') | translate
+          }}
+        </button>
+      </div>
+    </div>
+  </div>
+  <es-powered-by mode="color"></es-powered-by>
 </div>

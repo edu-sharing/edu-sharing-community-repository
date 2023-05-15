@@ -1,127 +1,137 @@
-@import "../../../core-ui-module/styles/variables";
+@import '../../../core-ui-module/styles/variables';
 
+:host ::ng-deep {
+    mat-header-row {
+        display: none;
+    }
+}
 .main {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    > es-spinner {
+        display: flex;
+        justify-content: center;
+        margin-top: 30%;
+    }
 }
-.mimetype{
-  word-break: break-all;
-  padding-left: 5px;
-}
-.header{
-  display: flex;
-  background-color: $workspaceMetadataBackground;
-  align-items: center;
-  .name{
-    flex-grow: 1;
-    font-size:110%;
-    padding:10px 15px;
+.mimetype {
     word-break: break-all;
-  }
-  .close{
-    padding-right:10px;
-  }
+    padding-left: 5px;
+}
+.header {
+    display: flex;
+    background-color: $workspaceMetadataBackground;
+    align-items: center;
+    .name {
+        flex-grow: 1;
+        font-size: 110%;
+        padding: 10px 15px;
+        word-break: break-all;
+    }
+    .close {
+        padding-right: 10px;
+    }
 }
 
-.row{
-  padding-top:0;
-  background-color: $workspaceMetadataBackground;
-  margin-bottom: 0;
-  margin-left: unset;
-  margin-right: unset;
+.row {
+    padding-top: 0;
+    background-color: $workspaceMetadataBackground;
+    margin-bottom: 0;
+    margin-left: unset;
+    margin-right: unset;
 }
-.row .col{
-  padding:0;
-}
-
-.btn-flat{
-  color:$primary;
-}
-.btn-flat{
-  position: relative;
-  top:-5px;
-}
-.versionTitle{
-  font-weight:bold;
-}
-.versionComment{
-  font-style: italic;
-  padding-bottom:10px;
-}
-.versionAuthor{
-  line-height:1.25;
-}
-.versionDate{
-  color:$textLight;
-}
-.versionMain{
-  padding-bottom:20px;
-}
-.version{
-  padding-top:20px;
+.row .col {
+    padding: 0;
 }
 
-.btnVersion{
-  margin-right: 5px;
+.btn-flat {
+    color: $primary;
 }
-.content{
-  padding:0 12px;
-  overflow-x: hidden;
-  overflow-y: auto;
+.btn-flat {
+    position: relative;
+    top: -5px;
+}
+.versionTitle {
+    font-weight: bold;
+}
+.versionComment {
+    font-style: italic;
+    padding-bottom: 10px;
+}
+.versionAuthor {
+    line-height: 1.25;
+}
+.versionDate {
+    color: $textLight;
+}
+.versionMain {
+    padding-bottom: 20px;
+}
+.version {
+    padding-top: 20px;
+}
+
+.btnVersion {
+    margin-right: 5px;
+}
+.content {
+    padding: 0 12px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.content-properties:not([hidden]) {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 12px;
+}
+
+p.description {
+    margin-top: 0;
+    margin-bottom: 12px;
 }
 
 /*Value show in memu-tabs*/
-.value-properties{
-  float: right;
-  line-height: 40px;
-  margin-right: 18px;
+.value-properties {
+    float: right;
+    line-height: 40px;
+    margin-right: 18px;
 }
-// Statiskik Canvas
-canvas{
-  margin: 20px 0;
+canvas {
+    align-self: flex-start;
 }
-es-listTable{
-  float:left;
-  width:100%;
-  padding: 10px 0 30px;
-}
-.statistic-value{
-  margin-left: 20px;
-  margin-top: -14px;
-  margin-bottom: 10px;
-  width: 110%;
+.statistic-value {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    margin-left: 20px;
+    padding-right: 5px;
 
-  .point{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    float: left;
-    text-align: center;
-    width: 64px;
-    color: #383838;
-    font-weight: bold;
-    font-size: 26px;
-    i{
-      color: $textLight;
-      font-size: 20px;
+    .point {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        float: left;
+        text-align: center;
+        color: #383838;
+        font-weight: bold;
+        font-size: 26px;
+        i {
+            color: $textLight;
+            font-size: 20px;
+        }
     }
-  }
 }
 
-.usage-count{
-  margin: 20px 0;
-  float: left;
-}
-.usage-counter{
-  font-weight: bold;
+.usage-counter {
+    font-weight: bold;
 }
 .license-value {
-  padding-top: 4px;
-  display: flex;
-  .license {
-    padding-right: 6px;
-    height: 21px;
-  }
+    padding-top: 4px;
+    display: flex;
+    .license {
+        padding-right: 6px;
+        height: 21px;
+    }
 }
-

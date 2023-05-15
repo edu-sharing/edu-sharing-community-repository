@@ -1,0 +1,117 @@
+@import '../../../core-ui-module/styles/variables';
+
+.actionbar {
+    display: flex;
+    gap: 10px;
+}
+.actionToggle > button {
+    color: $textLight;
+}
+button {
+    min-width: unset;
+    &.button-icon {
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
+
+.light {
+    color: #fff;
+    background: transparent;
+}
+.disabled {
+    pointer-events: all;
+}
+.light a {
+    color: #fff;
+}
+
+.actionToggleDivider {
+    border-left: 1px solid #ddd;
+}
+.more {
+    color: $primary;
+    background-color: transparent;
+}
+.actionbar-background-dark {
+    .mat-button {
+        color: $textOnPrimary;
+        &:disabled {
+            color: $textOnPrimaryLight;
+        }
+    }
+}
+.actionbar-background-primary {
+    .mat-button {
+        color: $textOnPrimary;
+    }
+    .mat-flat-button {
+        background-color: #fff;
+        color: $primary;
+        &:disabled {
+            color: $textLight;
+        }
+    }
+}
+.actionbar-round {
+    .mat-button,
+    .mat-flat-button {
+        width: 45px;
+        height: 45px;
+        justify-content: center;
+    }
+    button {
+        border-radius: 50%;
+        @include materialShadow();
+    }
+    &.actionbar-background-primary {
+        .mat-button {
+            background-color: #fff;
+            color: $primary;
+        }
+    }
+    &.actionbar-all-flat button {
+        background: white;
+        color: $primary;
+        &:disabled {
+            color: $textLight;
+        }
+    }
+    .more,
+    .actionAlways {
+        background: white;
+        color: $primary;
+        display: flex;
+        width: 45px;
+        height: 45px;
+        line-height: 45px;
+        text-align: center;
+        align-items: center;
+        .edu-icons,
+        .material-icons {
+            position: relative;
+            font-size: 24px;
+        }
+        span {
+            display: none;
+        }
+    }
+    .action-always {
+        .edu-icons,
+        .material-icons {
+            right: 4px !important;
+        }
+    }
+}
+
+@media screen and (max-width: ($mobileWidth+$mobileStage*4)) {
+    .action-always {
+        padding: 0 1rem;
+    }
+    .action-always-caption {
+        display: none;
+    }
+    .mat-flat-button {
+        padding: 5px;
+    }
+}

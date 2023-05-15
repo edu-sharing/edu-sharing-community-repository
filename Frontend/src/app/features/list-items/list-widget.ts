@@ -1,22 +1,30 @@
 import { Input, Type, Directive } from '@angular/core';
-import { Person, Node } from 'ngx-edu-sharing-api';
+import { Person } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
-import { ProposalNode, Group, Statistics, ListItem } from 'src/app/core-module/core.module';
+import { ProposalNode, Group, Statistics, ListItem } from '../../core-module/core.module';
+import { UniversalNode } from '../../common/definitions';
 
 @Directive()
 export class ListWidget {
     @Input()
-    get node(): Node | ProposalNode | Group | Person | Statistics {
+    get node(): UniversalNode | ProposalNode | Group | Person | Statistics {
         return this.nodeSubject.value;
     }
-    set node(value: Node | ProposalNode | Group | Person | Statistics) {
+    set node(value: UniversalNode | ProposalNode | Group | Person | Statistics) {
         this.nodeSubject.next(value);
     }
     protected readonly nodeSubject = new BehaviorSubject<
-        Node | ProposalNode | Group | Person | Statistics
+        UniversalNode | ProposalNode | Group | Person | Statistics
     >(null); // node (or group/user)
 
-    @Input() item: ListItem;
+    @Input()
+    get item(): ListItem {
+        return this.itemSubject.value;
+    }
+    set item(value: ListItem) {
+        this.itemSubject.next(value);
+    }
+    protected readonly itemSubject = new BehaviorSubject<ListItem>(null);
 
     /**
      * Provide a label for non-obvious fields that describes the field the given value belongs to.

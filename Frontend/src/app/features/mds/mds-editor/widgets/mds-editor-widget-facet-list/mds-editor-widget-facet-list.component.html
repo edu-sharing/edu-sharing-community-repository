@@ -5,7 +5,12 @@
   [valueType]="valueType"
   [control]="formArray"
   [wrapInFormField]="false"
+  [showSpinner]="isInitState$ | async"
 >
+  <mat-form-field *ngIf="hasFilter()">
+    <mat-label>{{ 'MDS.FILTER_FACET' | translate }}</mat-label>
+    <input matInput [formControl]="filter" type="search" />
+  </mat-form-field>
   <ul *ngIf="formArray" [formGroup]="$any(formArray)" class="checkboxes-group">
     <li *ngFor="let control of formArray.controls; let i = index">
       <mat-checkbox
@@ -15,14 +20,19 @@
         [matTooltip]="text.hasTextOverflow() ? getFacet(i).label : null"
       >
         <span class="label">
-          <span class="caption">{{ getFacet(i).label }}</span>
+          <span
+            class="caption"
+            [innerHTML]="getFacet(i).label | escapeHtml | highlight: filter.value"
+          ></span>
           <span class="count">{{ getFacet(i).count }}</span>
         </span>
       </mat-checkbox>
     </li>
   </ul>
   <button
-    *ngIf="(facetAggregationSubject | async)?.hasMore"
+    *ngIf="
+      (facetAggregationSubject | async)?.hasMore && facetValuesFiltered.length < MAX_FACET_COUNT
+    "
     mat-button
     color="primary"
     (click)="onLoadMore()"

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.Schema;;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Schema(description = "")
@@ -34,7 +35,7 @@ public class Mediacenter extends ManagableGroup {
 			this.mediacenter = mediacenter;
 		}
 	}
-	public static class MediacenterProfileExtension{
+	public static class MediacenterProfileExtension implements Serializable {
 		// id, Standort, Kreiskürzel, Kurzbezeichnung (not here, equals the displayName), URL/Link zur Startseite / Kataloge (JSON)
 		private String id,location,districtAbbreviation,mainUrl;
 		private List<Catalog> catalogs;

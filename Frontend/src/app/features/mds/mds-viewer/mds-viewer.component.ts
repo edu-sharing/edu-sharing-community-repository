@@ -1,21 +1,26 @@
 import {
+    ChangeDetectorRef,
     Component,
     ComponentFactoryResolver,
     ElementRef,
     Injector,
     Input,
+    OnChanges,
+    NgZone,
     QueryList,
+    SimpleChanges,
     ViewChildren,
     ViewContainerRef,
 } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
-import { RestConstants, RestMdsService } from '../../../core-module/core.module';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { RestConstants } from '../../../core-module/core.module';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { MdsEditorInstanceService } from '../mds-editor/mds-editor-instance.service';
 import { ViewInstanceService } from '../mds-editor/mds-editor-view/view-instance.service';
 import { replaceElementWithDiv } from '../mds-editor/util/replace-element-with-div';
 import { Values } from '../types/types';
 import { MdsWidgetComponent } from './widget/mds-widget.component';
+import { MdsView, MdsDefinition, MdsService } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-mds-viewer',
@@ -23,44 +28,17 @@ import { MdsWidgetComponent } from './widget/mds-widget.component';
     styleUrls: ['mds-viewer.component.scss'],
     providers: [MdsEditorInstanceService, ViewInstanceService],
 })
-export class MdsViewerComponent {
+export class MdsViewerComponent implements OnChanges {
     @ViewChildren('container') container: QueryList<ElementRef>;
 
-    _groupId: string;
-    _setId: string;
-    _data: Values;
-    mds: any;
-    templates: any[];
-
-    @Input() set groupId(groupId: string) {
-        this._groupId = groupId;
-        this.inflate();
-    }
-
-    @Input() set setId(setId: string) {
-        this._setId = setId;
-        this.mdsService.getSet(setId).subscribe((mds) => {
-            this.mds = mds;
-            this.inflate();
-        });
-    }
-
-    @Input() set data(data: Values) {
-        this._data = data;
-        if (this._data[RestConstants.CM_PROP_METADATASET_EDU_METADATASET] != null) {
-            this.mdsService
-                .getSet(this._data[RestConstants.CM_PROP_METADATASET_EDU_METADATASET][0])
-                .subscribe(async (mds) => {
-                    this.mds = mds;
-                    await this.inflate();
-                });
-        } else {
-            this.mdsService.getSet().subscribe(async (mds) => {
-                this.mds = mds;
-                await this.inflate();
-            });
-        }
-    }
+    @Input() groupId: string;
+    @Input() setId: string;
+    @Input() data: Values;
+    mds: MdsDefinition;
+    templates: {
+        view: MdsView;
+        html: SafeHtml;
+    }[];
 
     /**
      * show group headings (+ icons) for the individual templates
@@ -82,7 +60,7 @@ export class MdsViewerComponent {
     }
 
     constructor(
-        private mdsService: RestMdsService,
+        private mdsService: MdsService,
         private mdsEditorInstanceService: MdsEditorInstanceService,
         private factoryResolver: ComponentFactoryResolver,
         private injector: Injector,
@@ -92,23 +70,23 @@ export class MdsViewerComponent {
     ) {}
 
     getGroup() {
-        return this.mds.groups.find((g: any) => g.id == this._groupId);
+        return this.mds.groups.find((g: any) => g.id == this.groupId);
     }
     getView(id: string) {
         return this.mds.views.find((v: any) => v.id == id);
     }
 
-    private async inflate() {
+    public async inflate() {
         if (!this.mds) {
             setTimeout(() => this.inflate(), 1000 / 60);
             return;
         }
         const editor = await this.mdsEditorInstanceService.initWithoutNodes(
-            this._groupId,
-            this._setId,
+            this.groupId,
+            this.setId,
             RestConstants.HOME_REPOSITORY,
-            'nodes',
-            this._data,
+            'viewer',
+            this.data,
         );
         if (!editor) {
             // Initialization was interrupted. Probably, this method was called again before it
@@ -173,5 +151,31 @@ export class MdsViewerComponent {
             html = html.substring(0, end) + '</' + w.id + '>' + html.substring(end);
         }
         return html;
+    }
+
+    async ngOnChanges(changes: SimpleChanges) {
+        let inflate = false;
+        if (changes.setId) {
+            this.mds = await this.mdsService
+                .getMetadataSet({ metadataSet: this.setId })
+                .toPromise();
+            inflate = true;
+        }
+        if (changes.data) {
+            if (this.data[RestConstants.CM_PROP_METADATASET_EDU_METADATASET] != null) {
+                this.mds = await this.mdsService
+                    .getMetadataSet({
+                        metadataSet:
+                            this.data[RestConstants.CM_PROP_METADATASET_EDU_METADATASET][0],
+                    })
+                    .toPromise();
+            } else if (!this.mds) {
+                this.mds = await this.mdsService.getMetadataSet({}).toPromise();
+            }
+            inflate = true;
+        }
+        if (inflate) {
+            this.inflate();
+        }
     }
 }

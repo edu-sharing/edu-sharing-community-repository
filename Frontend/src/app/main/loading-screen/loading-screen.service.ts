@@ -2,8 +2,8 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { Observable } from 'rxjs';
-import { distinctUntilChanged, finalize } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { distinctUntilChanged, finalize, first } from 'rxjs/operators';
 import { LoadingScreenComponent } from './loading-screen.component';
 
 class LoadingTask {
@@ -55,9 +55,27 @@ export class LoadingScreenService {
      *
      * @param startup Any new tasks with `startup: true` that are added after initial loading
      * finished will be ignored (default: true)
+     * @param until An abort criterion for the task. Usually a task finishes when its creator calls
+     * `done` on it. This parameter signals a state, where the creator is no longer in the position
+     * to call `done`. When the task was created by a component, `until` should emit when the
+     * component is destroyed. The effect of `until` emitting and `done` being called is the same,
+     * but since forgetting to call `done` is a common mistake, we require the additional value.
      */
-    addLoadingTask({ startup = true } = {}): LoadingTask {
-        const loadingTask = new LoadingTask(this.onLoadingTaskDone.bind(this));
+    addLoadingTask({
+        startup = true,
+        until,
+    }: {
+        startup?: boolean;
+        until: Observable<void>;
+    }): LoadingTask {
+        const doneSubject = new Subject<void>();
+        const loadingTask = new LoadingTask(() => {
+            doneSubject.next();
+            doneSubject.complete();
+        });
+        rxjs.merge(until, doneSubject)
+            .pipe(first())
+            .subscribe(() => this.onLoadingTaskDone(loadingTask));
         if (!startup || this.getIsLoading()) {
             this.loadingTasks.push(loadingTask);
             this.isLoadingSubject.next(true);
@@ -70,13 +88,13 @@ export class LoadingScreenService {
      *
      * The task is registered at the time the pipe is created and will be marked as done when the
      * observable either completes or throws an error.
-     * 
+     *
      * Use this function with observables that emit once and then complete.
-     * 
+     *
      * @param params See `addLoadingTask`
      */
     showUntilFinished<T>(
-        params: Parameters<LoadingScreenService['addLoadingTask']>[0] = {},
+        params: Parameters<LoadingScreenService['addLoadingTask']>[0],
     ): rxjs.UnaryFunction<Observable<T>, Observable<T>> {
         const task = this.addLoadingTask(params);
         return rxjs.pipe(finalize(() => task.done()));

@@ -52,6 +52,10 @@ public class LTIConstants {
     public static final String LTI_TARGET_LINK_URI = "https://purl.imsglobal.org/spec/lti/claim/target_link_uri";
 
     public static final String DEEP_LINKING_SETTINGS = "https://purl.imsglobal.org/spec/lti-dl/claim/deep_linking_settings";
+
+    public static final String LTI_CLAIM_RESOURCE_LINK = "https://purl.imsglobal.org/spec/lti/claim/resource_link";
+
+    public static final String LTI_CLAIM_CUSTOM = "https://purl.imsglobal.org/spec/lti/claim/custom";
     public static final String DEEP_LINK_RETURN_URL = "deep_link_return_url";
     public static final String DEEP_LINK_DATA = "data";
     public static final String DEEP_LINK_ACCEPT_TYPES = "accept_types";
@@ -66,7 +70,17 @@ public class LTIConstants {
     public static final String DEEP_LINK_TYPE = "type";
     public static final String DEEP_LINK_URL = "url";
 
-    public static final String DEEP_LINK_CONTEXT = "https://purl.imsglobal.org/spec/lti/claim/context";
+    public static final String CONTEXT = "https://purl.imsglobal.org/spec/lti/claim/context";
+
+    public static final String LTI_LAUNCH_PRESENTATION = "https://purl.imsglobal.org/spec/lti/claim/launch_presentation";
+
+    public static final String LTI_REGISTRATION_TOOL_CONFIGURATION = "https://purl.imsglobal.org/spec/lti-tool-configuration";
+
+    public static final String LTI_TOOL_PLATFORM = "https://purl.imsglobal.org/spec/lti/claim/tool_platform";
+
+    public static final String LTI_REGISTRATION_SCOPE_NEW = "NEW";
+
+    public static final String LTI_REGISTRATION_SCOPE_UPDATE = "UPDATE";
 
 
 

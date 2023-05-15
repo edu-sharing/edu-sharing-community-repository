@@ -1,8 +1,15 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import {BehaviorSubject, Observable} from 'rxjs';
-import {InputStatus, Values} from '../../../types/types';
+import {
+    ApplicationRef,
+    ChangeDetectorRef,
+    Component,
+    EventEmitter,
+    OnInit,
+    Output,
+} from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
+import { InputStatus, Values } from '../../../types/types';
 import { map } from 'rxjs/operators';
-import {NativeWidgetComponent} from '../../../types/mds-types';
 
 @Component({
     selector: 'es-mds-editor-widget-file-upload',
@@ -30,7 +37,7 @@ export class MdsEditorWidgetFileUploadComponent implements OnInit, NativeWidgetC
 
     @Output() onSetLink = new EventEmitter<string>();
 
-    constructor() {}
+    constructor(private changeDetectorRef: ChangeDetectorRef) {}
 
     ngOnInit(): void {}
 
@@ -70,9 +77,13 @@ export class MdsEditorWidgetFileUploadComponent implements OnInit, NativeWidgetC
         }
         return values;
     }
-
+    clearFile() {
+        this.selectedFiles.next(null);
+        this.changeDetectorRef.detectChanges();
+    }
     private update() {
         this.hasChanges.next(!!this.selectedFiles.value?.length || !!this._link);
         this.status.next(this.hasChanges.value ? 'VALID' : 'INVALID');
+        this.changeDetectorRef.detectChanges();
     }
 }

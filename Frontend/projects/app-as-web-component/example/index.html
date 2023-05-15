@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Components Example</title>
+    <base href="/" />
+    <script>
+      window.__env = {
+        // EDU_SHARING_API_URL: 'http://repository.127.0.0.1.nip.io:8100/edu-sharing/rest',
+        // EDU_SHARING_API_URL: 'http://localhost:4200/edu-sharing/rest',
+        EDU_SHARING_API_URL: '/edu-sharing/rest',
+      };
+    </script>
+    <script src="app-as-web-component/runtime.js" type="module"></script>
+    <script src="app-as-web-component/polyfills.js" type="module"></script>
+    <!-- Alternatively to loading `scripts.js`, provide your own versions of jQuery.  -->
+    <script src="app-as-web-component/scripts.js" defer></script>
+    <script src="app-as-web-component/main.js" type="module"></script>
+    <!-- Only for dev builds. Could also set `vendorChunk: false` in `angular.json` to omit
+    altogether. -->
+    <script src="app-as-web-component/vendor.js" type="module"></script>
+    <link rel="stylesheet" href="app-as-web-component/styles.css" />
+    <script>
+      function onSubmit(event) {
+        event.preventDefault();
+        const data = new FormData(event.target);
+        const searchString = data.get('searchString');
+        console.log('submit', searchString);
+        const eduSharingApp = document.getElementsByTagName('edu-sharing-app')[0];
+        eduSharingApp.setAttribute('search-string', searchString);
+      }
+    </script>
+    <style>
+      body {
+        padding: 100px;
+        max-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .main-container {
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .search-form {
+        flex-shrink: 0;
+      }
+      edu-sharing-app {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      /* .controls {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .details-container {
+        position: relative;
+        min-width: 0;
+      } */
+    </style>
+  </head>
+  <body>
+    <h1>Web Components Example</h1>
+    <main class="main-container">
+      <form class="search-form" onsubmit="onSubmit(event)">
+        <input name="searchString" class="search-input" type="text" placeholder="Search"" />
+      </form>
+      <edu-sharing-app></edu-sharing-app>
+    </main>
+  </body>
+</html>

@@ -78,6 +78,7 @@ public interface CollectionService {
 
 	void updateAndSetScope(Collection collection) throws Exception;
 
+    String getCollectionHomeParent();
     String getHomePath();
 
     Collection createAndSetScope(String parentId, Collection collection) throws Throwable;
@@ -91,10 +92,6 @@ public interface CollectionService {
     List<org.edu_sharing.service.model.NodeRef> getReferenceObjects(String nodeId);
 
 	List<NodeRef> getReferenceObjectsSync(String nodeId);
-
-	String addFeedback(String id, HashMap<String, String[]> feedbackData) throws Throwable;
-
-	List<String> getFeedbacks(String id) throws Throwable;
 
 	default CollectionProposalInfo getCollectionsContainingProposals(CCConstants.PROPOSAL_STATUS status, Integer skipCount, Integer maxItems, SortDefinition sortDefinition) throws Throwable {
 		throw new NotImplementedException("collections proposal feature is not supported without elasticsearch");

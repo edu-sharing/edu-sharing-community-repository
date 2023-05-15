@@ -23,6 +23,7 @@ import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.service.admin.model.RepositoryConfig;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.admin.model.ToolPermission;
+import org.edu_sharing.service.version.RepositoryVersionInfo;
 
 public interface AdminService {
 
@@ -68,7 +69,7 @@ public interface AdminService {
 	void writePublisherToMDSXml(String vcardProps, String valueSpaceProp, String ignoreValues, String filePath,
 			HashMap authInfo) throws Throwable;
 
-	ArrayList<String> getAllValuesFor(String property, HashMap authInfo) throws Throwable;
+	Collection<String> getAllValuesFor(String property) throws Throwable;
 
 	void removeApplication(ApplicationInfo info) throws Exception;
 
@@ -129,4 +130,6 @@ public interface AdminService {
     Object getLightbendConfig();
 
 	Collection<PluginStatus> getPlugins();
+
+    RepositoryVersionInfo getVersion();
 }

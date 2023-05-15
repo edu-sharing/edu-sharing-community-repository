@@ -1,0 +1,82 @@
+@import '../../../core-ui-module/styles/variables';
+
+// $height: $secondaryBarHeight;
+$height: 50px;
+
+.smallCollection {
+    display: flex;
+    min-height: $height;
+    width: 100%;
+    border-radius: 10px;
+    .right {
+        background-color: $primary;
+        border-top-right-radius: inherit;
+        border-bottom-right-radius: inherit;
+        padding: 7px;
+        display: flex;
+        flex-grow: 1;
+        align-items: center;
+        gap: 10px;
+        color: #fff;
+        .title {
+            margin-left: 13px;
+            font-size: 120%;
+        }
+        .scope {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
+    }
+
+    .image-icon {
+        align-items: center;
+        justify-content: center;
+    }
+    .image {
+        align-self: stretch;
+        width: $height;
+        display: flex;
+        flex-shrink: 0;
+        border-top-left-radius: inherit;
+        border-bottom-left-radius: inherit;
+        .icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff;
+            width: calc(#{$height} - 10px);
+            height: calc(#{$height} - 10px);
+            border-radius: 50%;
+        }
+        img {
+            height: 100%;
+            width: 100%;
+            border-top-left-radius: inherit;
+            border-bottom-left-radius: inherit;
+        }
+    }
+}
+.titleMobile {
+    display: none;
+}
+
+:host ::ng-deep {
+    es-list-collection-info {
+        display: flex;
+        > i {
+            font-size: 18px;
+        }
+        > span {
+            padding-left: 5px;
+        }
+    }
+}
+@media screen and (max-width: ($mobileWidth)) {
+    .title {
+        display: none;
+    }
+    .titleMobile {
+        display: block;
+    }
+}

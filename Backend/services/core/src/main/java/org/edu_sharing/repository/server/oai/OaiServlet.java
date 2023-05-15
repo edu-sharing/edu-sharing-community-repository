@@ -1,18 +1,29 @@
 package org.edu_sharing.repository.server.oai;
 
+import com.lyncode.xml.XmlReader;
+import com.lyncode.xml.exceptions.XmlReaderException;
+import com.lyncode.xml.exceptions.XmlWriteException;
 import com.typesafe.config.Config;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.namespace.QName;
+import org.apache.cxf.staxutils.DelegatingXMLStreamWriter;
 import org.apache.log4j.Logger;
+import org.apache.xml.serialize.OutputFormat;
+import org.apache.xml.serialize.XMLSerializer;
 import org.dspace.xoai.dataprovider.exceptions.IdDoesNotExistException;
 import org.dspace.xoai.dataprovider.exceptions.OAIException;
 import org.dspace.xoai.dataprovider.handlers.results.ListItemIdentifiersResult;
+import org.dspace.xoai.dataprovider.model.InMemoryItem;
+import org.dspace.xoai.dataprovider.model.Item;
 import org.dspace.xoai.dataprovider.model.ItemIdentifier;
+import org.dspace.xoai.dataprovider.model.Set;
 import org.dspace.xoai.dataprovider.repository.RepositoryConfiguration;
-import org.dspace.xoai.model.oaipmh.DeletedRecord;
-import org.dspace.xoai.model.oaipmh.Granularity;
-import org.dspace.xoai.model.oaipmh.OAIPMH;
+import org.dspace.xoai.model.oaipmh.*;
+import org.dspace.xoai.model.xoai.Element;
+import org.dspace.xoai.model.xoai.XOAIMetadata;
+import org.dspace.xoai.xml.EchoElement;
+import org.dspace.xoai.xml.XmlWriter;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
@@ -33,13 +44,19 @@ import org.edu_sharing.xoai.EduItemIdentifier;
 import org.edu_sharing.xoai.EduOai;
 import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.context.ApplicationContext;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.stream.XMLStreamException;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,7 +64,7 @@ import java.util.stream.Collectors;
 
 public class OaiServlet extends HttpServlet{
     private static final int MAX_ITEMS_PER_PAGE = 300;
-    Logger logger = Logger.getLogger(OaiServlet.class);
+    private static Logger logger = Logger.getLogger(OaiServlet.class);
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -58,7 +75,7 @@ public class OaiServlet extends HttpServlet{
             RepositoryConfiguration configuration = new RepositoryConfiguration().
                     withMaxListIdentifiers(itemsPerPage).withMaxListSets(itemsPerPage).
                     withMaxListRecords(itemsPerPage).withMaxListSets(itemsPerPage).
-                    withAdminEmail(new Mail().getConfig().getString("admin")).
+                    withAdminEmail(config.getString("adminEmail")).
                     withBaseUrl(URLTool.getBaseUrl() + "/eduservlet/oai/provider").
                     withGranularity(Granularity.valueOf(config.getString("granularity"))).
                     withDeleteMethod(DeletedRecord.fromValue(config.getString("delete"))).
@@ -167,11 +184,11 @@ public class OaiServlet extends HttpServlet{
 
         @Override
         public EduItem getItem(String id) throws IdDoesNotExistException, OAIException{
-            ByteArrayOutputStream os=new ByteArrayOutputStream();
             if(!id.startsWith(identifierPrefix)){
                 throw new IdDoesNotExistException("Invalid id, identifierPrefix does not match " + identifierPrefix);
             }
             try {
+                ByteArrayOutputStream os=new ByteArrayOutputStream();
                 String nodeId = id.substring(identifierPrefix.length());
                 OAIExporterFactory.getOAILOMExporter().write(os, nodeId);
                 return new EduItem(id, os.toString());

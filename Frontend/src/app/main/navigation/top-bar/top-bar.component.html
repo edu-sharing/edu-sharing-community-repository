@@ -1,11 +1,11 @@
 <es-create-menu
-#createMenu
-[scope]="currentScope"
-[allowed]="isCreateAllowed"
-[allowBinary]="create.allowBinary"
-[parent]="create.parent"
-[folder]="create.folder"
-(onCreate)="created.emit($event)"
+  #createMenu
+  [scope]="currentScope"
+  [allowed]="isCreateAllowed"
+  [allowBinary]="create.allowBinary"
+  [parent]="create.parent"
+  [folder]="create.folder"
+  (onCreate)="created.emit($event)"
 ></es-create-menu>
 
 <div class="mobile-move-top2">
@@ -43,6 +43,7 @@
         class="menuButton mat-button-no-uppercase"
         [class.clickable]="canOpen"
         title="{{ 'CHOOSEENVIRONMENT' | translate }}"
+        data-test="main-nav-scope-button"
       >
         <img class="material-icons eduImage" [src]="getIconSource()" alt="" />
         <span>{{ title | translate }}</span>
@@ -51,7 +52,7 @@
     </ng-container>
   </div>
   <ng-container *ngIf="isSafe && !mainMenuSidebar?.show">
-    <div class="timeout" *ngIf="autoLogoutTimeout$ | async as timeout">
+    <div class="timeout" *ngIf="autoLogoutTimeout$ | async as timeout" data-test="logout-timer">
       <i esIcon="av_timer"></i>
       {{ timeout }}
     </div>
@@ -68,6 +69,7 @@
         (menuOpened)="createMenu.updateOptions()"
         [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"
         [attr.aria-label]="'WORKSPACE.ADD' | translate"
+        data-test="top-bar-add-button"
       >
         <i esIcon="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
       </button>
@@ -136,6 +138,7 @@
       *ngIf="currentUser && showUser"
       [matMenuTriggerFor]="userDropdown.menu"
       title="{{ 'USERMENU' | translate }}"
+      data-test="main-nav-user-menu-button"
     >
       <es-user-avatar [user]="currentUser" [size]="'xsmall'"></es-user-avatar>
       <span *ngIf="!connector.getCurrentLogin()?.isGuest">{{ currentUser | authorityName }}</span>

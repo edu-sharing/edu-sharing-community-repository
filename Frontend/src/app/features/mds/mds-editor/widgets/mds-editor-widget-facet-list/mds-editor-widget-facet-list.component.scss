@@ -2,14 +2,27 @@
 
 $countBackgroundColor: scale-color($backgroundColor, $lightness: -15%);
 
-:host ::ng-deep mat-checkbox {
-    .mat-checkbox-layout {
+:host ::ng-deep {
+    mat-form-field {
         width: 100%;
+        > div {
+            padding-bottom: 1em;
+        }
     }
-    .mat-checkbox-label {
-        flex-grow: 1;
-        min-width: 0;
+    mat-checkbox {
+        .mat-checkbox-layout {
+            width: 100%;
+        }
+
+        .mat-checkbox-label {
+            flex-grow: 1;
+            min-width: 0;
+        }
     }
+}
+
+ul {
+    margin: 0;
 }
 
 li {
@@ -40,6 +53,7 @@ mat-checkbox {
 }
 
 .load-more-button {
+    margin-top: 1em;
     .spinner {
         margin-left: 10px;
         transform: scale(0.8);

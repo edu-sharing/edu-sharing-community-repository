@@ -35,6 +35,7 @@
 	<bean id="nodeServiceInterceptor" class="org.edu_sharing.service.nodeservice.NodeServiceInterceptor"
 		  init-method="init"/>
 
+	<bean id="authorityService" class=" org.edu_sharing.service.authority.AuthorityServiceImpl"/>
 	<bean id="permissionService" class="org.springframework.aop.framework.ProxyFactoryBean" >
 		<property name="targetName">
 			<value>permissionServiceImpl</value>
@@ -82,4 +83,9 @@
 	</bean>
 
 	<bean id="mediacenterLicenseProvider" class="org.edu_sharing.service.mediacenter.MediacenterLicenseProviderImpl"/>
+	<bean id="ratingService" class="org.edu_sharing.service.rating.RatingServiceImpl" init-method="init" lazy-init="true"/>
+	<bean id="relationService" class="org.edu_sharing.service.relations.RelationServiceDefaultImpl"/>
+
+	<bean class="org.edu_sharing.service.permission.PermissionChecking"/>
+
 </beans>

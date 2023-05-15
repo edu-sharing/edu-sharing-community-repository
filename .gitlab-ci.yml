@@ -7,9 +7,110 @@ default:
   image: maven:3.8.4-jdk-8
 
 stages:
+  - test
   - deploy
+
+unittest frontend:
+  stage: test
+  variables:
+    NODE_VERSION: 16
+    CHROME_BIN: /usr/bin/chromium-browser
+  image: node:$NODE_VERSION-alpine3.16
+  cache:
+    key:
+      files:
+        - Frontend/package-lock.json
+      prefix: node-modules-$NODE_VERSION
+    paths:
+      - Frontend/node_modules
+  before_script:
+    - apk add chromium
+    - mkdir -p Frontend/projects/edu-sharing-api/build/
+    - cp Backend/services/rest/api/src/main/resources/openapi.json Frontend/projects/edu-sharing-api/build/openapi.json
+    - cd Frontend/projects/edu-sharing-api
+    - npm ci
+    - npm run generate-api
+    - cd ../..
+    # Install dependencies on cache miss, e.g., when first running on a ci runner.
+    - ([[ -d node_modules ]] || npm ci)
+  script:
+    - npm run prebuild
+    - npm run test-ci
 
 deploy:
   stage: deploy
+  needs: []
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^maven\/release\/.*/ && $CI_PIPELINE_SOURCE == "pipeline"
+    - if: $CI_COMMIT_TAG && $CI_PIPELINE_SOURCE == "pipeline"
+    - if: $CI_COMMIT_BRANCH =~ /^maven\// && $CI_COMMIT_BRANCH !~ /^maven\/release\/.*/ && $CI_COMMIT_TAG == null
   script:
     - mvn $MAVEN_CLI -s .mvn/settings.xml deploy
+
+.frontend_job: &frontend_job
+  variables:
+    NODE_VERSION: 16
+  image: node:$NODE_VERSION
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^maven\/release\/.*/ && $CI_PIPELINE_SOURCE == "pipeline"
+    - if: $CI_COMMIT_TAG && $CI_PIPELINE_SOURCE == "pipeline"
+    - if: $CI_COMMIT_BRANCH !~ /^maven\/release\/.*/ && $CI_COMMIT_TAG == null
+  cache:
+    key:
+      files:
+        - Frontend/package-lock.json
+      prefix: node-modules-$NODE_VERSION  
+    paths:
+      - Frontend/node_modules
+  before_script:
+    - cd Frontend
+    - node -v
+    - npm -v
+    # Install dependencies on cache miss, e.g., when first running on a ci runner.
+    - ([[ -d node_modules ]] || npm ci)
+
+# build:
+#   <<: *frontend_job
+#   stage: build
+#   script:
+#     - npm run build
+
+check formatting:
+  <<: *frontend_job
+  stage: test
+  needs: []
+  script:
+    - npm run check:format
+
+check linting:
+  <<: *frontend_job
+  stage: test
+  needs: []
+  script:
+    - npm run check:lint
+
+# e2e:
+#   <<: *frontend_job
+#   stage: test
+#   needs: []
+#   image: mcr.microsoft.com/playwright:v1.22.0-focal
+#   variables:
+#     NODE_VERSION: 16  # Matches the preinstalled version of node in the image.
+#     # Test against external frontend.
+#     # E2E_TEST_BASE_URL: http://192.168.16.171/edu-sharing/ 
+#     BACKEND_URL: http://192.168.16.171
+#   script:
+#     - node -v
+#     - npm -v
+#     - npm start &
+#     - sleep 120
+#     - npm run e2e
+#   artifacts:
+#     paths:
+#       - Frontend/playwright-report/
+#     when: on_failure
+#   rules:
+#     - if: $CI_COMMIT_BRANCH =~ /^maven\/release\/.*/ && $CI_PIPELINE_SOURCE == "pipeline"
+#     - if: $CI_COMMIT_TAG && $CI_PIPELINE_SOURCE == "pipeline"
+#     - if: $CI_COMMIT_BRANCH !~ /^maven\/release\/.*/ && $CI_COMMIT_TAG == null
+#

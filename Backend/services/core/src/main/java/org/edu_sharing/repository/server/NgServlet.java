@@ -48,6 +48,8 @@ public class NgServlet extends HttpServlet {
 			// store url for shibboleth/sso, regardless if login is present or not (for guest redirects)
 			URL url = new URL(req.getRequestURL().toString()+"?"+req.getQueryString());
 			if(!url.getPath().contains(COMPONENTS_ERROR)) {
+				logger.debug("Persist previous frontend url: " + req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : ""));
+				logger.debug("Previous frontend url path: " + url.getPath());
 				req.getSession().setAttribute(PREVIOUS_ANGULAR_URL,
 						req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : ""));
 			}
@@ -67,26 +69,6 @@ public class NgServlet extends HttpServlet {
 			}
 			if(url.getPath().contains(COMPONENTS_ERROR)){
 				resp.setStatus(getErrorCode(url.getPath()));
-			}
-			if(req.getHeader("User-Agent")!=null){
-			    String platform="";
-                if(req.getHeader("User-Agent").contains("ios"))
-                    platform="ios";
-                if(req.getHeader("User-Agent").contains("android"))
-                    platform="android";
-				if(req.getHeader("User-Agent").contains("cordova / edu-sharing-app")){
-                    html=addToHead("<script type=\"text/javascript\" src=\"assets/cordova/"+platform+"/cordova.js\"></script>",html);
-                    logger.info("cordova app, add cordova.js to header");
-                }
-				if (req.getHeader("User-Agent").contains("ionic / edu-sharing-app")) {
-					// when using ionic, our app-registry will care for delivering the right plattform data
-					String[] headers=req.getHeader("User-Agent").split("\\/");
-                    String version=headers[headers.length-1].trim();
-                    if(!version.matches("\\d\\.\\d(\\.\\d)?"))
-                        version="0.0.0";
-					html =addToHead("<script type=\"text/javascript\" src=\"https://app-registry.edu-sharing.com/js/"+version+"/"+platform+"/cordova.js\"></script>",html);
-					logger.info("ionic app, add cordova.js to header");
-				}
 			}
 			resp.setHeader("Content-Type","text/html");
 			resp.getOutputStream().write(html.getBytes("UTF-8"));

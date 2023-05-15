@@ -4,6 +4,7 @@
 	<widgets>
 		<widget>
 			<id>cm:name</id>
+			<id rel="graphql">info.filename</id>
 			<caption>cm_name</caption>
 			<placeholder>cm_name_placeholder</placeholder>
 			<bottomCaption>cm_name_bottom</bottomCaption>
@@ -13,6 +14,7 @@
 		</widget>
 		<widget>
 			<id>cclom:title</id>
+			<id rel="graphql">lom.general.title</id>
 			<caption>cm_title</caption>
 			<placeholder>cm_title_placeholder</placeholder>
 			<bottomCaption>cm_title_bottom</bottomCaption>
@@ -22,6 +24,7 @@
 		</widget>
 		<widget>
 			<id>cclom:title</id>
+			<id rel="graphql">lom.general.title</id>
 			<caption>cm_title_wwwurl</caption>
 			<placeholder>cm_title_placeholder</placeholder>
 			<type>text</type>
@@ -29,6 +32,7 @@
 		</widget>
 		<widget>
 			<id>virtual:mediatype</id>
+			<id rel="graphql">content.mediatype</id>
 			<caption>virtual_mediatype</caption>
 			<type>text</type>
 			<hideIfEmpty>false</hideIfEmpty>
@@ -37,6 +41,7 @@
 		</widget>
 		<widget>
 			<id>ccm:wwwurl</id>
+			<id rel="graphql">info.url</id>
 			<caption>cm_wwwurl</caption>
 			<placeholder>cm_wwwurl_placeholder</placeholder>
 			<type>text</type>
@@ -45,6 +50,7 @@
 		</widget>
 		<widget>
 			<id>cclom:general_description</id>
+			<id rel="graphql">lom.general.description</id>
 			<type>textarea</type>
 			<caption>lom_prop_educational_description</caption>
 			<placeholder>lom_prop_educational_description_placeholder</placeholder>
@@ -52,12 +58,14 @@
 		</widget>
 		<widget>
 			<id>cm:description</id>
+			<id rel="graphql">lom.general.description</id>
 			<type>text</type>
 			<caption>lom_prop_educational_description</caption>
 			<placeholder>lom_prop_educational_description_placeholder</placeholder>
 		</widget>
 		<widget>
 			<id>cclom:general_keyword</id>
+			<id rel="graphql">lom.general.keyword</id>
 			<type>multivalueSuggestBadges</type>
 			<caption>lom_prop_general_keyword</caption>
 			<placeholder>lom_prop_general_keyword_placeholder</placeholder>
@@ -66,34 +74,40 @@
 		</widget>
 		<widget>
 			<id>cclom:general_keyword</id>
-			<template>search_suggestions</template>
+			<id rel="graphql">lom.general.keyword</id>
 			<type>multivalueSuggestBadges</type>
 			<caption>lom_prop_general_keyword_tagcloud</caption>
+			<template>search_suggestions</template>
 		</widget>
 		<widget>
 			<id>cclom:general_keyword</id>
+			<id rel="graphql">lom.general.keyword</id>
 			<type>multivalueSuggestBadges</type>
 			<caption>lom_prop_general_keyword</caption>
 			<template>search</template>
 		</widget>
 		<widget>
 			<id>ccm:author_freetext</id>
+			<id rel="graphql">lom.rights.author</id>
 			<type>textarea</type>
 			<caption>lom_prop_author_freetext</caption>
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
 			<id>ccm:educationallearningresourcetype</id>
+			<id rel="graphql">lom.educational.0.learningResourceType</id>
 			<type>multivalueFixedBadges</type>
 			<caption>lom_prop_educationallearningresourcetype</caption>
 			<placeholder>lom_prop_educationallearningresourcetype_placeholder</placeholder>
 			<hideIfEmpty>true</hideIfEmpty>
 			<valuespace>valuespaces.xml</valuespace>
 			<valuespace_i18n>valuespaces_i18n</valuespace_i18n>
+			<valuespace_sort>caption</valuespace_sort>
 			<searchable>true</searchable>
 		</widget>
 		<widget>
 			<id>ccm:restricted_access</id>
+			<id rel="graphql">lom.rights.restrictedAccess</id>
 			<type>checkbox</type>
 			<caption>cb_restricted_access</caption>
 			<bottomCaption>cb_restricted_access_info</bottomCaption>
@@ -171,12 +185,16 @@
 		</widget>
 		<widget>
 			<id>ccm:lifecyclecontributer_author</id>
+			<id rel="graphql">lom.lifecycle.contributor</id>
+			<filter rel="graphql">$.[?(@.role == "Author")]</filter>
+			<role>Author</role>
 			<caption>cb_contr_author</caption>
 			<type>vcard</type>
 			<icon>person</icon>
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_publisher</id>
 			<caption>cb_contr_publisher</caption>
 			<type>vcard</type>
@@ -184,6 +202,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_unknown</id>
 			<caption>cb_contr_unknown</caption>
 			<type>vcard</type>
@@ -191,6 +210,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_initiator</id>
 			<caption>cb_contr_initiator</caption>
 			<type>vcard</type>
@@ -198,6 +218,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_terminator</id>
 			<caption>cb_contr_terminator</caption>
 			<type>vcard</type>
@@ -205,6 +226,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_validator</id>
 			<caption>cb_contr_validator</caption>
 			<type>vcard</type>
@@ -212,6 +234,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_editor</id>
 			<caption>cb_contr_editor</caption>
 			<type>vcard</type>
@@ -219,6 +242,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_graphical_designer</id>
 			<caption>cb_contr_graphical_designer</caption>
 			<type>vcard</type>
@@ -226,6 +250,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_technical_implementer</id>
 			<caption>cb_contr_technical_implementer</caption>
 			<type>vcard</type>
@@ -233,6 +258,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_content_provider</id>
 			<caption>cb_contr_content_provider</caption>
 			<type>vcard</type>
@@ -240,6 +266,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_educational_validator</id>
 			<caption>cb_contr_educational_validator</caption>
 			<type>vcard</type>
@@ -247,6 +274,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_script_writer</id>
 			<caption>cb_contr_script_writer</caption>
 			<type>vcard</type>
@@ -254,6 +282,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_instructional_designer</id>
 			<caption>cb_contr_instructional_designer</caption>
 			<type>vcard</type>
@@ -261,6 +290,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_subject_matter_expert</id>
 			<caption>cb_contr_subject_matter_expert</caption>
 			<type>vcard</type>
@@ -268,6 +298,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:metadatacontributer_creator</id>
 			<caption>cb_contr_creator</caption>
 			<type>vcard</type>
@@ -275,6 +306,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:metadatacontributer_validator</id>
 			<caption>cb_contr_validator</caption>
 			<type>vcard</type>
@@ -282,6 +314,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:metadatacontributer_provider</id>
 			<caption>cb_contr_provider</caption>
 			<type>vcard</type>
@@ -290,11 +323,13 @@
 		</widget>
 		<widget>
 			<id>cm:created</id>
+			<id rel="graphql">info.createDate</id>
 			<caption>cm_prop_created</caption>
 			<type>date</type>
 		</widget>
 		<widget>
 			<id>cm:modified</id>
+			<id rel="graphql">info.modifiedDate</id>
 			<caption>cm_prop_modified</caption>
 			<type>date</type>
 		</widget>
@@ -326,17 +361,20 @@
 		</widget>
 		<widget>
 			<id>sys:node-uuid</id>
+			<id rel="graphql">id</id>
 			<caption>lom_prop_general_identifier</caption>
 			<type>text</type>
 		</widget>
 		<widget>
 			<id>cclom:size</id>
+			<id rel="graphql">lom.technical.size</id>
 			<caption>lom_prop_size</caption>
 			<type>number</type>
 			<format>bytes</format>
 		</widget>
 		<widget>
 			<id>ccm:educationaltypicalagerange</id>
+			<id rel="graphql">lom.educational.0.typicalAgeRangeNominal</id>
 			<caption>lom_prop_educational_typicalagerange</caption>
 			<type>range</type>
 			<min>0</min>
@@ -344,12 +382,14 @@
 		</widget>
 		<widget>
 			<id>ccm:taxonid</id>
+			<id rel="graphql">lom.classification.taxon</id>
 			<caption>input_taxonentry</caption>
 			<type>multivalueTree</type>
 			<valuespace>eaf_discipline.xml</valuespace>
 		</widget>
 		<widget>
 			<id>ccm:educationalcontext</id>
+			<id rel="graphql">lom.educational.0.context</id>
 			<caption>school_context_type_of_school</caption>
 			<type>multivalueFixedBadges</type>
 			<valuespace>context.xml</valuespace>
@@ -357,6 +397,7 @@
 		</widget>
 		<widget>
 			<id>ccm:imported_object_appname</id>
+			<id rel="graphql">importedObject.appName</id>
 			<caption>lom_prop_imported_object_appname</caption>
 			<type>text</type>
 			<hideIfEmpty>true</hideIfEmpty>
@@ -398,14 +439,15 @@
 			<required>true</required>
 		</widget>
 		<widget>
-			<id>collection_feedback</id>
-			<type>collection_feedback</type>
+			<id>material_feedback</id>
+			<type>material_feedback</type>
 			<link>_BLANK</link>
 			<icon>chat_bubble</icon>
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
 			<id>cclom:classification_keyword</id>
+			<id rel="graphql">lom.classification.keyword</id>
 			<type>multivalueFixedBadges</type>
 			<caption>lom_prop_classification_keyword</caption>
 			<placeholder>lom_prop_classification_keyword_placeholder</placeholder>
@@ -413,6 +455,11 @@
 			<suggestionQuery>select factual_term_ident, CASE WHEN factual_term_synonyms IS NULL THEN factual_term_value WHEN array_length(factual_term_synonyms,1) = 1 THEN format('%s (%s)',factual_term_value, factual_term_synonyms[1])  ELSE format('%s (%s, %s)',factual_term_value, factual_term_synonyms[1], factual_term_synonyms[2]) END from edu_factual_term where (lower(factual_term_value) like ? OR lower(factual_term_synonyms[0]) like ? OR lower(factual_term_synonyms[1]) like ? OR lower(factual_term_ident) like ?) order by char_length(factual_term_value) limit 100</suggestionQuery>
 			<suggestDisplayProperty>ccm:classification_keyword_display</suggestDisplayProperty>
 			<textEscapingPolicy>all</textEscapingPolicy>
+		</widget>
+		<widget>
+			<id>virtual:user_files</id>
+			<caption>virtual_user_files</caption>
+			<type>checkbox</type>
 		</widget>
 	</widgets>
 	<templates>
@@ -672,6 +719,14 @@
 				]]></html>
 		</template>
 		<template>
+			<id>node_relations_render</id>
+			<caption>dialog_upload_tab_relations</caption>
+			<hideIfEmpty>true</hideIfEmpty>
+			<html><![CDATA[
+					<nodeRelations>
+				]]></html>
+		</template>
+		<template>
 			<id>node_comments_render</id>
 			<caption>dialog_upload_tab_comments</caption>
 			<html><![CDATA[
@@ -698,7 +753,7 @@
 				]]></html>
 		</template>
 		<template>
-			<id>collection_feedback</id>
+			<id>material_feedback</id>
 			<html><![CDATA[
 					<style>
 					.feedback_comment_container textarea{
@@ -732,6 +787,12 @@
 		<template>
 			<id>mediacenter_filter</id>
 			<html><![CDATA[
+				]]></html>
+		</template>
+		<template>
+			<id>search_relation_node</id>
+			<html><![CDATA[
+				<virtual:user_files>
 				]]></html>
 		</template>
 	</templates>
@@ -811,6 +872,7 @@
 				<view>node_general_render</view>
 				<view>node_contributor_render</view>
 				<view>node_collections_render</view>
+				<view>node_relations_render</view>
 				<view>node_comments_render</view>
 			</views>
 		</group>
@@ -833,6 +895,13 @@
 			<rendering>angular</rendering>
 			<views>
 				<view>node_map</view>
+			</views>
+		</group>
+		<group>
+			<id>search_relation_node</id>
+			<rendering>angular</rendering>
+			<views>
+				<view>search_relation_node</view>
 			</views>
 		</group>
 		<group>
@@ -864,15 +933,17 @@
 			</views>
 		</group>
 		<group>
-			<id>collection_feedback_view</id>
+			<id>material_feedback_view</id>
+			<rendering>angular</rendering>
 			<views>
-				<view>collection_feedback</view>
+				<view>material_feedback</view>
 			</views>
 		</group>
 		<group>
-			<id>collection_feedback</id>
+			<id>material_feedback</id>
+			<rendering>angular</rendering>
 			<views>
-				<view>collection_feedback</view>
+				<view>material_feedback</view>
 			</views>
 		</group>
 		<group>
@@ -887,6 +958,13 @@
 			<rendering>angular</rendering>
 			<views>
 				<view>mediacenter_filter</view>
+			</views>
+		</group>
+		<group>
+			<id>search_relation_node</id>
+			<rendering>angular</rendering>
+			<views>
+				<view>search_relation_node</view>
 			</views>
 		</group>
 	</groups>
@@ -957,6 +1035,14 @@
 				<column>groupType</column>
 			</columns>
 		</list>
+		<list>
+			<id>relationNodes</id>
+			<columns>
+				<column>cclom:title</column>
+				<column>cm:creator</column>
+				<column>cm:created</column>
+			</columns>
+		</list>
 	</lists>
 	<queries>
 		<basequery>-TYPE:"ccm:toolpermission" AND NOT ASPECT:"ccm:metadataPresettingTemplate" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*" AND NOT PATH:"/app:company_home/ccm:Edu_Sharing_System/*" AND -ASPECT:"ccm:io_childobject"</basequery>
@@ -996,6 +1082,11 @@
 			<property name="workflow">
 				<statement>@ccm\:wf_status:"${value}"</statement>
 				<statement value="100_unchecked">@ccm\:wf_status:"${value}" or ISNULL:@ccm\:wf_status</statement>
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="virtual:reurlTypes">
+				<statement>@cclom\:format:"${value}*"</statement>
 				<multiple>true</multiple>
 				<multiplejoin>OR</multiplejoin>
 			</property>
@@ -1090,33 +1181,130 @@
 				<mandatory>false</mandatory>
 			</property>
 		</query>
+		<query join="AND" id="search_relation_query">
+			<basequery>TYPE:"ccm:io" AND NOT ASPECT:"ccm:collection_io_reference"</basequery>
+			<property name="ngsearchword">
+				<statement>(@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*")</statement>
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+			</property>
+			<property name="sourceNode">
+				<statement>TYPE:"ccm:io" AND NOT @sys\:node-uuid:"${value}" AND NOT @ccm\:published_original:"${value}"</statement>
+			</property>
+			<property name="ccm:taxonid">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="virtual:user_files">
+				<statement value="false">TYPE:"ccm:io"</statement>
+				<statement value="true">CREATOR:"${authority}" OR OWNER:"${authority}"</statement>
+			</property>
+		</query>
 	</queries>
 	<queries syntax="dsl">
-		<basequery></basequery>
+		<basequery>
+			{"bool":
+			{"must":[
+			{"term":{"nodeRef.storeRef.protocol":"workspace"}}
+			]
+			}}
+		</basequery>
 		<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
 
+		<query join="AND" id="collections">
+			<basequery propertyNull="ngsearchword">
+			{"bool":{
+			"must":[
+			{"term":{"aspects":"ccm:collection"}},{"term":{"nodeRef.storeRef.protocol":"workspace"}}
+			{"bool":{
+			"should":[
+			{"term":{"properties.ccm:collectionlevel0.keyword":"true"}},
+			{"term":{"properties.ccm:collection_pinned_status":"true"}},
+			]
+			}}]
+			}}
+			</basequery>
+			<basequery>{"bool":{
+				"must":[
+				{"term":{"type":"ccm:map"}},{"term":{"aspects":"ccm:collection"}}
+				]
+				}}
+			</basequery>
+			<property name="ngsearchword" asFilter="false">
+				<statement>
+					{"bool":{"should":[
+					{
+					"simple_query_string": {
+					"query": "${valueRaw}*",
+					"flags": "OR|AND|PREFIX|PHRASE|WHITESPACE",
+					"fields": [
+					"properties.cm:name^2",
+					"properties.cm:title^2",
+					"properties.cclom:title^5",
+					"properties.cclom:general_description^2",
+					"properties.cclom:general_keyword^4",
+					"i18n.de_DE.ccm:taxonid^2"
+					],
+					"default_operator": "and"
+					}
+					},
+					{"wildcard":{"nodeRef.id": {"value":"*${value}*", "case_insensitive": true }}}
+					]
+					}}</statement>
+			</property>
+		</query>
 		<query join="AND" id="ngsearch">
 			<!--TODO basequery-->
 			<!--basequery>ISNULL:@ccm\:tool_category</basequery-->
-			<basequery>
-				{"bool":
-				{"must":[{"term":{"nodeRef.storeRef.protocol":"workspace"}}],
-				 "must_not":[{"term":{"aspects":"ccm:metadataPresettingTemplate"}},
-							 {"term":{"aspects":"ccm:io_childobject"}},
-							 {"wildcard":{"properties.cm:name.keyword":"._*"}},
-							 {"term":{"aspects":"ccm:collection_io_reference"}},
-				             {"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}]
-				}
-				}</basequery>
-			<property name="ngsearchword">
-				<statement>{"bool":{"should":[
-					{"wildcard":{"properties.cm:name":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"properties.cclom:title.keyword":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"properties.cclom:general_description":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"properties.cclom:general_keyword":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"content.fulltext":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"nodeRef.id":{"value":"*${value}*", "case_insensitive": true }}}
-					]}}</statement>
+			<basequery>{"bool":{
+				"must":[
+				{"term":{"type":"ccm:io"}},
+				{"term":{"nodeRef.storeRef.protocol":"workspace"}}
+				],
+				"must_not":[
+				{"term":{"aspects":"ccm:metadataPresettingTemplate"}},
+				{"term":{"aspects":"ccm:io_childobject"}},
+				{"wildcard":{"properties.cm:name.keyword":"._*"}},
+				{"term":{"aspects":"ccm:collection_io_reference"}},
+				{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}
+				]
+				}}</basequery>
+			<property name="ngsearchword" asFilter="false">
+				<basequery>
+					{"bool": {
+					"must_not":[
+					{"term":{"aspects":"ccm:metadataPresettingTemplate"}},
+					{"term":{"aspects":"ccm:io_childobject"}},
+					{"wildcard":{"properties.cm:name.keyword":"._*"}},
+					{"term":{"aspects":"ccm:collection_io_reference"}},
+					{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}
+					]
+					}
+					}</basequery>
+				<statement>
+					{"bool":{"should":[
+					{
+					"simple_query_string": {
+					"query": "${valueRaw}*",
+					"flags": "OR|AND|PREFIX|PHRASE|WHITESPACE",
+					"fields": [
+					"properties.cm:name^2",
+					"properties.cm:title^2",
+					"properties.cclom:title^5",
+					"properties.cclom:general_description^2",
+					"properties.cclom:general_keyword^4",
+					"properties.ccm:lifecyclecontributer_author^1",
+					"properties.ccm:lifecyclecontributer_publisher^1",
+					"properties.ccm:publisher^1",
+					"i18n.de_DE.ccm:taxonid^2",
+					"content.fulltext^1"
+					],
+					"default_operator": "and"
+					}
+					},
+					{"wildcard":{"nodeRef.id": {"value":"*${value}*", "case_insensitive": true }}}
+					]
+					}}</statement>
 				<exactMatching>false</exactMatching>
 				<multiple>true</multiple>
 				<multiplejoin>AND</multiplejoin>
@@ -1148,11 +1336,69 @@
 				<multiple>true</multiple>
 				<multiplejoin>OR</multiplejoin>
 			</property>
+			<property name="virtual:reurlTypes">
+				<statement>{"wildcard": {"properties.cclom:format": "${valueRaw}*" }}</statement>
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
 		</query>
 		<query join="AND" id="mediacenter_filter">
 			<basequery>{"term":{"type":"ccm:io"}}</basequery>
 			<property name="ngsearchword">
-				<statement>{"bool":{"should":[{"wildcard":{"properties.cm:name":{"value":"*${value}*"}}},{"wildcard":{"properties.ccm.replicationsourceid":{"value":"*${value}*"}}}]}}</statement>
+				<statement>{"bool":{"should":[
+					{"wildcard":{"properties.cm:name.keyword":{"value":"*${value}*"}}},
+					{"wildcard":{"properties.cclom:title.keyword":{"value":"*${value}*"}}},
+					{"wildcard":{"properties.ccm:replicationsourceid.keyword":{"value":"*${value}*"}}}
+					]}}
+				</statement>
+			</property>
+		</query>
+		<query join="AND" id="search_relation_query">
+			<basequery>{"term":{"type":"ccm:io"}}</basequery>
+			<property name="ngsearchword" asFilter="false">
+				<statement>
+					{
+					"simple_query_string" : {
+					"query": "${value}*",
+					"fields": [
+					"properties.cm:name^4",
+					"properties.cclom:title^4",
+					"properties.cclom:general_description^2",
+					"properties.cclom:general_keyword^2",
+					"content.fulltext",
+					"nodeRef.id",
+					"i18n.de_DE.ccm:taxonid^3",
+					"i18n.de_DE.ccm:educationallearningresourcetype^3",
+					"i18n.de_DE.ccm:educationalcontext^3",
+					"i18n.de_DE.ccm:educationalintendedenduserrole^3"
+					],
+					"default_operator": "and"
+					}}
+				</statement>
+				<exactMatching>false</exactMatching>
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+			</property>
+			<property name="sourceNode">
+				<statement>{"bool": {
+					"must_not": [
+					{"match": {"nodeRef.id": "${valueRaw}"}},
+					{"wildcard": {"properties.ccm:published_original.keyword": "*${valueRaw}"}}
+					]}}</statement>
+			</property>
+			<property name="ccm:taxonid">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="virtual:user_files">
+				<statement value="false">{"term":{"type":"ccm:io"}}</statement>
+				<statement value="true">{"bool": {
+					"should": [
+					{"match": {"properties.cm:creator.keyword": "${authority}"}},
+					{"match": {"owner": "${authority}"}}
+					]
+					}}
+				</statement>
 			</property>
 		</query>
 	</queries>

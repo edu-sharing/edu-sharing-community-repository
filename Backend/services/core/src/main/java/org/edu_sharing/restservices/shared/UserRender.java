@@ -2,11 +2,14 @@ package org.edu_sharing.restservices.shared;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class UserRender extends UserSimple {
+public class UserRender extends UserSimple implements Serializable {
     private String primaryAffiliation;
     private List<String> remoteRoles;
+
+    private boolean isGuest;
 
     @JsonProperty
     public String getPrimaryAffiliation() {
@@ -24,5 +27,14 @@ public class UserRender extends UserSimple {
 
     public void setRemoteRoles(List<String> remoteRoles) {
         this.remoteRoles = remoteRoles;
+    }
+
+    @JsonProperty
+    public boolean getIsGuest() {
+        return isGuest;
+    }
+
+    public void setIsGuest(boolean loginStatusCode) {
+        this.isGuest = loginStatusCode;
     }
 }

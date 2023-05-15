@@ -1,0 +1,46 @@
+@import '../../../../core-ui-module/styles/variables';
+
+.node-relations-widget {
+    padding: 15px 20px;
+    border-radius: 5px;
+    .relations-heading {
+        font-size: 100%;
+        font-style: italic;
+        color: $textRenderingLabels;
+    }
+    .relation-nodes {
+        display: grid;
+        grid-template-rows: repeat(auto-fill, 1fr);
+        grid-gap: 10px;
+
+        es-node-row {
+            ::ng-deep .node-row {
+                background-color: $cardLightBackground;
+            }
+        }
+        .current-version {
+            border-left: 2px solid $primaryMediumLight;
+        }
+        .current-version-text {
+            font-size: $fontSizeXSmall;
+            font-weight: bold;
+        }
+        .info-group:last-child {
+            align-items: flex-end;
+        }
+    }
+
+    .empty {
+        text-align: center;
+        font-size: 120%;
+        color: $textLight;
+    }
+}
+.info-group {
+    display: flex;
+    flex-direction: column;
+    label {
+        font-size: $fontSizeXSmall;
+        color: $textLight;
+    }
+}

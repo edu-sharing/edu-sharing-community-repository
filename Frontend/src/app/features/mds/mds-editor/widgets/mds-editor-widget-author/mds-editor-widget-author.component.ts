@@ -1,24 +1,28 @@
-
-import {first, filter} from 'rxjs/operators';
-import {Component, Input, OnInit, ViewChild} from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { MatTabGroup } from '@angular/material/tabs';
+import { Metadata } from 'ngx-edu-sharing-graphql';
 import { BehaviorSubject } from 'rxjs';
+import { filter, tap } from 'rxjs/operators';
 import { Node } from '../../../../../core-module/rest/data-object';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { RestIamService } from '../../../../../core-module/rest/services/rest-iam.service';
 import { UIService } from '../../../../../core-module/rest/services/ui.service';
 import { VCard } from '../../../../../core-module/ui/VCard';
-import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import { Values } from '../../../types/types';
-import {MatTabGroup} from '@angular/material/tabs';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
-import {NativeWidgetComponent} from '../../../types/mds-types';
-import { Metadata } from 'ngx-edu-sharing-graphql';
+import { DialogsService } from '../../../../dialogs/dialogs.service';
+import { Values } from '../../../types/types';
+import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
+import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
+import { Attributes } from '../../util/parse-attributes';
 
 export interface AuthorData {
     freetext: string;
     author: VCard;
 }
-
+enum DefaultTab {
+    freetext = 'freetext',
+    vcard = 'vcard',
+}
 @Component({
     selector: 'es-mds-editor-widget-author',
     templateUrl: './mds-editor-widget-author.component.html',
@@ -34,6 +38,7 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         'lom.lifecycle.contribute.content',
         'lom.rights.author',
     ];
+    attributes: Attributes;
     @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
     @Input() showContributorDialog = true;
     _nodes: Node[];
@@ -51,26 +56,19 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         private iamApi: RestIamService,
         private mainNavService: MainNavService,
         public ui: UIService,
+        private dialogs: DialogsService,
     ) {}
 
     ngOnInit(): void {
-        this.mdsEditorValues.nodes$.pipe(
-            filter((n) => n != null))
-            .subscribe((nodes) => {
-                this.updateValues(nodes);
-            });
-        this.mdsEditorValues.graphqlMetadata$.pipe(
-            filter((v) => v != null))
-            .subscribe((values) => {
-                this.updateValuesGraphQL(values)
-            });
-        this.mdsEditorValues.values$.pipe(
-            filter((v) => v != null))
-            .subscribe((values) => {
-                this.updateValues([
-                    {properties: values}
-                ] as Node[])
-            });
+        this.mdsEditorValues.nodes$.pipe(filter((n) => n != null)).subscribe((nodes) => {
+            this.updateValues(nodes);
+        });
+        this.mdsEditorValues.graphqlMetadata$.pipe(filter((v) => v != null)).subscribe((values) => {
+            this.updateValuesGraphQL(values);
+        });
+        this.mdsEditorValues.values$.pipe(filter((v) => v != null)).subscribe((values) => {
+            this.updateValues([{ properties: values }] as Node[]);
+        });
     }
     onChange(): void {
         this.hasChanges.next(
@@ -79,26 +77,27 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         );
     }
 
-    static async openContributorDialog(mdsEditorInstanceService: MdsEditorInstanceService,
-                                       mainNavService: MainNavService) {
-        return new Promise<Node>(async (resolve) => {
-            // update props before switching to contributor to keep local changes
-            const nodes = mdsEditorInstanceService.nodes$.value;
-            const values = await mdsEditorInstanceService.getValues(nodes[0], false);
-            const node = nodes[0];
-            Object.keys(values).forEach((key) => node.properties[key] = values[key]);
-            // this._nodes[0].properties = await this.getValues(this._nodes[0].properties, this._nodes[0]);
-            mainNavService.getDialogs().nodeContributor = node;
-            mainNavService
-                .getDialogs()
-                .nodeContributorChange.pipe(first())
-                .subscribe((n) => {
-                    if (n) {
-                        mdsEditorInstanceService.updateNodes([n]);
-                        resolve(n);
+    static async openContributorDialog(
+        mdsEditorInstanceService: MdsEditorInstanceService,
+        dialogs: DialogsService,
+    ): Promise<Node | null> {
+        // update props before switching to contributor to keep local changes
+        const nodes = mdsEditorInstanceService.nodes$.value;
+        const values = await mdsEditorInstanceService.getValues(nodes[0], false);
+        const node = nodes[0];
+        Object.keys(values).forEach((key) => (node.properties[key] = values[key]));
+        // this._nodes[0].properties = await this.getValues(this._nodes[0].properties, this._nodes[0]);
+        const dialogRef = await dialogs.openContributorsDialog({ node });
+        return dialogRef
+            .afterClosed()
+            .pipe(
+                tap((result) => {
+                    if (result) {
+                        mdsEditorInstanceService.updateNodes([result]);
                     }
-                });
-        });
+                }),
+            )
+            .toPromise();
     }
 
     async setVCardAuthor(author: boolean) {
@@ -110,8 +109,8 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         this.onChange();
     }
 
-    async getValues(values: Values, node: Node|Metadata = null): Promise<Values> {
-        if(this.mdsEditorValues.graphqlMetadata$.value) {
+    async getValues(values: Values, node: Node | Metadata = null): Promise<Values> {
+        if (this.mdsEditorValues.graphqlMetadata$.value) {
             // @TODO: map data to graphql
             // return values;
         }
@@ -119,13 +118,16 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         // copy current value from node, replace only first entry (if it has multiple authors)
         values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] =
             (node as Node)?.properties?.[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] ||
-            (node as Metadata)?.lom?.lifecycle?.contribute?.filter((c) => c.role === 'author').map(c => c.content);
+            (node as Metadata)?.lom?.lifecycle?.contribute
+                ?.filter((c) => c.role === 'author')
+                .map((c) => c.content);
         if (!values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]) {
             values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = [''];
         }
-        if(this.author.author.isValid()) {
-            values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0] = this.author.author.toVCardString();
-        } else if(values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR].length === 1) {
+        if (this.author.author.isValid()) {
+            values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0] =
+                this.author.author.toVCardString();
+        } else if (values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR].length === 1) {
             values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = null;
         } else {
             delete values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0];
@@ -134,21 +136,23 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
     }
     private async updateValues(nodes: Node[]) {
         this._nodes = nodes;
-        if (nodes?.length) {
+        this.refreshTabs();
+    }
+
+    public async refreshTabs() {
+        if (this._nodes?.length) {
             let freetext = Array.from(
                 new Set(
-                    nodes.map(
+                    this._nodes.map(
                         (n) => n.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT]?.[0],
                     ),
                 ),
             );
             let author = Array.from(
                 new Set(
-                    nodes.map(
+                    this._nodes.map(
                         (n) =>
-                            n.properties[
-                                RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR
-                                ]?.[0],
+                            n.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]?.[0],
                     ),
                 ),
             );
@@ -168,12 +172,23 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
                 freetext: freetext?.[0] ?? '',
                 author: authorVCard,
             };
+            // set default tab based on config
+            if (!this.author.freetext?.trim() && !this.author.author?.getDisplayName().trim()) {
+                if (this.attributes?.defaulttab) {
+                    const tab = DefaultTab[this.attributes.defaulttab as DefaultTab];
+                    if (tab === DefaultTab.vcard) {
+                        this.authorTab = 1;
+                    }
+                }
+            }
             // switch to author tab if no freetext but author exists
-            if (
-                !this.author.freetext?.trim() &&
-                this.author.author?.getDisplayName().trim()
-            ) {
+            if (!this.author.freetext?.trim() && this.author.author?.getDisplayName().trim()) {
                 this.authorTab = 1;
+            } else if (
+                this.author.freetext?.trim() &&
+                !this.author.author?.getDisplayName().trim()
+            ) {
+                this.authorTab = 0;
             }
             // deep copy the elements to compare state
             this.initialAuthor = {
@@ -187,25 +202,20 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
     async openContributorDialog() {
         const updatedNode = await MdsEditorWidgetAuthorComponent.openContributorDialog(
             this.mdsEditorValues,
-            this.mainNavService,
+            this.dialogs,
         );
-        this.updateValues([updatedNode]);
+        if (updatedNode) {
+            await this.updateValues([updatedNode]);
+        }
     }
 
     private async updateValuesGraphQL(values: Metadata[]) {
         if (values?.length) {
-            let freetext = Array.from(
-                new Set(
-                    values.map(
-                        (n) => n.lom.rights?.author?.[0],
-                    ),
-                ),
-            );
+            let freetext = Array.from(new Set(values.map((n) => n.lom.rights?.author?.[0])));
             let author = Array.from(
                 new Set(
                     values.map(
-                        (n) =>
-                            n.lom.lifecycle?.contribute?.filter(c => c.role === 'author')?.[0]
+                        (n) => n.lom.lifecycle?.contribute?.filter((c) => c.role === 'author')?.[0],
                     ),
                 ),
             );
@@ -226,10 +236,7 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
                 author: authorVCard,
             };
             // switch to author tab if no freetext but author exists
-            if (
-                !this.author.freetext?.trim() &&
-                this.author.author?.getDisplayName().trim()
-            ) {
+            if (!this.author.freetext?.trim() && this.author.author?.getDisplayName().trim()) {
                 this.authorTab = 1;
             }
             // deep copy the elements to compare state

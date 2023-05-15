@@ -8,7 +8,7 @@ import { ConfigurationService, SessionStorageService } from '../core-module/core
 import { LANGUAGES } from './languages';
 
 // 'none' means that only labels should be shown (for dev)
-const DEFAULT_SUPPORTED_LANGUAGES = ['de', 'en', 'none'];
+const DEFAULT_SUPPORTED_LANGUAGES = ['de', 'de-informal', 'en', 'none'];
 
 @Injectable({ providedIn: 'root' })
 export class TranslationsService {
@@ -44,6 +44,11 @@ export class TranslationsService {
         }
         supportedLanguages$
             .pipe(
+                tap((supportedLanguages) => {
+                    if (!supportedLanguages.includes('none')) {
+                        supportedLanguages.push('none');
+                    }
+                }),
                 tap((supportedLanguages: string[]) => this.translate.addLangs(supportedLanguages)),
                 // Select queryParams.locale if set meaningfully
                 switchMap((supportedLanguages: string[]) =>
@@ -126,6 +131,8 @@ export class TranslationsService {
                     }
                     if (selectedLanguage === 'none') {
                         this.translate.setDefaultLang('none');
+                    } else if (selectedLanguage === 'de-informal') {
+                        this.translate.setDefaultLang('de');
                     } else {
                         this.translate.setDefaultLang(supportedLanguages[0]);
                     }

@@ -3,7 +3,7 @@
   "ignorePatterns": [
     "projects/**/*"
   ],
-  "plugins": ["only-warn"],
+  "plugins": ["only-warn", "@typescript-eslint"],
   "overrides": [
     {
       "files": [
@@ -18,8 +18,12 @@
       "extends": [
         "plugin:@angular-eslint/recommended",
         "plugin:@angular-eslint/template/process-inline-templates"
+        // A stricter set of rules, that needs some exceptions to be useful.
+        // "plugin:@typescript-eslint/recommended",
+        // "plugin:@typescript-eslint/recommended-requiring-type-checking"
       ],
       "rules": {
+        "@typescript-eslint/no-floating-promises": "error",
         "@angular-eslint/directive-selector": [
           "error",
           {

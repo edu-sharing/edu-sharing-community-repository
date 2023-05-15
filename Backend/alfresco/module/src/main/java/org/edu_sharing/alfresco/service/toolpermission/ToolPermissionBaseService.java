@@ -241,6 +241,7 @@ public class ToolPermissionBaseService {
                             QName.createQName(CCConstants.CCM_PROP_TOOLPERMISSION_SYSTEM_MANAGED),
                             true
                     );
+
                     if(value.hasPath("allowed")) {
                         List<String> allowed = value.getStringList("allowed");
                         for (String authority : allowed) {
@@ -331,7 +332,7 @@ public class ToolPermissionBaseService {
         toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING); // pin collections
         toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE); // use handle id
         toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_USAGE_STATISTIC); // get all usages across all nodes (as system)
-        toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK); // give feedback on collections
+        toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_MATERIAL_FEEDBACK); // give feedback on collections
         toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_USER);
         toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_NODES);
         toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_MEDIACENTER_MANAGE);
@@ -370,18 +371,23 @@ public class ToolPermissionBaseService {
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CURRICULUM);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE);
-        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK);
+        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_MATERIAL_FEEDBACK);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_USAGE_STATISTIC);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COMMENT_WRITE);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_USER);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_NODES);
-        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_RATE_READ);
+        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_RATE);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_RATE_WRITE);
+        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_RATE_READ);
+        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_MANAGE_RELATIONS);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_VIDEO_AUDIO_CUT);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_MEDIACENTER_MANAGE);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_MAP_LINK);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_SIGNUP_GROUP);
+
+        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS);
+
 
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PROPOSAL);

@@ -2,14 +2,18 @@
   <!-- The blur filter does not work with canvas as it does with img on Chrome, so we go for a black
   background for now. -->
   <!-- <canvas *ngIf="showCanvas" #backdropCanvas role="presentation" aria-hidden="true"></canvas> -->
-  <img [src]="node | appNodeImage" alt="" *ngIf="!replacedWithStatic" />
+  <img
+    [src]="node | esNodeImage: { maxWidth: 300, maxHeight: 300, crop: true } | async"
+    alt=""
+    *ngIf="!replacedWithStatic"
+  />
 </div>
 
 <canvas *ngIf="showCanvas" #canvas role="presentation" aria-hidden="true"></canvas>
 <img
   (load)="onImageLoad($event)"
   #image
-  [src]="node | appNodeImage"
+  [src]="node | esNodeImage: { maxWidth: 300, maxHeight: 300, crop: true } | async"
   alt=""
   [class.display-none]="replacedWithStatic && !playAnimation"
 />
