@@ -13,6 +13,8 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.apache.log4j.Logger;
+
+import org.apache.logging.log4j.ThreadContext;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
@@ -74,12 +76,24 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 			ScopeAuthenticationServiceFactory.getScopeAuthenticationService().setScopeForCurrentThread();
 
 			try{
+				String user = (String) ((HttpServletRequest) req).getSession().getAttribute(CCConstants.AUTH_USERNAME);
 				// Run as System because there is yet no session opened
 				Map<String, Serializable> info = AuthenticationUtil.runAsSystem(() ->
 						AuthorityServiceFactory.getLocalService().getUserInfo(
-								(String) ((HttpServletRequest) req).getSession().getAttribute(CCConstants.AUTH_USERNAME))
+								user)
 				);
 				QueryUtils.setUserInfo(info);
+
+				if(req.getRemoteAddr() != null) {
+					ThreadContext.put("RemoteAddr", req.getRemoteAddr());
+				}
+
+				if(user != null){
+					ThreadContext.put("User",user);
+				}
+
+				ThreadContext.put("Url",((HttpServletRequest)req).getRequestURL().toString());
+
 			}catch(Exception e){
 				logger.info("Could not set user info: "+e.getMessage());
 			}
@@ -143,6 +157,8 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 
 			//for soap api
 			AuthenticationUtils.setAuthenticationDetails(null);
+
+			ThreadContext.clearAll();
 
 		}
 
