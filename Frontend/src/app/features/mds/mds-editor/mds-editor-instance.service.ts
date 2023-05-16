@@ -1032,6 +1032,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                         // use the base class for mapping
                         const baseId = MdsEditorWidgetBase.mapGraphqlId(w);
                         if (
+                            !baseId ||
                             !(baseId[0].startsWith('lom') && !baseId[0].startsWith('lom.lifecycle'))
                         ) {
                             return [];
