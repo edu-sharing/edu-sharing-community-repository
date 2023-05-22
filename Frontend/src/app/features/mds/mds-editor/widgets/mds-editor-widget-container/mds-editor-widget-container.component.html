@@ -1,3 +1,6 @@
+<div *ngIf="widget?.getInternalError()" class="internal-error">
+  {{ widget.definition.id }}: {{ widget.getInternalError() }}
+</div>
 <mat-expansion-panel
   *ngIf="(expandedState$ | async) !== 'disabled'"
   [expanded]="(expandedState$ | async) === 'expanded'"
@@ -39,7 +42,6 @@
     <ng-container *ngTemplateOutlet="body"></ng-container>
   </div>
 </div>
-
 <ng-template #body>
   <div
     *ngIf="!wrapInFormField"

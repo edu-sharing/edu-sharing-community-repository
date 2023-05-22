@@ -22,7 +22,10 @@ import { MdsEditorWidgetCheckboxesComponent } from '../mds-editor/widgets/mds-ed
 import { MdsEditorWidgetChipsComponent } from '../mds-editor/widgets/mds-editor-widget-chips/mds-editor-widget-chips.component';
 import { MdsEditorWidgetAuthorityComponent } from '../mds-editor/widgets/mds-editor-widget-authority/mds-editor-widget-authority.component';
 import { MdsEditorWidgetSelectComponent } from '../mds-editor/widgets/mds-editor-widget-select/mds-editor-widget-select.component';
-import { MdsEditorWidgetSliderComponent } from '../mds-editor/widgets/mds-editor-widget-slider/mds-editor-widget-slider.component';
+import {
+    MdsEditorWidgetSliderComponent,
+    MdsEditorWidgetSliderRangeComponent,
+} from '../mds-editor/widgets/mds-editor-widget-slider/mds-editor-widget-slider.component';
 import { MdsEditorWidgetDurationComponent } from '../mds-editor/widgets/mds-editor-widget-duration/mds-editor-widget-duration.component';
 import { MdsEditorWidgetTreeComponent } from '../mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetFacetListComponent } from '../mds-editor/widgets/mds-editor-widget-facet-list/mds-editor-widget-facet-list.component';
@@ -92,7 +95,7 @@ export const WidgetComponents: {
     [MdsWidgetType.MultiValueAuthorityBadges]: MdsEditorWidgetAuthorityComponent,
     [MdsWidgetType.Singleoption]: MdsEditorWidgetSelectComponent,
     [MdsWidgetType.Slider]: MdsEditorWidgetSliderComponent,
-    [MdsWidgetType.Range]: MdsEditorWidgetSliderComponent,
+    [MdsWidgetType.Range]: MdsEditorWidgetSliderRangeComponent,
     [MdsWidgetType.Duration]: MdsEditorWidgetDurationComponent,
     [MdsWidgetType.SingleValueTree]: MdsEditorWidgetTreeComponent,
     [MdsWidgetType.MultiValueTree]: MdsEditorWidgetTreeComponent,

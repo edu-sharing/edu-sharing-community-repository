@@ -158,6 +158,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             map(() => this.getJointProperty()),
             shareReplay(1),
         );
+        private _internalError: string;
 
         get definition() {
             return this._definition;
@@ -594,6 +595,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                             definition.id +
                             ' has no graphql mapping, returning empty value',
                     );
+                    this.setInternalError('No graphql mapping');
                 }
                 return [];
             }
@@ -619,6 +621,14 @@ export class MdsEditorInstanceService implements OnDestroy {
                 }
             });
             return Array.from(result);
+        }
+
+        private setInternalError(internalError: string) {
+            this._internalError = internalError;
+        }
+
+        public getInternalError(): string {
+            return this._internalError;
         }
     };
 
@@ -1006,6 +1016,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                         const componentClass: MdsEditorWidgetComponent =
                             WidgetComponents[w.type as MdsWidgetType];
                         id = componentClass.mapGraphqlId(w);
+                        console.log(id, w.id, componentClass);
                     }
                     if (!id) {
                         console.error(
@@ -1028,11 +1039,13 @@ export class MdsEditorInstanceService implements OnDestroy {
                 .map((w) => {
                     let id: string[];
                     if (!Object.values(NativeWidgetType).includes(w.id as NativeWidgetType)) {
-                        // const componentClass: MdsEditorWidgetComponent = WidgetComponents[w.type as MdsWidgetType];
-                        // use the base class for mapping
-                        const baseId = MdsEditorWidgetBase.mapGraphqlId(w);
+                        const componentClass: MdsEditorWidgetComponent =
+                            WidgetComponents[w.type as MdsWidgetType];
+                        const baseId = componentClass.mapGraphqlId(w);
+                        console.log(baseId, w.id);
                         if (
                             !baseId ||
+                            baseId[0].startsWith('remote') ||
                             !(baseId[0].startsWith('lom') && !baseId[0].startsWith('lom.lifecycle'))
                         ) {
                             return [];
@@ -1305,7 +1318,11 @@ export class MdsEditorInstanceService implements OnDestroy {
         )?.component as MdsEditorWidgetVersionComponent;
         for (const widget of this.nativeWidgets.value) {
             if (widget.component.onSaveNode) {
-                await widget.component.onSaveNode(this.nodes$.value);
+                await widget.component.onSaveNode(
+                    this.nodes$.value
+                        ? this.nodes$.value
+                        : this.graphqlMetadata$.value.map((m) => new Node(m.id)),
+                );
             }
         }
         if (versionWidget) {
@@ -1735,11 +1752,17 @@ export class MdsEditorInstanceService implements OnDestroy {
             } else if (values) {
                 return widget.condition.negate === !values[widget.condition.value];
             } else if (metadata) {
-                return metadata.every(
-                    (m) =>
-                        widget.condition.negate ===
-                        !Helper.getDotPathFromNestedObject(m, (widget as any).ids?.graphql),
-                );
+                return metadata.every((m) => {
+                    try {
+                        return (
+                            widget.condition.negate ===
+                            !Helper.getDotPathFromNestedObject(m, (widget as any).ids?.graphql)
+                        );
+                    } catch (e) {
+                        console.warn('Error evaluating condition on widget', widget, e);
+                        return false;
+                    }
+                });
             } else {
                 throw new Error(`Condition check was called without data provided: ${widget.id}`);
             }
