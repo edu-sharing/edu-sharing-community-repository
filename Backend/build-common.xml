@@ -101,6 +101,9 @@
 		<copy todir="${app.server.tomcat.webapps.alfresco.lib}">
 			<fileset dir="${lib.dir}" includes="${alfrescojars_prepare}"></fileset>
 		</copy>
+
+		<copy file="lib/edu_sharing_xml-security-7.0.jar" tofile="${app.server.deploy.dir}/share/WEB-INF/lib/edu_sharing_xml-security-7.0.jar" failonerror="false"/>
+		<copy file="${app.server.deploy.dir}/alfresco/WEB-INF/lib/xalan-2.7.2-alfresco.jar" tofile="${app.server.deploy.dir}/share/WEB-INF/lib/xalan-2.7.2-alfresco.jar" failonerror="false"/>
 	</target>
 
 	<target name="prepare" depends="prepare-alfresco-config">
@@ -166,8 +169,6 @@
 	<target name="unzip-share-webapp" if="unzip.share.war">
 		<echo>will unzip share.war</echo>
 		<unzip src="${app.server.deploy.dir}/share.war" dest="${app.server.deploy.dir}/share" />
-		<copy file="lib/edu_sharing_xml-security-7.0.jar" tofile="${app.server.deploy.dir}/share/WEB-INF/lib/edu_sharing_xml-security-7.0.jar" failonerror="false"/>
-		<copy file="${app.server.deploy.dir}/alfresco/WEB-INF/lib/xalan-2.7.2-alfresco.jar" tofile="${app.server.deploy.dir}/share/WEB-INF/lib/xalan-2.7.2-alfresco.jar" failonerror="false"/>
 	</target>
 
 	<target name="prepare-extension" if="extension-name">
