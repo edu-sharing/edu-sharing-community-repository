@@ -264,13 +264,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 		eduOrganisationService = (org.edu_sharing.alfresco.service.OrganisationService)applicationContext.getBean("eduOrganisationService");
 
-		try {
-			logger.debug("currentAuthInfo from authservice:" + serviceRegistry.getAuthenticationService().getCurrentUserName() + " "
-					+ serviceRegistry.getAuthenticationService().getCurrentTicket());
-		} catch (net.sf.acegisecurity.AuthenticationCredentialsNotFoundException e) {
-			//logger.error(e.getMessage());
-		}
-
 		if (_authenticationInfo == null) {
 			try{
 				HashMap<String, String> authInfo = new HashMap<String, String>();
