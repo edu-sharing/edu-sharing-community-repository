@@ -1,5 +1,5 @@
 <div
-  class="topBar fixed scrollWithBanner"
+  class="topBar fixed"
   *ngIf="showTopBar && !mainNavService.getMainNav()?.topBar?.isSidenavOpen()"
 >
   <div class="displayBar">
@@ -44,7 +44,7 @@
     <i esIcon="keyboard_arrow_right" [aria]="true"></i>
   </button>
 </div>
-<div class="alignWithBanner">
+<div>
   <div id="nodeRenderContentWrapper">
     <div *ngIf="sequence" id="sequence" #sequencediv>
       <div

@@ -9,7 +9,7 @@ import {
 import { FormArray, FormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { FacetAggregation, FacetValue, SearchService } from 'ngx-edu-sharing-api';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import { debounceTime, filter, finalize, first, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
@@ -53,9 +53,9 @@ export class MdsEditorWidgetFacetListComponent
     ) {
         super(mdsEditorInstance, translate);
 
-        this.filter.valueChanges.pipe(debounceTime(200)).subscribe((filter) => {
-            this.filterControls(filter);
-        });
+        this.filter.valueChanges
+            .pipe(debounceTime(200))
+            .subscribe((filter) => this.filterControls(filter));
         this.filter.valueChanges
             .pipe(
                 first(),
@@ -101,13 +101,25 @@ export class MdsEditorWidgetFacetListComponent
             .pipe(
                 takeUntil(this.destroyed$),
                 tap((result) => this.isInitState$.next(result === null)),
+                // load all facets if filter mode is active
+                switchMap((facet) =>
+                    this.filter.value && facet.hasMore
+                        ? this.search.loadMoreFacets(
+                              this.widget.definition.id,
+                              RestConstants.COUNT_UNLIMITED,
+                          )
+                        : of(facet),
+                ),
             )
-            .subscribe((facetAggregation) => this.facetAggregationSubject.next(facetAggregation));
+            .subscribe((facetAggregation) =>
+                facetAggregation ? this.facetAggregationSubject.next(facetAggregation) : null,
+            );
     }
 
     private registerFormControls(): void {
         // (Re-)create `formArray` on changed facet values.
         this.facetAggregationSubject.subscribe((facetValues) => {
+            console.log(this.widget.definition.id, facetValues, this.filter.value);
             if (facetValues) {
                 this.facetValues = facetValues.values;
                 this.formArray = this.generateFormArray(facetValues.values);
@@ -160,7 +172,6 @@ export class MdsEditorWidgetFacetListComponent
     }
 
     private filterControls(filter: string) {
-        console.log(filter, this.facetValues);
         this.updateFilteredValues();
         this.changeDetectorRef.detectChanges();
     }

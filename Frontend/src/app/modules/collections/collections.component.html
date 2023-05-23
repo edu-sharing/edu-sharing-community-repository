@@ -18,7 +18,6 @@
   [color]="$any('dark')"
   [(selectedIndex)]="tabSelectedIndex"
   *ngIf="showTabs()"
-  class="scrollWithBanner"
 >
   <mat-tab *ngIf="!isGuest">
     <ng-template mat-tab-label>
@@ -75,7 +74,7 @@
   <ng-template #collectionContentTemplateRefDefault> </ng-template>
 </div>
 
-<div class="alignWithBanner" cdkDropList [cdkDropListSortingDisabled]="true">
+<div cdkDropList [cdkDropListSortingDisabled]="true">
   <div
     [class.collectionsContainerTabs]="showTabs()"
     [class.collectionsContainerNoSidebar]="isRootLevelCollection() || isLoading"

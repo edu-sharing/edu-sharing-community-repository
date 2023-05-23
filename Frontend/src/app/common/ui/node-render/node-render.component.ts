@@ -179,6 +179,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
     ngOnInit(): void {
         this.mainNavService.setMainNavConfig({
             show: true,
+            showNavigation: false,
             currentScope: 'render',
         });
         this.optionsHelper.registerGlobalKeyboardShortcuts();

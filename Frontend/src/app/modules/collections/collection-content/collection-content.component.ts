@@ -567,7 +567,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private deleteFromCollection(callback: Function = null) {
         this.toast.showProgressDialog();
         this.collectionService
-            .removeFromCollection(this.collection.ref.id, this.collection.ref.id)
+            .removeFromCollection(this.contentNode.ref.id, this.collection.ref.id)
             .subscribe(
                 () => {
                     if (!('proposal' in this.collection)) {

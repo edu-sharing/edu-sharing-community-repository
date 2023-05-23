@@ -772,48 +772,6 @@ public class SearchServiceElastic extends SearchServiceImpl {
         eduNodeRef.setAspects(((List<String>)sourceAsMap.get("aspects")).
                 stream().map(CCConstants::getValidGlobalName).filter(Objects::nonNull).collect(Collectors.toList()));
 
-        // @TODO: remove all of this from/to multivalue
-        ValueTool.getMultivalue(props);
-        PropertiesGetInterceptor.PropertiesContext propertiesContext = PropertiesInterceptorFactory.getPropertiesContext(
-                alfNodeRef,props,eduNodeRef.getAspects(),
-                sourceAsMap
-        )
-                ;
-        for (PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
-            props = new HashMap<>(i.beforeDeliverProperties(propertiesContext));
-        }
-        // @TODO: remove all of this from/to multivalue
-        ValueTool.toMultivalue(props);
-        eduNodeRef.setProperties(props);
-
-        eduNodeRef.setOwner((String)sourceAsMap.get("owner"));
-
-        Map preview = (Map) sourceAsMap.get("preview");
-        if(preview != null && preview.get("small") != null) {
-            eduNodeRef.setPreview(
-                    new NodeRefImpl.PreviewImpl((String) preview.get("mimetype"),
-                            Base64.getDecoder().decode((String) preview.get("small")))
-            );
-        }
-
-        List<Contributor> contributorsResult = new ArrayList<>();
-        List contributors = (List)sourceAsMap.get("contributor");
-        if(contributors != null) {
-            for (Object contributor : contributors) {
-                Map c = (Map) contributor;
-                Contributor contributorResult = new Contributor();
-                contributorResult.setProperty((String) c.get("property"));
-                contributorResult.setEmail((String) c.get("email"));
-                contributorResult.setFirstname((String) c.get("firstname"));
-                contributorResult.setLastname((String) c.get("lastname"));
-                contributorResult.setOrg((String) c.get("org"));
-                contributorResult.setVcard((String) c.get("vcard"));
-                contributorsResult.add(contributorResult);
-            }
-        }
-        eduNodeRef.setContributors(contributorsResult);
-
-
         HashMap<String, Boolean> permissions = new HashMap<>();
         permissions.put(CCConstants.PERMISSION_READ, true);
         String guestUser = ApplicationInfoList.getHomeRepository().getGuest_username();
@@ -844,6 +802,54 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 }
             }
         }
+
+        // @TODO: remove all of this from/to multivalue
+        ValueTool.getMultivalue(props);
+        PropertiesGetInterceptor.PropertiesContext propertiesContext = PropertiesInterceptorFactory.getPropertiesContext(
+                alfNodeRef,props,eduNodeRef.getAspects(),
+                permissions,
+                sourceAsMap
+        )
+                ;
+        for (PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
+            props = new HashMap<>(i.beforeDeliverProperties(propertiesContext));
+        }
+        // @TODO: remove all of this from/to multivalue
+        ValueTool.toMultivalue(props);
+        eduNodeRef.setProperties(props);
+
+        eduNodeRef.setOwner((String)sourceAsMap.get("owner"));
+
+        Map preview = (Map) sourceAsMap.get("preview");
+        if(preview != null && preview.get("small") != null) {
+            eduNodeRef.setPreview(
+                    new NodeRefImpl.PreviewImpl(
+                            (String) preview.get("mimetype"),
+                            Base64.getDecoder().decode((String) preview.get("small")),
+                            (String) preview.get("type"),
+                            (Boolean) preview.get("icon")
+                    )
+            );
+        }
+
+        List<Contributor> contributorsResult = new ArrayList<>();
+        List contributors = (List)sourceAsMap.get("contributor");
+        if(contributors != null) {
+            for (Object contributor : contributors) {
+                Map c = (Map) contributor;
+                Contributor contributorResult = new Contributor();
+                contributorResult.setProperty((String) c.get("property"));
+                contributorResult.setEmail((String) c.get("email"));
+                contributorResult.setFirstname((String) c.get("firstname"));
+                contributorResult.setLastname((String) c.get("lastname"));
+                contributorResult.setOrg((String) c.get("org"));
+                contributorResult.setVcard((String) c.get("vcard"));
+                contributorsResult.add(contributorResult);
+            }
+        }
+        eduNodeRef.setContributors(contributorsResult);
+
+
         if(AuthorityServiceHelper.isAdmin() || user.equals(owner)){
             permissions.put(CCConstants.PERMISSION_CC_PUBLISH,true);
             PermissionReference pr = permissionModel.getPermissionReference(null,"FullControl");
