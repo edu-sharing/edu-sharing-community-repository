@@ -12256,6 +12256,7 @@
     },
     "/collection/v1/collections/{repository}/search": {
       "get": {
+        "deprecated": true,
         "description": "Search collections.",
         "operationId": "searchCollections",
         "parameters": [
