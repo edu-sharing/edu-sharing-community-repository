@@ -245,8 +245,8 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 		}else{
 			// detect if the error component was requested -> then go ahead
 			// otherwise, go to the angular login page
-			URL url = new URL(req.getRequestURL().toString());
-			if(url.getPath().contains(NgServlet.COMPONENTS_ERROR)){
+			URL requestUrl = new URL(req.getRequestURL().toString());
+			if(requestUrl.getPath().contains(NgServlet.COMPONENTS_ERROR)){
 				addErrorCode(resp, url);
 				// go to the error component
 				chain.doFilter(req, resp);
