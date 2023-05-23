@@ -82,6 +82,7 @@ import { MdsEditorWidgetCore } from './mds-editor-widget-core.directive';
 import { isNumeric } from 'rxjs/util/isNumeric';
 import { DisplayValue } from './widgets/DisplayValues';
 import { MdsEditorWidgetBase } from './widgets/mds-editor-widget-base';
+import { MdsEditorWidgetSliderRangeComponent } from './widgets/mds-editor-widget-slider/mds-editor-widget-slider.component';
 
 export interface CompletionStatusField {
     widget: Widget;
@@ -957,7 +958,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         ).rendering?.toLowerCase() as EditorType;
     }
 
-    mapGraphqlField(id: string, modify: (a: string[]) => string[]) {
+    public static mapGraphqlField(id: string, modify: (a: string[]) => string[]) {
         let path = id.split('.').filter((key) => !isNumeric(key));
         path = modify(path);
         const count = path.length;
@@ -1032,60 +1033,24 @@ export class MdsEditorInstanceService implements OnDestroy {
                 .filter((id) => !!id),
         );
         const combined = Array.from(graphqlRequests)
-            .map((id) => this.mapGraphqlField(id, (a) => a))
+            .map((id) => MdsEditorInstanceService.mapGraphqlField(id, (a) => a))
             .join('\n');
-        const graphqlSuggestionRequests = new Set(
-            widgets
-                .map((w) => {
-                    let id: string[];
-                    if (!Object.values(NativeWidgetType).includes(w.id as NativeWidgetType)) {
-                        const componentClass: MdsEditorWidgetComponent =
-                            WidgetComponents[w.type as MdsWidgetType];
-                        const baseId = componentClass.mapGraphqlId(w);
-                        console.log(baseId, w.id);
-                        if (
-                            !baseId ||
-                            baseId[0].startsWith('remote') ||
-                            !(baseId[0].startsWith('lom') && !baseId[0].startsWith('lom.lifecycle'))
-                        ) {
-                            return [];
+        const combinedSuggestions = Array.from(
+            new Set(
+                widgets
+                    .map((w) => {
+                        if (!Object.values(NativeWidgetType).includes(w.id as NativeWidgetType)) {
+                            const componentClass: MdsEditorWidgetComponent =
+                                WidgetComponents[w.type as MdsWidgetType];
+                            // only keep ".value" values and filter id values
+                            return componentClass.mapGraphqlSuggestionId(w);
                         }
-                        // map into the "value" structure of the suggestion element
-                        baseId[0] += '.value';
-                    }
-                    if (!id) {
-                        id = [];
-                    }
-                    return id;
-                })
-                .reduce((acc, arr) => [...acc, ...arr])
-                .filter((id) => !!id),
-        );
-        // This is a bit hacky, may we find an easier way to dynamically fetch the suggestions?
-        const combinedSuggestions = []
-            .concat(
-                ...Array.from(graphqlSuggestionRequests).map((id) => [
-                    this.mapGraphqlField(id, (a) => {
-                        a.push('value');
-                        return a;
-                    }),
-                    this.mapGraphqlField(id, (a) => {
-                        a.push('info');
-                        a.push('status');
-                        return a;
-                    }),
-                    this.mapGraphqlField(id, (a) => {
-                        a.push('version');
-                        return a;
-                    }),
-                    this.mapGraphqlField(id, (a) => {
-                        a.push('info');
-                        a.push('editor');
-                        return a;
-                    }),
-                ]),
-            )
-            .join('\n');
+                        return [];
+                    })
+                    .reduce((acc, arr) => [...acc, ...arr])
+                    .filter((id) => !!id),
+            ),
+        ).join('\n');
         const metaQueryQgl =
             `query($ids: [ID!]) {
              metadatas(
@@ -1107,7 +1072,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                     }
                 }
             }`;
-        console.log(metaQueryQgl);
+        console.log(metaQueryQgl, combinedSuggestions);
         const metaQuery = this.apollo.query<Query>({
             query: gql(metaQueryQgl),
             variables: {

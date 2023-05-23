@@ -435,6 +435,32 @@ export class MdsEditorWidgetChipsComponent
                     .length,
         );
     }
+    public static mapGraphqlSuggestionId(definition: MdsWidget) {
+        const id = MdsEditorWidgetBase.mapGraphqlId(definition)?.[0];
+        if (id) {
+            return [
+                MdsEditorInstanceService.mapGraphqlField(id, (a) => {
+                    a.push('value');
+                    return a;
+                }),
+                MdsEditorInstanceService.mapGraphqlField(id, (a) => {
+                    a.push('info');
+                    a.push('status');
+                    return a;
+                }),
+                MdsEditorInstanceService.mapGraphqlField(id, (a) => {
+                    a.push('version');
+                    return a;
+                }),
+                MdsEditorInstanceService.mapGraphqlField(id, (a) => {
+                    a.push('info');
+                    a.push('editor');
+                    return a;
+                }),
+            ];
+        }
+        return [];
+    }
 }
 @Component({
     templateUrl: './mds-editor-widget-chips.component.html',
@@ -444,5 +470,37 @@ export class MdsEditorWidgetChipsRangedValueComponent extends MdsEditorWidgetChi
     public static mapGraphqlId(definition: MdsWidget) {
         // attach the "RangedValue" graphql Attributes
         return MdsEditorWidgetBase.attachGraphqlSelection(definition, ['id', 'value']);
+    }
+    public static mapGraphqlSuggestionId(definition: MdsWidget) {
+        const id = MdsEditorWidgetBase.mapGraphqlId(definition)?.[0];
+        if (id) {
+            return [
+                MdsEditorInstanceService.mapGraphqlField(id, (a) => {
+                    a.push('value');
+                    a.push('id');
+                    return a;
+                }),
+                MdsEditorInstanceService.mapGraphqlField(id, (a) => {
+                    a.push('value');
+                    a.push('value');
+                    return a;
+                }),
+                MdsEditorInstanceService.mapGraphqlField(id, (a) => {
+                    a.push('info');
+                    a.push('status');
+                    return a;
+                }),
+                MdsEditorInstanceService.mapGraphqlField(id, (a) => {
+                    a.push('version');
+                    return a;
+                }),
+                MdsEditorInstanceService.mapGraphqlField(id, (a) => {
+                    a.push('info');
+                    a.push('editor');
+                    return a;
+                }),
+            ];
+        }
+        return [];
     }
 }

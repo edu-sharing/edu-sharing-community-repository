@@ -108,6 +108,11 @@ export enum NativeWidgetType {
 
 export type MdsEditorWidgetComponent = {
     mapGraphqlId: (definition: MdsWidget) => string[] | null;
+    /**
+     *     required suggestion fields for graphql suggestions
+     *     should return empty array if not supported by the widget
+     */
+    mapGraphqlSuggestionId: (definition: MdsWidget) => string[];
 } & Type<MdsEditorWidgetBase>;
 
 export type EditorType = 'angular' | 'legacy';

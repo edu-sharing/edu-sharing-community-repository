@@ -66,4 +66,7 @@ export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
         }
         return null;
     }
+    public static mapGraphqlSuggestionId(definition: MdsWidget): string[] {
+        return [];
+    }
 }
