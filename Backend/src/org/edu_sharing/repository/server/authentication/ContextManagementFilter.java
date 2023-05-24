@@ -25,6 +25,8 @@ import org.edu_sharing.metadataset.v2.QueryUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.security.HMac;
+import org.edu_sharing.repository.server.tools.security.KeyStoreService;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
@@ -55,6 +57,8 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 	AuthenticationService authservice = serviceRegistry.getAuthenticationService();
 	AuthenticationComponent authenticationComponent = (AuthenticationComponent)applicationContext.getBean("authenticationComponent");
 
+	HMac hMac = null;
+
 	@Override
 	public void destroy() {
 	}
@@ -62,6 +66,15 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 	@Override
 	public void init(FilterConfig config) throws ServletException {
 		this.context=config.getServletContext();
+		KeyStoreService keyStoreService = new KeyStoreService();
+
+		try {
+			String hmacPassword = keyStoreService.readPasswordFromKeyStore(CCConstants.EDU_PASSWORD_KEYSTORE_NAME,
+					ApplicationInfoList.getHomeRepository().getKeyStorePassword(),"",CCConstants.EDU_PASSWORD_USERNAMEHASH);
+			hMac = new HMac(hmacPassword,HMac.ALG_SHA256);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -90,7 +103,9 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 				}
 
 				if(user != null){
-					ThreadContext.put("User",user);
+					String hmac = hMac.calculateHmac(user.trim());
+					ThreadContext.put("UserPlain",user);
+					ThreadContext.put("User",hmac);
 				}
 
 				ThreadContext.put("Url",((HttpServletRequest)req).getRequestURL().toString());

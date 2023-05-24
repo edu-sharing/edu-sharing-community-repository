@@ -12,7 +12,9 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.KeyTool;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
+import org.edu_sharing.repository.server.tools.security.KeyStoreService;
 import org.edu_sharing.repository.server.tools.security.Signing;
 
 public class KeyGenerator extends UpdateAbstract {
@@ -76,6 +78,24 @@ public class KeyGenerator extends UpdateAbstract {
 							CCConstants.REPOSITORY_FILE_HOME, PropertiesHelper.XML);
 				}
 
+			}
+
+			if(homeRepo.getKeyStorePassword() == null){
+				logInfo("will generate keystore password and default passwords");
+				if(!test){
+					KeyTool keyTool = new KeyTool();
+					String keyStorePw = keyTool.getRandomPassword();
+					PropertiesHelper.setProperty(ApplicationInfo.KEY_KEYSTORE_PW,
+							keyStorePw,
+							CCConstants.REPOSITORY_FILE_HOME, PropertiesHelper.XML);
+
+					KeyStoreService keyStoreService = new KeyStoreService();
+					keyStoreService.writePasswordToKeyStore(CCConstants.EDU_PASSWORD_KEYSTORE_NAME,
+							keyStorePw,
+							"",
+							CCConstants.EDU_PASSWORD_USERNAMEHASH,
+							keyTool.getRandomPassword());
+				}
 			}
 
 		} catch (Exception e) {
