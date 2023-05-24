@@ -2,6 +2,8 @@ package org.edu_sharing.repository.server.authentication;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 import javax.servlet.*;
@@ -59,6 +61,8 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 
 	HMac hMac = null;
 
+	SimpleDateFormat logEventDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS");
+
 	@Override
 	public void destroy() {
 	}
@@ -110,6 +114,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 
 				ThreadContext.put("Url",((HttpServletRequest)req).getRequestURL().toString());
 				ThreadContext.put("EduVersion", VersionService.getVersionNoException(VersionService.Type.REPOSITORY));
+				ThreadContext.put("LogEventDate",logEventDateFormat.format(new Date()));
 
 			}catch(Exception e){
 				logger.info("Could not set user info: "+e.getMessage());
