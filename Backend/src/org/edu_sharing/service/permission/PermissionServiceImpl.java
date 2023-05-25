@@ -22,12 +22,8 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.security.AccessPermission;
-import org.alfresco.service.cmr.security.AccessStatus;
-import org.alfresco.service.cmr.security.AuthorityService;
-import org.alfresco.service.cmr.security.AuthorityType;
+import org.alfresco.service.cmr.security.*;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -394,7 +390,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				}
 
 			} else {
-				logger.info("username/authority: " + authority + " has no valid emailaddress:" + emailaddress);
+				if(_sendMail) {
+					logger.info("username/authority: " + authority + " has no valid emailaddress:" + emailaddress);
+				}
 			}
 
 		}
@@ -478,13 +476,15 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		if(jsonHistory != null) {
 			for(String json : jsonHistory) {
 				Notify notify = gson.fromJson(json, Notify.class);
-
-				NodeRef personRef = personService.getPerson(notify.getUser().getAuthorityName(),false);
-				Map<QName, Serializable> personProps = nodeService.getProperties(personRef);
-				notify.getUser().setGivenName((String)personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_FIRSTNAME)));
-				notify.getUser().setSurname((String)personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_LASTNAME)));
-				notify.getUser().setEmail((String)personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_EMAIL)));
-
+				try {
+					NodeRef personRef = personService.getPerson(notify.getUser().getAuthorityName(), false);
+					Map<QName, Serializable> personProps = nodeService.getProperties(personRef);
+					notify.getUser().setGivenName((String) personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_FIRSTNAME)));
+					notify.getUser().setSurname((String) personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_LASTNAME)));
+					notify.getUser().setEmail((String) personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_EMAIL)));
+				} catch(NoSuchPersonException e) {
+					logger.warn("Notify could not be fully resolved, may contains deleted/invalid user", e);
+				}
 				/**
 				 * @todo overwrite acl user firstname, lastname, email
 				 */
@@ -1457,8 +1457,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_HISTORY), new ArrayList(history));
 					fixSharedByMe(nodeRef);
 				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					logger.warn("Error setting permission history", e1);
 				}
 			}finally {
 				policyBehaviourFilter.enableBehaviour(nodeRef);

@@ -66,7 +66,7 @@ public class oEmbedServlet extends HttpServlet {
                 base=new oEmbedBase();
                 base.setType("rich");
                 int[] size=getSize(oEmbedBase.DEFAULT_SIZE,oEmbedBase.DEFAULT_SIZE,maxWidth,maxHeight);
-                base.setHtml(getIFrameHTML(URLTool.getBaseUrl()+"/rendering-error?i18n=usage_missing&exception="+e.getClass().getName(),size[0],size[1]));
+                base.setHtml(getIFrameHTML(URLTool.getBaseUrl(true)+"/rendering-error?i18n=usage_missing&exception="+e.getClass().getName(),size[0],size[1]));
             }catch(Throwable t){
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,t.getMessage());
                 return;
@@ -139,7 +139,7 @@ public class oEmbedServlet extends HttpServlet {
         }
         int[] size=getSize(width,height,maxWidth,maxHeight);
         int[] thumbSize=getSize(width,height,oEmbedBase.DEFAULT_THUMBNAIL_SIZE,oEmbedBase.DEFAULT_THUMBNAIL_SIZE);
-        embed.setHtml(getIFrameHTML(URLTool.getEduservletUrl()+"render?node_id="+nodeDao.getRef().getId(),size[0],size[1]));
+        embed.setHtml(getIFrameHTML(URLTool.getEduservletUrl(true)+"render?node_id="+nodeDao.getRef().getId(),size[0],size[1]));
         embed.setThumbnail_url(nodeDao.asNode().getPreview().getUrl()+"&crop=true&maxWidth="+thumbSize[0]+"&maxHeight="+thumbSize[1]);
         embed.setThumbnail_width(thumbSize[0]);
         embed.setThumbnail_height(thumbSize[1]);
