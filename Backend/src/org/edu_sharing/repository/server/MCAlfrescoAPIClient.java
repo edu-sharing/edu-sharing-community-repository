@@ -1826,7 +1826,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	public String createNode(StoreRef store, String parentID, String nodeTypeString, String childAssociation, HashMap<String, Object> _props) {
 
 		String name = (String)_props.get(CCConstants.CM_NAME);
-		_props.put(CCConstants.CM_NAME,CharMatcher.JAVA_ISO_CONTROL.removeFrom(name));
+		_props.put(CCConstants.CM_NAME,CharMatcher.javaIsoControl().removeFrom(name));
 		Map<QName, Serializable> properties = transformPropMap(_props);
 
 		NodeRef parentNodeRef = new NodeRef(store, parentID);
@@ -1860,7 +1860,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 		try {
 			String name = (String)_props.get(CCConstants.CM_NAME);
-			_props.put(CCConstants.CM_NAME,CharMatcher.JAVA_ISO_CONTROL.removeFrom(name));
+			_props.put(CCConstants.CM_NAME,CharMatcher.javaIsoControl().removeFrom(name));
 			Map<QName, Serializable> props = transformPropMap(_props);
 			NodeRef nodeRef = new NodeRef(store, nodeId);
 
