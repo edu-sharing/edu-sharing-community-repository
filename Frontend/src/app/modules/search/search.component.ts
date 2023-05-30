@@ -520,7 +520,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         }
 
         this.searchService.reinit = true;
-        this.searchService.extendedSearchUsed = true;
+        if (Object.keys(props)?.length > 0) {
+            console.log(props);
+            this.searchService.extendedSearchUsed = true;
+        }
         this.updateGroupedRepositories();
         if (
             UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_WIDTH, UIConstants.MOBILE_WIDTH)
@@ -1143,7 +1146,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 };
             }
             if (param.parameters) {
-                this.searchService.extendedSearchUsed = true;
                 this.applyParameters('uri', JSON.parse(param.parameters), param.query, sort);
             } else if (this.searchService.values) {
                 this.applyParameters('uri', null, param.query, sort);
@@ -1314,7 +1316,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                         error,
                     );
                     this.searchRepository(repos, criteria, init, position, count, false);
-                    error.preventDefault();
+                    error?.preventDefault();
                     return;
                 }
                 this.searchRepository(repos, criteria, init, position + 1, count);
