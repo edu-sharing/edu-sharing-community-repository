@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MdsWidgetValue } from '../../../types/types';
+import { MdsWidget, MdsWidgetValue } from '../../../types/types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { MatSelect } from '@angular/material/select';
 
@@ -54,5 +54,10 @@ export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implemen
     onActiveDescendantChanges(elementId: string) {
         const element = document.getElementById(elementId);
         this.showTooltip((element as any)?.tooltip);
+    }
+
+    public static mapGraphqlId(definition: MdsWidget) {
+        // attach the "RangedValue" graphql Attributes
+        return MdsEditorWidgetBase.attachGraphqlSelection(definition, ['id', 'value']);
     }
 }
