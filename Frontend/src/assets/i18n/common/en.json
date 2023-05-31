@@ -261,6 +261,7 @@
     "exif:dateTimeOriginal": "recording date",
     "cm:modified": "last change",
     "ccm:replicationmodified": "last change",
+    "ccm:replicationsourcetimestamp": "last change",
     "cm:created": "creation date",
     "cm:creator": "created by",
     "cclom:title": "title",
