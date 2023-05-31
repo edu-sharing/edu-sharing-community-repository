@@ -4,11 +4,14 @@ import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.repo.domain.node.NodeExistsException;
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.service.cmr.repository.ContentIOException;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.InvalidStoreRefException;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.cmr.usage.ContentQuotaException;
+import org.edu_sharing.alfresco.policy.NodeFileExtensionValidationException;
+import org.edu_sharing.alfresco.policy.NodeMimetypeValidationException;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.collection.DuplicateNodeException;
@@ -76,6 +79,14 @@ public class DAOException extends Exception {
 		if (t instanceof NodeExistsException) {
 			
 			return new DAOValidationException(t,nodeId); 
+		}
+		if (t instanceof NodeMimetypeValidationException ||
+				t instanceof ContentIOException && t.getCause() instanceof NodeMimetypeValidationException) {
+			return new DAOMimetypeVerificationException(t,nodeId);
+		}
+		if (t instanceof NodeFileExtensionValidationException ||
+				t instanceof ContentIOException && t.getCause() instanceof NodeFileExtensionValidationException) {
+			return new DAOFileExtensionVerificationException(t,nodeId);
 		}
 		if(t instanceof ToolPermissionException){
 			return new DAOToolPermissionException(t);

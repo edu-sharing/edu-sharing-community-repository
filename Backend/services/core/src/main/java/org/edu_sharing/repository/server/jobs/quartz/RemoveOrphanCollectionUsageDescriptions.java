@@ -32,6 +32,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -45,6 +46,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -59,6 +61,7 @@ public class RemoveOrphanCollectionUsageDescriptions extends AbstractJob{
 
 	protected Logger logger = Logger.getLogger(RemoveOrphanCollectionUsageDescriptions.class);
 	private List<String> types;
+	private NodeService nodeService;
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -66,7 +69,7 @@ public class RemoveOrphanCollectionUsageDescriptions extends AbstractJob{
 
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
-		NodeService nodeService = serviceRegistry.getNodeService();
+		nodeService = serviceRegistry.getNodeService();
 		org.edu_sharing.service.nodeservice.NodeService nodeServiceEdu = NodeServiceFactory.getLocalService();
 
 		Object testRunStr = context.getJobDetail().getJobDataMap().get("testRun");
@@ -79,7 +82,7 @@ public class RemoveOrphanCollectionUsageDescriptions extends AbstractJob{
 		NodeRunner runner = new NodeRunner();
 		runner.setTask((ref)->{
 			String appId = (String) NodeServiceHelper.getPropertyNative(ref, CCConstants.CCM_PROP_USAGE_APPID);
-			if(localApp.equals(appId)){
+			if(localApp.equals(appId) || isNodeCollection((String) NodeServiceHelper.getPropertyNative(ref, CCConstants.CCM_PROP_USAGE_COURSEID))){
 				String refNodeId = NodeServiceHelper.getProperty(ref, CCConstants.CCM_PROP_USAGE_RESSOURCEID);
 				if(!nodeService.exists(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, refNodeId))) {
 					logger.info("Delete orphan usage from node: " + nodeService.getPrimaryParent(ref).getParentRef().getId() +
@@ -94,14 +97,19 @@ public class RemoveOrphanCollectionUsageDescriptions extends AbstractJob{
 		});
 		runner.setTypes(Collections.singletonList(CCConstants.CCM_TYPE_USAGE));
 		runner.setRunAsSystem(true);
-		runner.setRecurseMode(RecurseMode.All);
+		runner.setLucene("TYPE:\"ccm:usage\"");
 		runner.setThreaded(false);
 		runner.setKeepModifiedDate(true);
 		runner.setTransaction(NodeRunner.TransactionMode.Local);
 		int count=runner.run();
 		logger.info("Processed "+count+" nodes");
 	}
-	
+
+	private boolean isNodeCollection(String ref) {
+		NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ref);
+		return nodeService.exists(nodeRef) && nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION));
+	}
+
 	public void run() {
 
 	}

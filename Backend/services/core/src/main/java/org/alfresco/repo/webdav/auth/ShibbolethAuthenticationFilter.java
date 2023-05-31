@@ -26,15 +26,11 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.htmlunit.BrowserVersion;
+import org.htmlunit.WebClient;
+import org.htmlunit.html.*;
 import org.springframework.context.ApplicationContext;
 
-import com.gargoylesoftware.htmlunit.BrowserVersion;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlButton;
-import com.gargoylesoftware.htmlunit.html.HtmlForm;
-import com.gargoylesoftware.htmlunit.html.HtmlOption;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 
 
 /**
@@ -191,7 +187,7 @@ public class ShibbolethAuthenticationFilter implements Filter {
 					String proxyHost = System.getProperty("https.proxyHost");
 					String proxyPort = System.getProperty("https.proxyPort");
 					
-					final WebClient webClient = 
+					final WebClient webClient =
 							  (proxyHost != null & proxyPort != null)
 							? new WebClient(BrowserVersion.getDefault(), proxyHost, Integer.parseInt(proxyPort))
 							: new WebClient();
@@ -205,10 +201,10 @@ public class ShibbolethAuthenticationFilter implements Filter {
 									localname, 
 									password);
 
-					String content = page.asText();
+					String content = page.getTextContent();
 					page.cleanUp();
 					
-					webClient.closeAllWindows();
+					webClient.close();
 
 					if (content.contains(this.successContent)) {
 						
@@ -479,7 +475,7 @@ public class ShibbolethAuthenticationFilter implements Filter {
 			form2.getInputByName("j_username").setValueAttribute(localname);
 			form2.getInputByName("j_password").setValueAttribute(password);
 
-			HtmlButton button2 = 
+			HtmlButton button2 =
 					(HtmlButton) form2.getByXPath("//button[@type='submit']").get(0);
 			
 			result = button2.click();

@@ -380,7 +380,7 @@ public class Edu_SharingWebDAVServlet extends HttpServlet
         
         //it seems that Edu_SharingPutMethod fix is no longer needed
        // m_davMethods.put(WebDAV.METHOD_PUT, Edu_SharingPutMethod.class);
-        m_davMethods.put(WebDAV.METHOD_PUT, PutMethod.class);
+        m_davMethods.put(WebDAV.METHOD_PUT, Edu_SharingPutMethod2.class);
         m_davMethods.put(WebDAV.METHOD_UNLOCK, Edu_SharingUnlockMethod.class);
     }
 

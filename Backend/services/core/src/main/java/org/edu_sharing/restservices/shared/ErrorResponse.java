@@ -9,18 +9,14 @@ import java.io.StringWriter;
 import javax.ws.rs.core.Response;
 
 import org.alfresco.error.AlfrescoRuntimeException;
-import org.apache.commons.logging.impl.Log4JLogger;
 import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.restservices.*;
-import org.edu_sharing.restservices.node.v1.NodeApi;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.edu_sharing.service.foldertemplates.LoggingErrorHandler;
 
 @Schema(description = "")
 public class ErrorResponse {
@@ -69,6 +65,9 @@ public class ErrorResponse {
         if(t instanceof DAOMissingException) {
     		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
     	}
+		if(t instanceof DAOMimetypeVerificationException) {
+			return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity(new ErrorResponse(t)).build();
+		}
     	if(t instanceof DAOQuotaException){
 
 			logger.info(t.getMessage(), t);
