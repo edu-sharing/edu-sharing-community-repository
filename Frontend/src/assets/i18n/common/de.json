@@ -280,6 +280,7 @@
     "dimensions": "Bildgröße",
     "exif:dateTimeOriginal": "Aufnahmedatum",
     "cm:modified": "zuletzt geändert",
+    "ccm:replicationmodified": "zuletzt geändert",
     "cm:created": "Erstellungsdatum",
     "cm:creator": "erstellt von",
     "cclom:title": "Titel",

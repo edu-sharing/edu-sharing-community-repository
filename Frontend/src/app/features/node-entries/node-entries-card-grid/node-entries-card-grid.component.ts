@@ -258,6 +258,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
                     new ListItemSort('NODE', RestConstants.CM_PROP_TITLE),
                     new ListItemSort('NODE', RestConstants.CM_NAME),
                     new ListItemSort('NODE', RestConstants.CM_MODIFIED_DATE),
+                    new ListItemSort('NODE', RestConstants.CCM_PROP_REPLICATIONMODIFIED),
                 )
                 .some((c2) => c2.name === c.name),
         );

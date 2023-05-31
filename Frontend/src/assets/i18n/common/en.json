@@ -260,6 +260,7 @@
     "dimensions": "image size",
     "exif:dateTimeOriginal": "recording date",
     "cm:modified": "last change",
+    "ccm:replicationmodified": "last change",
     "cm:created": "creation date",
     "cm:creator": "created by",
     "cclom:title": "title",
