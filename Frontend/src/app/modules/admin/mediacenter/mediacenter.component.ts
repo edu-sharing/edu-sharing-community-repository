@@ -31,6 +31,7 @@ import {
 } from '../../../features/node-entries/entries-model';
 import { NodeDataSource } from '../../../features/node-entries/node-data-source';
 import { NodeEntriesWrapperComponent } from '../../../features/node-entries/node-entries-wrapper.component';
+import { VCard } from '../../../core-module/ui/VCard';
 
 @Component({
     selector: 'es-admin-mediacenter',
@@ -473,7 +474,7 @@ export class AdminMediacenterComponent {
             .filter((n) => n !== 'ccm:mediacenter');
         const propertiesLabel = properties.map((p) => this.translate.instant('NODE.' + p));
         this.toast.showProgressDialog();
-        const data = await this.mediacenterService
+        const data = (await this.mediacenterService
             .exportMediacenterLicensedNodes({
                 repository: RestConstants.HOME_REPOSITORY,
                 mediacenter: this.currentMediacenter.authorityName,
@@ -484,8 +485,15 @@ export class AdminMediacenterComponent {
                 },
                 properties,
             })
-            .toPromise();
+            .toPromise()) as unknown as any[];
         this.toast.closeModalDialog();
+        data.forEach((d) => {
+            Object.keys(d)
+                .filter((c) => RestConstants.getAllVCardFields().includes(c))
+                .forEach((c) => {
+                    d[c] = d[c]?.map((d2: string) => new VCard(d2).getDisplayName());
+                });
+        });
         CsvHelper.download(
             await this.translate.get('ADMIN.MEDIACENTER.NODES.CSV_FILENAME').toPromise(),
             propertiesLabel,
