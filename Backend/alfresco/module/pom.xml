@@ -264,6 +264,8 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
 
+
+
     <dependency>
       <groupId>org.springframework.security.extensions</groupId>
       <artifactId>spring-security-saml2-core</artifactId>
@@ -273,6 +275,55 @@
       <groupId>org.aspectj</groupId>
       <artifactId>aspectjweaver</artifactId>
     </dependency>
+
+    <!-- security fixes alfresco-5.2:-->
+    <dependency>
+      <groupId>com.thoughtworks.xstream</groupId>
+      <artifactId>xstream</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.edu_sharing</groupId>
+      <artifactId>edu_sharing-community-repository-security-fixes-jodconverter-alfresco-patched</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.xmlbeans</groupId>
+      <artifactId>xmlbeans</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.edu_sharing</groupId>
+      <artifactId>edu_sharing-community-repository-security-fixes-quartz-alfresco-patched</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.edu_sharing</groupId>
+      <artifactId>edu_sharing-community-repository-security-fixes-spring-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-fileupload</groupId>
+      <artifactId>commons-fileupload</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.dom4j</groupId>
+      <artifactId>dom4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy-all</artifactId>
+    </dependency>
+
+    <!-- END security fixes alfresco-5.2 -->
+
 
     <!-- provided -->
 
@@ -291,12 +342,6 @@
     <dependency>
       <groupId>org.alfresco</groupId>
       <artifactId>alfresco-repository</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -430,7 +475,7 @@
     </dependency>
 
     <dependency>
-      <groupId>net.sourceforge.htmlunit</groupId>
+      <groupId>org.htmlunit</groupId>
       <artifactId>htmlunit</artifactId>
       <scope>runtime</scope>
     </dependency>
