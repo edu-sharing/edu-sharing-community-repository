@@ -1,13 +1,11 @@
 package org.edu_sharing.restservices.about.v1;
 
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -19,13 +17,12 @@ import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.monitoring.Monitoring;
 import org.edu_sharing.service.version.VersionService;
+import org.edu_sharing.spring.ApplicationContextFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.io.File;
-import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,7 +33,6 @@ import java.util.Map;
 public class AboutApi  {
 
 	private static Logger logger = Logger.getLogger(AboutApi.class);
-
     @GET
     
     @Operation(summary = "Discover the API.", description = "Get all services provided by this API.")
@@ -49,10 +45,10 @@ public class AboutApi  {
     	})
 
     public Response about() {
-
     	try {
 	    	About about = new About();
-	    	
+			AboutPlugins plugins = ApplicationContextFactory.getApplicationContext().getBean(AboutPlugins.class);
+			about.setPlugins(plugins.getPlugins());
 	    	ServiceVersion version = new ServiceVersion();
 	    	
 	    	version.setMajor(ApiApplication.MAJOR);
@@ -68,7 +64,7 @@ public class AboutApi  {
 	    	
 	    	about.setThemesUrl(new MimeTypesV2(ApplicationInfoList.getHomeRepository()).getThemePath());
 	    	
-	    	Map<String, Service> services = new HashMap<String, Service>(); 
+	    	Map<String, Service> services = new HashMap<String, Service>();
 	    	for (Class<?> clazz : ApiApplication.SERVICES) {
 	
 				ApiService rest = clazz.getAnnotation(ApiService.class);

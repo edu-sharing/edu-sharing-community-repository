@@ -333,6 +333,8 @@ public class CCConstants {
 
 	public final static String CCM_PROP_PERSON_PREFERENCES = "{http://www.campuscontent.de/model/1.0}userPreferences";
 
+	public final static String CCM_PROP_PERSON_NOTIFICATION_PREFERENCES = "{http://www.campuscontent.de/model/1.0}userNotificationPreferences";
+
 	public final static String CCM_PROP_PERSON_SHOW_EMAIL = "{http://www.campuscontent.de/model/1.0}showEmail";
 
 	public final static String CCM_PROP_PERSON_RECENTLY_INVITED = "{http://www.campuscontent.de/model/1.0}userRecentlyInvited";

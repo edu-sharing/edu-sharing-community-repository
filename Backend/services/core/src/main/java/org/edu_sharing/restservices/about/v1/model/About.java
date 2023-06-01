@@ -14,6 +14,7 @@ public class About  {
   
   private ServiceVersion version = null;
   private List<Service> services = new ArrayList<Service>();
+  private List<PluginInfo> plugins = new ArrayList<>();
   private String themesUrl;
   private long lastCacheUpdate;
 
@@ -48,6 +49,14 @@ public class About  {
 
   public void setLastCacheUpdate(long lastCacheUpdate) {
     this.lastCacheUpdate = lastCacheUpdate;
+  }
+
+  public List<PluginInfo> getPlugins() {
+    return plugins;
+  }
+
+  public void setPlugins(List<PluginInfo> plugins) {
+    this.plugins = plugins;
   }
 
   @JsonProperty
