@@ -91,23 +91,19 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	Logger logger = Logger.getLogger(PermissionServiceImpl.class);
 	private PermissionService permissionService;
 
-	public PermissionServiceImpl(String appId) {
+	public PermissionServiceImpl(ToolPermissionService toolPermission, org.edu_sharing.service.nodeservice.NodeService eduNodeService) {
 		appInfo = ApplicationInfoList.getHomeRepository();
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext
 				.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
-		eduNodeService = NodeServiceFactory.getNodeService(appId);
+		this.eduNodeService=eduNodeService;
+		this.toolPermission=toolPermission;
 		nodeService = serviceRegistry.getNodeService();
 		shareService = new ShareServiceImpl(this);
 		permissionService = serviceRegistry.getPermissionService();
 
 		personService = serviceRegistry.getPersonService();
-
-	}
-
-	public PermissionServiceImpl() {
-		this(ApplicationInfoList.getHomeRepository().getAppId());
 	}
 	
 	public PermissionServiceImpl(boolean test) {
