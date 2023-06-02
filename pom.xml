@@ -426,6 +426,12 @@
       </dependency>
 
       <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-repackaged-spring-security-web</artifactId>
+        <version>${bom.repository-repackaged.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>com.google.apis</groupId>
         <artifactId>google-api-services-youtube</artifactId>
         <version>v3-rev157-1.19.1</version>
@@ -808,9 +814,9 @@
         <version>3.2.18.RELEASE</version>
       </dependency>
       <dependency>
-        <groupId>org.edu_sharing</groupId>
-        <artifactId>edu_sharing-community-repository-security-fixes-spring-security-web</artifactId>
-        <version>3.1.7.RELEASE</version>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-tx</artifactId>
+        <version>3.2.17.RELEASE</version>
       </dependency>
       <dependency>
         <groupId>commons-fileupload</groupId>
