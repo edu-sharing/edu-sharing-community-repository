@@ -122,7 +122,9 @@ export class ApplyToLmsComponent {
             );
             return;
         }
-        console.warn('Using an absolute url for the "reurl" parameter is deprecated. Please prefer the value "WINDOW" and use frame communication')
+        console.warn(
+            'Using an absolute url for the "reurl" parameter is deprecated. Please prefer the value "WINDOW" and use frame communication',
+        );
         let params = reurl.indexOf('?') == -1 ? '?' : '&';
         params += 'nodeId=' + ccrepUrl;
         params += '&localId=' + encodeURIComponent(node.ref.id);
