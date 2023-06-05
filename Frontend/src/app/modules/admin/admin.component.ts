@@ -52,10 +52,7 @@ import { AuthoritySearchMode } from '../../shared/components/authority-search-in
 import { PlatformLocation } from '@angular/common';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
-import {
-    InteractionType,
-    NodeEntriesDisplayType,
-} from 'src/app/features/node-entries/entries-model';
+import { InteractionType, NodeEntriesDisplayType } from '../../features/node-entries/entries-model';
 import { NodeDataSource } from '../../features/node-entries/node-data-source';
 import { WorkspaceExplorerComponent } from '../workspace/explorer/explorer.component';
 import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';

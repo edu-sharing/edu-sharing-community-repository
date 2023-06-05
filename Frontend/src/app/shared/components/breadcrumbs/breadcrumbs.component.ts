@@ -1,6 +1,6 @@
 import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
 import { Params, QueryParamsHandling } from '@angular/router';
-import { DropSource } from 'src/app/features/node-entries/entries-model';
+import { DropSource } from '../../../features/node-entries/entries-model';
 import { Node, RestConstants, RestNodeService } from '../../../core-module/core.module';
 import { DragData, NodesDragDropService } from '../../../services/nodes-drag-drop.service';
 import { CanDrop } from '../../directives/nodes-drop-target.directive';

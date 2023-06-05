@@ -1,5 +1,5 @@
 import { Observable, of } from 'rxjs';
-import { GenericAuthority, Node } from 'src/app/core-module/core.module';
+import { GenericAuthority, Node } from '../../core-module/core.module';
 import { NodeDataSource } from './node-data-source';
 
 /**

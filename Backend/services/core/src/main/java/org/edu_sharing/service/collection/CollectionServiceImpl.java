@@ -248,7 +248,7 @@ public class CollectionServiceImpl implements CollectionService {
                  * - ignore childs: usage and license data
                  * - the preview child will be copied
                  */
-                String refId = client.copyNode(originalNodeId, collectionId, true);
+                String refId = client.copyNode(originalNodeId, collectionId, false);
 
                 permissionService.setPermissions(refId, null, true);
                 client.addAspect(refId, CCConstants.CCM_ASPECT_POSITIONABLE);
@@ -419,6 +419,20 @@ public class CollectionServiceImpl implements CollectionService {
         }
 
     }
+
+	/**
+	 * return the main folder where ALL collections are stored
+	 */
+	@Override
+	public String getCollectionHomeParent() {
+		return AuthenticationUtil.runAsSystem(() -> {
+			try {
+				return NodeServiceHelper.getContainerRootPath(path);
+			} catch (Throwable e) {
+				throw new RuntimeException();
+			}
+		});
+	}
 
     /**
      * return the folder id to the collection home where new collections should be created

@@ -2127,6 +2127,13 @@ public class NodeDao {
     }
 
     private Preview getPreview() {
+		if(previewData != null){
+			return new Preview(getStoreProtocol(),
+					getStoreIdentifier(),
+					remoteId!=null ? remoteId : getRef().getId(),
+					previewData
+			);
+		}
         Preview result = new Preview(nodeService,
                 getStoreProtocol(),
                 getStoreIdentifier(),
@@ -2134,10 +2141,7 @@ public class NodeDao {
                 this.version,
                 type,
                 nodeProps);
-        if (previewData != null) {
-            result.setMimetype(previewData.getMimetype());
-            result.setData(previewData.getData());
-        }
+
         return result;
     }
 

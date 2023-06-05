@@ -1,6 +1,6 @@
 import { DataSource } from '@angular/cdk/collections';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { GenericAuthority, Node, Pagination } from 'src/app/core-module/core.module';
+import { GenericAuthority, Node, Pagination } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
 import { ItemsCap } from './items-cap';
 import { LoadingState } from './node-data-source-remote';

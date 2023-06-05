@@ -36,7 +36,7 @@ import {
     ListSortConfig,
     NodeClickEvent,
     NodeEntriesDisplayType,
-} from 'src/app/features/node-entries/entries-model';
+} from '../../../features/node-entries/entries-model';
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
 import { OptionItem, Scope } from '../../../core-ui-module/option-item';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
@@ -567,7 +567,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private deleteFromCollection(callback: Function = null) {
         this.toast.showProgressDialog();
         this.collectionService
-            .removeFromCollection(this.collection.ref.id, this.collection.ref.id)
+            .removeFromCollection(this.contentNode.ref.id, this.collection.ref.id)
             .subscribe(
                 () => {
                     if (!('proposal' in this.collection)) {

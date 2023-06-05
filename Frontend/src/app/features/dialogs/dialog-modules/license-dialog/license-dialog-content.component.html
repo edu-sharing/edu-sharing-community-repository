@@ -1,8 +1,11 @@
 <!-- TODO: remove remaining h4 and h5 headings (misused as labels) -->
 
-<mat-slide-toggle class="oerSelect switch toggle-reverse" [(ngModel)]="oerMode">{{
-  'WORKSPACE.LICENSE.ONLY_OER' | translate
-}}</mat-slide-toggle>
+<mat-slide-toggle
+  class="oerSelect switch toggle-reverse"
+  *ngIf="oerAvailable"
+  [(ngModel)]="oerMode"
+  >{{ 'WORKSPACE.LICENSE.ONLY_OER' | translate }}</mat-slide-toggle
+>
 <mat-radio-group class="oerLicenses" [(ngModel)]="type" name="oerLicenses" *ngIf="oerMode">
   <fieldset>
     <legend>{{ 'LICENSE.GROUPS.CC_0' | translate }}</legend>
@@ -198,7 +201,7 @@
                     </label>
                   </div>
                   <input type="checkbox" class="filled-in" [(ngModel)]="eduDownload" id="DOWNLOAD"><label for="DOWNLOAD">{{'WORKSPACE.LICENSE.EDU.DOWNLOAD' | translate}}</label>
-  
+
                 </div>-->
   <div *ngIf="primaryType === 'CUSTOM'" class="custom">
     <mat-form-field>

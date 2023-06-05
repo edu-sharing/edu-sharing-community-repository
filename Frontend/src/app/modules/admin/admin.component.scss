@@ -1,7 +1,5 @@
 @import '../../core-ui-module/styles/variables';
-
-$sidenavWidth: 250px;
-$sidenavWidthMobile: 66px;
+@import 'admin.variables';
 
 .main {
     display: flex;

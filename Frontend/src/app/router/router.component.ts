@@ -108,7 +108,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
     // --- https://developer.chrome.com/blog/page-lifecycle-api/
     @HostListener('window:beforeunload', ['$event'])
     interceptRoute(event: BeforeUnloadEvent) {
-        console.log(event);
+        // console.log(event);
     }
 
     constructor(

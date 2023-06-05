@@ -38,10 +38,10 @@ import {
     NodeClickEvent,
     NodeEntriesDisplayType,
     NodeRoot,
-} from 'src/app/features/node-entries/entries-model';
-import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';
-import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
-import { NodeEntriesDataType } from 'src/app/features/node-entries/node-entries.component';
+} from '../../../features/node-entries/entries-model';
+import { NodeEntriesWrapperComponent } from '../../../features/node-entries/node-entries-wrapper.component';
+import { NodeDataSource } from '../../../features/node-entries/node-data-source';
+import { NodeEntriesDataType } from '../../../features/node-entries/node-entries.component';
 import { canDropOnNode } from '../workspace-utils';
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import {

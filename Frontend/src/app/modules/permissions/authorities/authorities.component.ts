@@ -64,9 +64,9 @@ import {
     ListSortConfig,
     NodeClickEvent,
     NodeEntriesDisplayType,
-} from 'src/app/features/node-entries/entries-model';
-import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
-import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';
+} from '../../../features/node-entries/entries-model';
+import { NodeDataSource } from '../../../features/node-entries/node-data-source';
+import { NodeEntriesWrapperComponent } from '../../../features/node-entries/node-entries-wrapper.component';
 import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
 import { filter } from 'rxjs/operators';
 

@@ -42,6 +42,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.transaction.UserTransaction;
@@ -134,7 +135,6 @@ import org.edu_sharing.repository.server.tools.AuthenticatorRemoteRepository;
 import org.edu_sharing.repository.server.tools.DateTool;
 import org.edu_sharing.repository.server.tools.EduGroupTool;
 import org.edu_sharing.repository.server.tools.I18nServer;
-import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.repository.server.tools.ServerConstants;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
@@ -1152,7 +1152,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					nodeRef,
 					propsOutput,
 					Arrays.asList(aspects),
-					null)
+					null, null)
 			));
 		}
 
@@ -1337,14 +1337,31 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				properties.remove(CCConstants.KEY_PREVIEW_GENERATION_RUNS);
 			}
 			*/
-
-			List<NodeRef> usages = this.getChildrenByAssociationNodeIds(nodeRef.getStoreRef(),nodeRef.getId(), CCConstants.CCM_ASSOC_USAGEASPECT_USAGES);
-			if (usages != null) {
-				properties.put(CCConstants.VIRT_PROP_USAGECOUNT, "" + usages.size());
-			}
-			List<NodeRef> childs = this.getChildrenByAssociationNodeIds(nodeRef.getStoreRef(),nodeRef.getId(), CCConstants.CCM_ASSOC_CHILDIO);
-			if (childs != null) {
-				properties.put(CCConstants.VIRT_PROP_CHILDOBJECTCOUNT, "" + childs.size());
+			Consumer<NodeRef> fetchCounts = (ref) -> {
+				List<NodeRef> usages = this.getChildrenByAssociationNodeIds(ref.getStoreRef(), ref.getId(), CCConstants.CCM_ASSOC_USAGEASPECT_USAGES);
+				if (usages != null) {
+					properties.put(CCConstants.VIRT_PROP_USAGECOUNT, "" + usages.size());
+				}
+				List<NodeRef> childs = this.getChildrenByAssociationNodeIds(ref.getStoreRef(), ref.getId(), CCConstants.CCM_ASSOC_CHILDIO);
+				if (childs != null) {
+					properties.put(CCConstants.VIRT_PROP_CHILDOBJECTCOUNT, "" + childs.size());
+				}
+			};
+			if(aspects.contains(QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))) {
+				AuthenticationUtil.runAsSystem(() -> {
+					try {
+						fetchCounts.accept(
+								new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+										(String) service.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL))
+								)
+						);
+					}catch (Throwable ignored) {
+						// ignored, original might be deleted
+					}
+					return null;
+				});
+			} else {
+				fetchCounts.accept(nodeRef);
 			}
 			List<NodeRef> comments = this.getChildrenByAssociationNodeIds(nodeRef.getStoreRef(),nodeRef.getId(), CCConstants.CCM_ASSOC_COMMENT);
 			if (comments != null) {
@@ -1385,20 +1402,20 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		properties.put(CCConstants.REPOSITORY_CAPTION, appInfo.getAppCaption());
 
 		buildUpProperties(properties);
-
+		HashMap<String, Object> propertiesFinal = properties;
 		// cache
 		if (nodeRef.getStoreRef().equals(storeRef)) {
 			Date mdate = (Date) propMap.get(QName.createQName(CCConstants.CM_PROP_C_MODIFIED));
 			if (mdate != null) {
-				properties.put(CCConstants.CC_CACHE_MILLISECONDS_KEY, new Long(mdate.getTime()).toString());
+				propertiesFinal.put(CCConstants.CC_CACHE_MILLISECONDS_KEY, new Long(mdate.getTime()).toString());
 				for(PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
-					properties = new HashMap<>(i.beforeCacheProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef, properties,
-									aspects.stream().map(QName::toString).collect(Collectors.toList()), null)));
+					propertiesFinal = new HashMap<>(i.beforeCacheProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef, propertiesFinal,
+									aspects.stream().map(QName::toString).collect(Collectors.toList()), null, null)));
 				}
-				repCache.put(nodeRef.getId(), properties);
+				repCache.put(nodeRef.getId(), propertiesFinal);
 			}
 		}
-		return properties;
+		return propertiesFinal;
 	}
 
 	public String getAlfrescoMimetype(NodeRef nodeRef) {

@@ -158,7 +158,12 @@ public class CollectionApi {
 		}
 	}
 
+	/**
+	 * deprecated in favour of the generic search api
+	 * Use the generic search api instead
+	 */
 	@GET
+	@Deprecated
 	@Path("/collections/{repository}/search")
 	@Operation(operationId = "searchCollections", summary = "Search collections.", description = "Search collections.")
 	@ApiResponses(value = {

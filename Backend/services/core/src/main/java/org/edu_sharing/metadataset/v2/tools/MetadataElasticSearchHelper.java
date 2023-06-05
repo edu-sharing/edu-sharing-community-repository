@@ -270,10 +270,11 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
             }
 
             if(parameters.get(facet) != null && parameters.get(facet).length > 0) {
+                List<String> facetDetails = query.findParameterByName(facet).getFacets();
                 result.add(AggregationBuilders.filter(facet + "_selected", bqb).subAggregation(AggregationBuilders.terms(facet)
                         .size(parameters.get(facet).length)
                         .minDocCount(1)
-                        .field("properties." + facet + ".keyword")
+                        .field(facetDetails == null || facetDetails.size() == 0 ? "properties." + facet + ".keyword" : facetDetails.get(0))
                         .includeExclude(new IncludeExclude(parameters.get(facet), null))));
             }
 

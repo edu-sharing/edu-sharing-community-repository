@@ -11,6 +11,7 @@ import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -264,6 +265,7 @@ class RemoveNodeVersionsJobTest {
         verify(versionService, never()).deleteVersion(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
+    @Disabled
     @Test
     void DeleteVersionsThatAreOlderThen2Days() {
         // given

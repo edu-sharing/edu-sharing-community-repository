@@ -1,11 +1,6 @@
 @import '../../../core-ui-module/styles/variables';
 @import '../../../core-ui-module/styles/toast';
 
-:host.main-nav-visible {
-    display: block;
-    height: var(--mainnavHeight);
-}
-
 ::ng-deep {
     .mobile-move-top,
     .mobile-move-bottom {
@@ -16,13 +11,15 @@
     }
 }
 
-.topBar {
-    position: fixed;
+.navigation-container {
+    position: sticky;
     top: 0;
-    left: 0;
+    z-index: $topBarZIndex;
+}
+
+.topBar {
     width: 100%;
     max-width: 100%;
-    z-index: $topBarZIndex;
 }
 .dialog {
     z-index: $dialogZIndex + 5;

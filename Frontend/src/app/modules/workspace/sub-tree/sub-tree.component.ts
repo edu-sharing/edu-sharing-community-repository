@@ -12,7 +12,7 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { DropSource } from 'src/app/features/node-entries/entries-model';
+import { DropSource } from '../../../features/node-entries/entries-model';
 import { Node, NodeList, RestConstants, RestNodeService } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';

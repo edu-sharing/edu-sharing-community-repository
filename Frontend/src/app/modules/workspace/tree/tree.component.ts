@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import { DropSource, NodeRoot } from 'src/app/features/node-entries/entries-model';
+import { DropSource, NodeRoot } from '../../../features/node-entries/entries-model';
 import { Node } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { OptionItem } from '../../../core-ui-module/option-item';

@@ -11,7 +11,7 @@ import { SearchResults } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, ReplaySubject, Subject, Subscription } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil, tap } from 'rxjs/operators';
-import { GenericAuthority, Node } from 'src/app/core-module/core.module';
+import { GenericAuthority, Node } from '../../core-module/core.module';
 import { UserModifiableValuesService } from '../../pages/search-page/user-modifiable-values';
 import { ItemsCap } from './items-cap';
 import { NodeCache, NodeCacheRange, NodeCacheSlice } from './node-cache';

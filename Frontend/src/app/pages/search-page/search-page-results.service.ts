@@ -212,7 +212,17 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
                     query: RestConstants.DEFAULT_QUERY_NAME,
                     propertyFilter: [RestConstants.ALL],
                 })
-                .pipe(map(fromSearchResults));
+                .pipe(
+                    tap((r) => {
+                        if (r.pagination.total < r.pagination.count) {
+                            console.warn(
+                                'Total count of items is smaller than total, results might be truncated, check pagination results of api',
+                                r.pagination,
+                            );
+                        }
+                    }),
+                    map(fromSearchResults),
+                );
         };
     }
 

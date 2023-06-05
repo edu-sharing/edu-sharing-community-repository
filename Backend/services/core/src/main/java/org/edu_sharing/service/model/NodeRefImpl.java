@@ -17,12 +17,16 @@ public class NodeRefImpl implements NodeRef {
 	Map<Relation, NodeRef> relations = new HashMap<>();
 
 	public static class PreviewImpl implements Preview {
+		private final String type;
+		private final Boolean icon;
 		String mimetype;
 		byte[] data;
 
-		public PreviewImpl(String mimetype, byte[] data) {
+		public PreviewImpl(String mimetype, byte[] data, String type, Boolean icon) {
 			this.mimetype = mimetype;
 			this.data = data;
+			this.type = type;
+			this.icon = icon;
 		}
 
 		@Override
@@ -41,6 +45,16 @@ public class NodeRefImpl implements NodeRef {
 
 		public void setData(byte[] data) {
 			this.data = data;
+		}
+
+		@Override
+		public String getType() {
+			return type;
+		}
+
+		@Override
+		public Boolean getIcon() {
+			return icon;
 		}
 	}
 
