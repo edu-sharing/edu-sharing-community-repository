@@ -24,6 +24,7 @@
     </button>
     <es-sort-dropdown
       #sortDropdown
+      [class.display-nonen]="!entriesService.sort.active"
       [columns]="getSortColumns()"
       [sortBy]="entriesService.sort.active"
       [sortAscending]="entriesService.sort.direction === 'asc'"
