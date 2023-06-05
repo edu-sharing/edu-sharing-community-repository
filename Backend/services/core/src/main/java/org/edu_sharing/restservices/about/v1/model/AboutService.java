@@ -1,7 +1,7 @@
 package org.edu_sharing.restservices.about.v1.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.Schema;;
+;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 @Schema(description = "")
-public class Service  {
+public class AboutService {
   
   private String name = null;
   private List<ServiceInstance> instances = new ArrayList<ServiceInstance>();

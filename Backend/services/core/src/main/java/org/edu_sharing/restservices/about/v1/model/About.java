@@ -1,7 +1,7 @@
 package org.edu_sharing.restservices.about.v1.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.Schema;;
+;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class About  {
   
   private ServiceVersion version = null;
-  private List<Service> services = new ArrayList<Service>();
+  private List<AboutService> services = new ArrayList<AboutService>();
   private List<PluginInfo> plugins = new ArrayList<>();
   private String themesUrl;
   private long lastCacheUpdate;
@@ -35,10 +35,10 @@ public class About  {
    **/
   @Schema(required = true, description = "")
   @JsonProperty("services")
-  public List<Service> getServices() {
+  public List<AboutService> getServices() {
     return services;
   }
-  public void setServices(List<Service> services) {
+  public void setServices(List<AboutService> services) {
     this.services = services;
   }
 

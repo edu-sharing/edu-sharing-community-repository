@@ -3,8 +3,6 @@ package org.edu_sharing.restservices;
 import io.swagger.v3.jaxrs2.SwaggerSerializers;
 import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder;
 
-import javax.ws.rs.ApplicationPath;
-
 
 import io.swagger.v3.oas.integration.OpenApiConfigurationException;
 import io.swagger.v3.oas.integration.SwaggerConfiguration;
@@ -12,7 +10,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.restservices.about.v1.model.Service;
+import org.edu_sharing.restservices.about.v1.model.AboutService;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -34,7 +32,7 @@ public class ApiApplication extends ResourceConfig {
 	
 	public static final Set<Class<?>> SERVICES;
 	static {
-		Map<String, Service> services = new HashMap<String, Service>();
+		Map<String, AboutService> services = new HashMap<String, AboutService>();
 		ClassPathScanningCandidateComponentProvider scanner =
 				new ClassPathScanningCandidateComponentProvider(false);
 		scanner.addIncludeFilter(new AnnotationTypeFilter(ApiService.class));
