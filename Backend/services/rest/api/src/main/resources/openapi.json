@@ -52,9 +52,15 @@
             "format": "int64",
             "type": "integer"
           },
+          "plugins": {
+            "items": {
+              "$ref": "#/components/schemas/PluginInfo"
+            },
+            "type": "array"
+          },
           "services": {
             "items": {
-              "$ref": "#/components/schemas/Service"
+              "$ref": "#/components/schemas/AboutService"
             },
             "type": "array"
           },
@@ -68,6 +74,24 @@
         "required": [
           "services",
           "version"
+        ],
+        "type": "object"
+      },
+      "AboutService": {
+        "properties": {
+          "instances": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceInstance"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "instances",
+          "name"
         ],
         "type": "object"
       },
@@ -2087,26 +2111,6 @@
         },
         "type": "object"
       },
-      "LoggerConfigResult": {
-        "properties": {
-          "appender": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "config": {
-            "type": "boolean"
-          },
-          "level": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
       "Login": {
         "properties": {
           "authorityName": {
@@ -3421,6 +3425,98 @@
         ],
         "type": "object"
       },
+      "NotificationConfig": {
+        "properties": {
+          "configMode": {
+            "enum": [
+              "uniformly",
+              "individual"
+            ],
+            "type": "string"
+          },
+          "defaultInterval": {
+            "enum": [
+              "immediately",
+              "disabled",
+              "daily",
+              "weekly"
+            ],
+            "type": "string"
+          },
+          "intervals": {
+            "$ref": "#/components/schemas/NotificationConfigIntervals"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationConfigIntervals": {
+        "properties": {
+          "addToCollectionEvent": {
+            "enum": [
+              "immediately",
+              "disabled",
+              "daily",
+              "weekly"
+            ],
+            "type": "string"
+          },
+          "commentEvent": {
+            "enum": [
+              "immediately",
+              "disabled",
+              "daily",
+              "weekly"
+            ],
+            "type": "string"
+          },
+          "inviteEvent": {
+            "enum": [
+              "immediately",
+              "disabled",
+              "daily",
+              "weekly"
+            ],
+            "type": "string"
+          },
+          "metadataSuggestionEvent": {
+            "enum": [
+              "immediately",
+              "disabled",
+              "daily",
+              "weekly"
+            ],
+            "type": "string"
+          },
+          "nodeIssueEvent": {
+            "enum": [
+              "immediately",
+              "disabled",
+              "daily",
+              "weekly"
+            ],
+            "type": "string"
+          },
+          "ratingEvent": {
+            "enum": [
+              "immediately",
+              "disabled",
+              "daily",
+              "weekly"
+            ],
+            "type": "string"
+          },
+          "workflowEvent": {
+            "enum": [
+              "immediately",
+              "disabled",
+              "daily",
+              "weekly"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "NotifyEntry": {
         "properties": {
           "action": {
@@ -3813,6 +3909,14 @@
               "$ref": "#/components/schemas/PersonDeleteResult"
             },
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PluginInfo": {
+        "properties": {
+          "id": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -9338,107 +9442,7 @@
         ]
       }
     },
-    "/admin/v1/log/config": {
-      "get": {
-        "operationId": "getLoggingRuntime",
-        "parameters": [
-          {
-            "description": "filters",
-            "in": "query",
-            "name": "filters",
-            "schema": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            }
-          },
-          {
-            "description": "onlyConfig if true only loggers defined in log4j.xml or at runtime are returned",
-            "in": "query",
-            "name": "onlyConfig",
-            "schema": {
-              "type": "boolean"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoggerConfigResult"
-                }
-              }
-            },
-            "description": "OK."
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Preconditions are not present."
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Authorization failed."
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Session user has insufficient rights to perform this operation."
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Ressources are not found."
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Fatal error occured."
-          }
-        },
-        "summary": "get the logger config",
-        "tags": [
-          "ADMIN v1"
-        ]
-      },
+    "/admin/v1/log": {
       "post": {
         "description": "Root appenders are used. Check the appender treshold.",
         "operationId": "changeLogging",
@@ -12256,7 +12260,6 @@
     },
     "/collection/v1/collections/{repository}/search": {
       "get": {
-        "deprecated": true,
         "description": "Search collections.",
         "operationId": "searchCollections",
         "parameters": [
@@ -28527,6 +28530,51 @@
         "summary": "Store xApi-Conform data for a given node",
         "tags": [
           "NODE v1"
+        ]
+      }
+    },
+    "/notification/v1/config": {
+      "get": {
+        "operationId": "getConfig_2",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationConfig"
+                }
+              }
+            },
+            "description": "OK."
+          }
+        },
+        "summary": "get the config for notifications of the current user",
+        "tags": [
+          "NOTIFICATION v1"
+        ]
+      },
+      "put": {
+        "operationId": "setConfig_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {}
+            },
+            "description": "OK."
+          }
+        },
+        "summary": "Update the config for notifications of the current user",
+        "tags": [
+          "NOTIFICATION v1"
         ]
       }
     },
