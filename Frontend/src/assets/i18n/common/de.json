@@ -1266,6 +1266,34 @@
     },
     "COPIED_TO_CLIPBOARD_NOTICE": "Der Einbettungscode wurde in die Zwischenablage kopiert."
   },
+  "NOTIFICATION": {
+    "MENU": "Benachrichtigungen",
+    "TITLE": "Benachrichtigungseinstellungen",
+    "SUBTITLE": "Einstellungen zu Benachrichtigungen & Aktualisierungen",
+    "CONFIG": {
+      "uniformly": "Für alle Benachrichtigungstypen",
+      "uniformly_DESCRIPTION": "Der Intervall für Benachrichtigungen wird, unabhängig von der Art der Nachricht, global festgelegt",
+      "individual": "Pro Benachrichtigungstyp",
+      "individual_DESCRIPTION": "Der Intervall für Benachrichtigungen kann pro Benachrichtigungstyp individuell festgelegt werden"
+    },
+    "SAVED": "Benachrichtigungs-Einstellungen wurden gespeichert",
+    "INTERVAL_LABEL": "Benachrichtigungsintervall",
+    "INTERVAL": {
+      "immediately": "Sofort",
+      "daily": "Täglich",
+      "weekly": "Wöchentlich",
+      "disabled": "Keine Benachrichtigungen"
+    },
+    "GROUP": {
+      "addToCollectionEvent": "Inhalte in Sammlung eingefügt",
+      "commentEvent": "Kommentare an Inhalten",
+      "inviteEvent": "Einladungen zu Materialien",
+      "nodeIssueEvent": "Problemmeldungen zu Materialien",
+      "ratingEvent": "Bewertungen an Materialien",
+      "workflowEvent": "Als Workflow-Zuständiger zugewiesen",
+      "metadataSuggestionEvent": "Vorschlag für Metadaten"
+    }
+  },
   "API_ERROR": {
     "RELOAD_NOTICE_TITLE": "Seite muss neugeladen werden",
     "RELOAD_NOTICE": "Beim Laden von wichtigen Informationen ist etwas schief gegangen. Bitte laden Sie die Seite neu.",

@@ -1190,6 +1190,34 @@
     },
     "COPIED_TO_CLIPBOARD_NOTICE": "The embed code was copied to the clipboard."
   },
+  "NOTIFICATION": {
+    "MENU": "Notifications",
+    "TITLE": "Notification settings",
+    "SUBTITLE": "Settings for notifications & updates",
+    "CONFIG": {
+      "uniformly": "For all event types",
+      "uniformly_DESCRIPTION": "The interval will be configured for any messages regardless of their type",
+      "individual": "Invididual",
+      "individual_DESCRIPTION": "The interval will be configured for each message type individually"
+    },
+    "SAVED": "Notification settings saved",
+    "INTERVAL_LABEL": "Notification interval",
+    "INTERVAL": {
+      "immediately": "Immediately",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "disabled": "Notifications disabled"
+    },
+    "GROUP": {
+      "addToCollectionEvent": "Content added to collection",
+      "commentEvent": "Comment on material",
+      "inviteEvent": "Invitation on material",
+      "nodeIssueEvent": "Issue reported on material",
+      "ratingEvent": "Material rated",
+      "workflowEvent": "Assigned by workflow",
+      "metadataSuggestionEvent": "Suggestion for metadata"
+    }
+  },
   "API_ERROR": {
     "RELOAD_NOTICE_TITLE": "The page has to be reloaded",
     "RELOAD_NOTICE": "Something went wrong when loading important information. Please reload the page.",

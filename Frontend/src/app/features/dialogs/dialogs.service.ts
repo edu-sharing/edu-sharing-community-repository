@@ -86,6 +86,7 @@ import {
     XmlAppPropertiesDialogData,
     XmlAppPropertiesDialogResult,
 } from './dialog-modules/xml-app-properties-dialog/xml-app-properties-dialog-data';
+import { NotificationDialogComponent } from './dialog-modules/notification-dialog/notification-dialog.component';
 
 @Injectable({
     providedIn: 'root',
@@ -207,6 +208,18 @@ export class DialogsService {
             title: 'ACCESSIBILITY.TITLE',
             subtitle: 'ACCESSIBILITY.SUBTITLE',
             avatar: { kind: 'icon', icon: 'accessibility' },
+            width: 700,
+        });
+    }
+
+    async openNotificationDialog(): Promise<CardDialogRef<void, void>> {
+        const { NotificationDialogComponent } = await import(
+            './dialog-modules/notification-dialog/notification-dialog.module'
+        );
+        return this.cardDialog.open(NotificationDialogComponent, {
+            title: 'NOTIFICATION.TITLE',
+            subtitle: 'NOTIFICATION.SUBTITLE',
+            avatar: { kind: 'icon', icon: 'chat_bubble' },
             width: 700,
         });
     }

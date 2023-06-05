@@ -17,6 +17,7 @@ export {
     MdsWidget,
     MdsWidgetCondition,
     MetadataSetInfo,
+    NotificationConfig,
     Node,
     NodeEntries,
     NodeRef,

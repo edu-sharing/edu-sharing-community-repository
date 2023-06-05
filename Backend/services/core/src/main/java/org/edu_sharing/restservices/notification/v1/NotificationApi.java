@@ -30,7 +30,7 @@ public class NotificationApi {
     @Operation(summary = "get the config for notifications of the current user")
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Login.class))),
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NotificationConfig.class))),
             })
 
     public Response getConfig(@Context HttpServletRequest req) throws DAOException {
@@ -45,7 +45,7 @@ public class NotificationApi {
     @Operation(summary = "Update the config for notifications of the current user")
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Login.class))),
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
             })
 
     public Response setConfig(@Context HttpServletRequest req, NotificationConfig config) throws DAOException {

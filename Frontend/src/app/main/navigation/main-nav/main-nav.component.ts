@@ -530,6 +530,16 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     private updateUserOptions() {
         this.userMenuOptions = [];
         if (
+            this.connector.getCurrentLogin().statusCode === RestConstants.STATUS_CODE_OK &&
+            this.about.services.filter((s) => s.name === 'kafka-notification-plugin')
+        ) {
+            this.userMenuOptions.push(
+                new OptionItem('NOTIFICATION.MENU', 'chat_bubble', async () => {
+                    await this.dialogs.openNotificationDialog();
+                }),
+            );
+        }
+        if (
             !this.connector.getCurrentLogin()?.isGuest &&
             !this.connector.getCurrentLogin()?.currentScope
         ) {
