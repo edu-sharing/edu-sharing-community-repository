@@ -179,7 +179,7 @@
         "VERSION_DATE_ABSOLUTE": "Publicated",
         "DOI_DISTINCT": "Create new handle",
         "DOI_DISTINCT_INFO": "A new, unique handle is created. Future versions of the object will have independent identifiers. Note that after selecting this option, no updated versions of the item can subsequently be published under the same handle",
-        "DOI_UPDATE": "Update an existing handle",
+        "DOI_UPDATE": "Update existing handle",
         "DOI_UPDATE_INFO": "The new version of the element will be made available under the existing, old handle address in the future. The previously published version is no longer directly accessible via the handle address",
         "LICENSE_REQUIRED": "In order to publish the material you need to define a license first",
         "AUTHOR_REQUIRED": "In order to publish the material you need to define the author first"
