@@ -65,7 +65,7 @@
     <tomcat.version>${tomcat.version.major}.${tomcat.version.minor}.${tomcat.version.patch}
     </tomcat.version>
 
-    <mongodb.version>4.4.1</mongodb.version>
+    <mongodb.version>4.9.1</mongodb.version>
   </properties>
 
   <profiles>
