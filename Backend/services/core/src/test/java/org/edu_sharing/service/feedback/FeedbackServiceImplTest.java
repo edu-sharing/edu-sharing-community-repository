@@ -235,16 +235,17 @@ class FeedbackServiceImplTest {
             );
             underTest.userMode = UserMode.obfuscate;
             underTest.deleteUserData(userId);
-            nodeServiceHelperMockedStatic.verify(times(list.size()),
-                    () -> NodeServiceHelper.removeNode(any(), eq(false))
+            nodeServiceHelperMockedStatic.verify(() -> NodeServiceHelper.removeNode(any(), eq(false)),
+                    times(list.size())
             );
 
 
             nodeServiceHelperMockedStatic.reset();
             underTest.userMode = UserMode.session;
             underTest.deleteUserData(userId);
-            nodeServiceHelperMockedStatic.verify(times(0),
-                    () -> NodeServiceHelper.removeNode(any(), eq(false))
+            nodeServiceHelperMockedStatic.verify(
+                    () -> NodeServiceHelper.removeNode(any(), eq(false)),
+                    times(0)
             );
         }
     }
@@ -269,10 +270,11 @@ class FeedbackServiceImplTest {
             );
             underTest.userMode = UserMode.full;
             underTest.changeUserData(userId, newUserId);
-            nodeServiceHelperMockedStatic.verify(times(list.size()),
+            nodeServiceHelperMockedStatic.verify(
                     () -> NodeServiceHelper.setProperty(any(), eq(CCConstants.CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY), eq(
                             DigestUtils.sha1Hex(newUserId)
-                    ), eq(false))
+                    ), eq(false)),
+                    times(list.size())
             );
 
             nodeServiceHelperMockedStatic.reset();
@@ -281,17 +283,19 @@ class FeedbackServiceImplTest {
             );
             underTest.userMode = UserMode.full;
             underTest.changeUserData(userId, newUserId);
-            nodeServiceHelperMockedStatic.verify(times(list.size()),
+            nodeServiceHelperMockedStatic.verify(
                     () -> NodeServiceHelper.setProperty(any(), eq(CCConstants.CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY), eq(
                             DigestUtils.sha1Hex(newUserId)
-                    ), eq(false))
+                    ), eq(false)),
+                    times(list.size())
             );
 
             nodeServiceHelperMockedStatic.reset();
             underTest.userMode = UserMode.session;
             underTest.changeUserData(userId, newUserId);
-            nodeServiceHelperMockedStatic.verify(times(0),
-                    () -> NodeServiceHelper.setProperty(any(), eq(CCConstants.CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY), anyString(), eq(false))
+            nodeServiceHelperMockedStatic.verify(
+                    () -> NodeServiceHelper.setProperty(any(), eq(CCConstants.CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY), anyString(), eq(false)),
+                    times(0)
             );
 
         }
