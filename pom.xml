@@ -769,7 +769,8 @@
       <dependency>
         <groupId>org.springframework.security.extensions</groupId>
         <artifactId>spring-security-saml2-core</artifactId>
-        <version>1.0.10.RELEASE</version>
+        <!-- 1.0.4 and later breaks the HTTPS Checks, see https://github.com/spring-attic/spring-security-saml/issues/233 -->
+        <version>1.0.3.RELEASE</version>
       </dependency>
       <dependency>
         <groupId>org.opensaml</groupId>
