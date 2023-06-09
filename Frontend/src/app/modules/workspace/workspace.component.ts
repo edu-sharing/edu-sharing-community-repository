@@ -198,7 +198,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         this.translations.waitForInit().subscribe(() => {
             void this.initialize();
         });
-        this.connector.setRoute(this.route);
+        this.connector.setRoute(this.route, this.router);
         this.globalProgress = true;
         this.cardHasOpenModals$ = this.card.hasOpenModals.pipe(delay(0));
     }

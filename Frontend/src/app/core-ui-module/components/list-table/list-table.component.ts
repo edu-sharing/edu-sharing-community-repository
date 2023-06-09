@@ -563,7 +563,7 @@ export class ListTableComponent
         if (!this.loadRepositories) {
             return;
         }
-        this.locator.setRoute(this.route).subscribe(() => {
+        this.locator.setRoute(this.route, this.router).subscribe(() => {
             this.network.getRepositories().subscribe((repositories) => {
                 this.repositories = repositories;
                 this.changeDetectorRef.detectChanges();
