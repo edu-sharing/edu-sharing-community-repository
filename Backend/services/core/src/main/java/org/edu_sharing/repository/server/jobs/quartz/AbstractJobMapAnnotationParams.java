@@ -68,17 +68,19 @@ public abstract class AbstractJobMapAnnotationParams extends AbstractJob {
 						}
 					} else if(field.getType().isAssignableFrom(Collection.class) || field.getType().equals(List.class)) {
 						Class<?> type = (Class<?>) ((ParameterizedType)field.getGenericType()).getActualTypeArguments()[0];
-						field.set(this,
-								((Collection<?>)jobExecutionContext.getJobDetail().getJobDataMap().get(field.getName())).stream().map(
-										(v) -> {
-											if(type.isEnum()) {
-												return mapEnum(type,
-														(String) v);
-											} else {
-												return v;
+						if(jobExecutionContext.getJobDetail().getJobDataMap().get(field.getName()) != null) {
+							field.set(this,
+									((Collection<?>) jobExecutionContext.getJobDetail().getJobDataMap().get(field.getName())).stream().map(
+											(v) -> {
+												if (type.isEnum()) {
+													return mapEnum(type,
+															(String) v);
+												} else {
+													return v;
+												}
 											}
-										}
-								).collect(Collectors.toList()));
+									).collect(Collectors.toList()));
+						}
 					} else {
 						field.set(this, jobExecutionContext.getJobDetail().getJobDataMap().get(field.getName()));
 					}
