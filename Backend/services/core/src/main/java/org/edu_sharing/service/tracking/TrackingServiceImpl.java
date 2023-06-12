@@ -4,6 +4,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
 import org.apache.ibatis.binding.BindingException;
 import org.apache.ibatis.session.SqlSession;
@@ -13,7 +14,6 @@ import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -74,6 +74,11 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     public static String TRACKING_STATISTICS_NODE_SINGLE = "SELECT type,COUNT(*) from edu_tracking_node as tracking" +
             " WHERE node_uuid = ? AND time BETWEEN ? AND ?" +
             " GROUP BY type" +
+            " ORDER BY count DESC";
+
+    public static String TRACKING_STATISTICS_NODE_ARRAY = "SELECT node_uuid, type,COUNT(*) from edu_tracking_node as tracking" +
+            " WHERE node_uuid = ANY(?) AND time BETWEEN ? AND ?" +
+            " GROUP BY node_uuid, type" +
             " ORDER BY count DESC";
     public static String TRACKING_STATISTICS_DAILY = "SELECT type,COUNT(*),TO_CHAR(time,'yyyy-mm-dd') as date :fields from :table as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
@@ -412,6 +417,40 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
                 entry.getCounts().put(EventType.valueOf(resultSet.getString("type")), resultSet.getInt("count"));
             }
             return entry;
+        }catch(Throwable t){
+            throw t;
+        }finally {
+            dbAlf.cleanUp(con, statement);
+        }
+    }
+
+    @Override
+    public Map<NodeRef, StatisticEntry> getListNodeData(List<NodeRef> nodes,java.util.Date dateFrom,java.util.Date dateTo) throws Throwable{
+        ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
+        Connection con = null;
+        PreparedStatement statement = null;
+        Map<NodeRef, StatisticEntry> data = new HashMap<>();
+        nodes.forEach(ref -> {
+            data.put(ref, new StatisticEntry());
+        });
+        try {
+            con = dbAlf.getConnection();
+            String query = TRACKING_STATISTICS_NODE_ARRAY;
+            statement=con.prepareStatement(query);
+            int index=1;
+            statement.setArray(index++,con.createArrayOf("text", nodes.stream().map(NodeRef::getId).toArray()));
+            if(dateFrom==null)
+                dateFrom = new java.util.Date(0);
+            statement.setTimestamp(index++, Timestamp.valueOf(dateFrom.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
+            if(dateTo==null)
+                dateTo = new java.util.Date();
+            statement.setTimestamp(index++, Timestamp.valueOf(dateTo.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, resultSet.getString("node_uuid"));
+                data.get(nodeRef).getCounts().put(EventType.valueOf(resultSet.getString("type")), resultSet.getInt("count"));
+            }
+            return data;
         }catch(Throwable t){
             throw t;
         }finally {
