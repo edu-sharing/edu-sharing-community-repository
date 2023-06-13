@@ -62,7 +62,7 @@ public class Release_8_1_SetCompanyHomePermissions extends UpdateAbstract {
 				Repository repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
 				serviceRegistry.getPermissionService().deletePermission(
 						repositoryHelper.getCompanyHome(),
-						CCConstants.AUTHORITY_GROUP_EVERYONE, CCConstants.PERMISSION_READ
+						CCConstants.AUTHORITY_GROUP_EVERYONE, CCConstants.PERMISSION_CONSUMER
 				);
 			}
 			return true;

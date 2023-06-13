@@ -1335,6 +1335,8 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_SERVICE = "EDUSYSTEM_SERVICE";
 
+	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_MEDIACENTER = "EDUSYSTEM_MEDIACENTER";
+
 	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TOOLPERMISSIONS = "EDUSYSTEM_TOOLPERMISSIONS";
 
 	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_VALUESPACE = "EDUSYSTEM_VALUESPACE";
@@ -1555,6 +1557,8 @@ public class CCConstants {
 	public final static String I18n_SYSTEMFOLDER_UPDATE = "systemfolder_update";
 
 	public final static String I18n_SYSTEMFOLDER_CONFIG = "systemfolder_config";
+
+	public final static String I18n_SYSTEMFOLDER_MEDIACENTER = "systemfolder_mediacenter";
 
 	public final static String I18n_SYSTEMFOLDER_NOTIFY = "systemfolder_notify";
 

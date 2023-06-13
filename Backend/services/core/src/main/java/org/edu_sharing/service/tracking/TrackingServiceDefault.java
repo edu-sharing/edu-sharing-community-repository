@@ -53,6 +53,9 @@ public abstract class TrackingServiceDefault implements TrackingService{
 
     @Override
     public boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details, EventType type, String authorityName) {
+        if(!LightbendConfigLoader.get().getBoolean("repository.tracking.alfresco")) {
+            return false;
+        }
         String qname = EVENT_PROPERTY_MAPPING.get(type);
         if(qname == null){
             return false;

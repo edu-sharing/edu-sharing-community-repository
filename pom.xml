@@ -62,6 +62,7 @@
     <tomcat.version>${tomcat.version.major}.${tomcat.version.minor}.${tomcat.version.patch}
     </tomcat.version>
 
+    <mongodb.version>4.9.1</mongodb.version>
   </properties>
 
   <profiles>
@@ -91,6 +92,15 @@
     <pluginManagement>
 
       <plugins>
+        <plugin>
+          <!-- override super pom version for compatibility with java 8 -->
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <runOrder>alphabetical</runOrder>
+            <argLine>-Xmx1024m</argLine>
+          </configuration>
+        </plugin>
 
         <plugin>
           <groupId>org.alfresco.maven.plugin</groupId>
@@ -765,6 +775,7 @@
       <dependency>
         <groupId>org.springframework.security.extensions</groupId>
         <artifactId>spring-security-saml2-core</artifactId>
+        <!-- 1.0.4 and later breaks the HTTPS Checks, see https://github.com/spring-attic/spring-security-saml/issues/233 -->
         <version>1.0.3.RELEASE</version>
       </dependency>
 
@@ -832,7 +843,13 @@
       <dependency>
         <groupId>org.mongodb</groupId>
         <artifactId>mongodb-driver-sync</artifactId>
-        <version>4.4.1</version>
+        <version>${mongodb.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.mongodb</groupId>
+        <artifactId>bson</artifactId>
+        <version>${mongodb.version}</version>
       </dependency>
 
       <dependency>
@@ -886,7 +903,7 @@
       <dependency>
         <groupId>com.graphql-java</groupId>
         <artifactId>graphql-java</artifactId>
-        <version>17.3</version>
+        <version>20.2</version>
         <exclusions>
           <exclusion>
             <groupId>org.slf4j</groupId>
@@ -898,7 +915,7 @@
       <dependency>
         <groupId>com.graphql-java</groupId>
         <artifactId>graphql-java-extended-scalars</artifactId>
-        <version>17.0</version>
+        <version>20.2</version>
         <exclusions>
           <exclusion>
             <groupId>org.slf4j</groupId>
@@ -914,7 +931,7 @@
       <dependency>
         <groupId>com.graphql-java-kickstart</groupId>
         <artifactId>graphql-java-servlet</artifactId>
-        <version>12.0.0</version>
+        <version>14.0.0</version>
         <exclusions>
           <exclusion>
             <groupId>org.slf4j</groupId>
@@ -934,7 +951,8 @@
       <dependency>
         <groupId>com.graphql-java-kickstart</groupId>
         <artifactId>graphql-java-tools</artifactId>
-        <version>12.0.2</version>
+        <version>13.0.3-edu-sharing</version>
+<!--        <version>edu-sharing-SNAPSHOT</version>-->
         <exclusions>
           <exclusion>
             <groupId>org.slf4j</groupId>
