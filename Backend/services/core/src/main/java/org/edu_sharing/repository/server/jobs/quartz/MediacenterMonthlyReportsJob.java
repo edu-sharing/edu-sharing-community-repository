@@ -1,16 +1,13 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
-import com.google.common.collect.Lists;
+import com.opencsv.CSVWriter;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.apache.axis.utils.StringUtils;
-import org.apache.commons.csv.writer.CSVConfig;
-import org.apache.commons.csv.writer.CSVField;
-import org.apache.commons.csv.writer.CSVWriter;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -20,6 +17,7 @@ import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.repository.server.tools.NodeTool;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
+import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.service.mediacenter.MediacenterService;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.edu_sharing.service.model.NodeRef;
@@ -29,14 +27,14 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.tracking.TrackingService;
-import org.edu_sharing.service.tracking.TrackingServiceDefault;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -57,7 +55,10 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 	private List<String> columns = new ArrayList<String>() {{
 		add("cclom:title");
 		add("ccm:replicationsourceid");
+		add("ccm:lifecyclecontributer_publisher");
 	}};
+	@JobFieldDescription(description = "List of additional (custom) fields to be fetched from the tracking data", sampleValue = "field1")
+	private List<String> additionalFields = Collections.emptyList();
 
 	static List<TrackingService.EventType> STAT_FIELDS = Arrays.asList(
 			TrackingService.EventType.VIEW_MATERIAL,
@@ -65,10 +66,13 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 			TrackingService.EventType.VIEW_MATERIAL_PLAY_MEDIA,
 			TrackingService.EventType.DOWNLOAD_MATERIAL
 	);
-	@JobFieldDescription(description = "Optional, set a list of mediacenters to apply, otherwise it will run for all")
+	@JobFieldDescription(description = "Optional, set a list of mediacenters to apply, otherwise it will run for all", sampleValue = "GROUP_MEDIA_CENTER_1")
 	private List<String> mediacenters;
 	@JobFieldDescription(description = "force run, even if the date is currently not the 1st")
-	private boolean force;
+	private boolean force = false;
+
+	@JobFieldDescription(description = "Delete stats of the month if they're already existing")
+	private boolean delete = false;
 	private ContentService contentService;
 
 
@@ -113,12 +117,25 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 								ref -> new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ref.getNodeId())
 						).collect(Collectors.toList()),
 						Date.from(from.atStartOfDay().toInstant(ZoneOffset.UTC)),
-						Date.from(to.atTime(23, 59).toInstant(ZoneOffset.UTC)));
+						null,//Date.from(to.atTime(23, 59).toInstant(ZoneOffset.UTC)),
+						additionalFields
+				);
 				String filename = from.format(DateTimeFormatter.ISO_DATE) + " - " + to.format(DateTimeFormatter.ISO_DATE) + ".csv";
 				String parent = new NodeTool().createOrGetNodeByName(new MCAlfrescoAPIClient(), baseFolder, new String[]{mediacenter});
 				PermissionServiceFactory.getLocalService().setPermission(parent, mediacenterService.getMediacenterAdminGroup(mediacenter), CCConstants.PERMISSION_CONSUMER);
+				if(delete) {
+					String node = NodeServiceFactory.getLocalService().findNodeByName(parent, filename);
+					if(node != null) {
+						NodeServiceFactory.getLocalService().removeNode(node, null, false);
+					}
+				}
 				String nodeId = NodeServiceFactory.getLocalService().createNode(parent, CCConstants.CCM_TYPE_IO, NodeServiceFactory.getLocalService().getNameProperty(filename));
-				writeCSVFile(nodes, nodeId);
+				try {
+					writeCSVFile(data, nodeId);
+				} catch(Throwable t) {
+					logger.warn("Error writing csv data for mediacenter " + mediacenter, t);
+					NodeServiceHelper.removeNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), false);
+				}
 			}
 		} catch (Throwable t) {
 			throw new RuntimeException(t);
@@ -126,50 +143,61 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 		return null;
 	}
 
-	private void writeCSVFile(List<NodeRef> nodes, String nodeId) throws Exception {
+	private void writeCSVFile(Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> data, String nodeId) throws Exception {
 		ContentWriter contentWriter = contentService.getWriter(
 				new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
 				ContentModel.PROP_CONTENT,
 				true);
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		OutputStreamWriter osw = new OutputStreamWriter(bos);
-		CSVWriter writer = new CSVWriter();
-		writer.setWriter(osw);
-		CSVConfig config = new CSVConfig();
-		List<CSVField> fields = columns.stream().map(CSVField::new).collect(Collectors.toList());
-		fields.addAll(STAT_FIELDS.stream().map(Enum::toString).map(CSVField::new).collect(Collectors.toList()));
-		config.setFields(
-				fields
-		);
-		writer.setConfig(config);
-		Map<String, String> header = columns.stream().collect(Collectors.toMap(
-				e -> e,
-				e -> I18nAngular.getTranslationAngular("common", "NODE." + e)
-		));
-		header.putAll(STAT_FIELDS.stream().collect(Collectors.toMap(
-				Enum::toString,
-				e -> e.toString()
-		)));
-		writer.writeRecord(header);
-		for (NodeRef node : nodes) {
+		CSVWriter writer = new CSVWriter(osw);
+		List<String> header = columns.stream().map(c -> I18nAngular.getTranslationAngular("common", "NODE." + c)).collect(Collectors.toList());
+		header.addAll(STAT_FIELDS.stream().map(e ->  I18nAngular.getTranslationAngular("admin", "ADMIN.STATISTICS.ACTIONS." + e)).collect(Collectors.toList()));
+		List<Set<String>> additionalFieldValues = new ArrayList<>();
+		additionalFields.forEach(f -> {
+			additionalFieldValues.add(
+					data.values().stream().map(
+							d -> STAT_FIELDS.stream().map(
+									event -> d.getGroups().get(event).keySet()
+							).collect(Collectors.toSet())
+					).flatMap(Set::stream).flatMap(Set::stream).collect(Collectors.toSet())
+			);
+			header.addAll(STAT_FIELDS.stream().map(e ->
+					I18nAngular.getTranslationAngular("admin", "ADMIN.STATISTICS.ACTIONS." + e) + " (" + f + ")").collect(Collectors.toList()));
+		});
+
+		writer.writeNext(header.toArray(new String[0]));
+		for (Map.Entry<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> entry : data.entrySet()) {
 			if(isInterrupted()) {
 				return;
 			}
-			Map<String, String> csvMap = columns.stream().collect(Collectors.toMap(
-							e -> e,
-							e -> {
-								String prop = NodeServiceHelper.getProperty(
-										new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node.getNodeId()),
-										CCConstants.getValidGlobalName(e));
-								if(StringUtils.isEmpty(prop)) {
-									return "";
-								}
-							return prop;
-							}
+			List<String> csvEntry = columns.stream().map(
+					e -> {
+						String prop = NodeServiceHelper.getProperty(
+								new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, entry.getKey().getId()),
+								CCConstants.getValidGlobalName(e));
+						if(VCardConverter.isVCardProp(CCConstants.getValidGlobalName(e))) {
+							prop = VCardConverter.getNameForVCardString(prop);
+						}
+						if(StringUtils.isEmpty(prop)) {
+							return "";
+						}
+						return prop;
+					}
+			).collect(Collectors.toList());
+			additionalFieldValues.forEach(fieldGroup -> fieldGroup.forEach(
+							field -> csvEntry.add(
+									String.valueOf(
+											STAT_FIELDS.stream().map(
+													event -> entry.getValue().getGroups().get(event).get(field).values().stream().
+															reduce(Long::sum).orElse(0L)
+											).reduce(Long::sum).orElse(0L))
+							)
 					)
 			);
-			writer.writeRecord(csvMap);
+			writer.writeNext(csvEntry.toArray(new String[0]));
 		}
+		osw.close();
 		new MCAlfrescoAPIClient().writeContent(nodeId, bos.toByteArray(), "text/csv", String.valueOf(StandardCharsets.UTF_8), CCConstants.CM_PROP_CONTENT);
 	}
 }
