@@ -1,6 +1,9 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
 import com.opencsv.CSVWriter;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -29,6 +32,7 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
+import org.jetbrains.annotations.NotNull;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
@@ -152,21 +156,33 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 		OutputStreamWriter osw = new OutputStreamWriter(bos);
 		CSVWriter writer = new CSVWriter(osw);
 		List<String> header = columns.stream().map(c -> I18nAngular.getTranslationAngular("common", "NODE." + c)).collect(Collectors.toList());
+		header.add(I18nAngular.getTranslationAngular("admin", "ADMIN.STATISTICS.HEADERS.count"));
 		header.addAll(STAT_FIELDS.stream().map(e ->  I18nAngular.getTranslationAngular("admin", "ADMIN.STATISTICS.ACTIONS." + e)).collect(Collectors.toList()));
-		List<Set<String>> additionalFieldValues = new ArrayList<>();
+		Map<String, Set<String>> additionalFieldValues = new HashMap<>();
 		additionalFields.forEach(f -> {
-			additionalFieldValues.add(
+			additionalFieldValues.put(f,
 					data.values().stream().map(
 							d -> STAT_FIELDS.stream().map(
-									event -> d.getGroups().get(event).keySet()
+									event -> d.getGroups().getOrDefault(event, Collections.emptyMap()).getOrDefault(f, Collections.emptyMap()).keySet()
 							).collect(Collectors.toSet())
 					).flatMap(Set::stream).flatMap(Set::stream).collect(Collectors.toSet())
 			);
-			header.addAll(STAT_FIELDS.stream().map(e ->
-					I18nAngular.getTranslationAngular("admin", "ADMIN.STATISTICS.ACTIONS." + e) + " (" + f + ")").collect(Collectors.toList()));
+			additionalFieldValues.forEach((key, value) -> header.addAll(
+					value.stream().map(
+							// concat field name with possibile field value
+							// i.e. role: teacher
+							subField -> I18nAngular.getTranslationAngular("admin", "ADMIN.STATISTICS.HEADERS." + key) + ": " +
+									(StringUtils.isBlank(subField) ?
+											I18nAngular.getTranslationAngular("admin", "ADMIN.STATISTICS.UNKNOWN_VALUE") :
+											I18nAngular.getTranslationAngular("admin", "ADMIN.STATISTICS.CUSTOM." + key + "." + subField)
+									)
+					).map(
+							subField -> I18nAngular.getTranslationAngular("admin", "ADMIN.STATISTICS.HEADERS.count") + " (" + subField + ")"
+					).collect(Collectors.toList())
+			));
 		});
-
 		writer.writeNext(header.toArray(new String[0]));
+		ArrayList<ReportEntry> entries = new ArrayList<ReportEntry>();
 		for (Map.Entry<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> entry : data.entrySet()) {
 			if(isInterrupted()) {
 				return;
@@ -185,19 +201,45 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 						return prop;
 					}
 			).collect(Collectors.toList());
-			additionalFieldValues.forEach(fieldGroup -> fieldGroup.forEach(
-							field -> csvEntry.add(
-									String.valueOf(
-											STAT_FIELDS.stream().map(
-													event -> entry.getValue().getGroups().get(event).get(field).values().stream().
-															reduce(Long::sum).orElse(0L)
-											).reduce(Long::sum).orElse(0L))
-							)
+			// add total sum count
+			int totalSum =
+					STAT_FIELDS.stream().map(
+							event -> entry.getValue().getCounts().getOrDefault(event, 0)
+					).reduce(Integer::sum).orElse(0);
+			csvEntry.add(String.valueOf(totalSum));
+			// add counts per stat field
+			csvEntry.addAll(STAT_FIELDS.stream().map(
+					event -> entry.getValue().getCounts().getOrDefault(event, 0)
+			).map(String::valueOf).collect(Collectors.toList()));
+			// add additional, custom mapped field accounts (i.e. for role)
+			additionalFieldValues.forEach((key, value) -> value.forEach(
+					field -> csvEntry.add(
+							String.valueOf(
+									STAT_FIELDS.stream().map(
+											event -> entry.getValue().getGroups().getOrDefault(event, Collections.emptyMap())
+													.getOrDefault(key, Collections.emptyMap()).getOrDefault(field, 0L)
+									).reduce(Long::sum).orElse(0L))
 					)
-			);
-			writer.writeNext(csvEntry.toArray(new String[0]));
+			));
+			entries.add(new ReportEntry(csvEntry,  totalSum));
 		}
+		Collections.sort(entries);
+		writer.writeAll(entries.stream().map(ReportEntry::getEntry).map(l -> l.toArray(new String[0])).collect(Collectors.toList()));
 		osw.close();
 		new MCAlfrescoAPIClient().writeContent(nodeId, bos.toByteArray(), "text/csv", String.valueOf(StandardCharsets.UTF_8), CCConstants.CM_PROP_CONTENT);
+	}
+
+	@Getter
+	@Setter
+	@AllArgsConstructor
+	private class ReportEntry implements Comparable<ReportEntry>{
+		private List<String> entry;
+		private int totalCount;
+
+
+		@Override
+		public int compareTo(@NotNull ReportEntry reportEntry) {
+			return Long.compare(reportEntry.totalCount, this.totalCount);
+		}
 	}
 }

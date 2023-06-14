@@ -455,6 +455,7 @@
       "EXPORT_PROPERTIES_HINT": "z.B.: cm:name, cclom:title, cclom:general_keyword",
       "GROUP_TEMPLATE_LABEL": "Vorlage auswählen",
       "GROUPS_ADVANCED": "Erweiterte Optionen",
+      "UNKNOWN_VALUE": "<Sonstige>",
       "GROUP_TEMPLATE": {
         "group_organization": "Zugriffe aufgeteilt nach Organisation der Nutzenden",
         "group_mediacenter": "Zugriffe aufgeteilt nach Medienzentrum der Nutzenden",
