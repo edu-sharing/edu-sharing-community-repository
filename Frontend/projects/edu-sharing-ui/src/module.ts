@@ -3,6 +3,9 @@
  */
 
 export * from './lib/edu-sharing-ui.module';
+export * from './lib/edu-sharing-ui-configuration';
+export * from './lib/translations/fallback-translation-handler';
+export * from './lib/translations/translation-loader';
 export * from './lib/common/edu-sharing-ui-common.module';
 export * from './lib/translations/translations.module';
 export * from './lib/translations/translations.service';
