@@ -33,7 +33,7 @@ public class ESPKIXTrustEvaluator implements PKIXTrustEvaluator {
 
     boolean acceptAll = false;
 
-    Integer removeFromCertChainIdx = -1;
+    Integer removeFromCertChainIdx = null;
 
     @Override
     public boolean validate(PKIXValidationInformation validationInfo, X509Credential untrustedCredential) throws SecurityException {
@@ -58,13 +58,30 @@ public class ESPKIXTrustEvaluator implements PKIXTrustEvaluator {
             /**
              * we need to remove in our testcase with letsencrypt the first root cert (seems not to be in keystore)
              *
-             * 2 -> Issuer -> CN=DST Root CA X3, O=Digital Signature Trust Co.
-             * 1 -> Issuer -> CN=ISRG Root X1, O=Internet Security Research Group, C=US
-             * 0 -> CN=R3, O=Let's Encrypt, C=US
+             * 2 -> subject: CN=ISRG Root X1, O=Internet Security Research Group / issuer: CN=DST Root CA X3, O=Digital Signature Trust Co.
+             * 1 -> subject: CN=R3, O=Let's Encrypt, C=US / issuer: CN=ISRG Root X1, O=Internet Security Research Group, C=US
+             * 0 -> subject: our lets encrypt cert dn / issuer: CN=R3, O=Let's Encrypt, C=US
              *
+             * in keystore
+             * subject: CN=ISRG Root X1, O=Internet Security Research Group, C=US issuer: CN=ISRG Root X1, O=Internet Security Research Group, C=US
+             * --> issuer does not match
              */
-            int removeIdx = (removeFromCertChainIdx == -1 ) ? (list.size() - 1): removeFromCertChainIdx;
-            list.remove(removeIdx);
+            if(logger.isDebugEnabled()){
+                for(int i = 0; i < list.size(); i++){
+                    logger.debug("certchain entry idx:"+i+" subject: "+list.get(i).getSubjectDN() +" issuer: " +list.get(i).getIssuerDN());
+                }
+            }
+
+            if(removeFromCertChainIdx != null){
+                int removeIdx = (removeFromCertChainIdx == -1 ) ? (list.size() - 1): removeFromCertChainIdx;
+                if(removeIdx >= list.size() || removeIdx < 0){
+                    logger.info("can not remove certifcate from chain with index "+ removeIdx);
+                }else {
+                    logger.debug("will remove index:"+removeIdx+" from cert chain");
+                    list.remove(removeIdx);
+                }
+            }
+
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
             CertPath certPath = certFactory.generateCertPath(list);
 
@@ -103,6 +120,13 @@ public class ESPKIXTrustEvaluator implements PKIXTrustEvaluator {
         this.acceptAll = acceptAll;
     }
 
+    /**
+     *
+     * @param removeFromCertChainIdx
+     * null (default): nothing to do
+     * -1: the last entry will be removed
+     * >=0: exact index that will be removed
+     */
     public void setRemoveFromCertChainIdx(Integer removeFromCertChainIdx) {
         this.removeFromCertChainIdx = removeFromCertChainIdx;
     }
