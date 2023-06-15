@@ -38,7 +38,7 @@ public class FixSyncCollectionRefProperties extends AbstractJob{
                     NodeRef nodeRefOriginal = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,original);
                     try {
                         logger.info("syncing: "+ref+" nodeRefOriginal:"+nodeRefOriginal);
-                        NodeCustomizationPolicies.syncCollectionRefProps(nodeRefOriginal,ref,null, nodeService.getProperties(nodeRefOriginal),false, nodeService);
+                        NodeCustomizationPolicies.syncCollectionRefProps(nodeRefOriginal,ref,nodeService.getProperties(ref), nodeService.getProperties(nodeRefOriginal),false, nodeService);
                     } catch (Exception e) {
                         logger.error(e.getMessage(),e);
                     }

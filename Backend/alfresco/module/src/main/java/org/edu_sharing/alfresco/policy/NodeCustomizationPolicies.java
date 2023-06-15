@@ -6,7 +6,9 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import com.google.common.collect.Lists;
 import com.typesafe.config.Config;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.ContentServicePolicies.OnContentUpdatePolicy;
@@ -52,9 +54,9 @@ import org.quartz.Scheduler;
 import org.springframework.security.crypto.codec.Base64;
 
 /**
- * 
+ *
  * @author rudi
- *	
+ *
  *important only for IO's
  *
  * onCreateNode:
@@ -64,9 +66,9 @@ import org.springframework.security.crypto.codec.Base64;
  * * - title
  * * - technical location
  * * - contributer
- * 
+ *
  * onContentUpdate:
- * 
+ *
  * - if IO
  * - set LOM technical size
  * - create preview only if new content
@@ -160,7 +162,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			CCConstants.CCM_PROP_IO_LICENSE_SOURCE_URL,
 			CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL,
 			CCConstants.CCM_PROP_IO_COMMONLICENSE_QUESTIONSALLOWED
-	 };
+	};
 
 	static{
 		// add all contributor array maps (e.g. author) to be copied to collection refs
@@ -172,23 +174,23 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	static Logger logger = Logger.getLogger(NodeCustomizationPolicies.class);
 
 	ActionService actionService;
-	
+
 	NodeService nodeService;
-	
+
 	VersionService versionService;
-	
+
 	PersonService personService;
-	
+
 	PolicyComponent policyComponent;
-	
+
 	ContentService contentService;
-	
+
 	PermissionService permissionService;
-	
+
 	LockService lockService;
-	
+
 	ThumbnailService thumbnailService;
-	
+
 	BehaviourFilter policyBehaviourFilter;
 
 	TransactionService transactionService;
@@ -212,12 +214,12 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	}
 
 	public void init() {
-		
+
 		policyComponent.bindClassBehaviour(OnCreateNodePolicy.QNAME, ContentModel.TYPE_CONTENT, new JavaBehaviour(this, "onCreateNode"));
 		policyComponent.bindClassBehaviour(OnCreateNodePolicy.QNAME, ContentModel.TYPE_FOLDER, new JavaBehaviour(this, "onCreateNode"));
 		policyComponent.bindClassBehaviour(OnCreateNodePolicy.QNAME, QName.createQName(CCConstants.CCM_TYPE_IO), new JavaBehaviour(this, "onCreateNode"));
 		policyComponent.bindClassBehaviour(OnCreateNodePolicy.QNAME, QName.createQName(CCConstants.CCM_TYPE_MAP), new JavaBehaviour(this, "onCreateNode"));
-		
+
 		policyComponent.bindClassBehaviour(OnContentUpdatePolicy.QNAME, ContentModel.TYPE_CONTENT, new JavaBehaviour(this, "onContentUpdate"));
 		policyComponent.bindClassBehaviour(OnContentUpdatePolicy.QNAME, QName.createQName(CCConstants.CCM_TYPE_IO), new JavaBehaviour(this, "onContentUpdate"));
 
@@ -250,23 +252,23 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 
 	@Override
 	public void onContentUpdate(NodeRef nodeRef, boolean newContent) {
-		
+
 		logger.debug("nodeRef:" +  nodeRef.getId());
-		
+
 		if(QName.createQName(CCConstants.CCM_TYPE_IO).equals(nodeService.getType(nodeRef))){
-			
-			
+
+
 			ContentReader reader = contentService.getReader(nodeRef, ContentModel.PROP_CONTENT);
-			
+
 			LockStatus lockStatus = lockService.getLockStatus(nodeRef);
 			long contentSize =  0l;
 			if ((reader!=null) && (reader.getContentData()!=null)) contentSize = reader.getContentData().getSize();
 			String mimetype = null;
 			if (reader!=null) mimetype = reader.getMimetype();
 			logger.debug(" reader.getContentData().getSize():"+ contentSize +" newContent:"+newContent+" LockStatus:"+lockStatus+" mimetype:"+mimetype);
-			
+
 			if(reader != null){
-				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.LOM_PROP_TECHNICAL_SIZE), reader.getContentData().getSize());	
+				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.LOM_PROP_TECHNICAL_SIZE), reader.getContentData().getSize());
 			}
 			// only override / sync the technical format for non imported objects, because otherwise
 			// the technical format come's via import and might be wrongly replaced
@@ -280,38 +282,38 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			actionService.executeAction(resourceInfoAction, nodeRef, true, false);
 
 			logger.debug("lockStatus:"+lockStatus);
-			if(newContent 
+			if(newContent
 					&& (LockStatus.NO_LOCK.equals(lockStatus) || LockStatus.LOCK_EXPIRED.equals(lockStatus))
 					&& (reader!=null) && (reader.getContentData()!=null) && reader.getContentData().getSize() > 0){
-			
-	     	    new ThumbnailHandling().thumbnailHandling(nodeRef);
-    		}
+
+				new ThumbnailHandling().thumbnailHandling(nodeRef);
+			}
 
 			Action extractMetadataAction = actionService.createAction("extract-metadata");
 			//dont do async cause it conflicts with preview creation when webdav is used
 			actionService.executeAction(extractMetadataAction, nodeRef, true, false);
-			
+
 			Boolean createVersion = (Boolean)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_CREATE_VERSION));
 			//only create version when content is there, cause else in webdav for one file it goes twice here
 			//when metadata changes the servlet does version creation
 			if (createVersion && (reader!=null) && (reader.getContentData()!=null) && reader.getContentData().getSize() > 0) {
 				if(versionService.getVersionHistory(nodeRef) == null) {
-                	Map<String, Serializable> transFormedProps = transformQNameKeyToString(nodeService.getProperties(nodeRef));
-        			
-                	//see https://issues.alfresco.com/jira/browse/ALF-12815
-        			//alfresco-4.0.d fix version should start with 1.0 not with 0.1
-                	transFormedProps.put(VersionModel.PROP_VERSION_TYPE, VersionType.MAJOR);
-        			versionService.createVersion(nodeRef,transFormedProps);
-                }else{
-                	
-                	//prevent version will be created on revert
-                	if(!this.policyBehaviourFilter.isEnabled(nodeRef, ContentModel.ASPECT_VERSIONABLE)) {
-                		logger.debug(ContentModel.ASPECT_VERSIONABLE +" is not enabled on " + nodeRef );
-                	}else{
-                		versionService.createVersion(nodeRef,transformQNameKeyToString(nodeService.getProperties(nodeRef)));
-                	}
-                	
-            	}
+					Map<String, Serializable> transFormedProps = transformQNameKeyToString(nodeService.getProperties(nodeRef));
+
+					//see https://issues.alfresco.com/jira/browse/ALF-12815
+					//alfresco-4.0.d fix version should start with 1.0 not with 0.1
+					transFormedProps.put(VersionModel.PROP_VERSION_TYPE, VersionType.MAJOR);
+					versionService.createVersion(nodeRef,transFormedProps);
+				}else{
+
+					//prevent version will be created on revert
+					if(!this.policyBehaviourFilter.isEnabled(nodeRef, ContentModel.ASPECT_VERSIONABLE)) {
+						logger.debug(ContentModel.ASPECT_VERSIONABLE +" is not enabled on " + nodeRef );
+					}else{
+						versionService.createVersion(nodeRef,transformQNameKeyToString(nodeService.getProperties(nodeRef)));
+					}
+
+				}
 			}
 			// if may just the content gets updated, the refs still need to get a new modified date
 			AuthenticationUtil.runAsSystem(()-> {
@@ -333,24 +335,24 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 
 	@Override
 	public void onCreateNode(ChildAssociationRef childAssocRef) {
-		
+
 		NodeRef eduNodeRef = childAssocRef.getChildRef();
 		QName type = nodeService.getType(eduNodeRef);
-		
+
 		/**
 		 * it seams it is not possible to get an order to policy execution
 		 * so sometimes NodeCustomization.onCreateNode leads to ScopePolicies.beforeUpdateNode
 		 * which leads to ScopeNodeWrongScopeException: trying to modify unscoped node from within a scope"
-		 * 
+		 *
 		 * disable policies for this node to prevent that beforeUpdateNode 
 		 * checks the scope which will be there after update
 		 */
 		policyBehaviourFilter.disableBehaviour(eduNodeRef);
-		
+
 		logger.debug("nodeRef:" +  eduNodeRef.getId());
-		
+
 		try{
-	
+
 			/**
 			 * set content types to io type
 			 */
@@ -358,30 +360,30 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 				logger.debug("its a content node will transform to IO");
 				// type
 				QName ioType = QName.createQName(CCConstants.CCM_TYPE_IO);
-	        	nodeService.setType(eduNodeRef,ioType);
-	        	type = ioType;
+				nodeService.setType(eduNodeRef,ioType);
+				type = ioType;
 			}
-			
+
 			/**
 			 * generate metadata
 			 */
 			if(QName.createQName(CCConstants.CCM_TYPE_IO).equals(type)){
 				logger.debug("will generate lom metadata");
-	        	// props
-	        	Map<QName, Serializable> props = nodeService.getProperties(eduNodeRef);
-	        	String name = (String) props.get(ContentModel.PROP_NAME);
-	        	
-	        	//sometimes when this method is called the prop is already set so check if null i.e. lom importer
-	        	if(nodeService.getProperty(eduNodeRef, QName.createQName(CCConstants.LOM_PROP_GENERAL_TITLE)) == null){
+				// props
+				Map<QName, Serializable> props = nodeService.getProperties(eduNodeRef);
+				String name = (String) props.get(ContentModel.PROP_NAME);
+
+				//sometimes when this method is called the prop is already set so check if null i.e. lom importer
+				if(nodeService.getProperty(eduNodeRef, QName.createQName(CCConstants.LOM_PROP_GENERAL_TITLE)) == null){
 					// removed on 2017-04-20
-	        		//nodeService.setProperty(eduNodeRef, QName.createQName(CCConstants.LOM_PROP_GENERAL_TITLE), name);
-	        	}
-	        	
-	        	//for collections and solr set originalid (will be overwritten by collectionservice if a reference io is created)
+					//nodeService.setProperty(eduNodeRef, QName.createQName(CCConstants.LOM_PROP_GENERAL_TITLE), name);
+				}
+
+				//for collections and solr set originalid (will be overwritten by collectionservice if a reference io is created)
 				// the id will be written on copy, so may it already exists -> then keep it
 				if(nodeService.getProperty(eduNodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL))==null)
-	        		nodeService.setProperty(eduNodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL),eduNodeRef.getId());
-	        	
+					nodeService.setProperty(eduNodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL),eduNodeRef.getId());
+
 				NodeRef personRef = personService.getPersonOrNull((String) props.get(ContentModel.PROP_CREATOR));
 				String uid = null;
 				String givenName = null;
@@ -400,7 +402,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 					}
 				}
 				String replicationSourceId = (String)nodeService.getProperty(eduNodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID));
-				
+
 				/**
 				 * only do this with local created objects. contributer info is delivered by importer
 				 */
@@ -413,7 +415,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 						vcardMap.put(CCConstants.VCARD_EMAIL, email);
 					}
 					String vcardString = VCardTool.hashMap2VCard(vcardMap);
-					
+
 					//sometimes when this method is called the prop is already set so check if null i.e. lom importer
 					if(nodeService.getProperty(eduNodeRef,  QName.createQName(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR)) == null){
 						nodeService.setProperty(eduNodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR), vcardString);
@@ -422,13 +424,13 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 						// Changed for 4.0: DESREPO-897 do not autofill author
 						// nodeService.setProperty(eduNodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR), vcardString);
 					}
-					
+
 					String techLocValue = "ccrep://" + ApplicationInfoList.getHomeRepository().getAppId() + "/" + eduNodeRef.getId();
 					if(nodeService.getProperty(eduNodeRef,  QName.createQName(CCConstants.LOM_PROP_TECHNICAL_LOCATION)) == null){
 						nodeService.setProperty(eduNodeRef, QName.createQName(CCConstants.LOM_PROP_TECHNICAL_LOCATION), techLocValue);
 					}
 				}
-				
+
 				// inherit the mds from the parent folder
 				Serializable mdsForceSer = nodeService.getProperty(childAssocRef.getParentRef(), QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET));
 				boolean mdsForce=(mdsForceSer == null) ? false : (boolean)mdsForceSer;
@@ -444,7 +446,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			if(ContentModel.TYPE_FOLDER.equals(type)){
 				// type
 				logger.debug("its a folder node will transform to map");
-	        	nodeService.setType(eduNodeRef, QName.createQName(CCConstants.CCM_TYPE_MAP));
+				nodeService.setType(eduNodeRef, QName.createQName(CCConstants.CCM_TYPE_MAP));
 			}
 		}finally{
 			policyBehaviourFilter.enableBehaviour(eduNodeRef);
@@ -470,18 +472,18 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 
 	@Override
 	public void onUpdateProperties(NodeRef nodeRef, Map<QName, Serializable> before, Map<QName, Serializable> after) {
-		
+
 		//System.out.println("********** onUpdateProperties node("+nodeRef.getId()+")");
 
 		// make the title like the name(when webdav rename is done), @TODO mybe just show the name in the gui
 		String nameBefore = (String)before.get(ContentModel.PROP_NAME);
 		String nameAfter =  (String)after.get(ContentModel.PROP_NAME);
-		
+
 		QName type = nodeService.getType(nodeRef);
-		
+
 		logger.debug("nodeRef:" + nodeRef +" nodeRef:" +  nodeRef.getId());
-		
-		
+
+
 		if(type.equals(QName.createQName(CCConstants.CCM_TYPE_IO))){
 			if(nameAfter != null && !nameAfter.equals(nameBefore)){
 				// removed on 2017-04-20
@@ -497,7 +499,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 				return null;
 			});
 		}
-		
+
 		// refresh Titel for Maps changed in webdav
 		if(type.equals(QName.createQName(CCConstants.CCM_TYPE_MAP))){
 			/**
@@ -547,56 +549,56 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	}
 
 	public static void syncCollectionRefProps(NodeRef nodeRef, NodeRef ref, Map<QName, Serializable> before, Map<QName, Serializable> after, boolean checkRefPropsForCustomization, NodeService nodeService) throws Exception {
-			Map<QName, Serializable> ioColRefProperties = nodeService.getProperties(ref);
-			// security check: make sure we have an object which really matches the solr query
-			if (!nodeService.hasAspect(ref, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) || !ioColRefProperties.get(QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)).equals(nodeRef.getId())) {
-				logger.warn("CMIS query for node " + nodeRef.getId() + " returned node " + ref.getId() + ", but it's metadata do not match");
-				return;
-			}
-			Set<String> props = new HashSet<>(Arrays.asList(SAFE_PROPS));
-			props.addAll(Arrays.asList(LICENSE_PROPS));
-			props.addAll(MetadataReader.getWidgetsByNode(ref,"de_DE").stream().
-					map(MetadataWidget::getId).map(CCConstants::getValidGlobalName).
-					collect(Collectors.toList()));
+		Map<QName, Serializable> ioColRefProperties = nodeService.getProperties(ref);
+		// security check: make sure we have an object which really matches the solr query
+		if (!nodeService.hasAspect(ref, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) || !ioColRefProperties.get(QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)).equals(nodeRef.getId())) {
+			logger.warn("CMIS query for node " + nodeRef.getId() + " returned node " + ref.getId() + ", but it's metadata do not match");
+			return;
+		}
+		Set<String> props = new HashSet<>(Arrays.asList(SAFE_PROPS));
+		props.addAll(Arrays.asList(LICENSE_PROPS));
+		props.addAll(MetadataReader.getWidgetsByNode(ref,"de_DE").stream().
+				map(MetadataWidget::getId).map(CCConstants::getValidGlobalName).
+				collect(Collectors.toList()));
 
-			if(after != null){
-				for(Map.Entry<QName,Serializable> entry : after.entrySet()){
-					if(entry.getKey().getLocalName().startsWith("lifecyclecontributer")
-							|| entry.getKey().getLocalName().startsWith("metadatacontributer")){
-						props.add(entry.getKey().toString());
-					}
-				}
-			}
+		Set<QName> propSet = Stream.concat(before.keySet().stream(), after.keySet().stream()).collect(Collectors.toSet());
 
-			for (QName prop : after.keySet()) {
-				// the prop is contained in the mds of the node or a SAFE_PROP, than check if it still the original one -> replace it on the ref
-				if (props.contains(prop.toString())) {
-					if(checkRefPropsForCustomization){
-						if(propertyEquals(before.get(prop), ioColRefProperties.get(prop))){
-							ioColRefProperties.put(prop, after.get(prop));
-						}
-					}else{
+		for(QName entry : propSet){
+			if(entry.getLocalName().startsWith("lifecyclecontributer")
+					|| entry.getLocalName().startsWith("metadatacontributer")){
+				props.add(entry.toString());
+			}
+		}
+
+		for (QName prop : propSet) {
+			// the prop is contained in the mds of the node or a SAFE_PROP, than check if it still the original one -> replace it on the ref
+			if (props.contains(prop.toString())) {
+				if(checkRefPropsForCustomization){
+					if(propertyEquals(before.get(prop), ioColRefProperties.get(prop))){
 						ioColRefProperties.put(prop, after.get(prop));
 					}
+				}else{
+					ioColRefProperties.put(prop, after.get(prop));
 				}
 			}
-			try {
-				nodeService.setProperties(ref, ioColRefProperties);
-			}catch(DuplicateChildNodeNameException e){
-				logger.error(e.getMessage() +" try to rename");
-				String originalName = (String)ioColRefProperties.get(ContentModel.PROP_NAME);
-				for(int i = 2; i < 42;i++){
-					ioColRefProperties.put(ContentModel.PROP_NAME, renameNode(originalName,i));
-					try{
-						nodeService.setProperties(ref, ioColRefProperties);
-						break;
-					}catch (DuplicateChildNodeNameException ex){
-						logger.debug(e.getMessage()+" - will rename " +originalName +" "+i);
-					}
+		}
+		try {
+			nodeService.setProperties(ref, ioColRefProperties);
+		}catch(DuplicateChildNodeNameException e){
+			logger.error(e.getMessage() +" try to rename");
+			String originalName = (String)ioColRefProperties.get(ContentModel.PROP_NAME);
+			for(int i = 2; i < 42;i++){
+				ioColRefProperties.put(ContentModel.PROP_NAME, renameNode(originalName,i));
+				try{
+					nodeService.setProperties(ref, ioColRefProperties);
+					break;
+				}catch (DuplicateChildNodeNameException ex){
+					logger.debug(e.getMessage()+" - will rename " +originalName +" "+i);
 				}
 			}
+		}
 
-			new RepositoryCache().remove(ref.getId());
+		new RepositoryCache().remove(ref.getId());
 	}
 
 	public static String renameNode(String oldName,int number){
@@ -745,8 +747,8 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			}
 		}
 	}
-	
-	  /**
+
+	/**
 	 * edu-sharing for setting version props
 	 * @param props
 	 * @return
@@ -758,11 +760,11 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		}
 		return result;
 	}
-	
+
 	public void setActionService(ActionService actionService) {
 		this.actionService = actionService;
 	}
-	
+
 	public void setNodeService(NodeService nodeService) {
 		this.nodeService = nodeService;
 	}
@@ -772,27 +774,27 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	public void setVersionService(VersionService versionService) {
 		this.versionService = versionService;
 	}
-	
+
 	public void setPolicyComponent(PolicyComponent policyComponent) {
 		this.policyComponent = policyComponent;
 	}
-	
+
 	public void setPersonService(PersonService personService) {
 		this.personService = personService;
 	}
-	
+
 	public void setContentService(ContentService contentService) {
 		this.contentService = contentService;
 	}
-	
+
 	public void setPermissionService(PermissionService permissionService) {
 		this.permissionService = permissionService;
 	}
-	
+
 	public void setLockService(LockService lockService) {
 		this.lockService = lockService;
 	}
-	
+
 	public void setThumbnailService(ThumbnailService thumbnailService) {
 		this.thumbnailService = thumbnailService;
 	}
@@ -806,7 +808,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	 */
 	@Deprecated
 	public static String getPreviewFromURL(String httpURL) {
-		
+
 		String websitePreviewRenderService = "";
 		try {
 			websitePreviewRenderService = ApplicationInfoList.getHomeRepository().getWebsitepreviewrenderservice();
@@ -819,10 +821,10 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		} else {
 			logger.info("OK got websitepreviewrenderservice ...");
 		}
-		
+
 		// setting the scale factor from the 1024 default width
 		String scale = "0.25";
-		
+
 		// basic result setup
 		String result = null;
 		if (httpURL==null) return null;
@@ -832,23 +834,23 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		// --> IF NOT AVAILABLE WILL JUST WARN
 		try {
 			final String localServiceUrl = websitePreviewRenderService+"/?url="+java.net.URLEncoder.encode(httpURL, "ISO-8859-1")+"&scale="+scale+"&base64=1";
-		    HttpClient client = new HttpClient();
-		    GetMethod method = new GetMethod(localServiceUrl);
-		    int statusCode = client.executeMethod(method);
-		    if (statusCode == HttpStatus.SC_OK) {
-			      result = new String(method.getResponseBody());
-			      logger.info("OK on on Preview Image Service");
-		    } else {
+			HttpClient client = new HttpClient();
+			GetMethod method = new GetMethod(localServiceUrl);
+			int statusCode = client.executeMethod(method);
+			if (statusCode == HttpStatus.SC_OK) {
+				result = new String(method.getResponseBody());
+				logger.info("OK on on Preview Image Service");
+			} else {
 				logger.error("HTTP Error "+statusCode+" on Preview Image Service: "+localServiceUrl);
-		    }
-		} 
+			}
+		}
 		catch (java.net.ConnectException ce) {
 			logger.warn("!WARN! No Preview Image Service running at '"+websitePreviewRenderService+"' ...");
 		}
 		catch (Exception e) {
 			logger.error("EXCEPTION on Preview Image Service: "+e.getMessage(), e);
 		}
-	
+
 		return result;
 	}
 
