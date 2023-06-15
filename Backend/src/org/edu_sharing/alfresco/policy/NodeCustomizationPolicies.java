@@ -46,6 +46,7 @@ import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 
@@ -540,56 +541,56 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	}
 
 	public static void syncCollectionRefProps(NodeRef nodeRef, NodeRef ref, Map<QName, Serializable> before, Map<QName, Serializable> after, boolean checkRefPropsForCustomization, NodeService nodeService) throws Exception {
-			Map<QName, Serializable> ioColRefProperties = nodeService.getProperties(ref);
-			// security check: make sure we have an object which really matches the solr query
-			if (!nodeService.hasAspect(ref, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) || !ioColRefProperties.get(QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)).equals(nodeRef.getId())) {
-				logger.warn("CMIS query for node " + nodeRef.getId() + " returned node " + ref.getId() + ", but it's metadata do not match");
-				return;
-			}
-			Set<String> props = new HashSet<>(Arrays.asList(SAFE_PROPS));
-			props.addAll(Arrays.asList(LICENSE_PROPS));
+		Map<QName, Serializable> ioColRefProperties = nodeService.getProperties(ref);
+		// security check: make sure we have an object which really matches the solr query
+		if (!nodeService.hasAspect(ref, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) || !ioColRefProperties.get(QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)).equals(nodeRef.getId())) {
+			logger.warn("CMIS query for node " + nodeRef.getId() + " returned node " + ref.getId() + ", but it's metadata do not match");
+			return;
+		}
+		Set<String> props = new HashSet<>(Arrays.asList(SAFE_PROPS));
+		props.addAll(Arrays.asList(LICENSE_PROPS));
 			props.addAll(MetadataReaderV2.getWidgetsByNode(ref,"de_DE").stream().
-					map(MetadataWidget::getId).map(CCConstants::getValidGlobalName).
-					collect(Collectors.toList()));
+				map(MetadataWidget::getId).map(CCConstants::getValidGlobalName).
+				collect(Collectors.toList()));
 
-			if(after != null){
-				for(Map.Entry<QName,Serializable> entry : after.entrySet()){
-					if(entry.getKey().getLocalName().startsWith("lifecyclecontributer")
-							|| entry.getKey().getLocalName().startsWith("metadatacontributer")){
-						props.add(entry.getKey().toString());
-					}
-				}
+		Set<QName> propSet = Stream.concat(before.keySet().stream(), after.keySet().stream()).collect(Collectors.toSet());
+
+		for(QName entry : propSet){
+			if(entry.getLocalName().startsWith("lifecyclecontributer")
+					|| entry.getLocalName().startsWith("metadatacontributer")){
+				props.add(entry.toString());
 			}
+		}
 
-			for (QName prop : after.keySet()) {
-				// the prop is contained in the mds of the node or a SAFE_PROP, than check if it still the original one -> replace it on the ref
-				if (props.contains(prop.toString())) {
-					if(checkRefPropsForCustomization){
-						if(propertyEquals(before.get(prop), ioColRefProperties.get(prop))){
-							ioColRefProperties.put(prop, after.get(prop));
-						}
-					}else{
+		for (QName prop : propSet) {
+			// the prop is contained in the mds of the node or a SAFE_PROP, than check if it still the original one -> replace it on the ref
+			if (props.contains(prop.toString())) {
+				if(checkRefPropsForCustomization){
+					if(propertyEquals(before.get(prop), ioColRefProperties.get(prop))){
 						ioColRefProperties.put(prop, after.get(prop));
 					}
+				}else{
+					ioColRefProperties.put(prop, after.get(prop));
 				}
 			}
-			try {
-				nodeService.setProperties(ref, ioColRefProperties);
-			}catch(DuplicateChildNodeNameException e){
-				logger.error(e.getMessage() +" try to rename");
-				String originalName = (String)ioColRefProperties.get(ContentModel.PROP_NAME);
-				for(int i = 2; i < 42;i++){
-					ioColRefProperties.put(ContentModel.PROP_NAME, renameNode(originalName,i));
-					try{
-						nodeService.setProperties(ref, ioColRefProperties);
-						break;
-					}catch (DuplicateChildNodeNameException ex){
-						logger.debug(e.getMessage()+" - will rename " +originalName +" "+i);
-					}
+		}
+		try {
+			nodeService.setProperties(ref, ioColRefProperties);
+		}catch(DuplicateChildNodeNameException e){
+			logger.error(e.getMessage() +" try to rename");
+			String originalName = (String)ioColRefProperties.get(ContentModel.PROP_NAME);
+			for(int i = 2; i < 42;i++){
+				ioColRefProperties.put(ContentModel.PROP_NAME, renameNode(originalName,i));
+				try{
+					nodeService.setProperties(ref, ioColRefProperties);
+					break;
+				}catch (DuplicateChildNodeNameException ex){
+					logger.debug(e.getMessage()+" - will rename " +originalName +" "+i);
 				}
 			}
+		}
 
-			new RepositoryCache().remove(ref.getId());
+		new RepositoryCache().remove(ref.getId());
 	}
 
 	public static String renameNode(String oldName,int number){
