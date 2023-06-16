@@ -565,8 +565,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }else{
             queryBuilderGlobalConditions = queryBuilderGlobalConditions.must(QueryBuilders.termQuery("properties.ccm:eduscopename.keyword",NodeServiceInterceptor.getEduSharingScope()));
         }
-        queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + SystemFolder.getSystemFolderBase().getId() + "*"));
-        queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + SystemFolder.getSitesFolder().getId() + "*"));
+        // @TODO: Must be properly fixed via DESP-865, it will otherwise break mediacenter_statistics query!
+        // queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + SystemFolder.getSystemFolderBase().getId() + "*"));
+        // queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + SystemFolder.getSitesFolder().getId() + "*"));
+
         return queryBuilderGlobalConditions;
     }
 

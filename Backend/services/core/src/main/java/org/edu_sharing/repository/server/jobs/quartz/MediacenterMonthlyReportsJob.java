@@ -134,6 +134,8 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 					}
 				}
 				String nodeId = NodeServiceFactory.getLocalService().createNode(parent, CCConstants.CCM_TYPE_IO, NodeServiceFactory.getLocalService().getNameProperty(filename));
+				NodeServiceHelper.addAspect(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), CCConstants.CCM_MEDIACENTER_STATISTICS);
+				NodeServiceHelper.setProperty(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), CCConstants.CCM_PROP_MEDIACENTER_ID, mediacenter, false);
 				try {
 					writeCSVFile(data, nodeId);
 				} catch(Throwable t) {
@@ -191,7 +193,8 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 					e -> {
 						String prop = NodeServiceHelper.getProperty(
 								new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, entry.getKey().getId()),
-								CCConstants.getValidGlobalName(e));
+								CCConstants.getValidGlobalName(e)
+						);
 						if(VCardConverter.isVCardProp(CCConstants.getValidGlobalName(e))) {
 							prop = VCardConverter.getNameForVCardString(prop);
 						}
