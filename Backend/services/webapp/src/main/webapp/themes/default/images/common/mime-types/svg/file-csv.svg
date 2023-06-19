@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Generator: Adobe Illustrator 20.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+
+<svg
+   version="1.1"
+   id="Ebene_1"
+   x="0px"
+   y="0px"
+   viewBox="0 0 256 256"
+   xml:space="preserve"
+   width="256"
+   height="256"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs79" />
+<style
+   type="text/css"
+   id="style70">
+	.st0{fill:#967867;}
+	.st1{font-family:'MyriadPro-Bold';}
+	.st2{font-size:8.1118px;}
+</style>
+<path
+   class="st0"
+   d="M 14.1,3.2 11.9,1 C 11.4,0.4 10.4,0 9.7,0 H 2.3 C 1.6,0 1,0.6 1,1.3 V 14.8 C 1,15.5 1.6,16 2.3,16 H 13.8 C 14.5,16 15,15.4 15,14.8 V 5.3 C 15,4.6 14.6,3.6 14.1,3.2 Z m -0.7,0.7 c 0,0 0.1,0.1 0.1,0.2 H 11 V 1.5 c 0.1,0 0.1,0.1 0.2,0.1 z M 14,14.8 C 14,14.9 13.9,15 13.8,15 H 2.3 C 2.1,15 2,14.9 2,14.8 V 1.3 C 2,1.2 2.1,1 2.3,1 H 9.8 C 9.9,1 10,1 10,1 v 4 h 4 c 0,0.1 0,0.2 0,0.2 z"
+   id="path72"
+   style="fill:#16584b;fill-opacity:1" />
+
+<g
+   style="fill:#000000"
+   id="g258"
+   transform="matrix(0.48407139,0,0,0.48407139,2.7056814,4.1676186)"><g
+     id="g247"><rect
+       fill="none"
+       height="24"
+       width="24"
+       id="rect243"
+       x="0"
+       y="0" /><path
+       d="M 19,7 H 9 C 7.9,7 7,7.9 7,9 v 10 c 0,1.1 0.9,2 2,2 h 10 c 1.1,0 2,-0.9 2,-2 V 9 C 21,7.9 20.1,7 19,7 Z m 0,2 v 2 H 9 V 9 Z m -6,6 v -2 h 2 v 2 z m 2,2 v 2 H 13 V 17 Z M 11,15 H 9 v -2 h 2 z m 6,-2 h 2 v 2 h -2 z m -8,4 h 2 v 2 H 9 Z m 8,2 v -2 h 2 v 2 z M 6,17 H 5 C 3.9,17 3,16.1 3,15 V 5 C 3,3.9 3.9,3 5,3 h 10 c 1.1,0 2,0.9 2,2 V 6 H 15 V 5 H 5 v 10 h 1 z"
+       id="path245"
+       style="fill:#16584b;fill-opacity:1" /></g></g></svg>

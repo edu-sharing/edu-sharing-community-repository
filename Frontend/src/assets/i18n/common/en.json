@@ -403,6 +403,7 @@
     "file-xml": "XML file",
     "file-audio": "audio",
     "file-txt": "text file",
+    "file-csv": "csv file",
     "file-video": "video",
     "file-qti": "ONYX file",
     "file-h5p": "H5P file",
