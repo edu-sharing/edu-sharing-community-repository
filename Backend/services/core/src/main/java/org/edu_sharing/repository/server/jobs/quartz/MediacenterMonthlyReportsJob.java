@@ -191,17 +191,21 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 			}
 			List<String> csvEntry = columns.stream().map(
 					e -> {
-						String prop = NodeServiceHelper.getProperty(
-								new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, entry.getKey().getId()),
-								CCConstants.getValidGlobalName(e)
-						);
-						if(VCardConverter.isVCardProp(CCConstants.getValidGlobalName(e))) {
-							prop = VCardConverter.getNameForVCardString(prop);
-						}
-						if(StringUtils.isEmpty(prop)) {
+						try {
+							String prop = NodeServiceHelper.getProperty(
+									new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, entry.getKey().getId()),
+									CCConstants.getValidGlobalName(e)
+							);
+							if (VCardConverter.isVCardProp(CCConstants.getValidGlobalName(e))) {
+								prop = VCardConverter.getNameForVCardString(prop);
+							}
+							if (StringUtils.isEmpty(prop)) {
+								return "";
+							}
+							return prop;
+						}catch(Throwable t) {
 							return "";
 						}
-						return prop;
 					}
 			).collect(Collectors.toList());
 			// add total sum count
