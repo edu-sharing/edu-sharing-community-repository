@@ -291,11 +291,40 @@
       </mat-table>
     </div>
   </mat-tab>
+  <mat-tab label="{{ 'ADMIN.STATISTICS.ARCHIVED' | translate }}" *ngIf="_mediacenter">
+    <h4 class="mat-heading-4 mat-heading-underline">
+      <i esIcon="archive"></i> {{ 'ADMIN.STATISTICS.ARCHIVED' | translate }}
+    </h4>
+    <div class="stats-archived-table">
+      <es-info-message mode="info">
+        {{ 'ADMIN.STATISTICS.ARCHIVED_INFO' | translate }}
+      </es-info-message>
+      <es-node-entries-wrapper
+        [elementInteractionType]="InteractionType.Emitter"
+        [displayType]="NodeEntriesDisplayType.Table"
+        [dataSource]="archivedNodesDataSource"
+        [checkbox]="false"
+        [columns]="archivedNodesColumns"
+        (clickItem)="downloadArchivedNode($event.element)"
+      >
+        <ng-template #empty>
+          <div class="empty">
+            {{ 'ADMIN.STATISTICS.ARCHIVED_EMPTY' | translate }}
+          </div>
+        </ng-template>
+      </es-node-entries-wrapper>
+    </div>
+  </mat-tab>
 </mat-tab-group>
 <div
   class="export"
   *ngIf="
-    currentTab != 2 && !groupedLoading && !customGroupLoading && !nodesLoading && !singleLoading
+    currentTab != 2 &&
+    currentTab != 4 &&
+    !groupedLoading &&
+    !customGroupLoading &&
+    !nodesLoading &&
+    !singleLoading
   "
 >
   <h4 class="mat-heading-4 mat-heading-underline">

@@ -27,6 +27,14 @@ import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { trigger } from '@angular/animations';
 import { ListCountsComponent } from '../../../features/list-items/list-counts/list-counts.component';
+import { NodeDataSource } from '../../../features/node-entries/node-data-source';
+import { DEFAULT, HOME_REPOSITORY, SearchService } from 'ngx-edu-sharing-api';
+import { getRepoUrl } from '../../../util/repo-url';
+import {
+    InteractionType,
+    NodeEntriesDisplayType,
+} from 'src/app/features/node-entries/entries-model';
+import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 
 // Charts.js
 declare var Chart: any;
@@ -48,6 +56,8 @@ type GroupTemplate = {
     ],
 })
 export class AdminStatisticsComponent implements OnInit {
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    readonly InteractionType = InteractionType;
     @ViewChild('groupedChart') groupedChartRef: ElementRef;
     _mediacenter: any;
     private groupedChartData: { node: NodeStatistics[]; user: Statistics[] };
@@ -99,6 +109,8 @@ export class AdminStatisticsComponent implements OnInit {
     groupModeTemplates: GroupTemplate[];
     currentTemplate: GroupTemplate;
     showExport: boolean;
+    archivedNodesDataSource = new NodeDataSource<Node>();
+    archivedNodesColumns = [new ListItem('NODE', RestConstants.LOM_PROP_TITLE)];
 
     set groupedStart(groupedStart: Date) {
         this._groupedStart = groupedStart;
@@ -208,7 +220,9 @@ export class AdminStatisticsComponent implements OnInit {
         private storage: SessionStorageService,
         private connector: RestConnectorService,
         private translate: TranslateService,
+        private searchService: SearchService,
         private config: ConfigurationService,
+        private nodeHelperService: NodeHelperService,
     ) {
         this.initColumns();
         this.groupedStart = new Date(
@@ -264,6 +278,7 @@ export class AdminStatisticsComponent implements OnInit {
         this.refresh();
     }
     refresh() {
+        this.refreshArchived();
         this.refreshGroups();
         this.refreshNodes();
         this.refreshSingle();
@@ -880,5 +895,38 @@ export class AdminStatisticsComponent implements OnInit {
         if (refresh) {
             this.refreshCustomGroups();
         }
+    }
+
+    private async refreshArchived() {
+        if (!this._mediacenter) {
+            return;
+        }
+        this.archivedNodesDataSource.reset();
+        this.archivedNodesDataSource.isLoading = true;
+        const result = await this.searchService
+            .search({
+                sortProperties: [RestConstants.CM_PROP_C_CREATED],
+                sortAscending: [true],
+                repository: HOME_REPOSITORY,
+                contentType: 'FILES',
+                maxItems: 100,
+                metadataset: DEFAULT,
+                query: 'mediacenter_statistics',
+                body: {
+                    criteria: [
+                        {
+                            property: 'mediacenter',
+                            values: [this.getMediacenter()],
+                        },
+                    ],
+                },
+            })
+            .toPromise();
+        this.archivedNodesDataSource.setData(result.nodes, result.pagination);
+        this.archivedNodesDataSource.isLoading = false;
+    }
+
+    downloadArchivedNode(element: Node) {
+        this.nodeHelperService.downloadNodes([element]);
     }
 }

@@ -456,6 +456,9 @@
       "GROUP_TEMPLATE_LABEL": "Vorlage auswählen",
       "GROUPS_ADVANCED": "Erweiterte Optionen",
       "UNKNOWN_VALUE": "<Sonstige>",
+      "ARCHIVED": "Archiviert",
+      "ARCHIVED_INFO": "Sie können in diesem Bereich archivierte, aggregierte Statistiken für einen vergangenen Zeitraum als CSV-Datensatz herunterladen. Klicken Sie auf die Datei des gewünschten Zeitraums, um Sie herunterzuladen.",
+      "ARCHIVED_EMPTY": "Es existieren noch keine archivierten Statistiken",
       "GROUP_TEMPLATE": {
         "group_organization": "Zugriffe aufgeteilt nach Organisation der Nutzenden",
         "group_mediacenter": "Zugriffe aufgeteilt nach Medienzentrum der Nutzenden",
