@@ -64,7 +64,7 @@ public class ErrorResponse {
         if(t instanceof DAOMissingException) {
     		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
     	}
-		if(t instanceof DAOMimetypeVerificationException) {
+		if(t instanceof DAOMimetypeVerificationException || t instanceof DAOFileExtensionVerificationException) {
 			return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity(new ErrorResponse(t)).build();
 		}
 		if(t instanceof DAOVirusDetectedException || t instanceof DAOVirusScanFailedException) {
