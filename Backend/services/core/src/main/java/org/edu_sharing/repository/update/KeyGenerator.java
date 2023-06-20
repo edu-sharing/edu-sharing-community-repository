@@ -1,51 +1,32 @@
 package org.edu_sharing.repository.update;
 
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.repository.server.tools.security.Signing;
+import org.edu_sharing.repository.server.update.UpdateRoutine;
+import org.edu_sharing.repository.server.update.UpdateService;
 
-public class KeyGenerator extends UpdateAbstract {
+import java.io.FileOutputStream;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
-	public static final String ID = "KeyGenerator";
+@Slf4j
+@UpdateService
+public class KeyGenerator {
 
-	public static final String description = "generates public and private key in homeApplication if they don't exsist";
-
-	public KeyGenerator(PrintWriter _out) {
-		out = _out;
-		logger = Logger.getLogger(KeyGenerator.class);
-	}
-
-	@Override
-	public void execute() {
-		doIt(false);
-	}
-
-	@Override
-	public String getDescription() {
-		return description;
-	}
-
-	public String getId() {
-		return ID;
-	};
-
-	@Override
-	public void test() {
-		doIt(true);
-	}
-
-	private void doIt(boolean test) {
+	@UpdateRoutine(
+			id = "KeyGenerator",
+			description = "generates public and private key in homeApplication if they don't exsist",
+			order = 1800,
+			auto = true
+	)
+	public void execute(boolean test) {
 		ApplicationInfo homeRepo = ApplicationInfoList.getHomeRepository();
 
 		Signing s = new Signing();
@@ -56,8 +37,7 @@ public class KeyGenerator extends UpdateAbstract {
 					PropertiesHelper.Config.getPropertyFilePath(CCConstants.REPOSITORY_FILE_HOME)
 			);
 			if (homeRepo.getPublicKey() == null) {
-
-				logInfo("will set public key");
+				log.info("will set public key");
 				if (!test) {
 
 					String pubKeyString = "-----BEGIN PUBLIC KEY-----\n"
@@ -70,7 +50,7 @@ public class KeyGenerator extends UpdateAbstract {
 			}
 
 			if (homeRepo.getPrivateKey() == null) {
-				logInfo("will set private key");
+				log.info("will set private key");
 
 				if (!test) {
 					PropertiesHelper.setProperty(ApplicationInfo.KEY_PRIVATE_KEY,
@@ -81,7 +61,7 @@ public class KeyGenerator extends UpdateAbstract {
 			}
 
 		} catch (Exception e) {
-			logError(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 		}
 
 	}
@@ -125,10 +105,5 @@ public class KeyGenerator extends UpdateAbstract {
 			e.printStackTrace();
 		}
 
-	}
-	
-	@Override
-	public void run() {
-		this.logInfo("not implemented");
 	}
 }

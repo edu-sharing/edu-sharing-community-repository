@@ -1450,7 +1450,6 @@ public class AdminApi {
 			AdminServiceFactory.getInstance();
 
 			Configurator.setLevel(name, Level.toLevel(loglevel));
-
             return Response.status(Response.Status.OK).build();
         } catch (NotAnAdminException e) {
             return ErrorResponse.createResponse(e);
@@ -1477,7 +1476,6 @@ public class AdminApi {
 
 			LoggerContext loggerContext = LoggerContext.getContext(false);
 			Collection<org.apache.logging.log4j.core.Logger> loggers = loggerContext.getLoggers();
-
 
 			//effective loggers (classes)
 			List<LoggerConfigResult> result = new ArrayList<>();

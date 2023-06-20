@@ -1,82 +1,38 @@
 package org.edu_sharing.repository.update;
 
-import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.UUID;
-
-import org.alfresco.service.ServiceRegistry;
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
-import org.apache.log4j.Logger;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.springframework.context.ApplicationContext;
+import org.edu_sharing.repository.server.update.UpdateRoutine;
+import org.edu_sharing.repository.server.update.UpdateService;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class Edu_SharingPersonEsuidUpdate extends UpdateAbstract {
+import java.util.Set;
+import java.util.UUID;
 
-	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-	
-	NodeService nodeService = null;
-	PersonService personService = null;
-	
-	public static final String ID = "Edu_SharingPersonEsuidUpdate";
-	
-	public static final String description = "Creates esuids for all persons." ;
-	
-	public Edu_SharingPersonEsuidUpdate(PrintWriter out) {
-		this.out = out;
-		logger = Logger.getLogger(Edu_SharingPersonEsuidUpdate.class);
-	}
-	
-	@Override
-	public void execute() {
-		logInfo("starting excecute");
-		doIt(false);
-		logInfo("finished excecute");
+@Slf4j
+@UpdateService
+public class Edu_SharingPersonEsuidUpdate {
+
+	private final NodeService nodeService;
+	private final PersonService personService;
+
+
+	@Autowired
+	public Edu_SharingPersonEsuidUpdate(NodeService nodeService, PersonService personService) {
+		this.nodeService = nodeService;
+		this.personService = personService;
 	}
 
-	@Override
-	public void test() {
-		logInfo("starting test");
-		doIt(true);
-		logInfo("finished test");
-	}
-	
-	public void doIt(boolean test){
-		
-		/**
-		 * create all person folders
-		 */
-		
-		//do it here cause authentication is passed here instead of constructor
-		nodeService = serviceRegistry.getNodeService();
-		personService = serviceRegistry.getPersonService();
-		
-		try{
-		
-			Protocol protocol = new Protocol();
-			HashMap<String,Object> updateInfo = protocol.getSysUpdateEntry(this.getId());
-			if(updateInfo == null){
-				createEsUids(test);
-				if(!test){
-					protocol.writeSysUpdateEntry(this.getId());
-				}
-			}else{
-				logInfo("update" +this.getId()+ " already done at "+updateInfo.get(CCConstants.CCM_PROP_SYSUPDATE_DATE));
-			}
-			
-		}catch(Throwable e){
-			logError(e.getMessage(),e);
-		}
-		
-	}
-
-	public void createEsUids(boolean test){
-		
+	@UpdateRoutine(
+			id = "Edu_SharingPersonEsuidUpdate",
+			description = "Creates esuids for all persons.",
+			order = 1803
+	)
+	public void execute(boolean test) {
 		Set<NodeRef> allPeople = personService.getAllPeople();
 		int counter = 0;
 		for(NodeRef personRef : allPeople){
@@ -94,24 +50,8 @@ public class Edu_SharingPersonEsuidUpdate extends UpdateAbstract {
 			}
 			counter++;
 			if((counter % 100) == 0){
-				logger.info("processed "+ counter +" persons");
+				log.info("processed "+ counter +" persons");
 			}
 		}
 	}
-	
-	@Override
-	public String getId() {
-		return ID;
-	}
-
-	@Override
-	public String getDescription() {
-		return description;
-	}
-	
-	@Override
-	public void run() {
-		this.logInfo("not implemented");
-	}
-
 }
