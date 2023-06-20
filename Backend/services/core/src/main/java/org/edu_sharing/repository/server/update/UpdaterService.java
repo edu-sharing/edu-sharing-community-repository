@@ -107,9 +107,16 @@ public class UpdaterService implements ApplicationContextAware, ApplicationListe
         AbstractBeanFactory beanFactory = (AbstractBeanFactory) applicationContext.getAutowireCapableBeanFactory();
 
         updateInfoList = Arrays.stream(applicationContext.getBeanDefinitionNames())
-                .flatMap(x -> Arrays.stream(((RootBeanDefinition) beanFactory.getMergedBeanDefinition(x)).getTargetType().getMethods())
-                        .filter(y -> y.isAnnotationPresent(UpdateRoutine.class))
-                        .map(y -> new RoutineUpdateInfo(x, y.getAnnotation(UpdateRoutine.class), y, beanFactory)))
+                .flatMap(x -> {
+                    Method[] methods = java.util.Optional.ofNullable((RootBeanDefinition) beanFactory.getMergedBeanDefinition(x))
+                            .map(RootBeanDefinition::getTargetType)
+                            .map(Class::getMethods)
+                            .orElse(new Method[0]);
+
+                    return Arrays.stream(methods)
+                            .filter(y -> y.isAnnotationPresent(UpdateRoutine.class))
+                            .map(y -> new RoutineUpdateInfo(x, y.getAnnotation(UpdateRoutine.class), y, beanFactory));
+                })
                 .sorted(Comparator.comparingInt(RoutineUpdateInfo::getOrder))
                 .collect(Collectors.toList());
 
