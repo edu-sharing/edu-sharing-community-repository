@@ -478,11 +478,13 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			for(String json : jsonHistory) {
 				Notify notify = gson.fromJson(json, Notify.class);
 				try {
-					NodeRef personRef = personService.getPerson(notify.getUser().getAuthorityName(), false);
-					Map<QName, Serializable> personProps = nodeService.getProperties(personRef);
-					notify.getUser().setGivenName((String) personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_FIRSTNAME)));
-					notify.getUser().setSurname((String) personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_LASTNAME)));
-					notify.getUser().setEmail((String) personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_EMAIL)));
+					if(personService.personExists(notify.getUser().getAuthorityName())) {
+						NodeRef personRef = personService.getPerson(notify.getUser().getAuthorityName(), false);
+						Map<QName, Serializable> personProps = nodeService.getProperties(personRef);
+						notify.getUser().setGivenName((String) personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_FIRSTNAME)));
+						notify.getUser().setSurname((String) personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_LASTNAME)));
+						notify.getUser().setEmail((String) personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_EMAIL)));
+					}
 				} catch(NoSuchPersonException e) {
 					logger.warn("Notify could not be fully resolved, may contains deleted/invalid user", e);
 				}
