@@ -46,6 +46,7 @@ import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.*;
+import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
@@ -1462,6 +1463,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}finally {
 				policyBehaviourFilter.enableBehaviour(nodeRef);
 			}
+			// remove from cache so that the ccm:ph_* properties getting updated
+			new RepositoryCache().remove(nodeRef.getId());
 			return null;
 		});
 	}
