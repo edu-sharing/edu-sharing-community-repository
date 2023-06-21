@@ -73,21 +73,11 @@ export class UserAvatarComponent {
     openProfile() {
         this.router.navigate([UIConstants.ROUTER_PREFIX + 'profiles', this._user.authorityName]);
     }
-    getFirstChar(str: string) {
-        str = str.toUpperCase();
-        for (let i = 0; i < str.length; i++) {
-            if (str.charAt(i).match(/[a-zäöü]/i)) {
-                return str.charAt(i);
-            }
-        }
-        return ' ';
-    }
+
     getLetter(user: UserSimple) {
-        return this.getFirstChar(
-            this.connector.getCurrentLogin()?.isGuest
-                ? 'G'
-                : new AuthorityNamePipe(this.translate).transform(user, null),
-        );
+        return this.connector.getCurrentLogin()?.isGuest
+            ? 'G'
+            : new AuthorityNamePipe(this.translate).transform(user, { avatarShortcut: true });
     }
 
     isSafe() {

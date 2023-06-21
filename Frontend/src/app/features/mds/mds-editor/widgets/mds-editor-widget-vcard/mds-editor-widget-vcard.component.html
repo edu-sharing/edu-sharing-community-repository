@@ -10,25 +10,30 @@
     <mat-tab-group mat-stretch-tabs [(selectedIndex)]="editType">
       <mat-tab label="{{ 'WORKSPACE.CONTRIBUTOR.MODE_PERSON' | translate }}">
         <div class="vcard">
-          <div class="vcardGroup">
-            <!-- <i esIcon="person"></i> -->
+          <div class="title">
             <mat-form-field class="mat-form-field-no-padding">
-              <mat-label>{{ 'VCARD.Givenname' | translate }}</mat-label>
-              <input matInput class="vcard_Givenname vcardFirstInput" formControlName="givenname" />
+              <mat-label>{{ 'VCARD.Title' | translate }}</mat-label>
+              <input matInput formControlName="title" />
             </mat-form-field>
           </div>
-          <div class="vcardGroup">
+          <div class="givenname">
+            <mat-form-field class="mat-form-field-no-padding">
+              <mat-label>{{ 'VCARD.Givenname' | translate }}</mat-label>
+              <input matInput formControlName="givenname" />
+            </mat-form-field>
+          </div>
+          <div class="surname">
             <mat-form-field class="mat-form-field-no-padding">
               <mat-label>{{ 'VCARD.Surname' | translate }}</mat-label>
-              <input matInput class="vcard_Surname vcardFirstInput" formControlName="surname" />
+              <input matInput formControlName="surname" />
             </mat-form-field>
           </div>
         </div>
       </mat-tab>
       <mat-tab label="{{ 'WORKSPACE.CONTRIBUTOR.MODE_ORG' | translate }}">
         <div class="vcard">
-          <div class="vcardGroup">
-            <mat-form-field class="vcard_Org">
+          <div class="org">
+            <mat-form-field>
               <mat-label>{{ 'VCARD.Org' | translate }}</mat-label>
               <input matInput id="org" formControlName="org" />
             </mat-form-field>

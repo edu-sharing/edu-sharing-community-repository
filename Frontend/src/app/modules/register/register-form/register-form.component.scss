@@ -25,9 +25,14 @@ form {
     margin-top: 10px;
 }
 .name-input {
+    display: flex;
+    column-gap: 15px;
     mat-form-field {
-        display: inline-block;
-        width: calc(50% - 5px);
+        width: 0;
+        flex-grow: 2;
+        &.title {
+            flex-grow: 1;
+        }
     }
     .last-name {
         margin-left: 10px;

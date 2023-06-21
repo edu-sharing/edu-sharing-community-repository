@@ -26,6 +26,7 @@ export {
     UserStatus,
     WebsiteInformation,
     LicenseAgreement,
+    RegisterInformation,
 } from './api/models';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MdsView } from './api/models';
