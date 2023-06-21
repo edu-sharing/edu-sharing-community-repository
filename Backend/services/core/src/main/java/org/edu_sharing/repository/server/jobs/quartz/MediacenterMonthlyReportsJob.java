@@ -55,11 +55,13 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 	private org.alfresco.service.cmr.repository.NodeService nodeService;
 	private NodeService nodeServiceEdu;
 
-	@JobFieldDescription(description = "List of properties to include in the export file", sampleValue = "cm:name")
-	private List<String> columns = new ArrayList<String>() {{
-		add("cclom:title");
-		add("ccm:replicationsourceid");
-		add("ccm:lifecyclecontributer_publisher");
+	@JobFieldDescription(description = "List of properties to include in the export file, first value is the property, second value (only for vcard) is the vcard field id", sampleValue = "[\"cm:name\"]")
+	private List<List<String>> columns = new ArrayList<List<String>>() {{
+		add(Collections.singletonList("cclom:title"));
+		add(Collections.singletonList("ccm:replicationsourceid"));
+		add(Collections.singletonList("ccm:lifecyclecontributer_publisher"));
+		add(Arrays.asList("ccm:lifecyclecontributer_publisher","X-ES-LOM-CONTRIBUTE-DATE"));
+		add(Collections.singletonList("sys:node-uuid"));
 	}};
 	@JobFieldDescription(description = "List of additional (custom) fields to be fetched from the tracking data", sampleValue = "field1")
 	private List<String> additionalFields = Collections.emptyList();
@@ -74,6 +76,10 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 	private List<String> mediacenters;
 	@JobFieldDescription(description = "force run, even if the date is currently not the 1st")
 	private boolean force = false;
+
+	@JobFieldDescription(description = "use a custom date (month) to run the job for", sampleValue = "YYYY-MM-DD")
+	private Date customDate = null;
+
 
 	@JobFieldDescription(description = "Delete stats of the month if they're already existing")
 	private boolean delete = false;
@@ -104,6 +110,9 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 		try {
 			Date date = new Date();
 			LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+			if(customDate != null) {
+				localDate = customDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+			}
 			LocalDate from = LocalDate.of(localDate.getYear(), localDate.getMonthValue() - 1, 1);
 			YearMonth month = YearMonth.from(from);
 			LocalDate to = month.atEndOfMonth();
@@ -121,8 +130,9 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 								ref -> new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ref.getNodeId())
 						).collect(Collectors.toList()),
 						Date.from(from.atStartOfDay().toInstant(ZoneOffset.UTC)),
-						null,//Date.from(to.atTime(23, 59).toInstant(ZoneOffset.UTC)),
-						additionalFields
+						Date.from(to.atTime(23, 59).toInstant(ZoneOffset.UTC)),
+						additionalFields,
+						mediacenter
 				);
 				String filename = from.format(DateTimeFormatter.ISO_DATE) + " - " + to.format(DateTimeFormatter.ISO_DATE) + ".csv";
 				String parent = new NodeTool().createOrGetNodeByName(new MCAlfrescoAPIClient(), baseFolder, new String[]{mediacenter});
@@ -157,7 +167,11 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		OutputStreamWriter osw = new OutputStreamWriter(bos);
 		CSVWriter writer = new CSVWriter(osw);
-		List<String> header = columns.stream().map(c -> I18nAngular.getTranslationAngular("common", "NODE." + c)).collect(Collectors.toList());
+		List<String> header = columns.stream().map(c ->
+				I18nAngular.getTranslationAngular("common", (
+						c.size() == 1 ? "NODE." + c.get(0) : "VCARD." + c.get(1))
+				)
+		).collect(Collectors.toList());
 		header.add(I18nAngular.getTranslationAngular("admin", "ADMIN.STATISTICS.HEADERS.count"));
 		header.addAll(STAT_FIELDS.stream().map(e ->  I18nAngular.getTranslationAngular("admin", "ADMIN.STATISTICS.ACTIONS." + e)).collect(Collectors.toList()));
 		Map<String, Set<String>> additionalFieldValues = new HashMap<>();
@@ -194,17 +208,26 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 						try {
 							String prop = NodeServiceHelper.getProperty(
 									new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, entry.getKey().getId()),
-									CCConstants.getValidGlobalName(e)
+									CCConstants.getValidGlobalName(e.get(0))
 							);
-							if (VCardConverter.isVCardProp(CCConstants.getValidGlobalName(e))) {
-								prop = VCardConverter.getNameForVCardString(prop);
+							if (VCardConverter.isVCardProp(CCConstants.getValidGlobalName(e.get(0)))) {
+								if(e.size() == 1) {
+									prop = VCardConverter.getNameForVCardString(prop);
+								} else {
+									ArrayList<HashMap<String, Object>> vcard = VCardConverter.vcardToHashMap(null, prop);
+									if (vcard.size() == 0) {
+										return "";
+									}
+									return (String) vcard.get(0).getOrDefault(e.get(1), "");
+								}
 							}
 							if (StringUtils.isEmpty(prop)) {
 								return "";
 							}
 							return prop;
 						}catch(Throwable t) {
-							return "";
+							logger.debug(t.getMessage(), t);
+							return entry.getKey().getId();
 						}
 					}
 			).collect(Collectors.toList());

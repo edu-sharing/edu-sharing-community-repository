@@ -80,7 +80,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             " ORDER BY count DESC";
 
     public static String TRACKING_STATISTICS_NODE_ARRAY = "SELECT node_uuid, type,COUNT(*) :fields from edu_tracking_node as tracking" +
-            " WHERE node_uuid = ANY(?) AND time BETWEEN ? AND ?" +
+            " WHERE node_uuid = ANY(?) AND time BETWEEN ? AND ? AND (ARRAY[?] <@ authority_mediacenter)" +
             " GROUP BY node_uuid, type" +
             " ORDER BY count DESC";
     public static String TRACKING_STATISTICS_DAILY = "SELECT type,COUNT(*),TO_CHAR(time,'yyyy-mm-dd') as date :fields from :table as tracking" +
@@ -436,7 +436,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     }
 
     @Override
-    public Map<NodeRef, StatisticEntry> getListNodeData(List<NodeRef> nodes,java.util.Date dateFrom,java.util.Date dateTo, List<String> additionalFields) throws Throwable{
+    public Map<NodeRef, StatisticEntry> getListNodeData(List<NodeRef> nodes,java.util.Date dateFrom,java.util.Date dateTo, List<String> additionalFields, String mediacenter) throws Throwable{
         ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
         Connection con = null;
         PreparedStatement statement = null;
@@ -461,6 +461,8 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             if(dateTo==null)
                 dateTo = new java.util.Date();
             statement.setTimestamp(index++, Timestamp.valueOf(dateTo.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
+
+            statement.setString(index++, mediacenter);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, resultSet.getString("node_uuid"));
