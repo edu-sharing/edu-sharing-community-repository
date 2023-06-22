@@ -1,13 +1,11 @@
 package org.edu_sharing.service.notification;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.restservices.mds.v1.model.MdsValue;
-import org.edu_sharing.service.nodeservice.annotation.NodeOriginal;
-import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.annotation.Permission;
 import org.edu_sharing.service.rating.RatingDetails;
 
@@ -37,7 +35,7 @@ public interface NotificationService {
 	default NotificationConfig getConfig() throws Exception {
 		HashMap<String, String> info = new MCAlfrescoAPIClient().getUserInfo(AuthenticationUtil.getFullyAuthenticatedUser());
 		if(info.get(CCConstants.CCM_PROP_PERSON_NOTIFICATION_PREFERENCES) != null){
-			return new Gson().fromJson(info.get(CCConstants.CCM_PROP_PERSON_NOTIFICATION_PREFERENCES), NotificationConfig.class);
+			return new ObjectMapper().readValue(info.get(CCConstants.CCM_PROP_PERSON_NOTIFICATION_PREFERENCES), NotificationConfig.class);
 		}
 		return new NotificationConfig();
 	}
@@ -45,7 +43,7 @@ public interface NotificationService {
     default void setConfig(NotificationConfig config) throws Exception {
 		HashMap<String, Serializable> userInfo = new HashMap<>();
 		userInfo.put(CCConstants.PROP_USERNAME, AuthenticationUtil.getFullyAuthenticatedUser());
-		userInfo.put(CCConstants.CCM_PROP_PERSON_NOTIFICATION_PREFERENCES, new Gson().toJson(config));
+		userInfo.put(CCConstants.CCM_PROP_PERSON_NOTIFICATION_PREFERENCES, new ObjectMapper().writeValueAsString(config));
 		new MCAlfrescoAPIClient().updateUser(userInfo);
 	}
 }
