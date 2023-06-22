@@ -1,16 +1,14 @@
 import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
 import { Toast } from '../../../core-ui-module/toast';
-import { Router, UrlSerializer } from '@angular/router';
+import { Router } from '@angular/router';
 import { TranslationsService } from '../../../translations/translations.service';
 import { ConfigurationService } from '../../../core-module/core.module';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { PlatformLocation } from '@angular/common';
-import { RegisterInformation } from 'ngx-edu-sharing-api';
-import { RestRegisterService } from '../../../core-module/core.module';
-import { FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { RegisterInformation, RegisterV1Service } from 'ngx-edu-sharing-api';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { RegisterV1Service } from '../../../rest/ng/services/register-v-1.service';
 import { VCard } from '../../../core-module/ui/VCard';
 
 @Component({
