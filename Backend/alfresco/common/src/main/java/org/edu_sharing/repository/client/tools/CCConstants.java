@@ -419,6 +419,8 @@ public class CCConstants {
 
 	public final static String CCM_ASPECT_LICENSES ="{http://www.campuscontent.de/model/1.0}licenses";
 
+	public final static String CCM_MEDIACENTER_STATISTICS ="{http://www.campuscontent.de/model/1.0}mediacenter_statistics";
+
 	public final static String CCM_ASPECT_FORKED ="{http://www.campuscontent.de/model/1.0}forked";
 
 	public final static String CCM_ASPECT_COLLECTION = "{http://www.campuscontent.de/model/1.0}collection";

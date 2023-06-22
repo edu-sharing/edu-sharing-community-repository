@@ -1841,7 +1841,9 @@
 				</property>
 			</properties>
 		</aspect>
-
+		<!-- aspect for marking the io a mediacenter statistic file -->
+		<aspect name="ccm:mediacenter_statistics">
+		</aspect>
 		<!-- aspect for marking the io template files -->
 		<aspect name="ccm:metadataPresettingTemplate">
 		</aspect>

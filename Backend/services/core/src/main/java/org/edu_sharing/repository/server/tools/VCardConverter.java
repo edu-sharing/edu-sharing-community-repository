@@ -118,8 +118,6 @@ public class VCardConverter {
 											e -> e.getValue().toString().replace("\\\\", "\\").replace("\\,", ",")
 									)
 							));
-					result.add(vcardMap);
-
 				result.add(vcardMap);
 				}
 			}
@@ -145,6 +143,15 @@ public class VCardConverter {
 		if(data.containsKey(prefix+CCConstants.VCARD_ORG))
 			return (String) data.get(prefix+CCConstants.VCARD_ORG);
 		return null;
+	}
+
+	public static String getNameForVCardString(String vcardString) {
+		ArrayList<HashMap<String, Object>> vcard = VCardConverter.vcardToHashMap(null, vcardString);
+		if (vcard.size() == 0)
+			return null;
+		return StringUtils.join(vcard.stream().map(v ->
+					VCardConverter.getNameForVCard(null, v)
+		).collect(Collectors.toList()), ", ");
 	}
 
 

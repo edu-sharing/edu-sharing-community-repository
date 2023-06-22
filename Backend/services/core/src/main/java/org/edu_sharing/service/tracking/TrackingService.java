@@ -51,7 +51,7 @@ public interface TrackingService {
     List<StatisticEntryNode> getNodeStatisics(GroupingType type, Date dateFrom, Date dateTo, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable;
     List<StatisticEntry> getUserStatistics(GroupingType type, java.util.Date dateFrom, java.util.Date dateTo, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable;
     StatisticEntry getSingleNodeData(NodeRef nodeRef,java.util.Date dateFrom,java.util.Date dateTo) throws Throwable;
-    Map<NodeRef, StatisticEntry> getListNodeData(List<NodeRef> nodes, java.util.Date dateFrom, java.util.Date dateTo) throws Throwable;
+    Map<NodeRef, StatisticEntry> getListNodeData(List<NodeRef> nodes, java.util.Date dateFrom, java.util.Date dateTo, List<String> additionalFields, String mediacenter) throws Throwable;
 
     /**
      * delete all tracked data for a given user

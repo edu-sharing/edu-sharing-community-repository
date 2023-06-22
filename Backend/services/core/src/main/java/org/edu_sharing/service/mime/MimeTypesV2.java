@@ -273,6 +273,8 @@ public class MimeTypesV2 {
 		return "file-audio";
 	if(mimetype.startsWith("video"))
 		return "file-video";
+	if(mimetype.equals("text/csv"))
+			return "file-csv";
 	if(mimetype.startsWith("text"))
 		return "file-txt";
 	
