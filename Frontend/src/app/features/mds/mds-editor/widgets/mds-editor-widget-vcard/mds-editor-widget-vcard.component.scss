@@ -1,12 +1,5 @@
+@import 'vcard';
+
 :host ::ng-deep .mat-tab-labels {
     background-color: transparent;
-}
-
-mat-tab-group {
-    .vcard {
-        padding-top: 8px;
-        .vcard_Org {
-            flex-grow: 1;
-        }
-    }
 }

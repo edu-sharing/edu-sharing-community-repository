@@ -4,6 +4,7 @@
   style="display: none"
   accept="image/*"
   (change)="setPreview($event)"
+  (cancel)="$event.stopPropagation()"
 />
 <div class="image-container">
   <div class="delete-overlay" *ngIf="delete">

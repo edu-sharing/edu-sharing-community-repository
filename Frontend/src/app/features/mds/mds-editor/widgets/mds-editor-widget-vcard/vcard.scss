@@ -1,0 +1,38 @@
+@import 'src/app/core-ui-module/styles/variables';
+
+.vcard {
+    padding-top: 8px;
+    display: flex;
+    column-gap: 15px;
+    width: 100%;
+    grid-template-columns: 20% 40% 40%;
+    .title,
+    .givenname,
+    .surname,
+    .org {
+        width: 0;
+        > mat-form-field {
+            width: 100%;
+        }
+    }
+    .title,
+    .org {
+        flex-grow: 1;
+    }
+    .givenname,
+    .surname {
+        flex-grow: 2;
+    }
+    @media screen and (max-width: $mobileWidth - $mobileStage * 2) {
+        flex-direction: column;
+        row-gap: 5px;
+        .title,
+        .givenname,
+        .surname {
+            width: 100%;
+        }
+        .title {
+            max-width: 200px;
+        }
+    }
+}

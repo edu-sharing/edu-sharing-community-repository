@@ -456,23 +456,7 @@ es-mds .mdsGroup {
         }
     }
 }
-.vcard {
-    display: flex;
-    width: 100%;
-    padding-left: 10px;
-    .vcardGroup {
-        width: 0;
-        flex-grow: 1;
-        display: flex;
-        justify-content: center;
-        padding: 10px 10px;
-        > i {
-            color: $textLight;
-            align-self: center;
-            margin-right: 5px;
-        }
-    }
-}
+
 .treeGroup {
     div {
         float: left;
@@ -528,14 +512,5 @@ es-mds .mdsEmbedded {
         font-weight: bold;
         color: $primary;
         background-color: transparent;
-    }
-}
-
-@media screen and (max-width: ($mobileWidth - $mobileStage*1)) {
-    .vcard {
-        flex-direction: column;
-        .vcardGroup {
-            width: 100%;
-        }
     }
 }

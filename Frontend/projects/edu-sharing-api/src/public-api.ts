@@ -29,5 +29,6 @@ export {
     MdsV1Service,
     StreamV1Service,
     ClientutilsV1Service,
+    RegisterV1Service,
     FeedbackV1Service,
 } from './lib/api/services';
