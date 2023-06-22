@@ -1,5 +1,7 @@
 package org.edu_sharing.service.notification;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -30,47 +32,57 @@ public class NotificationConfig implements Serializable {
     }
 
     // if mode == uniformly
-    private NotificationConfigMode configMode;
+    @JsonProperty
+    private NotificationConfigMode configMode = NotificationConfigMode.uniformly;
+    @JsonProperty
     private NotificationInterval defaultInterval = NotificationInterval.immediately;
+    @JsonProperty
     // if mode == individual
     private NotificationIntervals intervals = new NotificationIntervals();
 
+    @JsonIgnore
     public NotificationInterval getAddToCollectionEvent() {
         return configMode == NotificationConfigMode.individual
                 ? intervals.getAddToCollectionEvent()
                 : defaultInterval;
     }
 
+    @JsonIgnore
     public NotificationInterval getCommentEvent() {
         return configMode == NotificationConfigMode.individual
                 ? intervals.getCommentEvent()
                 : defaultInterval;
     }
 
+    @JsonIgnore
     public NotificationInterval getInviteEvent() {
         return configMode == NotificationConfigMode.individual
                 ? intervals.getInviteEvent()
                 : defaultInterval;
     }
 
+    @JsonIgnore
     public NotificationInterval getNodeIssueEvent() {
         return configMode == NotificationConfigMode.individual
                 ? intervals.getNodeIssueEvent()
                 : defaultInterval;
     }
 
+    @JsonIgnore
     public NotificationInterval getRatingEvent() {
         return configMode == NotificationConfigMode.individual
                 ? intervals.getRatingEvent()
                 : defaultInterval;
     }
 
+    @JsonIgnore
     public NotificationInterval getWorkflowEvent() {
         return configMode == NotificationConfigMode.individual
                 ? intervals.getWorkflowEvent()
                 : defaultInterval;
     }
 
+    @JsonIgnore
     public NotificationInterval getMetadataSuggestionEvent() {
         return configMode == NotificationConfigMode.individual
         ? intervals.getMetadataSuggestionEvent()

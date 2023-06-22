@@ -2,6 +2,7 @@ package org.edu_sharing.service.notification;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -34,7 +35,7 @@ public interface NotificationService {
 	@Permission(requiresUser = true)
 	default NotificationConfig getConfig() throws Exception {
 		HashMap<String, String> info = new MCAlfrescoAPIClient().getUserInfo(AuthenticationUtil.getFullyAuthenticatedUser());
-		if(info.get(CCConstants.CCM_PROP_PERSON_NOTIFICATION_PREFERENCES) != null){
+		if(!StringUtils.isEmpty(info.get(CCConstants.CCM_PROP_PERSON_NOTIFICATION_PREFERENCES))){
 			return new ObjectMapper().readValue(info.get(CCConstants.CCM_PROP_PERSON_NOTIFICATION_PREFERENCES), NotificationConfig.class);
 		}
 		return new NotificationConfig();
