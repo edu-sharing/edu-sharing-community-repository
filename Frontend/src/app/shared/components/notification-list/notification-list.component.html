@@ -1,0 +1,18 @@
+<ng-container *ngIf="show">
+  <button mat-icon-button [matMenuTriggerFor]="dropdown">
+    <i esIcon="notifications"></i>
+  </button>
+</ng-container>
+<mat-menu
+  #dropdown="matMenu"
+  class="mat-notification-menu"
+  backdropClass="mat-dropdown-menu"
+  [xPosition]="'before'"
+>
+  <div class="menu-wrapper">
+    <div class="dialog-title">
+      <div>{{ 'NOTIFICATION_LIST.TITLE' }}</div>
+      <button mat-icon-button (click)="openSettings()"><i esIcon="settings"></i></button>
+    </div>
+  </div>
+</mat-menu>

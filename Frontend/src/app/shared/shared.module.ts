@@ -82,6 +82,7 @@ import { ReplaceCharsPipe } from './pipes/replace-chars.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { VCardNamePipe } from './pipes/vcard-name.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
+import { NotificationListComponent } from './components/notification-list/notification-list.component';
 
 @NgModule({
     declarations: [
@@ -128,6 +129,7 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
         SpinnerSmallComponent,
         TutorialComponent,
         UserAvatarComponent,
+        NotificationListComponent,
         VCardNamePipe,
         VersionLabelPipe,
         WorkspaceCreateConnector,
@@ -236,6 +238,7 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
         UserAvatarComponent,
         VCardNamePipe,
         VersionLabelPipe,
+        NotificationListComponent,
         WorkspaceCreateConnector,
         NodesDragDirective,
         NodesDropTargetDirective,

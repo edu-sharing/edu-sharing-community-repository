@@ -1,0 +1,19 @@
+@import '../../../core-ui-module/styles/variables';
+
+::ng-deep {
+    .mat-notification-menu {
+        max-width: initial !important;
+    }
+}
+.menu-wrapper {
+    padding: 10px 20px;
+    .dialog-title {
+        display: flex;
+        align-items: center;
+        column-gap: 15px;
+        > div {
+            font-size: 110%;
+            flex-grow: 1;
+        }
+    }
+}

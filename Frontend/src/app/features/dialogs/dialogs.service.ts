@@ -219,7 +219,7 @@ export class DialogsService {
         return this.cardDialog.open(NotificationDialogComponent, {
             title: 'NOTIFICATION.TITLE',
             subtitle: 'NOTIFICATION.SUBTITLE',
-            avatar: { kind: 'icon', icon: 'chat_bubble' },
+            avatar: { kind: 'icon', icon: 'notifications' },
             width: 700,
         });
     }
