@@ -4,7 +4,6 @@
     display: flex;
     align-items: center;
     span {
-        margin-top: 3px;
         padding-left: 8px;
     }
 }
@@ -24,6 +23,7 @@
         ::ng-deep {
             i {
                 font-size: 17px;
+                line-height: 1;
             }
         }
         &.star-hover {
