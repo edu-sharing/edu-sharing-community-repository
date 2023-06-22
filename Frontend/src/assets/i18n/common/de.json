@@ -1268,6 +1268,11 @@
     },
     "COPIED_TO_CLIPBOARD_NOTICE": "Der Einbettungscode wurde in die Zwischenablage kopiert."
   },
+  "NOTIFICATION_LIST": {
+    "UNREAD_COUNT": "{{count}} ungelesene Benachrichtigungen",
+    "TITLE": "Benachrichtigungen",
+    "SETTINGS": "Benachrichtigungseinstellungen"
+  },
   "NOTIFICATION": {
     "MENU": "Benachrichtigungen",
     "TITLE": "Benachrichtigungseinstellungen",

@@ -2,7 +2,26 @@
 
 ::ng-deep {
     .mat-notification-menu {
-        max-width: initial !important;
+        width: 500px;
+        max-width: 100vw !important;
+    }
+}
+button {
+    position: relative;
+    .unread {
+        position: absolute;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        right: -2px;
+        top: -6px;
+        width: 23px;
+        height: 23px;
+        line-height: 1;
+        font-size: $fontSizeXSmall;
+        font-weight: bold;
+        border-radius: 50%;
+        background-color: #ad4638;
     }
 }
 .menu-wrapper {
@@ -12,7 +31,7 @@
         align-items: center;
         column-gap: 15px;
         > div {
-            font-size: 110%;
+            font-size: $fontSizeXLarge;
             flex-grow: 1;
         }
     }

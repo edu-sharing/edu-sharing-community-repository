@@ -1199,7 +1199,7 @@
     "CONFIG": {
       "uniformly": "For all event types",
       "uniformly_DESCRIPTION": "The interval will be configured for any messages regardless of their type",
-      "individual": "Invididual",
+      "individual": "Individual",
       "individual_DESCRIPTION": "The interval will be configured for each message type individually"
     },
     "SAVED": "Notification settings saved",

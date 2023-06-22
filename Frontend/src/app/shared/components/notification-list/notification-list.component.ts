@@ -3,11 +3,12 @@
  */
 
 import { Component, OnInit } from '@angular/core';
-import { AboutService, AuthenticationService } from 'ngx-edu-sharing-api';
+import { AboutService, AuthenticationService, About } from 'ngx-edu-sharing-api';
 import { first } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { result } from 'lodash';
 
 @Component({
     selector: 'es-notification-list',
@@ -16,6 +17,8 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
 })
 export class NotificationListComponent implements OnInit {
     show = false;
+    count: number;
+    private about: About;
     constructor(
         private aboutService: AboutService,
         private authenticationService: AuthenticationService,
@@ -23,15 +26,14 @@ export class NotificationListComponent implements OnInit {
     ) {}
 
     async ngOnInit() {
-        const result = await forkJoin([
-            this.authenticationService.observeLoginInfo().pipe(first()),
-            this.aboutService.getAbout(),
-        ]).toPromise();
-        this.show =
-            result[0].statusCode === RestConstants.STATUS_CODE_OK &&
-            result[1].plugins.filter((s) => s.id === 'kafka-notification-plugin').length > 0;
+        this.about = await this.aboutService.getAbout().toPromise();
+        this.authenticationService.observeLoginInfo().subscribe((login) => {
+            this.show =
+                login.statusCode === RestConstants.STATUS_CODE_OK &&
+                this.about.plugins.filter((s) => s.id === 'kafka-notification-plugin').length > 0;
+            this.count = 1337;
+        });
     }
-
     async openSettings() {
         await this.dialogs.openNotificationDialog();
     }
