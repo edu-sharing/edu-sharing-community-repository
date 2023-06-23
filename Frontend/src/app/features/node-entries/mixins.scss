@@ -1,0 +1,23 @@
+@import '../../core-ui-module/styles/variables';
+
+@mixin card-top-bar-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    border-radius: 50%;
+    background-color: #fff;
+    padding: 5px;
+    position: relative;
+    z-index: 1;
+    @include materialShadow();
+    i {
+        // TODO: do we want to style based on collection type?
+        font-size: 18px;
+        color: #333;
+    }
+    img {
+        width: 18px;
+        height: 18px;
+    }
+}
