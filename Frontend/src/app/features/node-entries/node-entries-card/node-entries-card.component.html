@@ -35,24 +35,7 @@
   ></button>
   <div class="card-top-bar" [style.background-color]="isCollection ? node.collection.color : null">
     <div class="card-top-bar-collection-color" *ngIf="nodeHelper.isNodeCollection(node)"></div>
-    <div class="card-top-bar-type">
-      <ng-container *ngIf="isCollection">
-        <i
-          [matTooltip]="
-            'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName
-              | translate
-          "
-          [altText]="
-            'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName
-              | translate
-          "
-          [esIcon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"
-        ></i>
-      </ng-container>
-      <ng-container *ngIf="!isCollection">
-        <ng-container *ngTemplateOutlet="type; context: { node: this.node }"></ng-container>
-      </ng-container>
-    </div>
+    <es-node-type-badge [node]="node"></es-node-type-badge>
     <div *ngIf="isCollection && node.collection.pinned" class="card-top-bar-flag">
       <i esIcon="edu-pin"></i>
     </div>
@@ -224,25 +207,5 @@
         </ng-container>
       </div>
     </div>
-  </ng-template>
-  <ng-template #type let-node="node">
-    <ng-container *ngIf="getTemplate(CustomFieldSpecialType.type) as ref">
-      <ng-container *ngTemplateOutlet="ref; context: { node: this.node }"></ng-container>
-    </ng-container>
-    <ng-container *ngIf="!getTemplate(CustomFieldSpecialType.type)">
-      <img
-        [src]="node | esNodeIcon"
-        [alt]="
-          node.mediatype
-            ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
-            : ''
-        "
-        [matTooltip]="
-          node.mediatype
-            ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
-            : ''
-        "
-      />
-    </ng-container>
   </ng-template>
 </div>
