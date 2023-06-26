@@ -4,6 +4,9 @@
     .mat-notification-menu {
         width: 500px;
         max-width: 100vw !important;
+        // background: transparent;
+        // backdrop-filter: blur(5px) brightness(1.0);
+        // box-shadow: none;
     }
 }
 button {
@@ -24,15 +27,39 @@ button {
         background-color: #ad4638;
     }
 }
+.list {
+    display: flex;
+    flex-direction: column;
+    row-gap: 20px;
+    margin: 0 2px;
+    > es-notification-list-entry {
+        border-radius: 8px;
+        padding: 5px 20px;
+        background: rgb(var(--palette-background-card));
+    }
+}
 .menu-wrapper {
-    padding: 10px 20px;
     .dialog-title {
+        margin: 0;
         display: flex;
         align-items: center;
-        column-gap: 15px;
+        column-gap: 30px;
+        padding: 10px 20px;
+        border-radius: 8px;
+        background: rgb(var(--palette-background-card));
+        // @include materialShadowBottom();
         > div {
             font-size: $fontSizeXLarge;
             flex-grow: 1;
         }
+    }
+    es-spinner-small {
+        display: flex;
+        justify-content: center;
+    }
+    .toggle-reverse {
+        display: flex;
+        justify-content: flex-end;
+        padding: 0 20px 15px 20px;
     }
 }

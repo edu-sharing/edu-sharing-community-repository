@@ -4,28 +4,48 @@
     <div
       class="unread"
       *ngIf="count > 0"
-      attr.aria-label="{{ 'NOTIFICATION_LIST.UNREAD_COUNT' | translate: { count: this.count } }}"
+      attr.aria-label="{{ 'NOTIFICATION_LIST.UNREAD_COUNT' | translate : { count: this.count } }}"
     >
       {{ count > 9 ? '9+' : count }}
     </div>
   </button>
-</ng-container>
-<mat-menu
-  #dropdown="matMenu"
-  class="mat-notification-menu"
-  backdropClass="mat-dropdown-menu"
-  [xPosition]="'before'"
->
-  <div class="menu-wrapper" (click)="$event.stopPropagation()">
-    <div class="dialog-title">
-      <div>{{ 'NOTIFICATION_LIST.TITLE' | translate }}</div>
-      <button
-        mat-icon-button
-        (click)="openSettings()"
-        matTooltip="{{ 'NOTIFICATION_LIST.SETTINGS' | translate }}"
-      >
-        <i esIcon="settings" [aria]="false"></i>
-      </button>
+  <mat-menu
+    #dropdown="matMenu"
+    class="mat-notification-menu"
+    backdropClass="mat-dropdown-menu"
+    [xPosition]="'before'"
+  >
+    <div class="menu-wrapper" (click)="$event.stopPropagation()">
+      <div class="dialog-title">
+        <div>{{ 'NOTIFICATION_LIST.TITLE' | translate }}</div>
+        <button
+          mat-icon-button
+          (click)="openSettings()"
+          matTooltip="{{ 'NOTIFICATION_LIST.SETTINGS' | translate }}"
+        >
+          <i esIcon="settings" [aria]="false"></i>
+        </button>
+      </div>
+      <div class="toggle-reverse">
+        <mat-slide-toggle [ngModel]="viewRead" (ngModelChange)="setViewRead($event)">
+          <mat-label>{{ 'NOTIFICATION_LIST.SHOW_READ' | translate }}</mat-label>
+        </mat-slide-toggle>
+      </div>
+      <div class="list">
+        <es-spinner-small *ngIf="loading"></es-spinner-small>
+        <es-notification-list-entry></es-notification-list-entry>
+        <es-notification-list-entry></es-notification-list-entry>
+        <es-notification-list-entry></es-notification-list-entry>
+        <es-notification-list-entry></es-notification-list-entry>
+        <es-notification-list-entry></es-notification-list-entry>
+        <es-notification-list-entry></es-notification-list-entry>
+        <es-notification-list-entry></es-notification-list-entry>
+        <es-notification-list-entry></es-notification-list-entry>
+        <es-notification-list-entry></es-notification-list-entry>
+        <es-notification-list-entry></es-notification-list-entry>
+        <es-notification-list-entry></es-notification-list-entry>
+        <es-notification-list-entry></es-notification-list-entry>
+      </div>
     </div>
-  </div>
-</mat-menu>
+  </mat-menu>
+</ng-container>

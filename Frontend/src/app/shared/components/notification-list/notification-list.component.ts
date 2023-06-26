@@ -9,6 +9,7 @@ import { forkJoin } from 'rxjs';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { result } from 'lodash';
+import { TranslationsService } from '../../../translations/translations.service';
 
 @Component({
     selector: 'es-notification-list',
@@ -19,13 +20,17 @@ export class NotificationListComponent implements OnInit {
     show = false;
     count: number;
     private about: About;
+    viewRead = false;
+    loading = false;
     constructor(
         private aboutService: AboutService,
         private authenticationService: AuthenticationService,
+        private translations: TranslationsService,
         private dialogs: DialogsService,
     ) {}
 
     async ngOnInit() {
+        await this.translations.waitForInit().toPromise();
         this.about = await this.aboutService.getAbout().toPromise();
         this.authenticationService.observeLoginInfo().subscribe((login) => {
             this.show =
@@ -36,5 +41,9 @@ export class NotificationListComponent implements OnInit {
     }
     async openSettings() {
         await this.dialogs.openNotificationDialog();
+    }
+
+    setViewRead(viewRead: boolean) {
+        this.viewRead = viewRead;
     }
 }

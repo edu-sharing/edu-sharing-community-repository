@@ -83,6 +83,7 @@ import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { VCardNamePipe } from './pipes/vcard-name.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
 import { NotificationListComponent } from './components/notification-list/notification-list.component';
+import { NotificationListEntryComponent } from './components/notification-list-entry/notification-list-entry.component';
 
 @NgModule({
     declarations: [
@@ -130,6 +131,7 @@ import { NotificationListComponent } from './components/notification-list/notifi
         TutorialComponent,
         UserAvatarComponent,
         NotificationListComponent,
+        NotificationListEntryComponent,
         VCardNamePipe,
         VersionLabelPipe,
         WorkspaceCreateConnector,
@@ -148,6 +150,8 @@ import { NotificationListComponent } from './components/notification-list/notifi
         MatButtonModule,
         MatCardModule,
         MatDatepickerModule,
+        MatSlideToggleModule,
+        MatExpansionModule,
         MatInputModule,
         MatInputModule,
         MatMenuModule,
