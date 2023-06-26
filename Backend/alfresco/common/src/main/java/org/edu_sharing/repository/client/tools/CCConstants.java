@@ -323,7 +323,9 @@ public class CCConstants {
 	public final static String CM_PROP_PERSON_SIZE_QUOTA = "{http://www.alfresco.org/model/content/1.0}sizeQuota";
 
 	public final static String CM_PROP_PERSON_ESORIGINALUID = "{http://www.alfresco.org/model/content/1.0}esoriginaluid";
-	
+
+	public final static String CM_PROP_PERSON_ESAFFILIATIONS = "{http://www.alfresco.org/model/content/1.0}esaffiliations";
+
 	public final static String CM_PROP_PERSON_ESPERSONSTATUS = "{http://www.alfresco.org/model/content/1.0}espersonstatus";
 	public final static String CM_PROP_PERSON_ESPERSONSTATUSDATE = "{http://www.alfresco.org/model/content/1.0}espersonstatusdate";
 
