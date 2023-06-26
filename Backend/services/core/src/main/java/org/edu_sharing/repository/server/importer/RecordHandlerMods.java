@@ -169,7 +169,7 @@ public class RecordHandlerMods implements RecordHandlerInterface {
 		con.setRequestProperty("Content-Type", "application/json");
 		con.setConnectTimeout(5000);
 		con.setReadTimeout(5000);
-		
+
 		con.connect();
 		String result = IOUtils.toString(con.getInputStream(), StandardCharsets.UTF_8.name());
 		con.disconnect();

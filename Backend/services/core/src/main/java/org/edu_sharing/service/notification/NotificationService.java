@@ -7,9 +7,13 @@ import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.restservices.mds.v1.model.MdsValue;
+import org.edu_sharing.service.notification.events.NotificationEventDTO;
 import org.edu_sharing.service.permission.annotation.Permission;
 import org.edu_sharing.service.rating.RatingDetails;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -47,4 +51,13 @@ public interface NotificationService {
 		userInfo.put(CCConstants.CCM_PROP_PERSON_NOTIFICATION_PREFERENCES, new ObjectMapper().writeValueAsString(config));
 		new MCAlfrescoAPIClient().updateUser(userInfo);
 	}
+
+	@Permission(requiresUser = true)
+	Page<NotificationEventDTO> getNotifications( String receiverId, List<org.edu_sharing.service.notification.events.data.Status> status, Pageable pageable)throws IOException;
+
+	@Permission(requiresUser = true)
+	NotificationEventDTO setNotificationStatus(String id, org.edu_sharing.service.notification.events.data.Status status)throws IOException ;
+
+	@Permission(requiresUser = true)
+	void deleteNotification(String id)throws IOException;
 }

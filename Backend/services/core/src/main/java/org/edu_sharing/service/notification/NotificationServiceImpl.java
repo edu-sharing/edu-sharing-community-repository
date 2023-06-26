@@ -20,7 +20,10 @@ import org.edu_sharing.restservices.mds.v1.model.MdsValue;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.notification.events.NotificationEventDTO;
 import org.edu_sharing.service.rating.RatingDetails;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public class NotificationServiceImpl implements NotificationService {
 
@@ -182,6 +185,21 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void notifyRatingChanged(String nodeId, Map<String, Object> nodeProps, Double rating, RatingDetails accumulatedRatings, Status removed) {
+
+    }
+
+    @Override
+    public Page<NotificationEventDTO> getNotifications(String receiverId, List<org.edu_sharing.service.notification.events.data.Status> status, Pageable pageable) {
+        return null;
+    }
+
+    @Override
+    public NotificationEventDTO setNotificationStatus(String id, org.edu_sharing.service.notification.events.data.Status status) {
+        return null;
+    }
+
+    @Override
+    public void deleteNotification(String id) {
 
     }
 
