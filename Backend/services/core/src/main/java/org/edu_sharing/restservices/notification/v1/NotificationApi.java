@@ -19,20 +19,21 @@ import org.edu_sharing.service.notification.events.NotificationEventDTO;
 import org.edu_sharing.service.notification.events.data.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.List;
 
 @Path("/notification/v1")
-@Tag(name="NOTIFICATION v1")
-@ApiService(value="NOTIFICATION", major=1, minor=0)
-@Consumes({ "application/json" })
+@Tag(name = "NOTIFICATION v1")
+@ApiService(value = "NOTIFICATION", major = 1, minor = 0)
+@Consumes({"application/json"})
 @Produces({"application/json"})
 public class NotificationApi {
 
@@ -47,7 +48,7 @@ public class NotificationApi {
     public Response getConfig(@Context HttpServletRequest req) throws DAOException {
         try {
             return Response.ok(NotificationServiceFactoryUtility.getLocalService().getConfig()).build();
-        }catch(Throwable t) {
+        } catch (Throwable t) {
             throw DAOException.mapping(t);
         }
     }
@@ -59,7 +60,6 @@ public class NotificationApi {
             value = {
                     @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
             })
-
     public Response setConfig(@Context HttpServletRequest req, NotificationConfig config) throws DAOException {
         try {
             NotificationServiceFactoryUtility.getLocalService().setConfig(config);
@@ -76,28 +76,48 @@ public class NotificationApi {
             @Parameter(name = "receiverId", description = "receiver identifier",
                     in = ParameterIn.QUERY, schema = @Schema(type = "string", defaultValue = "-me-")),
             @Parameter(name = "status", description = "status (or conjunction)",
-                    in = ParameterIn.QUERY, content = @Content(array = @ArraySchema(schema =@Schema(implementation = Status.class)))),
+                    in = ParameterIn.QUERY, content = @Content(array = @ArraySchema(schema = @Schema(implementation = Status.class)))),
             @Parameter(name = "page", description = "page number",
                     in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "0")),
             @Parameter(name = "size", description = "page size",
                     in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "25")),
-            @Parameter(name = "sort", description = "Sorting criteria in the format: property(,asc|desc). "
+            @Parameter(name = "sort", description = "Sorting criteria in the format: property(,asc|desc)(,ignoreCase). "
                     + "Default sort order is ascending. " + "Multiple sort criteria are supported."
-                    ,in = ParameterIn.QUERY , content = @Content(array = @ArraySchema(schema = @Schema(type = "string"))))
+                    , in = ParameterIn.QUERY, content = @Content(array = @ArraySchema(schema = @Schema(type = "string"))))
     })
     @Operation(summary = "Retrieve stored notification, filtered by receiver and status",
             responses = @ApiResponse(responseCode = "200",
                     description = "get the received notifications",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = NotificationResponsePage.class))))
     public Response getNotifications(
-            @RequestParam(required = false) String receiverId,
-            @RequestParam(required = false) List<Status> status,
-            @Parameter(hidden = true)
-            @PageableDefault(size = 25)
-            Pageable pageable) throws DAOException {
+            @QueryParam("receiverId") String receiverId,
+            @QueryParam("status") List<Status> status,
+            @QueryParam("page") int page,
+            @QueryParam("size") int size,
+            @QueryParam("sort") List<String> sort) throws DAOException {
+
         try {
-            return Response.ok(NotificationServiceFactoryUtility.getLocalService().getNotifications(receiverId, status, pageable)).build();
-        }catch(Throwable t) {
+            List<Sort.Order> orders = new ArrayList<>();
+            if (sort != null && !sort.isEmpty()) {
+                for (String sortParam : sort) {
+                    String[] sortParams = sortParam.split(",");
+                    Sort.Order order = Sort.Order.by(sortParams[0]);
+                    for (int i = 1; i < sortParam.length(); i++) {
+                        if (sortParams[i].equalsIgnoreCase("desc")) {
+                            order.with(Sort.Direction.DESC);
+                        } else if (sortParams[i].equalsIgnoreCase("asc")) {
+                            order.with(Sort.Direction.ASC);
+                        } else if (sortParams[i].equalsIgnoreCase("ignoreCase")) {
+                            order.ignoreCase();
+                        }
+                    }
+                    orders.add(order);
+                }
+            }
+
+            PageRequest pageRequest = PageRequest.of(page, size, Sort.by(orders));
+            return Response.ok(new NotificationResponsePage(NotificationServiceFactoryUtility.getLocalService().getNotifications(receiverId, status, pageRequest))).build();
+        } catch (Throwable t) {
             throw DAOException.mapping(t);
         }
     }
@@ -110,26 +130,28 @@ public class NotificationApi {
 
     @PUT
     @Path("/notifications/status")
-    @Operation(summary = "Endpoint to update the notification status",
-            responses = @ApiResponse(responseCode = "200",
+    @Operation(summary = "Endpoint to update the notification status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
                     description = "set notification status",
-                    content = @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = NotificationEventDTO.class)))))
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = NotificationEventDTO.class)))
+    })
     public Response updateNotificationStatus(
-            @RequestParam String id,
-            @RequestParam Status status) throws DAOException {
+            @QueryParam("id") String id,
+            @QueryParam("status") @DefaultValue(value = "READ") Status status
+    ) throws DAOException {
         try {
-            return Response.ok(NotificationServiceFactoryUtility.getLocalService().setNotificationStatus(id, status)).build();
-        }catch(Throwable t) {
+            return Response.ok(NotificationServiceFactoryUtility.getLocalService().setNotificationStatus(id, Status.NEW)).build();
+        } catch (Throwable t) {
             throw DAOException.mapping(t);
         }
     }
 
-
     @DELETE
+    @Path("/notifications")
     @Operation(summary = "Endpoint to delete notification by id",
             responses = @ApiResponse(responseCode = "200", description = "deleted notification"))
-    public Response deleteNotification(@RequestParam String id) throws DAOException {
+    public Response deleteNotification(@QueryParam("id") String id) throws DAOException {
         try {
             NotificationServiceFactoryUtility.getLocalService().deleteNotification(id);
             return Response.ok().build();
