@@ -46,4 +46,6 @@ export class NotificationListComponent implements OnInit {
     setViewRead(viewRead: boolean) {
         this.viewRead = viewRead;
     }
+
+    markAllRead() {}
 }

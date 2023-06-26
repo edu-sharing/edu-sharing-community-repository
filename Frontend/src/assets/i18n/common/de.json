@@ -1273,6 +1273,7 @@
     "UNREAD_COUNT": "{{count}} ungelesene Benachrichtigungen",
     "TITLE": "Benachrichtigungen",
     "SETTINGS": "Benachrichtigungseinstellungen",
+    "MARK_ALL_READ": "Alle als gelesen markieren",
     "SHOW_READ": "Gelesene Benachrichtigungen anzeigen",
     "DESCRIPTIONS": {
       "AddToCollectionEvent": "{{creator}} hat das Material \"{{title}}\" der Sammlung {{collection}} hinzugefügt",

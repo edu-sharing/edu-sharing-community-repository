@@ -20,6 +20,13 @@
         <div>{{ 'NOTIFICATION_LIST.TITLE' | translate }}</div>
         <button
           mat-icon-button
+          (click)="markAllRead()"
+          matTooltip="{{ 'NOTIFICATION_LIST.MARK_ALL_READ' | translate }}"
+        >
+          <i esIcon="done_all" [aria]="false"></i>
+        </button>
+        <button
+          mat-icon-button
           (click)="openSettings()"
           matTooltip="{{ 'NOTIFICATION_LIST.SETTINGS' | translate }}"
         >
