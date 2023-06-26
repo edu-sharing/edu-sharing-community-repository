@@ -154,7 +154,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.mainNavService.registerMainNav(this);
         this.setMenuStyle();
 
-        this.connector.setRoute(this.route).subscribe(() => {
+        this.connector.setRoute(this.route, this.router).subscribe(() => {
             this.aboutService.getAbout().subscribe((about) => {
                 this.about = about;
                 this.initDone$.next();

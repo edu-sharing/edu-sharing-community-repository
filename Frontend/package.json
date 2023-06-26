@@ -36,6 +36,9 @@
     "prepare": "cd .. && husky install Frontend/.husky && cd Frontend/src/app/core-module && git config core.hooksPath ../../../.husky || true"
   },
   "private": false,
+  "subPackages": [
+    "src/app/extension"
+  ],
   "dependencies": {
     "@angular-slider/ngx-slider": "^2.0.3",
     "@angular/animations": "~13.3.12",

@@ -252,9 +252,13 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 				chain.doFilter(req, resp);
 			}
 			else {
-				// go to angular login
-				RequestDispatcher rp = req.getRequestDispatcher(AuthenticationFilter.PATH_LOGIN_ANGULAR);
-				rp.forward(req, resp);
+				if(requestUrl.getPath().contains("eduservlet/")){
+					resp.sendRedirect("/edu-sharing/shibboleth");
+				} else {
+					// go to angular login
+					RequestDispatcher rp = req.getRequestDispatcher(AuthenticationFilter.PATH_LOGIN_ANGULAR);
+					rp.forward(req, resp);
+				}
 			}
 		}
 	  

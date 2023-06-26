@@ -1213,16 +1213,16 @@
 
 		<query join="AND" id="collections">
 			<basequery propertyNull="ngsearchword">
-			{"bool":{
-			"must":[
-			{"term":{"aspects":"ccm:collection"}},{"term":{"nodeRef.storeRef.protocol":"workspace"}}
-			{"bool":{
-			"should":[
-			{"term":{"properties.ccm:collectionlevel0.keyword":"true"}},
-			{"term":{"properties.ccm:collection_pinned_status":"true"}},
-			]
-			}}]
-			}}
+				{"bool":{
+				"must":[
+				{"term":{"aspects":"ccm:collection"}},{"term":{"nodeRef.storeRef.protocol":"workspace"}}
+				{"bool":{
+				"should":[
+				{"term":{"properties.ccm:collectionlevel0.keyword":"true"}},
+				{"term":{"properties.ccm:collection_pinned_status":"true"}},
+				]
+				}}]
+				}}
 			</basequery>
 			<basequery>{"bool":{
 				"must":[
@@ -1346,11 +1346,25 @@
 			<basequery>{"term":{"type":"ccm:io"}}</basequery>
 			<property name="ngsearchword">
 				<statement>{"bool":{"should":[
-					{"wildcard":{"properties.cm:name.keyword":{"value":"*${value}*"}}},
-					{"wildcard":{"properties.cclom:title.keyword":{"value":"*${value}*"}}},
-					{"wildcard":{"properties.ccm:replicationsourceid.keyword":{"value":"*${value}*"}}}
+						{"wildcard":{"properties.cm:name.keyword":{"value":"*${value}*"}}},
+						{"wildcard":{"properties.cclom:title.keyword":{"value":"*${value}*"}}},
+						{"wildcard":{"properties.ccm:replicationsourceid.keyword":{"value":"*${value}*"}}}
+					],
+					"must_not":[
+						{"term":{"aspects":"ccm:mediacenter_statistics"}}
 					]}}
 				</statement>
+			</property>
+		</query>
+		<query join="AND" id="mediacenter_statistics">
+			<basequery>
+				{"bool":{"must":[
+				{"term":{"type":"ccm:io"}},
+				{"term":{"aspects":"ccm:mediacenter_statistics"}}
+				]}}
+			</basequery>
+			<property name="mediacenter" asFilter="false">
+				<statement>{"term":{"properties.ccm:mediacenterId.keyword": "${valueRaw}"}}</statement>
 			</property>
 		</query>
 		<query join="AND" id="search_relation_query">

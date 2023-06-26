@@ -442,6 +442,10 @@
       "EXPORT_PROPERTIES_HINT": "eg cm:name, cclom:title, cclom:general_keyword",
       "GROUP_TEMPLATE_LABEL": "Select template",
       "GROUPS_ADVANCED": "Advanced options",
+      "UNKNOWN_VALUE": "<others>",
+      "ARCHIVED": "Archived",
+      "ARCHIVED_INFO": "In this section you can download aggregated statistics for a previous timespan. Choose the element with the respective timespan to download it",
+      "ARCHIVED_EMPTY": "There are no aggregated statistics yet",
       "GROUP_TEMPLATE": {
         "group_organization": "Access counts grouped by organisation of the user",
         "group_mediacenter": "Access counts grouped by mediacenter of the user",

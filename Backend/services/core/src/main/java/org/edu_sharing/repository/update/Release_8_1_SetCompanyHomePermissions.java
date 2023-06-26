@@ -49,7 +49,7 @@ public class Release_8_1_SetCompanyHomePermissions {
 				log.info("edu-sharing is not installed. Will remove GROUP_EVERYONE from the company home folder");
 				permissionService.deletePermission(
 						repositoryHelper.getCompanyHome(),
-						CCConstants.AUTHORITY_GROUP_EVERYONE, CCConstants.PERMISSION_READ
+						CCConstants.AUTHORITY_GROUP_EVERYONE, CCConstants.PERMISSION_CONSUMER
 				);
 			}
 		} catch (Throwable e) {

@@ -1,7 +1,5 @@
 package org.edu_sharing.restservices.mediacenter.v1;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -25,12 +23,12 @@ import org.edu_sharing.restservices.search.v1.model.SearchParameters;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
+import org.edu_sharing.service.mediacenter.MediacenterServiceImpl;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -38,10 +36,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.io.Writer;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -224,11 +220,11 @@ public class MediacenterApi {
 			searchToken.setFrom(skipCount != null ? skipCount : 0);
 			searchToken.setMaxResult(maxItems!= null ? maxItems : 10);
 
-			checkMedaicenterSortProperty(sortProperties, mediacenter);
+			checkMediacenterSortProperty(sortProperties, mediacenter);
 
 			searchToken.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
 
-			String authorityScope = getAuthorityScope(mediacenter);
+			String authorityScope = MediacenterServiceImpl.getAuthorityScope(mediacenter);
 
 			searchToken.setAuthorityScope(Arrays.asList(new String[] {authorityScope}));
 			MdsDao mdsDao = MdsDao.getMds(repoDao, MdsDao.DEFAULT);
@@ -315,7 +311,7 @@ public class MediacenterApi {
 
 		try {
 
-			checkMedaicenterSortProperty(sortProperties, mediacenter);
+			checkMediacenterSortProperty(sortProperties, mediacenter);
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			MdsDao mdsDao = MdsDao.getMds(repoDao, MdsDao.DEFAULT);
@@ -328,7 +324,7 @@ public class MediacenterApi {
 			do {
 				SearchToken searchToken = new SearchToken();
 				searchToken.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
-				searchToken.setAuthorityScope(Collections.singletonList(getAuthorityScope(mediacenter)));
+				searchToken.setAuthorityScope(Collections.singletonList(MediacenterServiceImpl.getAuthorityScope(mediacenter)));
 				searchToken.setFacets(new ArrayList<>());
 				searchToken.setFrom(page);
 				searchToken.setMaxResult(pageSize);
@@ -366,16 +362,7 @@ public class MediacenterApi {
 		}
 	}
 
-	@NotNull
-	private static String getAuthorityScope(String mediacenter) throws Exception {
-		String authorityScope = MediacenterServiceFactory.getLocalService().getMediacenterAdminGroup(mediacenter);
-		if(authorityScope == null){
-			throw new Exception("No mediacenter admin group found.");
-		}
-		return authorityScope;
-	}
-
-	private static void checkMedaicenterSortProperty(List<String> sortProperties, String mediacenter) {
+	private static void checkMediacenterSortProperty(List<String> sortProperties, String mediacenter) {
 		if(!sortProperties.isEmpty() && sortProperties.get(0).equals("ccm:mediacenter")){
 			sortProperties.set(0,"ccm:mediacenter_sort."+ mediacenter +".activated.keyword");
 		}

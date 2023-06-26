@@ -333,6 +333,13 @@
     </dependency>
 
     <dependency>
+      <groupId>com.opencsv</groupId>
+      <artifactId>opencsv</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
+
+    <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>edu_sharing-community-repository-backend-tomcat</artifactId>
       <scope>provided</scope>

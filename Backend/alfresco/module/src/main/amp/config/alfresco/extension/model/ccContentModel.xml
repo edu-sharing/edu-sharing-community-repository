@@ -343,6 +343,11 @@
             <property name="cm:eduSchoolPrimaryAffiliation">
                <type>d:text</type>
             </property>
+            <!-- edu-sharing customization esaffiliations -->
+            <property name="cm:esaffiliations">
+               <type>d:text</type>
+               <multiple>true</multiple>
+            </property>
             <!-- edu-sharing customization -->
             <property name="cm:espersonTypicalAgeRangeFrom">
                <type>d:text</type>

@@ -133,7 +133,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
 
         this.translations.waitForInit().subscribe(() => {
             this.banner = ConfigurationHelper.getBanner(this.config);
-            this.connector.setRoute(this.route);
+            this.connector.setRoute(this.route, this.router);
             this.networkService.prepareCache();
             this.route.queryParams.subscribe((params: Params) => {
                 this.closeOnBack = params.closeOnBack === 'true';

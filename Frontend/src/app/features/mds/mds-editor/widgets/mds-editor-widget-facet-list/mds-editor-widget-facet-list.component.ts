@@ -119,7 +119,7 @@ export class MdsEditorWidgetFacetListComponent
     private registerFormControls(): void {
         // (Re-)create `formArray` on changed facet values.
         this.facetAggregationSubject.subscribe((facetValues) => {
-            console.log(this.widget.definition.id, facetValues, this.filter.value);
+            // console.log(this.widget.definition.id, facetValues, this.filter.value);
             if (facetValues) {
                 this.facetValues = facetValues.values;
                 this.formArray = this.generateFormArray(facetValues.values);

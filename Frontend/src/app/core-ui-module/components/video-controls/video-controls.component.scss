@@ -11,6 +11,9 @@
     * {
     display: none !important;
 }
+mat-expansion-panel {
+    @include materialShadowBottom();
+}
 
 .time {
     .mat-form-field,
