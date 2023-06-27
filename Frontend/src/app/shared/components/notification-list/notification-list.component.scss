@@ -63,3 +63,11 @@ button {
         padding: 0 20px 15px 20px;
     }
 }
+.empty {
+    display: flex;
+    justify-content: center;
+    user-select: none;
+    padding: 20px 30px;
+    font-size: $fontSizeLarge;
+    color: $textMediumLight;
+}

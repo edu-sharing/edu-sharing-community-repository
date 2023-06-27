@@ -2,7 +2,7 @@
  * Created by Torsten on 13.01.2017.
  */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { UIService } from '../../../core-module/rest/services/ui.service';
 import { NotificationListComponent } from '../notification-list/notification-list.component';
 import { Node } from '../../../core-module/rest/data-object';
@@ -31,6 +31,7 @@ export class NotificationListEntryComponent implements OnInit {
         creator: 'Max Muster',
         timestamp: new Date().getTime(),
     };
+    @Output() statusChange = new EventEmitter<string>();
     constructor(private uiService: UIService) {}
 
     ngOnInit() {}
@@ -40,7 +41,7 @@ export class NotificationListEntryComponent implements OnInit {
     }
 
     markAsRead() {
-        this.entry.status = 'READ';
+        this.statusChange.emit('READ');
     }
 
     getNode() {

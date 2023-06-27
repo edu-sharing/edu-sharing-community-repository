@@ -3,10 +3,12 @@
     <i esIcon="notifications"></i>
     <div
       class="unread"
-      *ngIf="count > 0"
-      attr.aria-label="{{ 'NOTIFICATION_LIST.UNREAD_COUNT' | translate : { count: this.count } }}"
+      *ngIf="unreadNotificationsCount > 0"
+      attr.aria-label="{{
+        'NOTIFICATION_LIST.UNREAD_COUNT' | translate : { count: unreadNotificationsCount }
+      }}"
     >
-      {{ count > 9 ? '9+' : count }}
+      {{ unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount }}
     </div>
   </button>
   <mat-menu
@@ -39,19 +41,14 @@
         </mat-slide-toggle>
       </div>
       <div class="list">
-        <es-spinner-small *ngIf="loading"></es-spinner-small>
-        <es-notification-list-entry></es-notification-list-entry>
-        <es-notification-list-entry></es-notification-list-entry>
-        <es-notification-list-entry></es-notification-list-entry>
-        <es-notification-list-entry></es-notification-list-entry>
-        <es-notification-list-entry></es-notification-list-entry>
-        <es-notification-list-entry></es-notification-list-entry>
-        <es-notification-list-entry></es-notification-list-entry>
-        <es-notification-list-entry></es-notification-list-entry>
-        <es-notification-list-entry></es-notification-list-entry>
-        <es-notification-list-entry></es-notification-list-entry>
-        <es-notification-list-entry></es-notification-list-entry>
-        <es-notification-list-entry></es-notification-list-entry>
+        <es-spinner-small *ngIf="dataSource.isLoading"></es-spinner-small>
+        <es-notification-list-entry
+          *ngFor="let entry of dataSource.connect() | async"
+          (statusChange)="updateStatus(entry, $event)"
+        ></es-notification-list-entry>
+        <div class="empty" *ngIf="!dataSource.isLoading && dataSource.isEmpty()">
+          {{ 'NOTIFICATION_LIST.EMPTY_' + (viewRead ? 'ALL' : 'UNREAD') | translate }}
+        </div>
       </div>
     </div>
   </mat-menu>

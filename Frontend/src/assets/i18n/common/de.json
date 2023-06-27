@@ -1275,6 +1275,8 @@
     "SETTINGS": "Benachrichtigungseinstellungen",
     "MARK_ALL_READ": "Alle als gelesen markieren",
     "SHOW_READ": "Gelesene Benachrichtigungen anzeigen",
+    "EMPTY_UNREAD": "Keine ungelesenen Benachrichtigungen",
+    "EMPTY_ALL": "Keine Benachrichtigungen",
     "DESCRIPTIONS": {
       "AddToCollectionEvent": "{{creator}} hat das Material \"{{title}}\" der Sammlung {{collection}} hinzugefügt",
       "CommentEvent": "{{creator}} hat ein Kommentar am Material \"{{title}}\" verfasst",
