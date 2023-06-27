@@ -86,11 +86,11 @@ public class NotificationApi {
                     Sort.Order order = Sort.Order.by(sortParams[0]);
                     for (int i = 1; i < sortParams.length; i++) {
                         if (sortParams[i].equalsIgnoreCase("desc")) {
-                            order.with(Sort.Direction.DESC);
+                            order = order.with(Sort.Direction.DESC);
                         } else if (sortParams[i].equalsIgnoreCase("asc")) {
-                            order.with(Sort.Direction.ASC);
+                            order = order.with(Sort.Direction.ASC);
                         } else if (sortParams[i].equalsIgnoreCase("ignoreCase")) {
-                            order.ignoreCase();
+                            order = order.ignoreCase();
                         }
                     }
                     orders.add(order);
