@@ -113,6 +113,25 @@
         ],
         "type": "object"
       },
+      "AddToCollectionEventDTO": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationEventDTO"
+          },
+          {
+            "properties": {
+              "collection": {
+                "$ref": "#/components/schemas/Collection"
+              },
+              "node": {
+                "$ref": "#/components/schemas/NodeData"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "type": "object"
+      },
       "Admin": {
         "properties": {
           "statistics": {
@@ -749,6 +768,31 @@
             "$ref": "#/components/schemas/NodeRef"
           }
         },
+        "type": "object"
+      },
+      "CommentEventDTO": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationEventDTO"
+          },
+          {
+            "properties": {
+              "commentContent": {
+                "type": "string"
+              },
+              "commentReference": {
+                "type": "string"
+              },
+              "event": {
+                "type": "string"
+              },
+              "node": {
+                "$ref": "#/components/schemas/NodeData"
+              }
+            },
+            "type": "object"
+          }
+        ],
         "type": "object"
       },
       "Comments": {
@@ -1670,6 +1714,37 @@
         },
         "type": "object"
       },
+      "InviteEventDTO": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationEventDTO"
+          },
+          {
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "node": {
+                "$ref": "#/components/schemas/NodeData"
+              },
+              "permissions": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "type": {
+                "type": "string"
+              },
+              "userComment": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "type": "object"
+      },
       "Job": {
         "properties": {
           "id": {
@@ -2106,6 +2181,26 @@
             "$ref": "#/components/schemas/Level"
           },
           "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LoggerConfigResult": {
+        "properties": {
+          "appender": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "config": {
+            "type": "boolean"
+          },
+          "level": {
+            "type": "string"
+          },
+          "name": {
             "type": "string"
           }
         },
@@ -2861,6 +2956,37 @@
         ],
         "type": "object"
       },
+      "MetadataSuggestionEventDTO": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationEventDTO"
+          },
+          {
+            "properties": {
+              "caption": {
+                "type": "string"
+              },
+              "captionId": {
+                "type": "string"
+              },
+              "node": {
+                "$ref": "#/components/schemas/NodeData"
+              },
+              "parentCaption": {
+                "type": "string"
+              },
+              "parentId": {
+                "type": "string"
+              },
+              "widget": {
+                "$ref": "#/components/schemas/WidgetData"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "type": "object"
+      },
       "Node": {
         "properties": {
           "access": {
@@ -3196,6 +3322,28 @@
         ],
         "type": "object"
       },
+      "NodeIssueEventDTO": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationEventDTO"
+          },
+          {
+            "properties": {
+              "node": {
+                "$ref": "#/components/schemas/NodeData"
+              },
+              "reason": {
+                "type": "string"
+              },
+              "userComment": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "type": "object"
+      },
       "NodeLTIDeepLink": {
         "properties": {
           "jwtDeepLinkResponse": {
@@ -3444,12 +3592,47 @@
             "type": "string"
           },
           "intervals": {
-            "$ref": "#/components/schemas/NotificationConfigIntervals"
+            "$ref": "#/components/schemas/NotificationIntervals"
           }
         },
         "type": "object"
       },
-      "NotificationConfigIntervals": {
+      "NotificationEventDTO": {
+        "discriminator": {
+          "propertyName": "_class"
+        },
+        "properties": {
+          "_class": {
+            "type": "string"
+          },
+          "_id": {
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/UserData"
+          },
+          "receiver": {
+            "$ref": "#/components/schemas/UserData"
+          },
+          "status": {
+            "enum": [
+              "PENDING",
+              "SENT",
+              "READ"
+            ],
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "_class"
+        ],
+        "type": "object"
+      },
+      "NotificationIntervals": {
         "properties": {
           "addToCollectionEvent": {
             "enum": [
@@ -3513,6 +3696,52 @@
               "weekly"
             ],
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationResponsePage": {
+        "properties": {
+          "content": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationEventDTO"
+            },
+            "type": "array"
+          },
+          "empty": {
+            "type": "boolean"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "number": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "numberOfElements": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/Pageable"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/Sort"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
           }
         },
         "type": "object"
@@ -3746,6 +3975,32 @@
           "organizations",
           "pagination"
         ],
+        "type": "object"
+      },
+      "Pageable": {
+        "properties": {
+          "offset": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pageNumber": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "paged": {
+            "type": "boolean"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/Sort"
+          },
+          "unpaged": {
+            "type": "boolean"
+          }
+        },
         "type": "object"
       },
       "Pagination": {
@@ -4088,6 +4343,34 @@
             "type": "number"
           }
         },
+        "type": "object"
+      },
+      "RatingEventDTO": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationEventDTO"
+          },
+          {
+            "properties": {
+              "newRating": {
+                "format": "double",
+                "type": "number"
+              },
+              "node": {
+                "$ref": "#/components/schemas/NodeData"
+              },
+              "ratingCount": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "ratingSum": {
+                "format": "double",
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        ],
         "type": "object"
       },
       "RatingHistory": {
@@ -4573,6 +4856,9 @@
       },
       "ServerUpdateInfo": {
         "properties": {
+          "auto": {
+            "type": "boolean"
+          },
           "description": {
             "type": "string"
           },
@@ -4582,6 +4868,13 @@
           },
           "id": {
             "type": "string"
+          },
+          "order": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "testable": {
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -4784,6 +5077,20 @@
               "type": "string"
             },
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Sort": {
+        "properties": {
+          "empty": {
+            "type": "boolean"
+          },
+          "sorted": {
+            "type": "boolean"
+          },
+          "unsorted": {
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -5445,6 +5752,20 @@
         "required": [
           "newPassword"
         ],
+        "type": "object"
+      },
+      "UserData": {
+        "properties": {
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "mailbox": {
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "UserEntries": {
@@ -6125,6 +6446,39 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "WidgetData": {
+        "properties": {
+          "caption": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WorkflowEventDTO": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationEventDTO"
+          },
+          {
+            "properties": {
+              "node": {
+                "$ref": "#/components/schemas/NodeData"
+              },
+              "userComment": {
+                "type": "string"
+              },
+              "workflowStatus": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ],
         "type": "object"
       },
       "WorkflowHistory": {
@@ -9442,7 +9796,107 @@
         ]
       }
     },
-    "/admin/v1/log": {
+    "/admin/v1/log/config": {
+      "get": {
+        "operationId": "getLoggingRuntime",
+        "parameters": [
+          {
+            "description": "filters",
+            "in": "query",
+            "name": "filters",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "onlyConfig if true only loggers defined in log4j.xml or at runtime are returned",
+            "in": "query",
+            "name": "onlyConfig",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoggerConfigResult"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "get the logger config",
+        "tags": [
+          "ADMIN v1"
+        ]
+      },
       "post": {
         "description": "Root appenders are used. Check the appender treshold.",
         "operationId": "changeLogging",
@@ -12260,6 +12714,7 @@
     },
     "/collection/v1/collections/{repository}/search": {
       "get": {
+        "deprecated": true,
         "description": "Search collections.",
         "operationId": "searchCollections",
         "parameters": [
@@ -28573,6 +29028,148 @@
           }
         },
         "summary": "Update the config for notifications of the current user",
+        "tags": [
+          "NOTIFICATION v1"
+        ]
+      }
+    },
+    "/notification/v1/notifications": {
+      "delete": {
+        "operationId": "deleteNotification",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "deleted notification"
+          }
+        },
+        "summary": "Endpoint to delete notification by id",
+        "tags": [
+          "NOTIFICATION v1"
+        ]
+      },
+      "get": {
+        "operationId": "getNotifications",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "receiverId",
+            "schema": {
+              "default": "-me-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "status (or conjunction)",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "items": {
+                "enum": [
+                  "PENDING",
+                  "SENT",
+                  "READ"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "page number",
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "page size",
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "default": 25,
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Sorting criteria in the format: property(,asc|desc)(,ignoreCase). Default sort order is ascending. Multiple sort criteria are supported.",
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationResponsePage"
+                }
+              }
+            },
+            "description": "get the received notifications"
+          }
+        },
+        "summary": "Retrieve stored notification, filtered by receiver and status",
+        "tags": [
+          "NOTIFICATION v1"
+        ]
+      }
+    },
+    "/notification/v1/notifications/status": {
+      "put": {
+        "operationId": "updateNotificationStatus",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "default": "READ",
+              "enum": [
+                "PENDING",
+                "SENT",
+                "READ"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationEventDTO"
+                }
+              }
+            },
+            "description": "set notification status"
+          }
+        },
+        "summary": "Endpoint to update the notification status",
         "tags": [
           "NOTIFICATION v1"
         ]
