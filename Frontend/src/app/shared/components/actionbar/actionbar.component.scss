@@ -104,7 +104,7 @@ button {
     }
 }
 
-@media screen and (max-width: ($mobileWidth+$mobileStage*4)) {
+@mixin icon-button() {
     .action-always {
         padding: 0 1rem;
     }
@@ -114,4 +114,12 @@ button {
     .mat-flat-button {
         padding: 5px;
     }
+}
+
+@media screen and (max-width: ($mobileWidth+$mobileStage*4)) {
+    @include icon-button();
+}
+
+.actionbar-icon-button {
+    @include icon-button();
 }
