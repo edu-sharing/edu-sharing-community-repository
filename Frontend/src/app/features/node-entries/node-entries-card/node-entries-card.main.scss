@@ -78,40 +78,6 @@ $optionBarHeight: 50px;
         .card-top-bar-flag {
             @include card-top-bar-badge;
         }
-        .card-top-bar-comments,
-        .card-top-bar-published-copy,
-        .card-top-bar-childobjects {
-            > div {
-                background-color: rgba(255, 255, 255, 0.75);
-                border-radius: 15px;
-                display: inline-flex;
-                align-items: center;
-                min-width: 35px;
-                min-height: 22px;
-                justify-content: center;
-                cursor: default;
-                user-select: none;
-                padding: 2px 8px;
-                &.childobject-count {
-                    > i {
-                        font-size: 13px;
-                        margin-left: 4px;
-                    }
-                }
-                &.node-published-copy {
-                    min-width: auto;
-                    > i {
-                        font-size: 13px;
-                    }
-                }
-                &.node-comments {
-                    > i {
-                        font-size: 13px;
-                        margin-right: 4px;
-                    }
-                }
-            }
-        }
         .card-top-bar-checkbox {
             mat-checkbox {
                 margin-right: -20px;
