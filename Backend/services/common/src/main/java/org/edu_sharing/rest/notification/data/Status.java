@@ -1,10 +1,6 @@
-package org.edu_sharing.service.notification.events.data;
+package org.edu_sharing.rest.notification.data;
 
 public enum Status {
-    /**
-     *  was created
-     */
-    NEW,
     /**
      * waits to get send
      */

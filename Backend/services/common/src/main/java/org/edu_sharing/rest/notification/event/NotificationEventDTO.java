@@ -1,4 +1,4 @@
-package org.edu_sharing.service.notification.events;
+package org.edu_sharing.rest.notification.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -7,7 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.edu_sharing.service.notification.events.data.Status;
+import org.edu_sharing.rest.notification.data.Status;
+import org.edu_sharing.rest.notification.data.UserData;
 
 import java.util.Date;
 
@@ -33,8 +34,8 @@ public abstract class NotificationEventDTO {
     @JsonProperty("_id")
     private String id;
     private Date timestamp;
-    private String creatorId;
-    private String receiverId;
+    private UserData creator;
+    private UserData receiver;
     private Status status;
 }
 

@@ -1,11 +1,7 @@
 package org.edu_sharing.service.notification;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.log4j.Logger;
@@ -14,16 +10,21 @@ import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.tools.*;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.I18nServer;
+import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
+import org.edu_sharing.rest.notification.event.NotificationEventDTO;
 import org.edu_sharing.restservices.mds.v1.model.MdsValue;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
-import org.edu_sharing.service.notification.events.NotificationEventDTO;
 import org.edu_sharing.service.rating.RatingDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class NotificationServiceImpl implements NotificationService {
 
@@ -189,12 +190,12 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public Page<NotificationEventDTO> getNotifications(String receiverId, List<org.edu_sharing.service.notification.events.data.Status> status, Pageable pageable) {
+    public Page<NotificationEventDTO> getNotifications(String receiverId, List<org.edu_sharing.rest.notification.data.Status> status, Pageable pageable) {
         return null;
     }
 
     @Override
-    public NotificationEventDTO setNotificationStatus(String id, org.edu_sharing.service.notification.events.data.Status status) {
+    public NotificationEventDTO setNotificationStatus(String id, org.edu_sharing.rest.notification.data.Status status) {
         return null;
     }
 

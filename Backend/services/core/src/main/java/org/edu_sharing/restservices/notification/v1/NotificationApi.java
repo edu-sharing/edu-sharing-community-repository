@@ -2,9 +2,6 @@ package org.edu_sharing.restservices.notification.v1;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,13 +12,12 @@ import org.edu_sharing.restservices.DAOException;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.service.notification.NotificationConfig;
 import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
-import org.edu_sharing.service.notification.events.NotificationEventDTO;
-import org.edu_sharing.service.notification.events.data.Status;
+import org.edu_sharing.rest.notification.event.NotificationEventDTO;
+import org.edu_sharing.rest.notification.data.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -72,37 +68,23 @@ public class NotificationApi {
 
     @GET
     @Path("/notifications")
-    @Parameters({
-            @Parameter(name = "receiverId", description = "receiver identifier",
-                    in = ParameterIn.QUERY, schema = @Schema(type = "string", defaultValue = "-me-")),
-            @Parameter(name = "status", description = "status (or conjunction)",
-                    in = ParameterIn.QUERY, content = @Content(array = @ArraySchema(schema = @Schema(implementation = Status.class)))),
-            @Parameter(name = "page", description = "page number",
-                    in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "0")),
-            @Parameter(name = "size", description = "page size",
-                    in = ParameterIn.QUERY, schema = @Schema(type = "integer", defaultValue = "25")),
-            @Parameter(name = "sort", description = "Sorting criteria in the format: property(,asc|desc)(,ignoreCase). "
-                    + "Default sort order is ascending. " + "Multiple sort criteria are supported."
-                    , in = ParameterIn.QUERY, content = @Content(array = @ArraySchema(schema = @Schema(type = "string"))))
-    })
     @Operation(summary = "Retrieve stored notification, filtered by receiver and status",
             responses = @ApiResponse(responseCode = "200",
                     description = "get the received notifications",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = NotificationResponsePage.class))))
     public Response getNotifications(
-            @QueryParam("receiverId") String receiverId,
-            @QueryParam("status") List<Status> status,
-            @QueryParam("page") int page,
-            @QueryParam("size") int size,
-            @QueryParam("sort") List<String> sort) throws DAOException {
-
+            @Parameter(name = "receiverId", schema = @Schema(defaultValue = "-me-")) @QueryParam("receiverId") String receiverId,
+            @Parameter(name = "status", description = "status (or conjunction)") @QueryParam("status") List<Status> status,
+            @Parameter(name = "page", description = "page number",schema = @Schema(defaultValue = "0")) @QueryParam("page") int page,
+            @Parameter(name = "size", description = "page size", schema = @Schema(type = "integer", defaultValue = "25")) @QueryParam("size") int size,
+            @Parameter(name = "sort", description = "Sorting criteria in the format: property(,asc|desc)(,ignoreCase). Default sort order is ascending. Multiple sort criteria are supported.") @QueryParam("sort") List<String> sort) throws DAOException {
         try {
             List<Sort.Order> orders = new ArrayList<>();
             if (sort != null && !sort.isEmpty()) {
                 for (String sortParam : sort) {
                     String[] sortParams = sortParam.split(",");
                     Sort.Order order = Sort.Order.by(sortParams[0]);
-                    for (int i = 1; i < sortParam.length(); i++) {
+                    for (int i = 1; i < sortParams.length; i++) {
                         if (sortParams[i].equalsIgnoreCase("desc")) {
                             order.with(Sort.Direction.DESC);
                         } else if (sortParams[i].equalsIgnoreCase("asc")) {
@@ -141,7 +123,7 @@ public class NotificationApi {
             @QueryParam("status") @DefaultValue(value = "READ") Status status
     ) throws DAOException {
         try {
-            return Response.ok(NotificationServiceFactoryUtility.getLocalService().setNotificationStatus(id, Status.NEW)).build();
+            return Response.ok(NotificationServiceFactoryUtility.getLocalService().setNotificationStatus(id, status)).build();
         } catch (Throwable t) {
             throw DAOException.mapping(t);
         }

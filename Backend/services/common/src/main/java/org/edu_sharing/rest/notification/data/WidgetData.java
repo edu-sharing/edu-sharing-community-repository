@@ -1,4 +1,4 @@
-package org.edu_sharing.service.notification.events.data;
+package org.edu_sharing.rest.notification.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
 
 @Data
-@Builder
-@Jacksonized
 @NoArgsConstructor
 @AllArgsConstructor
 public class WidgetData {

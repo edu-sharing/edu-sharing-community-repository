@@ -1,5 +1,6 @@
-package org.edu_sharing.service.notification.events.data;
+package org.edu_sharing.rest.notification.event;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -7,9 +8,10 @@ import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
 @Data
-@Jacksonized
-@SuperBuilder
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class Collection extends NodeData {
+public class WorkflowEventDTO extends NodeBaseEventDTO {
+    private String workflowStatus;
+    private  String userComment;
 }

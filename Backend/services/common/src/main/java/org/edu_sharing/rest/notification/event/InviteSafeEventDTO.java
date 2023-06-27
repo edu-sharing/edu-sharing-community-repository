@@ -1,4 +1,4 @@
-package org.edu_sharing.service.notification.events;
+package org.edu_sharing.rest.notification.event;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -7,15 +7,11 @@ import lombok.extern.jackson.Jacksonized;
 import java.util.List;
 
 @Data
-@Jacksonized
-@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class InviteEventDTO extends NodeBaseEventDTO {
+public class InviteSafeEventDTO extends NodeBaseEventDTO {
     private String name;
-    private String type;
     private String userComment;
-    @Singular
     private List<String> permissions;
 }

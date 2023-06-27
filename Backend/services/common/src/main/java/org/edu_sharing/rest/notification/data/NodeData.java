@@ -1,4 +1,4 @@
-package org.edu_sharing.service.notification.events.data;
+package org.edu_sharing.rest.notification.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,8 +10,6 @@ import lombok.extern.jackson.Jacksonized;
 import java.util.Map;
 
 @Data
-@Jacksonized
-@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class NodeData {

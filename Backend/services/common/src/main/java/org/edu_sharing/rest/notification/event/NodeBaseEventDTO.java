@@ -1,14 +1,13 @@
-package org.edu_sharing.service.notification.events;
+package org.edu_sharing.rest.notification.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.edu_sharing.service.notification.events.data.NodeData;
+import org.edu_sharing.rest.notification.data.NodeData;
 
 @Data
-@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)

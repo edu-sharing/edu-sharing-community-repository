@@ -6,8 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.rest.notification.event.NotificationEventDTO;
 import org.edu_sharing.restservices.mds.v1.model.MdsValue;
-import org.edu_sharing.service.notification.events.NotificationEventDTO;
 import org.edu_sharing.service.permission.annotation.Permission;
 import org.edu_sharing.service.rating.RatingDetails;
 import org.springframework.data.domain.Page;
@@ -53,10 +53,10 @@ public interface NotificationService {
 	}
 
 	@Permission(requiresUser = true)
-	Page<NotificationEventDTO> getNotifications( String receiverId, List<org.edu_sharing.service.notification.events.data.Status> status, Pageable pageable)throws IOException;
+	Page<NotificationEventDTO> getNotifications(String receiverId, List<org.edu_sharing.rest.notification.data.Status> status, Pageable pageable)throws IOException;
 
 	@Permission(requiresUser = true)
-	NotificationEventDTO setNotificationStatus(String id, org.edu_sharing.service.notification.events.data.Status status)throws IOException ;
+	NotificationEventDTO setNotificationStatus(String id, org.edu_sharing.rest.notification.data.Status status)throws IOException ;
 
 	@Permission(requiresUser = true)
 	void deleteNotification(String id)throws IOException;
