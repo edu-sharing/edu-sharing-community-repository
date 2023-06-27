@@ -1,5 +1,5 @@
 <ng-container *ngIf="show">
-  <button mat-icon-button [matMenuTriggerFor]="dropdown">
+  <button mat-icon-button [matMenuTriggerFor]="dropdown" #menuTrigger="matMenuTrigger">
     <i esIcon="notifications"></i>
     <div
       class="unread"
@@ -12,9 +12,11 @@
     </div>
   </button>
   <mat-menu
+    #menu
     #dropdown="matMenu"
     class="mat-notification-menu"
     backdropClass="mat-dropdown-menu"
+    (close)="viewRead = false"
     [xPosition]="'before'"
   >
     <div class="menu-wrapper" (click)="$event.stopPropagation()">
@@ -44,6 +46,7 @@
         <es-spinner-small *ngIf="dataSource.isLoading"></es-spinner-small>
         <es-notification-list-entry
           *ngFor="let entry of dataSource.connect() | async"
+          [entry]="entry"
           (statusChange)="updateStatus(entry, $event)"
         ></es-notification-list-entry>
         <div class="empty" *ngIf="!dataSource.isLoading && dataSource.isEmpty()">

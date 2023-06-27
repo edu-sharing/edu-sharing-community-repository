@@ -2,28 +2,39 @@
   <mat-expansion-panel-header>
     <div class="entry" [class.read]="entry.status === 'READ'">
       <div class="heading">
-        <div>{{ entry.creator }}</div>
+        <div>{{ entry.creator | authorityName }}</div>
         <div>{{ entry.timestamp | formatDate : { relative: true } }}</div>
       </div>
       <div class="main-info">
         <i [esIcon]="getIcon()"></i>
-        <div>{{ entry.title }}</div>
+        <div>{{ $any(entry).node | nodeTitle }}</div>
       </div>
     </div>
   </mat-expansion-panel-header>
   <div class="full-info">
     <div class="description">
-      {{
-        'NOTIFICATION_LIST.DESCRIPTIONS.' + entry._class
-          | translate
-            : {
-                creator: entry.creator,
-                title: entry.title,
-                collection: entry.collection,
-                workflowStatus: entry.workflowStatus,
-                reason: entry.reason
-              }
-      }}
+      <div>
+        {{
+          'NOTIFICATION_LIST.DESCRIPTIONS.' + entry._class
+            | translate
+              : {
+                  creator: (entry.creator | authorityName),
+                  title: ($any(entry).node | nodeTitle),
+                  collection: ($any(entry).collection | nodeTitle),
+                  workflowStatus: $any(entry).workflowStatus,
+                  reason: $any(entry).reason
+                }
+        }}
+      </div>
+      <div class="permissions" *ngIf="$any(entry).permissions as permissions">
+        {{ permissions }}
+      </div>
+      <div
+        class="user-content"
+        *ngIf="$any(entry).commentContent || $any(entry).userComment as content"
+      >
+        <span>{{ content }}</span>
+      </div>
     </div>
     <es-node-url mode="link" target="_blank" [node]="getNode()">
       <button mat-icon-button color="primary">

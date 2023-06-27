@@ -4,8 +4,9 @@
 
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { UIService } from '../../../core-module/rest/services/ui.service';
-import { NotificationListComponent } from '../notification-list/notification-list.component';
 import { Node } from '../../../core-module/rest/data-object';
+import { Notification } from 'ngx-edu-sharing-api';
+import { RestConstants } from '../../../core-module/rest/rest-constants';
 
 @Component({
     selector: 'es-notification-list-entry',
@@ -21,7 +22,9 @@ export class NotificationListEntryComponent implements OnInit {
         RatingEvent: 'star',
         WorkflowEvent: 'swap_calls',
     };
-    @Input() entry: any = {
+    @Input() entry: Notification;
+
+    /*: any = {
         _class: Object.keys(NotificationListEntryComponent.icons)[Math.floor(Math.random() * 5)],
         status: Math.random() > 0.5 ? 'READ' : 'PENDING',
         title: 'Mein PDF.pdf',
@@ -30,8 +33,8 @@ export class NotificationListEntryComponent implements OnInit {
         workflowStatus: 'Test-Status',
         creator: 'Max Muster',
         timestamp: new Date().getTime(),
-    };
-    @Output() statusChange = new EventEmitter<string>();
+    };*/
+    @Output() statusChange = new EventEmitter<'PENDING' | 'SENT' | 'READ'>();
     constructor(private uiService: UIService) {}
 
     ngOnInit() {}
@@ -45,6 +48,9 @@ export class NotificationListEntryComponent implements OnInit {
     }
 
     getNode() {
-        return new Node(this.entry.title);
+        const props = (this.entry as any).node.properties;
+        const node = new Node(props[RestConstants.SYS_NODE_UUID]);
+        node.isDirectory = props['virtual:type'] === RestConstants.CCM_TYPE_MAP;
+        return node;
     }
 }

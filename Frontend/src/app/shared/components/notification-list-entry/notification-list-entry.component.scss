@@ -39,4 +39,18 @@
     display: grid;
     grid-template-columns: auto 1fr;
     grid-gap: 10px;
+    .description {
+        display: flex;
+        flex-direction: column;
+        row-gap: 5px;
+    }
+    .user-content {
+        padding: 5px 10px;
+        white-space: pre-line;
+        border-left: 2px solid var(--primary);
+        color: $textLight;
+        > span {
+            @include limitLineCount(3);
+        }
+    }
 }
