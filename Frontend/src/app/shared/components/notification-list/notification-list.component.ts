@@ -23,7 +23,7 @@ import { MatMenuTrigger } from '@angular/material/menu';
     styleUrls: ['notification-list.component.scss'],
 })
 export class NotificationListComponent implements OnInit {
-    static readonly NOTIFICATION_REFRESH_INTERVAL = 2 * 1000;
+    static readonly NOTIFICATION_REFRESH_INTERVAL = 30 * 1000;
     static readonly NOTIFICATION_COUNT_ALL = 100;
     static readonly NOTIFICATION_COUNT_UNREAD = 25;
     @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
@@ -75,9 +75,10 @@ export class NotificationListComponent implements OnInit {
 
     markAllRead() {}
 
-    private async loadNotifications() {
+    async loadNotifications() {
         let status: Array<'PENDING' | 'SENT' | 'READ'> = ['PENDING', 'SENT'];
-
+        this.dataSource.reset();
+        this.dataSource.isLoading = true;
         const notifications = await this.notificationService
             .getNotifications({
                 receiverId: ME,

@@ -1273,6 +1273,7 @@
     "UNREAD_COUNT": "{{count}} ungelesene Benachrichtigungen",
     "TITLE": "Benachrichtigungen",
     "SETTINGS": "Benachrichtigungseinstellungen",
+    "RELOAD": "Aktualisieren",
     "MARK_ALL_READ": "Alle als gelesen markieren",
     "SHOW_READ": "Gelesene Benachrichtigungen anzeigen",
     "EMPTY_UNREAD": "Keine ungelesenen Benachrichtigungen",

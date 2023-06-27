@@ -24,6 +24,13 @@
         <div>{{ 'NOTIFICATION_LIST.TITLE' | translate }}</div>
         <button
           mat-icon-button
+          (click)="loadNotifications()"
+          matTooltip="{{ 'NOTIFICATION_LIST.RELOAD' | translate }}"
+        >
+          <i esIcon="refresh" [aria]="false"></i>
+        </button>
+        <button
+          mat-icon-button
           (click)="markAllRead()"
           matTooltip="{{ 'NOTIFICATION_LIST.MARK_ALL_READ' | translate }}"
         >
