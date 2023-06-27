@@ -13,6 +13,7 @@ import { NodeEntriesTableComponent } from './node-entries-table/node-entries-tab
 import { NodeEntriesWrapperComponent } from './node-entries-wrapper.component';
 import { NodeEntriesComponent } from './node-entries.component';
 import { NodeRatingComponent } from './node-rating/node-rating.component';
+import { NodeStatsBadgesComponent } from './node-stats-badges/node-stats-badges.component';
 import { NodeTypeBadgeComponent } from './node-type-badge/node-type-badge.component';
 import { OptionButtonComponent } from './option-button/option-button.component';
 import { PreviewImageComponent } from './preview-image/preview-image.component';
@@ -36,8 +37,14 @@ import { SortSelectPanelComponent } from './sort-select-panel/sort-select-panel.
         OptionButtonComponent,
         PreviewImageComponent,
         SortSelectPanelComponent,
+        NodeStatsBadgesComponent,
     ],
     imports: [SharedModule, ListItemsModule],
-    exports: [NodeEntriesWrapperComponent, ListItemLabelPipe],
+    exports: [
+        ListItemLabelPipe,
+        NodeEntriesWrapperComponent,
+        NodeStatsBadgesComponent,
+        NodeTypeBadgeComponent,
+    ],
 })
 export class NodeEntriesModule {}
