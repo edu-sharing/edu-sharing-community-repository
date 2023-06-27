@@ -108,13 +108,13 @@ export class NotificationListComponent implements OnInit {
                 .toPromise();
             this.dataSource.setData(notifications.content, {
                 from: 0,
-                count: notifications.size,
+                count: notifications.numberOfElements,
                 total: notifications.totalElements,
             });
         } else {
             this.dataSource.setData(notifications.content, {
                 from: 0,
-                count: notifications.size,
+                count: notifications.numberOfElements,
                 total: notifications.totalElements,
             });
         }
