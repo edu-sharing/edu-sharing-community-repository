@@ -144,7 +144,7 @@ public class ScopeUserHomeServiceImpl implements ScopeUserHomeService{
 		return nodeRefUserHome;
 	}
 	
-	private NodeRef getRootNodeRef(String scope){
+	public NodeRef getRootNodeRef(String scope){
 		NodeRef companyHome = repositoryHelper.getCompanyHome();
 		
 		//clear scope for root node the moment cause of the policy that sets the scope prop
