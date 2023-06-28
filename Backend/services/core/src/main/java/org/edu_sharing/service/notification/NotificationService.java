@@ -20,21 +20,21 @@ import java.util.List;
 import java.util.Map;
 
 public interface NotificationService {
-	void notifyNodeIssue(String nodeId, String reason, Map<String, Object> properties, String userEmail, String userComment) throws Throwable;
+	void notifyNodeIssue(String nodeId, String reason,  List<String> aspects, Map<String, Object> properties, String userEmail, String userComment) throws Throwable;
 
-	void notifyWorkflowChanged(String nodeId, Map<String, Object> nodeProperties, String receiver, String comment, String status);
+	void notifyWorkflowChanged(String nodeId, List<String> aspects, Map<String, Object> nodeProperties, String receiver, String comment, String status);
 
 	void notifyPersonStatusChanged(String receiver, String firstname, String lastName, String oldStatus, String newStatus);
 
-    void notifyPermissionChanged(String senderAuthority, String receiverAuthority, String nodeId, Map<String, Object> props, String[] permissions, String[] strings, String mailText) throws Throwable;
+    void notifyPermissionChanged(String senderAuthority, String receiverAuthority, String nodeId,  List<String> aspects, Map<String, Object> props, String[] permissions, String mailText) throws Throwable;
 
-	void notifyMetadataSetSuggestion(MdsValue mdsValue, MetadataWidget widgetDefinition, List<String> nodeIds, List<Map<String, Object>> nodeProperties) throws Throwable;
+	void notifyMetadataSetSuggestion(MdsValue mdsValue, MetadataWidget widgetDefinition, List<String> nodeIds,  List<List<String>> aspects, List<Map<String, Object>> nodeProperties) throws Throwable;
 
-	void notifyComment(String node, String comment, String commentReference, Map<String, Object> nodeProperties, Status status);
+	void notifyComment(String node, String comment, String commentReference, List<String> aspects, Map<String, Object> nodeProperties, Status status);
 
-	void notifyCollection(String collectionId, String refNodeId, Map<String, Object> collectionProperties, Map<String, Object> nodeProperties, Status status);
+	void notifyCollection(String collectionId, String refNodeId, List<String> collectionAspects, Map<String, Object> collectionProperties, List<String> nodeAspects, Map<String, Object> nodeProperties, Status status);
 
-	void notifyRatingChanged(String nodeId, Map<String, Object> nodeProps, Double rating, RatingDetails accumulatedRatings, Status removed);
+	void notifyRatingChanged(String nodeId, List<String> aspects, Map<String, Object> nodeProps, Double rating, RatingDetails accumulatedRatings, Status removed);
 
 	@Permission(requiresUser = true)
 	default NotificationConfig getConfig() throws Exception {
@@ -56,7 +56,10 @@ public interface NotificationService {
 	Page<NotificationEventDTO> getNotifications(String receiverId, List<org.edu_sharing.rest.notification.data.Status> status, Pageable pageable)throws IOException;
 
 	@Permission(requiresUser = true)
-	NotificationEventDTO setNotificationStatus(String id, org.edu_sharing.rest.notification.data.Status status)throws IOException ;
+	NotificationEventDTO setNotificationStatusByNotificationId(String id, org.edu_sharing.rest.notification.data.Status status)throws IOException;
+
+	@Permission(requiresUser = true)
+	void setNotificationStatusByReceiverId(String receiverId, List< org.edu_sharing.rest.notification.data.Status> oldStatusList, org.edu_sharing.rest.notification.data.Status newStatus)throws IOException ;
 
 	@Permission(requiresUser = true)
 	void deleteNotification(String id)throws IOException;

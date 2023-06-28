@@ -23,6 +23,7 @@ import org.edu_sharing.service.rating.RatingDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,7 +39,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyNodeIssue(String nodeId, String reason, Map<String, Object> properties, String userEmail, String userComment) throws Throwable {
+    public void notifyNodeIssue(String nodeId, String reason, List<String> aspects, Map<String, Object> properties, String userEmail, String userComment) throws Throwable {
         logger.info(String.format("send notifyNodeIssue: nodeId: %s, reason: %s, userComment: %s", nodeId, reason, userComment));
 
         Map<String, String> replace = new HashMap<>();
@@ -54,7 +55,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyWorkflowChanged(String nodeId, Map<String, Object> nodeProperties, String receiver, String comment, String status) {
+    public void notifyWorkflowChanged(String nodeId,  List<String> aspects, Map<String, Object> nodeProperties, String receiver, String comment, String status) {
         logger.info(String.format("send notifyWorkflowChanged: nodeId: %s, nodePropertiesList: %s, comment: %s, status: %s", nodeId, nodeProperties, comment, status));
 
         MailTemplate.UserMail receiverMail = MailTemplate.getUserMailData(receiver);
@@ -94,7 +95,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyPermissionChanged(String senderAuthority, String receiverAuthority, String nodeId, Map<String, Object> props, String[] aspects, String[] permissions, String mailText) throws Throwable {
+    public void notifyPermissionChanged(String senderAuthority, String receiverAuthority, String nodeId, List<String> aspects, Map<String, Object> props, String[] permissions, String mailText) throws Throwable {
         MailTemplate.UserMail sender = MailTemplate.getUserMailData(senderAuthority);
         MailTemplate.UserMail receiver = MailTemplate.getUserMailData(receiverAuthority);
         EmailValidator mailValidator = EmailValidator.getInstance(true, true);
@@ -141,14 +142,14 @@ public class NotificationServiceImpl implements NotificationService {
         String template = "invited";
         if (CCConstants.CCM_VALUE_SCOPE_SAFE.equals(NodeServiceInterceptor.getEduSharingScope())) {
             template = "invited_safe";
-        } else if (nodeType.equals(CCConstants.CCM_TYPE_MAP) && Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_COLLECTION)) {
+        } else if (nodeType.equals(CCConstants.CCM_TYPE_MAP) && aspects.contains(CCConstants.CCM_ASPECT_COLLECTION)) {
             template = "invited_collection";
         }
 
         MailTemplate.sendMail(sender.getFullName(), sender.getEmail(), receiver.getEmail(), template, replace);
     }
 
-    public void notifyMetadataSetSuggestion(MdsValue mdsValue, MetadataWidget widgetDefinition, List<String> nodeId, List<Map<String, Object>> nodePropertiesList) throws Throwable {
+    public void notifyMetadataSetSuggestion(MdsValue mdsValue, MetadataWidget widgetDefinition, List<String> nodeId, List<List<String>> aspects, List<Map<String, Object>> nodePropertiesList) throws Throwable {
         String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
         Map<String, String> replace = new HashMap<>();
         if (currentUser != null) {
@@ -175,17 +176,17 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyComment(String node, String comment, String commentReference, Map<String, Object> nodeProperties, Status status) {
+    public void notifyComment(String node, String comment, String commentReference, List<String> aspects, Map<String, Object> nodeProperties, Status status) {
 
     }
 
     @Override
-    public void notifyCollection(String collectionId, String refNodeId, Map<String, Object> collectionProperties, Map<String, Object> nodeProperties, Status status) {
+    public void notifyCollection(String collectionId, String refNodeId,  List<String> collectionAspects, Map<String, Object> collectionProperties,  List<String> nodeAspects, Map<String, Object> nodeProperties, Status status) {
 
     }
 
     @Override
-    public void notifyRatingChanged(String nodeId, Map<String, Object> nodeProps, Double rating, RatingDetails accumulatedRatings, Status removed) {
+    public void notifyRatingChanged(String nodeId, List<String> aspects, Map<String, Object> nodeProps, Double rating, RatingDetails accumulatedRatings, Status removed) {
 
     }
 
@@ -195,8 +196,12 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public NotificationEventDTO setNotificationStatus(String id, org.edu_sharing.rest.notification.data.Status status) {
+    public NotificationEventDTO setNotificationStatusByNotificationId(String id, org.edu_sharing.rest.notification.data.Status status) {
         return null;
+    }
+
+    @Override
+    public void setNotificationStatusByReceiverId(String receiverId, List<org.edu_sharing.rest.notification.data.Status> oldStatusList, org.edu_sharing.rest.notification.data.Status newStatus) throws IOException {
     }
 
     @Override

@@ -75,7 +75,7 @@ public class NotificationApi {
     public Response getNotifications(
             @Parameter(name = "receiverId", schema = @Schema(defaultValue = "-me-")) @QueryParam("receiverId") String receiverId,
             @Parameter(name = "status", description = "status (or conjunction)") @QueryParam("status") List<Status> status,
-            @Parameter(name = "page", description = "page number",schema = @Schema(defaultValue = "0")) @QueryParam("page") int page,
+            @Parameter(name = "page", description = "page number", schema = @Schema(defaultValue = "0")) @QueryParam("page") int page,
             @Parameter(name = "size", description = "page size", schema = @Schema(type = "integer", defaultValue = "25")) @QueryParam("size") int size,
             @Parameter(name = "sort", description = "Sorting criteria in the format: property(,asc|desc)(,ignoreCase). Default sort order is ascending. Multiple sort criteria are supported.") @QueryParam("sort") List<String> sort) throws DAOException {
         try {
@@ -123,11 +123,31 @@ public class NotificationApi {
             @QueryParam("status") @DefaultValue(value = "READ") Status status
     ) throws DAOException {
         try {
-            return Response.ok(NotificationServiceFactoryUtility.getLocalService().setNotificationStatus(id, status)).build();
+            return Response.ok(NotificationServiceFactoryUtility.getLocalService().setNotificationStatusByNotificationId(id, status)).build();
         } catch (Throwable t) {
             throw DAOException.mapping(t);
         }
     }
+
+    @PUT
+    @Path("/notifications/receiver/status")
+    @Operation(summary = "Endpoint to update the notification status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "set notification status")
+    })
+    public Response updateNotificationStatus(
+            @QueryParam("id") String id,
+            @Parameter(name = "oldStatus", description = "The old status (or conjunction)") @QueryParam("oldStatus") List<Status> oldStatus,
+            @QueryParam("newStatus") @DefaultValue(value = "READ") Status newStatus
+    ) throws DAOException {
+        try {
+            NotificationServiceFactoryUtility.getLocalService().setNotificationStatusByReceiverId(id, oldStatus, newStatus);
+            return Response.ok().build();
+        } catch (Throwable t) {
+            throw DAOException.mapping(t);
+        }
+    }
+
 
     @DELETE
     @Path("/notifications")
