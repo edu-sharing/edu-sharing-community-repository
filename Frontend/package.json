@@ -7,6 +7,7 @@
     "prestart": "npm run build:edu-sharing-api:dev",
     "start": "ng serve",
     "start-public": "ng serve --host 0.0.0.0 --disable-host-check",
+    "serve-dist": "node scripts/server.js",
     "build:edu-sharing-api": "(cd projects/edu-sharing-api && npm run update-if-needed) && node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build edu-sharing-api",
     "build:edu-sharing-api:dev": "(cd projects/edu-sharing-api && npm run update-if-needed) && node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build edu-sharing-api --configuration development",
     "publish:edu-sharing-api": "npm run build:edu-sharing-api && cd dist/edu-sharing-api && npm publish",

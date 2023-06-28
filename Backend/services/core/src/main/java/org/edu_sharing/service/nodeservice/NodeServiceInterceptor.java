@@ -244,17 +244,20 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         long test = System.currentTimeMillis();
         Provider providerByApp = ProviderHelper.getProviderByApp(ApplicationInfoList.getHomeRepository());
         if(!(providerByApp instanceof ElasticSearchProvider)){
-            logger.info("took:"+(System.currentTimeMillis() - test) +"ms");
+            logger.debug("Skipping collection permission check cause no elastic provider present");
             return false;
         }
-        if(!CallSourceHelper.getCallSource().equals(CallSourceHelper.CallSource.Render)
-                && !CallSourceHelper.getCallSource().equals(CallSourceHelper.CallSource.Preview)
-                && !CallSourceHelper.getCallSource().equals(CallSourceHelper.CallSource.Sitemap)){
-            logger.info("took:"+(System.currentTimeMillis() - test) +"ms");
+        if(
+                !Arrays.asList(
+                        CallSourceHelper.CallSource.Render, CallSourceHelper.CallSource.Preview,
+                        CallSourceHelper.CallSource.Sitemap, CallSourceHelper.CallSource.ToolConnector
+                ).contains(CallSourceHelper.getCallSource())
+        ){
+            logger.debug("Skipping collection permission check for call source " + CallSourceHelper.getCallSource());
             return false;
         }
         boolean result = ((SearchServiceElastic)providerByApp.getSearchService()).isAllowedToRead(nodeId);
-        logger.info("took:"+(System.currentTimeMillis() - test) +"ms");
+        logger.debug("collection permission check took:"+(System.currentTimeMillis() - test) +"ms");
         return result;
     }
 }
