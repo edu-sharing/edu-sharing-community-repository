@@ -427,7 +427,10 @@ export class WorkspaceManagementDialogsComponent {
         }
     }
     public uploadDone(event: Node[]) {
-        if (this.config.instant('licenseDialogOnUpload', false)) {
+        if (event == null) {
+            // error occured
+            this.onUploadFilesProcessed.emit(null);
+        } else if (this.config.instant('licenseDialogOnUpload', false)) {
             this.nodeLicense = event;
             this.nodeLicenseOnUpload = true;
         } else {
