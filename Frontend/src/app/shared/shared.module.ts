@@ -82,6 +82,7 @@ import { ReplaceCharsPipe } from './pipes/replace-chars.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { VCardNamePipe } from './pipes/vcard-name.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
+import { TitleDirective } from './directives/title.directive';
 
 @NgModule({
     declarations: [
@@ -126,6 +127,7 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
         SortDropdownComponent,
         SpinnerComponent,
         SpinnerSmallComponent,
+        TitleDirective,
         TutorialComponent,
         UserAvatarComponent,
         VCardNamePipe,
@@ -231,6 +233,7 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
         SortDropdownComponent,
         SpinnerComponent,
         SpinnerSmallComponent,
+        TitleDirective,
         TranslateModule,
         TutorialComponent,
         UserAvatarComponent,
