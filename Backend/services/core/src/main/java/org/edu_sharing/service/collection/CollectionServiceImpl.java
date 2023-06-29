@@ -200,8 +200,8 @@ public class CollectionServiceImpl implements CollectionService {
                 throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES);
             }
 
-            String nodeType = client.getNodeType(originalNodeId);
-            if (!nodeType.equals(CCConstants.CCM_TYPE_IO)) {
+            String originalNodeType = client.getNodeType(originalNodeId);
+            if (!originalNodeType.equals(CCConstants.CCM_TYPE_IO)) {
                 throw new Exception("Only Files are allowed to be added!");
             }
             NodeRef child = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId, CCConstants.CCM_TYPE_IO, CCConstants.CCM_PROP_IO_ORIGINAL, originalNodeId);
@@ -278,19 +278,30 @@ public class CollectionServiceImpl implements CollectionService {
                         collectionId,
                         originalNodeId, null, null, null, -1, versLabel, refId, null);
 
+                String  colllectionType = null;
+                List<String> collectionAspects;
                 Map<String, Object> collectionProperties;
-                Map<String, Object> nodeProperties;
                 try {
+                    colllectionType = nodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionId);
+                    collectionAspects = Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionId));
                     collectionProperties = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionId);
                 } catch (Throwable ignored) {
+                    collectionAspects = new ArrayList<>();
                     collectionProperties = new HashMap<>();
                 }
+
+                String nodeType = null;
+                List<String> nodeAspects;
+                Map<String, Object> nodeProperties;
                 try {
+                    nodeType = nodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), refNodeId);
+                    nodeAspects = Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), refNodeId));
                     nodeProperties = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), refNodeId);
                 } catch (Throwable ignored) {
                     nodeProperties = new HashMap<>();
+                    nodeAspects = new ArrayList<>();
                 }
-                notificationService.notifyCollection(collectionId, refNodeId, collectionProperties, nodeProperties, Status.ADDED);
+                notificationService.notifyCollection(collectionId, refNodeId, colllectionType, collectionAspects, collectionProperties, nodeType, nodeAspects, nodeProperties, Status.ADDED);
                 return refId;
             });
 

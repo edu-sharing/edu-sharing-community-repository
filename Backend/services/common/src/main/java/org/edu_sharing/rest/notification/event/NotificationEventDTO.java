@@ -6,14 +6,12 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
-import org.edu_sharing.rest.notification.data.Status;
-import org.edu_sharing.rest.notification.data.UserData;
+import org.edu_sharing.rest.notification.data.StatusDTO;
+import org.edu_sharing.rest.notification.data.UserDataDTO;
 
 import java.util.Date;
 
 @Data
-@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
@@ -34,8 +32,8 @@ public abstract class NotificationEventDTO {
     @JsonProperty("_id")
     private String id;
     private Date timestamp;
-    private UserData creator;
-    private UserData receiver;
-    private Status status;
+    private UserDataDTO creator;
+    private UserDataDTO receiver;
+    private StatusDTO status;
 }
 

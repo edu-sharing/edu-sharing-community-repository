@@ -289,10 +289,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 
 			if (_sendMail) {
+				String nodeType = eduNodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), _nodeId);
 				HashMap<String, Object> props = eduNodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), _nodeId);
-				String[] aspects = eduNodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), _nodeId);
+				List<String> aspects = Arrays.asList(eduNodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), _nodeId));
 				NotificationServiceFactoryUtility.getLocalService()
-						.notifyPermissionChanged(user, authority, _nodeId, props, aspects, permissions, _mailText);
+						.notifyPermissionChanged(user, authority, _nodeId, nodeType, aspects, props, permissions, _mailText);
 			}
 		}
 

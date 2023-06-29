@@ -1951,6 +1951,9 @@ public class NodeDao {
 
     public void addWorkflowHistory(WorkflowHistory history, boolean sendMail) throws DAOException {
         HashMap<String, Object> properties = getNativeProperties();
+        String nodeType = nodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
+        List<String> aspects = Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
+
         Object protocol = properties.get(CCConstants.CCM_PROP_WF_PROTOCOL);
         List<String> data = (List<String>) NodeServiceHelper.getPropertyNative(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
                 CCConstants.CCM_PROP_WF_PROTOCOL
@@ -1977,7 +1980,7 @@ public class NodeDao {
             if (sendMail) {
                 NotificationService localService = NotificationServiceFactoryUtility.getLocalService();
                 receivers.forEach((receiver) -> localService
-                        .notifyWorkflowChanged(nodeId, properties, receiver, history.getComment(), history.getStatus()));
+                        .notifyWorkflowChanged(nodeId, nodeType, aspects, properties, receiver, history.getComment(), history.getStatus()));
             }
         } catch (Throwable t) {
             throw DAOException.mapping(t);
@@ -2364,9 +2367,11 @@ public class NodeDao {
 
     public void reportNode(String reason, String userEmail, String userComment) throws DAOException {
         try {
+            String type = nodeService.getType(nodeId);
             HashMap<String, Object> properties = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
+            List<String> aspects = Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
             NotificationServiceFactoryUtility.getLocalService()
-                    .notifyNodeIssue(nodeId, reason, properties, userEmail, userComment);
+                    .notifyNodeIssue(nodeId, reason, type, aspects, properties, userEmail, userComment);
         } catch (Throwable t) {
             throw DAOException.mapping(t);
         }

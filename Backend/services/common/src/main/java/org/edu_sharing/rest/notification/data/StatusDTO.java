@@ -1,6 +1,6 @@
 package org.edu_sharing.rest.notification.data;
 
-public enum Status {
+public enum StatusDTO {
     /**
      * waits to get send
      */

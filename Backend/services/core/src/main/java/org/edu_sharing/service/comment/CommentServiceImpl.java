@@ -1,5 +1,7 @@
 package org.edu_sharing.service.comment;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -95,13 +97,19 @@ public class CommentServiceImpl implements CommentService{
 	}
 
 	private void notify(String node, String comment, String commentReference, Status status) {
+		String nodeType = null;
+		List<String> aspects;
 		HashMap<String, Object> nodeProps;
 		try {
+			nodeType = nodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), node);
+			aspects = Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), node));
 			nodeProps = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), node);
 		} catch (Throwable e) {
 			nodeProps = new HashMap<>();
+			aspects = new ArrayList<>();
 		}
-		notificationService.notifyComment(node, comment, commentReference, nodeProps, status);
+
+		notificationService.notifyComment(node, comment, commentReference, nodeType, aspects, nodeProps, status);
 	}
 
 	

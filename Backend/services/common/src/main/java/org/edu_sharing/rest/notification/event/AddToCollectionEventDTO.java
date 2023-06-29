@@ -4,17 +4,24 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
-import lombok.extern.jackson.Jacksonized;
-import org.edu_sharing.rest.notification.data.Collection;
+import org.edu_sharing.rest.notification.data.CollectionDTO;
+import org.edu_sharing.rest.notification.data.NodeDataDTO;
+import org.edu_sharing.rest.notification.data.StatusDTO;
+import org.edu_sharing.rest.notification.data.UserDataDTO;
+
+import java.util.Date;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class AddToCollectionEventDTO extends NodeBaseEventDTO {
+    public AddToCollectionEventDTO(String id, Date timestamp, UserDataDTO creator, UserDataDTO receiver, StatusDTO status, NodeDataDTO node, CollectionDTO collection) {
+        super(id, timestamp, creator, receiver, status, node);
+        this.collection = collection;
+    }
+
     /**
      * the collection the node has been added to
      */
-    private Collection collection;
+    private CollectionDTO collection;
 }

@@ -27,6 +27,7 @@ import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -73,14 +74,19 @@ public class RatingServiceImpl extends RatingServiceAdapter {
             invalidateCache(nodeId);
 
 
+            String nodeType = null;
+            List<String> nodeAspects;
             HashMap<String, Object> nodeProps;
             try {
+                nodeType = nodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
+                nodeAspects = Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
                 nodeProps = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
             } catch (Throwable e) {
+                nodeAspects = new ArrayList<>();
                 nodeProps = new HashMap<>();
             }
             RatingDetails accumulatedRatings = getAccumulatedRatings(nodeId, null);
-            notificationService.notifyRatingChanged(nodeId, nodeProps, rating, accumulatedRatings, Status.ADDED);
+            notificationService.notifyRatingChanged(nodeId, nodeType, nodeAspects, nodeProps, rating, accumulatedRatings, Status.ADDED);
             return null;
         });
     }
@@ -125,14 +131,19 @@ public class RatingServiceImpl extends RatingServiceAdapter {
             if (rating != null) {
                 nodeService.removeNode(rating.getRef().getId(), nodeId, false);
 
+                String nodeType = null;
+                List<String> nodeAspects;
                 HashMap<String, Object> nodeProps;
                 try {
+                    nodeType = nodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
+                    nodeAspects = Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
                     nodeProps = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
                 } catch (Throwable e) {
+                    nodeAspects = new ArrayList<>();
                     nodeProps = new HashMap<>();
                 }
                 RatingDetails accumulatedRatings = getAccumulatedRatings(nodeId, null);
-                notificationService.notifyRatingChanged(nodeId, nodeProps, rating.getRating(), accumulatedRatings, Status.REMOVED);
+                notificationService.notifyRatingChanged(nodeId, nodeType,  nodeAspects, nodeProps, rating.getRating(), accumulatedRatings, Status.REMOVED);
             } else {
                 throw new IllegalArgumentException("No rating for current user found for the given node");
             }

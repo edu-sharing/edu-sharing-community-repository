@@ -13,7 +13,7 @@ import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.service.notification.NotificationConfig;
 import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
 import org.edu_sharing.rest.notification.event.NotificationEventDTO;
-import org.edu_sharing.rest.notification.data.Status;
+import org.edu_sharing.rest.notification.data.StatusDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -74,7 +74,7 @@ public class NotificationApi {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = NotificationResponsePage.class))))
     public Response getNotifications(
             @Parameter(name = "receiverId", schema = @Schema(defaultValue = "-me-")) @QueryParam("receiverId") String receiverId,
-            @Parameter(name = "status", description = "status (or conjunction)") @QueryParam("status") List<Status> status,
+            @Parameter(name = "status", description = "status (or conjunction)") @QueryParam("status") List<StatusDTO> status,
             @Parameter(name = "page", description = "page number", schema = @Schema(defaultValue = "0")) @QueryParam("page") int page,
             @Parameter(name = "size", description = "page size", schema = @Schema(type = "integer", defaultValue = "25")) @QueryParam("size") int size,
             @Parameter(name = "sort", description = "Sorting criteria in the format: property(,asc|desc)(,ignoreCase). Default sort order is ascending. Multiple sort criteria are supported.") @QueryParam("sort") List<String> sort) throws DAOException {
@@ -120,7 +120,7 @@ public class NotificationApi {
     })
     public Response updateNotificationStatus(
             @QueryParam("id") String id,
-            @QueryParam("status") @DefaultValue(value = "READ") Status status
+            @QueryParam("status") @DefaultValue(value = "READ") StatusDTO status
     ) throws DAOException {
         try {
             return Response.ok(NotificationServiceFactoryUtility.getLocalService().setNotificationStatusByNotificationId(id, status)).build();
@@ -137,8 +137,8 @@ public class NotificationApi {
     })
     public Response updateNotificationStatus(
             @QueryParam("id") String id,
-            @Parameter(name = "oldStatus", description = "The old status (or conjunction)") @QueryParam("oldStatus") List<Status> oldStatus,
-            @QueryParam("newStatus") @DefaultValue(value = "READ") Status newStatus
+            @Parameter(name = "oldStatus", description = "The old status (or conjunction)") @QueryParam("oldStatus") List<StatusDTO> oldStatus,
+            @QueryParam("newStatus") @DefaultValue(value = "READ") StatusDTO newStatus
     ) throws DAOException {
         try {
             NotificationServiceFactoryUtility.getLocalService().setNotificationStatusByReceiverId(id, oldStatus, newStatus);
