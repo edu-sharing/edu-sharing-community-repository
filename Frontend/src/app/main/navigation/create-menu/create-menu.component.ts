@@ -99,7 +99,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     _parent: Node = null;
     addFolderName: string = null;
 
-    uploadSelectDialogRef: DialogRef<FileList>;
+    uploadSelectDialogRef: DialogRef<{ files: FileList; parent: Node | undefined }>;
     uploadDialogRef: DialogRef<Node[]>;
     connectorList: Connector[];
     fileIsOver = false;
@@ -310,9 +310,10 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             parent: this.getParent(),
             showPicker: this.showPicker,
         });
-        this.uploadSelectDialogRef.afterClosed().subscribe((files) => {
-            if (files) {
-                this.uploadFiles(files);
+        this.uploadSelectDialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                this._parent = result.parent;
+                this.uploadFiles(result.files);
             } else {
                 // When `files` is not set, that can either mean that the dialog was canceled or
                 // that a link was entered, which causes an edit dialog to be opened by the
