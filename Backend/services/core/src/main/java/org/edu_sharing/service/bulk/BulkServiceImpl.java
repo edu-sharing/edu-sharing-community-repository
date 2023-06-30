@@ -17,10 +17,10 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.EduSharingLockHelper;
-import org.edu_sharing.repository.server.tools.cache.PersonCache;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -317,8 +317,22 @@ public class BulkServiceImpl implements BulkService {
 				NodeServiceHelper.getPropertiesSinglevalue(
 						NodeServiceHelper.transformShortToLongProperties(properties)
 				),data);
+		result = filterCMISResult(result, primaryFolder);
+		if(result.size()==1){
+			return result.get(0);
+		}else if(result.size()>1){
+			StringBuilder props = new StringBuilder();
+			for (Map.Entry<String, String[]> entry : properties.entrySet()) {
+				props.append(entry.getKey()).append(":").append(entry.getValue()[0]).append(" ");
+			}
+			throw new Exception("The given properties ("+props+") matched more than 1 node (" + result.size() + "). Please check your criterias and make sure they match unique data");
+		}
+		return null;
+	}
 
-		result = result.stream().filter((r) -> {
+	public static List<NodeRef> filterCMISResult(List<NodeRef> result, NodeRef primaryFolder) throws Exception {
+		NodeService dbNodeService = (NodeService)AlfAppContextGate.getApplicationContext().getBean("alfrescoDefaultDbNodeService");
+		return result.stream().filter((r) -> {
 			Path path = dbNodeService.getPath(r);
 			for (Path.Element p : path) {
 				if (p instanceof Path.ChildAssocElement) {
@@ -330,15 +344,5 @@ public class BulkServiceImpl implements BulkService {
 			}
 			return false;
 		}).collect(Collectors.toList());
-		if(result.size()==1){
-			return result.get(0);
-		}else if(result.size()>1){
-			StringBuilder props = new StringBuilder();
-			for (Map.Entry<String, String[]> entry : properties.entrySet()) {
-				props.append(entry.getKey()).append(":").append(entry.getValue()[0]).append(" ");
-			}
-			throw new Exception("The given properties ("+props+") matched more than 1 node (" + result.size() + "). Please check your criterias and make sure they match unique data");
-		}
-		return null;
 	}
 }
