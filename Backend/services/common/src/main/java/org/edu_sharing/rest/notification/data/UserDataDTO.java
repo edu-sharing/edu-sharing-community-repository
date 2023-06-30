@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDataDTO {
+    private String id;
     private String firstName;
     private String lastName;
     private String mailbox; // compatibility with org.edu_sharing.restservices.shared.Person

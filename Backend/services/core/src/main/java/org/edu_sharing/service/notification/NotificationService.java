@@ -9,6 +9,7 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.rest.notification.data.StatusDTO;
 import org.edu_sharing.rest.notification.event.NotificationEventDTO;
 import org.edu_sharing.restservices.mds.v1.model.MdsValue;
+import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.permission.annotation.Permission;
 import org.edu_sharing.service.rating.RatingDetails;
 import org.springframework.data.domain.Page;
@@ -55,14 +56,14 @@ public interface NotificationService {
     }
 
     @Permission(requiresUser = true)
-    Page<NotificationEventDTO> getNotifications(String receiverId, List<StatusDTO> status, Pageable pageable) throws IOException;
+    Page<NotificationEventDTO> getNotifications(String receiverId, List<StatusDTO> status, Pageable pageable) throws IOException, InsufficientPermissionException;
 
     @Permission(requiresUser = true)
-    NotificationEventDTO setNotificationStatusByNotificationId(String id, StatusDTO status) throws IOException;
+    NotificationEventDTO setNotificationStatusByNotificationId(String id, StatusDTO status) throws IOException, InsufficientPermissionException;
 
     @Permission(requiresUser = true)
-    void setNotificationStatusByReceiverId(String receiverId, List<StatusDTO> oldStatusList, StatusDTO newStatus) throws IOException;
+    void setNotificationStatusByReceiverId(String receiverId, List<StatusDTO> oldStatusList, StatusDTO newStatus) throws IOException, InsufficientPermissionException;
 
     @Permission(requiresUser = true)
-    void deleteNotification(String id) throws IOException;
+    void deleteNotification(String id) throws IOException, InsufficientPermissionException;
 }
