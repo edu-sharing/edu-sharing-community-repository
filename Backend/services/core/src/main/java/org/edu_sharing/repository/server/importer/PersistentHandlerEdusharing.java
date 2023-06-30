@@ -465,6 +465,12 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 						String replSource = NodeServiceHelper.getProperty(entry, CCConstants.CCM_PROP_IO_REPLICATIONSOURCE);
 						String replSourceId = NodeServiceHelper.getProperty(entry, CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID);
 						String timestamp = NodeServiceHelper.getProperty(entry, CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP);
+						if(replIdMap.get(replSource + ":" + replSourceId) != null) {
+							getLogger().warn(
+									"Duplicate nodes found for " + replSource + ":" + replSourceId + ": " +
+											replIdMap.get(replSource + ":" + replSourceId) + " / " + entry
+							);
+						}
 						replIdMap.put(replSource + ":" + replSourceId, entry);
 						if (replSource != null && !replSource.trim().equals("") && timestamp != null && !timestamp.trim().equals("")) {
 							replIdTimestampMap.put(replSourceId, timestamp);
