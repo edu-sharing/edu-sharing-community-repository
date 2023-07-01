@@ -55,6 +55,7 @@ import javax.transaction.*;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -533,7 +534,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 				&& job.getJobDataMap().getBoolean(OAIConst.PARAM_FORCE_UPDATE)) {
 			return true;
 		}
-		String oldTimeStamp = getReplicationIdTimestampMap().get(replId);
+		String oldTimeStamp = getOldTimestamp(replId);
 
 		// we will not safe without timestamp
 		if (timeStamp == null || timeStamp.isEmpty()) {
@@ -570,6 +571,22 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			t.printStackTrace();
 		}
 		return false;
+	}
+
+	private String getOldTimestamp(String replId) {
+		if(!hasTimestampMap) {
+			try {
+				NodeRef node = getNodeIfExists(new HashMap<String, Object>() {{
+						put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID, replId);
+					}}, importFolderId);
+				return NodeServiceHelper.getProperty(node, CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP);
+			} catch (Throwable e) {
+				return null;
+			}
+		} else {
+			return getReplicationIdTimestampMap().get(replId);
+		}
+
 	}
 
 	@Override
