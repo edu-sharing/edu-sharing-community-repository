@@ -44,6 +44,7 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.jobs.quartz.AbstractJob;
 import org.edu_sharing.repository.server.jobs.quartz.OAIConst;
+import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.bulk.BulkServiceImpl;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -57,6 +58,7 @@ import java.io.ObjectOutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 
@@ -376,9 +378,11 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			// disable behaviour cause otherwise each delete will trigger "onUpdateProperties"
 			serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
 				policyBehaviourFilter.disableBehaviour(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
-				for (String prop : propertiesToRemove) {
-					NodeServiceFactory.getLocalService().removeProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, prop);
-				}
+				NodeServiceFactory.getLocalService().updateNodeNative(nodeId,
+						(HashMap<String, ?>) propertiesToRemove.stream().collect(
+								Collectors.toMap((o) -> o, (o) -> null)
+						)
+				);
 				policyBehaviourFilter.enableBehaviour(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
 				return null;
 			});
