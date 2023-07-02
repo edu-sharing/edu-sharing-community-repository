@@ -35,6 +35,7 @@ import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.transaction.TransactionService;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
@@ -196,7 +197,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 				licenseValidChanged = true;
 			}
 
-			if (mustBePersisted(childId, replicationId,newTimeStamp)) {
+			if (mustBePersisted(childId, replicationId,newTimeStamp, oldTimeStamp)) {
 				getLogger().info(" newTimeStamp "+newTimeStamp+" is after oldTimeStamp "+oldTimeStamp+" have to update object id:" + replicationId);
 				updateNode((String) childId.getId(), newNodeProps, recordHandler.getPropertiesToRemove());
 				setModifiedDate((String) childId.getId(), newNodeProps);
@@ -311,7 +312,8 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			result = BulkServiceImpl.filterCMISResult(result, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, importFolderId));
 			if(result.size() > 0) {
 				if(result.size() > 1) {
-					getLogger().warn("Duplicate nodes found for " + filter.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID));
+					getLogger().warn("Duplicate nodes found for " + filter.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID) + ": " +
+							StringUtils.join(result.stream().map(NodeRef::toString).collect(Collectors.toList()), " / "));
 				}
 				return result.get(0);
 			}
@@ -506,7 +508,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		return replIdTimestampMap;
 	}
 	public synchronized boolean mustBePersisted(String replId, String timeStamp) {
-		return mustBePersisted(null, replId, timeStamp);
+		return mustBePersisted(null, replId, timeStamp, getOldTimestamp(replId));
 	}
 
 	/**
@@ -516,7 +518,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	 * @param timeStamp
 	 * @return
 	 */
-	public synchronized boolean mustBePersisted(NodeRef childId, String replId, String timeStamp) {
+	public synchronized boolean mustBePersisted(NodeRef childId, String replId, String newTimeStamp, String oldTimeStamp) {
 
 		// we will not safe without replId
 		if (replId == null) {
@@ -534,10 +536,9 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 				&& job.getJobDataMap().getBoolean(OAIConst.PARAM_FORCE_UPDATE)) {
 			return true;
 		}
-		String oldTimeStamp = getOldTimestamp(replId);
 
 		// we will not safe without timestamp
-		if (timeStamp == null || timeStamp.isEmpty()) {
+		if (newTimeStamp == null || newTimeStamp.isEmpty()) {
 			return false;
 		}
 
@@ -549,7 +550,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 
 		Date newDate = null;
 		try {
-			newDate = sdf.parse(timeStamp);
+			newDate = sdf.parse(newTimeStamp);
 			Date oldDate = sdf.parse(oldTimeStamp);
 			if (newDate.after(oldDate)) {
 				getLogger().debug("newDate.after(oldDate) newDate:" + newDate+ " oldDate:"+ oldDate+" returning true");
@@ -558,7 +559,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 
 		} catch (ParseException e) {
 			getLogger().error(e.getMessage() + " while comparing old and new timestamp for id:" + replId + " oldTimeStamp:" + oldTimeStamp
-					+ " newTimeStamp:" + timeStamp);
+					+ " newTimeStamp:" + newTimeStamp);
 
 			// if old date was damaged but new date is ok
 			if (newDate != null) {
