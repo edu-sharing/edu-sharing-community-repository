@@ -52,6 +52,12 @@
 			<arg value="--format=%ad-%h" />
 			<arg value="--date=short" />
 		</exec>
+		<exec executable="git" outputproperty="git_internal.result" dir="../Edu-Sharing-Internal">
+			<arg value="log" />
+			<arg value="-n1" />
+			<arg value="--format=%h" />
+			<arg value="--date=short" />
+		</exec>
 		<!-- current version in version.html-->
 		<exec executable="git" outputproperty="git.version">
 			<arg value="log" />
@@ -121,10 +127,10 @@
 		        <isset property="extension-name"/>
 		</condition>
 
-		<zip destfile="${release.foldername}/${release.foldername}${extension-name}_${mainversion}.${git.result}.zip" basedir="." includes="${release.foldername}/**">
+		<zip destfile="${release.foldername}/${release.foldername}${extension-name}_${mainversion}.${git.result}-${git_internal.result}.zip" basedir="." includes="${release.foldername}/**">
 		</zip>
-		<move file="${release.foldername}/${release.foldername}${extension-name}_${mainversion}.${git.result}.zip" todir="release"> </move>
-		<checksum file="release/${release.foldername}${extension-name}_${mainversion}.${git.result}.zip" todir="release" algorithm="SHA"></checksum>
+		<move file="${release.foldername}/${release.foldername}${extension-name}_${mainversion}.${git.result}-${git_internal.result}.zip" todir="release"> </move>
+		<checksum file="release/${release.foldername}${extension-name}_${mainversion}.${git.result}-${git_internal.result}.zip" todir="release" algorithm="SHA"></checksum>
 
 		<!--clean up version tmp file -->
 		<delete file="version_tmp.properties"></delete>
