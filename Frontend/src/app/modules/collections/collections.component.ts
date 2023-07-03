@@ -8,15 +8,10 @@ import {
     ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
-import { Subject } from 'rxjs';
-import { NodeEntriesDisplayType } from '../../features/node-entries/entries-model';
-import { BridgeService } from '../../core-bridge-module/bridge.service';
 import * as EduData from '../../core-module/core.module';
 import {
     ConfigurationService,
     DialogButton,
-    FrameEventsService,
     LoginResult,
     Mediacenter,
     Node,
@@ -26,32 +21,26 @@ import {
     RestConstants,
     RestHelper,
     RestIamService,
-    RestMdsService,
     RestMediacenterService,
-    RestNetworkService,
     RestNodeService,
-    RestOrganizationService,
     TemporaryStorageService,
     UIService,
 } from '../../core-module/core.module';
-import { Toast } from '../../core-ui-module/toast';
-import { Scope } from '../../core-ui-module/option-item';
-import { UIHelper } from '../../core-ui-module/ui-helper';
+import { Helper } from '../../core-module/rest/helper';
+import { ColorHelper, PreferredColor } from '../../core-module/ui/color-helper';
 import { UIConstants } from '../../core-module/ui/ui-constants';
 import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
-import { Location } from '@angular/common';
-import { Helper } from '../../core-module/rest/helper';
-import { ColorHelper, PreferredColor } from '../../core-module/ui/color-helper';
-import { HttpClient } from '@angular/common/http';
+import { Scope } from '../../core-ui-module/option-item';
 import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
-import { SortEvent } from '../../shared/components/sort-dropdown/sort-dropdown.component';
-import { MainNavService } from '../../main/navigation/main-nav.service';
-import { CollectionInfoBarComponent } from './collection-info-bar/collection-info-bar.component';
-import { CollectionContentComponent } from './collection-content/collection-content.component';
-import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
-import { TranslationsService } from '../../translations/translations.service';
+import { Toast } from '../../core-ui-module/toast';
+import { UIHelper } from '../../core-ui-module/ui-helper';
+import { NodeEntriesDisplayType } from '../../features/node-entries/entries-model';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
+import { SortEvent } from '../../shared/components/sort-dropdown/sort-dropdown.component';
+import { TranslationsService } from '../../translations/translations.service';
+import { CollectionContentComponent } from './collection-content/collection-content.component';
+import { CollectionInfoBarComponent } from './collection-info-bar/collection-info-bar.component';
 
 // component class
 @Component({
@@ -154,35 +143,23 @@ export class CollectionsMainComponent implements OnDestroy {
     reurl: any;
     private _collectionShare: Node;
     private params: Params;
-    private destroyed = new Subject<void>();
 
     // inject services
     constructor(
-        private frame: FrameEventsService,
-        private http: HttpClient,
-        private temporaryStorageService: TemporaryStorageService,
-        private location: Location,
-        private collectionService: RestCollectionService,
-        private nodeHelper: NodeHelperService,
-        private mediacenterService: RestMediacenterService,
-        private nodeService: RestNodeService,
-        private mainNavService: MainNavService,
-        private networkService: RestNetworkService,
-        private organizationService: RestOrganizationService,
-        private iamService: RestIamService,
-        private mdsService: RestMdsService,
-        private connector: RestConnectorService,
-        private route: ActivatedRoute,
-        private uiService: UIService,
-        private router: Router,
-        private tempStorage: TemporaryStorageService,
-        private optionsService: OptionsHelperService,
-        private toast: Toast,
-        private bridge: BridgeService,
-        private config: ConfigurationService,
-        private translationService: TranslateService,
-        private translations: TranslationsService,
         private breadcrumbsService: BreadcrumbsService,
+        private collectionService: RestCollectionService,
+        private config: ConfigurationService,
+        private connector: RestConnectorService,
+        private iamService: RestIamService,
+        private mediacenterService: RestMediacenterService,
+        private nodeHelper: NodeHelperService,
+        private nodeService: RestNodeService,
+        private route: ActivatedRoute,
+        private router: Router,
+        private temporaryStorageService: TemporaryStorageService,
+        private toast: Toast,
+        private translations: TranslationsService,
+        private uiService: UIService,
     ) {
         this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn().subscribe(
