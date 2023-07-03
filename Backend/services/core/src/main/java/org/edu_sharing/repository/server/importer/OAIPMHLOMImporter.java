@@ -354,9 +354,15 @@ public class OAIPMHLOMImporter implements Importer{
 		String url = getRecordUrl(identifier);
 
 		long currentTime = System.currentTimeMillis();
-		String result = new HttpQueryTool().query(url);
+		String result = getQueryTool().query(url);
 		logger.info("GetRecord;"+url+";" + (System.currentTimeMillis() - currentTime));
 		return result;
+	}
+
+	private HttpQueryTool getQueryTool() {
+		HttpQueryTool httpTool = new HttpQueryTool();
+		httpTool.setTimeout(180 * 1000);
+		return httpTool;
 	}
 
 	private String getRecordUrl(String identifier) {
@@ -371,7 +377,7 @@ public class OAIPMHLOMImporter implements Importer{
 		for(String oaiID : oaiIDs) {
 			String url = getRecordUrl(oaiID);
 			logger.info("url record:"+url);
-			String result = new HttpQueryTool().query(url);
+			String result = getQueryTool().query(url);
 			if(result != null && !result.trim().equals("")){
 				handleGetRecordStuff("IDList",oaiID);
 			}
@@ -470,7 +476,7 @@ public class OAIPMHLOMImporter implements Importer{
 	public void importOAIObjectsFromFile(String urlToFile, RecordHandlerInterface recordHandlerLom) throws Throwable{
 		DocumentBuilder builder = factory.newDocumentBuilder();
 		
-		String queryResult = new HttpQueryTool().query(urlToFile);
+		String queryResult = getQueryTool().query(urlToFile);
 		
 		Document doc = builder.parse(new InputSource(new StringReader(queryResult)));
 		

@@ -8,9 +8,11 @@ import org.apache.http.*;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.*;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
@@ -46,6 +48,8 @@ public class HttpQueryTool {
 
 	String basicAuthPw = null;
 
+	int timeout = -1;
+
 	public HttpQueryTool() {
 		init();
 	}
@@ -54,6 +58,14 @@ public class HttpQueryTool {
 		this();
 		this.basicAuthUn = basicAuthUn;
 		this.basicAuthPw = basicAuthPw;
+	}
+
+	public int getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(int timeout) {
+		this.timeout = timeout;
 	}
 
 	private void init(){
@@ -221,7 +233,9 @@ public class HttpQueryTool {
 		}
 
 		clientBuilder.setUserAgent("Test Client");
-
+		clientBuilder.setDefaultRequestConfig(RequestConfig.copy(RequestConfig.DEFAULT).
+				setConnectTimeout(timeout).setConnectionRequestTimeout(timeout).setSocketTimeout(timeout).build()
+		);
 		//basic auth
 		CredentialsProvider credentialsProvider = null;
 		if(basicAuthUn != null && basicAuthPw != null) {

@@ -216,7 +216,9 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			String nodeId;
 			getLogger().info("found no local Object for: Id:" + replicationId + " catalog:" + lomCatalogId + " creating new one");
 			nodeId=createNode(targetFolder, CCConstants.CCM_TYPE_IO, CCConstants.CM_ASSOC_FOLDER_CONTAINS, newNodeProps);
+			getLogger().debug("node for " + replicationId + " created: " + nodeId);;
 			setModifiedDate(nodeId,newNodeProps);
+			getLogger().debug("modified date set for node " + nodeId);
 			// add it to the replication id map (full catalog + repl id)
 			replIdMap.put(nodeReplId,new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId));
 			// and the timestamp map (only replication id)
