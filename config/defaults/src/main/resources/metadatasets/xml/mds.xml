@@ -1266,7 +1266,8 @@
 				{"term":{"aspects":"ccm:io_childobject"}},
 				{"wildcard":{"properties.cm:name.keyword":"._*"}},
 				{"term":{"aspects":"ccm:collection_io_reference"}},
-				{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}
+				{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}},
+				{"term":{"aspects":"ccm:mediacenter_statistics"}}
 				]
 				}}</basequery>
 			<property name="ngsearchword" asFilter="false">
