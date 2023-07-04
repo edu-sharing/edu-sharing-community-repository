@@ -73,7 +73,13 @@ export class NotificationListComponent implements OnInit {
         await this.loadNotifications();
     }
 
-    markAllRead() {}
+    async markAllRead() {
+        this.dataSource.getData().forEach((e) => (e.status = 'READ'));
+        this.unreadNotificationsCount = 0;
+        await this.notificationService.updateNotificationStatusByReceiverId({
+            receiverId: ME,
+        });
+    }
 
     async loadNotifications() {
         let status: Array<'PENDING' | 'SENT' | 'READ'> = ['PENDING', 'SENT'];
