@@ -121,10 +121,10 @@
           {
             "properties": {
               "collection": {
-                "$ref": "#/components/schemas/Collection"
+                "$ref": "#/components/schemas/CollectionDTO"
               },
               "node": {
-                "$ref": "#/components/schemas/NodeData"
+                "$ref": "#/components/schemas/NodeDataDTO"
               }
             },
             "type": "object"
@@ -513,6 +513,26 @@
         },
         "type": "object"
       },
+      "CollectionDTO": {
+        "properties": {
+          "aspects": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "properties": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CollectionEntries": {
         "properties": {
           "collections": {
@@ -787,7 +807,7 @@
                 "type": "string"
               },
               "node": {
-                "$ref": "#/components/schemas/NodeData"
+                "$ref": "#/components/schemas/NodeDataDTO"
               }
             },
             "type": "object"
@@ -1725,7 +1745,7 @@
                 "type": "string"
               },
               "node": {
-                "$ref": "#/components/schemas/NodeData"
+                "$ref": "#/components/schemas/NodeDataDTO"
               },
               "permissions": {
                 "items": {
@@ -2970,7 +2990,7 @@
                 "type": "string"
               },
               "node": {
-                "$ref": "#/components/schemas/NodeData"
+                "$ref": "#/components/schemas/NodeDataDTO"
               },
               "parentCaption": {
                 "type": "string"
@@ -2979,7 +2999,7 @@
                 "type": "string"
               },
               "widget": {
-                "$ref": "#/components/schemas/WidgetData"
+                "$ref": "#/components/schemas/WidgetDataDTO"
               }
             },
             "type": "object"
@@ -3293,6 +3313,26 @@
         },
         "type": "object"
       },
+      "NodeDataDTO": {
+        "properties": {
+          "aspects": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "properties": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "NodeEntries": {
         "properties": {
           "nodes": {
@@ -3330,7 +3370,7 @@
           {
             "properties": {
               "node": {
-                "$ref": "#/components/schemas/NodeData"
+                "$ref": "#/components/schemas/NodeDataDTO"
               },
               "reason": {
                 "type": "string"
@@ -3609,10 +3649,10 @@
             "type": "string"
           },
           "creator": {
-            "$ref": "#/components/schemas/UserData"
+            "$ref": "#/components/schemas/UserDataDTO"
           },
           "receiver": {
-            "$ref": "#/components/schemas/UserData"
+            "$ref": "#/components/schemas/UserDataDTO"
           },
           "status": {
             "enum": [
@@ -4357,7 +4397,7 @@
                 "type": "number"
               },
               "node": {
-                "$ref": "#/components/schemas/NodeData"
+                "$ref": "#/components/schemas/NodeDataDTO"
               },
               "ratingCount": {
                 "format": "int64",
@@ -5754,9 +5794,12 @@
         ],
         "type": "object"
       },
-      "UserData": {
+      "UserDataDTO": {
         "properties": {
           "firstName": {
+            "type": "string"
+          },
+          "id": {
             "type": "string"
           },
           "lastName": {
@@ -6448,7 +6491,7 @@
         },
         "type": "object"
       },
-      "WidgetData": {
+      "WidgetDataDTO": {
         "properties": {
           "caption": {
             "type": "string"
@@ -6467,7 +6510,7 @@
           {
             "properties": {
               "node": {
-                "$ref": "#/components/schemas/NodeData"
+                "$ref": "#/components/schemas/NodeDataDTO"
               },
               "userComment": {
                 "type": "string"
@@ -29127,6 +29170,58 @@
           }
         },
         "summary": "Retrieve stored notification, filtered by receiver and status",
+        "tags": [
+          "NOTIFICATION v1"
+        ]
+      }
+    },
+    "/notification/v1/notifications/receiver/status": {
+      "put": {
+        "operationId": "updateNotificationStatusByReceiverId",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "receiverId",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The old status (or conjunction)",
+            "in": "query",
+            "name": "oldStatus",
+            "schema": {
+              "items": {
+                "enum": [
+                  "PENDING",
+                  "SENT",
+                  "READ"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "newStatus",
+            "schema": {
+              "default": "READ",
+              "enum": [
+                "PENDING",
+                "SENT",
+                "READ"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "set notification status"
+          }
+        },
+        "summary": "Endpoint to update the notification status",
         "tags": [
           "NOTIFICATION v1"
         ]

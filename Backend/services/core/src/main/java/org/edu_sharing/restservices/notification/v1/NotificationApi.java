@@ -135,13 +135,13 @@ public class NotificationApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "set notification status")
     })
-    public Response updateNotificationStatus(
-            @QueryParam("id") String id,
+    public Response updateNotificationStatusByReceiverId(
+            @QueryParam("receiverId") String receiverId,
             @Parameter(name = "oldStatus", description = "The old status (or conjunction)") @QueryParam("oldStatus") List<StatusDTO> oldStatus,
             @QueryParam("newStatus") @DefaultValue(value = "READ") StatusDTO newStatus
     ) throws DAOException {
         try {
-            NotificationServiceFactoryUtility.getLocalService().setNotificationStatusByReceiverId(id, oldStatus, newStatus);
+            NotificationServiceFactoryUtility.getLocalService().setNotificationStatusByReceiverId(receiverId, oldStatus, newStatus);
             return Response.ok().build();
         } catch (Throwable t) {
             throw DAOException.mapping(t);
