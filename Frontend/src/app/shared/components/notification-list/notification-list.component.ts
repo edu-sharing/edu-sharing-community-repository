@@ -144,4 +144,8 @@ export class NotificationListComponent implements OnInit {
             this.unreadNotificationsCount--;
         }
     }
+
+    allowMarkRead() {
+        return this.unreadNotificationsCount > 0;
+    }
 }

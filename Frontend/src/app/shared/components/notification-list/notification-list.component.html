@@ -33,6 +33,7 @@
         <button
           mat-icon-button
           color="primary"
+          [disabled]="!allowMarkRead()"
           (click)="markAllRead()"
           matTooltip="{{ 'NOTIFICATION_LIST.MARK_ALL_READ' | translate }}"
         >
