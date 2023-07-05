@@ -130,22 +130,15 @@ export class NodeHelperService {
                 name,
             });
             return error.status;
-        } else if (error._body) {
-            try {
-                const json = JSON.parse(error._body);
-                if (
-                    json.message.startsWith(
-                        'org.alfresco.service.cmr.repository.CyclicChildRelationshipException',
-                    )
-                ) {
-                    this.bridge.showTemporaryMessage(
-                        MessageType.error,
-                        'WORKSPACE.TOAST.CYCLIC_NODE',
-                        { name },
-                    );
-                    return error.status;
-                }
-            } catch (e) {}
+        } else if (
+            error.error?.message?.includes(
+                'org.alfresco.service.cmr.repository.CyclicChildRelationshipException',
+            )
+        ) {
+            this.bridge.showTemporaryMessage(MessageType.error, 'WORKSPACE.TOAST.CYCLIC_NODE', {
+                name,
+            });
+            return error.status;
         }
         this.bridge.showTemporaryMessage(MessageType.error, null, null, null, error);
         return error.status;
