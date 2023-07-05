@@ -18,6 +18,7 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.OwnableService;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
@@ -100,6 +101,12 @@ public class ScopeUserHomeServiceImpl implements ScopeUserHomeService{
 					//set owner to username
 					ownableService.setOwner(parentNodeRef, username);
 					serviceRegistry.getPermissionService().setInheritParentPermissions(parentNodeRef, false);
+
+					//set ROLE_OWNER authority to ALL like alfresco is doing
+					// (watch out for alfresco bean "personServicePermissionsManager"
+					//  and class org.alfresco.repo.security.person.PermissionsManagerImpl)
+					serviceRegistry.getPermissionService().setPermission(parentNodeRef, PermissionService.OWNER_AUTHORITY, PermissionService.ALL_PERMISSIONS, true);
+					serviceRegistry.getPermissionService().setPermission(parentNodeRef, username, PermissionService.ALL_PERMISSIONS, true);
 					
 					Map<QName,Serializable> personScopeProps = new HashMap<QName,Serializable>();
 					personScopeProps.put(PROP_PERSON_SCOPE_HOMEFOLDER, parentNodeRef);

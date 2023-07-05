@@ -1,13 +1,18 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.query.PagingRequest;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.OwnableService;
+import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.service.namespace.RegexQNamePattern;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -20,6 +25,7 @@ import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Arrays;
+import java.util.List;
 
 
 public class FixOwnerSafeScopeJob extends AbstractJob{
@@ -44,39 +50,49 @@ public class FixOwnerSafeScopeJob extends AbstractJob{
         String persistParam = (String)jobExecutionContext.getJobDetail().getJobDataMap().get("persist");
         persist = new Boolean(persistParam);
 
-        /**
-         * run for safe userhomes
-         */
-        logger.info("starting for safe userhomes. persist:"+persist);
-        NodeRef root = AuthenticationUtil.runAsSystem(() -> {
-            NodeRef tmp = new ScopeUserHomeServiceImpl().getRootNodeRef(CCConstants.CCM_VALUE_SCOPE_SAFE);
-            return tmp;
-        });
 
-        NodeRunner nr = getBasicNodeRunner();
-        nr.setTask((ref) -> {
-           checkAndFixOwner(ref);
-        });
-        nr.setStartFolder(root.getId());
-        nr.run();
-
-        /**
-         * run for safe shared folders
-         */
-        logger.info("starting for safe shared folders. persist:"+persist);
-        nr = getBasicNodeRunner();
-        NodeRef orgFolderRoot = AuthenticationUtil.runAsSystem(() -> {
-            return eduOrganisationService.getOrganisationFolderRoot();
-        });
-        nr.setTask((ref) -> {
-            if(CCConstants.CCM_VALUE_SCOPE_SAFE
-                    .equals(nodeService.getProperty(ref,QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME)))){
-                checkAndFixOwner(ref);
+        List<PersonService.PersonInfo> allPeople = getAllPeople();
+        for(PersonService.PersonInfo personInfo : allPeople){
+            NodeRef personNodeRef = personInfo.getNodeRef();
+            List<ChildAssociationRef> personScopes = nodeService.getChildAssocs(personNodeRef, ScopeUserHomeServiceImpl.CHILD_ASSOC_PERSON_SCOPES, RegexQNamePattern.MATCH_ALL);
+            if(personScopes == null || personScopes.size() == 0){
+                logger.info("no person scope found for person " + personInfo.getUserName());
+                continue;
             }
-        });
-        nr.setStartFolder(orgFolderRoot.getId());
-        nr.run();
 
+            for(ChildAssociationRef personScope : personScopes){
+                if(!ScopeUserHomeServiceImpl.TYPE_PERSON_SCOPE.equals(nodeService.getType(personScope.getChildRef()))) {
+                    logger.error(personScope.getChildRef() + " nis no person scope");
+                    continue;
+                }
+
+                String scope = (String)nodeService.getProperty(personScope.getChildRef(),ScopeUserHomeServiceImpl.PROP_PERSON_SCOPE_NAME);
+                if(!scope.equals(CCConstants.CCM_VALUE_SCOPE_SAFE)){
+                    logger.error("unkown scope found for "+personScope.getChildRef());
+                    continue;
+                }
+
+                NodeRef safeUserhome = (NodeRef)nodeService.getProperty(personScope.getChildRef(),ScopeUserHomeServiceImpl.PROP_PERSON_SCOPE_HOMEFOLDER);
+                if(safeUserhome == null){
+                    logger.error("no userhome found for personScope node ");
+                    continue;
+                }
+
+                NodeRunner nr = getBasicNodeRunner();
+                nr.setTask((ref) -> {
+                    checkAndFixOwner(ref);
+                });
+                nr.setNodesList(Arrays.asList(new NodeRef[]{safeUserhome}));
+                nr.run();
+            }
+        }
+    }
+
+    private List<PersonService.PersonInfo> getAllPeople() {
+        return AuthenticationUtil.runAsSystem(() -> {
+            PersonService personService = serviceRegistry.getPersonService();
+            return personService.getPeople(null, null, null, new PagingRequest(Integer.MAX_VALUE, null)).getPage();
+        });
     }
 
     private NodeRunner getBasicNodeRunner(){
@@ -91,19 +107,23 @@ public class FixOwnerSafeScopeJob extends AbstractJob{
     void checkAndFixOwner(NodeRef ref){
         String path = nodeService.getPath(ref).toDisplayPath(nodeService,serviceRegistry.getPermissionService());
 
-
         String pathIncludingNode = path + "/" +nodeService.getProperty(ref, ContentModel.PROP_NAME);
         logger.info(pathIncludingNode);
-        if(!ownableService.hasOwner(ref)){
-            String creator = (String)nodeService.getProperty(ref, ContentModel.PROP_CREATOR);
-            if(creator != null && !creator.trim().isEmpty()){
-                logger.info("adding owner for "+pathIncludingNode +" "+ref +" owner:" + creator);
-                if(persist){
-                    ownableService.setOwner(ref,creator);
-                }
-            }else{
-                logger.info("no creator found can not determine owner for "+pathIncludingNode +" "+ref);
-            }
+
+        String owner = ownableService.getOwner(ref);
+        if(owner == null){
+            logger.error("now owner found for "+ref);
+            return;
+        }
+
+        logger.info("adding ALL permission to user and OWNER_AUTHORITY for "+pathIncludingNode +" "+ref +" user:" + owner);
+        if(persist){
+
+            //set ROLE_OWNER authority to ALL like alfresco is doing
+            // (watch out for alfresco bean "personServicePermissionsManager"
+            //  and class org.alfresco.repo.security.person.PermissionsManagerImpl)
+            serviceRegistry.getPermissionService().setPermission(ref, PermissionService.OWNER_AUTHORITY, PermissionService.ALL_PERMISSIONS, true);
+            serviceRegistry.getPermissionService().setPermission(ref, owner, PermissionService.ALL_PERMISSIONS, true);
 
         }
     }
