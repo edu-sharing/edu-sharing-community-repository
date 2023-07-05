@@ -1215,11 +1215,11 @@
 			<basequery propertyNull="ngsearchword">
 				{"bool":{
 				"must":[
-				{"term":{"aspects":"ccm:collection"}},{"term":{"nodeRef.storeRef.protocol":"workspace"}}
+			{"term":{"aspects":"ccm:collection"}},{"term":{"nodeRef.storeRef.protocol":"workspace"}},
 				{"bool":{
 				"should":[
 				{"term":{"properties.ccm:collectionlevel0.keyword":"true"}},
-				{"term":{"properties.ccm:collection_pinned_status":"true"}},
+			{"term":{"properties.ccm:collection_pinned_status":"true"}}
 				]
 				}}]
 				}}
@@ -1266,7 +1266,8 @@
 				{"term":{"aspects":"ccm:io_childobject"}},
 				{"wildcard":{"properties.cm:name.keyword":"._*"}},
 				{"term":{"aspects":"ccm:collection_io_reference"}},
-				{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}
+				{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}},
+				{"term":{"aspects":"ccm:mediacenter_statistics"}}
 				]
 				}}</basequery>
 			<property name="ngsearchword" asFilter="false">

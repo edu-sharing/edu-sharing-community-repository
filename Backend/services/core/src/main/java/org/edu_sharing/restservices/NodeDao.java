@@ -779,7 +779,7 @@ public class NodeDao {
         if (nodeRef != null && nodeRef.getPublic() != null) {
             this.isPublic = nodeRef.getPublic();
         } else {
-            if (ApplicationInfoList.getHomeRepository().getGuest_username() != null) {
+			if(!StringUtils.isBlank(ApplicationInfoList.getHomeRepository().getGuest_username())) {
                 this.isPublic = usedPermissionService.hasPermission(
                         storeProtocol,
                         storeId,

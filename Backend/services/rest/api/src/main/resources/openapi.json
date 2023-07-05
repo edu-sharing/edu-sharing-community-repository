@@ -4500,6 +4500,9 @@
           },
           "password": {
             "type": "string"
+          },
+          "vcard": {
+            "type": "string"
           }
         },
         "type": "object"

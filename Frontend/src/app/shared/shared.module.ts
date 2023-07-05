@@ -82,6 +82,7 @@ import { ReplaceCharsPipe } from './pipes/replace-chars.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { VCardNamePipe } from './pipes/vcard-name.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
+import { TitleDirective } from './directives/title.directive';
 import { NotificationListComponent } from './components/notification-list/notification-list.component';
 import { NotificationListEntryComponent } from './components/notification-list-entry/notification-list-entry.component';
 
@@ -128,6 +129,7 @@ import { NotificationListEntryComponent } from './components/notification-list-e
         SortDropdownComponent,
         SpinnerComponent,
         SpinnerSmallComponent,
+        TitleDirective,
         TutorialComponent,
         UserAvatarComponent,
         NotificationListComponent,
@@ -237,6 +239,7 @@ import { NotificationListEntryComponent } from './components/notification-list-e
         SortDropdownComponent,
         SpinnerComponent,
         SpinnerSmallComponent,
+        TitleDirective,
         TranslateModule,
         TutorialComponent,
         UserAvatarComponent,

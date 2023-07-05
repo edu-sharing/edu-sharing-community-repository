@@ -193,6 +193,7 @@ public class RegisterServiceImpl implements RegisterService {
             map.put(ContentModel.PROP_LASTNAME, info.getLastName());
             map.put(ContentModel.PROP_ORGANIZATION, info.getOrganization());
             map.put(ContentModel.PROP_EMAIL, info.getEmail());
+            map.put(QName.createQName(CCConstants.CM_PROP_PERSON_VCARD), info.getVcard());
             map.put(QName.createQName(CCConstants.CM_PROP_PERSON_ALLOW_NOTIFICATIONS), info.isAllowNotifications());
             try {
                 authService.createAuthentication(authority, info.getPassword().toCharArray());

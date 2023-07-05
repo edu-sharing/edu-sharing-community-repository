@@ -60,6 +60,7 @@
         color="primary"
         class="filters-button"
         [attr.aria-label]="'SEARCH.FILTERS' | translate"
+        matTooltip="{{ 'TOGGLE_SEARCH_FILTERS' | translate }}"
         (click)="toggleFilters()"
       >
         <i esIcon="filter_list"></i>

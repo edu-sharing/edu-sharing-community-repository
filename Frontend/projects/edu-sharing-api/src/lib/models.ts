@@ -34,6 +34,7 @@ export {
     UserQuota,
     UserStatus,
     WebsiteInformation,
+    RegisterInformation,
 } from './api/models';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Acl, MdsView } from './api/models';

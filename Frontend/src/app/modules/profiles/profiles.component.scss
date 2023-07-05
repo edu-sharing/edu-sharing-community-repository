@@ -1,4 +1,6 @@
 @import '../../core-ui-module/styles/variables';
+@import '../../features/mds/mds-editor/widgets/mds-editor-widget-vcard/vcard';
+
 $path: '../../../assets/images/';
 
 .profile-bg {
@@ -77,13 +79,6 @@ $path: '../../../assets/images/';
             es-user-avatar {
                 display: flex;
                 justify-content: center;
-            }
-
-            mat-form-field {
-                width: auto;
-                margin: 10px;
-                z-index: 2;
-                //background-color: rgba(255,255,255,0.1);
             }
 
             .edit,
@@ -297,7 +292,18 @@ $path: '../../../assets/images/';
 }
 
 .email-group-form {
-    display: flow-root;
+    display: flex;
+    align-items: center;
+    column-gap: 20px;
+    padding-bottom: 20px;
+    mat-form-field {
+        flex-grow: 1;
+        ::ng-deep {
+            .mat-form-field-wrapper {
+                padding-bottom: 0;
+            }
+        }
+    }
     mat-slide-toggle {
         position: relative;
         z-index: 1;
