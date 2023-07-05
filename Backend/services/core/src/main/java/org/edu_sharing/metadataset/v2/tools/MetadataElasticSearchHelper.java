@@ -31,19 +31,18 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         );
         QueryBuilder baseQueryBuilder;
         if(baseQuery.equals(baseQueryConditional)) {
-            baseQueryBuilder = QueryBuilders.wrapperQuery(baseQuery);
+            baseQueryBuilder = new ESRestHighLevelClient.ReadableWrapperQueryBuilder(baseQuery);
         } else {
             baseQueryBuilder = QueryBuilders.boolQuery().must(
-                    QueryBuilders.wrapperQuery(baseQuery)
+                    new ESRestHighLevelClient.ReadableWrapperQueryBuilder(baseQuery)
             ).must(
-                    QueryBuilders.wrapperQuery(baseQueryConditional)
+                    new ESRestHighLevelClient.ReadableWrapperQueryBuilder(baseQueryConditional)
             );
         }
 
         BoolQueryBuilder result = QueryBuilders.boolQuery();
 
         if(asFilter == null || (asFilter.booleanValue() == query.getBasequeryAsFilter())){
-            baseQueryBuilder = new ESRestHighLevelClient.ReadableWrapperQueryBuilder(baseQuery);
             result.must(baseQueryBuilder);
         }
 

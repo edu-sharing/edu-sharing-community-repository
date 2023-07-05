@@ -54,6 +54,7 @@ export class MdsEditorWidgetVCardComponent extends MdsEditorWidgetBase implement
         this.editType = vcard.getType();
         this.formControl = new FormGroup(
             {
+                title: new FormControl(vcard.title),
                 givenname: new FormControl(vcard.givenname),
                 surname: new FormControl(vcard.surname),
                 org: new FormControl(vcard.org),
@@ -61,6 +62,7 @@ export class MdsEditorWidgetVCardComponent extends MdsEditorWidgetBase implement
             this.getStandardValidators(),
         );
         this.formControl.valueChanges.pipe(filter((value) => value !== null)).subscribe((value) => {
+            vcard.title = value.title;
             vcard.givenname = value.givenname;
             vcard.surname = value.surname;
             vcard.org = value.org;

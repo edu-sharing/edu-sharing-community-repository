@@ -369,8 +369,7 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
                 this.allPublishedVersions
                     .filter(
                         (v) =>
-                            !v.status === null &&
-                            v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID],
+                            !v.status && v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID],
                     )
                     .map((v) => v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID][0]),
             ).size === 1
