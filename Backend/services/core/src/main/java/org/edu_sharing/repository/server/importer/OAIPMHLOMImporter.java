@@ -184,7 +184,7 @@ public class OAIPMHLOMImporter implements Importer{
 	
 	public void updateWithRecordsList(String url,String set) throws Throwable{
 		
-		String queryResult = new HttpQueryTool().query(url);
+		String queryResult = getQueryTool().query(url);
 		if(queryResult != null){
 			//cursor
 			DocumentBuilder builder = factory.newDocumentBuilder();
@@ -239,7 +239,7 @@ public class OAIPMHLOMImporter implements Importer{
 		}
 		logger.info("url:"+url);
 		long currentTime = System.currentTimeMillis();
-		String queryResult = new HttpQueryTool().query(url);
+		String queryResult = getQueryTool().query(url);
 		logger.info("ListIdentifiers;"+url+";" + (System.currentTimeMillis() - currentTime));
 		if(queryResult != null){
 			DocumentBuilder builder = factory.newDocumentBuilder();
