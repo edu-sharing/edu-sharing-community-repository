@@ -1,28 +1,22 @@
-import { Component, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { TranslationsService } from '../../translations/translations.service';
 import {
-    NodeRef,
-    IamUser,
-    NodeWrapper,
-    Node,
-    Version,
-    NodeVersions,
+    ConfigurationService,
     LoginResult,
-    IamGroups,
-    Group,
-    OrganizationOrganizations,
     Organization,
+    OrganizationOrganizations,
+    RestConnectorService,
+    RestHelper,
+    RestOrganizationService,
 } from '../../core-module/core.module';
-import { Router, Params, Routes } from '@angular/router';
+import { Router } from '@angular/router';
 import { Toast } from '../../core-ui-module/toast';
-import { RestConnectorService } from '../../core-module/core.module';
-import { RestOrganizationService } from '../../core-module/core.module';
-import { ConfigurationService } from '../../core-module/core.module';
-import { RestHelper } from '../../core-module/core.module';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { Subject } from 'rxjs';
 import { SearchFieldService } from '../../main/navigation/search-field/search-field.service';
+import { UIHelper } from '../../core-ui-module/ui-helper';
+import { PlatformLocation } from '@angular/common';
 
 @Component({
     selector: 'es-permissions-main',
@@ -43,6 +37,7 @@ export class PermissionsMainComponent implements OnInit, OnDestroy {
     constructor(
         private toast: Toast,
         private router: Router,
+        private platformLocation: PlatformLocation,
         private config: ConfigurationService,
         private translations: TranslationsService,
         private organization: RestOrganizationService,
@@ -60,6 +55,19 @@ export class PermissionsMainComponent implements OnInit, OnDestroy {
                             .getOrganizations()
                             .subscribe((data: OrganizationOrganizations) => {
                                 this.isAdmin = data.canCreate;
+                                const hasAccess =
+                                    this.isAdmin ||
+                                    data.organizations.filter((o) => o.administrationAccess)
+                                        .length > 0;
+                                if (!hasAccess) {
+                                    this.toast.error(null, 'TOAST.API_FORBIDDEN');
+                                    UIHelper.goToDefaultLocation(
+                                        this.router,
+                                        this.platformLocation,
+                                        this.config,
+                                    );
+                                    return;
+                                }
                             });
                     } else {
                         this.goToLogin();
