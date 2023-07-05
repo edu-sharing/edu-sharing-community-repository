@@ -176,7 +176,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE, lomCatalogId);
 			put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID, replicationId);
 		}};
-		NodeRef childId = getNodeIfExists(filter,targetFolder);
+		NodeRef childId = getNodeIfExists(filter,importFolderId);
 		getLogger().debug("child id "+nodeReplId+": "+childId);
 
 		String newTimeStamp = (String) newNodeProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP);
@@ -311,7 +311,12 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		if(!hasTimestampMap) {
 			CMISSearchHelper.CMISSearchData data = new CMISSearchHelper.CMISSearchData();
 			List<NodeRef> result = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO, filter, data);
+			int previousSize = result.size();
+			getLogger().info("CMIS result for " + filter.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID) + ": " + StringUtils.join(result.stream().map(NodeRef::getId).collect(Collectors.toList()), " / "));
 			result = BulkServiceImpl.filterCMISResult(result, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, importFolderId));
+			if(result.size() != previousSize) {
+				getLogger().info(filter.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID) + ": Parent filter for id " + importFolderId + " reduced nodes to " + StringUtils.join(result.stream().map(NodeRef::getId).collect(Collectors.toList()), " / "));
+			}
 			if(result.size() > 0) {
 				if(result.size() > 1) {
 					getLogger().warn("Duplicate nodes found for " + filter.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID) + ": " +
