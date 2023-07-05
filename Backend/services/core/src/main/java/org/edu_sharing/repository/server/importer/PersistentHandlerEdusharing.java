@@ -45,7 +45,6 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.jobs.quartz.AbstractJob;
 import org.edu_sharing.repository.server.jobs.quartz.OAIConst;
-import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.bulk.BulkServiceImpl;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -56,7 +55,6 @@ import javax.transaction.*;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -176,7 +174,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE, lomCatalogId);
 			put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID, replicationId);
 		}};
-		NodeRef childId = getNodeIfExists(filter,importFolderId);
+		NodeRef childId = getNodeIfExists(filter);
 		getLogger().debug("child id "+nodeReplId+": "+childId);
 
 		String newTimeStamp = (String) newNodeProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP);
@@ -307,7 +305,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 	}
 
-	private NodeRef getNodeIfExists(Map<String, Object> filter,String importFolderId) throws Throwable {
+	private NodeRef getNodeIfExists(Map<String, Object> filter) throws Throwable {
 		if(!hasTimestampMap) {
 			CMISSearchHelper.CMISSearchData data = new CMISSearchHelper.CMISSearchData();
 			List<NodeRef> result = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO, filter, data);
@@ -326,7 +324,9 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			}
 			return null;
 		} else {
-			return replIdMap.getOrDefault(filter.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE) + ":" + filter.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID), null);
+			NodeRef result = replIdMap.getOrDefault(filter.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE) + ":" + filter.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID), null);
+			getLogger().info("Using cache map for " + filter.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID) + ": " + result);
+			return result;
 		}
 	}
 
@@ -586,7 +586,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			try {
 				NodeRef node = getNodeIfExists(new HashMap<String, Object>() {{
 						put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID, replId);
-					}}, importFolderId);
+					}});
 				return NodeServiceHelper.getProperty(node, CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP);
 			} catch (Throwable e) {
 				return null;
