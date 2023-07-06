@@ -91,6 +91,11 @@ public class MigrateFactualTermsToKeyValue extends AbstractJob{
                 return;
             }
 
+            if(serviceRegistry.getNodeService().getProperty(n,QName.createQName(PROP_DISPLAY)) != null){
+                logger.info(n+" is already migrated");
+                return;
+            }
+
             List<String> displayNames = (List<String>)serviceRegistry.getNodeService().getProperty(n, QName.createQName(PROP));
             if(displayNames != null && displayNames.size() > 0){
                 ArrayList<String> keys = new ArrayList<>();
