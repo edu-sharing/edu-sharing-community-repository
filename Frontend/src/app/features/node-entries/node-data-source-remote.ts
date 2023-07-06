@@ -577,8 +577,8 @@ class SortHandler {
         const sortDirection = userModifiableValue.createString<SortDirection>(
             this._defaultSort?.direction,
         );
-        sortActive.registerQueryParameter('sortBy', route);
-        sortDirection.registerQueryParameter('sortDirection', route);
+        sortActive.registerQueryParameter('sortBy', route, { skipScrollToTop: true });
+        sortDirection.registerQueryParameter('sortDirection', route, { skipScrollToTop: true });
         rxjs.combineLatest([sortActive.observeValue(), sortDirection.observeValue()]).subscribe(
             ([active, direction]) => this._changeSort({ active, direction }, 'query-params'),
         );
