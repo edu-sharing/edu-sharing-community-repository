@@ -21,7 +21,7 @@ export class Tree {
 
     static generateTree(
         definedValues: readonly MdsWidgetValue[],
-        checkedValues: readonly string[],
+        checkedValues: readonly string[] = [],
         indeterminateValues?: readonly string[],
     ): Tree {
         const tree = new Tree();
