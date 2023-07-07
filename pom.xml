@@ -101,7 +101,11 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <configuration>
             <runOrder>alphabetical</runOrder>
-            <argLine>-Xmx1024m</argLine>
+            <argLine>
+              -Xmx1024m
+              --add-opens=java.base/java.lang=ALL-UNNAMED
+              --add-opens=java.base/java.util=ALL-UNNAMED
+            </argLine>
           </configuration>
         </plugin>
 
