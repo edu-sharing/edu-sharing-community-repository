@@ -3,7 +3,7 @@
     <div class="entry" [class.read]="entry.status === 'READ'">
       <div class="heading">
         <div>{{ entry.creator | authorityName }}</div>
-        <div>{{ entry.timestamp | formatDate : { relative: true } }}</div>
+        <div>{{ entry.timestamp | formatDate: { relative: true } }}</div>
       </div>
       <div class="main-info">
         <i [esIcon]="getIcon()"></i>
