@@ -6,6 +6,8 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Widget } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import { MdsWidgetType } from '../../../types/types';
+import { Tree } from '../mds-editor-widget-tree/tree';
 
 @Component({
     selector: 'es-mds-editor-widget-search-suggestions',
@@ -28,6 +30,7 @@ export class MdsEditorWidgetSearchSuggestionsComponent
     );
 
     @ViewChild(MatChip, { read: ElementRef }) private firstSuggestionChip: ElementRef<HTMLElement>;
+    private tree: Tree;
 
     ngOnInit(): void {
         this.registerFilteredSuggestions();
@@ -60,5 +63,21 @@ export class MdsEditorWidgetSearchSuggestionsComponent
         } else {
             return null;
         }
+    }
+
+    getTooltip(suggestion: FacetValue) {
+        if (
+            [
+                MdsWidgetType.MultiValueTree.toString(),
+                MdsWidgetType.SingleValueTree.toString(),
+            ].includes(this.widget.definition.type)
+        ) {
+            if (!this.tree) {
+                // build up tree if not yet present
+                this.tree = Tree.generateTree(this.widget.definition.values);
+            }
+            return this.tree.idToDisplayValue(suggestion.value).hint;
+        }
+        return null;
     }
 }

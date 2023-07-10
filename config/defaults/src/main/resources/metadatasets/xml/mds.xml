@@ -615,7 +615,6 @@
 			<id>search_suggestions</id>
 			<rel>suggestions</rel>
 			<html><![CDATA[
-              <cclom:general_keyword>
 				]]></html>
 		</template>
 		<template>

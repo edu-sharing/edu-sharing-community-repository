@@ -1,6 +1,5 @@
 package org.edu_sharing.metadataset.v2.tools;
 
-import com.sun.star.lang.IllegalArgumentException;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
