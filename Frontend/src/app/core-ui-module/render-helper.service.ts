@@ -229,7 +229,9 @@ export class RenderHelperService {
             };
             videoElement.addEventListener('play', listener);
             target = document.createElement('div');
-            videoElement.parentElement.parentElement.appendChild(target);
+            document
+                .querySelector('.edusharing_rendering_wrapper')
+                .parentElement.appendChild(target);
         } catch (e) {
             // console.log("did not find video element, skipping controls",e);
             setTimeout(() => this.injectVideoControls(node), 1000 / 30);

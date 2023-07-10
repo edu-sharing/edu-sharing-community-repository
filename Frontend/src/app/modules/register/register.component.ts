@@ -81,7 +81,6 @@ export class RegisterComponent {
 
         this.translations.waitForInit().subscribe(() => {
             this.isLoading = false;
-            this.changes.detectChanges();
             if (['request', 'reset-password', 'done-reset'].indexOf(this.params.status) !== -1) {
                 if (
                     this.configService.instant('register.local', true as boolean) === false &&

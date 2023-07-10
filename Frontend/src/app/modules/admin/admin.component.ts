@@ -20,7 +20,6 @@ import {
     RestHelper,
     RestIamService,
     RestMediacenterService,
-    RestNetworkService,
     RestNodeService,
     RestOrganizationService,
     RestSearchService,
@@ -1369,6 +1368,11 @@ export class AdminComponent implements OnInit, OnDestroy {
 
     private init() {
         this.initButtons();
+        if (this.buttons.length === 0) {
+            this.toast.error(null, 'TOAST.API_FORBIDDEN');
+            UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.config);
+            return;
+        }
         this.globalProgress = false;
 
         this.searchColumns = WorkspaceExplorerComponent.getColumns(this.connector);

@@ -438,7 +438,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		try {
 			NodeRef nodeRef = new NodeRef(store, nodeId);
 			//logger.info("nodeRef:"+ nodeRef +"path: " + nodeServiceAlfresco.getPath(nodeRef).toDisplayPath(serviceRegistry.getNodeService(),serviceRegistry.getPermissionService()));
-			logger.debug("nodeRef:"+ nodeRef +"path: " + nodeServiceAlfresco.getPath(nodeRef).toPrefixString(serviceRegistry.getNamespaceService()));
+			if(logger.isDebugEnabled()) {
+				logger.debug("nodeRef:" + nodeRef + "path: " + nodeServiceAlfresco.getPath(nodeRef).toPrefixString(serviceRegistry.getNamespaceService()));
+			}
 			List<ChildAssociationRef> assocs;
 			if (types == null) {
 				assocs = nodeServiceAlfresco.getChildAssocs(nodeRef);
@@ -1317,7 +1319,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		Map<String, Object> filters = new HashMap<>();
 		filters.put(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
 		List<NodeRef> nodes = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO, filters);
-		return nodes.stream().map(NodeRef::getId).collect(Collectors.toList());
+		return nodes.stream().
+				// filter any collection ref to prevent duplicated published versions
+				filter(n -> !NodeServiceHelper.hasAspect(n, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)).
+				map(NodeRef::getId).collect(Collectors.toList());
 	}
 
 	@Override

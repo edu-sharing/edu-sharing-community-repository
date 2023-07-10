@@ -5,6 +5,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.text.Collator;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -1050,7 +1051,16 @@ public class AdminServiceImpl implements AdminService  {
 				JobDescription.JobFieldDescription fieldDesc = new JobDescription.JobFieldDescription();
 				fieldDesc.setName(f.getName());
 				boolean isArray = f.getType().isAssignableFrom(Collection.class) || f.getType().equals(List.class);
-				Class<?> type = isArray ? (Class<?>) ((ParameterizedType)f.getGenericType()).getActualTypeArguments()[0] : f.getType();
+				Class<?> type;
+				if(isArray) {
+					Type subtype = ((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0];
+					if (subtype instanceof ParameterizedType) {
+						subtype = ((ParameterizedType) subtype).getActualTypeArguments()[0];
+					}
+					 type = (Class<?>) subtype;
+				} else {
+					type = f.getType();
+				}
 				fieldDesc.setType(type);
 				fieldDesc.setIsArray(isArray);
 				fieldDesc.setDescription(f.getAnnotation(JobFieldDescription.class).description());

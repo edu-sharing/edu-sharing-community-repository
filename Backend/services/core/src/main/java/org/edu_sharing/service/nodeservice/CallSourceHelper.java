@@ -2,6 +2,8 @@ package org.edu_sharing.service.nodeservice;
 
 import org.apache.http.HttpHeaders;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -13,6 +15,8 @@ public class CallSourceHelper {
         Preview,
         Sitemap,
         Workspace,
+        // access from external edu connector tool
+        ToolConnector,
         Unknown
     }
 
@@ -37,8 +41,9 @@ public class CallSourceHelper {
             }
 
         }
-
-        if(isSearch(requestPath)){
+        if(isToolConnector()) {
+            return CallSource.ToolConnector;
+        }else if(isSearch(requestPath)){
             return CallSource.Search;
         }else if(isRender(requestPath) || (isRender(refererPath))){
             return CallSource.Render;
@@ -49,6 +54,10 @@ public class CallSourceHelper {
         }else{
             return CallSource.Workspace;
         }
+    }
+    private static boolean isToolConnector() {
+        return ContextManagementFilter.accessTool.get() != null &&
+                ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getType());
     }
 
     private static boolean isSearch(String path){

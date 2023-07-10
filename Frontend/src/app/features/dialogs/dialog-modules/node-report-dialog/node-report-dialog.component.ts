@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
-import { filter, take } from 'rxjs/operators';
+import { filter, first, take } from 'rxjs/operators';
 import {
     DialogButton,
     LoginResult,
@@ -23,7 +23,8 @@ import { UIAnimation } from '../../../../core-module/ui/ui-animation';
 import { Toast } from '../../../../core-ui-module/toast';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
-
+import { AuthenticationService, UserService } from 'ngx-edu-sharing-api';
+import { forkJoin } from 'rxjs';
 export interface NodeReportDialogData {
     node: Node;
 }
@@ -52,8 +53,8 @@ export class NodeReportDialogComponent implements OnInit {
     constructor(
         @Inject(CARD_DIALOG_DATA) public data: NodeReportDialogData,
         private dialogRef: CardDialogRef,
-        private connector: RestConnectorService,
-        private iam: RestIamService,
+        private authenticationService: AuthenticationService,
+        private userService: UserService,
         private translate: TranslateService,
         private toast: Toast,
         private nodeApi: RestNodeService,
@@ -68,12 +69,13 @@ export class NodeReportDialogComponent implements OnInit {
             ],
         });
         // Pre-fill the email field for logged-in users.
-        this.connector.isLoggedIn().subscribe((data: LoginResult) => {
-            if (!data.isGuest) {
+        forkJoin(
+            this.authenticationService.observeLoginInfo().pipe(first()),
+            this.userService.observeCurrentUser().pipe(first()),
+        ).subscribe(([login, user]) => {
+            if (!login.isGuest && !!user?.person?.profile?.email) {
                 this.form.get('email').disable();
-                this.iam.getCurrentUserAsync().then((user) => {
-                    this.form.patchValue({ email: user.person.profile.email });
-                });
+                this.form.patchValue({ email: user.person.profile.email });
             }
         });
         // Disable close by backdrop click as soon as the user enters any value .

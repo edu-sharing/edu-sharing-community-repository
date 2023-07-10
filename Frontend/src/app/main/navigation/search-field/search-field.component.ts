@@ -2,16 +2,28 @@ import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition } from '@angul
 import { Component, ElementRef, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatChip } from '@angular/material/chips';
-import { FacetsDict, LabeledValue, LabeledValuesDict } from 'ngx-edu-sharing-api';
+import {
+    FacetsDict,
+    LabeledValue,
+    LabeledValuesDict,
+    MdsService,
+    MdsDefinition,
+    MdsWidget,
+} from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, switchMap, takeUntil } from 'rxjs/operators';
 import { SearchFieldFacetsComponent } from '../../../features/mds/mds-editor/search-field-facets/search-field-facets.component';
-import { Values } from '../../../features/mds/types/types';
+import { MdsWidgetType, Values } from '../../../features/mds/types/types';
 import { LoadingScreenService } from '../../loading-screen/loading-screen.service';
 import { SearchFieldInternalService } from './search-field-internal.service';
 import { SearchFieldConfig } from './search-field.service';
+import { MdsHelper } from '../../../core-module/rest/mds-helper';
+import { Tree } from '../../../features/mds/mds-editor/widgets/mds-editor-widget-tree/tree';
 
+type MdsWidgetTree = MdsWidget & {
+    tree: Tree;
+};
 @Component({
     selector: 'es-search-field',
     templateUrl: './search-field.component.html',
@@ -25,6 +37,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     config: SearchFieldConfig;
 
     readonly inputSubject = new BehaviorSubject<ElementRef<HTMLInputElement>>(null);
+    private mds: MdsDefinition;
     @ViewChild('input')
     get input(): ElementRef<HTMLInputElement> {
         return this.inputSubject.value;
@@ -75,7 +88,12 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
         private internal: SearchFieldInternalService,
         private loadingScreen: LoadingScreenService,
         private ngZone: NgZone,
-    ) {}
+        private mdsService: MdsService,
+    ) {
+        this.mdsInfo$
+            .pipe(switchMap((mds) => this.mdsService.getMetadataSet(mds)))
+            .subscribe((mds) => (this.mds = mds));
+    }
 
     ngOnInit(): void {
         this.internal.searchFieldComponent.next(this);
@@ -258,5 +276,22 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
         } else {
             return mapped.reduce((a, b) => a + b);
         }
+    }
+
+    getTooltip(property: string, value: LabeledValue) {
+        const widget = MdsHelper.getWidget(property, undefined, this.mds.widgets) as MdsWidgetTree;
+        if (
+            [
+                MdsWidgetType.MultiValueTree.toString(),
+                MdsWidgetType.SingleValueTree.toString(),
+            ].includes(widget.type)
+        ) {
+            if (!widget.tree) {
+                // build up tree if not yet present
+                widget.tree = Tree.generateTree(widget.values);
+            }
+            return widget.tree.idToDisplayValue(value.value).hint;
+        }
+        return null;
     }
 }

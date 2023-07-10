@@ -13,8 +13,6 @@ import org.edu_sharing.metadataset.v2.SearchCriterias;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 
-import com.sun.star.lang.IllegalArgumentException;
-
 import org.edu_sharing.service.search.SearchService.ContentType;
 
 public class SearchToken implements Serializable {

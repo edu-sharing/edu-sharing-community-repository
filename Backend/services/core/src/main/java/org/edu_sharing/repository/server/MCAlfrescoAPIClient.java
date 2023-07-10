@@ -3549,12 +3549,17 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 						QName.createQName(CCConstants.CM_NAME));
 
 		nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(CCConstants.CM_NAME), UUID.randomUUID().toString());
-		nodeService.moveNode(
-				new NodeRef(storeRef, nodeId),
-				new NodeRef(storeRef, newParentId),
-				QName.createQName(childAssocType),
-				QName.createQName(CCConstants.NAMESPACE_CCM, nodeId));
-
+		nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(CCConstants.CM_NAME), UUID.randomUUID().toString());
+		try {
+			nodeService.moveNode(
+					new NodeRef(storeRef, nodeId),
+					new NodeRef(storeRef, newParentId),
+					QName.createQName(childAssocType),
+					QName.createQName(CCConstants.NAMESPACE_CCM, nodeId));
+		} catch(Exception e) {
+			nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(CCConstants.CM_NAME), originalName);
+			throw e;
+		}
 		String name = originalName;
 		int i = 1;
 		int maxRetries = 10;

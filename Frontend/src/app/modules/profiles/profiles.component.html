@@ -68,15 +68,25 @@
           <!--</div>-->
         </div>
         <div *ngIf="edit">
-          <div>
-            <mat-form-field class="mat-form-field-bright">
-              <mat-label>{{ 'USER.firstName' | translate }}</mat-label>
-              <input matInput type="text" [(ngModel)]="userEdit.profile.firstName" />
-            </mat-form-field>
-            <mat-form-field class="mat-form-field-bright">
-              <mat-label>{{ 'USER.lastName' | translate }}</mat-label>
-              <input matInput type="text" [(ngModel)]="userEdit.profile.lastName" />
-            </mat-form-field>
+          <div class="vcard">
+            <div class="title">
+              <mat-form-field class="mat-form-field-bright">
+                <mat-label>{{ 'VCARD.Title' | translate }}</mat-label>
+                <input matInput type="text" [(ngModel)]="userEdit.profile.vcard.title" />
+              </mat-form-field>
+            </div>
+            <div class="givenname">
+              <mat-form-field class="mat-form-field-bright">
+                <mat-label>{{ 'USER.firstName' | translate }}</mat-label>
+                <input matInput type="text" [(ngModel)]="userEdit.profile.firstName" />
+              </mat-form-field>
+            </div>
+            <div class="surname">
+              <mat-form-field class="mat-form-field-bright">
+                <mat-label>{{ 'USER.lastName' | translate }}</mat-label>
+                <input matInput type="text" [(ngModel)]="userEdit.profile.lastName" />
+              </mat-form-field>
+            </div>
           </div>
           <div class="email-group-form">
             <mat-form-field class="mat-form-field-bright email">

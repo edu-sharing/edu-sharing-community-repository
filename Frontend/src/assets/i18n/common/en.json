@@ -187,6 +187,7 @@
   "NO_PERMISSIONS_FOR_SCOPE": "No permissions to access this environment",
   "DATE_SELECT_YEAR": "Choose year",
   "SEARCH_CLEAR": "Clear",
+  "TOGGLE_SEARCH_FILTERS": "Toggle search filters",
   "DATE_CLEAR": "Clear",
   "USER_TUTORIAL_HEADING": "Your Profile",
   "USER_TUTORIAL_DESCRIPTION": "Here you can add a profile picture and show who you are and what you do. You decide what others can see.",

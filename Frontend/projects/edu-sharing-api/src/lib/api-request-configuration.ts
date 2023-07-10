@@ -1,5 +1,6 @@
-import { EventEmitter, Injectable } from '@angular/core';
 import { HttpRequest } from '@angular/common/http';
+import { EventEmitter, Injectable } from '@angular/core';
+import { v4 as uuidv4 } from 'uuid';
 import { ApiConfiguration } from './api/api-configuration';
 
 /**
@@ -31,6 +32,7 @@ export class ApiRequestConfiguration {
             return req;
         }
         this.apiRequest.emit();
+        headers['X-Client-Trace-Id'] = this.generateTraceId();
         if (this.locale) {
             headers.locale = this.locale;
         }
@@ -41,5 +43,9 @@ export class ApiRequestConfiguration {
         return req.clone({
             setHeaders: headers,
         });
+    }
+
+    private generateTraceId(): string {
+        return uuidv4();
     }
 }

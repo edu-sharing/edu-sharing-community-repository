@@ -5,6 +5,6 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class PropertySlugPipe implements PipeTransform {
     transform(value: string): string {
-        return value?.replace(/:/, '_');
+        return value?.replace(/[:.]/, '_');
     }
 }

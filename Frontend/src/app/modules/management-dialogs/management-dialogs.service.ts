@@ -55,8 +55,10 @@ export class ManagementDialogsService {
     }: {
         parent: Node;
         showPicker: boolean;
-    }): DialogRef<FileList> {
-        const dialogClosed = new Subject<FileList | undefined>();
+    }): DialogRef<{ files: FileList; parent: Node | undefined }> {
+        const dialogClosed = new Subject<
+            { files: FileList; parent: Node | undefined } | undefined
+        >();
         this.dialogsComponent.parent = parent;
         this.dialogsComponent.uploadShowPicker = showPicker;
         this.dialogsComponent.showUploadSelect = true;
@@ -77,7 +79,7 @@ export class ManagementDialogsService {
             // the observable before anyone sees its `next` value when the dialog is closed without
             // a result.
             .subscribe((files) => {
-                dialogClosed.next(files);
+                dialogClosed.next({ files, parent: this.dialogsComponent.parent || parent });
                 dialogClosed.complete();
             });
         return {

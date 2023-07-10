@@ -209,7 +209,27 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 globalConditions,
                 searchToken);
 
-        return parseAggregations(searchToken, aggregations);
+        SearchResultNodeRef result = parseAggregations(searchToken, aggregations);
+        result.setFacets(result.getFacets().stream().map(facet -> {
+            facet.setValues(facet.getValues().stream().filter(s -> {
+                // if one document has i.e. multiple keywords, they will be shown in the facet
+                // so, we filter for values which actually contain the given string
+                {
+                    try {
+                        String value = s.getValue();
+                        try {
+                            // map to i18n value if available
+                            value = mds.findWidget(facet.getProperty()).getValuesAsMap().get(value).getCaption();
+                        } catch(Throwable ignored) {}
+                        return value.toLowerCase().contains(searchToken.getQueryString().toLowerCase());
+                    } catch (IllegalArgumentException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }).distinct().collect(Collectors.toList()));
+            return facet;
+        }).collect(Collectors.toList()));
+        return result;
     }
 
     @NotNull
@@ -346,9 +366,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                             .confidence((float)0.9)
                                             .highlight("<em>","</em>")
                                             .addCandidateGenerator(new DirectCandidateGeneratorBuilder("properties.cclom:title.trigram")
-                                            .suggestMode("popular"))
+                                                    .suggestMode("popular"))
                                             .smoothingModel( new org.elasticsearch.search.suggest.phrase.Laplace(0.5))
-                                              );
+                            );
                     searchSourceBuilder.suggest(suggest);
                 }
             }
@@ -621,7 +641,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             return searchResult.getHits().getTotalHits().value > 0;
 
         } catch (IOException e) {
-           logger.error(e.getMessage(),e);
+            logger.error(e.getMessage(),e);
         }
 
         return false;
@@ -693,7 +713,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             if(i18n != null){
                 Map<String,Serializable> i18nProps = (Map<String,Serializable>)i18n.get(currentLocale);
                 if(i18nProps != null){
-                   List<String> displayNames = (List<String> )i18nProps.get(entry.getKey());
+                    List<String> displayNames = (List<String> )i18nProps.get(entry.getKey());
                     if(displayNames != null){
                         props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(displayNames, CCConstants.MULTIVALUE_SEPARATOR));
                     }
@@ -958,16 +978,16 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         if(contributorKind == ContributorKind.ORGANIZATION){
             qb.must(QueryBuilders.boolQuery().should(
-                    QueryBuilders.existsQuery("contributor.X-ROR")
-                ).should(
-                    QueryBuilders.existsQuery("contributor.X-Wikidata")
-                ).minimumShouldMatch(1)
+                            QueryBuilders.existsQuery("contributor.X-ROR")
+                    ).should(
+                            QueryBuilders.existsQuery("contributor.X-Wikidata")
+                    ).minimumShouldMatch(1)
             );
         }else{
             qb.must(QueryBuilders.boolQuery().should(
-                    QueryBuilders.existsQuery("contributor.X-ORCID")
+                            QueryBuilders.existsQuery("contributor.X-ORCID")
                     ).should(
-                    QueryBuilders.existsQuery("contributor.X-GND-URI")
+                            QueryBuilders.existsQuery("contributor.X-GND-URI")
                     ).minimumShouldMatch(1)
             );
         }
@@ -1033,9 +1053,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return aggregation.getBuckets().stream().
                 map(Terms.Bucket::getKey).
                 // this would be nicer via elastic "include" feature, however, it seems to be a pain with the java library
-                filter(
-                    (k) -> Arrays.stream(
-                        suggest.toLowerCase().split(" ")).allMatch(
+                        filter(
+                        (k) -> Arrays.stream(
+                                suggest.toLowerCase().split(" ")).allMatch(
                                 (t) -> k.toString().toLowerCase().contains(t)
                         )
                 ).
@@ -1079,14 +1099,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
     public void checkClient() throws IOException {
         if(client == null || !client.ping(getRequestOptions())){
-             if(client != null){
-                 try {
-                     client.close();
-                 }catch (Exception e){
-                     logger.error("ping failed, close failed:" + e.getMessage()+" creating new");
-                 }
-             }
-             client = new ESRestHighLevelClient(RestClient.builder(getConfiguredHosts()));
+            if(client != null){
+                try {
+                    client.close();
+                }catch (Exception e){
+                    logger.error("ping failed, close failed:" + e.getMessage()+" creating new");
+                }
+            }
+            client = new ESRestHighLevelClient(RestClient.builder(getConfiguredHosts()));
         }
     }
 
