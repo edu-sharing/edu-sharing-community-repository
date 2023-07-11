@@ -70,12 +70,3 @@
   </div>
   <es-workflow-list [history]="history"></es-workflow-list>
 </es-card>
-<es-modal-dialog
-  [isCancelable]="true"
-  [title]="dialogTitle"
-  [message]="dialogMessage"
-  [messageParameters]="dialogMessageParameters"
-  [buttons]="dialogButtons"
-  [priority]="1"
-  (onCancel)="dialogTitle = null"
-></es-modal-dialog>
