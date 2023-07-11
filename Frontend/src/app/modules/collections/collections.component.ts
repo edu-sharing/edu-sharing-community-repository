@@ -1011,8 +1011,13 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
                         ];
                     this.sortCollections.active =
                         orderCollections?.[0] || RestConstants.CM_MODIFIED_DATE;
+                    console.log(orderCollections);
                     this.sortCollections.direction =
-                        orderCollections?.[1] === 'true' ? 'asc' : 'desc';
+                        orderCollections?.[0] === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
+                            ? 'asc'
+                            : orderCollections?.[1] === 'true'
+                            ? 'asc'
+                            : 'desc';
 
                     const refMode = collection.collection.orderMode;
                     const refAscending = collection.collection.orderAscending;
@@ -1021,7 +1026,11 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
                     RestConstants.COLLECTION_ORDER_MODE_CUSTOM
                         ? RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
                         : refMode) || RestConstants.CM_MODIFIED_DATE) as any;
-                    this.sortReferences.direction = refAscending ? 'asc' : 'desc';
+                    this.sortReferences.direction = RestConstants.COLLECTION_ORDER_MODE_CUSTOM
+                        ? 'asc'
+                        : refAscending
+                        ? 'asc'
+                        : 'desc';
                     this.collectionContent.node = collection;
                     this.mainNavUpdateTrigger.next();
 
