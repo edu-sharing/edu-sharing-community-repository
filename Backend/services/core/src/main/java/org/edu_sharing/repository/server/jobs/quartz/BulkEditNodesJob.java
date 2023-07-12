@@ -106,7 +106,7 @@ public class BulkEditNodesJob extends AbstractJob{
 		ReplaceMapping,
 		@JobFieldDescription(description = "Currently Unsupported")
 		Append,
-		@JobFieldDescription(description = "Remove the property. Use with searchtoken: one value must be equal, than the property is removed.")
+		@JobFieldDescription(description = "Remove the property. Use with searchtoken: one value must be equal, than the property is removed. When no search token is given, the property will be removed on every node")
 		Remove,
 		@JobFieldDescription(description = "Remove Duplicates in multivalue properties.")
 		RemoveDuplicates,
@@ -159,7 +159,7 @@ public class BulkEditNodesJob extends AbstractJob{
 		}
 
 		if (mode.equals(Mode.Remove)) {
-			searchToken = prepareParam(context, "searchToken", true);
+			searchToken = prepareParam(context, "searchToken", false);
 		}
 
 		lucene = prepareParam(context, "lucene", false);
