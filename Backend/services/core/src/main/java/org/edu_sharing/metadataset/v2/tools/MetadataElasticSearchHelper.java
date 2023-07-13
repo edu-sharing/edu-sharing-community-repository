@@ -173,11 +173,11 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         for (String word : words) {
             //String statement = parameter.getStatement(value).replace("${value}", QueryParser.escape(word));
             String statement = QueryUtils.replacerFromSyntax(parameter.getSyntax()).replaceString(
-                    parameter.getStatement(value),
+                    parameter.getStatement(word),
                     "${value}", word);
             statement = QueryUtils.replacerFromSyntax(parameter.getSyntax(),true).replaceString(
                     statement,
-                    "${valueRaw}", value);
+                    "${valueRaw}", word);
             boolQuery = boolQuery.must(new ESRestHighLevelClient.ReadableWrapperQueryBuilder(statement));
 
         }
