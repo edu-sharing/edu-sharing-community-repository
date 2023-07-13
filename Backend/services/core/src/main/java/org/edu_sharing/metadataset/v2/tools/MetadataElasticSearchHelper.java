@@ -17,6 +17,10 @@ import java.security.InvalidParameterException;
 import java.util.*;
 
 public class MetadataElasticSearchHelper extends MetadataSearchHelper {
+    /**
+     *  the given count will be multiplied by this value since facets are filtered for the containing string afterwards and we need some overhead
+     */
+    public static final int FACET_LIMIT_MULTIPLIER = 5;
     static Logger logger = Logger.getLogger(MetadataElasticSearchHelper.class);
 
     public static QueryBuilder getElasticSearchQuery(SearchToken searchToken, MetadataQueries queries,MetadataQuery query, Map<String,String[]> parameters) throws IllegalArgumentException {
@@ -257,14 +261,14 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
             }
             if(fieldName.size() == 1) {
                 result.add(AggregationBuilders.filter(facet, bqb).subAggregation(AggregationBuilders.terms(facet)
-                        .size(searchToken.getFacetLimit())
+                        .size(searchToken.getFacetLimit()*FACET_LIMIT_MULTIPLIER)
                         .minDocCount(searchToken.getFacetsMinCount())
                         .field(fieldName.get(0))));
             } else {
                 Map<String, Object> props = new HashMap<>();
                 props.put("type", "multi_terms");
                 result.add(AggregationBuilders.filter(facet, bqb).setMetadata(props).subAggregation(
-                        new ESRestHighLevelClient.MultiTermsAggregationBuilder(facet, fieldName, searchToken.getFacetsMinCount(), searchToken.getFacetLimit())))
+                        new ESRestHighLevelClient.MultiTermsAggregationBuilder(facet, fieldName, searchToken.getFacetsMinCount(), searchToken.getFacetLimit()*FACET_LIMIT_MULTIPLIER)))
                 ;
             }
 
