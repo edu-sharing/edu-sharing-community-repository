@@ -271,7 +271,7 @@ export class NodeRelationManagerComponent implements OnInit, OnChanges {
                         this.nodeService.getNode(
                             RestConstants.HOME_REPOSITORY,
                             RestHelper.removeSpacesStoreRef(
-                                n.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL],
+                                n.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL][0],
                             ),
                         ),
                     ),
