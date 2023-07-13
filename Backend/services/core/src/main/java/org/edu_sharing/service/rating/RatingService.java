@@ -1,5 +1,6 @@
 package org.edu_sharing.service.rating;
 
+import org.edu_sharing.service.model.NodeRef;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,11 +15,11 @@ public interface RatingService {
 
 	void deleteRating(String nodeId) throws Exception;
 
-	RatingDetails getAccumulatedRatings(String nodeId, Date after);
+	RatingDetails getAccumulatedRatings(NodeRef nodeId, Date after);
 
 	List<String> getAlteredNodeIds(Date after);
 
-	List<RatingHistory> getAccumulatedRatingHistory(String nodeId, Date after);
+	List<RatingHistory> getAccumulatedRatingHistory(NodeRef nodeId, Date after);
 
 	void changeUserData(@NotNull String oldAuthority, @NotNull String newAuthority);
 

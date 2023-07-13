@@ -1,5 +1,7 @@
 package org.edu_sharing.restservices;
 
+import org.edu_sharing.service.model.NodeRef;
+import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.rating.*;
 
 import java.util.Date;
@@ -27,26 +29,10 @@ public class RatingDao {
 			throw DAOException.mapping(e);
 		}
 	}
-	public List<Rating> getRatings(String nodeId, Date after) throws DAOException {
-		try{
-			return this.ratingService.getRatings(nodeId,after);
-		}catch(Exception e) {
-			throw DAOException.mapping(e);
-		}
-	}
-
-
-	public RatingDetails getAccumulatedRating(String nodeId, Date after) throws DAOException {
-		try{
-			return this.ratingService.getAccumulatedRatings(nodeId,after);
-		}catch(Exception e) {
-			throw DAOException.mapping(e);
-		}
-	}
 
 	public List<RatingHistory> getAccumulatedRatingHistory(String nodeId, Date after) throws DAOException {
 		try{
-			return this.ratingService.getAccumulatedRatingHistory(nodeId, after);
+			return this.ratingService.getAccumulatedRatingHistory(new NodeRefImpl(repoDao.getId(), null, null, nodeId), after);
 		}catch(Exception e) {
 			throw DAOException.mapping(e);
 		}
