@@ -46,6 +46,7 @@ import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.*;
+import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
@@ -477,11 +478,13 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			for(String json : jsonHistory) {
 				Notify notify = gson.fromJson(json, Notify.class);
 				try {
-					NodeRef personRef = personService.getPerson(notify.getUser().getAuthorityName(), false);
-					Map<QName, Serializable> personProps = nodeService.getProperties(personRef);
-					notify.getUser().setGivenName((String) personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_FIRSTNAME)));
-					notify.getUser().setSurname((String) personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_LASTNAME)));
-					notify.getUser().setEmail((String) personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_EMAIL)));
+					if(personService.personExists(notify.getUser().getAuthorityName())) {
+						NodeRef personRef = personService.getPerson(notify.getUser().getAuthorityName(), false);
+						Map<QName, Serializable> personProps = nodeService.getProperties(personRef);
+						notify.getUser().setGivenName((String) personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_FIRSTNAME)));
+						notify.getUser().setSurname((String) personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_LASTNAME)));
+						notify.getUser().setEmail((String) personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_EMAIL)));
+					}
 				} catch(NoSuchPersonException e) {
 					logger.warn("Notify could not be fully resolved, may contains deleted/invalid user", e);
 				}
@@ -1462,6 +1465,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}finally {
 				policyBehaviourFilter.enableBehaviour(nodeRef);
 			}
+			// remove from cache so that the ccm:ph_* properties getting updated
+			new RepositoryCache().remove(nodeRef.getId());
 			return null;
 		});
 	}
