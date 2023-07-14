@@ -707,7 +707,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.currentRepository == RestConstants.ALL
                 ? this.repositoryIds
                 : [{ id: this.currentRepository, enabled: true }];
-        this.searchField.setFilterValues(this.searchService.values);
+        if (this.currentRepository !== RestConstants.ALL) {
+            this.searchField.setFilterValues(this.searchService.values);
+        }
         this.searchRepository(repos, criterias, init);
 
         if (init) {
