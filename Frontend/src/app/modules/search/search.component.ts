@@ -1236,6 +1236,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             const mdsAllowed = ConfigurationHelper.filterValidMds(repo, null, this.config);
             if (mdsAllowed) {
                 mdsId = mdsAllowed[0];
+            } else {
+                mdsId = RestConstants.DEFAULT;
             }
         }
         let properties = [RestConstants.ALL];
