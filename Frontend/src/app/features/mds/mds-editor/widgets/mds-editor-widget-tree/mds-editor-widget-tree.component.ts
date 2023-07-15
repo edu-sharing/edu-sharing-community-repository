@@ -10,7 +10,7 @@ import {
     ViewChild,
     ViewChildren,
 } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { startWith } from 'rxjs/operators';
@@ -20,7 +20,7 @@ import { DisplayValue } from '../DisplayValues';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { MdsEditorWidgetTreeCoreComponent } from './mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
 import { Tree } from './tree';
-import { MatChip } from '@angular/material/chips';
+import { MatChip, MatChipOption, MatChipRow } from '@angular/material/chips';
 import { UIService } from '../../../../../core-module/rest/services/ui.service';
 import { MatButton } from '@angular/material/button';
 import { UIHelper } from '../../../../../core-ui-module/ui-helper';
@@ -42,11 +42,11 @@ export class MdsEditorWidgetTreeComponent
     @ViewChild('box') boxRef: ElementRef<HTMLElement>;
     @ViewChild(MdsEditorWidgetTreeCoreComponent)
     treeCoreComponent: MdsEditorWidgetTreeCoreComponent;
-    @ViewChildren('chip') chips: QueryList<MatChip>;
+    @ViewChildren('chip') chips: QueryList<MatChipRow>;
 
     valueType: ValueType;
     tree: Tree;
-    chipsControl: FormControl;
+    chipsControl: UntypedFormControl;
     indeterminateValues$: BehaviorSubject<string[]>;
     overlayIsVisible = false;
     /**
@@ -85,7 +85,7 @@ export class MdsEditorWidgetTreeComponent
     }
 
     async ngOnInit() {
-        this.chipsControl = new FormControl(null, this.getStandardValidators());
+        this.chipsControl = new UntypedFormControl(null, this.getStandardValidators());
         if (this.widget.definition.type === MdsWidgetType.SingleValueTree) {
             this.valueType = ValueType.String;
         } else if (this.widget.definition.type === MdsWidgetType.MultiValueTree) {
@@ -98,7 +98,7 @@ export class MdsEditorWidgetTreeComponent
             (await this.widget.getInitalValuesAsync()).jointValues ?? [],
             (await this.widget.getInitalValuesAsync()).individualValues,
         );
-        this.chipsControl = new FormControl(
+        this.chipsControl = new UntypedFormControl(
             [
                 ...((await this.widget.getInitalValuesAsync()).jointValues ?? []),
                 ...((await this.widget.getInitalValuesAsync()).individualValues ?? []),
@@ -121,7 +121,7 @@ export class MdsEditorWidgetTreeComponent
         // doesn't do anything, we disable toggling the selection.
         this.chips.changes
             .pipe(startWith(this.chips))
-            .subscribe((chips: QueryList<MatChip>) =>
+            .subscribe((chips: QueryList<MatChipOption>) =>
                 chips.forEach((chip) => (chip.toggleSelected = () => true)),
             );
     }

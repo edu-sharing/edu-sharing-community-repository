@@ -1,5 +1,5 @@
 import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthenticationService, SavedSearch, SearchService } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
@@ -24,7 +24,7 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
     readonly activeRepository = this.searchPage.activeRepository;
     readonly availableMetadataSets = this.searchPage.availableMetadataSets;
     readonly activeMetadataSet = this.searchPage.activeMetadataSet;
-    readonly activeMdsForm = new FormControl(this.activeMetadataSet.getValue());
+    readonly activeMdsForm = new UntypedFormControl(this.activeMetadataSet.getValue());
     readonly searchFilters = this.searchPage.searchFilters;
     readonly reUrl = this.searchPage.reUrl;
     readonly customTemplates = this.globalSearchPageInternal.customTemplates;

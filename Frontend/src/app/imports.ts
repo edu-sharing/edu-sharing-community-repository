@@ -94,7 +94,6 @@ export const IMPORTS = [
         // behavior might be needed as done here:
         // https://github.com/openeduhub/oeh-search-frontend/blob/a74047b57007fc6c9561feab02d4d3664051e5c9/src/app/app.component.ts#L37-L52
         scrollPositionRestoration: 'enabled',
-        relativeLinkResolution: 'legacy',
         // This prevents the browser history from getting messed up when navigation attempts are
         // cancelled by guards.
         canceledNavigationResolution: 'computed',

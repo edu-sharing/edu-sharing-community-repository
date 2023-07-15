@@ -68,7 +68,9 @@ export class ShareDialogChooseTypeComponent implements AfterViewInit, OnDestroy 
     private _destroyed$ = new Subject<void>();
 
     ngAfterViewInit() {
-        this._slideToggle._inputElement.nativeElement.setAttribute('role', 'menuitemcheckbox');
+        // angular 15 change
+        this._slideToggle._elementRef.nativeElement.setAttribute('role', 'menuitemcheckbox');
+        // this._slideToggle._inputElement.nativeElement.setAttribute('role', 'menuitemcheckbox');
         this._keyManager = new FocusKeyManager(this._menuItems).withWrap();
         this._keyManager.tabOut.pipe(takeUntil(this._destroyed$)).subscribe(() => this._cancel());
         this._keyManager.setActiveItem(this._getActiveIndex());

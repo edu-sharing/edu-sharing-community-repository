@@ -7,7 +7,7 @@ import {
     TemplateRef,
     ViewChild,
 } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { Node, SavedSearch, SavedSearchesService } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { debounceTime, filter, first, map, startWith, switchMap, takeUntil } from 'rxjs/operators';
@@ -56,7 +56,7 @@ export class SavedSearchesDialogComponent implements OnInit, OnDestroy {
     readonly displayType = NodeEntriesDisplayType.Table;
     readonly scope = Scope.SavedSearches;
     readonly interactionType = InteractionType.Emitter;
-    readonly searchInputControl = new FormControl('');
+    readonly searchInputControl = new UntypedFormControl('');
 
     private destroyed = new Subject<void>();
 

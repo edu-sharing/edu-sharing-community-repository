@@ -2,7 +2,7 @@ import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import {
     AbstractControl,
     AbstractControlDirective,
-    FormControl,
+    UntypedFormControl,
     ValidatorFn,
 } from '@angular/forms';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
@@ -38,7 +38,7 @@ export class MdsEditorWidgetTinyMCE extends MdsEditorWidgetBase implements OnIni
     };
     editorConfig: Record<string, any>;
     _html = '';
-    dummyControl = new FormControl();
+    dummyControl = new UntypedFormControl();
     get html() {
         return this._html;
     }

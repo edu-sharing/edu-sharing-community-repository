@@ -41,7 +41,7 @@
     "moduleResolution": "node",
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
-    "target": "es2018",
+    "target": "es2020",
     "typeRoots": [
       "./node_modules/@types"
     ],

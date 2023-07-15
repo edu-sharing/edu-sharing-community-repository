@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { Options } from '@angular-slider/ngx-slider';
 import { MdsWidgetType, MdsWidgetValue } from '../../../types/types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
@@ -24,7 +24,7 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
 
     isRange: boolean;
     values: Promise<MdsWidgetValue[]>;
-    formControl = new FormControl();
+    formControl = new UntypedFormControl();
     currentValue: number[] = [];
 
     async ngOnInit() {

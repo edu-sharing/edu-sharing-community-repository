@@ -36,12 +36,12 @@
             (onChooseAuthority)="addInvite($event)"
           ></es-authority-search-input>
         </div>
-        <mat-chip-list class="toInvite">
-          <mat-chip *ngFor="let auth of invite" (removed)="removeInvite(auth)">
+        <mat-chip-listbox class="toInvite">
+          <mat-chip-option *ngFor="let auth of invite" (removed)="removeInvite(auth)">
             <span>{{ auth | authorityName }}</span>
             <i matChipRemove esIcon="cancel"></i>
-          </mat-chip>
-        </mat-chip-list>
+          </mat-chip-option>
+        </mat-chip-listbox>
       </div>
     </div>
   </div>

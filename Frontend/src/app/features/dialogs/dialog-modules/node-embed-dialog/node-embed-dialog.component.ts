@@ -11,7 +11,7 @@ import {
     OnInit,
     ViewChild,
 } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { startWith, take } from 'rxjs/operators';
@@ -47,16 +47,16 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
         height: { min: 200, max: 1200 },
     };
 
-    readonly form = new FormGroup({
-        width: new FormControl(400, [
+    readonly form = new UntypedFormGroup({
+        width: new UntypedFormControl(400, [
             Validators.min(this.sizeConstraints.width.min),
             Validators.max(this.sizeConstraints.width.max),
         ]),
-        height: new FormControl(300, [
+        height: new UntypedFormControl(300, [
             Validators.min(this.sizeConstraints.height.min),
             Validators.max(this.sizeConstraints.height.max),
         ]),
-        version: new FormControl('fixed'),
+        version: new UntypedFormControl('fixed'),
     });
 
     embedCode = '';

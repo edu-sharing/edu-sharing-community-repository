@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -228,7 +228,7 @@ export class UserModifiableValue<T> {
     //         .subscribe((userValue) => UserModifiableValue.preferences.set(key, userValue));
     // }
 
-    registerFormControl(formControl: FormControl): void {
+    registerFormControl(formControl: UntypedFormControl): void {
         this.observeValue()
             .pipe(
                 map((value) => this._serialize(value)),

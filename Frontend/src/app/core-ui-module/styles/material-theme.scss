@@ -1,5 +1,5 @@
 @use '@angular/material' as mat;
-@import '~angular-material-css-vars/src/lib/main';
+@use 'angular-material-css-vars/main' as mat-css-vars;
 @import 'variables';
 @import 'branding';
 
@@ -8,17 +8,7 @@
 // Be sure that you only ever include this mixin once!
 @include mat.core();
 // @include mat.strong-focus-indicators();
-
-// Include theme styles for core and each component used in your app.
-// Alternatively, you can import and @include the theme mixins for each component
-// that you are using.
-// @include mat.all-component-themes($my-app-theme-custom);
-// init theme
-@include init-material-css-vars() {
-    // If your app has any theme mixins, call them here.
-    // $mat-css-theme gets set to an appropriate value before this content is called.
-    // @include your-custom-component-theme($mat-css-theme);
-}
+@include mat-css-vars.init-material-css-vars();
 
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker

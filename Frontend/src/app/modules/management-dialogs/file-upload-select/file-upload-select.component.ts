@@ -10,7 +10,7 @@ import {
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { ClientutilsV1Service, WebsiteInformation } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { catchError, debounce, finalize, map, switchMap, tap } from 'rxjs/operators';
@@ -93,7 +93,7 @@ export class WorkspaceFileUploadSelectComponent implements OnInit, OnChanges {
     // private ltiTool: Node;
     buttons: DialogButton[];
     user: IamUser;
-    readonly linkControl = new FormControl('');
+    readonly linkControl = new UntypedFormControl('');
     websiteInformation: WebsiteInformation;
     hideFileUpload = false;
     loadingWebsiteInformation = false;

@@ -209,12 +209,12 @@
             [showRecent]="false"
             placeholder="{{ 'PERMISSIONS.DELETE.RECEIVER' | translate }}"
           ></es-authority-search-input>
-          <mat-chip-list>
-            <mat-chip *ngIf="receiver" (removed)="receiver = null">
+          <mat-chip-listbox>
+            <mat-chip-option *ngIf="receiver" (removed)="receiver = null">
               <span>{{ receiver | authorityName }}</span>
               <i matChipRemove esIcon="cancel"></i>
-            </mat-chip>
-          </mat-chip-list>
+            </mat-chip-option>
+          </mat-chip-listbox>
           <h4 class="mat-heading-4">
             {{ 'PERMISSIONS.DELETE.RECEIVER_GROUP_CAPTION' | translate }}
           </h4>
@@ -226,12 +226,12 @@
             (onChooseAuthority)="receiverGroup = $event"
             placeholder="{{ 'PERMISSIONS.DELETE.RECEIVER_GROUP' | translate }}"
           ></es-authority-search-input>
-          <mat-chip-list>
-            <mat-chip *ngIf="receiverGroup" (removed)="receiverGroup = null">
+          <mat-chip-listbox>
+            <mat-chip-option *ngIf="receiverGroup" (removed)="receiverGroup = null">
               <span>{{ receiverGroup | authorityName }}</span>
               <i matChipRemove esIcon="cancel"></i>
-            </mat-chip>
-          </mat-chip-list>
+            </mat-chip-option>
+          </mat-chip-listbox>
         </div>
       </div>
       <div class="info-wrapper">

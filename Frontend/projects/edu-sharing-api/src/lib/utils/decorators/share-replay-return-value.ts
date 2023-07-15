@@ -30,7 +30,7 @@ function serialize(value: any): string {
     );
 }
 
-function sortObject<T>(obj: T): T {
+function sortObject<T extends {}>(obj: T): T {
     return (Object.keys(obj) as Array<keyof T>)
         .sort()
         .reduce((acc, key) => ((acc[key] = obj[key]), acc), {} as T);

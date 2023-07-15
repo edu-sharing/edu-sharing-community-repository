@@ -789,12 +789,12 @@
           [showRecent]="false"
           (onChooseAuthority)="authenticateAuthority = $event"
         ></es-authority-search-input>
-        <mat-chip-list>
-          <mat-chip *ngIf="authenticateAuthority" (removed)="authenticateAuthority = null">
+        <mat-chip-listbox>
+          <mat-chip-option *ngIf="authenticateAuthority" (removed)="authenticateAuthority = null">
             <span>{{ authenticateAuthority | authorityName }}</span>
             <i matChipRemove esIcon="cancel"></i>
-          </mat-chip>
-        </mat-chip-list>
+          </mat-chip-option>
+        </mat-chip-listbox>
         <button
           mat-raised-button
           [disabled]="!authenticateAuthority"
@@ -1012,15 +1012,15 @@
             *ngIf="lucene.authorities && lucene.authorities.length"
           >
             <div></div>
-            <mat-chip-list>
-              <mat-chip
+            <mat-chip-listbox>
+              <mat-chip-option
                 *ngFor="let authority of lucene.authorities"
                 (removed)="removeLuceneAuthority(authority)"
               >
                 <span>{{ authority | authorityName }}</span>
                 <i matChipRemove esIcon="cancel"></i>
-              </mat-chip>
-            </mat-chip-list>
+              </mat-chip-option>
+            </mat-chip-listbox>
           </div>
         </ng-container>
         <div class="inputGroupGrow lucenePaging" *ngIf="lucene.outputMode === 'view'">

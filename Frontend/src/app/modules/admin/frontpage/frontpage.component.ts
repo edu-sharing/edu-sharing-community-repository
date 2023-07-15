@@ -18,7 +18,7 @@ import {
     RestNodeService,
 } from '../../../core-module/core.module';
 import { Toast } from '../../../core-ui-module/toast';
-import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 
@@ -35,7 +35,7 @@ export class AdminFrontpageComponent {
     config: any;
     modes = ['collection', 'rating', 'views', 'downloads'];
     conditionTypes = ['TOOLPERMISSION'];
-    form: FormGroup;
+    form: UntypedFormGroup;
     previewNodesDataSource = new NodeDataSource();
     previewColumns: ListItem[] = [];
     previewError: string;
@@ -57,7 +57,7 @@ export class AdminFrontpageComponent {
   */
 
     constructor(
-        private formBuilder: FormBuilder,
+        private formBuilder: UntypedFormBuilder,
         private adminService: RestAdminService,
         private iamService: RestIamService,
         private translate: TranslateService,

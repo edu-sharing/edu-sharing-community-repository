@@ -21,17 +21,19 @@
       - get correct value readings for the required-state
       - pass the disabled state to chips and the input.
     -->
-    <mat-chip-list
+    <mat-chip-grid
       #chipList
       [attr.aria-labelledby]="chipsControl?.value?.length > 0 ? container.labelId : null"
       (click)="$event.stopPropagation(); $event.preventDefault()"
-      [multiple]="true"
       [formControl]="chipsControl"
     >
+    <!-- @TODO removed in angular 15
+          [multiple]="true"
+    -->
       <!-- We mark all chips as selected because NVDA will announce "not selected" for each item
       otherwise. It announces nothing (!) for selected items. Same as MdsEditorWidgetChips. -->
-      <mat-chip
-        #chip="matChip"
+      <mat-chip-row
+        #chip
         *ngFor="let value of chipsControl?.value"
         [value]="value"
         [removable]="true"
@@ -45,7 +47,7 @@
       >
         <span class="mat-chip-label">{{ value.label }}</span>
         <mat-icon matChipRemove>cancel</mat-icon>
-      </mat-chip>
+      </mat-chip-row>
       <div class="input-wrapper">
         <input
           autocomplete="off"
@@ -63,13 +65,15 @@
           #openButton
           (click)="openOverlay()"
           [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
-          (keydown.tab)="chipList._allowFocusEscape()"
           [disabled]="chipsControl.disabled"
         >
+        <!-- @TODO removed with angular 15
+                  (keydown.tab)="chipList._allowFocusEscape()"
+        -->
           <span class="mat-select-arrow"></span>
         </button>
       </div>
-    </mat-chip-list>
+    </mat-chip-grid>
   </es-mds-editor-widget-container>
 </div>
 <ng-template

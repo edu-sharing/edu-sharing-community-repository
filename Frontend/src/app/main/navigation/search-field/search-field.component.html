@@ -8,7 +8,7 @@
     esBorderBoxObserver
     #triggerBorderBox="borderBoxObserver"
   >
-    <mat-form-field class="search-field" appearance="legacy" floatLabel="always">
+    <mat-form-field class="search-field" appearance="fill" floatLabel="always">
       <mat-label></mat-label>
       <div class="search-field-input-wrapper">
         <button
@@ -85,14 +85,14 @@
       [class.suggestion-active-filter-separator]="!facets.isEmpty()"
     >
       <label #label>{{ 'SEARCH.ACTIVE_FILTER' | translate }}</label>
-      <mat-chip-list [attr.aria-labelledby]="label" #chipList>
+      <mat-chip-listbox [attr.aria-labelledby]="label" #chipList>
         <div class="chips-wrapper" *ngIf="filters$ | async as filtersDict">
           <ng-container *ngFor="let filters of filtersDict | keyvalue">
             <!-- We considered injecting the chip list from the mds editor like the suggestions
             panel, but `mat-chip-list` needs direct access to `mat-chip`s as child components for
             keyboard interaction to work. -->
             <ng-container *ngIf="(categories$ | async)?.includes(filters.key)">
-              <mat-chip
+              <mat-chip-option
                 *ngFor="let filterValue of filters.value"
                 class="filter-chip-{{ filters.key | propertySlug }}"
                 [removable]="true"
@@ -100,11 +100,11 @@
               >
                 {{ filterValue.label }}
                 <mat-icon matChipRemove>cancel</mat-icon>
-              </mat-chip>
+              </mat-chip-option>
             </ng-container>
           </ng-container>
         </div>
-      </mat-chip-list>
+      </mat-chip-listbox>
     </div>
     <ng-container *ngTemplateOutlet="facets.suggestionsPanel"></ng-container>
   </div>

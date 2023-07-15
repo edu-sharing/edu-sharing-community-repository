@@ -10,7 +10,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { debounceTime, filter, map, switchMap, tap } from 'rxjs/operators';
 import { RestSearchService } from '../../../../../core-module/rest/services/rest-search.service';
@@ -69,7 +69,7 @@ export class NodeSearchSelectorComponent implements AfterViewInit {
     searchStatus: Status = {
         loading: false,
     };
-    input = new FormControl('');
+    input = new UntypedFormControl('');
     columns: ListItem[];
     showMds = false;
     private values: { [p: string]: string[] };

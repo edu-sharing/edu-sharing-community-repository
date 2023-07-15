@@ -45,8 +45,8 @@
       <mat-checkbox [(ngModel)]="globalSearch" [disabled]="!globalAllowed" id="global">{{'WORKSPACE.SHARE.GLOBAL_SEARCH' | translate}}</mat-checkbox>
     </div>-->
     <div class="receivers">
-      <mat-chip-list *ngIf="status.hasReceiver">
-        <mat-chip
+      <mat-chip-listbox *ngIf="status.hasReceiver">
+        <mat-chip-option
           *ngFor="let receiver of receivers"
           (removed)="removeReceiver(receiver)"
           class="badge"
@@ -56,8 +56,8 @@
             <span class="secondary">{{ receiver | permissionName: { field: 'secondary' } }}</span>
           </div>
           <i matChipRemove esIcon="cancel"></i>
-        </mat-chip>
-      </mat-chip-list>
+        </mat-chip-option>
+      </mat-chip-listbox>
     </div>
     <mat-form-field class="comment">
       <mat-label>{{ 'WORKSPACE.WORKFLOW.COMMENT' | translate }}</mat-label>

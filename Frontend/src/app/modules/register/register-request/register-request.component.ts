@@ -2,7 +2,7 @@ import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { RestConnectorService, RestRegisterService } from '../../../core-module/core.module';
 import { Toast } from '../../../core-ui-module/toast';
-import { FormControl, Validators } from '@angular/forms';
+import { UntypedFormControl, Validators } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -15,7 +15,7 @@ export class RegisterRequestComponent implements OnDestroy {
     @Output() onDone = new EventEmitter();
     @Output() onStateChanged = new EventEmitter<void>();
     private destroyed$: ReplaySubject<void> = new ReplaySubject(1);
-    emailFormControl = new FormControl('', [
+    emailFormControl = new UntypedFormControl('', [
         Validators.required,
         // Validators.email, // also local accounts are allowed for restore
     ]);

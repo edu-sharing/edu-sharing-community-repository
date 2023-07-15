@@ -1,6 +1,6 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import {
     MatAutocomplete,
     MatAutocompleteSelectedEvent,
@@ -44,8 +44,8 @@ export class MdsEditorWidgetAuthorityComponent extends MdsEditorWidgetBase imple
 
     readonly valueType: ValueType = ValueType.MultiValue;
     readonly separatorKeysCodes: number[] = [ENTER, COMMA];
-    inputControl = new FormControl();
-    chipsControl: FormControl;
+    inputControl = new UntypedFormControl();
+    chipsControl: UntypedFormControl;
     autocompleteValues: Observable<DisplayValue[]>;
     indeterminateValues$: BehaviorSubject<string[]>;
     showDropdownArrow: boolean;
@@ -72,7 +72,7 @@ export class MdsEditorWidgetAuthorityComponent extends MdsEditorWidgetBase imple
     }
 
     ngOnInit(): void {
-        this.chipsControl = new FormControl(
+        this.chipsControl = new UntypedFormControl(
             [
                 ...this.widget.getInitialValues().jointValues,
                 ...(this.widget.getInitialValues().individualValues ?? []),

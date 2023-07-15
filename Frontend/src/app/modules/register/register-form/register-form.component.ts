@@ -10,7 +10,7 @@ import {
 import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { PlatformLocation } from '@angular/common';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -23,7 +23,7 @@ export class RegisterFormComponent implements OnDestroy {
     @Output() onRegisterDone = new EventEmitter();
     @Output() onStateChanged = new EventEmitter<void>();
     password: string;
-    registerForm: FormGroup;
+    registerForm: UntypedFormGroup;
     private destroyed$: ReplaySubject<void> = new ReplaySubject(1);
     info: RegisterInformation;
     public news = true;
@@ -70,7 +70,7 @@ export class RegisterFormComponent implements OnDestroy {
         private connector: RestConnectorService,
         private toast: Toast,
         private platformLocation: PlatformLocation,
-        private formBuilder: FormBuilder,
+        private formBuilder: UntypedFormBuilder,
         private router: Router,
         private registerService: RestRegisterService,
         private translations: TranslationsService,
@@ -83,21 +83,21 @@ export class RegisterFormComponent implements OnDestroy {
             ]);
 
             this.registerForm = this.formBuilder.group({
-                firstName: new FormControl(
+                firstName: new UntypedFormControl(
                     '',
                     this.requiredFields.includes('firstName') ? [Validators.required] : null,
                 ),
-                lastName: new FormControl(
+                lastName: new UntypedFormControl(
                     '',
                     this.requiredFields.includes('lastName') ? [Validators.required] : null,
                 ),
-                organization: new FormControl(
+                organization: new UntypedFormControl(
                     '',
                     this.requiredFields.includes('organization') ? [Validators.required] : null,
                 ),
-                email: new FormControl('', [Validators.required, Validators.email]),
-                agree: new FormControl(false, [Validators.requiredTrue]),
-                allowNotifications: new FormControl(false),
+                email: new UntypedFormControl('', [Validators.required, Validators.email]),
+                agree: new UntypedFormControl(false, [Validators.requiredTrue]),
+                allowNotifications: new UntypedFormControl(false),
             });
             this.registerForm.statusChanges
                 .pipe(takeUntil(this.destroyed$))

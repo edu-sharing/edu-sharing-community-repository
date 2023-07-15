@@ -3,7 +3,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { VCard } from 'ngx-edu-sharing-ui';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { Toast } from '../../../../../core-ui-module/toast';
 import { MatTabGroup } from '@angular/material/tabs';
@@ -26,7 +26,7 @@ export class MdsEditorWidgetVCardComponent extends MdsEditorWidgetBase implement
     @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
     readonly valueType: ValueType = ValueType.String;
 
-    formControl: FormGroup;
+    formControl: UntypedFormGroup;
     editType: number;
 
     constructor(
@@ -44,11 +44,11 @@ export class MdsEditorWidgetVCardComponent extends MdsEditorWidgetBase implement
         }
         const vcard = new VCard(initialValue[0]);
         this.editType = vcard.getType();
-        this.formControl = new FormGroup(
+        this.formControl = new UntypedFormGroup(
             {
-                givenname: new FormControl(vcard.givenname),
-                surname: new FormControl(vcard.surname),
-                org: new FormControl(vcard.org),
+                givenname: new UntypedFormControl(vcard.givenname),
+                surname: new UntypedFormControl(vcard.surname),
+                org: new UntypedFormControl(vcard.org),
             },
             this.getStandardValidators(),
         );

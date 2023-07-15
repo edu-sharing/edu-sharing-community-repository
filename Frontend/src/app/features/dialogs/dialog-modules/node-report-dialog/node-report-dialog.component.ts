@@ -8,7 +8,7 @@ import {
     OnInit,
     ViewChild,
 } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { filter, take } from 'rxjs/operators';
 import {
@@ -43,10 +43,10 @@ export class NodeReportDialogComponent implements OnInit {
 
     @ViewChild('formElement') formRef: ElementRef<HTMLFormElement>;
 
-    readonly form = new FormGroup({
-        reason: new FormControl('', Validators.required),
-        comment: new FormControl(''),
-        email: new FormControl('', [Validators.email, Validators.required]),
+    readonly form = new UntypedFormGroup({
+        reason: new UntypedFormControl('', Validators.required),
+        comment: new UntypedFormControl(''),
+        email: new UntypedFormControl('', [Validators.email, Validators.required]),
     });
 
     constructor(

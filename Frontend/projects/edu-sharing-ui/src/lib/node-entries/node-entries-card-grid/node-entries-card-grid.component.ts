@@ -184,7 +184,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
         // `CdkDrag` doesn't really want us to rearrange the items while dragging. Its cached
         // element positions get out of sync unless we update them manually.
         this.ngZone.runOutsideAngular(() =>
-            setTimeout(() => this.dropLists?.forEach((list) => list._dropListRef['_cacheItems']())),
+            setTimeout(() => this.dropLists?.forEach((list) => (list._dropListRef as any)['_cacheItems']())),
         );
     }
 

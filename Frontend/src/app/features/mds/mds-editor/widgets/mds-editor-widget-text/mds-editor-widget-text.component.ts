@@ -1,6 +1,6 @@
 import { filter } from 'rxjs/operators';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FormControl, ValidatorFn, Validators } from '@angular/forms';
+import { UntypedFormControl, ValidatorFn, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { DialogButton } from '../../../../../core-module/core.module';
 import { DateHelper } from 'ngx-edu-sharing-ui';
@@ -17,7 +17,7 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
     @ViewChild('inputElement') inputElement: ElementRef;
     @ViewChild('textAreaElement') textAreaElement: ElementRef;
     readonly valueType: ValueType = ValueType.String;
-    formControl: FormControl;
+    formControl: UntypedFormControl;
     fileNameChecker: FileNameChecker;
 
     constructor(
@@ -29,12 +29,12 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
     }
 
     async ngOnInit() {
-        this.formControl = new FormControl(null, this.getValidators());
+        this.formControl = new UntypedFormControl(null, this.getValidators());
         let initialValue = (await this.widget.getInitalValuesAsync()).jointValues;
         if (this.widget.definition.type === 'date') {
             initialValue = initialValue.map((v) => DateHelper.formatDateByPattern(v, 'y-M-d'));
         }
-        this.formControl = new FormControl(initialValue[0] ?? null, this.getValidators());
+        this.formControl = new UntypedFormControl(initialValue[0] ?? null, this.getValidators());
         this.formControl.valueChanges
             .pipe(
                 filter((value) => value !== null && this.mdsEditorInstance.editorMode !== 'search'),
@@ -102,7 +102,7 @@ class FileNameChecker {
     previousValue: string;
 
     constructor(
-        private formControl: FormControl,
+        private formControl: UntypedFormControl,
         widget: Widget,
         private toast: Toast,
         private translate: TranslateService,

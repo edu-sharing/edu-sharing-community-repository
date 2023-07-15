@@ -23,11 +23,7 @@ import { environment } from '../environments/environment';
             provide: LocationStrategy,
             useClass: MockLocationStrategy,
         },
-    ],
-    // Uncomment to use as web component.
-    entryComponents: [AppComponent],
-    // Uncomment to serve as Angular app.
-    // bootstrap: [AppComponent],
+    ]
 })
 // export class AppModule {}
 export class AppModule implements DoBootstrap {

@@ -7,8 +7,8 @@ import {
     Output,
     ViewChild,
 } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete/autocomplete';
+import { UntypedFormControl } from '@angular/forms';
+import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { BehaviorSubject, forkJoin, Observable, of } from 'rxjs';
 import { catchError, debounceTime, filter, map, startWith, switchMap, tap } from 'rxjs/operators';
 import {
@@ -73,7 +73,7 @@ export class AuthoritySearchInputComponent {
 
     @Output() onChooseAuthority = new EventEmitter<Authority | any>();
 
-    input = new FormControl('');
+    input = new UntypedFormControl('');
     suggestionGroups$: Observable<SuggestionGroup[]>;
     suggestionLoading = new BehaviorSubject<boolean>(false);
 

@@ -1,6 +1,6 @@
 import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition } from '@angular/cdk/overlay';
 import { Component, ElementRef, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { MatChip } from '@angular/material/chips';
 import { FacetsDict, LabeledValue, LabeledValuesDict } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
@@ -36,7 +36,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     @ViewChild(SearchFieldFacetsComponent) private searchFieldFacets: SearchFieldFacetsComponent;
     @ViewChild(MatChip) private firstActiveChip: MatChip;
 
-    readonly inputControl = new FormControl('');
+    readonly inputControl = new UntypedFormControl('');
     /** The user clicked the filters button inside the search field. */
     readonly filtersButtonClicked = this.internal.filtersButtonClicked;
     readonly filters$ = this.internal.filters$;

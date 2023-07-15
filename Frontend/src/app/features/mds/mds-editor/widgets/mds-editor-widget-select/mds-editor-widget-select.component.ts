@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MdsWidgetValue } from '../../../types/types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
@@ -15,7 +15,7 @@ export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implemen
     @ViewChild(MatSelect) matSelect: MatSelect;
 
     values: Promise<MdsWidgetValue[]>;
-    formControl: FormControl;
+    formControl: UntypedFormControl;
 
     readonly showTooltip = (() => {
         let previousTooltip: MatTooltip;
@@ -31,7 +31,7 @@ export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implemen
     }
 
     async ngOnInit() {
-        this.formControl = new FormControl(null, this.getStandardValidators());
+        this.formControl = new UntypedFormControl(null, this.getStandardValidators());
         const initialValue = (await this.widget.getInitalValuesAsync()).jointValues[0];
         this.values = this.widget.getSuggestedValues();
         if (initialValue) {

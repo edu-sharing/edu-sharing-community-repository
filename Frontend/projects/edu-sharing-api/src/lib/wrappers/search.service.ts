@@ -535,7 +535,7 @@ export class SearchService {
 
     /** Compares two objects and return the keys of properties that are not deep-equal in a string
      * array. */
-    private getChangedProperties<T>(lhs: T, rhs: T): (keyof T)[] {
+    private getChangedProperties<T extends {}>(lhs: T, rhs: T): (keyof T)[] {
         const keys = [...new Set([...Object.keys(lhs), ...Object.keys([rhs])])] as (keyof T)[];
         return keys.filter(
             (key) => JSON.stringify((lhs as any)[key]) !== JSON.stringify((rhs as any)[key]),
@@ -629,9 +629,9 @@ function omitProperty<T, K extends keyof T>(obj: T | null, property: K): Omit<T,
     }
 }
 
-function pickProperties<T, K extends keyof T>(obj: T, properties: K[]): Pick<T, K>;
-function pickProperties<T, K extends keyof T>(obj: T | null, properties: K[]): Pick<T, K> | null;
-function pickProperties<T, K extends keyof T>(obj: T | null, properties: K[]): Pick<T, K> | null {
+function pickProperties<T extends {}, K extends keyof T>(obj: T, properties: K[]): Pick<T, K>;
+function pickProperties<T extends {}, K extends keyof T>(obj: T | null, properties: K[]): Pick<T, K> | null;
+function pickProperties<T extends {}, K extends keyof T>(obj: T | null, properties: K[]): Pick<T, K> | null {
     if (obj === null) {
         return null;
     } else {

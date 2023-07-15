@@ -5,7 +5,7 @@ import {
     Inject,
     OnInit,
 } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { NodeService, RelationData, RelationService, UserService } from 'ngx-edu-sharing-api';
 import { forkJoin } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -45,8 +45,8 @@ export class NodeRelationsDialogComponent implements OnInit {
     addRelations: RelationData[] = [];
     deleteRelations: RelationData[] = [];
     swapRelation: boolean;
-    readonly form = new FormGroup({
-        relation: new FormControl(Relations.isBasedOn, Validators.required),
+    readonly form = new UntypedFormGroup({
+        relation: new UntypedFormControl(Relations.isBasedOn, Validators.required),
     });
     permissions = [RestConstants.PERMISSION_WRITE];
     target: UniversalNode;

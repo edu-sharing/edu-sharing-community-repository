@@ -483,7 +483,6 @@
       }
     }
   },
-  "defaultProject": "angular-edusharing",
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "es",
@@ -491,9 +490,18 @@
     },
     "@schematics/angular:directive": {
       "prefix": "es"
+    },
+    "@angular-eslint/schematics:application": {
+      "setParserOptionsProject": true
+    },
+    "@angular-eslint/schematics:library": {
+      "setParserOptionsProject": true
     }
   },
   "cli": {
-    "defaultCollection": "@angular-eslint/schematics"
+    "schematicCollections": [
+      "@angular-eslint/schematics"
+    ],
+    "analytics": false
   }
 }

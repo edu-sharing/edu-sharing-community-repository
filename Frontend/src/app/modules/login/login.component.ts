@@ -2,7 +2,7 @@ import { trigger } from '@angular/animations';
 import { PlatformLocation } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { first, map, startWith } from 'rxjs/operators';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
@@ -47,7 +47,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     isLoading = true;
     loginUrl: any;
     password = '';
-    providerControl = new FormControl();
+    providerControl = new UntypedFormControl();
     showProviders = false;
     username = '';
 

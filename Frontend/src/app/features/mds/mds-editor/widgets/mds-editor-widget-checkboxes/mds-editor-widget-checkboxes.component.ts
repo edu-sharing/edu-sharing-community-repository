@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormArray, FormControl, ValidatorFn } from '@angular/forms';
+import { UntypedFormArray, UntypedFormControl, ValidatorFn } from '@angular/forms';
 import { filter } from 'rxjs/operators';
 import { MdsWidgetType } from '../../../types/types';
 import { DisplayValues } from '../DisplayValues';
@@ -12,7 +12,7 @@ import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 export class MdsEditorWidgetCheckboxesComponent extends MdsEditorWidgetBase implements OnInit {
     readonly valueType: ValueType = ValueType.String;
     values: DisplayValues;
-    formArray: FormArray;
+    formArray: UntypedFormArray;
     mode: 'horizontal' | 'vertical';
     indeterminateValues: boolean[];
 
@@ -23,8 +23,8 @@ export class MdsEditorWidgetCheckboxesComponent extends MdsEditorWidgetBase impl
         this.indeterminateValues = this.values.values.map(
             (value) => !!this.widget.getInitialValues()?.individualValues?.includes(value.key),
         );
-        this.formArray = new FormArray(
-            this.values.values.map((value) => new FormControl(initialValue.includes(value.key))),
+        this.formArray = new UntypedFormArray(
+            this.values.values.map((value) => new UntypedFormControl(initialValue.includes(value.key))),
             this.getStandardValidators({ requiredValidator }),
         );
         this.formArray.valueChanges
@@ -58,7 +58,7 @@ export class MdsEditorWidgetCheckboxesComponent extends MdsEditorWidgetBase impl
     }
 }
 
-const requiredValidator: ValidatorFn = (control: FormArray): { [key: string]: any } | null => {
+const requiredValidator: ValidatorFn = (control: UntypedFormArray): { [key: string]: any } | null => {
     const value: boolean[] = control.value;
     const valid = value.some((checked) => checked);
     return valid ? null : { required: true };

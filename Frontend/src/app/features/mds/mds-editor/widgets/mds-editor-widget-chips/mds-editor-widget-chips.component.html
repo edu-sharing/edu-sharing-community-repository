@@ -16,19 +16,18 @@
       - get correct value readings for the required-state
       - pass the disabled state to chips and the input.
     -->
-  <mat-chip-list
+  <mat-chip-grid
     #chipList
     *ngIf="chipsControl"
     [formControl]="chipsControl"
     [attr.aria-labelledby]="chipsControl.value?.length > 0 ? container.labelId : null"
     esOnAttributeChange="aria-describedby"
     (attributeChange)="input.setAttribute('aria-describedby', $event)"
-    [multiple]="true"
   >
     <!-- We mark all chips as selected because NVDA will announce "not selected" for each item
     otherwise. It announces nothing (!) for selected items. -->
-    <mat-chip
-      #chip="matChip"
+    <mat-chip-row
+      #chip
       *ngFor="let value of chipsControl.value"
       [value]="value"
       [removable]="true"
@@ -42,7 +41,7 @@
     >
       <span class="mat-chip-label" [innerHTML]="value.label | escapeHtml"></span>
       <mat-icon matChipRemove>cancel</mat-icon>
-    </mat-chip>
+    </mat-chip-row>
     <div class="input-wrapper">
       <input
         #input
@@ -63,13 +62,15 @@
         *ngIf="showDropdownArrow"
         (click)="toggleAutoCompletePanel()"
         [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
-        (keydown.tab)="chipList._allowFocusEscape()"
         [disabled]="chipsControl.disabled"
       >
+       <!-- @TODO removed with angular 15
+                  (keydown.tab)="chipList._allowFocusEscape()"
+        -->
         <span class="mat-select-arrow"></span>
       </button>
     </div>
-  </mat-chip-list>
+  </mat-chip-grid>
   <mat-autocomplete
     #auto="matAutocomplete"
     (optionSelected)="selected($event)"

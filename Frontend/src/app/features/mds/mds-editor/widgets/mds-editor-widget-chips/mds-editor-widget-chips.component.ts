@@ -8,13 +8,13 @@ import {
     ViewChild,
     ViewChildren,
 } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import {
     MatAutocomplete,
     MatAutocompleteSelectedEvent,
     MatAutocompleteTrigger,
 } from '@angular/material/autocomplete';
-import { MatChip, MatChipInputEvent } from '@angular/material/chips';
+import { MatChip, MatChipInputEvent, MatChipOption, MatChipRow } from '@angular/material/chips';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
@@ -53,12 +53,12 @@ export class MdsEditorWidgetChipsComponent
     @ViewChild(MatAutocompleteTrigger, { read: MatAutocompleteTrigger })
     trigger: MatAutocompleteTrigger;
     @ViewChild('auto') matAutocomplete: MatAutocomplete;
-    @ViewChildren('chip') chips: QueryList<MatChip>;
+    @ViewChildren('chip') chips: QueryList<MatChipRow>;
 
     readonly valueType: ValueType = ValueType.MultiValue;
     readonly separatorKeysCodes: number[] = [ENTER, COMMA];
-    inputControl = new FormControl();
-    chipsControl: FormControl;
+    inputControl = new UntypedFormControl();
+    chipsControl: UntypedFormControl;
     autocompleteValues: Observable<DisplayValue[]>;
     shouldShowNoMatchingValuesNotice: Observable<boolean>;
     indeterminateValues$: BehaviorSubject<string[]>;
@@ -85,8 +85,8 @@ export class MdsEditorWidgetChipsComponent
     }
 
     async ngOnInit() {
-        this.chipsControl = new FormControl(null, this.getStandardValidators());
-        this.chipsControl = new FormControl(
+        this.chipsControl = new UntypedFormControl(null, this.getStandardValidators());
+        this.chipsControl = new UntypedFormControl(
             [
                 ...((await this.widget.getInitalValuesAsync()).jointValues ?? []),
                 ...((await this.widget.getInitalValuesAsync()).individualValues ?? []),
@@ -149,7 +149,7 @@ export class MdsEditorWidgetChipsComponent
         // doesn't do anything, we disable toggling the selection.
         this.chips.changes
             .pipe(startWith(this.chips))
-            .subscribe((chips: QueryList<MatChip>) =>
+            .subscribe((chips: QueryList<MatChipOption>) =>
                 chips.forEach((chip) => (chip.toggleSelected = () => true)),
             );
     }

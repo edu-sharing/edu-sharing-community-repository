@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormControl, ValidatorFn } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, ValidatorFn } from '@angular/forms';
 import { filter } from 'rxjs/operators';
 import { MdsWidgetType } from '../../../types/types';
 import { DisplayValue, DisplayValues } from '../DisplayValues';
@@ -13,15 +13,15 @@ import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 export class MdsEditorWidgetRadioButtonComponent extends MdsEditorWidgetBase implements OnInit {
     readonly valueType: ValueType = ValueType.String;
     values: DisplayValues;
-    formControl: FormControl;
+    formControl: UntypedFormControl;
     mode: 'horizontal' | 'vertical';
 
     async ngOnInit() {
-        this.formControl = new FormControl(null, this.getStandardValidators({ requiredValidator }));
+        this.formControl = new UntypedFormControl(null, this.getStandardValidators({ requiredValidator }));
         this.mode = this.getMode();
         this.values = DisplayValues.fromMdsValues(this.widget.definition.values);
         const initialValue = (await this.widget.getInitalValuesAsync()).jointValues;
-        this.formControl = new FormControl(
+        this.formControl = new UntypedFormControl(
             this.values.get(initialValue[0]),
             this.getStandardValidators({ requiredValidator }),
         );

@@ -5,7 +5,7 @@ import {
     OnDestroy,
     OnInit,
 } from '@angular/core';
-import { FormArray, FormControl } from '@angular/forms';
+import { UntypedFormArray, UntypedFormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { FacetAggregation, FacetValue, SearchService } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -29,7 +29,7 @@ export class MdsEditorWidgetFacetListComponent
     /** Available facet values being updated from `mdsEditorInstance.suggestions$`. */
     readonly facetAggregationSubject = new BehaviorSubject<FacetAggregation>(null);
     /** Form array representing checkbox states. */
-    formArray: FormArray;
+    formArray: UntypedFormArray;
     /** all available facet values. */
     facetValues: FacetValue[];
     facetValuesFiltered: FacetValue[];
@@ -39,7 +39,7 @@ export class MdsEditorWidgetFacetListComponent
     /** IDs of selected values. Updated through user interaction. */
     private values: string[];
     private readonly destroyed$ = new Subject<void>();
-    filter = new FormControl('');
+    filter = new UntypedFormControl('');
 
     constructor(
         mdsEditorInstance: MdsEditorInstanceService,
@@ -112,9 +112,9 @@ export class MdsEditorWidgetFacetListComponent
         });
     }
 
-    private generateFormArray(facetValues: FacetValue[]): FormArray {
-        const formArray = new FormArray(
-            facetValues.map((value) => new FormControl(this.values.includes(value.value))),
+    private generateFormArray(facetValues: FacetValue[]): UntypedFormArray {
+        const formArray = new UntypedFormArray(
+            facetValues.map((value) => new UntypedFormControl(this.values.includes(value.value))),
         );
         // Propagate user interaction to instance service.
         formArray.valueChanges

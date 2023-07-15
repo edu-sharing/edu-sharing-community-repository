@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { ApiErrorResponse, SavedSearch, SavedSearchesService } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
@@ -20,7 +20,7 @@ import { SaveSearchDialogData, SaveSearchDialogResult } from './save-search-dial
     styleUrls: ['./save-search-dialog.component.scss'],
 })
 export class SaveSearchDialogComponent implements OnInit {
-    readonly nameControl = new FormControl();
+    readonly nameControl = new UntypedFormControl();
     private readonly _savedSearches = new BehaviorSubject<SavedSearch[]>(null);
     autocompleteValues: string[];
 

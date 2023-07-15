@@ -10,7 +10,7 @@
         <div class="row origin">
           <div class="receivers">
             <label>{{ 'WORKSPACE.WORKFLOW.RECEIVERS' | translate }}</label>
-            <mat-chip-list
+            <mat-chip-set
               *ngIf="
                 i == history.length - 1 || !getWorkflowForId(history[i + 1].status).hasReceiver
               "
@@ -18,8 +18,8 @@
               <mat-chip>
                 {{ 'WORKSPACE.WORKFLOW.NOBODY' | translate }}
               </mat-chip>
-            </mat-chip-list>
-            <mat-chip-list
+            </mat-chip-set>
+            <mat-chip-set
               *ngIf="
                 !(i == history.length - 1 || !getWorkflowForId(history[i + 1].status).hasReceiver)
               "
@@ -36,7 +36,7 @@
                   }}</span>
                 </div>
               </mat-chip>
-            </mat-chip-list>
+            </mat-chip-set>
           </div>
           <div class="status" *ngIf="i < history.length - 1">
             <label>{{ 'WORKSPACE.WORKFLOW.OLD_STATUS' | translate }}</label>
@@ -60,12 +60,12 @@
         <div class="row target">
           <div class="receivers">
             <label>{{ 'WORKSPACE.WORKFLOW.RECEIVERS_NEXT' | translate }}</label>
-            <mat-chip-list *ngIf="!getWorkflowForId(history[i].status).hasReceiver">
+            <mat-chip-set *ngIf="!getWorkflowForId(history[i].status).hasReceiver">
               <mat-chip>
                 {{ 'WORKSPACE.WORKFLOW.NOBODY' | translate }}
               </mat-chip>
-            </mat-chip-list>
-            <mat-chip-list
+            </mat-chip-set>
+            <mat-chip-set
               *ngIf="getWorkflowForId(history[i].status).hasReceiver && entry.receiver?.length"
             >
               <mat-chip *ngFor="let receiver of entry.receiver" class="badge">
@@ -80,7 +80,7 @@
                   }}</span>
                 </div>
               </mat-chip>
-            </mat-chip-list>
+            </mat-chip-set>
           </div>
           <div class="status">
             <label>{{ 'WORKSPACE.WORKFLOW.NEW_STATUS' | translate }}</label>
