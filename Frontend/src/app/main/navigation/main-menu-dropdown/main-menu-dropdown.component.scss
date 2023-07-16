@@ -16,7 +16,7 @@ $mainMenuSelectedBackground: linear-gradient(
 // selector to not bleed into other components.
 ::ng-deep .main-menu-dropdown {
     border-radius: 0px;
-    .mat-menu-content {
+    .mat-mdc-menu-content {
         min-width: 250px;
 
         @if variable-exists(mainMenuBackgroundColor) {

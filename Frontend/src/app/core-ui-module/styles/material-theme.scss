@@ -13,14 +13,14 @@
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
+
 $custom-typography: mat.define-typography-config(
     $font-family: $primaryFontFamily,
     $body-1: mat.define-typography-level(100%, normal, 400),
     $body-2: mat.define-typography-level(100%, normal, 600),
     $button: mat.define-typography-level(100%, normal, 400),
-    $headline: mat.define-typography-level(150%, normal, 400),
-    $title: mat.define-typography-level(130%, normal, 400),
-    $input: mat.define-typography-level(inherit, 1.25, 400),
+    $headline-1: mat.define-typography-level(150%, normal, 400),
+    $headline-2: mat.define-typography-level(140%, normal, 400),
 ) !default;
 // Override typography for all Angular Material, including mat-base-typography and all components.
 @include mat.all-component-typographies($custom-typography);

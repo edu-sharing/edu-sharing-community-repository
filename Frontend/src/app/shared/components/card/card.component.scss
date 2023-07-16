@@ -76,14 +76,14 @@
     }
     @each $name, $value in $heights {
         &[height='#{$name}'] {
-            .mat-card {
+            mat-card {
                 height: $value;
             }
         }
     }
     @each $name, $value in $widths {
         &[width='#{$name}'] {
-            .mat-card {
+            mat-card {
                 width: $value;
             }
             @media (max-width: $value + 2*$nonModalPadding) {
@@ -91,7 +91,7 @@
             }
         }
     }
-    .mat-card {
+    mat-card {
         display: flex;
         flex-direction: column;
         max-width: 100%;
@@ -99,15 +99,15 @@
         position: relative;
         padding: 0;
         @include materialShadowLarge();
-        .mat-card-header {
+        mat-card-header {
             flex-shrink: 0;
             background-color: $actionDialogBackground;
             display: flex;
-            align-items: center;
+            align-items: top;
             height: $titleHeight;
             padding-top: 15px;
             position: relative;
-            .mat-card-header-text {
+            .mat-mdc-card-header-text {
                 width: calc(100% - 32px);
                 mat-card-title {
                     &.no-subtitle {
@@ -144,7 +144,6 @@
                 align-items: center;
                 justify-content: center;
                 margin-left: 20px;
-                margin-top: -10px;
                 background-color: #fff;
                 > img {
                     width: 24px;
