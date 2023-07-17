@@ -1493,14 +1493,14 @@ public class NodeDao {
 				}
 
 				for(Map.Entry<Authority,List<String>> entry : authPerm.entrySet()){
-					ACE ace = getACEAsSystem(entry.getKey());
+					ACE ace = getACE(entry.getKey());
 					ace.setPermissions(entry.getValue());
 					ace.setEditable(entry.getKey().isEditable());
 					result.getLocalPermissions().getPermissions().add(ace);
 				}
 
 				for(Map.Entry<Authority,List<String>> entry : authPermInherited.entrySet()){
-					ACE ace = getACEAsSystem(entry.getKey());
+					ACE ace = getACE(entry.getKey());
 					ace.setPermissions(entry.getValue());
 					result.getInheritedPermissions().add(ace);
 				}
@@ -1516,11 +1516,7 @@ public class NodeDao {
 
 	}
 
-	private ACE getACEAsSystem(Authority key){
-		return AuthenticationUtil.runAsSystem(new RunAsWork<ACE>() {
-
-			@Override
-			public ACE doWork() throws Exception {
+	private ACE getACE(Authority key){
 				try{
 					if(key.getAuthorityType().name().equals("GROUP")){
 						GroupProfile group=GroupDao.getGroup(repoDao, key.getAuthorityName()).asGroup().getProfile();
@@ -1540,8 +1536,7 @@ public class NodeDao {
 					// this may happens for a virtual user, e.g. GROUP_EVERYONE
 					return new ACE(key,null,null);
 				}
-			}
-		});
+
 	}
 
 	public void setPermissions(ACL permissions, String mailText, Boolean sendMail, Boolean sendCopy) throws DAOException {
