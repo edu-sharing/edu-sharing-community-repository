@@ -13,4 +13,8 @@ public enum StatusDTO {
      * was read
      */
     READ,
+    /**
+     * was disabled
+     */
+    IGNORED,
 }
