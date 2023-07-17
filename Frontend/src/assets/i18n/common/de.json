@@ -1313,7 +1313,8 @@
       "nodeIssueEvent": "Problemmeldungen zu Materialien",
       "ratingEvent": "Bewertungen an Materialien",
       "workflowEvent": "Als Workflow-Zuständiger zugewiesen",
-      "metadataSuggestionEvent": "Vorschlag für Metadaten"
+      "metadataSuggestionEvent": "Vorschlag für Metadaten",
+      "proposeForCollectionEvent": "Vorschläge für Sammlungen"
     }
   },
   "API_ERROR": {

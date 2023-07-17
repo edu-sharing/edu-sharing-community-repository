@@ -1210,7 +1210,8 @@
       "NodeIssueEvent": "{{creator}} has reported the issue \"{{reason}}\" on material \"{{title}}\"",
       "RatingEvent": "A rating has been given on \"{{title}}\"",
       "WorkflowEvent": "{{creator}} has changed the workflow state of material \"{{title}}\" to \"{{workflowStatus}}\"",
-      "MetadataSuggestionEvent": ""
+      "MetadataSuggestionEvent": "",
+      "proposeForCollectionEvent": "Proposals for collection"
     }
   },
   "NOTIFICATION": {

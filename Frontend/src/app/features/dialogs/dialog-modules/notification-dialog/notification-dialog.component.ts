@@ -2,9 +2,11 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { DialogButton } from '../../../../core-module/ui/dialog-button';
-import { NotificationConfig, NotificationV1Service } from 'ngx-edu-sharing-api';
+import { ClientConfig, NotificationConfig, NotificationV1Service } from 'ngx-edu-sharing-api';
 import { FormControl, FormGroup } from '@angular/forms';
+import { ConfigService } from 'ngx-edu-sharing-api';
 import { Toast } from '../../../../core-ui-module/toast';
+import { first } from 'rxjs/operators';
 
 enum NotificationEvents {
     addToCollectionEvent = 'addToCollectionEvent',
@@ -13,6 +15,8 @@ enum NotificationEvents {
     nodeIssueEvent = 'nodeIssueEvent',
     ratingEvent = 'ratingEvent',
     workflowEvent = 'workflowEvent',
+
+    proposeForCollectionEvent = 'proposeForCollectionEvent',
     metadataSuggestionEvent = 'metadataSuggestionEvent',
 }
 
@@ -24,6 +28,7 @@ enum NotificationEvents {
 export class NotificationDialogComponent implements OnInit, OnDestroy {
     readonly destroyed$ = new Subject<void>();
     private config: NotificationConfig;
+    private clientConfig: ClientConfig;
 
     notificationForm = new FormGroup({
         configMode: new FormControl(),
@@ -35,6 +40,7 @@ export class NotificationDialogComponent implements OnInit, OnDestroy {
         private dialogRef: CardDialogRef<void, void>,
         private toast: Toast,
         private notificationService: NotificationV1Service,
+        private configService: ConfigService,
     ) {}
 
     getGroups() {
@@ -45,7 +51,12 @@ export class NotificationDialogComponent implements OnInit, OnDestroy {
                 ![
                     NotificationEvents.nodeIssueEvent.valueOf(),
                     NotificationEvents.metadataSuggestionEvent.valueOf(),
-                ].includes(v)
+                ].includes(v) &&
+                // do hide rating event if rating is disabled
+                !(
+                    (!this.clientConfig.rating || this.clientConfig.rating?.mode === 'none') &&
+                    NotificationEvents.ratingEvent.valueOf() === v
+                )
             ) {
                 result.push(v);
             }
@@ -54,6 +65,8 @@ export class NotificationDialogComponent implements OnInit, OnDestroy {
     }
 
     async ngOnInit() {
+        this.clientConfig = await this.configService.observeConfig().pipe(first()).toPromise();
+        console.log(this.clientConfig);
         for (let v in NotificationEvents) {
             (this.notificationForm.get('intervals') as FormGroup).addControl(v, new FormControl());
         }
