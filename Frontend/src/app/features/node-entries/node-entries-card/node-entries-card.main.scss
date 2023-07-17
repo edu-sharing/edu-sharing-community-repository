@@ -139,6 +139,7 @@ $optionBarHeight: 50px;
             flex-direction: row;
             align-items: center;
             min-height: 2.5em;
+            gap: 5px;
             &:not(:first-child) {
                 > label {
                     cursor: inherit;

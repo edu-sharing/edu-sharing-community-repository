@@ -281,8 +281,14 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                             ];
                         this.sortCollections.active =
                             orderCollections?.[0] || RestConstants.CM_MODIFIED_DATE;
+
                         this.sortCollections.direction =
-                            orderCollections?.[1] === 'true' ? 'asc' : 'desc';
+                            orderCollections?.[0] ===
+                            RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
+                                ? 'asc'
+                                : orderCollections?.[1] === 'true'
+                                ? 'asc'
+                                : 'desc';
 
                         const refMode = collection.collection.orderMode;
                         const refAscending = collection.collection.orderAscending;
@@ -291,7 +297,11 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         RestConstants.COLLECTION_ORDER_MODE_CUSTOM
                             ? RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
                             : refMode) || RestConstants.CM_MODIFIED_DATE) as any;
-                        this.sortReferences.direction = refAscending ? 'asc' : 'desc';
+                        this.sortReferences.direction = RestConstants.COLLECTION_ORDER_MODE_CUSTOM
+                            ? 'asc'
+                            : refAscending
+                            ? 'asc'
+                            : 'desc';
                         this.collection = collection;
                         this.mainNavUpdateTrigger.next();
                         this.dataSourceCollections.isLoading = false;
@@ -624,6 +634,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         const request: RequestObject = Helper.deepCopy(CollectionContentComponent.DEFAULT_REQUEST);
         if (this.sortCollections?.active) {
             request.sortBy = [this.sortCollections.active];
+
             request.sortAscending = [this.sortCollections.direction === 'asc'];
         } else {
             console.warn('Sort for collections is not defined in the mds!');

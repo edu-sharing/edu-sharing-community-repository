@@ -1,10 +1,11 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Scope } from '../../core-ui-module/option-item';
 import { NodeEntriesDisplayType } from '../../features/node-entries/entries-model';
 import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
 import { SearchPageResultsService } from './search-page-results.service';
 import { SearchPageService } from './search-page.service';
 import { GlobalSearchPageServiceInternal } from './global-search-page.service';
+import { TemporaryStorageService } from '../../core-module/rest/services/temporary-storage.service';
 
 @Component({
     selector: 'es-search-page-results',
@@ -12,7 +13,7 @@ import { GlobalSearchPageServiceInternal } from './global-search-page.service';
     styleUrls: ['./search-page-results.component.scss'],
     providers: [SearchPageResultsService],
 })
-export class SearchPageResultsComponent implements OnInit {
+export class SearchPageResultsComponent implements OnInit, OnDestroy {
     readonly Scope = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 
@@ -35,6 +36,7 @@ export class SearchPageResultsComponent implements OnInit {
         private globalSearchPageInternal: GlobalSearchPageServiceInternal,
         private results: SearchPageResultsService,
         private searchPage: SearchPageService,
+        private temporaryStorageService: TemporaryStorageService,
     ) {}
 
     ngOnInit(): void {
@@ -47,5 +49,12 @@ export class SearchPageResultsComponent implements OnInit {
     toggleFilters(): void {
         const filterBarIsVisible = this.searchPage.filterBarIsVisible;
         filterBarIsVisible.setUserValue(!filterBarIsVisible.getValue());
+    }
+
+    ngOnDestroy(): void {
+        this.temporaryStorageService.set(
+            TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE,
+            this.resultsDataSource,
+        );
     }
 }

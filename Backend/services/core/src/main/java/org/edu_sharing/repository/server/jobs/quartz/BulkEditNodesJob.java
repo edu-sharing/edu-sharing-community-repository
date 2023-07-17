@@ -111,9 +111,9 @@ public class BulkEditNodesJob extends AbstractJob{
 		ReplaceToken,
 		@JobFieldDescription(description = "Find specific keys in the list and map it to new ones (list must contain oldValue and newValue as csv-headings!)")
 		ReplaceMapping,
-		@JobFieldDescription(description = "Currently Unsupported")
+		@JobFieldDescription(description = "Add value to an multivalue property. use \"value\" param for the new value")
 		Append,
-		@JobFieldDescription(description = "Remove the property. Use with searchtoken: one value must be equal, than the property is removed.")
+		@JobFieldDescription(description = "Remove the property. Use with searchtoken: one value must be equal, than the property is removed. When no search token is given, the property will be removed on every node")
 		Remove,
 		@JobFieldDescription(description = "Remove the property. Use with searchtoken: if a found value is equal, than it is removed, but other values will stay stored (useful for multivalue fields).")
 		RemoveSingle,
@@ -169,7 +169,7 @@ public class BulkEditNodesJob extends AbstractJob{
 		}
 
 		if (mode.equals(Mode.Remove) || mode.equals(Mode.RemoveSingle)) {
-			searchToken = prepareParam(context, "searchToken", true);
+			searchToken = prepareParam(context, "searchToken", false);
 		}
 
 		lucene = prepareParam(context, "lucene", false);
@@ -300,6 +300,28 @@ public class BulkEditNodesJob extends AbstractJob{
 							setProperty(nodeRef, QName.createQName(property), (Serializable) ((List) current).stream().distinct().collect(Collectors.toList()));
 						}
 					}
+				} else if(mode.equals(Mode.Append)){
+					if(value == null ){
+						logger.warn("can not append value cause its's null");
+					}else if(!(value instanceof String)){
+						logger.warn("only strings as value supported");
+					}else{
+						Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
+						if(current == null){
+							logger.info("current is null");
+						}else if(!(current instanceof List)){
+							logger.info("property "+property +" is no list");
+						}else{
+							ArrayList newList = new ArrayList((List)current);
+							if(newList.contains(value)){
+								logger.info(nodeRef + " already contains "+value +" in "+property);
+							}else{
+								newList.add(value);
+								setProperty(nodeRef, QName.createQName(property),newList);
+							}
+						}
+					}
+
 				} else {
 					throw new IllegalArgumentException("Mode " + mode + " is currently not supported");
 				}

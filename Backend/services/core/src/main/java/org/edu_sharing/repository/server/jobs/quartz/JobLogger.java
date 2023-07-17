@@ -10,6 +10,7 @@ import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
 import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
+import org.springframework.context.ApplicationContext;
 
 import java.util.*;
 
@@ -19,21 +20,25 @@ import java.util.*;
     elementType = Appender.ELEMENT_TYPE)
 public class JobLogger extends AbstractAppender {
 
+    private final ApplicationContext applicationContext;
+
     public static final List<String> IGNORABLE_JOBS = new ArrayList<>();
     static{
         IGNORABLE_JOBS.add(SystemStatisticJob.class.getName());
         IGNORABLE_JOBS.add("org.edu_sharing.repository.server.jobs.quartz.ClusterInfoJob");
     }
 
-    public JobLogger(String name, Filter filter) {
+    public JobLogger(String name, Filter filter, ApplicationContext applicationContext) {
         super(name, filter, null);
+        this.applicationContext = applicationContext;
     }
 
     @PluginFactory
     public static JobLogger createAppender(
             @PluginAttribute("name") String name,
-            @PluginElement("Filter") Filter filter) {
-        return new JobLogger(name, filter);
+            @PluginElement("Filter") Filter filter,
+            ApplicationContext applicationContext) {
+        return new JobLogger(name, filter, applicationContext);
     }
 
     @Override
@@ -42,7 +47,7 @@ public class JobLogger extends AbstractAppender {
             return;
         }
         try {
-            for(JobInfo job : JobHandler.getInstance().getAllJobs()){
+            for(JobInfo job : JobHandler.getInstance(applicationContext).getAllJobs()){
                 if(!job.getStatus().equals(JobInfo.Status.Running))
                     continue;
                 String clazz=job.getJobDetail().getJobClass().getName();

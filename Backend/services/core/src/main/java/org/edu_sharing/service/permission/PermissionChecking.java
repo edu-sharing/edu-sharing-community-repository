@@ -24,6 +24,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Aspect
 @Order(AspectConstants.ORDER.PermissionChecking)
@@ -105,15 +107,23 @@ public class PermissionChecking {
 
     private void checkNodePermissions(Object node, String user, String[] permissions, String parameterName) throws InsufficientPermissionException {
         String nodeId;
+        List<String> nodePermissions = null;
         if (node instanceof String) {
             nodeId = (String) node;
         } else if (node instanceof NodeRef) {
             nodeId = ((NodeRef) node).getId();
+        }else if (node instanceof org.edu_sharing.service.model.NodeRef) {
+            nodeId = ((org.edu_sharing.service.model.NodeRef) node).getNodeId();
+            if(((org.edu_sharing.service.model.NodeRef) node).getPermissions() != null) {
+                nodePermissions = ((org.edu_sharing.service.model.NodeRef) node).getPermissions().entrySet().stream().
+                        filter(e -> e.getValue() == true).map(Map.Entry::getKey).collect(Collectors.toList());
+            }
         } else {
             throw new InvalidArgumentException(String.format("%s must be of type %s or %s", parameterName, String.class, NodeRef.class));
         }
-
-        List<String> nodePermissions = permissionService.getPermissionsForAuthority(nodeId, user);
+        if(nodePermissions == null) {
+            nodePermissions = permissionService.getPermissionsForAuthority(nodeId, user);
+        }
         if (!nodePermissions.containsAll(Arrays.asList(permissions))) {
             throw new InsufficientPermissionException(String.format("%s with id %s requires permission(s): %s",
                     parameterName, nodeId, String.join(", ", permissions)));

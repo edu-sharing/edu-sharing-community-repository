@@ -237,7 +237,7 @@ export class SearchFieldInternalService implements EventListener {
                     this.enableFiltersAndSuggestionsSubject.value ? inputString : null,
                 ),
                 map((inputString) => (inputString?.length >= 3 ? inputString : null)),
-                filter(() => this.categoriesSubject.value?.length > 1),
+                filter(() => this.categoriesSubject.value?.length > 0),
                 debounce((inputString) => (inputString ? timer(200) : EMPTY)),
                 switchMap((inputString) =>
                     inputString
