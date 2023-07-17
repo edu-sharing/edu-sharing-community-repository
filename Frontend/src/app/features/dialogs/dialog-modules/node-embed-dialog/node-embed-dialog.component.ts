@@ -4,7 +4,6 @@ import {
     ChangeDetectorRef,
     Component,
     ElementRef,
-    HostBinding,
     Inject,
     NgZone,
     OnDestroy,
@@ -15,7 +14,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { startWith, take } from 'rxjs/operators';
-import { DialogButton, RestHelper } from '../../../../core-module/core.module';
+import { DialogButton, RestConstants, RestHelper } from '../../../../core-module/core.module';
 import { Toast, ToastType } from '../../../../core-ui-module/toast';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { Node } from '../../../../core-module/rest/data-object';
@@ -89,7 +88,7 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
 
     async openInviteDialog(): Promise<void> {
         const dialogRef = await this.dialogs.openShareDialog({ nodes: [this.data.node] });
-        dialogRef.afterClosed().subscribe((result) => {
+        dialogRef.afterClosed().subscribe(() => {
             // TODO: Update `isPublic` if necessary.
         });
     }
@@ -147,7 +146,8 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
         const routerLink = 'eduservlet/render';
         const queryParams = {
             node_id: node.ref.id,
-            version: version === 'fixed' ? node.content.version : null,
+            version:
+                version === 'fixed' && !this.isCollectionReference() ? node.content.version : null,
             // Currently, `RenderingServlet` only supports local nodes. Uncomment, when other
             // repositories become supported.
             //
@@ -155,5 +155,8 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
         };
         const urlTree = this.router.createUrlTree([routerLink], { queryParams });
         return location.origin + this.location.prepareExternalUrl(urlTree.toString());
+    }
+    isCollectionReference() {
+        return this.data.node.aspects.includes(RestConstants.CCM_ASPECT_IO_REFERENCE);
     }
 }
