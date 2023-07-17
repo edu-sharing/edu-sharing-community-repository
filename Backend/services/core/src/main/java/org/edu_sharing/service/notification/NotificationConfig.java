@@ -11,6 +11,7 @@ public class NotificationConfig implements Serializable {
     @Data
     public static class NotificationIntervals implements Serializable {
         private NotificationInterval addToCollectionEvent = NotificationInterval.immediately;
+        private NotificationInterval proposeForCollectionEvent = NotificationInterval.immediately;
         private NotificationInterval commentEvent = NotificationInterval.immediately;
         private NotificationInterval inviteEvent = NotificationInterval.immediately;
         private NotificationInterval nodeIssueEvent = NotificationInterval.immediately;
@@ -42,6 +43,13 @@ public class NotificationConfig implements Serializable {
 
     @JsonIgnore
     public NotificationInterval getAddToCollectionEvent() {
+        return configMode == NotificationConfigMode.individual
+                ? intervals.getAddToCollectionEvent()
+                : defaultInterval;
+    }
+
+    @JsonIgnore
+    public NotificationInterval getProposeForCollectionEvent() {
         return configMode == NotificationConfigMode.individual
                 ? intervals.getAddToCollectionEvent()
                 : defaultInterval;
