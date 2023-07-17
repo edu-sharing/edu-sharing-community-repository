@@ -81,6 +81,9 @@ public class NodeRefImpl implements NodeRef {
 	public NodeRefImpl(){
 		
 	}
+	public NodeRefImpl(String nodeId){
+		this.nodeId = nodeId;
+	}
 	public NodeRefImpl(String repositoryId, String storeProtocol, String storeId, String nodeId){
 		this.repositoryId = repositoryId;
 		this.storeId = storeId;
