@@ -155,8 +155,8 @@ public class NgServlet extends HttpServlet {
 		return html;	}
 
 	private static String addEmbed(String html, URL url) throws UnsupportedEncodingException {
-		html=addToHead("<link rel=\"alternate\" type=\"application/json+oembed\" href=\""+URLTool.getEduservletUrl()+"oembed?format=json&url="+URLEncoder.encode(url.toString(),"UTF-8")+"\"/>",html);
-		html=addToHead("<link rel=\"alternate\" type=\"text/xml+oembed\" href=\""+URLTool.getEduservletUrl()+"oembed?format=xml&url="+URLEncoder.encode(url.toString(),"UTF-8")+"\"/>",html);
+		html=addToHead("<link rel=\"alternate\" type=\"application/json+oembed\" href=\""+URLTool.getEduservletUrl(true)+"oembed?format=json&url="+URLEncoder.encode(url.toString(),"UTF-8")+"\"/>",html);
+		html=addToHead("<link rel=\"alternate\" type=\"text/xml+oembed\" href=\""+URLTool.getEduservletUrl(true)+"oembed?format=xml&url="+URLEncoder.encode(url.toString(),"UTF-8")+"\"/>",html);
 		return html;
 	}
 

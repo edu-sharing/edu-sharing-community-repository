@@ -269,18 +269,19 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 		eduOrganisationService = (org.edu_sharing.alfresco.service.OrganisationService)applicationContext.getBean("eduOrganisationService");
 
-		try {
-			logger.debug("currentAuthInfo from authservice:" + serviceRegistry.getAuthenticationService().getCurrentUserName() + " "
-					+ serviceRegistry.getAuthenticationService().getCurrentTicket());
-		} catch (net.sf.acegisecurity.AuthenticationCredentialsNotFoundException e) {
-			//logger.error(e.getMessage());
-		}
 
 		if (_authenticationInfo == null) {
 			try{
 				HashMap<String, String> authInfo = new HashMap<String, String>();
 				authInfo.put(CCConstants.AUTH_USERNAME, serviceRegistry.getAuthenticationService().getCurrentUserName());
-				authInfo.put(CCConstants.AUTH_TICKET, serviceRegistry.getAuthenticationService().getCurrentTicket());
+				/**
+				 * when authentication.ticket.useSingleTicketPerUser=false is set
+				 * and the current user is the System user the call of
+				 * serviceRegistry.getAuthenticationService().getCurrentTicket() leads to new ticket creation
+				 */
+				if(!AuthenticationUtil.isRunAsUserTheSystemUser()){
+					authInfo.put(CCConstants.AUTH_TICKET, serviceRegistry.getAuthenticationService().getCurrentTicket());
+				}
 				authenticationInfo = authInfo;
 				logger.debug("authinfo init parameter is null, using " + " " + authenticationInfo.get(CCConstants.AUTH_USERNAME) + " " + authenticationInfo.get(CCConstants.AUTH_TICKET));
 			}catch(AuthenticationCredentialsNotFoundException e){

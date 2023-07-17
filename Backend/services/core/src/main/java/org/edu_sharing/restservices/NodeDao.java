@@ -87,6 +87,9 @@ import static org.codehaus.groovy.runtime.DefaultGroovyMethods.collect;
 public class NodeDao {
 	private static Logger logger = Logger.getLogger(NodeDao.class);
 	private static final StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
+	/**
+	 * also check @PermissionServiceHelper.PERMISSIONS
+	 */
 	private static final String[] DAO_PERMISSIONS = new String[]{
 			org.alfresco.service.cmr.security.PermissionService.READ,
 			org.alfresco.service.cmr.security.PermissionService.ADD_CHILDREN,
@@ -104,6 +107,7 @@ public class NodeDao {
 	private final boolean isCollectionHomePath;
 	private final String ownerUsername;
 	private final Map<NodeRefImpl.Relation, NodeDao> relations = new HashMap<>();
+	private org.edu_sharing.service.model.NodeRef nodeRef = null;
 	private CollectionRef collectionRef;
 	private final List<Contributor> contributors = new ArrayList<>();
 	/*
@@ -132,6 +136,13 @@ public class NodeDao {
 		previewData = null;
 		ownerUsername = null;
 		isCollectionHomePath=false; // TODO do we need to resolve this here?
+	}
+
+	private org.edu_sharing.service.model.NodeRef getNodeRef() {
+		if(this.nodeRef != null) {
+			return this.nodeRef;
+		}
+		return new org.edu_sharing.service.model.NodeRefImpl(repoDao.getId(), storeProtocol, storeId, nodeId);
 	}
 
 	public static NodeDao getNodeWithVersion(RepositoryDao repoDao, String nodeId,String versionLabel) throws DAOException {
@@ -617,6 +628,8 @@ public class NodeDao {
 			} else {
 				isCollectionHomePath = false;
 			}
+
+			this.nodeRef = nodeRef;
 
 			this.repoDao = repoDao;
 			this.nodeId = nodeRef.getNodeId();
@@ -1803,7 +1816,7 @@ public class NodeDao {
 	}
 	private RatingDetails getRating(){
 		try{
-			return RatingServiceFactory.getRatingService(repoDao.getId()).getAccumulatedRatings(nodeId,null);
+			return RatingServiceFactory.getRatingService(repoDao.getId()).getAccumulatedRatings(getNodeRef(),null);
 		}catch(Throwable t){
 			logger.warn("Can not fetch ratings for node "+nodeId+": "+t.getMessage(),t);
 			return null;

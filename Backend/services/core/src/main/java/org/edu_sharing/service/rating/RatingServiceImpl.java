@@ -122,11 +122,11 @@ public class RatingServiceImpl extends RatingServiceAdapter {
 
     /**
      * Get the accumulated ratings data
-     * @param nodeId the id of the node
      * @param after the date which the ratings should have at least. Use null (default) to use ratings of all times and also use the cache
      */
     @Override
-    public RatingDetails getAccumulatedRatings(String nodeId, Date after){
+    public RatingDetails getAccumulatedRatings(org.edu_sharing.service.model.NodeRef nodeRef, Date after){
+        String nodeId = nodeRef.getNodeId();
         if(after==null) {
             try {
                 RatingsCache accumulated = EduSharingRatingCache.get(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
@@ -170,7 +170,7 @@ public class RatingServiceImpl extends RatingServiceAdapter {
     }
 
     @Override
-    public List<RatingHistory> getAccumulatedRatingHistory(String nodeId, Date after) {
+    public List<RatingHistory> getAccumulatedRatingHistory(org.edu_sharing.service.model.NodeRef nodeRef, Date after) {
         throw new NotImplementedException();
     }
 

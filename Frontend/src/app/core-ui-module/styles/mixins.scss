@@ -91,14 +91,14 @@
         box-shadow: none !important;
     }
 }
-@mixin setGlobalKeyboardFocus($mode: 'outline') {
+@mixin setGlobalKeyboardFocus($mode: 'outline', $color: $focusColor) {
     //respect element border radius
     @include removeDefaultFocus();
     @if $mode== 'outline' {
-        outline: $focusWidth solid $focusColor;
+        outline: $focusWidth solid $color;
         outline-offset: 2px;
     } @else if $mode== 'border' {
-        border: $focusWidth solid $focusColor;
+        border: $focusWidth solid $color;
     }
 }
 @mixin setGlobalDashedFocus() {
@@ -131,10 +131,10 @@
 @mixin blurBackground($radius: 5px) {
     backdrop-filter: blur($radius);
 }
-@mixin setGlobalFocus() {
+@mixin setGlobalFocus($color: $focusColor) {
     //respect element border radius
     @include removeDefaultFocus();
-    box-shadow: 0 0 0 $focusWidth $focusColor !important;
+    box-shadow: 0 0 0 $focusWidth $color !important;
 }
 
 // Apply the content styles in contrast mode. This is just enough contrast to be WCAG complient ---
