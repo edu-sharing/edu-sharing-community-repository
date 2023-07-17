@@ -1281,7 +1281,7 @@
     "DESCRIPTIONS": {
       "AddToCollectionEvent": "{{creator}} hat das Material \"{{title}}\" der Sammlung {{collection}} hinzugefügt",
       "CommentEvent": "{{creator}} hat ein Kommentar am Material \"{{title}}\" verfasst",
-      "InviteEvent": "{{creator}} hat das Material \"{{title}}\" für Sie freigegeben",
+      "InviteEvent": "{{creator}} hat das Objekt \"{{title}}\" für Sie freigegeben",
       "NodeIssueEvent": "{{creator}} hat das Problem \"{{reason}}\" am Material \"{{title}}\" gemeldet",
       "RatingEvent": "{{creator}} hat eine Bewertung am Material \"{{title}}\" abgegeben",
       "WorkflowEvent": "{{creator}} hat den Workflow-Status von Material \"{{title}}\" auf \"{{workflowStatus}}\" geändert",

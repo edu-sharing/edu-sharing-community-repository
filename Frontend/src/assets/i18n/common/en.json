@@ -1194,6 +1194,25 @@
     },
     "COPIED_TO_CLIPBOARD_NOTICE": "The embed code was copied to the clipboard."
   },
+  "NOTIFICATION_LIST": {
+    "UNREAD_COUNT": "{{count}} unread notifications",
+    "TITLE": "Notifications",
+    "SETTINGS": "Notification settings",
+    "RELOAD": "Refresh",
+    "MARK_ALL_READ": "Mark all as read",
+    "SHOW_READ": "View read permissions",
+    "EMPTY_UNREAD": "No unread notifications",
+    "EMPTY_ALL": "No notifications",
+    "DESCRIPTIONS": {
+      "AddToCollectionEvent": "{{creator}} has added the material \"{{title}}\" to collection {{collection}}",
+      "CommentEvent": "{{creator}} has created a comment on \"{{title}}\"",
+      "InviteEvent": "{{creator}} has shared the object \"{{title}}\" with you",
+      "NodeIssueEvent": "{{creator}} has reported the issue \"{{reason}}\" on material \"{{title}}\"",
+      "RatingEvent": "{{creator}} has added a rating on \"{{title}}\"",
+      "WorkflowEvent": "{{creator}} has changed the workflow state of material \"{{title}}\" to \"{{workflowStatus}}\"",
+      "MetadataSuggestionEvent": ""
+    }
+  },
   "NOTIFICATION": {
     "MENU": "Notifications",
     "TITLE": "Notification settings",
