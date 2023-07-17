@@ -1208,7 +1208,7 @@
       "CommentEvent": "{{creator}} has created a comment on \"{{title}}\"",
       "InviteEvent": "{{creator}} has shared the object \"{{title}}\" with you",
       "NodeIssueEvent": "{{creator}} has reported the issue \"{{reason}}\" on material \"{{title}}\"",
-      "RatingEvent": "{{creator}} has added a rating on \"{{title}}\"",
+      "RatingEvent": "A rating has been given on \"{{title}}\"",
       "WorkflowEvent": "{{creator}} has changed the workflow state of material \"{{title}}\" to \"{{workflowStatus}}\"",
       "MetadataSuggestionEvent": ""
     }

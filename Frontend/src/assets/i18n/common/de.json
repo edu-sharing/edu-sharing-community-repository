@@ -1283,7 +1283,7 @@
       "CommentEvent": "{{creator}} hat ein Kommentar am Material \"{{title}}\" verfasst",
       "InviteEvent": "{{creator}} hat das Objekt \"{{title}}\" für Sie freigegeben",
       "NodeIssueEvent": "{{creator}} hat das Problem \"{{reason}}\" am Material \"{{title}}\" gemeldet",
-      "RatingEvent": "{{creator}} hat eine Bewertung am Material \"{{title}}\" abgegeben",
+      "RatingEvent": "Es wurde eine Bewertung am Material \"{{title}}\" abgegeben",
       "WorkflowEvent": "{{creator}} hat den Workflow-Status von Material \"{{title}}\" auf \"{{workflowStatus}}\" geändert",
       "MetadataSuggestionEvent": ""
     }
