@@ -27,10 +27,6 @@
  */
 package org.edu_sharing.repository.server.tools;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -137,35 +133,7 @@ public class I18nServer {
 		caption = (caption == null) ? permKey : caption; 
 		return caption;
 	}
-	
-	public static HashMap<String,String> permDescriptionMapper = null;
-	public final static String getPermissionDescription(String permKey){
-		if(permDescriptionMapper == null){
-			permDescriptionMapper = new HashMap<String,String>();
-			permDescriptionMapper.put(CCConstants.PERMISSION_READ, "dialog_inviteusers_perm_desc_read");
-			permDescriptionMapper.put(CCConstants.PERMISSION_READ_PREVIEW, "dialog_inviteusers_perm_desc_readpreview");
-			permDescriptionMapper.put(CCConstants.PERMISSION_READ_ALL, "dialog_inviteusers_perm_desc_readall");
-			permDescriptionMapper.put(CCConstants.PERMISSION_WRITE, "dialog_inviteusers_perm_desc_write");
-			permDescriptionMapper.put(CCConstants.PERMISSION_DELETE, "dialog_inviteusers_perm_desc_delete");
-			permDescriptionMapper.put(CCConstants.PERMISSION_DELETE_CHILDREN, "dialog_inviteusers_perm_desc_deletechildren");
-			permDescriptionMapper.put(CCConstants.PERMISSION_DELETE_NODE, "dialog_inviteusers_perm_desc_deletenode");
-			permDescriptionMapper.put(CCConstants.PERMISSION_ADD_CHILDREN, "dialog_inviteusers_perm_desc_addchildren");
-			permDescriptionMapper.put(CCConstants.PERMISSION_CONSUMER, "dialog_inviteusers_perm_desc_consumer");
-			permDescriptionMapper.put(CCConstants.PERMISSION_CONSUMER_METADATA, "dialog_inviteusers_perm_desc_consumermetadata");
-			permDescriptionMapper.put(CCConstants.PERMISSION_EDITOR, "dialog_inviteusers_perm_desc_editor");
-			permDescriptionMapper.put(CCConstants.PERMISSION_CONTRIBUTER, "dialog_inviteusers_perm_desc_contributer");
-			permDescriptionMapper.put(CCConstants.PERMISSION_COORDINATOR, "dialog_inviteusers_perm_desc_coordinator");
-			permDescriptionMapper.put(CCConstants.PERMISSION_COLLABORATOR, "dialog_inviteusers_perm_desc_collaborator");
-			permDescriptionMapper.put(CCConstants.PERMISSION_CC_PUBLISH, "dialog_inviteusers_perm_desc_ccpublish");
-			permDescriptionMapper.put(CCConstants.PERMISSION_READPERMISSIONS, "dialog_inviteusers_perm_desc_readpermissions");
-			permDescriptionMapper.put(CCConstants.PERMISSION_CHANGEPERMISSIONS, "dialog_inviteusers_perm_desc_changepermissions");
-		}
-		String caption = permDescriptionMapper.get(permKey);
-		caption = (caption == null) ? permKey : caption; 
-		return caption;
-	}
-	
-	
+
 	private static String getTranslation(String key,String language,String country, String resourceBoundle){
 		Locale currentLocale;
         ResourceBundle messages;

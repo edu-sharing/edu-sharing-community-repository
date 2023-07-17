@@ -1298,6 +1298,23 @@
       "individual": "Pro Benachrichtigungstyp",
       "individual_DESCRIPTION": "Der Intervall für Benachrichtigungen kann pro Benachrichtigungstyp individuell festgelegt werden"
     },
+    "PERMISSION": {
+      "consumer": "Sie haben Leserechte auf das Objekt.",
+      "collaborator": "Sie haben Änderungsrechte für das Objekt.",
+      "read": "read",
+      "write": "write",
+      "delete": "delete",
+      "deletechildren": "delete subordinate elements",
+      "deletenode": "delete node",
+      "addchildren": "add subordinate elements",
+      "editor": "editor",
+      "contributer": "contributor",
+      "coordinator": "Sie haben alle Rechte auf das Objekt.",
+      "ccpublish": "Sie können das Objekt in einem angebundenen System (z.B. ein Lernmanagementsystem) verwenden.",
+      "readpermissions": "read permissions",
+      "changepermissions": "change permissions",
+      "all": "all"
+    },
     "SAVED": "Benachrichtigungs-Einstellungen wurden gespeichert",
     "INTERVAL_LABEL": "Benachrichtigungsintervall",
     "INTERVAL": {

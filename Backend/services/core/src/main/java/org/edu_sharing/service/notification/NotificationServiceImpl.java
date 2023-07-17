@@ -12,7 +12,6 @@ import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.I18nServer;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.rest.notification.data.StatusDTO;
@@ -112,8 +111,6 @@ public class NotificationServiceImpl implements NotificationService {
             return;
         }
 
-        String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
-
         // used for sending copy to user
         String internalNodeType = (String) props.get(CCConstants.NODETYPE);
 
@@ -127,7 +124,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         String permText = Arrays.stream(permissions)
                 .filter(perm -> !(CCConstants.CCM_VALUE_SCOPE_SAFE.equals(NodeServiceInterceptor.getEduSharingScope()) && Objects.equals(CCConstants.PERMISSION_CC_PUBLISH, perm)))
-                .map(perm -> I18nServer.getTranslationDefaultResourcebundle(I18nServer.getPermissionDescription(perm), currentLocale))
+                .map(I18nAngular::getPermissionDescription)
                 .filter(StringUtils::isNotBlank)
                 .collect(Collectors.joining("\n"));
 

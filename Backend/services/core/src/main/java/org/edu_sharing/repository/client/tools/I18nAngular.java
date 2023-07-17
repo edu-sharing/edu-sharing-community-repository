@@ -2,15 +2,13 @@ package org.edu_sharing.repository.client.tools;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
-import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.alfresco.service.config.model.KeyValuePair;
+import org.edu_sharing.repository.server.AuthenticationToolAPI;
+import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.json.JSONObject;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
-import javax.servlet.jsp.PageContext;
 import java.io.File;
 
 /**
@@ -95,4 +93,7 @@ public class I18nAngular {
         return null;
     }
 
+    public static String getPermissionDescription(String permKey){
+        return getTranslationAngular("common", "NOTIFICATION.PERMISSION." + permKey.toLowerCase());
+    }
 }

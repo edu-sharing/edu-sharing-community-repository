@@ -43,6 +43,14 @@
         display: flex;
         flex-direction: column;
         row-gap: 5px;
+        .permissions {
+            padding-left: 20px;
+            color: $textLight;
+            li {
+                list-style-type: disc;
+                padding: 2px 5px;
+            }
+        }
     }
     .user-content {
         padding: 5px 10px;

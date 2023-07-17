@@ -26,9 +26,14 @@
                 }
         }}
       </div>
-      <div class="permissions" *ngIf="$any(entry).permissions as permissions">
-        {{ permissions }}
-      </div>
+      <ul class="permissions" *ngIf="$any(entry).permissions as permissions">
+        <li *ngFor="let permission of $any(permissions)">
+          {{
+            'NOTIFICATION.PERMISSION.' + permission.toLowerCase()
+              | translate: { fallback: permission }
+          }}
+        </li>
+      </ul>
       <div
         class="user-content"
         *ngIf="$any(entry).commentContent || $any(entry).userComment as content"

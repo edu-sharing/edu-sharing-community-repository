@@ -1224,6 +1224,23 @@
       "individual": "Individual",
       "individual_DESCRIPTION": "The interval will be configured for each message type individually"
     },
+    "PERMISSION": {
+      "consumer": "You got the permission to view the object.",
+      "collaborator": "You got the permission to modify the object.",
+      "read": "read",
+      "write": "write",
+      "delete": "delete",
+      "deletechildren": "delete subordinate elements",
+      "deletenode": "delete node",
+      "addchildren": "add subordinate elements",
+      "editor": "editor",
+      "contributer": "contributor",
+      "coordinator": "You got all permissions on this object.",
+      "ccpublish": "You got the permission to use the content in a connected System (e.g. a learning management system).",
+      "readpermissions": "read permissions",
+      "changepermissions": "change permissions",
+      "all": "all"
+    },
     "SAVED": "Notification settings saved",
     "INTERVAL_LABEL": "Notification interval",
     "INTERVAL": {
