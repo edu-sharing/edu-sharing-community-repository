@@ -243,6 +243,8 @@ public class BulkEditNodesJob extends AbstractJob{
 					if (current != null) {
 						if (current instanceof String) {
 							nodeService.setProperty(nodeRef, QName.createQName(property), processPropertyValue((String) current));
+						} else if (current instanceof Boolean) {
+							nodeService.setProperty(nodeRef, QName.createQName(property), Boolean.valueOf((String) processPropertyValue(((Boolean) current).toString())));
 						} else if (current instanceof List) {
 							nodeService.setProperty(nodeRef, QName.createQName(property), (Serializable) ((List) current).stream().map((v) -> {
 								if (v instanceof String) {
