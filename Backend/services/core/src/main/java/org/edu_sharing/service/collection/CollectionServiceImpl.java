@@ -301,7 +301,7 @@ public class CollectionServiceImpl implements CollectionService {
                     nodeProperties = new HashMap<>();
                     nodeAspects = new ArrayList<>();
                 }
-                notificationService.notifyCollection(collectionId, refNodeId, colllectionType, collectionAspects, collectionProperties, nodeType, nodeAspects, nodeProperties, Status.ADDED);
+                notificationService.notifyAddCollection(collectionId, refNodeId, colllectionType, collectionAspects, collectionProperties, nodeType, nodeAspects, nodeProperties, Status.ADDED);
                 return refId;
             });
 
@@ -356,10 +356,37 @@ public class CollectionServiceImpl implements CollectionService {
             props.put(CCConstants.CM_NAME, NodeServiceHelper.getProperty(nodeRef, CCConstants.CM_NAME));
             props.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, finalId));
             props.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS, CCConstants.PROPOSAL_STATUS.PENDING);
-            return NodeServiceFactory.getLocalService().createNodeBasic(collectionId,
+            String refId = NodeServiceFactory.getLocalService().createNodeBasic(collectionId,
                     CCConstants.CCM_TYPE_COLLECTION_PROPOSAL,
                     props
             );
+
+            String  colllectionType = null;
+            List<String> collectionAspects;
+            Map<String, Object> collectionProperties;
+            try {
+                colllectionType = nodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionId);
+                collectionAspects = Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionId));
+                collectionProperties = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionId);
+            } catch (Throwable ignored) {
+                collectionAspects = new ArrayList<>();
+                collectionProperties = new HashMap<>();
+            }
+
+            String nodeType = null;
+            List<String> nodeAspects;
+            Map<String, Object> nodeProperties;
+            try {
+                nodeType = nodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), originalNodeId);
+                nodeAspects = Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), originalNodeId));
+                nodeProperties = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), originalNodeId);
+            } catch (Throwable ignored) {
+                nodeProperties = new HashMap<>();
+                nodeAspects = new ArrayList<>();
+            }
+            notificationService.notifyProposeForCollection(collectionId, originalNodeId, colllectionType, collectionAspects, collectionProperties, nodeType, nodeAspects, nodeProperties, Status.ADDED);
+
+            return refId;
         });
     }
 

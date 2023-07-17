@@ -34,7 +34,8 @@ public interface NotificationService {
 
     void notifyComment(String node, String comment, String commentReference, String nodeType, List<String> aspects, Map<String, Object> nodeProperties, Status status);
 
-    void notifyCollection(String collectionId, String refNodeId, String collectionNodeType, List<String> collectionAspects, Map<String, Object> collectionProperties, String nodeType, List<String> nodeAspects, Map<String, Object> nodeProperties, Status status);
+    void notifyAddCollection(String collectionId, String nodeId, String collectionNodeType, List<String> collectionAspects, Map<String, Object> collectionProperties, String nodeType, List<String> nodeAspects, Map<String, Object> nodeProperties, Status status);
+    void notifyProposeForCollection(String collectionId, String nodeId, String collectionNodeType, List<String> collectionAspects, Map<String, Object> collectionProperties, String nodeType, List<String> nodeAspects, Map<String, Object> nodeProperties, Status status);
 
     void notifyRatingChanged(String nodeId, String nodeType, List<String> aspects, Map<String, Object> nodeProps, Double rating, RatingDetails accumulatedRatings, Status removed);
 
@@ -66,4 +67,5 @@ public interface NotificationService {
 
     @Permission(requiresUser = true)
     void deleteNotification(String id) throws IOException, InsufficientPermissionException;
+
 }

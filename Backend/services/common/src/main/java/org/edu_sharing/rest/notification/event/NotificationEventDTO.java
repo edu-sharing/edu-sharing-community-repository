@@ -21,6 +21,7 @@ import java.util.Date;
 @JsonSubTypes({
         // also register it in the @NotificationEventEnum
         @JsonSubTypes.Type(value = AddToCollectionEventDTO.class, name="AddToCollectionEvent"),
+        @JsonSubTypes.Type(value = ProposeForCollectionEventDTO.class, name="ProposeForCollectionEvent"),
         @JsonSubTypes.Type(value = CommentEventDTO.class, name="CommentEvent"),
         @JsonSubTypes.Type(value = InviteEventDTO.class, name="InviteEvent"),
         @JsonSubTypes.Type(value = NodeIssueEventDTO.class, name="NodeIssueEvent"),
