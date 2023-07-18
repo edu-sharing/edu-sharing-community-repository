@@ -105,7 +105,7 @@ export class NotificationListComponent implements OnInit {
                 .getNotifications({
                     receiverId: ME,
                     status,
-                    sort: ['timestamp(desc)'],
+                    sort: ['timestamp,desc'],
                     page: 0,
                     size: this.viewRead
                         ? NotificationListComponent.NOTIFICATION_COUNT_ALL
