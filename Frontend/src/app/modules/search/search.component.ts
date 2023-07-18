@@ -511,8 +511,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if (!this.searchService.sort) {
             this.updateSortState();
         }
-        this.searchService.sort.active = sort.active;
-        this.searchService.sort.direction = sort.direction;
+        this.searchService.sort.active = sort?.active;
+        this.searchService.sort.direction = sort?.direction;
 
         if (origin === 'uri' && !this.searchService.mdsInitialized) {
             console.info('ignoring routing - mds not ready yet');
@@ -707,7 +707,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.currentRepository == RestConstants.ALL
                 ? this.repositoryIds
                 : [{ id: this.currentRepository, enabled: true }];
-        this.searchField.setFilterValues(this.searchService.values);
+        if (this.currentRepository !== RestConstants.ALL) {
+            this.searchField.setFilterValues(this.searchService.values);
+        }
         this.searchRepository(repos, criterias, init);
 
         if (init) {
@@ -1003,7 +1005,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             const columns = sort.columns.map((c) => new ListItemSort('NODE', c.id, c.mode as any));
             // do not update state if current state is valid (otherwise sort info is lost when comming back from rendering)
             // exception: if there is no state at all, refresh it with the default
-            if (this.searchService.sort) {
+            if (this.searchService.sort?.active) {
                 this.searchService.sort.columns = columns;
                 return;
             }
@@ -1234,6 +1236,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             const mdsAllowed = ConfigurationHelper.filterValidMds(repo, null, this.config);
             if (mdsAllowed) {
                 mdsId = mdsAllowed[0];
+            } else {
+                mdsId = RestConstants.DEFAULT;
             }
         }
         let properties = [RestConstants.ALL];

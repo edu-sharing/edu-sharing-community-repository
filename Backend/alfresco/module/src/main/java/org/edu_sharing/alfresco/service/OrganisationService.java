@@ -61,14 +61,7 @@ public class OrganisationService {
 
 		String authorityAdminGroup = createOrganizationAdminGroup(groupDisplayName, groupName);
 
-		NodeRef companyHome = repositoryHelper.getCompanyHome();
-
-		NodeRef shared = findNodeByName(companyHome, ORGANIZATION_GROUP_FOLDER);
-
-		if (shared == null) {
-			shared = createNode(companyHome, CCConstants.CCM_TYPE_MAP, ORGANIZATION_GROUP_FOLDER);
-			permissionService.setInheritParentPermissions(shared, false);
-		}
+		NodeRef shared = getOrganisationFolderRoot();
 
 		String orgFolderName = (groupDisplayName != null && !groupDisplayName.trim().isEmpty()) ? groupDisplayName : orgName;
 		orgFolderName = EduSharingNodeHelper.cleanupCmName(orgFolderName);
@@ -93,6 +86,18 @@ public class OrganisationService {
 		}
 
 		return groupName;
+	}
+
+	public NodeRef getOrganisationFolderRoot() {
+		NodeRef companyHome = repositoryHelper.getCompanyHome();
+
+		NodeRef shared = findNodeByName(companyHome, ORGANIZATION_GROUP_FOLDER);
+
+		if (shared == null) {
+			shared = createNode(companyHome, CCConstants.CCM_TYPE_MAP, ORGANIZATION_GROUP_FOLDER);
+			permissionService.setInheritParentPermissions(shared, false);
+		}
+		return shared;
 	}
 
 	public String createOrganizationAdminGroup(String orgAuthorityName) {

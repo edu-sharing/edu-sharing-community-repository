@@ -119,7 +119,7 @@ public class BulkEditNodesJob extends AbstractJob{
 		ReplaceMapping,
 		@JobFieldDescription(description = "Add value to an multivalue property. use \"value\" param for the new value")
 		Append,
-		@JobFieldDescription(description = "Remove the property. Use with searchtoken: one value must be equal, than the property is removed.")
+		@JobFieldDescription(description = "Remove the property. Use with searchtoken: one value must be equal, than the property is removed. When no search token is given, the property will be removed on every node")
 		Remove,
 		@JobFieldDescription(description = "Remove the property. Use with searchtoken: if a found value is equal, than it is removed, but other values will stay stored (useful for multivalue fields).")
 		RemoveSingle,
@@ -175,7 +175,7 @@ public class BulkEditNodesJob extends AbstractJob{
 		}
 
 		if (mode.equals(Mode.Remove) || mode.equals(Mode.RemoveSingle)) {
-			searchToken = prepareParam(context, "searchToken", true);
+			searchToken = prepareParam(context, "searchToken", false);
 		}
 
 		lucene = prepareParam(context, "lucene", false);

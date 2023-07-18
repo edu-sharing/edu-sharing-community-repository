@@ -71,6 +71,12 @@ public class OnCopyIOPolicy implements OnCopyCompletePolicy, CopyServicePolicies
 			nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED));
 			nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
 		}
+
+		// remove stats
+		if(nodeService.hasAspect(targetNodeRef, QName.createQName(CCConstants.CCM_ASPECT_TRACKING))) {
+			nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_TRACKING_DOWNLOADS));
+			nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_TRACKING_VIEWS));
+		}
 	}
 	
 	
