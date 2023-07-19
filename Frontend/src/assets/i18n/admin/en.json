@@ -446,6 +446,8 @@
       "ARCHIVED": "Archived",
       "ARCHIVED_INFO": "In this section you can download aggregated statistics for a previous timespan. Choose the element with the respective timespan to download it",
       "ARCHIVED_EMPTY": "There are no aggregated statistics yet",
+      "SLICE_INFO": "This list is a preview and may only contain a slice of the actual data",
+      "SLICE_INFO_DOWNLOAD": "This list is a preview and may only contain a slice of the actual data. Choose the export or download function to retrieve all results",
       "GROUP_TEMPLATE": {
         "group_organization": "Access counts grouped by organisation of the user",
         "group_mediacenter": "Access counts grouped by mediacenter of the user",

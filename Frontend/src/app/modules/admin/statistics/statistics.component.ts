@@ -97,7 +97,7 @@ export class AdminStatisticsComponent implements OnInit {
     nodesNoData: boolean;
     _singleMode: 'NODES' | 'USERS' = 'NODES';
     _customGroupMode: 'NODES' | 'USERS' = 'NODES';
-    singleData: any;
+    singleData: any[];
     singleDataRows: string[];
     groupedChart: any;
     nodesLoading: boolean;
