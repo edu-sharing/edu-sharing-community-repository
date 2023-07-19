@@ -62,6 +62,7 @@
     <tomcat.version>${tomcat.version.major}.${tomcat.version.minor}.${tomcat.version.patch}
     </tomcat.version>
 
+    <mongodb.version>4.9.1</mongodb.version>
   </properties>
 
   <profiles>
@@ -833,6 +834,12 @@
         <groupId>org.mongodb</groupId>
         <artifactId>mongodb-driver-sync</artifactId>
         <version>4.4.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.mongodb</groupId>
+        <artifactId>bson</artifactId>
+        <version>${mongodb.version}</version>
       </dependency>
 
       <dependency>
