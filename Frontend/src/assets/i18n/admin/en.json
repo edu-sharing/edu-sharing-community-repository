@@ -387,6 +387,7 @@
       "LOG_LEVEL_4": "Warning",
       "LOG_LEVEL_3": "Error",
       "LOG_LEVEL_0": "Fatal",
+      "LOG_CLUSTER_NOT_SUPPORTED": "This job is/was executed on an other cluster node. Logs are not distributed across the cluster. Please check the logs on the individual server.",
       "UPLOAD_FILE_LABEL": "Select file for job",
       "CHOOSE_UPLOAD_FILE": "Choose file",
       "NAMES": {

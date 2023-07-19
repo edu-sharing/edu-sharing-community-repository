@@ -398,6 +398,7 @@
       "LOG_LEVEL_4": "Warning",
       "LOG_LEVEL_3": "Error",
       "LOG_LEVEL_0": "Fatal",
+      "LOG_CLUSTER_NOT_SUPPORTED": "Dieser Job wird/wurde auf einem anderen Cluster-Knoten ausgeführt. Die Logs werden nicht im Cluster verteilt. Bitte prüfen Sie die Logs auf dem jeweiligen Server.",
       "UPLOAD_FILE_LABEL": "Datei für Job bereitstellen",
       "CHOOSE_UPLOAD_FILE": "Datei wählen",
       "PARAMETERS": "Job-Parameter",

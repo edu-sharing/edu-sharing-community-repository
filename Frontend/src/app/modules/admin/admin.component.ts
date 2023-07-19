@@ -932,7 +932,10 @@ export class AdminComponent implements OnInit, OnDestroy {
         });
     }
     getJobLog(job: any, pos: number) {
-        let log = Helper.deepCopy(job.log).reverse();
+        let log = Helper.deepCopy(job.log)?.reverse();
+        if (!log) {
+            return null;
+        }
 
         if (this.jobsLogLevel[pos]) {
             const result: any = [];
