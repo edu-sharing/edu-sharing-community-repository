@@ -2,6 +2,9 @@ package org.edu_sharing.alfresco.service.search;
 
 import java.util.*;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
@@ -162,9 +165,13 @@ public class CMISSearchHelper {
         return sb.toString();
     }
 
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
     public static class CMISSearchData {
         /**
          * The folder in which the elements are located
+         * When used, the query is still processed via the DB
          */
         public String inFolder;
         /**
