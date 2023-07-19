@@ -93,7 +93,7 @@ public class CMISSearchHelper {
         if(data!=null){
             if(data.inFolder != null){
                 prepareWhere(where);
-                where.append("IN_FOLDER(").append(tableNameAlias).append(", ").append(data.inFolder).append(")");
+                where.append("IN_FOLDER(").append(tableNameAlias).append(", ").append(escape(data.inFolder)).append(")");
             }
             if(data.inTree != null){
                 prepareWhere(where);
