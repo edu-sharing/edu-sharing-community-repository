@@ -1,4 +1,4 @@
-<ng-container *ngIf="hasPermission && node.type === 'ccm:io'">
+<ng-container *ngIf="hasPermission && node.type === 'ccm:io' && isFromHomeRepo(node)">
   <div *ngIf="mode === 'likes'" class="likes">
     <button
       (click)="toogleLike()"
