@@ -76,9 +76,11 @@ export class NotificationListComponent implements OnInit {
     async markAllRead() {
         this.dataSource.getData().forEach((e) => (e.status = 'READ'));
         this.unreadNotificationsCount = 0;
-        await this.notificationService.updateNotificationStatusByReceiverId({
-            receiverId: ME,
-        });
+        await this.notificationService
+            .updateNotificationStatusByReceiverId({
+                receiverId: ME,
+            })
+            .toPromise();
     }
 
     async loadNotifications() {
