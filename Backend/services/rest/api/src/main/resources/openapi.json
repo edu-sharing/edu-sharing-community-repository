@@ -3658,7 +3658,8 @@
             "enum": [
               "PENDING",
               "SENT",
-              "READ"
+              "READ",
+              "IGNORED"
             ],
             "type": "string"
           },
@@ -3711,6 +3712,15 @@
             "type": "string"
           },
           "nodeIssueEvent": {
+            "enum": [
+              "immediately",
+              "disabled",
+              "daily",
+              "weekly"
+            ],
+            "type": "string"
+          },
+          "proposeForCollectionEvent": {
             "enum": [
               "immediately",
               "disabled",
@@ -4308,6 +4318,25 @@
         },
         "required": [
           "showEmail"
+        ],
+        "type": "object"
+      },
+      "ProposeForCollectionEventDTO": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationEventDTO"
+          },
+          {
+            "properties": {
+              "collection": {
+                "$ref": "#/components/schemas/CollectionDTO"
+              },
+              "node": {
+                "$ref": "#/components/schemas/NodeDataDTO"
+              }
+            },
+            "type": "object"
+          }
         ],
         "type": "object"
       },
@@ -29121,7 +29150,8 @@
                 "enum": [
                   "PENDING",
                   "SENT",
-                  "READ"
+                  "READ",
+                  "IGNORED"
                 ],
                 "type": "string"
               },
@@ -29198,7 +29228,8 @@
                 "enum": [
                   "PENDING",
                   "SENT",
-                  "READ"
+                  "READ",
+                  "IGNORED"
                 ],
                 "type": "string"
               },
@@ -29213,7 +29244,8 @@
               "enum": [
                 "PENDING",
                 "SENT",
-                "READ"
+                "READ",
+                "IGNORED"
               ],
               "type": "string"
             }
@@ -29249,7 +29281,8 @@
               "enum": [
                 "PENDING",
                 "SENT",
-                "READ"
+                "READ",
+                "IGNORED"
               ],
               "type": "string"
             }
