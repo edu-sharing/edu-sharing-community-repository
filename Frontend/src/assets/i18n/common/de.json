@@ -1280,6 +1280,7 @@
     "EMPTY_ALL": "Keine Benachrichtigungen",
     "DESCRIPTIONS": {
       "AddToCollectionEvent": "{{creator}} hat das Material \"{{title}}\" der Sammlung {{collection}} hinzugefügt",
+      "ProposeForCollectionEvent": "{{creator}} hat das Material \"{{title}}\" für die Sammlung {{collection}} vorgeschlagen",
       "CommentEvent": "{{creator}} hat ein Kommentar am Material \"{{title}}\" verfasst",
       "InviteEvent": "{{creator}} hat das Objekt \"{{title}}\" für Sie freigegeben",
       "NodeIssueEvent": "{{creator}} hat das Problem \"{{reason}}\" am Material \"{{title}}\" gemeldet",

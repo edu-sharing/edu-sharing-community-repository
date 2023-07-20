@@ -1205,6 +1205,7 @@
     "EMPTY_ALL": "No notifications",
     "DESCRIPTIONS": {
       "AddToCollectionEvent": "{{creator}} has added the material \"{{title}}\" to collection {{collection}}",
+      "ProposeForCollectionEvent": "{{creator}} has proposed the material \"{{title}}\" for collection {{collection}}",
       "CommentEvent": "{{creator}} has created a comment on \"{{title}}\"",
       "InviteEvent": "{{creator}} has shared the object \"{{title}}\" with you",
       "NodeIssueEvent": "{{creator}} has reported the issue \"{{reason}}\" on material \"{{title}}\"",
