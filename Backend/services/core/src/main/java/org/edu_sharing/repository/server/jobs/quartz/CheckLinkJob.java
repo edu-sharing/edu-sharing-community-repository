@@ -74,6 +74,10 @@ public class CheckLinkJob extends AbstractJob {
             property = CCConstants.getValidGlobalName(property);
         }
         action = LinkAction.valueOf((String) jobExecutionContext.getJobDetail().getJobDataMap().get("action"));
+        minFailCount = (Integer) jobExecutionContext.getJobDetail().getJobDataMap().get("minFailCount");
+        if(minFailCount == null) {
+            minFailCount = 1;
+        }
 
         AuthenticationUtil.runAsSystem(()->{
             execute(startFolder,property);
