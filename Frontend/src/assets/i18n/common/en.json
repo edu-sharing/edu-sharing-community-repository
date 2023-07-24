@@ -1257,7 +1257,8 @@
       "nodeIssueEvent": "Issue reported on material",
       "ratingEvent": "Material rated",
       "workflowEvent": "Assigned by workflow",
-      "metadataSuggestionEvent": "Suggestion for metadata"
+      "metadataSuggestionEvent": "Suggestion for metadata",
+      "proposeForCollectionEvent": "Collection proposals"
     }
   },
   "API_ERROR": {
