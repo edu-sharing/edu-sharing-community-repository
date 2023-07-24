@@ -7,6 +7,7 @@ import { UIService } from '../../../core-module/rest/services/ui.service';
 import { Node } from '../../../core-module/rest/data-object';
 import { Notification } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
+import { Values } from '../../../features/mds/types/types';
 
 @Component({
     selector: 'es-notification-list-entry',
@@ -16,6 +17,7 @@ import { RestConstants } from '../../../core-module/rest/rest-constants';
 export class NotificationListEntryComponent implements OnInit {
     static readonly icons = {
         AddToCollectionEvent: 'layers',
+        ProposeForCollectionEvent: 'layers',
         CommentEvent: 'comment',
         InviteEvent: 'person_add',
         NodeIssueEvent: 'flag',
@@ -48,9 +50,21 @@ export class NotificationListEntryComponent implements OnInit {
     }
 
     getNode() {
-        const props = (this.entry as any).node.properties;
-        const node = new Node(props[RestConstants.SYS_NODE_UUID]);
-        node.isDirectory = props['virtual:type'] === RestConstants.CCM_TYPE_MAP;
+        console.log(this.entry);
+        let nodeNotify: {
+            properties: { [key in string]: string };
+            aspects: string[];
+            type: string;
+        };
+        if ((this.entry as any).collection) {
+            nodeNotify = (this.entry as any).collection;
+        } else {
+            nodeNotify = (this.entry as any).node;
+        }
+        const node = new Node(nodeNotify.properties[RestConstants.SYS_NODE_UUID]);
+        node.aspects = nodeNotify.aspects;
+        node.isDirectory = nodeNotify.properties['virtual:type'] === RestConstants.CCM_TYPE_MAP;
+        //node.isDirectory = nodeNotify.type === RestConstants.CCM_TYPE_MAP;
         return node;
     }
 }
