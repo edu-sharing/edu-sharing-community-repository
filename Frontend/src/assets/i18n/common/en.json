@@ -1200,7 +1200,7 @@
     "SETTINGS": "Notification settings",
     "RELOAD": "Refresh",
     "MARK_ALL_READ": "Mark all as read",
-    "SHOW_READ": "View read permissions",
+    "SHOW_READ": "View read notifications",
     "EMPTY_UNREAD": "No unread notifications",
     "EMPTY_ALL": "No notifications",
     "DESCRIPTIONS": {
