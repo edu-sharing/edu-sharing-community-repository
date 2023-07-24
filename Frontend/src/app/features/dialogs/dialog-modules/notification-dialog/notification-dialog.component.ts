@@ -9,14 +9,13 @@ import { Toast } from '../../../../core-ui-module/toast';
 import { first } from 'rxjs/operators';
 
 enum NotificationEvents {
-    addToCollectionEvent = 'addToCollectionEvent',
-    commentEvent = 'commentEvent',
     inviteEvent = 'inviteEvent',
-    nodeIssueEvent = 'nodeIssueEvent',
-    ratingEvent = 'ratingEvent',
     workflowEvent = 'workflowEvent',
-
+    commentEvent = 'commentEvent',
+    ratingEvent = 'ratingEvent',
     proposeForCollectionEvent = 'proposeForCollectionEvent',
+    addToCollectionEvent = 'addToCollectionEvent',
+    nodeIssueEvent = 'nodeIssueEvent',
     metadataSuggestionEvent = 'metadataSuggestionEvent',
 }
 
