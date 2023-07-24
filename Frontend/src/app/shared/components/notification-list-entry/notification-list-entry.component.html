@@ -41,10 +41,12 @@
         <span>{{ content }}</span>
       </div>
     </div>
-    <es-node-url mode="link" target="_blank" [node]="getNode()">
-      <button mat-icon-button color="primary">
-        <i esIcon="open_in_new"></i>
-      </button>
-    </es-node-url>
+    <div>
+      <es-node-url mode="link" target="_blank" [node]="getNode()">
+        <button mat-icon-button color="primary">
+          <i esIcon="open_in_new"></i>
+        </button>
+      </es-node-url>
+    </div>
   </div>
 </mat-expansion-panel>

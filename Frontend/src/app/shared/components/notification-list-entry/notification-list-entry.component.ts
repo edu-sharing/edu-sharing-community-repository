@@ -50,7 +50,6 @@ export class NotificationListEntryComponent implements OnInit {
     }
 
     getNode() {
-        console.log(this.entry);
         let nodeNotify: {
             properties: { [key in string]: string };
             aspects: string[];

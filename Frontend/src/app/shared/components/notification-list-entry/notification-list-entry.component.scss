@@ -36,11 +36,11 @@
     }
 }
 .full-info {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    grid-gap: 10px;
+    display: flex;
+    gap: 10px;
     .description {
         display: flex;
+        flex-grow: 1;
         flex-direction: column;
         row-gap: 5px;
         .permissions {
