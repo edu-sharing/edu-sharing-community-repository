@@ -62,8 +62,8 @@ export class NotificationListEntryComponent implements OnInit {
         }
         const node = new Node(nodeNotify.properties[RestConstants.SYS_NODE_UUID]);
         node.aspects = nodeNotify.aspects;
-        node.isDirectory = nodeNotify.properties['virtual:type'] === RestConstants.CCM_TYPE_MAP;
-        //node.isDirectory = nodeNotify.type === RestConstants.CCM_TYPE_MAP;
+        // node.isDirectory = nodeNotify.properties['virtual:type'] === RestConstants.CCM_TYPE_MAP;
+        node.isDirectory = nodeNotify.type === RestConstants.CCM_TYPE_MAP;
         return node;
     }
 }
