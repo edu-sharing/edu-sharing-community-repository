@@ -387,6 +387,7 @@
       "LOG_LEVEL_4": "Warning",
       "LOG_LEVEL_3": "Error",
       "LOG_LEVEL_0": "Fatal",
+      "LOG_CLUSTER_NOT_SUPPORTED": "This job is/was executed on an other cluster node. Logs are not distributed across the cluster. Please check the logs on the individual server.",
       "UPLOAD_FILE_LABEL": "Select file for job",
       "CHOOSE_UPLOAD_FILE": "Choose file",
       "NAMES": {
@@ -446,6 +447,8 @@
       "ARCHIVED": "Archived",
       "ARCHIVED_INFO": "In this section you can download aggregated statistics for a previous timespan. Choose the element with the respective timespan to download it",
       "ARCHIVED_EMPTY": "There are no aggregated statistics yet",
+      "SLICE_INFO": "This list is a preview and may only contain a slice of the actual data",
+      "SLICE_INFO_DOWNLOAD": "This list is a preview and may only contain a slice of the actual data. Choose the export or download function to retrieve all results",
       "GROUP_TEMPLATE": {
         "group_organization": "Access counts grouped by organisation of the user",
         "group_mediacenter": "Access counts grouped by mediacenter of the user",

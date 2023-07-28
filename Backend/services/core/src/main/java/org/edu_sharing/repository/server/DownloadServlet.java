@@ -389,7 +389,7 @@ public class DownloadServlet extends HttpServlet{
 	}
 
 	public static String cleanName(String name) {
-		return name.replaceAll("[^a-zA-Z0-9-_\\.]", "_");
+		return name.replaceAll("[^a-zA-Z0-9-_\\.äöüßÄÖÜ]", "_");
 	}
 
 	/**

@@ -226,7 +226,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         throw new RuntimeException(e);
                     }
                 }
-            }).distinct().collect(Collectors.toList()));
+            }).distinct().limit(searchToken.getFacetLimit()).collect(Collectors.toList()));
             return facet;
         }).collect(Collectors.toList()));
         return result;
@@ -346,7 +346,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     searchResponseAggregations = LogTime.log("Searching elastic for facets", () -> client.search(searchRequestAggs, RequestOptions.DEFAULT));
                 }else{
                     for (String facet : searchToken.getFacets()) {
-                        searchSourceBuilder.aggregation(AggregationBuilders.terms(facet).size(searchToken.getFacetLimit()).minDocCount(searchToken.getFacetsMinCount()).field("properties." + facet+".keyword"));
+                        // we use a higher facet limit since the facets will be filtered for the containing string!
+                        searchSourceBuilder.aggregation(AggregationBuilders.terms(facet).size(searchToken.getFacetLimit()*MetadataElasticSearchHelper.FACET_LIMIT_MULTIPLIER).minDocCount(searchToken.getFacetsMinCount()).field("properties." + facet+".keyword"));
                     }
                 }
             }
@@ -1177,7 +1178,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         captions.containsKey(s.getValue()) ? captions.get(s.getValue()).getCaption() : s.getValue()
                 );
                 return suggestion;
-            }).distinct().collect(Collectors.toList());
+            }).distinct().limit(token.getFacetLimit()).collect(Collectors.toList());
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }

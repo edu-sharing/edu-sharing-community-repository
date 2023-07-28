@@ -173,6 +173,7 @@ export class MdsEditorWidgetTreeComponent
         }
         this.overlayIsVisible = false;
         this.openButtonRef.focus();
+        this.onBlur.emit();
     }
 
     onOverlayKeydown(event: KeyboardEvent) {
@@ -212,5 +213,12 @@ export class MdsEditorWidgetTreeComponent
     onValuesChange(values: DisplayValue[]): void {
         this.chipsControl.setValue(values);
         this.changeDetectorRef.detectChanges();
+    }
+
+    blur(event: FocusEvent) {
+        if (event.relatedTarget === this.treeRef.input.nativeElement) {
+            return;
+        }
+        this.onBlur.emit();
     }
 }

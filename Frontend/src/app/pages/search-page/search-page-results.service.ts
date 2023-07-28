@@ -14,7 +14,13 @@ import {
     takeUntil,
     tap,
 } from 'rxjs/operators';
-import { ListItem, ListItemSort, Node, RestConstants } from '../../core-module/core.module';
+import {
+    ListItem,
+    ListItemSort,
+    Node,
+    RestConstants,
+    RestSearchService,
+} from '../../core-module/core.module';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
 import { ListSortConfig } from '../../features/node-entries/entries-model';
 import {
@@ -26,6 +32,8 @@ import {
 import { notNull } from '../../util/functions';
 import { SearchPageRestoreService } from './search-page-restore.service';
 import { SearchPageService, SearchRequestParams } from './search-page.service';
+import { MdsWidgetType, Values } from '../../features/mds/types/types';
+import { Helper } from '../../core-module/rest/helper';
 
 export interface SearchPageResults {
     totalResults?: Observable<number>;
@@ -47,6 +55,7 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
     readonly loadingProgress = new BehaviorSubject<number>(0);
 
     private readonly _destroyed = new Subject<void>();
+    private mds: MdsDefinition;
 
     constructor(
         private _injector: Injector,
@@ -167,6 +176,7 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
                     this._mds.getMetadataSet({ repository, metadataSet }),
                 ),
             );
+        mds.subscribe((mds) => (this.mds = mds));
         // Register columns.
         mds.pipe(map((mds) => MdsHelper.getColumns(this._translate, mds, 'search'))).subscribe(
             this.resultColumns,
@@ -267,12 +277,12 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
     }
 
     private _getSearchCriteria(params: SearchRequestParams): MdsQueryCriteria[] {
-        // TODO: Port `unfoldTrees` feature from 8.0. See
-        // https://scm.edu-sharing.com/edu-sharing/community/repository/edu-sharing-angular-core-module/-/blob/5447ea837a99a3dab04395c10464dd417ddb73a1/rest/services/rest-search.service.ts#L34.
-        // Also consider a backend solution.
-        const criteria: MdsQueryCriteria[] = Object.entries(params.searchFilters ?? {}).map(
+        let criteria: MdsQueryCriteria[] = Object.entries(params.searchFilters ?? {}).map(
             ([property, values]) => ({ property, values }),
         );
+        if (this.mds) {
+            criteria = this.convertCriteria(criteria);
+        }
         if (params.searchString) {
             criteria.push({ property: 'ngsearchword', values: [params.searchString] });
         }
@@ -294,5 +304,34 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
                 // tap((progress) => console.log('progress', progress)),
             )
             .subscribe((progress) => this.loadingProgress.next(progress));
+    }
+
+    // TODO: Port `unfoldTrees` methods from 8.0. See
+    // https://scm.edu-sharing.com/edu-sharing/community/repository/edu-sharing-angular-core-module/-/blob/5447ea837a99a3dab04395c10464dd417ddb73a1/rest/services/rest-search.service.ts#L34.
+    // Also consider a backend solution.
+    private convertCriteria(criteria: MdsQueryCriteria[]) {
+        for (const c of criteria) {
+            let widget = MdsHelper.getWidget(c.property, undefined, this.mds.widgets);
+            if (widget && widget.type === MdsWidgetType.MultiValueTree.toString()) {
+                /**
+                 * @TODO check
+                 */
+                let attach = RestSearchService.unfoldTreeChilds(c.values, widget);
+                if (attach) {
+                    if (attach.length > RestSearchService.MAX_QUERY_CONCAT_PARAMS) {
+                        console.info(
+                            'param ' +
+                                c.property +
+                                ' has too many unfold childs (' +
+                                attach.length +
+                                '), falling back to basic prefix-based search',
+                        );
+                    } else {
+                        c.values = c.values.concat(attach);
+                    }
+                }
+            }
+        }
+        return criteria;
     }
 }

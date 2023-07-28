@@ -16,6 +16,8 @@ import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
+import java.util.UUID;
+
 @Slf4j
 @UpdateService
 public class KeyGenerator {
@@ -55,6 +57,17 @@ public class KeyGenerator {
 				if (!test) {
 					PropertiesHelper.setProperty(ApplicationInfo.KEY_PRIVATE_KEY,
 							new String(new Base64().encode(kp.getPrivate().getEncoded())),
+							file, PropertiesHelper.XML);
+				}
+
+			}
+
+			if(homeRepo.getLtiKid() == null){
+				log.info("will set lti kid");
+
+				if (!test) {
+					PropertiesHelper.setProperty(ApplicationInfo.KEY_LTI_KID,
+							UUID.randomUUID().toString(),
 							file, PropertiesHelper.XML);
 				}
 

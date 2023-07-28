@@ -672,8 +672,8 @@
               [class.status-aborted]="job.status === 'Aborted'"
             >
               <div class="job-col col-name">
-                <div class="name">{{ job.jobDetail.name }}</div>
-                <div class="class">{{ job.jobDetail.jobClass }}</div>
+                <div class="name">{{ job.jobName }}</div>
+                <div class="class">{{ job.jobClass }}</div>
               </div>
               <div class="job-col col-time">
                 <div class="date">
@@ -705,18 +705,20 @@
               </div>
               <div
                 class="job-col col-more"
-                [class.clickable]="job.log && job.log.length"
+                [class.clickable]="job.log === null || job.log?.length"
                 (click)="
-                  job.log && job.log.length ? (jobsOpen[i] = jobsOpen[i] ? false : true) : null
+                  job.log === null || job.log?.length
+                    ? (jobsOpen[i] = jobsOpen[i] ? false : true)
+                    : null
                 "
               >
-                <i class="material-icons" *ngIf="job.log && job.log.length">{{
+                <i class="material-icons" *ngIf="job.log === null || job.log?.length">{{
                   jobsOpen[i] ? 'keyboard_arrow_up' : 'keyboard_arrow_down'
                 }}</i>
               </div>
             </div>
             <div class="job-col row-detail" *ngIf="jobsOpen[i]">
-              <div class="job-row log-filters">
+              <div class="job-row log-filters" *ngIf="jobsLogData[i] !== null">
                 <mat-form-field class="job-row log-filter">
                   <mat-label>{{ 'ADMIN.JOBS.LOG_FILTER' | translate }}</mat-label>
                   <input
@@ -742,6 +744,9 @@
               <div class="job-col">
                 <div class="log">{{ 'ADMIN.JOBS.LOG' | translate }}</div>
                 <div class="log-data">
+                  <es-info-message *ngIf="jobsLogData[i] === null">
+                    {{ 'ADMIN.JOBS.LOG_CLUSTER_NOT_SUPPORTED' | translate }}
+                  </es-info-message>
                   <div
                     *ngFor="let entry of jobsLogData[i]"
                     class="job-row"

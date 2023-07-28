@@ -205,6 +205,9 @@
       [isLoading]="nodesLoading"
       [nodes]="nodes"
     ></es-listTable>
+    <es-info-message *ngIf="!nodesNoData">
+      {{ 'ADMIN.STATISTICS.SLICE_INFO_DOWNLOAD' | translate }}
+    </es-info-message>
   </mat-tab>
   <mat-tab label="{{ 'ADMIN.STATISTICS.SINGLE' | translate }}" class="stats-single">
     <h4 class="mat-heading-4 mat-heading-underline">
@@ -289,6 +292,9 @@
         <mat-header-row *matHeaderRowDef="singleDataRows; sticky: true"></mat-header-row>
         <mat-row matRipple *matRowDef="let row; columns: singleDataRows"></mat-row>
       </mat-table>
+      <es-info-message *ngIf="singleData?.length">
+        {{ 'ADMIN.STATISTICS.SLICE_INFO' | translate }}
+      </es-info-message>
     </div>
   </mat-tab>
   <mat-tab label="{{ 'ADMIN.STATISTICS.ARCHIVED' | translate }}" *ngIf="_mediacenter">

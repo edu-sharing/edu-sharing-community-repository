@@ -479,6 +479,7 @@
     "folder": "Ordner",
     "file": "Unbekannt",
     "collection": "Sammlung",
+    "tool_object": "LTI-Tool",
     "saved_search": "Suche"
   },
   "PERMISSION_TYPE": {

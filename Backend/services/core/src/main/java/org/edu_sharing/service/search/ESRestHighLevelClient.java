@@ -85,6 +85,9 @@ public class ESRestHighLevelClient extends RestHighLevelClient {
             for (String termField : termFields) {
                 builder.startObject();
                 builder.field("field", termField);
+                // missing elements should still behave and not be filtered
+                // otherwise, the query will only match if both files have values
+                builder.field("missing", "");
                 builder.endObject();
             }
             builder.endArray();

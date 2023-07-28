@@ -11,12 +11,16 @@ import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.tools.CCConstants;
 
 public class PermissionServiceHelper {
+	/**
+	 * permission list resolved by elastic
+	 */
 	public static final String[] PERMISSIONS = new String[] {
 			 org.alfresco.service.cmr.security.PermissionService.READ,
 			 CCConstants.PERMISSION_READ_PREVIEW,
 			 CCConstants.PERMISSION_READ_ALL,
 			 CCConstants.PERMISSION_COMMENT,
 			 CCConstants.PERMISSION_FEEDBACK,
+			 CCConstants.PERMISSION_RATE_READ,
 			 org.alfresco.service.cmr.security.PermissionService.ADD_CHILDREN,
 			 org.alfresco.service.cmr.security.PermissionService.READ_PERMISSIONS,
 			 org.alfresco.service.cmr.security.PermissionService.CHANGE_PERMISSIONS,

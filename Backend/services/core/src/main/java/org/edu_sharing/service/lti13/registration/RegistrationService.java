@@ -118,9 +118,6 @@ public class RegistrationService {
     }
 
     public void ltiDynamicRegistration(String openidConfiguration, String registrationToken, String eduSharingRegistrationToken) throws Throwable {
-        //check repo lti kid is available
-        checkHomeAppKid();
-
 
         if(eduSharingRegistrationToken == null || eduSharingRegistrationToken.trim().equals("")){
             throw new Exception("no eduSharingRegistrationToken provided");
@@ -399,8 +396,6 @@ public class RegistrationService {
                                         String customParameters, String description, String clientName, String targetLinkUriDeepLink, String toolUrl) throws Exception {
         HashMap<String,String> properties = new HashMap<>();
 
-        checkHomeAppKid();
-
         /**
          * fallback to required redrect Urls
          */
@@ -477,13 +472,4 @@ public class RegistrationService {
         return RandomStringUtils.random(15, true, true);
     }
 
-    private void checkHomeAppKid() throws Exception{
-        ApplicationInfo homeApp = ApplicationInfoList.getHomeRepository();
-        if(homeApp.getLtiKid() == null){
-            String kid = UUID.randomUUID().toString();
-            Map<String,String> newProps = new HashMap<>();
-            newProps.put(ApplicationInfo.KEY_LTI_KID, kid);
-            AdminServiceFactory.getInstance().updatePropertiesXML(homeApp.getAppFileName(),newProps);
-        }
-    }
 }

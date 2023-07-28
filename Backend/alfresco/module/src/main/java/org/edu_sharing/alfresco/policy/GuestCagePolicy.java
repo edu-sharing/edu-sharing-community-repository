@@ -69,7 +69,7 @@ public class GuestCagePolicy implements BeforeCreateNodePolicy, BeforeDeleteAsso
 
 		if(AuthenticationUtil.getFullyAuthenticatedUser() != null
 				&& guestUsers.contains(AuthenticationUtil.getFullyAuthenticatedUser())
-				&& !AuthenticationUtil.isRunAsUserTheSystemUser()){
+				&& guestUsers.contains(AuthenticationUtil.getRunAsUser())){
 			throw new GuestPermissionDeniedException("guest has no permissions to do that");
 		}
 	}

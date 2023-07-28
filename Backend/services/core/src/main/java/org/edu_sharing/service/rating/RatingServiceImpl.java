@@ -15,6 +15,7 @@ import org.edu_sharing.repository.server.tools.cache.EduSharingRatingCache;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -85,7 +86,7 @@ public class RatingServiceImpl extends RatingServiceAdapter {
                 nodeAspects = new ArrayList<>();
                 nodeProps = new HashMap<>();
             }
-            RatingDetails accumulatedRatings = getAccumulatedRatings(nodeId, null);
+            RatingDetails accumulatedRatings = getAccumulatedRatings(new NodeRefImpl(nodeId), null);
             notificationService.notifyRatingChanged(nodeId, nodeType, nodeAspects, nodeProps, rating, accumulatedRatings, Status.ADDED);
             return null;
         });
@@ -142,7 +143,7 @@ public class RatingServiceImpl extends RatingServiceAdapter {
                     nodeAspects = new ArrayList<>();
                     nodeProps = new HashMap<>();
                 }
-                RatingDetails accumulatedRatings = getAccumulatedRatings(nodeId, null);
+                RatingDetails accumulatedRatings = getAccumulatedRatings(new NodeRefImpl(nodeId), null);
                 notificationService.notifyRatingChanged(nodeId, nodeType,  nodeAspects, nodeProps, rating.getRating(), accumulatedRatings, Status.REMOVED);
             } else {
                 throw new IllegalArgumentException("No rating for current user found for the given node");
@@ -154,12 +155,11 @@ public class RatingServiceImpl extends RatingServiceAdapter {
 
     /**
      * Get the accumulated ratings data
-     *
-     * @param nodeId the id of the node
      * @param after  the date which the ratings should have at least. Use null (default) to use ratings of all times and also use the cache
      */
     @Override
-    public RatingDetails getAccumulatedRatings(String nodeId, Date after) {
+    public RatingDetails getAccumulatedRatings(org.edu_sharing.service.model.NodeRef nodeRef, Date after){
+        String nodeId = nodeRef.getNodeId();
         if (after == null) {
             try {
                 RatingsCache accumulated = EduSharingRatingCache.get(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
@@ -203,7 +203,7 @@ public class RatingServiceImpl extends RatingServiceAdapter {
     }
 
     @Override
-    public List<RatingHistory> getAccumulatedRatingHistory(String nodeId, Date after) {
+    public List<RatingHistory> getAccumulatedRatingHistory(org.edu_sharing.service.model.NodeRef nodeRef, Date after) {
         throw new NotImplementedException();
     }
 

@@ -1,6 +1,7 @@
 package org.edu_sharing.service.search;
 
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -15,6 +16,7 @@ import org.edu_sharing.service.search.model.SearchToken;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.extensions.surf.util.URLEncoder;
+import org.springframework.util.StreamUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,12 +27,13 @@ public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 
 	private static final String BROCKHAUS_API = "https://api2.brockhaus.de/search";
 	private final String apiKey;
+	private final ApplicationInfo appInfo;
 
 	Logger logger = Logger.getLogger(SearchServiceBrockhausImpl.class);
 	String repositoryId = null;
 
 	public SearchServiceBrockhausImpl(String appId) {
-		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
+		this.appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
 		this.repositoryId = appInfo.getAppId();
 		this.apiKey = appInfo.getApiKey();
 	}
@@ -96,7 +99,9 @@ public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 
 		String[] searchWordCriteria=criterias.get(MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA);
 		if(searchWordCriteria == null){
-			searchWordCriteria = new String[] {"*"};
+			searchWordCriteria = new String[] {
+					!StringUtils.isEmpty(appInfo.getRecommend_objects_query()) ?
+							appInfo.getRecommend_objects_query() : "*"};
 		}
 		String searchWord = searchWordCriteria[0];
 		String src="ecs";

@@ -119,10 +119,14 @@ public class CollectionServiceImpl implements CollectionService {
 
             this.authTool = RepoFactory.getAuthenticationToolInstance(appId);
 
+			String guestUn = ApplicationInfoList.getHomeRepository().getGuest_username();
+
             //fix for running in runas user mode
             if ((AuthenticationUtil.isRunAsUserTheSystemUser()
                     || "admin".equals(AuthenticationUtil.getRunAsUser()))
-                    || Context.getCurrentInstance().getCurrentInstance() == null) {
+					|| Context.getCurrentInstance().getCurrentInstance() == null
+					|| (guestUn != null
+					&& guestUn.equals(AuthenticationUtil.getFullyAuthenticatedUser()) )) {
                 logger.debug("starting in runas user mode");
                 this.authInfo = new HashMap<String, String>();
                 this.authInfo.put(CCConstants.AUTH_USERNAME, AuthenticationUtil.getRunAsUser());
@@ -204,10 +208,17 @@ public class CollectionServiceImpl implements CollectionService {
             if (!originalNodeType.equals(CCConstants.CCM_TYPE_IO)) {
                 throw new Exception("Only Files are allowed to be added!");
             }
-            NodeRef child = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId, CCConstants.CCM_TYPE_IO, CCConstants.CCM_PROP_IO_ORIGINAL, originalNodeId);
-            if (child != null && !allowDuplicate) {
+			//NodeRef child = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId, CCConstants.CCM_TYPE_IO, CCConstants.CCM_PROP_IO_ORIGINAL, originalNodeId);
+			if(!allowDuplicate) {
+				List<NodeRef> child = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO, new HashMap<String, Object>() {{
+							put(CCConstants.CCM_PROP_IO_ORIGINAL, originalNodeId);
+						}},
+						CMISSearchHelper.CMISSearchData.builder().inFolder(collectionId).build()
+				);
+				if (!child.isEmpty()) {
                 throw new DuplicateNodeException("Node is already in collection");
             }
+			}
             /*
             for(ChildAssociationRef node : nodeService.getChildrenChildAssociationRef(collectionId)){
                 // TODO: Maybe we can find a faster way to determine it?
@@ -240,15 +251,15 @@ public class CollectionServiceImpl implements CollectionService {
 
             permissionService.addToRecentProperty(CCConstants.CCM_PROP_PERSON_RECENT_COLLECTIONS, collectionRef);
 
-            return AuthenticationUtil.runAsSystem(() -> {
-                /**
-                 * make a copy of the original.
-                 * OnCopyCollectionRefPolicy cares about
-                 * - not duplicating the content
-                 * - ignore childs: usage and license data
-                 * - the preview child will be copied
-                 */
-                String refId = client.copyNode(originalNodeId, collectionId, false);
+			return AuthenticationUtil.runAsSystem(() -> {
+				/**
+				 * make a copy of the original.
+				 * OnCopyCollectionRefPolicy cares about
+				 * - not duplicating the content
+				 * - ignore childs: usage and license data
+				 * - the preview child will be copied
+				 */
+				String refId = client.copyNode(originalNodeId, collectionId, false);
 
                 permissionService.setPermissions(refId, null, true);
                 client.addAspect(refId, CCConstants.CCM_ASPECT_POSITIONABLE);

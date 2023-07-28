@@ -263,31 +263,29 @@ public class AdminServiceImpl implements AdminService {
         }
     }
 
-    @Override
-    public void writePublisherToMDSXml(String vcardProps, String valueSpaceProp, String ignoreValues, String filePath, HashMap authInfo) throws Throwable {
-        File file = new File(filePath);
-        Result result = new StreamResult(file);
-        writePublisherToMDSXml(result, vcardProps, valueSpaceProp, ignoreValues, authInfo);
-    }
-
-    public String getPublisherToMDSXml(List<String> vcardProps, String valueSpaceProp, String ignoreValues, HashMap authInfo) throws Throwable {
-        StringWriter writer = new StringWriter();
-        Result result = new StreamResult(writer);
-        writePublisherToMDSXml(result, StringUtils.join(vcardProps, ","), valueSpaceProp, ignoreValues, authInfo);
-        return writer.toString();
-    }
-
-    @Override
-    public List<JobInfo> getJobs() throws Throwable {
-        return JobHandler.getInstance().getAllJobs();
-    }
-
-    @Override
-    public void cancelJob(String jobName) throws Throwable {
-        if (!JobHandler.getInstance().cancelJob(jobName)) {
-            throw new Exception("Job could not be canceled. Scheduler returned false");
-        }
-    }
+	@Override
+	public void writePublisherToMDSXml(String vcardProps, String valueSpaceProp, String ignoreValues, String filePath, HashMap authInfo) throws Throwable {
+		File file = new File(filePath);
+		Result result = new StreamResult(file);
+		writePublisherToMDSXml(result,vcardProps,valueSpaceProp,ignoreValues,authInfo);
+	}
+	
+	public String getPublisherToMDSXml(List<String> vcardProps, String valueSpaceProp, String ignoreValues, HashMap authInfo) throws Throwable {
+		StringWriter writer=new StringWriter();
+		Result result = new StreamResult(writer);
+		writePublisherToMDSXml(result,StringUtils.join(vcardProps,","),valueSpaceProp,ignoreValues,authInfo);
+		return writer.toString();
+	}
+	@Override
+	public List<JobInfo> getJobs() throws Throwable {
+		return JobHandler.getInstance().getAllRunningJobs();
+	}
+	@Override
+	public void cancelJob(String jobName) throws Throwable {
+		if(!JobHandler.getInstance().cancelJob(jobName)){
+			throw new Exception("Job could not be canceled. Scheduler returned false");
+		}
+	}
 
     public void writePropertyToMDSXml(Result result, String property) throws Throwable {
         Collection<String> values = getAllValuesFor(property);
@@ -942,23 +940,23 @@ public class AdminServiceImpl implements AdminService {
 
     }
 
-    @Override
-    public Object startJobSync(String jobClass, HashMap<String, Object> params) throws Throwable {
-        ImmediateJobListener listener = startJob(jobClass, params);
-        while (true) {
-            if (listener.wasExecuted()) {
-                Optional<JobInfo> result = getJobs().stream().filter(job -> job.getStatus().equals(JobInfo.Status.Finished) && job.getJobDetail().getJobClass().getName().equals(jobClass)).max((a, b) -> Long.compare(a.getFinishTime(), b.getFinishTime()));
-                if (!result.isPresent()) {
-                    throw new IllegalStateException("Job status not found");
-                }
-                return result.get().getJobDetail().getJobDataMap().get(JobHandler.KEY_RESULT_DATA);
-            }
-            if (listener.isVetoed()) {
-                throw new Exception("job was vetoed by " + listener.getVetoBy());
-            }
-            Thread.sleep(1000);
-        }
-    }
+	@Override
+	public Object startJobSync(String jobClass, HashMap<String,Object> params) throws Throwable {
+		ImmediateJobListener listener = startJob(jobClass, params);
+		while(true) {
+			if(listener.wasExecuted()) {
+				Optional<JobInfo> result = getJobs().stream().filter(job -> job.getStatus().equals(JobInfo.Status.Finished) && job.getJobClass().getName().equals(jobClass)).max((a, b) -> Long.compare(a.getFinishTime(), b.getFinishTime()));
+				if(!result.isPresent()) {
+					throw new IllegalStateException("Job status not found");
+				}
+				return result.get().getJobDataMap().get(JobHandler.KEY_RESULT_DATA);
+			}
+			if(listener.isVetoed()) {
+				throw new Exception("job was vetoed by " + listener.getVetoBy());
+			}
+			Thread.sleep(1000);
+		}
+	}
 
     @Override
     public void startCacheRefreshingJob(String folderId, boolean sticky) throws Exception {

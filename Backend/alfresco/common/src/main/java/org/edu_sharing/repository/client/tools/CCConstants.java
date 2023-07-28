@@ -816,6 +816,8 @@ public class CCConstants {
 
 	public final static String CCM_PROP_IO_LOCATION_STATUS = "{http://www.campuscontent.de/model/1.0}location_status";
 
+	public final static String CCM_PROP_IO_LOCATION_STATUS_FAIL_COUNT = "{http://www.campuscontent.de/model/1.0}location_status_fail_count";
+
 	public final static String CCM_PROP_IO_EDITORIAL_CHECKLIST = "{http://www.campuscontent.de/model/1.0}editorial_checklist";
 
 	public final static String CCM_PROP_IO_PUBLISHED_DATE = "{http://www.campuscontent.de/model/1.0}published_date";

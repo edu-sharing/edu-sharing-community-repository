@@ -19,6 +19,11 @@ import java.util.*;
     category = Core.CATEGORY_NAME,
     elementType = Appender.ELEMENT_TYPE)
 public class JobLogger extends AbstractAppender {
+    private static final int MAX_LOG_ENTRIES = 5000;
+    /**
+     * logs are not shared in cluster for performance reasongs
+     */
+    private static HashMap<JobInfo, List<LogEntry>> logs = new HashMap<>();
 
     private final ApplicationContext applicationContext;
 
@@ -33,6 +38,22 @@ public class JobLogger extends AbstractAppender {
         this.applicationContext = applicationContext;
     }
 
+    public static void addLog(JobInfo jobInfo, LogEntry entry) {
+        List<LogEntry> log = logs.get(jobInfo);
+        if(log == null) {
+            log = new ArrayList<>();
+        }
+        log.add(entry);
+        if(entry.level.isGreaterOrEqual(jobInfo.getWorstLevel())){
+            jobInfo.setWorstLevel(entry.level);
+            JobHandler.refreshJobsCache(jobInfo);
+        }
+        if(log.size()>MAX_LOG_ENTRIES){
+            log.remove(0);
+        }
+        logs.put(jobInfo, log);
+    }
+
     @PluginFactory
     public static JobLogger createAppender(
             @PluginAttribute("name") String name,
@@ -41,26 +62,34 @@ public class JobLogger extends AbstractAppender {
         return new JobLogger(name, filter, applicationContext);
     }
 
+    public static List<LogEntry> getLog(JobInfo jobInfo) {
+        return logs.get(jobInfo);
+    }
+
+    public static void init(JobInfo info) {
+        logs.put(info, new ArrayList<>());
+    }
+
     @Override
     public void append(LogEvent event) {
         if(event.getLoggerName().equals(JobHandler.class.getName())){
             return;
         }
         try {
-            for(JobInfo job : JobHandler.getInstance(applicationContext).getAllJobs()){
+            for(JobInfo job : JobHandler.getInstance(applicationContext).getAllRunningJobs()){
                 if(!job.getStatus().equals(JobInfo.Status.Running))
                     continue;
-                String clazz=job.getJobDetail().getJobClass().getName();
+                String clazz=job.getJobClass().getName();
                 String message=event.getMessage().getFormattedMessage();
                 if(event.getThrown()!=null){
                     message+="\n\n" + StringUtils.join(event.getThrown().getStackTrace(),"\n");
                 }
                 if(clazz.equals(event.getLoggerName())){
-                    job.addLog(new JobInfo.LogEntry(org.apache.log4j.Level.toLevel(event.getLevel().name()),event.getInstant().getEpochMillisecond(),event.getLoggerName(),message));
+                    JobLogger.addLog(job, new LogEntry(org.apache.log4j.Level.toLevel(event.getLevel().name()),event.getInstant().getEpochMillisecond(),event.getLoggerName(),message));
                 }
                 // importer job mapping
                 if(clazz.equals(ImporterJob.class.getName()) && event.getLoggerName().startsWith("org.edu_sharing.repository.server.importer")){
-                    job.addLog(new JobInfo.LogEntry(org.apache.log4j.Level.toLevel(event.getLevel().name()),event.getInstant().getEpochMillisecond(),event.getLoggerName(),message));
+                    JobLogger.addLog(job, new LogEntry(org.apache.log4j.Level.toLevel(event.getLevel().name()),event.getInstant().getEpochMillisecond(),event.getLoggerName(),message));
                 }
             }
         } catch (Exception e) {

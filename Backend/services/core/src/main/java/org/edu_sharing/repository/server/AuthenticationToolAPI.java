@@ -68,7 +68,7 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 	ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
 	AuthenticationComponent authenticationComponent = (AuthenticationComponent) alfApplicationContext.getBean("authenticationComponent");
 	 
-	Logger log = Logger.getLogger(AuthenticationToolAPI.class);
+	static Logger log = Logger.getLogger(AuthenticationToolAPI.class);
 	
 	public AuthenticationToolAPI() {
 	}
