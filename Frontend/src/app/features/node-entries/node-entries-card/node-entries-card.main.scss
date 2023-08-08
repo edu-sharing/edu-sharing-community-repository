@@ -150,6 +150,9 @@ $optionBarHeight: 50px;
                     color: #000;
                     flex-grow: 1;
                     margin: 5px 0;
+                    // FIXME: This breaks `limitLineCount` via `-webkit-line-clamp`, which requires
+                    // `display: -webkit-box`. What is this even for? `text-align: end` seems to
+                    // work just fine, even for containers.
                     display: flex;
                     justify-content: flex-end;
                     text-align: end;
