@@ -462,11 +462,6 @@ label .label-secondary {
 .mat-slide-toggle-content {
     color: $textLight;
 }
-// prevent umlauts from cutting off
-.mat-hint,
-.mat-error {
-    line-height: 1.5;
-}
 
 // Show toggle on the right place
 .toggle-reverse {
