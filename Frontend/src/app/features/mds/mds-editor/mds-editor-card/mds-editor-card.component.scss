@@ -19,7 +19,6 @@ es-input-fill-progress {
         background-color: #f7f7f7;
         @media only screen and (min-width: $expandToggleWidthThreshold) {
             z-index: 11;
-            height: 0;
             background-color: unset;
         }
         .extended-toggle {
