@@ -1,6 +1,8 @@
 package org.edu_sharing.service.notification;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -28,19 +30,19 @@ import com.sun.star.lang.IllegalArgumentException;
 public class NotificationServiceImpl implements NotificationService {
 
 	private ApplicationInfo appInfo;
-	
+
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 
 	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	AuthorityService authorityService = serviceRegistry.getAuthorityService();
-	MCAlfrescoAPIClient repoClient = new MCAlfrescoAPIClient(); 
+	MCAlfrescoAPIClient repoClient = new MCAlfrescoAPIClient();
 	Logger logger = Logger.getLogger(NotificationServiceImpl.class);
 	private PermissionService permissionService;
 
 	private org.edu_sharing.service.nodeservice.NodeService nodeService;
 
 	private String currentLocale;
-	
+
 	public NotificationServiceImpl(String appId){
 		appInfo = ApplicationInfoList.getHomeRepository();
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
@@ -64,13 +66,22 @@ public class NotificationServiceImpl implements NotificationService {
 		replace.put("link.static", URLTool.getNgRenderNodeUrl(nodeId,null,false));
 		MailTemplate.applyNodePropertiesToMap("node.", properties, replace);
 		Mail mail=new Mail();
-		String receiver=mail.getConfig().getString("report.receiver");
-		if(receiver==null)
-			throw new IllegalArgumentException("no mail.report.receiver registered in ccmail.properties");
+		List<String> receivers = null;
+		if(mail.getConfig().hasPath("report.receivers")) {
+			receivers = mail.getConfig().getStringList("report.receivers");
+		} else if (mail.getConfig().getString("report.receiver") != null){
+			receivers = Collections.singletonList(mail.getConfig().getString("report.receiver"));
+			logger.info("report.receiver is deprecated. Prefer using the report.receivers field instead");
+		}
+		if(receivers==null || receivers.isEmpty()) {
+			throw new IllegalArgumentException("no mail.report.receivers registered in ccmail.properties");
+		}
 		ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
-		mail.sendMailHtml(
-				context,
-				receiver,
-				subject,content,replace);
+		for (String receiver : receivers) {
+			mail.sendMailHtml(
+					context,
+					receiver,
+					subject, content, replace);
+		}
 	}
 }
