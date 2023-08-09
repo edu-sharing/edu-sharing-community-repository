@@ -17,8 +17,7 @@ public class ProviderHelper {
         }
         if(appInfo.ishomeNode()
                 && (appInfo.getString(ApplicationInfo.KEY_REMOTE_PROVIDER,null) == null
-                    || appInfo.getString(ApplicationInfo.KEY_REMOTE_PROVIDER,null).isEmpty())
-                || appInfo.getRepositoryType().equals(ApplicationInfo.REPOSITORY_TYPE_LOCAL)) {
+                    || appInfo.getString(ApplicationInfo.KEY_REMOTE_PROVIDER,null).isEmpty())) {
             return false;
         }
         return appInfo.getType().equals(ApplicationInfo.TYPE_REPOSITORY);
