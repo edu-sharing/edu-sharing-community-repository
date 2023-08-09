@@ -1530,7 +1530,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             await this.onMdsReady();
             this.searchAll();
         } else {
-            if (!this.searchService.mdsInitialized) {
+            // We need to call `loadMds` to fill `currentMdsSet` again in case it has been set to
+            // null. Otherwise, `updateSortMds` will fail.
+            if (!this.searchService.mdsInitialized || !this.currentMdsSet) {
                 await this.getActiveMds().loadMds();
             }
             //this.onMdsReady();
