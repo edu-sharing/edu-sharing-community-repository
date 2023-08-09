@@ -2,6 +2,7 @@
 @import '../mixins.scss';
 
 $optionBarHeight: 50px;
+$cardLineHeight: 1.4;
 
 .grid-card {
     transition: all $transitionNormal;
@@ -138,7 +139,7 @@ $optionBarHeight: 50px;
             display: flex;
             flex-direction: row;
             align-items: center;
-            min-height: 2.5em;
+            min-height: $cardLineHeight * 2em;
             gap: 5px;
             &:not(:first-child) {
                 > label {
@@ -166,7 +167,7 @@ $optionBarHeight: 50px;
                     width: 100%;
                     color: $textMain;
                     font-size: 120%;
-                    height: 1.25 * 2em;
+                    height: $cardLineHeight * 2em;
                     text-align: left;
                     word-break: break-word;
                 }
@@ -200,7 +201,7 @@ $optionBarHeight: 50px;
             &:first-child {
                 es-list-base,
                 es-node-url a es-list-base {
-                    @include limitLineCount(2, 1.25);
+                    @include limitLineCount(2, $cardLineHeight);
                     > es-list-text {
                         word-break: break-word;
                     }
