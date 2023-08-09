@@ -7,12 +7,14 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -22,7 +24,11 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchResult;
 import org.springframework.context.ApplicationContext;
 
 import com.sun.star.lang.IllegalArgumentException;
@@ -65,6 +71,22 @@ public class NotificationServiceImpl implements NotificationService {
 		replace.put("link", URLTool.getNgRenderNodeUrl(nodeId,null,true));
 		replace.put("link.static", URLTool.getNgRenderNodeUrl(nodeId,null,false));
 		MailTemplate.applyNodePropertiesToMap("node.", properties, replace);
+		try {
+			HashMap<String, Object> userProps = NodeServiceHelper.getProperties(AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(AuthenticationUtil.getFullyAuthenticatedUser()));
+			MailTemplate.applyNodePropertiesToMap("user.", userProps, replace);
+			SearchResult<EduGroup> orgList = SearchServiceFactory.getLocalService().getAllOrganizations(true);
+			if(!orgList.getData().isEmpty()) {
+				HashMap<String, Object> orgProps = NodeServiceHelper.getProperties(AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(orgList.getData().get(0).getGroupname()));
+				MailTemplate.applyNodePropertiesToMap("user.organization.", orgProps, replace);
+			}
+			List<String> mzList = SearchServiceFactory.getLocalService().getAllMediacenters();
+			if(!mzList.isEmpty()) {
+				HashMap<String, Object> mzProps = NodeServiceHelper.getProperties(AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(mzList.get(0)));
+				MailTemplate.applyNodePropertiesToMap("user.mediacenter.", mzProps, replace);
+			}
+		} catch (Throwable ignored) {
+
+		}
 		Mail mail=new Mail();
 		List<String> receivers = null;
 		if(mail.getConfig().hasPath("report.receivers")) {
