@@ -654,13 +654,12 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             parameters = await this.getMdsValues();
         }
         if (repository !== this.currentRepository) {
-            parameters = null;
+            parameters = {};
         }
         const queryParams = await UIHelper.getCommonParameters(this.activatedRoute).toPromise();
         queryParams.addToCollection = this.addToCollection ? this.addToCollection.ref.id : null;
         queryParams.query = query;
-        queryParams.parameters =
-            parameters && Object.keys(parameters) ? JSON.stringify(parameters) : null;
+        queryParams.parameters = JSON.stringify(parameters);
         queryParams.repositoryFilter = this.getEnabledRepositories().join(',');
         queryParams.mds = mds;
         queryParams.repository = repository;
