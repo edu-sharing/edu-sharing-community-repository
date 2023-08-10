@@ -55,7 +55,6 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
     readonly loadingProgress = new BehaviorSubject<number>(0);
 
     private readonly _destroyed = new Subject<void>();
-    private mds: MdsDefinition;
 
     constructor(
         private _injector: Injector,
@@ -176,7 +175,6 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
                     this._mds.getMetadataSet({ repository, metadataSet }),
                 ),
             );
-        mds.subscribe((mds) => (this.mds = mds));
         // Register columns.
         mds.pipe(map((mds) => MdsHelper.getColumns(this._translate, mds, 'search'))).subscribe(
             this.resultColumns,
@@ -280,9 +278,7 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
         let criteria: MdsQueryCriteria[] = Object.entries(params.searchFilters ?? {}).map(
             ([property, values]) => ({ property, values }),
         );
-        if (this.mds) {
-            criteria = this.convertCriteria(criteria);
-        }
+        this.convertCriteria(criteria);
         if (params.searchString) {
             criteria.push({ property: 'ngsearchword', values: [params.searchString] });
         }
@@ -309,13 +305,16 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
     // TODO: Port `unfoldTrees` methods from 8.0. See
     // https://scm.edu-sharing.com/edu-sharing/community/repository/edu-sharing-angular-core-module/-/blob/5447ea837a99a3dab04395c10464dd417ddb73a1/rest/services/rest-search.service.ts#L34.
     // Also consider a backend solution.
-    private convertCriteria(criteria: MdsQueryCriteria[]) {
+    private convertCriteria(criteria: MdsQueryCriteria[]): void {
         for (const c of criteria) {
-            let widget = MdsHelper.getWidget(c.property, undefined, this.mds.widgets);
-            if (widget && widget.type === MdsWidgetType.MultiValueTree.toString()) {
-                /**
-                 * @TODO check
-                 */
+            // We get the widget definition from the MDS editor instance, so overrides with `data-`
+            // attributes in the MDS template are reflected.
+            const widget = this._searchPage.filtersMdsWidgets.value?.find(
+                (widget) => widget.definition.id === c.property,
+            )?.definition;
+            if (widget?.type === MdsWidgetType.MultiValueTree) {
+                // For multi-value-tree widgets, add all child values of selected values to the
+                // search criteria.
                 let attach = RestSearchService.unfoldTreeChilds(c.values, widget);
                 if (attach) {
                     if (attach.length > RestSearchService.MAX_QUERY_CONCAT_PARAMS) {
@@ -332,6 +331,5 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
                 }
             }
         }
-        return criteria;
     }
 }
