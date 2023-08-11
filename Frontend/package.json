@@ -12,7 +12,7 @@
     "build:edu-sharing-ui": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build edu-sharing-ui",
     "build:edu-sharing-api:dev": "(cd projects/edu-sharing-api && npm run update-if-needed) && node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build edu-sharing-api --configuration development",
     "publish:edu-sharing-api": "npm run build:edu-sharing-api && cd dist/edu-sharing-api && npm publish",
-    "prebuild": "npm run build:edu-sharing-api build:edu-sharing-ui",
+    "prebuild": "npm run build:edu-sharing-api && npm run build:edu-sharing-ui",
     "build": "node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build --configuration production --delete-output-path false --base-href /edu-sharing/",
     "prebuild-dev": "npm run build:edu-sharing-api:dev",
     "build-dev": "node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build --delete-output-path false --base-href /edu-sharing/",
