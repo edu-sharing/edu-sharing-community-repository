@@ -1833,8 +1833,43 @@
             "format": "int64",
             "type": "integer"
           },
+          "jobDataMap": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "properties": {
+              "allowsTransientData": {
+                "type": "boolean"
+              },
+              "dirty": {
+                "type": "boolean"
+              },
+              "empty": {
+                "type": "boolean"
+              },
+              "keys": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "wrappedMap": {
+                "additionalProperties": {
+                  "type": "object"
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
           "jobDetail": {
             "$ref": "#/components/schemas/JobDetail"
+          },
+          "jobGroup": {
+            "type": "string"
+          },
+          "jobName": {
+            "type": "string"
           },
           "log": {
             "items": {
