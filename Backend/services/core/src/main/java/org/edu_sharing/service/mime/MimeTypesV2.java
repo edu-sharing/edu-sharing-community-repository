@@ -53,6 +53,7 @@ public class MimeTypesV2 {
 			"application/vnd.ms-word.template.macroEnabled.12"
 			});
 	public static List<String> EXCEL=Arrays.asList(new String[]{	
+			"application/msexcel",
 			"application/vnd.ms-excel",
 			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 			"application/vnd.openxmlformats-officedocument.spreadsheetml.template",
@@ -61,6 +62,7 @@ public class MimeTypesV2 {
 			"application/vnd.ms-excel.sheet.binary.macroEnabled.12"
 			});
 	public static List<String> POWERPOINT=Arrays.asList(new String[]{	
+			"application/mspowerpoint",
 			"application/vnd.ms-powerpoint",
 			"application/vnd.openxmlformats-officedocument.presentationml.presentation",
 			"application/vnd.openxmlformats-officedocument.presentationml.template",

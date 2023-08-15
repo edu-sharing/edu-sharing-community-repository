@@ -5,6 +5,7 @@ import {
     RestConnectorService,
     RestConstants,
     RestHelper,
+    RestNetworkService,
     RestRatingService,
 } from '../../../core-module/core.module';
 import { Toast } from '../../../core-ui-module/toast';
@@ -93,6 +94,10 @@ export class NodeRatingComponent<T extends Node> implements OnInit {
         } catch (e) {
             this.toast.error(e);
         }
+    }
+
+    isFromHomeRepo(node: Node) {
+        return RestNetworkService.isFromHomeRepo(node);
     }
 }
 export type RatingMode = 'none' | 'likes' | 'stars';

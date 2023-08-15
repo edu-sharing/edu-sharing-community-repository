@@ -83,6 +83,7 @@
     "OPEN_MISSING": "Öffnen",
     "ORIGINAL_MISSING": "Das Orginal wurde gelöscht",
     "ORIGINAL_MISSING_INFO": "Das Orginal wurde gelöscht und steht nicht mehr zur Verfügung. Sie können die Referenz öffnen, um die Metadaten anzuzeigen.",
+    "REMOVE_FROM_COLLECTION_DIALOG_TEXT": "{{count}} Element(e) aus dieser Sammlung entfernen? Die Elemente selbst bleiben erhalten, jedoch werden sie nicht mehr über diese Sammlung zugänglich sein.",
     "REMOVED_FROM_COLLECTION": "Element(e) wurde von Sammlung entfernt",
     "EXTENDED_PERMISSIONS": "einzelne Personen oder Gruppen (sehen, mitarbeiten oder koordinieren)",
     "EXTENDED_PERMISSIONS_BUTTON": "Einladen",

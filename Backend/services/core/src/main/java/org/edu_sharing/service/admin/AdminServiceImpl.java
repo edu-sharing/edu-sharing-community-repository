@@ -21,14 +21,12 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.alfresco.repo.cache.SimpleCache;
-import org.alfresco.repo.module.ModuleServiceImpl;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.module.ModuleInstallState;
 import org.alfresco.service.cmr.module.ModuleService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.ReversedLinesFileReader;
@@ -46,7 +44,6 @@ import org.edu_sharing.repository.client.tools.StringTool;
 import org.edu_sharing.repository.server.*;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.importer.ExcelLOMImporter;
-import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.importer.collections.CollectionImporter;
 import org.edu_sharing.repository.server.jobs.quartz.*;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
@@ -66,7 +63,6 @@ import org.edu_sharing.service.admin.model.RepositoryConfig;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.admin.model.ToolPermission;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.foldertemplates.FolderTemplatesImpl;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -78,8 +74,6 @@ import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.service.version.RepositoryVersionInfo;
 import org.edu_sharing.service.version.VersionService;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StreamUtils;
 import org.w3c.dom.Document;
@@ -280,7 +274,7 @@ public class AdminServiceImpl implements AdminService  {
 	}
 	@Override
 	public List<JobInfo> getJobs() throws Throwable {
-		return JobHandler.getInstance().getAllJobs();
+		return JobHandler.getInstance().getAllRunningJobs();
 	}
 	@Override
 	public void cancelJob(String jobName) throws Throwable {
@@ -937,11 +931,11 @@ public class AdminServiceImpl implements AdminService  {
 		ImmediateJobListener listener = startJob(jobClass, params);
 		while(true) {
 			if(listener.wasExecuted()) {
-				Optional<JobInfo> result = getJobs().stream().filter(job -> job.getStatus().equals(JobInfo.Status.Finished) && job.getJobDetail().getJobClass().getName().equals(jobClass)).max((a, b) -> Long.compare(a.getFinishTime(), b.getFinishTime()));
+				Optional<JobInfo> result = getJobs().stream().filter(job -> job.getStatus().equals(JobInfo.Status.Finished) && job.getJobClass().getName().equals(jobClass)).max((a, b) -> Long.compare(a.getFinishTime(), b.getFinishTime()));
 				if(!result.isPresent()) {
 					throw new IllegalStateException("Job status not found");
 				}
-				return result.get().getJobDetail().getJobDataMap().get(JobHandler.KEY_RESULT_DATA);
+				return result.get().getJobDataMap().get(JobHandler.KEY_RESULT_DATA);
 			}
 			if(listener.isVetoed()) {
 				throw new Exception("job was vetoed by " + listener.getVetoBy());

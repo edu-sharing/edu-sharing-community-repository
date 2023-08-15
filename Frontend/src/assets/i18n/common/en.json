@@ -413,6 +413,7 @@
     "folder": "Folder",
     "file": "Unknown",
     "collection": "Collection",
+    "tool_object": "lti tool",
     "saved_search": "Search"
   },
   "PERMISSION_TYPE": {

@@ -932,7 +932,10 @@ export class AdminComponent implements OnInit, OnDestroy {
         });
     }
     getJobLog(job: any, pos: number) {
-        let log = Helper.deepCopy(job.log).reverse();
+        let log = Helper.deepCopy(job.log)?.reverse();
+        if (!log) {
+            return null;
+        }
 
         if (this.jobsLogLevel[pos]) {
             const result: any = [];
@@ -1089,8 +1092,10 @@ export class AdminComponent implements OnInit, OnDestroy {
             if (this.config.instant('nodeReport', false)) {
                 this.systemChecks.push({
                     name: 'MAIL_REPORT',
-                    status: mail.report.receiver && mail.server.smtp.host ? 'OK' : 'FAIL',
-                    translate: mail.report,
+                    status: mail.report.receivers && mail.server.smtp.host ? 'OK' : 'FAIL',
+                    translate: {
+                        receivers: mail.report?.receivers?.join(', '),
+                    },
                 });
             }
             this.systemChecks.push({

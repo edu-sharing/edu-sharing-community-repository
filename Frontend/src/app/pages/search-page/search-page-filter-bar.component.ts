@@ -171,6 +171,10 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
         this.mdsEditor.mdsEditorInstance.values
             .pipe(takeUntil(this.destroyed))
             .subscribe((values) => this.onMdsValuesChange(values));
+        this.mdsEditor
+            .getInstanceService()
+            .widgets.pipe(takeUntil(this.destroyed))
+            .subscribe((mdsWidgets) => this.searchPage.filtersMdsWidgets.next(mdsWidgets));
         rxjs.merge(
             this.activeMetadataSet.observeValue().pipe(
                 filter(notNull),

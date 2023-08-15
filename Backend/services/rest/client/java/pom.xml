@@ -106,6 +106,26 @@
             </configuration>
           </execution>
           <execution>
+            <id>fixJobInfo</id>
+            <phase>process-sources</phase>
+            <goals>
+              <goal>replace</goal>
+            </goals>
+            <configuration>
+              <basedir>${project.basedir}</basedir>
+              <includes>
+                <include>target/generated-sources/openapi/src/main/java/**/JobInfo.java</include>
+              </includes>
+              <regex>false</regex>
+              <replacements>
+                <replacement>
+                  <token><![CDATA[this.jobDataMap = ;]]></token>
+                  <value><![CDATA[this.jobDataMap = new HashMap<String, Object>();]]></value>
+                </replacement>
+              </replacements>
+            </configuration>
+          </execution>
+          <execution>
             <id>fixEnums</id>
             <phase>process-sources</phase>
             <goals>
