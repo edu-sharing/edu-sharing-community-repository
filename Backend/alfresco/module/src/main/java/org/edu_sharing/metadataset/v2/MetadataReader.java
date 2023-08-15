@@ -32,7 +32,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class MetadataReader {
-	
+
+	public static final String GENDER_SEPARATOR = "*";
 	public static final String SUGGESTION_SOURCE_SEARCH = "Search";
 	public static final String SUGGESTION_SOURCE_MDS = "Mds";
 	public static final String SUGGESTION_SOURCE_SQL = "Sql";
@@ -865,10 +866,10 @@ public class MetadataReader {
 			try {
 				defaultResourceBundleLocalOverride=getTranslationCache(i18n+"_override_"+locale);
 				if(defaultResourceBundleLocalOverride.containsKey(key))
-					return defaultResourceBundleLocalOverride.getString(key);
+					return replaceGenderSeperator(defaultResourceBundleLocalOverride.getString(key));
 			}catch(Throwable t) {}
 			if(defaultResourceBundleLocal.containsKey(key))
-				return defaultResourceBundleLocal.getString(key);
+				return replaceGenderSeperator(defaultResourceBundleLocal.getString(key));
 		}catch(Throwable t){
 		}
 		try{
@@ -876,16 +877,20 @@ public class MetadataReader {
 			try {
 				defaultResourceBundleGlobalOverride=getTranslationCache(i18n+"_override");
 				if(defaultResourceBundleGlobalOverride.containsKey(key))
-					return defaultResourceBundleGlobalOverride.getString(key);
+					return replaceGenderSeperator(defaultResourceBundleGlobalOverride.getString(key));
 			}catch(Throwable t) {}
 			if(defaultResourceBundleGlobal.containsKey(key))
 				defaultValue=defaultResourceBundleGlobal.getString(key);
 		}catch(Throwable t){
 			logger.warn("No translation file "+i18n+" found while looking for "+key);
 		}
-		return defaultValue;
+		return replaceGenderSeperator(defaultValue);
 	}
-	
+
+	private static String replaceGenderSeperator(String i18n) {
+		return i18n.replace("{{GENDER_SEPARATOR}}", GENDER_SEPARATOR);
+	}
+
 	public static void refresh() {
 		mdsCache.clear();
 		translationBundles=new HashMap<>();
