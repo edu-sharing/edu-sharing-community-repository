@@ -1205,13 +1205,13 @@
     "EMPTY_UNREAD": "No unread notifications",
     "EMPTY_ALL": "No notifications",
     "DESCRIPTIONS": {
-      "AddToCollectionEvent": "{{creator}} has added the material \"{{title}}\" to collection {{collection}}",
-      "ProposeForCollectionEvent": "{{creator}} has proposed the material \"{{title}}\" for collection {{collection}}",
-      "CommentEvent": "{{creator}} has created a comment on \"{{title}}\"",
-      "InviteEvent": "{{creator}} has shared the object \"{{title}}\" with you",
-      "NodeIssueEvent": "{{creator}} has reported the issue \"{{reason}}\" on material \"{{title}}\"",
-      "RatingEvent": "A rating has been given on \"{{title}}\"",
-      "WorkflowEvent": "{{creator}} has changed the workflow state of material \"{{title}}\" to \"{{workflowStatus}}\"",
+      "AddToCollectionEvent": "{{creator}} has added the material \"{{title}}\" to the collection {{collection}}.",
+      "ProposeForCollectionEvent": "{{creator}} has proposed the material \"{{title}}\" for the collection {{collection}}.",
+      "CommentEvent": "{{creator}} added a comment to \"{{title}}\".",
+      "InviteEvent": "{{creator}} has shared the object \"{{title}}\" with you.",
+      "NodeIssueEvent": "{{creator}} has reported the issue \"{{reason}}\" for the object \"{{title}}\".",
+      "RatingEvent": "The object \"{{title}}\" was rated.",
+      "WorkflowEvent": "{{creator}} has changed the workflow state of the material \"{{title}}\" to \"{{workflowStatus}}\".",
       "MetadataSuggestionEvent": "",
       "proposeForCollectionEvent": "Proposals for collection"
     }
