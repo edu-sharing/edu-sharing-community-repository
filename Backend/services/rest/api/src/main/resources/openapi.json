@@ -3877,11 +3877,8 @@
       "Preview": {
         "properties": {
           "data": {
-            "items": {
-              "format": "byte",
-              "type": "string"
-            },
-            "type": "array"
+            "format": "byte",
+            "type": "string"
           },
           "height": {
             "format": "int32",

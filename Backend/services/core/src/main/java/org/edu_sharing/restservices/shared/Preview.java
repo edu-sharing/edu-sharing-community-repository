@@ -178,6 +178,7 @@ public class Preview implements Serializable {
     this.data = data;
   }
 
+  @Schema(type = "string", format = "byte")
   public byte[] getData() {
     return data;
   }
