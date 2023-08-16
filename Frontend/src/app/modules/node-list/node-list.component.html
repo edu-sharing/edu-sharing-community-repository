@@ -24,28 +24,7 @@
 
 <div class="dialog" *ngIf="currentMore" (click)="currentMore = null"></div>
 <div class="recycleContainer" [class.recylceContainerWorkspace]="isInsideWorkspace">
-  <div class="results">
-    <es-listTable
-      [nodes]="list"
-      [columns]="_columns"
-      [hasIcon]="true"
-      [hasCheckbox]="true"
-      [totalCount]="pagination?.total"
-      [hasMore]="list?.length < pagination?.total"
-      [isClickable]="true"
-      [isLoading]="isLoading"
-      [dragDrop]="false"
-      [actionbar]="actionbar"
-      [customOptions]="customOptions"
-      [selectOnClick]="true"
-      [sortBy]="sortBy"
-      [sortAscending]="sortAscending"
-      (sortListener)="setSorting($event)"
-      [selectedNodes]="selected"
-      (selectionChanged)="onSelection($event)"
-      (loadMore)="loadMore()"
-    ></es-listTable>
-  </div>
+  <div class="results">TODO</div>
 
   <div class="noResults" *ngIf="!list && hasSearched && !isLoading">
     <h5>{{ 'RECYCLE.NO_RESULTS_TITLE' | translate }}</h5>

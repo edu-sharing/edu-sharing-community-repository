@@ -1,12 +1,9 @@
 import {
-    AfterViewInit,
     ChangeDetectorRef,
     Component,
     ElementRef,
     HostListener,
-    Input,
     NgZone,
-    Output,
     ViewChild,
 } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -15,7 +12,7 @@ import {
     EventListener,
     FrameEventsService,
 } from '../../../../core-module/rest/services/frame-events.service';
-import { UIAnimation } from '../../../../core-module/ui/ui-animation';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { ConfigurationService, RestConnectorService } from '../../../../core-module/core.module';
 import { first } from 'rxjs/operators';
 import { LoadingScreenService } from '../../../../main/loading-screen/loading-screen.service';

@@ -18,9 +18,14 @@ import { extensionImports } from './extension/extension-imports';
 import { extensionProviders } from './extension/extension-providers';
 import { extensionSchemas } from './extension/extension-schemas';
 import { DialogsModule } from './features/dialogs/dialogs.module';
-import { ListItemsModule } from './features/list-items/list-items.module';
 import { MdsModule } from './features/mds/mds.module';
-import { NodeEntriesModule } from './features/node-entries/node-entries.module';
+import {
+    AppService as AppServiceAbstract,
+    EduSharingUiModule,
+    KeyboardShortcutsService as KeyboardShortcutsServiceAbstract,
+    OptionsHelperService as OptionsHelperServiceAbstract,
+    Toast as ToastAbstract,
+} from 'ngx-edu-sharing-ui';
 import { IMPORTS } from './imports';
 import { MainModule } from './main/main.module';
 import { DECLARATIONS_ADMIN } from './modules/admin/declarations';
@@ -49,7 +54,11 @@ import { PROVIDERS } from './providers';
 import { AppLocationStrategy } from './router/location-strategy';
 import { RouterComponent } from './router/router.component';
 import { SharedModule } from './shared/shared.module';
-import { TranslationsModule } from './translations/translations.module';
+import { environment } from '../environments/environment';
+import { Toast } from './core-ui-module/toast';
+import { OptionsHelperService } from './core-ui-module/options-helper.service';
+import { KeyboardShortcutsService } from './services/keyboard-shortcuts.service';
+import { CordovaService } from './common/services/cordova.service';
 import { InMemoryCache } from '@apollo/client/core';
 import { HttpLink } from 'apollo-angular/http';
 import { APOLLO_OPTIONS, ApolloModule } from 'apollo-angular';
@@ -95,12 +104,10 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         IMPORTS,
         ApolloModule,
         SharedModule,
-        NodeEntriesModule,
-        ListItemsModule,
         MainModule,
         EduSharingApiModule.forRoot(),
+        EduSharingUiModule.forRoot({ production: environment.production }),
         EduSharingGraphqlModule,
-        TranslationsModule.forRoot(),
         DragDropModule,
         extensionImports,
         ResizableModule,
@@ -112,6 +119,10 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         }),
     ],
     providers: [
+        { provide: ToastAbstract, useClass: Toast },
+        { provide: OptionsHelperServiceAbstract, useClass: OptionsHelperService },
+        { provide: KeyboardShortcutsServiceAbstract, useClass: KeyboardShortcutsService },
+        { provide: CordovaService, useClass: AppServiceAbstract },
         {
             provide: EDU_SHARING_API_CONFIG,
             deps: [ErrorHandlerService],

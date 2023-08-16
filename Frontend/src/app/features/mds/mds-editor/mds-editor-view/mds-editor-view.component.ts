@@ -22,9 +22,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
 import { filter, first, map, take, takeUntil } from 'rxjs/operators';
 import { Node } from '../../../../core-module/core.module';
-import { UIAnimation } from '../../../../core-module/ui/ui-animation';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
-import { JumpMark, JumpMarksService } from '../../../../services/jump-marks.service';
 import { JUMP_MARK_POSTFIX } from '../../../dialogs/card-dialog/card-dialog-container/jump-marks-handler.directive';
 import { MdsWidgetComponent } from '../../mds-viewer/widget/mds-widget.component';
 import { EditorMode, GeneralWidget, NativeWidgets, WidgetComponents } from '../../types/mds-types';
@@ -51,6 +49,8 @@ import { MdsEditorWidgetPreviewComponent } from '../widgets/mds-editor-widget-pr
 import { MdsEditorWidgetSuggestionChipsComponent } from '../widgets/mds-editor-widget-suggestion-chips/mds-editor-widget-suggestion-chips.component';
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import { ViewInstanceService } from './view-instance.service';
+import { JumpMark, JumpMarksService } from '../../../../services/jump-marks.service';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;

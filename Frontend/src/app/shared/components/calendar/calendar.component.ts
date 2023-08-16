@@ -1,8 +1,7 @@
-import { Component, Input, Output, EventEmitter, OnInit, HostListener } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { DateHelper } from '../../../core-ui-module/DateHelper';
+import { DateHelper, UIAnimation } from 'ngx-edu-sharing-ui';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { DateAdapter } from '@angular/material/core';
 
 @Component({

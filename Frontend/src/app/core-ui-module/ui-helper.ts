@@ -1,6 +1,6 @@
 import { forkJoin as observableForkJoin, Observable, Observer, of } from 'rxjs';
 import { catchError, first, take } from 'rxjs/operators';
-import { OPEN_URL_MODE, UIConstants } from '../core-module/ui/ui-constants';
+import { ListItem, OPEN_URL_MODE, UIConstants } from 'ngx-edu-sharing-ui';
 import { ConfigurationService } from '../core-module/rest/services/configuration.service';
 import { TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
@@ -19,7 +19,6 @@ import { RestConstants } from '../core-module/rest/rest-constants';
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
 import { Toast } from './toast';
 import { RestHelper } from '../core-module/rest/rest-helper';
-import { UIService } from '../core-module/rest/services/ui.service';
 import {
     ComponentFactoryResolver,
     ComponentRef,
@@ -33,9 +32,7 @@ import {
 import { RestCollectionService } from '../core-module/rest/services/rest-collection.service';
 import { RestConnectorsService } from '../core-module/rest/services/rest-connectors.service';
 import { FrameEventsService } from '../core-module/rest/services/frame-events.service';
-import { ListItem } from '../core-module/ui/list-item';
 import { BridgeService } from '../core-bridge-module/bridge.service';
-import { OptionItem } from './option-item';
 import { RestConnectorService } from '../core-module/rest/services/rest-connector.service';
 import { RouterHelper } from './router.helper';
 import { PlatformLocation } from '@angular/common';
@@ -48,16 +45,6 @@ import { LoginInfo } from 'ngx-edu-sharing-api';
 
 export class UIHelper {
     static COPY_URL_PARAMS = ['mainnav', 'reurl', 'reurlTypes', 'reurlCreate', 'applyDirectories'];
-
-    public static evaluateMediaQuery(type: string, value: number) {
-        if (type == UIConstants.MEDIA_QUERY_MAX_WIDTH) return value > window.innerWidth;
-        if (type == UIConstants.MEDIA_QUERY_MIN_WIDTH) return value < window.innerWidth;
-        if (type == UIConstants.MEDIA_QUERY_MAX_HEIGHT) return value > window.innerHeight;
-        if (type == UIConstants.MEDIA_QUERY_MIN_HEIGHT) return value < window.innerHeight;
-        console.warn('Unsupported media query ' + type);
-        return true;
-    }
-
     public static getBlackWhiteContrast(color: string) {}
 
     static changeQueryParameter(router: Router, route: ActivatedRoute, name: string, value: any) {
@@ -641,31 +628,6 @@ export class UIHelper {
                 return window.open(url, '_blank');
             }
         }
-    }
-
-    static filterValidOptions(ui: UIService, options: OptionItem[]) {
-        if (options == null) return null;
-        options = options.filter((value) => value != null);
-        let optionsFiltered: OptionItem[] = [];
-        for (let option of options) {
-            if (
-                (!option.onlyMobile || (option.onlyMobile && ui.isMobile())) &&
-                (!option.onlyDesktop || (option.onlyDesktop && !ui.isMobile())) &&
-                (!option.mediaQueryType ||
-                    (option.mediaQueryType &&
-                        UIHelper.evaluateMediaQuery(option.mediaQueryType, option.mediaQueryValue)))
-            )
-                optionsFiltered.push(option);
-        }
-        return optionsFiltered;
-    }
-
-    static filterToggleOptions(options: OptionItem[], toggle: boolean) {
-        let result: OptionItem[] = [];
-        for (let option of options) {
-            if (option.isToggle == toggle) result.push(option);
-        }
-        return result;
     }
 
     /**

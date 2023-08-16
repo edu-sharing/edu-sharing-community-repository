@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject } from 'rxjs';
-import { LocalEventsService } from '../../../../../services/local-events.service';
+import { LocalEventsService } from 'ngx-edu-sharing-ui';
 import { DialogsService } from '../../../../dialogs/dialogs.service';
 import { Constraints, NativeWidgetType } from '../../../types/types';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';

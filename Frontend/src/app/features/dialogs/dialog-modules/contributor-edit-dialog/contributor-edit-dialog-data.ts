@@ -1,4 +1,4 @@
-import { VCard } from '../../../../core-module/ui/VCard';
+import { VCard } from 'ngx-edu-sharing-ui';
 
 export type EditMode = 'lifecycle' | 'metadata';
 

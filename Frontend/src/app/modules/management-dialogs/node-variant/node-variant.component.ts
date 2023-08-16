@@ -1,24 +1,27 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { DialogButton, RestConnectorService } from '../../../core-module/core.module';
+import {
+    ConfigurationService,
+    Connector,
+    DialogButton,
+    FrameEventsService,
+    Node,
+    RestConnectorService,
+    RestConnectorsService,
+    RestConstants,
+    RestHelper,
+    RestIamService,
+    RestNodeService,
+} from '../../../core-module/core.module';
 import { Toast } from '../../../core-ui-module/toast';
-import { RestNodeService } from '../../../core-module/core.module';
-import { Connector, Node } from '../../../core-module/core.module';
-import { ConfigurationService } from '../../../core-module/core.module';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { RestIamService } from '../../../core-module/core.module';
 import { TranslateService } from '@ngx-translate/core';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { RestConstants } from '../../../core-module/core.module';
 import { Router } from '@angular/router';
-import { RestHelper } from '../../../core-module/core.module';
-import { RestConnectorsService } from '../../../core-module/core.module';
-import { FrameEventsService } from '../../../core-module/core.module';
-import { OPEN_URL_MODE } from '../../../core-module/ui/ui-constants';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
+import { OPEN_URL_MODE, UIAnimation } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-node-variant',

@@ -2,7 +2,7 @@ import { PlatformLocation } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Params, Router, UrlSerializer } from '@angular/router';
-import { TranslationsService } from '../../translations/translations.service';
+import { TranslationsService, UIConstants } from 'ngx-edu-sharing-ui';
 import {
     ConfigurationService,
     DialogButton,
@@ -10,7 +10,6 @@ import {
     RestHelper,
     UIService,
 } from '../../core-module/core.module';
-import { UIConstants } from '../../core-module/ui/ui-constants';
 import { Toast } from '../../core-ui-module/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { RegisterDoneComponent } from './register-done/register-done.component';

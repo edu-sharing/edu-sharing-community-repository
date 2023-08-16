@@ -3,7 +3,6 @@ import { NodePermissions, NodeService } from 'ngx-edu-sharing-api';
 import { Observable } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 import {
-    ClipboardObject,
     DialogButton,
     Node,
     RestConnectorService,
@@ -14,7 +13,7 @@ import {
 } from '../../../../core-module/core.module';
 import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
 import { Toast } from '../../../../core-ui-module/toast';
-import { LocalEventsService } from '../../../../services/local-events.service';
+import { ClipboardObject, LocalEventsService } from 'ngx-edu-sharing-ui';
 import { forkJoinWithErrors } from '../../../../util/rxjs/forkJoinWithErrors';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';

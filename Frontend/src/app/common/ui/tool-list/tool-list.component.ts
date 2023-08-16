@@ -1,21 +1,7 @@
-import {
-    Component,
-    Input,
-    Output,
-    EventEmitter,
-    ChangeDetectionStrategy,
-    ApplicationRef,
-    ChangeDetectorRef,
-    ViewChild,
-    ElementRef,
-    HostListener,
-    ViewEncapsulation,
-} from '@angular/core';
-import { BrowserModule, DomSanitizer } from '@angular/platform-browser';
-import { TranslateService } from '@ngx-translate/core';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { trigger } from '@angular/animations';
-import { Node } from '../../../core-module/core.module';
+import { Node } from 'ngx-edu-sharing-api';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-toolList',

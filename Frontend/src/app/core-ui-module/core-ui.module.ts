@@ -20,13 +20,10 @@ import { RouterModule } from '@angular/router';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { CollectionChooserComponent } from './components/collection-chooser/collection-chooser.component';
 import { ListOptionItemComponent } from './components/list-option-item/list-option-item.component';
-import { ListTableComponent } from './components/list-table/list-table.component';
 import { UserTileComponent } from './components/user-tile/user-tile.component';
 import { DurationPipe } from './components/video-controls/duration.pipe';
 import { VideoControlsComponent } from './components/video-controls/video-controls.component';
 import { DistinctClickDirective } from './directives/distinct-click.directive';
-import { NodesDragSourceDirective } from './directives/drag-nodes/nodes-drag-source.directive';
-import { NodesDropTargetDirective } from './directives/drag-nodes/nodes-drop-target.directive';
 import { TitleDirective } from './directives/title.directive';
 import { NodeHelperService } from './node-helper.service';
 import { OptionsHelperService } from './options-helper.service';
@@ -44,23 +41,17 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { SharedModule } from '../shared/shared.module';
-import { ListItemsModule } from '../features/list-items/list-items.module';
 import { MdsNodeRelationsWidgetComponent } from '../common/ui/node-render/node-relations/node-relations-widget.component';
-import { AppModule } from '../app.module';
-import { NodeEntriesModule } from '../features/node-entries/node-entries.module';
 
 @NgModule({
     declarations: [
         CollectionChooserComponent,
-        ListTableComponent,
         NodeEntriesDragDirective,
         UserTileComponent,
         VideoControlsComponent,
         MdsNodeRelationsWidgetComponent,
         ToastMessageComponent,
         UrlPipe,
-        NodesDragSourceDirective,
-        NodesDropTargetDirective,
         ImageConfigDirective,
         ListOptionItemComponent,
         DistinctClickDirective,
@@ -68,7 +59,6 @@ import { NodeEntriesModule } from '../features/node-entries/node-entries.module'
         TitleDirective,
     ],
     imports: [
-        NodeEntriesModule,
         SharedModule,
         A11yModule,
         BrowserModule,
@@ -95,7 +85,6 @@ import { NodeEntriesModule } from '../features/node-entries/node-entries.module'
         MatPaginatorModule,
         MatSortModule,
         OverlayModule,
-        ListItemsModule,
     ],
     providers: [
         Toast,
@@ -106,15 +95,12 @@ import { NodeEntriesModule } from '../features/node-entries/node-entries.module'
     ],
     exports: [
         SharedModule,
-        ListTableComponent,
         ListOptionItemComponent,
         VideoControlsComponent,
         ImageConfigDirective,
         UserTileComponent,
         CollectionChooserComponent,
         UrlPipe,
-        NodesDragSourceDirective,
-        NodesDropTargetDirective,
         TitleDirective,
     ],
 })

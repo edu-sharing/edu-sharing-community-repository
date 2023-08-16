@@ -1,25 +1,27 @@
-import { forkJoin as observableForkJoin, Observable, Subject } from 'rxjs';
+import { forkJoin as observableForkJoin, Subject } from 'rxjs';
 
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { TranslationsService } from '../../translations/translations.service';
-import { ProfileSettings, UserStats } from '../../core-module/core.module';
+import {
+    DefaultGroups,
+    OptionItem,
+    TranslationsService,
+    UIAnimation,
+    VCard,
+} from 'ngx-edu-sharing-ui';
+import {
+    ConfigurationService,
+    ProfileSettings,
+    RestConnectorService,
+    RestHelper,
+    RestIamService,
+    User,
+    UserStats,
+} from '../../core-module/core.module';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Toast } from '../../core-ui-module/toast';
-import { RestConnectorService } from '../../core-module/core.module';
-import { ConfigurationService } from '../../core-module/core.module';
-import { RestIamService } from '../../core-module/core.module';
-import { IamUser, User } from '../../core-module/core.module';
-import { AuthorityNamePipe } from '../../shared/pipes/authority-name.pipe';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../core-module/ui/ui-animation';
-import { UserProfileComponent } from '../../main/navigation/user-profile/user-profile.component';
-import { RestConstants } from '../../core-module/core.module';
-import { RestHelper } from '../../core-module/core.module';
-import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.component';
 import { Helper } from '../../core-module/rest/helper';
-import { DefaultGroups, OptionGroup, OptionItem } from '../../core-ui-module/option-item';
-import { VCard } from '../../core-module/ui/VCard';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 

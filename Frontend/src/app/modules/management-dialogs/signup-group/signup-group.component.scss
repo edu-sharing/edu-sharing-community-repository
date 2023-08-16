@@ -27,7 +27,7 @@
             }
         }
         &.selected {
-            background: $listItemSelectedBackgroundEffect;
+            background: var(--listItemSelectedBackgroundEffect);
         }
         ::ng-deep {
             .mat-button-wrapper {

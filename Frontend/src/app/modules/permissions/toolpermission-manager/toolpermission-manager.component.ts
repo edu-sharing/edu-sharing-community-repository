@@ -9,10 +9,10 @@ import {
 } from '../../../core-module/core.module';
 import { Toast } from '../../../core-ui-module/toast';
 import { TranslateService } from '@ngx-translate/core';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { Helper } from '../../../core-module/rest/helper';
 import { trigger } from '@angular/animations';
 import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-toolpermission-manager',

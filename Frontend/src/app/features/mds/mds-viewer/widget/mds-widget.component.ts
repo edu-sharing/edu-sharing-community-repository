@@ -9,17 +9,14 @@ import {
     ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { DateHelper } from '../../../../core-ui-module/DateHelper';
-import { FormatSizePipe } from '../../../../shared/pipes/file-size.pipe';
+import { DateHelper, FormatSizePipe } from 'ngx-edu-sharing-ui';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor/mds-editor-instance.service';
 import { MdsEditorViewComponent } from '../../mds-editor/mds-editor-view/mds-editor-view.component';
 import { ViewInstanceService } from '../../mds-editor/mds-editor-view/view-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../../mds-editor/widgets/mds-editor-widget-base';
-import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
 import { RestHelper } from '../../../../core-module/rest/rest-helper';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { MdsWidgetType } from '../../types/types';
-import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { UIService } from '../../../../core-module/rest/services/ui.service';
 import { MatRipple } from '@angular/material/core';
 

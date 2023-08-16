@@ -10,7 +10,16 @@ import {
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
-import { NodeEntriesDisplayType } from '../../features/node-entries/entries-model';
+import {
+    ColorHelper,
+    NodeEntriesDisplayType,
+    OptionsHelperDataService,
+    PreferredColor,
+    Scope,
+    SortEvent,
+    TranslationsService,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import * as EduData from '../../core-module/core.module';
 import {
@@ -35,22 +44,14 @@ import {
     UIService,
 } from '../../core-module/core.module';
 import { Toast } from '../../core-ui-module/toast';
-import { Scope } from '../../core-ui-module/option-item';
 import { UIHelper } from '../../core-ui-module/ui-helper';
-import { UIConstants } from '../../core-module/ui/ui-constants';
-import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { Location } from '@angular/common';
 import { Helper } from '../../core-module/rest/helper';
-import { ColorHelper, PreferredColor } from '../../core-module/ui/color-helper';
 import { HttpClient } from '@angular/common/http';
-import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
-import { SortEvent } from '../../shared/components/sort-dropdown/sort-dropdown.component';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { CollectionInfoBarComponent } from './collection-info-bar/collection-info-bar.component';
 import { CollectionContentComponent } from './collection-content/collection-content.component';
-import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
-import { TranslationsService } from '../../translations/translations.service';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 
 // component class
@@ -59,7 +60,7 @@ import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcru
     templateUrl: 'collections.component.html',
     styleUrls: ['collections.component.scss'],
     // provide a new instance so to not get conflicts with other service instances
-    providers: [OptionsHelperService],
+    providers: [OptionsHelperDataService],
 })
 export class CollectionsMainComponent implements OnDestroy {
     static INDEX_MAPPING = [
@@ -77,8 +78,6 @@ export class CollectionsMainComponent implements OnDestroy {
     @ViewChild('infobar') infobar: CollectionInfoBarComponent;
     @ViewChild('collectionContentComponent') collectionContentRef: CollectionContentComponent;
     @ContentChild('collectionContentTemplate') collectionContentTemplateRef: TemplateRef<any>;
-
-    viewTypeNodes: 0 | 1 | 2 = ListTableComponent.VIEW_TYPE_GRID;
 
     dialogTitle: string;
     dialogCancelable = false;
@@ -176,7 +175,7 @@ export class CollectionsMainComponent implements OnDestroy {
         private uiService: UIService,
         private router: Router,
         private tempStorage: TemporaryStorageService,
-        private optionsService: OptionsHelperService,
+        private optionsService: OptionsHelperDataService,
         private toast: Toast,
         private bridge: BridgeService,
         private config: ConfigurationService,
@@ -415,18 +414,6 @@ export class CollectionsMainComponent implements OnDestroy {
         return this.isRootLevelCollection() && (!this.isGuest || this.hasEditorial);
     }
 
-    getCollectionViewType() {
-        // on mobile, we will always show the small collection list
-        if (
-            UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_WIDTH, UIConstants.MOBILE_WIDTH)
-        ) {
-            return ListTableComponent.VIEW_TYPE_GRID_SMALL;
-        }
-        return this.isRootLevelCollection()
-            ? ListTableComponent.VIEW_TYPE_GRID
-            : ListTableComponent.VIEW_TYPE_GRID_SMALL;
-    }
-
     hasNonIconPreview(): boolean {
         const preview = this.collection?.preview;
         return preview && !preview.isIcon;
@@ -466,7 +453,6 @@ export class CollectionsMainComponent implements OnDestroy {
                     const diffs = Helper.getDifferentKeys(this.params, params);
                     if (Object.keys(diffs).length === 1 && diffs.viewType) {
                         this.params = params;
-                        this.viewTypeNodes = diffs.viewType;
                         return;
                     }
                     this.params = params;

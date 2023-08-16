@@ -11,6 +11,7 @@ import {
     share,
     startWith,
     switchMap,
+    take,
     tap,
 } from 'rxjs/operators';
 import { ApiRequestConfiguration } from '../api-request-configuration';
@@ -160,6 +161,15 @@ export class AuthenticationService {
             this.loginActionTrigger.next({ kind: 'initial' });
         }
         return this.loginInfo$;
+    }
+
+    hasToolpermission(toolpermission: string) {
+        return this.observeLoginInfo()
+            .pipe(
+                map((login) => login.toolPermissions?.includes(toolpermission)),
+                take(1),
+            )
+            .toPromise() as Promise<boolean>;
     }
 
     /**

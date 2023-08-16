@@ -8,14 +8,8 @@ import {
     OnInit,
     Output,
 } from '@angular/core';
-import {
-    ConfigurationService,
-    RestConnectorService,
-    RestConstants,
-    RestIamService,
-    UIConstants,
-} from '../../../core-module/core.module';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { RestConstants, RestIamService } from '../../../core-module/core.module';
+import { UIAnimation, UIConstants } from 'ngx-edu-sharing-ui';
 import { LoginInfo, User, UserService } from 'ngx-edu-sharing-api';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';

@@ -9,7 +9,7 @@ import { RestConstants } from '../../core-module/core.module';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Values } from '../../features/mds/types/types';
-import { notNull } from '../../util/functions';
+import { notNull } from 'ngx-edu-sharing-ui';
 import { GlobalSearchPageServiceInternal } from './global-search-page.service';
 import { SearchPageService } from './search-page.service';
 

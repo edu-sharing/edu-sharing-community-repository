@@ -17,22 +17,8 @@ public class ConnectorServiceFactory {
 
 	private static String CACHE_KEY = "CONNECTOR_CONFIG";
 
-	private static SimpleCache<String, Serializable> configCache = (SimpleCache<String, Serializable>) AlfAppContextGate.getApplicationContext().getBean("eduSharingConfigCache");
-	//static ConnectorService cs = new ConnectorService();
-	
 	public static ConnectorService getConnectorService(){
-		if(configCache.get(CACHE_KEY) == null){
-			init();
-		}
-		return (ConnectorService)configCache.get(CACHE_KEY);
-	}
-	public static void invalidate(){
-		configCache.remove(CACHE_KEY);
-		init();
-	}
-
-	public static void init(){
-		configCache.put(CACHE_KEY,new ConnectorService());
+		return new ConnectorService();
 	}
 
 	public static ConnectorList getConnectorList(){

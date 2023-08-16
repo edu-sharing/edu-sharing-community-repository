@@ -5,6 +5,7 @@ import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCBaseClient;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceImpl;
 import org.edu_sharing.service.comment.CommentService;
@@ -19,8 +20,10 @@ import org.edu_sharing.service.rating.RatingServiceAdapter;
 import org.edu_sharing.service.relations.RelationService;
 import org.edu_sharing.service.relations.RelationServiceAdadapter;
 import org.edu_sharing.service.rendering.RenderingService;
+import org.edu_sharing.service.rendering.RenderingServiceFactory;
 import org.edu_sharing.service.rendering.RenderingServiceImpl;
 import org.edu_sharing.service.search.SearchService;
+import org.edu_sharing.spring.ApplicationContextFactory;
 
 import java.util.HashMap;
 
@@ -50,7 +53,9 @@ public abstract class Provider {
         return new AuthenticationToolAPI(appId);
     }
     public RenderingService getRenderingService(){
-        return new RenderingServiceImpl(appId);
+        RenderingService service = (RenderingService) ApplicationContextFactory.getApplicationContext().getBean("renderingService");
+        service.setAppId(ApplicationInfoList.getHomeRepository().getAppId());
+        return service;
     }
     public CollectionService getCollectionService(){
         return CollectionServiceImpl.build(appId);

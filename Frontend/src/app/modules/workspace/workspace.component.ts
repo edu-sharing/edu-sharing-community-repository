@@ -6,14 +6,25 @@ import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { delay, first } from 'rxjs/operators';
 import {
+    ActionbarComponent,
+    CanDrop,
+    ClipboardObject,
+    CustomOptions,
+    DefaultGroups,
+    DragData,
     DropSource,
     DropTarget,
+    ElementType,
+    NodeDataSource,
     NodeEntriesDisplayType,
     NodeRoot,
-} from '../../features/node-entries/entries-model';
-import { NodeDataSource } from '../../features/node-entries/node-data-source';
+    OptionItem,
+    TemporaryStorageService,
+    TranslationsService,
+    UIAnimation,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import {
-    ClipboardObject,
     ConfigurationService,
     Connector,
     DialogButton,
@@ -33,20 +44,11 @@ import {
     RestNodeService,
     RestToolService,
     SessionStorageService,
-    TemporaryStorageService,
     UIService,
 } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
-import { UIAnimation } from '../../core-module/ui/ui-animation';
-import { UIConstants } from '../../core-module/ui/ui-constants';
 import { CardService } from '../../core-ui-module/card.service';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
-import {
-    CustomOptions,
-    DefaultGroups,
-    ElementType,
-    OptionItem,
-} from '../../core-ui-module/option-item';
 import { Toast } from '../../core-ui-module/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
@@ -55,11 +57,7 @@ import {
     SearchEvent,
     SearchFieldService,
 } from '../../main/navigation/search-field/search-field.service';
-import { DragData } from '../../services/nodes-drag-drop.service';
-import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
-import { CanDrop } from '../../shared/directives/nodes-drop-target.directive';
-import { TranslationsService } from '../../translations/translations.service';
 import { WorkspaceExplorerComponent } from './explorer/explorer.component';
 import { WorkspaceTreeComponent } from './tree/tree.component';
 import { canDragDrop, canDropOnNode } from './workspace-utils';
@@ -805,7 +803,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         } else {
             // TODO: handle with homeRouterLink if possible.
             if (
-                UIHelper.evaluateMediaQuery(
+                UIService.evaluateMediaQuery(
                     UIConstants.MEDIA_QUERY_MAX_WIDTH,
                     UIConstants.MOBILE_TAB_SWITCH_WIDTH,
                 )

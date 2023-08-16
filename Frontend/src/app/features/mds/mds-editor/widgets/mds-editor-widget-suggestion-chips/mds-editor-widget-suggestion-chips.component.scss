@@ -1,7 +1,7 @@
 @import '../../../../../core-ui-module/styles/variables';
 
-$backgroundColor: scale-color($colorStatusPositive, $lightness: +50%);
-$iconColor: scale-color($colorStatusPositive, $lightness: -50%);
+$backgroundColor: rgba(var(--colorStatusPositive) 0.5);
+$iconColor: $colorStatusPositive;
 
 .mat-chip-list .mat-chip {
     background-color: $backgroundColor;
@@ -10,6 +10,7 @@ $iconColor: scale-color($colorStatusPositive, $lightness: -50%);
     align-items: center;
     .mat-icon {
         color: $iconColor;
+        filter: brightness(-0.5);
         margin-right: 8px;
         margin-left: 0;
         height: 18px;

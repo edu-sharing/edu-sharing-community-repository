@@ -1,10 +1,24 @@
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { TranslationsService } from '../../translations/translations.service';
+import {
+    CustomOptions,
+    DefaultGroups,
+    ElementType,
+    InteractionType,
+    ListItem,
+    ListSortConfig,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
+    OPEN_URL_MODE,
+    OptionItem,
+    Scope,
+    TemporaryStorageService,
+    TranslationsService,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import {
     ConfigurationHelper,
-    ConfigurationService,
-    ListItem,
     Node,
     Person,
     RestConnectorService,
@@ -13,28 +27,13 @@ import {
     RestNodeService,
     RestSharingService,
     SharingInfo,
-    TemporaryStorageService,
 } from '../../core-module/core.module';
-import {
-    CustomOptions,
-    DefaultGroups,
-    ElementType,
-    OptionItem,
-    Scope,
-} from '../../core-ui-module/option-item';
-import { OPEN_URL_MODE, UIConstants } from '../../core-module/ui/ui-constants';
 import { Toast } from '../../core-ui-module/toast';
 import { Helper } from '../../core-module/rest/helper';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
-import { NodeDataSource } from '../../features/node-entries/node-data-source';
-import {
-    InteractionType,
-    ListSortConfig,
-    NodeEntriesDisplayType,
-} from '../../features/node-entries/entries-model';
-import { NodeEntriesWrapperComponent } from '../../features/node-entries/node-entries-wrapper.component';
+import { ConfigService } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-sharing',
@@ -72,7 +71,7 @@ export class SharingComponent {
         private nodeHelperService: NodeHelperService,
         private storage: TemporaryStorageService,
         private toast: Toast,
-        private config: ConfigurationService,
+        private config: ConfigService,
         private translations: TranslationsService,
     ) {
         this.columns.push(new ListItem('NODE', RestConstants.CM_NAME));

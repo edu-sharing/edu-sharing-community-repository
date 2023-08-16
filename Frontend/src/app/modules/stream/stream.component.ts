@@ -1,6 +1,16 @@
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router, RoutesRecognized } from '@angular/router';
-import { TranslationsService } from '../../translations/translations.service';
+import {
+    CustomOptions,
+    DefaultGroups,
+    OptionItem,
+    OptionsHelperDataService,
+    Scope,
+    Target,
+    TranslationsService,
+    UIAnimation,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import * as EduData from '../../core-module/core.module';
 import {
     Connector,
@@ -22,24 +32,14 @@ import {
     TemporaryStorageService,
 } from '../../core-module/core.module'; //
 import { Toast } from '../../core-ui-module/toast'; //
-import {
-    CustomOptions,
-    DefaultGroups,
-    OptionItem,
-    Scope,
-    Target,
-} from '../../core-ui-module/option-item';
 import { UIHelper } from '../../core-ui-module/ui-helper';
-import { UIConstants } from '../../core-module/ui/ui-constants';
 import { Observable, Subject, Subscription } from 'rxjs';
-import { UIAnimation } from '../../core-module/ui/ui-animation';
 import { trigger } from '@angular/animations';
 import { CordovaService } from '../../common/services/cordova.service';
 import * as moment from 'moment';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { filter, pairwise } from 'rxjs/operators';
-import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
 import { StreamEntry, StreamV1Service } from 'ngx-edu-sharing-api';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
@@ -53,7 +53,7 @@ import {
     templateUrl: 'stream.component.html',
     styleUrls: ['stream.component.scss'],
     animations: [trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
-    providers: [OptionsHelperService],
+    providers: [OptionsHelperDataService],
 })
 export class StreamComponent implements OnInit, AfterViewInit, OnDestroy {
     connectorList: ConnectorList;
@@ -118,7 +118,7 @@ export class StreamComponent implements OnInit, AfterViewInit, OnDestroy {
         private searchService: RestSearchService,
         private event: FrameEventsService,
         private streamService: StreamV1Service,
-        private optionsHelper: OptionsHelperService,
+        private optionsHelper: OptionsHelperDataService,
         private iam: RestIamService,
         private storage: TemporaryStorageService,
         private toast: Toast,

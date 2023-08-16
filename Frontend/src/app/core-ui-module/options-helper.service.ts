@@ -6,10 +6,10 @@ import {
     forkJoin,
     forkJoin as observableForkJoin,
     fromEvent,
-    Observable,
     of,
     Subject,
     Subscription,
+    Observable,
 } from 'rxjs';
 import { isArray } from 'rxjs/internal/util/isArray';
 import { catchError, map, takeUntil, tap } from 'rxjs/operators';
@@ -17,58 +17,53 @@ import { BridgeService } from '../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
     FrameEventsService,
+    Node,
     RestCollectionService,
     RestConnectorService,
     RestHelper,
     RestIamService,
 } from '../core-module/core.module';
-import {
-    Connector,
-    Filetype,
-    Node,
-    NodesRightMode,
-    NodeWrapper,
-} from '../core-module/rest/data-object';
+import { Connector, Filetype, NodeWrapper } from '../core-module/rest/data-object';
 import { Helper } from '../core-module/rest/helper';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { RestConnectorsService } from '../core-module/rest/services/rest-connectors.service';
 import { RestNetworkService } from '../core-module/rest/services/rest-network.service';
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
-import {
-    ClipboardObject,
-    TemporaryStorageService,
-} from '../core-module/rest/services/temporary-storage.service';
 import { UIService } from '../core-module/rest/services/ui.service';
 import { MessageType } from '../core-module/ui/message-type';
 import { DialogsService } from '../features/dialogs/dialogs.service';
-import { ListEventInterface, NodeEntriesDisplayType } from '../features/node-entries/entries-model';
-import { NodeEntriesDataType } from '../features/node-entries/node-entries.component';
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { WorkspaceManagementDialogsComponent } from '../modules/management-dialogs/management-dialogs.component';
 import {
     KeyboardShortcutsService,
     matchesShortcutCondition,
 } from '../services/keyboard-shortcuts.service';
-import { LocalEventsService } from '../services/local-events.service';
-import { ActionbarComponent } from '../shared/components/actionbar/actionbar.component';
-import { DropdownComponent } from '../shared/components/dropdown/dropdown.component';
-import { forkJoinWithErrors } from '../util/rxjs/forkJoinWithErrors';
-import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
 import {
+    ClipboardObject,
     Constrain,
     CustomOptions,
     DefaultGroups,
     ElementType,
     HideMode,
+    LocalEventsService,
+    NodeEntriesDisplayType,
+    NodesRightMode,
+    OptionData,
     OptionItem,
+    OptionsHelperComponents,
+    OptionsHelperService as OptionsHelperServiceAbstract,
     Scope,
     Target,
-} from './option-item';
+    TemporaryStorageService,
+} from 'ngx-edu-sharing-ui';
+import { ProposalNode } from 'ngx-edu-sharing-api';
+import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
 import { Toast } from './toast';
 import { UIHelper } from './ui-helper';
+import { forkJoinWithErrors } from '../util/rxjs/forkJoinWithErrors';
 
 @Injectable()
-export class OptionsHelperService implements OnDestroy {
+export class OptionsHelperService extends OptionsHelperServiceAbstract implements OnDestroy {
     static DownloadElementTypes = [
         ElementType.Node,
         ElementType.NodeChild,
@@ -82,12 +77,8 @@ export class OptionsHelperService implements OnDestroy {
 
     private keyboardShortcutsSubscription: Subscription;
     private globalOptions: OptionItem[];
-    private list: ListEventInterface<NodeEntriesDataType>;
     private subscriptions: Subscription[] = [];
-    private actionbar: ActionbarComponent;
-    private dropdown: DropdownComponent;
     private queryParams: Params;
-    private data: OptionData;
     private destroyed = new Subject<void>();
 
     constructor(
@@ -99,7 +90,7 @@ export class OptionsHelperService implements OnDestroy {
         private nodeHelper: NodeHelperService,
         private route: ActivatedRoute,
         private eventService: FrameEventsService,
-        private ui: UIService,
+        private uiService: UIService,
         private toast: Toast,
         private translate: TranslateService,
         private nodeService: RestNodeService,
@@ -114,23 +105,13 @@ export class OptionsHelperService implements OnDestroy {
         private ngZone: NgZone,
         private localEvents: LocalEventsService,
     ) {
-        this.registerStaticSubscriptions();
+        super();
+        this.route.queryParams.subscribe((queryParams) => (this.queryParams = queryParams));
     }
 
     ngOnDestroy(): void {
         this.destroyed.next();
         this.destroyed.complete();
-    }
-
-    /** Performs subscriptions that don't have to be refreshed. */
-    private registerStaticSubscriptions(): void {
-        this.route.queryParams.subscribe((queryParams) => (this.queryParams = queryParams));
-        this.localEvents.nodesDeleted
-            .pipe(takeUntil(this.destroyed))
-            .subscribe((nodes) => this.list?.deleteNodes(nodes));
-        this.localEvents.nodesChanged
-            .pipe(takeUntil(this.destroyed))
-            .subscribe((nodes) => this.list?.updateNodes(nodes));
     }
 
     private handleKeyboardEvent(event: KeyboardEvent) {
@@ -149,22 +130,22 @@ export class OptionsHelperService implements OnDestroy {
         }
     }
 
-    private cutCopyNode(node: Node, copy: boolean) {
-        let list = this.getObjects(node);
+    private cutCopyNode(data: OptionData, node: Node, copy: boolean) {
+        let list = this.getObjects(node, data);
         if (!list || !list.length) {
             return;
         }
         list = Helper.deepCopy(list);
-        const clip: ClipboardObject = { sourceNode: this.data.parent, nodes: list, copy };
+        const clip: ClipboardObject = { sourceNode: data.parent, nodes: list, copy };
         this.storage.set('workspace_clipboard', clip);
         this.bridge.showTemporaryMessage(MessageType.info, 'WORKSPACE.TOAST.CUT_COPY', {
             count: list.length,
         });
     }
 
-    pasteNode(nodes: Node[] = []) {
+    pasteNode(components: OptionsHelperComponents, data: OptionData, nodes: Node[] = []) {
         const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
-        if (!this.canAddObjects()) {
+        if (!this.canAddObjects(data)) {
             return;
         }
         if (nodes.length === clip.nodes.length) {
@@ -174,22 +155,23 @@ export class OptionsHelperService implements OnDestroy {
                 from: clip.sourceNode
                     ? clip.sourceNode.name
                     : this.translate.instant('WORKSPACE.COPY_SEARCH'),
-                to: this.data.parent.name,
+                to: data.parent.name,
                 count: clip.nodes.length,
                 mode: this.translate.instant(
                     'WORKSPACE.' + (clip.copy ? 'PASTE_COPY' : 'PASTE_MOVE'),
                 ),
             };
             this.bridge.showTemporaryMessage(MessageType.info, 'WORKSPACE.TOAST.PASTE', info);
-            this.addVirtualObjects(nodes);
+            this.addVirtualObjects(components, nodes);
             return;
         }
         this.bridge.showProgressDialog();
-        const target = this.data.parent.ref.id;
+        const target = data.parent.ref.id;
         const source = clip.nodes[nodes.length].ref.id;
         if (clip.copy) {
             this.nodeService.copyNode(target, source).subscribe(
-                (data: NodeWrapper) => this.pasteNode(nodes.concat(data.node)),
+                (nodeData: NodeWrapper) =>
+                    this.pasteNode(components, data, nodes.concat(nodeData.node)),
                 (error: any) => {
                     console.log(error);
                     if (error.error?.error?.indexOf('DAORestrictedAccessException') !== -1) {
@@ -202,7 +184,8 @@ export class OptionsHelperService implements OnDestroy {
             );
         } else {
             this.nodeService.moveNode(target, source).subscribe(
-                (data: NodeWrapper) => this.pasteNode(nodes.concat(data.node)),
+                (nodeData: NodeWrapper) =>
+                    this.pasteNode(components, data, nodes.concat(nodeData.node)),
                 (error: any) => {
                     this.nodeHelper.handleNodeError(clip.nodes[nodes.length].name, error);
                     this.bridge.closeModalDialog();
@@ -212,40 +195,14 @@ export class OptionsHelperService implements OnDestroy {
     }
 
     /**
-     * shortcut to simply disable all options on the given compoennts
-     * @param actionbar
-     * @param list
-     */
-    clearComponents(actionbar: ActionbarComponent, list: ListEventInterface<Node> = null) {
-        if (list) {
-            list.setOptions(null);
-        }
-        if (actionbar) {
-            actionbar.options = [];
-        }
-    }
-
-    async initComponents(
-        actionbar: ActionbarComponent = null,
-        list: ListEventInterface<NodeEntriesDataType> = null,
-        dropdown: DropdownComponent = null,
-    ) {
-        if (!this.mainNavService.getMainNav()) {
-            console.warn('mainnav was not available via singleton service');
-        }
-        this.actionbar = actionbar;
-        this.list = list;
-        this.dropdown = dropdown;
-        if ((await this.iamService.getCurrentUserAsync()).person.authorityName) {
-            await this.networkService.getRepositories().toPromise();
-        }
-    }
-
-    /**
      * refresh all bound components with available menu options
      */
-    refreshComponents(refreshListOptions = true) {
-        if (this.data == null) {
+    refreshComponents(
+        components: OptionsHelperComponents,
+        data: OptionData,
+        refreshListOptions: boolean,
+    ) {
+        if (data == null) {
             console.info('options helper refresh called but no data previously bound');
             return;
         }
@@ -254,18 +211,28 @@ export class OptionsHelperService implements OnDestroy {
             this.subscriptions = [];
         }
 
-        this.globalOptions = this.getAvailableOptions(Target.Actionbar);
-        if (this.list) {
-            this.list.setOptions({
-                [Target.List]: this.getAvailableOptions(Target.List),
-                [Target.ListDropdown]: this.getAvailableOptions(Target.ListDropdown),
+        this.globalOptions = this.getAvailableOptions(Target.Actionbar, [], components, data);
+        if (components.list) {
+            components.list.setOptions({
+                [Target.List]: this.getAvailableOptions(Target.List, [], components, data),
+                [Target.ListDropdown]: this.getAvailableOptions(
+                    Target.ListDropdown,
+                    [],
+                    components,
+                    data,
+                ),
             });
         }
-        if (this.dropdown) {
-            this.dropdown.options = this.getAvailableOptions(Target.ListDropdown);
+        if (components.dropdown) {
+            components.dropdown.options = this.getAvailableOptions(
+                Target.ListDropdown,
+                [],
+                components,
+                data,
+            );
         }
-        if (this.actionbar) {
-            this.actionbar.options = this.globalOptions;
+        if (components.actionbar) {
+            components.actionbar.options = this.globalOptions;
         }
     }
 
@@ -288,7 +255,12 @@ export class OptionsHelperService implements OnDestroy {
         return true;
     }
 
-    getAvailableOptions(target: Target, objects: Node[] = null) {
+    getAvailableOptions(
+        target: Target,
+        objects: Node[],
+        components: OptionsHelperComponents,
+        data: OptionData,
+    ) {
         if (target === Target.List) {
             if (objects == null) {
                 // fetch ALL options of ALL items inside list
@@ -296,17 +268,22 @@ export class OptionsHelperService implements OnDestroy {
                 objects = null;
             }
         } else if (target === Target.Actionbar) {
-            objects = this.data.selectedObjects || this.data.activeObjects;
+            objects = data.selectedObjects || data.activeObjects;
         } else if (target === Target.ListDropdown) {
-            if (this.data.activeObjects) {
-                objects = this.data.activeObjects;
+            if (data.activeObjects) {
+                objects = data.activeObjects;
             } else {
                 return null;
             }
         }
         let options: OptionItem[] = [];
         if (this.mainNavService.getMainNav()) {
-            options = this.prepareOptions(this.mainNavService.getDialogs(), objects);
+            options = this.prepareOptions(
+                this.mainNavService.getDialogs(),
+                objects,
+                components,
+                data,
+            );
         } else {
             console.warn(
                 'options helper was called without main nav. Can not load default options',
@@ -326,11 +303,11 @@ export class OptionsHelperService implements OnDestroy {
         );
          */
 
-        options = this.applyExternalOptions(options);
+        options = this.applyExternalOptions(options, data);
         const custom = this.configService.instant<ConfigOptionItem[]>('customOptions');
-        this.nodeHelper.applyCustomNodeOptions(custom, this.data.allObjects, objects, options);
+        this.nodeHelper.applyCustomNodeOptions(custom, data.allObjects, objects, options);
         // do pre-handle callback options for dropdown + actionbar
-        options = this.filterOptions(options, target, objects);
+        options = this.filterOptions(options, target, data, objects);
         if (target !== Target.Actionbar) {
             options = options.filter((o) => !o.isToggle);
             // do not show any actions in the dropdown for no selection, these are reserved for actionbar
@@ -338,15 +315,16 @@ export class OptionsHelperService implements OnDestroy {
                 (o) => !o.constrains || o.constrains.indexOf(Constrain.NoSelection) === -1,
             );
         }
-        return UIHelper.filterValidOptions(this.ui, options) as OptionItem[];
+        return this.uiService.filterValidOptions(options) as OptionItem[];
     }
 
     private handleCallbackStates(
         options: OptionItem[],
         target: Target,
+        data: OptionData,
         objects: Node[] | any[] = null,
     ) {
-        this.handleCallbacks(options, objects);
+        this.handleCallbacks(options, objects, data);
         options = options.filter((o) =>
             o.showCallback(target === Target.List && objects && objects[0] ? objects[0] : null),
         );
@@ -359,17 +337,17 @@ export class OptionsHelperService implements OnDestroy {
         return options;
     }
 
-    private isOptionAvailable(option: OptionItem, objects: Node[] | any[]) {
+    private isOptionAvailable(option: OptionItem, objects: Node[] | any[], data: OptionData) {
         if (option.elementType.indexOf(this.getType(objects)) === -1) {
             // console.log('types not matching', objects, this.getType(objects), option);
             return false;
         }
         if (option.scopes) {
-            if (this.data.scope == null) {
+            if (data.scope == null) {
                 console.warn('Scope for options was not set, some may missing');
                 return false;
             }
-            if (option.scopes.indexOf(this.data.scope) === -1) {
+            if (option.scopes.indexOf(data.scope) === -1) {
                 // console.log('scopes not matching', objects, option);
                 return false;
             }
@@ -393,7 +371,7 @@ export class OptionsHelperService implements OnDestroy {
             }
         }
         if (option.constrains != null) {
-            const matched = this.objectsMatchesConstrains(option.constrains, objects);
+            const matched = this.objectsMatchesConstrains(option.constrains, data, objects);
             if (matched != null) {
                 // console.log('Constrain failed: ' + matched, option, objects);
                 return false;
@@ -403,8 +381,8 @@ export class OptionsHelperService implements OnDestroy {
         return true;
     }
 
-    private hasSelection() {
-        return this.data.selectedObjects && this.data.selectedObjects.length;
+    private hasSelection(data: OptionData) {
+        return data.selectedObjects && data.selectedObjects.length;
     }
 
     private getType(objects: Node[]): ElementType {
@@ -465,6 +443,8 @@ export class OptionsHelperService implements OnDestroy {
     private prepareOptions(
         management: WorkspaceManagementDialogsComponent,
         objects: Node[] | any[],
+        components: OptionsHelperComponents,
+        data: OptionData,
     ) {
         const options: OptionItem[] = [];
 
@@ -479,7 +459,7 @@ export class OptionsHelperService implements OnDestroy {
          */
 
         const applyNode = new OptionItem('APPLY', 'redo', (object) =>
-            this.nodeHelper.addNodeToLms(this.getObjects(object)[0], this.queryParams.reurl),
+            this.nodeHelper.addNodeToLms(this.getObjects(object, data)[0], this.queryParams.reurl),
         );
 
         applyNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
@@ -504,7 +484,7 @@ export class OptionsHelperService implements OnDestroy {
      }
         */
         const debugNode = new OptionItem('OPTIONS.DEBUG', 'build', async (object) => {
-            let nodes = this.getObjects(object);
+            let nodes = this.getObjects(object, data);
             console.info(nodes);
             if (nodes.some((n) => n.authorityName)) {
                 try {
@@ -544,7 +524,7 @@ export class OptionsHelperService implements OnDestroy {
         const acceptProposal = new OptionItem(
             'OPTIONS.COLLECTION_PROPOSAL_ACCEPT',
             'check',
-            (object) => management.addProposalsToCollection(this.getObjects(object)),
+            (object) => management.addProposalsToCollection(this.getObjects(object, data)),
         );
         /*acceptProposal.customEnabledCallback = (nodes) =>
             nodes.every((n) => (n as ProposalNode).accessible);*/
@@ -557,7 +537,7 @@ export class OptionsHelperService implements OnDestroy {
         const declineProposal = new OptionItem(
             'OPTIONS.COLLECTION_PROPOSAL_DECLINE',
             'clear',
-            (object) => management.declineProposals(this.getObjects(object)),
+            (object) => management.declineProposals(this.getObjects(object, data)),
         );
         declineProposal.elementType = [ElementType.NodeProposal];
         declineProposal.constrains = [Constrain.User];
@@ -584,7 +564,7 @@ export class OptionsHelperService implements OnDestroy {
             'description',
             async (object) => {
                 const nodeId = RestHelper.removeSpacesStoreRef(
-                    this.getObjects(object)[0].properties[
+                    this.getObjects(object, data)[0].properties[
                         RestConstants.CCM_PROP_PUBLISHED_ORIGINAL
                     ][0],
                 );
@@ -621,7 +601,7 @@ export class OptionsHelperService implements OnDestroy {
         openOriginalNode.priority = 13;
 
         const openParentNode = new OptionItem('OPTIONS.SHOW_IN_FOLDER', 'folder', async (object) =>
-            this.goToWorkspace((await this.getObjectsAsync(object, true))[0]),
+            this.goToWorkspace((await this.getObjectsAsync(object, data, true))[0]),
         );
         openParentNode.constrains = [
             Constrain.Files,
@@ -653,7 +633,7 @@ export class OptionsHelperService implements OnDestroy {
         openParentNode.priority = 15;
 
         const openNode = new OptionItem('OPTIONS.SHOW', 'remove_red_eye', (object) =>
-            UIHelper.goToNode(this.router, this.getObjects(object)[0]),
+            UIHelper.goToNode(this.router, this.getObjects(object, data)[0]),
         );
         openNode.constrains = [Constrain.Files, Constrain.NoBulk];
         openNode.scopes = [Scope.WorkspaceList];
@@ -661,7 +641,7 @@ export class OptionsHelperService implements OnDestroy {
         openNode.priority = 30;
 
         const editConnectorNode = new OptionItem('OPTIONS.OPEN', 'launch', (node) => {
-            this.editConnector(this.getObjects(node)[0]);
+            this.editConnector(this.getObjects(node, data)[0]);
         });
         editConnectorNode.customShowCallback = (nodes) => {
             let n = nodes ? nodes[0] : null;
@@ -708,14 +688,14 @@ export class OptionsHelperService implements OnDestroy {
         const addNodeToCollection = new OptionItem(
             'OPTIONS.COLLECTION',
             'layers',
-            (object) => (management.addToCollection = this.getObjects(object)),
+            (object) => (management.addToCollection = this.getObjects(object, data)),
         );
         addNodeToCollection.elementType = OptionsHelperService.ElementTypesAddToCollection;
         addNodeToCollection.showAsAction = true;
         addNodeToCollection.constrains = [Constrain.Files, Constrain.User, Constrain.NoScope];
         addNodeToCollection.customShowCallback = (nodes) => {
             addNodeToCollection.name =
-                this.data.scope === Scope.CollectionsReferences
+                data.scope === Scope.CollectionsReferences
                     ? 'OPTIONS.COLLECTION_OTHER'
                     : 'OPTIONS.COLLECTION';
             return this.nodeHelper.referenceOriginalExists(nodes ? nodes[0] : null);
@@ -728,7 +708,7 @@ export class OptionsHelperService implements OnDestroy {
         addNodeToCollection.priority = 10;
 
         const addNodeToLTIPlatform = new OptionItem('OPTIONS.LTI', 'input', (object) => {
-            const nodes: Node[] = this.getObjects(object);
+            const nodes: Node[] = this.getObjects(object, data);
             this.nodeHelper.addNodesToLTIPlatform(nodes);
         });
         addNodeToLTIPlatform.elementType = OptionsHelperService.ElementTypesAddToCollection;
@@ -744,7 +724,7 @@ export class OptionsHelperService implements OnDestroy {
                 return false;
             }
             if (!ltiSession.acceptMultiple) {
-                if (this.data.selectedObjects && this.data.selectedObjects.length > 1) {
+                if (data.selectedObjects && data.selectedObjects.length > 1) {
                     return false;
                 }
             }
@@ -779,7 +759,7 @@ export class OptionsHelperService implements OnDestroy {
         };
 
         const bookmarkNode = new OptionItem('OPTIONS.ADD_NODE_STORE', 'bookmark_border', (object) =>
-            this.bookmarkNodes(this.getObjects(object)),
+            this.bookmarkNodes(this.getObjects(object, data)),
         );
         bookmarkNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         bookmarkNode.constrains = [Constrain.Files, Constrain.HomeRepository, Constrain.NoScope];
@@ -795,7 +775,7 @@ export class OptionsHelperService implements OnDestroy {
         const createNodeVariant = new OptionItem(
             'OPTIONS.VARIANT',
             'call_split',
-            (object) => (management.nodeVariant = this.getObjects(object)[0]),
+            (object) => (management.nodeVariant = this.getObjects(object, data)[0]),
         );
         createNodeVariant.constrains = [
             Constrain.Files,
@@ -832,7 +812,7 @@ export class OptionsHelperService implements OnDestroy {
         createNodeVariant.priority = 30;
 
         const inviteNode = new OptionItem('OPTIONS.INVITE', 'group_add', async (object) =>
-            this.dialogs.openShareDialog({ nodes: await this.getObjectsAsync(object, true) }),
+            this.dialogs.openShareDialog({ nodes: await this.getObjectsAsync(object, data, true) }),
         );
         inviteNode.elementType = [ElementType.Node, ElementType.SavedSearch];
         inviteNode.showAsAction = true;
@@ -853,7 +833,7 @@ export class OptionsHelperService implements OnDestroy {
         const streamNode = new OptionItem(
             'OPTIONS.STREAM',
             'event',
-            (object) => (management.addNodesStream = this.getObjects(object)),
+            (object) => (management.addNodesStream = this.getObjects(object, data)),
         );
         streamNode.elementType = [ElementType.Node];
         streamNode.permissions = [RestConstants.ACCESS_CC_PUBLISH];
@@ -871,7 +851,7 @@ export class OptionsHelperService implements OnDestroy {
             this.configService.instant('stream.enabled', false);
 
         const licenseNode = new OptionItem('OPTIONS.LICENSE', 'copyright', (object) => {
-            const nodes = this.getObjects(object);
+            const nodes = this.getObjects(object, data);
             void this.dialogs.openLicenseDialog({ kind: 'nodes', nodes });
         });
         licenseNode.elementType = [ElementType.Node, ElementType.NodeChild];
@@ -890,7 +870,7 @@ export class OptionsHelperService implements OnDestroy {
 
         const contributorNode = new OptionItem('OPTIONS.CONTRIBUTOR', 'group', (object) => {
             void this.dialogs.openContributorsDialog({
-                node: this.getObjects(object)[0],
+                node: this.getObjects(object, data)[0],
             });
         });
         contributorNode.constrains = [
@@ -915,7 +895,7 @@ export class OptionsHelperService implements OnDestroy {
         const workflowNode = new OptionItem(
             'OPTIONS.WORKFLOW',
             'swap_calls',
-            (object) => (management.nodeWorkflow = this.getObjects(object)),
+            (object) => (management.nodeWorkflow = this.getObjects(object, data)),
         );
         workflowNode.constrains = [
             Constrain.Files,
@@ -944,7 +924,7 @@ export class OptionsHelperService implements OnDestroy {
             return isAllowed;
          */
         const downloadNode = new OptionItem('OPTIONS.DOWNLOAD', 'cloud_download', (object) =>
-            this.nodeHelper.downloadNodes(this.getObjects(object)),
+            this.nodeHelper.downloadNodes(this.getObjects(object, data)),
         );
         downloadNode.elementType = OptionsHelperService.DownloadElementTypes;
         downloadNode.constrains = [Constrain.Files];
@@ -978,7 +958,7 @@ export class OptionsHelperService implements OnDestroy {
             'format_align_left',
             (object) =>
                 this.nodeHelper.downloadNode(
-                    this.getObjects(object)[0],
+                    this.getObjects(object, data)[0],
                     RestConstants.NODE_VERSION_CURRENT,
                     true,
                 ),
@@ -1002,7 +982,7 @@ export class OptionsHelperService implements OnDestroy {
             'OPTIONS.EDIT_SIMPLE',
             'edu-quick_edit',
             async (object) =>
-                (management.nodeSimpleEdit = await this.getObjectsAsync(object, true)),
+                (management.nodeSimpleEdit = await this.getObjectsAsync(object, data, true)),
         );
         simpleEditNode.constrains = [Constrain.Files, Constrain.HomeRepository, Constrain.User];
         simpleEditNode.permissions = [RestConstants.ACCESS_WRITE];
@@ -1012,7 +992,7 @@ export class OptionsHelperService implements OnDestroy {
         simpleEditNode.priority = 15;
 
         const editNode = new OptionItem('OPTIONS.EDIT', 'edit', async (object) => {
-            const nodes = await this.getObjectsAsync(object, true);
+            const nodes = await this.getObjectsAsync(object, data, true);
             void this.dialogs.openMdsEditorDialogForNodes({ nodes });
         });
         editNode.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.MapRef];
@@ -1028,7 +1008,7 @@ export class OptionsHelperService implements OnDestroy {
         editNode.priority = 20;
 
         const templateNode = new OptionItem('OPTIONS.TEMPLATE', 'assignment_turned_in', (object) =>
-            this.dialogs.openNodeTemplateDialog({ node: this.getObjects(object)[0] }),
+            this.dialogs.openNodeTemplateDialog({ node: this.getObjects(object, data)[0] }),
         );
         templateNode.constrains = [Constrain.NoBulk, Constrain.Directory, Constrain.User];
         templateNode.permissions = [RestConstants.ACCESS_WRITE];
@@ -1037,7 +1017,7 @@ export class OptionsHelperService implements OnDestroy {
         templateNode.group = DefaultGroups.Edit;
 
         const linkMap = new OptionItem('OPTIONS.LINK_MAP', 'link', (node) =>
-            this.dialogs.openCreateMapLinkDialog({ node: this.getObjects(node)[0] }),
+            this.dialogs.openCreateMapLinkDialog({ node: this.getObjects(node, data)[0] }),
         );
         linkMap.constrains = [
             Constrain.NoBulk,
@@ -1061,7 +1041,7 @@ export class OptionsHelperService implements OnDestroy {
          options.push(new OptionItem('OPTIONS.COPY', 'content_copy', (node: Node) => this.cutCopyNode(node, true)));
          */
         const cutNodes = new OptionItem('OPTIONS.CUT', 'content_cut', (node) =>
-            this.cutCopyNode(node, false),
+            this.cutCopyNode(data, node, false),
         );
         cutNodes.elementType = [ElementType.Node, ElementType.SavedSearch, ElementType.MapRef];
         cutNodes.constrains = [Constrain.HomeRepository, Constrain.User];
@@ -1076,7 +1056,7 @@ export class OptionsHelperService implements OnDestroy {
         cutNodes.priority = 10;
 
         const copyNodes = new OptionItem('OPTIONS.COPY', 'content_copy', (node) =>
-            this.cutCopyNode(node, true),
+            this.cutCopyNode(data, node, true),
         );
         // do not allow copy of map links if tp is missing
         copyNodes.customEnabledCallback = (node) =>
@@ -1097,7 +1077,7 @@ export class OptionsHelperService implements OnDestroy {
         copyNodes.priority = 20;
 
         const pasteNodes = new OptionItem('OPTIONS.PASTE', 'content_paste', (node) =>
-            this.pasteNode(),
+            this.pasteNode(components, data),
         );
         pasteNodes.elementType = [ElementType.Unknown];
         pasteNodes.constrains = [
@@ -1118,7 +1098,7 @@ export class OptionsHelperService implements OnDestroy {
         pasteNodes.group = DefaultGroups.FileOperations;
 
         const deleteNode = new OptionItem('OPTIONS.DELETE', 'delete', (object) => {
-            void this.dialogs.openDeleteNodesDialog({ nodes: this.getObjects(object) });
+            void this.dialogs.openDeleteNodesDialog({ nodes: this.getObjects(object, data) });
         });
         deleteNode.elementType = [ElementType.Node, ElementType.SavedSearch, ElementType.MapRef];
         deleteNode.constrains = [
@@ -1135,7 +1115,7 @@ export class OptionsHelperService implements OnDestroy {
         deleteNode.priority = 10;
 
         const unblockNode = new OptionItem('OPTIONS.UNBLOCK_IMPORT', 'sync', (object) => {
-            management.nodeImportUnblock = this.getObjects(object);
+            management.nodeImportUnblock = this.getObjects(object, data);
         });
         unblockNode.elementType = [ElementType.NodeBlockedImport];
         unblockNode.constrains = [
@@ -1149,7 +1129,7 @@ export class OptionsHelperService implements OnDestroy {
         unblockNode.priority = 10;
 
         const unpublishNode = new OptionItem('OPTIONS.UNPUBLISH', 'cloud_off', (object) => {
-            void this.dialogs.openDeleteNodesDialog({ nodes: this.getObjects(object) });
+            void this.dialogs.openDeleteNodesDialog({ nodes: this.getObjects(object, data) });
         });
         unpublishNode.elementType = [ElementType.NodePublishedCopy];
         unpublishNode.constrains = [
@@ -1165,7 +1145,7 @@ export class OptionsHelperService implements OnDestroy {
         const removeNodeRef = new OptionItem(
             'OPTIONS.REMOVE_REF',
             'remove_circle_outline',
-            (object) => this.removeFromCollection(this.getObjects(object)),
+            (object) => this.removeFromCollection(this.getObjects(object, data), components, data),
         );
         removeNodeRef.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         removeNodeRef.constrains = [
@@ -1190,7 +1170,7 @@ export class OptionsHelperService implements OnDestroy {
         options.push(report);
          */
         const reportNode = new OptionItem('OPTIONS.NODE_REPORT', 'flag', (node) =>
-            this.dialogs.openNodeReportDialog({ node: this.getObjects(node)[0] }),
+            this.dialogs.openNodeReportDialog({ node: this.getObjects(node, data)[0] }),
         );
         reportNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         reportNode.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository];
@@ -1200,7 +1180,7 @@ export class OptionsHelperService implements OnDestroy {
         reportNode.priority = 60;
 
         const qrCodeNode = new OptionItem('OPTIONS.QR_CODE', 'edu-qr_code', (node) => {
-            node = this.getObjects(node)[0];
+            node = this.getObjects(node, data)[0];
             this.dialogs.openQrDialog({ node });
         });
         qrCodeNode.constrains = [Constrain.NoBulk];
@@ -1209,7 +1189,7 @@ export class OptionsHelperService implements OnDestroy {
         qrCodeNode.priority = 70;
 
         const embedNode = new OptionItem('OPTIONS.EMBED', 'perm_media', (node) => {
-            node = this.getObjects(node)[0];
+            node = this.getObjects(node, data)[0];
             this.dialogs.openNodeEmbedDialog({ node });
         });
         embedNode.constrains = [Constrain.NoBulk, Constrain.HomeRepository];
@@ -1218,7 +1198,7 @@ export class OptionsHelperService implements OnDestroy {
         embedNode.priority = 80;
 
         const relationNode = new OptionItem('OPTIONS.RELATIONS', 'swap_horiz', async (node) => {
-            const nodes = await this.getObjectsAsync(node, true);
+            const nodes = await this.getObjectsAsync(node, data, true);
             void this.dialogs.openNodeRelationsDialog({ node: nodes[0] });
         });
         relationNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
@@ -1239,7 +1219,7 @@ export class OptionsHelperService implements OnDestroy {
             );
         }*/
         const editCollection = new OptionItem('OPTIONS.COLLECTION_EDIT', 'edit', (object) =>
-            this.editCollection(this.getObjects(object)[0]),
+            this.editCollection(this.getObjects(object, data)[0]),
         );
         editCollection.constrains = [
             Constrain.HomeRepository,
@@ -1265,7 +1245,7 @@ export class OptionsHelperService implements OnDestroy {
         const pinCollection = new OptionItem(
             'OPTIONS.COLLECTION_PIN',
             'edu-pin',
-            (object) => (management.addPinnedCollection = this.getObjects(object)[0]),
+            (object) => (management.addPinnedCollection = this.getObjects(object, data)[0]),
         );
         pinCollection.constrains = [
             Constrain.HomeRepository,
@@ -1282,7 +1262,8 @@ export class OptionsHelperService implements OnDestroy {
         const feedbackMaterial = new OptionItem(
             'OPTIONS.MATERIAL_FEEDBACK',
             'chat_bubble',
-            (object) => this.dialogs.openSendFeedbackDialog({ node: this.getObjects(object)[0] }),
+            (object) =>
+                this.dialogs.openSendFeedbackDialog({ node: this.getObjects(object, data)[0] }),
         );
         feedbackMaterial.constrains = [
             Constrain.HomeRepository,
@@ -1308,7 +1289,7 @@ export class OptionsHelperService implements OnDestroy {
         const feedbackMaterialView = new OptionItem(
             'OPTIONS.MATERIAL_FEEDBACK_VIEW',
             'speaker_notes',
-            (object) => (management.materialViewFeedback = this.getObjects(object)[0]),
+            (object) => (management.materialViewFeedback = this.getObjects(object, data)[0]),
         );
         feedbackMaterialView.constrains = [
             Constrain.HomeRepository,
@@ -1327,22 +1308,22 @@ export class OptionsHelperService implements OnDestroy {
         const setDisplayType = (viewType: number, emit = true) => {
             switch (viewType) {
                 case NodeEntriesDisplayType.Table:
-                    this.list.setDisplayType(NodeEntriesDisplayType.Table);
+                    components.list.setDisplayType(NodeEntriesDisplayType.Table);
                     toggleViewType.name = 'OPTIONS.SWITCH_TO_CARDS_VIEW';
                     toggleViewType.icon = 'view_module';
                     break;
                 case NodeEntriesDisplayType.Grid:
-                    this.list.setDisplayType(NodeEntriesDisplayType.Grid);
+                    components.list.setDisplayType(NodeEntriesDisplayType.Grid);
                     toggleViewType.name = 'OPTIONS.SWITCH_TO_LIST_VIEW';
                     toggleViewType.icon = 'list';
                     break;
             }
             if (emit) {
-                this.displayTypeChanged.emit(this.list.getDisplayType());
+                this.displayTypeChanged.emit(components.list.getDisplayType());
             }
         };
         const toggleViewType = new OptionItem('', '', () => {
-            switch (this.list.getDisplayType()) {
+            switch (components.list.getDisplayType()) {
                 case NodeEntriesDisplayType.Table:
                     setDisplayType(NodeEntriesDisplayType.Grid);
                     break;
@@ -1351,7 +1332,7 @@ export class OptionsHelperService implements OnDestroy {
                     break;
             }
         });
-        setDisplayType(this.list?.getDisplayType(), false);
+        setDisplayType(components.list?.getDisplayType(), false);
         toggleViewType.scopes = [Scope.WorkspaceList, Scope.Search, Scope.CollectionsReferences];
         toggleViewType.constrains = [Constrain.NoSelection];
         toggleViewType.group = DefaultGroups.Toggles;
@@ -1390,11 +1371,13 @@ export class OptionsHelperService implements OnDestroy {
                 management.nodeSidebarChange.subscribe((change: Node) => {
                     metadataSidebar.icon = change ? 'info' : 'info_outline';
                 });
-                management.nodeSidebar = management.nodeSidebar ? null : this.getObjects(object)[0];
+                management.nodeSidebar = management.nodeSidebar
+                    ? null
+                    : this.getObjects(object, data)[0];
                 if (management.nodeSidebar == null) {
                     metadataSidebarSubscription?.unsubscribe();
                 } else {
-                    metadataSidebarSubscription = this.list
+                    metadataSidebarSubscription = components.list
                         ?.getSelection()
                         .changed.subscribe((selection) => {
                             if (selection.source.selected.length === 0) {
@@ -1460,8 +1443,8 @@ export class OptionsHelperService implements OnDestroy {
         options.push(toggleViewType);
         options.push(metadataSidebar);
 
-        if (this.data.postPrepareOptions) {
-            this.data.postPrepareOptions(options, objects);
+        if (data.postPrepareOptions) {
+            data.postPrepareOptions(options, objects);
         }
         return options;
     }
@@ -1488,21 +1471,21 @@ export class OptionsHelperService implements OnDestroy {
         }
     }
 
-    private canAddObjects() {
+    private canAddObjects(data: OptionData) {
         return (
-            this.data.parent &&
-            this.nodeHelper.getNodesRight([this.data.parent], RestConstants.ACCESS_ADD_CHILDREN)
+            data.parent &&
+            this.nodeHelper.getNodesRight([data.parent], RestConstants.ACCESS_ADD_CHILDREN)
         );
     }
 
-    private addVirtualObjects(objects: any[]) {
+    private addVirtualObjects(components: OptionsHelperComponents, objects: any[]) {
         objects = objects.map((o: any) => {
             o.virtual = true;
             return o;
         });
         this.virtualNodesAdded.emit(objects);
-        if (this.list) {
-            this.list.addVirtualNodes(objects);
+        if (components.list) {
+            components.list.addVirtualNodes(objects);
         }
     }
 
@@ -1551,11 +1534,11 @@ export class OptionsHelperService implements OnDestroy {
      * overwrite all the show callbacks by using the internal constrains + permission handlers
      * isOptionAvailable will check if customShowCallback exists and will also call it
      */
-    private handleCallbacks(options: OptionItem[], objects: Node[] | any) {
+    private handleCallbacks(options: OptionItem[], objects: Node[] | any, data: OptionData) {
         options.forEach((o) => {
             o.showCallback = (object) => {
                 const list = NodeHelperService.getActionbarNodes(objects, object);
-                return this.isOptionAvailable(o, list);
+                return this.isOptionAvailable(o, list, data);
             };
             o.enabledCallback = (object) => {
                 const list = NodeHelperService.getActionbarNodes(objects, object);
@@ -1586,9 +1569,9 @@ export class OptionsHelperService implements OnDestroy {
         }
     }
 
-    async getObjectsAsync(object: Node | any, resolveOriginals = false) {
+    async getObjectsAsync(object: Node | any, data: OptionData, resolveOriginals = false) {
         const nodes = NodeHelperService.getActionbarNodes(
-            this.data.selectedObjects || this.data.activeObjects,
+            data.selectedObjects || data.activeObjects,
             object,
         );
         if (resolveOriginals) {
@@ -1618,18 +1601,18 @@ export class OptionsHelperService implements OnDestroy {
         return nodes;
     }
 
-    getObjects(object: Node | any) {
+    getObjects(object: Node | any, data: OptionData) {
         return NodeHelperService.getActionbarNodes(
-            this.data.selectedObjects || this.data.activeObjects,
+            data.selectedObjects || data.activeObjects,
             object,
         );
     }
 
-    applyExternalOptions(options: OptionItem[]) {
-        if (!this.data.customOptions) {
+    applyExternalOptions(options: OptionItem[], data: OptionData) {
+        if (!data.customOptions) {
             return options;
         }
-        const customOptions = { ...new CustomOptions(), ...this.data.customOptions };
+        const customOptions = { ...new CustomOptions(), ...data.customOptions };
         if (!customOptions.useDefaultOptions) {
             options = [];
         }
@@ -1659,22 +1642,14 @@ export class OptionsHelperService implements OnDestroy {
         return options;
     }
 
-    getData() {
-        return this.data;
-    }
-
-    setData(data: OptionData) {
-        this.data = data;
-        this.wrapOptionCallbacks();
-    }
-
-    private wrapOptionCallbacks(): void {
-        if (this.data.customOptions?.addOptions) {
-            for (const option of this.data.customOptions.addOptions) {
+    wrapOptionCallbacks(data: OptionData) {
+        if (data.customOptions?.addOptions) {
+            for (const option of data.customOptions.addOptions) {
                 const callback = option.callback;
-                option.callback = (node) => callback(node, this.getObjects(node));
+                option.callback = (node) => callback(node, this.getObjects(node, data));
             }
         }
+        return data;
     }
 
     private sortOptionsByGroup(options: OptionItem[]) {
@@ -1698,7 +1673,11 @@ export class OptionsHelperService implements OnDestroy {
         return result;
     }
 
-    private objectsMatchesConstrains(constrains: Constrain[], objects: Node[] | any[]) {
+    private objectsMatchesConstrains(
+        constrains: Constrain[],
+        data: OptionData,
+        objects: Node[] | any[],
+    ) {
         if (constrains.indexOf(Constrain.NoCollectionReference) !== -1) {
             if (
                 objects.some((o) => o.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1)
@@ -1796,7 +1775,7 @@ export class OptionsHelperService implements OnDestroy {
             }
         }
         if (constrains.indexOf(Constrain.AddObjects) !== -1) {
-            if (!this.canAddObjects()) {
+            if (!this.canAddObjects(data)) {
                 return Constrain.AddObjects;
             }
         }
@@ -1813,11 +1792,15 @@ export class OptionsHelperService implements OnDestroy {
         return null;
     }
 
-    private removeFromCollection(nodes: Node[]) {
+    private removeFromCollection(
+        nodes: Node[],
+        components: OptionsHelperComponents,
+        data: OptionData,
+    ) {
         forkJoinWithErrors(
             nodes.map((node: Node) =>
                 this.collectionService
-                    .removeFromCollection(node.ref.id, this.data.parent.ref.id)
+                    .removeFromCollection(node.ref.id, data.parent.ref.id)
                     .pipe(map(() => node)),
             ),
         ).subscribe(({ successes: deletedNodes, errors }) => {
@@ -1842,16 +1825,21 @@ export class OptionsHelperService implements OnDestroy {
      * @param target
      * @param objects
      */
-    filterOptions(options: OptionItem[], target: Target, objects: Node[] | any = null) {
+    filterOptions(
+        options: OptionItem[],
+        target: Target,
+        data: OptionData,
+        objects: Node[] | any = null,
+    ) {
         if (target === Target.List) {
             /*let optionsAlways = options.filter((o) => o.showAlways);
             const optionsOthers = options.filter((o) => !o.showAlways);
             optionsAlways = this.handleCallbackStates(options, target, objects);
             options = optionsAlways.concat(optionsOthers);*/
             // attach the show callbacks
-            this.handleCallbacks(options, target);
+            this.handleCallbacks(options, target, data);
         } else {
-            options = this.handleCallbackStates(options, target, objects);
+            options = this.handleCallbackStates(options, target, data, objects);
         }
         options = this.sortOptionsByGroup(options);
         return options;
@@ -1866,17 +1854,4 @@ export class OptionsHelperService implements OnDestroy {
             }
         });
     }
-}
-
-export interface OptionData {
-    scope: Scope;
-    activeObjects?: Node[] | any[];
-    selectedObjects?: Node[] | any[];
-    allObjects?: Node[] | any[];
-    parent?: Node | any;
-    customOptions?: CustomOptions;
-    /**
-     * custom interceptor to modify the default options array
-     */
-    postPrepareOptions?: (options: OptionItem[], objects: Node[]) => void;
 }

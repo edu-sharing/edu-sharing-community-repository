@@ -1,11 +1,13 @@
 import { Component, Input } from '@angular/core';
-import { ListItem, RestConstants } from '../../../core-module/core.module';
+import {
+    Node,
+    RestConstants,
+    RestSearchService,
+    TemporaryStorageService,
+} from '../../../core-module/core.module';
 import { TranslateService } from '@ngx-translate/core';
 import { Toast } from '../../../core-ui-module/toast';
-import { ArchiveRestore, Node } from '../../../core-module/core.module';
-import { TemporaryStorageService } from '../../../core-module/core.module';
-import { RestSearchService } from '../../../core-module/core.module';
-import { OptionItem } from '../../../core-ui-module/option-item';
+import { ListItem, OptionItem } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-tasks',

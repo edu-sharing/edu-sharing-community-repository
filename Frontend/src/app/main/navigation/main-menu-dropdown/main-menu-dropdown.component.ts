@@ -1,10 +1,9 @@
 import { Component, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
-import { OptionItem } from '../../../core-ui-module/option-item';
 import { ConfigEntry } from '../../../core-ui-module/node-helper.service';
 import { MainMenuEntriesService } from '../main-menu-entries.service';
+import { DropdownComponent, OptionItem } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-main-menu-dropdown',

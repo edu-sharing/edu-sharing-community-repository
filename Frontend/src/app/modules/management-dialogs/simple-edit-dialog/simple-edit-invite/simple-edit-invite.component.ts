@@ -1,37 +1,27 @@
 import { ApplicationRef, Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import {
-    Authority,
     AuthorityProfile,
-    DialogButton,
+    ConfigurationService,
     Group,
-    LocalPermissions,
+    Node,
     Organization,
     Permission,
     Permissions,
     RestConnectorService,
+    RestConstants,
+    RestHelper,
+    RestIamService,
+    RestNodeService,
     RestOrganizationService,
 } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
-import { RestNodeService } from '../../../../core-module/core.module';
-import { Connector, Node } from '../../../../core-module/core.module';
-import { ConfigurationService } from '../../../../core-module/core.module';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
-import { RestIamService } from '../../../../core-module/core.module';
-import { TranslateService } from '@ngx-translate/core';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../../core-module/ui/ui-animation';
-import { RestConstants } from '../../../../core-module/core.module';
-import { Router } from '@angular/router';
-import { RestHelper } from '../../../../core-module/core.module';
-import { RestConnectorsService } from '../../../../core-module/core.module';
-import { FrameEventsService } from '../../../../core-module/core.module';
-
-import { OPEN_URL_MODE } from '../../../../core-module/ui/ui-constants';
-import { BridgeService } from '../../../../core-bridge-module/bridge.service';
-import { forkJoin, Observable, Observer } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 import { MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { Helper } from '../../../../core-module/rest/helper';
 import { AuthenticationService } from 'ngx-edu-sharing-api';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 
 type Org = { organization: Organization; groups?: any };
 

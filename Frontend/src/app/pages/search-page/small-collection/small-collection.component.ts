@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
-import { ListItem, Node } from '../../../core-module/core.module';
+import { ListItem } from 'ngx-edu-sharing-ui';
+import { Node } from '../../../core-module/core.module';
 
 @Component({
     selector: 'es-small-collection',

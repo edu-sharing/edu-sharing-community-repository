@@ -4,6 +4,7 @@ export {
     About,
     Connector,
     ConnectorList,
+    CollectionReference,
     FeedbackData,
     LicenseAgreement,
     ManualRegistrationData,
@@ -22,22 +23,30 @@ export {
     NodeEntries,
     NodeRef,
     Organization,
+    Group,
+    Pagination,
     Person,
     RelationData,
+    ReferenceEntries,
     SearchResultNode as SearchResults,
+    Repo as Repository,
+    Statistics,
+    StatisticsGroup,
     StreamEntry,
     Tool,
     Tools,
+    User,
     UserProfile,
     UserQuota,
     UserStatus,
     WebsiteInformation,
 } from './api/models';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Acl, MdsView } from './api/models';
+import { Group, MdsView, Organization, Person, User } from './api/models';
+import { Acl } from './api/models';
 
 export type MdsViewRelation = MdsView['rel'];
-
+export type GenericAuthority = Organization | Group | User;
 export type ApiErrorResponse = HttpErrorResponse & {
     readonly defaultPrevented: boolean;
     preventDefault: () => void;

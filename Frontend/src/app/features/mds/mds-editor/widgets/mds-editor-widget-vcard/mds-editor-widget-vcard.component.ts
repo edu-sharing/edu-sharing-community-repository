@@ -1,6 +1,6 @@
 import { filter } from 'rxjs/operators';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { VCard } from '../../../../../core-module/ui/VCard';
+import { VCard } from 'ngx-edu-sharing-ui';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { FormControl, FormGroup } from '@angular/forms';

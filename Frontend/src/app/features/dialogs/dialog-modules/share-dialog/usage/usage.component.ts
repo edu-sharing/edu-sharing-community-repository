@@ -1,7 +1,5 @@
-import { Component, Input, EventEmitter, Output, ViewChild, ElementRef } from '@angular/core';
-import { Permission, Usage } from '../../../../../core-module/core.module';
-import { RestConstants } from '../../../../../core-module/core.module';
-import { UIAnimation } from '../../../../../core-module/ui/ui-animation';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { trigger } from '@angular/animations';
 import { TranslateService } from '@ngx-translate/core';
 

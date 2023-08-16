@@ -4,7 +4,7 @@ import {
     EventListener,
     FrameEventsService,
 } from '../../../core-module/rest/services/frame-events.service';
-import { TranslationsService } from '../../../translations/translations.service';
+import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { LicenseDialogContentComponent } from '../../../features/dialogs/dialog-modules/license-dialog/license-dialog-content.component';
 import { Toast } from '../../../core-ui-module/toast';
 import { RestConstants } from '../../../core-module/rest/rest-constants';

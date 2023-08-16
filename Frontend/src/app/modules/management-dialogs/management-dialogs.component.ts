@@ -12,7 +12,6 @@ import { Router } from '@angular/router';
 import { forkJoin as observableForkJoin, Observable } from 'rxjs';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import {
-    CollectionProposalStatus,
     CollectionReference,
     ConfigurationService,
     DialogButton,
@@ -20,24 +19,26 @@ import {
     Node,
     NodeVersions,
     NodeWrapper,
-    ProposalNode,
     RestCollectionService,
     RestConstants,
     RestHelper,
     RestNodeService,
-    TemporaryStorageService,
     Version,
 } from '../../core-module/core.module';
-import { UIAnimation } from '../../core-module/ui/ui-animation';
-import { UIConstants } from '../../core-module/ui/ui-constants';
-import { ErrorProcessingService } from '../../core-ui-module/error.processing';
-import { LinkData, NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { Toast } from '../../core-ui-module/toast';
+import {
+    LocalEventsService,
+    TemporaryStorageService,
+    UIAnimation,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../core-ui-module/ui-helper';
+import { LinkData, NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { BulkBehavior } from '../../features/mds/types/types';
-import { LocalEventsService } from '../../services/local-events.service';
 import { SimpleEditCloseEvent } from './simple-edit-dialog/simple-edit-dialog.component';
+import { CollectionProposalStatus, ProposalNode } from 'ngx-edu-sharing-api';
+import { ErrorProcessingService } from 'src/app/core-ui-module/error.processing';
 
 export enum DialogType {
     SimpleEdit = 'SimpleEdit',

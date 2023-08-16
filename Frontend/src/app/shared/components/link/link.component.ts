@@ -1,20 +1,4 @@
-import {
-    Component,
-    Input,
-    Output,
-    EventEmitter,
-    OnInit,
-    ViewChild,
-    ElementRef,
-    HostListener,
-} from '@angular/core';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { trigger } from '@angular/animations';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { Helper } from '../../../core-module/rest/helper';
-import { OptionItem } from '../../../core-ui-module/option-item';
-import { UIService } from '../../../core-module/core.module';
-import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
+import { Component, EventEmitter, Output } from '@angular/core';
 
 @Component({
     selector: 'es-mat-link',

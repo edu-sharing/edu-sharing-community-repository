@@ -2,7 +2,7 @@ import { ElementRef, Injectable } from '@angular/core';
 import { RawValuesDict, SearchConfig } from 'ngx-edu-sharing-api';
 import { Observable, Subject } from 'rxjs';
 import { delay, map, take, takeUntil } from 'rxjs/operators';
-import { notNull } from '../../../util/functions';
+import { notNull } from 'ngx-edu-sharing-ui';
 import { SearchFieldInternalService } from './search-field-internal.service';
 
 export class SearchFieldConfig {

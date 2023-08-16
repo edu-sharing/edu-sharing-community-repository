@@ -6,13 +6,17 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { ModalDialogOptions } from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import { ProgressType } from '../shared/components/modal-dialog/modal-dialog.component';
 import { RestConstants } from '../core-module/rest/rest-constants';
-import { TemporaryStorageService } from '../core-module/rest/services/temporary-storage.service';
 import { DialogButton } from '../core-module/ui/dialog-button';
-import { UIConstants } from '../core-module/ui/ui-constants';
-import { DateHelper } from './DateHelper';
+import {
+    AccessibilityService,
+    DateHelper,
+    TemporaryStorageService,
+    Toast as ToastAbstract,
+    ToastDuration,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import { ToastMessageComponent } from './components/toast-message/toast-message.component';
 import { RestConnectorService } from '../core-module/core.module';
-import { AccessibilityService } from '../services/accessibility.service';
 import { takeUntil } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -27,15 +31,6 @@ interface Action {
     /** Translated button label. */
     label: string;
     callback: () => void;
-}
-export enum ToastDuration {
-    Seconds_3 = 3,
-    Seconds_5 = 5,
-    Seconds_8 = 8,
-    Seconds_15 = 15,
-    Seconds_30 = 30,
-    Seconds_60 = 60,
-    Infinite = null,
 }
 export enum ToastType {
     InfoSimple, // A simple info just confirming an action without providing useful data
@@ -52,7 +47,7 @@ export type ToastMessage = {
     action?: Action;
 };
 @Injectable()
-export class Toast implements OnDestroy {
+export class Toast extends ToastAbstract implements OnDestroy {
     private static MIN_TIME_BETWEEN_TOAST = 2000;
 
     dialogInputValue: string;
@@ -85,6 +80,7 @@ export class Toast implements OnDestroy {
         private storage: TemporaryStorageService,
         private accessibility: AccessibilityService,
     ) {
+        super();
         this.messageQueue.pipe(takeUntil(this.destroyed)).subscribe((message) => {
             if (this.isInstanceVisible) {
                 return;

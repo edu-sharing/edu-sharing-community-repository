@@ -4,7 +4,7 @@ import { delay, filter, first, map } from 'rxjs/operators';
 import { DialogButton, Node } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
 import { JumpMark } from '../../../../services/jump-marks.service';
-import { LocalEventsService } from '../../../../services/local-events.service';
+import { LocalEventsService } from 'ngx-edu-sharing-ui';
 import { MdsEditorCoreComponent } from '../../../mds/mds-editor/mds-editor-core/mds-editor-core.component';
 import { MdsEditorInstanceService } from '../../../mds/mds-editor/mds-editor-instance.service';
 import { EditorType } from '../../../mds/types/types';

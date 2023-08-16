@@ -2,11 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
 import { switchMap, takeUntil, tap } from 'rxjs/operators';
-import { ToastDuration } from '../../../../core-ui-module/toast';
-import {
-    AccessibilityService,
-    AccessibilitySettings,
-} from '../../../../services/accessibility.service';
+import { AccessibilityService, AccessibilitySettings, ToastDuration } from 'ngx-edu-sharing-ui';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 
 @Component({

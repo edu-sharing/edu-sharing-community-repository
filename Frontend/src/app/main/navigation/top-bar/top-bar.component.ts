@@ -12,7 +12,7 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import { User } from 'ngx-edu-sharing-api';
 import { Observable } from 'rxjs';
 import { ConfigurationService, Node, RestConnectorService } from '../../../core-module/core.module';
-import { OptionItem } from '../../../core-ui-module/option-item';
+import { OptionItem } from 'ngx-edu-sharing-ui';
 import { CreateMenuComponent } from '../create-menu/create-menu.component';
 import { MainMenuDropdownComponent } from '../main-menu-dropdown/main-menu-dropdown.component';
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';

@@ -2,12 +2,12 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
     DialogButton,
+    Node,
     NodeShare,
     RestConstants,
     RestNodeService,
-    Node,
 } from '../../../../core-module/core.module';
-import { DateHelper } from '../../../../core-ui-module/DateHelper';
+import { DateHelper } from 'ngx-edu-sharing-ui';
 import { Toast } from '../../../../core-ui-module/toast';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';

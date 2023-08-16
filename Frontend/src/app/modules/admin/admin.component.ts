@@ -1,4 +1,16 @@
-import { TranslationsService } from '../../translations/translations.service';
+import {
+    ActionbarComponent,
+    DateHelper,
+    InteractionType,
+    ListItem,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
+    Scope,
+    TranslationsService,
+    UIAnimation,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Toast } from '../../core-ui-module/toast';
@@ -9,7 +21,6 @@ import {
     ConfigurationService,
     DialogButton,
     JobDescription,
-    ListItem,
     LoginResult,
     Node,
     NodeListElastic,
@@ -20,7 +31,6 @@ import {
     RestHelper,
     RestIamService,
     RestMediacenterService,
-    RestNetworkService,
     RestNodeService,
     RestOrganizationService,
     RestSearchService,
@@ -38,25 +48,17 @@ import {
     ViewContainerRef,
 } from '@angular/core';
 import { Helper } from '../../core-module/rest/helper';
-import { UIConstants } from '../../core-module/ui/ui-constants';
 import { SuggestItem } from '../../common/ui/autocomplete/autocomplete.component';
 import { Observable, Observer } from 'rxjs';
 import { CustomHelper } from '../../common/custom-helper';
-import { DateHelper } from '../../core-ui-module/DateHelper';
 import { CsvHelper } from '../../core-module/csv.helper';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../core-module/ui/ui-animation';
-import { Scope } from '../../core-ui-module/option-item';
 import { AboutService, NetworkService } from 'ngx-edu-sharing-api';
 import { AuthoritySearchMode } from '../../shared/components/authority-search-input/authority-search-input.component';
 import { PlatformLocation } from '@angular/common';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
-import { InteractionType, NodeEntriesDisplayType } from '../../features/node-entries/entries-model';
-import { NodeDataSource } from '../../features/node-entries/node-data-source';
 import { WorkspaceExplorerComponent } from '../workspace/explorer/explorer.component';
-import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
-import { NodeEntriesWrapperComponent } from '../../features/node-entries/node-entries-wrapper.component';
 import { XmlAppPropertiesDialogData } from '../../features/dialogs/dialog-modules/xml-app-properties-dialog/xml-app-properties-dialog-data';
 
 type LuceneData = {

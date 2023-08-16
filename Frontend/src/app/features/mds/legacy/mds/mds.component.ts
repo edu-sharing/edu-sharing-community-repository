@@ -1,28 +1,17 @@
-import { forkJoin as observableForkJoin, Observable, throwError } from 'rxjs';
-import {
-    Component,
-    ElementRef,
-    EventEmitter,
-    HostListener,
-    Input,
-    NgZone,
-    Output,
-    ViewChild,
-} from '@angular/core';
+import { forkJoin as observableForkJoin, throwError } from 'rxjs';
+import { Component, EventEmitter, Input, NgZone, Output } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Toast } from '../../../../core-ui-module/toast';
-import { VCard } from '../../../../core-module/ui/VCard';
+import { DateHelper, UIAnimation, VCard } from 'ngx-edu-sharing-ui';
 import { Helper } from '../../../../core-module/rest/helper';
-import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../../core-module/ui/ui-animation';
 import {
-    Node,
-    NodeList,
     DialogButton,
     MdsValueList,
+    Node,
+    NodeList,
     NodeWrapper,
     RestConnectorService,
     RestConstants,
@@ -32,24 +21,18 @@ import {
     RestNodeService,
     RestSearchService,
     RestToolService,
-    UIService,
     RestUtilitiesService,
+    UIService,
 } from '../../../../core-module/core.module';
 import { JumpMark } from '../../../../services/jump-marks.service';
 import { MdsHelper } from '../../../../core-module/rest/mds-helper';
-import {
-    MdsType,
-    UserPresentableError,
-    MdsDefinition,
-    BulkBehavior,
-    Values,
-} from '../../types/types';
+import { BulkBehavior, MdsDefinition, MdsType } from '../../types/types';
 import { MdsEditorCommonService } from '../../mds-editor/mds-editor-common.service';
-import { DateHelper } from '../../../../core-ui-module/DateHelper';
-import { MdsService, MdsValue, ConfigService } from 'ngx-edu-sharing-api';
+import { ConfigService, MdsService, MdsValue } from 'ngx-edu-sharing-api';
 import { first } from 'rxjs/operators';
 import { DialogsService as LegacyDialogsService } from '../../../../modules/management-dialogs/dialogs.service';
 import { DialogsService } from '../../../dialogs/dialogs.service';
+
 declare var noUiSlider: any;
 
 @Component({

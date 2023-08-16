@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { SharedModule } from '../../../../shared/shared.module';
-import { NodeEntriesModule } from '../../../node-entries/node-entries.module';
 import { SavedSearchesDialogComponent } from './saved-searches-dialog.component';
+import { NodeEntriesModule } from 'ngx-edu-sharing-ui';
 
 export { SavedSearchesDialogComponent };
 

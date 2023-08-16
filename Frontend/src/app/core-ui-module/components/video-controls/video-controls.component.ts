@@ -1,27 +1,20 @@
-import { first, catchError, filter, map, takeUntil, tap } from 'rxjs/operators';
+import { catchError, filter, first, map, tap } from 'rxjs/operators';
 import { trigger } from '@angular/animations';
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { Options } from '@angular-slider/ngx-slider';
 import { of, ReplaySubject } from 'rxjs';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
-import {
-    NodesRightMode,
-    RestCollectionService,
-    RestConnectorService,
-    RestHelper,
-    TemporaryStorageService,
-    UIConstants,
-} from '../../../core-module/core.module';
+import { RestCollectionService, RestConnectorService } from '../../../core-module/core.module';
 import { Node } from '../../../core-module/rest/data-object';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestNodeService } from '../../../core-module/rest/services/rest-node.service';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { NodesRightMode, TemporaryStorageService, UIAnimation } from 'ngx-edu-sharing-ui';
 import { Toast } from '../../toast';
-import { UIHelper } from '../../ui-helper';
 import { DurationPipe } from './duration.pipe';
 import { NodeHelperService } from '../../node-helper.service';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
+
 interface VideoControlsValues {
     startTime: number;
     endTime: number;

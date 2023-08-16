@@ -1,16 +1,7 @@
-import {
-    Component,
-    Input,
-    Output,
-    EventEmitter,
-    OnInit,
-    ViewChild,
-    ElementRef,
-    HostListener,
-    Inject,
-} from '@angular/core';
+import { Component, EventEmitter, Inject, Output } from '@angular/core';
 import { MAT_SNACK_BAR_DATA, MatSnackBar } from '@angular/material/snack-bar';
-import { Toast, ToastDuration, ToastMessage } from '../../toast';
+import { Toast, ToastMessage } from '../../toast';
+import { ToastDuration } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-toast-message',

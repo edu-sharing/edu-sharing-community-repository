@@ -5,6 +5,9 @@ import { CollectionV1Service } from '../api/services';
 import { HOME_REPOSITORY } from '../constants';
 import { Node } from '../models';
 import { cachedShareReplay, KeyCache } from '../utils/decorators/cached-share-replay';
+import { ReferenceEntries } from '../api/models/reference-entries';
+import { CollectionEntries } from '../api/models/collection-entries';
+import { CollectionEntry } from '../api/models/collection-entry';
 
 @Injectable({
     providedIn: 'root',
@@ -18,6 +21,21 @@ export class CollectionService {
         // TODO: Wrap other endpoints and reset not on get, but on modifying actions.
         CollectionService.collectionCache.reset(getCacheKey(id, { repository }));
         return this.observeCollection(id, { repository }).pipe(take(1));
+    }
+
+    getReferences(
+        params: Parameters<typeof CollectionV1Service.prototype.getCollectionsReferences>[0],
+    ): Observable<ReferenceEntries> {
+        return this.collectionV1.getCollectionsReferences(params);
+    }
+
+    getSubcollections(
+        params: Parameters<typeof CollectionV1Service.prototype.getCollectionsSubcollections>[0],
+    ): Observable<CollectionEntries> {
+        // wrong api data
+        return this.collectionV1.getCollectionsSubcollections(
+            params,
+        ) as unknown as Observable<CollectionEntries>;
     }
 
     @cachedShareReplay(CollectionService.collectionCache, getCacheKey)

@@ -2,7 +2,7 @@ import { Component, Inject, OnInit, ViewChild } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { DialogButton, Node } from '../../../../core-module/core.module';
-import { LocalEventsService } from '../../../../services/local-events.service';
+import { LocalEventsService } from 'ngx-edu-sharing-ui';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { LicenseDialogContentComponent } from './license-dialog-content.component';

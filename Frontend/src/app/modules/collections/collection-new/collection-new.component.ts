@@ -1,78 +1,70 @@
 import {
+    ApplicationRef,
     Component,
-    OnInit,
-    NgZone,
-    HostListener,
-    ViewChild,
-    Sanitizer,
     ElementRef,
     EventEmitter,
-    ApplicationRef,
+    HostListener,
+    NgZone,
     OnDestroy,
+    OnInit,
+    ViewChild,
 } from '@angular/core';
 
-import { Router, Params, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
-import { TranslationsService } from '../../../translations/translations.service';
+import {
+    ColorHelper,
+    DefaultGroups,
+    InteractionType,
+    ListItem,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
+    OptionItem,
+    PreferredColor,
+    TranslationsService,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 
 import * as EduData from '../../../core-module/core.module';
-
 import {
-    RestCollectionService,
-    ListItem,
+    ConfigurationHelper,
+    ConfigurationService,
     DialogButton,
-    RestMediacenterService,
-    RestMdsService,
-    UIService,
-    FrameEventsService,
     EventListener,
-    Node,
-} from '../../../core-module/core.module';
-import { RestNodeService } from '../../../core-module/core.module';
-import { RestConstants } from '../../../core-module/core.module';
-import { RestHelper } from '../../../core-module/core.module';
-import { Toast } from '../../../core-ui-module/toast';
-import { RestIamService } from '../../../core-module/core.module';
-import {
-    Group,
+    FrameEventsService,
     IamGroups,
     IamUser,
-    LoginResult,
+    LocalPermissions,
+    Node,
     NodeRef,
     Permission,
+    RestCollectionService,
+    RestConnectorService,
+    RestConstants,
+    RestHelper,
+    RestIamService,
+    RestMdsService,
+    RestMediacenterService,
+    RestNodeService,
+    TemporaryStorageService,
+    UIService,
+    User,
 } from '../../../core-module/core.module';
-import { User } from '../../../core-module/core.module';
-import { LocalPermissions } from '../../../core-module/core.module';
-import { Collection } from '../../../core-module/core.module';
-import { RestConnectorService } from '../../../core-module/core.module';
-import { ConfigurationService } from '../../../core-module/core.module';
-import { UIConstants } from '../../../core-module/ui/ui-constants';
-import { MdsComponent } from '../../../features/mds/legacy/mds/mds.component';
+import { Toast } from '../../../core-ui-module/toast';
+import { ConfigService, Group } from 'ngx-edu-sharing-api';
 import { TranslateService } from '@ngx-translate/core';
-import { ColorHelper, PreferredColor } from '../../../core-module/ui/color-helper';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { TemporaryStorageService } from '../../../core-module/core.module';
-import { RegisterResetPasswordComponent } from '../../register/register-reset-password/register-reset-password.component';
-import { MainNavComponent } from '../../../main/navigation/main-nav/main-nav.component';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
-import { MdsMetadatasets } from '../../../core-module/core.module';
-import { ConfigurationHelper } from '../../../core-module/core.module';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
-import { DefaultGroups, OptionItem } from '../../../core-ui-module/option-item';
 import { Observable, Subject } from 'rxjs';
 import { PlatformLocation } from '@angular/common';
 import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Values } from '../../../features/mds/types/types';
-import { NodeDataSource } from '../../../features/node-entries/node-data-source';
-import {
-    InteractionType,
-    NodeEntriesDisplayType,
-} from '../../../features/node-entries/entries-model';
-import { NodeEntriesWrapperComponent } from '../../../features/node-entries/node-entries-wrapper.component';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { ShareDialogResult } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog-data';
 
@@ -241,7 +233,8 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         private temporaryStorage: TemporaryStorageService,
         private zone: NgZone,
         private sanitizer: DomSanitizer,
-        private config: ConfigurationService,
+        private configLegacy: ConfigurationService,
+        private configService: ConfigService,
         private ref: ApplicationRef,
         private translations: TranslationsService,
         private translationService: TranslateService,
@@ -256,11 +249,14 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
                     const sets = ConfigurationHelper.filterValidMds(
                         RestConstants.HOME_REPOSITORY,
                         mdsSets.metadatasets,
-                        this.config,
+                        this.configService,
                     );
                     this.mdsSet = sets[0]?.id;
 
-                    this.COLORS = this.config.instant('collections.colors', this.DEFAULT_COLORS);
+                    this.COLORS = this.configLegacy.instant(
+                        'collections.colors',
+                        this.DEFAULT_COLORS,
+                    );
                     if (data.statusCode != RestConstants.STATUS_CODE_OK) {
                         this.toast.error(
                             { message: 'loginData.statusCode was not ok', data },
@@ -360,7 +356,10 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
                                 sortAscending: [true],
                             })
                             .subscribe((data: IamGroups) => {
-                                this.editorialGroups.setData(data.groups, data.pagination);
+                                this.editorialGroups.setData(
+                                    data.groups as Group[],
+                                    data.pagination,
+                                );
                             });
                     }
                 });

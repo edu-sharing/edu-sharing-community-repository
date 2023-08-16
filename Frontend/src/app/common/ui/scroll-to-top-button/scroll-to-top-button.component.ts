@@ -1,7 +1,7 @@
 import { trigger } from '@angular/animations';
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 
 /**
  * Shows a small button on the bottom of the screen that scrolls to the page top.

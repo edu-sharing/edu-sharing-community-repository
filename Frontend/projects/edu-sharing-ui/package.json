@@ -1,0 +1,19 @@
+{
+  "name": "ngx-edu-sharing-ui",
+  "version": "0.0.1",
+  "license": "GNU GPL v2",
+  "description": "Angular components for Edu-Sharing UX parts",
+  "peerDependencies": {
+    "@angular/cdk": "~13.3.9",
+    "@angular/common": "^13.3.0",
+    "@angular/core": "^13.3.0",
+    "@angular/material": "13.3.9",
+    "material-design-icons": "^3.0.1",
+    "@ngx-translate/core": "^14.0.0",
+    "angular-material-css-vars": "^3.0.0",
+    "rxjs": "^6.6.7"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  }
+}

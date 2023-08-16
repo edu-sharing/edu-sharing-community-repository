@@ -1,7 +1,6 @@
-import { PipeTransform, Pipe } from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { DateHelper } from '../../core-ui-module/DateHelper';
-import { isNumeric } from './isNumeric';
+import { isNumeric } from 'ngx-edu-sharing-ui';
 
 /**
  * Format a given value of time in seconds to a readable time span

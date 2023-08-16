@@ -1,8 +1,5 @@
-import { PipeTransform, Pipe } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
-import { RestHelper } from '../../core-module/core.module';
-import { Node } from '../../core-module/core.module';
-import { ColorHelper } from '../../core-module/ui/color-helper';
+import { Pipe, PipeTransform } from '@angular/core';
+import { ColorHelper } from 'ngx-edu-sharing-ui';
 
 type Settings = {
     brightness?: number; // 0...infinite

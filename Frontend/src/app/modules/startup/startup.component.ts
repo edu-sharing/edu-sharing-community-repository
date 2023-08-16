@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CordovaService } from '../../common/services/cordova.service';
-import { UIConstants } from '../../core-module/ui/ui-constants';
+import { UIConstants } from 'ngx-edu-sharing-ui';
 import { Router } from '@angular/router';
 
 @Component({

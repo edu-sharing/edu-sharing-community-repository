@@ -1,33 +1,17 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import {
     ConfigurationHelper,
-    ConfigurationService,
-    IamUser,
-    ListItem,
     Node,
     NodePermissions,
-    NodeVersions,
     Permission,
     RestConnectorService,
     RestConstants,
-    RestHelper,
-    RestIamService,
     RestNodeService,
-    RestSearchService,
-    RestUsageService,
-    Usage,
-    UsageList,
-    Version,
 } from '../../../../core-module/core.module';
 import { TranslateService } from '@ngx-translate/core';
-import { Toast } from '../../../../core-ui-module/toast';
-import { VCard } from '../../../../core-module/ui/VCard';
-import { Router } from '@angular/router';
-import { UIHelper } from '../../../../core-ui-module/ui-helper';
-import { UIConstants } from '../../../../core-module/ui/ui-constants';
+import { DurationHelper, FormatDatePipe, NodeImageSizePipe, VCard } from 'ngx-edu-sharing-ui';
 import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
-import { FormatDatePipe } from '../../../../shared/pipes/format-date.pipe';
-import { NodeImageSizePipe } from '../../../../shared/pipes/node-image-size.pipe';
+import { ConfigService } from 'ngx-edu-sharing-api';
 
 // Charts.js
 declare var Chart: any;
@@ -70,7 +54,7 @@ export class WorkspaceMetadataBlockComponent {
             this.configService,
         );
         data.createDate = new FormatDatePipe(this.translate).transform(node.createdAt);
-        data.duration = RestHelper.getDurationFormatted(
+        data.duration = DurationHelper.getDurationFormatted(
             node.properties[RestConstants.LOM_PROP_TECHNICAL_DURATION],
         );
         data.author = this.toVCards(
@@ -105,7 +89,7 @@ export class WorkspaceMetadataBlockComponent {
         public connector: RestConnectorService,
         private nodeApi: RestNodeService,
         private translate: TranslateService,
-        private configService: ConfigurationService,
+        private configService: ConfigService,
         private nodeHelper: NodeHelperService,
     ) {}
     isAnimated() {

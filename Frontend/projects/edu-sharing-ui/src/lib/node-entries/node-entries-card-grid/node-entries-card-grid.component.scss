@@ -1,0 +1,181 @@
+@use 'sass:math';
+@import '../../../../assets/scss/mixins';
+
+$horizontalScrollPadding: 1.5em;
+
+@keyframes OrderAnimationCards {
+    0% {
+        transform: rotate(-0.25deg);
+    }
+    50% {
+        transform: rotate(0.25deg);
+    }
+    100% {
+        transform: rotate(-0.25deg);
+    }
+}
+
+.order-panel {
+    margin-left: auto;
+}
+
+.load-more {
+    display: flex;
+    justify-content: center;
+}
+.card-grid-wrapper {
+    position: relative;
+    z-index: 0;
+    .scroll-helper-left,
+    .scroll-helper-right {
+        position: absolute;
+        width: 15%;
+        min-width: 60px;
+        max-width: calc(var(--cardWidth) * 0.4);
+        display: flex;
+        align-items: center;
+        // do not overlay scrollbar
+        height: calc(100% - 10px);
+        z-index: 5;
+        @include clickable();
+        > button {
+            background-color: #fff;
+            color: var(--primary);
+            @include materialShadowMediumLarge(false, 0.25);
+        }
+    }
+    .scroll-helper-left {
+        left: -$horizontalScrollPadding;
+        justify-content: flex-start;
+        background: linear-gradient(
+            to left,
+            rgba(255, 255, 255, 0.000001) 0,
+            rgb(255, 255, 255) calc(100% - $horizontalScrollPadding)
+        );
+        > button {
+            margin-left: calc($horizontalScrollPadding - 8px);
+        }
+    }
+    .scroll-helper-right {
+        right: -$horizontalScrollPadding;
+        justify-content: flex-end;
+        background: linear-gradient(
+            to right,
+            rgba(255, 255, 255, 0.000001) 0,
+            rgb(255, 255, 255) calc(100% - $horizontalScrollPadding)
+        );
+        > button {
+            margin-right: calc($horizontalScrollPadding - 8px);
+        }
+    }
+}
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--cardWidth), 1fr));
+    grid-column-gap: 20px;
+    grid-row-gap: 20px;
+    grid-template-rows: auto;
+    padding-block-start: 1em;
+    padding-block-end: 1em;
+    &.card-grid-layout-scroll {
+        position: relative;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        grid-auto-flow: column;
+        grid-template-columns: repeat(auto-fit, var(--cardWidth));
+        grid-auto-columns: minmax(var(--cardWidth), 1fr);
+        // slightly more padding to prevent shadow clipping
+        padding: $horizontalScrollPadding;
+        // compensate for larger padding
+        margin: calc(1em - $horizontalScrollPadding) (-$horizontalScrollPadding) 0;
+        &::-webkit-scrollbar-track {
+            margin: 0 $horizontalScrollPadding;
+        }
+        @include materialScrollbar();
+        > .card-grid-drag-wrapper {
+            scroll-snap-align: center;
+            scroll-snap-stop: always;
+        }
+    }
+    > .card-grid-drag-wrapper {
+        position: relative;
+        // .cdk-drag-placeholder ~ .card-grid-drop-blocked-container {
+        //     display: none;
+        // }
+        .card-grid-drop-allowed-container,
+        .card-grid-drop-blocked-container {
+            position: absolute;
+            z-index: 1;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            > i {
+                background: radial-gradient(circle, #fff 30%, rgba(255, 255, 255, 0.0001) 70%);
+                width: 200px;
+                height: 200px;
+                font-size: 80px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+        .card-grid-drop-allowed-container {
+            > i {
+                color: var(--colorStatusPositive);
+            }
+        }
+        .card-grid-drop-blocked-container {
+            backdrop-filter: blur(5px);
+            > i {
+                color: var(--colorStatusNegative);
+            }
+        }
+        .selected-when-dragging {
+            opacity: 0.5; // Same as .cdk-drag-placeholder
+        }
+        &.cdk-drop-list-dragging {
+            > *:first-child {
+                display: none;
+            }
+        }
+    }
+    &.card-grid-reorder {
+        > .card-grid-order-wrapper {
+            $orderAnimationTime: 0.5s;
+            animation-iteration-count: infinite;
+            animation-duration: $orderAnimationTime;
+            animation-name: OrderAnimationCards;
+            &:nth-of-type(2n) {
+                animation-delay: 0s;
+            }
+            &:nth-of-type(2n + 1) {
+                animation-delay: math.div(-$orderAnimationTime, 2);
+            }
+            &:nth-of-type(3n) {
+                animation-delay: math.div(-$orderAnimationTime, 4);
+            }
+            &:nth-of-type(5n) {
+                animation-delay: math.div(-$orderAnimationTime, 8);
+            }
+            .cdk-drag-placeholder {
+                display: none;
+            }
+        }
+    }
+}
+
+.card-drag-preview {
+    width: 250px;
+}
+
+// Disable animations for rearranging. We misuse `entered` events for doing the rearranging, so the
+// preview animation would go to the wrong position (see
+// https://stackblitz.com/edit/drag-drop-dashboard).
+::ng-deep .es-card-grid-rearrange-drag-preview.cdk-drag-animating {
+    transition: none;
+}

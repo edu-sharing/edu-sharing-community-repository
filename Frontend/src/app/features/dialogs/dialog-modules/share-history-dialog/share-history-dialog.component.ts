@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
     NodePermissionsHistory,
@@ -7,7 +7,7 @@ import {
     RestNodeService,
 } from '../../../../core-module/core.module';
 import { Helper } from '../../../../core-module/rest/helper';
-import { DateHelper } from '../../../../core-ui-module/DateHelper';
+import { DateHelper } from 'ngx-edu-sharing-ui';
 import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
 import { Toast } from '../../../../core-ui-module/toast';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
