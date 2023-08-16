@@ -3,6 +3,7 @@ package org.edu_sharing.repository.server.jobs.quartz;
 import org.apache.http.client.ClientProtocolException;
 import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +33,7 @@ class CheckLinkJobTest {
     }
     @Test
     @Ignore
+    @Disabled
     public void testStatusCodes() {
         Arrays.asList(200, 201, 400, 401, 403, 404, 500).forEach(expected -> {
             CheckLinkJob.StatusResult actual = underTest.getStatus("https://httpstat.us/" + expected);
