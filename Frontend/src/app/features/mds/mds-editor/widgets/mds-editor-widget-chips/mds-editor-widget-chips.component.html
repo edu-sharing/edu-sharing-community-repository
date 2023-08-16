@@ -43,6 +43,30 @@
       <span class="mat-chip-label" [innerHTML]="value.label | escapeHtml"></span>
       <mat-icon matChipRemove>cancel</mat-icon>
     </mat-chip>
+    <ng-container *ngIf="getSuggestions()?.length">
+      <mat-chip
+        #chip="matChip"
+        class="mat-chip-suggestion"
+        *ngFor="let suggestion of chipsSuggestions"
+        [value]="suggestion"
+        [removable]="true"
+        (blur)="onBlurInput($event)"
+        (removed)="removeSuggestion(suggestion)"
+        [class.mat-chip-selected]="false"
+        [matTooltip]="getSuggestionTooltip(suggestion)"
+      >
+        <span class="mat-chip-label">{{ suggestion.displayValue.label }}</span>
+        <button
+          mat-icon-button
+          matChipTrailingIcon
+          class="accept"
+          (click)="addSuggestion(suggestion)"
+        >
+          <mat-icon matChipTrailingIcon>check_circle</mat-icon>
+        </button>
+        <mat-icon matChipRemove class="decline">cancel</mat-icon>
+      </mat-chip>
+    </ng-container>
     <div class="input-wrapper">
       <input
         #input

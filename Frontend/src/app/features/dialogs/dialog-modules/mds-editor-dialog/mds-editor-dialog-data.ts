@@ -7,9 +7,14 @@ class SharedData {
     immediatelyShowMissingRequiredWidgets? = false;
 }
 
-export class MdsEditorDialogDataNodes extends SharedData {
-    nodes: Node[];
+abstract class MdsEditorDialogDataAbstract extends SharedData {
     bulkBehavior? = BulkBehavior.Default;
+}
+export class MdsEditorDialogDataNodes extends MdsEditorDialogDataAbstract {
+    nodes: Node[];
+}
+export class MdsEditorDialogDataGraphql extends MdsEditorDialogDataNodes {
+    graphqlIds: string[];
 }
 
 export class MdsEditorDialogDataValues extends SharedData {
@@ -19,6 +24,9 @@ export class MdsEditorDialogDataValues extends SharedData {
     editorMode: EditorMode;
 }
 
+export function hasGraphql(data: MdsEditorDialogData): data is MdsEditorDialogDataNodes {
+    return !!(data as MdsEditorDialogDataGraphql).graphqlIds;
+}
 export function hasNodes(data: MdsEditorDialogData): data is MdsEditorDialogDataNodes {
     return !!(data as MdsEditorDialogDataNodes).nodes;
 }
@@ -27,7 +35,10 @@ export function hasValues(data: MdsEditorDialogData): data is MdsEditorDialogDat
     return !!(data as MdsEditorDialogDataValues).values;
 }
 
-export type MdsEditorDialogData = MdsEditorDialogDataNodes | MdsEditorDialogDataValues;
+export type MdsEditorDialogData =
+    | MdsEditorDialogDataNodes
+    | MdsEditorDialogDataGraphql
+    | MdsEditorDialogDataValues;
 
 export type MdsEditorDialogResultNodes = Node[] | null;
 export type MdsEditorDialogResultValues = Values | null;

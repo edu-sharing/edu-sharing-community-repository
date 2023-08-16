@@ -26,7 +26,6 @@ import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class NodeServiceDDBImpl extends NodeServiceAdapterCached{
 	Logger logger = Logger.getLogger(NodeServiceDDBImpl.class);
@@ -99,10 +98,13 @@ public class NodeServiceDDBImpl extends NodeServiceAdapterCached{
 			);
 			properties.put(
 					CCConstants.LOM_PROP_GENERAL_KEYWORD,
-					getXPathArray(doc, Arrays.asList(
-							"/cortex/indexing-profile/facet[@name='keywords_fct']/value",
-							"/cortex/indexing-profile/facet[@name='topic_fct']/value"
-					)).stream().distinct().collect(Collectors.toList())
+					// fix after DESP-738
+					ValueTool.toMultivalue(
+							getXPathArray(doc, Arrays.asList(
+									"/cortex/indexing-profile/facet[@name='keywords_fct']/value",
+									"/cortex/indexing-profile/facet[@name='topic_fct']/value"
+							)).stream().distinct().toArray(String[]::new)
+					)
 			);
 			properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL,
 					getThumbnail(doc)

@@ -8,8 +8,8 @@ import {
     ViewChild,
 } from '@angular/core';
 import { SearchService } from 'ngx-edu-sharing-api';
-import { Subject } from 'rxjs';
 import * as rxjs from 'rxjs';
+import { Subject } from 'rxjs';
 import { first, map, switchMap, takeUntil } from 'rxjs/operators';
 import { Node, RestConstants } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
@@ -61,6 +61,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
     @Input() toastOnSave = 'WORKSPACE.EDITOR.UPDATED';
     @Input() mode: 'search' | 'default' = 'default';
     @Input() nodes: Node[];
+    @Input() graphqlIds: string[];
     @Input() parentNode: Node;
     @Input() priority = 1;
     @Input() repository = RestConstants.HOME_REPOSITORY;
@@ -113,7 +114,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
         //
         // TODO: Make sure that inputs are ready when this component is initialized and remove calls
         // to `loadMds()`.
-        if (this.nodes || this.currentValues) {
+        if (this.graphqlIds || this.nodes || this.currentValues) {
             this.init();
         }
         this.mdsEditorInstance.values.subscribe((values) => (this.values = values));
@@ -275,12 +276,18 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
         }
         this.isLoading = true;
         try {
-            if (this.nodes) {
-                this.editorType = await this.mdsEditorInstance.initWithNodes(this.nodes, {
-                    groupId: this.groupId,
-                    bulkBehavior: this.bulkBehaviour,
-                    editorMode: this.editorMode ?? 'nodes',
-                });
+            const config = {
+                groupId: this.groupId,
+                bulkBehavior: this.bulkBehaviour,
+                editorMode: this.editorMode ?? 'nodes',
+            };
+            if (this.graphqlIds) {
+                this.editorType = await this.mdsEditorInstance.initWithGraphqlData(
+                    this.graphqlIds,
+                    config,
+                );
+            } else if (this.nodes) {
+                this.editorType = await this.mdsEditorInstance.initWithNodes(this.nodes, config);
             } else {
                 this.editorType = await this.mdsEditorInstance.initWithoutNodes(
                     this.groupId,

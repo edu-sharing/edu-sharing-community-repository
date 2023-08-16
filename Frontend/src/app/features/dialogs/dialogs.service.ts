@@ -41,6 +41,8 @@ import {
     LicenseDialogResult,
 } from './dialog-modules/license-dialog/license-dialog-data';
 import {
+    MdsEditorDialogData,
+    MdsEditorDialogDataGraphql,
     MdsEditorDialogDataNodes,
     MdsEditorDialogDataValues,
     MdsEditorDialogResultNodes,
@@ -401,11 +403,17 @@ export class DialogsService {
 
     async openMdsEditorDialogForNodes(
         data: MdsEditorDialogDataNodes,
-    ): Promise<CardDialogRef<MdsEditorDialogDataNodes, MdsEditorDialogResultNodes>> {
+        mode: 'graphql' | 'rest' = 'graphql',
+    ): Promise<CardDialogRef<MdsEditorDialogData, MdsEditorDialogResultNodes>> {
         const { MdsEditorDialogComponent } = await import(
             './dialog-modules/mds-editor-dialog/mds-editor-dialog.module'
         );
-        data = { ...new MdsEditorDialogDataNodes(), ...data };
+        if (mode === 'graphql') {
+            data = {
+                graphqlIds: data.nodes.map((n) => n.ref.id),
+                ...data,
+            } as MdsEditorDialogDataGraphql;
+        }
         return this.cardDialog.open(MdsEditorDialogComponent, {
             title: 'MDS.TITLE',
             ...(await configForNodes(data.nodes, this.translate).toPromise()),

@@ -7,6 +7,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { Toast } from '../../../../../core-ui-module/toast';
 import { MatTabGroup } from '@angular/material/tabs';
+import { MdsWidget } from '../../../types/types';
 
 export interface AuthorData {
     freetext: string;
@@ -71,5 +72,9 @@ export class MdsEditorWidgetVCardComponent extends MdsEditorWidgetBase implement
 
     blur(): void {
         this.onBlur.emit();
+    }
+    public static mapGraphqlId(definition: MdsWidget) {
+        // attach the "Contributor" graphql Attributes
+        return MdsEditorWidgetBase.attachGraphqlSelection(definition, ['role', 'content']);
     }
 }

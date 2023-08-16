@@ -1,7 +1,7 @@
 import { ValidatorFn, Validators } from '@angular/forms';
-import { MdsEditorWidgetCore } from '../mds-editor-instance.service';
-import { InputStatus, RequiredMode } from '../../types/types';
+import { InputStatus, MdsWidget, RequiredMode } from '../../types/types';
 import { Directive, EventEmitter } from '@angular/core';
+import { MdsEditorWidgetCore } from '../mds-editor-widget-core.directive';
 
 export enum ValueType {
     String,
@@ -49,5 +49,24 @@ export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
             validators.push(overrides.requiredValidator ?? Validators.required);
         }
         return validators;
+    }
+    protected static attachGraphqlSelection(definition: MdsWidget, fields: string[]) {
+        const id = MdsEditorWidgetBase.mapGraphqlId(definition);
+        if (id) {
+            const originalId = id[0];
+            return fields.map((f) => originalId + '.' + f);
+        }
+        return null;
+    }
+    public static mapGraphqlId(definition: MdsWidget) {
+        // @TODO: make types!
+        const id = (definition as any).ids?.graphql;
+        if (id) {
+            return [(definition as any).ids?.graphql];
+        }
+        return null;
+    }
+    public static mapGraphqlSuggestionId(definition: MdsWidget): string[] {
+        return [];
     }
 }

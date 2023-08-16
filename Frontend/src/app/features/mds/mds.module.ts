@@ -18,7 +18,10 @@ import { MdsEditorWidgetAuthorityComponent } from './mds-editor/widgets/mds-edit
 import { MdsEditorWidgetCheckboxComponent } from './mds-editor/widgets/mds-editor-widget-checkbox/mds-editor-widget-checkbox.component';
 import { MdsEditorWidgetCheckboxesComponent } from './mds-editor/widgets/mds-editor-widget-checkboxes/mds-editor-widget-checkboxes.component';
 import { MdsEditorWidgetChildobjectsComponent } from './mds-editor/widgets/mds-editor-widget-childobjects/mds-editor-widget-childobjects.component';
-import { MdsEditorWidgetChipsComponent } from './mds-editor/widgets/mds-editor-widget-chips/mds-editor-widget-chips.component';
+import {
+    MdsEditorWidgetChipsComponent,
+    MdsEditorWidgetChipsRangedValueComponent,
+} from './mds-editor/widgets/mds-editor-widget-chips/mds-editor-widget-chips.component';
 import { MdsEditorWidgetContainerComponent } from './mds-editor/widgets/mds-editor-widget-container/mds-editor-widget-container.component';
 import { RegisterFormFieldDirective } from './mds-editor/widgets/mds-editor-widget-container/register-form-field.directive';
 import { MdsEditorWidgetDurationComponent } from './mds-editor/widgets/mds-editor-widget-duration/mds-editor-widget-duration.component';
@@ -32,7 +35,10 @@ import { MdsEditorWidgetPreviewComponent } from './mds-editor/widgets/mds-editor
 import { MdsEditorWidgetRadioButtonComponent } from './mds-editor/widgets/mds-editor-widget-radio-button/mds-editor-widget-radio-button.component';
 import { MdsEditorWidgetSearchSuggestionsComponent } from './mds-editor/widgets/mds-editor-widget-search-suggestions/mds-editor-widget-search-suggestions.component';
 import { MdsEditorWidgetSelectComponent } from './mds-editor/widgets/mds-editor-widget-select/mds-editor-widget-select.component';
-import { MdsEditorWidgetSliderComponent } from './mds-editor/widgets/mds-editor-widget-slider/mds-editor-widget-slider.component';
+import {
+    MdsEditorWidgetSliderComponent,
+    MdsEditorWidgetSliderRangeComponent,
+} from './mds-editor/widgets/mds-editor-widget-slider/mds-editor-widget-slider.component';
 import { MdsEditorWidgetSuggestionChipsComponent } from './mds-editor/widgets/mds-editor-widget-suggestion-chips/mds-editor-widget-suggestion-chips.component';
 import { MdsEditorWidgetTextComponent } from './mds-editor/widgets/mds-editor-widget-text/mds-editor-widget-text.component';
 import { HighlightPipe } from './mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree-core/highlight.pipe';
@@ -60,6 +66,7 @@ import { MdsWidgetComponent } from './mds-viewer/widget/mds-widget.component';
         MdsEditorWidgetCheckboxesComponent,
         MdsEditorWidgetChildobjectsComponent,
         MdsEditorWidgetChipsComponent,
+        MdsEditorWidgetChipsRangedValueComponent,
         MdsEditorWidgetContainerComponent,
         MdsEditorWidgetDurationComponent,
         MdsEditorWidgetErrorComponent,
@@ -72,6 +79,7 @@ import { MdsWidgetComponent } from './mds-viewer/widget/mds-widget.component';
         MdsEditorWidgetSearchSuggestionsComponent,
         MdsEditorWidgetSelectComponent,
         MdsEditorWidgetSliderComponent,
+        MdsEditorWidgetSliderRangeComponent,
         MdsEditorWidgetSuggestionChipsComponent,
         MdsEditorWidgetTextComponent,
         MdsEditorWidgetTinyMCE,

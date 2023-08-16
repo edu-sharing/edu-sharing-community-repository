@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Options } from '@angular-slider/ngx-slider';
-import { MdsWidgetType, MdsWidgetValue } from '../../../types/types';
+import { MdsWidget, MdsWidgetType, MdsWidgetValue } from '../../../types/types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
-    selector: 'es-mds-editor-widget-slider',
     templateUrl: './mds-editor-widget-slider.component.html',
     styleUrls: ['./mds-editor-widget-slider.component.scss'],
 })
@@ -121,5 +120,15 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
             return;
         }
         this.setValue([this.currentValue?.[0]?.toString(), value.toString()], true);
+    }
+}
+@Component({
+    templateUrl: './mds-editor-widget-slider.component.html',
+    styleUrls: ['./mds-editor-widget-slider.component.scss'],
+})
+export class MdsEditorWidgetSliderRangeComponent extends MdsEditorWidgetSliderComponent {
+    public static mapGraphqlId(definition: MdsWidget) {
+        // attach the "IntRangeNominal" graphql Attributes
+        return MdsEditorWidgetBase.attachGraphqlSelection(definition, ['from', 'to']);
     }
 }

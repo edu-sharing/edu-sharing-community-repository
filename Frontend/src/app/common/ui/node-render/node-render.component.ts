@@ -746,7 +746,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             data[id] = [value];
             params.mds = this.getMdsId();
             params.sidenav = true;
-            params.repository = this.repository;
+            params.repo = this.repository;
             params.parameters = JSON.stringify(data);
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], { queryParams: params });
         });

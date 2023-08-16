@@ -153,6 +153,7 @@
               placeholder="ADMIN.MEDIACENTER.GROUPS.ADD_LABEL"
               [mode]="AuthoritySearchMode.Organizations"
               [showRecent]="false"
+              [globalSearchAllowed]="true"
               (onChooseAuthority)="addGroup = $event"
             ></es-authority-search-input>
             <button *ngIf="addGroup" mat-raised-button color="primary" (click)="addCurrentGroup()">

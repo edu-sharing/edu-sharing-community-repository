@@ -1,9 +1,11 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
+import { Metadata } from 'dist/edu-sharing-graphql/ngx-edu-sharing-graphql';
 import { Node } from 'ngx-edu-sharing-api';
 import { RestConnectorService, RestConstants } from '../../../../../../core-module/core.module';
 import { NodeHelperService } from '../../../../../../core-ui-module/node-helper.service';
 import { Values } from '../../../../types/types';
+import { Helper } from '../../../../../../core-module/rest/helper';
 
 @Component({
     selector: 'es-license-details',
@@ -11,7 +13,13 @@ import { Values } from '../../../../types/types';
     styleUrls: ['license-details.component.scss'],
 })
 export class LicenseDetailsComponent implements OnChanges {
+    static PROPERTIES_MAPPING_GRAPHQL: { [key: string]: string } = {
+        [RestConstants.CCM_PROP_LICENSE]: 'lom.rights.internal',
+        [RestConstants.LOM_PROP_RIGHTS_DESCRIPTION]: 'lom.rights.description',
+    };
+
     @Input() nodes: Node[];
+    @Input() metadata: Metadata[];
     @Input() properties: Values;
     type: string;
     ccShare: string;
@@ -30,7 +38,7 @@ export class LicenseDetailsComponent implements OnChanges {
     ) {}
     ngOnChanges(changes: SimpleChanges) {
         // Set the `draggable` attribute when this directive is active.
-        if (changes.nodes) {
+        if (changes.nodes?.currentValue || changes.metadata?.currentValue) {
             this.readLicense();
         }
     }
@@ -81,14 +89,32 @@ export class LicenseDetailsComponent implements OnChanges {
     ) {
         if (this.properties) {
             return this.properties[prop] ? this.properties[prop][0] : fallbackIsEmpty;
+        } else if (this.metadata) {
+            const data = this.metadata.map(
+                (m) =>
+                    Helper.getDotPathFromNestedObject(
+                        m,
+                        LicenseDetailsComponent.PROPERTIES_MAPPING_GRAPHQL[prop],
+                    ) as string,
+            );
+            return this.nodeHelper.getValueForAllString(
+                data,
+                fallbackNotIdentical,
+                fallbackIsEmpty,
+                false,
+            );
+        } else if (this.nodes) {
+            return this.nodeHelper.getValueForAll(
+                this.nodes,
+                prop,
+                fallbackNotIdentical,
+                fallbackIsEmpty,
+                false,
+            );
+        } else {
+            // console.warn('license has no data to display');
+            return fallbackIsEmpty;
         }
-        return this.nodeHelper.getValueForAll(
-            this.nodes,
-            prop,
-            fallbackNotIdentical,
-            fallbackIsEmpty,
-            false,
-        );
     }
     getLicenseIcon() {
         return this.nodeHelper.getLicenseIconByString(this.getLicenseProperty());

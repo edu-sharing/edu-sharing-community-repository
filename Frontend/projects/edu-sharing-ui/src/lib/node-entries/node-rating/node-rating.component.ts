@@ -19,9 +19,8 @@ export class NodeRatingComponent<T extends Node> implements OnInit {
         public toast: Toast,
         public configService: ConfigService,
         public authenticationService: AuthenticationService,
-        public changeDetectorRef: ChangeDetectorRef, // @TODO
-    ) // public ratingService: RestRatingService,
-    {}
+        public changeDetectorRef: ChangeDetectorRef, // @TODO // public ratingService: RestRatingService,
+    ) {}
 
     async ngOnInit() {
         await this.configService.observeConfig().pipe(take(1)).toPromise();

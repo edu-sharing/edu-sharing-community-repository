@@ -8,10 +8,11 @@ import { RestConnectorService } from '../../../../../core-module/rest/services/r
 import { NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { Constraints, MdsWidgetValue, Values } from '../../../types/types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { DialogsService } from '../../../../dialogs/dialogs.service';
+import { Metadata } from 'ngx-edu-sharing-graphql';
+import { NativeWidgetComponent } from '../../../types/mds-types';
 
 @Component({
     selector: 'es-mds-editor-widget-license',
@@ -27,6 +28,12 @@ export class MdsEditorWidgetLicenseComponent
         requiresNode: false,
         supportsBulk: true,
     };
+    static readonly graphqlIds = [
+        'lom.rights.description',
+        'lom.rights.version',
+        'lom.rights.internal',
+        'lom.rights.locale',
+    ];
     readonly valueType: ValueType = ValueType.MultiValue;
     hasChanges = new BehaviorSubject<boolean>(false);
 
@@ -35,6 +42,7 @@ export class MdsEditorWidgetLicenseComponent
     licenses: License[];
     /** IDs of checked licenses. */
     checked: string[] = [];
+    metadata: Metadata[];
 
     constructor(
         private connector: RestConnectorService,
@@ -51,6 +59,7 @@ export class MdsEditorWidgetLicenseComponent
 
     ngOnInit(): void {
         this.nodes = this.mdsEditorValues.nodes$.value;
+        this.mdsEditorValues.graphqlMetadata$.subscribe((n) => (this.metadata = n));
         this.mdsEditorValues.nodes$.subscribe((n) => (this.nodes = n));
         this.licenses = this.widget?.definition?.values.map((v) => {
             const url = this.nodeHelper.getLicenseIconByString(v.id, false);

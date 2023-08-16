@@ -14,6 +14,7 @@ const PROXY_CONFIG = [
     {
         context: [
             '/edu-sharing/rest',
+            '/edu-sharing/graphql',
             '/edu-sharing/eduservlet',
             '/edu-sharing/preview',
             '/edu-sharing/themes',
