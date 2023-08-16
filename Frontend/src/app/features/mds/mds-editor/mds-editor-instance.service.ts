@@ -79,7 +79,6 @@ import {
 import { gql } from '@apollo/client/core';
 import { Helper } from '../../../core-module/rest/helper';
 import { MdsEditorWidgetCore } from './mds-editor-widget-core.directive';
-import { isNumeric } from 'rxjs/util/isNumeric';
 import { DisplayValue } from './widgets/DisplayValues';
 import { MdsEditorWidgetBase } from './widgets/mds-editor-widget-base';
 import { MdsEditorWidgetSliderRangeComponent } from './widgets/mds-editor-widget-slider/mds-editor-widget-slider.component';
@@ -959,7 +958,7 @@ export class MdsEditorInstanceService implements OnDestroy {
     }
 
     public static mapGraphqlField(id: string, modify: (a: string[]) => string[]) {
-        let path = id.split('.').filter((key) => !isNumeric(key));
+        let path = id.split('.').filter((key) => !isFinite(Number(key)));
         path = modify(path);
         const count = path.length;
         return path.join('{') + '}'.repeat(count - 1);
