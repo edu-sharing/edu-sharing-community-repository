@@ -18,33 +18,32 @@
   [color]="$any('dark')"
   [(selectedIndex)]="tabSelectedIndex"
   *ngIf="showTabs()"
-  class="scrollWithBanner"
 >
-  <mat-tab *ngIf="!isGuest">
+  <mat-tab *ngIf="!isGuest" labelClass="mat-tab-my">
     <ng-template mat-tab-label>
       <i esIcon="person" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.MY' | translate }}</span>
     </ng-template>
   </mat-tab>
-  <mat-tab *ngIf="!isGuest" label="{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}">
+  <mat-tab *ngIf="!isGuest" labelClass="mat-tab-groups">
     <ng-template mat-tab-label>
       <i esIcon="group" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}</span>
     </ng-template>
   </mat-tab>
-  <mat-tab *ngIf="hasEditorial">
+  <mat-tab *ngIf="hasEditorial" labelClass="mat-tab-editorial">
     <ng-template mat-tab-label>
       <i esIcon="star" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL' | translate }}</span>
     </ng-template>
   </mat-tab>
-  <mat-tab *ngIf="hasMediacenter">
+  <mat-tab *ngIf="hasMediacenter" labelClass="mat-tab-media-center">
     <ng-template mat-tab-label>
       <i esIcon="business" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_MEDIA_CENTER' | translate }}</span>
     </ng-template>
   </mat-tab>
-  <mat-tab>
+  <mat-tab labelClass="mat-tab-edu-all">
     <ng-template mat-tab-label>
       <i esIcon="language" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.EDU_ALL' | translate }}</span>
@@ -75,7 +74,7 @@
   <ng-template #collectionContentTemplateRefDefault> </ng-template>
 </div>
 
-<div class="alignWithBanner" cdkDropList [cdkDropListSortingDisabled]="true">
+<div cdkDropList [cdkDropListSortingDisabled]="true">
   <div
     [class.collectionsContainerTabs]="showTabs()"
     [class.collectionsContainerNoSidebar]="isRootLevelCollection() || isLoading"

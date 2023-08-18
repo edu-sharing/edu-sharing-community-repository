@@ -95,6 +95,15 @@
     <pluginManagement>
 
       <plugins>
+        <plugin>
+          <!-- override super pom version for compatibility with java 8 -->
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <runOrder>alphabetical</runOrder>
+            <argLine>-Xmx1024m</argLine>
+          </configuration>
+        </plugin>
 
         <plugin>
           <groupId>org.alfresco.maven.plugin</groupId>
@@ -769,6 +778,7 @@
       <dependency>
         <groupId>org.springframework.security.extensions</groupId>
         <artifactId>spring-security-saml2-core</artifactId>
+        <!-- 1.0.4 and later breaks the HTTPS Checks, see https://github.com/spring-attic/spring-security-saml/issues/233 -->
         <version>1.0.3.RELEASE</version>
       </dependency>
 
@@ -998,6 +1008,12 @@
         <groupId>javax.validation</groupId>
         <artifactId>validation-api</artifactId>
         <version>2.0.1.Final</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.opencsv</groupId>
+        <artifactId>opencsv</artifactId>
+        <version>5.7.1</version>
       </dependency>
 
     </dependencies>

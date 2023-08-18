@@ -40,6 +40,7 @@ export {
     UserQuota,
     UserStatus,
     WebsiteInformation,
+    RegisterInformation,
 } from './api/models';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Group, MdsView, Organization, Person, User } from './api/models';

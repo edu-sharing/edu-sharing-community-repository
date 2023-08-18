@@ -250,17 +250,27 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
     }
 
     getSortColumns() {
-        return this.entriesService.sort?.columns?.filter((c) =>
-            this.entriesService.columns
+        return this.entriesService.sort?.columns?.filter((c) => {
+            const result = this.entriesService.columns
                 .concat(
                     new ListItemSort('NODE', 'score'),
                     new ListItemSort('NODE', RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION),
                     new ListItemSort('NODE', RestConstants.CM_PROP_TITLE),
                     new ListItemSort('NODE', RestConstants.CM_NAME),
                     new ListItemSort('NODE', RestConstants.CM_MODIFIED_DATE),
+                    new ListItemSort('NODE', RestConstants.CCM_PROP_REPLICATIONMODIFIED),
+                    new ListItemSort('NODE', RestConstants.CCM_PROP_REPLICATIONSOURCETIMESTAMP),
                 )
-                .some((c2) => c2.name === c.name),
-        );
+                .some((c2) => c2.name === c.name);
+            if (!result) {
+                console.warn(
+                    'Sort field ' +
+                        c.name +
+                        ' was specified but is not present as a column. It will be ignored. Please also configure this field in the <lists> section',
+                );
+            }
+            return result;
+        });
     }
 
     canDropNodes = (dragData: DragData<T>) => this.entriesService.dragDrop.dropAllowed?.(dragData);

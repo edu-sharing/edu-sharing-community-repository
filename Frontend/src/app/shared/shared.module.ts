@@ -63,6 +63,7 @@ import { PermissionNamePipe } from './pipes/permission-name.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
 import { environment } from '../../environments/environment';
+import { TitleDirective } from './directives/title.directive';
 
 @NgModule({
     declarations: [
@@ -92,6 +93,7 @@ import { environment } from '../../environments/environment';
         SafeHtmlPipe,
         SkipTargetDirective,
         SpinnerSmallComponent,
+        TitleDirective,
         TutorialComponent,
         UserAvatarComponent,
         VersionLabelPipe,
@@ -180,6 +182,7 @@ import { environment } from '../../environments/environment';
         SafeHtmlPipe,
         SkipTargetDirective,
         SpinnerSmallComponent,
+        TitleDirective,
         TutorialComponent,
         UserAvatarComponent,
         VersionLabelPipe,

@@ -139,7 +139,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
 
         this.translations.waitForInit().subscribe(() => {
             this.banner = ConfigurationHelper.getBanner(this.configService);
-            this.connector.setRoute(this.route);
+            this.connector.setRoute(this.route, this.router);
             this.networkService.prepareCache();
             this.route.queryParams.subscribe((params: Params) => {
                 this.closeOnBack = params.closeOnBack === 'true';
@@ -185,6 +185,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
     ngOnInit(): void {
         this.mainNavService.setMainNavConfig({
             show: true,
+            showNavigation: false,
             currentScope: 'render',
         });
         this.optionsHelper.registerGlobalKeyboardShortcuts();

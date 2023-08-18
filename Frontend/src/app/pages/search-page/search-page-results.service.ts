@@ -31,6 +31,8 @@ import {
 import { SearchPageRestoreService } from './search-page-restore.service';
 import { SearchPageService, SearchRequestParams } from './search-page.service';
 import { RestConstants } from '../../core-module/rest/rest-constants';
+import { MdsWidgetType } from 'src/app/features/mds/types/types';
+import { RestSearchService } from 'src/app/core-module/core.module';
 
 export interface SearchPageResults {
     totalResults?: Observable<number>;
@@ -194,7 +196,6 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
     }
 
     private _getSearchRemote(params: SearchRequestParams): NodeRemote<Node> {
-        console.log(params);
         // console.log('%cgetSearchRemote', 'font-weight: bold', params);
         return (request: NodeRequestParams) => {
             // console.log('search', request);
@@ -273,12 +274,10 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
     }
 
     private _getSearchCriteria(params: SearchRequestParams): MdsQueryCriteria[] {
-        // TODO: Port `unfoldTrees` feature from 8.0. See
-        // https://scm.edu-sharing.com/edu-sharing/community/repository/edu-sharing-angular-core-module/-/blob/5447ea837a99a3dab04395c10464dd417ddb73a1/rest/services/rest-search.service.ts#L34.
-        // Also consider a backend solution.
-        const criteria: MdsQueryCriteria[] = Object.entries(params.searchFilters ?? {}).map(
+        let criteria: MdsQueryCriteria[] = Object.entries(params.searchFilters ?? {}).map(
             ([property, values]) => ({ property, values }),
         );
+        this.convertCriteria(criteria);
         if (params.searchString) {
             criteria.push({ property: 'ngsearchword', values: [params.searchString] });
         }
@@ -300,5 +299,36 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
                 // tap((progress) => console.log('progress', progress)),
             )
             .subscribe((progress) => this.loadingProgress.next(progress));
+    }
+
+    // TODO: Port `unfoldTrees` methods from 8.0. See
+    // https://scm.edu-sharing.com/edu-sharing/community/repository/edu-sharing-angular-core-module/-/blob/5447ea837a99a3dab04395c10464dd417ddb73a1/rest/services/rest-search.service.ts#L34.
+    // Also consider a backend solution.
+    private convertCriteria(criteria: MdsQueryCriteria[]): void {
+        for (const c of criteria) {
+            // We get the widget definition from the MDS editor instance, so overrides with `data-`
+            // attributes in the MDS template are reflected.
+            const widget = this._searchPage.filtersMdsWidgets.value?.find(
+                (widget) => widget.definition.id === c.property,
+            )?.definition;
+            if (widget?.type === MdsWidgetType.MultiValueTree) {
+                // For multi-value-tree widgets, add all child values of selected values to the
+                // search criteria.
+                let attach = MdsService.unfoldTreeChilds(c.values, widget);
+                if (attach) {
+                    if (attach.length > RestSearchService.MAX_QUERY_CONCAT_PARAMS) {
+                        console.info(
+                            'param ' +
+                                c.property +
+                                ' has too many unfold childs (' +
+                                attach.length +
+                                '), falling back to basic prefix-based search',
+                        );
+                    } else {
+                        c.values = c.values.concat(attach);
+                    }
+                }
+            }
+        }
     }
 }

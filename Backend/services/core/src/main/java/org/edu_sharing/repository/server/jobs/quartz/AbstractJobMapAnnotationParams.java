@@ -27,6 +27,7 @@
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
+import com.google.api.client.util.Data;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.math3.analysis.function.Abs;
@@ -36,10 +37,8 @@ import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescript
 import org.quartz.*;
 
 import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class AbstractJobMapAnnotationParams extends AbstractJob {
@@ -51,6 +50,7 @@ public abstract class AbstractJobMapAnnotationParams extends AbstractJob {
 			if(field.isAnnotationPresent(JobFieldDescription.class)) {
 				try {
 					field.setAccessible(true);
+					Object value = jobExecutionContext.getJobDetail().getJobDataMap().get(field.getName());
 					if(field.getType().isEnum()) {
 						field.set(this,
 								mapEnum(field.getType(), jobExecutionContext.getJobDetail().getJobDataMap().getString(field.getName()))
@@ -67,18 +67,33 @@ public abstract class AbstractJobMapAnnotationParams extends AbstractJob {
 							logger.warn(e.getMessage(), e);
 						}
 					} else if(field.getType().isAssignableFrom(Collection.class) || field.getType().equals(List.class)) {
-						Class<?> type = (Class<?>) ((ParameterizedType)field.getGenericType()).getActualTypeArguments()[0];
-						field.set(this,
-								((Collection<?>)jobExecutionContext.getJobDetail().getJobDataMap().get(field.getName())).stream().map(
-										(v) -> {
-											if(type.isEnum()) {
-												return mapEnum(type,
-														(String) v);
-											} else {
-												return v;
-											}
-										}
-								).collect(Collectors.toList()));
+						if(value != null) {
+							Type abstractType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+							if(abstractType instanceof ParameterizedType) {
+								field.set(this,
+										new ArrayList<>(((Collection<?>) value))
+								);
+							} else {
+								Class<?> type = (Class<?>) abstractType;
+								if (jobExecutionContext.getJobDetail().getJobDataMap().get(field.getName()) != null) {
+									field.set(this,
+											((Collection<?>) jobExecutionContext.getJobDetail().getJobDataMap().get(field.getName())).stream().map(
+													(v) -> {
+														if (type.isEnum()) {
+															return mapEnum(type,
+																	(String) v);
+														} else {
+															return v;
+														}
+													}
+											).collect(Collectors.toList()));
+								}
+							}
+						}
+					} else if(field.getType().equals(Date.class) && value != null) {
+						String formatPattern = "yyyy-MM-dd";
+						SimpleDateFormat dateFormat = new SimpleDateFormat(formatPattern);
+						field.set(this, dateFormat.format(jobExecutionContext.getJobDetail().getJobDataMap().get(field.getName())));
 					} else {
 						field.set(this, jobExecutionContext.getJobDetail().getJobDataMap().get(field.getName()));
 					}

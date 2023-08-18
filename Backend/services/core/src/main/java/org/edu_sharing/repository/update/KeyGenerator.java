@@ -6,6 +6,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.UUID;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
@@ -75,6 +76,17 @@ public class KeyGenerator extends UpdateAbstract {
 				if (!test) {
 					PropertiesHelper.setProperty(ApplicationInfo.KEY_PRIVATE_KEY,
 							new String(new Base64().encode(kp.getPrivate().getEncoded())),
+							file, PropertiesHelper.XML);
+				}
+
+			}
+
+			if(homeRepo.getLtiKid() == null){
+				logInfo("will set lti kid");
+
+				if (!test) {
+					PropertiesHelper.setProperty(ApplicationInfo.KEY_LTI_KID,
+							UUID.randomUUID().toString(),
 							file, PropertiesHelper.XML);
 				}
 

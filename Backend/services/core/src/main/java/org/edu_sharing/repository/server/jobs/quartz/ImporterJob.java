@@ -251,7 +251,7 @@ public class ImporterJob extends AbstractJob implements JobClusterLocker.Cluster
 				if(persistentHandler != null){
 					importer.setPersistentHandler(persistentHandler.newInstance());
 				}else{
-					importer.setPersistentHandler(new PersistentHandlerEdusharing(this,importer,true));
+					importer.setPersistentHandler(new PersistentHandlerEdusharing(this,importer,false));
 				}
 
 				importer.setSet(set);

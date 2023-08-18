@@ -1,7 +1,13 @@
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
-import { Node, ConfigService, AuthenticationService, RestConstants } from 'ngx-edu-sharing-api';
+import {
+    Node,
+    ConfigService,
+    AuthenticationService,
+    RestConstants,
+    NetworkService,
+} from 'ngx-edu-sharing-api';
 import { Toast } from '../../services/abstract/toast.service';
-import { take } from 'rxjs/operators';
+import { take, takeUntil } from 'rxjs/operators';
 import { RestHelper } from '../../util/rest-helper';
 @Component({
     selector: 'es-node-rating',
@@ -18,6 +24,7 @@ export class NodeRatingComponent<T extends Node> implements OnInit {
     constructor(
         public toast: Toast,
         public configService: ConfigService,
+        private networkApi: NetworkService,
         public authenticationService: AuthenticationService,
         public changeDetectorRef: ChangeDetectorRef, // @TODO // public ratingService: RestRatingService,
     ) {}
@@ -89,6 +96,10 @@ export class NodeRatingComponent<T extends Node> implements OnInit {
         } catch (e) {
             this.toast.error(e);
         }
+    }
+
+    isFromHomeRepo(node: Node) {
+        return this.networkApi.isFromHomeRepository(node);
     }
 }
 export type RatingMode = 'none' | 'likes' | 'stars';

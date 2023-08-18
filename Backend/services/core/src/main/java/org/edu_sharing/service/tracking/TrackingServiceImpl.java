@@ -1,10 +1,13 @@
 package org.edu_sharing.service.tracking;
 
+import bsh.StringUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.binding.BindingException;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
@@ -13,7 +16,6 @@ import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -23,6 +25,7 @@ import org.edu_sharing.service.tracking.ibatis.NodeData;
 import org.edu_sharing.service.tracking.ibatis.NodeResult;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.postgresql.util.PGobject;
 import org.postgresql.util.PSQLException;
@@ -74,6 +77,11 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     public static String TRACKING_STATISTICS_NODE_SINGLE = "SELECT type,COUNT(*) from edu_tracking_node as tracking" +
             " WHERE node_uuid = ? AND time BETWEEN ? AND ?" +
             " GROUP BY type" +
+            " ORDER BY count DESC";
+
+    public static String TRACKING_STATISTICS_NODE_ARRAY = "SELECT node_uuid, type,COUNT(*) :fields from edu_tracking_node as tracking" +
+            " WHERE node_uuid = ANY(?) AND time BETWEEN ? AND ? AND (ARRAY[?] <@ authority_mediacenter)" +
+            " GROUP BY node_uuid, type" +
             " ORDER BY count DESC";
     public static String TRACKING_STATISTICS_DAILY = "SELECT type,COUNT(*),TO_CHAR(time,'yyyy-mm-dd') as date :fields from :table as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
@@ -284,19 +292,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     private void mapResult(EventType type, List<String> additionalFields, List<String> groupFields, ResultSet resultSet, StatisticEntry entry) throws SQLException {
         setAuthorityFromResult(resultSet, entry);
         if (additionalFields != null && additionalFields.size() > 0) {
-            for (String field : additionalFields) {
-                Map<String, Map<String, Long>> current = entry.getGroups().get(type);
-                if(current==null) {
-                    current = new HashMap<>();
-                }
-                // the sql field will add each property to an array like 1,2,1,3
-                // we will map it to {1:2,2:1,3:1}
-                String[] array = (String[]) resultSet.getArray(field).getArray();
-                HashMap<String, Long> counted = new HashMap<>(Arrays.stream(array).map((a)->a==null ? "" : a)
-                        .collect(Collectors.groupingBy(Function.identity(), Collectors.counting())));
-                current.put(field,counted);
-                entry.getGroups().put(type, current);
-            }
+            mapAdditionalFields(type, additionalFields, resultSet, entry);
         }
         try{
             entry.setDate(resultSet.getString("date"));
@@ -308,6 +304,26 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
                 entry.getFields().put(field, resultSet.getString(field));
             }
         }
+    }
+
+    private static void mapAdditionalFields(EventType type, List<String> additionalFields, ResultSet resultSet, StatisticEntry entry) throws SQLException {
+        for (String field : additionalFields) {
+            Map<String, Map<String, Long>> current = entry.getGroups().get(type);
+            if(current==null) {
+                current = new HashMap<>();
+            }
+            HashMap<String, Long> counted = getArrayAggToCounts((String[]) resultSet.getArray(field).getArray());
+            current.put(field,counted);
+            entry.getGroups().put(type, current);
+        }
+    }
+
+    @NotNull
+    private static HashMap<String, Long> getArrayAggToCounts(String[] arrayAgg) throws SQLException {
+        // the sql field will add each property to an array like 1,2,1,3
+        // we will map it to {1:2,2:1,3:1}
+        return new HashMap<>(Arrays.stream(arrayAgg).map((a)->a==null ? "" : a)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting())));
     }
 
     @Override
@@ -412,6 +428,51 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
                 entry.getCounts().put(EventType.valueOf(resultSet.getString("type")), resultSet.getInt("count"));
             }
             return entry;
+        }catch(Throwable t){
+            throw t;
+        }finally {
+            dbAlf.cleanUp(con, statement);
+        }
+    }
+
+    @Override
+    public Map<NodeRef, StatisticEntry> getListNodeData(List<NodeRef> nodes,java.util.Date dateFrom,java.util.Date dateTo, List<String> additionalFields, String mediacenter) throws Throwable{
+        ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
+        Connection con = null;
+        PreparedStatement statement = null;
+        Map<NodeRef, StatisticEntry> data = new HashMap<>();
+        nodes.forEach(ref -> {
+            data.put(ref, new StatisticEntry());
+        });
+        try {
+            con = dbAlf.getConnection();
+            String query = TRACKING_STATISTICS_NODE_ARRAY;
+            String fields = "";
+            if(!additionalFields.isEmpty()) {
+                fields = "," + StringUtils.join(additionalFields.stream().map(f -> "ARRAY_AGG(" + makeDbField(f, true) + ") as " + f).collect(Collectors.toList()), ",");
+            }
+            query = query.replace(":fields", fields);
+            statement=con.prepareStatement(query);
+            int index=1;
+            statement.setArray(index++,con.createArrayOf("text", nodes.stream().map(NodeRef::getId).toArray()));
+            if(dateFrom==null)
+                dateFrom = new java.util.Date(0);
+            statement.setTimestamp(index++, Timestamp.valueOf(dateFrom.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
+            if(dateTo==null)
+                dateTo = new java.util.Date();
+            statement.setTimestamp(index++, Timestamp.valueOf(dateTo.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
+
+            statement.setString(index++, mediacenter);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, resultSet.getString("node_uuid"));
+                EventType event = EventType.valueOf(resultSet.getString("type"));
+                data.get(nodeRef).getCounts().put(event, resultSet.getInt("count"));
+                if(!additionalFields.isEmpty()) {
+                    mapAdditionalFields(event, additionalFields, resultSet, data.get(nodeRef));
+                }
+            }
+            return data;
         }catch(Throwable t){
             throw t;
         }finally {

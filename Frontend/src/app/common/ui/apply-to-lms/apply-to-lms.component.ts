@@ -117,6 +117,9 @@ export class ApplyToLmsComponent {
             );
             return;
         }
+        console.warn(
+            'Using an absolute url for the "reurl" parameter is deprecated. Please prefer the value "WINDOW" and use frame communication',
+        );
         let params = reurl.indexOf('?') == -1 ? '?' : '&';
         params += 'nodeId=' + ccrepUrl;
         params += '&localId=' + encodeURIComponent(node.ref.id);
@@ -145,12 +148,8 @@ export class ApplyToLmsComponent {
         // let contentParams = node.contentUrl.indexOf("?") == -1 ? '?' : '&';
         // contentParams += "LMS_URL=" + encodeURIComponent(reurl);
         // console.log(node.contentUrl + contentParams);
+        console.log(reurl);
         this.temporaryStorage.set(TemporaryStorageService.APPLY_TO_LMS_PARAMETER_NODE, node);
-        RouterHelper.navigateToAbsoluteUrl(
-            this.platformLocation,
-            this.router,
-            reurl + params,
-            true,
-        );
+        window.location.replace(reurl + params);
     }
 }

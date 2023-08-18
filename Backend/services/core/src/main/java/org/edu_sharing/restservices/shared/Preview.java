@@ -8,11 +8,14 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.PreviewServlet;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeService;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 
 
@@ -62,7 +65,29 @@ public class Preview implements Serializable {
 	  }
 	  */
   }
-/**
+
+  public Preview(String storeProtocol, String storeIdentifier, String nodeId, NodeRef.Preview previewData) {
+    setUrl(NodeServiceFactory.getLocalService().getPreviewUrl(
+            storeProtocol,
+            storeIdentifier,
+            nodeId,
+            null
+    ));
+    if(previewData.getIcon() != null) {
+      setIsIcon(previewData.getIcon());
+    } else {
+      Logger.getLogger(Preview.class).warn("no preview icon info in elastic index for node " + nodeId);
+    }
+    if(previewData.getType() != null) {
+      setType(previewData.getType());
+    } else {
+      Logger.getLogger(Preview.class).warn("no preview type info in elastic index for node " + nodeId);
+    }
+    setMimetype(previewData.getMimetype());
+    setData(previewData.getData());
+  }
+
+  /**
    **/
   @Schema(required = true, description = "")
   @JsonProperty("url")
@@ -153,6 +178,7 @@ public class Preview implements Serializable {
     this.data = data;
   }
 
+  @Schema(type = "string", format = "byte")
   public byte[] getData() {
     return data;
   }

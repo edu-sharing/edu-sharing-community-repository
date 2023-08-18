@@ -379,6 +379,7 @@ export class DialogsService {
         return this.cardDialog.open(NodeRelationsDialogComponent, {
             title: 'NODE_RELATIONS.TITLE',
             ...configForNode(data.node),
+            closable: Closable.Standard,
             width: 700,
             minHeight: 700,
             data,

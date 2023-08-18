@@ -203,9 +203,11 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 		if(loginSuccessRedirectUrl.contains(CCConstants.REQUEST_PARAM_DISABLE_GUESTFILTER)){
 			loginSuccessRedirectUrl = UrlTool.removeParam(loginSuccessRedirectUrl, CCConstants.REQUEST_PARAM_DISABLE_GUESTFILTER);
 		}
-		
-		log.info(LOGIN_SUCCESS_REDIRECT_URL+":"+loginSuccessRedirectUrl);
-		req.getSession().setAttribute(LOGIN_SUCCESS_REDIRECT_URL, loginSuccessRedirectUrl);
+		URL url = new URL(req.getRequestURL().toString()+"?"+req.getQueryString());
+		if(!url.getPath().contains(NgServlet.COMPONENTS_ERROR)) {
+			log.info(LOGIN_SUCCESS_REDIRECT_URL + ":" + loginSuccessRedirectUrl);
+			req.getSession().setAttribute(LOGIN_SUCCESS_REDIRECT_URL, loginSuccessRedirectUrl);
+		}
 		
 		String allowedAuthTypes = ApplicationInfoList.getHomeRepository().getAllowedAuthenticationTypes();
 
@@ -243,23 +245,27 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 		}else{
 			// detect if the error component was requested -> then go ahead
 			// otherwise, go to the angular login page
-			URL url = new URL(req.getRequestURL().toString());
-			if(url.getPath().contains(NgServlet.COMPONENTS_ERROR)){
+			URL requestUrl = new URL(req.getRequestURL().toString());
+			if(requestUrl.getPath().contains(NgServlet.COMPONENTS_ERROR)){
 				addErrorCode(resp, url);
 				// go to the error component
 				chain.doFilter(req, resp);
 			}
 			else {
-				// go to angular login
-				RequestDispatcher rp = req.getRequestDispatcher(AuthenticationFilter.PATH_LOGIN_ANGULAR);
-				rp.forward(req, resp);
+				if(requestUrl.getPath().contains("eduservlet/")){
+					resp.sendRedirect("/edu-sharing/shibboleth");
+				} else {
+					// go to angular login
+					RequestDispatcher rp = req.getRequestDispatcher(AuthenticationFilter.PATH_LOGIN_ANGULAR);
+					rp.forward(req, resp);
+				}
 			}
 		}
 	  
 	}
 
 	private void addErrorCode(HttpServletResponse resp, URL url) {
-		String error=url.getPath().substring(url.getPath().indexOf(NgServlet.COMPONENTS_ERROR)+ NgServlet.COMPONENTS_ERROR.length());
+		String error=url.getPath().substring(url.getPath().indexOf(NgServlet.COMPONENTS_ERROR) + NgServlet.COMPONENTS_ERROR.length() + 1);
 		try {
 			resp.setStatus(Integer.parseInt(error));
 		}catch(Throwable t){

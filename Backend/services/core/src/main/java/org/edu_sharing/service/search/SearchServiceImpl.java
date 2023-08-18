@@ -1,6 +1,5 @@
 package org.edu_sharing.service.search;
 
-import com.sun.star.lang.IllegalArgumentException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.search.impl.solr.ESSearchParameters;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;

@@ -13,6 +13,8 @@ import { PlatformLocation } from '@angular/common';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { VCard } from 'ngx-edu-sharing-ui';
+import { RegisterV1Service } from '../../../rest/ng/services/register-v-1.service';
 
 @Component({
     selector: 'es-register-form',
@@ -25,7 +27,7 @@ export class RegisterFormComponent implements OnDestroy {
     password: string;
     registerForm: FormGroup;
     private destroyed$: ReplaySubject<void> = new ReplaySubject(1);
-    info: RegisterInformation;
+    info: RegisterInformation & { vcard: string };
     public news = true;
     public agree = false;
     public privacyUrl: string;
@@ -33,10 +35,17 @@ export class RegisterFormComponent implements OnDestroy {
 
     public register() {
         this.toast.showProgressDialog();
-        this.info = this.registerForm.getRawValue();
+        const rawData = this.registerForm.getRawValue();
+        this.info = rawData;
+        // wrap additional fields (at the moment only "title") into an additional vcard
+        const vcard = new VCard();
+        vcard.title = rawData.title;
+        this.info.vcard = vcard.toVCardString();
+        delete (this.info as any).title;
+
         delete (this.info as any).agree;
         this.info.password = this.password;
-        this.registerService.register(this.info).subscribe(
+        this.registerService.register({ body: this.info }).subscribe(
             () => {
                 this.toast.closeModalDialog();
                 this.onRegisterDone.emit();
@@ -67,12 +76,11 @@ export class RegisterFormComponent implements OnDestroy {
     }
 
     constructor(
-        private connector: RestConnectorService,
         private toast: Toast,
         private platformLocation: PlatformLocation,
         private formBuilder: FormBuilder,
         private router: Router,
-        private registerService: RestRegisterService,
+        private registerService: RegisterV1Service,
         private translations: TranslationsService,
         private configService: ConfigurationService,
     ) {
@@ -83,6 +91,10 @@ export class RegisterFormComponent implements OnDestroy {
             ]);
 
             this.registerForm = this.formBuilder.group({
+                title: new FormControl(
+                    '',
+                    this.requiredFields.includes('title') ? [Validators.required] : null,
+                ),
                 firstName: new FormControl(
                     '',
                     this.requiredFields.includes('firstName') ? [Validators.required] : null,

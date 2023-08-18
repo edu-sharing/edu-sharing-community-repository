@@ -10,6 +10,8 @@ import { NodeEntriesTableComponent } from './node-entries-table/node-entries-tab
 import { NodeEntriesWrapperComponent } from './node-entries-wrapper.component';
 import { NodeEntriesComponent } from './node-entries.component';
 import { NodeRatingComponent } from './node-rating/node-rating.component';
+import { NodeStatsBadgesComponent } from './node-stats-badges/node-stats-badges.component';
+import { NodeTypeBadgeComponent } from './node-type-badge/node-type-badge.component';
 import { OptionButtonComponent } from './option-button/option-button.component';
 import { PreviewImageComponent } from './preview-image/preview-image.component';
 import { DragPreviewComponent } from './drag-preview/drag-preview.component';
@@ -37,24 +39,28 @@ import { NodeEntriesGlobalOptionsComponent } from './node-entries-global-options
 
 @NgModule({
     declarations: [
+        ColumnChooserComponent,
+        DragPreviewComponent,
+        FocusStateDirective,
+        ListItemLabelPipe,
         NodeEntriesCardComponent,
         NodeEntriesCardGridComponent,
         NodeEntriesCardSmallComponent,
         NodeEntriesTableComponent,
         NodeRatingComponent,
         PreviewImageComponent,
-        NodeEntriesWrapperComponent,
         NodeEntriesComponent,
-        ColumnChooserComponent,
-        ListItemLabelPipe,
+        NodeEntriesWrapperComponent,
+        NodeRatingComponent,
+        NodeTypeBadgeComponent,
         OptionButtonComponent,
-        FocusStateDirective,
-        DragPreviewComponent,
+        PreviewImageComponent,
         SortSelectPanelComponent,
         NodesDragDirective,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
         NodeEntriesGlobalOptionsComponent,
+        NodeStatsBadgesComponent,
     ],
     imports: [
         CommonModule,
@@ -62,7 +68,6 @@ import { NodeEntriesGlobalOptionsComponent } from './node-entries-global-options
         A11yModule,
         OverlayModule,
         DragDropModule,
-        MatPaginatorModule,
         EduSharingUiCommonModule,
         ListItemsModule,
         MatCheckboxModule,
@@ -71,6 +76,7 @@ import { NodeEntriesGlobalOptionsComponent } from './node-entries-global-options
         MatMenuModule,
         MatTableModule,
         MatCheckboxModule,
+        MatPaginatorModule,
         MatRippleModule,
         MatSortModule,
         MatTooltipModule,

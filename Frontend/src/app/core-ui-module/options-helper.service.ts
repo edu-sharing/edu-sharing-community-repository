@@ -12,7 +12,7 @@ import {
     Observable,
 } from 'rxjs';
 import { isArray } from 'rxjs/internal/util/isArray';
-import { catchError, map, takeUntil, tap } from 'rxjs/operators';
+import { catchError, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { BridgeService } from '../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
@@ -31,6 +31,7 @@ import { RestNetworkService } from '../core-module/rest/services/rest-network.se
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
 import { UIService } from '../core-module/rest/services/ui.service';
 import { MessageType } from '../core-module/ui/message-type';
+import { DELETE_OR_CANCEL } from '../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { WorkspaceManagementDialogsComponent } from '../modules/management-dialogs/management-dialogs.component';
@@ -1792,27 +1793,45 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         return null;
     }
 
-    private removeFromCollection(
+    /**
+     * Shows a confirmation dialog and removes the given nodes from the current collection if
+     * confirmed.
+     */
+    private async removeFromCollection(
         nodes: Node[],
         components: OptionsHelperComponents,
         data: OptionData,
     ) {
-        forkJoinWithErrors(
-            nodes.map((node: Node) =>
-                this.collectionService
-                    .removeFromCollection(node.ref.id, data.parent.ref.id)
-                    .pipe(map(() => node)),
-            ),
-        ).subscribe(({ successes: deletedNodes, errors }) => {
-            if (errors.length > 0) {
-                this.toast.error(errors[0]);
-            } else {
-                this.toast.toast('COLLECTIONS.REMOVED_FROM_COLLECTION');
-            }
-            if (deletedNodes.length > 0) {
-                this.localEvents.nodesDeleted.emit(deletedNodes);
-            }
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'OPTIONS.REMOVE_REF',
+            messageText: 'COLLECTIONS.REMOVE_FROM_COLLECTION_DIALOG_TEXT',
+            messageParameters: { count: nodes.length.toString() },
+            buttons: DELETE_OR_CANCEL,
         });
+        dialogRef
+            .afterClosed()
+            .pipe(
+                filter((value) => value === 'YES_DELETE'),
+                switchMap(() =>
+                    forkJoinWithErrors(
+                        nodes.map((node: Node) =>
+                            this.collectionService
+                                .removeFromCollection(node.ref.id, data.parent.ref.id)
+                                .pipe(map(() => node)),
+                        ),
+                    ),
+                ),
+            )
+            .subscribe(({ successes: deletedNodes, errors }) => {
+                if (errors.length > 0) {
+                    this.toast.error(errors[0]);
+                } else {
+                    this.toast.toast('COLLECTIONS.REMOVED_FROM_COLLECTION');
+                }
+                if (deletedNodes.length > 0) {
+                    this.localEvents.nodesDeleted.emit(deletedNodes);
+                }
+            });
     }
 
     private editCollection(object: Node | any) {

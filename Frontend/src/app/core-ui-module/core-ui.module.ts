@@ -24,7 +24,6 @@ import { UserTileComponent } from './components/user-tile/user-tile.component';
 import { DurationPipe } from './components/video-controls/duration.pipe';
 import { VideoControlsComponent } from './components/video-controls/video-controls.component';
 import { DistinctClickDirective } from './directives/distinct-click.directive';
-import { TitleDirective } from './directives/title.directive';
 import { NodeHelperService } from './node-helper.service';
 import { OptionsHelperService } from './options-helper.service';
 import { UrlPipe } from './pipes/url.pipe';
@@ -56,7 +55,6 @@ import { MdsNodeRelationsWidgetComponent } from '../common/ui/node-render/node-r
         ListOptionItemComponent,
         DistinctClickDirective,
         DurationPipe,
-        TitleDirective,
     ],
     imports: [
         SharedModule,
@@ -101,7 +99,6 @@ import { MdsNodeRelationsWidgetComponent } from '../common/ui/node-render/node-r
         UserTileComponent,
         CollectionChooserComponent,
         UrlPipe,
-        TitleDirective,
     ],
 })
 export class CoreUiModule {}

@@ -115,6 +115,7 @@ public class ShibbolethServlet extends HttpServlet {
 		redirectUrl = (String)req.getSession().getAttribute(NgServlet.PREVIOUS_ANGULAR_URL);
 		// prefer the login url since it will intercept the regular angular url
 		if(req.getSession().getAttribute(AuthenticationFilter.LOGIN_SUCCESS_REDIRECT_URL) != null){
+			logger.debug("Previous frontend url found: " + req.getSession().getAttribute(AuthenticationFilter.LOGIN_SUCCESS_REDIRECT_URL));
 			redirectUrl = (String) req.getSession().getAttribute(AuthenticationFilter.LOGIN_SUCCESS_REDIRECT_URL);
 		}
 

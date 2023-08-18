@@ -323,7 +323,9 @@ public class CCConstants {
 	public final static String CM_PROP_PERSON_SIZE_QUOTA = "{http://www.alfresco.org/model/content/1.0}sizeQuota";
 
 	public final static String CM_PROP_PERSON_ESORIGINALUID = "{http://www.alfresco.org/model/content/1.0}esoriginaluid";
-	
+
+	public final static String CM_PROP_PERSON_ESAFFILIATIONS = "{http://www.alfresco.org/model/content/1.0}esaffiliations";
+
 	public final static String CM_PROP_PERSON_ESPERSONSTATUS = "{http://www.alfresco.org/model/content/1.0}espersonstatus";
 	public final static String CM_PROP_PERSON_ESPERSONSTATUSDATE = "{http://www.alfresco.org/model/content/1.0}espersonstatusdate";
 
@@ -418,6 +420,8 @@ public class CCConstants {
 	public final static String CCM_ASPECT_USER_EXTENSION ="{http://www.campuscontent.de/model/1.0}userExtension";
 
 	public final static String CCM_ASPECT_LICENSES ="{http://www.campuscontent.de/model/1.0}licenses";
+
+	public final static String CCM_MEDIACENTER_STATISTICS ="{http://www.campuscontent.de/model/1.0}mediacenter_statistics";
 
 	public final static String CCM_ASPECT_FORKED ="{http://www.campuscontent.de/model/1.0}forked";
 
@@ -809,6 +813,8 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_TECHNICAL_STATE = "{http://www.campuscontent.de/model/1.0}technical_state";
 
 	public final static String CCM_PROP_IO_LOCATION_STATUS = "{http://www.campuscontent.de/model/1.0}location_status";
+
+	public final static String CCM_PROP_IO_LOCATION_STATUS_FAIL_COUNT = "{http://www.campuscontent.de/model/1.0}location_status_fail_count";
 
 	public final static String CCM_PROP_IO_EDITORIAL_CHECKLIST = "{http://www.campuscontent.de/model/1.0}editorial_checklist";
 
@@ -1335,6 +1341,8 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_SERVICE = "EDUSYSTEM_SERVICE";
 
+	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_MEDIACENTER = "EDUSYSTEM_MEDIACENTER";
+
 	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TOOLPERMISSIONS = "EDUSYSTEM_TOOLPERMISSIONS";
 
 	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_VALUESPACE = "EDUSYSTEM_VALUESPACE";
@@ -1555,6 +1563,8 @@ public class CCConstants {
 	public final static String I18n_SYSTEMFOLDER_UPDATE = "systemfolder_update";
 
 	public final static String I18n_SYSTEMFOLDER_CONFIG = "systemfolder_config";
+
+	public final static String I18n_SYSTEMFOLDER_MEDIACENTER = "systemfolder_mediacenter";
 
 	public final static String I18n_SYSTEMFOLDER_NOTIFY = "systemfolder_notify";
 

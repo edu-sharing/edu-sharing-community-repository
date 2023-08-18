@@ -1,10 +1,8 @@
-<!--
-@TODO
-<ng-container *ngIf="hasPermission && node.type === 'ccm:io'">
+<ng-container *ngIf="hasPermission && node.type === 'ccm:io' && isFromHomeRepo(node)">
   <div *ngIf="mode === 'likes'" class="likes">
     <button
       (click)="toogleLike()"
-      [disabled]="connector.getCurrentLogin().isGuest"
+      [disabled]="(this.authenticationService.observeLoginInfo() | async)?.isGuest"
       mat-icon-button
       color="primary"
       matTooltip="{{ 'RATING.LIKES' | translate }}"
@@ -22,7 +20,7 @@
       color="primary"
       class="star"
       (click)="setRating(rating)"
-      [disabled]="connector.getCurrentLogin().isGuest"
+      [disabled]="(this.authenticationService.observeLoginInfo() | async)?.isGuest"
       (focus)="hoverStar = rating"
       (mouseenter)="hoverStar = rating"
       (mouseleave)="hoverStar = 0"
@@ -44,7 +42,7 @@
       class="delete"
       matTooltip="{{ 'RATING.DELETE_RATING' | translate }}"
       (click)="deleteRating()"
-      [disabled]="connector.getCurrentLogin().isGuest"
+      [disabled]="(this.authenticationService.observeLoginInfo() | async)?.isGuest"
     >
       <i esIcon="clear"></i>
     </button>
@@ -53,4 +51,3 @@
     >
   </div>
 </ng-container>
--->

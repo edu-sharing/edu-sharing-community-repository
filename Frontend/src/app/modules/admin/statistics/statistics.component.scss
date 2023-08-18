@@ -89,6 +89,19 @@ es-listTable {
     justify-content: center;
     align-items: center;
 }
+.stats-archived-table {
+    > es-info-message {
+        display: flex;
+        margin: 20px 0;
+    }
+    .empty {
+        color: $textLight;
+        font-size: 110%;
+        padding: 20px;
+        text-align: center;
+    }
+}
+
 .export {
     padding: 30px 20px;
     > h4 {

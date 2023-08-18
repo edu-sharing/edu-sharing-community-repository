@@ -25,11 +25,15 @@ export class ActionbarComponent implements OnChanges {
     @Input() numberOfAlwaysVisibleOptions = 2;
     @Input() numberOfAlwaysVisibleOptionsMobile = 1;
     /**
-     * Appearance show actionbar as button or circles (collection)
-     * Values 'button' or 'round'
-     * Appearance default = button;
+     * Visual style of the actionbar
+     *
+     * Values:
+     *  - 'button': material buttons with icons and text on medium to large screens
+     *  - 'icon-button': material buttons without text
+     *  - 'round': circular buttons without text
+     * @default 'button'
      */
-    @Input() appearance = 'button';
+    @Input() appearance: 'round' | 'button' | 'icon-button' = 'button';
     /**
      * dropdownPosition is for position of dropdown (default = left)
      * Values 'left' or 'right'

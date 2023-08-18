@@ -1833,8 +1833,43 @@
             "format": "int64",
             "type": "integer"
           },
+          "jobDataMap": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "properties": {
+              "allowsTransientData": {
+                "type": "boolean"
+              },
+              "dirty": {
+                "type": "boolean"
+              },
+              "empty": {
+                "type": "boolean"
+              },
+              "keys": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "wrappedMap": {
+                "additionalProperties": {
+                  "type": "object"
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
           "jobDetail": {
             "$ref": "#/components/schemas/JobDetail"
+          },
+          "jobGroup": {
+            "type": "string"
+          },
+          "jobName": {
+            "type": "string"
           },
           "log": {
             "items": {
@@ -3842,11 +3877,8 @@
       "Preview": {
         "properties": {
           "data": {
-            "items": {
-              "format": "byte",
-              "type": "string"
-            },
-            "type": "array"
+            "format": "byte",
+            "type": "string"
           },
           "height": {
             "format": "int32",
@@ -4072,6 +4104,9 @@
             "type": "string"
           },
           "password": {
+            "type": "string"
+          },
+          "vcard": {
             "type": "string"
           }
         },
@@ -12256,6 +12291,7 @@
     },
     "/collection/v1/collections/{repository}/search": {
       "get": {
+        "deprecated": true,
         "description": "Search collections.",
         "operationId": "searchCollections",
         "parameters": [

@@ -280,6 +280,8 @@
     "dimensions": "Bildgröße",
     "exif:dateTimeOriginal": "Aufnahmedatum",
     "cm:modified": "zuletzt geändert",
+    "ccm:replicationmodified": "zuletzt geändert",
+    "ccm:replicationsourcetimestamp": "zuletzt geändert",
     "cm:created": "Erstellungsdatum",
     "cm:creator": "erstellt von",
     "cclom:title": "Titel",
@@ -468,6 +470,7 @@
     "file-xml": "XML-Datei",
     "file-audio": "Audio",
     "file-txt": "Textdatei",
+    "file-csv": "CSV-Datei",
     "file-video": "Video",
     "file-qti": "ONYX-Datei",
     "file-h5p": "H5P-Datei",
@@ -476,6 +479,7 @@
     "folder": "Ordner",
     "file": "Unbekannt",
     "collection": "Sammlung",
+    "tool_object": "LTI-Tool",
     "saved_search": "Suche"
   },
   "PERMISSION_TYPE": {

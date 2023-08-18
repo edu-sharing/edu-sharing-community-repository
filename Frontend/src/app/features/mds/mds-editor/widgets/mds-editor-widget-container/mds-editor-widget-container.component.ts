@@ -19,7 +19,7 @@ import { MatFormFieldControl } from '@angular/material/form-field';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { MdsWidget } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
-import { distinctUntilChanged, map, startWith, takeUntil } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, startWith, takeUntil } from 'rxjs/operators';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { ViewInstanceService } from '../../mds-editor-view/view-instance.service';
 import { BulkBehavior, BulkMode, EditorBulkMode, InputStatus } from '../../../types/types';
@@ -211,7 +211,13 @@ export class MdsEditorWidgetContainerComponent
     }
 
     private initFormControl(formControl: AbstractControl): void {
-        this.widget.observeIsDisabled().subscribe((isDisabled) => this.setDisabled(isDisabled));
+        this.widget
+            .observeIsDisabled()
+            .pipe(
+                // debounce cause form control might not yet initialized
+                debounceTime(10),
+            )
+            .subscribe((isDisabled) => this.setDisabled(isDisabled));
         formControl.statusChanges
             .pipe(startWith(formControl.status), distinctUntilChanged())
             .subscribe((status: InputStatus) => {
