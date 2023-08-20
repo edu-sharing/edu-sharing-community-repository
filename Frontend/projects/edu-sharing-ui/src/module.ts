@@ -14,6 +14,7 @@ export * from './lib/node-entries/node-data-source-remote';
 export * from './lib/node-entries/items-cap';
 export * from './lib/node-entries/combined-data-source';
 export * from './lib/node-entries/entries-model';
+export * from './lib/node-entries/node-entries-global.service';
 export * from './lib/node-entries/node-cache';
 export * from './lib/node-entries/node-entries.module';
 export * from './lib/node-entries/node-entries-wrapper.component';
