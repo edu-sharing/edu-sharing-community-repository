@@ -143,7 +143,6 @@
 		<widget>
 			<caption>Notizen / Bermerkungen (intern)</caption>
 			<id>ccm:notes</id>
-			<id rel="graphql">info.notes</id>
 			<type>textarea</type>
 			<hideIfEmpty>true</hideIfEmpty>
 			<toolpermission>TOOLPERMISSION_COLLECTION_EDITORIAL</toolpermission>
