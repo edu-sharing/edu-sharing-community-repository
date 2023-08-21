@@ -14,7 +14,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { VCard } from 'ngx-edu-sharing-ui';
-import { RegisterV1Service } from '../../../rest/ng/services/register-v-1.service';
+import { RegisterV1Service } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-register-form',
