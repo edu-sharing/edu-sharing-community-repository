@@ -1020,7 +1020,11 @@ export class MdsEditorInstanceService implements OnDestroy {
                     } else {
                         const componentClass: MdsEditorWidgetComponent =
                             WidgetComponents[w.type as MdsWidgetType];
-                        id = componentClass.mapGraphqlId(w);
+                        try {
+                            id = componentClass.mapGraphqlId(w);
+                        } catch (e) {
+                            console.warn('Can not map to graphql', componentClass);
+                        }
                         console.log(id, w.id, componentClass);
                     }
                     if (!id) {
@@ -1047,7 +1051,14 @@ export class MdsEditorInstanceService implements OnDestroy {
                             const componentClass: MdsEditorWidgetComponent =
                                 WidgetComponents[w.type as MdsWidgetType];
                             // only keep ".value" values and filter id values
-                            return componentClass.mapGraphqlSuggestionId(w);
+                            try {
+                                return componentClass.mapGraphqlSuggestionId(w);
+                            } catch (e) {
+                                console.warn(
+                                    'Can not map to graphql suggestion id',
+                                    componentClass,
+                                );
+                            }
                         }
                         return [];
                     })
