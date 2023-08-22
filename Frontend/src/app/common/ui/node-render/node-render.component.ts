@@ -79,7 +79,7 @@ import { OptionsHelperService } from 'src/app/core-ui-module/options-helper.serv
     selector: 'es-node-render',
     templateUrl: 'node-render.component.html',
     styleUrls: ['node-render.component.scss'],
-    providers: [OptionsHelperDataService],
+    providers: [OptionsHelperDataService, RenderHelperService],
     animations: [trigger('fadeFast', UIAnimation.fade(UIAnimation.ANIMATION_TIME_FAST))],
 })
 export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
