@@ -140,7 +140,7 @@ public class SearchApi {
 	@Path("/queries/{repository}/{metadataset}/{query}/lrmi")
 	@Consumes({ "application/json" })
 
-	@Operation(operationId = "search", summary = "Perform queries based on metadata sets.", description = "Perform queries based on metadata sets.")
+	@Operation(operationId = "search-lrmi", summary = "Perform queries based on metadata sets.", description = "Perform queries based on metadata sets.")
 	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultLrmi.class))),
 			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),

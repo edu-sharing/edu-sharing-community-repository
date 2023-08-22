@@ -31453,7 +31453,7 @@
     "/search/v1/queries/{repository}/{metadataset}/{query}/lrmi": {
       "post": {
         "description": "Perform queries based on metadata sets.",
-        "operationId": "search_1",
+        "operationId": "search-lrmi",
         "parameters": [
           {
             "description": "ID of repository (or \"-home-\" for home repository)",
@@ -33168,7 +33168,7 @@
     },
     "/stream/v1/search/{repository}": {
       "post": {
-        "operationId": "search_2",
+        "operationId": "search_1",
         "parameters": [
           {
             "description": "ID of repository (or \"-home-\" for home repository)",
