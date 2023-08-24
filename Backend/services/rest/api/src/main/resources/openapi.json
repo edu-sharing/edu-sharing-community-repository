@@ -4460,6 +4460,43 @@
         ],
         "type": "object"
       },
+      "SearchResultLrmi": {
+        "properties": {
+          "facets": {
+            "items": {
+              "$ref": "#/components/schemas/Facet"
+            },
+            "type": "array"
+          },
+          "ignored": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "nodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          },
+          "suggests": {
+            "items": {
+              "$ref": "#/components/schemas/Suggest"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "facets",
+          "nodes",
+          "pagination"
+        ],
+        "type": "object"
+      },
       "SearchResultNode": {
         "properties": {
           "facets": {
@@ -31408,6 +31445,191 @@
           }
         },
         "summary": "Search in facets.",
+        "tags": [
+          "SEARCH v1"
+        ]
+      }
+    },
+    "/search/v1/queries/{repository}/{metadataset}/{query}/lrmi": {
+      "post": {
+        "description": "Perform queries based on metadata sets.",
+        "operationId": "search-lrmi",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of metadataset (or \"-default-\" for default metadata set)",
+            "in": "path",
+            "name": "metadataset",
+            "required": true,
+            "schema": {
+              "default": "-default-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of query",
+            "in": "path",
+            "name": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Type of element",
+            "in": "query",
+            "name": "contentType",
+            "schema": {
+              "enum": [
+                "FILES",
+                "FOLDERS",
+                "FILES_AND_FOLDERS",
+                "COLLECTIONS",
+                "TOOLPERMISSIONS",
+                "COLLECTION_PROPOSALS",
+                "ALL"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "maximum items per page",
+            "in": "query",
+            "name": "maxItems",
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "skip a number of items",
+            "in": "query",
+            "name": "skipCount",
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "sort properties",
+            "in": "query",
+            "name": "sortProperties",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index",
+            "in": "query",
+            "name": "sortAscending",
+            "schema": {
+              "items": {
+                "type": "boolean"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "property filter for result nodes (or \"-all-\" for all properties)",
+            "in": "query",
+            "name": "propertyFilter",
+            "schema": {
+              "items": {
+                "default": "-all-",
+                "type": "string"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchParameters"
+              }
+            }
+          },
+          "description": "search parameters",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResultLrmi"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Perform queries based on metadata sets.",
         "tags": [
           "SEARCH v1"
         ]
