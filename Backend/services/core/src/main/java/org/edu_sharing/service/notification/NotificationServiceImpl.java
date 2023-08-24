@@ -102,6 +102,8 @@ public class NotificationServiceImpl implements NotificationService {
 		for (String receiver : receivers) {
 			mail.sendMailHtml(
 					context,
+					null,
+					userEmail,
 					receiver,
 					subject, content, replace);
 		}
