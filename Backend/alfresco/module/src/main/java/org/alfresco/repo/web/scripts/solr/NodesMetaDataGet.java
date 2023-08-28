@@ -90,7 +90,7 @@ public class NodesMetaDataGet extends DeclarativeWebScript
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status)
     {
-        logger.error("using edu version NodesMetaDataGet");
+        logger.debug("using edu version NodesMetaDataGet");
         try
         {
             Content content = req.getContent();
