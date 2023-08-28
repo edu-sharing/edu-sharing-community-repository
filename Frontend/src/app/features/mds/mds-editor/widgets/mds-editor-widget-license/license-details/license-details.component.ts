@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { Metadata } from 'dist/edu-sharing-graphql/ngx-edu-sharing-graphql';
+import { Metadata } from 'ngx-edu-sharing-graphql';
 import { Node } from 'ngx-edu-sharing-api';
 import { RestConnectorService, RestConstants } from '../../../../../../core-module/core.module';
 import { NodeHelperService } from '../../../../../../core-ui-module/node-helper.service';

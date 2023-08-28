@@ -44,7 +44,6 @@
     </mat-chip-row>
     <ng-container *ngIf="getSuggestions()?.length">
       <mat-chip-row
-        #chip="matChip"
         class="mat-chip-suggestion"
         *ngFor="let suggestion of chipsSuggestions"
         [value]="suggestion"
@@ -81,7 +80,7 @@
         (blur)="onBlurInput($event)"
       />
       <button
-        mat-icon-button
+        mat-icon-button.0.
         class="mat-button-select-arrow"
         *ngIf="showDropdownArrow"
         (click)="toggleAutoCompletePanel()"

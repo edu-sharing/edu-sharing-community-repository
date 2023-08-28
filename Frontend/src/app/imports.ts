@@ -81,7 +81,6 @@ export const IMPORTS = [
     MonacoEditorModule.forRoot({ baseUrl: './assets' }),
     RouterModule.forRoot(ROUTES, {
         // scrollPositionRestoration: 'enabled' emulated via ScrollPositionRestorationService.
-        relativeLinkResolution: 'legacy',
         // This prevents the browser history from getting messed up when navigation attempts are
         // cancelled by guards.
         canceledNavigationResolution: 'computed',

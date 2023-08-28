@@ -104,7 +104,7 @@
     "@typescript-eslint/eslint-plugin": "^5.59.2",
     "@typescript-eslint/parser": "^5.59.2",
     "@apollo/client": "~3.6.10",
-    "apollo-angular": "~3.0.1",
+    "apollo-angular": "~5.0.0",
     "babel-jest": "^29.1.2",
     "babel-loader": "^8.0.6",
     "codelyzer": "^6.0.0",
