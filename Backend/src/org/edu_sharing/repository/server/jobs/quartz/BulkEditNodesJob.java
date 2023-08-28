@@ -144,7 +144,7 @@ public class BulkEditNodesJob extends AbstractJob{
 			}
 			copy = CCConstants.getValidGlobalName(copy);
 		}
-		value = prepareParam(context, "value", false);
+		value = prepareParamSerializeable(context, "value", false);
 		if (mode.equals(Mode.Replace)) {
 			if (copy == null && value == null) {
 				throwMissingParam("'value' or 'copy'");
@@ -316,12 +316,16 @@ public class BulkEditNodesJob extends AbstractJob{
 	}
 
 	private String prepareParam(JobExecutionContext context, String param, boolean required) {
-		String value = (String) context.getJobDetail().getJobDataMap().get(param);
+		String value = (String)prepareParamSerializeable(context,param,required);
+		return value;
+	}
+
+	private Serializable prepareParamSerializeable(JobExecutionContext context, String param, boolean required){
+		Serializable value = (Serializable) context.getJobDetail().getJobDataMap().get(param);
 		if(value==null && required) {
 			throwMissingParam(param);
 		}
 		return value;
-
 	}
 
 	private void throwMissingParam(String param) {
