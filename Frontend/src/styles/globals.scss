@@ -15,6 +15,7 @@ body {
     font-family: $primaryFontFamily !important;
     font-size: $primaryFontSize;
     -webkit-font-smoothing: antialiased;
+    margin: 0;
 }
 // storybook no background
 body:not(.sb-show-main) {

@@ -1,4 +1,4 @@
-import { PlatformLocation } from '@angular/common';
+import { BrowserPlatformLocation, PlatformLocation } from '@angular/common';
 import { Router } from '@angular/router';
 
 export class RouterHelper {
@@ -12,7 +12,7 @@ export class RouterHelper {
         replaceUrl = false,
     ) {
         let cleanUrl = url.replace(
-            (platformLocation as any).location.origin + platformLocation.getBaseHrefFromDOM(),
+            (platformLocation as any).origin + platformLocation.getBaseHrefFromDOM(),
             '',
         );
         let parsed = router.parseUrl(cleanUrl);

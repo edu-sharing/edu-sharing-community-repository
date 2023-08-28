@@ -23,12 +23,14 @@
 
     ul {
         margin: 0;
+        list-style: none;
+        padding-left: 0;
         li {
             .mat-mdc-menu-item {
                 &:hover:not([disabled]),
                 &.cdk-focused {
                     color: var(--itemSelectedTextColor);
-                    background-color: var(--itemSelectedBackground);
+                    background-color: var(--listItemSelectedBackground);
                 }
                 &.cdk-keyboard-focused {
                     @include setGlobalKeyboardFocus('border');

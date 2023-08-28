@@ -1,17 +1,22 @@
 @use '@angular/material' as mat;
-@use 'angular-material-css-vars/main' as mat-css-vars;
+@use 'angular-material-css-vars/main' as mat-css;
+@use 'angular-material-css-vars/public-util' as mat-css-utilities;
+
 @import 'variables';
 @import 'branding';
 
-// Include the common styles for Angular Material. We include this here so that you only
-// have to load a single css file for Angular Material in your app.
-// Be sure that you only ever include this mixin once!
-@include mat.core();
-// @include mat.strong-focus-indicators();
-@include mat-css-vars.init-material-css-vars();
+// optional
+$mat-css-dark-theme-selector: '.isDarkTheme';
+$mat-css-light-theme-selector: '.isLightTheme';
 
+// init theme
+@include mat-css.init-material-css-vars() using($mat-css-theme) {
+    // If your app has any theme mixins, call them here.
+    // $mat-css-theme gets set to an appropriate value before this content is called.
+    // @include your-custom-component-theme($mat-css-theme);
+}
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
-// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// (impomatrted above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
 
 $custom-typography: mat.define-typography-config(
@@ -57,6 +62,23 @@ $custom-typography: mat.define-typography-config(
 $dark-dividers: rgba(black, 0.12);
 $dark-disabled-text: rgba(black, 0.54); // increased contrast
 $dark-secondary-text: rgba(black, 0.54);
+
+// https://github.com/angular/components/issues/26056
+.mat-mdc-unelevated-button:not(:disabled) {
+    color: mat-css-utilities.mat-css-contrast-color(A100) !important;
+}
+
+.mdc-button {
+    span {
+        display: flex;
+        align-items: center;
+        > .material-icons,
+        .custom-icons {
+            margin-right: 10px;
+        }
+    }
+}
+
 $light-theme-foreground-palette: (
     base: black,
     divider: $dark-dividers,
@@ -219,8 +241,14 @@ mat-button-toggle-group {
     }
 }
 // form border on hover
-.mat-form-field-appearance-outline .mat-form-field-outline-thick {
-    color: $primaryMediumLight;
+.mat-form-field-appearance-outline {
+    .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover {
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__trailing,
+        .mdc-notched-outline__notch {
+            border-color: mat-css-utilities.mat-css-color-primary(300) !important;
+        }
+    }
 }
 .mat-form-field-dark {
     input,
