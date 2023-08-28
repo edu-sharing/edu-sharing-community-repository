@@ -7,6 +7,7 @@ import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { Toast } from '../../../../../core-ui-module/toast';
 import { MatTabGroup } from '@angular/material/tabs';
+import { MdsWidget } from '../../../types/types';
 
 export interface AuthorData {
     freetext: string;
@@ -46,6 +47,7 @@ export class MdsEditorWidgetVCardComponent extends MdsEditorWidgetBase implement
         this.editType = vcard.getType();
         this.formControl = new UntypedFormGroup(
             {
+                title: new UntypedFormControl(vcard.title),
                 givenname: new UntypedFormControl(vcard.givenname),
                 surname: new UntypedFormControl(vcard.surname),
                 org: new UntypedFormControl(vcard.org),
@@ -53,6 +55,7 @@ export class MdsEditorWidgetVCardComponent extends MdsEditorWidgetBase implement
             this.getStandardValidators(),
         );
         this.formControl.valueChanges.pipe(filter((value) => value !== null)).subscribe((value) => {
+            vcard.title = value.title;
             vcard.givenname = value.givenname;
             vcard.surname = value.surname;
             vcard.org = value.org;
@@ -71,5 +74,9 @@ export class MdsEditorWidgetVCardComponent extends MdsEditorWidgetBase implement
 
     blur(): void {
         this.onBlur.emit();
+    }
+    public static mapGraphqlId(definition: MdsWidget) {
+        // attach the "Contributor" graphql Attributes
+        return MdsEditorWidgetBase.attachGraphqlSelection(definition, ['role', 'content']);
     }
 }

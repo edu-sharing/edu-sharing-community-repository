@@ -42,6 +42,30 @@
       <span class="mat-chip-label" [innerHTML]="value.label | escapeHtml"></span>
       <mat-icon matChipRemove>cancel</mat-icon>
     </mat-chip-row>
+    <ng-container *ngIf="getSuggestions()?.length">
+      <mat-chip-row
+        #chip="matChip"
+        class="mat-chip-suggestion"
+        *ngFor="let suggestion of chipsSuggestions"
+        [value]="suggestion"
+        [removable]="true"
+        (blur)="onBlurInput($event)"
+        (removed)="removeSuggestion(suggestion)"
+        [class.mat-chip-selected]="false"
+        [matTooltip]="getSuggestionTooltip(suggestion)"
+      >
+        <span class="mat-chip-label">{{ suggestion.displayValue.label }}</span>
+        <button
+          mat-icon-button
+          matChipTrailingIcon
+          class="accept"
+          (click)="addSuggestion(suggestion)"
+        >
+          <mat-icon matChipTrailingIcon>check_circle</mat-icon>
+        </button>
+        <mat-icon matChipRemove class="decline">cancel</mat-icon>
+      </mat-chip-row>
+    </ng-container>
     <div class="input-wrapper">
       <input
         #input
@@ -64,7 +88,7 @@
         [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
         [disabled]="chipsControl.disabled"
       >
-       <!-- @TODO removed with angular 15
+        <!-- @TODO removed with angular 15
                   (keydown.tab)="chipList._allowFocusEscape()"
         -->
         <span class="mat-select-arrow"></span>

@@ -48,6 +48,8 @@ public class NgServlet extends HttpServlet {
 			// store url for shibboleth/sso, regardless if login is present or not (for guest redirects)
 			URL url = new URL(req.getRequestURL().toString()+"?"+req.getQueryString());
 			if(!url.getPath().contains(COMPONENTS_ERROR)) {
+				logger.debug("Persist previous frontend url: " + req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : ""));
+				logger.debug("Previous frontend url path: " + url.getPath());
 				req.getSession().setAttribute(PREVIOUS_ANGULAR_URL,
 						req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : ""));
 			}
@@ -155,8 +157,8 @@ public class NgServlet extends HttpServlet {
 		return html;	}
 
 	private static String addEmbed(String html, URL url) throws UnsupportedEncodingException {
-		html=addToHead("<link rel=\"alternate\" type=\"application/json+oembed\" href=\""+URLTool.getEduservletUrl()+"oembed?format=json&url="+URLEncoder.encode(url.toString(),"UTF-8")+"\"/>",html);
-		html=addToHead("<link rel=\"alternate\" type=\"text/xml+oembed\" href=\""+URLTool.getEduservletUrl()+"oembed?format=xml&url="+URLEncoder.encode(url.toString(),"UTF-8")+"\"/>",html);
+		html=addToHead("<link rel=\"alternate\" type=\"application/json+oembed\" href=\""+URLTool.getEduservletUrl(true)+"oembed?format=json&url="+URLEncoder.encode(url.toString(),"UTF-8")+"\"/>",html);
+		html=addToHead("<link rel=\"alternate\" type=\"text/xml+oembed\" href=\""+URLTool.getEduservletUrl(true)+"oembed?format=xml&url="+URLEncoder.encode(url.toString(),"UTF-8")+"\"/>",html);
 		return html;
 	}
 

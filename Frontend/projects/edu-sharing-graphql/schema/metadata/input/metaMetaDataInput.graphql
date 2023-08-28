@@ -1,0 +1,4 @@
+input MetaMetadataInput {
+    schema: String
+    contribute: [ContributeInput!]
+}

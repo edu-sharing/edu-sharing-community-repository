@@ -1,5 +1,6 @@
 import { Type } from '@angular/core';
 import { MdsEditorWidgetBase } from '../mds-editor/widgets/mds-editor-widget-base';
+import { MdsWidget } from 'ngx-edu-sharing-api';
 
 export {
     MdsDefinition,
@@ -105,7 +106,14 @@ export enum NativeWidgetType {
     Contributor = 'contributor',
 }
 
-export type MdsEditorWidgetComponent = Type<MdsEditorWidgetBase>;
+export type MdsEditorWidgetComponent = {
+    mapGraphqlId: (definition: MdsWidget) => string[] | null;
+    /**
+     *     required suggestion fields for graphql suggestions
+     *     should return empty array if not supported by the widget
+     */
+    mapGraphqlSuggestionId: (definition: MdsWidget) => string[];
+} & Type<MdsEditorWidgetBase>;
 
 export type EditorType = 'angular' | 'legacy';
 

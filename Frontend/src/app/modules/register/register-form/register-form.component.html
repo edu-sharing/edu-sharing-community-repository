@@ -1,5 +1,9 @@
 <form (ngSubmit)="register()" #loginForm *ngIf="registerForm" [formGroup]="registerForm">
   <div class="name-input">
+    <mat-form-field class="title">
+      <mat-label>{{ 'VCARD.Title' | translate }}</mat-label>
+      <input matInput type="text" formControlName="title" />
+    </mat-form-field>
     <mat-form-field>
       <mat-label>{{ 'USER.firstName' | translate }}</mat-label>
       <input matInput type="text" formControlName="firstName" />

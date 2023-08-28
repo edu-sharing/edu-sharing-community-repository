@@ -30,6 +30,7 @@
     </mat-form-field>
     <form class="preferences-form" [formGroup]="form">
       <mat-radio-group
+        *ngIf="!isCollectionReference()"
         class="version-radio-group"
         [attr.aria-label]="'EMBED.VERSION' | translate"
         formControlName="version"

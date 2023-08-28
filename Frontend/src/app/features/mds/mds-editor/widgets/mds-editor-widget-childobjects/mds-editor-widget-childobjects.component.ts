@@ -38,6 +38,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
         requiresNode: true,
         supportsBulk: false,
     };
+    static readonly graphqlIds: string[] = [];
     hasChanges = new BehaviorSubject<boolean>(false);
     children: Childobject[] = [];
     childrenDelete: Node[] = [];
@@ -266,7 +267,9 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
                                     RestConstants.COMMENT_MAIN_FILE_UPLOAD,
                                     RestConstants.CCM_ASSOC_CHILDIO,
                                 )
-                                .subscribe(() => {});
+                                .subscribe(() => {
+                                    observer.complete();
+                                });
                         } else {
                             this.nodeApi
                                 .editNodeMetadata(child.node.ref.id, this.getProperties(child))

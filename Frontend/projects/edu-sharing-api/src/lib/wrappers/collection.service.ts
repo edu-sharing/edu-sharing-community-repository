@@ -14,6 +14,7 @@ import { CollectionEntry } from '../api/models/collection-entry';
 })
 export class CollectionService {
     private static readonly collectionCache = new KeyCache();
+    private static readonly subCollectionsCache = new KeyCache();
 
     constructor(private collectionV1: CollectionV1Service) {}
 
@@ -43,6 +44,29 @@ export class CollectionService {
         return this.collectionV1
             .getCollection({ collectionId: id, repository })
             .pipe(map((entry) => entry.collection));
+    }
+
+    getSubCollections(id: string, { repository = HOME_REPOSITORY } = {}): Observable<Node[]> {
+        // TODO: Wrap other endpoints and reset not on get, but on modifying actions.
+        CollectionService.subCollectionsCache.reset(getCacheKey(id, { repository }));
+        return this.observeSubCollections(id, { repository }).pipe(take(1));
+    }
+
+    /**
+     * Observes child collections of the given collection.
+     *
+     * Does not use pagination and is not meant to get root-level collections.
+     */
+    @cachedShareReplay(CollectionService.subCollectionsCache, getCacheKey)
+    observeSubCollections(id: string, { repository = HOME_REPOSITORY } = {}): Observable<Node[]> {
+        return this.collectionV1
+            .getCollectionsSubcollections({
+                collection: id,
+                repository,
+                scope: 'EDU_ALL', // value ignored for sub collections
+                maxItems: 65535,
+            })
+            .pipe(map((collectionsEntry) => collectionsEntry.collections));
     }
 }
 

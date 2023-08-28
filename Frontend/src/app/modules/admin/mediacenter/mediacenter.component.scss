@@ -1,4 +1,5 @@
 @import '../../../core-ui-module/styles/variables';
+@import '../admin.variables';
 :host ::ng-deep {
     .mat-tab-body-wrapper {
         padding: 20px;
@@ -98,6 +99,7 @@
 }
 
 .nodes {
+    max-width: calc(100vw - #{$sidenavWidth} - 100px);
     .export {
         display: flex;
         justify-content: flex-end;

@@ -100,6 +100,7 @@
 		<widget>
 			<caption>Barrierefreiheit</caption>
 			<id>ccm:accessibilitySummary</id>
+			<id rel="graphql">oeh.accessibilitySummary</id>
 			<type>multivalueFixedBadges</type>
 			<hideIfEmpty>true</hideIfEmpty>
 			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/accessibilitySummary/index.json</valuespace>
@@ -124,6 +125,7 @@
 		<widget>
 			<caption>Nutzungsrechte</caption>
 			<id>ccm:license_oer</id>
+			<id rel="graphql">oeh.licenseOer</id>
 			<type>singleoption</type>
 			<allowempty>true</allowempty>
 			<hideIfEmpty>true</hideIfEmpty>
@@ -133,6 +135,7 @@
 		<widget>
 			<caption>Interner Quellenname</caption>
 			<id>ccm:general_identifier</id>
+			<id rel="graphql">oeh.generalIdentifier</id>
 			<type>text</type>
 			<hideIfEmpty>true</hideIfEmpty>
 			<condition type="PROPERTY" pattern="SOURCE" dynamic="true">ccm:objecttype</condition>
@@ -140,7 +143,6 @@
 		<widget>
 			<caption>Notizen / Bermerkungen (intern)</caption>
 			<id>ccm:notes</id>
-			<id rel="graphql">info.notes</id>
 			<type>textarea</type>
 			<hideIfEmpty>true</hideIfEmpty>
 			<toolpermission>TOOLPERMISSION_COLLECTION_EDITORIAL</toolpermission>
@@ -151,10 +153,10 @@
 			<id rel="graphql">info.objectType</id>
 			<type>singleoption</type>
 			<values>
-					<value cap="Material">MATERIAL</value>
-					<value cap="Tool">TOOL</value>
-					<value cap="Quelle">SOURCE</value>
-					<value cap="Unterrichtsplanung">LESSONPLANNING</value>
+				<value cap="Material">MATERIAL</value>
+				<value cap="Tool">TOOL</value>
+				<value cap="Quelle">SOURCE</value>
+				<value cap="Unterrichtsplanung">LESSONPLANNING</value>
 			</values>
 		</widget>
 		<widget>
@@ -229,11 +231,11 @@
 	</groups>
 	<templates>
 		<template>
-				<id>node_general</id>
-				<caption>dialog_upload_tab_basic</caption>
-				<icon>description</icon>
-				<html><![CDATA[
-              <ccm:wwwurl>			
+			<id>node_general</id>
+			<caption>dialog_upload_tab_basic</caption>
+			<icon>description</icon>
+			<html><![CDATA[
+              <ccm:wwwurl>
               <cm:name>
               <cclom:title>
               <cclom:general_keyword>
@@ -285,10 +287,10 @@
 				]]></html>
 		</template>
 		<template>
-				<id>node_general_bulk</id>
-				<caption>dialog_upload_tab_basic</caption>
-				<icon>description</icon>
-				<html><![CDATA[
+			<id>node_general_bulk</id>
+			<caption>dialog_upload_tab_basic</caption>
+			<icon>description</icon>
+			<html><![CDATA[
               <cclom:title>
               <cclom:general_keyword>
               <cclom:general_description type="textarea">
@@ -348,8 +350,8 @@
 				]]></html>
 		</template>
 		<template>
-		<id>search</id>
-		<html><![CDATA[
+			<id>search</id>
+			<html><![CDATA[
 		  <ccm:objecttype type="checkboxHorizontal">
 		  <ccm:taxonid>
 		  <ccm:educationalcontext>

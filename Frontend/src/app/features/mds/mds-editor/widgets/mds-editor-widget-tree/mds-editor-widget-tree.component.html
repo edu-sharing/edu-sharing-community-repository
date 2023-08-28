@@ -27,7 +27,7 @@
       (click)="$event.stopPropagation(); $event.preventDefault()"
       [formControl]="chipsControl"
     >
-    <!-- @TODO removed in angular 15
+      <!-- @TODO removed in angular 15
           [multiple]="true"
     -->
       <!-- We mark all chips as selected because NVDA will announce "not selected" for each item
@@ -56,6 +56,7 @@
           [placeholder]="chipsControl?.value?.length ? null : widget.definition.placeholder"
           [matChipInputFor]="chipList"
           (focus)="openOverlay($event)"
+          (blur)="blur($event)"
         />
         <button
           matSuffix
@@ -67,7 +68,7 @@
           [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
           [disabled]="chipsControl.disabled"
         >
-        <!-- @TODO removed with angular 15
+          <!-- @TODO removed with angular 15
                   (keydown.tab)="chipList._allowFocusEscape()"
         -->
           <span class="mat-select-arrow"></span>

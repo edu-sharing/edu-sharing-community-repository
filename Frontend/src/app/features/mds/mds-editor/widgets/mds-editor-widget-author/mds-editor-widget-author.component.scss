@@ -1,3 +1,5 @@
+@import '../mds-editor-widget-vcard/vcard';
+
 :host ::ng-deep .mat-tab-labels {
     background-color: transparent;
 }
@@ -33,7 +35,8 @@ mat-tab-group {
     }
 
     .contributors {
+        margin-top: 15px;
         display: flex;
-        margin-left: 62px;
+        margin-left: 30px;
     }
 }

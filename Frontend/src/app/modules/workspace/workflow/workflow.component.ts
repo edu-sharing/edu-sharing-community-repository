@@ -21,6 +21,7 @@ import { UIAnimation, WORKFLOW_STATUS_UNCHECKED, WorkflowDefinition } from 'ngx-
 import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
 import { Toast } from '../../../core-ui-module/toast';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
+import { ModalMessageType } from 'src/app/common/ui/modal-dialog-toast/modal-dialog-toast.component';
 
 type WorkflowReceiver = UserSimple | Group;
 
@@ -34,10 +35,6 @@ type WorkflowReceiver = UserSimple | Group;
     ],
 })
 export class WorkspaceWorkflowComponent implements OnChanges {
-    dialogTitle: string;
-    dialogMessage: string;
-    dialogMessageParameters: any;
-    dialogButtons: DialogButton[];
     loading = true;
     node: Node;
     receivers: WorkflowReceiver[] = [];
@@ -307,21 +304,24 @@ export class WorkspaceWorkflowComponent implements OnChanges {
      */
     private async requestReceiverPermissionDialog(receiver: WorkflowReceiver): Promise<boolean> {
         return new Promise((resolve) => {
-            this.dialogTitle = 'WORKSPACE.WORKFLOW.USER_NO_PERMISSION';
-            this.dialogMessage = 'WORKSPACE.WORKFLOW.USER_NO_PERMISSION_INFO';
-            this.dialogMessageParameters = {
-                user: new AuthorityNamePipe(this.translate).transform(receiver, null),
-            };
-            this.dialogButtons = [
-                new DialogButton('CANCEL', { color: 'standard' }, () => {
-                    this.dialogTitle = null;
-                    resolve(false);
-                }),
-                new DialogButton('WORKSPACE.WORKFLOW.PROCEED', { color: 'primary' }, () => {
-                    this.dialogTitle = null;
-                    resolve(true);
-                }),
-            ];
+            this.toast.showConfigurableDialog({
+                title: 'WORKSPACE.WORKFLOW.USER_NO_PERMISSION',
+                message: 'WORKSPACE.WORKFLOW.USER_NO_PERMISSION_INFO',
+                messageParameters: {
+                    user: new AuthorityNamePipe(this.translate).transform(receiver, null),
+                },
+                messageType: ModalMessageType.HTML,
+                buttons: [
+                    new DialogButton('CANCEL', { color: 'standard' }, () => {
+                        this.toast.closeModalDialog();
+                        resolve(false);
+                    }),
+                    new DialogButton('WORKSPACE.WORKFLOW.PROCEED', { color: 'primary' }, () => {
+                        this.toast.closeModalDialog();
+                        resolve(true);
+                    }),
+                ],
+            });
         });
     }
 

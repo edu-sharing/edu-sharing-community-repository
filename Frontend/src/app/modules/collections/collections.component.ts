@@ -8,10 +8,10 @@ import {
     ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import {
     ColorHelper,
+    LocalEventsService,
     NodeEntriesDisplayType,
     OptionsHelperDataService,
     PreferredColor,
@@ -25,7 +25,6 @@ import * as EduData from '../../core-module/core.module';
 import {
     ConfigurationService,
     DialogButton,
-    FrameEventsService,
     LoginResult,
     Mediacenter,
     Node,
@@ -35,11 +34,8 @@ import {
     RestConstants,
     RestHelper,
     RestIamService,
-    RestMdsService,
     RestMediacenterService,
-    RestNetworkService,
     RestNodeService,
-    RestOrganizationService,
     TemporaryStorageService,
     UIService,
 } from '../../core-module/core.module';
@@ -53,6 +49,7 @@ import { MainNavService } from '../../main/navigation/main-nav.service';
 import { CollectionInfoBarComponent } from './collection-info-bar/collection-info-bar.component';
 import { CollectionContentComponent } from './collection-content/collection-content.component';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
+import { filter, takeUntil } from 'rxjs/operators';
 
 // component class
 @Component({
@@ -157,31 +154,22 @@ export class CollectionsMainComponent implements OnDestroy {
 
     // inject services
     constructor(
-        private frame: FrameEventsService,
-        private http: HttpClient,
-        private temporaryStorageService: TemporaryStorageService,
-        private location: Location,
+        private breadcrumbsService: BreadcrumbsService,
         private collectionService: RestCollectionService,
-        private nodeHelper: NodeHelperService,
-        private mediacenterService: RestMediacenterService,
-        private nodeService: RestNodeService,
-        private mainNavService: MainNavService,
-        private networkService: RestNetworkService,
-        private organizationService: RestOrganizationService,
-        private iamService: RestIamService,
-        private mdsService: RestMdsService,
+        private config: ConfigurationService,
         private connector: RestConnectorService,
+        private iamService: RestIamService,
+        private localEvents: LocalEventsService,
+        private mediacenterService: RestMediacenterService,
+        private nodeHelper: NodeHelperService,
+        private nodeService: RestNodeService,
         private route: ActivatedRoute,
-        private uiService: UIService,
         private router: Router,
         private tempStorage: TemporaryStorageService,
         private optionsService: OptionsHelperDataService,
         private toast: Toast,
-        private bridge: BridgeService,
-        private config: ConfigurationService,
-        private translationService: TranslateService,
         private translations: TranslationsService,
-        private breadcrumbsService: BreadcrumbsService,
+        private uiService: UIService,
     ) {
         this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn().subscribe(
@@ -217,9 +205,19 @@ export class CollectionsMainComponent implements OnDestroy {
                 () => RestHelper.goToLogin(this.router, this.config),
             );
         });
+        // Navigate to parent collection when the current collection is deleted.
+        this.localEvents.nodesDeleted
+            .pipe(
+                takeUntil(this.destroyed),
+                filter((nodes) => nodes.some((node) => node.ref.id === this.collection.ref.id)),
+            )
+            .subscribe(() => this.navigate(this.parentCollectionId.id));
     }
+
     ngOnDestroy() {
-        this.temporaryStorageService.set(
+        this.destroyed.next();
+        this.destroyed.complete();
+        this.tempStorage.set(
             TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE,
             this.collectionContentRef.dataSourceReferences,
         );
@@ -236,7 +234,9 @@ export class CollectionsMainComponent implements OnDestroy {
     navigate(id = '', addToOther = '', feedback = false) {
         UIHelper.getCommonParameters(this.route).subscribe((params) => {
             params.scope = this.tabSelected;
-            params.id = id;
+            if (id && id !== '-root-') {
+                params.id = id;
+            }
             if (feedback) {
                 params.feedback = feedback;
             }
@@ -313,31 +313,6 @@ export class CollectionsMainComponent implements OnDestroy {
 
     getScopeInfo() {
         return this.nodeHelper.getCollectionScopeInfo(this.collection);
-    }
-
-    collectionDelete(): void {
-        this.dialogTitle = 'COLLECTIONS.CONFIRM_DELETE';
-        this.dialogMessage = 'COLLECTIONS.CONFIRM_DELETE_INFO';
-        this.dialogCancelable = true;
-        this.dialogButtons = DialogButton.getYesNo(
-            () => this.closeDialog(),
-            () => {
-                this.isLoading = true;
-                this.closeDialog();
-                this.collectionService
-                    .deleteCollection(this.collection.ref.id, this.collection.ref.repo)
-                    .subscribe(
-                        () => {
-                            this.isLoading = false;
-                            this.navigate(this.parentCollectionId.id);
-                        },
-                        () => {
-                            this.isLoading = false;
-                            this.toast.error(null, 'COLLECTIONS.ERROR_DELETE');
-                        },
-                    );
-            },
-        );
     }
 
     collectionEdit(): void {

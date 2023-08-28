@@ -59,6 +59,11 @@ import { Toast } from './core-ui-module/toast';
 import { OptionsHelperService } from './core-ui-module/options-helper.service';
 import { KeyboardShortcutsService } from './services/keyboard-shortcuts.service';
 import { CordovaService } from './common/services/cordova.service';
+import { InMemoryCache } from '@apollo/client/core';
+import { HttpLink } from 'apollo-angular/http';
+import { APOLLO_OPTIONS, ApolloModule } from 'apollo-angular';
+import { EduSharingGraphqlModule } from 'ngx-edu-sharing-graphql';
+
 // http://blog.angular-university.io/angular2-ngmodule/
 // -> Making modules more readable using the spread operator
 
@@ -97,10 +102,12 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     ],
     imports: [
         IMPORTS,
+        ApolloModule,
         SharedModule,
         MainModule,
         EduSharingApiModule.forRoot(),
         EduSharingUiModule.forRoot({ production: environment.production }),
+        EduSharingGraphqlModule,
         DragDropModule,
         extensionImports,
         ResizableModule,
@@ -123,6 +130,16 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
                 ({
                     onError: (err, req) => errorHandler.handleError(err, req),
                 } as EduSharingApiConfigurationParams),
+        },
+        {
+            provide: APOLLO_OPTIONS,
+            useFactory: (httpLink: HttpLink) => {
+                return {
+                    link: httpLink.create({ uri: '/edu-sharing/graphql' }),
+                    cache: new InMemoryCache(),
+                };
+            },
+            deps: [HttpLink],
         },
         { provide: LocationStrategy, useClass: AppLocationStrategy },
         PROVIDERS,

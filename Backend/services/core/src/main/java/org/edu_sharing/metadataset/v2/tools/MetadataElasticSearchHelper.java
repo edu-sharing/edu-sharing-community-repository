@@ -17,6 +17,10 @@ import java.security.InvalidParameterException;
 import java.util.*;
 
 public class MetadataElasticSearchHelper extends MetadataSearchHelper {
+    /**
+     *  the given count will be multiplied by this value since facets are filtered for the containing string afterwards and we need some overhead
+     */
+    public static final int FACET_LIMIT_MULTIPLIER = 5;
     static Logger logger = Logger.getLogger(MetadataElasticSearchHelper.class);
 
     public static QueryBuilder getElasticSearchQuery(SearchToken searchToken, MetadataQueries queries,MetadataQuery query, Map<String,String[]> parameters) throws IllegalArgumentException {
@@ -31,19 +35,18 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         );
         QueryBuilder baseQueryBuilder;
         if(baseQuery.equals(baseQueryConditional)) {
-            baseQueryBuilder = QueryBuilders.wrapperQuery(baseQuery);
+            baseQueryBuilder = new ESRestHighLevelClient.ReadableWrapperQueryBuilder(baseQuery);
         } else {
             baseQueryBuilder = QueryBuilders.boolQuery().must(
-                    QueryBuilders.wrapperQuery(baseQuery)
+                    new ESRestHighLevelClient.ReadableWrapperQueryBuilder(baseQuery)
             ).must(
-                    QueryBuilders.wrapperQuery(baseQueryConditional)
+                    new ESRestHighLevelClient.ReadableWrapperQueryBuilder(baseQueryConditional)
             );
         }
 
         BoolQueryBuilder result = QueryBuilders.boolQuery();
 
         if(asFilter == null || (asFilter.booleanValue() == query.getBasequeryAsFilter())){
-            baseQueryBuilder = new ESRestHighLevelClient.ReadableWrapperQueryBuilder(baseQuery);
             result.must(baseQueryBuilder);
         }
 
@@ -174,11 +177,11 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         for (String word : words) {
             //String statement = parameter.getStatement(value).replace("${value}", QueryParser.escape(word));
             String statement = QueryUtils.replacerFromSyntax(parameter.getSyntax()).replaceString(
-                    parameter.getStatement(value),
+                    parameter.getStatement(word),
                     "${value}", word);
             statement = QueryUtils.replacerFromSyntax(parameter.getSyntax(),true).replaceString(
                     statement,
-                    "${valueRaw}", value);
+                    "${valueRaw}", word);
             boolQuery = boolQuery.must(new ESRestHighLevelClient.ReadableWrapperQueryBuilder(statement));
 
         }
@@ -258,22 +261,23 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
             }
             if(fieldName.size() == 1) {
                 result.add(AggregationBuilders.filter(facet, bqb).subAggregation(AggregationBuilders.terms(facet)
-                        .size(searchToken.getFacetLimit())
+                        .size(searchToken.getFacetLimit()*FACET_LIMIT_MULTIPLIER)
                         .minDocCount(searchToken.getFacetsMinCount())
                         .field(fieldName.get(0))));
             } else {
                 Map<String, Object> props = new HashMap<>();
                 props.put("type", "multi_terms");
                 result.add(AggregationBuilders.filter(facet, bqb).setMetadata(props).subAggregation(
-                        new ESRestHighLevelClient.MultiTermsAggregationBuilder(facet, fieldName, searchToken.getFacetsMinCount(), searchToken.getFacetLimit())))
+                        new ESRestHighLevelClient.MultiTermsAggregationBuilder(facet, fieldName, searchToken.getFacetsMinCount(), searchToken.getFacetLimit()*FACET_LIMIT_MULTIPLIER)))
                 ;
             }
 
             if(parameters.get(facet) != null && parameters.get(facet).length > 0) {
+                List<String> facetDetails = query.findParameterByName(facet).getFacets();
                 result.add(AggregationBuilders.filter(facet + "_selected", bqb).subAggregation(AggregationBuilders.terms(facet)
                         .size(parameters.get(facet).length)
                         .minDocCount(1)
-                        .field("properties." + facet + ".keyword")
+                        .field(facetDetails == null || facetDetails.size() == 0 ? "properties." + facet + ".keyword" : facetDetails.get(0))
                         .includeExclude(new IncludeExclude(parameters.get(facet), null))));
             }
 

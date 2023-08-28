@@ -9,7 +9,7 @@ table, div {
 */
 mat-tab-group {
     margin-bottom: 0;
-    position: fixed;
+    position: sticky;
     top: var(--mainnavHeight);
     width: 100%;
     z-index: 15;
@@ -26,7 +26,6 @@ mat-tab-group {
     min-height: calc(100vh - var(--mainnavHeight));
 
     &.collectionsContainerTabs {
-        margin-top: 48px;
         min-height: calc(100vh - (var(--mainnavHeight) + 48px));
     }
 

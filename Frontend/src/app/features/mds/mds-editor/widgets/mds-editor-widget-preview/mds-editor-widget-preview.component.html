@@ -4,6 +4,7 @@
   style="display: none"
   accept="image/*"
   (change)="setPreview($event)"
+  (cancel)="$event.stopPropagation()"
 />
 <div class="image-container">
   <div class="delete-overlay" *ngIf="delete">
@@ -16,7 +17,7 @@
       mat-fab
       [color]="$any('white')"
       (click)="file ? (file = null) : (delete = true); updateSrc()"
-      *ngIf="!delete && (file || node.preview.type === 'TYPE_USERDEFINED')"
+      *ngIf="!delete && (file || getType() === 'TYPE_USERDEFINED')"
     >
       <i esIcon="delete"></i>
     </button>

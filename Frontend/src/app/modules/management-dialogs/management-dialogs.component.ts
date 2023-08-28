@@ -219,7 +219,10 @@ export class WorkspaceManagementDialogsComponent {
     }
 
     public uploadDone(event: Node[]) {
-        if (this.config.instant('licenseDialogOnUpload', false)) {
+        if (event == null) {
+            // error occured
+            this.onUploadFilesProcessed.emit(null);
+        } else if (this.config.instant('licenseDialogOnUpload', false)) {
             void this.openLicenseDialog(event);
             this.nodeLicenseOnUpload = true;
         } else {

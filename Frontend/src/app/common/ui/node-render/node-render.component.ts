@@ -79,7 +79,7 @@ import { OptionsHelperService } from 'src/app/core-ui-module/options-helper.serv
     selector: 'es-node-render',
     templateUrl: 'node-render.component.html',
     styleUrls: ['node-render.component.scss'],
-    providers: [OptionsHelperDataService],
+    providers: [OptionsHelperDataService, RenderHelperService],
     animations: [trigger('fadeFast', UIAnimation.fade(UIAnimation.ANIMATION_TIME_FAST))],
 })
 export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
@@ -139,7 +139,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
 
         this.translations.waitForInit().subscribe(() => {
             this.banner = ConfigurationHelper.getBanner(this.configService);
-            this.connector.setRoute(this.route);
+            this.connector.setRoute(this.route, this.router);
             this.networkService.prepareCache();
             this.route.queryParams.subscribe((params: Params) => {
                 this.closeOnBack = params.closeOnBack === 'true';
@@ -185,6 +185,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
     ngOnInit(): void {
         this.mainNavService.setMainNavConfig({
             show: true,
+            showNavigation: false,
             currentScope: 'render',
         });
         this.optionsHelper.registerGlobalKeyboardShortcuts();
@@ -746,7 +747,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             data[id] = [value];
             params.mds = this.getMdsId();
             params.sidenav = true;
-            params.repository = this.repository;
+            params.repo = this.repository;
             params.parameters = JSON.stringify(data);
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], { queryParams: params });
         });

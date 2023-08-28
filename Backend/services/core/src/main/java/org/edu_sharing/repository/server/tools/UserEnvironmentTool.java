@@ -187,6 +187,9 @@ public class UserEnvironmentTool {
 	public String getEdu_SharingConfigFolder() throws Throwable {
 		return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_SERVICE, CCConstants.I18n_SYSTEMFOLDER_CONFIG);
 	}
+	public String getEdu_SharingMediacenterFolder() throws Throwable {
+		return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_MEDIACENTER, CCConstants.I18n_SYSTEMFOLDER_MEDIACENTER);
+	}
     public String getEdu_SharingServiceFolder() throws Throwable {
         return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_SERVICE, CCConstants.I18n_SYSTEMFOLDER_SERVICE);
     }

@@ -13,9 +13,11 @@ import { JUMP_MARK_POSTFIX } from '../../card-dialog/card-dialog-container/jump-
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { FillTypeStatus } from './input-fill-progress/input-fill-progress.component';
 import {
+    hasGraphql,
     hasNodes,
     hasValues,
     MdsEditorDialogData,
+    MdsEditorDialogDataGraphql,
     MdsEditorDialogResult,
 } from './mds-editor-dialog-data';
 
@@ -70,7 +72,16 @@ export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
 
     private async initMdsEditor(): Promise<void> {
         let editorType: EditorType;
-        if (hasNodes(this.data)) {
+        if (hasGraphql(this.data)) {
+            editorType = await this.mdsEditorInstance.initWithGraphqlData(
+                (this.data as MdsEditorDialogDataGraphql).graphqlIds,
+                {
+                    groupId: this.data.groupId,
+                    bulkBehavior: this.data.bulkBehavior,
+                    editorMode: 'nodes',
+                },
+            );
+        } else if (hasNodes(this.data)) {
             editorType = await this.mdsEditorInstance.initWithNodes(this.data.nodes, {
                 groupId: this.data.groupId,
                 bulkBehavior: this.data.bulkBehavior,

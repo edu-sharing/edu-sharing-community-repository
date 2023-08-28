@@ -21,7 +21,9 @@ import org.edu_sharing.alfresco.service.AuthorityService;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.importer.PersistentHandlerEdusharing;
 import org.edu_sharing.repository.server.importer.RecordHandlerInterfaceBase;
@@ -29,8 +31,11 @@ import org.edu_sharing.repository.server.jobs.helper.NodeHelper;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.service.util.CSVTool;
+import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -56,6 +61,15 @@ public class MediacenterServiceImpl implements MediacenterService {
     SearchService searchService = serviceregistry.getSearchService();
     PermissionService permissionService = serviceregistry.getPermissionService();
     BehaviourFilter policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
+
+    @NotNull
+    public static String getAuthorityScope(String mediacenter) throws Exception {
+        String authorityScope = MediacenterServiceFactory.getLocalService().getMediacenterAdminGroup(mediacenter);
+        if(authorityScope == null){
+            throw new Exception("No mediacenter admin group found.");
+        }
+        return authorityScope;
+    }
 
 
     @Override
@@ -894,5 +908,27 @@ public class MediacenterServiceImpl implements MediacenterService {
         }else{
             throw new RuntimeException(authorityName + " does not exist.");
         }
+    }
+    @Override
+    public List<org.edu_sharing.service.model.NodeRef> getAllLicensedNodes(String mediacenter) throws Throwable {
+        List<org.edu_sharing.service.model.NodeRef> data = new ArrayList<>();
+        boolean hasMore = true;
+        int pageSize = 1000;
+        int page = 0;
+        SearchToken searchToken = new SearchToken();
+        searchToken.setAuthorityScope(Collections.singletonList(getAuthorityScope(mediacenter)));
+        searchToken.setFacets(new ArrayList<>());
+        searchToken.setMaxResult(pageSize);
+        do {
+            searchToken.setFrom(page);
+            SearchResultNodeRef search = SearchServiceFactory.getLocalService().search(MetadataHelper.getLocalDefaultMetadataset(), "mediacenter_filter", Collections.emptyMap(), searchToken);
+            page = page + pageSize;
+            if((search.getData().size() - 1) <= page){
+                hasMore = false;
+            }
+            data.addAll(search.getData());
+        }while (hasMore);
+        logger.info("result:" + data.size());
+        return data;
     }
 }

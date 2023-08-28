@@ -1,4 +1,5 @@
 @import '../../../../assets/scss/mixins';
+@import '../mixins';
 
 $optionBarHeight: 50px;
 
@@ -74,64 +75,8 @@ $optionBarHeight: 50px;
             right: 0;
             bottom: 0;
         }
-        .card-top-bar-type,
         .card-top-bar-flag {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            user-select: none;
-            //align-self: flex-start;
-            border-radius: 50%;
-            background-color: #fff;
-            padding: 5px;
-            position: relative;
-            z-index: 1;
-            @include materialShadow();
-            i {
-                // TODO: do we want to style based on collection type?
-                font-size: 18px;
-                color: #333;
-            }
-            img {
-                width: 18px;
-                height: 18px;
-            }
-        }
-        .card-top-bar-type {
-        }
-        .card-top-bar-comments,
-        .card-top-bar-published-copy,
-        .card-top-bar-childobjects {
-            > div {
-                background-color: rgba(255, 255, 255, 0.75);
-                border-radius: 15px;
-                display: inline-flex;
-                align-items: center;
-                min-width: 35px;
-                min-height: 22px;
-                justify-content: center;
-                cursor: default;
-                user-select: none;
-                padding: 2px 8px;
-                &.childobject-count {
-                    > i {
-                        font-size: 13px;
-                        margin-left: 4px;
-                    }
-                }
-                &.node-published-copy {
-                    min-width: auto;
-                    > i {
-                        font-size: 13px;
-                    }
-                }
-                &.node-comments {
-                    > i {
-                        font-size: 13px;
-                        margin-right: 4px;
-                    }
-                }
-            }
+            @include card-top-bar-badge;
         }
         .card-top-bar-checkbox {
             mat-checkbox {
@@ -194,6 +139,7 @@ $optionBarHeight: 50px;
             flex-direction: row;
             align-items: center;
             min-height: 2.5em;
+            gap: 5px;
             &:not(:first-child) {
                 > label {
                     cursor: inherit;

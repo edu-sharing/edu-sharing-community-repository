@@ -135,7 +135,6 @@ import org.edu_sharing.repository.server.tools.AuthenticatorRemoteRepository;
 import org.edu_sharing.repository.server.tools.DateTool;
 import org.edu_sharing.repository.server.tools.EduGroupTool;
 import org.edu_sharing.repository.server.tools.I18nServer;
-import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.repository.server.tools.ServerConstants;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
@@ -270,18 +269,19 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 		eduOrganisationService = (org.edu_sharing.alfresco.service.OrganisationService)applicationContext.getBean("eduOrganisationService");
 
-		try {
-			logger.debug("currentAuthInfo from authservice:" + serviceRegistry.getAuthenticationService().getCurrentUserName() + " "
-					+ serviceRegistry.getAuthenticationService().getCurrentTicket());
-		} catch (net.sf.acegisecurity.AuthenticationCredentialsNotFoundException e) {
-			//logger.error(e.getMessage());
-		}
 
 		if (_authenticationInfo == null) {
 			try{
 				HashMap<String, String> authInfo = new HashMap<String, String>();
 				authInfo.put(CCConstants.AUTH_USERNAME, serviceRegistry.getAuthenticationService().getCurrentUserName());
-				authInfo.put(CCConstants.AUTH_TICKET, serviceRegistry.getAuthenticationService().getCurrentTicket());
+				/**
+				 * when authentication.ticket.useSingleTicketPerUser=false is set
+				 * and the current user is the System user the call of
+				 * serviceRegistry.getAuthenticationService().getCurrentTicket() leads to new ticket creation
+				 */
+				if(!AuthenticationUtil.isRunAsUserTheSystemUser()){
+					authInfo.put(CCConstants.AUTH_TICKET, serviceRegistry.getAuthenticationService().getCurrentTicket());
+				}
 				authenticationInfo = authInfo;
 				logger.debug("authinfo init parameter is null, using " + " " + authenticationInfo.get(CCConstants.AUTH_USERNAME) + " " + authenticationInfo.get(CCConstants.AUTH_TICKET));
 			}catch(AuthenticationCredentialsNotFoundException e){
@@ -1153,7 +1153,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					nodeRef,
 					propsOutput,
 					Arrays.asList(aspects),
-					null)
+					null, null)
 			));
 		}
 
@@ -1411,7 +1411,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				propertiesFinal.put(CCConstants.CC_CACHE_MILLISECONDS_KEY, new Long(mdate.getTime()).toString());
 				for(PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
 					propertiesFinal = new HashMap<>(i.beforeCacheProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef, propertiesFinal,
-									aspects.stream().map(QName::toString).collect(Collectors.toList()), null)));
+									aspects.stream().map(QName::toString).collect(Collectors.toList()), null, null)));
 				}
 				repCache.put(nodeRef.getId(), propertiesFinal);
 			}
@@ -3550,12 +3550,17 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 						QName.createQName(CCConstants.CM_NAME));
 
 		nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(CCConstants.CM_NAME), UUID.randomUUID().toString());
-		nodeService.moveNode(
-				new NodeRef(storeRef, nodeId),
-				new NodeRef(storeRef, newParentId),
-				QName.createQName(childAssocType),
-				QName.createQName(CCConstants.NAMESPACE_CCM, nodeId));
-
+		nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(CCConstants.CM_NAME), UUID.randomUUID().toString());
+		try {
+			nodeService.moveNode(
+					new NodeRef(storeRef, nodeId),
+					new NodeRef(storeRef, newParentId),
+					QName.createQName(childAssocType),
+					QName.createQName(CCConstants.NAMESPACE_CCM, nodeId));
+		} catch(Exception e) {
+			nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(CCConstants.CM_NAME), originalName);
+			throw e;
+		}
 		String name = originalName;
 		int i = 1;
 		int maxRetries = 10;

@@ -1,0 +1,4 @@
+input IntRangeInput {
+    from: Int
+    to: Int
+}

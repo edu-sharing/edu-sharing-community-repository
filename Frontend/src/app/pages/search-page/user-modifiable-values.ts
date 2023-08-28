@@ -160,7 +160,7 @@ export class UserModifiableValue<T> {
     registerQueryParameter(
         key: string,
         activatedRoute: ActivatedRoute,
-        { replaceUrl = false } = {},
+        { replaceUrl = false, skipScrollToTop = false } = {},
     ): void {
         if (this._queryParam) {
             console.warn(
@@ -190,6 +190,7 @@ export class UserModifiableValue<T> {
                 UserModifiableValue.navigationScheduler.scheduleNavigation({
                     queryParams: { [key]: param },
                     replaceUrl,
+                    skipScrollToTop,
                 });
             });
     }

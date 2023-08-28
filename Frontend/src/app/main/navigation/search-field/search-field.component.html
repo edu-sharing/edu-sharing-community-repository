@@ -17,6 +17,7 @@
           class="filters-button"
           mat-icon-button
           type="button"
+          [attr.aria-label]="'SEARCH.FILTERS' | translate"
           matTooltip="{{ 'TOGGLE_SEARCH_FILTERS' | translate }} {{
             totalFiltersCount > 0
               ? '(' +
@@ -59,6 +60,7 @@
           class="submit-button"
           mat-icon-button
           attr.aria-label="{{ 'WORKSPACE.SEARCH_ACTION' | translate }}"
+          data-test="top-bar-search-button"
         >
           <i esIcon="search" [aria]="false"></i>
         </button>
@@ -97,6 +99,8 @@
                 class="filter-chip-{{ filters.key | propertySlug }}"
                 [removable]="true"
                 (removed)="onRemoveFilter(filters.key, filterValue)"
+                [matTooltip]="getTooltip(filters.key, filterValue)"
+                matTooltipPosition="above"
               >
                 {{ filterValue.label }}
                 <mat-icon matChipRemove>cancel</mat-icon>

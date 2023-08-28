@@ -192,7 +192,18 @@
       </div>
     </div>
 
-    TODO
+    <h5 class="mat-heading-5" *ngIf="nodesNoData">{{ 'ADMIN.STATISTICS.NO_DATA' | translate }}</h5>
+    <es-node-entries-wrapper
+      *ngIf="!nodesNoData"
+      [dataSource]="nodesDataSource"
+      [elementInteractionType]="InteractionType.Emitter"
+      [checkbox]="false"
+      [displayType]="NodeEntriesDisplayType.Table"
+      (clickItem)="onOpenNode.emit($event.element)"
+    ></es-node-entries-wrapper>
+    <es-info-message *ngIf="!nodesNoData">
+      {{ 'ADMIN.STATISTICS.SLICE_INFO_DOWNLOAD' | translate }}
+    </es-info-message>
   </mat-tab>
   <mat-tab label="{{ 'ADMIN.STATISTICS.SINGLE' | translate }}" class="stats-single">
     <h4 class="mat-heading-4 mat-heading-underline">
@@ -277,13 +288,45 @@
         <mat-header-row *matHeaderRowDef="singleDataRows; sticky: true"></mat-header-row>
         <mat-row matRipple *matRowDef="let row; columns: singleDataRows"></mat-row>
       </mat-table>
+      <es-info-message *ngIf="singleData?.length">
+        {{ 'ADMIN.STATISTICS.SLICE_INFO' | translate }}
+      </es-info-message>
+    </div>
+  </mat-tab>
+  <mat-tab label="{{ 'ADMIN.STATISTICS.ARCHIVED' | translate }}" *ngIf="_mediacenter">
+    <h4 class="mat-heading-4 mat-heading-underline">
+      <i esIcon="archive"></i> {{ 'ADMIN.STATISTICS.ARCHIVED' | translate }}
+    </h4>
+    <div class="stats-archived-table">
+      <es-info-message mode="info">
+        {{ 'ADMIN.STATISTICS.ARCHIVED_INFO' | translate }}
+      </es-info-message>
+      <es-node-entries-wrapper
+        [elementInteractionType]="InteractionType.Emitter"
+        [displayType]="NodeEntriesDisplayType.Table"
+        [dataSource]="archivedNodesDataSource"
+        [checkbox]="false"
+        [columns]="archivedNodesColumns"
+        (clickItem)="downloadArchivedNode($event.element)"
+      >
+        <ng-template #empty>
+          <div class="empty">
+            {{ 'ADMIN.STATISTICS.ARCHIVED_EMPTY' | translate }}
+          </div>
+        </ng-template>
+      </es-node-entries-wrapper>
     </div>
   </mat-tab>
 </mat-tab-group>
 <div
   class="export"
   *ngIf="
-    currentTab != 2 && !groupedLoading && !customGroupLoading && !nodesLoading && !singleLoading
+    currentTab != 2 &&
+    currentTab != 4 &&
+    !groupedLoading &&
+    !customGroupLoading &&
+    !nodesDataSource.isLoading &&
+    !singleLoading
   "
 >
   <h4 class="mat-heading-4 mat-heading-underline">

@@ -1,5 +1,5 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { NodeEntriesDisplayType, Scope } from 'ngx-edu-sharing-ui';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { NodeEntriesDisplayType, Scope, TemporaryStorageService } from 'ngx-edu-sharing-ui';
 import { ActionbarComponent } from 'ngx-edu-sharing-ui';
 import { SearchPageResultsService } from './search-page-results.service';
 import { SearchPageService } from './search-page.service';
@@ -11,7 +11,7 @@ import { GlobalSearchPageServiceInternal } from './global-search-page.service';
     styleUrls: ['./search-page-results.component.scss'],
     providers: [SearchPageResultsService],
 })
-export class SearchPageResultsComponent implements OnInit {
+export class SearchPageResultsComponent implements OnInit, OnDestroy {
     readonly Scope = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 
@@ -34,6 +34,7 @@ export class SearchPageResultsComponent implements OnInit {
         private globalSearchPageInternal: GlobalSearchPageServiceInternal,
         private results: SearchPageResultsService,
         private searchPage: SearchPageService,
+        private temporaryStorageService: TemporaryStorageService,
     ) {}
 
     ngOnInit(): void {
@@ -46,5 +47,19 @@ export class SearchPageResultsComponent implements OnInit {
     toggleFilters(): void {
         const filterBarIsVisible = this.searchPage.filterBarIsVisible;
         filterBarIsVisible.setUserValue(!filterBarIsVisible.getValue());
+    }
+
+    ngOnDestroy(): void {
+        this.temporaryStorageService.set(
+            TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE,
+            this.resultsDataSource,
+        );
+    }
+
+    getCountClass() {
+        if (this.searchPage.searchString.getValue()) {
+            return 'count-ngsearchword';
+        }
+        return '';
     }
 }

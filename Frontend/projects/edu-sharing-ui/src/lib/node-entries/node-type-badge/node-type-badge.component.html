@@ -1,0 +1,31 @@
+<ng-container *ngIf="isCollection">
+  <i
+    [matTooltip]="
+      'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate
+    "
+    [altText]="
+      'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate
+    "
+    [esIcon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"
+  ></i>
+</ng-container>
+<ng-container *ngIf="!isCollection">
+  <ng-container *ngIf="getCustomTemplate() as ref">
+    <ng-container *ngTemplateOutlet="ref; context: { node: this.node }"></ng-container>
+  </ng-container>
+  <ng-container *ngIf="!getCustomTemplate()">
+    <img
+      [src]="node | esNodeIcon"
+      [alt]="
+        node.mediatype
+          ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
+          : ''
+      "
+      [matTooltip]="
+        node.mediatype
+          ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
+          : ''
+      "
+    />
+  </ng-container>
+</ng-container>

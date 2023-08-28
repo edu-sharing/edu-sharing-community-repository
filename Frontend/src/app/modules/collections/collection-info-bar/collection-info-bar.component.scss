@@ -92,6 +92,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    .blurred-image {
+        display: block;
+        filter: blur(15px);
+    }
+    .collection-header-image {
+        height: 100%;
+        width: 100%;
+        object-fit: contain;
+        margin: auto;
+        z-index: 1;
+        position: relative;
+        @include materialShadowLarge();
+    }
 }
 .big-edit-button {
     position: absolute;

@@ -187,6 +187,7 @@
   "NO_PERMISSIONS_FOR_SCOPE": "No permissions to access this environment",
   "DATE_SELECT_YEAR": "Choose year",
   "SEARCH_CLEAR": "Clear",
+  "TOGGLE_SEARCH_FILTERS": "Toggle search filters",
   "DATE_CLEAR": "Clear",
   "USER_TUTORIAL_HEADING": "Your Profile",
   "USER_TUTORIAL_DESCRIPTION": "Here you can add a profile picture and show who you are and what you do. You decide what others can see.",
@@ -260,6 +261,8 @@
     "dimensions": "image size",
     "exif:dateTimeOriginal": "recording date",
     "cm:modified": "last change",
+    "ccm:replicationmodified": "last change",
+    "ccm:replicationsourcetimestamp": "last change",
     "cm:created": "creation date",
     "cm:creator": "created by",
     "cclom:title": "title",
@@ -401,6 +404,7 @@
     "file-xml": "XML file",
     "file-audio": "audio",
     "file-txt": "text file",
+    "file-csv": "csv file",
     "file-video": "video",
     "file-qti": "ONYX file",
     "file-h5p": "H5P file",
@@ -409,6 +413,7 @@
     "folder": "Folder",
     "file": "Unknown",
     "collection": "Collection",
+    "tool_object": "lti tool",
     "saved_search": "Search"
   },
   "PERMISSION_TYPE": {

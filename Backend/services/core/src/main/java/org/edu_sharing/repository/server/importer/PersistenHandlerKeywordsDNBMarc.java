@@ -1,23 +1,9 @@
 package org.edu_sharing.repository.server.importer;
 
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.util.TempFileProvider;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.writer.CSVWriter;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.ibatis.session.ExecutorType;
-import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
-import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
-import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.service.search.Suggestion;
-import org.edu_sharing.service.util.CSVTool;
-import org.json.simple.JSONValue;
 
 import java.sql.*;
 import java.text.Normalizer;

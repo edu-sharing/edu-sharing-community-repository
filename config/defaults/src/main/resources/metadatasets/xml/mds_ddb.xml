@@ -1,54 +1,55 @@
 <metadataset id="default" label="default" hidden="false">
-	<name>DDB Metadataset</name>
+	<name>Core Metadataset</name>
 	<inherit>mds</inherit>
 	<i18n>mds_translation</i18n>
 	<widgets>
 		<widget>
-			<id>virutal:title</id>
+			<id>virtual:title</id>
 			<caption>Title</caption>
 			<placeholder>z.B. Goethe</placeholder>
 			<type>text</type>
 		</widget>
 		<widget>
-			<id>virutal:place</id>
-			<type>multivalueFixedBadges</type>
+			<id>virtual:place</id>
+			<type>text</type>
 			<suggestionSource>Search</suggestionSource>
 			<caption>Ort</caption>
 			<placeholder>z.B. Frankfurt</placeholder>
 		</widget>
 		<widget>
-			<id>virutal:affiliate</id>
-			<type>multivalueFixedBadges</type>
+			<id>virtual:affiliate</id>
+			<type>text</type>
 			<caption>Person/Organisation</caption>
 			<placeholder>z.B. Goethe, Johann Wolfgang von</placeholder>
 		</widget>
 		<!-- new -->
 		<widget>
-			<id>virutal:keywords</id>
-			<type>multivalueFixedBadges</type>
+			<id>cclom:general_keyword</id>
+			<type>multivalueSuggestBadges</type>
 			<caption>Stichwort</caption>
 			<placeholder>z.B. Aufsatz</placeholder>
+			<searchable>true</searchable>
 		</widget>
 		<widget>
-			<id>virutal:language</id>
+			<id>virtual:language</id>
 			<type>multivalueFixedBadges</type>
 			<caption>Sprache</caption>
 			<placeholder>z.B. Deutsch</placeholder>
 		</widget>
 		<widget>
-			<id>virutal:type</id>
+			<id>virtual:type</id>
 			<type>multivalueFixedBadges</type>
 			<caption>Medientyp</caption>
 			<placeholder>z.B. Bild</placeholder>
 		</widget>
 		<widget>
-			<id>virutal:sector</id>
+			<id>virtual:sector</id>
 			<type>multivalueFixedBadges</type>
 			<caption>Sparte</caption>
 			<placeholder>z.B. Forschung</placeholder>
 		</widget>
 		<widget>
-			<id>virutal:provider</id>
+			<id>virtual:provider</id>
 			<type>multivalueFixedBadges</type>
 			<caption>Datengeber</caption>
 			<placeholder>z.B. Bundesarchiv</placeholder>
@@ -59,10 +60,10 @@
 		<template>
 			<id>search</id>
 			<html><![CDATA[
-	            <virutal:title>
-	            <virutal:place>
-	            <virutal:affiliate>
-	            <virutal:keywords>
+	            <virtual:title>
+	            <virtual:place>
+	            <virtual:affiliate>
+	            <cclom:general_keyword>
 		  ]]></html>
 		</template>
 		<template>
@@ -70,16 +71,12 @@
 			<caption>dialog_upload_tab_basic</caption>
 			<html><![CDATA[
 	            <cclom:title>
+	            <cclom:general_description>
+	            <cclom:general_keyword>
 	            <sys:node-uuid>
 			]]></html>
 		</template>
 	</templates>
-	<template>
-		<id>search_input</id>
-		<rel>suggestions</rel>
-		<html><![CDATA[
-				]]></html>
-	</template>
 	<sorts>
 		<sort>
 			<id>search</id>
@@ -98,9 +95,10 @@
 			<id>search</id>
 			<columns>
 				<column>cm:title</column>
-				<column>ccm:lifecyclecontributer_publisher</column>
+				<column>cm:creator</column>
 				<column>ccm:commonlicense_key</column>
 				<column>ccm:replicationsource</column>
+
 			</columns>
 		</list>
 	</lists>
@@ -115,38 +113,40 @@
 	</groups>
 	<queries>
 		<query join="AND" id="ngsearch">
-			<property name="virutal:title"></property>
-			<property name="virutal:place">
+			<property name="virtual:title"></property>
+			<property name="virtual:place">
 				<facets>
 					<facet>place_fct</facet>
 				</facets>
 			</property>
-			<property name="virutal:affiliate">
+			<property name="virtual:affiliate">
 				<facets>
 					<facet>affiliate_fct</facet>
 				</facets>
 			</property>
-			<property name="virutal:keywords">
+			<property name="cclom:general_keyword">
 				<facets>
 					<facet>keywords_fct</facet>
 				</facets>
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
 			</property>
-			<property name="virutal:language">
+			<property name="virtual:language">
 				<facets>
 					<facet>language_fct</facet>
 				</facets>
 			</property>
-			<property name="virutal:type">
+			<property name="virtual:type">
 				<facets>
 					<facet>type_fct</facet>
 				</facets>
 			</property>
-			<property name="virutal:sector">
+			<property name="virtual:sector">
 				<facets>
 					<facet>sector_fct</facet>
 				</facets>
 			</property>
-			<property name="virutal:provider">
+			<property name="virtual:provider">
 				<facets>
 					<facet>provider_fct</facet>
 				</facets>

@@ -17,6 +17,8 @@
       [selectable]="false"
       (click)="add(suggestion)"
       (keydown.enter)="add(suggestion)"
+      [matTooltip]="getTooltip(suggestion)"
+      matTooltipPosition="above"
     >
       <span class="caption">{{ suggestion.label }}</span>
       <!-- <span class="count">({{ value.count }})</span> -->

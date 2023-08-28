@@ -1,7 +1,10 @@
 package org.edu_sharing.service.mediacenter;
 
+import org.edu_sharing.service.model.NodeRef;
+
 import java.io.InputStream;
 import java.util.Date;
+import java.util.List;
 
 public interface MediacenterService {
 	
@@ -43,4 +46,6 @@ public interface MediacenterService {
 	public void updateMediacenter(String id, String displayName, String postalCode, String city, String districtAbbreviation, String mainUrl, String mediacenterCatalogs, boolean active) throws Exception;
 
 	public void deleteMediacenter(String authorityName);
+
+    List<NodeRef> getAllLicensedNodes(String mediacenter) throws Throwable;
 }

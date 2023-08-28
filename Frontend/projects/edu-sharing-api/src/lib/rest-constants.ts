@@ -82,6 +82,8 @@ export class RestConstants {
     public static CCM_PROP_WF_INSTRUCTIONS = 'ccm:wf_instructions';
     public static CCM_PROP_WF_PROTOCOL = 'ccm:wf_protocol';
     public static CCM_PROP_REPLICATIONSOURCE = 'ccm:replicationsource';
+    public static CCM_PROP_REPLICATIONMODIFIED = 'ccm:replicationmodified';
+    public static CCM_PROP_REPLICATIONSOURCETIMESTAMP = 'ccm:replicationsourcetimestamp';
     public static CCM_PROP_EDUSCOPENAME = 'ccm:eduscopename';
     public static CM_MODIFIED_DATE = 'cm:modified';
     public static CCM_PROP_REPLICATIONSOURCEID = 'ccm:replicationsourceid';
@@ -94,10 +96,10 @@ export class RestConstants {
     public static CM_PROP_C_CREATED = 'cm:created';
     public static CCM_PROP_EAF_PRODUCTIONYEAR = 'ccm:eaf_productionyear';
     public static EXIF_PROP_DATE_TIME_ORIGINAL = 'exif:dateTimeOriginal';
-    public static CCM_PROP_REPLICATIONMODIFIED = 'ccm:replicationmodified';
     public static CCM_TYPE_COLLECTION_PROPOSAL = 'ccm:collection_proposal';
     public static CCM_PROP_COLLECTION_ORDERED_POSITION = 'ccm:collection_ordered_position';
     public static CM_NAME = 'cm:name';
+    public static LOM_PROP_TITLE = 'cclom:title';
     public static CM_PROP_TITLE = 'cm:title';
     public static CCM_PROP_WIDTH = 'ccm:width';
     public static CCM_PROP_HEIGHT = 'ccm:height';

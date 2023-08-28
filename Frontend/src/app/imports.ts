@@ -80,20 +80,8 @@ export const IMPORTS = [
     CustomModule,
     MonacoEditorModule.forRoot({ baseUrl: './assets' }),
     RouterModule.forRoot(ROUTES, {
-        // Scroll position restoration used behave sensibly out of the box because browsers tried to set
-        // the scroll position before the content was loaded and ended up scrolling to the top of the
-        // page each time. While this is still true depending on browser and loading times, browsers
-        // sometimes respect the `scrollPositionRestoration` setting now. This might lead to keeping the
-        // scroll position on navigation (even forward) with the default `disabled` setting. We could
-        // emulate the old behavior by setting this to `top` but `enabled` is actually useful when it
-        // works.
-        //
-        // To consistently get the `enabled` behavior across browsers and independently of loading
-        // times, we could fetch the content via a [resolver](https://angular.io/api/router/Resolve) on
-        // navigation. In case this doesn't work everywhere, a small modification to the default
-        // behavior might be needed as done here:
-        // https://github.com/openeduhub/oeh-search-frontend/blob/a74047b57007fc6c9561feab02d4d3664051e5c9/src/app/app.component.ts#L37-L52
-        scrollPositionRestoration: 'enabled',
+        // scrollPositionRestoration: 'enabled' emulated via ScrollPositionRestorationService.
+        relativeLinkResolution: 'legacy',
         // This prevents the browser history from getting messed up when navigation attempts are
         // cancelled by guards.
         canceledNavigationResolution: 'computed',

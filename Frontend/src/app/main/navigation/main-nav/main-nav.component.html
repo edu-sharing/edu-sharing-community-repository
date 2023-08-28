@@ -2,7 +2,12 @@
   <es-skip-nav></es-skip-nav>
   <es-banner [scope]="mainNavConfig.currentScope" (onUpdate)="refreshBanner()"></es-banner>
 
-  <div role="navigation" [attr.aria-label]="'NAV.MAIN' | translate">
+  <div
+    *ngIf="mainNavConfig.showNavigation"
+    class="navigation-container"
+    role="navigation"
+    [attr.aria-label]="'NAV.MAIN' | translate"
+  >
     <es-user-profile *ngIf="showProfile" (onCancel)="showProfile = false"></es-user-profile>
 
     <es-global-progress *ngIf="globalProgress"></es-global-progress>
@@ -14,7 +19,7 @@
     ></es-tutorial>
 
     <es-top-bar
-      class="topBar {{ 'topBar-' + mainNavConfig.currentScope }} scrollWithBanner"
+      class="topBar {{ 'topBar-' + mainNavConfig.currentScope }}"
       [class.noUser]="!showUser"
       [autoLogoutTimeout$]="autoLogoutTimeout$"
       [canOpen]="canOpen"

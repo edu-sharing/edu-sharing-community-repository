@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Node, NodeStatistics, Statistics } from '../../../core-module/rest/data-object';
-import { ListCountsComponent, ListItem, UIAnimation } from 'ngx-edu-sharing-ui';
+import { ListItem, UIAnimation } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { ConfigurationService } from '../../../core-module/rest/services/configuration.service';
@@ -23,6 +23,11 @@ import { SessionStorageService } from '../../../core-module/rest/services/sessio
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
 import { UIService } from '../../../core-module/rest/services/ui.service';
 import { trigger } from '@angular/animations';
+import { ListCountsComponent } from 'ngx-edu-sharing-ui';
+import { NodeDataSource } from 'ngx-edu-sharing-ui';
+import { DEFAULT, HOME_REPOSITORY, SearchService } from 'ngx-edu-sharing-api';
+import { InteractionType, NodeEntriesDisplayType } from 'ngx-edu-sharing-ui';
+import { NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
 
 // Charts.js
 declare var Chart: any;
@@ -44,6 +49,8 @@ type GroupTemplate = {
     ],
 })
 export class AdminStatisticsComponent implements OnInit {
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    readonly InteractionType = InteractionType;
     @ViewChild('groupedChart') groupedChartRef: ElementRef;
     _mediacenter: any;
     private groupedChartData: { node: NodeStatistics[]; user: Statistics[] };
@@ -83,11 +90,10 @@ export class AdminStatisticsComponent implements OnInit {
     nodesNoData: boolean;
     _singleMode: 'NODES' | 'USERS' = 'NODES';
     _customGroupMode: 'NODES' | 'USERS' = 'NODES';
-    singleData: any;
+    singleData: any[];
     singleDataRows: string[];
     groupedChart: any;
-    nodesLoading: boolean;
-    nodes: any[];
+    nodesDataSource = new NodeDataSource<any>();
     columns: ListItem[];
     currentTab = 0;
     exportProperties: string;
@@ -95,6 +101,8 @@ export class AdminStatisticsComponent implements OnInit {
     groupModeTemplates: GroupTemplate[];
     currentTemplate: GroupTemplate;
     showExport: boolean;
+    archivedNodesDataSource = new NodeDataSource<Node>();
+    archivedNodesColumns = [new ListItem('NODE', RestConstants.LOM_PROP_TITLE)];
 
     set groupedStart(groupedStart: Date) {
         this._groupedStart = groupedStart;
@@ -204,7 +212,9 @@ export class AdminStatisticsComponent implements OnInit {
         private storage: SessionStorageService,
         private connector: RestConnectorService,
         private translate: TranslateService,
+        private searchService: SearchService,
         private config: ConfigurationService,
+        private nodeHelperService: NodeHelperService,
     ) {
         this.initColumns();
         this.groupedStart = new Date(
@@ -260,6 +270,7 @@ export class AdminStatisticsComponent implements OnInit {
         this.refresh();
     }
     refresh() {
+        this.refreshArchived();
         this.refreshGroups();
         this.refreshNodes();
         this.refreshSingle();
@@ -488,8 +499,8 @@ export class AdminStatisticsComponent implements OnInit {
         if (!this.finishedPreload) {
             return;
         }
-        this.nodes = [];
-        this.nodesLoading = true;
+        this.nodesDataSource.reset();
+        this.nodesDataSource.isLoading = false;
         const group = this.config.instant('admin.statistics.nodeGroup');
         this.statistics
             .getStatisticsNode(
@@ -500,12 +511,14 @@ export class AdminStatisticsComponent implements OnInit {
                 group ? [group] : null,
             )
             .subscribe((data) => {
-                this.nodesLoading = false;
+                this.nodesDataSource.isLoading = false;
                 this.nodesNoData = data.length === 0;
-                this.nodes = data.map((stat) => {
-                    (stat.node as any).counts = stat;
-                    return stat.node;
-                });
+                this.nodesDataSource.setData(
+                    data.map((stat) => {
+                        (stat.node as any).counts = stat;
+                        return stat.node;
+                    }),
+                );
             });
     }
     getValidMode(mode: 'NODES' | 'USERS') {
@@ -801,7 +814,7 @@ export class AdminStatisticsComponent implements OnInit {
                 csvHeadersTranslated = properties
                     .map((e) => this.translate.instant('NODE.' + e))
                     .concat(countHeaders.map((s) => this.translate.instant('NODE.counts.' + s)));
-                csvData = this.nodes.map((n) => {
+                csvData = this.nodesDataSource.getData().map((n) => {
                     const c: any = {};
                     console.log(Object.keys(n.counts));
                     for (const prop of properties) {
@@ -876,5 +889,38 @@ export class AdminStatisticsComponent implements OnInit {
         if (refresh) {
             this.refreshCustomGroups();
         }
+    }
+
+    private async refreshArchived() {
+        if (!this._mediacenter) {
+            return;
+        }
+        this.archivedNodesDataSource.reset();
+        this.archivedNodesDataSource.isLoading = true;
+        const result = await this.searchService
+            .search({
+                sortProperties: [RestConstants.CM_PROP_C_CREATED],
+                sortAscending: [true],
+                repository: HOME_REPOSITORY,
+                contentType: 'FILES',
+                maxItems: 100,
+                metadataset: DEFAULT,
+                query: 'mediacenter_statistics',
+                body: {
+                    criteria: [
+                        {
+                            property: 'mediacenter',
+                            values: [this.getMediacenter()],
+                        },
+                    ],
+                },
+            })
+            .toPromise();
+        this.archivedNodesDataSource.setData(result.nodes, result.pagination);
+        this.archivedNodesDataSource.isLoading = false;
+    }
+
+    downloadArchivedNode(element: Node) {
+        this.nodeHelperService.downloadNodes([element]);
     }
 }

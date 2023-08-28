@@ -1,0 +1,4 @@
+input EditorialSuggestionInput {
+    state: RangedValueSuggestionDataInput
+    checklist: [RangedValueSuggestionDataInput]
+}

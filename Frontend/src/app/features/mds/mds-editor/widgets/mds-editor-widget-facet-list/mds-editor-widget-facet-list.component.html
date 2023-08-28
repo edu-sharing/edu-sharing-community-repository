@@ -5,6 +5,7 @@
   [valueType]="valueType"
   [control]="formArray"
   [wrapInFormField]="false"
+  [showSpinner]="isInitState$ | async"
 >
   <mat-form-field *ngIf="hasFilter()">
     <mat-label>{{ 'MDS.FILTER_FACET' | translate }}</mat-label>

@@ -44,6 +44,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.repository.server.RequestHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.springframework.extensions.surf.util.URLEncoder;
 
@@ -155,7 +156,7 @@ public class URLTool{
 
 	public static String getBaseUrlFromRequest(HttpServletRequest req) {
 		ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
-		String path = req.getScheme() + "://" + req.getServerName();
+		String path = req.getScheme() + "://" + new RequestHelper(req).getServerName();
 		int port = req.getServerPort();
 		if (port != 80 && port != 443) {
 			path += ":" + port;

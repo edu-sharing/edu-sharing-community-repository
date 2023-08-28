@@ -251,7 +251,7 @@ export class NodeRelationsDialogComponent implements OnInit {
             node = await this.nodeService
                 .getNode(
                     RestHelper.removeSpacesStoreRef(
-                        node.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL],
+                        node.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL][0],
                     ),
                 )
                 .toPromise();

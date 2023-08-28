@@ -81,6 +81,8 @@ public class BulkDeleteNodesJob extends AbstractJob{
 	private boolean recycle;
 	@JobFieldDescription(description = "Force delete (for broken nodes)")
 	private boolean force;
+	@JobFieldDescription(description = "Run threaded (default false)")
+	private boolean threaded = false;
 	@JobFieldDescription(description = "Cleanup/remove collection references")
 	private boolean collectionRefsCleanup;
 	@JobFieldDescription(description = "Element types to delete (comma seperated list), e.g. ccm:map,ccm:io")
@@ -108,9 +110,12 @@ public class BulkDeleteNodesJob extends AbstractJob{
 		if(recycleStr==null){
 			throw new IllegalArgumentException("Missing required boolean parameter 'recycle'");
 		}
-		recycle = Boolean.parseBoolean(recycleStr.toString());
-		force = Boolean.parseBoolean((String) context.getJobDetail().getJobDataMap().get("force"));
-		collectionRefsCleanup = Boolean.parseBoolean((String) context.getJobDetail().getJobDataMap().get("collectionRefsCleanup"));
+		recycle = (boolean) recycleStr;
+		force = (boolean) context.getJobDetail().getJobDataMap().get("force");
+		if(context.getJobDetail().getJobDataMap().get("threaded") != null) {
+			threaded = (boolean) context.getJobDetail().getJobDataMap().get("threaded");
+		}
+		collectionRefsCleanup = (boolean) context.getJobDetail().getJobDataMap().get("collectionRefsCleanup");
 
 		try {
 			types = Arrays.stream(((String) context.getJobDetail().getJobDataMap().get("types")).
@@ -125,6 +130,9 @@ public class BulkDeleteNodesJob extends AbstractJob{
 
 		NodeRunner runner = new NodeRunner();
 		runner.setTask((ref)->{
+			if(isInterrupted()) {
+				return;
+			}
 			logger.info("removing node " + ref);
 			try {
 				if (collectionRefsCleanup) {
@@ -156,12 +164,15 @@ public class BulkDeleteNodesJob extends AbstractJob{
 		});
 		runner.setTypes(types!=null && !types.isEmpty() ? types : null);
 		runner.setRunAsSystem(true);
-		runner.setThreaded(false);
+		runner.setThreaded(threaded);
 		runner.setStartFolder(startFolder);
 		runner.setLucene(lucene);
 		runner.setKeepModifiedDate(true);
 		runner.setTransaction(NodeRunner.TransactionMode.LocalRetrying);
 		int count=runner.run();
+		if(isInterrupted()) {
+			return;
+		}
 		AuthenticationUtil.runAsSystem(() -> {
 			if(lucene == null || lucene.isEmpty()) {
 				nodeServiceEdu.removeNode(startFolder, null, recycle);

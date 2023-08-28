@@ -12,6 +12,7 @@ import {
     NodeEntriesWrapperComponent,
     OptionItem,
     Scope,
+    VCard,
 } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
@@ -470,10 +471,12 @@ export class AdminMediacenterComponent {
     }
 
     async exportNodes() {
-        const properties = this.nodeColumns.map((c) => c.name);
+        const properties = this.nodeColumns
+            .map((c) => c.name)
+            .filter((n) => n !== 'ccm:mediacenter');
         const propertiesLabel = properties.map((p) => this.translate.instant('NODE.' + p));
         this.toast.showProgressDialog();
-        const data = await this.mediacenterService
+        const data = (await this.mediacenterService
             .exportMediacenterLicensedNodes({
                 repository: RestConstants.HOME_REPOSITORY,
                 mediacenter: this.currentMediacenter.authorityName,
@@ -484,8 +487,15 @@ export class AdminMediacenterComponent {
                 },
                 properties,
             })
-            .toPromise();
+            .toPromise()) as unknown as any[];
         this.toast.closeModalDialog();
+        data.forEach((d) => {
+            Object.keys(d)
+                .filter((c) => RestConstants.getAllVCardFields().includes(c))
+                .forEach((c) => {
+                    d[c] = d[c]?.map((d2: string) => new VCard(d2).getDisplayName());
+                });
+        });
         CsvHelper.download(
             await this.translate.get('ADMIN.MEDIACENTER.NODES.CSV_FILENAME').toPromise(),
             propertiesLabel,

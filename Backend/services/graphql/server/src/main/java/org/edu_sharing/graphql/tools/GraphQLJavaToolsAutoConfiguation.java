@@ -32,7 +32,8 @@ public class GraphQLJavaToolsAutoConfiguation {
 
     @Bean
     public SchemaStringProvider schemaStringProvider(ApplicationContext applicationContext){
-        return new ClasspathResourceSchemaStringProvider("**/*.graphql");
+        // only fetch graphql files from the backend classpath and ignore Frontend graphql files
+        return new ClasspathResourceSchemaStringProvider("**/edu_sharing/**/*.graphql");
     }
 
     @Autowired(required = false) PerFieldObjectMapperProvider perFieldObjectMapperProvider;
