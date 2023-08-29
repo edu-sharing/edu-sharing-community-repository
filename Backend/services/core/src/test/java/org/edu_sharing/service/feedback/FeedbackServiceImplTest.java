@@ -223,7 +223,7 @@ class FeedbackServiceImplTest {
     void deleteUserData() {
         try (MockedStatic<CMISSearchHelper> cmisSearchHelperMockedStatic = Mockito.mockStatic(CMISSearchHelper.class)) {
             Map<String, Object> filters=new HashMap<String, Object>() {{
-                put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY), DigestUtils.sha1Hex(userId + userEsId));
+                put(CCConstants.CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY, DigestUtils.sha1Hex(userId + userEsId));
             }};
             List<NodeRef> list = new ArrayList<>();
             int randListSize = (int) (1 + Math.random() * 100);
@@ -254,10 +254,10 @@ class FeedbackServiceImplTest {
         try (MockedStatic<CMISSearchHelper> cmisSearchHelperMockedStatic = Mockito.mockStatic(CMISSearchHelper.class)) {
             String newUserId = UUID.randomUUID().toString();
             Map<String, Object> filtersObfuscate=new HashMap<String, Object>() {{
-                put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY), DigestUtils.sha1Hex(userId + userEsId));
+                put(CCConstants.CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY, DigestUtils.sha1Hex(userId + userEsId));
             }};
             Map<String, Object> filtersFull=new HashMap<String, Object>() {{
-                put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY), userId);
+                put(CCConstants.CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY, userId);
             }};
             List<NodeRef> list = new ArrayList<>();
             int randListSize = (int) (1 + Math.random() * 100);
