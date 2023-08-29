@@ -1163,7 +1163,7 @@
     "DELETE_RATING": "Remove rating",
     "TOAST": {
       "LIKED": "Recommended material \"{{name}}\". Thank you!",
-      "RATED": "Rated material \"{{name}}\" with {{rating}} stars. Thank you!",
+      "RATED": "You rated material \"{{name}}\" with {{rating}} stars. Thank you!",
       "LIKE_REMOVED": "Removed recommendation for material \"{{name}}\"",
       "RATING_REMOVED": "Removed rating for material \"{{name}}\""
     }
@@ -1253,13 +1253,13 @@
     },
     "GROUP": {
       "addToCollectionEvent": "Content added to collection",
-      "commentEvent": "Comment on material",
-      "inviteEvent": "Invitation on material",
-      "nodeIssueEvent": "Issue reported on material",
-      "ratingEvent": "Material rated",
-      "workflowEvent": "Assigned by workflow",
-      "metadataSuggestionEvent": "Suggestion for metadata",
-      "proposeForCollectionEvent": "Collection proposals"
+      "commentEvent": "Comment on materials",
+      "inviteEvent": "Invitation to materials",
+      "nodeIssueEvent": "Issue reported for materials",
+      "ratingEvent": "Ratings for materials",
+      "workflowEvent": "Materials assigned to a workflow",
+      "metadataSuggestionEvent": "Suggestions for metadata",
+      "proposeForCollectionEvent": "Materials proposed for collections"
     }
   },
   "API_ERROR": {
