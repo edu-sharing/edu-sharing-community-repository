@@ -93,6 +93,17 @@
               <destinationFile>${project.build.directory}/fixes/net/sf/jooreports/converter/DocumentFamily.class</destinationFile>
             </configuration>
           </execution>
+          <execution>
+            <id>fix7</id>
+            <goals>
+              <goal>rename</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <sourceFile>${project.build.directory}/classes/org/alfresco/repo/web/scripts/solr/NodesMetaDataGet.class</sourceFile>
+              <destinationFile>${project.build.directory}/fixes/org/alfresco/repo/web/scripts/solr/NodesMetaDataGet.class</destinationFile>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 
