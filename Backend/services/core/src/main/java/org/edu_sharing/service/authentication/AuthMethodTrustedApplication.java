@@ -48,7 +48,7 @@ public class AuthMethodTrustedApplication implements AuthMethodInterface {
 		/**
 		 * check host
 		 */	
-		if (clientIp == null || !appInfo.isTrustedHost(clientIp)) {	
+		if (ssoAuthorityMapper.isAuthByAppCheckClientIp() && (clientIp == null || !appInfo.isTrustedHost(clientIp))) {
 			logger.error(AuthenticationExceptionMessages.INVALID_HOST + " clientHost:" + clientIp + " appInfo.trusted hosts:" + appInfo.getHost() +" "+ appInfo.getHostAliases() +" "+appInfo.getDomain() +" appInfo.getAppId():"+appInfo.getAppId() +" appfile:"+appInfo.getAppFile() +" param appid:"+applicationId);
 			throw new AuthenticationException(AuthenticationExceptionMessages.INVALID_HOST + ": " + clientIp);
 		}
