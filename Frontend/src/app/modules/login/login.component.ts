@@ -95,7 +95,7 @@ export class LoginComponent implements OnInit, OnDestroy {
                     if (params.username) {
                         this.username = params.username;
                     }
-
+                    this.next = params.next;
                     this.connector.onAllRequestsReady().subscribe(() => {
                         setTimeout(() => {
                             if (this.username && this.passwordInput) {
@@ -154,7 +154,6 @@ export class LoginComponent implements OnInit, OnDestroy {
                         loadingTask.done();
                     });
                     this.isSafeLogin = this.scope == RestConstants.SAFE_SCOPE;
-                    this.next = params.next;
                     if (this.scope === RestConstants.SAFE_SCOPE) {
                         this.connector.isLoggedIn(true).subscribe(
                             (data: LoginResult) => {
