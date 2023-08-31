@@ -152,7 +152,7 @@
       [currentValues]="searchService.values"
       [mode]="'search'"
       [(extended)]="mdsExtended"
-      (onMdsLoaded)="onMdsReady($event)"
+      (onMdsLoaded)="currentRepository === '-all-' ? null : onMdsReady($event)"
       (onDone)="applyParameters('mds', $any($event), null, null)"
     >
     </es-mds-editor-wrapper>
