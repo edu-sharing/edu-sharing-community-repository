@@ -188,7 +188,7 @@ public class HttpQueryTool {
 
 		Header[] headersContentType = method.getHeaders("Content-Type");
 		if(headersContentType == null || headersContentType.length == 0){
-			method.setHeader("Content-Type", "charset=UTF-8");
+			method.setHeader("Content-Type", "text/plain; charset=UTF-8");
 		}
 
 
