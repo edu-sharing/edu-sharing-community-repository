@@ -599,17 +599,18 @@ public class MetadataReader {
             if (description == null) description = "";
             if (keyNode.getTextContent().trim().isEmpty() && (cap.trim().isEmpty())) continue;
             MetadataKey key = new MetadataKey();
-            key.setKey(StringUtils.isNotBlank(keyNode.getTextContent())
-                    ? keyNode.getTextContent()
-                    : cap);
-
+            key.setKey(keyNode.getTextContent());
             key.setI18n(valuespaceI18n);
             key.setI18nPrefix(valuespaceI18nPrefix);
             if (attributes != null && attributes.getNamedItem("parent") != null)
                 key.setParent(attributes.getNamedItem("parent").getTextContent());
             String fallback = null;
             if (!cap.isEmpty()) fallback = cap;
-            key.setCaption(getTranslation(key, key.getKey(), fallback));
+            key.setCaption(getTranslation(key,
+                    StringUtils.isNotBlank(key.getKey())
+                            ? key.getKey()
+                            : cap,
+                    fallback));
             key.setDescription(getTranslation(key, description));
             keys.add(key);
         }
