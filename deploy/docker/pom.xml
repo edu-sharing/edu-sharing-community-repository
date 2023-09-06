@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.edu_sharing</groupId>
+    <artifactId>edu_sharing-community-repository-deploy</artifactId>
+    <version>git</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>edu_sharing-community-repository-deploy-docker</artifactId>
+  <packaging>pom</packaging>
+
+  <name>edu_sharing-community-repository-deploy-docker</name>
+
+  <properties>
+    <helm.kube.version>&gt;= 1.20.0</helm.kube.version>
+    <helm.version>3.10.0</helm.version>
+
+
+    <docker.edu_sharing.communty.common.repository>
+      ${docker.registry}/community/common
+    </docker.edu_sharing.communty.common.repository>
+
+    <docker.edu_sharing.community.common.alfresco.repository>
+      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-alfresco-repository:7.2
+    </docker.edu_sharing.community.common.alfresco.repository>
+
+    <docker.edu_sharing.community.common.alfresco.activemq>
+      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-alfresco-activemq:5.16.5
+    </docker.edu_sharing.community.common.alfresco.activemq>
+
+    <docker.edu_sharing.community.common.alfresco.transform>
+      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-alfresco-transform:1.0.0
+    </docker.edu_sharing.community.common.alfresco.transform>
+
+    <docker.edu_sharing.community.common.alfresco.transform.core.aio>
+      ${docker.edu_sharing.communty.common.repository}/edu-sharing-community-common-alfresco-transformer-core-aio:2.6.0
+    </docker.edu_sharing.community.common.alfresco.transform.core.aio>
+
+
+    <docker.edu_sharing.community.common.alfresco.search.service>
+      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-alfresco-search-service:2.0.3
+    </docker.edu_sharing.community.common.alfresco.search.service>
+
+
+    <docker.edu_sharing.community.common.postgresql>
+      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-postgresql:${postgresql.version}
+    </docker.edu_sharing.community.common.postgresql>
+
+    <docker.edu_sharing.community.common.postgresql.exporter>
+      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-postgresql-exporter:0.11.1
+    </docker.edu_sharing.community.common.postgresql.exporter>
+
+    <docker.edu_sharing.community.common.mailcatcher>
+      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-mailcatcher:1.0.0
+    </docker.edu_sharing.community.common.mailcatcher>
+
+
+    <docker.edu_sharing.community.common.minideb>
+      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-minideb:11
+    </docker.edu_sharing.community.common.minideb>
+
+  </properties>
+
+  <build>
+
+    <pluginManagement>
+
+      <plugins>
+
+        <plugin>
+          <groupId>io.kokuwa.maven</groupId>
+          <artifactId>helm-maven-plugin</artifactId>
+          <configuration>
+            <helmVersion>${helm.version}</helmVersion>
+          </configuration>
+        </plugin>
+
+      </plugins>
+
+    </pluginManagement>
+
+  </build>
+
+  <modules>
+    <module>build</module>
+    <module>compose</module>
+  </modules>
+</project>

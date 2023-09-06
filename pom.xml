@@ -219,12 +219,6 @@
       </dependency>
 
       <dependency>
-        <groupId>org.aspectj</groupId>
-        <artifactId>aspectjweaver</artifactId>
-        <version>1.8.9</version>
-      </dependency>
-
-      <dependency>
         <groupId>org.apache.axis</groupId>
         <artifactId>axis</artifactId>
         <version>1.4</version>
@@ -1136,6 +1130,7 @@
     <module>Backend</module>
     <module>config</module>
     <module>Frontend</module>
+<!--    <module>deploy</module>-->
   </modules>
 
 </project>

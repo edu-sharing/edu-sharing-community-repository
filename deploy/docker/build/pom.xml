@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.edu_sharing</groupId>
+    <artifactId>edu_sharing-community-repository-deploy-docker</artifactId>
+    <version>git</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>edu_sharing-community-repository-deploy-docker-build</artifactId>
+  <packaging>pom</packaging>
+
+  <name>edu_sharing-community-repository-deploy-docker-build</name>
+
+  <build>
+
+    <resources>
+      <resource>
+        <directory>src/main/build</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <configuration>
+          <outputDirectory>${project.build.directory}/build</outputDirectory>
+        </configuration>
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+  <dependencyManagement>
+
+    <dependencies>
+
+      <dependency>
+        <groupId>io.prometheus.jmx</groupId>
+        <artifactId>jmx_prometheus_javaagent</artifactId>
+        <version>${prometheus.jmx.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.redisson</groupId>
+        <artifactId>redisson-all</artifactId>
+        <version>${redisson.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.redisson</groupId>
+        <artifactId>redisson-tomcat-9</artifactId>
+        <version>${redisson.version}</version>
+      </dependency>
+
+    </dependencies>
+
+  </dependencyManagement>
+
+  <modules>
+<!--    <module>service</module>-->
+    <module>transform-edu-sharing</module>
+  </modules>
+</project>

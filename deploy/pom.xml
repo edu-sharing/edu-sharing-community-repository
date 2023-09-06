@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.edu_sharing</groupId>
+    <artifactId>edu_sharing-community-repository</artifactId>
+    <version>git</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>edu_sharing-community-repository-deploy</artifactId>
+  <packaging>pom</packaging>
+
+  <name>edu_sharing-community-repository-deploy</name>
+
+  <properties>
+
+    <docker.repository>community</docker.repository>
+    <docker.prefix>edu_sharing-community-repository</docker.prefix>
+    <helm.prefix>edu_sharing-community-repository</helm.prefix>
+
+    <prometheus.jmx.version>0.17.2</prometheus.jmx.version>
+    <redisson.version>3.18.0</redisson.version>
+    <redisson.version>3.18.0</redisson.version>
+
+    <postgresql.version.major>13</postgresql.version.major>
+    <postgresql.version.minor>9</postgresql.version.minor>
+    <postgresql.version.patch>0</postgresql.version.patch>
+    <postgresql.version>${postgresql.version.major}.${postgresql.version.minor}.${postgresql.version.patch}
+    </postgresql.version>
+
+  </properties>
+
+  <modules>
+    <module>docker</module>
+  </modules>
+</project>
