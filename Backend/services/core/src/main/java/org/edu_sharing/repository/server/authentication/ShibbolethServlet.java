@@ -289,10 +289,13 @@ public class ShibbolethServlet extends HttpServlet {
             if (authentication != null && authentication.isAuthenticated()) {
             	Object credential = authentication.getCredentials();
             	if(credential instanceof SAMLCredential) {
-            		 SAMLCredential samlCredential = (SAMLCredential) credential;
-            	     return samlCredential.getAttributeAsString(attName);
-            	}
-
+					SAMLCredential samlCredential = (SAMLCredential) credential;
+					String[] values = samlCredential.getAttributeAsStringArray(attName);
+					if (values == null) {
+						return null;
+					}
+					return String.join(";", values);
+				}
             }
 
 	    	String attValue = null;

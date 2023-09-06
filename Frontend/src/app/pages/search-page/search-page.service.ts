@@ -30,6 +30,7 @@ import { notNull } from '../../util/functions';
 import { NavigationScheduler } from './navigation-scheduler';
 import { SearchPageResults } from './search-page-results.service';
 import { UserModifiableValuesService } from './user-modifiable-values';
+import { Widget } from '../../features/mds/mds-editor/mds-editor-instance.service';
 
 export class SearchRequestParams {
     constructor(
@@ -62,6 +63,7 @@ export class SearchPageService implements OnDestroy {
     readonly loadingProgress = new BehaviorSubject<number>(null);
     readonly reUrl = new BehaviorSubject<string | false>(null);
     readonly addToCollectionMode = new BehaviorSubject<AddToCollectionMode>(null);
+    readonly filtersMdsWidgets: BehaviorSubject<Widget[]> = new BehaviorSubject(null);
     /**
      * A list of properties that should be fetched as facets with a search request.
      *

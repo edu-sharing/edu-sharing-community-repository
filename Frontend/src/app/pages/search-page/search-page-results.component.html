@@ -1,4 +1,7 @@
-<ng-container *ngTemplateOutlet="customTemplates.value.resultsTop"></ng-container>
+<ng-container
+  *ngTemplateOutlet="customTemplates.value.resultsTop"
+  xmlns="http://www.w3.org/1999/html"
+></ng-container>
 
 <es-small-collection
   *ngIf="addToCollectionMode.value as addToCollection"
@@ -50,7 +53,9 @@
         {{ 'SEARCH.MATERIALS' | translate }}
         <ng-container *ngIf="!resultsDataSource.isLoading; else smallLoadingSpinner">
           <ng-container *ngIf="!resultsDataSource.isEmpty()">
-            ({{ resultsDataSource.getTotal() }})
+            <span class="count {{ getCountClass() }}">
+              &nbsp;({{ resultsDataSource.getTotal() }})
+            </span>
           </ng-container>
         </ng-container>
       </h2>

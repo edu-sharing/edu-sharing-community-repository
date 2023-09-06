@@ -10,8 +10,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.repository.server.NodeRefVersion;
+import org.edu_sharing.repository.server.tools.LRMITool;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
@@ -130,6 +133,104 @@ public class SearchApi {
 	    	}  catch (Throwable t) {
 	    		return ErrorResponse.createResponse(t);
 	    	}
+
+	}
+
+	@POST
+	@Path("/queries/{repository}/{metadataset}/{query}/lrmi")
+	@Consumes({ "application/json" })
+
+	@Operation(operationId = "search-lrmi", summary = "Perform queries based on metadata sets.", description = "Perform queries based on metadata sets.")
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultLrmi.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+
+	public Response searchLrmi(
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, schema = @Schema(defaultValue="-default-")) @PathParam("metadataset") String mdsId,
+			@Parameter(description = "ID of query", required = true) @PathParam("query") String query,
+			@Parameter(description = "Type of element", required = false) @QueryParam("contentType") SearchService.ContentType contentType,
+			@Parameter(description = "maximum items per page", schema = @Schema(defaultValue="10")) @QueryParam("maxItems") Integer maxItems,
+			@Parameter(description = "skip a number of items", schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
+			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+			@Parameter(description = "search parameters", required = true) SearchParameters parameters,
+			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Context HttpServletRequest req) {
+
+		try {
+
+
+			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+				return RepoProxyFactory.getRepoProxy().searchV2(repository, mdsId, query, contentType, maxItems, skipCount, sortProperties, sortAscending, parameters, propertyFilter, req);
+			}
+
+			Filter filter = new Filter(propertyFilter);
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			MdsDao mdsDao = MdsDao.getMds(repoDao, mdsId);
+
+			SearchToken token = new SearchToken();
+			token.setFacets(parameters.getFacets());
+			token.setFacetLimit((parameters.getFacetLimit() != null && parameters.getFacetLimit() > 0)
+					? parameters.getFacetLimit() : 10);
+			token.setFacetsMinCount((parameters.getFacetMinCount() != null && parameters.getFacetMinCount() >= 0 )
+					? parameters.getFacetMinCount(): 5);
+			token.setQueryString(parameters.getFacetSuggest());
+			token.setPermissions(parameters.getPermissions());
+			token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
+			token.setFrom(skipCount != null ? skipCount : 0);
+			token.setMaxResult(maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS);
+			token.setContentType(contentType);
+			token.setResolveCollections(parameters.isResolveCollections());
+			token.setReturnSuggestion(parameters.isReturnSuggestions());
+			token.setExcludes(parameters.getExcludes());
+			NodeSearch search = NodeDao.search(repoDao, mdsDao, query, parameters.getCriteria(), token, filter);
+
+			List<Node> nodes = null;//new ArrayList<Node>();
+			if(search.getNodes().size() == 0){
+				//searched repo deliveres only nodeRefs by query time
+				nodes = NodeDao.convertToRest(repoDao, search.getResult(), filter, null);
+			}else{
+				//searched repo delivered properties by query time
+				nodes = search.getNodes();
+				// @TODO: we may need to still call convertToRest to make sure we've latest data from remote repos
+			}
+
+
+			List<String> data = new ArrayList<>(nodes.size());
+			for (Node node: nodes) {
+				org.alfresco.service.cmr.repository.NodeRef nodeRef = new org.alfresco.service.cmr.repository.NodeRef(
+						node.getRef().isArchived()
+								? StoreRef.STORE_REF_ARCHIVE_SPACESSTORE
+								: StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+						node.getRef().getId());
+
+				data.add(LRMITool.getLRMIJson(new NodeRefVersion(nodeRef, null)).toString());
+			}
+
+
+			Pagination pagination = new Pagination();
+			pagination.setFrom(search.getSkip());
+			pagination.setCount(nodes.size());
+			pagination.setTotal(search.getCount());
+
+
+			SearchResultLrmi response = new SearchResultLrmi();
+			response.setNodes(data);
+			response.setIgnored(search.getIgnored());
+			response.setPagination(pagination);
+			response.setFacets(search.getFacets());
+			response.setSuggests(search.getSuggests());
+
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		}  catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
 
 	}
 

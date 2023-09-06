@@ -5,24 +5,31 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
+import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.rest.notification.data.StatusDTO;
 import org.edu_sharing.rest.notification.event.NotificationEventDTO;
 import org.edu_sharing.restservices.mds.v1.model.MdsValue;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.rating.RatingDetails;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchResult;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import javax.servlet.ServletContext;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,7 +48,9 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void notifyNodeIssue(String nodeId, String reason, String nodeType, List<String> aspects, Map<String, Object> properties, String userEmail, String userComment) throws Throwable {
         logger.info(String.format("send notifyNodeIssue: nodeId: %s, reason: %s, userComment: %s", nodeId, reason, userComment));
-
+        String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
+        String subject=MailTemplate.getSubject("nodeIssue", currentLocale);
+        String content=MailTemplate.getContent("nodeIssue", currentLocale, true);
         Map<String, String> replace = new HashMap<>();
         replace.put("reporterEmail", userEmail.trim());
         replace.put("userComment", userComment);
@@ -50,8 +59,43 @@ public class NotificationServiceImpl implements NotificationService {
         replace.put("id", nodeId);
         replace.put("link", URLTool.getNgRenderNodeUrl(nodeId, null, true));
         replace.put("link.static", URLTool.getNgRenderNodeUrl(nodeId, null, false));
-        MailTemplate.applyNodePropertiesToMap("nodeId.", properties, replace);
-        MailTemplate.sendMail("nodeIssue", replace);
+        MailTemplate.applyNodePropertiesToMap("node.", properties, replace);
+        try {
+            HashMap<String, Object> userProps = NodeServiceHelper.getProperties(AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(AuthenticationUtil.getFullyAuthenticatedUser()));
+            MailTemplate.applyNodePropertiesToMap("user.", userProps, replace);
+            SearchResult<EduGroup> orgList = SearchServiceFactory.getLocalService().getAllOrganizations(true);
+            if(!orgList.getData().isEmpty()) {
+                HashMap<String, Object> orgProps = NodeServiceHelper.getProperties(AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(orgList.getData().get(0).getGroupname()));
+                MailTemplate.applyNodePropertiesToMap("user.organization.", orgProps, replace);
+            }
+            List<String> mzList = SearchServiceFactory.getLocalService().getAllMediacenters();
+            if(!mzList.isEmpty()) {
+                HashMap<String, Object> mzProps = NodeServiceHelper.getProperties(AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(mzList.get(0)));
+                MailTemplate.applyNodePropertiesToMap("user.mediacenter.", mzProps, replace);
+            }
+        } catch (Throwable ignored) {
+
+        }
+        Mail mail=new Mail();
+        List<String> receivers = null;
+        if(mail.getConfig().hasPath("report.receivers")) {
+            receivers = mail.getConfig().getStringList("report.receivers");
+        } else if (mail.getConfig().getString("report.receiver") != null){
+            receivers = Collections.singletonList(mail.getConfig().getString("report.receiver"));
+            logger.info("report.receiver is deprecated. Prefer using the report.receivers field instead");
+        }
+        if(receivers==null || receivers.isEmpty()) {
+            throw new IllegalArgumentException("no mail.report.receivers registered in ccmail.properties");
+        }
+        ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
+        for (String receiver : receivers) {
+            mail.sendMailHtml(
+                    context,
+                    null,
+                    userEmail,
+                    receiver,
+                    subject, content, replace);
+        }
     }
 
     @Override
