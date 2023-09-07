@@ -21,12 +21,8 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.security.AccessPermission;
-import org.alfresco.service.cmr.security.AccessStatus;
-import org.alfresco.service.cmr.security.AuthorityService;
-import org.alfresco.service.cmr.security.AuthorityType;
+import org.alfresco.service.cmr.security.*;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -34,7 +30,6 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.repackaged.elasticsearch.org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.service.OrganisationService;
-import org.edu_sharing.alfresco.service.handleservice.HandleService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
@@ -50,18 +45,20 @@ import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.*;
+import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
-import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
 import org.edu_sharing.service.oai.OAIExporterService;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
+import org.edu_sharing.service.share.ShareService;
+import org.edu_sharing.service.share.ShareServiceImpl;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
-import org.edu_sharing.service.version.VersionTool;
 import org.springframework.context.ApplicationContext;
 
 import com.google.gson.Gson;
@@ -74,10 +71,12 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public static final String NODE_PUBLISHED = "NODE_PUBLISHED";
 	// the maximal number of "notify" entries in the PH_HISTORY field that are serialized
 	private static final int MAX_NOTIFY_HISTORY_LENGTH = 100;
+	private ShareService shareService = null;
 	private NodeService nodeService = null;
 	private PersonService personService;
 	private ApplicationInfo appInfo;
 	private ToolPermissionService toolPermission;
+	private org.edu_sharing.service.nodeservice.NodeService eduNodeService;
 
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	OrganisationService organisationService = (OrganisationService)applicationContext.getBean("eduOrganisationService");
@@ -88,21 +87,19 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	Logger logger = Logger.getLogger(PermissionServiceImpl.class);
 	private PermissionService permissionService;
 
-	public PermissionServiceImpl(String appId) {
+	public PermissionServiceImpl(ToolPermissionService toolPermission, org.edu_sharing.service.nodeservice.NodeService eduNodeService) {
 		appInfo = ApplicationInfoList.getHomeRepository();
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext
 				.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
+		this.eduNodeService=eduNodeService;
+		this.toolPermission=toolPermission;
 		nodeService = serviceRegistry.getNodeService();
+		shareService = new ShareServiceImpl(this);
 		permissionService = serviceRegistry.getPermissionService();
 
 		personService = serviceRegistry.getPersonService();
-
-	}
-
-	public PermissionServiceImpl() {
-		this(ApplicationInfoList.getHomeRepository().getAppId());
 	}
 	
 	public PermissionServiceImpl(boolean test) {
@@ -271,21 +268,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public void addPermissions(String _nodeId, HashMap<String, String[]> _authPerm, Boolean _inheritPermissions,
 							   String _mailText, Boolean _sendMail, Boolean _sendCopy) throws Throwable {
 
-		EmailValidator mailValidator = EmailValidator.getInstance(true, true);
-
-		String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
-
-		// used for sending copy to user
-		String copyMailText = "";
-
 		String user = new AuthenticationToolAPI().getCurrentUser();
-		MailTemplate.UserMail sender = MailTemplate.getUserMailData(user);
-
 		for (String authority : _authPerm.keySet()) {
 			String[] permissions = _authPerm.get(authority);
 			setPermissions(_nodeId, authority, permissions, _inheritPermissions);
 
-			MailTemplate.UserMail receiver = MailTemplate.getUserMailData(authority);
 			AuthorityType authorityType = AuthorityType.getAuthorityType(authority);
 
 
@@ -293,85 +280,17 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				addToRecent(personService.getPerson(authority));
 			}
 			// send group email notifications
-			if(AuthorityType.GROUP.equals(authorityType)){
+			if (AuthorityType.GROUP.equals(authorityType)) {
 				addToRecent(authorityService.getAuthorityNodeRef(authority));
 			}
 
-
-			if (mailValidator.isValid(receiver.getEmail()) && _sendMail) {
-				Mail mail = new Mail();
-				HashMap<String, Object> props = repoClient.getProperties(_nodeId);
-				String nodeType = (String) props.get(CCConstants.NODETYPE);
-
-				String name;
-				if (nodeType.equals(CCConstants.CCM_TYPE_IO)) {
-					name = (String) props.get(CCConstants.LOM_PROP_GENERAL_TITLE);
-					name = (name == null || name.trim().isEmpty()) ? (String) props.get(CCConstants.CM_NAME) : name;
-				} else {
-					name = (String) props.get(CCConstants.CM_PROP_C_TITLE);
-					name = (name == null || name.trim().isEmpty()) ? (String) props.get(CCConstants.CM_NAME) : name;
-				}
-
-				String permText = "";
-				for (String perm : permissions) {
-					if(CCConstants.CCM_VALUE_SCOPE_SAFE.equals(NodeServiceInterceptor.getEduSharingScope())){
-						// do not show some permission infos in safe invitations since they don't make sense
-						if(Arrays.asList(CCConstants.PERMISSION_CC_PUBLISH).contains(perm)){
-							continue;
-						}
-					}
-					String i18nPerm = I18nServer
-							.getTranslationDefaultResourcebundle(I18nServer.getPermissionCaption(perm), "en_EN");
-					String i18nPermDesc = I18nServer.getTranslationDefaultResourcebundle(
-							I18nServer.getPermissionDescription(perm), currentLocale);
-
-					if (i18nPermDesc != null) {
-						if (!permText.isEmpty())
-							permText += "\n";
-						permText += i18nPermDesc;
-					}
-
-				}
-
-				String linkText = I18nServer.getTranslationDefaultResourcebundle("dialog_inviteusers_mailtext_link",
-						currentLocale);
-				String localeStr = currentLocale;
-				if (localeStr == null || localeStr.equals("default")) {
-					localeStr = "de_DE";
-				}
-
-				ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
-				Map<String, String> replace = new HashMap<>();
-				receiver.applyToMap("", replace);
-				sender.applyToMap("inviter.", replace);
-				MailTemplate.applyNodePropertiesToMap("node.", props, replace);
-				replace.put("name", name.trim());
-				replace.put("message", _mailText.replace("\n", "<br />").trim());
-				replace.put("permissions", permText.trim());
-				MailTemplate.addContentLinks(appInfo, _nodeId, replace, "link");
-				String template="invited";
-				boolean send=true;
-				org.edu_sharing.service.nodeservice.NodeService nodeServiceApp = NodeServiceFactory.getNodeService(appInfo.getAppId());
-				if(nodeType.equals(CCConstants.CCM_TYPE_MAP) &&
-						nodeServiceApp.hasAspect(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),_nodeId,CCConstants.CCM_ASPECT_COLLECTION)){
-					template="invited_collection";
-					// if the receiver is the creator itself, skip it (because it is automatically added)
-					if(authority.equals(nodeServiceApp.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),_nodeId,CCConstants.CM_PROP_C_CREATOR))){
-						send=false;
-					}
-				}
-				if(CCConstants.CCM_VALUE_SCOPE_SAFE.equals(NodeServiceInterceptor.getEduSharingScope())){
-					template = "invited_safe";
-				}
-				if(send) {
-					mail.sendMailHtml(context, sender.getFullName(), sender.getEmail(), receiver.getEmail(), MailTemplate.getSubject(template, currentLocale),
-							MailTemplate.getContent(template, currentLocale, true), replace);
-				}
-
-			} else {
-				logger.info("username/authority: " + authority + " has no valid emailaddress:" + receiver.getEmail());
+			if (_sendMail) {
+				String nodeType = eduNodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), _nodeId);
+				HashMap<String, Object> props = eduNodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), _nodeId);
+				List<String> aspects = Arrays.asList(eduNodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), _nodeId));
+				NotificationServiceFactoryUtility.getLocalService()
+						.notifyPermissionChanged(user, authority, _nodeId, nodeType, aspects, props, permissions, _mailText);
 			}
-
 		}
 
 		org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory
@@ -453,13 +372,17 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		if(jsonHistory != null) {
 			for(String json : jsonHistory) {
 				Notify notify = gson.fromJson(json, Notify.class);
-
-				NodeRef personRef = personService.getPerson(notify.getUser().getAuthorityName(),false);
-				Map<QName, Serializable> personProps = nodeService.getProperties(personRef);
-				notify.getUser().setGivenName((String)personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_FIRSTNAME)));
-				notify.getUser().setSurname((String)personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_LASTNAME)));
-				notify.getUser().setEmail((String)personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_EMAIL)));
-
+				try {
+					if(personService.personExists(notify.getUser().getAuthorityName())) {
+						NodeRef personRef = personService.getPerson(notify.getUser().getAuthorityName(), false);
+						Map<QName, Serializable> personProps = nodeService.getProperties(personRef);
+						notify.getUser().setGivenName((String) personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_FIRSTNAME)));
+						notify.getUser().setSurname((String) personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_LASTNAME)));
+						notify.getUser().setEmail((String) personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_EMAIL)));
+					}
+				} catch(NoSuchPersonException e) {
+					logger.warn("Notify could not be fully resolved, may contains deleted/invalid user", e);
+				}
 				/**
 				 * @todo overwrite acl user firstname, lastname, email
 				 */
@@ -1398,12 +1321,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_ACTION), action);
 
-				ArrayList<String> phUsers = (ArrayList<String>) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
-				if (phUsers == null) phUsers = new ArrayList<String>();
-				if (!phUsers.contains(user)) phUsers.add(user);
-				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS), phUsers);
 				Date created = new Date();
-				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED), created);
+				addUserToSharedList(user, nodeRef, created);
 
 
 				//ObjectMapper jsonMapper = new ObjectMapper();
@@ -1435,19 +1354,34 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					}
 					history.add(jsonStringACL);
 					nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_HISTORY), new ArrayList(history));
-					fixSharedByMe(nodeRef);
+					cleanUpSharedList(nodeRef);
 				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					logger.warn("Error setting permission history", e1);
 				}
 			}finally {
 				policyBehaviourFilter.enableBehaviour(nodeRef);
 			}
+			// remove from cache so that the ccm:ph_* properties getting updated
+			new RepositoryCache().remove(nodeRef.getId());
 			return null;
 		});
 	}
 
-	private void fixSharedByMe(NodeRef nodeRef){
+	@Override
+	public void addUserToSharedList(String user, NodeRef nodeRef){
+		addUserToSharedList(user, nodeRef, new Date());
+	}
+
+	private void addUserToSharedList(String user, NodeRef nodeRef, Date created) {
+		ArrayList<String> phUsers = (ArrayList<String>) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
+		if (phUsers == null) phUsers = new ArrayList<String>();
+		if (!phUsers.contains(user)) phUsers.add(user);
+		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS), phUsers);
+		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED), created);
+	}
+
+	@Override
+	public void cleanUpSharedList(NodeRef nodeRef){
 
 		try {
 			ArrayList<String> phUsers = (ArrayList<String>) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
@@ -1491,35 +1425,42 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			 * find out if current aces still contains at least one user added ace
 			 * if not collect the user in remove list
 			 */
-			Notify currentNotify = notifyList.get(notifyList.size() - 1);
 			Set<String> removePhUsers = new HashSet<>();
-			for(Map.Entry<String, List<ACE>> entry: userAddAcesList.entrySet()){
-				if(entry.getValue() == null || entry.getValue().size() == 0){
-					removePhUsers.add(entry.getKey());
-					continue;
-				}
-				if(currentNotify.getAcl() == null
-						|| currentNotify.getAcl().getAces() == null
-						|| currentNotify.getAcl().getAces().length == 0){
-					removePhUsers.add(entry.getKey());
-					continue;
-				}
+			if(notifyList.size() > 0) {
+				Notify currentNotify = notifyList.get(notifyList.size() - 1);
+				for (Map.Entry<String, List<ACE>> entry : userAddAcesList.entrySet()) {
+					if (entry.getValue() == null || entry.getValue().size() == 0) {
+						removePhUsers.add(entry.getKey());
+						continue;
+					}
+					if (currentNotify.getAcl() == null
+							|| currentNotify.getAcl().getAces() == null
+							|| currentNotify.getAcl().getAces().length == 0) {
+						removePhUsers.add(entry.getKey());
+						continue;
+					}
 
-				List<ACE> userAddedAces = entry.getValue();
-				List<ACE> remainingUserAddedAces = (List<ACE>)new ArrayList(Arrays.asList(currentNotify.getAcl().getAces()))
-						.stream()
-						.filter(userAddedAces::contains)
-						.collect(toList());
-				if(remainingUserAddedAces == null || remainingUserAddedAces.size() == 0){
-					removePhUsers.add(entry.getKey());
+					List<ACE> userAddedAces = entry.getValue();
+					List<ACE> remainingUserAddedAces = (List<ACE>) new ArrayList(Arrays.asList(currentNotify.getAcl().getAces()))
+							.stream()
+							.filter(userAddedAces::contains)
+							.collect(toList());
+					if (remainingUserAddedAces == null || remainingUserAddedAces.size() == 0) {
+						removePhUsers.add(entry.getKey());
+					}
 				}
 			}
 			/**
 			 * remove users that are in ph_users but never added an permission.
 			 * i.e. only did "change permission", "remove permission"
 			 */
-			removePhUsers.addAll(phUsers.stream().filter(u -> !userAddAcesList.keySet().contains(u)).collect(Collectors.toList()));
+		    boolean hasShares = Arrays.stream(shareService.getShares(nodeRef.getId()))
+					.anyMatch(x->x.getExpiryDate() >= new Date().getTime());
 
+			if(!hasShares) {
+				removePhUsers.addAll(phUsers.stream().filter(u -> !userAddAcesList.containsKey(u))
+						.collect(Collectors.toList()));
+			}
 			/**
 			 * remove users from PH_USERS property
 			 */

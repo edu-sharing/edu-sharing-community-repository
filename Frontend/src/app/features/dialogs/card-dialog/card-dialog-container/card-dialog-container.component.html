@@ -22,24 +22,26 @@
     class="card-dialog-header"
   ></es-card-header>
 
-  <div
-    #cardContent
-    class="card-content"
-    [style.padding.px]="config.contentPadding"
-    [attr.aria-hidden]="isLoading"
-    [esJumpMarksHandler]="config.jumpMarks"
-    (activeJumpMarkChanged)="activeJumpMark = $event"
-    #jumpMarksHandler="esJumpMarksHandler"
-    cdkScrollable
-    [@expandContent]="{
-      value: expandAnimation.state,
-      params: {
-        height: expandAnimation.height,
-        width: expandAnimation.width
-      }
-    }"
-  >
-    <ng-template cdkPortalOutlet></ng-template>
+  <div class="card-content-container">
+    <div
+      #cardContent
+      class="card-content"
+      [style.padding.px]="config.contentPadding"
+      [attr.aria-hidden]="isLoading"
+      [esJumpMarksHandler]="config.jumpMarks"
+      (activeJumpMarkChanged)="activeJumpMark = $event"
+      #jumpMarksHandler="esJumpMarksHandler"
+      cdkScrollable
+      [@expandContent]="{
+        value: expandAnimation.state,
+        params: {
+          height: expandAnimation.height,
+          width: expandAnimation.width
+        }
+      }"
+    >
+      <ng-template cdkPortalOutlet></ng-template>
+    </div>
     <div *ngIf="isLoading" class="loading-overlay">
       <es-spinner></es-spinner>
     </div>

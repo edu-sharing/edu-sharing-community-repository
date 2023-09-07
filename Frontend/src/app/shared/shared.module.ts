@@ -12,6 +12,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatOptionModule, MatRippleModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -51,6 +52,7 @@ import { SpinnerComponent } from './components/spinner/spinner.component';
 import { TutorialComponent } from './components/tutorial/tutorial.component';
 import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
 import { WorkspaceCreateConnector } from './dialogs/create-connector/create-connector.component';
+import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.component';
 import { BorderBoxObserverDirective } from './directives/border-box-observer.directive';
 import { CheckTextOverflowDirective } from './directives/check-text-overflow.directive';
 import { ElementRefDirective } from './directives/element-ref.directive';
@@ -80,7 +82,9 @@ import { ReplaceCharsPipe } from './pipes/replace-chars.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { VCardNamePipe } from './pipes/vcard-name.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
-import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.component';
+import { TitleDirective } from './directives/title.directive';
+import { NotificationListComponent } from './components/notification-list/notification-list.component';
+import { NotificationListEntryComponent } from './components/notification-list-entry/notification-list-entry.component';
 
 @NgModule({
     declarations: [
@@ -125,8 +129,11 @@ import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.
         SortDropdownComponent,
         SpinnerComponent,
         SpinnerSmallComponent,
+        TitleDirective,
         TutorialComponent,
         UserAvatarComponent,
+        NotificationListComponent,
+        NotificationListEntryComponent,
         VCardNamePipe,
         VersionLabelPipe,
         WorkspaceCreateConnector,
@@ -145,6 +152,8 @@ import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.
         MatButtonModule,
         MatCardModule,
         MatDatepickerModule,
+        MatSlideToggleModule,
+        MatExpansionModule,
         MatInputModule,
         MatInputModule,
         MatMenuModule,
@@ -191,6 +200,7 @@ import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.
         MatButtonModule,
         MatCardModule,
         MatCheckboxModule,
+        MatExpansionModule,
         MatPaginatorModule,
         MatProgressBarModule,
         MatChipsModule,
@@ -199,6 +209,7 @@ import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.
         MatInputModule,
         MatMenuModule,
         MatOptionModule,
+        MatProgressSpinnerModule,
         MatRadioModule,
         MatRippleModule,
         MatSelectModule,
@@ -228,11 +239,13 @@ import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.
         SortDropdownComponent,
         SpinnerComponent,
         SpinnerSmallComponent,
+        TitleDirective,
         TranslateModule,
         TutorialComponent,
         UserAvatarComponent,
         VCardNamePipe,
         VersionLabelPipe,
+        NotificationListComponent,
         WorkspaceCreateConnector,
         NodesDragDirective,
         NodesDropTargetDirective,

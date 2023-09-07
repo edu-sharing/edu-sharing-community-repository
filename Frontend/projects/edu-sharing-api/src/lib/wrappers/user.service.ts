@@ -5,7 +5,7 @@ import { first, map, startWith, switchMap, take, tap } from 'rxjs/operators';
 import { User, UserEntry, UserProfileEdit } from '../api/models';
 import { IamV1Service } from '../api/services';
 import { HOME_REPOSITORY, ME } from '../constants';
-import { switchReplay } from '../utils/switch-replay';
+import { switchReplay } from '../utils/rxjs-operators/switch-replay';
 import { AuthenticationService, LoginInfo } from './authentication.service';
 
 export { UserEntry, User };

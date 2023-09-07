@@ -55,7 +55,7 @@
         </ng-template>
       </es-node-entries-wrapper>
       <div
-        *ngIf="dataSourceCollections.isEmpty()"
+        *ngIf="!isRootLevel && dataSourceCollections.isEmpty() && !dataSourceCollections.isLoading"
         class="section-headline collection-nocontent-container"
       >
         <div class="collection-nocontent-big">
@@ -95,6 +95,7 @@
       ></es-actionbar>
       <div
         class="references-wrapper"
+        [class.wrapper-table]="referencesDisplayType === NodeEntriesDisplayType.Table"
         [class.wrapper-empty]="dataSourceReferences.isEmpty()"
         [class.wrapper-edit]="isUserAllowedToEdit(collection)"
       >

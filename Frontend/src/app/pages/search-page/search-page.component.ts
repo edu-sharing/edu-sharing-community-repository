@@ -1,6 +1,7 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, HostBinding, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { Observable, Subject } from 'rxjs';
@@ -12,6 +13,7 @@ import { CardDialogRef } from '../../features/dialogs/card-dialog/card-dialog-re
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { NodeEntriesWrapperComponent } from '../../features/node-entries/node-entries-wrapper.component';
 import { MainNavService } from '../../main/navigation/main-nav.service';
+import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 import { notNull } from '../../util/functions';
 import { NavigationScheduler } from './navigation-scheduler';
 import { SearchPageService } from './search-page.service';
@@ -35,10 +37,10 @@ export class SearchPageComponent implements OnInit, OnDestroy {
     @ViewChild('filtersDialogResetButton', { static: true })
     filtersDialogResetButton: TemplateRef<HTMLElement>;
     @ViewChild('filtersDialogContent', { static: true }) filtersDialogContent: TemplateRef<unknown>;
-    @ViewChild('nodeEntriesResults') nodeEntriesResults: NodeEntriesWrapperComponent<Node>;
 
     @HostBinding('class.has-tab-bar') tabBarIsVisible: boolean = null;
     progressBarIsVisible = false;
+    queryParamsAllRepositories: { [key: string]: string };
 
     readonly availableRepositories = this.searchPage.availableRepositories;
     readonly activeRepository = this.searchPage.activeRepository;
@@ -51,18 +53,21 @@ export class SearchPageComponent implements OnInit, OnDestroy {
     private readonly destroyed = new Subject<void>();
 
     constructor(
+        private breadcrumbsService: BreadcrumbsService,
         private breakpointObserver: BreakpointObserver,
-        private mainNav: MainNavService,
-        private searchPage: SearchPageService,
         private dialogs: DialogsService,
-        private translate: TranslateService,
+        private mainNav: MainNavService,
         private navigationScheduler: NavigationScheduler,
+        private route: ActivatedRoute,
+        private searchPage: SearchPageService,
+        private translate: TranslateService,
     ) {
         this.searchPage.init();
     }
 
     ngOnInit(): void {
         this.initMainNav();
+        this.breadcrumbsService.setNodePath(null);
         this.availableRepositories
             .pipe(
                 filter(notNull),
@@ -71,6 +76,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
             .subscribe((tabBarIsVisible) => (this.tabBarIsVisible = tabBarIsVisible));
         this.registerProgressBarIsVisible();
         this.registerFilterDialog();
+        this.registerQueryParamsAllRepositories();
     }
 
     ngOnDestroy(): void {
@@ -109,6 +115,18 @@ export class SearchPageComponent implements OnInit, OnDestroy {
             });
     }
 
+    private registerQueryParamsAllRepositories(): void {
+        rxjs.combineLatest([this.route.queryParams, this.searchString.observeQueryParamEntry()])
+            .pipe(
+                takeUntil(this.destroyed),
+                map(([queryParams, searchStringEntry]) => ({
+                    addToCollection: queryParams.addToCollection,
+                    ...searchStringEntry,
+                })),
+            )
+            .subscribe((params) => (this.queryParamsAllRepositories = params));
+    }
+
     private async openFilterDialog(): Promise<CardDialogRef<unknown>> {
         const dialogRef = await this.dialogs.openGenericDialog({
             title: 'SEARCH.FILTERS',
@@ -138,7 +156,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
             title: 'SEARCH.TITLE',
             currentScope: 'search',
             canOpen: true,
-            onCreate: (nodes) => this.nodeEntriesResults.addVirtualNodes(nodes),
+            onCreate: (nodes) => this.searchPage.results.addNodes(nodes),
         });
         const activeRepositoryIsHome: Observable<boolean> = rxjs
             .combineLatest([this.availableRepositories, this.activeRepository.observeValue()])

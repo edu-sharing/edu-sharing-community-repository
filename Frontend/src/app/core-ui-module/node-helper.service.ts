@@ -130,22 +130,15 @@ export class NodeHelperService {
                 name,
             });
             return error.status;
-        } else if (error._body) {
-            try {
-                const json = JSON.parse(error._body);
-                if (
-                    json.message.startsWith(
-                        'org.alfresco.service.cmr.repository.CyclicChildRelationshipException',
-                    )
-                ) {
-                    this.bridge.showTemporaryMessage(
-                        MessageType.error,
-                        'WORKSPACE.TOAST.CYCLIC_NODE',
-                        { name },
-                    );
-                    return error.status;
-                }
-            } catch (e) {}
+        } else if (
+            error.error?.message?.includes(
+                'org.alfresco.service.cmr.repository.CyclicChildRelationshipException',
+            )
+        ) {
+            this.bridge.showTemporaryMessage(MessageType.error, 'WORKSPACE.TOAST.CYCLIC_NODE', {
+                name,
+            });
+            return error.status;
         }
         this.bridge.showTemporaryMessage(MessageType.error, null, null, null, error);
         return error.status;
@@ -257,7 +250,7 @@ export class NodeHelperService {
                         const reader = new FileReader();
                         reader.onload = () => {
                             const dataUrl = reader.result;
-                            node.preview.data = [dataUrl.toString()];
+                            node.preview.data = dataUrl.toString();
                             observer.next(node);
                             observer.complete();
                         };
@@ -878,11 +871,14 @@ export class NodeHelperService {
     /**
      * Returns the full URL to a node, including the server origin and base href.
      */
-    getNodeUrl(node: UniversalNode): string {
+    getNodeUrl(node: UniversalNode, queryParams?: Params): string {
         const link = this.getNodeLink('queryParams', node);
         if (link) {
             const urlTree = this.router.createUrlTree([this.getNodeLink('routerLink', node)], {
-                queryParams: this.getNodeLink('queryParams', node) as Params,
+                queryParams: {
+                    ...(this.getNodeLink('queryParams', node) as Params),
+                    ...queryParams,
+                },
             });
             return location.origin + this.location.prepareExternalUrl(urlTree.toString());
         } else {
@@ -922,6 +918,22 @@ export class NodeHelperService {
                 },
             );
         });
+    }
+
+    /**
+     * this method syncs common attributes like name, title, description on this node by fetching it from the properties
+     * This is helpful if you did client-side editing and want to reflect the changes in the UI
+     * @param node
+     */
+    syncAttributesWithProperties(node: Node) {
+        node.name = node.properties[RestConstants.CM_NAME]?.[0];
+        node.title =
+            node.properties[RestConstants.CM_PROP_TITLE]?.[0] ||
+            node.properties[RestConstants.LOM_PROP_TITLE]?.[0];
+        if (node.collection) {
+            node.collection.description = node.properties[RestConstants.CM_DESCRIPTION]?.[0];
+        }
+        return node;
     }
 }
 

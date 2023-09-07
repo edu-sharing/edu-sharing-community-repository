@@ -19,9 +19,19 @@ import {
     Subject,
     timer,
 } from 'rxjs';
-import { catchError, debounce, distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
+import {
+    catchError,
+    debounce,
+    delay,
+    distinctUntilChanged,
+    filter,
+    first,
+    map,
+    switchMap,
+    timeout,
+} from 'rxjs/operators';
 import { EventListener, FrameEventsService } from '../../../core-module/core.module';
-import { notNull } from '../../../util/functions';
+import { isTrue, notNull } from '../../../util/functions';
 import { SearchFieldComponent } from './search-field.component';
 import { MdsInfo, SearchEvent, SearchFieldConfig } from './search-field.service';
 
@@ -37,7 +47,7 @@ const NUMBER_OF_FACET_SUGGESTIONS = 5;
 export class SearchFieldInternalService implements EventListener {
     readonly config = new BehaviorSubject<SearchFieldConfig | null>(null);
     /** Reference to the search-field component, if currently visible. */
-    searchFieldComponent: SearchFieldComponent;
+    searchFieldComponent = new BehaviorSubject<SearchFieldComponent>(null);
     /** The user clicked the filters button inside the search field. */
     readonly filtersButtonClicked = new Subject<void>();
     /** The user triggered a search using the search field. */
@@ -85,6 +95,39 @@ export class SearchFieldInternalService implements EventListener {
                 distinctUntilChanged(),
             )
             .subscribe((enabled) => this.setEnableFiltersAndSuggestions(enabled));
+        this.registerAutoFocus();
+    }
+
+    private registerAutoFocus(): void {
+        const autoFocus = this.config.pipe(
+            map((config) => config?.autoFocus ?? false),
+            // `config` will be set to `null` between page changes, so we will get events on page
+            // changes if `autoFocus` is set to `true`.
+            distinctUntilChanged(),
+        );
+        const inputElement = this.searchFieldComponent.pipe(
+            switchMap((component) => component?.inputSubject ?? rxjs.of(null)),
+            map((input) => input?.nativeElement),
+        );
+        // Each time the autoFocus option is set to true (i.e. we changed to a page that set the
+        // option), wait for the input element to become available _once_ and focus it.
+        autoFocus
+            .pipe(
+                filter(isTrue),
+                switchMap(() =>
+                    inputElement.pipe(
+                        first(notNull),
+                        timeout(5_000),
+                        catchError(
+                            () => (console.warn('Could not focus search field'), rxjs.EMPTY),
+                        ),
+                    ),
+                ),
+                // Don't loose focus to the main-menu button being refocused after the menu closes
+                // on page navigation.
+                delay(0),
+            )
+            .subscribe((input) => input.focus());
     }
 
     onEvent(event: string, data: any) {
@@ -131,12 +174,19 @@ export class SearchFieldInternalService implements EventListener {
      * To be called by the search-field component.
      */
     removeFilter(property: string, filter: LabeledValue): void {
-        const filterList = this.filtersSubject.value[property];
-        const index = filterList?.findIndex((f) => f.value === filter.value);
+        const { [property]: propertyFilters, ...otherFilters } = this.filtersSubject.value;
+        const index = propertyFilters?.findIndex((f) => f.value === filter.value);
         if (index >= 0) {
-            const filterCopy = filterList.slice();
-            filterCopy.splice(index, 1);
-            const newFilters = { ...this.filtersSubject.value, [property]: filterCopy };
+            let newFilters: { [x: string]: LabeledValue[] };
+            if (propertyFilters.length > 1) {
+                const filterCopy = propertyFilters.slice();
+                filterCopy.splice(index, 1);
+                newFilters = { ...otherFilters, [property]: filterCopy };
+            } else {
+                // The filter to be removed was the last one of this property. Remove the entire
+                // property list.
+                newFilters = otherFilters;
+            }
             this.filtersSubject.next(newFilters);
             this.filterValuesChanged.next(this.mdsLabel.getRawValuesDict(newFilters));
         }
@@ -151,8 +201,20 @@ export class SearchFieldInternalService implements EventListener {
     setFilterValues(values: RawValuesDict, { emitValuesChange = false } = {}): void {
         this.getMdsIdentifier()
             .pipe(
+                first(notNull),
+                // Wait for the mds information to be set, but give up after 5 seconds.
+                timeout(5_000),
                 switchMap((mdsId) =>
                     mdsId ? this.mdsLabel.labelValuesDict(mdsId, values ?? {}) : rxjs.of(null),
+                ),
+                catchError(
+                    () => (
+                        console.warn(
+                            'Tried to set filter values for search field, ' +
+                                'but did not set mds information',
+                        ),
+                        rxjs.EMPTY
+                    ),
                 ),
             )
             .subscribe((filterValues) => {
@@ -175,7 +237,7 @@ export class SearchFieldInternalService implements EventListener {
                     this.enableFiltersAndSuggestionsSubject.value ? inputString : null,
                 ),
                 map((inputString) => (inputString?.length >= 3 ? inputString : null)),
-                filter(() => !!this.categoriesSubject.value),
+                filter(() => this.categoriesSubject.value?.length > 0),
                 debounce((inputString) => (inputString ? timer(200) : EMPTY)),
                 switchMap((inputString) =>
                     inputString
@@ -187,7 +249,18 @@ export class SearchFieldInternalService implements EventListener {
                               )
                               // TODO: Figure out if the MDS supports suggestion facet queries
                               // beforehand.
-                              .pipe(catchError((error) => (error.preventDefault(), rxjs.of(null))))
+                              .pipe(
+                                  catchError((error) => {
+                                      console.warn(
+                                          'Failed to fetch as-you-type facet suggestions. ' +
+                                              'In case your MDS does not support facet ' +
+                                              'suggestions, please override the group ' +
+                                              '"search_input" to not contain any views.',
+                                      );
+                                      error.preventDefault();
+                                      return rxjs.of(null);
+                                  }),
+                              )
                         : of(null),
                 ),
             )

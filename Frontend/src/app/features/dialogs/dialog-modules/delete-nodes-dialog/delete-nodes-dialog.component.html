@@ -1,0 +1,13 @@
+{{ message | translate: messageParams }}
+<div *ngIf="canBlockImport" class="block-import-checkbox">
+  <mat-checkbox [(ngModel)]="shouldBlockImport">
+    <es-multi-line-label>
+      <ng-container slot="label">
+        {{ 'WORKSPACE.DELETE_IMPORT_BLOCK' | translate }}
+      </ng-container>
+      <ng-container slot="description">
+        {{ 'WORKSPACE.DELETE_IMPORT_BLOCK_INFO' | translate }}
+      </ng-container>
+    </es-multi-line-label>
+  </mat-checkbox>
+</div>

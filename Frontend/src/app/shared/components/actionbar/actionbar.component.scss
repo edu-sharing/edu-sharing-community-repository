@@ -2,6 +2,7 @@
 
 .actionbar {
     display: flex;
+    gap: 10px;
 }
 .actionToggle > button {
     color: $textLight;
@@ -24,19 +25,13 @@ button {
 .light a {
     color: #fff;
 }
-.actionToggle {
-    padding-left: 10px;
-    margin-left: 10px;
-}
+
 .actionToggleDivider {
     border-left: 1px solid #ddd;
 }
 .more {
     color: $primary;
     background-color: transparent;
-}
-button {
-    margin: 0 5px;
 }
 .actionbar-background-dark {
     .mat-button {
@@ -53,6 +48,9 @@ button {
     .mat-flat-button {
         background-color: #fff;
         color: $primary;
+        &:disabled {
+            color: $textLight;
+        }
     }
 }
 .actionbar-round {
@@ -106,7 +104,7 @@ button {
     }
 }
 
-@media screen and (max-width: ($mobileWidth+$mobileStage*4)) {
+@mixin icon-button() {
     .action-always {
         padding: 0 1rem;
     }
@@ -116,4 +114,12 @@ button {
     .mat-flat-button {
         padding: 5px;
     }
+}
+
+@media screen and (max-width: ($mobileWidth+$mobileStage*4)) {
+    @include icon-button();
+}
+
+.actionbar-icon-button {
+    @include icon-button();
 }

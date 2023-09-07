@@ -29,13 +29,13 @@ package org.edu_sharing.repository.server.jobs.quartz;
 
 import java.text.ParseException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigValue;
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 
+import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.service.ServiceRegistry;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -45,12 +45,8 @@ import org.quartz.impl.JobDetailImpl;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
-import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 import org.springframework.stereotype.Component;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
-import javax.xml.xpath.XPathConstants;
 import org.springframework.context.ApplicationContext;
 
 import static org.quartz.JobBuilder.newJob;
@@ -66,7 +62,8 @@ public class JobHandler {
 
 	public static final Object KEY_RESULT_DATA = "JOB_RESULT_DATA";
 	private static final int MAX_JOB_LOG_COUNT = 20; // maximal number of jobs to store for history and gui
-	private static List<JobInfo> jobs = new ArrayList<>();
+	public final static SimpleCache<String, List<JobInfo>> jobs = (SimpleCache)  AlfAppContextGate.getApplicationContext().getBean("eduSharingJobsListCache");
+	private static final String JOB_LIST_KEY = "jobs";
 
 	//private final ApplicationContext eduApplicationContext = null;
 
@@ -81,6 +78,11 @@ public class JobHandler {
 
 	private final SchedulerFactoryBean schedulerFactoryBean;
 
+	public static void refreshJobsCache(JobInfo job) {
+		// trigger refresh of the jobs list in cluster
+		jobs.put(JOB_LIST_KEY, jobs.get(JOB_LIST_KEY).stream().map(j -> j.equals(job) ? job : j).collect(Collectors.toList()));
+	}
+
 	public boolean cancelJob(String jobName) throws SchedulerException {
 
 		boolean result=quartzScheduler.interrupt(JobKey.jobKey(jobName));
@@ -94,10 +96,11 @@ public class JobHandler {
 		return result;
 	}
 	public void finishJob(JobDetail jobDetail, JobInfo.Status status) {
-		for(JobInfo job : jobs){
-			if(Objects.equals(job.getJobDetail(),(jobDetail)) && job.getStatus().equals(JobInfo.Status.Running)){
+		for(JobInfo job : getJobs()){
+			if(job.equalsDetail(jobDetail) && job.getStatus().equals(JobInfo.Status.Running)){
 				job.setStatus(status);
 				job.setFinishTime(System.currentTimeMillis());
+				refreshJobsCache(job);
 				return;
 			}
 		}
@@ -106,11 +109,23 @@ public class JobHandler {
 		throw new IllegalArgumentException("Job "+jobDetail.getKey()+" was not found");
 	}
 
+	private static synchronized List<JobInfo> getJobs() {
+		if(jobs.get(JOB_LIST_KEY) == null) {
+			jobs.put(JOB_LIST_KEY, new ArrayList<>());
+		}
+		return jobs.get(JOB_LIST_KEY);
+	}
+	private static synchronized void addJob(JobInfo jobInfo) {
+		List<JobInfo> jobList = getJobs();
+		jobList.add(jobInfo);
+		jobs.put(JOB_LIST_KEY, jobList);
+	}
+
 	public void updateJobName(JobDetail jobDetail, String name) {
 		if(jobDetail==null)
 			return;
-		for(JobInfo info : jobs){
-			if(info.getJobDetail().equals(jobDetail)){
+		for(JobInfo info : getJobs()){
+			if(info.equalsDetail(jobDetail)){
 				((JobDetailImpl)jobDetail).setName(name);
 				info.setJobDetail(jobDetail);
 				return;
@@ -343,10 +358,10 @@ public class JobHandler {
 		// use startDelayed() to not block server startup by IMMEDIATE jobs
 		quartzScheduler.startDelayed(10);
 
-		refresh();
+		refresh(true);
 	}
 
-	public synchronized void refresh() {
+	public synchronized void refresh(boolean triggerImmediateJobs) {
 		try {
 			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 			List<? extends Config> list = LightbendConfigLoader.get().getConfigList("jobs.entries");
@@ -376,7 +391,9 @@ public class JobHandler {
 				String triggerConfig = job.getString("trigger");
 				Trigger trigger = getTriggerFromString(jobName, triggerConfig);
 				if (trigger != null) {
-					jobConfigList.add(new JobConfig(clazz, trigger, params, jobName));
+					if(!triggerConfig.contains(TRIGGER_TYPE_IMMEDIATE) || triggerImmediateJobs) {
+						jobConfigList.add(new JobConfig(clazz, trigger, params, jobName));
+					}
 				} else {
 					logger.warn("Job "+jobName+" has no trigger and will not be scheduled");
 				}
@@ -438,17 +455,21 @@ public class JobHandler {
 
 	}
 
-	private void registerJob(JobDetail jobDetail) {
+	private synchronized void registerJob(JobDetail jobDetail) {
 		if(JobLogger.IGNORABLE_JOBS.contains(jobDetail.getJobClass().getName()))
 			return;
 		JobInfo info=new JobInfo(jobDetail);
-		jobs.add(info);
-		while(jobs.size()>MAX_JOB_LOG_COUNT)
-			jobs.remove(0);
+		JobLogger.init(info);
+		addJob(info);
+		while(getJobs().size()>MAX_JOB_LOG_COUNT) {
+			List<JobInfo> jobsTmp = getJobs();
+			jobsTmp.remove(0);
+			jobs.put(JOB_LIST_KEY, jobsTmp);
+		}
 	}
 
-	public List<JobInfo> getAllJobs() throws SchedulerException {
-		List<JobInfo> result=jobs;
+	public List<JobInfo> getAllRunningJobs() throws SchedulerException {
+		List<JobInfo> result=getJobs();
 		/*
 		List running=getRunningJobs();
 		for(JobInfo info : result) {

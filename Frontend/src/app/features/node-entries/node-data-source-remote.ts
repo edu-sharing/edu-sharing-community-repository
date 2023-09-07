@@ -11,7 +11,7 @@ import { SearchResults } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, ReplaySubject, Subject, Subscription } from 'rxjs';
 import { debounceTime, map, switchMap, takeUntil, tap } from 'rxjs/operators';
-import { GenericAuthority, Node } from 'src/app/core-module/core.module';
+import { GenericAuthority, Node } from '../../core-module/core.module';
 import { UserModifiableValuesService } from '../../pages/search-page/user-modifiable-values';
 import { ItemsCap } from './items-cap';
 import { NodeCache, NodeCacheRange, NodeCacheSlice } from './node-cache';
@@ -56,6 +56,15 @@ export interface SortPanel {
     readonly sortChange: Observable<Sort>;
 }
 
+export class NodeDataSourceRemoteState {
+    _cache: {};
+    _pageIndex: number;
+    _pageSize: number;
+    _length: number;
+}
+
+let nextId = 0;
+
 export class NodeDataSourceRemote<
     T extends Node | GenericAuthority = Node,
     P extends MatTableDataSourcePaginator = MatTableDataSourcePaginator,
@@ -79,7 +88,14 @@ export class NodeDataSourceRemote<
     private _renderChangesSubscription: Subscription | null = null;
     private _cache = new NodeCache<T>();
     private dataStream = new BehaviorSubject<T[]>([]);
-    isLoading: LoadingState;
+    // FIXME: type 'boolean' only used for type compatibility with non-remote data source.
+    isLoadingSubject = new BehaviorSubject<LoadingState | boolean>(null);
+    get isLoading(): LoadingState | boolean {
+        return this.isLoadingSubject.value;
+    }
+    set isLoading(value: LoadingState | boolean) {
+        this.isLoadingSubject.next(value);
+    }
     private _itemsCap: ItemsCap<T> | null;
     get itemsCap(): ItemsCap<T> | null {
         return this._itemsCap;
@@ -98,6 +114,8 @@ export class NodeDataSourceRemote<
     private _isLoading = new BehaviorSubject<boolean>(true);
     private _initDone = false;
     private _resetDone = false;
+    private _restoreFunction: () => NodeDataSourceRemoteState;
+    id = nextId++;
 
     constructor(private _injector: Injector) {
         super();
@@ -126,7 +144,6 @@ export class NodeDataSourceRemote<
 
     setRemote(remote: NodeRemote<T>): void {
         this._remote = remote;
-        this._cache.clear();
         this._updateRemoteSubscription();
     }
 
@@ -155,7 +172,6 @@ export class NodeDataSourceRemote<
     }
 
     appendData(appendData: T[], location: 'before' | 'after' = 'after') {
-        // TODO: handle pagination
         let data = this.dataStream.value;
         if (location === 'after') {
             data = data.concat(appendData);
@@ -163,15 +179,57 @@ export class NodeDataSourceRemote<
             data = appendData.concat(data);
         }
         this.dataStream.next(data);
+        this._paginationHandler.length += appendData.length;
+        this._cache.clear();
     }
 
     removeData(data: T[]): void {
-        throw new Error('not implemented');
+        const currentData = this.dataStream.value;
+        const deleteCount = currentData.filter((entry) => data.includes(entry)).length;
+        const updatedData = currentData.filter((entry) => !data.includes(entry));
+        this.dataStream.next(updatedData);
+        this._paginationHandler.length -= deleteCount;
+        this._cache.clear();
     }
 
     registerQueryParameters(route: ActivatedRoute): void {
         this._paginationHandler.registerQueryParameters(route);
         this._sortHandler.registerQueryParameters(route);
+    }
+
+    dumpState(): NodeDataSourceRemoteState {
+        // With this, we implicitly test for `_initDone` and `_resetDone`.
+        console.assert(this.isLoading === false, 'dumping state not supported while loading');
+        return {
+            _cache: { ...this._cache },
+            _pageIndex: this._paginationHandler.pageIndex,
+            _pageSize: this._paginationHandler.pageSize,
+            _length: this._paginationHandler.length,
+        };
+    }
+
+    registerRestoreFunction(restoreFunction: () => NodeDataSourceRemoteState): void {
+        this._restoreFunction = restoreFunction;
+    }
+
+    private _restoreState(state: NodeDataSourceRemoteState) {
+        Object.assign(this._cache, state._cache);
+        this._paginationHandler.pageIndex = state._pageIndex;
+        this._paginationHandler.pageSize = state._pageSize;
+        this._paginationHandler.length = state._length;
+    }
+
+    private _resetState(): void {
+        const restoreState = this._restoreFunction?.();
+        if (restoreState) {
+            this._restoreState(restoreState);
+        } else {
+            this._paginationHandler.length = null;
+            if (this._initDone) {
+                this._paginationHandler.firstPage();
+            }
+            this._cache.clear();
+        }
     }
 
     private _registerLoadingState(): void {
@@ -203,9 +261,7 @@ export class NodeDataSourceRemote<
 
     private _updateRemoteSubscription(): void {
         this._resetDone = false;
-        if (this._initDone) {
-            this._paginationHandler.firstPage();
-        }
+        this._resetState();
         const sortChange = rxjs.merge(
             this._sortHandler.sortChange.pipe(
                 tap(({ source }) => {
@@ -231,21 +287,28 @@ export class NodeDataSourceRemote<
                 // Don't send multiple requests in case a sort change triggers a page change.
                 debounceTime(0),
                 map(() => this._cache.getMissingRange(this._getRequestRange())),
+                tap((missingRange) => missingRange && this._isLoading.next(true)),
                 switchMap((missingRange) => this._downloadAndCache(missingRange)),
                 map(() => this._cache.get(this._getDisplayRange())),
                 tap(() => {
                     this._initDone = true;
                     this._resetDone = true;
                 }),
+                tap({
+                    next: () => this._isLoading.next(false),
+                    error: () => this._isLoading.next(false),
+                }),
             )
             .subscribe((data) => this.dataStream.next(data));
     }
 
     private _getRequestRange(): Range {
-        return {
-            startIndex: this._paginationHandler.pageIndex * this._paginationHandler.pageSize,
-            endIndex: (this._paginationHandler.pageIndex + 1) * this._paginationHandler.pageSize,
-        };
+        const startIndex = this._paginationHandler.pageIndex * this._paginationHandler.pageSize;
+        let endIndex = (this._paginationHandler.pageIndex + 1) * this._paginationHandler.pageSize;
+        if (this._paginationHandler.length !== null) {
+            endIndex = Math.min(endIndex, this._paginationHandler.length);
+        }
+        return { startIndex, endIndex };
     }
 
     private _getDisplayRange(): Range {
@@ -258,16 +321,12 @@ export class NodeDataSourceRemote<
 
     private _downloadAndCache(missingRange: Range): Observable<void> {
         if (missingRange) {
-            this._isLoading.next(true);
             return this._remote({ range: missingRange, sort: this._sortHandler.currentSort }).pipe(
                 tap((response) => (this._paginationHandler.length = response.total)),
                 tap((response) =>
                     this._cache.add(this._getCacheSlice(missingRange, response.data)),
                 ),
-                tap({
-                    next: () => this._isLoading.next(false),
-                    error: () => this._isLoading.next(false),
-                }),
+
                 map(() => void 0),
             );
         } else {
@@ -328,7 +387,7 @@ class PaginationHandler<P extends MatTableDataSourcePaginator = MatTableDataSour
             this.paginator.pageSize = value;
         }
     }
-    private _length = 0;
+    private _length: number = null;
     get length() {
         return this._length;
     }
@@ -518,8 +577,8 @@ class SortHandler {
         const sortDirection = userModifiableValue.createString<SortDirection>(
             this._defaultSort?.direction,
         );
-        sortActive.registerQueryParameter('sortBy', route);
-        sortDirection.registerQueryParameter('sortDirection', route);
+        sortActive.registerQueryParameter('sortBy', route, { skipScrollToTop: true });
+        sortDirection.registerQueryParameter('sortDirection', route, { skipScrollToTop: true });
         rxjs.combineLatest([sortActive.observeValue(), sortDirection.observeValue()]).subscribe(
             ([active, direction]) => this._changeSort({ active, direction }, 'query-params'),
         );

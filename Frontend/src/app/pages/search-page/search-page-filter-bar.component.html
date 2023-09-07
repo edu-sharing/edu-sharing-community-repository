@@ -1,3 +1,15 @@
+<button
+  *ngIf="savedSearchesButtonIsVisible"
+  mat-stroked-button
+  color="primary"
+  class="saved-searches-button"
+  [matTooltip]="'SEARCH.SAVED_SEARCHES.TITLE' | translate"
+  (click)="openSavedSearchesDialog()"
+>
+  <i esIcon="bookmark_outline"></i>
+  {{ 'SEARCH.SAVED_SEARCHES.TITLE' | translate }}
+</button>
+
 <mat-form-field appearance="fill" *ngIf="(availableMetadataSets | async)?.length > 1">
   <mat-label>{{ 'SEARCH.METADATASET' | translate }}</mat-label>
   <mat-select [formControl]="activeMdsForm">
@@ -6,11 +18,6 @@
     </mat-option>
   </mat-select>
 </mat-form-field>
-
-<!-- 
-    [class.display-none]="currentRepository === '-all-'"
-    [(extended)]="mdsExtended"
- -->
 
 <es-mds-editor-wrapper
   *ngIf="mdsParams"
@@ -21,46 +28,8 @@
   [embedded]="true"
   mode="search"
   [currentValues]="searchFilterValues"
+  [externalFilters]="mdsExternalFilters"
 >
 </es-mds-editor-wrapper>
 
-<button
-  *ngIf="savedSearchesButtonIsVisible"
-  mat-fab
-  class="saved-searches-button"
-  color="primary"
-  [matMenuTriggerFor]="savedSearchesMenu"
-  [matTooltip]="'SEARCH.SAVED_SEARCHES_LABEL' | translate"
->
-  <mat-icon>bookmark</mat-icon>
-</button>
-<mat-menu #savedSearchesMenu="matMenu">
-  <button mat-menu-item *ngIf="reUrl.value" (click)="embedCurrentSearch()">
-    <mat-icon>redo</mat-icon>
-    <span>{{ 'SEARCH.EMBED_SEARCH_ACTION' | translate }}</span>
-  </button>
-  <button
-    mat-menu-item
-    *ngIf="!reUrl.value && !currentSavedSearch"
-    (click)="openSaveSearchDialog()"
-  >
-    <mat-icon>save</mat-icon>
-    <span>{{ 'SEARCH.SAVED_CURRENT_SEARCH' | translate }}</span>
-  </button>
-  <ng-container *ngIf="savedSearches | async as savedSearches">
-    <button mat-menu-item *ngIf="savedSearches.length > 0" (click)="goToSavedSearches()">
-      <mat-icon>folder</mat-icon>
-      <span>{{ 'SEARCH.MANAGE_SAVED_SEARCH' | translate }}</span>
-    </button>
-    <button
-      mat-menu-item
-      *ngFor="let savedSearch of savedSearches"
-      [disabled]="savedSearch === currentSavedSearch"
-      [class.current-saved-search-entry]="savedSearch === currentSavedSearch"
-      (click)="applySavedSearch(savedSearch)"
-    >
-      <mat-icon>search</mat-icon>
-      <span>{{ savedSearch.title }}</span>
-    </button>
-  </ng-container>
-</mat-menu>
+<ng-container *ngTemplateOutlet="customTemplates.value.filterBarBottom"></ng-container>

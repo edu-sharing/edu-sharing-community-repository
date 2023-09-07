@@ -28,6 +28,7 @@ import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { NodeRelationsDialogData, NodeRelationsDialogResult } from './node-relations-dialog-data';
+import { LocalEventsService } from '../../../../services/local-events.service';
 
 @Component({
     selector: 'es-node-relations-dialog',
@@ -63,13 +64,14 @@ export class NodeRelationsDialogComponent implements OnInit {
     constructor(
         @Inject(CARD_DIALOG_DATA) public data: NodeRelationsDialogData,
         private dialogRef: CardDialogRef<NodeRelationsDialogData, NodeRelationsDialogResult>,
-        private relationService: RelationService,
-        private nodeHelper: NodeHelperService,
-        private nodeService: NodeService,
-        private userService: UserService,
-        private toast: Toast,
         private bridgeService: BridgeService,
         private cdr: ChangeDetectorRef,
+        private localEvents: LocalEventsService,
+        private nodeHelper: NodeHelperService,
+        private nodeService: NodeService,
+        private relationService: RelationService,
+        private toast: Toast,
+        private userService: UserService,
     ) {
         this.dialogRef.patchState({ isLoading: true });
     }
@@ -116,7 +118,13 @@ export class NodeRelationsDialogComponent implements OnInit {
     }
 
     openNode(node: UniversalNode) {
-        UIHelper.openUrl(this.nodeHelper.getNodeUrl(node), this.bridgeService, OPEN_URL_MODE.Blank);
+        UIHelper.openUrl(
+            this.nodeHelper.getNodeUrl(node, {
+                closeOnBack: true,
+            }),
+            this.bridgeService,
+            OPEN_URL_MODE.Blank,
+        );
     }
 
     removeRelation(relation: RelationData) {
@@ -167,6 +175,7 @@ export class NodeRelationsDialogComponent implements OnInit {
                 }),
             ).toPromise();
             this.dialogRef.close(true);
+            this.localEvents.nodesChanged.emit([this.data.node]);
         } catch (e) {}
         this.toast.closeModalDialog();
     }
@@ -246,7 +255,7 @@ export class NodeRelationsDialogComponent implements OnInit {
             node = await this.nodeService
                 .getNode(
                     RestHelper.removeSpacesStoreRef(
-                        node.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL],
+                        node.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL][0],
                     ),
                 )
                 .toPromise();

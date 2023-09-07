@@ -1,7 +1,6 @@
 package org.edu_sharing.service.search;
 
 import com.google.gson.Gson;
-import com.hazelcast.map.impl.query.Query;
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.vcard.VCard;
 import net.sourceforge.cardme.vcard.types.ExtendedType;
@@ -28,8 +27,6 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.URLTool;
-import org.edu_sharing.restservices.NodeDao;
-import org.edu_sharing.restservices.mds.v1.model.Suggestions;
 import org.edu_sharing.restservices.shared.Contributor;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.restservices.shared.NodeSearch;
@@ -79,9 +76,7 @@ import org.elasticsearch.xcontent.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -214,7 +209,27 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 globalConditions,
                 searchToken);
 
-        return parseAggregations(searchToken, aggregations);
+        SearchResultNodeRef result = parseAggregations(searchToken, aggregations);
+        result.setFacets(result.getFacets().stream().map(facet -> {
+            facet.setValues(facet.getValues().stream().filter(s -> {
+                // if one document has i.e. multiple keywords, they will be shown in the facet
+                // so, we filter for values which actually contain the given string
+                {
+                    try {
+                        String value = s.getValue();
+                        try {
+                            // map to i18n value if available
+                            value = mds.findWidget(facet.getProperty()).getValuesAsMap().get(value).getCaption();
+                        } catch(Throwable ignored) {}
+                        return value.toLowerCase().contains(searchToken.getQueryString().toLowerCase());
+                    } catch (IllegalArgumentException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }).distinct().limit(searchToken.getFacetLimit()).collect(Collectors.toList()));
+            return facet;
+        }).collect(Collectors.toList()));
+        return result;
     }
 
     @NotNull
@@ -237,12 +252,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 ParsedFilter pf = (ParsedFilter)a;
                 for(Aggregation aggregation : pf.getAggregations().asList()){
                     if(aggregation instanceof ParsedStringTerms){
+                        AggregationBuilder definition = aggregations.stream().filter(agg -> agg.getName().equalsIgnoreCase(a.getName())).findAny().get();
                         ParsedStringTerms pst = (ParsedStringTerms) aggregation;
-                        facetsResult.add(getFacet(pst));
+                        facetsResult.add(getFacet(pst ,definition));
                     }
                 }
             }else{
-                logger.error("non supported aggreagtion " + a.getName());
+                logger.error("non supported aggregation " + a.getName());
             }
         }
 
@@ -330,7 +346,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     searchResponseAggregations = LogTime.log("Searching elastic for facets", () -> client.search(searchRequestAggs, RequestOptions.DEFAULT));
                 }else{
                     for (String facet : searchToken.getFacets()) {
-                        searchSourceBuilder.aggregation(AggregationBuilders.terms(facet).size(searchToken.getFacetLimit()).minDocCount(searchToken.getFacetsMinCount()).field("properties." + facet+".keyword"));
+                        // we use a higher facet limit since the facets will be filtered for the containing string!
+                        searchSourceBuilder.aggregation(AggregationBuilders.terms(facet).size(searchToken.getFacetLimit()*MetadataElasticSearchHelper.FACET_LIMIT_MULTIPLIER).minDocCount(searchToken.getFacetsMinCount()).field("properties." + facet+".keyword"));
                     }
                 }
             }
@@ -350,9 +367,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                             .confidence((float)0.9)
                                             .highlight("<em>","</em>")
                                             .addCandidateGenerator(new DirectCandidateGeneratorBuilder("properties.cclom:title.trigram")
-                                            .suggestMode("popular"))
+                                                    .suggestMode("popular"))
                                             .smoothingModel( new org.elasticsearch.search.suggest.phrase.Laplace(0.5))
-                                              );
+                            );
                     searchSourceBuilder.suggest(suggest);
                 }
             }
@@ -402,7 +419,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 for(Aggregation a : aggregations){
                     if(a instanceof  ParsedStringTerms) {
                         ParsedStringTerms pst = (ParsedStringTerms) a;
-                        facetsResult.add(getFacet(pst));
+                        facetsResult.add(getFacet(pst, null));
                     }else if (a instanceof ParsedCardinality){
                         ParsedCardinality pc = (ParsedCardinality)a;
                         if (a.getName().equals("original_count")) {
@@ -417,9 +434,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                             if(aggregation instanceof ParsedStringTerms){
                                 ParsedStringTerms pst = (ParsedStringTerms) aggregation;
                                 if(a.getName().endsWith("_selected")){
-                                    facetsResultSelected.add(getFacet(pst));
+                                    facetsResultSelected.add(getFacet(pst, null));
                                 }else{
-                                    facetsResult.add(getFacet(pst));
+                                    facetsResult.add(getFacet(pst, null));
                                 }
                             }
                         }
@@ -512,19 +529,30 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return sr;
     }
 
-    private NodeSearch.Facet getFacet(ParsedStringTerms pst){
+    private NodeSearch.Facet getFacet(ParsedStringTerms pst, AggregationBuilder builder){
         NodeSearch.Facet facet = new NodeSearch.Facet();
         facet.setProperty(pst.getName());
         List<NodeSearch.Facet.Value> values = new ArrayList<>();
         facet.setValues(values);
 
         for (Terms.Bucket b : pst.getBuckets()) {
-            String key = b.getKeyAsString();
-            long count = b.getDocCount();
-            NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
-            value.setValue(key);
-            value.setCount((int)count);
-            values.add(value);
+            if(builder != null && "multi_terms".equals(builder.getMetadata().get("type"))) {
+                String[] key = b.getKeyAsString().split("\\|");
+                for (String k : key) {
+                    long count = b.getDocCount();
+                    NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
+                    value.setValue(k);
+                    value.setCount((int) count);
+                    values.add(value);
+                }
+            } else {
+                String key = b.getKeyAsString();
+                long count = b.getDocCount();
+                NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
+                value.setValue(key);
+                value.setCount((int) count);
+                values.add(value);
+            }
         }
 
         facet.setSumOtherDocCount(pst.getSumOfOtherDocCounts());
@@ -558,8 +586,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }else{
             queryBuilderGlobalConditions = queryBuilderGlobalConditions.must(QueryBuilders.termQuery("properties.ccm:eduscopename.keyword",NodeServiceInterceptor.getEduSharingScope()));
         }
-        queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + SystemFolder.getSystemFolderBase().getId() + "*"));
-        queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + SystemFolder.getSitesFolder().getId() + "*"));
+        // @TODO: Must be properly fixed via DESP-865, it will otherwise break mediacenter_statistics query!
+        // queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + SystemFolder.getSystemFolderBase().getId() + "*"));
+        // queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + SystemFolder.getSitesFolder().getId() + "*"));
+
         return queryBuilderGlobalConditions;
     }
 
@@ -612,7 +642,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             return searchResult.getHits().getTotalHits().value > 0;
 
         } catch (IOException e) {
-           logger.error(e.getMessage(),e);
+            logger.error(e.getMessage(),e);
         }
 
         return false;
@@ -684,7 +714,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             if(i18n != null){
                 Map<String,Serializable> i18nProps = (Map<String,Serializable>)i18n.get(currentLocale);
                 if(i18nProps != null){
-                   List<String> displayNames = (List<String> )i18nProps.get(entry.getKey());
+                    List<String> displayNames = (List<String> )i18nProps.get(entry.getKey());
                     if(displayNames != null){
                         props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(displayNames, CCConstants.MULTIVALUE_SEPARATOR));
                     }
@@ -765,48 +795,6 @@ public class SearchServiceElastic extends SearchServiceImpl {
         eduNodeRef.setAspects(((List<String>)sourceAsMap.get("aspects")).
                 stream().map(CCConstants::getValidGlobalName).filter(Objects::nonNull).collect(Collectors.toList()));
 
-        // @TODO: remove all of this from/to multivalue
-        ValueTool.getMultivalue(props);
-        PropertiesGetInterceptor.PropertiesContext propertiesContext = PropertiesInterceptorFactory.getPropertiesContext(
-                alfNodeRef,props,eduNodeRef.getAspects(),
-                sourceAsMap
-        )
-                ;
-        for (PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
-            props = new HashMap<>(i.beforeDeliverProperties(propertiesContext));
-        }
-        // @TODO: remove all of this from/to multivalue
-        ValueTool.toMultivalue(props);
-        eduNodeRef.setProperties(props);
-
-        eduNodeRef.setOwner((String)sourceAsMap.get("owner"));
-
-        Map preview = (Map) sourceAsMap.get("preview");
-        if(preview != null && preview.get("small") != null) {
-            eduNodeRef.setPreview(
-                    new NodeRefImpl.PreviewImpl((String) preview.get("mimetype"),
-                            Base64.getDecoder().decode((String) preview.get("small")))
-            );
-        }
-
-        List<Contributor> contributorsResult = new ArrayList<>();
-        List contributors = (List)sourceAsMap.get("contributor");
-        if(contributors != null) {
-            for (Object contributor : contributors) {
-                Map c = (Map) contributor;
-                Contributor contributorResult = new Contributor();
-                contributorResult.setProperty((String) c.get("property"));
-                contributorResult.setEmail((String) c.get("email"));
-                contributorResult.setFirstname((String) c.get("firstname"));
-                contributorResult.setLastname((String) c.get("lastname"));
-                contributorResult.setOrg((String) c.get("org"));
-                contributorResult.setVcard((String) c.get("vcard"));
-                contributorsResult.add(contributorResult);
-            }
-        }
-        eduNodeRef.setContributors(contributorsResult);
-
-
         HashMap<String, Boolean> permissions = new HashMap<>();
         permissions.put(CCConstants.PERMISSION_READ, true);
         String guestUser = ApplicationInfoList.getHomeRepository().getGuest_username();
@@ -837,6 +825,54 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 }
             }
         }
+
+        // @TODO: remove all of this from/to multivalue
+        ValueTool.getMultivalue(props);
+        PropertiesGetInterceptor.PropertiesContext propertiesContext = PropertiesInterceptorFactory.getPropertiesContext(
+                alfNodeRef,props,eduNodeRef.getAspects(),
+                permissions,
+                sourceAsMap
+        )
+                ;
+        for (PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
+            props = new HashMap<>(i.beforeDeliverProperties(propertiesContext));
+        }
+        // @TODO: remove all of this from/to multivalue
+        ValueTool.toMultivalue(props);
+        eduNodeRef.setProperties(props);
+
+        eduNodeRef.setOwner((String)sourceAsMap.get("owner"));
+
+        Map preview = (Map) sourceAsMap.get("preview");
+        if(preview != null && preview.get("small") != null) {
+            eduNodeRef.setPreview(
+                    new NodeRefImpl.PreviewImpl(
+                            (String) preview.get("mimetype"),
+                            Base64.getDecoder().decode((String) preview.get("small")),
+                            (String) preview.get("type"),
+                            (Boolean) preview.get("icon")
+                    )
+            );
+        }
+
+        List<Contributor> contributorsResult = new ArrayList<>();
+        List contributors = (List)sourceAsMap.get("contributor");
+        if(contributors != null) {
+            for (Object contributor : contributors) {
+                Map c = (Map) contributor;
+                Contributor contributorResult = new Contributor();
+                contributorResult.setProperty((String) c.get("property"));
+                contributorResult.setEmail((String) c.get("email"));
+                contributorResult.setFirstname((String) c.get("firstname"));
+                contributorResult.setLastname((String) c.get("lastname"));
+                contributorResult.setOrg((String) c.get("org"));
+                contributorResult.setVcard((String) c.get("vcard"));
+                contributorsResult.add(contributorResult);
+            }
+        }
+        eduNodeRef.setContributors(contributorsResult);
+
+
         if(AuthorityServiceHelper.isAdmin() || user.equals(owner)){
             permissions.put(CCConstants.PERMISSION_CC_PUBLISH,true);
             PermissionReference pr = permissionModel.getPermissionReference(null,"FullControl");
@@ -943,16 +979,16 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         if(contributorKind == ContributorKind.ORGANIZATION){
             qb.must(QueryBuilders.boolQuery().should(
-                    QueryBuilders.existsQuery("contributor.X-ROR")
-                ).should(
-                    QueryBuilders.existsQuery("contributor.X-Wikidata")
-                ).minimumShouldMatch(1)
+                            QueryBuilders.existsQuery("contributor.X-ROR")
+                    ).should(
+                            QueryBuilders.existsQuery("contributor.X-Wikidata")
+                    ).minimumShouldMatch(1)
             );
         }else{
             qb.must(QueryBuilders.boolQuery().should(
-                    QueryBuilders.existsQuery("contributor.X-ORCID")
+                            QueryBuilders.existsQuery("contributor.X-ORCID")
                     ).should(
-                    QueryBuilders.existsQuery("contributor.X-GND-URI")
+                            QueryBuilders.existsQuery("contributor.X-GND-URI")
                     ).minimumShouldMatch(1)
             );
         }
@@ -1018,9 +1054,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return aggregation.getBuckets().stream().
                 map(Terms.Bucket::getKey).
                 // this would be nicer via elastic "include" feature, however, it seems to be a pain with the java library
-                filter(
-                    (k) -> Arrays.stream(
-                        suggest.toLowerCase().split(" ")).allMatch(
+                        filter(
+                        (k) -> Arrays.stream(
+                                suggest.toLowerCase().split(" ")).allMatch(
                                 (t) -> k.toString().toLowerCase().contains(t)
                         )
                 ).
@@ -1064,14 +1100,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
     public void checkClient() throws IOException {
         if(client == null || !client.ping(getRequestOptions())){
-             if(client != null){
-                 try {
-                     client.close();
-                 }catch (Exception e){
-                     logger.error("ping failed, close failed:" + e.getMessage()+" creating new");
-                 }
-             }
-             client = new RestHighLevelClient(RestClient.builder(getConfiguredHosts()));
+            if(client != null){
+                try {
+                    client.close();
+                }catch (Exception e){
+                    logger.error("ping failed, close failed:" + e.getMessage()+" creating new");
+                }
+            }
+            client = new ESRestHighLevelClient(RestClient.builder(getConfiguredHosts()));
         }
     }
 
@@ -1132,9 +1168,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 return Collections.emptyList();
             }
             return search.getFacets().get(0).getValues().stream().filter(s ->
-                // if one document has i.e. multiple keywords, they will be shown in the facet
-                // so, we filter for values which actually contain the given string
-                s.getValue().toLowerCase().contains(value.toLowerCase())
+                    // if one document has i.e. multiple keywords, they will be shown in the facet
+                    // so, we filter for values which actually contain the given string
+                    s.getValue().toLowerCase().contains(value.toLowerCase())
             ).map(s -> {
                 Suggestion suggestion = new Suggestion();
                 suggestion.setKey(s.getValue());
@@ -1142,7 +1178,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         captions.containsKey(s.getValue()) ? captions.get(s.getValue()).getCaption() : s.getValue()
                 );
                 return suggestion;
-            }).collect(Collectors.toList());
+            }).distinct().limit(token.getFacetLimit()).collect(Collectors.toList());
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }

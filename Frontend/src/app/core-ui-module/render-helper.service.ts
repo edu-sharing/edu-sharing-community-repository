@@ -1,7 +1,7 @@
 import { ComponentFactoryResolver, Injectable, ViewContainerRef } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Node } from '../core-module/rest/data-object';
+import { EventType, Node } from '../core-module/rest/data-object';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { RestUsageService } from '../core-module/rest/services/rest-usage.service';
 import { ListItem } from '../core-module/ui/list-item';
@@ -16,6 +16,8 @@ import { NodeDataSource } from '../features/node-entries/node-data-source';
 import { NodeEntriesWrapperComponent } from '../features/node-entries/node-entries-wrapper.component';
 import { OptionsHelperService } from './options-helper.service';
 import { Scope, Target } from './option-item';
+import { VideoControlsComponent } from './components/video-controls/video-controls.component';
+import { RestTrackingService } from '../core-module/rest/services/rest-tracking.service';
 
 @Injectable()
 export class RenderHelperService {
@@ -29,6 +31,7 @@ export class RenderHelperService {
         private componentFactoryResolver: ComponentFactoryResolver,
         private usageApi: RestUsageService,
         private optionsHelperService: OptionsHelperService,
+        private tracking: RestTrackingService,
     ) {}
 
     setViewContainerRef(viewContainerRef: ViewContainerRef) {
@@ -207,5 +210,60 @@ export class RenderHelperService {
         this.injectNodeRelationsWidget(node);
         this.injectModuleComments(node);
         this.applyActionButtons(node);
+        this.injectVideoControls(node);
+    }
+
+    injectVideoControls(node: Node) {
+        let videoElement: HTMLVideoElement;
+        let target: Element;
+        try {
+            videoElement = document.querySelector('.edusharing_rendering_content_wrapper video');
+            if (!videoElement) {
+                throw new Error();
+            }
+            const listener = () => {
+                this.tracking
+                    .trackEvent(EventType.VIEW_MATERIAL_PLAY_MEDIA, node.ref.id)
+                    .subscribe(() => {});
+                videoElement.removeEventListener('play', listener);
+            };
+            videoElement.addEventListener('play', listener);
+            target = document.createElement('div');
+            document
+                .querySelector('.edusharing_rendering_wrapper')
+                .parentElement.appendChild(target);
+        } catch (e) {
+            // console.log("did not find video element, skipping controls",e);
+            setTimeout(() => this.injectVideoControls(node), 1000 / 30);
+            return;
+        }
+        const data = {
+            video: videoElement,
+            node,
+        };
+        UIHelper.injectAngularComponent(
+            this.componentFactoryResolver,
+            this.viewContainerRef,
+            VideoControlsComponent,
+            target,
+            data,
+        );
+    }
+
+    /**
+     * applies the render data given as the detailsSnippet and injects it in the given HTMLELement
+     * Script urls given by the rendering data will be obeyed. However, inline scripts are NOT supported
+     * This function should be used to align with CSP security policies
+     */
+    applyRenderData(htmlElement: HTMLElement, detailsSnippet: string) {
+        htmlElement.innerHTML = detailsSnippet;
+        Array.from(htmlElement.querySelectorAll('script')).forEach((script) => {
+            const newScriptElement = document.createElement('script');
+            Array.from(script.attributes).forEach((attr) => {
+                newScriptElement.setAttribute(attr.name, attr.value);
+            });
+            document.head.appendChild(newScriptElement);
+            script.parentElement.removeChild(script);
+        });
     }
 }

@@ -69,7 +69,7 @@ public class GuestCagePolicy implements BeforeCreateNodePolicy, BeforeDeleteAsso
 
 		if(AuthenticationUtil.getFullyAuthenticatedUser() != null
 				&& guestUsers.contains(AuthenticationUtil.getFullyAuthenticatedUser())
-				&& !AuthenticationUtil.isRunAsUserTheSystemUser()){
+				&& guestUsers.contains(AuthenticationUtil.getRunAsUser())){
 			throw new GuestPermissionDeniedException("guest has no permissions to do that");
 		}
 	}
@@ -133,10 +133,12 @@ public class GuestCagePolicy implements BeforeCreateNodePolicy, BeforeDeleteAsso
 			guestUsers.add(CCConstants.PROXY_USER);
 			guestUsers.add("guest");
 		}
-		String gun = ApplicationInfoList.getHomeRepository().getGuest_username();
-		if (gun != null && !guestUsers.contains(gun)) {
-			guestUsers.add(gun);
+
+		String guestUsername = ApplicationInfoList.getHomeRepository().getGuest_username();
+		if (guestUsername != null && !guestUsers.contains(guestUsername)) {
+			guestUsers.add(guestUsername);
 		}
+
 		return guestUsers;
 
 	}

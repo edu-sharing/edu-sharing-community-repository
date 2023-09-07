@@ -12,7 +12,7 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { DropSource } from 'src/app/features/node-entries/entries-model';
+import { DropSource } from '../../../features/node-entries/entries-model';
 import { Node, NodeList, RestConstants, RestNodeService } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
@@ -21,6 +21,7 @@ import { OptionsHelperService } from '../../../core-ui-module/options-helper.ser
 import { DragData } from '../../../services/nodes-drag-drop.service';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 import { canDropOnNode } from '../workspace-utils';
+import { LocalEventsService } from '../../../services/local-events.service';
 
 @Component({
     selector: 'es-workspace-sub-tree',
@@ -40,11 +41,6 @@ export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
     dropdownLeft: string;
     dropdownTop: string;
 
-    @Input() set reload(reload: Boolean) {
-        if (reload) {
-            this.refresh();
-        }
-    }
     private _currentPath: string[] = [];
     /** Parent hierarchy of the currently selected node. */
     @Input()
@@ -83,12 +79,21 @@ export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
     private expandedNodes: string[] = [];
     private destroyed = new Subject<void>();
 
-    constructor(private nodeApi: RestNodeService, private optionsService: OptionsHelperService) {}
+    constructor(
+        private nodeApi: RestNodeService,
+        private optionsService: OptionsHelperService,
+        private localEvents: LocalEventsService,
+    ) {}
 
     ngOnInit(): void {
-        rxjs.merge(this.optionsService.nodesChanged, this.optionsService.nodesDeleted)
+        rxjs.merge(this.localEvents.nodesChanged, this.localEvents.nodesDeleted)
             .pipe(takeUntil(this.destroyed))
-            .subscribe(() => this.refresh());
+            .subscribe((nodes) => {
+                const nodeIds = this._nodes.map((node) => node.ref.id);
+                if (nodes.some((node) => nodeIds.includes(node.ref.id))) {
+                    this.refresh();
+                }
+            });
     }
 
     /**

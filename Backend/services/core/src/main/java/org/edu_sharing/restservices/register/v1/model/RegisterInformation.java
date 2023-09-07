@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class RegisterInformation implements Serializable{
-    private String firstName,lastName,email,password;
+    private String vcard, firstName,lastName,email,password;
     private String organization;
     // general flag for indicating if user may receive mail notifications
     private boolean allowNotifications;
@@ -28,6 +28,12 @@ public class RegisterInformation implements Serializable{
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
+
+    @JsonProperty
+    public String getVcard() {
+        return vcard;
+    }
+
     @JsonProperty
     public String getEmail() {
         return email;

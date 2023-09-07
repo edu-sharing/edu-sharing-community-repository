@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 import { SessionStorageService } from '../core-module/core.module';
 import { ToastDuration } from '../core-ui-module/toast';
 
@@ -20,13 +20,21 @@ export class AccessibilityService {
 
     constructor(private storage: SessionStorageService) {}
 
-    set(accessibilitySettings: Partial<AccessibilitySettings>): Promise<void> {
-        return this.storage.setValues(
-            Object.entries(accessibilitySettings).reduce((acc, [key, value]) => {
+    async set(accessibilitySettings: Partial<AccessibilitySettings>): Promise<void> {
+        const currentValues = await this.observeAll().pipe(first()).toPromise();
+        const values = Object.entries(accessibilitySettings)
+            .filter(
+                ([key, value]) =>
+                    // check if value has been modified
+                    (currentValues as any)[key] !== value,
+            )
+            .reduce((acc, [key, value]) => {
                 acc[AccessibilityService.STORAGE_PREFIX + key] = value;
                 return acc;
-            }, {} as { [key: string]: any }),
-        );
+            }, {} as { [key: string]: any });
+        if (Object.keys(values).length > 0) {
+            return this.storage.setValues(values);
+        }
     }
 
     observe<K extends keyof AccessibilitySettings>(key: K): Observable<AccessibilitySettings[K]>;

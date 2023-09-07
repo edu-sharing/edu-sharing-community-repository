@@ -57,17 +57,19 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 	HttpQueryTool qt = new HttpQueryTool();
 
 	PersistentHandlerInterface persistentHandler = null;
-	
+
 	RecordHandlerInterfaceBase recordHandler = null;
-	
+
 	BinaryHandler binaryHandler = null;
-	
+
 	boolean addSetToGetRecordUrl = false;
-	
+
+	String currentUrl = null;
+
 	public ListIdentifiersHandler() {
-		
+
 	}
-	
+
 	public ListIdentifiersHandler(String oaiBaseUrl, String set, String metadataPrefix) {
 		this(null, null, null, oaiBaseUrl, set, metadataPrefix, null, false, null, null);
 	}
@@ -105,21 +107,23 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 
 	public void handleIdentifiersList(String url) {
 
+		currentUrl = new String(url);
+
 		String result = qt.query(url);
-		
+
 
 		try {
 
 			InputSource inputSource = new InputSource(new ByteArrayInputStream(result.getBytes(Charset.forName("utf-8"))));
 
 			XMLReader xmlReader = XMLReaderFactory.createXMLReader();
-			
+
 			// Stream to xml file
 			xmlReader.setContentHandler(this);
 
 			// Start parsing
 			xmlReader.parse(inputSource);
-			
+
 		} catch (SAXException e) {
 			logger.error(e.getMessage(), e);
 		} catch (IOException e) {
@@ -165,7 +169,7 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 		String lowerLocalName = localName.toLowerCase();
 
 		if (parentLocalName.equals("oai-pmh") && lowerLocalName.equals("error")) {
-			logger.error("oai service error:" + currentValue + " code:" + currentAtts.getValue("code") + " " +" cursor:"+cursor+ " set:"+set +" metadataPrefix:" + metadataPrefix);
+			logger.error("oai service error:" + currentValue + " code:" + currentAtts.getValue("code") + " " +" cursor:"+cursor+ " set:"+set +" metadataPrefix:" + metadataPrefix + " currentUrl:"+currentUrl);
 		}
 
 		// reset deleted status
@@ -218,32 +222,32 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 	 * @param timeStamp
 	 */
 	protected void handleRecord(String replId, String timeStamp) {
-	
+
 		if (isCurrentRecordDeleted()) {
 			logger.info("record " + currentIdentifier + " is deleted");
 			return;
 		}
-		
+
 		boolean mustBePersisted = persistentHandler.mustBePersisted(replId, timeStamp);
-		
+
 		logger.info("record " + currentIdentifier + " must be persisted " + mustBePersisted);
 
 		if (mustBePersisted) {
-			
+
 			String url = getRecordUrl(replId);
 			logger.info("url:" + url);
 			String result = qt.query(url);
 
 			try {
-				
-				
+
+
 				/**
 				 * prevent a Invalid byte 2 of 3-byte UTF-8 sequence. org.xml.sax.SAXParseException: Invalid byte 2 of 3-byte UTF-8 sequence.
 				 * with explicit utf-8 encoding
 				 */
 				if(recordHandler instanceof RecordHandlerInterface) {
 					((RecordHandlerInterface)recordHandler).handleRecord(new ByteArrayInputStream(result.getBytes(Charset.forName("utf-8"))));
-				
+
 					if (recordHandler.getProperties().size() > 0) {
 						persistentHandler.safe(recordHandler, cursor, set);
 					} else {
@@ -251,7 +255,7 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 					}
 				}
 				if(recordHandler instanceof org.edu_sharing.repository.server.importer.RecordHandlerInterface) {
-					
+
 					try{
 						XPathFactory pfactory = XPathFactory.newInstance();
 						XPath xpath = pfactory.newXPath();
@@ -262,18 +266,18 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 						if(errorcode == null || errorcode.trim().equals("")){
 							Node nodeRecord = (Node)xpath.evaluate("/OAI-PMH/GetRecord/record", doc, XPathConstants.NODE);
 							((org.edu_sharing.repository.server.importer.RecordHandlerInterface)recordHandler).handleRecord(nodeRecord, cursor, set);
-							
+
 							logger.info("staring exists check:" + replId);
 							boolean exists = persistentHandler.exists(replId);
 							logger.info("finished exists check" + replId+ " exists:" + exists);
-							
-							
+
+
 							String nodeId = persistentHandler.safe((org.edu_sharing.repository.server.importer.RecordHandlerInterface) recordHandler, cursor, set);
 							if(nodeId != null) {
 								if(binaryHandler != null){
 									binaryHandler.safe(nodeId, (org.edu_sharing.repository.server.importer.RecordHandlerInterface) recordHandler,nodeRecord, set);
 								}
-								
+
 								if(!exists) {
 									new MCAlfrescoAPIClient().createVersion(nodeId);
 								}
@@ -288,10 +292,10 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 						logger.error("Throwable occured at set: "+set+", identifier: "+replId);
 						logger.error(e.getMessage(),e);
 					}
-				
+
 				}
-				
-				
+
+
 			} catch (IOException e) {
 				logger.error(e.getMessage(), e);
 			} catch (SAXParseException e) {
@@ -304,13 +308,13 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 			}
 		}
 	}
-	
+
 	public String getRecordUrl(String replicationSourceId) {
-		String getRecordUrl = this.oaiBaseUrl + "?verb=GetRecord&identifier=" + replicationSourceId + "&metadataPrefix=" + this.metadataPrefix; 
+		String getRecordUrl = this.oaiBaseUrl + "?verb=GetRecord&identifier=" + replicationSourceId + "&metadataPrefix=" + this.metadataPrefix;
 		if(this.addSetToGetRecordUrl) getRecordUrl += "&set=" + this.set;
 		return getRecordUrl;
 	}
-	
+
 	public boolean isCurrentRecordDeleted() {
 		return currentRecordIsDeleted;
 	}

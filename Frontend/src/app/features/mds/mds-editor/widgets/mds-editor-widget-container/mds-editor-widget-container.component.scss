@@ -2,6 +2,28 @@
 :host {
     display: block;
 }
+
+.mat-expansion-panel {
+    margin-left: calc(var(--container-padding, 0px) * -1);
+    margin-right: calc(var(--container-padding, 0px) * -1);
+    box-shadow: none;
+    border-bottom: 1px solid
+        rgba(var(--palette-foreground-divider), var(--palette-foreground-divider-alpha));
+    .mat-expansion-panel-header {
+        es-spinner-small {
+            margin: 0 1.5rem;
+        }
+        i {
+            margin-right: 1rem;
+        }
+    }
+    .mat-expansion-panel-header,
+    & ::ng-deep .mat-expansion-panel-body {
+        padding-left: var(--container-padding, 24px);
+        padding-right: var(--container-padding, 24px);
+    }
+}
+
 .widget-container {
     display: block;
     &:not(.read-only) {

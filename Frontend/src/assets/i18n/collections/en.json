@@ -83,6 +83,7 @@
     "OPEN_MISSING": "Open",
     "ORIGINAL_MISSING": "The original has been deleted",
     "ORIGINAL_MISSING_INFO": "The original has been deleted and can not be accessed anymore. You can open the reference to view the metadata.",
+    "REMOVE_FROM_COLLECTION_DIALOG_TEXT": "Remove {{count}} element(s) from this collection? The elements themselves will remain untouched, however, they won't be accessible via this collection anymore.",
     "REMOVED_FROM_COLLECTION": "The element(s) have been removed from the collection",
     "EXTENDED_PERMISSIONS": "Individual persons or groups (view, collaborate or coordinate)",
     "EXTENDED_PERMISSIONS_BUTTON": "Invite",
@@ -102,6 +103,13 @@
     "ADD_TO": {
       "DUPLICATE_TITLE": "Element(s) already existing",
       "DUPLICATE_MESSAGE": "The collection already contains {{count}} of the element(s). Are you want to add them again?"
+    },
+    "PROPOSALS": {
+      "TITLE": "Materials proposed by users",
+      "TOAST": {
+        "ACCEPTED": "The element has been added to the collection.",
+        "DECLINED": "The proposal has been declined."
+      }
     }
   },
 

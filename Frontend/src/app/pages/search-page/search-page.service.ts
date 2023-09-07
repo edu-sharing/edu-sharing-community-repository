@@ -1,17 +1,27 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
     ClientConfig,
+    CollectionService,
     ConfigService,
     HOME_REPOSITORY,
     MdsService,
     MetadataSetInfo,
     NetworkService,
+    Node,
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { Repository, UIConstants } from '../../core-module/core.module';
+import {
+    CustomOptions,
+    DefaultGroups,
+    ElementType,
+    OptionItem,
+} from '../../core-ui-module/option-item';
+import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
+import { MainNavService } from '../../main/navigation/main-nav.service';
 import {
     SearchFieldInstance,
     SearchFieldService,
@@ -20,6 +30,7 @@ import { notNull } from '../../util/functions';
 import { NavigationScheduler } from './navigation-scheduler';
 import { SearchPageResults } from './search-page-results.service';
 import { UserModifiableValuesService } from './user-modifiable-values';
+import { Widget } from '../../features/mds/mds-editor/mds-editor-instance.service';
 
 export class SearchRequestParams {
     constructor(
@@ -34,6 +45,11 @@ export class SearchRequestParams {
     }
 }
 
+interface AddToCollectionMode {
+    customOptions: CustomOptions;
+    collection: Node;
+}
+
 @Injectable()
 export class SearchPageService implements OnDestroy {
     readonly availableRepositories = new BehaviorSubject<Repository[]>(null);
@@ -46,6 +62,18 @@ export class SearchPageService implements OnDestroy {
     readonly searchString = this.userModifiableValues.createString();
     readonly loadingProgress = new BehaviorSubject<number>(null);
     readonly reUrl = new BehaviorSubject<string | false>(null);
+    readonly addToCollectionMode = new BehaviorSubject<AddToCollectionMode>(null);
+    readonly filtersMdsWidgets: BehaviorSubject<Widget[]> = new BehaviorSubject(null);
+    /**
+     * A list of properties that should be fetched as facets with a search request.
+     *
+     * The facets are determined by the mds instance of the filter-bar and are used to show
+     * suggestions for filter values to the user.
+     *
+     * Will be set to `null` while a value is being determined. Set to the empty array in case there
+     * are no facets to fetch.
+     */
+    readonly facetsToFetch = new BehaviorSubject<string[]>(null);
     private _results = new BehaviorSubject<SearchPageResults>(null);
     get results(): SearchPageResults {
         return this._results.value;
@@ -57,12 +85,15 @@ export class SearchPageService implements OnDestroy {
     private readonly destroyed = new Subject<void>();
 
     constructor(
+        private collection: CollectionService,
         private config: ConfigService,
-        private searchField: SearchFieldService,
+        private mainNavService: MainNavService,
         private mds: MdsService,
         private navigationScheduler: NavigationScheduler,
         private network: NetworkService,
         private route: ActivatedRoute,
+        private router: Router,
+        private searchField: SearchFieldService,
         private userModifiableValues: UserModifiableValuesService,
     ) {}
 
@@ -78,6 +109,7 @@ export class SearchPageService implements OnDestroy {
         this.initSearchPageUi();
         this.initQueryParams();
         this.registerAllRepositories();
+        this.registerAddToCollection();
     }
 
     /**
@@ -88,7 +120,7 @@ export class SearchPageService implements OnDestroy {
      */
     initSearchFieldOnly(): void {
         this.initBasicData();
-        const searchFieldInstance = this.registerSearchField();
+        const searchFieldInstance = this.registerSearchField({ autoFocusSearchField: false });
         this.initQueryParams();
         searchFieldInstance.patchConfig({ showFiltersButton: false });
         // Jump to the search page when a search is triggered.
@@ -197,10 +229,11 @@ export class SearchPageService implements OnDestroy {
         });
     }
 
-    private registerSearchField(): SearchFieldInstance {
+    private registerSearchField({ autoFocusSearchField = true } = {}): SearchFieldInstance {
         const searchFieldInstance = this.searchField.enable(
             {
                 placeholder: 'SEARCH.SEARCH_STUFF',
+                autoFocus: autoFocusSearchField,
             },
             this.destroyed,
         );
@@ -249,6 +282,51 @@ export class SearchPageService implements OnDestroy {
                 switchMap((results) => results.loadingProgress),
             )
             .subscribe(this.loadingProgress);
+    }
+
+    private registerAddToCollection(): void {
+        this.route.queryParamMap
+            .pipe(
+                map((queryParamMap) => queryParamMap.get('addToCollection')),
+                distinctUntilChanged(),
+                switchMap((collectionId) =>
+                    collectionId ? this.collection.getCollection(collectionId) : rxjs.of(null),
+                ),
+            )
+            .subscribe((collection) => {
+                if (collection) {
+                    this.addToCollectionMode.next({
+                        collection,
+                        customOptions: this.getAddToCollectionOptions(collection),
+                    });
+                } else {
+                    this.addToCollectionMode.next(null);
+                }
+            });
+    }
+
+    private getAddToCollectionOptions(collection: Node): CustomOptions {
+        const addTo = new OptionItem('SEARCH.ADD_INTO_COLLECTION_SHORT', 'layers', (_, nodes) => {
+            this.mainNavService.getDialogs().addToCollectionList(collection, nodes, true, () =>
+                this.router.navigate([UIConstants.ROUTER_PREFIX + 'collections'], {
+                    queryParams: { id: collection.ref.id },
+                }),
+            );
+        });
+        addTo.elementType = OptionsHelperService.ElementTypesAddToCollection;
+        addTo.group = DefaultGroups.Reuse;
+        addTo.showAlways = true;
+        const cancel = new OptionItem('CANCEL', 'close', () =>
+            this.router.navigate([UIConstants.ROUTER_PREFIX, 'collections'], {
+                queryParams: { id: collection.ref.id },
+            }),
+        );
+        cancel.group = DefaultGroups.Delete;
+        cancel.elementType = [ElementType.Unknown];
+        return {
+            useDefaultOptions: false,
+            addOptions: [cancel, addTo],
+        };
     }
 }
 

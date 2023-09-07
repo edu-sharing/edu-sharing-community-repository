@@ -101,7 +101,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
 
     _parent: Node = null;
 
-    uploadSelectDialogRef: DialogRef<FileList>;
+    uploadSelectDialogRef: DialogRef<{ files: FileList; parent: Node | undefined }>;
     uploadDialogRef: DialogRef<Node[]>;
     connectorList: Connector[];
     fileIsOver = false;
@@ -294,10 +294,8 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             if (this.tools?.tools.length > 0) {
                 this.options = this.options.concat(
                     this.tools.tools.map((tool, i) => {
-                        const option = new OptionItem(
-                            tool.name + ' (' + tool.appId + ')',
-                            'create',
-                            () => this.showCreateLtiTool(tool),
+                        const option = new OptionItem(tool.name, 'create', () =>
+                            this.showCreateLtiTool(tool),
                         );
                         option.elementType = [ElementType.Unknown];
                         option.group = DefaultGroups.CreateLtiTools;
@@ -346,9 +344,10 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             parent: await this.getParent(),
             showPicker: this.showPicker,
         });
-        this.uploadSelectDialogRef.afterClosed().subscribe((files) => {
-            if (files) {
-                this.uploadFiles(files);
+        this.uploadSelectDialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                this._parent = result.parent;
+                this.uploadFiles(result.files);
             } else {
                 // When `files` is not set, that can either mean that the dialog was canceled or
                 // that a link was entered, which causes an edit dialog to be opened by the

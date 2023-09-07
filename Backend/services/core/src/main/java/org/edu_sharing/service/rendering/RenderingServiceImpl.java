@@ -64,7 +64,14 @@ public class RenderingServiceImpl implements RenderingService{
 			this.authTool = RepoFactory.getAuthenticationToolInstance(appId);
 			this.permissionService = PermissionServiceFactory.getLocalService();
 
-			if((AuthenticationUtil.isRunAsUserTheSystemUser() || "admin".equals(AuthenticationUtil.getRunAsUser())) ) {
+			String guestUn = ApplicationInfoList.getHomeRepository().getGuest_username();
+
+			//fix for running in runas user mode
+			if((AuthenticationUtil.isRunAsUserTheSystemUser()
+					|| "admin".equals(AuthenticationUtil.getRunAsUser()))
+					|| Context.getCurrentInstance().getCurrentInstance() == null
+					|| (guestUn != null
+					&& guestUn.equals(AuthenticationUtil.getFullyAuthenticatedUser()) )) {
 				logger.debug("starting in runas user mode");
 				this.authInfo = new HashMap<String,String>();
 				this.authInfo.put(CCConstants.AUTH_USERNAME, AuthenticationUtil.getRunAsUser());

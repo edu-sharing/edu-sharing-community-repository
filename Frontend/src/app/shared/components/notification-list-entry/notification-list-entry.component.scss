@@ -1,0 +1,64 @@
+@import '../../../core-ui-module/styles/variables';
+
+:host ::ng-deep {
+    .mat-expansion-panel-header {
+        height: auto;
+    }
+}
+.entry {
+    display: grid;
+    width: 100%;
+    grid-template-rows: 1fr 1fr;
+    grid-gap: 10px;
+    padding: 10px 20px 10px 0;
+    > .heading {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-gap: 10px;
+        font-size: $fontSizeXSmall;
+        color: $textMediumLight;
+    }
+    > .main-info {
+        color: $textLight;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        grid-gap: 10px;
+        align-items: center;
+        i {
+            font-size: 15px;
+        }
+    }
+}
+.entry:not(.read) {
+    > .main-info {
+        font-weight: bold;
+        color: $textMain;
+    }
+}
+.full-info {
+    display: flex;
+    gap: 10px;
+    .description {
+        display: flex;
+        flex-grow: 1;
+        flex-direction: column;
+        row-gap: 5px;
+        .permissions {
+            padding-left: 20px;
+            color: $textLight;
+            li {
+                list-style-type: disc;
+                padding: 2px 5px;
+            }
+        }
+    }
+    .user-content {
+        padding: 5px 10px;
+        white-space: pre-line;
+        border-left: 2px solid var(--primary);
+        color: $textLight;
+        > span {
+            @include limitLineCount(3);
+        }
+    }
+}

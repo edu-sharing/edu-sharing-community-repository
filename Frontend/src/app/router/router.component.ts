@@ -28,7 +28,6 @@ import { PermissionsRoutingComponent } from '../modules/permissions/permissions-
 import { PermissionsMainComponent } from '../modules/permissions/permissions.component';
 import { ProfilesComponent } from '../modules/profiles/profiles.component';
 import { RegisterComponent } from '../modules/register/register.component';
-import { SearchComponent } from '../modules/search/search.component';
 import { ServicesComponent } from '../modules/services/services.components';
 import { ShareAppComponent } from '../modules/share-app/share-app.component';
 import { SharingComponent } from '../modules/sharing/sharing.component';
@@ -54,6 +53,7 @@ import { LicenseAgreementService } from '../services/license-agreement.service';
 import { DialogsNavigationGuard } from '../features/dialogs/dialogs-navigation.guard';
 import { AuthenticationService } from 'ngx-edu-sharing-api';
 import { ConfigurationService, RestHelper } from '../core-module/core.module';
+import { ScrollPositionRestorationService } from '../services/scroll-position-restoration.service';
 
 @Component({
     selector: 'es-router',
@@ -109,7 +109,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
     // --- https://developer.chrome.com/blog/page-lifecycle-api/
     @HostListener('window:beforeunload', ['$event'])
     interceptRoute(event: BeforeUnloadEvent) {
-        console.log(event);
+        // console.log(event);
     }
 
     constructor(
@@ -125,6 +125,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
         private themeService: ThemeService,
         private authentication: AuthenticationService,
         private configuration: ConfigurationService,
+        private scrollPositionRestoration: ScrollPositionRestorationService,
     ) {
         this.injector.get(Router).events.subscribe((event) => {
             // if (event instanceof NavigationStart) {
@@ -156,6 +157,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
         this.registerRedirectToLogin();
         this.registerContrastMode();
         this.licenseAgreement.setup();
+        this.scrollPositionRestoration.setup();
     }
 
     ngDoCheck(): void {

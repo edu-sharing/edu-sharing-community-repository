@@ -29,6 +29,7 @@ package org.edu_sharing.repository.server.tools;
 
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -41,13 +42,19 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.RepoFactory;
+import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 public class UserEnvironmentTool {
 	
 	private static Log logger = LogFactory.getLog(UserEnvironmentTool.class);
 	MCAlfrescoAPIClient mcBaseClient = new MCAlfrescoAPIClient();
 	String username = null;
+
+	private final NodeService nodeService;
 
     public UserEnvironmentTool() throws Throwable {
         this(AuthenticationUtil.getFullyAuthenticatedUser());
@@ -56,12 +63,25 @@ public class UserEnvironmentTool {
          * use this for running this class in an runAs context
          * @throws Throwable
          */
-	public UserEnvironmentTool(String runAsUser) throws Throwable{
+	public UserEnvironmentTool(String runAsUser) {
+		this(NodeServiceFactory.getLocalService(), runAsUser);
+	}
+
+	public UserEnvironmentTool(NodeService nodeService) {
+		this(nodeService, AuthenticationUtil.getFullyAuthenticatedUser());
+	}
+
+	public UserEnvironmentTool(NodeService nodeService, String runAsUser) {
 		username = runAsUser;
+		this.nodeService = nodeService;
 	}
 	
-	public UserEnvironmentTool(String repositoryId, HashMap<String,String> authInfo) throws Throwable{
-		username = authInfo.get(CCConstants.AUTH_USERNAME);
+	public UserEnvironmentTool(String repositoryId, Map<String,String> authInfo) {
+		this(NodeServiceFactory.getLocalService(), repositoryId, authInfo);
+	}
+
+	public UserEnvironmentTool(NodeService nodeService, String repositoryId, Map<String,String> authInfo) {
+		this(nodeService,  authInfo.get(CCConstants.AUTH_USERNAME));
 	}
 	
 	public String getDefaultUserDataFolder() throws Throwable{
@@ -103,7 +123,7 @@ public class UserEnvironmentTool {
 			throw new Exception("Admin group required");
 		}
 		String companyHomeNodeId = mcBaseClient.getCompanyHomeNodeId();
-		NodeRef edu_SharingSysMap = NodeServiceFactory.getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,companyHomeNodeId, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM);
+		NodeRef edu_SharingSysMap = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,companyHomeNodeId, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM);
 		
 		String result = null;
 		if(edu_SharingSysMap == null){
@@ -164,7 +184,7 @@ public class UserEnvironmentTool {
 		
 		String systemFolderName = I18nServer.getTranslationDefaultResourcebundle(CCConstants.I18n_SYSTEMFOLDER_NOTIFY);
 		systemFolderName = (currentScope == null || currentScope.trim().isEmpty()) ? systemFolderName: systemFolderName + "_" + currentScope;
-		NodeRef edu_SharingSystemFolderNotify = NodeServiceFactory.getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, systemFolderId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME,systemFolderName);
+		NodeRef edu_SharingSystemFolderNotify = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, systemFolderId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME,systemFolderName);
 		String result = null;
 		if(edu_SharingSystemFolderNotify == null){
 			
@@ -186,6 +206,9 @@ public class UserEnvironmentTool {
 	}
 	public String getEdu_SharingConfigFolder() throws Throwable {
 		return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_SERVICE, CCConstants.I18n_SYSTEMFOLDER_CONFIG);
+	}
+	public String getEdu_SharingMediacenterFolder() throws Throwable {
+		return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_MEDIACENTER, CCConstants.I18n_SYSTEMFOLDER_MEDIACENTER);
 	}
     public String getEdu_SharingServiceFolder() throws Throwable {
         return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_SERVICE, CCConstants.I18n_SYSTEMFOLDER_SERVICE);
@@ -292,7 +315,7 @@ public class UserEnvironmentTool {
 	 * @throws Throwable
 	 */
 	private String getMap(String parentId, String name, String mapType) throws Throwable{
-		NodeRef child = NodeServiceFactory.getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME,name);
+		NodeRef child = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME,name);
 		if(child == null){
 			HashMap<String,Object> props = new HashMap<String,Object>();
 			props.put(CCConstants.CM_NAME, name);

@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -21,7 +22,7 @@ public class PropertiesInterceptorFactory {
         synchronized (PropertiesInterceptorFactory.class) {
             try {
                 List<String> className = new ArrayList<>(LightbendConfigLoader.get().getStringList(key));
-                ArrayList<Class<?>> clazz = className.stream().map((String className1) -> {
+                ArrayList<Class<?>> clazz = (ArrayList<Class<?>>)className.stream().map((String className1) -> {
                     try {
                         return Class.forName(className1);
                     } catch (ClassNotFoundException e) {
@@ -82,11 +83,12 @@ public class PropertiesInterceptorFactory {
         propertiesSetInterceptors = null;
     }
 
-    public static PropertiesGetInterceptor.PropertiesContext getPropertiesContext(NodeRef nodeRef, Map<String,Object> properties, List<String> aspects, Map<String, Object> elasticsearchSource){
+    public static PropertiesGetInterceptor.PropertiesContext getPropertiesContext(NodeRef nodeRef, Map<String,Object> properties, List<String> aspects, HashMap<String, Boolean> permissions, Map<String, Object> elasticsearchSource){
         PropertiesGetInterceptor.PropertiesContext propertiesContext = new PropertiesGetInterceptor.PropertiesContext();
         propertiesContext.setProperties(properties);
         propertiesContext.setAspects(aspects);
         propertiesContext.setNodeRef(nodeRef);
+        propertiesContext.setPermissions(permissions);
         propertiesContext.setElasticsearchSource(elasticsearchSource);
         propertiesContext.setSource(CallSourceHelper.getCallSource());
         return propertiesContext;

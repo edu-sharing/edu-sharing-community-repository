@@ -10,8 +10,8 @@ import {
     DropTarget,
     NodeEntriesDisplayType,
     NodeRoot,
-} from 'src/app/features/node-entries/entries-model';
-import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
+} from '../../features/node-entries/entries-model';
+import { NodeDataSource } from '../../features/node-entries/node-data-source';
 import {
     ClipboardObject,
     ConfigurationService,
@@ -63,6 +63,7 @@ import { TranslationsService } from '../../translations/translations.service';
 import { WorkspaceExplorerComponent } from './explorer/explorer.component';
 import { WorkspaceTreeComponent } from './tree/tree.component';
 import { canDragDrop, canDropOnNode } from './workspace-utils';
+import { DialogsService } from '../../features/dialogs/dialogs.service';
 
 @Component({
     selector: 'es-workspace-main',
@@ -191,12 +192,13 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         private loadingScreen: LoadingScreenService,
         private mainNavService: MainNavService,
         private searchField: SearchFieldService,
+        private dialogs: DialogsService,
     ) {
         this.event.addListener(this, this.destroyed$);
         this.translations.waitForInit().subscribe(() => {
             void this.initialize();
         });
-        this.connector.setRoute(this.route);
+        this.connector.setRoute(this.route, this.router);
         this.globalProgress = true;
         this.cardHasOpenModals$ = this.card.hasOpenModals.pipe(delay(0));
     }
@@ -1058,7 +1060,8 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     }
 
     onDeleteNodes(nodes: Node[]): void {
-        this.mainNavService.getDialogs().nodeDelete = nodes;
+        this.dialogs.openDeleteNodesDialog({ nodes });
+        // this.mainNavService.getDialogs().nodeDelete = nodes;
     }
 }
 

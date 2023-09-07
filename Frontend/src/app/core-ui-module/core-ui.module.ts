@@ -27,7 +27,6 @@ import { VideoControlsComponent } from './components/video-controls/video-contro
 import { DistinctClickDirective } from './directives/distinct-click.directive';
 import { NodesDragSourceDirective } from './directives/drag-nodes/nodes-drag-source.directive';
 import { NodesDropTargetDirective } from './directives/drag-nodes/nodes-drop-target.directive';
-import { TitleDirective } from './directives/title.directive';
 import { NodeHelperService } from './node-helper.service';
 import { OptionsHelperService } from './options-helper.service';
 import { UrlPipe } from './pipes/url.pipe';
@@ -65,7 +64,6 @@ import { NodeEntriesModule } from '../features/node-entries/node-entries.module'
         ListOptionItemComponent,
         DistinctClickDirective,
         DurationPipe,
-        TitleDirective,
     ],
     imports: [
         NodeEntriesModule,
@@ -115,7 +113,6 @@ import { NodeEntriesModule } from '../features/node-entries/node-entries.module'
         UrlPipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
-        TitleDirective,
     ],
 })
 export class CoreUiModule {}

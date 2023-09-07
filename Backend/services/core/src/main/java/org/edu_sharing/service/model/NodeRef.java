@@ -23,6 +23,10 @@ public interface NodeRef {
 	interface Preview{
 		String getMimetype();
 		byte[] getData();
+
+		String getType();
+
+		Boolean getIcon();
 	}
 
 	public String getRepositoryId();

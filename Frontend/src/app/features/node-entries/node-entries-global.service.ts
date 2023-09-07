@@ -1,7 +1,7 @@
 import { Injectable, TemplateRef } from '@angular/core';
-import { ListItem, ListItemType } from '../../core-module/ui/list-item';
-import { Scope } from '../../core-ui-module/option-item';
 import { Node } from 'ngx-edu-sharing-api';
+import { ListItemType } from '../../core-module/ui/list-item';
+import { Scope } from '../../core-ui-module/option-item';
 
 export type CustomField = {
     type: ListItemType;
@@ -14,12 +14,12 @@ export enum CustomFieldSpecialType {
 export type CustomFieldInfo = {
     type: ListItemType;
     /**
-     * either the property name (i.e. "cm:name") or a special value
+     * Either the property name (i.e. "cm:name") or a special value.
      */
     name: string | CustomFieldSpecialType;
 
     /**
-     * custom callback which should return true if the template should be used for the given item
+     * Custom callback which should return true if the template should be used for the given item.
      */
     useCallback?: (node: Node) => boolean;
     templateRef: TemplateRef<unknown>;
@@ -69,8 +69,9 @@ export class NodeEntriesGlobalService {
     }
 
     /**
-     * register a custom (node) attribute you want to render via the given template
-     * You may also override existing attributes if you want to provide a custom view
+     * Registers a custom (node) attribute you want to render via the given template.
+     *
+     * You may also override existing attributes if you want to provide a custom view.
      */
     registerCustomFieldRendering(customFieldInfo: CustomFieldInfo) {
         this.customFields.push(customFieldInfo);

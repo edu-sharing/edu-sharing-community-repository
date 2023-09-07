@@ -282,7 +282,15 @@ public class NodeServiceHelper {
     public static HashMap<String, String[]> getPropertiesMultivalue(Map<String, ?> properties) {
         HashMap<String, String[]> propertiesMultivalue = new HashMap<>();
         if(properties!=null) {
-			properties.forEach((key, value) -> propertiesMultivalue.put(key, value==null ? null : ValueTool.getMultivalue(value.toString())));
+			properties.forEach((key, value) -> {
+				String[] result = value==null ? null : ValueTool.getMultivalue(value.toString());
+				if(value instanceof Collection) {
+					if(((Collection) value).size() > 0 && ((Collection) value).iterator().next() instanceof String) {
+						result = (String[]) ((Collection) value).toArray(new String[0]);
+					}
+				}
+				propertiesMultivalue.put(key, result);
+			});
 			return propertiesMultivalue;
 		}
         return null;

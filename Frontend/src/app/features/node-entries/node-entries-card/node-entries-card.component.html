@@ -35,73 +35,12 @@
   ></button>
   <div class="card-top-bar" [style.background-color]="isCollection ? node.collection.color : null">
     <div class="card-top-bar-collection-color" *ngIf="nodeHelper.isNodeCollection(node)"></div>
-    <div class="card-top-bar-type">
-      <ng-container *ngIf="isCollection">
-        <i
-          [matTooltip]="
-            'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName
-              | translate
-          "
-          [altText]="
-            'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName
-              | translate
-          "
-          [esIcon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"
-        ></i>
-      </ng-container>
-      <ng-container *ngIf="!isCollection">
-        <ng-container *ngTemplateOutlet="type; context: { node: this.node }"></ng-container>
-      </ng-container>
-    </div>
+    <es-node-type-badge [node]="node"></es-node-type-badge>
     <div *ngIf="isCollection && node.collection.pinned" class="card-top-bar-flag">
       <i esIcon="edu-pin"></i>
     </div>
     <div class="card-top-bar-empty"></div>
-    <!--
-    <div
-      *ngIf="node.aspects?.includes('ccm:published')"
-      class="card-top-bar-published-copy"
-    >
-      <div class="node-published-copy">
-        <i
-          esIcon="content_copy"
-          [matTooltip]="'PUBLISHED_COPY_TOOLTIP' | translate"
-        ></i>
-      </div>
-    </div>
-    -->
-    <div class="card-top-bar-comments">
-      <div
-        class="node-comments"
-        *ngIf="node.type === 'ccm:io'"
-        (click)="
-          entriesService.onClicked({
-            event: $event,
-            element: node,
-            source: ClickSource.Comments
-          })
-        "
-        [matTooltip]="('COMMENTS_MULTIPLE' | translate) + ': ' + node.commentCount"
-      >
-        <i esIcon="comment"></i>
-        <span>{{ node.commentCount }}</span>
-      </div>
-    </div>
-    <div
-      class="card-top-bar-childobjects"
-      *ngIf="node.properties?.['virtual:childobjectcount'] > 0"
-    >
-      <div
-        class="childobject-count"
-        matTooltip="{{
-          'CHILDOBJECT_COUNT'
-            | translate: { count: node.properties['virtual:childobjectcount'] * 1 + 1 }
-        }}"
-      >
-        <span>{{ node.properties['virtual:childobjectcount'] * 1 + 1 }}</span
-        ><i esIcon="filter_none"></i>
-      </div>
-    </div>
+    <es-node-stats-badges [node]="node"></es-node-stats-badges>
     <div class="card-top-bar-checkbox" *ngIf="entriesService.checkbox">
       <mat-checkbox
         [checked]="entriesService.selection.isSelected(node)"
@@ -224,25 +163,5 @@
         </ng-container>
       </div>
     </div>
-  </ng-template>
-  <ng-template #type let-node="node">
-    <ng-container *ngIf="getTemplate(CustomFieldSpecialType.type) as ref">
-      <ng-container *ngTemplateOutlet="ref; context: { node: this.node }"></ng-container>
-    </ng-container>
-    <ng-container *ngIf="!getTemplate(CustomFieldSpecialType.type)">
-      <img
-        [src]="node | esNodeIcon"
-        [alt]="
-          node.mediatype
-            ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
-            : ''
-        "
-        [matTooltip]="
-          node.mediatype
-            ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
-            : ''
-        "
-      />
-    </ng-container>
   </ng-template>
 </div>

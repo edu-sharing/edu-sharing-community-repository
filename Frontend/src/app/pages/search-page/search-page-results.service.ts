@@ -7,13 +7,20 @@ import {
     debounceTime,
     distinctUntilChanged,
     filter,
+    first,
     map,
     share,
     switchMap,
     takeUntil,
     tap,
 } from 'rxjs/operators';
-import { ListItem, ListItemSort, Node, RestConstants } from '../../core-module/core.module';
+import {
+    ListItem,
+    ListItemSort,
+    Node,
+    RestConstants,
+    RestSearchService,
+} from '../../core-module/core.module';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
 import { ListSortConfig } from '../../features/node-entries/entries-model';
 import {
@@ -23,11 +30,15 @@ import {
     NodeRequestParams,
 } from '../../features/node-entries/node-data-source-remote';
 import { notNull } from '../../util/functions';
+import { SearchPageRestoreService } from './search-page-restore.service';
 import { SearchPageService, SearchRequestParams } from './search-page.service';
+import { MdsWidgetType, Values } from '../../features/mds/types/types';
+import { Helper } from '../../core-module/rest/helper';
 
 export interface SearchPageResults {
     totalResults?: Observable<number>;
     loadingProgress: Observable<number>;
+    addNodes: (nodes: Node[]) => void;
 }
 
 @Injectable()
@@ -47,11 +58,13 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
 
     constructor(
         private _injector: Injector,
+        private _mds: MdsService,
         private _search: SearchService,
         private _searchPage: SearchPageService,
-        private _mds: MdsService,
+        private _searchPageRestore: SearchPageRestoreService,
         private _translate: TranslateService,
     ) {
+        this._registerPageRestore();
         this._registerSearchObservables();
         this._registerColumnsAndSortConfig();
         this._registerLoadingProgress();
@@ -60,6 +73,15 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
     ngOnDestroy(): void {
         this._destroyed.next();
         this._destroyed.complete();
+    }
+
+    addNodes(nodes: Node[]): void {
+        this.resultsDataSource.appendData(nodes, 'before');
+    }
+
+    private _registerPageRestore() {
+        this._searchPageRestore.registerDataSource('materials', this.resultsDataSource);
+        this._searchPageRestore.registerDataSource('collections', this.collectionsDataSource);
     }
 
     private _registerSearchObservables() {
@@ -77,9 +99,25 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
             .pipe(
                 takeUntil(this._destroyed),
                 tap(() => this.loadingParams.next(true)),
+                // Search filters and facets to fetch depend on the active repository and metadata
+                // set. Their values will be set to `null` while data is being determined after
+                // repository or metadata set changed. Give other components a tick to do this, so
+                // we don't prematurely send a search request with outdated data.
+                debounceTime(0),
                 filter(
                     ([repository, metadataSet, searchFilters]) =>
                         notNull(repository) && notNull(metadataSet) && notNull(searchFilters),
+                ),
+                // Wait until the filter bar's MDS instance has registered its needed facets for
+                // suggestions at the search service. We don't explicitly include the facets in the
+                // search request here to let the search service decide not to update the facets
+                // when not needed (e.g., when loading a new page). See comments on
+                // `MdsEditorWrapperComponent.registerLegacySuggestions` for further context.
+                switchMap((values) =>
+                    this._searchPage.facetsToFetch.pipe(
+                        first(notNull),
+                        map(() => values),
+                    ),
                 ),
                 tap(() => this.loadingParams.next(false)),
                 map(
@@ -103,11 +141,24 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
             distinctUntilChanged((x, y) => x.equals(y)),
         );
         searchRequestParams
-            .pipe(map((params) => this._getSearchRemote(params)))
+            .pipe(
+                tap(() => this.loadingContent.next(true)),
+                map((params) => this._getSearchRemote(params)),
+            )
             .subscribe((remote) => this.resultsDataSource.setRemote(remote));
+
         collectionRequestParams
-            .pipe(map((params) => this._getCollectionsSearchRemote(params)))
+            .pipe(
+                tap(() => this.loadingCollections.next(true)),
+                map((params) => this._getCollectionsSearchRemote(params)),
+            )
             .subscribe((remote) => this.collectionsDataSource.setRemote(remote));
+        this.resultsDataSource.isLoadingSubject.subscribe((isLoading) =>
+            this.loadingContent.next(!!isLoading),
+        );
+        this.collectionsDataSource.isLoadingSubject.subscribe((isLoading) =>
+            this.loadingCollections.next(!!isLoading),
+        );
     }
 
     private _registerColumnsAndSortConfig(): void {
@@ -147,9 +198,7 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
 
     private _getSearchRemote(params: SearchRequestParams): NodeRemote<Node> {
         // console.log('%cgetSearchRemote', 'font-weight: bold', params);
-        this.loadingContent.next(true);
         return (request: NodeRequestParams) => {
-            this.loadingContent.next(true);
             // console.log('search', request);
             return this._search
                 .search({
@@ -172,8 +221,15 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
                     propertyFilter: [RestConstants.ALL],
                 })
                 .pipe(
+                    tap((r) => {
+                        if (r.pagination.total < r.pagination.count) {
+                            console.warn(
+                                'Total count of items is smaller than total, results might be truncated, check pagination results of api',
+                                r.pagination,
+                            );
+                        }
+                    }),
                     map(fromSearchResults),
-                    tap(() => this.loadingContent.next(false)),
                 );
         };
     }
@@ -182,14 +238,16 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
         const repository = this._searchPage.availableRepositories.value.find(
             ({ id }) => id === params.repository,
         );
-        // We cannot show collections for another repository.
-        if (!repository.isHomeRepo) {
+        if (
+            // We cannot show collections for another repository.
+            !repository.isHomeRepo ||
+            // We don't show other collections when searching for material to add to a collection.
+            this._searchPage.addToCollectionMode.value
+        ) {
             this.loadingCollections.next(false);
             return () => rxjs.of({ data: [], total: 0 });
         }
-        this.loadingCollections.next(true);
         return (request: NodeRequestParams) => {
-            this.loadingCollections.next(true);
             return this._search
                 .requestSearch({
                     body: {
@@ -212,17 +270,15 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
                     query: RestConstants.QUERY_NAME_COLLECTIONS,
                     propertyFilter: [RestConstants.ALL],
                 })
-                .pipe(
-                    map(fromSearchResults),
-                    tap(() => this.loadingCollections.next(false)),
-                );
+                .pipe(map(fromSearchResults));
         };
     }
 
     private _getSearchCriteria(params: SearchRequestParams): MdsQueryCriteria[] {
-        const criteria: MdsQueryCriteria[] = Object.entries(params.searchFilters ?? {}).map(
+        let criteria: MdsQueryCriteria[] = Object.entries(params.searchFilters ?? {}).map(
             ([property, values]) => ({ property, values }),
         );
+        this.convertCriteria(criteria);
         if (params.searchString) {
             criteria.push({ property: 'ngsearchword', values: [params.searchString] });
         }
@@ -244,5 +300,36 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
                 // tap((progress) => console.log('progress', progress)),
             )
             .subscribe((progress) => this.loadingProgress.next(progress));
+    }
+
+    // TODO: Port `unfoldTrees` methods from 8.0. See
+    // https://scm.edu-sharing.com/edu-sharing/community/repository/edu-sharing-angular-core-module/-/blob/5447ea837a99a3dab04395c10464dd417ddb73a1/rest/services/rest-search.service.ts#L34.
+    // Also consider a backend solution.
+    private convertCriteria(criteria: MdsQueryCriteria[]): void {
+        for (const c of criteria) {
+            // We get the widget definition from the MDS editor instance, so overrides with `data-`
+            // attributes in the MDS template are reflected.
+            const widget = this._searchPage.filtersMdsWidgets.value?.find(
+                (widget) => widget.definition.id === c.property,
+            )?.definition;
+            if (widget?.type === MdsWidgetType.MultiValueTree) {
+                // For multi-value-tree widgets, add all child values of selected values to the
+                // search criteria.
+                let attach = RestSearchService.unfoldTreeChilds(c.values, widget);
+                if (attach) {
+                    if (attach.length > RestSearchService.MAX_QUERY_CONCAT_PARAMS) {
+                        console.info(
+                            'param ' +
+                                c.property +
+                                ' has too many unfold childs (' +
+                                attach.length +
+                                '), falling back to basic prefix-based search',
+                        );
+                    } else {
+                        c.values = c.values.concat(attach);
+                    }
+                }
+            }
+        }
     }
 }

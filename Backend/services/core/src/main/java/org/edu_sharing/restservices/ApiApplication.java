@@ -3,8 +3,6 @@ package org.edu_sharing.restservices;
 import io.swagger.v3.jaxrs2.SwaggerSerializers;
 import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder;
 
-import javax.ws.rs.ApplicationPath;
-
 
 import io.swagger.v3.oas.integration.OpenApiConfigurationException;
 import io.swagger.v3.oas.integration.SwaggerConfiguration;
@@ -12,10 +10,17 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.restservices.about.v1.model.AboutService;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,35 +30,15 @@ public class ApiApplication extends ResourceConfig {
 	public static final int MAJOR = 1;
 	public static final int MINOR = 1;
 	
-	public static final Class<?>[] SERVICES = new Class<?>[] {
-		org.edu_sharing.restservices.about.v1.AboutApi.class,
-		org.edu_sharing.restservices.admin.v1.AdminApi.class,
-		org.edu_sharing.restservices.bulk.v1.BulkApi.class,
-		org.edu_sharing.restservices.collection.v1.CollectionApi.class,
-		org.edu_sharing.restservices.comment.v1.CommentApi.class,
-		org.edu_sharing.restservices.rating.v1.RatingApi.class,
-		org.edu_sharing.restservices.config.v1.ConfigApi.class,
-		org.edu_sharing.restservices.iam.v1.IamApi.class,
-//		org.edu_sharing.restservices.knowledge.v1.KnowledgeApi.class,
-		org.edu_sharing.restservices.login.v1.LoginApi.class,
-		org.edu_sharing.restservices.mds.v1.MdsApi.class,
-		org.edu_sharing.restservices.mediacenter.v1.MediacenterApi.class,
-		org.edu_sharing.restservices.network.v1.NetworkApi.class,
-		org.edu_sharing.restservices.node.v1.NodeApi.class,
-		org.edu_sharing.restservices.organization.v1.OrganizationApi.class,
-		org.edu_sharing.restservices.search.v1.SearchApi.class,
-		org.edu_sharing.restservices.usage.v1.UsageApi.class,
-		org.edu_sharing.restservices.rendering.v1.RenderingApi.class,
-		org.edu_sharing.restservices.statistic.v1.StatisticApi.class,
-		org.edu_sharing.restservices.tracking.v1.TrackingApi.class,
-		org.edu_sharing.restservices.archive.v1.ArchiveApi.class,
-		org.edu_sharing.restservices.clientutils.v1.ClientUtilsApi.class,
-		org.edu_sharing.restservices.tool.v1.ToolApi.class,
-		org.edu_sharing.restservices.register.v1.RegisterApi.class,
-		org.edu_sharing.restservices.sharing.v1.SharingApi.class,
-		org.edu_sharing.restservices.lti.v13.LTIApi.class,
-		org.edu_sharing.restservices.ltiplatform.v13.LTIPlatformApi.class
-	};
+	public static final Set<Class<?>> SERVICES;
+	static {
+		Map<String, AboutService> services = new HashMap<String, AboutService>();
+		ClassPathScanningCandidateComponentProvider scanner =
+				new ClassPathScanningCandidateComponentProvider(false);
+		scanner.addIncludeFilter(new AnnotationTypeFilter(ApiService.class));
+		Set<BeanDefinition> annotated = scanner.findCandidateComponents("org.edu_sharing.restservices");
+		SERVICES = annotated.stream().map(BeanDefinition::getClass).collect(Collectors.toSet());
+	}
 	
 	public ApiApplication() {
 

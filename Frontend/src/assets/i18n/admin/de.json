@@ -229,7 +229,7 @@
         },
         "MAIL_REPORT": {
           "TITLE": "Problem-Melden Funktion",
-          "STATUS_OK": "Die Funktion ist aktiv, eingehende Anfragen werden an die Adresse {{receiver}} versendet.",
+          "STATUS_OK": "Die Funktion ist aktiv, eingehende Anfragen werden an die Adresse {{receivers}} versendet.",
           "STATUS_FAIL": "Die Funktion ist aktiv, aber die Konfiguration ist ungültig.",
           "SOLUTION": "Wechseln Sie in den Bereich \"Globale Systemkonfiguration\" und ergänzen Sie in der edu-sharing Konfiguration den Empfänger im Mail-Abschnitt"
         },
@@ -398,6 +398,7 @@
       "LOG_LEVEL_4": "Warning",
       "LOG_LEVEL_3": "Error",
       "LOG_LEVEL_0": "Fatal",
+      "LOG_CLUSTER_NOT_SUPPORTED": "Dieser Job wird/wurde auf einem anderen Cluster-Knoten ausgeführt. Die Logs werden nicht im Cluster verteilt. Bitte prüfen Sie die Logs auf dem jeweiligen Server.",
       "UPLOAD_FILE_LABEL": "Datei für Job bereitstellen",
       "CHOOSE_UPLOAD_FILE": "Datei wählen",
       "PARAMETERS": "Job-Parameter",
@@ -455,6 +456,12 @@
       "EXPORT_PROPERTIES_HINT": "z.B.: cm:name, cclom:title, cclom:general_keyword",
       "GROUP_TEMPLATE_LABEL": "Vorlage auswählen",
       "GROUPS_ADVANCED": "Erweiterte Optionen",
+      "UNKNOWN_VALUE": "<Sonstige>",
+      "ARCHIVED": "Archiviert",
+      "ARCHIVED_INFO": "Sie können in diesem Bereich archivierte, aggregierte Statistiken für einen vergangenen Zeitraum als CSV-Datensatz herunterladen. Klicken Sie auf die Datei des gewünschten Zeitraums, um Sie herunterzuladen.",
+      "ARCHIVED_EMPTY": "Es existieren noch keine archivierten Statistiken",
+      "SLICE_INFO": "Die vorstehende Liste ist eine Vorschau und enthält ggf. nur einen Teil der Ergebnisse.",
+      "SLICE_INFO_DOWNLOAD": "Die vorstehende Liste ist eine Vorschau und enthält ggf. nur einen Teil der Ergebnisse. Wählen Sie die Export bzw. Download-Funktion, um alle Ergebnisse zu erhalten.",
       "GROUP_TEMPLATE": {
         "group_organization": "Zugriffe aufgeteilt nach Organisation der Nutzenden",
         "group_mediacenter": "Zugriffe aufgeteilt nach Medienzentrum der Nutzenden",
@@ -533,7 +540,9 @@
       "NODES": {
         "TITLE": "Medien",
         "SEARCHWORD": "Name/Id des Mediums",
-        "FILTER": "Medien filtern"
+        "FILTER": "Medien filtern",
+        "CSV_EXPORT": "Als CSV herunterladen",
+        "CSV_FILENAME": "Medienliste"
       },
       "STATISTICS": {
         "TITLE": "Statistiken"
@@ -621,8 +630,8 @@
       "SAVE": "Speichern",
       "REMOVE_TITLE": "Token löschen?",
       "REMOVE_MESSAGE": "Möchten Sie das Token mit der URL \"{{url}}\" wirklich löschen?\n\nBestehende Verlinkungen werden dadurch möglicherweise unbrauchbar.",
-      "DYNAMIC_INFO": "Mit Hilfe der dynamischen LTI-Registrierung können andere, LTI-Kompatible Systeme, einfach mit edu-sharing verbunden werden. Durch Klick auf \"Token hinzufügen\" können Sie einen Token generieren.\n\nFügen Sie diesen anschließend in ihr LTI-Kompatibles System (z.B. Moodle) ein. Anschließend wird das externe System automatisch an edu-sharing angebunden.",
-      "MANUAL_INFO": "Sollte ihr LTI-Kompatibles System die dynamische Registrierung nicht unterstützen oder diese nicht funktionieren, können Sie die manuelle Registrierung unten nutzen.\n\nNach Klick auf \"Speichern\" wird mit den gegebenen Daten eine Anbindung vorbereitet.",
+      "DYNAMIC_INFO": "Mit Hilfe der dynamischen LTI-Registrierung können andere, LTI-Kompatible Plattformen, einfach mit edu-sharing verbunden werden. Durch Klick auf \"Token hinzufügen\" können Sie einen Token generieren.\n\nFügen Sie diesen anschließend in ihr LTI-Kompatibles System (z.B. Moodle) ein. Anschließend wird das externe System automatisch an edu-sharing angebunden.",
+      "MANUAL_INFO": "Sollte ihre LTI-Kompatible Plattform die dynamische Registrierung nicht unterstützen oder diese nicht funktionieren, können Sie die manuelle Registrierung unten nutzen.\n\nNach Klick auf \"Speichern\" wird mit den gegebenen Daten eine Anbindung vorbereitet.",
       "EXPIRED": "Abgelaufen",
       "DATA": {
         "platformId": "Platform Id",
@@ -633,6 +642,20 @@
         "key_id": "Key id",
         "auth_token_url": "Auth Token Url",
         "CREATED": "Plattform wurde angebunden"
+      }
+    },
+    "LTITOOL": {
+      "HEADER": "LTI Tool Registrierung",
+      "REGISTER": "Registrierung starten",
+      "DYNAMIC_URL": "Url des Tools für die dynamische Registrierung",
+      "DYNAMIC_INFO": "Mit Hilfe der dynamischen LTI-Registrierung können LTI Tools einfach mit edu-sharing verbunden werden. \n Ermitteln Sie die Url für die dynamische Registrierung des Tools und fügen Sie diese in das feld \"Url des Tools für die dynamische Registrierung\" ein. Durch klick auf \"Registrierung starten\" wird das externe Tool automatisch an edu-sharing angebunden.",
+      "MANUAL_INFO": "Sollte ihr LTI-Kompatibles Tool die dynamische Registrierung nicht unterstützen oder diese nicht funktionieren, können Sie die manuelle Registrierung nutzen.\n\nNach Klick auf \"Speichern\" wird mit den gegebenen Daten eine Anbindung vorbereitet.",
+      "DATA": {
+        "loginInitiationUrl": "Login Initiation (oidc) Url",
+        "redirectionUrls": "Redirection Url's",
+        "targetLinkUri": "Target Link Url",
+        "keysetUrl": "Keyset Url",
+        "clientName": "Tool Bezeichnung"
       }
     }
   },
@@ -766,7 +789,6 @@
   "NO_PERMISSIONS_FOR_SCOPE": "Keine Berechtigungen, um diesen Bereich anzuzeigen",
   "DATE_SELECT_YEAR": "Jahr wählen",
   "SEARCH_CLEAR": "Löschen",
-  "TOGGLE_SEARCH_FILTERS": "Toggle search filters",
   "DATE_CLEAR": "Löschen",
   "USER_TUTORIAL_HEADING": "Dein Profil",
   "USER_TUTORIAL_DESCRIPTION": "Hier können Sie ein eigenes Profilbild angeben und zeigen, wer Sie sind und was Sie tun. Sie entscheiden, was Andere sehen können.",

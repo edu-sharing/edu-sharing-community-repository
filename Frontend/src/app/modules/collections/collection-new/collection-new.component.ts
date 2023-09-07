@@ -372,6 +372,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         this.mainNav.setMainNavConfig({
             title: 'COLLECTIONS.TITLE',
             currentScope: 'collections',
+            additionalScope: 'edit',
         });
     }
 
@@ -712,7 +713,9 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     navigateToCollectionId(id: string): void {
         this.isLoading = false;
         UIHelper.getCommonParameters(this.route).subscribe((params) => {
-            params.id = id;
+            if (id !== RestConstants.ROOT) {
+                params.id = id;
+            }
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'collections'], {
                 queryParams: params,
             });

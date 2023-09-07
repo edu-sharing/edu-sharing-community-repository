@@ -12,15 +12,14 @@ import {
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, fromEvent, ReplaySubject } from 'rxjs';
-import { filter, startWith, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { startWith } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsWidgetType } from '../../../types/types';
 import { DisplayValue } from '../DisplayValues';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { MdsEditorWidgetTreeCoreComponent } from './mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
 import { Tree } from './tree';
-import { FocusOrigin } from '@angular/cdk/a11y';
 import { MatChip } from '@angular/material/chips';
 import { UIService } from '../../../../../core-module/rest/services/ui.service';
 import { MatButton } from '@angular/material/button';
@@ -85,7 +84,8 @@ export class MdsEditorWidgetTreeComponent
         super(mdsEditorInstance, translate);
     }
 
-    ngOnInit(): void {
+    async ngOnInit() {
+        this.chipsControl = new FormControl(null, this.getStandardValidators());
         if (this.widget.definition.type === MdsWidgetType.SingleValueTree) {
             this.valueType = ValueType.String;
         } else if (this.widget.definition.type === MdsWidgetType.MultiValueTree) {
@@ -95,18 +95,18 @@ export class MdsEditorWidgetTreeComponent
         }
         this.tree = Tree.generateTree(
             this.widget.definition.values,
-            this.widget.getInitialValues()?.jointValues ?? [],
-            this.widget.getInitialValues()?.individualValues,
+            (await this.widget.getInitalValuesAsync()).jointValues ?? [],
+            (await this.widget.getInitalValuesAsync()).individualValues,
         );
         this.chipsControl = new FormControl(
             [
-                ...(this.widget.getInitialValues()?.jointValues ?? []),
-                ...(this.widget.getInitialValues()?.individualValues ?? []),
+                ...((await this.widget.getInitalValuesAsync()).jointValues ?? []),
+                ...((await this.widget.getInitalValuesAsync()).individualValues ?? []),
             ].map((value) => this.tree.idToDisplayValue(value)),
             this.getStandardValidators(),
         );
         this.indeterminateValues$ = new BehaviorSubject(
-            this.widget.getInitialValues()?.individualValues,
+            (await this.widget.getInitalValuesAsync()).individualValues,
         );
         this.chipsControl.valueChanges.subscribe((values: DisplayValue[]) => {
             this.setValue(values.map((value) => value.key));
@@ -173,6 +173,7 @@ export class MdsEditorWidgetTreeComponent
         }
         this.overlayIsVisible = false;
         this.openButtonRef.focus();
+        this.onBlur.emit();
     }
 
     onOverlayKeydown(event: KeyboardEvent) {
@@ -212,5 +213,12 @@ export class MdsEditorWidgetTreeComponent
     onValuesChange(values: DisplayValue[]): void {
         this.chipsControl.setValue(values);
         this.changeDetectorRef.detectChanges();
+    }
+
+    blur(event: FocusEvent) {
+        if (event.relatedTarget === this.treeRef.input.nativeElement) {
+            return;
+        }
+        this.onBlur.emit();
     }
 }

@@ -82,6 +82,12 @@
 		</templates>
 		<groups>
 			<group>
+				<id>search_input</id>
+				<rendering>angular</rendering>
+				<views>
+				</views>
+			</group>
+			<group>
 				<id>ngsearch</id>
 				<rendering>angular</rendering>
 				<views>

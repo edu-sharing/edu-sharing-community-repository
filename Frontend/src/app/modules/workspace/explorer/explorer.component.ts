@@ -38,21 +38,23 @@ import {
     NodeClickEvent,
     NodeEntriesDisplayType,
     NodeRoot,
-} from 'src/app/features/node-entries/entries-model';
-import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';
-import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
-import { NodeEntriesDataType } from 'src/app/features/node-entries/node-entries.component';
+} from '../../../features/node-entries/entries-model';
+import { NodeEntriesWrapperComponent } from '../../../features/node-entries/node-entries-wrapper.component';
+import { NodeDataSource } from '../../../features/node-entries/node-data-source';
+import { NodeEntriesDataType } from '../../../features/node-entries/node-entries.component';
 import { canDropOnNode } from '../workspace-utils';
-import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import {
     catchError,
     debounceTime,
     distinctUntilChanged,
     retryWhen,
     switchMap,
+    takeUntil,
     tap,
 } from 'rxjs/operators';
 import { WorkspaceTreeComponent } from '../tree/tree.component';
+import { LocalEventsService } from '../../../services/local-events.service';
 
 @Component({
     selector: 'es-workspace-explorer',
@@ -167,7 +169,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
 
     public columns: ListItem[] = [];
     @Input() displayType = NodeEntriesDisplayType.Table;
-    @Input() tree: WorkspaceTreeComponent;
+    @Output() refreshTree = new EventEmitter<void>();
     @Output() displayTypeChange = new EventEmitter<NodeEntriesDisplayType>();
     @Input() reorderDialog = false;
     @Output() reorderDialogChange = new EventEmitter<boolean>();
@@ -210,6 +212,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     @Output() onDrop = new EventEmitter<{ target: DropTarget; source: DropSource<Node> }>();
     @Output() onReset = new EventEmitter();
     private path: Node[];
+    private destroyed = new Subject<void>();
     searchGlobal() {
         this.onSearchGlobal.emit(this.searchQuery$.value);
     }
@@ -265,7 +268,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             count: event?.amount,
         };
         if (this.searchQuery$.value) {
-            const query = '*' + this.searchQuery$.value + '*';
+            const query = this.searchQuery$.value;
             this.lastRequestSearch = true;
             /*this.search.searchByProperties([RestConstants.NODE_ID,RestConstants.CM_PROP_TITLE,RestConstants.CM_NAME,RestConstants.LOM_PROP_DESCRIPTION,RestConstants.LOM_PROP_GENERAL_KEYWORD],
               [query,query,query,query,query],[],RestConstants.COMBINE_MODE_OR,RestConstants.CONTENT_TYPE_FILES_AND_FOLDERS, request).subscribe((data : NodeList) => this.addNodes(data,true));*/
@@ -303,6 +306,8 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     }
 
     ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
         this.temporaryStorage.set(
             TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE,
             this.dataSource,
@@ -339,9 +344,11 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         private toast: Toast,
         public ui: UIService,
         private nodeApi: RestNodeService,
+        private localEvents: LocalEventsService,
     ) {
         // super(temporaryStorage,['_node','_nodes','sortBy','sortAscending','columns','totalCount','hasMoreToLoad']);
         this.initColumns();
+        this.registerNodesDeleted();
         combineLatest([this.node$, this.searchQuery$])
             .pipe(
                 distinctUntilChanged((a, b) => {
@@ -483,12 +490,11 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         });
     }
 
-    onDelete(nodes: Node[]): void {
-        this.dataSource.removeData(nodes);
-        this.nodeEntries?.getSelection().clear();
-        if (nodes.filter((n) => n.isDirectory).length && this.tree) {
-            this.tree.refresh();
-        }
+    private registerNodesDeleted(): void {
+        this.localEvents.nodesDeleted.pipe(takeUntil(this.destroyed)).subscribe((nodes) => {
+            this.dataSource.removeData(nodes);
+            this.nodeEntries?.getSelection().clear();
+        });
     }
 
     saveColumns(columns: ListItem[]) {
@@ -503,9 +509,9 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         }
     }
 
-    syncTreeView(nodes: Node[]) {
-        if (nodes.filter((n) => n.virtual && n.isDirectory).length && this.tree) {
-            this.tree.refresh();
+    syncTreeViewOnAdd(nodes: Node[]) {
+        if (nodes.filter((n) => n.virtual && n.isDirectory).length) {
+            this.refreshTree.emit();
         }
     }
 }

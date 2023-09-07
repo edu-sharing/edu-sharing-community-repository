@@ -73,7 +73,11 @@
       (scroll)="updateScrollState()"
       (scrolled)="!visibleItemsLimited && loadData('scroll')"
     >
-      <ng-container *ngTemplateOutlet="globalOptions"></ng-container>
+      <es-node-entries-global-options
+        *ngIf="entriesService.globalOptions?.length"
+        [displayType]="displayType"
+      >
+      </es-node-entries-global-options>
       <ng-container *ngIf="nodes$ | async as nodes">
         <div
           class="card-grid-drag-wrapper"
@@ -84,44 +88,51 @@
           (nodeDropped)="onNodesDropped($event)"
           #dropTarget="esNodesDropTarget"
         >
-          <es-node-entries-card
-            *ngIf="displayType === NodeEntriesDisplayType.Grid"
-            #item
-            [node]="node"
-            [dropdown]="dropdown"
-            role="listitem"
-            cdkDrag
-            [cdkDragDisabled]="!getDragEnabled()"
-            [cdkDragData]="getDragData(node)"
-            esNodesDrag
-            (cdkDragStarted)="onDragStarted(node)"
-            (cdkDragEnded)="onDragEnded()"
-            [class.selected-when-dragging]="isDragging && entriesService.selection.isSelected(node)"
-          >
-            <ng-container *ngIf="entriesService.selection.selected.length > 1">
-              <es-node-entries-card
-                *cdkDragPreview
-                [node]="node"
-                [matBadge]="
-                  entriesService.selection.selected.length > 1
-                    ? entriesService.selection.selected.length
-                    : null
-                "
-                class="card-drag-preview"
-              ></es-node-entries-card>
-            </ng-container>
-          </es-node-entries-card>
-          <es-node-entries-card-small
-            *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
-            #item
-            [node]="node"
-            role="listitem"
-            cdkDrag
-            [cdkDragDisabled]="!getDragEnabled()"
-            [cdkDragData]="[node]"
-            esNodesDrag
-          >
-          </es-node-entries-card-small>
+          <ng-container *ngIf="isCustomTemplate()">
+            <ng-container *ngTemplateOutlet="$any(node)"></ng-container>
+          </ng-container>
+          <ng-container *ngIf="!isCustomTemplate()">
+            <es-node-entries-card
+              *ngIf="displayType === NodeEntriesDisplayType.Grid"
+              #item
+              [node]="node"
+              [dropdown]="dropdown"
+              role="listitem"
+              cdkDrag
+              [cdkDragDisabled]="!getDragEnabled()"
+              [cdkDragData]="getDragData(node)"
+              esNodesDrag
+              (cdkDragStarted)="onDragStarted(node)"
+              (cdkDragEnded)="onDragEnded()"
+              [class.selected-when-dragging]="
+                isDragging && entriesService.selection.isSelected(node)
+              "
+            >
+              <ng-container *ngIf="entriesService.selection.selected.length > 1">
+                <es-node-entries-card
+                  *cdkDragPreview
+                  [node]="node"
+                  [matBadge]="
+                    entriesService.selection.selected.length > 1
+                      ? entriesService.selection.selected.length
+                      : null
+                  "
+                  class="card-drag-preview"
+                ></es-node-entries-card>
+              </ng-container>
+            </es-node-entries-card>
+            <es-node-entries-card-small
+              *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
+              #item
+              [node]="node"
+              role="listitem"
+              cdkDrag
+              [cdkDragDisabled]="!getDragEnabled()"
+              [cdkDragData]="[node]"
+              esNodesDrag
+            >
+            </es-node-entries-card-small>
+          </ng-container>
           <div
             *ngIf="dropTarget.active?.canDrop?.denyExplicit"
             class="card-grid-drop-blocked-container"
@@ -167,32 +178,6 @@
 
 <ng-template #loading>
   <es-spinner></es-spinner>
-</ng-template>
-<ng-template #globalOptions>
-  <div
-    *ngIf="entriesService.globalOptions?.length"
-    role="listitem"
-    class="global-options"
-    [class.global-options-small]="displayType === NodeEntriesDisplayType.SmallGrid"
-  >
-    <button
-      mat-button
-      *ngFor="let option of entriesService.globalOptions"
-      (click)="option.callback()"
-      class="global-option-btn"
-      attr.data-test="card-button-{{ option.name }}"
-    >
-      <ng-container
-        *ngTemplateOutlet="globalOption; context: { option: this.option }"
-      ></ng-container>
-    </button>
-  </div>
-</ng-template>
-<ng-template #globalOption let-option="option">
-  <span class="global-option">
-    <i [esIcon]="option.icon"></i>
-    <span class="label">{{ option.name | translate }}</span>
-  </span>
 </ng-template>
 <ng-template #scrollHelper>
   <ng-container *ngIf="layout === 'scroll'">

@@ -1,4 +1,5 @@
 <es-mds-editor-widget-container
+  *ngIf="currentValue"
   [widget]="widget"
   [label]="widget.definition.caption"
   [valueType]="valueType"

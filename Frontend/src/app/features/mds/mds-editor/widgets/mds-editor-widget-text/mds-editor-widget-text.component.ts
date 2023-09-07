@@ -28,8 +28,9 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
         super(mdsEditorInstance, translate);
     }
 
-    ngOnInit(): void {
-        let initialValue = this.getInitialValue();
+    async ngOnInit() {
+        this.formControl = new FormControl(null, this.getValidators());
+        let initialValue = (await this.widget.getInitalValuesAsync()).jointValues;
         if (this.widget.definition.type === 'date') {
             initialValue = initialValue.map((v) => DateHelper.formatDateByPattern(v, 'y-M-d'));
         }
@@ -83,7 +84,7 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
 
     showBulkMixedValues() {
         return (
-            this.widget.getInitialValues().individualValues &&
+            this.widget.getInitialValues()?.individualValues &&
             this.mdsEditorInstance.editorBulkMode?.isBulk &&
             this.widget.getBulkMode() === 'no-change'
         );

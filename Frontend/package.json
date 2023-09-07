@@ -8,6 +8,7 @@
     "start": "ng serve",
     "start-public": "ng serve --host 0.0.0.0 --disable-host-check",
     "start:app-as-web-component-example": "http-server projects/app-as-web-component/example --proxy 'http://repository.127.0.0.1.nip.io:8100' & ng build app-as-web-component --configuration development --output-hashing none --watch",
+    "serve-dist": "node scripts/server.js",
     "build:edu-sharing-api": "(cd projects/edu-sharing-api && npm run update-if-needed) && node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build edu-sharing-api",
     "build:edu-sharing-api:dev": "(cd projects/edu-sharing-api && npm run update-if-needed) && node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build edu-sharing-api --configuration development",
     "publish:edu-sharing-api": "npm run build:edu-sharing-api && cd dist/edu-sharing-api && npm publish",
@@ -36,6 +37,9 @@
     "prepare": "cd .. && husky install Frontend/.husky && cd Frontend/src/app/core-module && git config core.hooksPath ../../../.husky || true"
   },
   "private": false,
+  "subPackages": [
+    "src/app/extension"
+  ],
   "dependencies": {
     "@angular-slider/ngx-slider": "^2.0.3",
     "@angular/animations": "~13.3.12",
@@ -56,10 +60,10 @@
     "chart.js": "^2.7.2",
     "core-js": "^3.6.4",
     "edu-sharing-extension-dependencies": "file:src/app/extension",
-    "jquery": "^3.4.1",
+    "jquery": "^3.6.2",
     "material-design-icons": "^3.0.1",
     "materialize-css": "^1.0.0",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "ng-lazyload-image": "^7.0.1",
     "ngx-monaco-editor": "^8.1.1",
     "rxjs": "^6.5.4",

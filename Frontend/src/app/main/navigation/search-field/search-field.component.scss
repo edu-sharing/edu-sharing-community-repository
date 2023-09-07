@@ -20,6 +20,8 @@
     .mat-form-field-infix {
         padding: 0;
         border: none;
+        width: auto;
+        min-width: auto;
     }
 }
 
@@ -89,7 +91,7 @@ mat-form-field {
     flex: 1 0 0;
     display: flex;
     align-items: center;
-    min-width: 120px;
+    min-width: 100px;
     padding-left: 16px;
 }
 

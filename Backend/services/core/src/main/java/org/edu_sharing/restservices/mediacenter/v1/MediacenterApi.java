@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
@@ -22,6 +23,9 @@ import org.edu_sharing.restservices.search.v1.model.SearchParameters;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
+import org.edu_sharing.service.mediacenter.MediacenterServiceImpl;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -33,9 +37,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.io.Serializable;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Path("/mediacenter/v1")
@@ -217,16 +220,11 @@ public class MediacenterApi {
 			searchToken.setFrom(skipCount != null ? skipCount : 0);
 			searchToken.setMaxResult(maxItems!= null ? maxItems : 10);
 
-			if(!sortProperties.isEmpty() && sortProperties.get(0).equals("ccm:mediacenter")){
-				sortProperties.set(0,"ccm:mediacenter_sort."+mediacenter+".activated.keyword");
-			}
+			checkMediacenterSortProperty(sortProperties, mediacenter);
 
 			searchToken.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
 
-			String authorityScope = MediacenterServiceFactory.getLocalService().getMediacenterAdminGroup(mediacenter);
-			if(authorityScope == null){
-				throw new Exception("No mediacenter admin group found.");
-			}
+			String authorityScope = MediacenterServiceImpl.getAuthorityScope(mediacenter);
 
 			searchToken.setAuthorityScope(Arrays.asList(new String[] {authorityScope}));
 			MdsDao mdsDao = MdsDao.getMds(repoDao, MdsDao.DEFAULT);
@@ -287,9 +285,89 @@ public class MediacenterApi {
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}
-
 	}
-	
+
+	@POST
+	@Path("/mediacenter/{repository}/{mediacenter}/licenses/export")
+	@Operation(summary = "get nodes that are licensed by the given mediacenter",  description = "e.g. cm:name")
+	@ApiResponses(
+			value = {
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Map[].class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+			})
+	public Response exportMediacenterLicensedNodes(
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+			@Parameter(description = "properties to fetch, use parent::<property> to include parent property values") @QueryParam("properties") List<String> properties,
+			@Parameter(description = "authorityName of the mediacenter that licenses nodes",required=true) @PathParam("mediacenter") String mediacenter,
+			@Parameter(description = "search parameters", required = true) SearchParameters parameters,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			checkMediacenterSortProperty(sortProperties, mediacenter);
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			MdsDao mdsDao = MdsDao.getMds(repoDao, MdsDao.DEFAULT);
+
+			List<Map<String, Serializable>> data = new ArrayList<>();
+			boolean hasMore = true;
+			int pageSize = 1000;
+			int page = 0;
+
+			do {
+				SearchToken searchToken = new SearchToken();
+				searchToken.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
+				searchToken.setAuthorityScope(Collections.singletonList(MediacenterServiceImpl.getAuthorityScope(mediacenter)));
+				searchToken.setFacets(new ArrayList<>());
+				searchToken.setFrom(page);
+				searchToken.setMaxResult(pageSize);
+
+				NodeSearch search = NodeDao.search(repoDao, mdsDao, "mediacenter_filter", parameters.getCriteria(), searchToken, Filter.createShowAllFilter());
+				logger.info("page: "+ page +" count:"+search.getCount() +" t:"+Thread.currentThread().getId());
+				page = page + pageSize;
+				if((search.getCount() - 1) <= page){
+					hasMore = false;
+				}
+
+				for (org.edu_sharing.restservices.shared.NodeRef ref : search.getResult()) {
+					org.alfresco.service.cmr.repository.NodeRef alfRef=new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ref.getId());
+					Map<String, Serializable> props=new HashMap<>();
+					for(String prop : properties){
+						if(prop.startsWith("parent::")){
+							String parentId = NodeServiceFactory.getLocalService().getPrimaryParent(ref.getId());
+							String realProp=prop.substring("parent::".length());
+							props.put(prop, NodeServiceHelper.getPropertyNative(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentId),CCConstants.getValidGlobalName(realProp)));
+						}
+						else{
+							props.put(prop, NodeServiceHelper.getPropertyNative(alfRef,CCConstants.getValidGlobalName(prop)));
+						}
+					}
+					data.add(props);
+				}
+
+			}while (hasMore);
+
+			logger.info("result:" + data.size());
+			return Response.status(Response.Status.OK).entity(data).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+	private static void checkMediacenterSortProperty(List<String> sortProperties, String mediacenter) {
+		if(!sortProperties.isEmpty() && sortProperties.get(0).equals("ccm:mediacenter")){
+			sortProperties.set(0,"ccm:mediacenter_sort."+ mediacenter +".activated.keyword");
+		}
+	}
+
 	@PUT
 	@Path("/mediacenter/{repository}/{mediacenter}/manages/{group}")
 

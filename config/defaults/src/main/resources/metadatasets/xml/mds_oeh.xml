@@ -100,6 +100,7 @@
 		<widget>
 			<caption>Barrierefreiheit</caption>
 			<id>ccm:accessibilitySummary</id>
+			<id rel="graphql">oeh.accessibilitySummary</id>
 			<type>multivalueFixedBadges</type>
 			<hideIfEmpty>true</hideIfEmpty>
 			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/accessibilitySummary/index.json</valuespace>
@@ -124,6 +125,7 @@
 		<widget>
 			<caption>Nutzungsrechte</caption>
 			<id>ccm:license_oer</id>
+			<id rel="graphql">oeh.licenseOer</id>
 			<type>singleoption</type>
 			<allowempty>true</allowempty>
 			<hideIfEmpty>true</hideIfEmpty>
@@ -133,6 +135,7 @@
 		<widget>
 			<caption>Interner Quellenname</caption>
 			<id>ccm:general_identifier</id>
+			<id rel="graphql">oeh.generalIdentifier</id>
 			<type>text</type>
 			<hideIfEmpty>true</hideIfEmpty>
 			<condition type="PROPERTY" pattern="SOURCE" dynamic="true">ccm:objecttype</condition>

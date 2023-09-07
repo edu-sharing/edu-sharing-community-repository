@@ -6,14 +6,14 @@
   </div>
 </div>
 <div class="template-content">
-  <es-mds
+  <es-mds-editor-wrapper
     #mds
-    [embedded]="true"
     [groupId]="'io_template'"
+    [embedded]="true"
+    [editorMode]="'nodes'"
     [currentValues]="templateNode?.properties ?? {}"
-    [invalidate]="true"
     [class.display-none]="!enabled"
-  ></es-mds>
+  ></es-mds-editor-wrapper>
   <div *ngIf="!enabled" class="template-disabled">
     <div class="disabled-info" data-i18n="[html]content.body">
       {{ 'WORKSPACE.NODE_TEMPLATE.STATUS_DISABLED' | translate }}

@@ -1,7 +1,7 @@
 import { ElementRef, Injectable } from '@angular/core';
 import { RawValuesDict, SearchConfig } from 'ngx-edu-sharing-api';
 import { Observable, Subject } from 'rxjs';
-import { map, take, takeUntil } from 'rxjs/operators';
+import { delay, map, take, takeUntil } from 'rxjs/operators';
 import { notNull } from '../../../util/functions';
 import { SearchFieldInternalService } from './search-field-internal.service';
 
@@ -20,6 +20,8 @@ export class SearchFieldConfig {
      * being handled.
      */
     enableFiltersAndSuggestions = false;
+    /** Focus the search field input when it initially becomes available. */
+    autoFocus = false;
 }
 
 export type MdsInfo = Pick<SearchConfig, 'repository' | 'metadataSet'>;
@@ -65,6 +67,10 @@ export class SearchFieldInstance {
         this._internal.searchString.next(value);
     }
 
+    getSearchString(): string {
+        return this._internal.searchString.value;
+    }
+
     /**
      * Sets the repository and metadata set to be used for suggestions and value lookups.
      */
@@ -85,7 +91,7 @@ export class SearchFieldInstance {
      * Use only for positioning, not for data.
      */
     getInputElement(): ElementRef {
-        return this._internal.searchFieldComponent.input;
+        return this._internal.searchFieldComponent.value.input;
     }
 }
 
@@ -133,7 +139,7 @@ export class SearchFieldService {
     }
 
     /**
-     * Returns the current search field instance or null if the search field is disabled.
+     * Returns the current search-field instance or null if the search field is disabled.
      *
      * The returned instance's lifetime is determined by the `until` subject given when `enable` was
      * called. Use this method if you want to use a search field instance, that has been enabled
@@ -142,6 +148,19 @@ export class SearchFieldService {
      */
     getCurrentInstance(): SearchFieldInstance | null {
         return this._currentInstance;
+    }
+
+    /**
+     * Returns an updated observable of the current search-field instance or null if the search
+     * field is disabled.
+     *
+     * Use this to monitor how other components interact with the search field.
+     */
+    observeCurrentInstance(): Observable<SearchFieldInstance | null> {
+        return this.observeEnabled().pipe(
+            delay(0),
+            map(() => this._currentInstance),
+        );
     }
 
     private _createInstance(): SearchFieldInstance {

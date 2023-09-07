@@ -610,6 +610,11 @@
 					<type>d:text</type>
 					<mandatory>true</mandatory>
 				</property>
+				<!-- edu-sharing customization: notification config as json -->
+				<property name="ccm:userNotificationPreferences">
+					<type>d:text</type>
+					<mandatory>true</mandatory>
+				</property>
 				<!-- edu-sharing show or hide email in profile: true=show , false=hide   -->
 				<property name="ccm:showEmail">
 					<type>d:boolean</type>
@@ -1010,6 +1015,15 @@
 				<!-- status of a location (http code), set by CheckLinkJob -->
 				<property name="ccm:location_status">
 					<type>d:text</type>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<!-- how often the last http status code occured after each other, set by CheckLinkJob -->
+				<property name="ccm:location_status_fail_count">
+					<type>d:int</type>
 					<index enabled="true">
 						<atomic>true</atomic>
 						<stored>false</stored>
@@ -1841,7 +1855,9 @@
 				</property>
 			</properties>
 		</aspect>
-
+		<!-- aspect for marking the io a mediacenter statistic file -->
+		<aspect name="ccm:mediacenter_statistics">
+		</aspect>
 		<!-- aspect for marking the io template files -->
 		<aspect name="ccm:metadataPresettingTemplate">
 		</aspect>

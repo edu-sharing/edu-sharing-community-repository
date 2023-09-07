@@ -1,5 +1,9 @@
 @import './common';
 
+.add-to-collection-banner {
+    @include addToCollectionBanner;
+}
+
 .entries-wrapper {
     @include entriesWrapper;
 }
@@ -10,4 +14,14 @@
 
 .no-search-results-message {
     @include noSearchResultsMessage;
+}
+
+.filters-button {
+    @media (max-width: 600px) {
+        min-width: 0;
+        min-height: 36px;
+        span {
+            display: none;
+        }
+    }
 }

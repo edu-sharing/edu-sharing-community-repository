@@ -23,7 +23,7 @@ import {
 import * as rxjs from 'rxjs';
 import { Observable, ReplaySubject, Subject } from 'rxjs';
 import { delay, filter, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
-import { NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
+import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { RocketChatService } from '../../../common/ui/global-container/rocketchat/rocket-chat.service';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
@@ -43,7 +43,6 @@ import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import { NodeStoreService } from '../../../modules/search/node-store.service';
 import { LicenseAgreementService } from '../../../services/license-agreement.service';
 import { MainMenuEntriesService } from '../main-menu-entries.service';
 import { MainNavConfig, MainNavService } from '../main-nav.service';
@@ -95,7 +94,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly initDone$ = new ReplaySubject<void>();
     private readonly destroyed$ = new Subject<void>();
     private editUrl: string;
-    private scrollInitialPositions: any[] = [];
     private lastScroll = -1;
     private elementsTopY = 0;
     private elementsBottomY = 0;
@@ -120,7 +118,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         private user: UserService,
         private ngZone: NgZone,
         // private changeDetectorRef: ChangeDetectorRef,
-        private nodeStore: NodeStoreService,
         private rocketChat: RocketChatService,
         private dialogs: DialogsService,
         private licenseAgreement: LicenseAgreementService,
@@ -157,7 +154,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.mainNavService.registerMainNav(this);
         this.setMenuStyle();
 
-        this.connector.setRoute(this.route).subscribe(() => {
+        this.connector.setRoute(this.route, this.router).subscribe(() => {
             this.aboutService.getAbout().subscribe((about) => {
                 this.about = about;
                 this.initDone$.next();
@@ -279,98 +276,8 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.storage.get(TemporaryStorageService.OPTION_DISABLE_SCROLL_LAYOUT, false)) {
             return;
         }
-        // FIXME: These classes don't work properly when resizing the view causes the banner to
-        // change height. To reproduce, load an affected extension (e.g. Lisum) and resize the
-        // window to trigger the mobile menu switch. We have two problems:
-        //
-        // - Some updates happen only on first scroll after resize.
-        // - Some updates happen only after the page is reloaded.
-        //
-        // Interim states are visually broken.
-        const elementsScroll = document.getElementsByClassName('scrollWithBanner');
-        const elementsAlign = document.getElementsByClassName('alignWithBanner');
-        const elements: any = [];
-        for (let i = 0; i < elementsScroll.length; i++) {
-            elements.push(elementsScroll[i]);
-        }
-        for (let i = 0; i < elementsAlign.length; i++) {
-            elements.push(elementsAlign[i]);
-        }
-        if (event == null) {
-            // Re-init the positions, reset the elements
-            this.scrollInitialPositions = [];
-            for (let i = 0; i < elements.length; i++) {
-                const element: any = elements[i];
-                element.style.position = null;
-                element.style.top = null;
-                // Disable transition for instant refreshes
-                element.style.transition = 'none';
-            }
-            // Give the browser layout engine some time to remove the values, otherwise the elements
-            // will have not their initial positions
-            await new Promise((resolve) => resolve(void 0));
-            for (let i = 0; i < elements.length; i++) {
-                const element: any = elements[i];
-                element.style.transition = null;
-                if (!element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)) {
-                    element.setAttribute(MainNavComponent.ID_ATTRIBUTE_NAME, Math.random());
-                }
-                if (
-                    this.scrollInitialPositions[
-                        element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)
-                    ]
-                )
-                    continue;
-                // getComputedStyle does report wrong values in search sidenav
-                this.scrollInitialPositions[
-                    element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)
-                ] = window.getComputedStyle(element).getPropertyValue('top');
-            }
-            this.posScrollElements(event, elements);
-        } else {
+        if (event != null) {
             this.handleScrollHide();
-            this.posScrollElements(event, elements);
-        }
-    }
-
-    posScrollElements(event: Event, elements: any[]) {
-        let y = 0;
-        try {
-            const rect = document.getElementsByTagName('header')[0].getBoundingClientRect();
-            y = rect.bottom - rect.top;
-            // Set min height + a small increase of height to prevent flickering in chrome
-            document.documentElement.style.minHeight = 'calc(100% + ' + (y + 10) + 'px)';
-        } catch (e) {}
-        for (let i = 0; i < elements.length; i++) {
-            const element: any = elements[i];
-            if (y === 0) {
-                element.style.position = null;
-                element.style.top = null;
-                continue;
-            }
-            if (element.className.indexOf('alignWithBanner') !== -1) {
-                element.style.position = 'relative';
-                if (event == null) {
-                    element.style.top = y + 'px';
-                }
-            } else if ((window.pageYOffset || document.documentElement.scrollTop) > y) {
-                element.style.position = 'fixed';
-                element.style.top =
-                    this.scrollInitialPositions[
-                        element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)
-                    ];
-            } else {
-                element.style.position = 'absolute';
-                element.style.top =
-                    Number.parseInt(
-                        this.scrollInitialPositions[
-                            element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)
-                        ],
-                        10,
-                    ) +
-                    y +
-                    'px';
-            }
         }
     }
 
@@ -407,10 +314,11 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.user
             .observeCurrentUserInfo()
             .pipe(
+                filter(({ user }) => user != null),
                 filter(
                     ({ user, loginInfo }) =>
                         loginInfo.statusCode === RestConstants.STATUS_CODE_OK &&
-                        user.editProfile &&
+                        user?.editProfile &&
                         this.configService.instant('editProfile', false),
                 ),
                 take(1),
@@ -530,6 +438,18 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private updateUserOptions() {
         this.userMenuOptions = [];
+        if (
+            this.connector.getCurrentLogin().statusCode === RestConstants.STATUS_CODE_OK &&
+            this.about.plugins.filter((s) => s.id === 'kafka-notification-plugin').length > 0
+        ) {
+            /*
+            this.userMenuOptions.push(
+                new OptionItem('NOTIFICATION.MENU', 'notifications', async () => {
+                    await this.dialogs.openNotificationDialog();
+                }),
+            );
+             */
+        }
         if (
             !this.connector.getCurrentLogin()?.isGuest &&
             !this.connector.getCurrentLogin()?.currentScope

@@ -158,7 +158,12 @@ public class CollectionApi {
 		}
 	}
 
+	/**
+	 * deprecated in favour of the generic search api
+	 * Use the generic search api instead
+	 */
 	@GET
+	@Deprecated
 	@Path("/collections/{repository}/search")
 	@Operation(operationId = "searchCollections", summary = "Search collections.", description = "Search collections.")
 	@ApiResponses(value = {
@@ -415,7 +420,7 @@ public class CollectionApi {
 	@Path("/collections/{repository}/{collection}/children/collections")
 	@Operation(summary = "Get child collections for collection (or root).")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = ReferenceEntries.class))),
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = CollectionEntries.class))),
 			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),

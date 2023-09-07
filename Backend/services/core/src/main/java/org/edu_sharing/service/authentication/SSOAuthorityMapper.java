@@ -110,6 +110,13 @@ public class SSOAuthorityMapper {
 	boolean debug = false;
 	String mappingGroupBuilderClass;
 
+	/**
+	 * prefer value for req.getRemoteUser() as username
+	 */
+	boolean preferRemoteUser = true;
+
+	boolean authByAppCheckClientIp = true;
+
 	CustomGroupMapping customGroupMapping;
 
 	List<String> additionalAttributes = new ArrayList<String>();
@@ -774,5 +781,21 @@ public class SSOAuthorityMapper {
 
 	public void setCustomGroupMapping(CustomGroupMapping customGroupMapping) {
 		this.customGroupMapping = customGroupMapping;
+	}
+
+	public boolean isPreferRemoteUser() {
+		return preferRemoteUser;
+	}
+
+	public void setPreferRemoteUser(boolean preferRemoteUser) {
+		this.preferRemoteUser = preferRemoteUser;
+	}
+
+	public void setAuthByAppCheckClientIp(boolean authByAppCheckClientIp) {
+		this.authByAppCheckClientIp = authByAppCheckClientIp;
+	}
+
+	public boolean isAuthByAppCheckClientIp() {
+		return authByAppCheckClientIp;
 	}
 }

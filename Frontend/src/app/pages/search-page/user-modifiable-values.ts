@@ -153,10 +153,14 @@ export class UserModifiableValue<T> {
         }
     }
 
+    observeQueryParamEntry(): Observable<{ [key: string]: string }> {
+        return this.observeValue().pipe(map((value) => this.getQueryParamEntry(value)));
+    }
+
     registerQueryParameter(
         key: string,
         activatedRoute: ActivatedRoute,
-        { replaceUrl = false } = {},
+        { replaceUrl = false, skipScrollToTop = false } = {},
     ): void {
         if (this._queryParam) {
             console.warn(
@@ -186,6 +190,7 @@ export class UserModifiableValue<T> {
                 UserModifiableValue.navigationScheduler.scheduleNavigation({
                     queryParams: { [key]: param },
                     replaceUrl,
+                    skipScrollToTop,
                 });
             });
     }

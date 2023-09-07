@@ -1,5 +1,10 @@
 @import '../../core-ui-module/styles/variables';
 
+@mixin addToCollectionBanner {
+    display: block;
+    margin-top: 1.5rem;
+}
+
 @mixin entriesWrapper {
     display: block;
     margin-top: 1.5rem;
@@ -12,6 +17,9 @@
     h2 {
         flex-grow: 1;
         margin: 1rem 0;
+    }
+    .small-progress-spinner {
+        margin-left: 12px;
     }
 }
 

@@ -1,98 +1,70 @@
 package org.edu_sharing.repository.update;
 
-import java.io.PrintWriter;
-import java.util.List;
-
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.query.PagingRequest;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
-import org.alfresco.service.ServiceRegistry;
+import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
+import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.security.PersonService.PersonInfo;
 import org.alfresco.service.namespace.QName;
-import org.apache.log4j.Logger;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.springframework.context.ApplicationContext;
+import org.edu_sharing.repository.server.update.UpdateRoutine;
+import org.edu_sharing.repository.server.update.UpdateService;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class Release_4_2_PersonStatusUpdater extends UpdateAbstract{
+import java.util.List;
 
-	public static final String ID = "Release_4_2_PersonStatusUpdater";
-	
-	public static final String description = "when personActiveStatus is set in config set this value for existing person objects.";
-	
-	String personActiveStatus = null;
-	
-	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-	PersonService personService = serviceRegistry.getPersonService();
+@Slf4j
+@UpdateService
+public class Release_4_2_PersonStatusUpdater {
 
-	QName prop = QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS);
-	
-	public Release_4_2_PersonStatusUpdater(PrintWriter out) {
-		this.out = out;
-		logger = Logger.getLogger(Release_4_2_PersonStatusUpdater.class);
-		if(!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
-			personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
-		}
-	}
-	
-	@Override
-	public String getDescription() {
-		// TODO Auto-generated method stub
-		return description;
-	}
-	
-	@Override
-	public String getId() {
-		// TODO Auto-generated method stub
-		return ID;
-	}
+    private final String personActiveStatus;
+    private final PersonService personService;
+    private final NodeService nodeService;
+    private final QName prop = QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS);
 
-	@Override
-	public void run() {
-		RunAsWork<Void> runAs = new RunAsWork<Void>() {
-			@Override
-			public Void doWork() throws Exception {
-			   
-				List<PersonInfo> people = getAllPeople();
-				for(PersonInfo personInfo : people) {
-					if(serviceRegistry.getNodeService().getProperty(personInfo.getNodeRef(),prop) == null){
-						logInfo("updateing person: " + personInfo.getUserName());
-						serviceRegistry.getNodeService().setProperty(personInfo.getNodeRef(), prop, personActiveStatus);
-					}
-		    	}
-				
-				return null;
-		       
-			}
-		};
-		AuthenticationUtil.runAsSystem(runAs);
-	}
-	
-	private  List<PersonInfo> getAllPeople() {
-		return personService.getPeople(null, null, null, new PagingRequest(Integer.MAX_VALUE, null)).getPage();
-	}
-	
-	@Override
-	public void test() {
-		logInfo("not implemented");
-		
-	}
-	
-	@Override
-	public void execute() {
-		
-		if(personActiveStatus != null 
-				&& !personActiveStatus.trim().equals("") ) {
-			this.executeWithProtocolEntry();
-		}else {
-			logInfo("personActiveStatus not set in config");
-		}
-		
-	}
-	
-	
-	
+    @Autowired
+    public Release_4_2_PersonStatusUpdater(PersonService personService, NodeService nodeService) {
+        this.personService = personService;
+        this.nodeService = nodeService;
+
+        if (!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
+            personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
+        }else {
+            personActiveStatus = null;
+        }
+    }
+
+
+    @UpdateRoutine(
+            id = "Release_4_2_PersonStatusUpdater",
+            description = "when personActiveStatus is set in config set this value for existing person objects.",
+            order = 200000,
+            auto = true
+    )
+    public void execute() {
+        if (StringUtils.isBlank(personActiveStatus)) {
+            throw new InvalidArgumentException("personActiveStatus not set in config");
+        }
+
+        AuthenticationUtil.runAsSystem(() -> {
+            List<PersonInfo> people = getAllPeople();
+            for (PersonInfo personInfo : people) {
+                if (nodeService.getProperty(personInfo.getNodeRef(), prop) == null) {
+                    log.info("updating person: " + personInfo.getUserName());
+                    nodeService.setProperty(personInfo.getNodeRef(), prop, personActiveStatus);
+                }
+            }
+
+            return null;
+
+        });
+    }
+
+    private List<PersonInfo> getAllPeople() {
+        return personService.getPeople(null, null, null, new PagingRequest(Integer.MAX_VALUE, null)).getPage();
+    }
 }

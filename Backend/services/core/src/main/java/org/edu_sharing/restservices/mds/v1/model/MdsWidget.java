@@ -1,17 +1,15 @@
 package org.edu_sharing.restservices.mds.v1.model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.edu_sharing.metadataset.v2.MetadataCondition;
 import org.edu_sharing.metadataset.v2.MetadataKey;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 @Schema(description = "")
 public class MdsWidget {
 
@@ -106,6 +104,7 @@ public class MdsWidget {
 	private MetadataWidget.InteractionType interactionType;
 
 	private MetadataWidget.WidgetFilterMode filterMode;
+	private MetadataWidget.WidgetExpandable expandable;
 
 	public MdsWidget(){}
 	public MdsWidget(MetadataWidget widget) {
@@ -121,6 +120,7 @@ public class MdsWidget {
 		this.maxlength=widget.getMaxlength();
 		this.interactionType=widget.getInteractionType();
 		this.filterMode=widget.getFilterMode();
+		this.expandable=widget.getExpandable();
 		this.unit=widget.getUnit();
 		this.configuration=widget.getConfiguration();
 		this.min=widget.getMin();
@@ -393,6 +393,15 @@ public class MdsWidget {
 
 	public void setFilterMode(MetadataWidget.WidgetFilterMode filterMode) {
 		this.filterMode = filterMode;
+	}
+
+	@JsonProperty
+	public MetadataWidget.WidgetExpandable getExpandable() {
+		return expandable;
+	}
+
+	public void setExpandable(MetadataWidget.WidgetExpandable expandable) {
+		this.expandable = expandable;
 	}
 }
 

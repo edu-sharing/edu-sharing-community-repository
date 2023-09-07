@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { first, map, switchMap } from 'rxjs/operators';
 import { NetworkV1Service } from '../api/services';
 import { HOME_REPOSITORY } from '../constants';
 import { Node } from '../models';
-import { shareReplayReturnValue } from '../utils/decorators';
+import { shareReplayReturnValue } from '../utils/decorators/share-replay-return-value';
+import { AuthenticationService } from './authentication.service';
 
 interface Repository {
     id: string;
@@ -25,13 +26,18 @@ interface NetworkRepositories {
     providedIn: 'root',
 })
 export class NetworkService {
-    constructor(private networkV1: NetworkV1Service) {}
+    constructor(
+        private networkV1: NetworkV1Service,
+        private authentication: AuthenticationService,
+    ) {}
 
     @shareReplayReturnValue()
     getRepositories(): Observable<Repository[]> {
-        return this.networkV1
-            .getRepositories()
-            .pipe(map((repos) => (repos as unknown as NetworkRepositories).repositories));
+        return this.authentication.observeLoginInfo().pipe(
+            first((login) => login.isValidLogin),
+            switchMap(() => this.networkV1.getRepositories()),
+            map((repos) => (repos as unknown as NetworkRepositories).repositories),
+        );
     }
 
     getRepository(id: string): Observable<Repository | null> {

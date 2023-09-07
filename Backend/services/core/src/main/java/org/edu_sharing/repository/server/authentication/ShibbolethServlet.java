@@ -75,12 +75,11 @@ public class ShibbolethServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-		logger.info("req.getRemoteUser():"+req.getRemoteUser());
-
 
 		ApplicationContext eduApplicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
 
 		SSOAuthorityMapper ssoMapper = (SSOAuthorityMapper)eduApplicationContext.getBean("ssoAuthorityMapper");
+		logger.info("req.getRemoteUser():"+req.getRemoteUser() +" isPreferRemoteUser:" + ssoMapper.isPreferRemoteUser());
 
 		List<String> additionalAttributes = null;
 		try {
@@ -102,7 +101,9 @@ public class ShibbolethServlet extends HttpServlet {
 
 		String headerUserName = getShibValue(ssoMapper.getSSOUsernameProp(), req);//transform(req.getHeader(authMethodShibboleth.getShibbolethUsername()));
 
-		if (req.getRemoteUser() != null && !req.getRemoteUser().trim().isEmpty()) {
+		if (req.getRemoteUser() != null
+				&& !req.getRemoteUser().trim().isEmpty()
+				&& ssoMapper.isPreferRemoteUser()) {
 			headerUserName = req.getRemoteUser();
 		}
 
@@ -112,6 +113,7 @@ public class ShibbolethServlet extends HttpServlet {
 		redirectUrl = (String)req.getSession().getAttribute(NgServlet.PREVIOUS_ANGULAR_URL);
 		// prefer the login url since it will intercept the regular angular url
 		if(req.getSession().getAttribute(AuthenticationFilter.LOGIN_SUCCESS_REDIRECT_URL) != null){
+			logger.debug("Previous frontend url found: " + req.getSession().getAttribute(AuthenticationFilter.LOGIN_SUCCESS_REDIRECT_URL));
 			redirectUrl = (String) req.getSession().getAttribute(AuthenticationFilter.LOGIN_SUCCESS_REDIRECT_URL);
 		}
 
@@ -171,7 +173,9 @@ public class ShibbolethServlet extends HttpServlet {
 			/**
 			 * overwrite user name with the remoteUser when set
 			 */
-			if(req.getRemoteUser() != null && !req.getRemoteUser().trim().isEmpty()) {
+			if(req.getRemoteUser() != null
+					&& !req.getRemoteUser().trim().isEmpty()
+					&& ssoMapper.isPreferRemoteUser()) {
 
 				logger.info("putting remoteuser:" + ssoMapper.getSSOUsernameProp() + " " +req.getRemoteUser());
 				ssoMap.put(ssoMapper.getSSOUsernameProp(),req.getRemoteUser());
@@ -281,7 +285,7 @@ public class ShibbolethServlet extends HttpServlet {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication != null && authentication.isAuthenticated() && authentication instanceof SamlAuthentication) {
-				SamlAuthentication samlAuthentication = (SamlAuthentication) authentication;
+                SamlAuthentication samlAuthentication = (SamlAuthentication) authentication;
 				return samlAuthentication.getAssertion().getFirstAttribute(attName).getValues().stream().findFirst().map(Object::toString).orElse(null);
             }
 

@@ -24,8 +24,8 @@ export class MdsEditorWidgetDurationComponent extends MdsEditorWidgetBase implem
     hours: string;
     minutes: string;
 
-    ngOnInit() {
-        this.initCurrentValue();
+    async ngOnInit() {
+        await this.initCurrentValue();
         this.sliderOptions.floor = this.widget.definition.min ?? 0;
         this.sliderOptions.ceil = this.widget.definition.max ?? 599;
         this.updateInput();
@@ -60,9 +60,9 @@ export class MdsEditorWidgetDurationComponent extends MdsEditorWidgetBase implem
         return value + ' ' + this.translate.instant('INPUT_MINUTES');
     }
 
-    private initCurrentValue(): void {
-        const initialValues = this.getInitialValue();
-        const value = parseInt(initialValues[0] ?? '0', 10);
+    private async initCurrentValue() {
+        const initialValues = (await this.widget.getInitalValuesAsync()).jointValues;
+        let value = parseInt(initialValues[0] ?? '0', 10);
         // Internally values are saved as [ms].
         const { valueMin, wasMin } = this.msToMin(value);
         this.currentValue = valueMin;

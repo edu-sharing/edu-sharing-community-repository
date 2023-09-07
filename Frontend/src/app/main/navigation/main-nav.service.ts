@@ -20,9 +20,13 @@ export class MainNavCreateConfig {
 
 export class MainNavConfig {
     /**
-     * Show or hide the complete navigation
+     * Show or hide the entire component including banner and navigation bar
      */
     show? = true;
+    /**
+     * Show or hide the navigation bar
+     */
+    showNavigation? = true;
     /**
      * Shows the current location
      */
@@ -44,6 +48,11 @@ export class MainNavConfig {
      */
     create?: MainNavCreateConfig = new MainNavCreateConfig();
     currentScope: string;
+
+    /**
+     * additional scope info, i.e. for collections this can be "edit" when in edit/create context
+     */
+    additionalScope?: 'edit';
     /**
      * Hide the search field although it was enabled via `SearchFieldService`.
      *

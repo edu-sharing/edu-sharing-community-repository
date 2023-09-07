@@ -65,6 +65,7 @@
     <tomcat.version>${tomcat.version.major}.${tomcat.version.minor}.${tomcat.version.patch}
     </tomcat.version>
 
+    <mongodb.version>4.9.1</mongodb.version>
   </properties>
 
   <profiles>
@@ -94,6 +95,19 @@
     <pluginManagement>
 
       <plugins>
+        <plugin>
+          <!-- override super pom version for compatibility with java 8 -->
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <runOrder>alphabetical</runOrder>
+            <argLine>
+              -Xmx1024m
+              --add-opens=java.base/java.lang=ALL-UNNAMED
+              --add-opens=java.base/java.util=ALL-UNNAMED
+            </argLine>
+          </configuration>
+        </plugin>
 
         <plugin>
           <groupId>org.alfresco.maven.plugin</groupId>
@@ -114,7 +128,6 @@
             </dependency>
           </dependencies>
         </plugin>
-
 
         <plugin>
           <groupId>org.openapitools</groupId>
@@ -498,7 +511,6 @@
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>30.1-jre</version>
-        <!--version>11.0.2</version-->
       </dependency>
 
       <dependency>
@@ -694,6 +706,20 @@
       </dependency>
 
       <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-queryparser</artifactId>
+        <version>8.11.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-bom</artifactId>
+        <version>5.3.1</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+
+      <dependency>
         <groupId>com.nimbusds</groupId>
         <artifactId>nimbus-jose-jwt</artifactId>
         <version>9.9</version>
@@ -799,6 +825,12 @@
 
       <dependency>
         <groupId>org.springframework.data</groupId>
+        <artifactId>spring-data-commons</artifactId>
+        <version>2.3.9.RELEASE</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework.data</groupId>
         <artifactId>spring-data-mongodb</artifactId>
         <version>3.4.1</version>
       </dependency>
@@ -814,12 +846,6 @@
         <artifactId>spring-security-config</artifactId>
         <version>5.6.1</version>
       </dependency>
-
-<!--      <dependency>-->
-<!--        <groupId>org.springframework.security</groupId>-->
-<!--        <artifactId>spring-security-core</artifactId>-->
-<!--        <version>5.6.1</version>-->
-<!--      </dependency>-->
 
       <dependency>
         <groupId>org.springframework.security</groupId>
@@ -916,7 +942,19 @@
       <dependency>
         <groupId>org.mongodb</groupId>
         <artifactId>mongodb-driver-sync</artifactId>
-        <version>4.4.1</version>
+        <version>${mongodb.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.mongodb</groupId>
+        <artifactId>bson</artifactId>
+        <version>${mongodb.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <version>5.9.3</version>
       </dependency>
 
       <dependency>
@@ -970,7 +1008,7 @@
       <dependency>
         <groupId>com.graphql-java</groupId>
         <artifactId>graphql-java</artifactId>
-        <version>17.3</version>
+        <version>20.2</version>
         <exclusions>
           <exclusion>
             <groupId>org.slf4j</groupId>
@@ -982,7 +1020,7 @@
       <dependency>
         <groupId>com.graphql-java</groupId>
         <artifactId>graphql-java-extended-scalars</artifactId>
-        <version>17.0</version>
+        <version>20.2</version>
         <exclusions>
           <exclusion>
             <groupId>org.slf4j</groupId>
@@ -998,7 +1036,7 @@
       <dependency>
         <groupId>com.graphql-java-kickstart</groupId>
         <artifactId>graphql-java-servlet</artifactId>
-        <version>12.0.0</version>
+        <version>14.0.0</version>
         <exclusions>
           <exclusion>
             <groupId>org.slf4j</groupId>
@@ -1018,7 +1056,7 @@
       <dependency>
         <groupId>com.graphql-java-kickstart</groupId>
         <artifactId>graphql-java-tools</artifactId>
-        <version>12.0.2</version>
+        <version>13.0.3-edu-sharing</version>
         <exclusions>
           <exclusion>
             <groupId>org.slf4j</groupId>
@@ -1071,6 +1109,12 @@
         <groupId>javax.validation</groupId>
         <artifactId>validation-api</artifactId>
         <version>2.0.1.Final</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.opencsv</groupId>
+        <artifactId>opencsv</artifactId>
+        <version>5.7.1</version>
       </dependency>
 
       <dependency>

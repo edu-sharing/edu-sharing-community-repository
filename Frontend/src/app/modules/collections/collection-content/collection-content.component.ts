@@ -36,7 +36,7 @@ import {
     ListSortConfig,
     NodeClickEvent,
     NodeEntriesDisplayType,
-} from 'src/app/features/node-entries/entries-model';
+} from '../../../features/node-entries/entries-model';
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
 import { OptionItem, Scope } from '../../../core-ui-module/option-item';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
@@ -281,8 +281,14 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                             ];
                         this.sortCollections.active =
                             orderCollections?.[0] || RestConstants.CM_MODIFIED_DATE;
+
                         this.sortCollections.direction =
-                            orderCollections?.[1] === 'true' ? 'asc' : 'desc';
+                            orderCollections?.[0] ===
+                            RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
+                                ? 'asc'
+                                : orderCollections?.[1] === 'true'
+                                ? 'asc'
+                                : 'desc';
 
                         const refMode = collection.collection.orderMode;
                         const refAscending = collection.collection.orderAscending;
@@ -291,7 +297,11 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         RestConstants.COLLECTION_ORDER_MODE_CUSTOM
                             ? RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
                             : refMode) || RestConstants.CM_MODIFIED_DATE) as any;
-                        this.sortReferences.direction = refAscending ? 'asc' : 'desc';
+                        this.sortReferences.direction = RestConstants.COLLECTION_ORDER_MODE_CUSTOM
+                            ? 'asc'
+                            : refAscending
+                            ? 'asc'
+                            : 'desc';
                         this.collection = collection;
                         this.mainNavUpdateTrigger.next();
                         this.dataSourceCollections.isLoading = false;
@@ -567,10 +577,12 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private deleteFromCollection(callback: Function = null) {
         this.toast.showProgressDialog();
         this.collectionService
-            .removeFromCollection(this.collection.ref.id, this.collection.ref.id)
+            .removeFromCollection(this.contentNode.ref.id, this.collection.ref.id)
             .subscribe(
                 () => {
-                    this.toast.toast('COLLECTIONS.REMOVED_FROM_COLLECTION');
+                    if (!('proposal' in this.collection)) {
+                        this.toast.toast('COLLECTIONS.REMOVED_FROM_COLLECTION');
+                    }
                     this.toast.closeModalDialog();
                     this.refreshContent();
                     if (callback) {
@@ -613,6 +625,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private refreshContent() {
         this.dataSourceCollections.reset();
         this.dataSourceReferences.reset();
+        this.dataSourceCollectionProposals.reset();
         this.listReferences?.getSelection().clear();
         this.dataSourceCollections.isLoading = true;
         this.dataSourceReferences.isLoading = true;
@@ -621,6 +634,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         const request: RequestObject = Helper.deepCopy(CollectionContentComponent.DEFAULT_REQUEST);
         if (this.sortCollections?.active) {
             request.sortBy = [this.sortCollections.active];
+
             request.sortAscending = [this.sortCollections.direction === 'asc'];
         } else {
             console.warn('Sort for collections is not defined in the mds!');
@@ -876,7 +890,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         }
     }
 
-    addNodesToCollection(nodes: Node[]) {
+    addNodesToCollection(nodes: Node[], allowDuplicate: boolean | 'ignore' = false) {
         this.toast.showProgressDialog();
         UIHelper.addToCollection(
             this.nodeHelper,
@@ -890,6 +904,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 this.refreshContent();
                 this.toast.closeModalDialog();
             },
+            allowDuplicate,
         );
     }
 

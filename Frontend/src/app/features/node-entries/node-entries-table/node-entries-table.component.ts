@@ -18,6 +18,7 @@ import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import {
+    debounceTime,
     delay,
     distinctUntilChanged,
     first,
@@ -25,9 +26,8 @@ import {
     shareReplay,
     startWith,
     takeUntil,
-    tap,
 } from 'rxjs/operators';
-import { Toast } from 'src/app/core-ui-module/toast';
+import { Toast } from '../../../core-ui-module/toast';
 import { ListItem, Node, UIService } from '../../../core-module/core.module';
 import { NodeEntriesService } from '../../../core-ui-module/node-entries.service';
 import { Target } from '../../../core-ui-module/option-item';
@@ -35,7 +35,7 @@ import { DragData } from '../../../services/nodes-drag-drop.service';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 import { BorderBoxObserverDirective } from '../../../shared/directives/border-box-observer.directive';
 import { CanDrop } from '../../../shared/directives/nodes-drop-target.directive';
-import { ClickSource, InteractionType } from '../entries-model';
+import { ClickSource, InteractionType, NodeEntriesDisplayType } from '../entries-model';
 import { NodeDataSourceRemote } from '../node-data-source-remote';
 import { NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeEntriesDataType } from '../node-entries.component';
@@ -51,6 +51,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
 {
     readonly InteractionType = InteractionType;
     readonly ClickSource = ClickSource;
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Target = Target;
 
     @ViewChild(MatSort) sort: MatSort;
@@ -88,6 +89,9 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         private elementRef: ElementRef<HTMLElement>,
     ) {
         this.registerMaximumColumnsNumber();
+        this.entriesService.selection.changed
+            .pipe(takeUntil(this.destroyed), debounceTime(0))
+            .subscribe(() => this.changeDetectorRef.detectChanges());
     }
 
     ngAfterViewInit(): void {
@@ -100,12 +104,16 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         this.visibleDataColumns$
             .pipe(first(), delay(0))
             .subscribe(() => (this.columnChooserTriggerReady = true));
-        this.entriesService.dataSource$
-            .pipe(
-                takeUntil(this.destroyed),
-                tap(() => console.log('change')),
-            )
-            .subscribe(() => this.changeDetectorRef.detectChanges());
+        rxjs.combineLatest([
+            this.entriesService.dataSource$.pipe(startWith(void 0 as void)),
+            this.entriesService.options$.pipe(startWith(void 0 as void)),
+            this.entriesService.dataSource.isLoadingSubject.pipe(startWith(void 0 as void)),
+            this.entriesService.selection.changed.pipe(startWith(void 0 as void)),
+        ])
+            .pipe(takeUntil(this.destroyed))
+            .subscribe(() => {
+                this.changeDetectorRef.detectChanges();
+            });
     }
 
     ngOnChanges(changes: SimpleChanges): void {

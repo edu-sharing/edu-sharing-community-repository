@@ -1,18 +1,61 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.log4j.Level;
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
+import org.quartz.impl.JobDetailImpl;
+import org.quartz.utils.Key;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
-public class JobInfo {
-    private static final int MAX_LOG_ENTRIES = 5000;
+public class JobInfo implements Serializable {
+    private final String uniqueId;
+    private Class jobClass;
+    private Key jobKey;
+    private JobDataMap jobDataMap;
+    private String jobName;
+    private String jobGroup;
 
     public JobInfo(JobDetail jobDetail) {
+        uniqueId = UUID.randomUUID().toString();
         setJobDetail(jobDetail);
         setStartTime(System.currentTimeMillis());
         setStatus(Status.Running);
+    }
+
+    public JobDataMap getJobDataMap() {
+        return jobDataMap;
+    }
+
+    public Class getJobClass() {
+        return jobClass;
+    }
+
+    public boolean equalsDetail(JobDetail other) {
+        return
+                Objects.equals(((JobDetailImpl)other).getName(), jobName) &&
+                        Objects.equals(((JobDetailImpl)other).getGroup(), jobGroup);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if(other instanceof JobInfo) {
+            return Objects.equals(((JobInfo) other).uniqueId, uniqueId);
+        }
+        return super.equals(other);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uniqueId);
+    }
+
+    public void setWorstLevel(Level level) {
+        this.worstLevel = level;
     }
 
     public enum Status{
@@ -21,86 +64,19 @@ public class JobInfo {
         Aborted,
         Finished
     }
-    public static class LogEntry{
-        private String className;
-        private Level level;
-        private long date;
-        private String message;
-
-        public LogEntry(Level level, long date, String className, String message) {
-            this.level=level;
-            this.date = date;
-            this.className = className;
-            this.message=message;
-        }
-
-        public String getClassName() {
-            return className;
-        }
-
-        public void setClassName(String className) {
-            this.className = className;
-        }
-
-        public long getDate() {
-            return date;
-        }
-
-        public void setDate(long date) {
-            this.date = date;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
-        }
-
-        public Level getLevel() {
-            return level;
-        }
-
-        public void setLevel(Level level) {
-            this.level = level;
-        }
-    }
     private long startTime,finishTime;
     private Status status;
     private Level worstLevel=Level.ALL;
-    private List<LogEntry> log=new ArrayList<>();
-    private JobDetail jobDetail;
-
-
-    public JobDetail getJobDetail() {
-        return jobDetail;
-    }
 
     public void setJobDetail(JobDetail jobDetail) {
-        this.jobDetail = jobDetail;
-    }
-
-    public void addLog(LogEntry entry) {
-        this.log.add(entry);
-        if(entry.level.isGreaterOrEqual(worstLevel)){
-            worstLevel=entry.level;
-        }
-        if(this.log.size()>MAX_LOG_ENTRIES){
-            this.log.remove(0);
-        }
+        jobClass = jobDetail.getJobClass();
+        jobName = ((JobDetailImpl)jobDetail).getName();
+        jobGroup = ((JobDetailImpl)jobDetail).getGroup();
+        jobDataMap = jobDetail.getJobDataMap();
     }
 
     public Level getWorstLevel() {
         return worstLevel;
-    }
-
-    public List<LogEntry> getLog() {
-        return log;
-    }
-
-    public void setLog(List<LogEntry> log) {
-        this.log = log;
     }
 
     public long getFinishTime() {
@@ -127,4 +103,18 @@ public class JobInfo {
     public void setStartTime(long startTime) {
         this.startTime = startTime;
     }
+
+    public String getJobName() {
+        return jobName;
+    }
+
+    public String getJobGroup() {
+        return jobGroup;
+    }
+
+    @JsonProperty
+    List<LogEntry> getLog() {
+        return JobLogger.getLog(this);
+    }
+
 }

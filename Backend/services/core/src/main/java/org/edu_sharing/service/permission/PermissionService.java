@@ -84,7 +84,11 @@ public interface PermissionService {
 	public Result<List<Authority>> findAuthorities(String searchWord, boolean globalContext, int from, int nrOfResults);
 
 	public Result<List<Group>> findGroups(String searchWord, boolean globalContext, int from, int nrOfResults);
-	
+
+    void addUserToSharedList(String user, NodeRef nodeRef);
+
+	void cleanUpSharedList(NodeRef nodeRef);
+
 	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String permission);
 
 	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String authority, String permission);

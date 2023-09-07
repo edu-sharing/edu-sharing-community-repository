@@ -1,3 +1,18 @@
+<ng-container
+  *ngTemplateOutlet="customTemplates.value.resultsTop"
+  xmlns="http://www.w3.org/1999/html"
+></ng-container>
+
+<es-small-collection
+  *ngIf="addToCollectionMode.value as addToCollection"
+  class="add-to-collection-banner"
+  [collection]="addToCollection.collection"
+  [titleLabel]="'SEARCH.ADD_INTO_COLLECTION'"
+  [titleLabelShort]="'SEARCH.ADD_INTO_COLLECTION_SHORT'"
+>
+  <es-actionbar backgroundType="primary"></es-actionbar>
+</es-small-collection>
+
 <!-- We cannot use *ngIf on node-entries-wrapper since it depends on its input variables to
       initialize data fetching. -->
 <es-node-entries-wrapper
@@ -12,7 +27,12 @@
 >
   <ng-template #title>
     <div class="title-container">
-      <h2 class="mat-heading-2">{{ 'SEARCH.COLLECTIONS' | translate }}</h2>
+      <h2 class="mat-heading-2">
+        {{ 'SEARCH.COLLECTIONS' | translate }}
+        <ng-container *ngIf="!collectionsDataSource.isLoading; else smallLoadingSpinner">
+          ({{ collectionsDataSource.getTotal() }})
+        </ng-container>
+      </h2>
     </div>
   </ng-template>
 </es-node-entries-wrapper>
@@ -25,12 +45,33 @@
   [columns]="resultColumns.value"
   [sort]="sortConfig | async"
   [primaryInstance]="true"
-  [initConfig]="{ actionbar }"
+  [initConfig]="{ actionbar, customOptions: addToCollectionMode.value?.customOptions}"
 >
   <ng-template #title>
     <div class="title-container">
-      <h2 class="mat-heading-2">{{ 'SEARCH.MATERIALS' | translate }}</h2>
-      <es-actionbar></es-actionbar>
+      <h2 class="mat-heading-2">
+        {{ 'SEARCH.MATERIALS' | translate }}
+        <ng-container *ngIf="!resultsDataSource.isLoading; else smallLoadingSpinner">
+          <ng-container *ngIf="!resultsDataSource.isEmpty()">
+            <span class="count {{ getCountClass() }}">
+              &nbsp;({{ resultsDataSource.getTotal() }})
+            </span>
+          </ng-container>
+        </ng-container>
+      </h2>
+      <button
+        *ngIf="nodeEntriesResults.getSelection().isEmpty()"
+        mat-flat-button
+        color="primary"
+        class="filters-button"
+        [attr.aria-label]="'SEARCH.FILTERS' | translate"
+        matTooltip="{{ 'TOGGLE_SEARCH_FILTERS' | translate }}"
+        (click)="toggleFilters()"
+      >
+        <i esIcon="filter_list"></i>
+        <span>{{ 'SEARCH.FILTERS' | translate }}</span>
+      </button>
+      <es-actionbar *ngIf="!addToCollectionMode.value"></es-actionbar>
     </div>
   </ng-template>
   <ng-template #empty>
@@ -40,3 +81,7 @@
     </div>
   </ng-template>
 </es-node-entries-wrapper>
+
+<ng-template #smallLoadingSpinner>
+  <mat-spinner diameter="24" class="small-progress-spinner"></mat-spinner>
+</ng-template>

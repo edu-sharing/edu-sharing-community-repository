@@ -4,16 +4,10 @@
     flex-direction: column;
 }
 
+.saved-searches-button {
+    margin-bottom: 20px;
+}
+
 .mds-editor {
     flex-grow: 1;
-}
-
-.saved-searches-button {
-    position: sticky;
-    align-self: flex-end;
-    bottom: 0;
-}
-
-.current-saved-search-entry {
-    font-weight: bold;
 }

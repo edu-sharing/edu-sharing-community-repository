@@ -27,18 +27,18 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
     formControl = new FormControl();
     currentValue: number[] = [];
 
-    ngOnInit() {
+    async ngOnInit() {
         this.sliderOptions.floor = this.widget.definition.min;
         this.sliderOptions.ceil = this.widget.definition.max;
         this.sliderOptions.step = this.widget.definition.step ?? 1;
         this.isRange = this.widget.definition.type === MdsWidgetType.Range;
-        this.currentValue = this.getInitialValue_();
+        this.currentValue = await this.getInitialValue_();
         // Since computation of initial values is a bit different for sliders and ranges, we handle
         // processing of default values here in this component. To reflect default values, we save
         // values once when initializing. This might mark the whole dialog as dirty without the user
         // interacting even if default values have not been provided. However, since the slider
         // always implies a state, to save that state seems to be the natural behavior.
-        this.updateValues(false);
+        this.updateValues();
         this.widget.observeIsDisabled().subscribe((isDisabled) => {
             this.sliderOptions = {
                 ...this.sliderOptions,
@@ -52,23 +52,26 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
         });
     }
 
-    updateValues(dirty: boolean = true) {
+    updateValues() {
+        if (this.currentValue == null) {
+            return;
+        }
         if (this.widget.definition.type === 'slider') {
             // emit single value
-            this.setValue([this.currentValue[0].toString()], dirty);
+            this.setValue([this.currentValue[0].toString()], false);
         } else {
             this.setValue(
                 [this.currentValue[0].toString(), this.currentValue[1].toString()],
-                dirty,
+                false,
             );
         }
     }
 
     // TODO: remove trailing underscore when `getInitialValue` is removed from
     // `MdsEditorWidgetBase`.
-    private getInitialValue_(): number[] {
-        const initialValues = this.widget.getInitialValues().jointValues;
-        if (this.isRange) {
+    private async getInitialValue_() {
+        const initialValues = (await this.widget.getInitalValuesAsync())?.jointValues;
+        if (this.isRange && initialValues) {
             if (initialValues.length === 2) {
                 return [parseInt(initialValues[0], 10), parseInt(initialValues[1], 10)];
             } else {
@@ -78,7 +81,7 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
                 ];
             }
         } else {
-            if (initialValues.length === 1) {
+            if (initialValues?.length === 1) {
                 return [parseInt(initialValues[0], 10)];
             } else {
                 return [
@@ -92,5 +95,31 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
 
     private format(value: number): string {
         return (value + ' ' + (this.widget.definition.unit ?? '')).trim();
+    }
+
+    updateValue(value: number) {
+        if (isNaN(value)) {
+            return;
+        }
+        if (this.widget.definition.type === 'slider') {
+            // emit single value
+            this.setSliderValue([value]);
+        } else {
+            this.setSliderValue([value, this.currentValue?.[1]]);
+        }
+    }
+    setSliderValue(value: number[]) {
+        this.currentValue = value;
+        this.setValue(
+            value.map((v) => v?.toString()),
+            true,
+        );
+    }
+
+    updateHighValue(value: number) {
+        if (isNaN(value)) {
+            return;
+        }
+        this.setValue([this.currentValue?.[0]?.toString(), value.toString()], true);
     }
 }

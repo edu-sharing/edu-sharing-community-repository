@@ -21,6 +21,10 @@ import {
     CreateMapLinkDialogResult,
 } from './dialog-modules/create-map-link-dialog/create-map-link-dialog-data';
 import {
+    DeleteNodesDialogData,
+    DeleteNodesDialogResult,
+} from './dialog-modules/delete-nodes-dialog/delete-nodes-dialog-data';
+import {
     FileChooserDialogData,
     FileChooserDialogResult,
 } from './dialog-modules/file-chooser-dialog/file-chooser-dialog-data';
@@ -59,6 +63,10 @@ import {
     SaveSearchDialogResult,
 } from './dialog-modules/save-search-dialog/save-search-dialog-data';
 import {
+    SavedSearchesDialogData,
+    SavedSearchesDialogResult,
+} from './dialog-modules/saved-searches-dialog/saved-searches-dialog-data';
+import {
     SendFeedbackDialogData,
     SendFeedbackDialogResult,
 } from './dialog-modules/send-feedback-dialog/send-feedback-dialog-data';
@@ -78,6 +86,7 @@ import {
     XmlAppPropertiesDialogData,
     XmlAppPropertiesDialogResult,
 } from './dialog-modules/xml-app-properties-dialog/xml-app-properties-dialog-data';
+import { NotificationDialogComponent } from './dialog-modules/notification-dialog/notification-dialog.component';
 
 @Injectable({
     providedIn: 'root',
@@ -199,6 +208,18 @@ export class DialogsService {
             title: 'ACCESSIBILITY.TITLE',
             subtitle: 'ACCESSIBILITY.SUBTITLE',
             avatar: { kind: 'icon', icon: 'accessibility' },
+            width: 700,
+        });
+    }
+
+    async openNotificationDialog(): Promise<CardDialogRef<void, void>> {
+        const { NotificationDialogComponent } = await import(
+            './dialog-modules/notification-dialog/notification-dialog.module'
+        );
+        return this.cardDialog.open(NotificationDialogComponent, {
+            title: 'NOTIFICATION.TITLE',
+            subtitle: 'NOTIFICATION.SUBTITLE',
+            avatar: { kind: 'icon', icon: 'notifications' },
             width: 700,
         });
     }
@@ -369,6 +390,7 @@ export class DialogsService {
         return this.cardDialog.open(NodeRelationsDialogComponent, {
             title: 'NODE_RELATIONS.TITLE',
             ...configForNode(data.node),
+            closable: Closable.Standard,
             width: 700,
             minHeight: 700,
             data,
@@ -463,6 +485,38 @@ export class DialogsService {
             width: 600,
             data,
             closable: Closable.Standard,
+        });
+    }
+
+    async openSavedSearchesDialog(
+        data: SavedSearchesDialogData,
+    ): Promise<CardDialogRef<SavedSearchesDialogData, SavedSearchesDialogResult>> {
+        const { SavedSearchesDialogComponent } = await import(
+            './dialog-modules/saved-searches-dialog/saved-searches-dialog.module'
+        );
+        return this.cardDialog.open(SavedSearchesDialogComponent, {
+            title: 'SEARCH.SAVED_SEARCHES.TITLE',
+            avatar: { kind: 'icon', icon: 'search' },
+            contentPadding: 0,
+            minHeight: 500,
+            width: 600,
+            data,
+            closable: Closable.Casual,
+        });
+    }
+
+    async openDeleteNodesDialog(
+        data: DeleteNodesDialogData,
+    ): Promise<CardDialogRef<DeleteNodesDialogData, DeleteNodesDialogResult>> {
+        const { DeleteNodesDialogComponent } = await import(
+            './dialog-modules/delete-nodes-dialog/delete-nodes-dialog.module'
+        );
+        return this.cardDialog.open(DeleteNodesDialogComponent, {
+            ...(await configForNodes(data.nodes, this.translate).toPromise()),
+            minHeight: 240,
+            width: 500,
+            data,
+            closable: Closable.Casual,
         });
     }
 }

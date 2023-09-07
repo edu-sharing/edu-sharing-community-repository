@@ -19,7 +19,7 @@ import { MatFormFieldControl } from '@angular/material/form-field';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { MdsWidget } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
-import { distinctUntilChanged, map, startWith, takeUntil } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, startWith, takeUntil } from 'rxjs/operators';
 import { UIAnimation } from '../../../../../core-module/ui/ui-animation';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
@@ -92,9 +92,16 @@ export class MdsEditorWidgetContainerComponent
      */
     @Input() wrapInGroup = true;
 
+    /**
+     * should a progress spinner be shown
+     * (only applicable for widgets with non-native material fields)
+     */
+    @Input() showSpinner: boolean;
+
     @ContentChild(MatFormFieldControl) formFieldControl: MatFormFieldControl<any>;
 
     @HostBinding('class.disabled') isDisabled = false;
+    expandedState$ = new BehaviorSubject<'disabled' | 'expanded' | 'collapsed'>('disabled');
     @HostBinding('@showHideExtended') get showHideExtendedState(): string {
         return this.isHidden ? 'hidden' : 'shown';
     }
@@ -156,6 +163,7 @@ export class MdsEditorWidgetContainerComponent
         }
         this.wrapInFormField = this.wrapInFormField ?? !!this.control;
         if (this.widget) {
+            this.expandedState$.next(this.widget.definition?.expandable);
             this.widget.focusTrigger
                 .pipe(takeUntil(this.destroyed$))
                 .subscribe(() => this.injectedView?.focus());
@@ -203,7 +211,13 @@ export class MdsEditorWidgetContainerComponent
     }
 
     private initFormControl(formControl: AbstractControl): void {
-        this.widget.observeIsDisabled().subscribe((isDisabled) => this.setDisabled(isDisabled));
+        this.widget
+            .observeIsDisabled()
+            .pipe(
+                // debounce cause form control might not yet initialized
+                debounceTime(10),
+            )
+            .subscribe((isDisabled) => this.setDisabled(isDisabled));
         formControl.statusChanges
             .pipe(startWith(formControl.status), distinctUntilChanged())
             .subscribe((status: InputStatus) => {
