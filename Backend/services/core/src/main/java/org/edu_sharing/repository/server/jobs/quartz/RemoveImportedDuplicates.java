@@ -8,6 +8,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -18,6 +19,7 @@ import org.edu_sharing.repository.server.jobs.helper.NodeHelper;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
+import org.alfresco.service.cmr.version.VersionService;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,6 +33,8 @@ public class RemoveImportedDuplicates extends AbstractJob{
     ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
     ServiceRegistry serviceRegistry = (ServiceRegistry)applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
     NodeService nodeService = serviceRegistry.getNodeService();
+
+    VersionService versionService = serviceRegistry.getVersionService();
     BehaviourFilter policyBehaviourFilter = (BehaviourFilter)applicationContext.getBean("policyBehaviourFilter");
 
     Repository repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
@@ -70,7 +74,7 @@ public class RemoveImportedDuplicates extends AbstractJob{
                     nodeService.getProperty(
                             entry.getValue().get(0),
                             QName.createQName(CCConstants.CM_NAME)
-                    ) + entry.getValue().stream().map(NodeRef::getId).collect(Collectors.joining(","))
+                    ) + " " + entry.getValue().stream().map(NodeRef::getId).collect(Collectors.joining(","))
             );
             HashMap<NodeRef, Integer> result = new HashMap<>();
             for(NodeRef nodeRef : entry.getValue()){
@@ -80,12 +84,20 @@ public class RemoveImportedDuplicates extends AbstractJob{
                 if(children != null && children.size() > 0){
                     // logger.error(entry.getKey() + ": can not remove " + nodeRef + " cause of usages " + children);
                     isInUse += children.size();
+                    logger.info(" " + entry.getKey() +" " + nodeRef +": has usage");
                 }
                 List<String> curriculum = (List<String>)nodeService.getProperty(nodeRef,QName.createQName(CCConstants.getValidGlobalName("ccm:curriculum")));
                 if(curriculum != null && curriculum.size() > 0){
                     // logger.error(entry.getKey() + ": can not remove " + nodeRef + " cause of ccm:curriculum: " + String.join(",",curriculum));
                     isInUse++;
+                    logger.info(" " + entry.getKey()+" " + nodeRef +": has curriculum");
                 }
+                VersionHistory versionHistory = versionService.getVersionHistory(nodeRef);
+                if(versionHistory != null && versionHistory.getAllVersions() != null && versionHistory.getAllVersions().size() > 1){
+                    isInUse++;
+                    logger.info(" " + entry.getKey()+" " + nodeRef +": has > 1 versions");
+                }
+
                 result.put(nodeRef, isInUse);
             }
             List<NodeRef> toDelete = result.entrySet().stream().filter((e) -> e.getValue() == 0).
