@@ -22,7 +22,10 @@ $mat-css-light-theme-selector: '.isLightTheme';
 $custom-typography: mat.define-typography-config(
     $font-family: $primaryFontFamily,
     $body-1: mat.define-typography-level(100%, normal, 400),
-    $body-2: mat.define-typography-level(100%, normal, 600),
+    $body-2: mat.define-typography-level(100%, normal, 400),
+    // mat-table cells
+    $subtitle-2: mat.define-typography-level(90%, normal, 600),
+    // mat-table header
     $button: mat.define-typography-level(100%, normal, 400),
     $headline-1: mat.define-typography-level(150%, normal, 400),
     $headline-2: mat.define-typography-level(140%, normal, 400),

@@ -1,7 +1,7 @@
 @use 'sass:color';
 @import '../../../../assets/scss/mixins';
 
-$defaultColumnWidth: 120px;
+$defaultColumnWidth: 145px;
 $minColumnWidth: 30%;
 $rowHeight: 58px;
 
@@ -9,6 +9,13 @@ $rowHeight: 58px;
     display: flex;
     flex-direction: column;
     ::ng-deep {
+        mat-header-cell {
+            color: var(--textMediumLight);
+        }
+        mat-cell,
+        mat-header-cell {
+            margin: 0 !important;
+        }
         mat-cell es-node-url {
             width: 100%;
             a {
@@ -44,8 +51,8 @@ mat-cell {
         min-width: 54px;
     }
     &.mat-column-icon {
-        flex: 0 65px;
-        min-width: 65px;
+        flex: 0 85px;
+        min-width: 85px;
         justify-content: center;
     }
     &.mat-column-actions {

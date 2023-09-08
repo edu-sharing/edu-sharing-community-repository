@@ -15,7 +15,7 @@ $warningMedium: #e98c1b !default;
 $toastLeftError: #c15d5d !default;
 $toastPrimary: #5c5c5c !default;
 $textLight: var(--textLight) !default;
-$textMediumLight: #888 !default;
+$textMediumLight: var(--textMediumLight) !default;
 $textVeryLight: #aaa !default;
 // prefer using var(--textMain)
 $textMain: #383838 !default;
