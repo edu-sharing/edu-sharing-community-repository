@@ -102,7 +102,8 @@ public class RemoveImportedDuplicates extends AbstractJob{
                     isInUse++;
                     logger.info(" " + entry.getKey()+" " + nodeRef +": has curriculum");
                 }
-                if(ignoreModifierVersionCheck == null || !ignoreModifierVersionCheck.equals(nodeService.getProperty(nodeRef,ContentModel.PROP_MODIFIER))) {
+                String modifier = (String)nodeService.getProperty(nodeRef,ContentModel.PROP_MODIFIER);
+                if(ignoreModifierVersionCheck == null || (!ignoreModifierVersionCheck.equals(modifier) && !"admin".equals(modifier))) {
                     VersionHistory versionHistory = versionService.getVersionHistory(nodeRef);
                     if (versionHistory != null && versionHistory.getAllVersions() != null && versionHistory.getAllVersions().size() > 1) {
                         isInUse++;
