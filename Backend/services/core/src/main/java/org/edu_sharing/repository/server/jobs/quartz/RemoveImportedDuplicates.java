@@ -16,6 +16,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.jobs.helper.NodeHelper;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
@@ -26,8 +27,6 @@ import java.util.stream.Collectors;
 
 public class RemoveImportedDuplicates extends AbstractJob{
 
-    public static final String PARAM_START_FOLDER = "START_FOLDER";
-    public static final String PARAM_EXECUTE = "EXECUTE";
     public static final String DESCRIPTION = "Find and remove Imported duplicates (got the same replicationsourceid";
 
     ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
@@ -41,18 +40,29 @@ public class RemoveImportedDuplicates extends AbstractJob{
 
     Logger logger = Logger.getLogger(RemoveImportedDuplicates.class);
 
+    @JobFieldDescription(description = "startfolder", sampleValue = "cm:name")
+    String startFolder;
+
+    @JobFieldDescription(description = "weather to start the job in persistent (true) or protocol mode (false). default is false", sampleValue = "false")
+    Boolean execute;
+
+    @JobFieldDescription(description = "username i.e. import job user. nodes where the current modifier equals this user, the versioncheck is skipped.")
+    String ignoreModifierVersionCheck;
+
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        String startFolder = (String)jobExecutionContext.getJobDetail().getJobDataMap().get(PARAM_START_FOLDER);
-        Boolean execute = new Boolean((String)jobExecutionContext.getJobDetail().getJobDataMap().get(PARAM_EXECUTE));
+        startFolder = (String)jobExecutionContext.getJobDetail().getJobDataMap().get("startFolder");
+        execute = (Boolean)jobExecutionContext.getJobDetail().getJobDataMap().get("execute");
+        if(execute == null) execute = false;
+        ignoreModifierVersionCheck = (String)jobExecutionContext.getJobDetail().getJobDataMap().get("ignoreModifierVersionCheck");
         AuthenticationUtil.runAsSystem(() -> {
-                    excecute(startFolder,execute);
+                    excecute(startFolder,execute,ignoreModifierVersionCheck);
                     return null;
                 }
         );
     }
 
-    private void excecute(String startFolder, boolean execute){
+    private void excecute(String startFolder, boolean execute, String ignoreModifierVersionCheck){
         if(startFolder == null || startFolder.trim().equals("")){
             for(ChildAssociationRef ref : nodeService.getChildAssocs(repositoryHelper.getCompanyHome())){
                 if(OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS.equals(nodeService.getProperty(ref.getChildRef(), ContentModel.PROP_NAME))){
@@ -92,10 +102,14 @@ public class RemoveImportedDuplicates extends AbstractJob{
                     isInUse++;
                     logger.info(" " + entry.getKey()+" " + nodeRef +": has curriculum");
                 }
-                VersionHistory versionHistory = versionService.getVersionHistory(nodeRef);
-                if(versionHistory != null && versionHistory.getAllVersions() != null && versionHistory.getAllVersions().size() > 1){
-                    isInUse++;
-                    logger.info(" " + entry.getKey()+" " + nodeRef +": has > 1 versions");
+                if(ignoreModifierVersionCheck == null || !ignoreModifierVersionCheck.equals(nodeService.getProperty(nodeRef,ContentModel.PROP_MODIFIER))) {
+                    VersionHistory versionHistory = versionService.getVersionHistory(nodeRef);
+                    if (versionHistory != null && versionHistory.getAllVersions() != null && versionHistory.getAllVersions().size() > 1) {
+                        isInUse++;
+                        logger.info(" " + entry.getKey() + " " + nodeRef + ": has > 1 versions");
+                    }
+                }else{
+                    logger.info(" " + entry.getKey() + " " + nodeRef + ":version check ignored");
                 }
 
                 result.put(nodeRef, isInUse);
