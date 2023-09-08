@@ -107,24 +107,6 @@ es-user-quota {
     width: calc(100% - 600px);
 }
 
-.actionbarFrame {
-    width: auto;
-    position: fixed;
-    right: 0;
-    z-index: 62;
-    > div {
-        height: $workspaceBreadcrumbsHeight - 3px;
-        padding-top: 15px;
-        padding-left: 20px;
-        padding-right: 10px;
-        background: linear-gradient(
-            to right,
-            rgba(255, 255, 255, 0.001) 0,
-            #fff 10px,
-            #fff 100%
-        ); /* safari fix */
-    }
-}
 .viewType {
     position: fixed;
     color: $textLight;
@@ -136,25 +118,42 @@ es-user-quota {
 .viewType div {
     /* border-left:1px solid #ccc; */
 }
-.breadcrumbFrame {
+.topbarFrame {
     position: fixed;
     left: 0;
     width: 100%;
     z-index: 60;
     > div {
+        width: 100%;
         height: $workspaceBreadcrumbsHeight;
         background-color: #fff;
-        padding-left: 36px;
-        padding-top: 18px;
-        padding-bottom: 20px;
-        padding-right: 50px;
         @include materialShadow();
+        display: flex;
+        > es-breadcrumbs {
+            padding-left: 30px;
+            flex-grow: 1;
+            height: 100%;
+        }
+        > es-actionbar {
+            position: absolute;
+            right: 0;
+            height: 100%;
+            padding-left: 20px;
+            padding-right: 10px;
+            display: flex;
+            align-items: center;
+            z-index: 62;
+            background: linear-gradient(
+                to right,
+                rgba(255, 255, 255, 0.001) 0,
+                #fff 10px,
+                #fff 100%
+            ); /* safari fix */
+        }
     }
 }
 :host ::ng-deep {
-    .breadcrumbFrame .breadcrumb {
-        position: relative;
-        top: 5px;
+    .topbarFrame .breadcrumb {
         div {
             word-break: break-all;
         }

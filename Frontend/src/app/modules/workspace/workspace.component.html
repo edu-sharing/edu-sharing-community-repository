@@ -57,7 +57,7 @@
       ></es-workspace-tree>
       <es-user-quota *ngIf="user.person.quota.enabled" [quota]="user.person.quota"></es-user-quota>
     </div>
-    <div class="breadcrumbFrame">
+    <div class="topbarFrame">
       <div class="mobile-move-top">
         <!--[homeRouterLink]="path ? {
             routerLink: '.',
@@ -72,14 +72,10 @@
           (onDrop)="handleDropOnBreadcrumb($event)"
           (onClick)="openBreadcrumb($event)"
         ></es-breadcrumbs>
-      </div>
-    </div>
-    <es-recycle *ngIf="root === 'RECYCLE'" class="explorer" [actionbar]="actionbar"></es-recycle>
-    <div class="actionbarFrame">
-      <div class="mobile-move-top">
         <es-actionbar #actionbar></es-actionbar>
       </div>
     </div>
+    <es-recycle *ngIf="root === 'RECYCLE'" class="explorer" [actionbar]="actionbar"></es-recycle>
     <h1 esTitle class="cdk-visually-hidden">{{ 'WORKSPACE.TITLE' | translate }}</h1>
     <es-workspace-explorer
       class="explorer"
