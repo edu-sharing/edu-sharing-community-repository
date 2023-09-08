@@ -28,6 +28,8 @@
     <export-filters>
       <entry><family>PortableDocumentFormat</family><string>pdf</string></entry>
       <entry><family>Presentation</family><string>ppsx</string></entry>
+      <entry><family>Text</family><string>docx</string></entry>
+      <entry><family>Spreadsheet</family><string>xlsx</string></entry>
     </export-filters>
   </document-format>
 

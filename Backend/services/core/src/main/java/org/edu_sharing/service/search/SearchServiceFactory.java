@@ -15,7 +15,7 @@ public class SearchServiceFactory {
 		ApplicationInfo appInfo = (appLicationId == null) ? ApplicationInfoList.getHomeRepository() : ApplicationInfoList.getRepositoryInfoById(appLicationId);
 
 		if(!ProviderHelper.hasProvider(appInfo)){
-			searchService = new SearchServiceImpl(appLicationId);
+			searchService = new SearchServiceImpl(appInfo.getAppId());
 		}else{
 			return ProviderHelper.getProviderByApp(appInfo).getSearchService();
 		}
