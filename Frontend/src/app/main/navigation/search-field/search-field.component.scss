@@ -10,19 +10,6 @@
     display: block;
 }
 
-:host mat-form-field.search-field ::ng-deep {
-    .mat-form-field-wrapper {
-        padding-bottom: 0;
-    }
-    .mat-form-field-underline {
-        display: none;
-    }
-    .mat-form-field-infix {
-        padding: 0;
-        border: none;
-    }
-}
-
 mat-form-field {
     width: 100%;
     color: $workspaceTopBarInputText;
@@ -32,7 +19,24 @@ mat-form-field {
     width: 100%;
     display: flex;
     background: $workspaceTopBarInputBackground;
+    padding: 4px;
     border-radius: 2px;
+    .search-field {
+        display: flex;
+        width: 100%;
+        input {
+            background: $workspaceTopBarInputBackground;
+            height: 100%;
+            border: none;
+            &:focus {
+                border: none;
+                outline: none;
+            }
+        }
+        button {
+            color: $textMain;
+        }
+    }
     &.input-has-focus {
         border-radius: 0;
         &:not(.cdk-keyboard-focused) {
@@ -47,7 +51,6 @@ mat-form-field {
 
 .filters-button {
     margin-right: 6px;
-    margin-left: -10px;
     &.mat-badge ::ng-deep .mat-badge-content {
         right: -3px;
         top: -3px;
@@ -90,7 +93,6 @@ mat-form-field {
     display: flex;
     align-items: center;
     min-width: 120px;
-    padding-left: 16px;
 }
 
 .search-input {
@@ -104,8 +106,8 @@ mat-form-field {
 }
 
 .submit-button {
-    height: 48px;
-    width: 48px;
+    height: 44px;
+    width: 44px;
     border-radius: 0 2px 2px 0;
     background-color: mix($workspaceTopBarInputBackground, $workspaceTopBarBackground, 80%);
 }

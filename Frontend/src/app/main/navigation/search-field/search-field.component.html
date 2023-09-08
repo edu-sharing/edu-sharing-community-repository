@@ -8,8 +8,7 @@
     esBorderBoxObserver
     #triggerBorderBox="borderBoxObserver"
   >
-    <mat-form-field class="search-field" appearance="fill" floatLabel="always">
-      <mat-label></mat-label>
+    <div class="search-field">
       <div class="search-field-input-wrapper">
         <button
           *ngIf="config.showFiltersButton"
@@ -65,7 +64,7 @@
           <i esIcon="search" [aria]="false"></i>
         </button>
       </div>
-    </mat-form-field>
+    </div>
   </div>
 </form>
 
