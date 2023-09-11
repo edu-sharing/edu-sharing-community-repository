@@ -74,6 +74,9 @@ mat-cell {
     }
     &.mat-row-selected {
         background: var(--listItemSelectedBackgroundEffect);
+        .mat-mdc-cell {
+            background: transparent;
+        }
     }
     // Overrides `.mat-row-selected` background by order
     &.mat-row-virtual {
