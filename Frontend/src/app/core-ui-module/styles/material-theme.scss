@@ -321,6 +321,13 @@ mat-label,
 .mat-autocomplete-high {
     max-height: 350px;
 }
+.mat-flat-button {
+    padding: 0 15px !important;
+    .mdc-button__label {
+        color: $textOnPrimary !important;
+    }
+    background-color: $primary !important;
+}
 // improve default positioning of outlined fields with label
 .mat-mdc-text-field-wrapper.mdc-text-field--outlined {
     .mat-mdc-form-field-infix {
