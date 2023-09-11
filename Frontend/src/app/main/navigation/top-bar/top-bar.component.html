@@ -17,9 +17,9 @@
       ></es-main-menu-dropdown>
       <button
         *ngIf="showScope"
-        mat-button
         [matMenuTriggerFor]="mainMenuDropdown.dropdown.menu"
         [disabled]="!canOpen"
+        cdkMonitorElementFocus
         class="menuButton mat-button-no-uppercase"
         [class.clickable]="canOpen"
         title="{{ 'CHOOSEENVIRONMENT' | translate }}"
@@ -37,9 +37,9 @@
       ></es-main-menu-sidebar>
       <button
         *ngIf="showScope"
-        mat-button
         (click)="mainMenuSidebar.toggle()"
         [disabled]="!canOpen"
+        cdkMonitorElementFocus
         class="menuButton mat-button-no-uppercase"
         [class.clickable]="canOpen"
         title="{{ 'CHOOSEENVIRONMENT' | translate }}"

@@ -27,6 +27,13 @@
         padding-left: 0;
         li {
             .mat-mdc-menu-item {
+                .mdc-list-item__primary-text {
+                    display: flex;
+                    align-items: center;
+                    i {
+                        padding-right: 10px;
+                    }
+                }
                 &:hover:not([disabled]),
                 &.cdk-focused {
                     color: var(--itemSelectedTextColor);

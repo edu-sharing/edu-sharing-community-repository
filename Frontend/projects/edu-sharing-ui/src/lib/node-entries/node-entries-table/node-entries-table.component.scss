@@ -47,8 +47,9 @@ mat-cell {
         min-width: $minColumnWidth;
     }
     &.mat-column-select {
-        flex: 0 54px;
-        min-width: 54px;
+        flex: 0 58px;
+        min-width: 58px;
+        padding-left: 14px;
     }
     &.mat-column-icon {
         flex: 0 85px;

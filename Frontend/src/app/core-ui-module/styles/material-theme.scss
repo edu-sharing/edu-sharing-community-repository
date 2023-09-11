@@ -334,10 +334,24 @@ mat-label,
 .mat-autocomplete-high {
     max-height: 350px;
 }
-.mat-checkbox-inner-container {
-    .mat-checkbox-frame {
-        border-color: $primary;
-        background-color: #fff;
+.mat-mdc-checkbox {
+    .mdc-checkbox__background {
+        border-color: $primary !important;
+        background-color: #fff !important;
+
+        .mdc-checkbox__checkmark {
+            color: #fff !important;
+        }
+    }
+    &.mat-mdc-checkbox-checked {
+        .mdc-checkbox__background {
+            background-color: $primary !important;
+            .mdc-checkbox__checkmark,
+            .mdc-checkbox__mixedmark {
+                color: #fff !important;
+                border-color: #fff !important;
+            }
+        }
     }
 }
 .mat-radio-container {
@@ -345,7 +359,7 @@ mat-label,
         border-color: $primary;
     }
 }
-.mat-checkbox-label {
+.mat-mdc-checkbox-label {
     line-height: 17pt !important;
     font-size: 1rem;
     color: $textMain;
@@ -353,7 +367,7 @@ mat-label,
         line-height: normal !important;
     }
 }
-.mat-checkbox-disabled {
+.mat-mdc-checkbox-disabled {
     $disabled-color: #919191; // 3:1 on #fafafa (fill-color of checkmark)
     &.mat-checkbox-checked,
     &.mat-checkbox-indeterminate {
@@ -367,7 +381,7 @@ mat-label,
         }
     }
 }
-.mat-checkbox.cdk-keyboard-focused .mat-focus-indicator {
+.mat-mdc-checkbox.cdk-keyboard-focused .mat-focus-indicator {
     @include setGlobalKeyboardFocus();
 }
 .mat-flat-button,

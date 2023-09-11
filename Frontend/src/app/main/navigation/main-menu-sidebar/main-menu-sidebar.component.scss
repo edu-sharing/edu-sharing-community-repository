@@ -26,6 +26,7 @@ $licenseInfoHeight: 40px;
             z-index: 2;
             color: #fff;
             border-radius: 50%;
+            width: 66px;
             height: 66px;
         }
         .top {
@@ -43,6 +44,7 @@ $licenseInfoHeight: 40px;
                 color: #fff;
                 a {
                     color: unset;
+                    text-decoration: none;
                 }
                 es-user-avatar {
                     display: flex;
@@ -51,6 +53,7 @@ $licenseInfoHeight: 40px;
                 i {
                     font-size: 50pt;
                 }
+
                 .username {
                     font-size: 120%;
                     overflow: hidden;
@@ -68,9 +71,11 @@ $licenseInfoHeight: 40px;
         justify-content: flex-end;
         align-items: center;
         padding: 0 20px;
-        width: 100%;
+        width: calc(100% - 40px);
         height: $licenseInfoHeight;
-        color: $textLight;
+        ::ng-deep span {
+            color: $textLight;
+        }
         font-size: 90%;
         @include clickable();
     }
