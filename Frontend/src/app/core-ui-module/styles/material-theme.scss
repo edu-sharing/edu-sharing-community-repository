@@ -321,6 +321,13 @@ mat-label,
 .mat-autocomplete-high {
     max-height: 350px;
 }
+// improve default positioning of outlined fields with label
+.mat-mdc-text-field-wrapper.mdc-text-field--outlined {
+    .mat-mdc-form-field-infix {
+        padding-top: 18px;
+        min-height: unset;
+    }
+}
 .mat-mdc-checkbox {
     .mdc-checkbox__background {
         border-color: $primary !important;

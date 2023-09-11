@@ -16,7 +16,6 @@ mat-form-field {
     background: $cardLightBackground;
     display: flex;
     flex-direction: column;
-    width: calc(100% + #{$cardPadding * 2});
     .breadcrumb-group {
         display: flex;
         > es-breadcrumbs {
