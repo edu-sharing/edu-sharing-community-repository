@@ -16,9 +16,15 @@
     }
 }
 
-.mat-tab-group {
+.mat-mdc-tab-group {
+    height: 100%;
     flex-grow: 1;
     min-height: 0;
+    ::ng-deep {
+        .mat-mdc-tab-body-wrapper {
+            height: 100%;
+        }
+    }
 }
 
 .advancedPermission {
@@ -36,7 +42,6 @@
 .group {
     position: relative;
     display: flex;
-    width: 100%;
     padding: 10px 20px;
 }
 
@@ -117,6 +122,9 @@
         display: flex;
         flex-wrap: wrap;
         width: 100%;
+        mat-chip {
+            font-weight: bold;
+        }
     }
     .typeButton {
         display: flex;
@@ -140,8 +148,6 @@
     display: flex;
     background: #eee;
     border-radius: 25px;
-    padding-left: 15px;
-    padding-right: 5px;
     margin-bottom: 6px;
     align-items: center;
     es-share-dialog-permission {

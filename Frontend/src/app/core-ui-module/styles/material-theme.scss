@@ -23,6 +23,8 @@ $custom-typography: mat.define-typography-config(
     $font-family: $primaryFontFamily,
     $body-1: mat.define-typography-level(100%, normal, 400),
     $body-2: mat.define-typography-level(100%, normal, 400),
+    // mat-optgroups labels
+    $subtitle-1: mat.define-typography-level(90%, normal, 600),
     // mat-table cells
     $subtitle-2: mat.define-typography-level(90%, normal, 600),
     // mat-table header
@@ -136,26 +138,11 @@ mat-button-toggle-group {
     color: $textMain !important;
     font-weight: bold;
 }
-.mat-tab-labels {
-    background-color: $actionDialogBackground;
-    .mat-tab-label {
-        &.cdk-keyboard-focused {
-            @include setGlobalKeyboardFocus('border');
-        }
-        &.mat-tab-label-active {
-            opacity: 0.9;
-        }
-        &.mat-tab-disabled {
-            // Disabled styles are already reflected via label color, don't further reduce contrast.
-            opacity: 1;
-        }
-        .tab-icon {
-            margin-right: 5px;
-        }
+.mdc-tab__content {
+    .mdc-tab__text-label {
+        display: flex;
+        gap: 10px; // padding for icons
     }
-}
-.mat-tab-group .mat-ink-bar {
-    height: 4px;
 }
 .mat-tab-group.mat-dark {
     .mat-tab-header {
@@ -384,14 +371,10 @@ mat-label,
 .mat-mdc-checkbox.cdk-keyboard-focused .mat-focus-indicator {
     @include setGlobalKeyboardFocus();
 }
-.mat-flat-button,
-.mat-raised-button {
-    min-height: 36px;
+.mat-mdc-raised-button {
+    color: $primary !important;
 }
-.mat-raised-button {
-    color: $primary;
-}
-.mat-button.mat-cancel {
+.mat-mdc-button.mat-cancel {
     color: $textMediumLight;
     &:hover {
         color: $primary;
@@ -423,9 +406,11 @@ button {
 .mat-calendar-table-header-divider {
     display: none;
 }
-.mat-chip {
-    i {
-        font-size: 1.45rem;
+.mat-mdc-standard-chip:not(.mdc-evolution-chip--disabled) {
+    background-color: rgb(var(--palette-primary-100)) !important;
+    .mat-mdc-chip-remove {
+        color: $primary !important;
+        opacity: 1 !important;
     }
 }
 .mat-option {

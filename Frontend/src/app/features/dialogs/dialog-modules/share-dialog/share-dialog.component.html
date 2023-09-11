@@ -30,8 +30,8 @@
       </div>
 
       <div class="group groupToInvite" *ngIf="getNewInvitedAuthorities().length">
-        <mat-chip-listbox class="toInvite">
-          <mat-chip-option
+        <mat-chip-set class="toInvite">
+          <mat-chip
             *ngFor="let permission of getNewInvitedAuthorities()"
             (removed)="removePermission(permission)"
           >
@@ -42,8 +42,8 @@
               }}</span>
             </div>
             <i matChipRemove esIcon="cancel"></i>
-          </mat-chip-option>
-        </mat-chip-listbox>
+          </mat-chip>
+        </mat-chip-set>
         <div class="typeButton" *ngIf="getNewInvitedAuthorities().length">
           <button
             mat-raised-button

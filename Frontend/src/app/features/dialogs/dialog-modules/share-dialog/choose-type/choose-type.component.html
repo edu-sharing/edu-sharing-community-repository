@@ -7,12 +7,10 @@
   id="es-share-dialog-choose-type-menu"
   [attr.aria-label]="ariaLabel"
 >
-  <button
+  <mat-option
     *ngFor="let option of _options"
     esWorkspaceShareFocusableOption
     role="menuitemradio"
-    mat-button
-    class="mat-button-no-uppercase"
     (click)="_setType(option.id)"
     [attr.aria-checked]="_contains(option.id)"
     [attr.aria-label]="option.label | translate"
@@ -22,7 +20,7 @@
     <div><i [esIcon]="option.icon"></i> {{ option.label | translate }}</div>
     <i icon="check" class="selected" *ngIf="_contains(option.id)"></i>
     <p>{{ option.description | translate }}</p>
-  </button>
+  </mat-option>
   <hr class="cdk-visually-hidden" />
   <div class="publish-toggle" *ngIf="true">
     <!-- <div class="publish-toggle" *ngIf="!isDirectory && canPublish"> -->

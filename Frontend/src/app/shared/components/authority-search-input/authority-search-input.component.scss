@@ -8,10 +8,23 @@ form {
 .authority-search-input {
     width: 100%;
     .material-icons {
+        padding-left: 6px;
         color: $textLight;
+    }
+    es-spinner-small {
+        display: flex;
+        padding-right: 10px;
     }
     mat-hint {
         margin-top: 15px;
+    }
+    ::ng-deep {
+        .mat-mdc-text-field-wrapper {
+            height: 50px;
+        }
+        .mat-mdc-form-field-infix {
+            padding-top: 18px;
+        }
     }
 }
 
@@ -25,13 +38,18 @@ es-user-avatar {
         color: $textMediumLight;
     }
 }
-.mat-optgroup ::ng-deep .mat-optgroup-label {
-    display: flex;
-    align-items: flex-end;
-    height: $optionHeight;
+.mat-mdc-optgroup ::ng-deep .mat-mdc-optgroup-label {
+    > span {
+        color: $textMediumLight;
+    }
 }
 
 .authority-search-input-option {
+    ::ng-deep {
+        .mdc-list-item__primary-text {
+            width: 100%;
+        }
+    }
     es-authority-row {
         width: 100%;
     }
