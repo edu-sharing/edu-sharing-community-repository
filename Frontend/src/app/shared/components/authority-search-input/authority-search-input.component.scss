@@ -40,6 +40,7 @@ es-user-avatar {
 }
 .mat-mdc-optgroup ::ng-deep .mat-mdc-optgroup-label {
     > span {
+        font-weight: bold;
         color: $textMediumLight;
     }
 }

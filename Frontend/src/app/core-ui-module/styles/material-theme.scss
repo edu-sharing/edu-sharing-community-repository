@@ -23,8 +23,8 @@ $custom-typography: mat.define-typography-config(
     $font-family: $primaryFontFamily,
     $body-1: mat.define-typography-level(100%, normal, 400),
     $body-2: mat.define-typography-level(100%, normal, 400),
-    // mat-optgroups labels
-    $subtitle-1: mat.define-typography-level(90%, normal, 600),
+    // mat-optgroups labels, input placeholder
+    $subtitle-1: mat.define-typography-level(90%, normal, 400),
     // mat-table cells
     $subtitle-2: mat.define-typography-level(90%, normal, 600),
     // mat-table header
