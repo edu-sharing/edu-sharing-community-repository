@@ -10,6 +10,9 @@ mat-form-field {
 .input-wrapper {
     display: flex;
     flex-grow: 1;
+    button {
+        margin: -16px;
+    }
 }
 
 .mat-select-arrow {

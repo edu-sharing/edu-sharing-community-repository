@@ -506,12 +506,17 @@ es-mds .mdsEmbedded {
   angular es-mds
  */
 
-.mat-autocomplete-panel,
+.mat-mdc-autocomplete-panel,
 .suggestion-card,
 es-mds-editor-widget-facet-list {
     mark {
         font-weight: bold;
         color: $primary;
         background-color: transparent;
+    }
+}
+.mat-mdc-autocomplete-panel {
+    span {
+        color: $primary;
     }
 }

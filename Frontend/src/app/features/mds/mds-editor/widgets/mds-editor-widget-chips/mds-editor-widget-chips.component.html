@@ -80,7 +80,8 @@
         (blur)="onBlurInput($event)"
       />
       <button
-        mat-icon-button.0.
+        mat-icon-button
+        color="primary"
         class="mat-button-select-arrow"
         *ngIf="showDropdownArrow"
         (click)="toggleAutoCompletePanel()"
@@ -90,7 +91,7 @@
         <!-- @TODO removed with angular 15
                   (keydown.tab)="chipList._allowFocusEscape()"
         -->
-        <span class="mat-select-arrow"></span>
+        <i esIcon class="mat-select-arrow">keyboard_arrow_down</i>
       </button>
     </div>
   </mat-chip-grid>
