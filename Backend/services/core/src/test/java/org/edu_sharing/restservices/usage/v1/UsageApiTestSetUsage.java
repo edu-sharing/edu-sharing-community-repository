@@ -10,7 +10,6 @@ import org.edu_sharing.restservices.login.v1.model.Login;
 import org.edu_sharing.restservices.shared.UserProfileAppAuth;
 import org.edu_sharing.restservices.usage.v1.model.Usages;
 import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.filter.LoggingFilter;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -20,12 +19,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Properties;
 import java.util.logging.Logger;
+import org.glassfish.jersey.logging.LoggingFeature;
 
 public class UsageApiTestSetUsage {
 
     public static void main(String[] args) {
         java.util.logging.Logger jaxlogger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-        Client client = ClientBuilder.newClient(new ClientConfig().register(new LoggingFilter(jaxlogger,true)));
+        Client client = ClientBuilder.newClient(new ClientConfig().register(new LoggingFeature(jaxlogger)));
 
         String username = "admin";
         try {

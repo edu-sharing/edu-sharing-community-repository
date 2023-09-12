@@ -9,7 +9,7 @@ import org.edu_sharing.restservices.login.v1.model.AuthenticationToken;
 import org.edu_sharing.restservices.login.v1.model.Login;
 import org.edu_sharing.restservices.shared.UserProfileAppAuth;
 import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.filter.LoggingFilter;
+import org.glassfish.jersey.logging.LoggingFeature;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -24,7 +24,7 @@ public class LoginApiTestAppAuth {
 
     public static void main(String[] args) {
         java.util.logging.Logger jaxlogger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-        Client client = ClientBuilder.newClient(new ClientConfig().register(new LoggingFilter(jaxlogger,true)));
+        Client client = ClientBuilder.newClient(new ClientConfig().register(new LoggingFeature(jaxlogger)));
 
         String username = "admin";
         try {
