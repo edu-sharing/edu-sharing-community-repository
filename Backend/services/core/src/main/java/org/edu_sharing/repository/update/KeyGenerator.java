@@ -73,6 +73,8 @@ public class KeyGenerator {
 
 			}
 
+			ApplicationInfoList.refresh();
+
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
