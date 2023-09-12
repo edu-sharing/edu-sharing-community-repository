@@ -42,7 +42,7 @@ public class SQLUpdater implements UpdateFactory {
                     UpdateFactoryInfo updateInfo = new UpdateFactoryInfo(
                             ID + script,
                             "SQLUpdater to run sql scripts defined in the repository.database.scripts config",
-                            false,
+                            true,
                             100000 + i,
                             true,
                             false,

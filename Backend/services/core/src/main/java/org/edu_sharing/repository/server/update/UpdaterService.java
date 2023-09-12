@@ -150,7 +150,11 @@ public class UpdaterService implements ApplicationContextAware, ApplicationListe
             if (!x.isAuto()) {
                 continue;
             }
-            executeUpdate(x, false);
+            try {
+                executeUpdate(x, false);
+            }catch (Exception ex){
+                log.error("Update failed {}:", x.getId(), ex);
+            }
         }
     }
 
