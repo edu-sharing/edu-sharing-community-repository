@@ -130,7 +130,7 @@ export class WorkspaceExplorerComponent implements OnDestroy {
               RestConstants.VIRTUAL_PROP_USAGECOUNT,*/
             ],sortBy:[this.sortBy],sortAscending:this.sortAscending};
         if(this._searchQuery) {
-            const query='*'+this._searchQuery+'*';
+            const query = this._searchQuery;
             this.lastRequestSearch=true;
             /*this.search.searchByProperties([RestConstants.NODE_ID,RestConstants.CM_PROP_TITLE,RestConstants.CM_NAME,RestConstants.LOM_PROP_DESCRIPTION,RestConstants.LOM_PROP_GENERAL_KEYWORD],
               [query,query,query,query,query],[],RestConstants.COMBINE_MODE_OR,RestConstants.CONTENT_TYPE_FILES_AND_FOLDERS, request).subscribe((data : NodeList) => this.addNodes(data,true));*/

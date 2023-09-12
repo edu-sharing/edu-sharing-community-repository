@@ -43,7 +43,7 @@ public class Edu_SharingDeletedContentBackupCleanerListener  implements ContentS
     	 * edu-sharing customization check source store
     	 */
     	
-    	logger.error("sourceStore.getClass().getName():" + sourceStore.getClass().getName() + " allowedSourceStore:" + allowedSourceStore.getClass().getName());
+    	logger.debug("sourceStore.getClass().getName():" + sourceStore.getClass().getName() + " allowedSourceStore:" + allowedSourceStore.getClass().getName());
     	
     	if(!sourceStore.equals(allowedSourceStore)){
     		return;
