@@ -7,8 +7,10 @@
   (onCancel)="cancel()"
 >
   <div *ngIf="_node" class="variant-content">
-    <label for="variantName">{{ 'NODE_VARIANT.NEW_VARIANT' | translate }}</label>
-    <input type="text" id="variantName" [(ngModel)]="variantName" />
+    <mat-form-field>
+      <mat-label for="variantName">{{ 'NODE_VARIANT.NEW_VARIANT' | translate }}</mat-label>
+      <input matInput type="text" id="variantName" [(ngModel)]="variantName" />
+    </mat-form-field>
     <es-info-message
       *ngIf="licenseWarning"
       mode="warning"
