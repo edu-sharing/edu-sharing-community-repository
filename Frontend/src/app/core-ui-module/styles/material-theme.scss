@@ -489,13 +489,14 @@ label .label-secondary {
     }
 }
 .mat-card-subtitle,
-.mat-hint,
+mat-hint,
 .mat-slide-toggle-content {
     color: $textLight;
 }
 // prevent umlauts from cutting off
-.mat-hint,
-.mat-error {
+mat-hint,
+mat-error {
+    font-size: $fontSizeSmall;
     line-height: 1.5;
 }
 

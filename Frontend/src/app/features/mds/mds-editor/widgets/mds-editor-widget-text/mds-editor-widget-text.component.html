@@ -30,13 +30,19 @@
   />
 </es-mds-editor-widget-container>
 
-<es-mds-editor-widget-container
-  *ngIf="widget.definition.type === 'textarea'"
-  [widget]="widget"
-  [label]="false"
-  [valueType]="valueType"
-  [control]="formControl"
->
+<!-- es-mds-editor-widget-container causes issues with textarea -->
+<mat-form-field *ngIf="widget.definition.type === 'textarea'" class="mat-form-textarea">
+  <mat-label>
+    {{ widget.definition.caption }}
+    <!-- We use our own required marker to show it even on disabled controls for bulk editing.
+  -->
+    <span
+      *ngIf="widget.definition.isRequired === 'mandatory'"
+      class="required-marker"
+      aria-hidden="true"
+      >*</span
+    >
+  </mat-label>
   <textarea matInput #textAreaElement *ngIf="showBulkMixedValues()" disabled>{{
     'MDS.DIFFERENT_VALUES' | translate
   }}</textarea>
@@ -49,4 +55,19 @@
     (blur)="blur()"
     (keydown.enter)="submit()"
   ></textarea>
-</es-mds-editor-widget-container>
+  <mat-hint [hidden]="!widget.definition.bottomCaption">
+    {{ widget.definition.bottomCaption }}
+  </mat-hint>
+  <mat-error [hidden]="!formControl.errors?.required">
+    <ng-container *ngTemplateOutlet="error"></ng-container>
+  </mat-error>
+</mat-form-field>
+
+<ng-template #error>
+  <ng-container *ngIf="widget.definition.isRequired === 'mandatory'">
+    {{ 'MDS.REQUIRED_MESSAGE' | translate }}
+  </ng-container>
+  <ng-container *ngIf="widget.definition.isRequired === 'mandatoryForPublish'">
+    {{ 'MDS.REQUIRED_FOR_PUBLISH_MESSAGE' | translate }}
+  </ng-container>
+</ng-template>
