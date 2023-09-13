@@ -22,11 +22,12 @@
     [formControl]="chipsControl"
     [attr.aria-labelledby]="chipsControl.value?.length > 0 ? container.labelId : null"
     esOnAttributeChange="aria-describedby"
+    class="chip-grid"
     (attributeChange)="input.setAttribute('aria-describedby', $event)"
   >
     <!-- We mark all chips as selected because NVDA will announce "not selected" for each item
     otherwise. It announces nothing (!) for selected items. -->
-    <mat-chip-row
+    <mat-chip
       #chip
       *ngFor="let value of chipsControl.value"
       [value]="value"
@@ -41,7 +42,7 @@
     >
       <span class="mat-chip-label" [innerHTML]="value.label | escapeHtml"></span>
       <mat-icon matChipRemove>cancel</mat-icon>
-    </mat-chip-row>
+    </mat-chip>
     <ng-container *ngIf="getSuggestions()?.length">
       <mat-chip-row
         class="mat-chip-suggestion"

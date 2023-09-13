@@ -9,10 +9,19 @@ mat-form-field {
 
 .input-wrapper {
     display: flex;
+    align-items: center;
     flex-grow: 1;
+    min-height: 30px;
     button {
-        margin: -16px;
+        // margin: -16px -16px -16px 0;
+        position: absolute;
+        bottom: 10%;
+        right: -10px;
     }
+}
+.chip-grid {
+    // spacing for drop-down button
+    padding-right: 35px;
 }
 
 .mat-select-arrow {

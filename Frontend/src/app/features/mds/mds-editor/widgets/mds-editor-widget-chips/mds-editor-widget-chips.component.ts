@@ -39,6 +39,7 @@ import { DisplayValue } from '../DisplayValues';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
 import { RangedValueSuggestionData, SuggestionStatus } from 'ngx-edu-sharing-graphql';
+import { Helper } from '../../../../../core-module/rest/helper';
 
 @Component({
     templateUrl: './mds-editor-widget-chips.component.html',
@@ -130,7 +131,10 @@ export class MdsEditorWidgetChipsComponent
             this.autocompleteValues = combineLatest([
                 filteredValues,
                 this.autocompleteIsInhibited,
-            ]).pipe(map(([values, inhibit]) => (inhibit ? null : values)));
+            ]).pipe(
+                distinctUntilChanged((a, b) => Helper.objectEquals(a, b)),
+                map(([values, inhibit]) => (inhibit ? null : values)),
+            );
             this.shouldShowNoMatchingValuesNotice = combineLatest([
                 this.autocompleteValues,
                 this.inputControl.valueChanges,
@@ -190,7 +194,11 @@ export class MdsEditorWidgetChipsComponent
     onBlurInput(event: FocusEvent): void {
         const target = event.relatedTarget as HTMLElement;
         // ignore mat option focus to prevent resetting before selection is done
-        if (target?.tagName === 'MAT-OPTION' || target === this.input.nativeElement) {
+        if (
+            target == null ||
+            target?.tagName === 'MAT-OPTION' ||
+            target === this.input.nativeElement
+        ) {
             return;
         }
         this.inputControl.setValue(null);
