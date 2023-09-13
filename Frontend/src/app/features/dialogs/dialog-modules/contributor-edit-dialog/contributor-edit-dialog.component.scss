@@ -40,7 +40,7 @@ input[type='number']::-webkit-outer-spin-button {
 
 .author-checkbox {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     margin-bottom: 10px;
 }
 
@@ -61,10 +61,13 @@ h2 {
         padding-bottom: 10px;
     }
 }
-
+.author-group {
+    padding: 15px 20px 30px 20px;
+}
 .table {
     display: flex;
-    width: 100%;
+    flex-grow: 1;
+    grid-gap: 10px;
     mat-form-field {
         width: 100%;
     }
@@ -72,17 +75,17 @@ h2 {
         display: flex;
     }
     .title {
-        width: 20%;
+        width: 0;
+        flex-grow: 2;
     }
     .givenname,
     .surname {
-        width: 40%;
+        width: 0;
+        flex-grow: 4;
     }
 
     > div {
-        display: table-cell;
-        padding: 0 10px;
-        width: 50%;
+        flex-grow: 1;
     }
     .datePicker {
         display: flex;

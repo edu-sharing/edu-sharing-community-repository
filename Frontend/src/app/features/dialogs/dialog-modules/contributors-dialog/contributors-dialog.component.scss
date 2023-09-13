@@ -14,6 +14,13 @@
 .group {
     padding-bottom: 10px;
 }
+mat-chip-grid {
+    mat-chip {
+        ::ng-deep .mat-mdc-chip-action {
+            @include clickable();
+        }
+    }
+}
 
 .metadataHeading {
     padding-top: 30px;

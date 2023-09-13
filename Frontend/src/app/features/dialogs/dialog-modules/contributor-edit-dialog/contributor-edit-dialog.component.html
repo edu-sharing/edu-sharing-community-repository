@@ -12,159 +12,166 @@
 <!-- FIXME: Using a tab group for choosing an option is misleading UI. -->
 <mat-tab-group mat-stretch-tabs [(selectedIndex)]="editType">
   <mat-tab label="{{ 'WORKSPACE.CONTRIBUTOR.MODE_PERSON' | translate }}">
-    <div class="table">
-      <div class="author-checkbox">
-        <mat-checkbox [(ngModel)]="userAuthor" (ngModelChange)="setVCardAuthor($event)">{{
-          'WORKSPACE.CONTRIBUTOR.CHECKBOX_ME' | translate
-        }}</mat-checkbox>
+    <div class="author-group">
+      <div class="table">
+        <div class="author-checkbox">
+          <mat-checkbox [(ngModel)]="userAuthor" (ngModelChange)="setVCardAuthor($event)">{{
+            'WORKSPACE.CONTRIBUTOR.CHECKBOX_ME' | translate
+          }}</mat-checkbox>
+        </div>
       </div>
-    </div>
-    <div class="table">
-      <div class="title">
-        <mat-form-field>
-          <mat-label>{{ 'VCARD.Title' | translate }}</mat-label>
-          <input matInput id="title" [(ngModel)]="vCard.title" [disabled]="editDisabled" />
-        </mat-form-field>
-      </div>
-      <div class="givenname">
-        <mat-form-field>
-          <mat-label>{{ 'VCARD.Givenname' | translate }}</mat-label>
-          <input
-            matInput
-            id="givenname"
-            [(ngModel)]="vCard.givenname"
-            [disabled]="editDisabled"
-            (ngModelChange)="setFullName()"
-            [matAutocomplete]="autoPerson"
-          />
-        </mat-form-field>
-      </div>
-      <div class="surname">
-        <mat-form-field>
-          <mat-label>{{ 'VCARD.Surname' | translate }}</mat-label>
-          <input
-            matInput
-            id="surname"
-            [(ngModel)]="vCard.surname"
-            [disabled]="editDisabled"
-            (ngModelChange)="setFullName()"
-            [matAutocomplete]="autoPerson"
-          />
-        </mat-form-field>
-      </div>
+      <div class="table">
+        <div class="title">
+          <mat-form-field>
+            <mat-label>{{ 'VCARD.Title' | translate }}</mat-label>
+            <input matInput id="title" [(ngModel)]="vCard.title" [disabled]="editDisabled" />
+          </mat-form-field>
+        </div>
+        <div class="givenname">
+          <mat-form-field>
+            <mat-label>{{ 'VCARD.Givenname' | translate }}</mat-label>
+            <input
+              matInput
+              id="givenname"
+              [(ngModel)]="vCard.givenname"
+              [disabled]="editDisabled"
+              (ngModelChange)="setFullName()"
+              [matAutocomplete]="autoPerson"
+            />
+          </mat-form-field>
+        </div>
+        <div class="surname">
+          <mat-form-field>
+            <mat-label>{{ 'VCARD.Surname' | translate }}</mat-label>
+            <input
+              matInput
+              id="surname"
+              [(ngModel)]="vCard.surname"
+              [disabled]="editDisabled"
+              (ngModelChange)="setFullName()"
+              [matAutocomplete]="autoPerson"
+            />
+          </mat-form-field>
+        </div>
 
-      <mat-autocomplete
-        #autoPerson="matAutocomplete"
-        class="mat-autocomplete-person"
-        (optionSelected)="useVCardSuggestion($event)"
-      >
-        <mat-option *ngFor="let person of suggestionPersons$ | async" [value]="person.vcard">
-          <div class="mat-option-primary">
-            {{ person.vcard?.title }} {{ person.vcard?.givenname }} {{ person.vcard?.surname }}
-          </div>
-          <div class="mat-option-secondary">{{ person.vcard?.email }}</div>
-        </mat-option>
-      </mat-autocomplete>
-    </div>
-    <button mat-button color="primary" (click)="showPersistentIds = !showPersistentIds">
-      <i esIcon="fingerprint"></i>
-      <span>{{ 'WORKSPACE.CONTRIBUTOR.PERSISTENT_IDS' | translate }}</span>
-      <i esIcon="keyboard_arrow_down" *ngIf="showPersistentIds"></i>
-      <i esIcon="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
-    </button>
-    <div *ngIf="showPersistentIds" [@overlay]="more" class="persistent-id">
-      <div class="table">
-        <mat-form-field floatLabel="always">
-          <mat-label>{{ 'VCARD.X-ORCID' | translate }}</mat-label>
-          <input
-            matInput
-            id="orcid"
-            [(ngModel)]="vCard.orcid"
-            [disabled]="editDisabled"
-            pattern="https?:\/\/orcid.org\/\d{4}(-\d{4}){2}((-\d{3}X)|(-\d{4}))"
-            placeholder="http://orcid.org/0000-0000-0000-0000"
-          />
-          <mat-hint innerHTML="{{ 'VCARD_HINT.X-ORCID' | translate }}"></mat-hint>
-        </mat-form-field>
+        <mat-autocomplete
+          #autoPerson="matAutocomplete"
+          class="mat-autocomplete-person"
+          (optionSelected)="useVCardSuggestion($event)"
+        >
+          <mat-option *ngFor="let person of suggestionPersons$ | async" [value]="person.vcard">
+            <div class="mat-option-primary">
+              {{ person.vcard?.title }} {{ person.vcard?.givenname }} {{ person.vcard?.surname }}
+            </div>
+            <div class="mat-option-secondary">{{ person.vcard?.email }}</div>
+          </mat-option>
+        </mat-autocomplete>
       </div>
-      <div class="table">
-        <mat-form-field floatLabel="always">
-          <mat-label>{{ 'VCARD.X-GND-URI' | translate }}</mat-label>
-          <input
-            matInput
-            id="gnduri"
-            [(ngModel)]="vCard.gnduri"
-            [disabled]="editDisabled"
-            pattern="https?:\/\/d-nb.info\/gnd\/(\d|x|X)+"
-            placeholder="http://d-nb.info/gnd/0000000000"
-          />
-          <mat-hint innerHTML="{{ 'VCARD_HINT.X-GND-URI' | translate }}"></mat-hint>
-        </mat-form-field>
+      <button mat-button color="primary" (click)="showPersistentIds = !showPersistentIds">
+        <i esIcon="fingerprint"></i>
+        <span>{{ 'WORKSPACE.CONTRIBUTOR.PERSISTENT_IDS' | translate }}</span>
+        <i esIcon="keyboard_arrow_down" *ngIf="showPersistentIds"></i>
+        <i esIcon="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
+      </button>
+      <div *ngIf="showPersistentIds" [@overlay]="more" class="persistent-id">
+        <div class="table">
+          <mat-form-field floatLabel="always">
+            <mat-label>{{ 'VCARD.X-ORCID' | translate }}</mat-label>
+            <input
+              matInput
+              id="orcid"
+              [(ngModel)]="vCard.orcid"
+              [disabled]="editDisabled"
+              pattern="https?:\/\/orcid.org\/\d{4}(-\d{4}){2}((-\d{3}X)|(-\d{4}))"
+              placeholder="http://orcid.org/0000-0000-0000-0000"
+            />
+            <mat-hint innerHTML="{{ 'VCARD_HINT.X-ORCID' | translate }}"></mat-hint>
+          </mat-form-field>
+        </div>
+        <div class="table">
+          <mat-form-field floatLabel="always">
+            <mat-label>{{ 'VCARD.X-GND-URI' | translate }}</mat-label>
+            <input
+              matInput
+              id="gnduri"
+              [(ngModel)]="vCard.gnduri"
+              [disabled]="editDisabled"
+              pattern="https?:\/\/d-nb.info\/gnd\/(\d|x|X)+"
+              placeholder="http://d-nb.info/gnd/0000000000"
+            />
+            <mat-hint innerHTML="{{ 'VCARD_HINT.X-GND-URI' | translate }}"></mat-hint>
+          </mat-form-field>
+        </div>
+        <es-info-message *ngIf="vCard.orcid || vCard.gnduri">{{
+          'WORKSPACE.CONTRIBUTOR.PERSISTENT_ID_SET' | translate
+        }}</es-info-message>
       </div>
-      <es-info-message *ngIf="vCard.orcid || vCard.gnduri">{{
-        'WORKSPACE.CONTRIBUTOR.PERSISTENT_ID_SET' | translate
-      }}</es-info-message>
     </div>
   </mat-tab>
 
   <mat-tab label="{{ 'WORKSPACE.CONTRIBUTOR.MODE_ORG' | translate }}">
-    <div class="table">
-      <mat-form-field>
-        <mat-label>{{ 'VCARD.Org' | translate }}</mat-label>
-        <input
-          matInput
-          id="org"
-          [(ngModel)]="vCard.org"
-          (ngModelChange)="setOrgName()"
-          [disabled]="editDisabled"
-          [matAutocomplete]="autoOrg"
-        />
-        <mat-autocomplete #autoOrg="matAutocomplete" (optionSelected)="useVCardSuggestion($event)">
-          <mat-option *ngFor="let org of suggestionOrgs$ | async" [value]="org.vcard">
-            <div class="mat-option-primary">{{ org.vcard?.org }}</div>
-            <div class="mat-option-secondary">{{ org.vcard?.email }}</div>
-          </mat-option>
-        </mat-autocomplete>
-      </mat-form-field>
-    </div>
-    <button mat-button color="primary" (click)="showPersistentIds = !showPersistentIds">
-      <i esIcon="fingerprint"></i>
-      <span>{{ 'WORKSPACE.CONTRIBUTOR.PERSISTENT_IDS' | translate }}</span>
-      <i esIcon="keyboard_arrow_down" *ngIf="showPersistentIds"></i>
-      <i esIcon="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
-    </button>
-    <div *ngIf="showPersistentIds" [@overlay]="more" class="persistent-id">
+    <div class="author-group">
       <div class="table">
-        <mat-form-field floatLabel="always">
-          <mat-label>{{ 'VCARD.X-ROR' | translate }}</mat-label>
+        <mat-form-field>
+          <mat-label>{{ 'VCARD.Org' | translate }}</mat-label>
           <input
             matInput
-            id="ror"
-            [(ngModel)]="vCard.ror"
+            id="org"
+            [(ngModel)]="vCard.org"
+            (ngModelChange)="setOrgName()"
             [disabled]="editDisabled"
-            pattern="https?:\/\/ror.org\/.+"
-            placeholder="https://ror.org/abcdef000"
+            [matAutocomplete]="autoOrg"
           />
-          <mat-hint innerHTML="{{ 'VCARD_HINT.X-ROR' | translate }}"></mat-hint>
+          <mat-autocomplete
+            #autoOrg="matAutocomplete"
+            (optionSelected)="useVCardSuggestion($event)"
+          >
+            <mat-option *ngFor="let org of suggestionOrgs$ | async" [value]="org.vcard">
+              <div class="mat-option-primary">{{ org.vcard?.org }}</div>
+              <div class="mat-option-secondary">{{ org.vcard?.email }}</div>
+            </mat-option>
+          </mat-autocomplete>
         </mat-form-field>
       </div>
-      <div class="table">
-        <mat-form-field floatLabel="always">
-          <mat-label>{{ 'VCARD.X-Wikidata' | translate }}</mat-label>
-          <input
-            matInput
-            id="wikidata"
-            [(ngModel)]="vCard.wikidata"
-            [disabled]="editDisabled"
-            pattern="https?://www.wikidata.org/wiki/.+"
-            placeholder="https://www.wikidata.org/wiki/Q000000"
-          />
-          <mat-hint innerHTML="{{ 'VCARD_HINT.X-Wikidata' | translate }}"></mat-hint>
-        </mat-form-field>
+      <button mat-button color="primary" (click)="showPersistentIds = !showPersistentIds">
+        <i esIcon="fingerprint"></i>
+        <span>{{ 'WORKSPACE.CONTRIBUTOR.PERSISTENT_IDS' | translate }}</span>
+        <i esIcon="keyboard_arrow_down" *ngIf="showPersistentIds"></i>
+        <i esIcon="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
+      </button>
+      <div *ngIf="showPersistentIds" [@overlay]="more" class="persistent-id">
+        <div class="table">
+          <mat-form-field floatLabel="always">
+            <mat-label>{{ 'VCARD.X-ROR' | translate }}</mat-label>
+            <input
+              matInput
+              id="ror"
+              [(ngModel)]="vCard.ror"
+              [disabled]="editDisabled"
+              pattern="https?:\/\/ror.org\/.+"
+              placeholder="https://ror.org/abcdef000"
+            />
+            <mat-hint innerHTML="{{ 'VCARD_HINT.X-ROR' | translate }}"></mat-hint>
+          </mat-form-field>
+        </div>
+        <div class="table">
+          <mat-form-field floatLabel="always">
+            <mat-label>{{ 'VCARD.X-Wikidata' | translate }}</mat-label>
+            <input
+              matInput
+              id="wikidata"
+              [(ngModel)]="vCard.wikidata"
+              [disabled]="editDisabled"
+              pattern="https?://www.wikidata.org/wiki/.+"
+              placeholder="https://www.wikidata.org/wiki/Q000000"
+            />
+            <mat-hint innerHTML="{{ 'VCARD_HINT.X-Wikidata' | translate }}"></mat-hint>
+          </mat-form-field>
+        </div>
+        <es-info-message *ngIf="vCard.ror || vCard.wikidata">{{
+          'WORKSPACE.CONTRIBUTOR.PERSISTENT_ID_SET' | translate
+        }}</es-info-message>
       </div>
-      <es-info-message *ngIf="vCard.ror || vCard.wikidata">{{
-        'WORKSPACE.CONTRIBUTOR.PERSISTENT_ID_SET' | translate
-      }}</es-info-message>
     </div>
   </mat-tab>
 </mat-tab-group>
@@ -187,13 +194,10 @@
       </mat-form-field>
     </div>
     <div class="calendar">
-      <!-- FIXME: Should this really be disabled along with the form fields for the contributor's
-      data? -->
       <es-calendar
         label="{{ 'WORKSPACE.CONTRIBUTOR.DATE' | translate }}"
         [isResettable]="true"
         [(date)]="date"
-        [disabled]="editDisabled"
       ></es-calendar>
     </div>
   </div>

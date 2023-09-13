@@ -61,40 +61,6 @@ a {
 .center {
     margin: 0 auto;
 }
-.badge {
-    border-radius: 16px;
-    min-height: 32px;
-    color: $primary;
-    background-color: $buttonHoverBackground;
-    padding: 6px 13px;
-    height: auto;
-    margin-right: 10px;
-    margin-top: 10px;
-    display: inline-flex;
-    align-items: center;
-    &:focus {
-        @include setGlobalInsetFocus();
-    }
-    span {
-        display: table-cell;
-        vertical-align: middle;
-        word-break: break-all;
-    }
-    i {
-        font-size: 18px;
-        position: relative;
-        top: 0;
-        left: 7px;
-        display: table-cell;
-        vertical-align: middle;
-        &:focus {
-            @include focusShadow();
-        }
-    }
-    .badgeIconLeft {
-        left: 0;
-    }
-}
 .mat-chip-group {
     display: flex;
     flex-direction: column;
