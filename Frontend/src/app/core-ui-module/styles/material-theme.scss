@@ -386,7 +386,12 @@ mat-label,
     @include setGlobalKeyboardFocus();
 }
 .mat-mdc-raised-button {
-    color: $primary !important;
+    &:not(.mat-primary) {
+        color: $primary !important;
+    }
+    &.mat-primary {
+        color: $textOnPrimary !important;
+    }
 }
 .mat-mdc-button.mat-cancel {
     color: $textMediumLight;

@@ -278,9 +278,10 @@ $cardActionHeight: 77px;
     display: flex;
     flex-direction: column;
     @include materialShadow();
-    .title {
+    > .title {
         display: flex;
-        padding-left: $cardPadding;
+        align-items: center;
+        padding: 6px 10px 6px $cardPadding;
         font-size: 110%;
         color: $textMain;
         background-color: $workspaceMetadataBackground;

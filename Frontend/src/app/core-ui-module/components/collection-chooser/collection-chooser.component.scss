@@ -10,6 +10,7 @@
 }
 .breadcrumbs {
     display: flex;
+    align-items: center;
     padding: 10px 20px;
     button {
         margin-left: 10px;
@@ -23,6 +24,10 @@
     align-items: center;
     z-index: 101;
     pointer-events: none;
+    > button {
+        color: $primary;
+        background-color: #fff;
+    }
 }
 .show-more {
     display: flex;
@@ -66,7 +71,7 @@
 }
 .search {
     padding: 20px 20px 0 20px;
-    .mat-form-field {
+    mat-form-field {
         width: 100%;
         .mat-form-field-appearance-outline .mat-form-field-wrapper {
             margin: 0;
