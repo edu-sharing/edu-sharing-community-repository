@@ -26,7 +26,8 @@ mat-tab-group {
     }
 
     .authorFreetext {
-        width: 100%;
+        display: flex;
+        flex-grow: 1;
         margin-top: 5px;
 
         textarea {

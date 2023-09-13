@@ -6,7 +6,12 @@
   [(ngModel)]="oerMode"
   >{{ 'WORKSPACE.LICENSE.ONLY_OER' | translate }}</mat-slide-toggle
 >
-<mat-radio-group class="oerLicenses" [(ngModel)]="type" name="oerLicenses" *ngIf="oerMode">
+<mat-radio-group
+  class="oerLicenses"
+  [(ngModel)]="type"
+  name="oerLicenses mat-group-gap"
+  *ngIf="oerMode"
+>
   <fieldset>
     <legend>{{ 'LICENSE.GROUPS.CC_0' | translate }}</legend>
     <div class="oerCC0">
@@ -123,7 +128,11 @@
       </mat-radio-group>
     </div>
   </div>
-  <mat-radio-group [(ngModel)]="type" *ngIf="primaryType === 'COPYRIGHT'" class="copyright">
+  <mat-radio-group
+    [(ngModel)]="type"
+    *ngIf="primaryType === 'COPYRIGHT'"
+    class="copyright mat-group-gap"
+  >
     <div *ngIf="isAllowedLicense('COPYRIGHT_FREE')">
       <mat-radio-button value="COPYRIGHT_FREE">
         <es-multi-line-label>

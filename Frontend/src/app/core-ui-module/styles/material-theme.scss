@@ -495,7 +495,7 @@ label .label-secondary {
 }
 .mat-card-subtitle,
 mat-hint,
-.mat-slide-toggle-content {
+mat-slide-toggle .mdc-form-field label {
     color: $textLight;
 }
 // prevent umlauts from cutting off
@@ -507,11 +507,9 @@ mat-error {
 
 // Show toggle on the right place
 .toggle-reverse {
-    .mat-slide-toggle-label {
+    .mdc-form-field {
         flex-direction: row-reverse;
-    }
-    .mat-slide-toggle-content {
-        margin-right: 18px;
+        gap: 10px;
     }
 }
 .mat-slide-toggle-twoside {

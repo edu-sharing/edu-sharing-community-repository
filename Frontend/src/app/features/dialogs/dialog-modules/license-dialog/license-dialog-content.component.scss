@@ -18,6 +18,7 @@
 
 es-mds-editor-widget-author {
     flex-grow: 1;
+    padding-top: 20px;
 }
 
 .cc label {
@@ -28,20 +29,10 @@ es-mds-editor-widget-author {
     padding-bottom: 5px;
 }
 
-.cc {
-    mat-radio-group {
-        display: flex;
-        flex-direction: column;
-        mat-radio-button {
-            margin: 3px 0;
-        }
-    }
-}
-
 .cc .ccAbout {
-    text-transform: uppercase;
     text-align: center;
     font-weight: bold;
+    text-decoration: none;
 }
 
 .licenseType {
@@ -79,7 +70,6 @@ h5 {
     h4 {
         margin: 10px 0 20px 0;
     }
-    width: calc(100% + 40px);
 }
 
 .licenseName {
@@ -111,10 +101,19 @@ h5 {
     }
 }
 
-.oerLicenses {
+mat-radio-group {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden; // there might be a better solution though!
+    &.mat-group-gap {
+        gap: 20px;
+    }
     .ccAuthor {
         margin: 5px 20px;
+    }
+    mat-radio-button {
+        margin: -5px 0;
     }
 }
 
@@ -125,9 +124,12 @@ mat-radio-button {
 }
 
 .more-information-link {
-    margin-left: 48px;
-    margin-top: -10px;
+    margin-left: 64px;
+    margin-top: 0;
     margin-bottom: 20px;
+    > a {
+        text-decoration: none;
+    }
 }
 
 fieldset {
@@ -142,7 +144,9 @@ fieldset {
 }
 
 .oerSelect {
-    float: right;
+    display: flex;
+    justify-content: flex-end;
+    padding-bottom: 10px;
 }
 
 .currentLicenseIcon {
@@ -173,7 +177,9 @@ fieldset {
 
 .licenseUrl {
     margin: 10px !important;
-    text-transform: uppercase;
+    a {
+        text-decoration: none;
+    }
 }
 .authors {
     .mixed-authors {
