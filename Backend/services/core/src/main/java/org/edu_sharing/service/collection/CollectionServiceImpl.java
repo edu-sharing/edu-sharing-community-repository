@@ -959,7 +959,8 @@ public class CollectionServiceImpl implements CollectionService{
 	@Override
 	public void writePreviewImage(String collectionId,InputStream is, String mimeType) throws Exception {
 		//new ImageMagickContentTransformerWorker()
-		is=ImageTool.autoRotateImage(is,ImageTool.MAX_THUMB_SIZE);
+		is = ImageTool.verifyImage(is);
+		is = ImageTool.autoRotateImage(is,ImageTool.MAX_THUMB_SIZE);
 		client.writeContent(MCAlfrescoAPIClient.storeRef, collectionId, is, mimeType,null, CCConstants.CCM_PROP_MAP_ICON);
 		ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
