@@ -19,10 +19,15 @@ import org.apache.catalina.util.IOTools;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
-import com.drew.metadata.Metadata;
 import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.sun.star.uno.Exception;
+import org.apache.tika.config.TikaConfig;
+import org.apache.tika.detect.Detector;
+import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
+import org.apache.tika.mime.MimeTypeException;
 
 /** 
  * 
@@ -33,7 +38,7 @@ public class ImageTool {
 	public static final int MAX_THUMB_SIZE = 900;
 
 	private static int readImageOrientation(InputStream imageFile)  throws IOException, MetadataException, ImageProcessingException {
-	    Metadata metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(imageFile));
+	    com.drew.metadata.Metadata metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(imageFile));
 	    Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
 	    int orientation = 1;
 	    try {
@@ -145,5 +150,22 @@ public class ImageTool {
 		BufferedImage buffered = new BufferedImage(width,height, image.getType());
 		buffered.getGraphics().drawImage(scaled, 0, 0 , null);
 		return buffered;
+	}
+
+	/**
+	 * checks if given input stream is an image mimetype and throws an exception otherwise
+	 */
+	public static InputStream verifyImage(InputStream is) throws MimeTypeException, IOException {
+		byte[] data=org.apache.poi.util.IOUtils.toByteArray(is);
+		TikaConfig config = TikaConfig.getDefaultConfig();
+		Detector detector = config.getDetector();
+		TikaInputStream stream = TikaInputStream.get(data);
+		Metadata metadata = new Metadata();
+		MediaType mediaType = detector.detect(stream, metadata);
+		if(!mediaType.getType().equals("image")) {
+			// TODO: convert to NodeMimetypeValidationException after merge of file filter completed
+			throw new MimeTypeException("Invalid mime type for image: " + mediaType.getType() + "/" + mediaType.getSubtype());
+		}
+		return new ByteArrayInputStream(data);
 	}
 }

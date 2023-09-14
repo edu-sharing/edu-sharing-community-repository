@@ -705,6 +705,7 @@
     "LICENSE_LINK": "Lizenz verwalten",
     "TEMPLATE_LINK": "Metadaten-Vorlage verwalten",
     "CONTRIBUTOR_LINK": "Weitere Beteiligte",
+    "ERROR_PREVIEW": "Preview-Bild konnte nicht ersetzt werden. Bitte versuchen Sie eine andere Bilddatei",
     "ERROR_INVALID_TYPE_BULK": "Elemente dieses Typs können nicht im Bulk bearbeitet werden",
     "ERROR_INVALID_MDS_COMBINATION": "Elemente mit unterschiedlichen Metadatensets können nicht im Bulk bearbeitet werden",
     "ERROR_INVALID_TYPE_COMBINATION": "Elemente unterschiedlichen Dateityps (Dateien/Ordner) können nicht im Bulk bearbeitet werden",

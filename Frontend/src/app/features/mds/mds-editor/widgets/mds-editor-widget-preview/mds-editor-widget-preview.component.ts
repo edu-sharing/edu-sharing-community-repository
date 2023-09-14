@@ -1,5 +1,5 @@
-import { forkJoin as observableForkJoin, BehaviorSubject, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { forkJoin as observableForkJoin, BehaviorSubject, Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
@@ -7,6 +7,7 @@ import { FileChangeEvent } from '@angular/compiler-cli/src/perform_watch';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { RestNodeService } from '../../../../../core-module/rest/services/rest-node.service';
 import { Node } from '../../../../../core-module/rest/data-object';
+import { Toast } from '../../../../../core-ui-module/toast';
 
 @Component({
     selector: 'es-mds-editor-widget-preview',
@@ -27,6 +28,7 @@ export class MdsEditorWidgetPreviewComponent implements OnInit, NativeWidgetComp
     constructor(
         private mdsEditorValues: MdsEditorInstanceService,
         private nodeService: RestNodeService,
+        private toast: Toast,
         private sanitizer: DomSanitizer,
     ) {}
 
@@ -77,7 +79,13 @@ export class MdsEditorWidgetPreviewComponent implements OnInit, NativeWidgetComp
         return observableForkJoin(
             nodes.map((n) => this.nodeService.uploadNodePreview(n.ref.id, this.file, false)),
         )
-            .pipe(map(() => nodes))
+            .pipe(
+                map(() => nodes),
+                catchError((e) => {
+                    this.toast.error(null, 'MDS.ERROR_PREVIEW');
+                    return of(nodes);
+                }),
+            )
             .toPromise();
     }
 }

@@ -439,7 +439,7 @@ public class CollectionDao {
 			collectionClient.writePreviewImage(collectionId,is,mimeType);
 			//thumbnailService.createThumbnail(ref, QName.createQName(CCConstants.CCM_PROP_MAP_ICON), ,"collection");
 		}catch(Exception e){
-			throw new DAOException(e,collectionId);
+			throw DAOException.mapping(e);
 		}
 	}
 

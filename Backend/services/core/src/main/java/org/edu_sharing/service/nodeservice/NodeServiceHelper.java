@@ -404,7 +404,9 @@ public class NodeServiceHelper {
 					result = new NodeTool().createOrGetNodeByName(client, rootId, items);
 					cache.put(key, result);
 				}
-			}finally{
+			} catch(Throwable e) {
+				logger.error(e.getMessage(), e);
+			} finally {
 				lock.unlock();
 			}
 

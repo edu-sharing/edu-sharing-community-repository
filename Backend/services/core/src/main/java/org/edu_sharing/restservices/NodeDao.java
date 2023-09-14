@@ -1098,7 +1098,8 @@ public class NodeDao {
 	public NodeDao changePreview(InputStream is,String mimetype, boolean version) throws DAOException {
 
 		try {
-			is=ImageTool.autoRotateImage(is,ImageTool.MAX_THUMB_SIZE);
+			is = ImageTool.verifyImage(is);
+			is = ImageTool.autoRotateImage(is,ImageTool.MAX_THUMB_SIZE);
 
 			HashMap<String,String[]> props = new HashMap<>();
 			if(version){
