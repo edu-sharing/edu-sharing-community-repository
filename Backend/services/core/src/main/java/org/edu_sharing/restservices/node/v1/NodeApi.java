@@ -1536,7 +1536,8 @@ public class NodeApi  {
 	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 	    @Parameter(description = "comment, leave empty = no new version, otherwise new version is generated", required=false ) @QueryParam("versionComment")  String versionComment,
 	    @Parameter(description = "MIME-Type", required=true ) @QueryParam("mimetype")  String mimetype,
-	    @FormDataParam("file") InputStream inputStream,
+	    //@FormDataParam("file") InputStream inputStream,
+		@Parameter(description = "file", schema = @Schema( name = "file", type = "string", format = "binary")) @FormDataParam("file") InputStream inputStream,
 //	    @FormDataParam("file") FormDataContentDisposition fileDetail,
 		@Context HttpServletRequest req) {
     	
