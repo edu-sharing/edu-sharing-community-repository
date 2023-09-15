@@ -22735,7 +22735,9 @@
               "schema": {
                 "properties": {
                   "file": {
-                    "type": "object"
+                    "description": "file",
+                    "format": "binary",
+                    "type": "string"
                   }
                 },
                 "type": "object"
