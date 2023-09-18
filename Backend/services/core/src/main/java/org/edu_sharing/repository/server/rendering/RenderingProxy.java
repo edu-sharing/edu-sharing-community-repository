@@ -358,7 +358,7 @@ public class RenderingProxy extends HttpServlet {
 			String finalContentUrl = populateContentUrlParameters(contentUrl, getParameters(req), repoInfo, repoInfo.getAppId(),
 					usernameDecrypted, nodeId);
 
-			RenderingServiceData renderData = service.getData(repoInfo, nodeId, null, usernameDecrypted, options);
+			RenderingServiceData renderData = service.getData(repoInfo, nodeId, getVersion(req), usernameDecrypted, options);
 			resp.getOutputStream().write(service.getDetails(finalContentUrl, renderData).getBytes(StandardCharsets.UTF_8));
 			// track inline / lms
 			if (options.displayMode.equals(RenderingTool.DISPLAY_INLINE)) {
