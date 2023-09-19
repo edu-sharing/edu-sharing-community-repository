@@ -858,6 +858,7 @@ public class AdminApi {
 
 	@POST
 	@Path("/import/oai/xml")
+	@Consumes({ "multipart/form-data" })
 	@Operation(summary = "Import single xml via oai (for testing)")
 	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Node.class))),
 			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
