@@ -970,7 +970,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             () => {
                 this.dialogTitle = null;
                 this.globalProgress = true;
-                this.admin.cancelJob(job.jobDetail.name).subscribe(
+                this.admin.cancelJob(job.jobName).subscribe(
                     () => {
                         this.toast.toast('ADMIN.JOBS.TOAST_CANCELED');
                         this.globalProgress = false;
