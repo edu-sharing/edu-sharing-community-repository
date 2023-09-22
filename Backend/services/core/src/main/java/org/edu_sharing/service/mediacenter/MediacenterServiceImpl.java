@@ -48,6 +48,7 @@ import java.util.stream.Collectors;
 
 public class MediacenterServiceImpl implements MediacenterService {
 
+    private final PersistentHandlerEdusharing persistentHandlerEdusharing;
     Logger logger = Logger.getLogger(MediacenterServiceImpl.class);
 
     ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
@@ -61,6 +62,13 @@ public class MediacenterServiceImpl implements MediacenterService {
     SearchService searchService = serviceregistry.getSearchService();
     PermissionService permissionService = serviceregistry.getPermissionService();
     BehaviourFilter policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
+    public MediacenterServiceImpl() {
+        try {
+            persistentHandlerEdusharing = new PersistentHandlerEdusharing(null,null,false);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @NotNull
     public static String getAuthorityScope(String mediacenter) throws Exception {
@@ -616,13 +624,7 @@ public class MediacenterServiceImpl implements MediacenterService {
         List<String> allMediacenterIds = getAllMediacenterIds();
         logger.info("cache mediacenter nodes");
 
-        Repository repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
-        String impFolderId = null;
-        for(ChildAssociationRef ref : nodeService.getChildAssocs(repositoryHelper.getCompanyHome())){
-            if(OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS.equals(nodeService.getProperty(ref.getChildRef(),ContentModel.PROP_NAME))){
-                impFolderId = ref.getChildRef().getId();
-            }
-        }
+        String impFolderId = persistentHandlerEdusharing.getImportFolderId();
         if(impFolderId == null){
             logger.error("no imported objects folder found");
             return;
@@ -810,7 +812,7 @@ public class MediacenterServiceImpl implements MediacenterService {
                     permissionService.setPermission(nodeRef, mediacenterAdminGroup, CCConstants.PERMISSION_CONSUMER, true);
                 }
 
-               fixMediacenterStatus(nodeRef,mediacenterGroupName,false);
+                fixMediacenterStatus(nodeRef,mediacenterGroupName,false);
             }
         }
     }
@@ -856,7 +858,11 @@ public class MediacenterServiceImpl implements MediacenterService {
     }
 
     private NodeRef getNodeRefByReplicationSourceId(String replicationSourceId){
-        NodeRef nodeRef =  CMISSearchHelper.getNodeRefByReplicationSourceId(replicationSourceId);
+        NodeRef nodeRef = persistentHandlerEdusharing.getNodeIfExists(new HashMap<String, Object>() {
+            {
+                put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID, replicationSourceId);
+            }}
+        );
 
         if(nodeRef == null){
             logger.info("creating dummy object for:"+replicationSourceId);
@@ -866,8 +872,8 @@ public class MediacenterServiceImpl implements MediacenterService {
             properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID,replicationSourceId);
             properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,MediacenterLicenseProviderFactory.getMediacenterLicenseProvider().getCatalogId());
             properties.put(CCConstants.CCM_PROP_IO_TECHNICAL_STATE,"problem_notAvailable");
-              try {
-                String nodeId = new PersistentHandlerEdusharing(null,null,false).safe(new RecordHandlerInterfaceBase() {
+            try {
+                String nodeId = persistentHandlerEdusharing.safe(new RecordHandlerInterfaceBase() {
                     @Override
                     public HashMap<String, Object> getProperties() {
                         return properties;

@@ -182,24 +182,6 @@ public class CMISSearchHelper {
         public String inTree;
     }
 
-    public static NodeRef getNodeRefByReplicationSourceId(String replicationSourceId){
-
-        ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-        ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-
-        SearchParameters sp = new SearchParameters();
-        sp.setLanguage(SearchService.LANGUAGE_CMIS_ALFRESCO);
-        sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
-        sp.setPermissionEvaluation(PermissionEvaluationMode.NONE);
-        sp.setMaxItems(10);
-
-        sp.setQuery("SELECT * FROM ccm:iometadata WHERE ccm:replicationsourceid = '"+replicationSourceId+"'");
-        ResultSet resultSet = serviceRegistry.getSearchService().query(sp);
-        logger.debug("found "+ resultSet.getNodeRefs().size() +" for:" + replicationSourceId);
-        if(resultSet.getNodeRefs().size() == 0) return null;
-        return resultSet.getNodeRefs().get(0);
-    }
-
     public static List<NodeRef> getLevel0Collections(String username){
         Map<String,Object> filter = new HashMap<>();
         filter.put(CCConstants.CM_PROP_OWNER,username);

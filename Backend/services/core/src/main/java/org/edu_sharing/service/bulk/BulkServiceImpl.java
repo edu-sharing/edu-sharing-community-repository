@@ -330,7 +330,7 @@ public class BulkServiceImpl implements BulkService {
 		return null;
 	}
 
-	public static List<NodeRef> filterCMISResult(List<NodeRef> result, NodeRef primaryFolder) throws Exception {
+	public static List<NodeRef> filterCMISResult(List<NodeRef> result, NodeRef primaryFolder){
 		NodeService dbNodeService = (NodeService)AlfAppContextGate.getApplicationContext().getBean("alfrescoDefaultDbNodeService");
 		return result.stream().filter((r) -> {
 			Path path = dbNodeService.getPath(r);
