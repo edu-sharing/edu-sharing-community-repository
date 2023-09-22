@@ -17,6 +17,8 @@
         <include>src/**</include>
         <include>tests/**</include>
         <include>playwright/**</include>
+        <include>.angular/**</include>
+        <include>node_modules/**</include>
         <include>*.ts</include>
         <include>*.js</include>
         <include>*.json</include>

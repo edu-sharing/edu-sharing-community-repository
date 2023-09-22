@@ -49,7 +49,7 @@
           <nodeVersion>v${node.version}</nodeVersion>
           <!--suppress UnresolvedMavenProperty -->
           <npmVersion>${npm.version}</npmVersion>
-          <workingDirectory>projects/edu-sharing-api</workingDirectory>
+          <!--workingDirectory>projects/edu-sharing-api</workingDirectory-->
         </configuration>
         <executions>
           <execution>
@@ -76,8 +76,18 @@
             </goals>
             <phase>compile</phase>
             <configuration>
-              <arguments>run generate-api</arguments>
+              <arguments>run build</arguments>
             </configuration>
+          </execution>
+          <execution>
+              <id>licenses</id>
+              <goals>
+                  <goal>npm</goal>
+              </goals>
+              <phase>process-classes</phase>
+              <configuration>
+                  <arguments>run print-licenses</arguments>
+              </configuration>
           </execution>
         </executions>
       </plugin>

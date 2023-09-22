@@ -47,7 +47,7 @@
     <node.version>${node.version.major}.${node.version.minor}.${node.version.patch}</node.version>
 
     <npm.args.install>install</npm.args.install>
-    <npm.args.build>run build-dev</npm.args.build>
+    <npm.args.build>run build:edu-sharing</npm.args.build>
 
     <npm.version.major>7</npm.version.major>
     <npm.version.minor>24</npm.version.minor>
@@ -1152,7 +1152,8 @@
     <module>Backend</module>
     <module>config</module>
     <module>Frontend</module>
-<!--    <module>deploy</module>-->
+    <module>webapp</module>
+    <module>deploy</module>
   </modules>
 
 </project>
