@@ -54,10 +54,8 @@ public class MediacenterNodePermissionsJob extends AbstractJob implements JobClu
 		try {
 			fromLocal = OAIConst.DATE_FORMAT.parse((String)jobDataMap.get(OAIConst.PARAM_FROM));
 			untilLocal = OAIConst.DATE_FORMAT.parse((String)jobDataMap.get(OAIConst.PARAM_UNTIL));
-		} catch (ParseException e) {
-			logger.error(e.getMessage());
-		}catch (NullPointerException e){
-			logger.error(e.getMessage());
+		} catch (ParseException|NullPointerException e) {
+			logger.info(OAIConst.PARAM_FROM + " and " + OAIConst.PARAM_UNTIL + " was not set or could not be parsed and will be ignored: " + e.getMessage());
 		}
 
 		if(fromLocal == null && untilLocal == null){
