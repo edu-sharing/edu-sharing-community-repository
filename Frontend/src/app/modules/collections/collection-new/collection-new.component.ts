@@ -287,7 +287,10 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
                     );
                     this.mediacenterService.getMediacenters().subscribe((mediacenters) => {
                         this.createMediacenter =
-                            mediacenters.filter((m) => m.administrationAccess).length === 1;
+                            mediacenters.filter((m) => m.administrationAccess).length === 1 &&
+                            this.connector.hasToolPermissionInstant(
+                                RestConstants.TOOLPERMISSION_INVITE,
+                            );
                         if (this.createMediacenter) this.mediacenter = mediacenters[0];
                     });
                     this.authorFreetextAllowed = this.connector.hasToolPermissionInstant(
