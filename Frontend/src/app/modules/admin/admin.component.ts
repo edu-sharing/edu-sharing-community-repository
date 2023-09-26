@@ -1516,6 +1516,9 @@ export class AdminComponent implements OnInit, OnDestroy {
             }
             data[param.name] =
                 param.type === 'boolean' ? param.sampleValue === 'true' : param.sampleValue ?? '';
+            if (param.type?.includes('Integer') && data[param.name] === '') {
+                data[param.name] = null;
+            }
             if (param.values) {
                 data[param.name] = param.values.map((v) => v.name).join('|');
             }
