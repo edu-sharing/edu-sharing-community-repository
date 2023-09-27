@@ -722,6 +722,10 @@
     position: fixed;
     z-index: 10;
 }
+.cancel-job-message {
+    white-space: pre-line;
+    padding-bottom: 20px;
+}
 @media all and (max-width: $mobileWidth+$mobileStage*1) {
     .main {
         .main-nav {

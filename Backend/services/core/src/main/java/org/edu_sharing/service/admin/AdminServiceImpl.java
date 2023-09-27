@@ -277,8 +277,8 @@ public class AdminServiceImpl implements AdminService  {
 		return JobHandler.getInstance().getAllRunningJobs();
 	}
 	@Override
-	public void cancelJob(String jobName) throws Throwable {
-		if(!JobHandler.getInstance().cancelJob(jobName)){
+	public void cancelJob(String jobName, boolean force) throws Throwable {
+		if(!JobHandler.getInstance().cancelJob(jobName, force)){
 			throw new Exception("Job could not be canceled. Scheduler returned false");
 		}
 	}

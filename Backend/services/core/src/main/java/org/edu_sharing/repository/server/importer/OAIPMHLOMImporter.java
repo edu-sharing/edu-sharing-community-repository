@@ -300,7 +300,7 @@ public class OAIPMHLOMImporter implements Importer{
 		List<Callable<Void>> threads = new ArrayList<>();
 		final String authority = AuthenticationUtil.getFullyAuthenticatedUser();
 		if(job!=null && job.isInterrupted()) {
-			logger.info("Will cancel identifier reading, job is aborted");
+			shutdown();
 			return;
 		}
 		long time=System.currentTimeMillis();
@@ -315,7 +315,7 @@ public class OAIPMHLOMImporter implements Importer{
 					String identifier = (String) xpath.evaluate("identifier", headerNode, XPathConstants.STRING);
 					try {
 						if(job!=null && job.isInterrupted()){
-							return null;
+							shutdown();
 						}
 						String timeStamp = (String) xpath.evaluate("datestamp", headerNode, XPathConstants.STRING);
 						logger.debug("import "+identifier+" "+timeStamp);
@@ -348,6 +348,11 @@ public class OAIPMHLOMImporter implements Importer{
 			logger.info("Import progress: "+totalResults+" entries processed so far");
 			logger.info(getThreadCount() + " Threads finished (" + threads.size() + ", " + (time / 1000) + " s -> " + (time / threads.size()) + "ms per entry)");
 		}
+	}
+
+	private void shutdown() {
+		logger.info("Will cancel import, job is aborted");
+		executor.shutdownNow();
 	}
 
 	private String getRecordAsString(String identifier) {
@@ -387,6 +392,7 @@ public class OAIPMHLOMImporter implements Importer{
 	@Override
 	public void setJob(ImporterJob importerJob) {
 		this.job = importerJob;
+		job.onInterrupted(this::shutdown);
 	}
 
 	public static final int MAX_PER_RESUMPTION = 5000;

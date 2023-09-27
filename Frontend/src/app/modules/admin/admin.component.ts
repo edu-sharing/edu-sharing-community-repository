@@ -39,7 +39,7 @@ import {
 import { Helper } from '../../core-module/rest/helper';
 import { UIConstants } from '../../core-module/ui/ui-constants';
 import { SuggestItem } from '../../common/ui/autocomplete/autocomplete.component';
-import { Observable, Observer } from 'rxjs';
+import { interval, Observable, Observer } from 'rxjs';
 import { CustomHelper } from '../../common/custom-helper';
 import { DateHelper } from '../../core-ui-module/DateHelper';
 import { CsvHelper } from '../../core-module/csv.helper';
@@ -71,6 +71,10 @@ type LuceneData = {
     exportFormat?: 'json' | 'csv';
 };
 
+type Job = {
+    jobName: string;
+};
+
 @Component({
     selector: 'es-admin-main',
     templateUrl: 'admin.component.html',
@@ -85,6 +89,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     @ViewChild('searchResults') nodeEntriesSearchResult: NodeEntriesWrapperComponent<Node>;
     @ViewChild('actionbarComponent') actionbarComponent: ActionbarComponent;
     elasticResponse: NodeListElastic;
+    cancelJobInfo: Job;
 
     constructor(
         private toast: Toast,
@@ -244,6 +249,22 @@ export class AdminComponent implements OnInit, OnDestroy {
     ownAppMode = 'repository';
     authenticateAuthority: Authority;
     private readonly onDestroyTasks: Array<() => void> = [];
+    cancelJobButtons = DialogButton.getYesNo(
+        () => (this.cancelJobInfo = null),
+        () => {
+            this.cancelJobFinally();
+        },
+    );
+    private _jobForceCancel: boolean;
+
+    get jobForceCancel(): boolean {
+        return this._jobForceCancel;
+    }
+
+    set jobForceCancel(value: boolean) {
+        this._jobForceCancel = value;
+        this.cancelJobButtons[1].color = this._jobForceCancel ? 'danger' : 'primary';
+    }
 
     ngOnInit(): void {
         this.mainNav.setMainNavConfig({
@@ -960,26 +981,20 @@ export class AdminComponent implements OnInit, OnDestroy {
         if (log.length <= 200) return log;
         return log.slice(0, 200);
     }
-    cancelJob(job: any) {
-        this.dialogTitle = 'ADMIN.JOBS.CANCEL_TITLE';
-        this.dialogMessage = 'ADMIN.JOBS.CANCEL_MESSAGE';
-        this.dialogButtons = DialogButton.getYesNo(
+    cancelJob(job: Job) {
+        this.cancelJobInfo = job;
+    }
+    cancelJobFinally() {
+        const jobInfo = this.cancelJobInfo;
+        this.cancelJobInfo = null;
+        this.admin.cancelJob(jobInfo.jobName, this.jobForceCancel).subscribe(
             () => {
-                this.dialogTitle = null;
+                this.toast.toast('ADMIN.JOBS.TOAST_CANCELED');
+                this.globalProgress = false;
             },
-            () => {
-                this.dialogTitle = null;
-                this.globalProgress = true;
-                this.admin.cancelJob(job.jobName).subscribe(
-                    () => {
-                        this.toast.toast('ADMIN.JOBS.TOAST_CANCELED');
-                        this.globalProgress = false;
-                    },
-                    (error) => {
-                        this.toast.error(error);
-                        this.globalProgress = false;
-                    },
-                );
+            (error) => {
+                this.toast.error(error);
+                this.globalProgress = false;
             },
         );
     }

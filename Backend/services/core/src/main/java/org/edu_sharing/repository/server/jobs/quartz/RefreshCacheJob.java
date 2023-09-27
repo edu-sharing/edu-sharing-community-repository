@@ -32,25 +32,34 @@ import java.util.HashMap;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.apache.commons.logging.LogFactory;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
 
-public class RefreshCacheJob extends AbstractJob implements JobClusterLocker.ClusterSingelton {
-	
+@JobDescription(description = "Re-Build/warmup cache for the IMP-OBJ or a custom folder")
+public class RefreshCacheJob extends AbstractInterruptableJob implements JobClusterLocker.ClusterSingelton {
+
+
+	@JobFieldDescription(description = "the node id to start from (defaults to IMP-OBJ)")
+	String rootFolderId;
 	
 	public RefreshCacheJob(){
 		this.logger = LogFactory.getLog(RefreshCacheJob.class);
 	}
 	
 	@Override
-	public void execute(JobExecutionContext context) throws JobExecutionException {
+	public void executeInterruptable(JobExecutionContext context) throws JobExecutionException {
 		logger.info("starting");
-		
+		try {
+			Thread.sleep(60000);
+		} catch (InterruptedException e) {
+			// ignore
+		}
 		JobDataMap jobDataMap = context.getJobDetail().getJobDataMap();
 		
-		String rootFolderId = (String)jobDataMap.get("rootFolderId");
 		final boolean sticky;
 		if(jobDataMap.get("sticky") != null) {
 			if (jobDataMap.get("sticky") instanceof Boolean) {

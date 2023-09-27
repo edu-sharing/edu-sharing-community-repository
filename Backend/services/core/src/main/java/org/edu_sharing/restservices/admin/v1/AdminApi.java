@@ -320,9 +320,11 @@ public class AdminApi {
 			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response cancelJob(@Context HttpServletRequest req,
-							  @PathParam("job") String name) {
+							  @PathParam("job") String name,
+							  @QueryParam("force") boolean force
+							  ) {
 		try {
-			AdminServiceFactory.getInstance().cancelJob(name);
+			AdminServiceFactory.getInstance().cancelJob(name, force);
 			return Response.ok().build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
