@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 
 public class MediacenterServiceImpl implements MediacenterService {
 
-    private final PersistentHandlerEdusharing persistentHandlerEdusharing;
+    private PersistentHandlerEdusharing persistentHandlerEdusharing;
     Logger logger = Logger.getLogger(MediacenterServiceImpl.class);
 
     ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
@@ -63,11 +63,7 @@ public class MediacenterServiceImpl implements MediacenterService {
     PermissionService permissionService = serviceregistry.getPermissionService();
     BehaviourFilter policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
     public MediacenterServiceImpl() {
-        try {
-            persistentHandlerEdusharing = new PersistentHandlerEdusharing(null,null,false);
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     @NotNull
@@ -624,7 +620,7 @@ public class MediacenterServiceImpl implements MediacenterService {
         List<String> allMediacenterIds = getAllMediacenterIds();
         logger.info("cache mediacenter nodes");
 
-        String impFolderId = persistentHandlerEdusharing.getImportFolderId();
+        String impFolderId = getPersistentHandlerEdusharing().getImportFolderId();
         if(impFolderId == null){
             logger.error("no imported objects folder found");
             return;
@@ -709,6 +705,20 @@ public class MediacenterServiceImpl implements MediacenterService {
             }
             return null;
         });
+    }
+
+    private PersistentHandlerEdusharing getPersistentHandlerEdusharing() {
+        if(persistentHandlerEdusharing != null) {
+            return persistentHandlerEdusharing;
+        }
+        persistentHandlerEdusharing = AuthenticationUtil.runAsSystem(() -> {
+            try {
+                return new PersistentHandlerEdusharing(null,null,false);
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        });
+        return persistentHandlerEdusharing;
     }
 
     @Override
@@ -858,7 +868,7 @@ public class MediacenterServiceImpl implements MediacenterService {
     }
 
     private NodeRef getNodeRefByReplicationSourceId(String replicationSourceId){
-        NodeRef nodeRef = persistentHandlerEdusharing.getNodeIfExists(new HashMap<String, Object>() {
+        NodeRef nodeRef = getPersistentHandlerEdusharing().getNodeIfExists(new HashMap<String, Object>() {
             {
                 put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID, replicationSourceId);
             }}
@@ -873,7 +883,7 @@ public class MediacenterServiceImpl implements MediacenterService {
             properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,MediacenterLicenseProviderFactory.getMediacenterLicenseProvider().getCatalogId());
             properties.put(CCConstants.CCM_PROP_IO_TECHNICAL_STATE,"problem_notAvailable");
             try {
-                String nodeId = persistentHandlerEdusharing.safe(new RecordHandlerInterfaceBase() {
+                String nodeId = getPersistentHandlerEdusharing().safe(new RecordHandlerInterfaceBase() {
                     @Override
                     public HashMap<String, Object> getProperties() {
                         return properties;
