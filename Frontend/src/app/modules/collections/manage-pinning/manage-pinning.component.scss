@@ -12,10 +12,12 @@
         mat-checkbox,
         label {
             display: flex;
+            align-items: center;
         }
-
-        mat-checkbox {
+        .name {
             flex-grow: 1;
+        }
+        mat-checkbox {
             ::ng-deep .mat-checkbox-layout {
                 white-space: normal;
                 .mat-checkbox-label {
