@@ -132,10 +132,14 @@ export class AdminComponent implements OnInit, OnDestroy {
             this.getTemplates();
             this.connector.isLoggedIn().subscribe((data: LoginResult) => {
                 this.loginResult = data;
-                this.mediacenterService.getMediacenters().subscribe((mediacenters) => {
-                    this.mediacenters = mediacenters;
+                if (data.isAdmin) {
                     this.init();
-                });
+                } else {
+                    this.mediacenterService.getMediacenters().subscribe((mediacenters) => {
+                        this.mediacenters = mediacenters;
+                        this.init();
+                    });
+                }
             });
         });
     }
@@ -1377,7 +1381,7 @@ export class AdminComponent implements OnInit, OnDestroy {
         }
         if (
             this.loginResult.isAdmin ||
-            this.mediacenters.filter((mc) => mc.administrationAccess).length
+            this.mediacenters?.filter((mc) => mc.administrationAccess).length
         ) {
             this.buttons.splice(3, 0, {
                 id: 'MEDIACENTER',
