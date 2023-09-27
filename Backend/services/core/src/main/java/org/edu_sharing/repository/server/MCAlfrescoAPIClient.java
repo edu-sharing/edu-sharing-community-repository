@@ -2418,7 +2418,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                     public String execute() throws Throwable
                     {
 	                    try {
-		                		String key = PermissionService.GROUP_PREFIX + groupName;
+		                		String key = (groupName.startsWith(PermissionService.GROUP_PREFIX) ? "" : PermissionService.GROUP_PREFIX) + groupName;
 		                		
 		                		return 	  authorityService.authorityExists(key)
 		                				? authorityService.getAuthorityDisplayName(key)
