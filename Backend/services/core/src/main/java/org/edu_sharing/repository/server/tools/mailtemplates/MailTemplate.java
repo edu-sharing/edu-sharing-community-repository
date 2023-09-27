@@ -78,9 +78,11 @@ public class MailTemplate {
 			if(nodeService.hasAspect(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,CCConstants.CCM_ASPECT_COLLECTION)){
 				target.put(keyName, URLTool.getNgComponentsUrl() + "collections/?id="+nodeId);
 				target.put(keyName + ".static", URLTool.getNgComponentsUrl(false) + "collections/?id="+nodeId);
+				return;
 			}
 			target.put(keyName, URLTool.getNgComponentsUrl() +  "workspace/?id="+nodeId);
 			target.put(keyName + ".static", URLTool.getNgComponentsUrl(false) +  "workspace/?id="+nodeId);
+			return;
 		}
 		target.put(keyName, URLTool.getNgComponentsUrl() + "render/"+nodeId+"?closeOnBack=true");
 		target.put(keyName + ".static", URLTool.getNgComponentsUrl(false) + "render/"+nodeId+"?closeOnBack=true");
