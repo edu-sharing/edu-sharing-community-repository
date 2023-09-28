@@ -7,25 +7,24 @@
 
 :host {
     position: relative;
-    display: block;
+    display: flex;
 }
 
-mat-form-field {
-    width: 100%;
-    color: $workspaceTopBarInputText;
+form {
+    display: flex;
+    flex-grow: 1;
 }
 
 .search-field-wrapper {
     width: 100%;
     display: flex;
     background: $workspaceTopBarInputBackground;
-    padding: 4px;
-    border-radius: 2px;
+    border-radius: 3px;
     .search-field {
         display: flex;
         width: 100%;
         input {
-            background: $workspaceTopBarInputBackground;
+            background: unset;
             height: 100%;
             border: none;
             &:focus {
@@ -38,7 +37,6 @@ mat-form-field {
         }
     }
     &.input-has-focus {
-        border-radius: 0;
         &:not(.cdk-keyboard-focused) {
             @include setGlobalFocus();
         }
@@ -96,6 +94,8 @@ mat-form-field {
 }
 
 .search-input {
+    padding: 0 1em;
+    color: $workspaceTopBarInputText;
     -webkit-appearance: none; // Fix white background on Safari
     width: unset;
     min-width: 0;
@@ -106,14 +106,23 @@ mat-form-field {
 }
 
 .submit-button {
-    height: 44px;
-    width: 44px;
-    border-radius: 0 2px 2px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0 3px 3px 0;
     background-color: mix($workspaceTopBarInputBackground, $workspaceTopBarBackground, 80%);
+    & ::ng-deep .mdc-icon-button__ripple {
+        border-radius: unset;
+    }
 }
 
 .clear-button {
-    color: rgba($workspaceTopBarInputText, 0.8);
+    --mdc-icon-button-state-layer-size: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 4px;
+    color: #{rgba($workspaceTopBarInputText, 0.8)};
     &.cdk-keyboard-focused {
         @include setGlobalKeyboardFocus('border');
     }

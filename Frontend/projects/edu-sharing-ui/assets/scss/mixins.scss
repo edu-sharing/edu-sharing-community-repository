@@ -52,10 +52,10 @@
     //respect element border radius
     @include removeDefaultFocus();
     @if $mode== 'outline' {
-        outline: var(--focusWidth) solid rgb(var(--palette-primary-300));
+        outline: var(--focusWidth) solid var(--palette-primary-300);
         outline-offset: 2px;
     } @else if $mode== 'border' {
-        border: var(--focusWidth) solid rgb(var(--palette-primary-300));
+        border: var(--focusWidth) solid var(--palette-primary-300);
     }
 }
 // Apply the content styles in contrast mode. This is just enough contrast to be WCAG complient ---

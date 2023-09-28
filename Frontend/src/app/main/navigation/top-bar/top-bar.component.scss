@@ -1,3 +1,4 @@
+@use 'sass:color';
 @import '../../../core-ui-module/styles/variables';
 
 :host > div {
@@ -36,15 +37,20 @@
 }
 
 .menuButton {
+    position: relative;
     width: 250px;
     height: 100%;
+    padding: 0 16px;
     display: flex;
     align-items: center;
     justify-content: flex-start;
     border: none;
     outline: none;
-    background-color: transparent;
+    background-color: unset;
     color: $workspaceTopBarFontColor !important;
+    & ::ng-deep .mat-ripple-element {
+        background-color: #{color.change($workspaceTopBarFontColor, $alpha: 0.1)};
+    }
     .barIcon {
         margin-top: 2px;
     }
@@ -55,13 +61,23 @@
         @include setGlobalKeyboardFocus();
         outline-offset: -5px;
     }
+    &:not([disabled]):hover::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: $workspaceTopBarFontColor;
+        opacity: 0.04;
+    }
 }
 .menuButtonOuter {
     height: 100%;
     display: flex;
     align-items: center;
     // fix button move to background if sidemenu is open
-    z-index: 1;
+    z-index: 2;
     > button {
         border-radius: 0px;
     }
@@ -71,26 +87,26 @@
     flex: auto;
     margin: 0 20px;
 }
-:host ::ng-deep {
-    .addDesktop {
-        margin-left: 50px;
-        padding-right: 25px;
-        height: 39px;
-        display: flex;
-        align-items: center;
-        color: $workspaceTopBarFontColor !important;
-        background-color: rgba(
-            red($workspaceTopBarFontColor),
-            green($workspaceTopBarFontColor),
-            blue($workspaceTopBarFontColor),
-            0.1
-        );
-        border-radius: 0;
-        .mdc-button__label {
-            display: flex;
-            align-items: center;
-        }
-    }
+.addDesktop {
+    margin-left: 50px;
+    padding-left: 16px;
+    padding-right: 25px;
+    height: 39px;
+    display: flex;
+    align-items: center;
+    color: $workspaceTopBarFontColor !important;
+    background-color: rgba(
+        red($workspaceTopBarFontColor),
+        green($workspaceTopBarFontColor),
+        blue($workspaceTopBarFontColor),
+        0.1
+    );
+    border-radius: 0;
+}
+
+.mat-mdc-button {
+    --mat-mdc-button-ripple-color: #{color.change($workspaceTopBarFontColor, $alpha: 0.1)};
+    --mat-mdc-button-persistent-ripple-color: #{$workspaceTopBarFontColor};
 }
 
 .menuButton img {
@@ -101,7 +117,6 @@
 span {
     font-size: 130%;
     position: relative;
-    margin-left: 6px;
 }
 .rocketchat {
     display: none;

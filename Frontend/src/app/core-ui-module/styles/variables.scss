@@ -4,8 +4,8 @@
 
 // All variables can be overridden in `branding.scss`.
 /* replace variables which are may not defined in the branding */
-$primaryVeryLight: rgb(var(--palette-primary-50)) !default;
-$primaryMediumDark: rgb(var(--palette-primary-700)) !default;
+$primaryVeryLight: var(--palette-primary-50) !default;
+$primaryMediumDark: var(--palette-primary-700) !default;
 
 $tabColor: var(--primary) !default;
 $tabColorDark: var(--primary) !default;
@@ -30,11 +30,11 @@ $workspaceInheritColor: #42ca8d !default;
 $editorialCollectionsBackground: #f5ec19 !default;
 $itemSelectedBackground: $primaryVeryLight !default;
 $itemSelectedTextColor: $primaryMediumDark !default;
-$buttonHoverBackground: rgb(var(--palette-primary-500), 0.08) !default;
+$buttonHoverBackground: var(--palette-primary-500, 0.08) !default;
 $workspaceNewBackground: $itemSelectedBackground !default;
 // the white bar height in search and es-workspace
 $secondaryBarHeight: 65px !default;
-$listItemSelectedBackground: rgb(var(--palette-primary-50)) !default;
+$listItemSelectedBackground: var(--palette-primary-50) !default;
 $workspaceSelectedBackgroundEffect: linear-gradient(
         to right,
         var(--primary) 0,
@@ -78,7 +78,7 @@ $colorStatusWarning: $warningMedium !default;
 $colorStatusRecommended: #acd331 !default;
 $colorStatusNeutral: #777 !default;
 $colorStarActive: var(--colorStarActive) !default;
-$focusColor: rgb(var(--palette-primary-300)) !default;
+$focusColor: var(--palette-primary-300) !default;
 $placeholderColor: #767676 !default;
 $focusWidth: 2px !default;
 $cardWidth: var(--cardWidth) !default;

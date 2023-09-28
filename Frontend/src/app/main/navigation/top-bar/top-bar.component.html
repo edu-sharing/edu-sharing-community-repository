@@ -19,8 +19,9 @@
         *ngIf="showScope"
         [matMenuTriggerFor]="mainMenuDropdown.dropdown.menu"
         [disabled]="!canOpen"
+        matRipple
         cdkMonitorElementFocus
-        class="menuButton mat-button-no-uppercase"
+        class="menuButton"
         [class.clickable]="canOpen"
         title="{{ 'CHOOSEENVIRONMENT' | translate }}"
       >
@@ -39,8 +40,9 @@
         *ngIf="showScope"
         (click)="mainMenuSidebar.toggle()"
         [disabled]="!canOpen"
+        matRipple
         cdkMonitorElementFocus
-        class="menuButton mat-button-no-uppercase"
+        class="menuButton"
         [class.clickable]="canOpen"
         title="{{ 'CHOOSEENVIRONMENT' | translate }}"
         data-test="main-nav-scope-button"
@@ -62,6 +64,7 @@
     <ng-container *ngIf="!createButtonRef">
       <button
         mat-button
+        matRippleColor="rgba(255,255,255,0.08)"
         class="addDesktop mat-button-no-uppercase"
         *ngIf="!connector.getCurrentLogin()?.isGuest && isCreateAllowed"
         [disabled]="!isCreateAllowed || !createMenu.hasUsableOptions()"
@@ -132,7 +135,7 @@
     </button>
     <button
       mat-button
-      class="user clickable"
+      class="user"
       esElementRef
       #userRef="esElementRef"
       *ngIf="currentUser && showUser"
@@ -143,7 +146,7 @@
       <es-user-avatar [user]="currentUser" [size]="'xsmall'"></es-user-avatar>
       <span *ngIf="!connector.getCurrentLogin()?.isGuest">{{ currentUser | authorityName }}</span>
       <span *ngIf="connector.getCurrentLogin()?.isGuest">{{ 'USER_GUEST' | translate }}</span>
-      <i aria-hidden="true" class="material-icons barIcon iconArrow">keyboard_arrow_down</i>
+      <i esIcon="keyboard_arrow_down" [aria]="false" class="iconArrow"></i>
       <!-- <i class="material-icons barIcon iconPerson">account_circle</i>-->
     </button>
     <es-dropdown #userDropdown class="userMenu" [options]="userMenuOptions"></es-dropdown>
