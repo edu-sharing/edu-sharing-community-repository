@@ -177,8 +177,14 @@ public class SearchServiceLAppsImpl extends SearchServiceAdapter{
 			int page = 0;
 			String uri="&search="+URLEncoder.encodeUriComponent(searchWord)+cat+edusector;
 			searchToken.setQueryString(uri);
-			return searchLApps(repositoryId,APIKey,uri);
-			
+			SearchResultNodeRef result = searchLApps(repositoryId, APIKey, uri);
+			if(result.getData() != null) {
+				if(searchToken.getFrom() < result.getData().size()) {
+					result.setData(result.getData().subList(searchToken.getFrom(), result.getData().size()));
+				}
+				result.setData(result.getData().subList(0, searchToken.getMaxResult()));
+			}
+			return result;
 		}
 		catch (IOException e) {
 			InputStream is=connection.getErrorStream();
