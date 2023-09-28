@@ -11,7 +11,6 @@ import {
     Subscription,
     Observable,
 } from 'rxjs';
-import { isArray } from 'rxjs/internal/util/isArray';
 import { catchError, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { BridgeService } from '../core-bridge-module/bridge.service';
 import {
@@ -738,7 +737,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             if (ltiSession.customContentNode) {
                 return nodes.some((n) => {
                     let nLtiToolUrlArr = ltiSession.customContentNode.properties['ccm:ltitool_url'];
-                    if (!isArray(nLtiToolUrlArr) || nLtiToolUrlArr.length == 0) {
+                    if (!Array.isArray(nLtiToolUrlArr) || nLtiToolUrlArr.length == 0) {
                         return true;
                     }
                     let nLtiToolUrl = nLtiToolUrlArr[0];
@@ -1617,7 +1616,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         if (!customOptions.useDefaultOptions) {
             options = [];
         }
-        if (customOptions.supportedOptions && isArray(customOptions.supportedOptions)) {
+        if (customOptions.supportedOptions && Array.isArray(customOptions.supportedOptions)) {
             options = options.filter((o) => customOptions.supportedOptions.indexOf(o.name) !== -1);
         } else if (customOptions.removeOptions) {
             for (const option of customOptions.removeOptions) {
