@@ -40,12 +40,12 @@
     },
     "declaration": false,
     "experimentalDecorators": true,
-    "lib": ["es2019", "dom", "dom.iterable"],
-    "module": "es2020",
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "module": "es2022",
     "moduleResolution": "node",
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
-    "target": "es2020",
+    "target": "es2022",
     "typeRoots": [
       "./node_modules/@types"
     ],
@@ -53,6 +53,12 @@
     // Needed for imports of @angular/compiler-cli in version 13.3.5. Can be removed, when
     // @angular/compiler-cli compiles without this.
     "allowSyntheticDefaultImports": true,
+    // Public class fields in JavaScript are likely to be standardized in a different way than
+    // TypeScript used to assume. This opts for the legacy behavior. Relevant code will likely have
+    // to be migrated in the future. However, as of Angular 16, `false` is still the default value.
+    // See
+    // https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-7.html#the-usedefineforclassfields-flag-and-the-declare-property-modifier
+    "useDefineForClassFields": false,
   },
   "angularCompilerOptions": {
     "strictInjectionParameters": true,
