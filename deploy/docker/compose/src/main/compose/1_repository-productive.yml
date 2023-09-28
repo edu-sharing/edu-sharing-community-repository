@@ -2,13 +2,16 @@ version: '3.7'
 
 services:
 
+  cache:
+    restart: unless-stopped
+
   repository-database:
     restart: unless-stopped
 
   repository-mailcatcher:
     restart: unless-stopped
 
-  repository-search-solr6:
+  repository-search-solr:
     restart: unless-stopped
 
   repository-service:

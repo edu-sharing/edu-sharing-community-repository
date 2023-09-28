@@ -4,6 +4,7 @@
   },
   "scripts": {
     "build": "ng-openapi-gen --input target/api/openapi.json --output target/generated-sources/openapi",
-    "build-dev": "ng-openapi-gen --input target/api/openapi.json --output target/generated-sources/openapi"
+    "build-dev": "ng-openapi-gen --input target/api/openapi.json --output target/generated-sources/openapi",
+    "build:edu-sharing": "ng-openapi-gen --input target/api/openapi.json --output target/generated-sources/openapi"
   }
 }

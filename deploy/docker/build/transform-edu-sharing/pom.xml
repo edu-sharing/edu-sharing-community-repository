@@ -58,7 +58,7 @@
         <configuration>
           <images>
             <image>
-              <name>${docker.repository}/${docker.prefix}-deploy-docker-repository-build-transform-edu-sharing:${docker.tag}</name>
+              <name>${docker.repository}/${docker.prefix}-deploy-docker-build-transform-edu-sharing:${docker.tag}</name>
             </image>
           </images>
         </configuration>
@@ -86,6 +86,11 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>edu_sharing-community-repository-backend-transform</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.prometheus.jmx</groupId>
+      <artifactId>jmx_prometheus_javaagent</artifactId>
     </dependency>
 
   </dependencies>

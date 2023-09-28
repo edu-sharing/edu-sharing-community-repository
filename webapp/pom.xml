@@ -10,10 +10,10 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>edu_sharing-community-repository-repository-webapp</artifactId>
+  <artifactId>edu_sharing-community-repository-webapp</artifactId>
   <packaging>war</packaging>
 
-  <name>edu_sharing-community-repository-repository-webapp</name>
+  <name>edu_sharing-community-repository-webapp</name>
 
   <build>
 

@@ -19,6 +19,7 @@
         <include>playwright/**</include>
         <include>.angular/**</include>
         <include>node_modules/**</include>
+        <include>dist/**</include>
         <include>*.ts</include>
         <include>*.js</include>
         <include>*.json</include>

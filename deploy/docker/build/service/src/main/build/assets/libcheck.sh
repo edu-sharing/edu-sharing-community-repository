@@ -13,8 +13,6 @@ whitelist=(
   "swagger-parser-2.1.0.jar:alf-lib" #diff classes
   "swagger-core-1.6.6.jar:alf-lib" # diff groupId
   "swagger-core-2.1.11.jar:alf-lib" # diff groupId
-  "wss4j-1.6.19.jar:alf-lib" # axis-1.4
-  "wss4j-1.5.12.jar:edu-lib" # axis-1.4
   "xmlsec-1.5.8.jar:alf-lib" # axis-1.4
   "xmlsec-1.4.5.jar:edu-lib" # axis-1.4
 )

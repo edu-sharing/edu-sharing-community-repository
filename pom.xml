@@ -298,37 +298,60 @@
         <type>amp</type>
       </dependency>
 
-      <!--
+
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-auth-java</artifactId>
+        <artifactId>edu_sharing-community-repository-deploy-docker-helm-postgresql</artifactId>
         <version>${project.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-core-java</artifactId>
+        <artifactId>edu_sharing-community-repository-deploy-docker-helm-solr</artifactId>
         <version>${project.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-discovery-java</artifactId>
+        <artifactId>edu_sharing-community-repository-deploy-docker-helm-rediscluster</artifactId>
         <version>${project.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-search-java</artifactId>
+        <artifactId>edu_sharing-community-repository-deploy-docker-helm-service</artifactId>
         <version>${project.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-workflow-java</artifactId>
+        <artifactId>edu_sharing-community-repository-deploy-docker-build-service</artifactId>
+        <version>${project.version}</version>
+        <classifier>sources</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-deploy-docker-compose</artifactId>
         <version>${project.version}</version>
       </dependency>
-      -->
+
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-deploy-docker-helm-bundle</artifactId>
+        <version>${project.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
+      </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
@@ -475,6 +498,20 @@
         <artifactId>edu_sharing-community-repository-frontend</artifactId>
         <version>${project.version}</version>
         <classifier>sources</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-frontend</artifactId>
+        <version>${project.version}</version>
+        <type>war</type>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-webapp</artifactId>
+        <version>${project.version}</version>
+        <type>war</type>
       </dependency>
 
       <dependency>
@@ -1151,9 +1188,9 @@
   <modules>
     <module>Backend</module>
     <module>config</module>
+    <module>deploy</module>
     <module>Frontend</module>
     <module>webapp</module>
-    <module>deploy</module>
   </modules>
 
 </project>

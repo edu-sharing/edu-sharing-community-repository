@@ -59,6 +59,7 @@
 
   </build>
 
+
   <dependencies>
 
     <dependency>
@@ -116,19 +117,5 @@
       <scope>provided</scope>
     </dependency>
 
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-projects-enterprise-repository-backend-alfresco-module</artifactId>
-      <type>amp</type>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-projects-enterprise-repository-backend-services-core</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
   </dependencies>
-
 </project>

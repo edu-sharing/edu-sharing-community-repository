@@ -1,0 +1,44 @@
+{{- if .Values.global.cluster.istio.enabled }}
+{{- if .Capabilities.APIVersions.Has "networking.istio.io/v1beta1" }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ include "edusharing_repository_service.name" . }}-internal
+  labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
+spec:
+  hosts:
+  - {{ include "edusharing_repository_service.name" . }}
+  http:
+  - route:
+    - destination:
+        host: {{ include "edusharing_repository_service.name" . }}
+      weight: 100
+  tcp:
+  - route:
+    - destination:
+        host: {{ include "edusharing_repository_service.name" . }}
+      weight: 100
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ include "edusharing_repository_service.name" . }}-external
+  labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
+spec:
+  hosts: {{ toYaml .Values.ingress.hosts | nindent 4 }}
+  gateways:
+  - {{ include "edusharing_repository_service.name" . }}
+  http:
+  {{- range .Values.ingress.paths }}
+  - match:
+    - uri:
+        prefix: {{ . }}
+    route:
+    - destination:
+        host: {{ include "edusharing_repository_service.name" $ }}
+        port:
+          number: {{ $.Values.service.port.api.external }}
+      weight: 100
+  {{- end }}
+{{- end }}
+{{- end }}

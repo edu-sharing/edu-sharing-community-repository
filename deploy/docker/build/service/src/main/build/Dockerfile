@@ -5,15 +5,7 @@ FROM ${docker.edu_sharing.community.common.alfresco.repository}
 USER root
 
 RUN set -eux \
-    && ln -sf /opt/bitnami/tomcat tomcat
-
-RUN set -eux \
     && mkdir -p tomcat/shared/classes/config/defaults \
-    && mkdir -p tomcat/shared/classes/config/plugins/plugin-cluster \
-    && mkdir -p tomcat/shared/classes/config/plugins/plugin-elastic \
-    && mkdir -p tomcat/shared/classes/config/plugins/plugin-mongo \
-    && mkdir -p tomcat/shared/classes/config/plugins/plugin-remote \
-    && mkdir -p tomcat/shared/classes/config/plugins/plugin-transform \
     && mkdir -p tomcat/shared/classes/config/cluster/applications \
     && mkdir -p tomcat/shared/classes/config/node \
     && chown -RL worker:worker . \
@@ -26,7 +18,6 @@ RUN set -eux \
         tomcat/webapps/alfresco/WEB-INF/classes/log4j.properties \
         tomcat/webapps/alfresco/WEB-INF/lib/commons-lang3-* \
         tomcat/webapps/alfresco/WEB-INF/lib/jackson-* \
-        tomcat/webapps/alfresco/WEB-INF/lib/log4j-* \
         tomcat/webapps/alfresco/WEB-INF/lib/slf4j-* \
         tomcat/webapps/alfresco/WEB-INF/lib/jsr305-* \
         tomcat/webapps/alfresco/WEB-INF/lib/woodstox-core-* \
@@ -43,7 +34,7 @@ RUN set -eux \
 	&& cp tomcat/webapps/edu-sharing/META-INF/context.xml tomcat/conf/Catalina/localhost/edu-sharing.xml
 
 COPY --chown=worker:worker amps amps/
-COPY --chown=worker:worker config tomcat/shared/assets/
+COPY --chown=worker:worker shared tomcat/shared/
 
 RUN set -eux \
     && chown -RL worker:worker alf_data \
@@ -56,18 +47,8 @@ RUN set -eux \
 ########################################################################################################################
 
 COPY --chown=worker:worker assets/entrypoint.sh assets/reinstall.sh assets/libcheck.sh bin/
-
 RUN set -eux \
 	&& find bin -type f -name '*.sh' -exec chmod +x {} \;
-
-########################################################################################################################
-
-RUN set -eux \
-    && mkdir profiler \
-    && wget -qO- https://github.com/Granulate/async-profiler/releases/download/v2.0g1/async-profiler-2.0-linux-x64.tar.gz | tar xvz -C profiler \
-    && chown -RL worker:worker profiler
-
-COPY --chown=worker:worker assets/profiler profiler/
 
 ########################################################################################################################
 
