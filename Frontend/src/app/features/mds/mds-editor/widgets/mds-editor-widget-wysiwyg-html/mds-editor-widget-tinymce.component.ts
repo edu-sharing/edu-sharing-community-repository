@@ -73,7 +73,9 @@ export class MdsEditorWidgetTinyMCE extends MdsEditorWidgetBase implements OnIni
     }
 
     blur(): void {
-        this.editorComponent.editor.blur();
+        // @TODO: Check if this works as expected
+        this.editorComponent.editor.editorContainer.blur();
+        //this.editorComponent.editor.execCommand('blur');
     }
 
     ngAfterViewInit(): void {

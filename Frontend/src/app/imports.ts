@@ -33,7 +33,7 @@ import { CustomModule } from './custom-module/custom.module';
 import { RestLocatorService, CoreModule } from './core-module/core.module';
 import { CoreBridgeModule } from './core-bridge-module/core.bridge.module';
 import { CoreUiModule } from './core-ui-module/core-ui.module';
-import { MonacoEditorModule } from 'ngx-monaco-editor';
+import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 import { A11yModule } from '@angular/cdk/a11y';
 import { MatTreeModule } from '@angular/material/tree';
 import { OverlayModule } from '@angular/cdk/overlay';

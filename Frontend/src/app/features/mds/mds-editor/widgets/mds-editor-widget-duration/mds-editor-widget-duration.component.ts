@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Options } from '@angular-slider/ngx-slider';
+import { Options } from 'ngx-slider-v2';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({

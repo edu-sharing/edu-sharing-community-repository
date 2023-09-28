@@ -15,13 +15,10 @@ export class ListCollectionInfoComponent extends ListWidget {
         new ListItem('COLLECTION', 'scope'),
     ];
 
-    readonly indicatorIcons$ = this.accessibility.observe('indicatorIcons');
+    readonly indicatorIcons$;
 
-    constructor(
-        private accessibility: AccessibilityService,
-
-        public nodeHelper: NodeHelperService,
-    ) {
+    constructor(private accessibility: AccessibilityService, public nodeHelper: NodeHelperService) {
         super();
+        this.indicatorIcons$ = this.accessibility.observe('indicatorIcons');
     }
 }

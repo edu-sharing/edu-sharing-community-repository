@@ -42,10 +42,10 @@ export class ThemeService {
         switch (variable) {
             case Variable.Primary:
                 this.materialCssVarsService.setPrimaryColor(color);
-                this.materialCssVarsService.setVariable(
+                /*this.materialCssVarsService.setVariable(
                     MaterialCssVariables.ForegroundDivider,
                     this.fromPalette(color, '500'),
-                );
+                );*/
                 break;
             case Variable.Accent:
                 this.materialCssVarsService.setAccentColor(color);

@@ -78,17 +78,9 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
         right: false,
     };
 
-    readonly nodes$ = this.entriesService.dataSource$.pipe(
-        switchMap((dataSource) => dataSource?.connect()),
-    );
-    private readonly maxRows$ = this.entriesService.gridConfig$.pipe(
-        map((gridConfig) => gridConfig?.maxRows || null),
-        distinctUntilChanged(),
-    );
-    private readonly layout$ = this.entriesService.gridConfig$.pipe(
-        map((gridConfig) => gridConfig?.layout || 'grid'),
-        distinctUntilChanged(),
-    );
+    readonly nodes$;
+    private readonly maxRows$;
+    private readonly layout$;
     private readonly itemsPerRowSubject = new BehaviorSubject<number | null>(null);
     readonly itemsCap = new ItemsCap<T>();
     private globalCursorStyle: HTMLStyleElement;
@@ -101,6 +93,17 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
         public ui: UIService,
         private ngZone: NgZone,
     ) {
+        this.nodes$ = this.entriesService.dataSource$.pipe(
+            switchMap((dataSource) => dataSource?.connect()),
+        );
+        this.maxRows$ = this.entriesService.gridConfig$.pipe(
+            map((gridConfig) => gridConfig?.maxRows || null),
+            distinctUntilChanged(),
+        );
+        this.layout$ = this.entriesService.gridConfig$.pipe(
+            map((gridConfig) => gridConfig?.layout || 'grid'),
+            distinctUntilChanged(),
+        );
         this.entriesService.dataSource$.pipe(takeUntil(this.destroyed)).subscribe(() => {
             this.updateScrollState();
         });

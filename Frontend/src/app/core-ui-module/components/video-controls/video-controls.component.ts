@@ -2,7 +2,7 @@ import { catchError, filter, first, map, tap } from 'rxjs/operators';
 import { trigger } from '@angular/animations';
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
-import { Options } from '@angular-slider/ngx-slider';
+import { Options } from 'ngx-slider-v2';
 import { of, ReplaySubject } from 'rxjs';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import { RestCollectionService, RestConnectorService } from '../../../core-module/core.module';

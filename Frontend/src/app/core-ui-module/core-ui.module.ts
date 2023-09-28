@@ -17,7 +17,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
-import { NgxSliderModule } from '@angular-slider/ngx-slider';
+import { NgxSliderModule } from 'ngx-slider-v2';
 import { CollectionChooserComponent } from './components/collection-chooser/collection-chooser.component';
 import { ListOptionItemComponent } from './components/list-option-item/list-option-item.component';
 import { UserTileComponent } from './components/user-tile/user-tile.component';

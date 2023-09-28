@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
-import { Options } from '@angular-slider/ngx-slider';
+import { Options } from 'ngx-slider-v2';
 import { MdsWidget, MdsWidgetType, MdsWidgetValue } from '../../../types/types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 

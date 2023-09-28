@@ -27,9 +27,11 @@ export class UserService {
      */
     private readonly currentUserProfileChangesSubject = new Subject<void>();
     /** The currently logged in user. */
-    private readonly currentUser$ = this.createCurrentUser();
+    private readonly currentUser$;
 
-    constructor(private authentication: AuthenticationService, private iamApi: IamV1Service) {}
+    constructor(private authentication: AuthenticationService, private iamApi: IamV1Service) {
+        this.currentUser$ = this.createCurrentUser();
+    }
 
     /**
      * Returns the user with the given `userId`.

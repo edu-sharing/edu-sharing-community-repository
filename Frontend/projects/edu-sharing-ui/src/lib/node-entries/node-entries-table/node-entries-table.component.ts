@@ -78,8 +78,8 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     isDragging = false;
 
     private readonly maximumColumnsNumber$ = new BehaviorSubject(1);
-    readonly visibleDataColumns$ = this.getVisibleDataColumns();
-    readonly visibleColumnNames$ = this.getVisibleColumnNames();
+    readonly visibleDataColumns$;
+    readonly visibleColumnNames$;
 
     private destroyed = new Subject<void>();
 
@@ -93,6 +93,8 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         private ngZone: NgZone,
         private elementRef: ElementRef<HTMLElement>,
     ) {
+        this.visibleDataColumns$ = this.getVisibleDataColumns();
+        this.visibleColumnNames$ = this.getVisibleColumnNames();
         this.registerMaximumColumnsNumber();
         this.entriesService.selection.changed
             .pipe(takeUntil(this.destroyed), debounceTime(0))

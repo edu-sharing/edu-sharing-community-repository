@@ -124,8 +124,8 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Output() clickItem = new EventEmitter<NodeClickEvent<T>>();
     @Output() dblClickItem = new EventEmitter<NodeClickEvent<T>>();
     @Output() sortChange = new EventEmitter<ListSortConfig>();
-    @Output() virtualNodesAdded = this.optionsHelper.virtualNodesAdded;
-    @Output() displayTypeChanged = this.optionsHelper.displayTypeChanged;
+    @Output() virtualNodesAdded;
+    @Output() displayTypeChanged;
 
     customNodeListComponent: Type<NodeEntriesComponent<T>>;
     private componentRef: ComponentRef<NodeEntriesComponent<T>>;
@@ -152,7 +152,8 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
             setInterval(() => this.componentRef.instance.emptyRef = this.emptyRef)
         );
         */
-
+        this.virtualNodesAdded = this.optionsHelper.virtualNodesAdded;
+        this.displayTypeChanged = this.optionsHelper.displayTypeChanged;
         this.entriesService.selection.changed.subscribe(() => {
             if (this.optionsHelper.getData()) {
                 this.optionsHelper.getData().selectedObjects =
