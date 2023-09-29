@@ -50,6 +50,9 @@
       })
     "
   >
+    <div *ngIf="nodeHelper.isNodeCollection(node) && node.collection.pinned" class="collection-pin">
+      <i esIcon="edu-pin"></i>
+    </div>
     <es-preview-image
       *ngIf="!(nodeHelper.isNodeCollection(node) && node.preview.isIcon)"
       [node]="node"
