@@ -241,7 +241,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     }
 
     isSortable(column: ListItem) {
-        return this.entriesService.sort?.columns.some((c) => c.name === column.name);
+        return this.entriesService.sort?.columns?.some((c) => c.name === column.name);
     }
 
     toggleAll(checked: boolean) {

@@ -1,28 +1,28 @@
 /**
  *
- *  
- * 
- * 
- *	
  *
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  *
  */
 package org.edu_sharing.repository.server.jobs.quartz;
@@ -87,16 +87,55 @@ public class JobHandler {
 		jobs.put(JOB_LIST_KEY, jobs.get(JOB_LIST_KEY).stream().map(j -> j.equals(job) ? job : j).collect(Collectors.toList()));
 	}
 
-	public boolean cancelJob(String jobName) throws SchedulerException {
+	public Job getJobByName(String jobName) throws SchedulerException {
+		return (Job) quartzScheduler.getCurrentlyExecutingJobs().
+				stream()
+				.filter(j -> ((JobExecutionContext)j).getJobDetail().getName().equals(jobName))
+				.map(j -> ((JobExecutionContext)j).getJobInstance())
+				.findFirst().orElse(null);
+	}
+	public boolean cancelJob(String jobName, boolean force) throws SchedulerException {
+		JobDetail jobDetail = quartzScheduler.getJobDetail(jobName, null);
+		Job jobInstance = getJobByName(jobName);
+		if(force) {
+			if(jobInstance != null) {
+				if(jobInstance instanceof AbstractInterruptableJob) {
+					((AbstractInterruptableJob) jobInstance).setForceStop(force);
+				} else {
+					throw new RuntimeException("Force Stop of jobs is only supported for jobs of type " + AbstractInterruptableJob.class);
+				}
+			}
+			if(jobInstance == null) {
+				throw new RuntimeException("Job " + jobName + " was not found as a running job. May it is running on an other cluster node?");
+			}
+		}
 		boolean result=quartzScheduler.interrupt(jobName, null);
 		if(!result){
+			if(jobInstance == null) {
+				throw new RuntimeException("Job " + jobName + " was not found as a running job. May it is running on an other cluster node?");
+			}
 			try {
-				finishJob(quartzScheduler.getJobDetail(jobName, null), JobInfo.Status.Aborted);
+				if(jobDetail != null) {
+					finishJob(jobDetail, JobInfo.Status.Aborted);
+				} else {
+					setJobStatusByName(jobName, JobInfo.Status.Aborted);
+				}
+
 			}catch(Throwable t){
 				t.printStackTrace();
 			}
 		}
 		return result;
+	}
+	public void setJobStatusByName(String jobName, JobInfo.Status status) {
+		for(JobInfo job : getJobs()){
+			if(job.getJobName().equals(jobName) && job.getStatus().equals(JobInfo.Status.Running)){
+				job.setStatus(status);
+				job.setFinishTime(System.currentTimeMillis());
+				refreshJobsCache(job);
+				return;
+			}
+		}
 	}
 	public void finishJob(JobDetail jobDetail, JobInfo.Status status) {
 		for(JobInfo job : getJobs()){
@@ -131,13 +170,14 @@ public class JobHandler {
 			if(info.equalsDetail(jobDetail)){
 				jobDetail.setName(name);
 				info.setJobDetail(jobDetail);
+				refreshJobsCache(info);
 				return;
 			}
 		}
 	}
 
 	public class JobConfig {
-		
+
 		Class jobClass = null;
 		Trigger trigger = null;
 		HashMap<String, Object> params = null;
@@ -184,7 +224,7 @@ public class JobHandler {
 		public void setJobname(String jobname) {
 			this.jobname = jobname;
 		}
-		
+
 	}
 
 	Logger logger = Logger.getLogger(JobHandler.class);
@@ -201,11 +241,11 @@ public class JobHandler {
 
 	// trigger info Const job was vetoed
 	public static final String JOB_VETOED = "JOB_VETOED";
-	
+
 	public static final String IMMEDIATE_JOBNAME_SUFFIX = "_IMMEDIATE";
-	
+
 	public static final String VETO_BY_KEY = "VETO_BY";
-	
+
 	public static final String AUTH_INFO_KEY = "AUTH_INFO";
 
 	public static final String FILE_DATA = "FILE_DATA";
@@ -481,7 +521,7 @@ public class JobHandler {
 		return quartzScheduler.getCurrentlyExecutingJobs();
 	}
 	/**
-	 * 
+	 *
 	 * This is for immediate job excecution. when it's called a new job with an
 	 * immediate trigger will be created and registered with
 	 * scheduler.scheduleJob. For every immediate job there will be a
@@ -489,16 +529,16 @@ public class JobHandler {
 	 * - after the excecution finished
 	 * - an exception was drown 
 	 * - an veto occured.
-	 * 
+	 *
 	 * This listener also saves status information i.e if the job was vetoed or
 	 * the job finished. It is returned to the caller so that the caller can ask
 	 * for status Information
-	 * 
-	 * 
+	 *
+	 *
 	 * Another Idea was to put the status information in an JobDataMap of the
 	 * trigger but the Method Scheduler.triggerJob(jobName, null,jdm) creates an
 	 * own trigger
-	 * 
+	 *
 	 * @param jobClass
 	 * @param params
 	 * @return ImmediateJobListener
@@ -531,7 +571,7 @@ public class JobHandler {
 		 * user information if the job was vetoed(i.e. cause another job runs).
 		 * so we simulate synchr execution and wait 1 second and confirm that the
 		 * check is done.
-		 * 
+		 *
 		 * for the future maybe there will be a new UI where every job that is
 		 * registered at the scheduler is listed with status information. The
 		 * status information can be refreshed by polling
@@ -560,7 +600,7 @@ public class JobHandler {
 	 * schedules the job. used for cron triggers not for immediate triggers the
 	 * job detail name for the scheduler is jobClass.getSimpleName() +
 	 * "JobDetail";
-	 * 
+	 *
 	 * @param jobConfig
 	 */
 	private void scheduleJob(JobConfig jobConfig) throws SchedulerException {
@@ -612,5 +652,5 @@ public class JobHandler {
 	public List<JobConfig> getJobConfigList() {
 		return jobConfigList;
 	}
-	
+
 }

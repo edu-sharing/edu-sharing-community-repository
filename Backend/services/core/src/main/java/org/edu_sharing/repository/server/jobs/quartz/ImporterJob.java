@@ -43,7 +43,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
-public class ImporterJob extends AbstractJob implements JobClusterLocker.ClusterSingelton {
+public class ImporterJob extends AbstractInterruptableJob implements JobClusterLocker.ClusterSingelton {
 
 	public static Logger logger=Logger.getLogger(ImporterJob.class);
 	private JobExecutionContext context;
@@ -52,8 +52,7 @@ public class ImporterJob extends AbstractJob implements JobClusterLocker.Cluster
 
 	}
 	@Override
-	public void execute(JobExecutionContext context) throws JobExecutionException {
-		super.execute(context);
+	public void executeInterruptable(JobExecutionContext context) throws JobExecutionException {
 		String username = (String) context.getJobDetail().getJobDataMap().get(OAIConst.PARAM_USERNAME);
 		
 		if(username == null || username.trim().equals("")) {

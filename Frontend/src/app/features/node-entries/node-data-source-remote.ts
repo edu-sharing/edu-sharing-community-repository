@@ -591,8 +591,8 @@ class SortHandler {
     private _initSortPanel(sortPanel: SortPanel): void {
         this._sortPanelReset.next();
         if (sortPanel) {
-            sortPanel.active = this.currentSort.active;
-            sortPanel.direction = this.currentSort.direction;
+            sortPanel.active = this.currentSort?.active;
+            sortPanel.direction = this.currentSort?.direction;
             sortPanel.sortChange.pipe(takeUntil(this._sortPanelReset)).subscribe((sortEvent) => {
                 this._changeSort(sortEvent, 'user');
             });

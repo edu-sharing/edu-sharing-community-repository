@@ -377,6 +377,8 @@
       "TOAST_CANCELED": "The task was canceled. However, it may take a moment for the status to be updated.",
       "CANCEL_TITLE": "Cancel task?",
       "CANCEL_MESSAGE": "Canceling a task can lead to an inconsistent data state or even data loss.\n\nAre you really sure you want to cancel the task?",
+      "CANCEL_FORCE": "Force cancelling",
+      "CANCEL_FORCE_INFO": "By using this option, the thread of the job will be tried to force-stop. This is not recommended cause it might lead to deadlocks. Only use if no other option is viable",
       "WITH_WARNINGS": "(has warnings)",
       "WITH_ERRORS": "(has errors)",
       "Aborted": "Cancelled",

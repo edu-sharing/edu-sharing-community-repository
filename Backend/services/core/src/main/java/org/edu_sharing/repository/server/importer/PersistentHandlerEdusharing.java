@@ -226,6 +226,11 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 
 	}
+
+	public String getImportFolderId() {
+		return importFolderId;
+	}
+
 	private Map<String,String> importFolderCursorIds=new HashMap<>();
 	private synchronized String createFolderStructure(String cursor, String set) throws Throwable {
 		if (set == null || set.trim().equals("")) {
@@ -305,7 +310,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 	}
 
-	private NodeRef getNodeIfExists(Map<String, Object> filter) throws Throwable {
+	public NodeRef getNodeIfExists(Map<String, Object> filter) {
 		if(!hasTimestampMap) {
 			CMISSearchHelper.CMISSearchData data = new CMISSearchHelper.CMISSearchData();
 			List<NodeRef> result = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO, filter, data);

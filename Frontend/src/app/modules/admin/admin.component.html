@@ -12,6 +12,26 @@
   [isCancelable]="true"
   (onCancel)="dialogTitle = null"
 ></es-modal-dialog>
+<es-card
+  *ngIf="cancelJobInfo"
+  [title]="'ADMIN.JOBS.CANCEL_TITLE' | translate"
+  [buttons]="cancelJobButtons"
+  height="auto"
+>
+  <div class="card-content-padding">
+    <div class="cancel-job-message">{{ 'ADMIN.JOBS.CANCEL_MESSAGE' | translate }}</div>
+    <mat-checkbox [(ngModel)]="jobForceCancel" [ngModelOptions]="{ standalone: true }">
+      <es-multi-line-label>
+        <ng-container slot="label">
+          {{ 'ADMIN.JOBS.CANCEL_FORCE' | translate }}
+        </ng-container>
+        <span class="description" slot="description">
+          {{ 'ADMIN.JOBS.CANCEL_FORCE_INFO' | translate }}
+        </span>
+      </es-multi-line-label>
+    </mat-checkbox>
+  </div>
+</es-card>
 <div class="main">
   <div class="main-nav">
     <div>

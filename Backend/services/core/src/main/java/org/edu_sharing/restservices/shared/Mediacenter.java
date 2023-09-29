@@ -2,18 +2,18 @@ package org.edu_sharing.restservices.shared;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.Schema;;
+import io.swagger.v3.oas.annotations.media.Schema;
+import org.alfresco.service.cmr.security.PermissionService;;
 
 import java.io.Serializable;
 import java.util.List;
 
 @Schema(description = "")
 public class Mediacenter extends ManagableGroup {
-	public Mediacenter(Group group) {
-		this.setAuthorityName(group.getAuthorityName());
-		this.setAuthorityType(group.getAuthorityType());
-		this.setGroupName(group.getGroupName());
-		this.setProfile(group.getProfile());
+	public Mediacenter(String authorityName, Type authorityType) {
+		this.setAuthorityName(authorityName);
+		this.setAuthorityType(authorityType);
+		this.setGroupName(authorityName.substring(PermissionService.GROUP_PREFIX.length()));
 	}
 
 	public static class Profile extends GroupProfile {

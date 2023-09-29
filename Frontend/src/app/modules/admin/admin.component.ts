@@ -39,7 +39,7 @@ import {
 import { Helper } from '../../core-module/rest/helper';
 import { UIConstants } from '../../core-module/ui/ui-constants';
 import { SuggestItem } from '../../common/ui/autocomplete/autocomplete.component';
-import { Observable, Observer } from 'rxjs';
+import { interval, Observable, Observer } from 'rxjs';
 import { CustomHelper } from '../../common/custom-helper';
 import { DateHelper } from '../../core-ui-module/DateHelper';
 import { CsvHelper } from '../../core-module/csv.helper';
@@ -71,6 +71,10 @@ type LuceneData = {
     exportFormat?: 'json' | 'csv';
 };
 
+type Job = {
+    jobName: string;
+};
+
 @Component({
     selector: 'es-admin-main',
     templateUrl: 'admin.component.html',
@@ -85,6 +89,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     @ViewChild('searchResults') nodeEntriesSearchResult: NodeEntriesWrapperComponent<Node>;
     @ViewChild('actionbarComponent') actionbarComponent: ActionbarComponent;
     elasticResponse: NodeListElastic;
+    cancelJobInfo: Job;
 
     constructor(
         private toast: Toast,
@@ -127,10 +132,14 @@ export class AdminComponent implements OnInit, OnDestroy {
             this.getTemplates();
             this.connector.isLoggedIn().subscribe((data: LoginResult) => {
                 this.loginResult = data;
-                this.mediacenterService.getMediacenters().subscribe((mediacenters) => {
-                    this.mediacenters = mediacenters;
+                if (data.isAdmin) {
                     this.init();
-                });
+                } else {
+                    this.mediacenterService.getMediacenters().subscribe((mediacenters) => {
+                        this.mediacenters = mediacenters;
+                        this.init();
+                    });
+                }
             });
         });
     }
@@ -244,6 +253,22 @@ export class AdminComponent implements OnInit, OnDestroy {
     ownAppMode = 'repository';
     authenticateAuthority: Authority;
     private readonly onDestroyTasks: Array<() => void> = [];
+    cancelJobButtons = DialogButton.getYesNo(
+        () => (this.cancelJobInfo = null),
+        () => {
+            this.cancelJobFinally();
+        },
+    );
+    private _jobForceCancel: boolean;
+
+    get jobForceCancel(): boolean {
+        return this._jobForceCancel;
+    }
+
+    set jobForceCancel(value: boolean) {
+        this._jobForceCancel = value;
+        this.cancelJobButtons[1].color = this._jobForceCancel ? 'danger' : 'primary';
+    }
 
     ngOnInit(): void {
         this.mainNav.setMainNavConfig({
@@ -960,26 +985,20 @@ export class AdminComponent implements OnInit, OnDestroy {
         if (log.length <= 200) return log;
         return log.slice(0, 200);
     }
-    cancelJob(job: any) {
-        this.dialogTitle = 'ADMIN.JOBS.CANCEL_TITLE';
-        this.dialogMessage = 'ADMIN.JOBS.CANCEL_MESSAGE';
-        this.dialogButtons = DialogButton.getYesNo(
+    cancelJob(job: Job) {
+        this.cancelJobInfo = job;
+    }
+    cancelJobFinally() {
+        const jobInfo = this.cancelJobInfo;
+        this.cancelJobInfo = null;
+        this.admin.cancelJob(jobInfo.jobName, this.jobForceCancel).subscribe(
             () => {
-                this.dialogTitle = null;
+                this.toast.toast('ADMIN.JOBS.TOAST_CANCELED');
+                this.globalProgress = false;
             },
-            () => {
-                this.dialogTitle = null;
-                this.globalProgress = true;
-                this.admin.cancelJob(job.jobDetail.name).subscribe(
-                    () => {
-                        this.toast.toast('ADMIN.JOBS.TOAST_CANCELED');
-                        this.globalProgress = false;
-                    },
-                    (error) => {
-                        this.toast.error(error);
-                        this.globalProgress = false;
-                    },
-                );
+            (error) => {
+                this.toast.error(error);
+                this.globalProgress = false;
             },
         );
     }
@@ -1362,7 +1381,7 @@ export class AdminComponent implements OnInit, OnDestroy {
         }
         if (
             this.loginResult.isAdmin ||
-            this.mediacenters.filter((mc) => mc.administrationAccess).length
+            this.mediacenters?.filter((mc) => mc.administrationAccess).length
         ) {
             this.buttons.splice(3, 0, {
                 id: 'MEDIACENTER',
@@ -1516,6 +1535,9 @@ export class AdminComponent implements OnInit, OnDestroy {
             }
             data[param.name] =
                 param.type === 'boolean' ? param.sampleValue === 'true' : param.sampleValue ?? '';
+            if (param.type?.includes('Integer') && data[param.name] === '') {
+                data[param.name] = null;
+            }
             if (param.values) {
                 data[param.name] = param.values.map((v) => v.name).join('|');
             }

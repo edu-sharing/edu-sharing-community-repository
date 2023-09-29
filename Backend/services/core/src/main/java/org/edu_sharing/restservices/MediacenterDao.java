@@ -1,28 +1,26 @@
 package org.edu_sharing.restservices;
 
-import java.util.ArrayList;
+import com.google.gson.Gson;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.security.PermissionService;
+import org.edu_sharing.alfresco.service.AuthorityService;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.restservices.shared.Authority;
+import org.edu_sharing.restservices.shared.Mediacenter;
+import org.edu_sharing.service.mediacenter.MediacenterService;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.security.permissions.AccessDeniedException;
-import org.alfresco.service.cmr.security.PermissionService;
-import org.edu_sharing.alfresco.service.AuthorityService;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.restservices.shared.Mediacenter;
-import org.edu_sharing.restservices.shared.Node;
-import org.edu_sharing.service.mediacenter.MediacenterService;
-import org.edu_sharing.service.model.NodeRef;
-import org.edu_sharing.service.search.model.SearchToken;
-
-import com.google.gson.Gson;
-import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
-
 public class MediacenterDao extends AbstractDao{
 
 	private String authorityName;
+	private NodeRef nodeRef;
 
 	MediacenterService mediacenterService;
 
@@ -102,39 +100,48 @@ public class MediacenterDao extends AbstractDao{
 	}
 	public Mediacenter asMediacenter() {
 		try {
-			GroupDao groupDao = GroupDao.getGroup(repoDao, authorityName);
-			Mediacenter mediacenter = new Mediacenter(groupDao.asGroup());
+			String groupName = authorityName.startsWith(PermissionService.GROUP_PREFIX)
+					? authorityName
+					: PermissionService.GROUP_PREFIX + authorityName;
+			Mediacenter mediacenter = new Mediacenter(groupName,
+					Authority.Type.GROUP
+			);
 			// extend the group profile with mediacenter data
-			Mediacenter.Profile profile = new Mediacenter.Profile(mediacenter.getProfile());
+			Mediacenter.Profile profile = new Mediacenter.Profile();
+			profile.setDisplayName(new MCAlfrescoAPIClient().getGroupDisplayName(authorityName));
+			// this is verified on init of mediacenter so there is no need to fetch it again
+			profile.setGroupType(AuthorityService.MEDIA_CENTER_GROUP_TYPE);
+			profile.setScopeType((String) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CCM_PROP_SCOPE_TYPE));
+			profile.setGroupEmail((String) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CCM_PROP_GROUPEXTENSION_GROUPEMAIL));
 			Mediacenter.MediacenterProfileExtension mProfile=new Mediacenter.MediacenterProfileExtension();
-			mProfile.setId(authorityService.getProperty(mediacenter.getAuthorityName(), CCConstants.CCM_PROP_MEDIACENTER_ID));
+			mProfile.setId((String) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CCM_PROP_MEDIACENTER_ID));
 			try {
 				boolean isActive = mediacenterService.isActive(mediacenter.getAuthorityName());
 				mProfile.setContentStatus((isActive) ? Mediacenter.MediacenterProfileExtension.ContentStatus.Activated : Mediacenter.MediacenterProfileExtension.ContentStatus.Deactivated);
 			}catch(NullPointerException t){}
-			mProfile.setLocation(authorityService.getProperty(mediacenter.getAuthorityName(), CCConstants.CCM_PROP_ADDRESS_CITY));
-			mProfile.setDistrictAbbreviation(authorityService.getProperty(mediacenter.getAuthorityName(), CCConstants.CCM_PROP_MEDIACENTER_DISTRICT_ABBREVIATION));
-			mProfile.setMainUrl(authorityService.getProperty(mediacenter.getAuthorityName(), CCConstants.CCM_PROP_MEDIACENTER_MAIN_URL));
+			mProfile.setLocation((String) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CCM_PROP_ADDRESS_CITY));
+			mProfile.setDistrictAbbreviation((String) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CCM_PROP_MEDIACENTER_DISTRICT_ABBREVIATION));
+			mProfile.setMainUrl((String) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CCM_PROP_MEDIACENTER_MAIN_URL));
 			try {
-				mProfile.setCatalogs(Arrays.asList(new Gson().fromJson(authorityService.getProperty(mediacenter.getAuthorityName(), CCConstants.CCM_PROP_MEDIACENTER_CATALOGS),
+				mProfile.setCatalogs(Arrays.asList(new Gson().fromJson((String) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CCM_PROP_MEDIACENTER_CATALOGS),
 						Mediacenter.Catalog[].class)));
 			}catch(NullPointerException e){}
 			profile.setMediacenter(mProfile);
 			mediacenter.setProfile(profile);
 			
-			mediacenter.setAdministrationAccess(authorityService.hasAdminAccessToMediacenter(groupDao.getGroupName()));
+			mediacenter.setAdministrationAccess(authorityService.hasAdminAccessToMediacenter(groupName));
 			return mediacenter;
-		}catch(DAOException e){
+		}catch(Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	private MediacenterDao get(String group) throws DAOException {
 		try {
-			org.alfresco.service.cmr.repository.NodeRef ref=authorityService.getAuthorityNodeRef(group);
-			if(ref==null)
+			nodeRef=authorityService.getAuthorityNodeRef(group);
+			if(nodeRef==null)
 				throw new DAOMissingException(new Exception("Authority not found: "+group));
-			String property = nodeService.getProperty(ref.getStoreRef().getProtocol(), ref.getStoreRef().getIdentifier(), ref.getId(), CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
+			String property = nodeService.getProperty(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(), CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
 			if(property==null || !property.equals(AuthorityService.MEDIA_CENTER_GROUP_TYPE))
 				throw new java.lang.IllegalArgumentException("The given authority is not of type "+AuthorityService.MEDIA_CENTER_GROUP_TYPE);
 
@@ -178,6 +185,7 @@ public class MediacenterDao extends AbstractDao{
 	private MediacenterDao create(String name,Mediacenter.Profile profile) throws DAOException {
 		try {
 			this.authorityName = mediacenterService.createMediacenter(name,profile.getDisplayName(),null,null);
+			nodeRef=authorityService.getAuthorityNodeRef(authorityName);
 			if(profile.getMediacenter().getContentStatus()==null
 					|| profile.getMediacenter().getContentStatus().equals(Mediacenter.MediacenterProfileExtension.ContentStatus.Deactivated)){
 				mediacenterService.setActive(false, authorityName );
@@ -188,5 +196,9 @@ public class MediacenterDao extends AbstractDao{
 		}catch(Throwable t){
 			throw DAOException.mapping(t);
 		}
+	}
+
+	public NodeRef getNodeRef() {
+		return nodeRef;
 	}
 }
