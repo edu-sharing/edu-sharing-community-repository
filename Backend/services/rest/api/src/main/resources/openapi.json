@@ -9347,6 +9347,13 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "force",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
