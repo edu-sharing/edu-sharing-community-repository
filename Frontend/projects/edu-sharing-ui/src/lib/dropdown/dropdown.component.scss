@@ -3,7 +3,7 @@
 // We cannot use `:host` here, since the `mat-menu` elements are rearranged
 // outside of the original container. Hence we rely on the `.mat-dropdown-menu`
 // selector to not bleed into other components.
-::ng-deep .mat-mdc-menu-panel {
+::ng-deep .mat-dropdown-menu {
     .mat-mdc-menu-content {
         min-width: 200px;
         > ul > li > button {

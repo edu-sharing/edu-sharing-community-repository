@@ -12,18 +12,22 @@
 
 .collection-item {
     display: flex;
-    align-items: center;
     color: var(--primary);
     text-align: left;
     border: none;
     width: 100%;
+    & ::ng-deep .mat-mdc-menu-item-text {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+    }
     &.cdk-keyboard-focused {
         @include setGlobalKeyboardFocus('border');
     }
     &.active {
-        font-weight: bold;
+        --mat-menu-item-label-text-weight: bold;
     }
-    &.active::before {
+    &.active::after {
         content: '';
         position: absolute;
         left: 0;

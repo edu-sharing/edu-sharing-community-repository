@@ -73,12 +73,12 @@ $dark-secondary-text: rgba(black, 0.54);
     color: mat-css-utilities.mat-css-contrast-color(A100) !important;
 }
 
-.mdc-button {
+.mdc-button:not(.icon-button) {
     span {
         display: flex;
         align-items: center;
-        > .material-icons:not(:last-child),
-        > .custom-icons:not(:last-child) {
+        .material-icons,
+        .custom-icons {
             margin-right: 10px;
         }
     }
