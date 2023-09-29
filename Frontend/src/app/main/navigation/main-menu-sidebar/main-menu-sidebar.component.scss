@@ -1,9 +1,11 @@
 @import '../../../core-ui-module/styles/variables';
 
-$licenseInfoHeight: 40px;
+$licenseInfoHeight: 48px;
 
 .sidebar {
     position: fixed;
+    display: flex;
+    flex-direction: column;
     top: 0;
     left: 0;
     height: 100%;
@@ -18,16 +20,18 @@ $licenseInfoHeight: 40px;
     .main {
         min-height: calc(100% - #{$licenseInfoHeight});
         button.close {
-            @include clickable();
             position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             right: 2px;
             top: 2px;
-            padding: 10px;
             z-index: 2;
             color: #fff;
-            border-radius: 50%;
             width: 66px;
             height: 66px;
+            --mat-mdc-button-ripple-color: rgba(255, 255, 255, 0.1);
+            --mat-mdc-button-persistent-ripple-color: white;
         }
         .top {
             display: flex;
@@ -38,13 +42,17 @@ $licenseInfoHeight: 40px;
             @include unselectableText();
             > .profile {
                 z-index: 1;
-                left: 0;
                 width: 100%;
                 text-align: center;
                 color: #fff;
                 a {
+                    display: flex;
+                    flex-direction: column;
                     color: unset;
                     text-decoration: none;
+                    &.cdk-keyboard-focused {
+                        @include setGlobalKeyboardFocus('border');
+                    }
                 }
                 es-user-avatar {
                     display: flex;
@@ -68,10 +76,10 @@ $licenseInfoHeight: 40px;
     }
     .license-info {
         display: flex;
+        flex-grow: 1;
         justify-content: flex-end;
         align-items: center;
         padding: 0 20px;
-        width: calc(100% - 40px);
         height: $licenseInfoHeight;
         ::ng-deep span {
             color: $textLight;
@@ -79,7 +87,4 @@ $licenseInfoHeight: 40px;
         font-size: 90%;
         @include clickable();
     }
-}
-:host ::ng-deep .mat-button:hover .mat-button-focus-overlay {
-    opacity: 0;
 }

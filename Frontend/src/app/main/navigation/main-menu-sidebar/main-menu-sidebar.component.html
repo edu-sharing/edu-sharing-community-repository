@@ -29,6 +29,7 @@
         </ng-template>
         <a
           *ngIf="!loginInfo.isGuest; else userAvatar"
+          cdkMonitorElementFocus
           [routerLink]="['/' + ROUTER_PREFIX + 'profiles', ME]"
           [attr.aria-label]="'PROFILES.TITLE_NAV' | translate"
           aria-describedby="main-menu-sidebar-username"
