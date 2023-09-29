@@ -10,6 +10,7 @@
         [elementInteractionType]="interactionType"
         [columns]="collectionsColumns"
         (clickItem)="clickItem.emit($event)"
+        (fetchData)="loadMoreCollections()"
         [displayType]="NodeEntriesDisplayType.SmallGrid"
         [globalOptions]="createAllowed() ? [createSubCollectionOptionItem] : []"
         [dragDrop]="{
