@@ -15,7 +15,7 @@ import {
 import { Sort } from '@angular/material/sort';
 import { Node } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, map, switchMap, take, takeUntil } from 'rxjs/operators';
 import { ListItemSort, RestConstants, UIService } from '../../../core-module/core.module';
 import { NodeEntriesService } from '../../../core-ui-module/node-entries.service';
@@ -282,8 +282,10 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
         });
     }
 
-    getDragEnabled(): boolean {
-        return this.entriesService.dragDrop?.dragAllowed && !this.ui.isMobile();
+    getDragEnabled() {
+        return this.ui.isTouchSubject.pipe(
+            map((touch) => !touch && this.entriesService.dragDrop?.dragAllowed),
+        );
     }
 
     getDragData(node: T): T[] {

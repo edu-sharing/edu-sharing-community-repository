@@ -16,6 +16,7 @@
       <div
         class="sub-tree-element"
         cdkDrag
+        [cdkDragDisabled]="ui.isTouchSubject | async"
         [cdkDragData]="[node]"
         esNodesDrag
         [esNodesDropTarget]="node"

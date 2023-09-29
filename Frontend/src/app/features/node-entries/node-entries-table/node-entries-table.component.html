@@ -182,7 +182,7 @@
     matRipple
     cdkDrag
     esNodesDrag
-    [cdkDragDisabled]="!entriesService.dragDrop?.dragAllowed || ui.isMobile()"
+    [cdkDragDisabled]="!entriesService.dragDrop?.dragAllowed || (ui.isTouchSubject | async)"
     [cdkDragData]="getDragData(node)"
     (cdkDragStarted)="onDragStarted(node)"
     (cdkDragEnded)="onDragEnded()"

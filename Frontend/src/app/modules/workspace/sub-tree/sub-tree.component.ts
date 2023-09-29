@@ -13,7 +13,13 @@ import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { DropSource } from '../../../features/node-entries/entries-model';
-import { Node, NodeList, RestConstants, RestNodeService } from '../../../core-module/core.module';
+import {
+    Node,
+    NodeList,
+    RestConstants,
+    RestNodeService,
+    UIService,
+} from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { OptionItem, Scope } from '../../../core-ui-module/option-item';
@@ -83,6 +89,7 @@ export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
         private nodeApi: RestNodeService,
         private optionsService: OptionsHelperService,
         private localEvents: LocalEventsService,
+        public ui: UIService,
     ) {}
 
     ngOnInit(): void {
