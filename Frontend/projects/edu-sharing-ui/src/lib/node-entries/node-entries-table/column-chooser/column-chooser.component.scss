@@ -13,19 +13,17 @@
     color: rgba(0, 0, 0, 0.87);
     display: flex;
     flex-direction: row;
-    align-items: stretch;
+    align-items: center;
     box-sizing: border-box;
     background: white;
     font-size: 14px;
     justify-content: space-between;
     mat-checkbox {
-        margin: 20px;
+        margin: 0 12px;
     }
     .drag-handle {
         color: rgba(0, 0, 0, 0.5);
         cursor: move;
-        width: 60px;
-        height: unset;
         padding: 20px;
     }
 }

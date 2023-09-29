@@ -77,8 +77,8 @@ $dark-secondary-text: rgba(black, 0.54);
     span {
         display: flex;
         align-items: center;
-        > .material-icons,
-        .custom-icons {
+        > .material-icons:not(:last-child),
+        > .custom-icons:not(:last-child) {
             margin-right: 10px;
         }
     }
