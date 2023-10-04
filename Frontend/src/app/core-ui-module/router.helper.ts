@@ -11,29 +11,15 @@ export class RouterHelper {
         url: string,
         replaceUrl = false,
     ) {
-        let cleanUrl = url.replace(
-            (platformLocation as any).origin + platformLocation.getBaseHrefFromDOM(),
-            '',
-        );
-        let parsed = router.parseUrl(cleanUrl);
-        let segments: string[] = [];
-        try {
-            for (let segment of parsed.root.children.primary.segments) {
-                segments.push(segment.path);
+        // Strip origin and base HREF
+        const cleanUrl = url.replace(window.origin + platformLocation.getBaseHrefFromDOM(), '');
+        router.navigateByUrl(cleanUrl, { replaceUrl }).catch((error: any) => {
+            console.warn(error);
+            if (replaceUrl) {
+                window.location.replace(url);
+            } else {
+                window.location.assign(url);
             }
-        } catch (e) {
-            // some users get a nlp if a not parsable url is given. Use default redirect in this case
-            console.warn(e);
-            if (replaceUrl) window.location.replace(url);
-            else window.location.assign(url);
-            return;
-        }
-        router
-            .navigate(segments, { queryParams: parsed.queryParams, replaceUrl: replaceUrl })
-            .catch((error: any) => {
-                console.warn(error);
-                if (replaceUrl) window.location.replace(url);
-                else window.location.assign(url);
-            });
+        });
     }
 }
