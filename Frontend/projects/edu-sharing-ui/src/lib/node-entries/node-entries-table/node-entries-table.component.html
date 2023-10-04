@@ -40,7 +40,7 @@
       <mat-checkbox
         [checked]="entriesService.selection.isSelected(node)"
         (change)="entriesService.onCheckboxChanged(node, $event.checked)"
-        aria-label="{{ 'SELECT' | translate: { element: (node | nodeTitle) } }}"
+        aria-label="{{ 'SELECT' | translate : { element: (node | nodeTitle) } }}"
       ></mat-checkbox>
     </mat-cell>
   </ng-container>
@@ -166,7 +166,7 @@
             class="childobject-count"
             matTooltip="{{
               'CHILDOBJECT_COUNT'
-                | translate: { count: node.properties['virtual:childobjectcount'] * 1 + 1 }
+                | translate : { count: node.properties['virtual:childobjectcount'] * 1 + 1 }
             }}"
           >
             <span>{{ node.properties['virtual:childobjectcount'] * 1 + 1 }}</span
@@ -237,7 +237,7 @@
 available. -->
 <es-column-chooser
   *ngIf="columnChooserTriggerReady"
-  [columns]="entriesService.columns"
+  [(columns)]="entriesService.columns"
   [(columnChooserVisible)]="columnChooserVisible"
   [origin]="columnChooserTrigger"
   (columnsChange)="entriesService.columnsChange.emit($event)"

@@ -42,10 +42,20 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     get paginationStrategy(): PaginationStrategy {
         return this.entriesGlobal.getPaginationStrategy(this.scope);
     }
-    // TODO: Use a subject of an immutable type for columns, so users don't have to monitor
-    // `columnsChange` separately.
-    columns: ListItem[];
+    /**
+     * Subject that reflects the current columns configuration.
+     *
+     * Updated when loading configuration and through user interaction.
+     */
+    columnsSubject = new BehaviorSubject<ListItem[]>(null);
+    get columns(): ListItem[] {
+        return this.columnsSubject.value;
+    }
+    set columns(value: ListItem[]) {
+        this.columnsSubject.next(value);
+    }
     configureColumns: boolean;
+    /** Emits when the columns configuration changes through user interaction. */
     columnsChange: EventEmitter<ListItem[]>;
     displayType: NodeEntriesDisplayType;
     selection = new SelectionModel<T>(true, []);
