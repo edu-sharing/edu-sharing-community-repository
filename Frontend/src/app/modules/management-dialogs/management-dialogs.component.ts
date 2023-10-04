@@ -281,9 +281,15 @@ export class WorkspaceManagementDialogsComponent {
         this.toast.showProgressDialog();
         observableForkJoin(
             nodes.map((n) => this.nodeService.deleteNode(n.ref.id, false)),
-        ).subscribe(() => {
-            this.toast.closeModalDialog();
-        });
+        ).subscribe(
+            () => {
+                this.toast.closeModalDialog();
+            },
+            (error) => {
+                this.toast.error(error);
+                this.toast.closeModalDialog();
+            },
+        );
     }
 
     async openMdsEditor(nodes: Node[]): Promise<void> {
