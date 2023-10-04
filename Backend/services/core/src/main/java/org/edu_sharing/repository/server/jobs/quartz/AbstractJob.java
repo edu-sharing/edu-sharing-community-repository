@@ -38,7 +38,7 @@ import org.quartz.*;
 public abstract class AbstractJob implements Job,InterruptableJob {
 	// add your job description
 	static JobDescription JOB_DESCRIPTION;
-	protected Log logger = LogFactory.getLog(AbstractJob.class);
+	protected Log logger = LogFactory.getLog(this.getClass());
 	
 	boolean isStarted = false;
 
