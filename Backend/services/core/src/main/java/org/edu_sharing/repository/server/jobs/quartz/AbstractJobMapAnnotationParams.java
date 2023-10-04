@@ -51,7 +51,9 @@ public abstract class AbstractJobMapAnnotationParams extends AbstractJob {
 				try {
 					field.setAccessible(true);
 					Object value = jobExecutionContext.getJobDetail().getJobDataMap().get(field.getName());
-					if(field.getType().isEnum()) {
+					if(field.getAnnotation(JobFieldDescription.class).file()) {
+						field.set(this, jobExecutionContext.getJobDetail().getJobDataMap().get(JobHandler.FILE_DATA));
+					} else if (field.getType().isEnum()) {
 						field.set(this,
 								mapEnum(field.getType(), jobExecutionContext.getJobDetail().getJobDataMap().getString(field.getName()))
 						);
