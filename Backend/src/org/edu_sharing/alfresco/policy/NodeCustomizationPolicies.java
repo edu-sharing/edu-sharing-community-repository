@@ -370,7 +370,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			TikaInputStream stream = TikaInputStream.get(reader.getContentInputStream());
 			Metadata metadata = new Metadata();
 			MediaType mediaType = detector.detect(stream, metadata);
-			if(mediaType.equals(MediaType.OCTET_STREAM)) {
+			if(mediaType.equals(MediaType.OCTET_STREAM) && !LightbendConfigLoader.get().getBoolean("security.fileManagement.mimetypeVerification.allowUnknownMimetypes")) {
 				throw new NodeMimetypeUnknownValidationException();
 			}
 			String detectedMimeType = mediaType.getType() + "/" + mediaType.getSubtype();
