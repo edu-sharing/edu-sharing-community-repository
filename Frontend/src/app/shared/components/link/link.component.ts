@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
 
 @Component({
     selector: 'es-mat-link',
@@ -10,5 +10,7 @@ import { Component, EventEmitter, Output } from '@angular/core';
  * Will handle keyup.enter automatically for the click binding
  */
 export class LinkComponent {
+    @Input() @HostBinding('class.highlight') highlight: boolean;
+
     @Output() click = new EventEmitter();
 }

@@ -30,6 +30,8 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTreeModule } from '@angular/material/tree';
 import { RouterModule } from '@angular/router';
+import { EduSharingUiModule, TranslationsModule } from 'ngx-edu-sharing-ui';
+import { environment } from '../../environments/environment';
 import { AuthorityRowComponent } from './components/authority-search-input/authority-row/authority-row.component';
 import { AuthoritySearchInputComponent } from './components/authority-search-input/authority-search-input.component';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
@@ -45,16 +47,17 @@ import { MultiLineLabelComponent } from './components/multi-line-label/multi-lin
 import { SpinnerSmallComponent } from './components/spinner-small/spinner-small.component';
 import { TutorialComponent } from './components/tutorial/tutorial.component';
 import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
+import { UserQuotaComponent } from './components/user-quota/user-quota.component';
 import { WorkspaceCreateConnector } from './dialogs/create-connector/create-connector.component';
 import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.component';
 import { ElementRefDirective } from './directives/element-ref.directive';
 import { EscapeHtmlPipe } from './directives/escape-html.pipe';
 import { FileDropDirective } from './directives/file-drop';
 import { InfiniteScrollDirective } from './directives/infinite-scroll.directive';
-import { EduSharingUiModule, TranslationsModule } from 'ngx-edu-sharing-ui';
 import { OnAttributeChangeDirective } from './directives/on-attribute-change.directive';
 import { RegisterCustomPropertyDirective } from './directives/register-custom-property.directive';
 import { SkipTargetDirective } from './directives/skip-target.directive';
+import { TitleDirective } from './directives/title.directive';
 import { AuthorityAffiliationPipe } from './pipes/authority-affiliation.pipe';
 import { AuthorityColorPipe } from './pipes/authority-color.pipe';
 import { AuthorityNamePipe } from './pipes/authority-name.pipe';
@@ -62,8 +65,6 @@ import { BitwisePipe } from './pipes/bitwise.pipe';
 import { PermissionNamePipe } from './pipes/permission-name.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
-import { environment } from '../../environments/environment';
-import { TitleDirective } from './directives/title.directive';
 
 @NgModule({
     declarations: [
@@ -76,6 +77,7 @@ import { TitleDirective } from './directives/title.directive';
         BreadcrumbsComponent,
         CalendarComponent,
         CardComponent,
+        CreateLtitoolComponent,
         ElementRefDirective,
         EscapeHtmlPipe,
         FileDropDirective,
@@ -96,9 +98,9 @@ import { TitleDirective } from './directives/title.directive';
         TitleDirective,
         TutorialComponent,
         UserAvatarComponent,
+        UserQuotaComponent,
         VersionLabelPipe,
         WorkspaceCreateConnector,
-        CreateLtitoolComponent,
     ],
     imports: [
         A11yModule,
@@ -136,7 +138,9 @@ import { TitleDirective } from './directives/title.directive';
         CalendarComponent,
         CardComponent,
         CommonModule,
+        CreateLtitoolComponent,
         DragDropModule,
+        EduSharingUiModule,
         ElementRefDirective,
         EscapeHtmlPipe,
         FileDropDirective,
@@ -148,18 +152,19 @@ import { TitleDirective } from './directives/title.directive';
         LicenseSourceComponent,
         LinkComponent,
         MatAutocompleteModule,
+        MatBadgeModule,
         MatButtonModule,
         MatCardModule,
         MatCheckboxModule,
-        MatExpansionModule,
-        MatPaginatorModule,
-        MatProgressBarModule,
         MatChipsModule,
+        MatExpansionModule,
         MatFormFieldModule,
         MatIconModule,
         MatInputModule,
         MatMenuModule,
         MatOptionModule,
+        MatPaginatorModule,
+        MatProgressBarModule,
         MatProgressSpinnerModule,
         MatRadioModule,
         MatRippleModule,
@@ -185,11 +190,9 @@ import { TitleDirective } from './directives/title.directive';
         TitleDirective,
         TutorialComponent,
         UserAvatarComponent,
+        UserQuotaComponent,
         VersionLabelPipe,
         WorkspaceCreateConnector,
-        MatBadgeModule,
-        CreateLtitoolComponent,
-        EduSharingUiModule,
     ],
 })
 export class SharedModule {}

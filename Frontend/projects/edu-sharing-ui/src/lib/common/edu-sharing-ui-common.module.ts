@@ -24,6 +24,7 @@ import { ReplaceCharsPipe } from '../pipes/replace-chars.pipe';
 import { ActionbarComponent } from '../actionbar/actionbar.component';
 import { BorderBoxObserverDirective } from '../directives/border-box-observer.directive';
 import { MatButtonModule } from '@angular/material/button';
+import { FocusStateDirective } from '../directives/focus-state.directive';
 
 @NgModule({
     declarations: [
@@ -32,6 +33,7 @@ import { MatButtonModule } from '@angular/material/button';
         NodeIconPipe,
         NodeImagePipe,
         VCardNamePipe,
+        FocusStateDirective,
         FormatSizePipe,
         NodeImageSizePipe,
         NodePersonNamePipe,
@@ -62,6 +64,7 @@ import { MatButtonModule } from '@angular/material/button';
         NodeImagePipe,
         VCardNamePipe,
         SortDropdownComponent,
+        FocusStateDirective,
         FormatSizePipe,
         NodeImageSizePipe,
         NodePersonNamePipe,

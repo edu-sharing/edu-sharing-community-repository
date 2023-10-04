@@ -26,6 +26,7 @@ export * from './lib/directives/drag-nodes/nodes-drop-target.directive';
 export * from './lib/directives/drag-nodes/nodes-drag-source.directive';
 export * from './lib/directives/drag-nodes/nodes-drag.directive';
 export * from './lib/directives/check-text-overflow.directive';
+export * from './lib/directives/focus-state.directive';
 export * from './lib/sort-dropdown/sort-dropdown.component';
 export * from './lib/actionbar/actionbar.component';
 export * from './lib/list-items/list-items.module';

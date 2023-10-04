@@ -30,7 +30,7 @@ $workspaceInheritColor: #42ca8d !default;
 $editorialCollectionsBackground: #f5ec19 !default;
 $itemSelectedBackground: $primaryVeryLight !default;
 $itemSelectedTextColor: $primaryMediumDark !default;
-$buttonHoverBackground: var(--palette-primary-500, 0.08) !default;
+$buttonHoverBackground: rgba(var(--palette-primary-500-no-rgb), 0.08) !default;
 $workspaceNewBackground: $itemSelectedBackground !default;
 // the white bar height in search and es-workspace
 $secondaryBarHeight: 65px !default;

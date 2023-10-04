@@ -10,7 +10,6 @@ import { AutocompleteComponent } from './common/ui/autocomplete/autocomplete.com
 import { CookieInfoComponent } from './common/ui/cookie-info/cookie-info.component';
 import { PoweredByComponent } from './common/ui/powered-by/powered-by.component';
 import { FooterComponent } from './common/ui/footer/footer.component';
-import { UserQuotaComponent } from './common/ui/user-quota/user-quota.component';
 import { TimePipe } from './common/ui/time.pipe';
 import { GlobalContainerComponent } from './common/ui/global-container/global-container.component';
 import { RocketchatComponent } from './common/ui/global-container/rocketchat/rocketchat.component';
@@ -44,7 +43,6 @@ export const DECLARATIONS = [
     ApplyToLmsComponent,
     ModalDialogToastComponent,
     ToolListComponent,
-    UserQuotaComponent,
     ToucheventDirective,
     PoweredByComponent,
     FooterComponent,

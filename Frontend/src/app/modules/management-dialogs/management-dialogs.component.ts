@@ -235,24 +235,7 @@ export class WorkspaceManagementDialogsComponent {
     public uploadFile(event: FileList) {
         this.onUploadFileSelected.emit(event);
     }
-    createUrlLink(link: LinkData) {
-        const urlData = this.nodeHelper.createUrlLink(link);
-        this.closeUploadSelect();
-        this.toast.showProgressDialog();
-        this.nodeService
-            .createNode(
-                link.parent?.ref.id,
-                RestConstants.CCM_TYPE_IO,
-                urlData.aspects,
-                urlData.properties,
-                true,
-                RestConstants.COMMENT_MAIN_FILE_UPLOAD,
-            )
-            .subscribe((data) => {
-                this.showMetadataAfterUpload([data.node]);
-                this.toast.closeModalDialog();
-            });
-    }
+
     public closeUploadSelect() {
         this.showUploadSelect = false;
         this.showUploadSelectChange.emit(false);
@@ -278,7 +261,7 @@ export class WorkspaceManagementDialogsComponent {
             }
         });
     }
-    deleteNodes(nodes: Node[]) {
+    private deleteNodes(nodes: Node[]) {
         this.toast.showProgressDialog();
         observableForkJoin(
             nodes.map((n) => this.nodeService.deleteNode(n.ref.id, false)),

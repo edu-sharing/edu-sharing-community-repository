@@ -1,0 +1,160 @@
+import { Injectable } from '@angular/core';
+import { Node } from 'ngx-edu-sharing-api';
+import { LocalEventsService } from 'ngx-edu-sharing-ui';
+import * as rxjs from 'rxjs';
+import { ConfigurationService, RestConstants, RestNodeService } from '../core-module/core.module';
+import { Toast } from '../core-ui-module/toast';
+import {
+    FileData,
+    LinkData,
+} from '../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog-data';
+import { DialogsService } from '../features/dialogs/dialogs.service';
+import { BulkBehavior } from '../features/mds/types/types';
+import { DialogType } from '../modules/management-dialogs/management-dialogs.component';
+import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';
+
+/**
+ * Provides high-level methods to allow uploading and saving new material.
+ */
+@Injectable({
+    providedIn: 'root',
+})
+export class UploadDialogService {
+    constructor(
+        private config: ConfigurationService,
+        private dialogs: DialogsService,
+        private localEvents: LocalEventsService,
+        private managementDialogs: ManagementDialogsService,
+        private nodeService: RestNodeService,
+        private toast: Toast,
+    ) {}
+
+    /**
+     * Opens an upload dialog that allows the user to either upload new files or provide a web link.
+     *
+     * After the user confirms their choice, files will be uploaded (if any) and the required nodes
+     * will be added to the repository.
+     *
+     * @returns the created nodes or null if the process was cancelled by the user
+     */
+    async openUploadDialog({
+        parent,
+        chooseParent,
+    }: {
+        parent: Node;
+        chooseParent: boolean;
+    }): Promise<Node[] | null> {
+        const dialogRef = await this.dialogs.openAddMaterialDialog({
+            chooseParent,
+            parent,
+            multiple: true,
+            showLti: true,
+        });
+        const result = await dialogRef.afterClosed().toPromise();
+        if (result) {
+            switch (result.kind) {
+                case 'file':
+                    return this._createFileNodes(result);
+                case 'link':
+                    return this.createLinkNode(result);
+            }
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Creates a new node for a web link in the repository.
+     */
+    async createLinkNode(data: LinkData): Promise<Node[] | null> {
+        const urlData = this._createUrlLink(data);
+        this.toast.showProgressDialog();
+        const { node } = await this.nodeService
+            .createNode(
+                data.parent?.ref.id,
+                RestConstants.CCM_TYPE_IO,
+                urlData.aspects,
+                urlData.properties,
+                true,
+                RestConstants.COMMENT_MAIN_FILE_UPLOAD,
+            )
+            .toPromise();
+        this.toast.closeModalDialog();
+        return this._showMetadataAfterUpload([node]);
+    }
+
+    /**
+     * Uploads new files and creates respective new nodes in the repository.
+     */
+    private _createFileNodes(data: FileData): Node[] | null {
+        throw new Error('Method not implemented.');
+    }
+
+    private async _showMetadataAfterUpload(nodes: Node[]): Promise<Node[] | null> {
+        const dialogType = await this.config
+            .get('upload.postDialog', DialogType.SimpleEdit)
+            .toPromise();
+        if (dialogType === DialogType.SimpleEdit) {
+            this.managementDialogs.getDialogsComponent()._nodeSimpleEdit = nodes;
+            this.managementDialogs.getDialogsComponent()._nodeFromUpload = true;
+            return null; // TODO: return correct value
+        } else if (dialogType === DialogType.Mds) {
+            return this._openMdsEditor(nodes);
+        } else {
+            console.error('Invalid configuration for upload.postDialog: ' + dialogType);
+            return null;
+        }
+    }
+
+    private async _openMdsEditor(nodes: Node[]): Promise<Node[] | null> {
+        const dialogRef = await this.dialogs.openMdsEditorDialogForNodes({
+            nodes,
+            bulkBehavior: BulkBehavior.Replace,
+        });
+        const updatedNodes = await dialogRef.afterClosed().toPromise();
+        await this._afterMetadataEditDone(nodes, updatedNodes);
+        return updatedNodes;
+    }
+
+    private async _afterMetadataEditDone(originalNodes: Node[], updatedNodes: Node[] | null) {
+        if (!updatedNodes) {
+            await this._deleteNodes(originalNodes);
+        }
+        if (updatedNodes) {
+            this.localEvents.nodesChanged.emit(updatedNodes);
+        }
+    }
+
+    private async _deleteNodes(nodes: Node[]): Promise<void> {
+        this.toast.showProgressDialog();
+        await rxjs
+            .forkJoin(nodes.map((n) => this.nodeService.deleteNode(n.ref.id, false)))
+            .toPromise();
+        this.toast.closeModalDialog();
+    }
+
+    private _createUrlLink(data: LinkData): {
+        properties: Node['properties'];
+        aspects: string[];
+        url: string;
+    } {
+        const properties: Node['properties'] = {};
+        const aspects: string[] = [];
+        const url = this._addHttpIfRequired(data.link);
+        properties[RestConstants.CCM_PROP_IO_WWWURL] = [url];
+        if (data.lti) {
+            aspects.push(RestConstants.CCM_ASPECT_TOOL_INSTANCE_LINK);
+            properties[RestConstants.CCM_PROP_TOOL_INSTANCE_KEY] = [data.lti.consumerKey];
+            properties[RestConstants.CCM_PROP_TOOL_INSTANCE_SECRET] = [data.lti.sharedSecret];
+        }
+        properties[RestConstants.CCM_PROP_LINKTYPE] = [RestConstants.LINKTYPE_USER_GENERATED];
+        return { properties, aspects, url };
+    }
+
+    private _addHttpIfRequired(link: string): string {
+        if (!link.includes('://')) {
+            return 'http://' + link;
+        }
+        return link;
+    }
+}

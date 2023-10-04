@@ -185,11 +185,8 @@ export class NodeHelperService {
         target.name = source.name;
         target.title = source.title;
     }
-    isNodeCollection(node: Node | any) {
-        return (
-            (node.aspects && node.aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION) !== -1) ||
-            node.collection
-        );
+    isNodeCollection(node: Node): boolean {
+        return node.aspects?.includes(RestConstants.CCM_ASPECT_COLLECTION) || !!node.collection;
     }
     public getSourceIconPath(src: string) {
         return 'assets/images/sources/' + src.toLowerCase() + '.png';

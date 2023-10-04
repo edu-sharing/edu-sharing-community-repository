@@ -643,20 +643,6 @@ export class NodeHelperService extends NodeHelperServiceBase {
         return found;
     }
 
-    createUrlLink(link: LinkData) {
-        const properties: any = {};
-        const aspects: string[] = [];
-        const url = this.addHttpIfRequired(link.link);
-        properties[RestConstants.CCM_PROP_IO_WWWURL] = [url];
-        if (link.lti) {
-            aspects.push(RestConstants.CCM_ASPECT_TOOL_INSTANCE_LINK);
-            properties[RestConstants.CCM_PROP_TOOL_INSTANCE_KEY] = [link.consumerKey];
-            properties[RestConstants.CCM_PROP_TOOL_INSTANCE_SECRET] = [link.sharedSecret];
-        }
-        properties[RestConstants.CCM_PROP_LINKTYPE] = [RestConstants.LINKTYPE_USER_GENERATED];
-        return { properties, aspects, url };
-    }
-
     addHttpIfRequired(link: string) {
         if (link.indexOf('://') == -1) {
             return 'http://' + link;

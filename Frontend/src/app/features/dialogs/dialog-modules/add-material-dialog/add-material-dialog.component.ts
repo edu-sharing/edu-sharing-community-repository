@@ -1,41 +1,36 @@
 import { trigger } from '@angular/animations';
+import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormControl } from '@angular/forms';
 import {
-    Component,
-    ElementRef,
-    EventEmitter,
-    Input,
-    OnChanges,
-    OnInit,
-    Output,
-    SimpleChanges,
-    ViewChild,
-} from '@angular/core';
-import { UntypedFormControl } from '@angular/forms';
-import { ClientutilsV1Service, WebsiteInformation } from 'ngx-edu-sharing-api';
+    ClientutilsV1Service,
+    Node,
+    RestConstants,
+    UserQuota,
+    UserService,
+    WebsiteInformation,
+} from 'ngx-edu-sharing-api';
+import { ListItem, UIAnimation } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { catchError, debounce, finalize, map, switchMap, tap } from 'rxjs/operators';
 import {
     ConfigurationService,
     DialogButton,
-    IamUser,
-    Node,
     ParentList,
-    RestConstants,
-    RestIamService,
     RestNodeService,
-    RestSearchService,
     SessionStorageService,
-} from '../../../core-module/core.module';
-import { ListItem, UIAnimation } from 'ngx-edu-sharing-ui';
-import { LinkData } from '../../../core-ui-module/node-helper.service';
-import { Toast } from '../../../core-ui-module/toast';
-import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
+} from '../../../../core-module/core.module';
+import { Toast } from '../../../../core-ui-module/toast';
+import { BreadcrumbsService } from '../../../../shared/components/breadcrumbs/breadcrumbs.service';
+import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
+import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { DialogsService } from '../../dialogs.service';
+import { AddMaterialDialogData, AddMaterialDialogResult } from './add-material-dialog-data';
 
 @Component({
-    selector: 'es-workspace-file-upload-select',
-    templateUrl: 'file-upload-select.component.html',
-    styleUrls: ['file-upload-select.component.scss'],
+    selector: 'es-add-material-dialog',
+    templateUrl: './add-material-dialog.component.html',
+    styleUrls: ['./add-material-dialog.component.scss'],
     animations: [
         trigger('fade', UIAnimation.fade()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
@@ -43,91 +38,62 @@ import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/bread
     ],
     providers: [BreadcrumbsService],
 })
-export class WorkspaceFileUploadSelectComponent implements OnInit, OnChanges {
-    @ViewChild('fileSelect') file: ElementRef;
+export class AddMaterialDialogComponent implements OnInit {
+    @ViewChild('fileSelect') private file: ElementRef;
 
-    /**
-     * priority, useful if the dialog seems not to be in the foreground
-     * Values greater 0 will raise the z-index
-     */
-    @Input() priority = 0;
-    /**
-     * Allow multiple files uploaded
-     * @type {boolean}
-     */
-    @Input() multiple = true;
-    /**
-     * Should this widget display that it supports dropping
-     * @type {boolean}
-     */
-    @Input() supportsDrop = true; // always true
-    @Input() isFileOver = false; // always false
-    /**
-     * Allow the user to use a file picker to choose the parent?
-     */
-    @Input() showPicker = false;
-    /**
-     * Show the lti option and support generation of lti files?
-     * @type {boolean}
-     */
-    @Input() showLti = true;
-    @Input() parent: Node;
+    private disabled = true;
 
-    @Output() parentChange = new EventEmitter();
-    @Output() onCancel = new EventEmitter();
-    @Output() onFileSelected = new EventEmitter<FileList>();
-    @Output() onLinkSelected = new EventEmitter<LinkData>();
-
-    disabled = true;
-    showSaveParent = false;
-    saveParent = false;
-    breadcrumbs: {
+    protected readonly linkControl = new FormControl('');
+    protected showSaveParent = false;
+    protected saveParent = false;
+    protected breadcrumbs: {
         homeLabel: string;
         homeIcon: string;
     };
-    ltiAllowed: boolean;
-    ltiActivated: boolean;
-    ltiConsumerKey: string;
-    ltiSharedSecret: string;
-    // private ltiTool: Node;
-    buttons: DialogButton[];
-    user: IamUser;
-    readonly linkControl = new UntypedFormControl('');
-    websiteInformation: WebsiteInformation;
-    hideFileUpload = false;
-    loadingWebsiteInformation = false;
-    showInvalidUrlMessage = false;
-    columns = [
+    protected ltiEnabled: boolean;
+    protected ltiActivated: boolean;
+    protected ltiConsumerKey: string;
+    protected ltiSharedSecret: string;
+    protected userQuota: UserQuota;
+    protected websiteInformation: WebsiteInformation;
+    protected hideFileUpload = false;
+    protected isFileOver = false;
+    protected loadingWebsiteInformation = false;
+    protected columns = [
         new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
         new ListItem('NODE', RestConstants.CM_PROP_C_CREATED),
     ];
+    protected parent: Node;
 
     constructor(
-        private nodeService: RestNodeService,
-        private iamService: RestIamService,
-        private storageService: SessionStorageService,
-        public configService: ConfigurationService,
-        private toast: Toast,
+        @Inject(CARD_DIALOG_DATA) public data: AddMaterialDialogData,
+        private dialogRef: CardDialogRef<AddMaterialDialogData, AddMaterialDialogResult>,
         private breadcrumbsService: BreadcrumbsService,
         private clientUtils: ClientutilsV1Service,
+        private configService: ConfigurationService,
         private dialogs: DialogsService,
+        private nodeService: RestNodeService,
+        private storageService: SessionStorageService,
+        private toast: Toast,
+        private userService: UserService,
     ) {
+        this.parent = this.data.parent;
         this.setState('');
-        this.iamService.getCurrentUserAsync().then((user) => {
-            this.user = user;
-        });
+        this.userService
+            .observeCurrentUser()
+            .pipe(takeUntilDestroyed())
+            .subscribe((user) => (this.userQuota = user?.person.quota));
+        this.configService
+            .get('upload.lti.enabled', false)
+            .subscribe((ltiEnabled) => (this.ltiEnabled = ltiEnabled));
     }
 
     ngOnInit(): void {
         this.registerLink();
-    }
-    ngOnChanges(changes: SimpleChanges) {
-        if (changes?.parent) {
-            this.getBreadcrumbs(this.parent).subscribe((breadcrumbs) => {
-                this.breadcrumbs = breadcrumbs;
-                this.breadcrumbsService.setNodePath(breadcrumbs.nodes);
-            });
-        }
+        this.getBreadcrumbs(this.parent).subscribe((breadcrumbs) => {
+            this.breadcrumbs = breadcrumbs;
+            this.breadcrumbsService.setNodePath(breadcrumbs.nodes);
+        });
     }
 
     private registerLink(): void {
@@ -140,7 +106,6 @@ export class WorkspaceFileUploadSelectComponent implements OnInit, OnChanges {
                 tap(() => {
                     this.loadingWebsiteInformation = true;
                     this.websiteInformation = null;
-                    this.showInvalidUrlMessage = false;
                 }),
                 switchMap((url) =>
                     url ? this.clientUtils.getWebsiteInformation({ url }) : rxjs.of(null),
@@ -154,7 +119,6 @@ export class WorkspaceFileUploadSelectComponent implements OnInit, OnChanges {
                     if (websiteInformation) {
                         this.setState(this.linkControl.value);
                     }
-                    this.updateShowInvalidUrlMessage();
                     this.updateHideFileUpload();
                 },
                 error: () => {
@@ -171,25 +135,23 @@ export class WorkspaceFileUploadSelectComponent implements OnInit, OnChanges {
         }
     }
 
-    private updateShowInvalidUrlMessage(): void {
-        this.showInvalidUrlMessage =
-            this.linkControl.value.trim() && !this.websiteInformation?.page;
-    }
-
     cancel() {
-        this.onCancel.emit();
+        this.dialogRef.close(null);
     }
 
     selectFile() {
         this.file.nativeElement.click();
     }
 
-    onDrop(fileList: FileList) {
-        this.onFileSelected.emit(fileList);
-    }
-
-    async filesSelected(event: any) {
-        this.onFileSelected.emit(event.target.files);
+    /**
+     * Closes the dialog and returns the given file list to the caller.
+     */
+    closeWithFiles(fileList: FileList) {
+        this.dialogRef.close({
+            kind: 'file',
+            files: fileList,
+            parent: this.parent,
+        });
     }
 
     setLink() {
@@ -207,25 +169,29 @@ export class WorkspaceFileUploadSelectComponent implements OnInit, OnChanges {
             };
             this.toast.error(null, 'WORKSPACE.TOAST.LTI_FIELDS_REQUIRED', null, null, null, params);
         } else {
-            this.emitLinkSelected();
+            this.closeWithLink();
         }
     }
 
-    private emitLinkSelected(): void {
-        this.onLinkSelected.emit({
+    private closeWithLink(): void {
+        this.dialogRef.close({
+            kind: 'link',
             link: this.linkControl.value,
-            lti: this.ltiActivated,
             parent: this.parent,
-            consumerKey: this.ltiConsumerKey,
-            sharedSecret: this.ltiSharedSecret,
+            lti: this.ltiActivated
+                ? {
+                      consumerKey: this.ltiConsumerKey,
+                      sharedSecret: this.ltiSharedSecret,
+                  }
+                : null,
         });
     }
 
     setState(link: string) {
         link = link.trim();
         this.disabled = !link;
-        this.ltiAllowed = true;
         this.updateButtons();
+        this.dialogRef.patchConfig({ closable: Closable.Standard });
     }
 
     async chooseParent() {
@@ -236,22 +202,23 @@ export class WorkspaceFileUploadSelectComponent implements OnInit, OnChanges {
         });
         dialogRef.afterClosed().subscribe((nodes) => {
             if (nodes) {
-                this.parentChoosed(nodes);
+                this.parentSelected(nodes);
             }
         });
     }
 
-    parentChoosed(event: Node[]) {
+    parentSelected(event: Node[]) {
         this.showSaveParent = true;
         this.parent = event[0];
-        this.parentChange.emit(this.parent);
         this.updateButtons();
+        this.dialogRef.patchConfig({ closable: Closable.Standard });
     }
 
     updateButtons() {
-        const ok = new DialogButton('OK', { color: 'primary' }, () => this.setLink());
-        ok.disabled = this.disabled || (this.showPicker && !this.parent);
-        this.buttons = [new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()), ok];
+        const [okButton] = DialogButton.getOk(() => this.setLink());
+        okButton.disabled = this.disabled || (this.chooseParent && !this.parent);
+        const buttons = [...DialogButton.getCancel(() => this.cancel()), okButton];
+        this.dialogRef.patchConfig({ buttons });
     }
 
     private getBreadcrumbs(node: Node) {

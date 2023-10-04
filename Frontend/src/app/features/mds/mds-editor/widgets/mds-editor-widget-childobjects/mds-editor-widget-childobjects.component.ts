@@ -1,6 +1,6 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
-import { BehaviorSubject, forkJoin as observableForkJoin, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, forkJoin as observableForkJoin } from 'rxjs';
 import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { Node, NodeWrapper } from '../../../../../core-module/rest/data-object';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
@@ -10,7 +10,6 @@ import { RestNodeService } from '../../../../../core-module/rest/services/rest-n
 import { RestUtilitiesService } from '../../../../../core-module/rest/services/rest-utilities.service';
 import { NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
 import { Toast } from '../../../../../core-ui-module/toast';
-import { DialogsService as LegacyDialogsService } from '../../../../../modules/management-dialogs/dialogs.service';
 import { DialogsService } from '../../../../dialogs/dialogs.service';
 import { Values } from '../../../types/types';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
@@ -52,7 +51,6 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
         private utilities: RestUtilitiesService,
         private nodeHelper: NodeHelperService,
         public toast: Toast,
-        private legacyDialogsService: LegacyDialogsService,
         private dialogs: DialogsService,
     ) {}
 
@@ -86,8 +84,15 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
         this.hasChanges.next(true);
     }
 
-    openUploadSelectDialog(): void {
-        const dialogRef = this.legacyDialogsService.openUploadSelectDialog({ showLti: false });
+    async openUploadSelectDialog(): Promise<void> {
+        const dialogRef = await this.dialogs.openAddMaterialDialog({
+            // FIXME: We have ported these options from implicit values of the legacy dialog system,
+            // but didn't check whether the values make sense here.
+            parent: null,
+            chooseParent: false,
+            multiple: false,
+            showLti: false,
+        });
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
                 switch (result.kind) {
@@ -115,8 +120,8 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
         this.onChange();
     }
 
-    private addLink(linkData: any) {
-        const link = this.nodeHelper.addHttpIfRequired(linkData.link);
+    private addLink(link: string) {
+        link = this.nodeHelper.addHttpIfRequired(link);
         const properties = RestHelper.createNameProperty(link);
         properties[RestConstants.CCM_PROP_IO_WWWURL] = [link];
         properties[RestConstants.LOM_PROP_TITLE] = [link];

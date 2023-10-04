@@ -88,6 +88,10 @@ import {
     XmlAppPropertiesDialogData,
     XmlAppPropertiesDialogResult,
 } from './dialog-modules/xml-app-properties-dialog/xml-app-properties-dialog-data';
+import {
+    AddMaterialDialogData,
+    AddMaterialDialogResult,
+} from './dialog-modules/add-material-dialog/add-material-dialog-data';
 
 @Injectable({
     providedIn: 'root',
@@ -511,6 +515,24 @@ export class DialogsService {
             minHeight: 240,
             width: 500,
             data,
+            closable: Closable.Casual,
+        });
+    }
+
+    async openAddMaterialDialog(
+        data: AddMaterialDialogData,
+    ): Promise<CardDialogRef<AddMaterialDialogData, AddMaterialDialogResult>> {
+        const { AddMaterialDialogComponent } = await import(
+            './dialog-modules/add-material-dialog/add-material-dialog.module'
+        );
+        return this.cardDialog.open(AddMaterialDialogComponent, {
+            title: 'WORKSPACE.ADD_OBJECT_TITLE',
+            subtitle: 'WORKSPACE.ADD_OBJECT_SUBTITLE',
+            avatar: { kind: 'icon', icon: 'cloud_upload' },
+            minHeight: 700,
+            width: 600,
+            data,
+            autoFocus: '[autofocus]',
             closable: Closable.Casual,
         });
     }

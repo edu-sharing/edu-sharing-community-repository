@@ -605,17 +605,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.mainNavService.setMainNavConfig({
             title: 'COLLECTIONS.TITLE',
             currentScope: 'collections',
-            // TODO: document where this fails.
-            //
-            // onCreate: (nodes) => this.addNodesToCollection(nodes),
+            onCreate: (nodes) => this.addNodesToCollection(nodes),
         });
-        this.mainNavService
-            .getDialogs()
-            .onUploadFilesProcessed.pipe(
-                takeUntil(this.destroyed$),
-                filter((nodes) => !!nodes),
-            )
-            .subscribe((nodes) => this.addNodesToCollection(nodes));
         this.mainNavUpdateTrigger.pipe(takeUntil(this.destroyed$)).subscribe(async () => {
             this.mainNavService.patchMainNavConfig({
                 create: {

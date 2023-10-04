@@ -30,7 +30,6 @@ import { BulkBehavior, MdsDefinition, MdsType } from '../../types/types';
 import { MdsEditorCommonService } from '../../mds-editor/mds-editor-common.service';
 import { ConfigService, MdsService, MdsValue } from 'ngx-edu-sharing-api';
 import { first } from 'rxjs/operators';
-import { DialogsService as LegacyDialogsService } from '../../../../modules/management-dialogs/dialogs.service';
 import { DialogsService } from '../../../dialogs/dialogs.service';
 
 declare var noUiSlider: any;
@@ -279,7 +278,6 @@ export class MdsComponent {
         private mdsEditorCommon: MdsEditorCommonService,
         private nodeHelper: NodeHelperService,
         private _ngZone: NgZone,
-        private legacyDialogsService: LegacyDialogsService,
         private dialogs: DialogsService,
     ) {
         (window as any)['mdsComponentRef_' + this.mdsId] = { component: this, zone: _ngZone };
@@ -2509,8 +2507,13 @@ export class MdsComponent {
         this.refreshChildobjects();
     }
 
-    openUploadSelectDialog(): void {
-        const dialogRef = this.legacyDialogsService.openUploadSelectDialog({ showLti: false });
+    async openUploadSelectDialog(): Promise<void> {
+        const dialogRef = await this.dialogs.openAddMaterialDialog({
+            parent: null,
+            chooseParent: false,
+            multiple: false,
+            showLti: false,
+        });
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
                 switch (result.kind) {
@@ -2525,8 +2528,8 @@ export class MdsComponent {
         });
     }
 
-    private addChildobjectLink(event: any) {
-        let link = this.nodeHelper.addHttpIfRequired(event.link);
+    private addChildobjectLink(link: string) {
+        link = this.nodeHelper.addHttpIfRequired(link);
         let properties = RestHelper.createNameProperty(link);
         properties[RestConstants.CCM_PROP_IO_WWWURL] = [link];
         properties[RestConstants.LOM_PROP_TITLE] = [link];

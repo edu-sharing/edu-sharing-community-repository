@@ -11,12 +11,23 @@ import {
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ConnectorService, LtiPlatformService, Tool, Tools } from 'ngx-edu-sharing-api';
+import {
+    Constrain,
+    DateHelper,
+    DefaultGroups,
+    DropdownComponent,
+    ElementType,
+    OptionItem,
+    OptionsHelperDataService,
+    Scope,
+    Target,
+    UIAnimation,
+} from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { Observable, Subject } from 'rxjs';
 import { delay, take, takeUntil } from 'rxjs/operators';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
-    ConfigurationService,
     Connector,
     DialogButton,
     Filetype,
@@ -29,25 +40,11 @@ import {
     RestHelper,
     RestIamService,
     RestNodeService,
-    SessionStorageService,
     UIConstants,
 } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
-import {
-    Constrain,
-    DateHelper,
-    DefaultGroups,
-    DropdownComponent,
-    ElementType,
-    OptionItem,
-    OptionsHelperDataService,
-    Scope,
-    Target,
-    TemporaryStorageService,
-    UIAnimation,
-} from 'ngx-edu-sharing-ui';
 import { CardService } from '../../../core-ui-module/card.service';
-import { LinkData, NodeHelperService } from '../../../core-ui-module/node-helper.service';
+import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { AddFolderDialogResult } from '../../../features/dialogs/dialog-modules/add-folder-dialog/add-folder-dialog-data';
@@ -57,6 +54,7 @@ import {
     ManagementDialogsService,
 } from '../../../modules/management-dialogs/management-dialogs.service';
 import { PasteService } from '../../../services/paste.service';
+import { UploadDialogService } from '../../../services/upload-dialog.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
 
 @Component({
@@ -117,28 +115,26 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
 
     constructor(
         public bridge: BridgeService,
-        private connector: RestConnectorService,
-        private connectors: RestConnectorsService,
-        private connectorApi: ConnectorService,
-        private iamService: RestIamService,
-        private nodeService: RestNodeService,
-        private managementService: ManagementDialogsService,
-        private toast: Toast,
-        private router: Router,
-        private translate: TranslateService,
-        private configService: ConfigurationService,
-        private sessionStorage: SessionStorageService,
-        private temporaryStorage: TemporaryStorageService,
-        private route: ActivatedRoute,
-        private optionsService: OptionsHelperDataService,
-        private iam: RestIamService,
-        private nodeHelper: NodeHelperService,
-        private event: FrameEventsService,
         private cardService: CardService,
-        private managementDialogs: ManagementDialogsService,
-        private paste: PasteService,
+        private connector: RestConnectorService,
+        private connectorApi: ConnectorService,
+        private connectors: RestConnectorsService,
         private dialogs: DialogsService,
+        private event: FrameEventsService,
+        private iam: RestIamService,
+        private iamService: RestIamService,
         private ltiPlatformService: LtiPlatformService, //private paste: PasteService,
+        private managementDialogs: ManagementDialogsService,
+        private managementService: ManagementDialogsService,
+        private nodeHelper: NodeHelperService,
+        private nodeService: RestNodeService,
+        private optionsService: OptionsHelperDataService,
+        private paste: PasteService,
+        private route: ActivatedRoute,
+        private router: Router,
+        private toast: Toast,
+        private translate: TranslateService,
+        private uploadDialog: UploadDialogService,
     ) {
         this.route.queryParams.subscribe((params) => {
             this.params = params;
@@ -155,7 +151,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             if (login.statusCode === RestConstants.STATUS_CODE_OK) {
             }
         });
-        this.cardHasOpenModals$ = cardService.hasOpenModals.pipe(delay(0));
+        this.cardHasOpenModals$ = this.cardService.hasOpenModals.pipe(delay(0));
 
         this.ltiPlatformService.getTools().subscribe((t) => {
             this.tools = t;
@@ -189,22 +185,13 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         if (CardComponent.getNumberOfOpenCards() > 0) {
             return;
         }
-        // @TODO: Later we should find a way to prevent the event from propagating
-        // this currently fails because getAsString is called async!
-        this.managementService.getDialogsComponent().createUrlLink({
-            ...new LinkData(url),
+        const nodes = await this.uploadDialog.createLinkNode({
+            link: url,
             parent: await this.getParent(),
         });
-        // `onUploadFilesProcessed` will be fired when the quick edit dialog triggered by
-        // `createUrlLink` is confirmed or canceled.
-        this.managementDialogs
-            .getDialogsComponent()
-            .onUploadFilesProcessed.pipe(take(1))
-            .subscribe((nodes) => {
-                if (nodes) {
-                    this.onCreate.emit(nodes);
-                }
-            });
+        if (nodes) {
+            this.onCreate.emit(nodes);
+        }
     }
 
     updateOptions() {
@@ -338,7 +325,18 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         });
     }
 
-    async openUploadSelect() {
+    async openUploadSelect(): Promise<void> {
+        const nodes = await this.uploadDialog.openUploadDialog({
+            parent: await this.getParent(),
+            chooseParent: this.showPicker,
+        });
+        if (nodes) {
+            this.onCreate.emit(nodes);
+        }
+    }
+
+    // TODO: remove
+    private async _openUploadSelect() {
         this.uploadSelectDialogRef = this.managementDialogs.openUploadSelect({
             parent: await this.getParent(),
             showPicker: this.showPicker,

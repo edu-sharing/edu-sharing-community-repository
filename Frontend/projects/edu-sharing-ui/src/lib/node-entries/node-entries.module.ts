@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { ListItemsModule } from '../list-items/list-items.module';
-import { FocusStateDirective } from './focus-state.directive';
 import { ListItemLabelPipe } from './list-item-label.pipe';
 import { NodeEntriesCardGridComponent } from './node-entries-card-grid/node-entries-card-grid.component';
 import { NodeEntriesCardSmallComponent } from './node-entries-card-small/node-entries-card-small.component';
@@ -41,7 +40,6 @@ import { NodeEntriesGlobalOptionsComponent } from './node-entries-global-options
     declarations: [
         ColumnChooserComponent,
         DragPreviewComponent,
-        FocusStateDirective,
         ListItemLabelPipe,
         NodeEntriesCardComponent,
         NodeEntriesCardGridComponent,

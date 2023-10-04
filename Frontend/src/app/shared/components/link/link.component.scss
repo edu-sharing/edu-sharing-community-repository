@@ -8,10 +8,14 @@ button {
     border: unset;
     padding: unset;
     text-transform: unset;
-    &:hover {
+    cursor: pointer;
+    border-bottom: 1px solid transparent; // Take up the same space as when focused
+    &:hover,
+    :host.highlight & {
         color: $primaryDark;
     }
-    &:focus {
+    &:focus,
+    :host.highlight & {
         box-shadow: none !important;
         @include removeDefaultFocus();
         border-bottom: 1px solid $focusColor;
