@@ -1,4 +1,4 @@
-import { MdsWidgetValue } from '../../../types/types';
+import { MdsWidget, MdsWidgetValue } from '../../../types/types';
 import { DisplayValue } from '../DisplayValues';
 
 let nextUniqueId = 0;
@@ -14,6 +14,10 @@ export class TreeNode {
     isHidden?: boolean;
     type?: null | 'suggestionInput';
 }
+
+export type MdsWidgetTree = MdsWidget & {
+    tree: Tree;
+};
 
 export class Tree {
     rootNodes: TreeNode[];

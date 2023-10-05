@@ -15,6 +15,7 @@ public abstract class AbstractInterruptableJob extends AbstractJobMapAnnotationP
             try {
                 executeInterruptable(jobExecutionContext);
             } catch (JobExecutionException e) {
+                logger.error(e);
                 throw new RuntimeException(e);
             }
         });

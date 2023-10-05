@@ -51,7 +51,9 @@ public abstract class AbstractJobMapAnnotationParams extends AbstractJob {
 				try {
 					field.setAccessible(true);
 					Object value = jobExecutionContext.getJobDetail().getJobDataMap().get(field.getName());
-					if(field.getType().isEnum()) {
+					if(field.getAnnotation(JobFieldDescription.class).file()) {
+						field.set(this, jobExecutionContext.getJobDetail().getJobDataMap().get(JobHandler.FILE_DATA));
+					} else if (field.getType().isEnum()) {
 						field.set(this,
 								mapEnum(field.getType(), jobExecutionContext.getJobDetail().getJobDataMap().getString(field.getName()))
 						);
@@ -94,7 +96,14 @@ public abstract class AbstractJobMapAnnotationParams extends AbstractJob {
 						String formatPattern = "yyyy-MM-dd";
 						SimpleDateFormat dateFormat = new SimpleDateFormat(formatPattern);
 						field.set(this, dateFormat.format(jobExecutionContext.getJobDetail().getJobDataMap().get(field.getName())));
-					} else {
+					} else if(field.getType().getName().equals(Integer.class.getName())) {
+						Object data = jobExecutionContext.getJobDetail().getJobDataMap().get(field.getName());
+						if(data instanceof String) {
+							field.set(this, Integer.parseInt((String) data));
+						} else {
+							field.set(this, data);
+						}
+					}else {
 						field.set(this, jobExecutionContext.getJobDetail().getJobDataMap().get(field.getName()));
 					}
 				} catch (IllegalAccessException e) {

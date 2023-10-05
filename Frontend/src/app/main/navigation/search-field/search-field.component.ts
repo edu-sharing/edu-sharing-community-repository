@@ -19,11 +19,11 @@ import { LoadingScreenService } from '../../loading-screen/loading-screen.servic
 import { SearchFieldInternalService } from './search-field-internal.service';
 import { SearchFieldConfig } from './search-field.service';
 import { MdsHelper } from '../../../core-module/rest/mds-helper';
-import { Tree } from '../../../features/mds/mds-editor/widgets/mds-editor-widget-tree/tree';
+import {
+    MdsWidgetTree,
+    Tree,
+} from '../../../features/mds/mds-editor/widgets/mds-editor-widget-tree/tree';
 
-type MdsWidgetTree = MdsWidget & {
-    tree: Tree;
-};
 @Component({
     selector: 'es-search-field',
     templateUrl: './search-field.component.html',
