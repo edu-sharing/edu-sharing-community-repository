@@ -58,6 +58,7 @@ import { NativeWidgetComponent } from './mds-editor-view/mds-editor-view.compone
 import { parseAttributes } from './util/parse-attributes';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import { Helper } from '../../../core-module/rest/helper';
+import { MdsWidgetTree } from './widgets/mds-editor-widget-tree/tree';
 
 export interface CompletionStatusField {
     widget: Widget;
@@ -167,7 +168,10 @@ export class MdsEditorInstanceService implements OnDestroy {
             public readonly variables: { [key: string]: string } = null,
         ) {
             // deep copy to prevent persistence from inline overrides
+            // the tree element is recursive and might not be serializable, remove it (will be rebuild later)
+            delete (this._definition as MdsWidgetTree).tree;
             this._definition = Helper.deepCopy(this._definition);
+            console.log(this._definition);
             this.replaceVariables();
             combineLatest([this.value$, this.bulkMode, this.ready])
                 .pipe(
@@ -1284,6 +1288,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         for (const view of views) {
             for (let widgetDefinition of this.getWidgetsForView(availableWidgets, view)) {
                 widgetDefinition = parseAttributes(view.html, widgetDefinition);
+                console.log(widgetDefinition);
                 const widget = new MdsEditorInstanceService.Widget(
                     this,
                     widgetDefinition,
