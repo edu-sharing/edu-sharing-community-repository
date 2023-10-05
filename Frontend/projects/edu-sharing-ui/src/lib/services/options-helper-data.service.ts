@@ -68,10 +68,10 @@ export class OptionsHelperDataService implements OnDestroy {
     private registerStaticSubscriptions(): void {
         this.localEvents.nodesDeleted
             .pipe(takeUntil(this.destroyed))
-            .subscribe((nodes) => this.components.list?.deleteNodes(nodes));
+            .subscribe((nodes) => this.components?.list?.deleteNodes(nodes));
         this.localEvents.nodesChanged
             .pipe(takeUntil(this.destroyed))
-            .subscribe((nodes) => this.components.list?.updateNodes(nodes));
+            .subscribe((nodes) => this.components?.list?.updateNodes(nodes));
     }
     ngOnDestroy(): void {
         this.destroyed.next();
