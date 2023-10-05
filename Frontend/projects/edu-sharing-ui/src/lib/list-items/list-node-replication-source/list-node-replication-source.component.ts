@@ -28,9 +28,8 @@ export class ListNodeReplicationSourceComponent extends ListWidget {
         ),
         switchMap((replicationSource) =>
             this.translate.get(
-                'REPOSITORIES.' +
-                    this.nodeSource.transform(replicationSource[0], { mode: 'escaped' }),
-                { fallback: this.nodeSource.transform(replicationSource[0], { mode: 'text' }) },
+                'REPOSITORIES.' + this.nodeSource.transform(replicationSource, { mode: 'escaped' }),
+                { fallback: this.nodeSource.transform(replicationSource, { mode: 'text' }) },
             ),
         ),
     );
