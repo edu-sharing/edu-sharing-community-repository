@@ -20,7 +20,7 @@ export class ListNodeLicenseComponent extends ListWidget {
     );
 
     readonly licenseIcon$ = this.nodeSubject.pipe(
-        map((node) => this.nodeHelper.getLicenseIcon(node as Node)),
+        switchMap((node) => this.nodeHelper.getLicenseIcon(node as Node)),
     );
 
     readonly tooltip$ = rxjs.combineLatest([this.licenseName$, this.provideLabelSubject]).pipe(

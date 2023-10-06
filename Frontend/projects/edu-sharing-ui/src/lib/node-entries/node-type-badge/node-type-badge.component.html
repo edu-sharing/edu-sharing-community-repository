@@ -15,7 +15,7 @@
   </ng-container>
   <ng-container *ngIf="!getCustomTemplate()">
     <img
-      [src]="node | esNodeIcon"
+      [src]="node | esNodeIcon | async"
       [alt]="
         node.mediatype
           ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
