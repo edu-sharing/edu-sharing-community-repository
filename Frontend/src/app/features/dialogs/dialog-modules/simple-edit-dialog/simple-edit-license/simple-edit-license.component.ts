@@ -1,4 +1,9 @@
+import { trigger } from '@angular/animations';
 import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { MatButtonToggleGroup } from '@angular/material/button-toggle';
+import { UIAnimation, VCard } from 'ngx-edu-sharing-ui';
+import { Observable, forkJoin, from } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import {
     ConfigurationService,
     Node,
@@ -7,15 +12,10 @@ import {
     RestIamService,
     RestNodeService,
     RestOrganizationService,
-} from '../../../../core-module/core.module';
-import { Toast } from '../../../../core-ui-module/toast';
-import { trigger } from '@angular/animations';
-import { forkJoin, from, Observable } from 'rxjs';
-import { MatButtonToggleGroup } from '@angular/material/button-toggle';
-import { UIAnimation, VCard } from 'ngx-edu-sharing-ui';
-import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
-import { Values } from '../../../../features/mds/types/types';
-import { switchMap } from 'rxjs/operators';
+} from '../../../../../core-module/core.module';
+import { NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
+import { Toast } from '../../../../../core-ui-module/toast';
+import { Values } from '../../../../../features/mds/types/types';
 
 @Component({
     selector: 'es-simple-edit-license',

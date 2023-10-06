@@ -748,7 +748,7 @@
     },
     "DIRTY": {
       "TITLE": "Changes have been made to the dialog",
-      "MESSAGE": "Changes have already been made to the dialog. They must be saved before changing the dialog.\n\nDo you want to save or discard the changes already made??"
+      "MESSAGE": "Changes have already been made to the dialog. They must be saved before changing the dialog.\n\nDo you want to save the changes already made?"
     }
   },
 

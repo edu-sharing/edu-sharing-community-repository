@@ -9,7 +9,15 @@ import {
     TemplateRef,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { forkJoin as observableForkJoin, Observable } from 'rxjs';
+import { CollectionProposalStatus, ProposalNode } from 'ngx-edu-sharing-api';
+import {
+    LocalEventsService,
+    TemporaryStorageService,
+    UIAnimation,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
+import { Observable, forkJoin as observableForkJoin } from 'rxjs';
+import { ErrorProcessingService } from 'src/app/core-ui-module/error.processing';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import {
     CollectionReference,
@@ -18,27 +26,17 @@ import {
     LocalPermissions,
     Node,
     NodeVersions,
-    NodeWrapper,
     RestCollectionService,
     RestConstants,
     RestHelper,
     RestNodeService,
     Version,
 } from '../../core-module/core.module';
+import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { Toast } from '../../core-ui-module/toast';
-import {
-    LocalEventsService,
-    TemporaryStorageService,
-    UIAnimation,
-    UIConstants,
-} from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../core-ui-module/ui-helper';
-import { LinkData, NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { BulkBehavior } from '../../features/mds/types/types';
-import { SimpleEditCloseEvent } from './simple-edit-dialog/simple-edit-dialog.component';
-import { CollectionProposalStatus, ProposalNode } from 'ngx-edu-sharing-api';
-import { ErrorProcessingService } from 'src/app/core-ui-module/error.processing';
 
 export enum DialogType {
     SimpleEdit = 'SimpleEdit',
@@ -94,10 +92,6 @@ export class WorkspaceManagementDialogsComponent {
     @Output() addNodesStreamChange = new EventEmitter();
     @Input() nodeVariant: Node;
     @Output() nodeVariantChange = new EventEmitter();
-    @Input() set nodeSimpleEdit(nodeSimpleEdit: Node[]) {
-        this._nodeSimpleEdit = nodeSimpleEdit;
-        this._nodeFromUpload = false;
-    }
     @Input() nodeSimpleEditChange = new EventEmitter<Node[]>();
     @Input() materialViewFeedback: Node;
     @Output() materialViewFeedbackChange = new EventEmitter<Node>();
@@ -126,10 +120,8 @@ export class WorkspaceManagementDialogsComponent {
         collection: Node;
         references: CollectionReference[];
     }>();
-    _nodeSimpleEdit: Node[];
     _nodeFromUpload = false;
     public editorPending = false;
-    reopenSimpleEdit = false;
     private nodeLicenseOnUpload = false;
     /**
      * QR Code object data to print
@@ -179,37 +171,7 @@ export class WorkspaceManagementDialogsComponent {
         private dialogs: DialogsService,
         private localEvents: LocalEventsService,
     ) {}
-    async openShareDialog(nodes: Node[]): Promise<void> {
-        const dialogRef = await this.dialogs.openShareDialog({
-            nodes,
-            sendMessages: true,
-        });
-        dialogRef.afterClosed().subscribe((result) => {
-            this.closeShare(nodes);
-        });
-    }
-    closeShare(originalNodes: Node[]) {
-        // reload node metadata
-        this.toast.showProgressDialog();
-        observableForkJoin(
-            originalNodes.map((n) =>
-                this.nodeService.getNodeMetadata(n.ref.id, [RestConstants.ALL]),
-            ),
-        ).subscribe(
-            (nodes: NodeWrapper[]) => {
-                this.localEvents.nodesChanged.next(nodes.map((n) => n.node));
-                const previousNodes = originalNodes;
-                if (this.reopenSimpleEdit) {
-                    this.reopenSimpleEdit = false;
-                    this._nodeSimpleEdit = previousNodes;
-                }
-                this.toast.closeModalDialog();
-            },
-            (error) => {
-                this.toast.closeModalDialog();
-            },
-        );
-    }
+
     public closeWorkflow(nodes: Node[] = null) {
         this.nodeWorkflow = null;
         this.nodeWorkflowChange.emit(null);
@@ -249,9 +211,6 @@ export class WorkspaceManagementDialogsComponent {
         dialogRef.afterClosed().subscribe((updatedNodes) => {
             if (this.nodeLicenseOnUpload) {
                 this.showMetadataAfterUpload(nodes);
-            } else if (this.reopenSimpleEdit) {
-                this.reopenSimpleEdit = false;
-                this._nodeSimpleEdit = nodes;
             } else if (this._nodeFromUpload) {
                 this.onUploadFilesProcessed.emit(nodes);
             }
@@ -282,16 +241,13 @@ export class WorkspaceManagementDialogsComponent {
 
     private closeMdsEditor(originalNodes: Node[], updatedNodes: Node[] = null) {
         let refresh = !!updatedNodes;
-        if (this._nodeFromUpload && !this.reopenSimpleEdit && updatedNodes == null) {
+        if (this._nodeFromUpload && updatedNodes == null) {
             this.deleteNodes(originalNodes);
             this.localEvents.nodesDeleted.emit(originalNodes);
             refresh = true;
         }
         this.onCloseMetadata.emit(updatedNodes);
-        if (this.reopenSimpleEdit) {
-            this.reopenSimpleEdit = false;
-            this._nodeSimpleEdit = originalNodes;
-        } else if (this._nodeFromUpload) {
+        if (this._nodeFromUpload) {
             this.onUploadFilesProcessed.emit(updatedNodes);
         } else if (
             this.nodeSidebar &&
@@ -406,8 +362,8 @@ export class WorkspaceManagementDialogsComponent {
         this._nodeFromUpload = true;
         const dialog = this.config.instant('upload.postDialog', DialogType.SimpleEdit);
         if (dialog === DialogType.SimpleEdit) {
-            this._nodeSimpleEdit = event;
-            this.nodeSimpleEditChange.emit(event);
+            // this._nodeSimpleEdit = event;
+            // this.nodeSimpleEditChange.emit(event);
         } else if (dialog === DialogType.Mds) {
             void this.openMdsEditor(event);
         } else {
@@ -478,22 +434,6 @@ export class WorkspaceManagementDialogsComponent {
         } else {
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id]);
         }
-    }
-
-    closeSimpleEdit(event: SimpleEditCloseEvent) {
-        if (this._nodeFromUpload) {
-            if (event.reason === 'done') {
-                this.onUploadFilesProcessed.emit(event.nodes);
-            } else if (event.reason === 'abort') {
-                this.deleteNodes(this._nodeSimpleEdit);
-                this.onUploadFilesProcessed.emit(null);
-            }
-        }
-        if (event.nodes) {
-            this.localEvents.nodesChanged.emit(event.nodes);
-        }
-        this._nodeSimpleEdit = null;
-        this.nodeSimpleEditChange.emit(null);
     }
 
     private unblockImportedNodes(nodes: Node[]) {

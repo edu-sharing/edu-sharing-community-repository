@@ -11,7 +11,6 @@ import {
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { BulkBehavior } from '../features/mds/types/types';
 import { DialogType } from '../modules/management-dialogs/management-dialogs.component';
-import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';
 
 /**
  * Provides high-level methods to allow uploading and saving new material.
@@ -24,7 +23,6 @@ export class UploadDialogService {
         private config: ConfigurationService,
         private dialogs: DialogsService,
         private localEvents: LocalEventsService,
-        private managementDialogs: ManagementDialogsService,
         private nodeService: RestNodeService,
         private toast: Toast,
     ) {}
@@ -95,15 +93,20 @@ export class UploadDialogService {
             .get('upload.postDialog', DialogType.SimpleEdit)
             .toPromise();
         if (dialogType === DialogType.SimpleEdit) {
-            this.managementDialogs.getDialogsComponent()._nodeSimpleEdit = nodes;
-            this.managementDialogs.getDialogsComponent()._nodeFromUpload = true;
-            return null; // TODO: return correct value
+            return this._openSimpleEditor(nodes);
         } else if (dialogType === DialogType.Mds) {
             return this._openMdsEditor(nodes);
         } else {
             console.error('Invalid configuration for upload.postDialog: ' + dialogType);
             return null;
         }
+    }
+
+    private async _openSimpleEditor(nodes: Node[]): Promise<Node[] | null> {
+        const dialogRef = await this.dialogs.openSimpleEditDialog({ nodes, fromUpload: true });
+        const updatedNodes = await dialogRef.afterClosed().toPromise();
+        await this._afterMetadataEditDone(nodes, updatedNodes);
+        return updatedNodes;
     }
 
     private async _openMdsEditor(nodes: Node[]): Promise<Node[] | null> {

@@ -65,6 +65,7 @@ import { BitwisePipe } from './pipes/bitwise.pipe';
 import { PermissionNamePipe } from './pipes/permission-name.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 @NgModule({
     declarations: [
@@ -109,6 +110,7 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
         FormsModule,
         MatAutocompleteModule,
         MatButtonModule,
+        MatButtonToggleModule,
         MatCardModule,
         MatDatepickerModule,
         MatInputModule,
@@ -154,6 +156,7 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
         MatAutocompleteModule,
         MatBadgeModule,
         MatButtonModule,
+        MatButtonToggleModule,
         MatCardModule,
         MatCheckboxModule,
         MatChipsModule,

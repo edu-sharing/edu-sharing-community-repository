@@ -1,4 +1,9 @@
+import { trigger } from '@angular/animations';
 import { ApplicationRef, Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { MatButtonToggleGroup } from '@angular/material/button-toggle';
+import { AuthenticationService } from 'ngx-edu-sharing-api';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
+import { Observable, forkJoin } from 'rxjs';
 import {
     AuthorityProfile,
     ConfigurationService,
@@ -13,15 +18,10 @@ import {
     RestIamService,
     RestNodeService,
     RestOrganizationService,
-} from '../../../../core-module/core.module';
-import { Toast } from '../../../../core-ui-module/toast';
-import { UIHelper } from '../../../../core-ui-module/ui-helper';
-import { trigger } from '@angular/animations';
-import { forkJoin, Observable } from 'rxjs';
-import { MatButtonToggleGroup } from '@angular/material/button-toggle';
-import { Helper } from '../../../../core-module/rest/helper';
-import { AuthenticationService } from 'ngx-edu-sharing-api';
-import { UIAnimation } from 'ngx-edu-sharing-ui';
+} from '../../../../../core-module/core.module';
+import { Helper } from '../../../../../core-module/rest/helper';
+import { Toast } from '../../../../../core-ui-module/toast';
+import { UIHelper } from '../../../../../core-ui-module/ui-helper';
 
 type Org = { organization: Organization; groups?: any };
 

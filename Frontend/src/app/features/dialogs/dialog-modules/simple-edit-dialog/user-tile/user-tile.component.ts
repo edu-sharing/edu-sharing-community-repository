@@ -5,7 +5,7 @@
 import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { DomSanitizer } from '@angular/platform-browser';
-import { AuthorityProfile } from '../../../core-module/core.module';
+import { AuthorityProfile } from '../../../../../core-module/core.module';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({

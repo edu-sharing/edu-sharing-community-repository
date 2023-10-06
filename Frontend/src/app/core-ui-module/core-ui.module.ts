@@ -20,7 +20,6 @@ import { RouterModule } from '@angular/router';
 import { NgxSliderModule } from 'ngx-slider-v2';
 import { CollectionChooserComponent } from './components/collection-chooser/collection-chooser.component';
 import { ListOptionItemComponent } from './components/list-option-item/list-option-item.component';
-import { UserTileComponent } from './components/user-tile/user-tile.component';
 import { DurationPipe } from './components/video-controls/duration.pipe';
 import { VideoControlsComponent } from './components/video-controls/video-controls.component';
 import { DistinctClickDirective } from './directives/distinct-click.directive';
@@ -46,7 +45,6 @@ import { MdsNodeRelationsWidgetComponent } from '../common/ui/node-render/node-r
     declarations: [
         CollectionChooserComponent,
         NodeEntriesDragDirective,
-        UserTileComponent,
         VideoControlsComponent,
         MdsNodeRelationsWidgetComponent,
         ToastMessageComponent,
@@ -96,7 +94,6 @@ import { MdsNodeRelationsWidgetComponent } from '../common/ui/node-render/node-r
         ListOptionItemComponent,
         VideoControlsComponent,
         ImageConfigDirective,
-        UserTileComponent,
         CollectionChooserComponent,
         UrlPipe,
     ],

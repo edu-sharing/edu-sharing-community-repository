@@ -92,6 +92,10 @@ import {
     AddMaterialDialogData,
     AddMaterialDialogResult,
 } from './dialog-modules/add-material-dialog/add-material-dialog-data';
+import {
+    SimpleEditDialogData,
+    SimpleEditDialogResult,
+} from './dialog-modules/simple-edit-dialog/simple-edit-dialog-data';
 
 @Injectable({
     providedIn: 'root',
@@ -442,6 +446,22 @@ export class DialogsService {
             minHeight: 700,
             contentPadding: 0,
             data,
+        });
+    }
+
+    async openSimpleEditDialog(
+        data: SimpleEditDialogData,
+    ): Promise<CardDialogRef<SimpleEditDialogData, SimpleEditDialogResult>> {
+        const { SimpleEditDialogComponent } = await import(
+            './dialog-modules/simple-edit-dialog/simple-edit-dialog.module'
+        );
+        return this.cardDialog.open(SimpleEditDialogComponent, {
+            ...(await configForNodes(data.nodes, this.translate).toPromise()),
+            title: 'SIMPLE_EDIT.TITLE',
+            // minHeight: 700,
+            width: 600,
+            data,
+            closable: Closable.Standard,
         });
     }
 

@@ -785,7 +785,7 @@
     },
     "DIRTY": {
       "TITLE": "Am Dialog wurden Änderungen vorgenommen",
-      "MESSAGE": "Es wurden bereits Änderungen am Dialog vorgenommen. Diese müssen vor dem Dialogwechsel gespeichert werden.\n\nMöchten Sie die bereits vorgenommen Änderungen jetzt speichern oder verwerfen?"
+      "MESSAGE": "Es wurden bereits Änderungen am Dialog vorgenommen. Diese müssen vor dem Dialogwechsel gespeichert werden.\n\nMöchten Sie die bereits vorgenommen Änderungen jetzt speichern?"
     }
   },
   "SHARE_APP": {

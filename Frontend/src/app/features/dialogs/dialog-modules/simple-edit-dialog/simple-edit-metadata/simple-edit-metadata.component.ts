@@ -1,12 +1,12 @@
 import { trigger } from '@angular/animations';
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import { BehaviorSubject, forkJoin, from, Observable, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
-import { Node, RestConstants, RestNodeService } from '../../../../core-module/core.module';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
-import { Toast } from '../../../../core-ui-module/toast';
-import { MdsEditorWrapperComponent } from '../../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
-import { BulkBehavior } from '../../../../features/mds/types/types';
+import { Observable, forkJoin, from, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+import { Node, RestConstants, RestNodeService } from '../../../../../core-module/core.module';
+import { Toast } from '../../../../../core-ui-module/toast';
+import { MdsEditorWrapperComponent } from '../../../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { BulkBehavior } from '../../../../../features/mds/types/types';
 
 @Component({
     selector: 'es-simple-edit-metadata',
@@ -22,11 +22,20 @@ export class SimpleEditMetadataComponent {
 
     @ViewChild('mds') mds: MdsEditorWrapperComponent;
 
-    @Input() nodes: Node[];
+    private _nodes: Node[];
+    @Input()
+    get nodes(): Node[] {
+        return this._nodes;
+    }
+    set nodes(value: Node[]) {
+        // If nodes are changed and the mds is already rendered, force an update of values.
+        if (this._nodes && this.mds) {
+            void this.mds.reInit();
+        }
+        this._nodes = value;
+    }
     @Input() fromUpload: boolean;
     @Output() onError = new EventEmitter<void>();
-
-    isInited = new BehaviorSubject(false);
 
     constructor(private nodeApi: RestNodeService, private toast: Toast) {}
 
@@ -48,6 +57,7 @@ export class SimpleEditMetadataComponent {
         }
         return true;
     }
+
     save(): Observable<void> {
         if (!this.isDirty()) {
             // emit null so that next and complete get's called

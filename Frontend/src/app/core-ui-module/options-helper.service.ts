@@ -981,8 +981,10 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         const simpleEditNode = new OptionItem(
             'OPTIONS.EDIT_SIMPLE',
             'edu-quick_edit',
-            async (object) =>
-                (management.nodeSimpleEdit = await this.getObjectsAsync(object, data, true)),
+            async (object) => {
+                const nodes = await this.getObjectsAsync(object, data, true);
+                void this.dialogs.openSimpleEditDialog({ nodes, fromUpload: false });
+            },
         );
         simpleEditNode.constrains = [Constrain.Files, Constrain.HomeRepository, Constrain.User];
         simpleEditNode.permissions = [RestConstants.ACCESS_WRITE];

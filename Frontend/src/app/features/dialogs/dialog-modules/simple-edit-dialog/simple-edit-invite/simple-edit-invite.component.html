@@ -44,7 +44,7 @@
               *ngFor="let group of organizationGroups"
               >{{
                 'SIMPLE_EDIT.INVITE.GROUP_TYPES.' + group
-                  | translate: { school: organization.organization | authorityName }
+                  | translate : { school: organization.organization | authorityName }
               }}</mat-button-toggle
             >
             <mat-button-toggle

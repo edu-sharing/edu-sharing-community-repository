@@ -42,7 +42,7 @@
       "INVALID_STATE": "Für die gewählten Elemente kann keine passenden Lizenz in diesem Dialog gefunden werden. Wähle \"Lizenz ersetzen\", wenn Du die Lizenz neu festlegen willst."
     },
     "DIRTY": {
-      "MESSAGE": "Es wurden bereits Änderungen am Dialog vorgenommen. Diese müssen vor dem Dialogwechsel gespeichert werden.\n\nMöchtest Du die bereits vorgenommen Änderungen jetzt speichern oder verwerfen?"
+      "MESSAGE": "Es wurden bereits Änderungen am Dialog vorgenommen. Diese müssen vor dem Dialogwechsel gespeichert werden.\n\nMöchtest Du die bereits vorgenommen Änderungen jetzt speichern?"
     }
   },
   "TOAST": {

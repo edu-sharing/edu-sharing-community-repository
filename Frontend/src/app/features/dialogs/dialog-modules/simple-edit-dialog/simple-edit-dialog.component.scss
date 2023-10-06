@@ -1,12 +1,16 @@
-@import '../../../core-ui-module/styles/variables';
-@import '../../../shared/components/card/variables';
+@import '../../../../core-ui-module/styles/variables';
+@import '../../../../shared/components/card/variables';
 
 .block {
     display: flex;
     flex-direction: column;
-    margin: 0 $cardPadding;
-    padding: 20px 0;
-    border-bottom: 1px solid #ccc;
+    &:not(:first-child) {
+        padding-top: 20px;
+    }
+    &:not(:last-child) {
+        padding-bottom: 20px;
+        border-bottom: 1px solid #ccc;
+    }
     .top {
         display: flex;
         align-items: center;

@@ -50,3 +50,8 @@ export const REPLACE_OR_BACK: GenericDialogButton<'REPLACE' | 'BACK'>[] = [
     { label: 'BACK', config: { color: 'standard' } },
     { label: 'REPLACE', config: { color: 'primary' } },
 ];
+
+export const SAVE_OR_CANCEL: GenericDialogButton<'SAVE' | 'CANCEL'>[] = [
+    { label: 'CANCEL', config: { color: 'standard' } },
+    { label: 'SAVE', config: { color: 'primary' } },
+];
