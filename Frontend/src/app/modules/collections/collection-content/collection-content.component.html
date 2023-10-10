@@ -161,7 +161,7 @@
           </ng-template>
         </es-node-entries-wrapper>
         <div
-          *ngIf="dataSourceReferences.isEmpty()"
+          *ngIf="!dataSourceReferences.isLoading && dataSourceReferences.isEmpty()"
           class="section-headline collection-nocontent-container"
         >
           <div class="collection-nocontent-big">
