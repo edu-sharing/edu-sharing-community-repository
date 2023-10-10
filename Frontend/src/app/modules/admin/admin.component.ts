@@ -259,10 +259,10 @@ export class AdminComponent implements OnInit, OnDestroy {
             this.cancelJobFinally();
         },
     );
-    private _jobForceCancel: boolean;
+    private _jobForceCancel = false;
 
     get jobForceCancel(): boolean {
-        return this._jobForceCancel;
+        return this._jobForceCancel ?? false;
     }
 
     set jobForceCancel(value: boolean) {
