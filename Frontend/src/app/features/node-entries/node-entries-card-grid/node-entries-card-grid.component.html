@@ -14,7 +14,9 @@
 <es-dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></es-dropdown>
 
 <!-- Do not render the list element (`role="list"` or `li`) when there are no list items. -->
-<ng-container *ngIf="(nodes$ | async)?.length > 0 || entriesService.globalOptions?.length > 0">
+<ng-container
+  *ngIf="(nodes$ | async)?.length > 0 || (entriesService.globalOptionsSubject | async)?.length > 0"
+>
   <!-- FIXME: Ideally, we would use native `ul` and `li` elements, but these have a strict model,
   that only allows `li` elements as direct children of `ul` elements. So we would need to use the
   native elements at all places without any elements between `ul` and `li`. -->
@@ -74,7 +76,7 @@
       (scrolled)="!visibleItemsLimited && loadData('scroll')"
     >
       <es-node-entries-global-options
-        *ngIf="entriesService.globalOptions?.length"
+        *ngIf="(entriesService.globalOptionsSubject | async)?.length"
         [displayType]="displayType"
       >
       </es-node-entries-global-options>

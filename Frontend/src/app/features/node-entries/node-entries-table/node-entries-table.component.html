@@ -10,7 +10,7 @@
   aria-hidden="true"
 ></button>
 <es-node-entries-global-options
-  *ngIf="entriesService.globalOptions?.length"
+  *ngIf="(entriesService.globalOptionsSubject | async)?.length"
   [displayType]="NodeEntriesDisplayType.Table"
 >
 </es-node-entries-global-options>
