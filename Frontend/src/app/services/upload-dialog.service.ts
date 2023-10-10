@@ -33,26 +33,31 @@ export class UploadDialogService {
      * After the user confirms their choice, files will be uploaded (if any) and the required nodes
      * will be added to the repository.
      *
+     * A dialog for editing metadata will be shown to the user. If the user cancels this dialog,
+     * already created nodes will be removed from the repository.
+     *
      * @returns the created nodes or null if the process was cancelled by the user
      */
     async openUploadDialog({
         parent,
         chooseParent,
+        multiple = true,
     }: {
         parent: Node;
         chooseParent: boolean;
+        multiple?: boolean;
     }): Promise<Node[] | null> {
         const dialogRef = await this.dialogs.openAddMaterialDialog({
             chooseParent,
             parent,
-            multiple: true,
+            multiple,
             showLti: true,
         });
         const result = await dialogRef.afterClosed().toPromise();
         if (result) {
             switch (result.kind) {
                 case 'file':
-                    return this._createFileNodes(result);
+                    return this.uploadFilesAndCreateNodes(result);
                 case 'link':
                     return this.createLinkNode(result);
             }
@@ -84,8 +89,29 @@ export class UploadDialogService {
     /**
      * Uploads new files and creates respective new nodes in the repository.
      */
-    private _createFileNodes(data: FileData): Node[] | null {
-        throw new Error('Method not implemented.');
+    async uploadFilesAndCreateNodes(data: FileData): Promise<Node[] | null> {
+        const dialogRef = await this.dialogs.openFileUploadProgressDialog(data);
+        const nodes = await dialogRef.afterClosed().toPromise();
+        if (nodes) {
+            return this._onFilesUploaded(nodes);
+        } else {
+            return null;
+        }
+    }
+
+    private async _onFilesUploaded(nodes: Node[]): Promise<Node[] | null> {
+        const shouldShowLicenseDialog = await this.config
+            .get('licenseDialogOnUpload', false)
+            .toPromise();
+        if (shouldShowLicenseDialog) {
+            const dialogRef = await this.dialogs.openLicenseDialog({ kind: 'nodes', nodes });
+            nodes = await dialogRef.afterClosed().toPromise();
+        }
+        if (nodes) {
+            return this._showMetadataAfterUpload(nodes);
+        } else {
+            return null;
+        }
     }
 
     private async _showMetadataAfterUpload(nodes: Node[]): Promise<Node[] | null> {

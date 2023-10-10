@@ -1,4 +1,4 @@
-@import '../../../core-ui-module/styles/variables';
+@import '../../../../core-ui-module/styles/variables';
 
 .loading {
     margin: 0 10px;
@@ -7,9 +7,6 @@
     }
 }
 
-.content {
-    padding: $cardPadding;
-}
 .group {
     width: 100%;
     display: flex;
@@ -61,21 +58,23 @@
         color: $colorStatusNegative;
     }
     .progress {
+        width: 100%;
         margin: 0 10px;
+        background-color: var(--palette-primary-100);
+        position: relative;
+        height: 4px;
+        border-radius: 2px;
+        overflow: hidden;
+        .determinate {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            background-color: var(--primary);
+            transition: width 0.3s linear;
+        }
     }
 }
 .groupColumn {
     flex-direction: column;
-}
-.scrollable {
-    overflow-x: hidden;
-    overflow-y: auto;
-    height: 350px;
-    margin: $cardPadding * -1;
-    padding: $cardPadding;
-}
-@media screen and (max-height: ($mobileHeight)) {
-    .card .scrollable {
-        height: calc(100% + 60px);
-    }
 }

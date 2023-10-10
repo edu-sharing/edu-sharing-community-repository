@@ -67,8 +67,6 @@ export class WorkspaceManagementDialogsComponent {
     @Input() fileIsOver = false;
     @Input() addToCollection: Node[];
     @Output() addToCollectionChange = new EventEmitter();
-    @Input() filesToUpload: FileList;
-    @Output() filesToUploadChange = new EventEmitter();
     @Input() parent: Node;
     @Input() addPinnedCollection: Node;
     @Output() addPinnedCollectionChange = new EventEmitter();
@@ -122,7 +120,6 @@ export class WorkspaceManagementDialogsComponent {
     }>();
     _nodeFromUpload = false;
     public editorPending = false;
-    private nodeLicenseOnUpload = false;
     /**
      * QR Code object data to print
      * @node: Reference to the node (for header title)
@@ -180,20 +177,6 @@ export class WorkspaceManagementDialogsComponent {
         }
     }
 
-    public uploadDone(event: Node[]) {
-        if (event == null) {
-            // error occured
-            this.onUploadFilesProcessed.emit(null);
-        } else if (this.config.instant('licenseDialogOnUpload', false)) {
-            void this.openLicenseDialog(event);
-            this.nodeLicenseOnUpload = true;
-        } else {
-            this.showMetadataAfterUpload(event);
-        }
-        this.filesToUpload = null;
-        this.filesToUploadChange.emit(null);
-    }
-
     public uploadFile(event: FileList) {
         this.onUploadFileSelected.emit(event);
     }
@@ -205,20 +188,6 @@ export class WorkspaceManagementDialogsComponent {
     public cancelUploadSelect() {
         this.closeUploadSelect();
         this.onUploadSelectCanceled.emit(false);
-    }
-    async openLicenseDialog(nodes: Node[]): Promise<void> {
-        const dialogRef = await this.dialogs.openLicenseDialog({ kind: 'nodes', nodes });
-        dialogRef.afterClosed().subscribe((updatedNodes) => {
-            if (this.nodeLicenseOnUpload) {
-                this.showMetadataAfterUpload(nodes);
-            } else if (this._nodeFromUpload) {
-                this.onUploadFilesProcessed.emit(nodes);
-            }
-            this.nodeLicenseOnUpload = false;
-            if (updatedNodes) {
-                this.localEvents.nodesChanged.emit(updatedNodes);
-            }
-        });
     }
     private deleteNodes(nodes: Node[]) {
         this.toast.showProgressDialog();
@@ -356,19 +325,6 @@ export class WorkspaceManagementDialogsComponent {
                 }
             },
         );
-    }
-
-    private showMetadataAfterUpload(event: Node[]) {
-        this._nodeFromUpload = true;
-        const dialog = this.config.instant('upload.postDialog', DialogType.SimpleEdit);
-        if (dialog === DialogType.SimpleEdit) {
-            // this._nodeSimpleEdit = event;
-            // this.nodeSimpleEditChange.emit(event);
-        } else if (dialog === DialogType.Mds) {
-            void this.openMdsEditor(event);
-        } else {
-            console.error('Invalid configuration for upload.postDialog: ' + dialog);
-        }
     }
 
     closePinnedCollection() {

@@ -99,7 +99,6 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     _parent: Node = null;
 
     uploadSelectDialogRef: DialogRef<{ files: FileList; parent: Node | undefined }>;
-    uploadDialogRef: DialogRef<Node[]>;
     connectorList: Connector[];
     fileIsOver = false;
     showPicker: boolean;
@@ -421,15 +420,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
 
     onFileDrop(files: FileList) {
         if (!this.allowed) {
-            /*if (this.searchQuery) {
-                this.toast.error(null, 'WORKSPACE.TOAST.NOT_POSSIBLE_IN_SEARCH');
-            } else {*/
             this.toast.error(null, 'WORKSPACE.TOAST.NOT_POSSIBLE_GENERAL');
-            // }
-            return;
-        }
-        if (this.uploadDialogRef) {
-            this.toast.error(null, 'WORKSPACE.TOAST.ONGOING_UPLOAD');
             return;
         }
         if (
@@ -441,28 +432,20 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             return;
         }
         this.uploadSelectDialogRef?.close();
-        this.openUpload(files);
+        void this.openUpload(files);
     }
 
-    private async openUpload(files: FileList) {
-        this.uploadDialogRef = this.managementDialogs.openUpload({
+    private async openUpload(files: FileList): Promise<void> {
+        const nodes = await this.uploadDialog.uploadFilesAndCreateNodes({
             parent: await this.getParent(),
             files,
         });
-        this.uploadDialogRef.afterClosed().subscribe((nodes) => {
-            this.afterUpload(nodes);
-            this.uploadDialogRef = null;
-        });
-    }
-
-    afterUpload(nodes: Node[]) {
-        if (nodes == null) {
-            return;
+        if (nodes) {
+            if (this.params.reurl) {
+                this.nodeHelper.addNodeToLms(nodes[0], this.params.reurl);
+            }
+            this.onCreate.emit(nodes);
         }
-        if (this.params.reurl) {
-            this.nodeHelper.addNodeToLms(nodes[0], this.params.reurl);
-        }
-        this.onCreate.emit(nodes);
     }
 
     async showCreateConnector(connector: Connector) {
@@ -620,7 +603,6 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     isAllowed() {
         return (
             this.allowed &&
-            !this.uploadDialogRef &&
             this.connector.hasToolPermissionInstant(
                 RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,
             )

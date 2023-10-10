@@ -9,6 +9,10 @@ import {
     AddFolderDialogResult,
 } from './dialog-modules/add-folder-dialog/add-folder-dialog-data';
 import {
+    AddMaterialDialogData,
+    AddMaterialDialogResult,
+} from './dialog-modules/add-material-dialog/add-material-dialog-data';
+import {
     ContributorEditDialogData,
     ContributorEditDialogResult,
 } from './dialog-modules/contributor-edit-dialog/contributor-edit-dialog-data';
@@ -28,6 +32,10 @@ import {
     FileChooserDialogData,
     FileChooserDialogResult,
 } from './dialog-modules/file-chooser-dialog/file-chooser-dialog-data';
+import {
+    FileUploadProgressDialogData,
+    FileUploadProgressDialogResult,
+} from './dialog-modules/file-upload-progress-dialog/file-upload-progress-dialog-data';
 import {
     GenericDialogConfig,
     GenericDialogData,
@@ -85,17 +93,13 @@ import {
     ShareLinkDialogResult,
 } from './dialog-modules/share-link-dialog/share-link-dialog-data';
 import {
-    XmlAppPropertiesDialogData,
-    XmlAppPropertiesDialogResult,
-} from './dialog-modules/xml-app-properties-dialog/xml-app-properties-dialog-data';
-import {
-    AddMaterialDialogData,
-    AddMaterialDialogResult,
-} from './dialog-modules/add-material-dialog/add-material-dialog-data';
-import {
     SimpleEditDialogData,
     SimpleEditDialogResult,
 } from './dialog-modules/simple-edit-dialog/simple-edit-dialog-data';
+import {
+    XmlAppPropertiesDialogData,
+    XmlAppPropertiesDialogResult,
+} from './dialog-modules/xml-app-properties-dialog/xml-app-properties-dialog-data';
 
 @Injectable({
     providedIn: 'root',
@@ -554,6 +558,21 @@ export class DialogsService {
             data,
             autoFocus: '[autofocus]',
             closable: Closable.Casual,
+        });
+    }
+
+    async openFileUploadProgressDialog(
+        data: FileUploadProgressDialogData,
+    ): Promise<CardDialogRef<FileUploadProgressDialogData, FileUploadProgressDialogResult>> {
+        const { FileUploadProgressDialogComponent } = await import(
+            './dialog-modules/file-upload-progress-dialog/file-upload-progress-dialog.module'
+        );
+        return this.cardDialog.open(FileUploadProgressDialogComponent, {
+            title: 'WORKSPACE.UPLOAD_TITLE',
+            avatar: { kind: 'icon', icon: 'cloud_upload' },
+            width: 500,
+            data,
+            closable: Closable.Disabled,
         });
     }
 }

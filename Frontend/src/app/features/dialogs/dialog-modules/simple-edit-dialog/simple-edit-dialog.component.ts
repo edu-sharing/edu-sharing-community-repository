@@ -92,7 +92,9 @@ export class SimpleEditDialogComponent {
             nodes: this._nodes,
         });
         const updatedNodes = await dialogRef.afterClosed().toPromise();
-        this._nodes = updatedNodes;
+        if (updatedNodes) {
+            this._nodes = updatedNodes;
+        }
     }
 
     /**
@@ -129,7 +131,9 @@ export class SimpleEditDialogComponent {
             nodes: this._nodes,
         });
         const updatedNodes = await dialogRef.afterClosed().toPromise();
-        this._nodes = updatedNodes;
+        if (updatedNodes) {
+            this._nodes = updatedNodes;
+        }
     }
 
     /**

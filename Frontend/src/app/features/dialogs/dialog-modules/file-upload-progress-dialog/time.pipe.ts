@@ -8,7 +8,7 @@ import { isNumeric } from 'ngx-edu-sharing-ui';
  */
 @Pipe({ name: 'formatTime' })
 export class TimePipe implements PipeTransform {
-    transform(value: number, args: any): string {
+    transform(value: number): string {
         if (!isNumeric(value)) return 'invalid value';
 
         let hours = Math.floor(value / 3600);

@@ -61,12 +61,6 @@
   </ng-template>
 </es-collection-chooser>
 
-<es-workspace-file-upload
-  *ngIf="filesToUpload"
-  [current]="parent"
-  [files]="filesToUpload"
-  (onDone)="uploadDone($event)"
-></es-workspace-file-upload>
 <es-workspace-file-upload-select
   *ngIf="showUploadSelect"
   [isFileOver]="fileIsOver"

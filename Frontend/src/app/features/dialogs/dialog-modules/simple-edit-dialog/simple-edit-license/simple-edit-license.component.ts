@@ -47,7 +47,9 @@ export class SimpleEditLicenseComponent implements OnInit {
     ccProfileUrl: string;
     @Input() set nodes(nodes: Node[]) {
         this._nodes = nodes;
-        this.prepare(true);
+        if (nodes) {
+            this.prepare(true);
+        }
     }
     constructor(
         private nodeApi: RestNodeService,

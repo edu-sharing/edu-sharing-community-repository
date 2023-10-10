@@ -65,7 +65,9 @@ export class SimpleEditInviteComponent {
     inherited: boolean;
     @Input() set nodes(nodes: Node[]) {
         this._nodes = nodes;
-        this.prepare();
+        if (nodes) {
+            this.prepare();
+        }
     }
     @Input() fromUpload: boolean;
     @Output() onInitFinished = new EventEmitter<boolean>();

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Node } from 'ngx-edu-sharing-api';
 import { Observable, Subject } from 'rxjs';
-import { first, map, take, takeUntil } from 'rxjs/operators';
+import { first, map, takeUntil } from 'rxjs/operators';
 import { WorkspaceManagementDialogsComponent } from './management-dialogs.component';
 
 export interface DialogRef<R> {
@@ -30,23 +30,6 @@ export class ManagementDialogsService {
     registerDialogsComponent(dialogsComponent: WorkspaceManagementDialogsComponent): void {
         this.dialogsComponent = dialogsComponent;
         this.subscribeChanges();
-    }
-
-    openUpload({ parent, files }: { parent: Node; files: FileList }): DialogRef<Node[]> {
-        const dialogClosed = new Subject<Node[] | undefined>();
-        this.dialogsComponent.parent = parent;
-        this.dialogsComponent.filesToUpload = files;
-        dialogClosed.subscribe(() => {
-            // Reset to default values
-            this.dialogsComponent.parent = null;
-        });
-        // After the upload, a metadata editor will be shown to the user. When that dialog is closed
-        // `onUploadFilesProcessed` will be called---even if it was canceled.
-        this.dialogsComponent.onUploadFilesProcessed.pipe(take(1)).subscribe(dialogClosed);
-        return {
-            close: null as () => void, // Not implemented
-            afterClosed: () => dialogClosed.asObservable(),
-        };
     }
 
     openUploadSelect({
