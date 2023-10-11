@@ -8,12 +8,12 @@ import { Widget } from '../../mds-editor-instance.service';
 import { WidgetDummy, mdsStorybookProviders } from '../../storybook-utils';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
 import { RegisterFormFieldDirective } from '../mds-editor-widget-container/register-form-field.directive';
-import { MdsEditorWidgetTextComponent } from './mds-editor-widget-text.component';
+import { MdsEditorWidgetSelectComponent } from './mds-editor-widget-select.component';
 
 // More on how to set up stories at: https://storybook.js.org/docs/angular/writing-stories/introduction
 const meta: Meta<Widget['definition']> = {
-    title: 'Mds/Widget/Text',
-    component: MdsEditorWidgetTextComponent,
+    title: 'Mds/Widget/Select',
+    component: MdsEditorWidgetSelectComponent,
     decorators: [
         moduleMetadata({
             declarations: [MdsEditorWidgetContainerComponent, RegisterFormFieldDirective],
@@ -27,16 +27,12 @@ const meta: Meta<Widget['definition']> = {
         id: { table: { disable: true } },
         expandable: { table: { disable: true } },
         type: {
+            table: { disable: true },
             control: 'select',
-            options: [
-                MdsWidgetType.Text,
-                MdsWidgetType.Number,
-                MdsWidgetType.Email,
-                MdsWidgetType.Date,
-                MdsWidgetType.Month,
-                MdsWidgetType.Color,
-                MdsWidgetType.Textarea,
-            ],
+            options: [MdsWidgetType.Singleoption],
+        },
+        placeholder: {
+            control: 'text',
         },
         caption: {
             control: 'text',
@@ -44,15 +40,9 @@ const meta: Meta<Widget['definition']> = {
         bottomCaption: {
             control: 'text',
         },
-        placeholder: {
-            control: 'text',
-        },
         isRequired: {
             control: 'inline-radio',
             options: [RequiredMode.Mandatory, RequiredMode.Optional, RequiredMode.Ignore],
-        },
-        maxlength: {
-            control: 'number',
         },
     },
     args: {
@@ -60,6 +50,11 @@ const meta: Meta<Widget['definition']> = {
         caption: 'Caption',
         expandable: 'disabled',
         isRequired: RequiredMode.Optional,
+        values: [
+            { id: 'foo', caption: 'Foo' },
+            { id: 'bar', caption: 'Bar' },
+            { id: 'long', caption: 'One very very very very very very long label' },
+        ],
     },
     tags: ['autodocs'],
     render: (args) => {
@@ -74,82 +69,23 @@ const meta: Meta<Widget['definition']> = {
 export default meta;
 type Story = StoryObj<Widget['definition']>;
 
-export const TextMinimal: Story = {
+export const SingleOptionMinimal: Story = {
     args: {
-        type: 'text',
+        type: 'singleoption',
     },
 };
 
-export const TextFull: Story = {
+export const SingleOptionFull: Story = {
     args: {
-        type: 'text',
+        type: 'singleoption',
         bottomCaption: 'Bottom Caption',
         placeholder: 'Placeholder...',
     },
 };
 
-export const TextMandatory: Story = {
+export const SingleOptionMandatory: Story = {
     args: {
-        type: 'text',
+        type: 'singleoption',
         isRequired: 'mandatory',
-    },
-};
-
-export const TextareaMinimal: Story = {
-    args: {
-        type: 'textarea',
-    },
-};
-
-export const TextareaFull: Story = {
-    args: {
-        type: 'textarea',
-        bottomCaption: 'Bottom Caption',
-        placeholder: 'Placeholder...',
-    },
-};
-
-export const TextareaMandatory: Story = {
-    args: {
-        type: 'textarea',
-        isRequired: 'mandatory',
-    },
-};
-
-export const Number: Story = {
-    args: {
-        type: 'number',
-    },
-    argTypes: {
-        min: {
-            control: 'number',
-        },
-        max: {
-            control: 'number',
-        },
-    },
-};
-
-export const Email: Story = {
-    args: {
-        type: 'email',
-    },
-};
-
-export const Date: Story = {
-    args: {
-        type: 'date',
-    },
-};
-
-export const Month: Story = {
-    args: {
-        type: 'month',
-    },
-};
-
-export const Color: Story = {
-    args: {
-        type: 'color',
     },
 };

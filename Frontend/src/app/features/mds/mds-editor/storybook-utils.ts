@@ -27,7 +27,7 @@ import { Toast } from '../../../core-ui-module/toast';
 import { InitialValues, MdsEditorInstanceService } from './mds-editor-instance.service';
 import { ViewInstanceService } from './mds-editor-view/view-instance.service';
 import { Subject, BehaviorSubject, Observable, of } from 'rxjs';
-import { InputStatus } from '../types/types';
+import { InputStatus, MdsWidgetValue } from '../types/types';
 
 export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     HttpClient,
@@ -124,4 +124,8 @@ export class WidgetDummy {
     registerShowMissingRequired() {}
 
     setValue() {}
+
+    getSuggestedValues(): Promise<MdsWidgetValue[]> {
+        return Promise.resolve(this.definition.values);
+    }
 }
