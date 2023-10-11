@@ -77,7 +77,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 	@JobFieldDescription(description = "force run, even if the date is currently not the 1st")
 	private boolean force = false;
 
-	@JobFieldDescription(description = "use a custom date (month) to run the job for", sampleValue = "YYYY-MM-DD")
+	@JobFieldDescription(description = "use a custom date (month) to run the job for. Note: The job will run the month BEFORE the given date!", sampleValue = "YYYY-MM-DD")
 	private Date customDate = null;
 
 
