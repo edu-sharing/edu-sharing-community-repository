@@ -37,7 +37,6 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.chemistry.opencmis.server.impl.CmisRepositoryContextListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ws.security.saml.ext.OpenSAMLUtil;
 import org.edu_sharing.alfresco.policy.OnUpdatePersonPropertiesPolicy;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataReader;
@@ -70,7 +69,6 @@ public class MCAlfrescoManager implements ServletContextListener {
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
 		try{
 			// Disable SHA-1 XML Signatures (https://bugs.openjdk.java.net/browse/JDK-8259709)
-			OpenSAMLUtil.initSamlEngine();
 			BasicSecurityConfiguration config = (BasicSecurityConfiguration) Configuration.getGlobalSecurityConfiguration();
 			config.setSignatureReferenceDigestMethod(SignatureConstants.ALGO_ID_DIGEST_SHA256);
 
