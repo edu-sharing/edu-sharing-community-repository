@@ -1,10 +1,8 @@
 import {
-    Constraints,
-    InputStatus,
     MdsEditorWidgetComponent,
     MdsWidgetType,
+    NativeWidgetClass,
     NativeWidgetType,
-    Values,
 } from './types';
 import { MdsEditorWidgetPreviewComponent } from '../mds-editor/widgets/mds-editor-widget-preview/mds-editor-widget-preview.component';
 import { MdsEditorWidgetAuthorComponent } from '../mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
@@ -32,10 +30,6 @@ import {
 import { MdsEditorWidgetDurationComponent } from '../mds-editor/widgets/mds-editor-widget-duration/mds-editor-widget-duration.component';
 import { MdsEditorWidgetTreeComponent } from '../mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetFacetListComponent } from '../mds-editor/widgets/mds-editor-widget-facet-list/mds-editor-widget-facet-list.component';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { Node } from '../../../core-module/rest/data-object';
-import { Type } from '@angular/core';
-import { Metadata } from 'ngx-edu-sharing-graphql';
 
 /**
  * - `nodes`:
@@ -105,31 +99,3 @@ export const WidgetComponents: {
     [MdsWidgetType.DefaultValue]: null,
     [MdsWidgetType.FacetList]: MdsEditorWidgetFacetListComponent,
 };
-
-export interface NativeWidgetComponent {
-    hasChanges: BehaviorSubject<boolean>;
-    onSaveNode?: (nodes: Node[]) => Promise<Node[]>;
-    getValues?: (values: Values, node: Node | Metadata) => Promise<Values>;
-    getValuesGraphql?: (values: Metadata, node: Metadata) => Promise<Metadata>;
-    status?: Observable<InputStatus>;
-    focus?: () => void;
-}
-
-export type NativeWidgetClass = {
-    constraints: Constraints;
-    // ids of fields in dot-notation this widget requires for displaying the node data
-    graphqlIds?: string[];
-} & Type<NativeWidgetComponent>;
-
-/**
- * NativeWidget and Widget
- */
-export interface GeneralWidget {
-    status: Observable<InputStatus>;
-    viewId: string;
-}
-
-// TODO: use this object for data properties and register it with the component.
-export interface NativeWidget extends GeneralWidget {
-    component: NativeWidgetComponent;
-}

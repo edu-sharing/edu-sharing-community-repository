@@ -6,7 +6,8 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { RestNodeService } from '../../../../../core-module/rest/services/rest-node.service';
 import { Node } from '../../../../../core-module/rest/data-object';
 import { Metadata } from 'ngx-edu-sharing-graphql';
-import { NativeWidgetComponent } from '../../../types/mds-types';
+
+import { NativeWidgetComponent } from '../../../types/types';
 @Component({
     selector: 'es-mds-editor-widget-preview',
     templateUrl: './mds-editor-widget-preview.component.html',

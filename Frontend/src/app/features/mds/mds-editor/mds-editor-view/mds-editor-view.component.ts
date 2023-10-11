@@ -25,9 +25,11 @@ import { Node } from '../../../../core-module/core.module';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { JUMP_MARK_POSTFIX } from '../../../dialogs/card-dialog/card-dialog-container/jump-marks-handler.directive';
 import { MdsWidgetComponent } from '../../mds-viewer/widget/mds-widget.component';
-import { EditorMode, GeneralWidget, NativeWidgets, WidgetComponents } from '../../types/mds-types';
+import { NativeWidgets, WidgetComponents } from '../../types/mds-types';
 import {
     Constraints,
+    EditorMode,
+    GeneralWidget,
     InputStatus,
     MdsView,
     MdsWidgetType,

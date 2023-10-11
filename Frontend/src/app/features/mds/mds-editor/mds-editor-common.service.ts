@@ -10,7 +10,6 @@ import {
 import { MdsDefinition, MdsType, Values } from '../types/types';
 import { Metadata, BaseMetadataFragment } from 'ngx-edu-sharing-graphql';
 import { Meta } from '@angular/platform-browser';
-import { Apollo } from 'apollo-angular';
 import { DocumentNode } from '@apollo/client/link/core/types';
 
 /** Error with a translatable message that is suitable to be shown to the user. */
@@ -33,11 +32,7 @@ export class UserPresentableError extends Error {
     providedIn: 'root',
 })
 export class MdsEditorCommonService {
-    constructor(
-        private restNode: RestNodeService,
-        private mdsService: RestMdsService,
-        private apollo: Apollo,
-    ) {}
+    constructor(private restNode: RestNodeService, private mdsService: RestMdsService) {}
 
     /**
      * Fetches the up-to-date and complete metadata from the server.

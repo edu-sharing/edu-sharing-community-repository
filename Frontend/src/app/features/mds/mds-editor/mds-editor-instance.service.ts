@@ -35,26 +35,21 @@ import {
     RestSearchService,
 } from '../../../core-module/core.module';
 import {
-    EditorMode,
-    GeneralWidget,
-    NativeWidget,
-    NativeWidgets,
-    WidgetComponents,
-} from '../types/mds-types';
-import {
     BulkBehavior,
     BulkMode,
     EditorBulkMode,
+    EditorMode,
     EditorType,
+    GeneralWidget,
     InputStatus,
     MdsDefinition,
-    MdsEditorWidgetComponent,
     MdsGroup,
     MdsView,
     MdsWidget,
     MdsWidgetCondition,
     MdsWidgetType,
     MdsWidgetValue,
+    NativeWidget,
     NativeWidgetType,
     RequiredMode,
     Values,
@@ -63,25 +58,18 @@ import { MdsEditorCommonService } from './mds-editor-common.service';
 import { NativeWidgetComponent } from './mds-editor-view/mds-editor-view.component';
 import { parseAttributes } from './util/parse-attributes';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
-import { Apollo } from 'apollo-angular';
 import {
     Metadata,
-    MetadatasGQL,
-    Query,
     RangedValue,
     RangedValueSuggestionData,
     StringSuggestionData,
     Suggestion,
     SuggestionInput,
-    SuggestionsGQL,
     SuggestionStatus,
 } from 'ngx-edu-sharing-graphql';
-import { gql } from '@apollo/client/core';
 import { Helper } from '../../../core-module/rest/helper';
 import { MdsEditorWidgetCore } from './mds-editor-widget-core.directive';
 import { DisplayValue } from './widgets/DisplayValues';
-import { MdsEditorWidgetBase } from './widgets/mds-editor-widget-base';
-import { MdsEditorWidgetSliderRangeComponent } from './widgets/mds-editor-widget-slider/mds-editor-widget-slider.component';
 
 export interface CompletionStatusField {
     widget: Widget;
@@ -575,7 +563,8 @@ export class MdsEditorInstanceService implements OnDestroy {
                     return (node as Node).properties[definition.id];
                 }
             } else {
-                // @TODO: make types!
+                // @TODO: make types! / fix Cyclic deps for Storybook
+                /*
                 const graphqlId = (definition as any).ids?.graphql;
                 if (graphqlId) {
                     let value = Helper.getDotPathFromNestedObject(node, graphqlId);
@@ -597,6 +586,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                     );
                     this.setInternalError('No graphql mapping');
                 }
+                 */
                 return [];
             }
         }
@@ -744,9 +734,9 @@ export class MdsEditorInstanceService implements OnDestroy {
     constructor(
         private mdsEditorCommonService: MdsEditorCommonService,
         private mdsService: MdsService,
-        private apollo: Apollo,
-        private metadatasGQL: MetadatasGQL,
-        private suggestionsGQL: SuggestionsGQL,
+        // private apollo: Apollo,
+        // private metadatasGQL: MetadatasGQL,
+        // private suggestionsGQL: SuggestionsGQL,
         private restMdsService: RestMdsService,
         private configService: ConfigurationService,
         private restConnector: RestConnectorService,
@@ -973,7 +963,15 @@ export class MdsEditorInstanceService implements OnDestroy {
      *
      * @throws UserPresentableError
      */
-    async initWithGraphqlData(
+    /**
+     * TODO DISABLED: causes cyclic deps to Widgets for Storybook
+     * @param graphqlIds
+     * @param groupId
+     * @param refetch
+     * @param bulkBehavior
+     * @param editorMode
+     */
+    /*async initWithGraphqlData(
         graphqlIds: string[],
         {
             groupId = null,
@@ -1120,7 +1118,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             this.mdsDefinition$.value,
             groupId,
         ).rendering?.toLowerCase() as EditorType;
-    }
+    }*/
     async initWithoutNodes(
         groupId: string,
         mdsId: string = null,
@@ -1782,6 +1780,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         );
     }
     private async saveGraphqlSuggestions() {
+        /*
         return this.suggestions.map((s) => {
             return this.suggestionsGQL
                 .mutate({
@@ -1789,6 +1788,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                 })
                 .toPromise();
         });
+         */
     }
 
     private getNewPropertyValue(widget: Widget, oldPropertyValue?: string[]): string[] {

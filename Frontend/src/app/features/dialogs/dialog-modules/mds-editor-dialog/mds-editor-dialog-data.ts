@@ -1,6 +1,5 @@
 import { Node, RestConstants } from '../../../../core-module/core.module';
-import { EditorMode } from '../../../mds/types/mds-types';
-import { BulkBehavior, Values } from '../../../mds/types/types';
+import { BulkBehavior, EditorMode, Values } from '../../../mds/types/types';
 
 class SharedData {
     groupId?: string;

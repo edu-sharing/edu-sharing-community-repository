@@ -1,6 +1,9 @@
 import { Type } from '@angular/core';
 import { MdsEditorWidgetBase } from '../mds-editor/widgets/mds-editor-widget-base';
 import { MdsWidget } from 'ngx-edu-sharing-api';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { Node } from '../../../core-module/rest/data-object';
+import { Metadata } from 'ngx-edu-sharing-graphql';
 
 export {
     MdsDefinition,
@@ -143,4 +146,55 @@ export function assertUnreachable(x: never): never {
 export enum BulkBehavior {
     Default, // default equals no replace on choose, but show options
     Replace, // Don't display settings, simply replace for all (usefull after uploads)
+}
+
+/**
+ * - `nodes`:
+ *   - Supports bulk.
+ *   - Returns only changed values.
+ * - `search`:
+ *   - No bulk.
+ *   - All values returned.
+ *   - Trees sub-children are auto-selected if root is selected.
+ *   - Required errors and -warnings are disabled.
+ * - `form`:
+ *   - No bulk.
+ *   - All values returned.
+ * - `inline`
+ *   - No bulk
+ *   - Editing individual values on demand
+ *   - default apperance is read only
+ * - `viewer`
+ *   - No editing
+ *   - Read only
+ *   - Triggered via mds-viewer
+ */
+export type EditorMode = 'nodes' | 'search' | 'form' | 'inline' | 'viewer';
+
+export interface NativeWidgetComponent {
+    hasChanges: BehaviorSubject<boolean>;
+    onSaveNode?: (nodes: Node[]) => Promise<Node[]>;
+    getValues?: (values: Values, node: Node | Metadata) => Promise<Values>;
+    getValuesGraphql?: (values: Metadata, node: Metadata) => Promise<Metadata>;
+    status?: Observable<InputStatus>;
+    focus?: () => void;
+}
+
+export type NativeWidgetClass = {
+    constraints: Constraints;
+    // ids of fields in dot-notation this widget requires for displaying the node data
+    graphqlIds?: string[];
+} & Type<NativeWidgetComponent>;
+
+/**
+ * NativeWidget and Widget
+ */
+export interface GeneralWidget {
+    status: Observable<InputStatus>;
+    viewId: string;
+}
+
+// TODO: use this object for data properties and register it with the component.
+export interface NativeWidget extends GeneralWidget {
+    component: NativeWidgetComponent;
 }

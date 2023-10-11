@@ -72,7 +72,7 @@ export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
 
     private async initMdsEditor(): Promise<void> {
         let editorType: EditorType;
-        if (hasGraphql(this.data)) {
+        /*if (hasGraphql(this.data)) {
             editorType = await this.mdsEditorInstance.initWithGraphqlData(
                 (this.data as MdsEditorDialogDataGraphql).graphqlIds,
                 {
@@ -81,7 +81,8 @@ export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
                     editorMode: 'nodes',
                 },
             );
-        } else if (hasNodes(this.data)) {
+        } else */
+        if (hasNodes(this.data)) {
             editorType = await this.mdsEditorInstance.initWithNodes(this.data.nodes, {
                 groupId: this.data.groupId,
                 bulkBehavior: this.data.bulkBehavior,

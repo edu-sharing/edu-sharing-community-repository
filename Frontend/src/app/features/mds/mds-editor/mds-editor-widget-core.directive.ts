@@ -1,6 +1,5 @@
 import { Directive, Input } from '@angular/core';
-import { EditorMode } from '../types/mds-types';
-import { EditorBulkMode } from '../types/types';
+import { EditorBulkMode, EditorMode } from '../types/types';
 import { TranslateService } from '@ngx-translate/core';
 import { MdsEditorInstanceService, Widget } from './mds-editor-instance.service';
 

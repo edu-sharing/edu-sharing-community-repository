@@ -22,11 +22,16 @@ import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, startWith, takeUntil } from 'rxjs/operators';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { ViewInstanceService } from '../../mds-editor-view/view-instance.service';
-import { BulkBehavior, BulkMode, EditorBulkMode, InputStatus } from '../../../types/types';
+import {
+    BulkBehavior,
+    BulkMode,
+    EditorBulkMode,
+    InputStatus,
+    NativeWidgetComponent,
+} from '../../../types/types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { FormFieldRegistrationService } from './form-field-registration.service';
 import { UIService } from '../../../../../core-module/rest/services/ui.service';
-import { NativeWidgetComponent } from '../../../types/mds-types';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
 
 @Component({

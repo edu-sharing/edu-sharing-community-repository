@@ -15,9 +15,9 @@ import { Node, RestConstants } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
 import { MdsComponent } from '../../legacy/mds/mds.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
-import { EditorMode } from '../../types/mds-types';
 import {
     BulkBehavior,
+    EditorMode,
     EditorType,
     MdsWidget,
     MdsWidgetValue,
@@ -281,12 +281,12 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
                 bulkBehavior: this.bulkBehaviour,
                 editorMode: this.editorMode ?? 'nodes',
             };
-            if (this.graphqlIds) {
+            /*if (this.graphqlIds) {
                 this.editorType = await this.mdsEditorInstance.initWithGraphqlData(
                     this.graphqlIds,
                     config,
                 );
-            } else if (this.nodes) {
+            } else */ if (this.nodes) {
                 this.editorType = await this.mdsEditorInstance.initWithNodes(this.nodes, config);
             } else {
                 this.editorType = await this.mdsEditorInstance.initWithoutNodes(

@@ -3,7 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { filter } from 'rxjs/operators';
-import { NativeWidgetComponent } from '../../../types/mds-types';
+import { NativeWidgetComponent } from '../../../types/types';
 
 @Component({
     selector: 'es-mds-editor-widget-version',

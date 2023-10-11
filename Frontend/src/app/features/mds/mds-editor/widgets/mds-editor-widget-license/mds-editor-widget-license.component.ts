@@ -8,11 +8,10 @@ import { RestConnectorService } from '../../../../../core-module/rest/services/r
 import { NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import { Constraints, MdsWidgetValue, Values } from '../../../types/types';
+import { Constraints, MdsWidgetValue, NativeWidgetComponent, Values } from '../../../types/types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { DialogsService } from '../../../../dialogs/dialogs.service';
 import { Metadata } from 'ngx-edu-sharing-graphql';
-import { NativeWidgetComponent } from '../../../types/mds-types';
 
 @Component({
     selector: 'es-mds-editor-widget-license',
