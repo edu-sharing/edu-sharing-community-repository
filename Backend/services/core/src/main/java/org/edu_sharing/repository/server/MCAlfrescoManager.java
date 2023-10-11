@@ -53,9 +53,6 @@ import org.edu_sharing.repository.server.tracking.buffer.MemoryRingBuffer;
 import org.edu_sharing.repository.server.tracking.buffer.TrackingBuffer;
 import org.edu_sharing.repository.update.*;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
-import org.opensaml.xml.Configuration;
-import org.opensaml.xml.security.BasicSecurityConfiguration;
-import org.opensaml.xml.signature.SignatureConstants;
 import org.springframework.context.ApplicationContext;
 
 public class MCAlfrescoManager implements ServletContextListener {
@@ -68,10 +65,6 @@ public class MCAlfrescoManager implements ServletContextListener {
 	
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
 		try{
-			// Disable SHA-1 XML Signatures (https://bugs.openjdk.java.net/browse/JDK-8259709)
-			BasicSecurityConfiguration config = (BasicSecurityConfiguration) Configuration.getGlobalSecurityConfiguration();
-			config.setSignatureReferenceDigestMethod(SignatureConstants.ALGO_ID_DIGEST_SHA256);
-
 			applicationContext = AlfAppContextGate.getApplicationContext();
 			serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 			//generate security keys if not there
