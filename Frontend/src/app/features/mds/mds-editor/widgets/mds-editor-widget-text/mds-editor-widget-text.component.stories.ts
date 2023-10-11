@@ -1,7 +1,4 @@
-import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { TranslateModule } from '@ngx-translate/core';
 import { applicationConfig, moduleMetadata, type Meta, type StoryObj } from '@storybook/angular';
-import { TranslationsModule } from 'ngx-edu-sharing-ui';
 import { SharedModule } from '../../../../../shared/shared.module';
 import { MdsWidgetType, RequiredMode } from '../../../types/types';
 import { Widget } from '../../mds-editor-instance.service';
@@ -17,7 +14,7 @@ const meta: Meta<Widget['definition']> = {
     decorators: [
         moduleMetadata({
             declarations: [MdsEditorWidgetContainerComponent, RegisterFormFieldDirective],
-            imports: [SharedModule, MatSnackBarModule, TranslateModule, TranslationsModule],
+            imports: [SharedModule],
         }),
         applicationConfig({
             providers: mdsStorybookProviders,

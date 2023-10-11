@@ -5,29 +5,14 @@ import { importProvidersFrom } from '@angular/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import {
-    DEFAULT_LANGUAGE,
-    FakeMissingTranslationHandler,
-    MissingTranslationHandler,
-    TranslateCompiler,
-    TranslateDefaultParser,
-    TranslateFakeCompiler,
-    TranslateFakeLoader,
-    TranslateLoader,
-    TranslateParser,
-    TranslateService,
-    TranslateStore,
-    USE_DEFAULT_LANG,
-    USE_EXTEND,
-    USE_STORE,
-} from '@ngx-translate/core';
+import { TranslateService } from '@ngx-translate/core';
 import { EduSharingApiModule, MdsWidget } from 'ngx-edu-sharing-api';
+import { BehaviorSubject, Observable, Subject, of } from 'rxjs';
 import { CordovaService } from '../../../common/services/cordova.service';
 import { Toast } from '../../../core-ui-module/toast';
+import { InputStatus, MdsWidgetValue } from '../types/types';
 import { InitialValues, MdsEditorInstanceService } from './mds-editor-instance.service';
 import { ViewInstanceService } from './mds-editor-view/view-instance.service';
-import { Subject, BehaviorSubject, Observable, of } from 'rxjs';
-import { InputStatus, MdsWidgetValue } from '../types/types';
 
 export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     HttpClient,
@@ -45,39 +30,9 @@ export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     ViewInstanceService,
     CordovaService,
     Toast,
-    TranslateService,
-    TranslateStore,
     {
-        provide: TranslateLoader,
-        useClass: TranslateFakeLoader,
-    },
-    {
-        provide: TranslateCompiler,
-        useClass: TranslateFakeCompiler,
-    },
-    {
-        provide: TranslateParser,
-        useClass: TranslateDefaultParser,
-    },
-    {
-        provide: MissingTranslationHandler,
-        useClass: FakeMissingTranslationHandler,
-    },
-    {
-        provide: USE_DEFAULT_LANG,
-        useValue: true,
-    },
-    {
-        provide: USE_STORE,
-        useValue: true,
-    },
-    {
-        provide: USE_EXTEND,
-        useValue: true,
-    },
-    {
-        provide: DEFAULT_LANGUAGE,
-        useValue: 'de',
+        provide: TranslateService,
+        useValue: {},
     },
     MatSnackBar,
     provideAnimations(),
