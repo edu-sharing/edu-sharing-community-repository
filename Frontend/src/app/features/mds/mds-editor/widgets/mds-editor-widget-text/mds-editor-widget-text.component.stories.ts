@@ -1,200 +1,155 @@
-import { applicationConfig, type Meta, moduleMetadata, type StoryObj } from '@storybook/angular';
-import { HttpClient, HttpHandler, HttpXhrBackend } from '@angular/common/http';
-import { importProvidersFrom } from '@angular/core';
-import { EduSharingApiModule } from 'ngx-edu-sharing-api';
-import { MdsEditorWidgetTextComponent } from './mds-editor-widget-text.component';
-import { SharedModule } from '../../../../../shared/shared.module';
-import {
-    InitialValues,
-    MdsEditorInstanceService,
-    Widget as WidgetInstance,
-} from '../../mds-editor-instance.service';
-import { CordovaService } from '../../../../../common/services/cordova.service';
-import { InputStatus, MdsWidget, RequiredMode } from '../../../types/types';
-import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
-import { ViewInstanceService } from '../../mds-editor-view/view-instance.service';
-import { provideAnimations } from '@angular/platform-browser/animations';
-import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
-import { RegisterFormFieldDirective } from '../mds-editor-widget-container/register-form-field.directive';
-import { Toast } from '../../../../../core-ui-module/toast';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import {
-    DEFAULT_LANGUAGE,
-    FakeMissingTranslationHandler,
-    MissingTranslationHandler,
-    TranslateCompiler,
-    TranslateDefaultParser,
-    TranslateFakeCompiler,
-    TranslateFakeLoader,
-    TranslateLoader,
-    TranslateModule,
-    TranslateParser,
-    TranslateService,
-    TranslateStore,
-    USE_DEFAULT_LANG,
-    USE_EXTEND,
-    USE_STORE,
-} from '@ngx-translate/core';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { TranslateModule } from '@ngx-translate/core';
+import { applicationConfig, moduleMetadata, type Meta, type StoryObj } from '@storybook/angular';
 import { TranslationsModule } from 'ngx-edu-sharing-ui';
-import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+import { SharedModule } from '../../../../../shared/shared.module';
+import { MdsWidgetType, RequiredMode } from '../../../types/types';
+import { Widget } from '../../mds-editor-instance.service';
+import { WidgetDummy, mdsStorybookProviders } from '../../storybook-utils';
+import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
+import { RegisterFormFieldDirective } from '../mds-editor-widget-container/register-form-field.directive';
+import { MdsEditorWidgetTextComponent } from './mds-editor-widget-text.component';
 
 // More on how to set up stories at: https://storybook.js.org/docs/angular/writing-stories/introduction
-const meta: Meta<MdsEditorWidgetTextComponent> = {
+const meta: Meta<Widget['definition']> = {
     title: 'Mds/Widget/Text',
     component: MdsEditorWidgetTextComponent,
     decorators: [
         moduleMetadata({
-            declarations: [MdsEditorWidgetContainerComponent, RegisterFormFieldDirective], // Prevent duplicate declaration of InfoMessageComponent
+            declarations: [MdsEditorWidgetContainerComponent, RegisterFormFieldDirective],
             imports: [SharedModule, MatSnackBarModule, TranslateModule, TranslationsModule],
         }),
         applicationConfig({
-            providers: [
-                HttpClient,
-                {
-                    provide: HttpHandler,
-                    useValue: new HttpXhrBackend({ build: () => new XMLHttpRequest() }),
-                },
-                importProvidersFrom(
-                    EduSharingApiModule.forRoot({
-                        rootUrl: '/api',
-                    }),
-                ),
-                { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
-                MdsEditorInstanceService,
-                ViewInstanceService,
-                CordovaService,
-                Toast,
-                TranslateService,
-                TranslateStore,
-                {
-                    provide: TranslateLoader,
-                    useClass: TranslateFakeLoader,
-                },
-                {
-                    provide: TranslateCompiler,
-                    useClass: TranslateFakeCompiler,
-                },
-                {
-                    provide: TranslateParser,
-                    useClass: TranslateDefaultParser,
-                },
-                {
-                    provide: MissingTranslationHandler,
-                    useClass: FakeMissingTranslationHandler,
-                },
-                {
-                    provide: USE_DEFAULT_LANG,
-                    useValue: true,
-                },
-                {
-                    provide: USE_STORE,
-                    useValue: true,
-                },
-                {
-                    provide: USE_EXTEND,
-                    useValue: true,
-                },
-                {
-                    provide: DEFAULT_LANGUAGE,
-                    useValue: 'de',
-                },
-                MatSnackBar,
-                provideAnimations(),
-            ],
+            providers: mdsStorybookProviders,
         }),
     ],
-    parameters: {
-        controls: {
-            // exclude:/(type)/g
-        },
-    },
     argTypes: {
+        id: { table: { disable: true } },
+        expandable: { table: { disable: true } },
         type: {
-            control: false,
+            control: 'select',
+            options: [
+                MdsWidgetType.Text,
+                MdsWidgetType.Number,
+                MdsWidgetType.Email,
+                MdsWidgetType.Date,
+                MdsWidgetType.Month,
+                MdsWidgetType.Color,
+                MdsWidgetType.Textarea,
+            ],
+        },
+        caption: {
+            control: 'text',
         },
         bottomCaption: {
-            control: {
-                type: 'text',
-            },
+            control: 'text',
+        },
+        placeholder: {
+            control: 'text',
         },
         isRequired: {
-            control: 'radio',
+            control: 'inline-radio',
             options: [RequiredMode.Mandatory, RequiredMode.Optional, RequiredMode.Ignore],
         },
-    } as any,
+        maxlength: {
+            control: 'number',
+        },
+    },
     args: {
-        bottomCaption: 'Bottom Caption',
+        id: 'test',
+        caption: 'Caption',
+        expandable: 'disabled',
         isRequired: RequiredMode.Optional,
     } as any,
     tags: ['autodocs'],
     render: (args) => {
         return {
             props: {
-                widget: new Widget({
-                    placeholder: 'Placeholder...',
-                    type: 'text',
-                    ...args,
-                }) as unknown as WidgetInstance,
+                widget: new WidgetDummy(args) as unknown as Widget,
             },
         };
     },
 };
 
-class Widget {
-    readonly focusTrigger = new Subject<void>();
-    readonly status = new BehaviorSubject<InputStatus>(null);
-    readonly meetsDynamicCondition = new BehaviorSubject<boolean>(true);
-    readonly defaultDefinition: Partial<MdsWidget> = {
-        id: 'test',
-        caption: 'Test',
-        expandable: 'disabled',
-    };
-
-    public constructor(public definition: MdsWidget) {
-        this.definition = { ...this.defaultDefinition, ...this.definition };
-    }
-
-    getInitalValuesAsync(): Promise<InitialValues> {
-        return Promise.resolve(this.getInitialValues());
-    }
-
-    getInitialValues(): InitialValues {
-        return {
-            individualValues: [],
-            jointValues: [],
-        };
-    }
-
-    observeIsDisabled(): Observable<boolean> {
-        return of(false);
-    }
-
-    public getInternalError(): string {
-        return '';
-    }
-
-    setStatus(value: InputStatus): void {
-        console.log(value);
-        this.status.next(value);
-    }
-
-    getStatus(): InputStatus {
-        return this.status.value;
-    }
-
-    registerShowMissingRequired() {}
-
-    setValue() {}
-}
 export default meta;
-type Story = StoryObj<MdsEditorWidgetTextComponent>;
-export const Empty: Story = {
+type Story = StoryObj<Widget['definition']>;
+
+export const TextMinimal: Story = {
     args: {
         type: 'text',
-    } as any,
+    },
 };
-export const EmptyTextarea: Story = {
+
+export const TextFull: Story = {
+    args: {
+        type: 'text',
+        bottomCaption: 'Bottom Caption',
+        placeholder: 'Placeholder...',
+    },
+};
+
+export const TextMandatory: Story = {
+    args: {
+        type: 'text',
+        isRequired: 'mandatory',
+    },
+};
+
+export const TextareaMinimal: Story = {
     args: {
         type: 'textarea',
-    } as any,
+    },
+};
+
+export const TextareaFull: Story = {
+    args: {
+        type: 'textarea',
+        bottomCaption: 'Bottom Caption',
+        placeholder: 'Placeholder...',
+    },
+};
+
+export const TextareaMandatory: Story = {
+    args: {
+        type: 'textarea',
+        isRequired: 'mandatory',
+    },
+};
+
+export const Number: Story = {
+    args: {
+        type: 'number',
+    },
+    argTypes: {
+        min: {
+            control: 'number',
+        },
+        max: {
+            control: 'number',
+        },
+    },
+};
+
+export const Email: Story = {
+    args: {
+        type: 'email',
+    },
+};
+
+export const Date: Story = {
+    args: {
+        type: 'date',
+    },
+};
+
+export const Month: Story = {
+    args: {
+        type: 'month',
+    },
+};
+
+export const Color: Story = {
+    args: {
+        type: 'color',
+    },
 };
