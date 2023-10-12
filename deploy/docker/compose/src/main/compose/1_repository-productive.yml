@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
 
-  cache:
+  repository-cache:
     restart: unless-stopped
 
   repository-database:

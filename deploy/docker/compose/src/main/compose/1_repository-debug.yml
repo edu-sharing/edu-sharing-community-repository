@@ -2,9 +2,9 @@ version: '3.7'
 
 services:
 
-  cache:
+  repository-cache:
     ports:
-      - "${COMMON_BIND_HOST:-127.0.0.1}:${CACHE_PORT:-7000}:6379"
+      - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_CACHE_PORT:-7000}:6379"
 
   repository-database:
     ports:

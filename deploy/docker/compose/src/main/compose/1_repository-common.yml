@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
 
-  cache:
+  repository-cache:
     image: "${docker.edu_sharing.community.common.redis}"
     container_name: "cache_${COMPOSE_PROJECT_NAME}"
     environment:
@@ -65,7 +65,7 @@ services:
       ALLOW_EMPTY_PASSWORD: "yes"
       CACHE_CLUSTER: "false"
       CACHE_DATABASE: "0"
-      CACHE_HOST: cache
+      CACHE_HOST: repository-cache
       CACHE_PORT: "6379"
       CATALINA_OPTS: >-
         -Xms${REPOSITORY_SERVICE_JAVA_XMS:-2g}
