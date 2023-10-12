@@ -60,7 +60,10 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
         this.options$.next(options);
     }
     checkbox: boolean;
-    globalOptions: OptionItem[];
+    globalOptionsSubject = new BehaviorSubject<OptionItem[]>([]);
+    set globalOptions(globalOptions: OptionItem[]) {
+        this.globalOptionsSubject.next(globalOptions);
+    }
     sortSubject = new BehaviorSubject<ListSortConfig>(void 0);
     get sort(): ListSortConfig {
         return this.sortSubject.value;

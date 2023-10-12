@@ -268,7 +268,7 @@
     "size": "Größe",
     "mediatype": "Dateityp",
     "ccm:commonlicense_key": "Lizenz",
-    "ccm:collection_ordered_position": "individuell",
+    "ccm:collection_ordered_position": "Manuelle Sortierung",
     "ccm:educationallearningresourcetype": "Medienart",
     "ccm:replicationsourceid": "Original-ID",
     "ccm:educationalcontext": "Bildungsbereich",
