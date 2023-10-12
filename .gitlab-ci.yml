@@ -5,7 +5,11 @@ variables:
 
 default:
   image: maven:3.8.4-eclipse-temurin-17
-
+  services:
+    - name: "$DIND_IMAGE"
+      alias: docker
+      entrypoint: [ "env", "-u", "DOCKER_HOST" ]
+      command: [ "dockerd-entrypoint.sh" ]
 stages:
   - test
   - deploy
