@@ -151,11 +151,12 @@ public class JobHandler {
 		throw new IllegalArgumentException("Job "+jobDetail.getFullName()+" was not found");
 	}
 
-	private static synchronized List<JobInfo> getJobs() {
-		if(jobs.get(JOB_LIST_KEY) == null) {
-			jobs.put(JOB_LIST_KEY, new ArrayList<>());
+	private static List<JobInfo> getJobs() {
+		List<JobInfo> jobList = jobs.get(JOB_LIST_KEY);
+		if(jobList == null) {
+			return new ArrayList<>();
 		}
-		return jobs.get(JOB_LIST_KEY);
+		return jobList;
 	}
 	private static synchronized void addJob(JobInfo jobInfo) {
 		List<JobInfo> jobList = getJobs();
