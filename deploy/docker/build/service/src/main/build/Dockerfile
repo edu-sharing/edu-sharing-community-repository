@@ -54,12 +54,10 @@ RUN set -eux \
 
 USER worker
 
-STOPSIGNAL SIGWINCH
-
 EXPOSE 8009 8080 8081
 
 ENTRYPOINT ["entrypoint.sh"]
-CMD ["catalina.sh", "run"]
+CMD [ "/opt/bitnami/scripts/tomcat/run.sh" ]
 
 VOLUME [ "/opt/alfresco/alf_data", "/opt/bitnami/tomcat/shared/classes/config/cluster", "/opt/bitnami/tomcat/shared/classes/config/node" ]
 
