@@ -129,9 +129,10 @@ public class NodeFrontpage {
         searchRequest.indices("workspace");
         SearchResponse searchResult = searchServiceElastic.searchNative(searchRequest);
         List<NodeRef> result=new ArrayList<>();
+        Set<String> authorities = searchServiceElastic.getUserAuthorities();
         for(SearchHit hit : searchResult.getHits().getHits()){
             logger.info("score:"+hit.getScore() +" id:"+hit.getId() + " "+ ((Map)hit.getSourceAsMap().get("properties")).get("cm:name"));
-            result.add(searchServiceElastic.transformSearchHit(new HashSet<>(), AuthenticationUtil.getFullyAuthenticatedUser(),hit,false));
+            result.add(searchServiceElastic.transformSearchHit(authorities, AuthenticationUtil.getFullyAuthenticatedUser(),hit,false));
         }
         result = result.subList(0, result.size() > config.totalCount ? config.totalCount : result.size());
         if(config.displayCount<config.totalCount) {
