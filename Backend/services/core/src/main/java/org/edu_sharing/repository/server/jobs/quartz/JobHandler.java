@@ -469,7 +469,10 @@ public class JobHandler {
 	private boolean isPrimaryRepository() {
 		if(LightbendConfigLoader.get().hasPath("jobs.primaryHostname")) {
 			try {
-				return LightbendConfigLoader.get().getString("jobs.primaryHostname").equals(InetAddress.getLocalHost().getHostName());
+				return Arrays.asList(
+						InetAddress.getLocalHost().getHostName(),
+						InetAddress.getLocalHost().getHostName().split("\\.")[0]
+				).contains(LightbendConfigLoader.get().getString("jobs.primaryHostname"));
 			} catch (UnknownHostException e) {
 				logger.warn("Could not resolve hostname", e);
 				return false;
