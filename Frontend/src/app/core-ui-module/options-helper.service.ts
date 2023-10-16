@@ -714,7 +714,7 @@ export class OptionsHelperService implements OnDestroy {
                 return false;
             }
 
-            if(nodes.some(n => n.properties?.[RestConstants.CCM_PROP_EDUSCOPENAME].includes(RestConstants.SAFE_SCOPE))) {
+            if(nodes.some(n => n.properties?.[RestConstants.CCM_PROP_EDUSCOPENAME]?.includes(RestConstants.SAFE_SCOPE))) {
                 downloadNode.name = 'OPTIONS.DOWNLOAD_SAFE';
             } else {
                 downloadNode.name = 'OPTIONS.DOWNLOAD';
