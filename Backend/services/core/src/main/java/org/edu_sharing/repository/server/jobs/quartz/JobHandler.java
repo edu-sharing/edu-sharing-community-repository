@@ -27,6 +27,8 @@
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -95,6 +97,7 @@ public class JobHandler {
 				.findFirst().orElse(null);
 	}
 	public boolean cancelJob(String jobName, boolean force) throws SchedulerException {
+		checkPrimaryRepository();
 		JobDetail jobDetail = quartzScheduler.getJobDetail(jobName, null);
 		Job jobInstance = getJobByName(jobName);
 		if(force) {
@@ -106,13 +109,14 @@ public class JobHandler {
 				}
 			}
 			if(jobInstance == null) {
-				throw new RuntimeException("Job " + jobName + " was not found as a running job. May it is running on an other cluster node?");
+				// throw new RuntimeException("Job " + jobName + " was not found as a running job. May it is running on an other cluster node?");
+				// we're on the primary instance - so if the job is not existing, we can still assume it's dead and cancel it
 			}
 		}
 		boolean result=quartzScheduler.interrupt(jobName, null);
 		if(!result){
-			if(jobInstance == null) {
-				throw new RuntimeException("Job " + jobName + " was not found as a running job. May it is running on an other cluster node?");
+			if(jobInstance == null && !force) {
+				throw new RuntimeException("Job " + jobName + " was not found as a running job. Use force parameter if you want to remove the entry anyway.");
 			}
 			try {
 				if(jobDetail != null) {
@@ -127,6 +131,13 @@ public class JobHandler {
 		}
 		return result;
 	}
+
+	private void checkPrimaryRepository() {
+		if(!isPrimaryRepository()) {
+			throw new RuntimeException("Jobs can only be controlled on the primary repository");
+		}
+	}
+
 	public void setJobStatusByName(String jobName, JobInfo.Status status) {
 		for(JobInfo job : getJobs()){
 			if(job.getJobName().equals(jobName) && job.getStatus().equals(JobInfo.Status.Running)){
@@ -370,6 +381,7 @@ public class JobHandler {
 
 			@Override
 			public void jobToBeExecuted(JobExecutionContext context) {
+				checkPrimaryRepository();
 				Job job = context.getJobInstance();
 				logger.info("JobListener.jobToBeExecuted " + job.getClass());
 				if (job instanceof AbstractJob) {
@@ -406,6 +418,12 @@ public class JobHandler {
 
 	public synchronized void refresh(boolean triggerImmediateJobs) {
 		try {
+			if(!isPrimaryRepository()) {
+				logger.info("Not primary repository, will not register or handle quartz jobs");
+				return;
+			}
+			logger.info("primary repository, will register and handle quartz jobs");
+
 			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 			List<? extends Config> list = LightbendConfigLoader.get().getConfigList("jobs.entries");
 			jobConfigList.clear();
@@ -446,6 +464,24 @@ public class JobHandler {
 		}catch (Exception e){
 			logger.warn("Could not init scheduled jobs",e);
 		}
+	}
+
+	private boolean isPrimaryRepository() {
+		if(LightbendConfigLoader.get().hasPath("jobs.primaryHostname")) {
+			try {
+				return Arrays.asList(
+						InetAddress.getLocalHost().getHostName(),
+						InetAddress.getLocalHost().getHostName().split("\\.")[0]
+				).contains(LightbendConfigLoader.get().getString("jobs.primaryHostname"));
+			} catch (UnknownHostException e) {
+				logger.warn("Could not resolve hostname", e);
+				return false;
+			}
+		} else {
+			logger.info("No primaryHostname key, assuming no cluster, jobs are active on this repository");
+			return true;
+		}
+
 	}
 
 	private Trigger getTriggerFromString(String jobName, String triggerConfig) throws ParseException {
@@ -546,6 +582,7 @@ public class JobHandler {
 	 * @throws SchedulerException
 	 */
 	public ImmediateJobListener startJob(Class jobClass, HashMap<String, Object> params) throws SchedulerException, Exception {
+		checkPrimaryRepository();
 
 		String jobName = jobClass.getSimpleName() + IMMEDIATE_JOBNAME_SUFFIX;
 
