@@ -16,7 +16,7 @@ import { OptionItem } from '../../../core-ui-module/option-item';
 import { CreateMenuComponent } from '../create-menu/create-menu.component';
 import { MainMenuDropdownComponent } from '../main-menu-dropdown/main-menu-dropdown.component';
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';
-import { MainNavCreateConfig } from '../main-nav.service';
+import { MainNavCreateConfig, MainNavService, TemplateSlot } from '../main-nav.service';
 
 @Component({
     selector: 'es-top-bar',
@@ -24,6 +24,7 @@ import { MainNavCreateConfig } from '../main-nav.service';
     styleUrls: ['./top-bar.component.scss'],
 })
 export class TopBarComponent {
+    readonly TemplateSlot = TemplateSlot;
     @ContentChild('createButton') createButtonRef: TemplateRef<any>;
     @ViewChild('createMenu') createMenu: CreateMenuComponent;
     @ViewChild('dropdownTriggerDummy') createMenuTrigger: MatMenuTrigger;
@@ -57,11 +58,13 @@ export class TopBarComponent {
 
     createMenuX: number;
     createMenuY: number;
+    toggleSidebar = () => this.mainMenuSidebar.toggle();
 
     constructor(
         // FIXME: Required values should be passed as inputs.
         public connector: RestConnectorService,
         private configService: ConfigurationService,
+        public mainNavService: MainNavService,
         public elementRef: ElementRef,
     ) {}
 

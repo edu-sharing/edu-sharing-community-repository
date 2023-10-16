@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, TemplateRef } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -67,6 +67,11 @@ export class MainNavConfig {
     onCreateNotAllowed?: () => void;
 }
 
+export enum TemplateSlot {
+    MainScopeButton,
+    BeforeUserMenu,
+}
+
 @Injectable({
     providedIn: 'root',
 })
@@ -75,6 +80,7 @@ export class MainNavService {
     private cookieInfo: CookieInfoComponent;
     private mainNavConfigSubject = new BehaviorSubject<MainNavConfig>(new MainNavConfig());
     private mainNavConfigOverrideSubject = new BehaviorSubject<Partial<MainNavConfig> | null>(null);
+    private customTemplates: { [key in TemplateSlot]?: TemplateRef<any> } = {};
 
     constructor(
         private managementDialogs: ManagementDialogsService,
@@ -83,6 +89,15 @@ export class MainNavService {
         private dialogs: DialogsService,
     ) {}
 
+    /**
+     * register a template to be used in the top bar instead of the default one
+     */
+    registerCustomTemplateSlot(slot: TemplateSlot, template: TemplateRef<any>) {
+        this.customTemplates[slot] = template;
+    }
+    getCustomTemplateSlot(slot: TemplateSlot) {
+        return this.customTemplates[slot];
+    }
     getDialogs() {
         return this.managementDialogs.getDialogsComponent();
     }
