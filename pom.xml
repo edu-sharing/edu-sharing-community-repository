@@ -34,7 +34,7 @@
     <alfresco.sdk.version>3.1.0</alfresco.sdk.version>
 
     <!-- release-1 -->
-    <bom.repository-repackaged.version>8.1.0-RC7</bom.repository-repackaged.version>
+    <bom.repository-repackaged.version>8.1.0-RC8</bom.repository-repackaged.version>
 
     <java.version.range>[1.8.0, 9)</java.version.range>
 
