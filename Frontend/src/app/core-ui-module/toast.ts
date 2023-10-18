@@ -621,7 +621,7 @@ export class Toast extends ToastAbstract implements OnDestroy {
             duration: Toast.convertDuration(this.duration)
                 ? Toast.convertDuration(this.duration) * 1000
                 : null,
-            panelClass: ['app-mat-snackbar-toast', `app-mat-snackbar-toast-${message.type}`],
+            panelClass: ['toast-message', `toast-message-${message.type}`],
         });
         if (message.action) {
             snackBarRef.onAction().subscribe(message.action.callback);

@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Inject, Output } from '@angular/core';
 import { MAT_SNACK_BAR_DATA, MatSnackBar } from '@angular/material/snack-bar';
-import { Toast, ToastMessage } from '../../toast';
 import { ToastDuration } from 'ngx-edu-sharing-ui';
+import { ToastMessage } from '../../toast';
 
 @Component({
     selector: 'es-toast-message',
@@ -18,6 +18,5 @@ export class ToastMessageComponent {
     constructor(
         @Inject(MAT_SNACK_BAR_DATA) public data: ToastMessage,
         public snackBar: MatSnackBar,
-        public toast: Toast,
     ) {}
 }
