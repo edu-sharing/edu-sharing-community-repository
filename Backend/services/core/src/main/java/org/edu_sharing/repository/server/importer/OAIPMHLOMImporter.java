@@ -364,7 +364,7 @@ public class OAIPMHLOMImporter implements Importer{
 		return result;
 	}
 
-	private HttpQueryTool getQueryTool() {
+	public static HttpQueryTool getQueryTool() {
 		HttpQueryTool httpTool = new HttpQueryTool();
 		httpTool.setTimeout(180 * 1000);
 		return httpTool;
