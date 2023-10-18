@@ -44,6 +44,9 @@ public class CCConstants {
 	 */
 	public final static String DOWNLOADURL = "DownloadURL";
 
+
+	public final static String CCREP_PROTOCOL = "ccrep://";
+
 	/**
 	 * will be used when there is an Alfresco content
 	 */
