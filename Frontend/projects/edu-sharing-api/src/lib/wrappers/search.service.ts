@@ -630,8 +630,14 @@ function omitProperty<T, K extends keyof T>(obj: T | null, property: K): Omit<T,
 }
 
 function pickProperties<T extends {}, K extends keyof T>(obj: T, properties: K[]): Pick<T, K>;
-function pickProperties<T extends {}, K extends keyof T>(obj: T | null, properties: K[]): Pick<T, K> | null;
-function pickProperties<T extends {}, K extends keyof T>(obj: T | null, properties: K[]): Pick<T, K> | null {
+function pickProperties<T extends {}, K extends keyof T>(
+    obj: T | null,
+    properties: K[],
+): Pick<T, K> | null;
+function pickProperties<T extends {}, K extends keyof T>(
+    obj: T | null,
+    properties: K[],
+): Pick<T, K> | null {
     if (obj === null) {
         return null;
     } else {

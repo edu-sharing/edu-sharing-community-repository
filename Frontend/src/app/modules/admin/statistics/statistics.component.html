@@ -255,9 +255,9 @@
               'ADMIN.STATISTICS.ACTIONS.' + element[key] | translate
             }}</span>
             <span *ngIf="key === 'date'">{{
-              element[key] | formatDate: { time: true, relative: false }
+              element[key] | formatDate : { time: true, relative: false }
             }}</span>
-            <span *ngIf="key === 'authority'">{{ element.authority.hash | slice: 0:8 }}</span>
+            <span *ngIf="key === 'authority'">{{ element.authority.hash | slice : 0 : 8 }}</span>
             <span *ngIf="key === 'authority_organization'">
               <div *ngFor="let org of element.authority.organization">
                 {{ org | authorityName }}

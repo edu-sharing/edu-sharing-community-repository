@@ -23,7 +23,7 @@ import { environment } from '../environments/environment';
             provide: LocationStrategy,
             useClass: MockLocationStrategy,
         },
-    ]
+    ],
 })
 // export class AppModule {}
 export class AppModule implements DoBootstrap {

@@ -522,7 +522,7 @@ cordova.define('es6-promise-plugin.Promise', function (require, exports, module)
                                 ae
                             );
                         });
-                    }.call(
+                    }).call(
                         this,
                         t('_process'),
                         'undefined' != typeof global
@@ -532,7 +532,7 @@ cordova.define('es6-promise-plugin.Promise', function (require, exports, module)
                             : 'undefined' != typeof window
                             ? window
                             : {},
-                    ));
+                    );
                 },
                 { _process: 3 },
             ],

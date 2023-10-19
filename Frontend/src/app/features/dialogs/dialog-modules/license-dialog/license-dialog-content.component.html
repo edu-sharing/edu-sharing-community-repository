@@ -291,7 +291,7 @@
         {{ 'LICENSE.DESCRIPTION.CC_COMMERCIAL_' + ccCommercial | translate }}
       </div>
       <div *ngIf="ccVersion != '4.0'">
-        {{ 'WORKSPACE.LICENSE.LOCALE' | translate: { locale: ccCountry } }}
+        {{ 'WORKSPACE.LICENSE.LOCALE' | translate : { locale: ccCountry } }}
         {{ 'COUNTRY_CODE.' + (ccCountry ? ccCountry : 'INTERNATIONAL') | uppercase | translate }}.
       </div>
     </div>

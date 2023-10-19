@@ -14,13 +14,13 @@
           <div class="subobjects" *ngIf="childCount() > 0">
             {{
               'SHARING.SUBELEMENT_' + (childCount() === 1 ? 'SINGLE' : 'MULTI')
-                | translate: { count: childCount() }
+                | translate : { count: childCount() }
             }}
           </div>
           <div *ngIf="inviterIsAuthor()">
             {{
               'SHARING.INVITED_AND_CREATED_BY'
-                | translate: { inviter: getPersonName(sharingInfo.invitedBy) }
+                | translate : { inviter: getPersonName(sharingInfo.invitedBy) }
             }}
           </div>
           <div *ngIf="!inviterIsAuthor()">

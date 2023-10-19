@@ -51,7 +51,7 @@
       <p class="description collections" *ngIf="!usagesCollection.isEmpty()">
         {{
           'WORKSPACE.METADATA.COLLECTIONS'
-            | translate: { count: (usagesCollectionData | async).length }
+            | translate : { count: (usagesCollectionData | async).length }
         }}
       </p>
       <es-node-entries-wrapper
@@ -74,7 +74,8 @@
       ></es-node-entries-wrapper>
       <div class="description forkedParend" *ngIf="!forkedChildren.isEmpty()">
         {{
-          'WORKSPACE.METADATA.FORKED_CHILDS' | translate: { count: forkedChildren.getData().length }
+          'WORKSPACE.METADATA.FORKED_CHILDS'
+            | translate : { count: forkedChildren.getData().length }
         }}
       </div>
       <es-node-entries-wrapper
