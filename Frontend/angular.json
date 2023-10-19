@@ -133,7 +133,8 @@
             ],
             "assets": [
               "src/assets"
-            ]
+            ],
+            "karmaConfig": "karma.conf.js"
           }
         },
         "lint": {
@@ -194,7 +195,8 @@
               "zone.js",
               "zone.js/testing"
             ],
-            "tsConfig": "projects/edu-sharing-api/tsconfig.spec.json"
+            "tsConfig": "projects/edu-sharing-api/tsconfig.spec.json",
+            "karmaConfig": "projects/edu-sharing-api/karma.conf.js"
           }
         },
         "lint": {
@@ -229,6 +231,17 @@
             }
           },
           "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "projects/edu-sharing-graphql/tsconfig.spec.json",
+            "karmaConfig": "projects/edu-sharing-graphql/karma.conf.js"
+          }
         },
         "lint": {
           "builder": "@angular-eslint/builder:lint",
@@ -325,6 +338,23 @@
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
             "browserTarget": "embed:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": "projects/embed/src/polyfills.ts",
+            "tsConfig": "projects/embed/tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "projects/embed/src/favicon.ico",
+              "projects/embed/src/assets"
+            ],
+            "styles": [
+              "projects/embed/src/styles.scss"
+            ],
+            "scripts": [],
+            "karmaConfig": "projects/embed/karma.conf.js"
           }
         },
         "lint": {
@@ -447,6 +477,23 @@
             "browserTarget": "app-as-web-component:build"
           }
         },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": "projects/app-as-web-component/src/polyfills.ts",
+            "tsConfig": "projects/app-as-web-component/tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "projects/app-as-web-component/src/favicon.ico",
+              "projects/app-as-web-component/src/assets"
+            ],
+            "styles": [
+              "projects/app-as-web-component/src/styles.scss"
+            ],
+            "scripts": [],
+            "karmaConfig": "projects/app-as-web-component/karma.conf.js"
+          }
+        },
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
@@ -486,7 +533,8 @@
               "zone.js",
               "zone.js/testing"
             ],
-            "tsConfig": "projects/edu-sharing-ui/tsconfig.spec.json"
+            "tsConfig": "projects/edu-sharing-ui/tsconfig.spec.json",
+            "karmaConfig": "projects/edu-sharing-ui/karma.conf.js"
           }
         },
         "lint": {
