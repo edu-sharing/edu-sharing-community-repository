@@ -21,7 +21,6 @@ import { ErrorProcessingService } from 'src/app/core-ui-module/error.processing'
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import {
     CollectionReference,
-    ConfigurationService,
     DialogButton,
     LocalPermissions,
     Node,
@@ -62,12 +61,8 @@ export interface ManagementEvent {
 export class WorkspaceManagementDialogsComponent {
     @ContentChild('collectionChooserBeforeRecent')
     collectionChooserBeforeRecentRef: TemplateRef<any>;
-    @Input() uploadShowPicker = false;
-    @Input() uploadMultiple = true;
-    @Input() fileIsOver = false;
     @Input() addToCollection: Node[];
     @Output() addToCollectionChange = new EventEmitter();
-    @Input() parent: Node;
     @Input() addPinnedCollection: Node;
     @Output() addPinnedCollectionChange = new EventEmitter();
     @Output() onEvent = new EventEmitter<ManagementEvent>();
@@ -95,30 +90,15 @@ export class WorkspaceManagementDialogsComponent {
     @Output() materialViewFeedbackChange = new EventEmitter<Node>();
     @Input() nodeSidebar: Node;
     @Output() nodeSidebarChange = new EventEmitter<Node>();
-    @Input() showUploadSelect = false;
-    @Output() showUploadSelectChange = new EventEmitter();
-    @Output() onUploadSelectCanceled = new EventEmitter();
     @Output() onClose = new EventEmitter();
     @Output() onCreate = new EventEmitter();
     @Output() onRefresh = new EventEmitter<Node[] | void>();
-    /**
-     * Emits once when the user created new nodes (either by upload or links) after the user closed
-     * the final editing dialog.
-     *
-     * - Does not emit when jumping between dialogs (the final dialog is also the first dialog that
-     *   appears after the user creates new nodes).
-     * - Emits the new nodes when the user confirms the final dialog.
-     * - Emits `null` when the user cancels the final dialog.
-     */
-    @Output() onUploadFilesProcessed = new EventEmitter<Node[]>();
     @Output() onCloseMetadata = new EventEmitter();
-    @Output() onUploadFileSelected = new EventEmitter<FileList>();
     @Output() onCloseAddToCollection = new EventEmitter();
     @Output() onStoredAddToCollection = new EventEmitter<{
         collection: Node;
         references: CollectionReference[];
     }>();
-    _nodeFromUpload = false;
     public editorPending = false;
     /**
      * QR Code object data to print
@@ -159,7 +139,6 @@ export class WorkspaceManagementDialogsComponent {
         private nodeService: RestNodeService,
         private temporaryStorage: TemporaryStorageService,
         private collectionService: RestCollectionService,
-        private config: ConfigurationService,
         private toast: Toast,
         private errorProcessing: ErrorProcessingService,
         private nodeHelper: NodeHelperService,
@@ -177,31 +156,10 @@ export class WorkspaceManagementDialogsComponent {
         }
     }
 
-    public uploadFile(event: FileList) {
-        this.onUploadFileSelected.emit(event);
-    }
-
-    public closeUploadSelect() {
-        this.showUploadSelect = false;
-        this.showUploadSelectChange.emit(false);
-    }
-    public cancelUploadSelect() {
-        this.closeUploadSelect();
-        this.onUploadSelectCanceled.emit(false);
-    }
-    private deleteNodes(nodes: Node[]) {
-        this.toast.showProgressDialog();
-        observableForkJoin(
-            nodes.map((n) => this.nodeService.deleteNode(n.ref.id, false)),
-        ).subscribe(() => {
-            this.toast.closeModalDialog();
-        });
-    }
-
     async openMdsEditor(nodes: Node[]): Promise<void> {
         const dialogRef = await this.dialogs.openMdsEditorDialogForNodes({
             nodes,
-            bulkBehavior: this._nodeFromUpload ? BulkBehavior.Replace : BulkBehavior.Default,
+            bulkBehavior: BulkBehavior.Default,
         });
         dialogRef
             .afterClosed()
@@ -210,15 +168,8 @@ export class WorkspaceManagementDialogsComponent {
 
     private closeMdsEditor(originalNodes: Node[], updatedNodes: Node[] = null) {
         let refresh = !!updatedNodes;
-        if (this._nodeFromUpload && updatedNodes == null) {
-            this.deleteNodes(originalNodes);
-            this.localEvents.nodesDeleted.emit(originalNodes);
-            refresh = true;
-        }
         this.onCloseMetadata.emit(updatedNodes);
-        if (this._nodeFromUpload) {
-            this.onUploadFilesProcessed.emit(updatedNodes);
-        } else if (
+        if (
             this.nodeSidebar &&
             this.nodeSidebar.ref.id === originalNodes[0]?.ref.id &&
             updatedNodes

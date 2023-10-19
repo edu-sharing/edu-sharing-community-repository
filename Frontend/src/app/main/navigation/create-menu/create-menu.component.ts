@@ -98,10 +98,8 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
 
     _parent: Node = null;
 
-    uploadSelectDialogRef: DialogRef<{ files: FileList; parent: Node | undefined }>;
     connectorList: Connector[];
     fileIsOver = false;
-    showPicker: boolean;
     createConnectorName: string;
     createConnectorType: Connector;
     cardHasOpenModals$: Observable<boolean>;
@@ -109,6 +107,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     tools: Tools;
     createToolType: Tool;
 
+    private showPicker: boolean;
     private params: Params;
     private destroyed = new Subject<void>();
 
@@ -334,49 +333,11 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         }
     }
 
-    // TODO: remove
-    private async _openUploadSelect() {
-        this.uploadSelectDialogRef = this.managementDialogs.openUploadSelect({
-            parent: await this.getParent(),
-            showPicker: this.showPicker,
-        });
-        this.uploadSelectDialogRef.afterClosed().subscribe((result) => {
-            if (result) {
-                this._parent = result.parent;
-                this.uploadFiles(result.files);
-            } else {
-                // When `files` is not set, that can either mean that the dialog was canceled or
-                // that a link was entered, which causes an edit dialog to be opened by the
-                // management dialogs component. When that edit dialog is confirmed or canceled, the
-                // `onUploadFilesProcessed` event is fired. When either of this happens, the link
-                // creation is completed.
-                //
-                // FIXME: This kind of logic should be cleanly separated. Either
-                // - the management-dialogs service should process file uploads and edit dialogs and
-                //   should, for both links and uploads, notify us only after the edit dialog was
-                //   closed by the user, or
-                // - we handle the edit dialog here as a response to the user either uploading files
-                //   or entering a link.
-                rxjs.merge(
-                    this.managementDialogs.getDialogsComponent().onUploadFilesProcessed,
-                    this.managementDialogs.getDialogsComponent().onUploadSelectCanceled,
-                )
-                    .pipe(take(1))
-                    .subscribe((nodes) => {
-                        if (nodes) {
-                            this.onCreate.emit(nodes);
-                        }
-                    });
-            }
-            this.uploadSelectDialogRef = null;
-        });
-    }
-
     public hasUsableOptions() {
         return this.options.some((o) => o.isEnabled);
     }
 
-    async getParent() {
+    private async getParent() {
         return this._parent && !this.nodeHelper.isNodeCollection(this._parent)
             ? this._parent
             : this.nodeHelper.getDefaultInboxFolder().toPromise();
@@ -431,7 +392,6 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             this.toast.toolpermissionError(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES);
             return;
         }
-        this.uploadSelectDialogRef?.close();
         void this.openUpload(files);
     }
 

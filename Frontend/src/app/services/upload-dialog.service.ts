@@ -148,6 +148,7 @@ export class UploadDialogService {
     private async _afterMetadataEditDone(originalNodes: Node[], updatedNodes: Node[] | null) {
         if (!updatedNodes) {
             await this._deleteNodes(originalNodes);
+            this.localEvents.nodesDeleted.emit(originalNodes);
         }
         if (updatedNodes) {
             this.localEvents.nodesChanged.emit(updatedNodes);

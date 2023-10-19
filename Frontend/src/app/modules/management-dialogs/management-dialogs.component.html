@@ -60,14 +60,3 @@
     ></ng-container>
   </ng-template>
 </es-collection-chooser>
-
-<es-workspace-file-upload-select
-  *ngIf="showUploadSelect"
-  [isFileOver]="fileIsOver"
-  [(parent)]="parent"
-  [showPicker]="uploadShowPicker"
-  [multiple]="uploadMultiple"
-  (onCancel)="cancelUploadSelect()"
-  (onFileSelected)="uploadFile($event)"
-></es-workspace-file-upload-select>
-<!-- (onLinkSelected)="createUrlLink($event)" -->
