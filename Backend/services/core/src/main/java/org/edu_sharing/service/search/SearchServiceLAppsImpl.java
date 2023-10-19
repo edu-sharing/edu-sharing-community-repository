@@ -182,7 +182,11 @@ public class SearchServiceLAppsImpl extends SearchServiceAdapter{
 				if(searchToken.getFrom() < result.getData().size()) {
 					result.setData(result.getData().subList(searchToken.getFrom(), result.getData().size()));
 				}
-				result.setData(result.getData().subList(0, searchToken.getMaxResult()));
+				int toIdx = searchToken.getMaxResult();
+				if((result.getData().size() - 1) < toIdx){
+					toIdx = result.getData().size() - 1;
+				}
+				result.setData(result.getData().subList(0, toIdx));
 			}
 			return result;
 		}
