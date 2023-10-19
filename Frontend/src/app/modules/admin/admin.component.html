@@ -588,10 +588,10 @@
       </div>
     </div>
     <div *ngIf="modeIsActive('JOBS')" class="content jobs">
-      <div class="heading">
+      <div class="heading" *ngIf="jobs !== null">
         <i class="material-icons">done</i><span>{{ 'ADMIN.JOBS.START_JOB' | translate }}</span>
       </div>
-      <section class="group">
+      <section class="group" *ngIf="jobs !== null">
         <form>
           <div class="inputGroupGrow">
             <div class="info">{{ 'ADMIN.JOBS.JOB_CLASS' | translate }}</div>
@@ -667,7 +667,7 @@
               <div class="file">{{ uploadJobsFile?.name }}</div>
             </div>
           </div>
-          <button mat-raised-button (click)="startJob()">
+          <button mat-raised-button (click)="startJob()" [disabled]="jobs === null">
             {{ 'ADMIN.JOBS.START_JOB' | translate }}
           </button>
         </form>
@@ -679,7 +679,10 @@
         <div class="reload">
           <i class="material-icons clickable" (click)="reloadJobStatus()">refresh</i>
         </div>
-        <div class="no-jobs" *ngIf="!jobs || !jobs.length">
+        <es-info-message *ngIf="jobs === null">
+          {{ 'ADMIN.JOBS.CLUSTER_NOT_SUPPORTED' | translate }}
+        </es-info-message>
+        <div class="no-jobs" *ngIf="jobs?.length === 0">
           {{ 'ADMIN.JOBS.NO_JOBS' | translate }}
         </div>
         <div *ngFor="let job of jobs; let i = index" class="job">
@@ -764,9 +767,6 @@
               <div class="job-col">
                 <div class="log">{{ 'ADMIN.JOBS.LOG' | translate }}</div>
                 <div class="log-data">
-                  <es-info-message *ngIf="jobsLogData[i] === null">
-                    {{ 'ADMIN.JOBS.LOG_CLUSTER_NOT_SUPPORTED' | translate }}
-                  </es-info-message>
                   <div
                     *ngFor="let entry of jobsLogData[i]"
                     class="job-row"

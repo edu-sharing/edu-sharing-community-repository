@@ -174,7 +174,7 @@ export class AdminComponent implements OnInit, OnDestroy {
         class?: string;
         object?: JobDescription;
     } = {};
-    public jobs: any;
+    public jobs: any[] = [];
     public jobsOpen: boolean[] = [];
     public jobsLogFilter: any = [];
     public jobsLogLevel: any = [];
@@ -1004,6 +1004,9 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
     reloadJobStatus() {
         this.admin.getJobs().subscribe((jobs) => {
+            if (!jobs) {
+                this.jobs = null;
+            }
             this.jobs = jobs.filter((j: any) => !!j);
             this.updateJobLogs();
         });
