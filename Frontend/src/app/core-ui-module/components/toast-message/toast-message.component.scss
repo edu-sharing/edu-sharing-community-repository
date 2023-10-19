@@ -20,9 +20,8 @@ $toastLeftWidth: 8px;
         //
         // --mdc-snackbar-supporting-text-color: white;
 
-        // Uncomment to change the action button's text and ripple color
-        //
-        // --mat-snack-bar-button-color: $primaryMediumLight;
+        // Action button's text and ripple color
+        --mat-snack-bar-button-color: var(--palette-accent-200);
     }
 
     .toast-message-info .mdc-snackbar__surface {
