@@ -1,8 +1,8 @@
 import { fakeAsync } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import * as rxjs from 'rxjs';
 import { ConfigService, SessionStorageService } from 'ngx-edu-sharing-api';
+import * as rxjs from 'rxjs';
 import { TranslationsService } from './translations.service';
 
 class BridgeServiceStub {
@@ -12,10 +12,10 @@ class BridgeServiceStub {
 }
 
 class ConfigServiceStub {
-    get(key: string, defaultValue?: any): Promise<string> {
-        return defaultValue;
+    get<T>(key: string, defaultValue?: T): Promise<T> {
+        return Promise.resolve(defaultValue);
     }
-    instant(key: string, defaultValue?: any) {
+    instant<T>(key: string, defaultValue?: T): T {
         return defaultValue;
     }
     getLocator() {
@@ -60,7 +60,7 @@ describe('TranslationsService', () => {
             sessionStorageServiceStub = new SessionStorageServiceStub();
             activatedRouteStub = new ActivatedRouteStub();
             translationsService = new TranslationsService(
-                configurationServiceStub as ConfigService,
+                configurationServiceStub as unknown as ConfigService,
                 activatedRouteStub as any as ActivatedRoute,
                 sessionStorageServiceStub as any as SessionStorageService,
                 translateServiceSpy as TranslateService,

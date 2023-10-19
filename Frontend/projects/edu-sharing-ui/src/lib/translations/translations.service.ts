@@ -1,7 +1,7 @@
 import { Injectable, Optional } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, from, Observable, of as observableOf } from 'rxjs';
+import { BehaviorSubject, from, Observable, of as observableOf, of } from 'rxjs';
 import { first, map, switchMap, tap } from 'rxjs/operators';
 import { LANGUAGES } from './languages';
 import { ConfigService, SessionStorageService } from 'ngx-edu-sharing-api';
