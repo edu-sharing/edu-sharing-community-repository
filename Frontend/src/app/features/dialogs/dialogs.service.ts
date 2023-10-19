@@ -25,6 +25,10 @@ import {
     CreateMapLinkDialogResult,
 } from './dialog-modules/create-map-link-dialog/create-map-link-dialog-data';
 import {
+    CreateVariantDialogData,
+    CreateVariantDialogResult,
+} from './dialog-modules/create-variant-dialog/create-variant-dialog-data';
+import {
     DeleteNodesDialogData,
     DeleteNodesDialogResult,
 } from './dialog-modules/delete-nodes-dialog/delete-nodes-dialog-data';
@@ -571,6 +575,21 @@ export class DialogsService {
             title: 'WORKSPACE.UPLOAD_TITLE',
             avatar: { kind: 'icon', icon: 'cloud_upload' },
             width: 500,
+            data,
+            closable: Closable.Disabled,
+        });
+    }
+
+    async openCreateVariantDialog(
+        data: CreateVariantDialogData,
+    ): Promise<CardDialogRef<CreateVariantDialogData, CreateVariantDialogResult>> {
+        const { CreateVariantDialogComponent } = await import(
+            './dialog-modules/create-variant-dialog/create-variant-dialog.module'
+        );
+        return this.cardDialog.open(CreateVariantDialogComponent, {
+            title: 'NODE_VARIANT.TITLE',
+            ...configForNode(data.node),
+            width: 600,
             data,
             closable: Closable.Disabled,
         });

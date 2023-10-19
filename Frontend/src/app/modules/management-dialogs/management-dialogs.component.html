@@ -37,13 +37,6 @@
   (onDone)="closeWorkflow($event)"
   (onClose)="closeWorkflow()"
 ></es-workspace-workflow>
-<es-node-variant
-  *ngIf="nodeVariant"
-  [node]="nodeVariant"
-  (onLoading)="globalProgress = $event"
-  (onCancel)="closeVariant()"
-  (onDone)="closeVariant()"
-></es-node-variant>
 <es-collection-chooser
   class="dialog-right"
   *ngIf="addToCollection"

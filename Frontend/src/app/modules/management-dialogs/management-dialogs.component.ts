@@ -83,8 +83,6 @@ export class WorkspaceManagementDialogsComponent {
     @Output() signupGroupChange = new EventEmitter<boolean>();
     @Input() addNodesStream: Node[];
     @Output() addNodesStreamChange = new EventEmitter();
-    @Input() nodeVariant: Node;
-    @Output() nodeVariantChange = new EventEmitter();
     @Input() nodeSimpleEditChange = new EventEmitter<Node[]>();
     @Input() materialViewFeedback: Node;
     @Output() materialViewFeedbackChange = new EventEmitter<Node>();
@@ -184,10 +182,6 @@ export class WorkspaceManagementDialogsComponent {
     public closeStream() {
         this.addNodesStream = null;
         this.addNodesStreamChange.emit(null);
-    }
-    public closeVariant() {
-        this.nodeVariant = null;
-        this.nodeVariantChange.emit(null);
     }
     cancelAddToCollection() {
         this.addToCollection = null;

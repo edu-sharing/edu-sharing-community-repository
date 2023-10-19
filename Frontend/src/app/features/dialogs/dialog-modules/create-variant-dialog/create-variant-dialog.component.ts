@@ -1,6 +1,8 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
+import { OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
 import {
-    ConfigurationService,
     Connector,
     DialogButton,
     FrameEventsService,
@@ -11,40 +13,53 @@ import {
     RestHelper,
     RestIamService,
     RestNodeService,
-} from '../../../core-module/core.module';
-import { Toast } from '../../../core-ui-module/toast';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { TranslateService } from '@ngx-translate/core';
-import { trigger } from '@angular/animations';
-import { Router } from '@angular/router';
-import { BridgeService } from '../../../core-bridge-module/bridge.service';
-import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
-import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
-import { OPEN_URL_MODE, UIAnimation } from 'ngx-edu-sharing-ui';
+} from '../../../../core-module/core.module';
+import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
+import { Toast } from '../../../../core-ui-module/toast';
+import { UIHelper } from '../../../../core-ui-module/ui-helper';
+import { DialogsService } from '../../../../features/dialogs/dialogs.service';
+import { BreadcrumbsService } from '../../../../shared/components/breadcrumbs/breadcrumbs.service';
+import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
+import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { CreateVariantDialogData, CreateVariantDialogResult } from './create-variant-dialog-data';
 
 @Component({
-    selector: 'es-node-variant',
-    templateUrl: 'node-variant.component.html',
-    styleUrls: ['node-variant.component.scss'],
-    animations: [
-        trigger('fade', UIAnimation.fade()),
-        trigger('cardAnimation', UIAnimation.cardAnimation()),
-    ],
-    providers: [BreadcrumbsService],
+    selector: 'es-create-variant-dialog',
+    templateUrl: './create-variant-dialog.component.html',
+    styleUrls: ['./create-variant-dialog.component.scss'],
 })
-export class NodeVariantComponent {
-    _node: Node;
+export class CreateVariantDialogComponent {
     variantName: string;
-    openViaConnector: Connector;
     licenseWarning: string;
-    buttons: DialogButton[];
-    @Input() set node(node: Node) {
-        this._node = node;
+
+    private _openViaConnector: Connector;
+
+    constructor(
+        @Inject(CARD_DIALOG_DATA) public data: CreateVariantDialogData,
+        private dialogRef: CardDialogRef<CreateVariantDialogData, CreateVariantDialogResult>,
+        private breadcrumbsService: BreadcrumbsService,
+        private connector: RestConnectorService,
+        private connectors: RestConnectorsService,
+        private dialogs: DialogsService,
+        private events: FrameEventsService,
+        private iam: RestIamService,
+        private nodeApi: RestNodeService,
+        private nodeHelper: NodeHelperService,
+        private router: Router,
+        private toast: Toast,
+        private translate: TranslateService,
+    ) {
+        this._initNode();
+        this._updateBreadcrumbs(RestConstants.INBOX);
+        this._updateButtons();
+    }
+
+    private _initNode() {
+        const node = this.data.node;
         this.variantName = this.translate.instant('NODE_VARIANT.DEFAULT_NAME', {
-            name: this._node.name,
+            name: this.data.node.name,
         });
-        this.openViaConnector = this.connectors.connectorSupportsEdit(node);
+        this._openViaConnector = this.connectors.connectorSupportsEdit(node);
         let license = node.properties[RestConstants.CCM_PROP_LICENSE]
             ? node.properties[RestConstants.CCM_PROP_LICENSE][0]
             : '';
@@ -55,48 +70,31 @@ export class NodeVariantComponent {
         } else if (!license) {
             this.licenseWarning = 'NO_LICENSE';
         }
-        this.updateButtons();
-    }
-    @Output() onLoading = new EventEmitter();
-    @Output() onCancel = new EventEmitter();
-    @Output() onDone = new EventEmitter();
-    constructor(
-        private connector: RestConnectorService,
-        private iam: RestIamService,
-        private translate: TranslateService,
-        private connectors: RestConnectorsService,
-        private config: ConfigurationService,
-        private nodeHelper: NodeHelperService,
-        private toast: Toast,
-        private bridge: BridgeService,
-        private events: FrameEventsService,
-        private router: Router,
-        private breadcrumbsService: BreadcrumbsService,
-        private nodeApi: RestNodeService,
-        private dialogs: DialogsService,
-    ) {
-        this.updateBreadcrumbs(RestConstants.INBOX);
-        this.updateButtons();
-    }
-    public cancel() {
-        this.onCancel.emit();
     }
 
-    public create() {
+    private _cancel() {
+        this.dialogRef.close(null);
+    }
+
+    private _done() {
+        this.dialogRef.close(null);
+    }
+
+    private _create() {
         if (!this.breadcrumbsService.breadcrumbs$.value?.length) {
             return;
         }
         let win: any = null;
-        if (this.openViaConnector) {
+        if (this._openViaConnector) {
             win = UIHelper.getNewWindow(this.connector);
         }
-        this.onLoading.emit(true);
+        this.dialogRef.patchState({ isLoading: true });
         this.nodeApi
             .forkNode(
                 this.breadcrumbsService.breadcrumbs$.value[
                     this.breadcrumbsService.breadcrumbs$.value.length - 1
                 ].ref.id,
-                this._node.ref.id,
+                this.data.node.ref.id,
             )
             .subscribe(
                 (created) => {
@@ -107,8 +105,8 @@ export class NodeVariantComponent {
                         )
                         .subscribe(
                             (edited) => {
-                                this.onLoading.emit(false);
-                                if (this.openViaConnector) {
+                                this.dialogRef.patchState({ isLoading: false });
+                                if (this._openViaConnector) {
                                     UIHelper.openConnector(
                                         this.connectors,
                                         this.iam,
@@ -156,17 +154,17 @@ export class NodeVariantComponent {
                                         additional,
                                     );
                                 }
-                                this.onDone.emit();
+                                this._done();
                             },
                             (error) => {
-                                this.onLoading.emit(false);
+                                this.dialogRef.patchState({ isLoading: false });
                                 this.nodeHelper.handleNodeError(this.variantName, error);
                                 if (win) win.close();
                             },
                         );
                 },
                 (error) => {
-                    this.onLoading.emit(false);
+                    this.dialogRef.patchState({ isLoading: false });
                     console.log(error);
                     if (error.error?.error?.indexOf('DAORestrictedAccessException') !== -1) {
                         this.toast.error(null, 'RESTRICTED_ACCESS_COPY_ERROR');
@@ -186,20 +184,21 @@ export class NodeVariantComponent {
         });
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
-                this.setDirectory(result);
+                this._setDirectory(result);
             }
         });
     }
 
-    setDirectory(event: Node[]) {
-        this.updateBreadcrumbs(event[0].ref.id);
+    private _setDirectory(event: Node[]) {
+        this._updateBreadcrumbs(event[0].ref.id);
     }
 
-    private updateBreadcrumbs(id: string) {
+    private _updateBreadcrumbs(id: string) {
         this.nodeApi.getNodeParents(id, false).subscribe((parents) => {
             this.breadcrumbsService.setNodePath(parents.nodes.reverse());
         });
     }
+
     openLicense() {
         UIHelper.openUrl(
             this.getLicenseUrl(),
@@ -210,18 +209,20 @@ export class NodeVariantComponent {
 
     getLicenseUrl(): string {
         return this.nodeHelper.getLicenseUrlByString(
-            this._node.properties[RestConstants.CCM_PROP_LICENSE],
-            this._node.properties[RestConstants.CCM_PROP_LICENSE_CC_VERSION],
+            this.data.node.properties[RestConstants.CCM_PROP_LICENSE]?.[0],
+            this.data.node.properties[RestConstants.CCM_PROP_LICENSE_CC_VERSION]?.[0],
         );
     }
-    updateButtons(): any {
-        this.buttons = [
-            new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
+
+    private _updateButtons(): void {
+        const buttons = [
+            new DialogButton('CANCEL', { color: 'standard' }, () => this._cancel()),
             new DialogButton(
-                'NODE_VARIANT.CREATE' + (this.openViaConnector ? '_EDIT' : ''),
+                'NODE_VARIANT.CREATE' + (this._openViaConnector ? '_EDIT' : ''),
                 { color: 'primary' },
-                () => this.create(),
+                () => this._create(),
             ),
         ];
+        this.dialogRef.patchConfig({ buttons });
     }
 }

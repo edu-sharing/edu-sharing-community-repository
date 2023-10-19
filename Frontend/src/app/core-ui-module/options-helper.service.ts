@@ -772,10 +772,8 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             return true;
         };
 
-        const createNodeVariant = new OptionItem(
-            'OPTIONS.VARIANT',
-            'call_split',
-            (object) => (management.nodeVariant = this.getObjects(object, data)[0]),
+        const createNodeVariant = new OptionItem('OPTIONS.VARIANT', 'call_split', (object) =>
+            this.dialogs.openCreateVariantDialog({ node: this.getObjects(object, data)[0] }),
         );
         createNodeVariant.constrains = [
             Constrain.Files,
