@@ -52,5 +52,9 @@ public abstract class AbstractInterruptableJob extends AbstractJobMapAnnotationP
         this.forceStop = forceStop;
     }
 
+    public boolean isForceStop() {
+        return forceStop;
+    }
+
     protected abstract void executeInterruptable(JobExecutionContext jobExecutionContext) throws JobExecutionException;
 }

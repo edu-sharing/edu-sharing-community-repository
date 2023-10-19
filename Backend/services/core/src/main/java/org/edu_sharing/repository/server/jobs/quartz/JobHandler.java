@@ -116,6 +116,10 @@ public class JobHandler {
 			if(jobInstance == null && !force) {
 				throw new RuntimeException("Job " + jobName + " was not found as a running job. Use force parameter if you want to remove the entry anyway.");
 			}
+		} else if(force) {
+			quartzScheduler.deleteJob(jobName, null);
+		}
+		if(force) {
 			try {
 				if(jobDetail != null) {
 					finishJob(jobDetail, JobInfo.Status.Aborted);
@@ -320,9 +324,19 @@ public class JobHandler {
 								//&& Arrays.asList(((AbstractJob) jec.getJobInstance()).getJobClasses()).contains(jec.getJobInstance().getClass())
 								&& jobExecutionContext.getJobInstance().getClass().equals(jec.getJobInstance().getClass())
 						) {
-							veto = true;
-							jobExecutionContext.getJobDetail().getJobDataMap().put(VETO_BY_KEY, "another job is running");
-							logger.info("a job of class " + jec.getJobInstance().getClass().getName() + " is running. veto = true:");
+							if (jec.getJobInstance() instanceof AbstractInterruptableJob) {
+								if (
+										((AbstractInterruptableJob) jec.getJobInstance()).isForceStop() &&
+										((AbstractInterruptableJob) jec.getJobInstance()).isInterrupted()
+								) {
+									// no veto, the job is stuck or abandoned
+									logger.info("a job of class " + jec.getJobInstance().getClass().getName() + " is running. but is in stopped state. Skipping veto");
+								} else {
+									veto = true;
+									jobExecutionContext.getJobDetail().getJobDataMap().put(VETO_BY_KEY, "another job is running");
+									logger.info("a job of class " + jec.getJobInstance().getClass().getName() + " is running. veto = true:");
+								}
+							}
 						}
 					}
 
@@ -566,7 +580,7 @@ public class JobHandler {
 	 * scheduler.scheduleJob. For every immediate job there will be a
 	 * JobListener which is responsible to delete the Job from the scheduler:
 	 * - after the excecution finished
-	 * - an exception was drown 
+	 * - an exception was drown
 	 * - an veto occured.
 	 *
 	 * This listener also saves status information i.e if the job was vetoed or
