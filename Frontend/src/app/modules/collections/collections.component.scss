@@ -206,7 +206,8 @@ section {
 
 .card-image-icon-container {
     position: relative;
-    height: 200px;
+    // aspect ratio equals 4/3 -> 250/220
+    height: 220px;
     width: 100%;
     overflow: hidden;
     margin: auto;
