@@ -452,7 +452,7 @@ public class RegistrationService {
 
 
         JWKSet publicKeys = JWKSet.load(new URL(jwksuri));
-        if(publicKeys == null){
+        if(publicKeys == null || publicKeys.getKeys() == null || publicKeys.getKeys().size() == 0){
             throw new Exception("no public key found");
         }
         JWK jwk = publicKeys.getKeys().get(0);
