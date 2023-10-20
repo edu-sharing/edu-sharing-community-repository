@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
+import { BehaviorSubject, observable, Observable, of as observableOf } from 'rxjs';
 import { first, map, switchMap, tap } from 'rxjs/operators';
 import { BridgeService } from '../core-bridge-module/bridge.service';
 import { ConfigurationService, SessionStorageService } from '../core-module/core.module';
@@ -148,26 +148,29 @@ export class TranslationsService {
     }
 
     private initializeCordova(supportedLanguages = DEFAULT_SUPPORTED_LANGUAGES) {
-        this.translate.addLangs(supportedLanguages);
-        let language = supportedLanguages[0];
-        this.translate.setDefaultLang(language);
-        this.translate.use(language);
-        this.language = language;
-        this.bridge
-            .getCordova()
-            .getLanguage()
-            .subscribe((data: string) => {
-                if (supportedLanguages.indexOf(data) != -1) {
-                    language = data;
-                }
-                this.language = language;
-                this.translate.use(language).subscribe(() => {
-                    this.languageLoaded.next(true);
+        return new Observable<void>((observable) => {
+            this.translate.addLangs(supportedLanguages);
+            let language = supportedLanguages[0];
+            this.translate.setDefaultLang(language);
+            this.translate.use(language);
+            this.language = language;
+            this.bridge
+                .getCordova()
+                .getLanguage()
+                .subscribe((data: string) => {
+                    if (supportedLanguages.indexOf(data) != -1) {
+                        language = data;
+                    }
+                    this.language = language;
+                    this.translate.use(language).subscribe(() => {
+                        this.languageLoaded.next(true);
+                    });
+                    this.waitForInit().subscribe(() => {
+                        observable.next();
+                        observable.complete();
+                    });
                 });
-                // this.translate.getTranslation(language).subscribe(() => {
-                // });
-            });
-        return this.waitForInit();
+        });
     }
 
     waitForInit(): Observable<void> {
