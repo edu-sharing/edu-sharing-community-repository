@@ -23,9 +23,8 @@ import {
     Target,
     UIAnimation,
 } from 'ngx-edu-sharing-ui';
-import * as rxjs from 'rxjs';
 import { Observable, Subject } from 'rxjs';
-import { delay, take, takeUntil } from 'rxjs/operators';
+import { delay, takeUntil } from 'rxjs/operators';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     Connector,
@@ -49,10 +48,6 @@ import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { AddFolderDialogResult } from '../../../features/dialogs/dialog-modules/add-folder-dialog/add-folder-dialog-data';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import {
-    DialogRef,
-    ManagementDialogsService,
-} from '../../../modules/management-dialogs/management-dialogs.service';
 import { PasteService } from '../../../services/paste.service';
 import { UploadDialogService } from '../../../services/upload-dialog.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
@@ -122,8 +117,6 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         private iam: RestIamService,
         private iamService: RestIamService,
         private ltiPlatformService: LtiPlatformService, //private paste: PasteService,
-        private managementDialogs: ManagementDialogsService,
-        private managementService: ManagementDialogsService,
         private nodeHelper: NodeHelperService,
         private nodeService: RestNodeService,
         private optionsService: OptionsHelperDataService,

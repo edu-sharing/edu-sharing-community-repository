@@ -1,12 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { Observable } from 'rxjs';
 import { WorkspaceManagementDialogsComponent } from './management-dialogs.component';
-
-export interface DialogRef<R> {
-    close: () => void;
-    afterClosed: () => Observable<R | undefined>;
-}
 
 /**
  * Provides access to dialogs via a global component.
