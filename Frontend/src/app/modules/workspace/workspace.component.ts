@@ -4,7 +4,7 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { delay, filter, first, switchMap } from 'rxjs/operators';
+import { delay, filter, first, map, switchMap, takeUntil } from 'rxjs/operators';
 import {
     DropSource,
     DropTarget,
@@ -59,6 +59,8 @@ import { TranslationsService } from '../../translations/translations.service';
 import { WorkspaceExplorerComponent } from './explorer/explorer.component';
 import { canDragDrop, canDropOnNode } from './workspace-utils';
 import { WorkspaceTreeComponent } from './tree/tree.component';
+import { UserService } from 'ngx-edu-sharing-api';
+import { mapVCard } from '../../core-module/rest/services/rest-iam.service';
 
 @Component({
     selector: 'es-workspace-main',
@@ -165,6 +167,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
 
     constructor(
         private toast: Toast,
+        private userService: UserService,
         private route: ActivatedRoute,
         private router: Router,
         private nodeHelper: NodeHelperService,
@@ -404,15 +407,24 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     }
 
     private async initialize() {
+        this.route.params
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((routeParams: Params) => this.handleParamsUpdate(routeParams));
+        this.route.queryParams
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((params: Params) => this.handleQueryParamsUpdate(params));
+    }
+    private async initUser() {
         try {
-            this.user = await this.iam.getCurrentUserAsync();
+            // wait until a valid user is present (issues after app login otherwise)
+            this.user = await this.userService
+                .observeCurrentUser()
+                .pipe(first(notNull), map(mapVCard))
+                .toPromise();
         } catch (e) {
             this.toast.error(e);
             return;
         }
-
-        this.route.params.subscribe((routeParams: Params) => this.handleParamsUpdate(routeParams));
-        this.route.queryParams.subscribe((params: Params) => this.handleQueryParamsUpdate(params));
     }
 
     private async handleParamsUpdate(routeParams: Params) {
@@ -449,6 +461,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             return;
         }
         await this.prepareActionbar();
+        await this.initUser();
         this.loadFolders(this.user);
 
         this.connector.scope = this.isSafe ? RestConstants.SAFE_SCOPE : null;

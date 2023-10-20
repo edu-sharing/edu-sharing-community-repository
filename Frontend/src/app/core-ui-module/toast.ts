@@ -15,6 +15,7 @@ import { RestConnectorService } from '../core-module/core.module';
 import { AccessibilityService } from '../common/ui/accessibility/accessibility.service';
 import { takeUntil } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
+import { BridgeService } from '../core-bridge-module/bridge.service';
 
 interface CustomAction {
     link: {
@@ -550,12 +551,16 @@ export class Toast implements OnDestroy {
 
                 const login = this.injector.get(RestConnectorService).getCurrentLogin();
                 if (login && login.isGuest) {
-                    this.toast('TOAST.API_FORBIDDEN_LOGIN');
-                    this.goToLogin();
+                    if (!this.injector.get(BridgeService).isRunningCordova()) {
+                        this.toast('TOAST.API_FORBIDDEN_LOGIN');
+                        this.goToLogin();
+                    }
                     return false;
                 }
             } else if (errorObject.status === RestConstants.HTTP_UNAUTHORIZED) {
-                this.toast('TOAST.API_FORBIDDEN_LOGIN');
+                if (!this.injector.get(BridgeService).isRunningCordova()) {
+                    this.toast('TOAST.API_FORBIDDEN_LOGIN');
+                }
                 return false;
             } else {
                 if (!dialogMessage) {
