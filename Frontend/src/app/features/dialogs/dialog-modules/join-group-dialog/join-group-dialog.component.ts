@@ -1,43 +1,42 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import {
-    ConfigurationService,
     DialogButton,
     Group,
     LoginResult,
     RestConnectorService,
     RestConstants,
     RestIamService,
-    RestNodeService,
-    RestStreamService,
-} from '../../../core-module/core.module';
-import { Toast } from '../../../core-ui-module/toast';
+} from '../../../../core-module/core.module';
+import { Toast } from '../../../../core-ui-module/toast';
+import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
+import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { JoinGroupDialogData, JoinGroupDialogResult } from './join-group-dialog-data';
 
 enum Step {
     selectGroup,
     confirmGroup,
 }
+
 @Component({
-    selector: 'es-signup-group',
-    templateUrl: 'signup-group.component.html',
-    styleUrls: ['signup-group.component.scss'],
+    selector: 'es-join-group-dialog',
+    templateUrl: './join-group-dialog.component.html',
+    styleUrls: ['./join-group-dialog.component.scss'],
 })
-export class SignupGroupComponent implements OnInit {
+export class JoinGroupDialogComponent implements OnInit {
     readonly STEP = Step;
-    @Output() onCancel = new EventEmitter<void>();
-    buttons: DialogButton[];
     dialogStep: Step = Step.selectGroup;
     group: Group;
     groups: Group[];
     password = '';
     groupsLoading = true;
     userGroups: Group[];
+
     constructor(
+        @Inject(CARD_DIALOG_DATA) public data: JoinGroupDialogData,
+        private dialogRef: CardDialogRef<JoinGroupDialogData, JoinGroupDialogResult>,
         private connector: RestConnectorService,
         private iam: RestIamService,
-        private streamApi: RestStreamService,
-        private config: ConfigurationService,
         private toast: Toast,
-        private nodeApi: RestNodeService,
     ) {
         this.updateButtons();
         this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
@@ -58,16 +57,25 @@ export class SignupGroupComponent implements OnInit {
         });
     }
 
+    async ngOnInit() {
+        this.userGroups = (await this.iam.getUserGroups().toPromise()).groups;
+    }
+
+    private cancel(): void {
+        this.dialogRef.close(null);
+    }
+
     updateButtons() {
+        let buttons: DialogButton[];
         if (this.dialogStep === Step.selectGroup) {
-            this.buttons = DialogButton.getNextCancel(
-                () => this.onCancel.emit(),
+            buttons = DialogButton.getNextCancel(
+                () => this.cancel(),
                 () => {
                     this.dialogStep = Step.confirmGroup;
                     this.updateButtons();
                 },
             );
-            this.buttons[1].disabled = !this.group || this.isMemberOf(this.group);
+            buttons[1].disabled = !this.group || this.isMemberOf(this.group);
         }
         if (this.dialogStep === Step.confirmGroup) {
             const back = new DialogButton('BACK', { color: 'standard' }, () => {
@@ -78,11 +86,12 @@ export class SignupGroupComponent implements OnInit {
                 this.signup(),
             );
             signup.disabled = this.group.signupMethod === 'password' && !this.password;
-            this.buttons = [back, signup];
+            buttons = [back, signup];
         }
+        this.dialogRef.patchConfig({ buttons });
     }
 
-    signup(): void {
+    private signup(): void {
         this.toast.showProgressDialog();
         this.iam.signupGroup(this.group.authorityName, this.password).subscribe(
             (result) => {
@@ -96,7 +105,7 @@ export class SignupGroupComponent implements OnInit {
                             group: this.group.profile.displayName,
                         });
                     }
-                    this.onCancel.emit();
+                    this.cancel();
                 }
                 this.toast.closeModalDialog();
             },
@@ -110,10 +119,7 @@ export class SignupGroupComponent implements OnInit {
     select(group: Group) {
         this.group = group;
         this.updateButtons();
-    }
-
-    async ngOnInit() {
-        this.userGroups = (await this.iam.getUserGroups().toPromise()).groups;
+        this.dialogRef.patchConfig({ closable: Closable.Standard });
     }
 
     isMemberOf(group: Group) {

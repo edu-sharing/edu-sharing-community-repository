@@ -453,8 +453,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             ) {
                 this.userMenuOptions.push(
                     new OptionItem('SIGNUP_GROUP.TITLE', 'group_add', () => {
-                        this.mainNavService.getDialogs().signupGroup = true;
-                        this.mainNavService.getDialogs().signupGroupChange.emit(true);
+                        void this.dialogs.openJoinGroupDialog();
                     }),
                 );
             }

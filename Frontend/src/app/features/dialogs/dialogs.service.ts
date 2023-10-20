@@ -45,6 +45,10 @@ import {
     GenericDialogData,
 } from './dialog-modules/generic-dialog/generic-dialog-data';
 import {
+    JoinGroupDialogData,
+    JoinGroupDialogResult,
+} from './dialog-modules/join-group-dialog/join-group-dialog-data';
+import {
     LicenseAgreementDialogData,
     LicenseAgreementDialogResult,
 } from './dialog-modules/license-agreement-dialog/license-agreement-dialog-data';
@@ -591,7 +595,23 @@ export class DialogsService {
             ...configForNode(data.node),
             width: 600,
             data,
-            closable: Closable.Disabled,
+            closable: Closable.Casual,
+        });
+    }
+
+    async openJoinGroupDialog(): Promise<
+        CardDialogRef<JoinGroupDialogData, JoinGroupDialogResult>
+    > {
+        const { JoinGroupDialogComponent } = await import(
+            './dialog-modules/join-group-dialog/join-group-dialog.module'
+        );
+        return this.cardDialog.open(JoinGroupDialogComponent, {
+            title: 'SIGNUP_GROUP.TITLE',
+            subtitle: 'SIGNUP_GROUP.SUBTITLE',
+            avatar: { kind: 'icon', icon: 'group_add' },
+            width: 500,
+            minHeight: 600,
+            closable: Closable.Casual,
         });
     }
 }

@@ -5,11 +5,6 @@
   (onCancel)="closeStream()"
   (onDone)="closeStream()"
 ></es-add-stream>
-<es-signup-group
-  *ngIf="signupGroup"
-  (onCancel)="signupGroup = false; signupGroupChange.emit(false)"
->
-</es-signup-group>
 <es-workspace-metadata
   *ngIf="nodeSidebar"
   [@fromRight]="nodeSidebar"

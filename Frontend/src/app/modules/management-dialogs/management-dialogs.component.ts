@@ -79,8 +79,6 @@ export class WorkspaceManagementDialogsComponent {
     }
     @Input() nodeWorkflow: Node[];
     @Output() nodeWorkflowChange = new EventEmitter();
-    @Input() signupGroup: boolean;
-    @Output() signupGroupChange = new EventEmitter<boolean>();
     @Input() addNodesStream: Node[];
     @Output() addNodesStreamChange = new EventEmitter();
     @Input() nodeSimpleEditChange = new EventEmitter<Node[]>();

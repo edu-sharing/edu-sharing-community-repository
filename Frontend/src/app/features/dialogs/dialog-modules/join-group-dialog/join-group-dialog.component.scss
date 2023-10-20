@@ -1,24 +1,24 @@
-@import '../../../core-ui-module/styles/variables';
+@import '../../../../core-ui-module/styles/variables';
+
+$cardPadding: 25px;
 
 .select-group {
-    h4,
-    h5 {
-        padding: 0 $cardPadding;
+    display: flex;
+    flex-direction: column;
+    p {
         display: flex;
         justify-content: center;
-        text-align: center;
     }
-    h4 {
+    .no-groups-message {
         margin-top: 20%;
         color: $textLight;
     }
-    h5 {
-        padding: $cardPadding;
-    }
     button {
-        width: 100%;
-        border-radius: 0;
+        margin: 0 -#{$cardPadding};
         padding: 0 $cardPadding;
+        border-radius: 0;
+        background: none;
+        border: none;
         &.is-member {
             app-authority-row {
                 opacity: 0.75;
@@ -29,12 +29,6 @@
         &.selected {
             background: var(--listItemSelectedBackgroundEffect);
         }
-        ::ng-deep {
-            .mat-button-wrapper {
-                text-transform: none;
-                justify-content: initial;
-            }
-        }
         es-authority-row {
             display: flex;
             width: 100%;
@@ -42,17 +36,16 @@
         }
     }
 }
+
 .confirm-group {
     display: flex;
     flex-direction: column;
-    h4,
-    h5 {
+    p {
         display: flex;
         justify-content: center;
-        text-align: center;
     }
-    h4 {
-        margin-bottom: 25px;
+    .group-name {
+        margin-bottom: 2em;
     }
     es-input-password {
         display: flex;
