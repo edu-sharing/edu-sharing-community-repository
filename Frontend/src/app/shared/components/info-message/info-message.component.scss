@@ -21,7 +21,7 @@
         border: 1px solid darken($warning, 20%);
     }
     &.info {
-        background-color: rgb(var(--palette-primary-50));
+        background-color: var(--palette-primary-50);
         border: 1px solid $primary;
     }
     > div:first-child {
