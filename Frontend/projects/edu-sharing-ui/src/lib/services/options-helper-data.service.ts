@@ -102,6 +102,10 @@ export class OptionsHelperDataService implements OnDestroy {
     }
 
     refreshComponents(refreshListOptions = true) {
+        if (this.data == null) {
+            console.warn('options helper refresh called but no data previously bound');
+            return;
+        }
         if (this.optionsHelperService == null) {
             console.warn('optionsHelperService not provided. No default actions will be generated');
             return;

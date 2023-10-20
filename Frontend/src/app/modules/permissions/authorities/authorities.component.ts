@@ -74,7 +74,7 @@ import { filter } from 'rxjs/operators';
         trigger('fade', UIAnimation.fade()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
     ],
-    providers: [BreadcrumbsService],
+    providers: [BreadcrumbsService, OptionsHelperDataService],
 })
 export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit {
     readonly DisplayType = NodeEntriesDisplayType;

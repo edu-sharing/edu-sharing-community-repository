@@ -237,7 +237,9 @@ export class PermissionsDeleteComponent implements OnInit {
     }
 
     canSubmit() {
-        return !this.nodeEntriesWrapperComponent.getSelection().isEmpty && !this.missingAssigning();
+        return (
+            !this.nodeEntriesWrapperComponent?.getSelection().isEmpty && !this.missingAssigning()
+        );
     }
 
     allAssigning() {
