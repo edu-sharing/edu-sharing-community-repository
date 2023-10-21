@@ -180,3 +180,13 @@
     <es-dropdown #userDropdown class="userMenu" [options]="userMenuOptions"></es-dropdown>
   </div>
 </div>
+<ng-container *ngIf="mainNavService.getCustomTemplateSlot(TemplateSlot.BeforeUserMenu)">
+  <ng-container
+    *ngTemplateOutlet="
+      mainNavService.getCustomTemplateSlot(TemplateSlot.BelowTopBar);
+      context: {
+        currentScope: this.currentScope
+      }
+    "
+  ></ng-container>
+</ng-container>
