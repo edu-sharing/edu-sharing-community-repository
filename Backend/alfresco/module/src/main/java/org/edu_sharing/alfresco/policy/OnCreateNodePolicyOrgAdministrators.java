@@ -77,7 +77,7 @@ public class OnCreateNodePolicyOrgAdministrators implements OnCreateNodePolicy, 
 
 		NodeRef currentNode = childRef.getParentRef();
 		NodeRef organisationNode = null;
-		while(!companyHome.equals(currentNode) && organisationNode == null){
+		while(!companyHome.equals(currentNode) && organisationNode == null && currentNode != null){
 			
 			if(EduGroupCache.isAnOrganisationFolder(currentNode)){
 				organisationNode = currentNode;
