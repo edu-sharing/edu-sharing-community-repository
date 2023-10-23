@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.vcard.VCard;
 import net.sourceforge.cardme.vcard.types.ExtendedType;
+import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.PermissionReference;
 import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
@@ -91,6 +92,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     Logger logger = Logger.getLogger(SearchServiceElastic.class);
 
     ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
+    Repository repositoryHelper = (Repository) alfApplicationContext.getBean("repositoryHelper");
 
     ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
@@ -196,9 +198,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     public SearchResultNodeRef searchFacets(MetadataSet mds, String query, Map<String,String[]> criterias, SearchToken searchToken) throws Throwable {
-        BoolQueryBuilder globalConditions = getGlobalConditions(searchToken.getAuthorityScope(),searchToken.getPermissions());
-
         MetadataQuery queryData = mds.findQuery(query, MetadataReader.QUERY_SYNTAX_DSL);
+        BoolQueryBuilder globalConditions = getGlobalConditions(searchToken.getAuthorityScope(),searchToken.getPermissions(), queryData);
+
         Set<MetadataQueryParameter> excludeOwnFacets = MetadataElasticSearchHelper.getExcludeOwnFacets(queryData, new HashMap<>(), searchToken.getFacets());
         List<AggregationBuilder> aggregations = MetadataElasticSearchHelper.getAggregations(
                 mds,
@@ -279,7 +281,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
             QueryBuilder metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL),queryData,criterias,true);
             QueryBuilder metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL),queryData,criterias,false);
-            BoolQueryBuilder queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(),searchToken.getPermissions());
+            BoolQueryBuilder queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(),searchToken.getPermissions(), queryData);
 
             BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
             BoolQueryBuilder filterBuilder = QueryBuilders.boolQuery().must(metadataQueryBuilderFilter).must(queryBuilderGlobalConditions);
@@ -346,9 +348,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                             .confidence((float)0.9)
                                             .highlight("<em>","</em>")
                                             .addCandidateGenerator(new DirectCandidateGeneratorBuilder("properties.cclom:title.trigram")
-                                            .suggestMode("popular"))
+                                                    .suggestMode("popular"))
                                             .smoothingModel( new org.elasticsearch.search.suggest.phrase.Laplace(0.5))
-                                              );
+                            );
                     searchSourceBuilder.suggest(suggest);
                 }
             }
@@ -540,11 +542,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     /**
      * permissions, scope ...
+     *
      * @param authorityScope
      * @param permissions
+     * @param query
      * @return
      */
-    private BoolQueryBuilder getGlobalConditions(List<String> authorityScope, List<String> permissions) {
+    private BoolQueryBuilder getGlobalConditions(List<String> authorityScope, List<String> permissions, MetadataQuery query) {
         BoolQueryBuilder queryBuilderGlobalConditions = (authorityScope != null && authorityScope.size() > 0)
                 ? getPermissionsQuery("permissions.read",new HashSet<>(authorityScope))
                 : getReadPermissionsQuery();
@@ -565,8 +569,18 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }else{
             queryBuilderGlobalConditions = queryBuilderGlobalConditions.must(QueryBuilders.termQuery("properties.ccm:eduscopename.keyword",NodeServiceInterceptor.getEduSharingScope()));
         }
-        queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + SystemFolder.getSystemFolderBase().getId() + "*"));
-        queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + SystemFolder.getSitesFolder().getId() + "*"));
+        // mds specialFilter processing on per-query basis
+        if(query != null) {
+            for (MetadataQuery.SpecialFilter filter : query.getSpecialFilter()) {
+                if(MetadataQuery.SpecialFilter.exclude_system_folder.equals(filter)) {
+                    queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + SystemFolder.getSystemFolderBase().getId() + "*"));
+                } else if(MetadataQuery.SpecialFilter.exclude_sites_folder.equals(filter)) {
+                    queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + SystemFolder.getSitesFolder().getId() + "*"));
+                } else if(MetadataQuery.SpecialFilter.exclude_people_folder.equals(filter)) {
+                    queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + repositoryHelper.getPerson().getId() + "*"));
+                }
+            }
+        }
         return queryBuilderGlobalConditions;
     }
 
@@ -619,7 +633,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             return searchResult.getHits().getTotalHits().value > 0;
 
         } catch (IOException e) {
-           logger.error(e.getMessage(),e);
+            logger.error(e.getMessage(),e);
         }
 
         return false;
@@ -691,7 +705,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             if(i18n != null){
                 Map<String,Serializable> i18nProps = (Map<String,Serializable>)i18n.get(currentLocale);
                 if(i18nProps != null){
-                   List<String> displayNames = (List<String> )i18nProps.get(entry.getKey());
+                    List<String> displayNames = (List<String> )i18nProps.get(entry.getKey());
                     if(displayNames != null){
                         props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(displayNames, CCConstants.MULTIVALUE_SEPARATOR));
                     }
@@ -950,16 +964,16 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         if(contributorKind == ContributorKind.ORGANIZATION){
             qb.must(QueryBuilders.boolQuery().should(
-                    QueryBuilders.existsQuery("contributor.X-ROR")
-                ).should(
-                    QueryBuilders.existsQuery("contributor.X-Wikidata")
-                ).minimumShouldMatch(1)
+                            QueryBuilders.existsQuery("contributor.X-ROR")
+                    ).should(
+                            QueryBuilders.existsQuery("contributor.X-Wikidata")
+                    ).minimumShouldMatch(1)
             );
         }else{
             qb.must(QueryBuilders.boolQuery().should(
-                    QueryBuilders.existsQuery("contributor.X-ORCID")
+                            QueryBuilders.existsQuery("contributor.X-ORCID")
                     ).should(
-                    QueryBuilders.existsQuery("contributor.X-GND-URI")
+                            QueryBuilders.existsQuery("contributor.X-GND-URI")
                     ).minimumShouldMatch(1)
             );
         }
@@ -1025,9 +1039,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return aggregation.getBuckets().stream().
                 map(Terms.Bucket::getKey).
                 // this would be nicer via elastic "include" feature, however, it seems to be a pain with the java library
-                filter(
-                    (k) -> Arrays.stream(
-                        suggest.toLowerCase().split(" ")).allMatch(
+                        filter(
+                        (k) -> Arrays.stream(
+                                suggest.toLowerCase().split(" ")).allMatch(
                                 (t) -> k.toString().toLowerCase().contains(t)
                         )
                 ).
@@ -1071,14 +1085,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
     public void checkClient() throws IOException {
         if(client == null || !client.ping(getRequestOptions())){
-             if(client != null){
-                 try {
-                     client.close();
-                 }catch (Exception e){
-                     logger.error("ping failed, close failed:" + e.getMessage()+" creating new");
-                 }
-             }
-             client = new ESRestHighLevelClient(RestClient.builder(getConfiguredHosts()));
+            if(client != null){
+                try {
+                    client.close();
+                }catch (Exception e){
+                    logger.error("ping failed, close failed:" + e.getMessage()+" creating new");
+                }
+            }
+            client = new ESRestHighLevelClient(RestClient.builder(getConfiguredHosts()));
         }
     }
 
@@ -1091,7 +1105,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         SearchRequest searchRequest = new SearchRequest("workspace");
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        BoolQueryBuilder queryBuilder = getGlobalConditions(null,null);
+        BoolQueryBuilder queryBuilder = getGlobalConditions(null,null, null);
         BoolQueryBuilder qbNodeIds = QueryBuilders.boolQuery().minimumShouldMatch(1);
         queryBuilder.must(qbNodeIds);
 

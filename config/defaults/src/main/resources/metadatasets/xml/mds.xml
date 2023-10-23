@@ -1213,16 +1213,16 @@
 
 		<query join="AND" id="collections">
 			<basequery propertyNull="ngsearchword">
-			{"bool":{
-			"must":[
-			{"term":{"aspects":"ccm:collection"}},{"term":{"nodeRef.storeRef.protocol":"workspace"}},
-			{"bool":{
-			"should":[
-			{"term":{"properties.ccm:collectionlevel0.keyword":"true"}},
-			{"term":{"properties.ccm:collection_pinned_status":"true"}}
-			]
-			}}]
-			}}
+				{"bool":{
+				"must":[
+				{"term":{"aspects":"ccm:collection"}},{"term":{"nodeRef.storeRef.protocol":"workspace"}},
+				{"bool":{
+				"should":[
+				{"term":{"properties.ccm:collectionlevel0.keyword":"true"}},
+				{"term":{"properties.ccm:collection_pinned_status":"true"}}
+				]
+				}}]
+				}}
 			</basequery>
 			<basequery>{"bool":{
 				"must":[
@@ -1269,6 +1269,9 @@
 				{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}
 				]
 				}}</basequery>
+			<specialFilter>exclude_system_folder</specialFilter>
+			<specialFilter>exclude_sites_folder</specialFilter>
+			<specialFilter>exclude_people_folder</specialFilter>
 			<property name="ngsearchword" asFilter="false">
 				<basequery>
 					{"bool": {
@@ -1344,6 +1347,9 @@
 		</query>
 		<query join="AND" id="mediacenter_filter">
 			<basequery>{"term":{"type":"ccm:io"}}</basequery>
+			<specialFilter>exclude_system_folder</specialFilter>
+			<specialFilter>exclude_sites_folder</specialFilter>
+			<specialFilter>exclude_people_folder</specialFilter>
 			<property name="ngsearchword">
 				<statement>{"bool":{"should":[
 					{"wildcard":{"properties.cm:name.keyword":{"value":"*${value}*"}}},
@@ -1355,6 +1361,9 @@
 		</query>
 		<query join="AND" id="search_relation_query">
 			<basequery>{"term":{"type":"ccm:io"}}</basequery>
+			<specialFilter>exclude_system_folder</specialFilter>
+			<specialFilter>exclude_sites_folder</specialFilter>
+			<specialFilter>exclude_people_folder</specialFilter>
 			<property name="ngsearchword" asFilter="false">
 				<statement>
 					{
@@ -1403,3 +1412,4 @@
 		</query>
 	</queries>
 </metadataset>
+
