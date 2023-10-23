@@ -68,16 +68,14 @@ public class JobHandler {
 
 	public static final Object KEY_RESULT_DATA = "JOB_RESULT_DATA";
 	private static final int MAX_JOB_LOG_COUNT = 20; // maximal number of jobs to store for history and gui
-	public final static SimpleCache<String, List<JobInfo>> jobs = (SimpleCache)  AlfAppContextGate.getApplicationContext().getBean("eduSharingJobsListCache");
+	//public final static SimpleCache<String, List<JobInfo>> jobs = (SimpleCache)  AlfAppContextGate.getApplicationContext().getBean("eduSharingJobsListCache");
+	public final static Map<String, List<JobInfo>> jobs = new HashMap<>();
 	private static final String JOB_LIST_KEY = "jobs";
 
 	//private final ApplicationContext eduApplicationContext = null;
 
-	private final JobClusterLocker jobClusterLocker;
-
 	@Autowired
 	public JobHandler(JobClusterLocker jobClusterLocker, SchedulerFactoryBean schedulerFactoryBean) throws Exception {
-		this.jobClusterLocker = jobClusterLocker;
 		this.schedulerFactoryBean = schedulerFactoryBean;
 		init();
 	}
@@ -118,6 +116,10 @@ public class JobHandler {
 			if(jobInstance == null && !force) {
 				throw new RuntimeException("Job " + jobName + " was not found as a running job. Use force parameter if you want to remove the entry anyway.");
 			}
+		} else if(force) {
+			quartzScheduler.deleteJob(jobName, null);
+		}
+		if(force) {
 			try {
 				if(jobDetail != null) {
 					finishJob(jobDetail, JobInfo.Status.Aborted);
@@ -322,20 +324,31 @@ public class JobHandler {
 								//&& Arrays.asList(((AbstractJob) jec.getJobInstance()).getJobClasses()).contains(jec.getJobInstance().getClass())
 								&& jobExecutionContext.getJobInstance().getClass().equals(jec.getJobInstance().getClass())
 						) {
-							veto = true;
-							jobExecutionContext.getJobDetail().getJobDataMap().put(VETO_BY_KEY, "another job is running");
-							logger.info("a job of class " + jec.getJobInstance().getClass().getName() + " is running. veto = true:");
+							if (jec.getJobInstance() instanceof AbstractInterruptableJob) {
+								if (
+										((AbstractInterruptableJob) jec.getJobInstance()).isForceStop() &&
+										((AbstractInterruptableJob) jec.getJobInstance()).isInterrupted()
+								) {
+									// no veto, the job is stuck or abandoned
+									logger.info("a job of class " + jec.getJobInstance().getClass().getName() + " is running. but is in stopped state. Skipping veto");
+								} else {
+									veto = true;
+									jobExecutionContext.getJobDetail().getJobDataMap().put(VETO_BY_KEY, "another job is running");
+									logger.info("a job of class " + jec.getJobInstance().getClass().getName() + " is running. veto = true:");
+								}
+							}
 						}
 					}
 
 					//check cluster singeltons
-					if(jobExecutionContext.getJobInstance() instanceof JobClusterLocker.ClusterSingelton){
+					// removed cause jobs only run on ONE primary node
+					/*if(jobExecutionContext.getJobInstance() instanceof JobClusterLocker.ClusterSingelton){
 						boolean aquiredLock = jobClusterLocker.tryLock(jobExecutionContext.getJobInstance().getClass().getName());
 						if(!aquiredLock){
 							veto = true;
 							jobExecutionContext.getJobDetail().getJobDataMap().put(VETO_BY_KEY, "same job is running on another cluster node");
 						}
-					}
+					}*/
 
 					logger.info("TriggerListener.vetoJobExecution returning:" + veto);
 					return veto;
@@ -373,9 +386,9 @@ public class JobHandler {
 				}
 				finishJob(context.getJobDetail(),status);
 
-				if(job instanceof JobClusterLocker.ClusterSingelton){
+				/*if(job instanceof JobClusterLocker.ClusterSingelton){
 					jobClusterLocker.releaseLock(job.getClass().getName());
-				}
+				}*/
 
 			}
 
@@ -538,6 +551,9 @@ public class JobHandler {
 	}
 
 	public List<JobInfo> getAllRunningJobs() throws SchedulerException {
+		if(!isPrimaryRepository()) {
+			return null;
+		}
 		List<JobInfo> result=getJobs();
 		/*
 		List running=getRunningJobs();
@@ -564,7 +580,7 @@ public class JobHandler {
 	 * scheduler.scheduleJob. For every immediate job there will be a
 	 * JobListener which is responsible to delete the Job from the scheduler:
 	 * - after the excecution finished
-	 * - an exception was drown 
+	 * - an exception was drown
 	 * - an veto occured.
 	 *
 	 * This listener also saves status information i.e if the job was vetoed or

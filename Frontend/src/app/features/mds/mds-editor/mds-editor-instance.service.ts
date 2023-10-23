@@ -171,7 +171,6 @@ export class MdsEditorInstanceService implements OnDestroy {
             // the tree element is recursive and might not be serializable, remove it (will be rebuild later)
             delete (this._definition as MdsWidgetTree).tree;
             this._definition = Helper.deepCopy(this._definition);
-            console.log(this._definition);
             this.replaceVariables();
             combineLatest([this.value$, this.bulkMode, this.ready])
                 .pipe(
@@ -1288,7 +1287,6 @@ export class MdsEditorInstanceService implements OnDestroy {
         for (const view of views) {
             for (let widgetDefinition of this.getWidgetsForView(availableWidgets, view)) {
                 widgetDefinition = parseAttributes(view.html, widgetDefinition);
-                console.log(widgetDefinition);
                 const widget = new MdsEditorInstanceService.Widget(
                     this,
                     widgetDefinition,

@@ -53,11 +53,7 @@ public class RefreshCacheJob extends AbstractInterruptableJob implements JobClus
 	@Override
 	public void executeInterruptable(JobExecutionContext context) throws JobExecutionException {
 		logger.info("starting");
-		try {
-			Thread.sleep(60000);
-		} catch (InterruptedException e) {
-			// ignore
-		}
+
 		JobDataMap jobDataMap = context.getJobDetail().getJobDataMap();
 		
 		final boolean sticky;
