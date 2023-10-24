@@ -167,7 +167,7 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 		String lowerLocalName = localName.toLowerCase();
 
 		if (parentLocalName.equals("oai-pmh") && lowerLocalName.equals("error")) {
-			logger.error("oai service error:" + currentValue + " code:" + currentAtts.getValue("code") + " " +" cursor:"+cursor+ " set:"+set +" metadataPrefix:" + metadataPrefix + " currentUrl:"+currentUrl);
+			logger.warn("oai service error:" + currentValue + " code:" + currentAtts.getValue("code") + " " +" cursor:"+cursor+ " set:"+set +" metadataPrefix:" + metadataPrefix + " currentUrl:"+currentUrl);
 		}
 
 		// reset deleted status
