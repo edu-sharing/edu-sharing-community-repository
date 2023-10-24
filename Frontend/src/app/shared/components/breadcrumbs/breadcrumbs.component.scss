@@ -101,6 +101,10 @@ button {
     }
 }
 
+.breadcrumb-element-home {
+    text-decoration: none;
+}
+
 .breadcrumb-inner {
     color: $primary;
     display: flex;
