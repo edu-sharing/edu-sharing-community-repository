@@ -75,6 +75,10 @@ import {
     NodeTemplateDialogData,
     NodeTemplateDialogResult,
 } from './dialog-modules/node-template-dialog/node-template-dialog-data';
+import {
+    PinnedCollectionsDialogData,
+    PinnedCollectionsDialogResult,
+} from './dialog-modules/pinned-collections-dialog/pinned-collections-dialog-data';
 import { QrDialogData } from './dialog-modules/qr-dialog/qr-dialog.component';
 import {
     SaveSearchDialogData,
@@ -612,6 +616,23 @@ export class DialogsService {
             width: 500,
             minHeight: 600,
             closable: Closable.Casual,
+        });
+    }
+
+    async openPinnedCollectionsDialog(
+        data: PinnedCollectionsDialogData,
+    ): Promise<CardDialogRef<PinnedCollectionsDialogData, PinnedCollectionsDialogResult>> {
+        const { PinnedCollectionsDialogComponent } = await import(
+            './dialog-modules/pinned-collections-dialog/pinned-collections-dialog.module'
+        );
+        return this.cardDialog.open(PinnedCollectionsDialogComponent, {
+            title: 'COLLECTIONS.PINNING.TITLE',
+            avatar: { kind: 'icon', icon: 'edu-pin' },
+            width: 400,
+            minHeight: 400,
+            contentPadding: 0,
+            data,
+            closable: Closable.Standard,
         });
     }
 }

@@ -63,8 +63,6 @@ export class WorkspaceManagementDialogsComponent {
     collectionChooserBeforeRecentRef: TemplateRef<any>;
     @Input() addToCollection: Node[];
     @Output() addToCollectionChange = new EventEmitter();
-    @Input() addPinnedCollection: Node;
-    @Output() addPinnedCollectionChange = new EventEmitter();
     @Output() onEvent = new EventEmitter<ManagementEvent>();
     @Input() set nodeImportUnblock(nodeImportUnblock: Node[]) {
         this.toast.showConfigurableDialog({
@@ -268,11 +266,6 @@ export class WorkspaceManagementDialogsComponent {
                 }
             },
         );
-    }
-
-    closePinnedCollection() {
-        this.addPinnedCollection = null;
-        this.addPinnedCollectionChange.emit(null);
     }
 
     restoreVersion(restore: { version: Version; node: Node }) {

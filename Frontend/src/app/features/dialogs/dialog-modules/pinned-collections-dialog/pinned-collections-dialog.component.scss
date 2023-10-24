@@ -1,0 +1,23 @@
+@import '../../../../core-ui-module/styles/variables.scss';
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: $backgroundColor;
+    border-bottom: solid 1px $cardSeparatorLineColor;
+    mat-checkbox {
+        margin: 12px;
+    }
+    .drag-handle {
+        opacity: 0.5;
+        cursor: move;
+        padding: 20px;
+    }
+}

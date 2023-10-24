@@ -3,13 +3,31 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { NodeListErrorResponses, NodeListService } from 'ngx-edu-sharing-api';
 import {
-    forkJoin,
-    forkJoin as observableForkJoin,
-    fromEvent,
-    of,
+    ClipboardObject,
+    Constrain,
+    CustomOptions,
+    DefaultGroups,
+    ElementType,
+    HideMode,
+    LocalEventsService,
+    NodeEntriesDisplayType,
+    NodesRightMode,
+    OptionData,
+    OptionItem,
+    OptionsHelperComponents,
+    OptionsHelperService as OptionsHelperServiceAbstract,
+    Scope,
+    Target,
+    TemporaryStorageService,
+} from 'ngx-edu-sharing-ui';
+import {
+    Observable,
     Subject,
     Subscription,
-    Observable,
+    forkJoin,
+    fromEvent,
+    forkJoin as observableForkJoin,
+    of,
 } from 'rxjs';
 import { catchError, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { BridgeService } from '../core-bridge-module/bridge.service';
@@ -38,29 +56,10 @@ import {
     KeyboardShortcutsService,
     matchesShortcutCondition,
 } from '../services/keyboard-shortcuts.service';
-import {
-    ClipboardObject,
-    Constrain,
-    CustomOptions,
-    DefaultGroups,
-    ElementType,
-    HideMode,
-    LocalEventsService,
-    NodeEntriesDisplayType,
-    NodesRightMode,
-    OptionData,
-    OptionItem,
-    OptionsHelperComponents,
-    OptionsHelperService as OptionsHelperServiceAbstract,
-    Scope,
-    Target,
-    TemporaryStorageService,
-} from 'ngx-edu-sharing-ui';
-import { ProposalNode } from 'ngx-edu-sharing-api';
+import { forkJoinWithErrors } from '../util/rxjs/forkJoinWithErrors';
 import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
 import { Toast } from './toast';
 import { UIHelper } from './ui-helper';
-import { forkJoinWithErrors } from '../util/rxjs/forkJoinWithErrors';
 
 @Injectable()
 export class OptionsHelperService extends OptionsHelperServiceAbstract implements OnDestroy {
@@ -1233,19 +1232,10 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         editCollection.group = DefaultGroups.Edit;
         editCollection.priority = 5;
 
-        /*
-         if (this.pinningAllowed && this.isAllowedToDeleteCollection()) {
-            this.optionsCollection.push(
-                new OptionItem('COLLECTIONS.ACTIONBAR.PIN', 'edu-pin', () =>
-                    this.pinCollection(),
-                ),
-            );
-        }
-        */
-        const pinCollection = new OptionItem(
-            'OPTIONS.COLLECTION_PIN',
-            'edu-pin',
-            (object) => (management.addPinnedCollection = this.getObjects(object, data)[0]),
+        const pinCollection = new OptionItem('OPTIONS.COLLECTION_PIN', 'edu-pin', (object) =>
+            this.dialogs.openPinnedCollectionsDialog({
+                collection: this.getObjects(object, data)[0],
+            }),
         );
         pinCollection.constrains = [
             Constrain.HomeRepository,

@@ -20,11 +20,6 @@
   [node]="materialViewFeedback"
   (onClose)="closeMaterialViewFeedback()"
 ></es-view-material-feedback>
-<es-collections-manage-pinning
-  *ngIf="addPinnedCollection"
-  [addCollection]="addPinnedCollection"
-  (onClose)="closePinnedCollection()"
-></es-collections-manage-pinning>
 <es-workspace-workflow
   *ngIf="nodeWorkflow"
   [nodes]="nodeWorkflow"
