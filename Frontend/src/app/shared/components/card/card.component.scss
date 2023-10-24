@@ -105,7 +105,7 @@
             display: flex;
             align-items: top;
             height: $titleHeight;
-            padding-top: 15px;
+            box-sizing: border-box;
             position: relative;
             .mat-mdc-card-header-text {
                 width: calc(100% - 32px);
@@ -186,7 +186,7 @@
             }
         }
         mat-card-content {
-            margin: 0;
+            padding: 0;
             position: relative;
             flex-grow: 1;
         }

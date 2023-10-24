@@ -123,6 +123,7 @@ $imagePath: '../../../../assets/images/collections/';
         background-color: $workspaceMetadataBackground;
     }
     .collection-item {
+        height: unset;
         padding: 10px 5px;
         width: 100%;
         border-radius: 0;
