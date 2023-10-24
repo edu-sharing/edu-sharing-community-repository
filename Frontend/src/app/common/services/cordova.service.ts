@@ -213,7 +213,7 @@ export class CordovaService {
     public static TEST_OK = 'OK';
 
     // change this during development for testing true, but false is default
-    private forceCordovaMode = true;
+    private forceCordovaMode = false;
 
     private deviceIsReady = false;
 
