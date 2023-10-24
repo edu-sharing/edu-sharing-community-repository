@@ -1,6 +1,5 @@
 package org.edu_sharing.service.tracking;
 
-import bsh.StringUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -269,7 +268,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             while (resultSet.next()) {
                 StatisticEntry entry = new StatisticEntry();
                 boolean grouping=!type.equals(GroupingType.None);
-                mapResult(EventType.valueOf(resultSet.getString("type")), additionalFields, groupFields, resultSet, entry);
+                mapResult(EventType.valueOf(resultSet.getString("type")), additionalFields, groupFields, resultSet, entry, mediacenter);
 
                 if (result.contains(entry) && grouping) {
                     entry = result.get(result.indexOf(entry));
@@ -289,10 +288,10 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         }
     }
 
-    private void mapResult(EventType type, List<String> additionalFields, List<String> groupFields, ResultSet resultSet, StatisticEntry entry) throws SQLException {
-        setAuthorityFromResult(resultSet, entry);
+    private void mapResult(EventType type, List<String> additionalFields, List<String> groupFields, ResultSet resultSet, StatisticEntry entry, String mediacenter) throws SQLException {
+        setAuthorityFromResult(resultSet, entry, mediacenter);
         if (additionalFields != null && additionalFields.size() > 0) {
-            mapAdditionalFields(type, additionalFields, resultSet, entry);
+            mapAdditionalFields(type, additionalFields, resultSet, entry, mediacenter);
         }
         try{
             entry.setDate(resultSet.getString("date"));
@@ -306,13 +305,19 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         }
     }
 
-    private static void mapAdditionalFields(EventType type, List<String> additionalFields, ResultSet resultSet, StatisticEntry entry) throws SQLException {
+    private static void mapAdditionalFields(EventType type, List<String> additionalFields, ResultSet resultSet, StatisticEntry entry, String mediacenter) throws SQLException {
         for (String field : additionalFields) {
+
             Map<String, Map<String, Long>> current = entry.getGroups().get(type);
             if(current==null) {
                 current = new HashMap<>();
             }
             HashMap<String, Long> counted = getArrayAggToCounts((String[]) resultSet.getArray(field).getArray());
+            if(field.equals("authority_mediacenter") && mediacenter != null) {
+                counted = counted.entrySet().stream().filter(
+                        e -> mediacenter.equals(e.getKey())
+                ).collect(HashMap::new, (m,v)->m.put(v.getKey(), v.getValue()), HashMap::putAll);
+            }
             current.put(field,counted);
             entry.getGroups().put(type, current);
         }
@@ -366,7 +371,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
                     }
                 }
 
-                mapResult(EventType.valueOf(resultSet.getString("type")), additionalFields, groupFields, resultSet, entry);
+                mapResult(EventType.valueOf(resultSet.getString("type")), additionalFields, groupFields, resultSet, entry, mediacenter);
 
                 if (result.contains(entry) && grouping) {
                     entry = result.get(result.indexOf(entry));
@@ -469,7 +474,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
                 EventType event = EventType.valueOf(resultSet.getString("type"));
                 data.get(nodeRef).getCounts().put(event, resultSet.getInt("count"));
                 if(!additionalFields.isEmpty()) {
-                    mapAdditionalFields(event, additionalFields, resultSet, data.get(nodeRef));
+                    mapAdditionalFields(event, additionalFields, resultSet, data.get(nodeRef), mediacenter);
                 }
             }
             return data;
@@ -514,7 +519,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         });
     }
 
-    private void setAuthorityFromResult(ResultSet resultSet, StatisticEntry entry) throws SQLException {
+    private void setAuthorityFromResult(ResultSet resultSet, StatisticEntry entry, String mediacenter) throws SQLException {
         try {
             entry.getAuthorityInfo().setAuthority(resultSet.getString("authority"));
         }catch(PSQLException e){}
@@ -527,7 +532,12 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         try{
             Array mediacenters = resultSet.getArray("authority_mediacenter");
             if (mediacenters != null) {
-                entry.getAuthorityInfo().setMediacenters((String[]) mediacenters.getArray());
+                if(mediacenter != null) {
+                    // filter only for the current mediacenter
+                    entry.getAuthorityInfo().setMediacenters(Arrays.stream((String[]) mediacenters.getArray()).filter(mediacenter::equals).toArray(String[]::new));
+                } else {
+                    entry.getAuthorityInfo().setMediacenters((String[]) mediacenters.getArray());
+                }
             }
         }catch(PSQLException e){}
     }
