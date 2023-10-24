@@ -20,15 +20,21 @@
     </h3>
   </ng-template>
 </es-node-entries-wrapper>
-<es-recycle-delete-confirmation
-  *ngIf="toDelete"
-  [node]="toDelete"
-  (onClose)="finishDelete()"
-  (onDelete)="deleteNodesWithoutConfirmation()"
-></es-recycle-delete-confirmation>
+
 <es-recycle-restore-info
   *ngIf="restoreResult"
   [results]="restoreResult"
   (onClose)="finishRestore()"
   (onRestoreFolder)="restoreNodesEvent($event)"
 ></es-recycle-restore-info>
+
+<ng-template #confirmDeleteDialog>
+  <p>{{ 'RECYCLE.DELETE.CONFIRM_MESSAGE' | translate }}</p>
+  <form>
+    <div class="checkbox">
+      <mat-checkbox name="skipDeleteConfirmation" [(ngModel)]="skipDeleteConfirmation">{{
+        'RECYCLE.DELETE.NOT_ASK_AGAIN' | translate
+      }}</mat-checkbox>
+    </div>
+  </form>
+</ng-template>

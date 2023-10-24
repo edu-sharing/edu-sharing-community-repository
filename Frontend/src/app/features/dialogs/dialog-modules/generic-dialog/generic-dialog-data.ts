@@ -1,4 +1,5 @@
 import { TemplateRef } from '@angular/core';
+import { Node } from 'ngx-edu-sharing-api';
 import { ButtonConfig } from '../../../../core-module/ui/dialog-button';
 import { CardDialogConfig } from '../../card-dialog/card-dialog-config';
 
@@ -20,6 +21,7 @@ export class GenericDialogData<R extends string> {
 
 export class GenericDialogConfig<R extends string> extends GenericDialogData<R> {
     title: CardDialogConfig['title'];
+    nodes?: Node[];
     closable?: CardDialogConfig['closable'] = new CardDialogConfig().closable;
     minWidth?: CardDialogConfig['minWidth'];
     maxWidth?: CardDialogConfig['maxWidth'] = 750;

@@ -1,14 +1,14 @@
-import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 import {
-    ArchiveRestore,
-    Node,
-    RestArchiveService,
-    RestConstants,
-    TemporaryStorageService,
-} from '../../../core-module/core.module';
+    AfterViewInit,
+    Component,
+    Input,
+    OnDestroy,
+    OnInit,
+    TemplateRef,
+    ViewChild,
+} from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
+import { GenericAuthority } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     CustomOptions,
@@ -25,10 +25,21 @@ import {
     OptionItem,
     Scope,
 } from 'ngx-edu-sharing-ui';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import {
+    ArchiveRestore,
+    Node,
+    RestArchiveService,
+    RestConstants,
+    TemporaryStorageService,
+} from '../../../core-module/core.module';
 import { Toast } from '../../../core-ui-module/toast';
+import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
+import { DELETE_OR_CANCEL } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { SearchFieldService } from '../../../main/navigation/search-field/search-field.service';
 import { RecycleRestoreComponent } from './restore/restore.component';
-import { GenericAuthority } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-recycle',
@@ -40,8 +51,8 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly InteractionType = InteractionType;
     readonly Scope = Scope;
     @ViewChild('list') list: NodeEntriesWrapperComponent<Node>;
+    @ViewChild('confirmDeleteDialog') confirmDeleteDialog: TemplateRef<unknown>;
     dataSource = new NodeDataSource();
-    public toDelete: Node[] = null;
     public restoreResult: ArchiveRestore;
 
     @Input() actionbar: ActionbarComponent;
@@ -64,6 +75,7 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
         direction: 'desc',
     };
     searchQuery: string;
+    skipDeleteConfirmation = false;
     loadData(currentQuery: string, offset: number, sortBy: string, sortAscending: boolean) {
         return this.archive.search(currentQuery || '*', '', {
             propertyFilter: [RestConstants.ALL],
@@ -80,6 +92,7 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
         private translate: TranslateService,
         private service: TemporaryStorageService,
         private searchField: SearchFieldService,
+        private dialogs: DialogsService,
     ) {}
 
     ngOnInit(): void {
@@ -119,6 +132,25 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
         this.destroyed.complete();
     }
 
+    private async openConfirmDeleteDialog(nodes: Node[]): Promise<void> {
+        this.skipDeleteConfirmation = false; // reset
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'RECYCLE.DELETE.CONFIRM_TITLE',
+            buttons: DELETE_OR_CANCEL,
+            closable: Closable.Standard,
+            contentTemplate: this.confirmDeleteDialog,
+            nodes,
+        });
+        dialogRef.afterClosed().subscribe((response) => {
+            if (response === 'YES_DELETE') {
+                if (this.skipDeleteConfirmation) {
+                    this.service.set('recycleSkipDeleteConfirmation', true);
+                }
+                this.deleteNodesWithoutConfirmation(nodes);
+            }
+        });
+    }
+
     private restoreFinished(list: Node[], restoreResult: any) {
         this.toast.closeModalDialog();
 
@@ -131,9 +163,11 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
         } else this.toast.toast('RECYCLE.TOAST.RESTORE_FINISHED');
         this.refresh();
     }
+
     private delete(): void {
         this.deleteNodes(this.list.getSelection().selected);
     }
+
     private deleteSingle(node: Node): void {
         if (node == null) {
             this.delete();
@@ -142,9 +176,9 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
         this.deleteNodes([node]);
     }
 
-    public deleteNodesWithoutConfirmation(list = this.toDelete) {
+    private deleteNodesWithoutConfirmation(nodes: Node[]) {
         this.toast.showProgressDialog();
-        this.archive.delete(list).subscribe(
+        this.archive.delete(nodes).subscribe(
             () => this.deleteFinished(),
             (error) => this.handleErrors(error),
         );
@@ -162,16 +196,14 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
         }
 
-        this.toDelete = [...list];
+        void this.openConfirmDeleteDialog([...list]);
     }
+
     restoreNodesEvent(event: any) {
         this.restoreNodes(event.nodes, event.parent);
     }
     finishRestore() {
         this.restoreResult = null;
-    }
-    finishDelete() {
-        this.toDelete = null;
     }
     public restoreNodes(list: Node[], toPath = '') {
         // archiveRestore list
