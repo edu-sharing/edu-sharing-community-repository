@@ -55,6 +55,11 @@
             z-index: $baseZIndex + $p;
         }
     }
+    @for $p from 1000 through 1050 {
+        &[priority='#{$p}'] {
+            z-index: $baseZIndex + $p;
+        }
+    }
 }
 
 :host ::ng-deep .card-dialog {

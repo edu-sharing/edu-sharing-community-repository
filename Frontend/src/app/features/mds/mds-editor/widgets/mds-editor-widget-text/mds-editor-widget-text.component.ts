@@ -146,10 +146,21 @@ class FileNameChecker {
                 return 'EXTENSION_NOT_MATCH_INFO';
             }
         })();
-        this.toast.showModalDialog(
-            'EXTENSION_NOT_MATCH',
+        this.toast.showConfigurableDialog({
+            title: 'EXTENSION_NOT_MATCH',
             message,
-            [
+            messageParameters: {
+                extensionOld,
+                extensionNew,
+                warning: this.translate.instant('EXTENSION_NOT_MATCH_WARNING'),
+            },
+            priority: 1000,
+            isCancelable: true,
+            onCancel: () => {
+                callbacks.onCancel();
+                this.toast.closeModalDialog();
+            },
+            buttons: [
                 new DialogButton('CANCEL', { color: 'standard' }, () => {
                     callbacks.onCancel();
                     this.toast.closeModalDialog();
@@ -163,17 +174,7 @@ class FileNameChecker {
                     this.toast.closeModalDialog();
                 }),
             ],
-            true,
-            () => {
-                callbacks.onCancel();
-                this.toast.closeModalDialog();
-            },
-            {
-                extensionOld,
-                extensionNew,
-                warning: this.translate.instant('EXTENSION_NOT_MATCH_WARNING'),
-            },
-        );
+        });
     }
 
     private shouldWarn(oldValue: string, newValue: string): boolean {
