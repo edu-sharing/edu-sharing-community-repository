@@ -82,6 +82,11 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             " WHERE node_uuid = ANY(?) AND time BETWEEN ? AND ? AND (ARRAY[?] <@ authority_mediacenter)" +
             " GROUP BY node_uuid, type" +
             " ORDER BY count DESC";
+
+    public static String TRACKING_STATISTICS_NODE_MEDIACENTER = "SELECT node_uuid, type,COUNT(*) :fields from edu_tracking_node as tracking" +
+            " WHERE (ARRAY[?] <@ authority_mediacenter) AND time BETWEEN ? AND ? AND ARRAY_LENGTH(authority_mediacenter, 1) = 1" +
+            " GROUP BY node_uuid, type" +
+            " ORDER BY count DESC";
     public static String TRACKING_STATISTICS_DAILY = "SELECT type,COUNT(*),TO_CHAR(time,'yyyy-mm-dd') as date :fields from :table as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY type,date :grouping" +
@@ -472,6 +477,48 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             while (resultSet.next()) {
                 NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, resultSet.getString("node_uuid"));
                 EventType event = EventType.valueOf(resultSet.getString("type"));
+                data.get(nodeRef).getCounts().put(event, resultSet.getInt("count"));
+                if(!additionalFields.isEmpty()) {
+                    mapAdditionalFields(event, additionalFields, resultSet, data.get(nodeRef), mediacenter);
+                }
+            }
+            return data;
+        }catch(Throwable t){
+            throw t;
+        }finally {
+            dbAlf.cleanUp(con, statement);
+        }
+    }
+
+    @Override
+    public Map<NodeRef, StatisticEntry> getListNodeDataByMediacenter(String mediacenter, java.util.Date dateFrom,java.util.Date dateTo, List<String> additionalFields) throws Throwable{
+        ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
+        Connection con = null;
+        PreparedStatement statement = null;
+        Map<NodeRef, StatisticEntry> data = new HashMap<>();
+        try {
+            con = dbAlf.getConnection();
+            String query = TRACKING_STATISTICS_NODE_MEDIACENTER;
+            String fields = "";
+            if(!additionalFields.isEmpty()) {
+                fields = "," + StringUtils.join(additionalFields.stream().map(f -> "ARRAY_AGG(" + makeDbField(f, true) + ") as " + f).collect(Collectors.toList()), ",");
+            }
+            query = query.replace(":fields", fields);
+            statement=con.prepareStatement(query);
+            int index=1;
+            statement.setString(index++,mediacenter);
+            if(dateFrom==null)
+                dateFrom = new java.util.Date(0);
+            statement.setTimestamp(index++, Timestamp.valueOf(dateFrom.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
+            if(dateTo==null)
+                dateTo = new java.util.Date();
+            statement.setTimestamp(index++, Timestamp.valueOf(dateTo.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
+
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, resultSet.getString("node_uuid"));
+                EventType event = EventType.valueOf(resultSet.getString("type"));
+                data.put(nodeRef, new StatisticEntry());
                 data.get(nodeRef).getCounts().put(event, resultSet.getInt("count"));
                 if(!additionalFields.isEmpty()) {
                     mapAdditionalFields(event, additionalFields, resultSet, data.get(nodeRef), mediacenter);
