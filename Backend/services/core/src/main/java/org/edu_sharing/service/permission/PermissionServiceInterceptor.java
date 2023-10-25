@@ -13,14 +13,14 @@ import java.util.stream.Collectors;
 
 public class PermissionServiceInterceptor implements MethodInterceptor {
 
-    public void init(){
+    public void init() {
 
     }
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
-        String methodName=invocation.getMethod().getName();
-        if(methodName.equals("hasPermission") || methodName.equals("hasAllPermissions")) {
+        String methodName = invocation.getMethod().getName();
+        if (methodName.equals("hasPermission") || methodName.equals("hasAllPermissions")) {
             String nodeId = (String) invocation.getArguments()[2];
             Object data = invocation.getArguments()[3];
             if (methodName.equals("hasPermission")) {
@@ -45,16 +45,19 @@ public class PermissionServiceInterceptor implements MethodInterceptor {
                     return e;
                 }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
             }
-        } else if(methodName.equals("getPermissionsForAuthority")) {
+        } else if (methodName.equals("getPermissionsForAuthority")) {
             String nodeId = (String) invocation.getArguments()[0];
             String authority = (String) invocation.getArguments()[1];
             // do only intercEept in case the current authority is requested
-            if(AuthenticationUtil.getFullyAuthenticatedUser().equals(authority)) {
+            if (AuthenticationUtil.getFullyAuthenticatedUser().equals(authority)) {
                 List<String> result = (List<String>) invocation.proceed();
-                if(!result.isEmpty()) {
+                if (!result.isEmpty()) {
                     return result;
                 }
-                result = (List<String>) NodeServiceInterceptor.handleInvocation(nodeId, invocation, false);
+                if (NodeServiceInterceptor.hasReadAccess(nodeId)) {
+                    // return all valid usage permissions because indirect access is available
+                    return CCConstants.getUsagePermissions();
+                }
                 return result.stream().filter(e -> CCConstants.getUsagePermissions().contains(e)).collect(Collectors.toList());
             }
         }

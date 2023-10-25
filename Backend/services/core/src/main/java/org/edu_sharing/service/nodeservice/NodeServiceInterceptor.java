@@ -35,8 +35,8 @@ import java.util.Arrays;
 import java.util.concurrent.Callable;
 
 public class NodeServiceInterceptor implements MethodInterceptor {
-    ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-    ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+    static ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+    static ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
     static Logger logger = Logger.getLogger(NodeServiceInterceptor.class);
     public void init(){
@@ -177,16 +177,31 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         });
     }
 
-        private static Object runAsSystem(String nodeId,MethodInvocation invocation) throws Throwable {
-        ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-        ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-        NodeService nodeService = serviceRegistry.getNodeService();
+    /**
+     * returns true if the current user has access on the given node via usages, collections or other indirect permissions
+     */
+    public static boolean hasReadAccess(String nodeId) {
+        int i = 0;
+        while (nodeId!=null) {
+            if (
+                    hasPermissions(nodeId, i)
+            ) {
+                return true;
+            }
+            // only one parent at the moment
+            if(i++ >= 1) {
+                break;
+            }
+            nodeId = fetchParentId(nodeId);
+        }
+        return false;
+    }
+
+    private static Object runAsSystem(String nodeId,MethodInvocation invocation) throws Throwable {
         int i = 0;
         while(nodeId!=null) {
             if (
-                    (hasSignature(nodeId) || hasUsage(nodeId)) ||
-                    // direct permissions only valid for current node, NOT for parent!
-                    (accessibleViaStream(nodeId) || hasCollectionPermissions(nodeId) && i == 0)
+                    hasPermissions(nodeId, i)
             ) {
                 logger.debug("Node "+nodeId+" -> will run as system");
                 return AuthenticationUtil.runAsSystem(() -> {
@@ -198,21 +213,30 @@ public class NodeServiceInterceptor implements MethodInterceptor {
                 });
             }
 
-            // we'll check if any of the nodes in the parent hierarchy may has an usage -> so it is allowed as well
-            final String nodeIdFinal=nodeId;
-            nodeId=AuthenticationUtil.runAsSystem(()->{
-                try {
-                    return nodeService.getPrimaryParent(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeIdFinal)).getParentRef().getId();
-                }catch(Throwable t2){
-                    return null;
-                }
-            });
             // only one parent at the moment
             if(i++>=1) {
                 break;
             }
+            // we'll check if any of the nodes in the parent hierarchy may has an usage -> so it is allowed as well
+            nodeId = fetchParentId(nodeId);
         }
         return invocation.proceed();
+    }
+
+    private static String fetchParentId(String nodeIdFinal) {
+        return AuthenticationUtil.runAsSystem(() -> {
+            try {
+                return serviceRegistry.getNodeService().getPrimaryParent(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeIdFinal)).getParentRef().getId();
+            } catch (Throwable t2) {
+                return null;
+            }
+        });
+    }
+
+    private static boolean hasPermissions(String nodeId, int recursionDepth) {
+        return (hasSignature(nodeId) || hasUsage(nodeId)) ||
+                // direct permissions only valid for current node, NOT for parent!
+                (accessibleViaStream(nodeId) || hasCollectionPermissions(nodeId) && recursionDepth == 0);
     }
 
     private static boolean accessibleViaStream(String nodeId) {
