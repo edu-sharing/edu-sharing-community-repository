@@ -252,7 +252,8 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         if(
                 !Arrays.asList(
                         CallSourceHelper.CallSource.Render, CallSourceHelper.CallSource.Preview,
-                        CallSourceHelper.CallSource.Sitemap, CallSourceHelper.CallSource.ToolConnector
+                        CallSourceHelper.CallSource.Sitemap, CallSourceHelper.CallSource.ToolConnector,
+                        CallSourceHelper.CallSource.RatingApi
                 ).contains(CallSourceHelper.getCallSource())
         ){
             logger.debug("Skipping collection permission check for call source " + CallSourceHelper.getCallSource());
