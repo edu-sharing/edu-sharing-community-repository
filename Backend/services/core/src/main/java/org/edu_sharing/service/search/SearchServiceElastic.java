@@ -874,7 +874,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
             //Set<PermissionReference> immediateGranteePermissions = permissionModel.getImmediateGranteePermissions(pr);
 
         }
-
+        // check if user has access via any collection and grant him all usage permissions
+        processCollectionUsagePermissions(authorities, user, sourceAsMap, permissions);
 
         eduNodeRef.setPermissions(permissions);
         boolean isProposal = sourceAsMap.get("type").equals(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_COLLECTION_PROPOSAL));
@@ -925,6 +926,32 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
         long permMillisSingle = (System.currentTimeMillis() - millis);
         return eduNodeRef;
+    }
+
+    /**
+     * check if the user has permissions on this element via a collection and give him all permissions as it is an usage access
+     */
+    private static void processCollectionUsagePermissions(Set<String> authorities, String user, Map<String, Object> sourceAsMap, HashMap<String, Boolean> permissions) {
+        if(permissions.size() == 1) {
+            List<Map<String, Object>> collections = (List<Map<String, Object>>) sourceAsMap.get("collections");
+            for (Map<String, Object> collection : Optional.ofNullable(collections).orElse(Collections.emptyList())) {
+                Map<String, List<String>> collectionPermissions = (Map<String, List<String>>) collection.get("permissions");
+                if(Optional.ofNullable(collectionPermissions).orElse(Collections.emptyMap()).entrySet().stream().filter(p ->
+                        // check the consumer, collaborator or coordinator lists
+                        Arrays.asList(CCConstants.PERMISSION_CONSUMER,CCConstants.PERMISSION_COLLABORATOR, CCConstants.PERMISSION_COORDINATOR).contains(p.getKey())
+                ).anyMatch(
+                        // and if the user has one of this rights
+                        (entry) ->
+                                authorities.stream().anyMatch(s -> entry.getValue().contains(s))
+                                        || entry.getValue().contains(user))) {
+                    permissions.putAll(
+                            CCConstants.getUsagePermissions().stream().collect(
+                            Collectors.toMap(o -> o, (o) -> true)
+                    ));
+                    break;
+                }
+            }
+        }
     }
 
     enum CONTRIBUTOR_PROP {firstname,lastname,email,url,uid};
