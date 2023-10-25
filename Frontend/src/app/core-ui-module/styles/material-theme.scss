@@ -422,13 +422,6 @@ button {
 .mat-calendar-table-header-divider {
     display: none;
 }
-.mat-mdc-standard-chip:not(.mdc-evolution-chip--disabled) {
-    background-color: rgb(var(--palette-primary-100)) !important;
-    .mat-mdc-chip-remove {
-        color: $primary !important;
-        opacity: 1 !important;
-    }
-}
 .mat-option {
     font-size: 100%;
     .mat-option-primary {
@@ -554,6 +547,13 @@ mat-select.mat-select-icon {
     .mat-option.mat-selected:not(.mat-option-multiple) {
         background-color: $cardLightBackground;
         font-weight: bold;
+    }
+}
+.mat-mdc-standard-chip:not(.mdc-evolution-chip--disabled) {
+    background-color: var(--palette-primary-100) !important;
+    .mat-mdc-chip-remove {
+        color: $primary !important;
+        opacity: 1 !important;
     }
 }
 .mat-chip-list {

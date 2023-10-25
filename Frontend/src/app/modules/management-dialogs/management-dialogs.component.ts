@@ -75,8 +75,6 @@ export class WorkspaceManagementDialogsComponent {
             isCancelable: true,
         });
     }
-    @Input() nodeWorkflow: Node[];
-    @Output() nodeWorkflowChange = new EventEmitter();
     @Input() addNodesStream: Node[];
     @Output() addNodesStreamChange = new EventEmitter();
     @Input() nodeSimpleEditChange = new EventEmitter<Node[]>();
@@ -141,14 +139,6 @@ export class WorkspaceManagementDialogsComponent {
         private dialogs: DialogsService,
         private localEvents: LocalEventsService,
     ) {}
-
-    public closeWorkflow(nodes: Node[] = null) {
-        this.nodeWorkflow = null;
-        this.nodeWorkflowChange.emit(null);
-        if (nodes) {
-            this.localEvents.nodesChanged.emit(nodes);
-        }
-    }
 
     async openMdsEditor(nodes: Node[]): Promise<void> {
         const dialogRef = await this.dialogs.openMdsEditorDialogForNodes({

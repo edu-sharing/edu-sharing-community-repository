@@ -1,8 +1,13 @@
-import { trigger } from '@angular/animations';
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { forkJoin, Observable } from 'rxjs';
+import {
+    LocalEventsService,
+    WORKFLOW_STATUS_UNCHECKED,
+    WorkflowDefinition,
+} from 'ngx-edu-sharing-ui';
+import { Observable, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { ModalMessageType } from 'src/app/common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import {
     ConfigurationService,
     DialogButton,
@@ -16,53 +21,45 @@ import {
     RestNodeService,
     UserSimple,
     WorkflowEntry,
-} from '../../../core-module/core.module';
-import { UIAnimation, WORKFLOW_STATUS_UNCHECKED, WorkflowDefinition } from 'ngx-edu-sharing-ui';
-import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
-import { Toast } from '../../../core-ui-module/toast';
-import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
-import { ModalMessageType } from 'src/app/common/ui/modal-dialog-toast/modal-dialog-toast.component';
+} from '../../../../core-module/core.module';
+import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
+import { Toast } from '../../../../core-ui-module/toast';
+import { AuthorityNamePipe } from '../../../../shared/pipes/authority-name.pipe';
+import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
+import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { WorkflowDialogData, WorkflowDialogResult } from './workflow-dialog-data';
 
 type WorkflowReceiver = UserSimple | Group;
 
 @Component({
-    selector: 'es-workspace-workflow',
-    templateUrl: 'workflow.component.html',
-    styleUrls: ['workflow.component.scss'],
-    animations: [
-        trigger('fade', UIAnimation.fade()),
-        trigger('cardAnimation', UIAnimation.cardAnimation()),
-    ],
+    selector: 'es-workflow-dialog',
+    templateUrl: './workflow-dialog.component.html',
+    styleUrls: ['./workflow-dialog.component.scss'],
 })
-export class WorkspaceWorkflowComponent implements OnChanges {
-    loading = true;
-    node: Node;
+export class WorkflowDialogComponent {
+    readonly TYPE_EDITORIAL = RestConstants.GROUP_TYPE_EDITORIAL;
+
+    comment: string;
+    globalAllowed: boolean;
+    history: WorkflowEntry[];
     receivers: WorkflowReceiver[] = [];
     status = WORKFLOW_STATUS_UNCHECKED;
-    initialStatus = WORKFLOW_STATUS_UNCHECKED;
-    chooseStatus = false;
-    comment: string;
     validStatus: WorkflowDefinition[];
-    history: WorkflowEntry[];
-    globalAllowed: boolean;
-    globalSearch = false;
-    readonly TYPE_EDITORIAL = RestConstants.GROUP_TYPE_EDITORIAL;
-    buttons: DialogButton[];
 
-    @Input() nodes: Node[];
-
-    @Output() onDone = new EventEmitter<Node[]>();
-    @Output() onClose = new EventEmitter();
-    @Output() onLoading = new EventEmitter();
+    private initialStatus = WORKFLOW_STATUS_UNCHECKED;
+    private nodes: Node[] = this.data.nodes;
 
     constructor(
-        private nodeService: RestNodeService,
-        private translate: TranslateService,
-        private iam: RestIamService,
-        private nodeHelper: NodeHelperService,
+        @Inject(CARD_DIALOG_DATA) public data: WorkflowDialogData,
+        private dialogRef: CardDialogRef<WorkflowDialogData, WorkflowDialogResult>,
         private config: ConfigurationService,
         private connector: RestConnectorService,
+        private iam: RestIamService,
+        private localEvents: LocalEventsService,
+        private nodeHelper: NodeHelperService,
+        private nodeService: RestNodeService,
         private toast: Toast,
+        private translate: TranslateService,
     ) {
         this.updateButtons();
         this.connector
@@ -79,12 +76,7 @@ export class WorkspaceWorkflowComponent implements OnChanges {
                 }
             }
         });
-    }
-
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes.nodes) {
-            this.initNodes(changes.nodes.currentValue);
-        }
+        void this.initNodes(this.data.nodes);
     }
 
     isAllowedAsNext(status: WorkflowDefinition) {
@@ -102,7 +94,6 @@ export class WorkspaceWorkflowComponent implements OnChanges {
             return;
         }
         this.status = status;
-        this.chooseStatus = false;
         this.updateButtons();
     }
 
@@ -119,11 +110,11 @@ export class WorkspaceWorkflowComponent implements OnChanges {
         this.updateButtons();
     }
 
-    hasChanges() {
+    private hasChanges() {
         return this.statusChanged() || this.receiversChanged();
     }
 
-    async saveWorkflow() {
+    private async saveWorkflow() {
         if (
             !this.comment &&
             this.receiversChanged() &&
@@ -145,22 +136,22 @@ export class WorkspaceWorkflowComponent implements OnChanges {
         this.saveWorkflowFinal(receivers);
     }
 
-    cancel() {
-        this.onClose.emit();
+    private cancel() {
+        this.dialogRef.close(null);
     }
 
     private async initNodes(nodes: Node[]): Promise<void> {
         if (!nodes || nodes.length === 0) {
             return;
         }
-        this.loading = true;
+        this.dialogRef.patchState({ isLoading: true });
         try {
             await this.initNodesInner(nodes);
         } catch (error) {
             this.toast.error(error);
             this.cancel();
         } finally {
-            this.loading = false;
+            this.dialogRef.patchState({ isLoading: false });
             this.updateButtons();
         }
     }
@@ -213,7 +204,7 @@ export class WorkspaceWorkflowComponent implements OnChanges {
         entry.receiver = receiversClean;
         entry.comment = this.comment;
         entry.status = this.status.id;
-        this.onLoading.emit(true);
+        this.dialogRef.patchState({ isLoading: true });
         forkJoin(
             this.nodes.map((node) => this.nodeService.addWorkflow(node.ref.id, entry)),
         ).subscribe(
@@ -221,20 +212,24 @@ export class WorkspaceWorkflowComponent implements OnChanges {
                 this.toast.toast('WORKSPACE.TOAST.WORKFLOW_UPDATED');
                 this.fetchCompleteNodes(this.nodes).subscribe(
                     (nodes) => {
-                        this.onDone.emit(nodes);
-                        this.onLoading.emit(false);
+                        this.afterSaved(nodes);
                     },
                     (error) => {
                         this.toast.error(error);
-                        this.onLoading.emit(false);
+                        this.dialogRef.patchState({ isLoading: false });
                     },
                 );
             },
             (error) => {
                 this.toast.error(error);
-                this.onLoading.emit(false);
+                this.dialogRef.patchState({ isLoading: false });
             },
         );
+    }
+
+    private afterSaved(nodes: Node[]): void {
+        this.localEvents.nodesChanged.emit(nodes);
+        this.dialogRef.close(null);
     }
 
     private receiversChanged() {
@@ -258,17 +253,17 @@ export class WorkspaceWorkflowComponent implements OnChanges {
     }
 
     private statusChanged() {
-        console.log(this.status, this.initialStatus);
         return this.status.id !== this.initialStatus.id;
     }
 
     private updateButtons() {
         const save = new DialogButton('SAVE', { color: 'primary' }, () => this.saveWorkflow());
-        save.disabled = this.loading || !this.hasChanges();
-        this.buttons = [
+        save.disabled = !this.hasChanges();
+        const buttons = [
             new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
             save,
         ];
+        this.dialogRef.patchConfig({ buttons });
     }
 
     /**
@@ -329,7 +324,7 @@ export class WorkspaceWorkflowComponent implements OnChanges {
         nodes: Node[],
         receiver: WorkflowReceiver,
     ): Promise<void> {
-        this.loading = true;
+        this.dialogRef.patchState({ isLoading: true });
         try {
             await Promise.all(
                 nodes.map((node) => this.addWritePermission(receiver.authorityName, node)),

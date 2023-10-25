@@ -109,6 +109,10 @@ import {
     SimpleEditDialogResult,
 } from './dialog-modules/simple-edit-dialog/simple-edit-dialog-data';
 import {
+    WorkflowDialogData,
+    WorkflowDialogResult,
+} from './dialog-modules/workflow-dialog/workflow-dialog-data';
+import {
     XmlAppPropertiesDialogData,
     XmlAppPropertiesDialogResult,
 } from './dialog-modules/xml-app-properties-dialog/xml-app-properties-dialog-data';
@@ -644,6 +648,21 @@ export class DialogsService {
             width: 400,
             minHeight: 400,
             contentPadding: 0,
+            data,
+            closable: Closable.Standard,
+        });
+    }
+
+    async openWorkflowDialog(
+        data: WorkflowDialogData,
+    ): Promise<CardDialogRef<WorkflowDialogData, WorkflowDialogResult>> {
+        const { WorkflowDialogComponent } = await import(
+            './dialog-modules/workflow-dialog/workflow-dialog.module'
+        );
+        return this.cardDialog.open(WorkflowDialogComponent, {
+            title: 'WORKSPACE.WORKFLOW.TITLE',
+            ...(await configForNodes(data.nodes, this.translate).toPromise()),
+            width: 700,
             data,
             closable: Closable.Standard,
         });

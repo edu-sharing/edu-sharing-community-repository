@@ -883,16 +883,8 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         contributorNode.group = DefaultGroups.Edit;
         contributorNode.priority = 40;
 
-        /*
-        if (nodes && nodes.length==1 && !nodes[0].isDirectory  && nodes[0].type!=RestConstants.CCM_TYPE_SAVED_SEARCH && nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)==-1) {
-            option = new OptionItem("OPTIONS.WORKFLOW", "swap_calls", callback);
-            option.isEnabled = this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS);
-        }
-         */
-        const workflowNode = new OptionItem(
-            'OPTIONS.WORKFLOW',
-            'swap_calls',
-            (object) => (management.nodeWorkflow = this.getObjects(object, data)),
+        const workflowNode = new OptionItem('OPTIONS.WORKFLOW', 'swap_calls', (object) =>
+            this.dialogs.openWorkflowDialog({ nodes: this.getObjects(object, data) }),
         );
         workflowNode.constrains = [
             Constrain.Files,

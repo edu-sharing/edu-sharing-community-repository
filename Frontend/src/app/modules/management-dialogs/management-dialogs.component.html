@@ -20,13 +20,6 @@
   [node]="materialViewFeedback"
   (onClose)="closeMaterialViewFeedback()"
 ></es-view-material-feedback>
-<es-workspace-workflow
-  *ngIf="nodeWorkflow"
-  [nodes]="nodeWorkflow"
-  (onLoading)="globalProgress = $event"
-  (onDone)="closeWorkflow($event)"
-  (onClose)="closeWorkflow()"
-></es-workspace-workflow>
 <es-collection-chooser
   class="dialog-right"
   *ngIf="addToCollection"

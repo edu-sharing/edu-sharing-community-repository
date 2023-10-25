@@ -2,8 +2,8 @@
   <div class="no-history" *ngIf="!history.length">
     {{ 'WORKSPACE.WORKFLOW.NO_HISTORY' | translate }}
   </div>
-  <div class="history">
-    <div *ngFor="let entry of history; let i = index">
+  <div *ngIf="history.length" class="history">
+    <div *ngFor="let entry of history; let i = index; let last = last">
       <div class="user">{{ entry.editor | authorityName }}</div>
       <div class="date">{{ entry.time | formatDate : { time: true, relative: true } }}</div>
       <div class="box">
@@ -12,7 +12,7 @@
             <label>{{ 'WORKSPACE.WORKFLOW.RECEIVERS' | translate }}</label>
             <mat-chip-set
               *ngIf="
-                i == history.length - 1 || !getWorkflowForId(history[i + 1].status).hasReceiver
+                i === history.length - 1 || !getWorkflowForId(history[i + 1].status).hasReceiver
               "
             >
               <mat-chip>
@@ -21,12 +21,12 @@
             </mat-chip-set>
             <mat-chip-set
               *ngIf="
-                !(i == history.length - 1 || !getWorkflowForId(history[i + 1].status).hasReceiver)
+                !(i === history.length - 1 || !getWorkflowForId(history[i + 1].status).hasReceiver)
               "
             >
               <mat-chip *ngFor="let receiver of history[i + 1].receiver" class="badge">
                 <i
-                  class="badgeIconLeft"
+                  matChipAvatar
                   [esIcon]="receiver.authorityType === 'USER' ? 'person' : 'group'"
                 ></i>
                 <div class="mat-chip-group">
@@ -47,7 +47,7 @@
               {{ 'WORKFLOW.' + history[i + 1].status | translate }}
             </div>
           </div>
-          <div class="status" *ngIf="i == history.length - 1">
+          <div class="status" *ngIf="i === history.length - 1">
             <label>{{ 'WORKSPACE.WORKFLOW.OLD_STATUS' | translate }}</label>
             <div class="workflowStatus" [style.background-color]="defaultStatus.color">
               {{ 'WORKFLOW.' + defaultStatus.id | translate }}
@@ -70,7 +70,7 @@
             >
               <mat-chip *ngFor="let receiver of entry.receiver" class="badge">
                 <i
-                  class="badgeIconLeft"
+                  matChipAvatar
                   [esIcon]="receiver.authorityType === 'USER' ? 'person' : 'group'"
                 ></i>
                 <div class="mat-chip-group">
@@ -97,6 +97,7 @@
         <label>{{ 'WORKSPACE.WORKFLOW.COMMENT' | translate }}</label>
         <div>{{ entry.comment }}</div>
       </div>
+      <hr *ngIf="!last" />
     </div>
   </div>
 </ng-container>
