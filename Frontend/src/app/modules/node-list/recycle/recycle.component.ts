@@ -32,14 +32,24 @@ import {
     Node,
     RestArchiveService,
     RestConstants,
+    RestoreResult,
     TemporaryStorageService,
 } from '../../../core-module/core.module';
 import { Toast } from '../../../core-ui-module/toast';
 import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
-import { DELETE_OR_CANCEL } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import {
+    CLOSE,
+    DELETE_OR_CANCEL,
+} from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { SearchFieldService } from '../../../main/navigation/search-field/search-field.service';
-import { RecycleRestoreComponent } from './restore/restore.component';
+
+type RestoreResults = {
+    results: (RestoreResult & { message: string })[];
+} & {
+    hasDuplicateNames: boolean;
+    hasParentFolderMissing: boolean;
+};
 
 @Component({
     selector: 'es-recycle',
@@ -52,8 +62,8 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly Scope = Scope;
     @ViewChild('list') list: NodeEntriesWrapperComponent<Node>;
     @ViewChild('confirmDeleteDialog') confirmDeleteDialog: TemplateRef<unknown>;
+    @ViewChild('restoreDialog') restoreDialog: TemplateRef<unknown>;
     dataSource = new NodeDataSource();
-    public restoreResult: ArchiveRestore;
 
     @Input() actionbar: ActionbarComponent;
 
@@ -154,14 +164,28 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
     private restoreFinished(list: Node[], restoreResult: any) {
         this.toast.closeModalDialog();
 
-        RecycleRestoreComponent.prepareResults(this.translate, restoreResult);
-        if (restoreResult.hasDuplicateNames || restoreResult.hasParentFolderMissing)
-            this.restoreResult = restoreResult;
-
+        this.prepareResults(restoreResult);
+        if (restoreResult.hasDuplicateNames || restoreResult.hasParentFolderMissing) {
+            this.openRestoreDialog(restoreResult);
+        }
         if (list.length == 1) {
-            this.toast.toast('RECYCLE.TOAST.RESTORE_FINISHED_SINGLE'); //,{link : 'TODO'},{enableHTML:true});
-        } else this.toast.toast('RECYCLE.TOAST.RESTORE_FINISHED');
+            this.toast.toast('RECYCLE.TOAST.RESTORE_FINISHED_SINGLE');
+        } else {
+            this.toast.toast('RECYCLE.TOAST.RESTORE_FINISHED');
+        }
         this.refresh();
+    }
+
+    private openRestoreDialog(restoreResults: RestoreResults): void {
+        void this.dialogs.openGenericDialog({
+            title: 'RECYCLE.RESTORE.NEW_LOCATION_TITLE',
+            subtitle: 'RECYCLE.RESTORE.NEW_LOCATION_SUBTITLE',
+            avatar: { kind: 'icon', icon: 'undo' },
+            buttons: CLOSE,
+            closable: Closable.Standard,
+            contentTemplate: this.restoreDialog,
+            context: { $implicit: restoreResults },
+        });
     }
 
     private delete(): void {
@@ -199,12 +223,6 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
         void this.openConfirmDeleteDialog([...list]);
     }
 
-    restoreNodesEvent(event: any) {
-        this.restoreNodes(event.nodes, event.parent);
-    }
-    finishRestore() {
-        this.restoreResult = null;
-    }
     public restoreNodes(list: Node[], toPath = '') {
         // archiveRestore list
         this.toast.showProgressDialog();
@@ -259,5 +277,25 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
         console.log(sort);
         this.sort = sort;
         this.refresh();
+    }
+
+    private prepareResults(results: RestoreResults) {
+        for (const result of results.results) {
+            if (result.restoreStatus === 'FINE') {
+                continue;
+            }
+            this.translate
+                .get('RECYCLE.RESTORE.' + result.restoreStatus)
+                .subscribe((text) => (result.message = text));
+            if (result.restoreStatus === 'DUPLICATENAME') {
+                results.hasDuplicateNames = true;
+            }
+            if (
+                result.restoreStatus === 'FALLBACK_PARENT_NOT_EXISTS' ||
+                result.restoreStatus === 'FALLBACK_PARENT_NO_PERMISSION'
+            ) {
+                results.hasParentFolderMissing = true;
+            }
+        }
     }
 }

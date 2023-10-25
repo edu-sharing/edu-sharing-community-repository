@@ -17,10 +17,16 @@ export class GenericDialogData<R extends string> {
      * observable.
      */
     buttons?: GenericDialogButton<R>[];
+    /**
+     * A context to pass to the content template.
+     */
+    context?: unknown;
 }
 
 export class GenericDialogConfig<R extends string> extends GenericDialogData<R> {
     title: CardDialogConfig['title'];
+    subtitle?: CardDialogConfig['subtitle'];
+    avatar?: CardDialogConfig['avatar'];
     nodes?: Node[];
     closable?: CardDialogConfig['closable'] = new CardDialogConfig().closable;
     minWidth?: CardDialogConfig['minWidth'];
@@ -32,6 +38,10 @@ interface GenericDialogButton<R extends string> {
     label: R;
     config: ButtonConfig;
 }
+
+export const CLOSE: GenericDialogButton<'CLOSE'>[] = [
+    { label: 'CLOSE', config: { color: 'standard' } },
+];
 
 export const DELETE_OR_CANCEL: GenericDialogButton<'YES_DELETE' | 'CANCEL'>[] = [
     { label: 'CANCEL', config: { color: 'standard' } },

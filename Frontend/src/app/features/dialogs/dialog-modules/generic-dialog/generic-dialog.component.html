@@ -3,5 +3,5 @@
 }}</span>
 
 <ng-container *ngIf="data.contentTemplate">
-  <ng-container *ngTemplateOutlet="data.contentTemplate"></ng-container>
+  <ng-container *ngTemplateOutlet="data.contentTemplate; context: data.context"></ng-container>
 </ng-container>

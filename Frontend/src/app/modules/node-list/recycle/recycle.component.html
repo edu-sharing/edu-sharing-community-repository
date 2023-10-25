@@ -21,13 +21,6 @@
   </ng-template>
 </es-node-entries-wrapper>
 
-<es-recycle-restore-info
-  *ngIf="restoreResult"
-  [results]="restoreResult"
-  (onClose)="finishRestore()"
-  (onRestoreFolder)="restoreNodesEvent($event)"
-></es-recycle-restore-info>
-
 <ng-template #confirmDeleteDialog>
   <p>{{ 'RECYCLE.DELETE.CONFIRM_MESSAGE' | translate }}</p>
   <form>
@@ -37,4 +30,29 @@
       }}</mat-checkbox>
     </div>
   </form>
+</ng-template>
+
+<ng-template #restoreDialog let-restoreResult>
+  <div *ngIf="restoreResult.hasDuplicateNames">
+    <p>{{ 'RECYCLE.RESTORE.LIST_DUPLICATE_NAMES' | translate }}</p>
+    <div *ngFor="let result of restoreResult.results">
+      <div *ngIf="result.restoreStatus === 'DUPLICATENAME'">
+        {{ result.name }} <span class="restore-message">({{ result.message }})</span>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="restoreResult.hasParentFolderMissing">
+    <hr *ngIf="restoreResult.hasDuplicateNames" />
+    <p>{{ 'RECYCLE.RESTORE.LIST_PARENT_FOLDER_MISSING' | translate }}</p>
+    <div *ngFor="let result of restoreResult.results">
+      <div
+        *ngIf="
+          result.restoreStatus === 'FALLBACK_PARENT_NOT_EXISTS' ||
+          result.restoreStatus === 'FALLBACK_PARENT_NO_PERMISSION'
+        "
+      >
+        {{ result.name }} <span class="restore-message">({{ result.message }})</span>
+      </div>
+    </div>
+  </div>
 </ng-template>

@@ -131,7 +131,17 @@ export class DialogsService {
     async openGenericDialog<R extends string>(
         config: GenericDialogConfig<R>,
     ): Promise<CardDialogRef<GenericDialogData<R>, R>> {
-        const { title, nodes, minWidth, maxWidth, customHeaderBarContent, closable, ...data } = {
+        const {
+            title,
+            subtitle,
+            avatar,
+            nodes,
+            minWidth,
+            maxWidth,
+            customHeaderBarContent,
+            closable,
+            ...data
+        } = {
             ...new GenericDialogConfig<R>(),
             ...config,
         };
@@ -140,6 +150,8 @@ export class DialogsService {
         );
         return this.cardDialog.open(GenericDialogComponent, {
             title,
+            subtitle,
+            avatar,
             ...(nodes ? await configForNodes(nodes, this.translate).toPromise() : {}),
             minWidth,
             maxWidth,
