@@ -150,6 +150,9 @@
     <h4 class="mat-heading-4 mat-heading-underline">
       <i esIcon="assessment"></i> {{ 'ADMIN.STATISTICS.NODES' | translate }}
     </h4>
+    <es-info-message *ngIf="_mediacenter">
+      {{ 'ADMIN.STATISTICS.NODES_MEDIACENTER_INFO' | translate }}
+    </es-info-message>
     <div class="modes">
       <div class="calendars">
         <div>
