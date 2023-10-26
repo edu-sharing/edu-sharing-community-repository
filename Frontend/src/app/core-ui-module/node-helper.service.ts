@@ -390,6 +390,11 @@ export class NodeHelperService {
                 } else if (c.changeStrategy === 'update') {
                     item = options.find((o) => o.name === c.name);
                     if (!item) {
+                        console.warn(
+                            'Updating item ' +
+                                c.name +
+                                ' failed: No such item is currently present',
+                        );
                         continue;
                     }
                 } else {
@@ -471,39 +476,40 @@ export class NodeHelperService {
                 }
                 item.showAsAction = c.showAsAction;
                 item.isSeparate = c.isSeparate;
-                item.customEnabledCallback = (nodes) => {
-                    if (c.permission) {
-                        return this.getNodesRight(nodes, c.permission);
-                    }
-                    return true;
-                };
-                item.isEnabled = item.customEnabledCallback(null);
-                item.customShowCallback = (nodes) => {
-                    if (c.mode == 'nodes' && !nodes?.length) return false;
-                    if (c.mode == 'noNodes' && nodes && nodes.length) return false;
-                    if (
-                        c.mode == 'noNodesNotEmpty' &&
-                        ((nodes && nodes.length) || !allNodes || !allNodes.length)
-                    )
-                        return false;
-                    // @ts-ignore
-                    if (
-                        c.mode == 'nodes' &&
-                        c.isDirectory != 'any' &&
-                        nodes &&
-                        c.isDirectory != nodes[0].isDirectory
-                    )
-                        return false;
-                    if (
-                        c.toolpermission &&
-                        !this.connector.hasToolPermissionInstant(c.toolpermission)
-                    )
-                        return false;
-                    if (c.multiple != null && !c.multiple && nodes && nodes.length > 1)
-                        return false;
-                    return true;
-                };
                 if (c.changeStrategy !== 'update') {
+                    item.customEnabledCallback = (nodes) => {
+                        if (c.permission) {
+                            return this.getNodesRight(nodes, c.permission);
+                        }
+                        return true;
+                    };
+                    item.isEnabled = item.customEnabledCallback(null);
+                    item.customShowCallback = (nodes) => {
+                        if (c.mode == 'nodes' && !nodes?.length) return false;
+                        if (c.mode == 'noNodes' && nodes && nodes.length) return false;
+                        if (
+                            c.mode == 'noNodesNotEmpty' &&
+                            ((nodes && nodes.length) || !allNodes || !allNodes.length)
+                        )
+                            return false;
+                        // @ts-ignore
+                        if (
+                            c.mode == 'nodes' &&
+                            c.isDirectory != 'any' &&
+                            nodes &&
+                            c.isDirectory != nodes[0].isDirectory
+                        )
+                            return false;
+                        if (
+                            c.toolpermission &&
+                            !this.connector.hasToolPermissionInstant(c.toolpermission)
+                        )
+                            return false;
+                        if (c.multiple != null && !c.multiple && nodes && nodes.length > 1)
+                            return false;
+
+                        return true;
+                    };
                     options.splice(c.position ?? 0, 0, item);
                 }
             }
