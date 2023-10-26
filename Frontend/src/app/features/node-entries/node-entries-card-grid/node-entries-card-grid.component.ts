@@ -3,10 +3,12 @@ import {
     ChangeDetectionStrategy,
     Component,
     ElementRef,
+    EventEmitter,
     Input,
     NgZone,
     OnDestroy,
     OnInit,
+    Output,
     QueryList,
     TemplateRef,
     ViewChild,
@@ -28,6 +30,7 @@ import { NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
 import { SortSelectPanelComponent } from '../sort-select-panel/sort-select-panel.component';
 import { CustomTemplatesDataSource } from '../custom-templates-data-source';
+import { CdkOverlayOrigin } from '@angular/cdk/overlay';
 
 @Component({
     selector: 'es-node-entries-card-grid',
@@ -44,6 +47,8 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
      */
     readonly ScrollingOffsetPercentage = 0.4;
 
+    columnChooserVisible$ = new BehaviorSubject(false);
+    @ViewChild('columnChooserTrigger') columnChooserTrigger: CdkOverlayOrigin;
     @ViewChild('gridTop', { static: true }) set gridTop(value: TemplateRef<unknown>) {
         this.registerGridTop(value);
     }
