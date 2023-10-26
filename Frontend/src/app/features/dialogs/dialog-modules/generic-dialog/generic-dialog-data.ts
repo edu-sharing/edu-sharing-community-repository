@@ -43,6 +43,8 @@ export const CLOSE: GenericDialogButton<'CLOSE'>[] = [
     { label: 'CLOSE', config: { color: 'standard' } },
 ];
 
+export const OK: GenericDialogButton<'OK'>[] = [{ label: 'OK', config: { color: 'primary' } }];
+
 export const DELETE_OR_CANCEL: GenericDialogButton<'YES_DELETE' | 'CANCEL'>[] = [
     { label: 'CANCEL', config: { color: 'standard' } },
     { label: 'YES_DELETE', config: { color: 'danger' } },
