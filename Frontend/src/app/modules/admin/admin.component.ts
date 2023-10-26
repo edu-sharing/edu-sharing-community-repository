@@ -1,3 +1,18 @@
+import { trigger } from '@angular/animations';
+import { PlatformLocation } from '@angular/common';
+import {
+    Component,
+    ComponentFactoryResolver,
+    ElementRef,
+    OnDestroy,
+    OnInit,
+    TemplateRef,
+    ViewChild,
+    ViewContainerRef,
+} from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
+import { AboutService, NetworkService } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     DateHelper,
@@ -11,9 +26,9 @@ import {
     UIAnimation,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
-import { UIHelper } from '../../core-ui-module/ui-helper';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Toast } from '../../core-ui-module/toast';
+import { Observable, Observer } from 'rxjs';
+import { CustomHelper } from '../../common/custom-helper';
+import { SuggestItem } from '../../common/ui/autocomplete/autocomplete.component';
 import {
     Application,
     Authority,
@@ -37,29 +52,20 @@ import {
     ServerUpdate,
     SessionStorageService,
 } from '../../core-module/core.module';
-import { TranslateService } from '@ngx-translate/core';
-import {
-    Component,
-    ComponentFactoryResolver,
-    ElementRef,
-    OnDestroy,
-    OnInit,
-    ViewChild,
-    ViewContainerRef,
-} from '@angular/core';
-import { Helper } from '../../core-module/rest/helper';
-import { SuggestItem } from '../../common/ui/autocomplete/autocomplete.component';
-import { Observable, Observer } from 'rxjs';
-import { CustomHelper } from '../../common/custom-helper';
 import { CsvHelper } from '../../core-module/csv.helper';
-import { trigger } from '@angular/animations';
-import { AboutService, NetworkService } from 'ngx-edu-sharing-api';
-import { AuthoritySearchMode } from '../../shared/components/authority-search-input/authority-search-input.component';
-import { PlatformLocation } from '@angular/common';
-import { MainNavService } from '../../main/navigation/main-nav.service';
-import { DialogsService } from '../../features/dialogs/dialogs.service';
-import { WorkspaceExplorerComponent } from '../workspace/explorer/explorer.component';
+import { Helper } from '../../core-module/rest/helper';
+import { Toast } from '../../core-ui-module/toast';
+import { UIHelper } from '../../core-ui-module/ui-helper';
+import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config';
+import {
+    DELETE_OR_CANCEL,
+    YES_OR_NO,
+} from '../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { XmlAppPropertiesDialogData } from '../../features/dialogs/dialog-modules/xml-app-properties-dialog/xml-app-properties-dialog-data';
+import { DialogsService } from '../../features/dialogs/dialogs.service';
+import { MainNavService } from '../../main/navigation/main-nav.service';
+import { AuthoritySearchMode } from '../../shared/components/authority-search-input/authority-search-input.component';
+import { WorkspaceExplorerComponent } from '../workspace/explorer/explorer.component';
 
 type LuceneData = {
     mode: 'NODEREF' | 'SOLR' | 'ELASTIC';
@@ -87,6 +93,8 @@ export class AdminComponent implements OnInit, OnDestroy {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     @ViewChild('searchResults') nodeEntriesSearchResult: NodeEntriesWrapperComponent<Node>;
     @ViewChild('actionbarComponent') actionbarComponent: ActionbarComponent;
+    @ViewChild('keyValueTable') keyValueTable: TemplateRef<undefined>;
+    @ViewChild('preformatted') preformatted: TemplateRef<undefined>;
     elasticResponse: NodeListElastic;
 
     constructor(
@@ -119,14 +127,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.searchColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
         this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
         this.translations.waitForInit().subscribe(() => {
-            this.warningButtons = [
-                new DialogButton('CANCEL', { color: 'standard' }, () => {
-                    window.history.back();
-                }),
-                new DialogButton('ADMIN.UNDERSTAND', { color: 'primary' }, () => {
-                    this.showWarning = false;
-                }),
-            ];
             this.getTemplates();
             this.connector.isLoggedIn().subscribe((data: LoginResult) => {
                 this.loginResult = data;
@@ -206,12 +206,6 @@ export class AdminComponent implements OnInit, OnDestroy {
     public updates: ServerUpdate[] = [];
     public applications: Application[] = [];
     public applicationsOpen: any = {};
-    public showWarning = false;
-    public dialogTitle: string;
-    public dialogMessage: string;
-    public dialogButtons: DialogButton[] = [];
-    public dialogParameters: any;
-    public warningButtons: DialogButton[] = [];
     parentNode: Node;
     parentCollection: Node;
     parentCollectionType = 'root';
@@ -469,22 +463,19 @@ export class AdminComponent implements OnInit, OnDestroy {
         });
     }
 
-    public removeApp(app: Application) {
-        this.dialogTitle = 'ADMIN.APPLICATIONS.REMOVE_TITLE';
-        this.dialogMessage = 'ADMIN.APPLICATIONS.REMOVE_MESSAGE';
-        let info = '';
-        for (const key in app) {
-            if (key == 'xml') continue;
-            info += key + ': ' + (app as any)[key] + '\n';
-        }
-
-        this.dialogParameters = { info };
-        this.dialogButtons = [
-            new DialogButton('CANCEL', { color: 'standard' }, () => {
-                this.dialogTitle = null;
-            }),
-            new DialogButton('ADMIN.APPLICATIONS.REMOVE', { color: 'danger' }, () => {
-                this.dialogTitle = null;
+    async removeApp(app: Application) {
+        const info = Object.entries(app)
+            .filter(([key]) => key !== 'xml')
+            .map(([key, value]) => ({ key, value }));
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'ADMIN.APPLICATIONS.REMOVE_TITLE',
+            messageText: 'ADMIN.APPLICATIONS.REMOVE_MESSAGE',
+            buttons: DELETE_OR_CANCEL,
+            contentTemplate: this.keyValueTable,
+            context: { $implicit: info },
+        });
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result === 'YES_DELETE') {
                 this.globalProgress = true;
                 this.admin.removeApplication(app.id).subscribe(
                     () => {
@@ -496,8 +487,8 @@ export class AdminComponent implements OnInit, OnDestroy {
                         this.globalProgress = false;
                     },
                 );
-            }),
-        ];
+            }
+        });
     }
     public setMode(mode: string, skipLocationChange = false) {
         this.router.navigate(['./'], {
@@ -567,16 +558,20 @@ export class AdminComponent implements OnInit, OnDestroy {
             },
         );
     }
-    public getCacheInfo() {
+    getCacheInfo() {
         this.globalProgress = true;
         this.admin.getCacheInfo(this.cacheInfo).subscribe(
             (data: CacheInfo) => {
                 this.globalProgress = false;
-                this.dialogTitle = this.cacheInfo;
-                this.dialogMessage =
-                    'size: ' + data.size + '\nstatistic hits: ' + data.statisticHits;
-                this.dialogButtons = DialogButton.getOk(() => {
-                    this.dialogTitle = null;
+                void this.dialogs.openGenericDialog({
+                    title: this.cacheInfo,
+                    contentTemplate: this.keyValueTable,
+                    context: {
+                        $implicit: [
+                            { key: 'size', value: data.size },
+                            { key: 'statisticHits', value: data.statisticHits },
+                        ],
+                    },
                 });
             },
             (error: any) => {
@@ -722,16 +717,17 @@ export class AdminComponent implements OnInit, OnDestroy {
     public getPropertyValues() {
         this.globalProgress = true;
         this.admin.getPropertyValuespace(this.propertyName).subscribe(
-            (data: any) => {
+            (data) => {
                 this.globalProgress = false;
-                this.dialogTitle = 'ADMIN.TOOLKIT.PROPERTY_VALUESPACE';
-                this.dialogMessage = data.xml;
-                this.dialogButtons = DialogButton.getOk(() => {
-                    this.dialogTitle = null;
+                void this.dialogs.openGenericDialog({
+                    title: 'ADMIN.TOOLKIT.PROPERTY_VALUESPACE',
+                    contentTemplate: this.preformatted,
+                    context: { $implicit: data.xml },
+                    maxWidth: null,
                 });
                 this.appUrl = '';
             },
-            (error: any) => {
+            (error) => {
                 this.globalProgress = false;
                 this.toast.error(error);
             },
@@ -740,12 +736,13 @@ export class AdminComponent implements OnInit, OnDestroy {
     public runUpdate(update: ServerUpdate, execute = false) {
         this.globalProgress = true;
         this.admin.runServerUpdate(update.id, execute).subscribe(
-            (data: any) => {
+            (data) => {
                 this.globalProgress = false;
-                this.dialogTitle = 'ADMIN.UPDATE.RESULT';
-                this.dialogMessage = data.result;
-                this.dialogButtons = DialogButton.getOk(() => {
-                    this.dialogTitle = null;
+                void this.dialogs.openGenericDialog({
+                    title: 'ADMIN.UPDATE.RESULT',
+                    contentTemplate: this.preformatted,
+                    context: { $implicit: data.result },
+                    maxWidth: null,
                 });
                 this.refreshUpdateList();
             },
@@ -963,15 +960,14 @@ export class AdminComponent implements OnInit, OnDestroy {
         if (log.length <= 200) return log;
         return log.slice(0, 200);
     }
-    cancelJob(job: any) {
-        this.dialogTitle = 'ADMIN.JOBS.CANCEL_TITLE';
-        this.dialogMessage = 'ADMIN.JOBS.CANCEL_MESSAGE';
-        this.dialogButtons = DialogButton.getYesNo(
-            () => {
-                this.dialogTitle = null;
-            },
-            () => {
-                this.dialogTitle = null;
+    async cancelJob(job: any) {
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'ADMIN.JOBS.CANCEL_TITLE',
+            messageText: 'ADMIN.JOBS.CANCEL_MESSAGE',
+            buttons: YES_OR_NO,
+        });
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result === 'YES') {
                 this.globalProgress = true;
                 this.admin.cancelJob(job.jobDetail.name).subscribe(
                     () => {
@@ -983,8 +979,8 @@ export class AdminComponent implements OnInit, OnDestroy {
                         this.globalProgress = false;
                     },
                 );
-            },
-        );
+            }
+        });
     }
     reloadJobStatus() {
         this.admin.getJobs().subscribe((jobs) => {
@@ -1405,7 +1401,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             } else this.setMode(this.buttons[0].id, true);
         });
         if (this.loginResult.isAdmin) {
-            this.showWarning = true;
+            void this.showWarningDialog();
             this.admin.getServerUpdates().subscribe((data: ServerUpdate[]) => {
                 this.updates = data;
             });
@@ -1456,6 +1452,25 @@ export class AdminComponent implements OnInit, OnDestroy {
                 },
             );
         }
+    }
+
+    private async showWarningDialog(): Promise<void> {
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'ADMIN.WARNING_TITLE',
+            messageText: 'ADMIN.WARNING_INFO',
+
+            buttons: [
+                { label: 'CANCEL', config: { color: 'standard' } },
+                { label: 'ADMIN.UNDERSTAND', config: { color: 'primary' } },
+            ],
+            closable: Closable.Disabled,
+            maxWidth: 600,
+        });
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result === 'CANCEL') {
+                window.history.back();
+            }
+        });
     }
 
     getOwnAppUrl() {

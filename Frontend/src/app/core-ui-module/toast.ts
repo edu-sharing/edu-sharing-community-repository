@@ -3,8 +3,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { ModalDialogOptions } from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
-import { ProgressType } from '../shared/components/modal-dialog/modal-dialog.component';
+import {
+    ModalDialogOptions,
+    ProgressType,
+} from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { DialogButton } from '../core-module/ui/dialog-button';
 import {

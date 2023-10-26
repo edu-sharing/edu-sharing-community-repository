@@ -42,7 +42,6 @@ import { InfoMessageComponent } from './components/info-message/info-message.com
 import { InputPasswordComponent } from './components/input-password/input-password.component';
 import { LicenseSourceComponent } from './components/license-source/license-source.component';
 import { LinkComponent } from './components/link/link.component';
-import { ModalDialogComponent } from './components/modal-dialog/modal-dialog.component';
 import { MultiLineLabelComponent } from './components/multi-line-label/multi-line-label.component';
 import { SpinnerSmallComponent } from './components/spinner-small/spinner-small.component';
 import { TutorialComponent } from './components/tutorial/tutorial.component';
@@ -88,7 +87,6 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
         InputPasswordComponent,
         LicenseSourceComponent,
         LinkComponent,
-        ModalDialogComponent,
         MultiLineLabelComponent,
         OnAttributeChangeDirective,
         PermissionNamePipe,
@@ -179,7 +177,6 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
         MatTabsModule,
         MatTooltipModule,
         MatTreeModule,
-        ModalDialogComponent,
         MultiLineLabelComponent,
         OnAttributeChangeDirective,
         OverlayModule,

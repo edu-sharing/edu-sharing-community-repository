@@ -1,6 +1,11 @@
-<span class="message" *ngIf="data.messageText">{{
-  data.messageText | translate : data.messageParameters
-}}</span>
+<ng-container *ngIf="data.messageText">
+  <p
+    *ngFor="let line of data.messageText | translate : data.messageParameters | splitNewLines"
+    class="message-line"
+  >
+    {{ line }}
+  </p>
+</ng-container>
 
 <ng-container *ngIf="data.contentTemplate">
   <ng-container *ngTemplateOutlet="data.contentTemplate; context: data.context"></ng-container>

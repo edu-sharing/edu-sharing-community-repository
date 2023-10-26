@@ -43,7 +43,12 @@
   (onDone)="setChildobjectProperties($event)"
   [invalidate]="editChildobject != null"
 ></es-mds>
-<es-modal-dialog
+<!-- 
+  Didn't migrate since the legacy MDS component is being faded out.
+
+  If this is still needed, replace with `DialogsService.openGenericDialog()`.
+ -->
+<!-- <es-modal-dialog
   [priority]="1 + priority"
   [title]="dialogTitle"
   [message]="dialogMessage"
@@ -51,4 +56,4 @@
   [messageParameters]="dialogParameters"
   [buttons]="dialogButtons"
   (onCancel)="dialogTitle = null"
-></es-modal-dialog>
+></es-modal-dialog> -->

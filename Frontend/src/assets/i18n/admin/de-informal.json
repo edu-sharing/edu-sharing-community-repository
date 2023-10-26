@@ -11,7 +11,7 @@
   "TOOLPERMISSION_ERROR_FOOTER": "Falls Du dies für einen Fehler hältst, kontaktiere die Administrierenden und fragen nach Freigabe der Berechtigung {{permission}}",
   "USER_TUTORIAL_DESCRIPTION": "Hier kannst du ein eigenes Profilbild angeben und zeigen, wer du bist und was du tust. Du entscheidest, was Andere sehen können.",
   "ADMIN": {
-    "WARNING_INFO": "Dieser Bereich ist nur zur Administration des Repositorys gedacht.\nFalsche Änderungen können zu Fehlern bis hin zu Datenverlust führen.\n\nFühre keine Aktionen durch, bei denen Du unsicher bist!",
+    "WARNING_INFO": "Dieser Bereich ist nur zur Administration des Repositorys gedacht. Falsche Änderungen können zu Fehlern bis hin zu Datenverlust führen.\nFühre keine Aktionen durch, bei denen Du unsicher bist!",
     "GLOBAL_CONFIG": {
       "CLIENT_CONFIG_HINT": "Du kannst hier Werte eintragen, um Labels zu überschreiben, Kontexte zu konfigurieren, Authentifizierungsmethoden einzurichten und mehr. Nach dem Speichern musst Du möglicherweise die gesamte Seite im Browser neu laden.",
       "EXTENSION_CONFIG_HINT": "Du kannst hier Werte der Konfiguration überschreiben. Beachten, dass diese Konfiguration beim Rollout überschrieben wird. Die hier erfolgten Änderungen müssen an das edu-sharing Entwicklerteam gegeben werden.",
@@ -76,7 +76,7 @@
     },
     "JOBS": {
       "JOB_STARTED": "Die Aufgabe wurde gestartet. Überprüfe die Aufgabenliste, um den Status einzusehen.",
-      "CANCEL_MESSAGE": "Das Abbrechen einer Aufgabe kann zu einem inkonsistenten Datenzustand oder sogar Datenverlust führen.\n\nBist Du wirklich sicher, dass Du die Aufgabe abbrechen möchtest?"
+      "CANCEL_MESSAGE": "Das Abbrechen einer Aufgabe kann zu einem inkonsistenten Datenzustand oder sogar Datenverlust führen.\nBist Du wirklich sicher, dass Du die Aufgabe abbrechen möchtest?"
     },
     "FOLDERTEMPLATES": {
       "TEMPLATE_NOTAPPLIED": "Ordnervorlage {{templatename}} konnte nicht für {{groupname}} angewandt werden. Prüfe die Ordnervorlage auf Richtigkeit.",

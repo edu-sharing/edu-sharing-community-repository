@@ -3,8 +3,10 @@ import { Toast } from '../core-ui-module/toast';
 import { CordovaService } from '../common/services/cordova.service';
 import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { MessageType } from '../core-module/ui/message-type';
-import { ModalDialogOptions } from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
-import { ProgressType } from '../shared/components/modal-dialog/modal-dialog.component';
+import {
+    ModalDialogOptions,
+    ProgressType,
+} from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 
 @Injectable({ providedIn: 'root' })
 export class BridgeService {

@@ -1,9 +1,9 @@
 {
   "ADMIN": {
     "TITLE": "Admin-Tools",
-    "UNDERSTAND": "Understood, proceed.",
+    "UNDERSTAND": "Understood, proceed",
     "WARNING_TITLE": "Administration area",
-    "WARNING_INFO": "This area is intended for repository administration only.\nImproper settings can lead to errors or even data loss.\n\nDo not carry out any actions that you are unsure about!",
+    "WARNING_INFO": "This area is intended for repository administration only. Improper settings can lead to errors or even data loss.\nDo not carry out any actions that you are unsure about!",
     "MODE": {
       "INFO": "Info",
       "PLUGINS": "Extensions",
@@ -116,9 +116,8 @@
       "TYPE": "Type",
       "REPOTYPE": "Repo-Type",
       "SUBTYPE": "Sub-Type",
-      "REMOVE": "Delete",
       "REMOVE_TITLE": "Delete application",
-      "REMOVE_MESSAGE": "If you continue, the application will be deleted with the following information.\nPlease note that this procedure cannot be undone!\n\n{{info}}",
+      "REMOVE_MESSAGE": "If you continue, the application will be deleted with the following information.\nPlease note that this procedure cannot be undone!",
       "EDIT_APP": "{{xml}} edit",
       "APP_SAVED": "Changes to {{xml}} were saved",
       "APP_XML_WARNING": "Attention! Invalid values may make edu-sharing no longer accessible!",
@@ -376,7 +375,7 @@
       "NO_JOBS": "No tasks have been performed yet. Tasks are created by an import process, for example",
       "TOAST_CANCELED": "The task was canceled. However, it may take a moment for the status to be updated.",
       "CANCEL_TITLE": "Cancel task?",
-      "CANCEL_MESSAGE": "Canceling a task can lead to an inconsistent data state or even data loss.\n\nAre you really sure you want to cancel the task?",
+      "CANCEL_MESSAGE": "Canceling a task can lead to an inconsistent data state or even data loss.\nAre you really sure you want to cancel the task?",
       "WITH_WARNINGS": "(has warnings)",
       "WITH_ERRORS": "(has errors)",
       "Aborted": "Cancelled",

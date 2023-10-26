@@ -5,7 +5,6 @@ import { Node } from '../../../core-module/rest/data-object.js';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { Toast } from '../../../core-ui-module/toast';
 import { CardType } from '../../../shared/components/card/card.component';
-import { ProgressType } from '../../../shared/components/modal-dialog/modal-dialog.component';
 
 export enum DialogType {
     /**
@@ -16,6 +15,10 @@ export enum DialogType {
      * info message bar at the bottom
      */
     Infobar,
+}
+
+export enum ProgressType {
+    Indeterminate = 'indeterminate',
 }
 
 @Component({

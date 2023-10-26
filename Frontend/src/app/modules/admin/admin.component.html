@@ -1,17 +1,23 @@
-<es-modal-dialog
-  [title]="showWarning ? 'ADMIN.WARNING_TITLE' : null"
-  [message]="'ADMIN.WARNING_INFO'"
-  [buttons]="warningButtons"
-  [isCancelable]="false"
-></es-modal-dialog>
-<es-modal-dialog
-  [title]="dialogTitle"
-  [message]="dialogMessage"
-  [buttons]="dialogButtons"
-  [messageParameters]="dialogParameters"
-  [isCancelable]="true"
-  (onCancel)="dialogTitle = null"
-></es-modal-dialog>
+<ng-template #keyValueTable let-info>
+  <table mat-table [dataSource]="info">
+    <!-- Key Column -->
+    <ng-container matColumnDef="key">
+      <td mat-cell *matCellDef="let element">{{ element.key }}</td>
+    </ng-container>
+
+    <!-- Value Column -->
+    <ng-container matColumnDef="value">
+      <td mat-cell *matCellDef="let element">{{ element.value }}</td>
+    </ng-container>
+
+    <tr mat-row *matRowDef="let row; columns: ['key', 'value']"></tr>
+  </table>
+</ng-template>
+
+<ng-template #preformatted let-text>
+  <pre>{{ text }}</pre>
+</ng-template>
+
 <div class="main">
   <div class="main-nav">
     <div>
@@ -826,7 +832,7 @@
             [(ngModel)]="cacheInfo"
             placeholder="{{ 'ADMIN.TOOLKIT.CACHE_NAME' | translate }}"
           />
-          <button mat-raised-button (click)="getCacheInfo()">
+          <button mat-raised-button>
             {{ 'ADMIN.TOOLKIT.CACHE_INFO' | translate }}
           </button>
         </form>
