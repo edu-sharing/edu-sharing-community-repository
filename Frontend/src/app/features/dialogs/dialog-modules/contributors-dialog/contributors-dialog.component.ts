@@ -103,7 +103,7 @@ export class ContributorsDialogComponent implements OnInit {
     async remove(data: any[], pos: number) {
         const confirmDialogRef = await this.dialogs.openGenericDialog({
             title: 'WORKSPACE.CONTRIBUTOR.DELETE_TITLE',
-            messageText: 'WORKSPACE.CONTRIBUTOR.DELETE_MESSAGE',
+            message: 'WORKSPACE.CONTRIBUTOR.DELETE_MESSAGE',
             messageParameters: { name: data[pos].getDisplayName() },
             buttons: YES_OR_NO,
         });

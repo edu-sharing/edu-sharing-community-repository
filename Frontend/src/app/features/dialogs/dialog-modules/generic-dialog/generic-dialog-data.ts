@@ -4,23 +4,35 @@ import { ButtonConfig } from '../../../../core-module/ui/dialog-button';
 import { CardDialogConfig } from '../../card-dialog/card-dialog-config';
 
 export class GenericDialogData<R extends string> {
-    /** Message text to show in the dialog body. Will be translated. */
-    messageText?: string;
+    /** Message to show in the dialog body. Will be translated. */
+    message?: string;
     /** Translation parameters for the given message text. */
     messageParameters?: { [key: string]: string };
-    /** Custom template to use as dialog content. */
-    contentTemplate?: TemplateRef<unknown>;
     /**
-     * Buttons to include in the bottom bar of the dialog.
+     * How the message should be displayed.
      *
-     * Each button closes the dialog when clicked and passes its label to the `after_closed`
-     * observable.
+     * - text: The message is displayed as is. New-line characters will be converted to <p> tags.
+     * - preformatted: The message will be wrapped in a <pre> tag.
+     * - html: The message will be rendered as HTML in a <div> tag.
      */
-    buttons?: GenericDialogButton<R>[];
+    messageMode?: 'text' | 'preformatted' | 'html' = 'text';
+    /**
+     * Custom template to use as dialog content.
+     *
+     * Can be used instead of or in addition to a message.
+     */
+    contentTemplate?: TemplateRef<unknown>;
     /**
      * A context to pass to the content template.
      */
     context?: unknown;
+    /**
+     * Buttons to include in the bottom bar of the dialog.
+     *
+     * Each button closes the dialog when clicked and passes its label to the `afterClosed`
+     * observable.
+     */
+    buttons?: GenericDialogButton<R>[];
 }
 
 export class GenericDialogConfig<R extends string> extends GenericDialogData<R> {
@@ -44,6 +56,11 @@ export const CLOSE: GenericDialogButton<'CLOSE'>[] = [
 ];
 
 export const OK: GenericDialogButton<'OK'>[] = [{ label: 'OK', config: { color: 'primary' } }];
+
+export const OK_OR_CANCEL: GenericDialogButton<'OK' | 'CANCEL'>[] = [
+    { label: 'CANCEL', config: { color: 'standard' } },
+    { label: 'OK', config: { color: 'primary' } },
+];
 
 export const DELETE_OR_CANCEL: GenericDialogButton<'YES_DELETE' | 'CANCEL'>[] = [
     { label: 'CANCEL', config: { color: 'standard' } },

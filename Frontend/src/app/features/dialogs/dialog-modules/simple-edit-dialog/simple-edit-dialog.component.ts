@@ -185,7 +185,7 @@ export class SimpleEditDialogComponent {
         }
         const dialogRef = await this.dialogs.openGenericDialog({
             title: 'SIMPLE_EDIT.DIRTY.TITLE',
-            messageText: 'SIMPLE_EDIT.DIRTY.MESSAGE',
+            message: 'SIMPLE_EDIT.DIRTY.MESSAGE',
             buttons: SAVE_OR_CANCEL,
         });
         const result = await dialogRef.afterClosed().toPromise();

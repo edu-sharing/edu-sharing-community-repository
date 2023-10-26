@@ -34,7 +34,6 @@ import {
     Authority,
     CacheInfo,
     ConfigurationService,
-    DialogButton,
     JobDescription,
     LoginResult,
     Node,
@@ -59,6 +58,7 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config';
 import {
     DELETE_OR_CANCEL,
+    OK_OR_CANCEL,
     YES_OR_NO,
 } from '../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { XmlAppPropertiesDialogData } from '../../features/dialogs/dialog-modules/xml-app-properties-dialog/xml-app-properties-dialog-data';
@@ -94,7 +94,6 @@ export class AdminComponent implements OnInit, OnDestroy {
     @ViewChild('searchResults') nodeEntriesSearchResult: NodeEntriesWrapperComponent<Node>;
     @ViewChild('actionbarComponent') actionbarComponent: ActionbarComponent;
     @ViewChild('keyValueTable') keyValueTable: TemplateRef<undefined>;
-    @ViewChild('preformatted') preformatted: TemplateRef<undefined>;
     elasticResponse: NodeListElastic;
 
     constructor(
@@ -469,7 +468,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             .map(([key, value]) => ({ key, value }));
         const dialogRef = await this.dialogs.openGenericDialog({
             title: 'ADMIN.APPLICATIONS.REMOVE_TITLE',
-            messageText: 'ADMIN.APPLICATIONS.REMOVE_MESSAGE',
+            message: 'ADMIN.APPLICATIONS.REMOVE_MESSAGE',
             buttons: DELETE_OR_CANCEL,
             contentTemplate: this.keyValueTable,
             context: { $implicit: info },
@@ -721,8 +720,8 @@ export class AdminComponent implements OnInit, OnDestroy {
                 this.globalProgress = false;
                 void this.dialogs.openGenericDialog({
                     title: 'ADMIN.TOOLKIT.PROPERTY_VALUESPACE',
-                    contentTemplate: this.preformatted,
-                    context: { $implicit: data.xml },
+                    message: data.xml,
+                    messageMode: 'preformatted',
                     maxWidth: null,
                 });
                 this.appUrl = '';
@@ -740,8 +739,8 @@ export class AdminComponent implements OnInit, OnDestroy {
                 this.globalProgress = false;
                 void this.dialogs.openGenericDialog({
                     title: 'ADMIN.UPDATE.RESULT',
-                    contentTemplate: this.preformatted,
-                    context: { $implicit: data.result },
+                    message: data.result,
+                    messageMode: 'preformatted',
                     maxWidth: null,
                 });
                 this.refreshUpdateList();
@@ -963,7 +962,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     async cancelJob(job: any) {
         const dialogRef = await this.dialogs.openGenericDialog({
             title: 'ADMIN.JOBS.CANCEL_TITLE',
-            messageText: 'ADMIN.JOBS.CANCEL_MESSAGE',
+            message: 'ADMIN.JOBS.CANCEL_MESSAGE',
             buttons: YES_OR_NO,
         });
         dialogRef.afterClosed().subscribe((result) => {
@@ -1457,8 +1456,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     private async showWarningDialog(): Promise<void> {
         const dialogRef = await this.dialogs.openGenericDialog({
             title: 'ADMIN.WARNING_TITLE',
-            messageText: 'ADMIN.WARNING_INFO',
-
+            message: 'ADMIN.WARNING_INFO',
             buttons: [
                 { label: 'CANCEL', config: { color: 'standard' } },
                 { label: 'ADMIN.UNDERSTAND', config: { color: 'primary' } },
@@ -1548,27 +1546,20 @@ export class AdminComponent implements OnInit, OnDestroy {
         }
     }
 
-    async authenticateAsUser(force = false) {
-        if (!force) {
-            this.toast.showConfigurableDialog({
-                title: 'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER',
-                message: 'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER_DETAILS',
-                buttons: DialogButton.getOkCancel(
-                    () => this.toast.closeModalDialog(),
-                    () => {
-                        this.toast.closeModalDialog();
-                        this.authenticateAsUser(true);
-                    },
-                ),
-            });
-            return;
-        }
-        try {
-            await this.admin
-                .switchAuthentication(this.authenticateAuthority.authorityName)
-                .toPromise();
-            UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.config, true);
-        } catch (e) {}
+    async authenticateAsUser(): Promise<void> {
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER',
+            message: 'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER_DETAILS',
+            buttons: OK_OR_CANCEL,
+        });
+        dialogRef.afterClosed().subscribe(async (response) => {
+            if (response === 'OK') {
+                await this.admin
+                    .switchAuthentication(this.authenticateAuthority.authorityName)
+                    .toPromise();
+                UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.config, true);
+            }
+        });
     }
 
     openNodeRender(event: Node) {

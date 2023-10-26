@@ -25,7 +25,7 @@ export class LtiComponent implements OnInit {
     private async showDialog(): Promise<void> {
         const dialogRef = await this.dialogs.openGenericDialog({
             title: 'LTI.REGISTERED.TITLE',
-            messageText: 'LTI.REGISTERED.DESCRIPTION',
+            message: 'LTI.REGISTERED.DESCRIPTION',
             buttons: OK,
             closable: Closable.Disabled,
         });

@@ -144,7 +144,7 @@ export class CardDialogRef<D = unknown, R = unknown> {
                         const closed = this.dialogs
                             .openGenericDialog({
                                 title: 'DIALOG.CONFIRM_DISCARD_TITLE',
-                                messageText: 'DIALOG.CONFIRM_DISCARD_MESSAGE',
+                                message: 'DIALOG.CONFIRM_DISCARD_MESSAGE',
                                 buttons: DISCARD_OR_BACK,
                             })
                             .then((dialogRef) => dialogRef.afterClosed().toPromise())

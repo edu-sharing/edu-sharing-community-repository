@@ -1785,7 +1785,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     ) {
         const dialogRef = await this.dialogs.openGenericDialog({
             title: 'OPTIONS.REMOVE_REF',
-            messageText: 'COLLECTIONS.REMOVE_FROM_COLLECTION_DIALOG_TEXT',
+            message: 'COLLECTIONS.REMOVE_FROM_COLLECTION_DIALOG_TEXT',
             messageParameters: { count: nodes.length.toString() },
             buttons: DELETE_OR_CANCEL,
         });

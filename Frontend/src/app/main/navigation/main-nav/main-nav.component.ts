@@ -679,7 +679,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.topBar?.mainMenuSidebar?.close();
                     const dialogRef = await this.dialogs.openGenericDialog({
                         title: 'WORKSPACE.AUTOLOGOUT',
-                        messageText: 'WORKSPACE.AUTOLOGOUT_INFO',
+                        message: 'WORKSPACE.AUTOLOGOUT_INFO',
                         messageParameters: {
                             minutes: Math.round(this.connector.logoutTimeout / 60).toString(),
                         },

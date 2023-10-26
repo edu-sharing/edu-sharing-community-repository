@@ -1,10 +1,14 @@
-<ng-container *ngIf="data.messageText">
-  <p
-    *ngFor="let line of data.messageText | translate : data.messageParameters | splitNewLines"
-    class="message-line"
-  >
-    {{ line }}
-  </p>
+<ng-container *ngIf="data.message" [ngSwitch]="data.messageMode">
+  <ng-container *ngSwitchCase="'text'">
+    <p
+      *ngFor="let line of data.message | translate : data.messageParameters | splitNewLines"
+      class="message-line"
+    >
+      {{ line }}
+    </p>
+  </ng-container>
+  <pre *ngSwitchCase="'preformatted'">{{ data.message | translate : data.messageParameters }}</pre>
+  <div *ngSwitchCase="'html'" [innerHtml]="data.message | translate : data.messageParameters"></div>
 </ng-container>
 
 <ng-container *ngIf="data.contentTemplate">

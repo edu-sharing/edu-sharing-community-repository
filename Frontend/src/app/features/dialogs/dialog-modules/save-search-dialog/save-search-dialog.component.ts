@@ -111,7 +111,7 @@ export class SaveSearchDialogComponent implements OnInit {
     private async showShouldReplaceDialog(): Promise<void> {
         const dialogRef = await this.dialogs.openGenericDialog({
             title: 'SEARCH.SAVE_SEARCH.SEARCH_EXISTS_TITLE',
-            messageText: 'SEARCH.SAVE_SEARCH.SEARCH_EXISTS_MESSAGE',
+            message: 'SEARCH.SAVE_SEARCH.SEARCH_EXISTS_MESSAGE',
             buttons: REPLACE_OR_BACK,
         });
         dialogRef.beforeClosed().subscribe((result) => {

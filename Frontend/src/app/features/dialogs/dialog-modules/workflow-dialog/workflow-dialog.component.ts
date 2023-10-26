@@ -7,7 +7,6 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { Observable, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ModalMessageType } from 'src/app/common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import {
     ConfigurationService,
     DialogButton,
@@ -27,6 +26,7 @@ import { Toast } from '../../../../core-ui-module/toast';
 import { AuthorityNamePipe } from '../../../../shared/pipes/authority-name.pipe';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { DialogsService } from '../../dialogs.service';
 import { WorkflowDialogData, WorkflowDialogResult } from './workflow-dialog-data';
 
 type WorkflowReceiver = UserSimple | Group;
@@ -54,6 +54,7 @@ export class WorkflowDialogComponent {
         private dialogRef: CardDialogRef<WorkflowDialogData, WorkflowDialogResult>,
         private config: ConfigurationService,
         private connector: RestConnectorService,
+        private dialogs: DialogsService,
         private iam: RestIamService,
         private localEvents: LocalEventsService,
         private nodeHelper: NodeHelperService,
@@ -298,26 +299,19 @@ export class WorkflowDialogComponent {
      * @returns `true` if the user decided to grant the permissions.
      */
     private async requestReceiverPermissionDialog(receiver: WorkflowReceiver): Promise<boolean> {
-        return new Promise((resolve) => {
-            this.toast.showConfigurableDialog({
-                title: 'WORKSPACE.WORKFLOW.USER_NO_PERMISSION',
-                message: 'WORKSPACE.WORKFLOW.USER_NO_PERMISSION_INFO',
-                messageParameters: {
-                    user: new AuthorityNamePipe(this.translate).transform(receiver, null),
-                },
-                messageType: ModalMessageType.HTML,
-                buttons: [
-                    new DialogButton('CANCEL', { color: 'standard' }, () => {
-                        this.toast.closeModalDialog();
-                        resolve(false);
-                    }),
-                    new DialogButton('WORKSPACE.WORKFLOW.PROCEED', { color: 'primary' }, () => {
-                        this.toast.closeModalDialog();
-                        resolve(true);
-                    }),
-                ],
-            });
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'WORKSPACE.WORKFLOW.USER_NO_PERMISSION',
+            message: 'WORKSPACE.WORKFLOW.USER_NO_PERMISSION_INFO',
+            messageParameters: {
+                user: new AuthorityNamePipe(this.translate).transform(receiver, null),
+            },
+            buttons: [
+                { label: 'CANCEL', config: { color: 'standard' } },
+                { label: 'WORKSPACE.WORKFLOW.PROCEED', config: { color: 'primary' } },
+            ],
         });
+        const response = await dialogRef.afterClosed().toPromise();
+        return response === 'WORKSPACE.WORKFLOW.PROCEED';
     }
 
     private async grantReceiverPermission(

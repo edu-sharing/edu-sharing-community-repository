@@ -56,7 +56,7 @@ type Story = StoryObj<GenericDialogComponent<string>>;
 export const Info: Story = {
     args: {
         data: {
-            messageText: 'foo',
+            message: 'foo',
         },
     },
 };

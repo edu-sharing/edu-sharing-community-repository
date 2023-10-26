@@ -1,10 +1,10 @@
-import { RestAdminService } from '../../../core-module/rest/services/rest-admin.service';
 import { Component } from '@angular/core';
-import { DialogButton } from '../../../core-module/core.module';
-import { Toast } from '../../../core-ui-module/toast';
-import { ModalMessageType } from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
-import { forkJoin } from 'rxjs';
 import { ConfigService } from 'ngx-edu-sharing-api';
+import { forkJoin } from 'rxjs';
+import { RestAdminService } from '../../../core-module/rest/services/rest-admin.service';
+import { Toast } from '../../../core-ui-module/toast';
+import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
 
 @Component({
     selector: 'es-admin-config',
@@ -50,6 +50,7 @@ export class AdminConfigComponent {
     constructor(
         private adminService: RestAdminService,
         private configService: ConfigService,
+        private dialogs: DialogsService,
         private toast: Toast,
     ) {
         this.adminService
@@ -90,20 +91,16 @@ export class AdminConfigComponent {
         this.codeOptionsHocoonRW = { ...this.codeOptionsHocoonRW, readOnly: !this.editSupported };
         this.clientCodeOptions = { ...this.clientCodeOptions, readOnly: !this.editSupported };
     }
-    displayError(error: any) {
+    private displayError(error: any) {
         console.warn(error);
         this.toast.closeModalDialog();
-        this.toast.showConfigurableDialog({
+        void this.dialogs.openGenericDialog({
             title: 'ADMIN.GLOBAL_CONFIG.ERROR',
             message: 'ADMIN.GLOBAL_CONFIG.PARSE_ERROR',
             messageParameters: { error: error?.error?.error },
-            messageType: ModalMessageType.HTML,
-            isCancelable: true,
-            buttons: [
-                new DialogButton('ADMIN.GLOBAL_CONFIG.CHECK', { color: 'danger' }, () =>
-                    this.toast.closeModalDialog(),
-                ),
-            ],
+            messageMode: 'html',
+            closable: Closable.Disabled,
+            buttons: [{ label: 'ADMIN.GLOBAL_CONFIG.CHECK', config: { color: 'danger' } }],
         });
     }
     save() {
@@ -141,9 +138,7 @@ export class AdminConfigComponent {
                         (error) => this.displayError(error),
                     );
                 },
-                (error) => {
-                    this.displayError(error);
-                },
+                (error) => this.displayError(error),
             );
         });
     }
