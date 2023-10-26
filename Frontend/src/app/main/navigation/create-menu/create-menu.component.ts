@@ -47,6 +47,7 @@ import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { AddFolderDialogResult } from '../../../features/dialogs/dialog-modules/add-folder-dialog/add-folder-dialog-data';
+import { AddWithConnectorDialogResult } from '../../../features/dialogs/dialog-modules/add-with-connector-dialog/add-with-connector-dialog-data';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { PasteService } from '../../../services/paste.service';
 import { UploadDialogService } from '../../../services/upload-dialog.service';
@@ -95,8 +96,6 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
 
     connectorList: Connector[];
     fileIsOver = false;
-    createConnectorName: string;
-    createConnectorType: Connector;
     cardHasOpenModals$: Observable<boolean>;
     options: OptionItem[];
     tools: Tools;
@@ -401,9 +400,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         }
     }
 
-    async showCreateConnector(connector: Connector) {
-        this.createConnectorName = '';
-        this.createConnectorType = connector;
+    async showCreateConnector(connector: Connector, name?: string) {
         const user = await this.iamService.getCurrentUserAsync();
         if (
             user.person.quota.enabled &&
@@ -417,7 +414,13 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                 }),
                 true,
             );
-            this.createConnectorName = null;
+        } else {
+            const dialogRef = await this.dialogs.openAddWithConnectorDialog({ connector, name });
+            dialogRef.afterClosed().subscribe((result) => {
+                if (result) {
+                    void this.createConnector(connector, result);
+                }
+            });
         }
     }
 
@@ -479,9 +482,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         });
     }
 
-    async createConnector(event: any) {
-        const name = event.name + '.' + event.type.filetype;
-        this.createConnectorName = null;
+    private async createConnector(connector: Connector, event: AddWithConnectorDialogResult) {
         const prop = this.nodeHelper.propertiesFromConnector(event);
         let win: any;
         if (!this.bridge.isRunningCordova()) {
@@ -491,7 +492,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             .createNode((await this.getParent()).ref.id, RestConstants.CCM_TYPE_IO, [], prop, false)
             .subscribe(
                 (data: NodeWrapper) => {
-                    this.editConnector(data.node, event.type, win, this.createConnectorType);
+                    this.editConnector(data.node, event.type as Filetype, win, connector);
                     this.onCreate.emit([data.node]);
                 },
                 (error: any) => {
@@ -500,7 +501,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                         this.nodeHelper.handleNodeError(event.name, error) ===
                         RestConstants.DUPLICATE_NODE_RESPONSE
                     ) {
-                        this.createConnectorName = event.name;
+                        void this.showCreateConnector(connector, event.name);
                     }
                 },
             );
@@ -524,12 +525,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                             this.createToolType = null;
                         },
                         (error: any) => {
-                            if (
-                                this.nodeHelper.handleNodeError(n.name, error) ===
-                                RestConstants.DUPLICATE_NODE_RESPONSE
-                            ) {
-                                this.createConnectorName = event.name;
-                            }
+                            this.nodeHelper.handleNodeError(n.name, error);
                         },
                     );
                 }

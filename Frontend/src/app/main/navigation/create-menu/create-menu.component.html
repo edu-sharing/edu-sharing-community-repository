@@ -5,22 +5,6 @@
   [options]="options"
   position="right"
 ></es-dropdown>
-<!-- TODO: include via overlays -->
-<!-- <es-workspace-management #management
-        [parent]="getParent()"
-        [(showUploadSelect)]="showUploadSelect"
-        [uploadShowPicker]="showPicker"
-        [(filesToUpload)]="filesToUpload"
-        (onUploadFileSelected)="uploadFiles($event)"
-        (onUploadFilesProcessed)="afterUpload($event)"
-></es-workspace-management> -->
-<es-workspace-create-connector
-  *ngIf="createConnectorName != null"
-  [name]="createConnectorName"
-  [connector]="createConnectorType"
-  (onCancel)="createConnectorName = null"
-  (onCreate)="createConnector($event)"
-></es-workspace-create-connector>
 
 <es-create-ltitool
   *ngIf="createToolType != null"

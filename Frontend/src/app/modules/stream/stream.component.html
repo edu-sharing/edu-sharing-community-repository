@@ -263,19 +263,11 @@
       class="collection-item"
       [class.collection-item-separate]="!i"
       tabindex="0"
-      (keyup.enter)="showCreate = false; createConnectorName = ''; createConnectorType = connector"
-      (click)="showCreate = false; createConnectorName = ''; createConnectorType = connector"
+      (click)="showCreate = false; openCreateWithConnectorDialog(connector)"
     >
       <i class="material-icons">{{ connector.icon }}</i>
       {{ 'CONNECTOR.' + connector.id + '.NAME' | translate
       }}<img class="connectorBeta" src="assets/images/beta.svg"
     /></a>
   </div>
-  <es-workspace-create-connector
-    *ngIf="createConnectorName != null"
-    [name]="createConnectorName"
-    [connector]="createConnectorType"
-    (onCancel)="createConnectorName = null"
-    (onCreate)="createConnector($event)"
-  ></es-workspace-create-connector>
 </div>

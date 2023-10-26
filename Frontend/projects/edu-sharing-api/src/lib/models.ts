@@ -3,6 +3,7 @@
 export {
     About,
     Connector,
+    ConnectorFileType,
     ConnectorList,
     CollectionReference,
     FeedbackData,

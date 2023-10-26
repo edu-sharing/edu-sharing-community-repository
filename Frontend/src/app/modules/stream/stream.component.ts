@@ -1,5 +1,8 @@
+import { trigger } from '@angular/animations';
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router, RoutesRecognized } from '@angular/router';
+import * as moment from 'moment';
+import { StreamEntry, StreamV1Service } from 'ngx-edu-sharing-api';
 import {
     CustomOptions,
     DefaultGroups,
@@ -11,6 +14,10 @@ import {
     UIAnimation,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
+import { Observable, Subject, Subscription } from 'rxjs';
+import { filter, pairwise } from 'rxjs/operators';
+import { CordovaService } from '../../common/services/cordova.service';
+import { BridgeService } from '../../core-bridge-module/bridge.service';
 import * as EduData from '../../core-module/core.module';
 import {
     Connector,
@@ -31,16 +38,11 @@ import {
     STREAM_STATUS,
     TemporaryStorageService,
 } from '../../core-module/core.module'; //
+import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { Toast } from '../../core-ui-module/toast'; //
 import { UIHelper } from '../../core-ui-module/ui-helper';
-import { Observable, Subject, Subscription } from 'rxjs';
-import { trigger } from '@angular/animations';
-import { CordovaService } from '../../common/services/cordova.service';
-import * as moment from 'moment';
-import { BridgeService } from '../../core-bridge-module/bridge.service';
-import { NodeHelperService } from '../../core-ui-module/node-helper.service';
-import { filter, pairwise } from 'rxjs/operators';
-import { StreamEntry, StreamV1Service } from 'ngx-edu-sharing-api';
+import { AddWithConnectorDialogResult } from '../../features/dialogs/dialog-modules/add-with-connector-dialog/add-with-connector-dialog-data';
+import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import {
@@ -57,8 +59,6 @@ import {
 })
 export class StreamComponent implements OnInit, AfterViewInit, OnDestroy {
     connectorList: ConnectorList;
-    createConnectorName: string;
-    createConnectorType: Connector;
     createAllowed: boolean;
     showCreate = false;
     public collectionNodes: EduData.Node[];
@@ -113,6 +113,7 @@ export class StreamComponent implements OnInit, AfterViewInit, OnDestroy {
         private route: ActivatedRoute,
         private connector: RestConnectorService,
         private connectors: RestConnectorsService,
+        private dialogs: DialogsService,
         private nodeService: RestNodeService,
         private cordova: CordovaService,
         private searchService: RestSearchService,
@@ -391,8 +392,17 @@ export class StreamComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.showCreate = true;
     }
-    createConnector(event: any) {
-        this.createConnectorName = null;
+
+    async openCreateWithConnectorDialog(connector: Connector, name?: string): Promise<void> {
+        const dialogRef = await this.dialogs.openAddWithConnectorDialog({ connector, name });
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                this.createConnector(connector, result);
+            }
+        });
+    }
+
+    private createConnector(connector: Connector, event: AddWithConnectorDialogResult) {
         const prop = this.nodeHelper.propertiesFromConnector(event);
         let win: any;
         if (!this.cordova.isRunningCordova()) {
@@ -402,7 +412,7 @@ export class StreamComponent implements OnInit, AfterViewInit, OnDestroy {
             .createNode(RestConstants.INBOX, RestConstants.CCM_TYPE_IO, [], prop, false)
             .subscribe(
                 (data: NodeWrapper) => {
-                    this.editConnector(data.node, event.type, win, this.createConnectorType);
+                    this.editConnector(data.node, event.type as Filetype, win, connector);
                     UIHelper.goToWorkspaceFolder(
                         this.nodeService,
                         this.router,
@@ -416,7 +426,7 @@ export class StreamComponent implements OnInit, AfterViewInit, OnDestroy {
                         this.nodeHelper.handleNodeError(event.name, error) ==
                         RestConstants.DUPLICATE_NODE_RESPONSE
                     ) {
-                        this.createConnectorName = event.name;
+                        void this.openCreateWithConnectorDialog(connector, event.name);
                     }
                 },
             );

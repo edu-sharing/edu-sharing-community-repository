@@ -13,6 +13,10 @@ import {
     AddMaterialDialogResult,
 } from './dialog-modules/add-material-dialog/add-material-dialog-data';
 import {
+    AddWithConnectorDialogData,
+    AddWithConnectorDialogResult,
+} from './dialog-modules/add-with-connector-dialog/add-with-connector-dialog-data';
+import {
     ContributorEditDialogData,
     ContributorEditDialogResult,
 } from './dialog-modules/contributor-edit-dialog/contributor-edit-dialog-data';
@@ -586,6 +590,19 @@ export class DialogsService {
             width: 600,
             data,
             autoFocus: '[autofocus]',
+            closable: Closable.Casual,
+        });
+    }
+
+    async openAddWithConnectorDialog(
+        data: AddWithConnectorDialogData,
+    ): Promise<CardDialogRef<AddWithConnectorDialogData, AddWithConnectorDialogResult>> {
+        const { AddWithConnectorDialogComponent } = await import(
+            './dialog-modules/add-with-connector-dialog/add-with-connector-dialog.module'
+        );
+        return this.cardDialog.open(AddWithConnectorDialogComponent, {
+            width: 600,
+            data,
             closable: Closable.Casual,
         });
     }

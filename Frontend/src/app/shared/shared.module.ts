@@ -47,7 +47,6 @@ import { SpinnerSmallComponent } from './components/spinner-small/spinner-small.
 import { TutorialComponent } from './components/tutorial/tutorial.component';
 import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
 import { UserQuotaComponent } from './components/user-quota/user-quota.component';
-import { WorkspaceCreateConnector } from './dialogs/create-connector/create-connector.component';
 import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.component';
 import { ElementRefDirective } from './directives/element-ref.directive';
 import { EscapeHtmlPipe } from './directives/escape-html.pipe';
@@ -99,7 +98,6 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
         UserAvatarComponent,
         UserQuotaComponent,
         VersionLabelPipe,
-        WorkspaceCreateConnector,
     ],
     imports: [
         A11yModule,
@@ -192,7 +190,6 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
         UserAvatarComponent,
         UserQuotaComponent,
         VersionLabelPipe,
-        WorkspaceCreateConnector,
     ],
 })
 export class SharedModule {}
