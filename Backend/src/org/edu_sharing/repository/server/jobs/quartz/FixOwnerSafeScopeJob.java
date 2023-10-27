@@ -51,7 +51,9 @@ public class FixOwnerSafeScopeJob extends AbstractJob{
         persist = new Boolean(persistParam);
 
 
+        logger.info("starting getAllPeople");
         List<PersonService.PersonInfo> allPeople = getAllPeople();
+        logger.info("finished getAllPeople");
         for(PersonService.PersonInfo personInfo : allPeople){
             NodeRef personNodeRef = personInfo.getNodeRef();
             List<ChildAssociationRef> personScopes = nodeService.getChildAssocs(personNodeRef, ScopeUserHomeServiceImpl.CHILD_ASSOC_PERSON_SCOPES, RegexQNamePattern.MATCH_ALL);
