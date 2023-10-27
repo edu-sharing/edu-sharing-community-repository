@@ -8,11 +8,10 @@ import {
     OnInit,
     TemplateRef,
     ViewChild,
-    ViewContainerRef,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { AboutService, NetworkService } from 'ngx-edu-sharing-api';
+import { AboutService, NetworkService, Store } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     DateHelper,
@@ -43,7 +42,6 @@ import {
     RestConnectorService,
     RestConstants,
     RestHelper,
-    RestIamService,
     RestMediacenterService,
     RestNodeService,
     RestOrganizationService,
@@ -97,27 +95,26 @@ export class AdminComponent implements OnInit, OnDestroy {
     elasticResponse: NodeListElastic;
 
     constructor(
-        private toast: Toast,
+        private about: AboutService,
+        private admin: RestAdminService,
+        private componentFactoryResolver: ComponentFactoryResolver,
+        private config: ConfigurationService,
+        private connector: RestConnectorService,
+        private dialogs: DialogsService,
+        private mainNav: MainNavService,
+        private mediacenterService: RestMediacenterService,
+        private networkService: NetworkService,
+        private node: RestNodeService,
+        private organization: RestOrganizationService,
+        private platformLocation: PlatformLocation,
         private route: ActivatedRoute,
         private router: Router,
-        private platformLocation: PlatformLocation,
-        private config: ConfigurationService,
+        private searchApi: RestSearchService,
+        private sessionStorage: SessionStorageService,
+        private storage: SessionStorageService,
+        private toast: Toast,
         private translate: TranslateService,
         private translations: TranslationsService,
-        private iamService: RestIamService,
-        private storage: SessionStorageService,
-        private networkService: NetworkService,
-        private mediacenterService: RestMediacenterService,
-        private componentFactoryResolver: ComponentFactoryResolver,
-        private viewContainerRef: ViewContainerRef,
-        private admin: RestAdminService,
-        private connector: RestConnectorService,
-        private about: AboutService,
-        private node: RestNodeService,
-        private searchApi: RestSearchService,
-        private mainNav: MainNavService,
-        private dialogs: DialogsService,
-        private organization: RestOrganizationService,
     ) {
         this.addCustomComponents(
             CustomHelper.getCustomComponents('AdminComponent', this.componentFactoryResolver),
@@ -1454,6 +1451,12 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     private async showWarningDialog(): Promise<void> {
+        const alreadyConfirmed = await this.sessionStorage
+            .get('admin-confirmed-warning-dialog', false, Store.Session)
+            .toPromise();
+        if (alreadyConfirmed) {
+            return;
+        }
         const dialogRef = await this.dialogs.openGenericDialog({
             title: 'ADMIN.WARNING_TITLE',
             message: 'ADMIN.WARNING_INFO',
@@ -1467,6 +1470,8 @@ export class AdminComponent implements OnInit, OnDestroy {
         dialogRef.afterClosed().subscribe((result) => {
             if (result === 'CANCEL') {
                 window.history.back();
+            } else if (result === 'ADMIN.UNDERSTAND') {
+                void this.sessionStorage.set('admin-confirmed-warning-dialog', true, Store.Session);
             }
         });
     }
