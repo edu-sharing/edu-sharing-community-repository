@@ -1,9 +1,21 @@
-import { forkJoin as observableForkJoin, Observable, Observer, of } from 'rxjs';
-import { catchError, first, take } from 'rxjs/operators';
-import { ListItem, OPEN_URL_MODE, UIConstants } from 'ngx-edu-sharing-ui';
-import { ConfigurationService } from '../core-module/rest/services/configuration.service';
-import { TranslateService } from '@ngx-translate/core';
+import { PlatformLocation } from '@angular/common';
+import {
+    ComponentFactoryResolver,
+    ComponentRef,
+    ElementRef,
+    EmbeddedViewRef,
+    Injector,
+    NgZone,
+    Type,
+    ViewContainerRef,
+} from '@angular/core';
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
+import { LoginInfo } from 'ngx-edu-sharing-api';
+import { ListItem, OPEN_URL_MODE, UIConstants } from 'ngx-edu-sharing-ui';
+import { Observable, Observer, forkJoin as observableForkJoin, of } from 'rxjs';
+import { catchError, first, take } from 'rxjs/operators';
+import { BridgeService } from '../core-bridge-module/bridge.service';
 import {
     CollectionReference,
     Connector,
@@ -15,33 +27,22 @@ import {
     ParentList,
     Permission,
 } from '../core-module/rest/data-object';
-import { RestConstants } from '../core-module/rest/rest-constants';
-import { RestNodeService } from '../core-module/rest/services/rest-node.service';
-import { Toast } from './toast';
-import { RestHelper } from '../core-module/rest/rest-helper';
-import {
-    ComponentFactoryResolver,
-    ComponentRef,
-    ElementRef,
-    EmbeddedViewRef,
-    Injector,
-    NgZone,
-    Type,
-    ViewContainerRef,
-} from '@angular/core';
-import { RestCollectionService } from '../core-module/rest/services/rest-collection.service';
-import { RestConnectorsService } from '../core-module/rest/services/rest-connectors.service';
-import { FrameEventsService } from '../core-module/rest/services/frame-events.service';
-import { BridgeService } from '../core-bridge-module/bridge.service';
-import { RestConnectorService } from '../core-module/rest/services/rest-connector.service';
-import { RouterHelper } from './router.helper';
-import { PlatformLocation } from '@angular/common';
-import { MessageType } from '../core-module/ui/message-type';
 import { Helper } from '../core-module/rest/helper';
-import { NodeHelperService } from './node-helper.service';
+import { RestConstants } from '../core-module/rest/rest-constants';
+import { RestHelper } from '../core-module/rest/rest-helper';
+import { ConfigurationService } from '../core-module/rest/services/configuration.service';
+import { FrameEventsService } from '../core-module/rest/services/frame-events.service';
+import { RestCollectionService } from '../core-module/rest/services/rest-collection.service';
+import { RestConnectorService } from '../core-module/rest/services/rest-connector.service';
+import { RestConnectorsService } from '../core-module/rest/services/rest-connectors.service';
 import { RestIamService } from '../core-module/rest/services/rest-iam.service';
+import { RestNodeService } from '../core-module/rest/services/rest-node.service';
 import { DialogButton } from '../core-module/ui/dialog-button';
-import { LoginInfo } from 'ngx-edu-sharing-api';
+import { MessageType } from '../core-module/ui/message-type';
+import { YES_OR_NO } from '../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import { NodeHelperService } from './node-helper.service';
+import { RouterHelper } from './router.helper';
+import { Toast } from './toast';
 
 export class UIHelper {
     static COPY_URL_PARAMS = ['mainnav', 'reurl', 'reurlTypes', 'reurlCreate', 'applyDirectories'];
@@ -409,7 +410,7 @@ export class UIHelper {
                     )
                     .pipe(catchError((error) => of({ error, node }))),
             ),
-        ).subscribe((results) => {
+        ).subscribe(async (results) => {
             const success: NodeWrapper[] = results.filter((r) => !(r as any).error);
             const failed: { node: Node; error: any }[] = results.filter(
                 (r) => !!(r as any).error,
@@ -429,43 +430,41 @@ export class UIHelper {
                 );
                 if (duplicated.length > 0 && !asProposal) {
                     if (allowDuplicate !== 'ignore') {
-                        bridge.showModalDialog({
+                        const dialogRef = await bridge.openGenericDialog({
                             title: 'COLLECTIONS.ADD_TO.DUPLICATE_TITLE',
                             message: 'COLLECTIONS.ADD_TO.DUPLICATE_MESSAGE',
-                            messageParameters: { count: duplicated.length },
-                            isCancelable: true,
-                            buttons: DialogButton.getYesNo(
-                                () => {
-                                    bridge.closeModalDialog();
-                                    if (callback) {
-                                        // Invoke `callback` only with the nodes successfully added
-                                        // before.
-                                        callback(success.map((n) => n.node as CollectionReference));
-                                    }
-                                },
-                                () => {
-                                    bridge.closeModalDialog();
-                                    UIHelper.addToCollection(
-                                        nodeHelper,
-                                        collectionService,
-                                        router,
-                                        bridge,
-                                        collection,
-                                        duplicated.map((d) => d.node),
-                                        false,
-                                        (nodes) =>
-                                            // Invoke `callback` with both, the nodes successfully added
-                                            // before and the duplicate nodes added now.
-                                            callback?.([
-                                                ...success.map(
-                                                    (n) => n.node as CollectionReference,
-                                                ),
-                                                ...nodes,
-                                            ]),
-                                        true,
-                                    );
-                                },
-                            ),
+                            messageParameters: { count: duplicated.length.toString() },
+                            buttons: YES_OR_NO,
+                        });
+                        dialogRef.afterClosed().subscribe((response) => {
+                            if (response === 'YES') {
+                                UIHelper.addToCollection(
+                                    nodeHelper,
+                                    collectionService,
+                                    router,
+                                    bridge,
+                                    collection,
+                                    duplicated.map((d) => d.node),
+                                    false,
+                                    (nodes) =>
+                                        // Invoke `callback` with both, the nodes successfully added
+                                        // before and the duplicate nodes added now.
+                                        callback?.([
+                                            ...success.map((n) => n.node as CollectionReference),
+                                            ...nodes,
+                                        ]),
+                                    true,
+                                );
+                            } else if (response === 'NO') {
+                                // Invoke `callback` only with the nodes successfully added
+                                // before.
+                                callback?.(success.map((n) => n.node as CollectionReference));
+                            } else {
+                                // Dialog was canceled by the user.
+                                //
+                                // TODO: should we invoke `callback` here?
+                                bridge.closeModalDialog();
+                            }
                         });
                         return;
                     }

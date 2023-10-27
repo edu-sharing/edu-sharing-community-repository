@@ -1,12 +1,18 @@
 import { Injectable, Injector } from '@angular/core';
-import { Toast } from '../core-ui-module/toast';
-import { CordovaService } from '../common/services/cordova.service';
 import { TranslationsService } from 'ngx-edu-sharing-ui';
-import { MessageType } from '../core-module/ui/message-type';
+import { CordovaService } from '../common/services/cordova.service';
 import {
     ModalDialogOptions,
     ProgressType,
 } from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
+import { MessageType } from '../core-module/ui/message-type';
+import { Toast } from '../core-ui-module/toast';
+import { CardDialogRef } from '../features/dialogs/card-dialog/card-dialog-ref';
+import {
+    GenericDialogConfig,
+    GenericDialogData,
+} from '../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import { DialogsService } from '../features/dialogs/dialogs.service';
 
 @Injectable({ providedIn: 'root' })
 export class BridgeService {
@@ -35,6 +41,11 @@ export class BridgeService {
     }
     closeModalDialog() {
         this.injector.get(Toast).closeModalDialog();
+    }
+    openGenericDialog<R extends string>(
+        config: GenericDialogConfig<R>,
+    ): Promise<CardDialogRef<GenericDialogData<R>, R>> {
+        return this.injector.get(DialogsService).openGenericDialog(config);
     }
     showModalDialog(options: ModalDialogOptions) {
         this.injector.get(Toast).showConfigurableDialog(options);
