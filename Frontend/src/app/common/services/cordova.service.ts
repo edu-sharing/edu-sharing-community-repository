@@ -14,7 +14,7 @@ import { RestConstants } from '../../core-module/rest/rest-constants';
 import { RestConnectorService } from '../../core-module/rest/services/rest-connector.service';
 import { AuthenticationService, LoginInfo } from 'ngx-edu-sharing-api';
 import { RestLocatorService } from '../../core-module/rest/services/rest-locator.service';
-import { first, map } from 'rxjs/operators';
+import { first, map, share } from 'rxjs/operators';
 
 declare var cordova: any;
 
@@ -32,6 +32,40 @@ export class CordovaService {
     private onBackBehaviour = OnBackBehaviour.default;
     platform: 'ios' | 'android';
     private lastValidLogin: number;
+
+    oauthRequestData: string;
+    oauthRequest$ = new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
+        const url = this.injector.get(RestLocatorService).endpointUrl + '../oauth2/token';
+        const headers = { 'Content-Type': 'application/x-www-form-urlencoded', Accept: '*/*' };
+        const options = { headers, withCredentials: false };
+
+        this.http.post<OAuthResult>(url, this.oauthRequestData, options).subscribe(
+            async (oauth: OAuthResult) => {
+                if (oauth == null) {
+                    observer.error('INVALID_CREDENTIALS');
+                    observer.complete();
+                    return;
+                }
+
+                // set local expire ts on token
+                this.oauth = oauth;
+                // force a renew to consum the token
+                this.injector.get(AuthenticationService).loginToken(oauth.access_token);
+                observer.next(this.oauth);
+                observer.complete();
+            },
+            (error: any) => {
+                if (error.status == 401) {
+                    observer.error('LOGIN.ERROR');
+                    observer.complete();
+                    return;
+                }
+
+                observer.error(error);
+                observer.complete();
+            },
+        );
+    }).pipe(share());
 
     get oauth() {
         return this.oauth$.value;
@@ -94,7 +128,6 @@ export class CordovaService {
             console.info('ionic user agent, add cordova.js to header', this.platform, version);
         }
         this.initialHref = window.location.href;
-
         // CORDOVA EVENT: Pause (App is put into Background)
         const whenDeviceGoesBackground = () => {
             // rember time when app went into background
@@ -1228,34 +1261,8 @@ export class CordovaService {
         } else if (grantType === 'client_credentials') {
             // nothing is needed, session will be sent automatically
         }
-        return new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
-            this.http.post<OAuthResult>(url, data, options).subscribe(
-                async (oauth: OAuthResult) => {
-                    if (oauth == null) {
-                        observer.error('INVALID_CREDENTIALS');
-                        observer.complete();
-                        return;
-                    }
-
-                    // set local expire ts on token
-                    this.oauth = oauth;
-                    // force a renew to consum the token
-                    this.injector.get(AuthenticationService).loginToken(oauth.access_token);
-                    observer.next(this.oauth);
-                    observer.complete();
-                },
-                (error: any) => {
-                    if (error.status == 401) {
-                        observer.error('LOGIN.ERROR');
-                        observer.complete();
-                        return;
-                    }
-
-                    observer.error(error);
-                    observer.complete();
-                },
-            );
-        });
+        this.oauthRequestData = data;
+        return this.oauthRequest$;
     }
     public reinitStatus(
         endpointUrl = this.injector.get(RestLocatorService).endpointUrl,
@@ -1317,30 +1324,11 @@ export class CordovaService {
     refreshOAuth(
         endpointUrl = this.injector.get(RestLocatorService).endpointUrl,
     ): Observable<OAuthResult> {
-        const url = endpointUrl + '../oauth2/token';
-        const headers = { 'Content-Type': 'application/x-www-form-urlencoded', Accept: '*/*' };
-        const options = { headers, withCredentials: false };
-
-        const data =
+        this.oauthRequestData =
             'grant_type=refresh_token&client_id=eduApp&client_secret=secret' +
             '&refresh_token=' +
             encodeURIComponent(this.oauth.refresh_token);
-
-        return new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
-            this.http.post<OAuthResult>(url, data, options).subscribe(
-                (oauthNew) => {
-                    // set local expire ts on token
-                    this.oauth = oauthNew;
-                    observer.next(this.oauth);
-                    observer.complete();
-                },
-                (error: any) => {
-                    console.error(error);
-                    observer.error(error);
-                    observer.complete();
-                },
-            );
-        });
+        return this.oauthRequest$;
     }
 
     /**

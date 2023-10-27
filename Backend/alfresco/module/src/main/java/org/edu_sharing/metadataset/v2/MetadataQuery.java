@@ -5,6 +5,7 @@ import org.apache.commons.lang3.SerializationUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MetadataQuery extends MetadataQueryBase implements Serializable {
@@ -13,6 +14,7 @@ public class MetadataQuery extends MetadataQueryBase implements Serializable {
 	protected Boolean applyBasequery;
 	protected boolean basequeryAsFilter = true;
 	private List<MetadataQueryParameter> parameters;
+	private List<SpecialFilter> specialFilter = new ArrayList<>();
 
 	public MetadataQuery(){}
 
@@ -69,6 +71,8 @@ public class MetadataQuery extends MetadataQueryBase implements Serializable {
 			this.conditions=query.conditions;
 		if(query.join!=null)
 			this.join=query.join;
+		if(!query.specialFilter.isEmpty())
+			this.specialFilter=query.specialFilter;
 
 		if(query.getBasequeryAsFilter() != this.getBasequeryAsFilter()){
 			this.setBasequeryAsFilter(query.getBasequeryAsFilter());
@@ -101,5 +105,19 @@ public class MetadataQuery extends MetadataQueryBase implements Serializable {
 
 	public boolean getBasequeryAsFilter() {
 		return basequeryAsFilter;
+	}
+
+	public void addSpecialFilter(SpecialFilter filter) {
+		specialFilter.add(filter);
+	}
+
+	public List<SpecialFilter> getSpecialFilter() {
+		return specialFilter;
+	}
+
+	public enum SpecialFilter {
+		exclude_system_folder,
+		exclude_sites_folder,
+		exclude_people_folder,
 	}
 }

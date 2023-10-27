@@ -1954,6 +1954,8 @@ public class CCConstants {
 			usagePermissions.add(PERMISSION_READ_ALL);
 			usagePermissions.add(PERMISSION_CONSUMER);
 			usagePermissions.add(PERMISSION_COMMENT);
+			usagePermissions.add(PERMISSION_RATE);
+			usagePermissions.add(PERMISSION_RATE_READ);
 		}
 		return usagePermissions;
 	}

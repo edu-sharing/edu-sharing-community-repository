@@ -161,6 +161,7 @@ export class LoginAppComponent implements OnInit {
                 this.goToDefaultLocation();
             },
             (error) => {
+                console.warn(error);
                 this.isLoading = false;
                 if (typeof error == 'string') {
                     this.toast.error(null, error);
