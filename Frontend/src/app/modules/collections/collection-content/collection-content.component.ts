@@ -11,17 +11,15 @@ import {
     TemplateRef,
     ViewChild,
 } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import {
     AuthenticationService,
     ConfigService,
     MdsService,
     Node,
     ProposalNode,
-    UserService,
 } from 'ngx-edu-sharing-api';
-import { RestHelper } from '../../../core-module/rest/rest-helper';
-import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
-import { filter, takeUntil } from 'rxjs/operators';
 import {
     ActionbarComponent,
     CanDrop,
@@ -42,20 +40,10 @@ import {
     Scope,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
-import { RestConstants } from '../../../core-module/rest/rest-constants';
-import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { ActivatedRoute, Router } from '@angular/router';
-import { MainNavService } from '../../../main/navigation/main-nav.service';
-import { forkJoin as observableForkJoin, Subject } from 'rxjs';
-import { RestNodeService } from '../../../core-module/rest/services/rest-node.service';
-import { Toast } from '../../../core-ui-module/toast';
-import { DialogButton } from '../../../core-module/ui/dialog-button';
-import { RestCollectionService } from '../../../core-module/rest/services/rest-collection.service';
-import { RequestObject } from '../../../core-module/rest/request-object';
-import { Helper } from '../../../core-module/rest/helper';
-import { UIService } from '../../../core-module/rest/services/ui.service';
-import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
+import { Subject, forkJoin as observableForkJoin } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { DialogType } from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
+import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import * as EduData from '../../../core-module/core.module';
 import {
     CollectionReference,
@@ -64,15 +52,26 @@ import {
     NodeWrapper,
     Permission,
 } from '../../../core-module/core.module';
+import { Helper } from '../../../core-module/rest/helper';
 import { MdsHelper } from '../../../core-module/rest/mds-helper';
-import { TranslateService } from '@ngx-translate/core';
-import { BridgeService } from '../../../core-bridge-module/bridge.service';
+import { RequestObject } from '../../../core-module/rest/request-object';
+import { RestConstants } from '../../../core-module/rest/rest-constants';
+import { RestHelper } from '../../../core-module/rest/rest-helper';
+import { RestCollectionService } from '../../../core-module/rest/services/rest-collection.service';
+import { RestNodeService } from '../../../core-module/rest/services/rest-node.service';
+import { UIService } from '../../../core-module/rest/services/ui.service';
+import { DialogButton } from '../../../core-module/ui/dialog-button';
+import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
+import { Toast } from '../../../core-ui-module/toast';
+import { UIHelper } from '../../../core-ui-module/ui-helper';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../../../main/navigation/main-nav.service';
 import {
     ManagementEvent,
     ManagementEventType,
 } from '../../management-dialogs/management-dialogs.component';
 import { CollectionInfoBarComponent } from '../collection-info-bar/collection-info-bar.component';
-import { DialogType } from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 
 @Component({
     selector: 'es-collection-content',
@@ -178,24 +177,24 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private contentNode: Node;
     permissions: Permission[];
     login: LoginResult;
+
     constructor(
+        private authenticationService: AuthenticationService,
+        private bridge: BridgeService,
+        private collectionService: RestCollectionService,
+        private configurationService: ConfigService,
+        private dialogs: DialogsService,
+        private loadingScreen: LoadingScreenService,
+        private mainNavService: MainNavService,
+        private mdsService: MdsService,
         private nodeHelper: NodeHelperService,
         private nodeService: RestNodeService,
-        private collectionService: RestCollectionService,
-        private toast: Toast,
-        private bridge: BridgeService,
-        private route: ActivatedRoute,
-        private loadingScreen: LoadingScreenService,
-        private uiService: UIService,
-        private router: Router,
-        private connector: RestConnectorService,
-        private translation: TranslateService,
-        private userService: UserService,
-        private configurationService: ConfigService,
         private optionsService: OptionsHelperDataService,
-        private mdsService: MdsService,
-        private mainNavService: MainNavService,
-        private authenticationService: AuthenticationService,
+        private route: ActivatedRoute,
+        private router: Router,
+        private toast: Toast,
+        private translation: TranslateService,
+        private uiService: UIService,
     ) {
         this.sortCollectionColumns[this.sortCollectionColumns.length - 1].mode = 'ascending';
         // this.collectionSortEmitter.subscribe((sort: SortEvent) => this.setCollectionSort(sort));
@@ -518,36 +517,31 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         }
     }
 
-    onContentClick(event: NodeClickEvent<CollectionReference | ProposalNode>, force = false): void {
+    async onContentClick(event: NodeClickEvent<CollectionReference | ProposalNode>): Promise<void> {
         this.contentNode = event.element;
-        let buttons: DialogButton[] = [];
         if (event.element.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL) {
             this.clickElementEvent(event);
-            return;
-        }
-        if (this.isAllowedToDeleteNodes([event.element])) {
-            buttons.push(
-                new DialogButton('OPTIONS.REMOVE_REF', { color: 'standard' }, () =>
-                    this.deleteFromCollection(() => this.toast.closeModalDialog()),
-                ),
-            );
-        }
-        buttons.push(
-            new DialogButton('COLLECTIONS.OPEN_MISSING', { color: 'primary' }, () => {
-                this.onContentClick(event, true);
-                this.toast.closeModalDialog();
-            }),
-        );
-        if ((event.element as CollectionReference).originalId == null && !force) {
-            this.toast.showConfigurableDialog({
+        } else if ((event.element as CollectionReference).originalId == null) {
+            const dialogRef = await this.dialogs.openGenericDialog({
                 title: 'COLLECTIONS.ORIGINAL_MISSING',
                 message: 'COLLECTIONS.ORIGINAL_MISSING_INFO',
-                isCancelable: true,
-                buttons,
+                buttons: [
+                    ...(this.isAllowedToDeleteNodes([event.element])
+                        ? [{ label: 'OPTIONS.REMOVE_REF', config: { color: 'standard' as const } }]
+                        : []),
+                    { label: 'COLLECTIONS.OPEN_MISSING', config: { color: 'primary' } },
+                ],
             });
-            return;
+            dialogRef.afterClosed().subscribe((response) => {
+                if (response === 'OPTIONS.REMOVE_REF') {
+                    this.deleteFromCollection();
+                } else if (response === 'COLLECTIONS.OPEN_MISSING') {
+                    this.clickElementEvent(event);
+                }
+            });
+        } else {
+            this.clickElementEvent(event);
         }
-        this.clickElementEvent(event);
     }
 
     private clickElementEvent(event: NodeClickEvent<CollectionReference | ProposalNode>) {

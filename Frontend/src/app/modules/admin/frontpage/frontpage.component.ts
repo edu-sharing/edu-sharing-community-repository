@@ -1,26 +1,26 @@
-import { RestAdminService } from '../../../core-module/rest/services/rest-admin.service';
 import { Component, EventEmitter, Output } from '@angular/core';
+import { UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
-import { Node } from '../../../core-module/rest/data-object';
 import {
     InteractionType,
     ListItem,
     NodeDataSource,
     NodeEntriesDisplayType,
 } from 'ngx-edu-sharing-ui';
-import { RestConstants } from '../../../core-module/rest/rest-constants';
-import { ConfigurationService } from '../../../core-module/rest/services/configuration.service';
 import {
-    DialogButton,
     RestCollectionService,
-    RestIamService,
     RestMdsService,
     RestNodeService,
 } from '../../../core-module/core.module';
-import { Toast } from '../../../core-ui-module/toast';
-import { UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { Node } from '../../../core-module/rest/data-object';
 import { MdsHelper } from '../../../core-module/rest/mds-helper';
+import { RestConstants } from '../../../core-module/rest/rest-constants';
+import { ConfigurationService } from '../../../core-module/rest/services/configuration.service';
+import { RestAdminService } from '../../../core-module/rest/services/rest-admin.service';
+import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
+import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
 
 @Component({
     selector: 'es-admin-frontpage',
@@ -44,28 +44,16 @@ export class AdminFrontpageComponent {
     codeOptions = { minimap: { enabled: false }, language: 'json' };
     toolpermissions: any;
 
-    /*
-  totalCountFormControl = new FormControl('', [
-    Validators.required,
-    Validators.pattern("[0-9]*"),
-    this.totalCountValidator
-  ]);
-  displayCountFormControl = new FormControl('', [
-    Validators.required,
-    //this.totalCountValidator
-  ]);
-  */
-
     constructor(
-        private formBuilder: UntypedFormBuilder,
         private adminService: RestAdminService,
-        private iamService: RestIamService,
-        private translate: TranslateService,
-        private nodeService: RestNodeService,
         private collectionService: RestCollectionService,
-        public configService: ConfigurationService,
-        private toast: Toast,
+        private dialogs: DialogsService,
+        private formBuilder: UntypedFormBuilder,
         private mdsService: RestMdsService,
+        private nodeService: RestNodeService,
+        private toast: Toast,
+        private translate: TranslateService,
+        public configService: ConfigurationService,
     ) {
         this.form = this.formBuilder.group(
             {
@@ -133,20 +121,25 @@ export class AdminFrontpageComponent {
         } catch (e) {
             this.toast.error(e);
             this.toast.closeModalDialog();
-            this.toast.showConfigurableDialog({
+            const dialogRef = await this.dialogs.openGenericDialog({
                 title: 'ADMIN.FRONTPAGE.CONFIG_BROKEN',
                 message: 'ADMIN.FRONTPAGE.CONFIG_BROKEN_INFO',
                 buttons: [
-                    new DialogButton('CANCEL', { color: 'standard' }, () =>
-                        this.toast.closeModalDialog(),
-                    ),
-                    new DialogButton('ADMIN.FRONTPAGE.RESET', { color: 'danger' }, () => {
-                        this.toast.showProgressDialog();
-                        this.adminService.updateRepositoryConfig(null).subscribe(() => {
-                            this.update();
-                        });
-                    }),
+                    { label: 'CANCEL', config: { color: 'standard' } },
+                    { label: 'ADMIN.FRONTPAGE.RESET', config: { color: 'danger' } },
                 ],
+                closable: Closable.Standard,
+                maxWidth: 500,
+            });
+            dialogRef.afterClosed().subscribe((response) => {
+                if (response === 'ADMIN.FRONTPAGE.RESET') {
+                    this.toast.showProgressDialog();
+                    this.adminService.updateRepositoryConfig(null).subscribe(() => {
+                        void this.update();
+                    });
+                } else {
+                    this.toast.closeModalDialog();
+                }
             });
         }
         this.updatePreviews();

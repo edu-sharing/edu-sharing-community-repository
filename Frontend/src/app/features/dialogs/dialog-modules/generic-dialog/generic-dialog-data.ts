@@ -3,11 +3,11 @@ import { Node } from 'ngx-edu-sharing-api';
 import { ButtonConfig } from '../../../../core-module/ui/dialog-button';
 import { CardDialogConfig } from '../../card-dialog/card-dialog-config';
 
-export class GenericDialogData<R extends string> {
+export class GenericDialogData<R extends string, P extends string = string> {
     /** Message to show in the dialog body. Will be translated. */
     message?: string;
     /** Translation parameters for the given message text. */
-    messageParameters?: { [key: string]: string };
+    messageParameters?: { [key in P]: string };
     /**
      * How the message should be displayed.
      *
@@ -46,7 +46,7 @@ export class GenericDialogConfig<R extends string> extends GenericDialogData<R> 
     customHeaderBarContent?: TemplateRef<HTMLElement>;
 }
 
-interface GenericDialogButton<R extends string> {
+export interface GenericDialogButton<R extends string> {
     label: R;
     config: ButtonConfig;
 }

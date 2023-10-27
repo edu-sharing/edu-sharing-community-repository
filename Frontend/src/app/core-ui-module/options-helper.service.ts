@@ -40,7 +40,12 @@ import {
     RestHelper,
     RestIamService,
 } from '../core-module/core.module';
-import { Connector, Filetype, NodeWrapper } from '../core-module/rest/data-object';
+import {
+    Connector,
+    Filetype,
+    LocalPermissions,
+    NodeWrapper,
+} from '../core-module/rest/data-object';
 import { Helper } from '../core-module/rest/helper';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { RestConnectorsService } from '../core-module/rest/services/rest-connectors.service';
@@ -48,7 +53,10 @@ import { RestNetworkService } from '../core-module/rest/services/rest-network.se
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
 import { UIService } from '../core-module/rest/services/ui.service';
 import { MessageType } from '../core-module/ui/message-type';
-import { DELETE_OR_CANCEL } from '../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import {
+    DELETE_OR_CANCEL,
+    OK_OR_CANCEL,
+} from '../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { WorkspaceManagementDialogsComponent } from '../modules/management-dialogs/management-dialogs.component';
@@ -1105,8 +1113,17 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         deleteNode.group = DefaultGroups.Delete;
         deleteNode.priority = 10;
 
-        const unblockNode = new OptionItem('OPTIONS.UNBLOCK_IMPORT', 'sync', (object) => {
-            management.nodeImportUnblock = this.getObjects(object, data);
+        const unblockNode = new OptionItem('OPTIONS.UNBLOCK_IMPORT', 'sync', async (object) => {
+            const dialogRef = await this.dialogs.openGenericDialog({
+                title: 'WORKSPACE.UNBLOCK_TITLE',
+                message: 'WORKSPACE.UNBLOCK_MESSAGE',
+                buttons: OK_OR_CANCEL,
+            });
+            dialogRef.afterClosed().subscribe((response) => {
+                if (response === 'OK') {
+                    this.unblockImportedNodes(this.getObjects(object, data));
+                }
+            });
         });
         unblockNode.elementType = [ElementType.NodeBlockedImport];
         unblockNode.constrains = [
@@ -1852,6 +1869,38 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                     .pipe(takeUntil(this.destroyed))
                     .subscribe((event: KeyboardEvent) => this.handleKeyboardEvent(event));
             }
+        });
+    }
+
+    private unblockImportedNodes(nodes: Node[]) {
+        this.toast.showProgressDialog();
+        observableForkJoin(
+            nodes.map((n) => {
+                const properties: any = {};
+                properties[RestConstants.CCM_PROP_IMPORT_BLOCKED] = [null];
+                return new Observable((observer) => {
+                    this.nodeService
+                        .editNodeMetadataNewVersion(
+                            n.ref.id,
+                            RestConstants.COMMENT_BLOCKED_IMPORT,
+                            properties,
+                        )
+                        .subscribe(({ node }) => {
+                            const permissions = new LocalPermissions();
+                            permissions.inherited = true;
+                            permissions.permissions = [];
+                            this.nodeService
+                                .setNodePermissions(node.ref.id, permissions)
+                                .subscribe(() => {
+                                    observer.next(node);
+                                    observer.complete();
+                                });
+                        });
+                });
+            }),
+        ).subscribe((results: Node[]) => {
+            this.toast.closeModalDialog();
+            this.localEvents.nodesChanged.emit(results);
         });
     }
 }

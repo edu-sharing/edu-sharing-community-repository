@@ -1,11 +1,10 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-
-import { RestLtiService } from '../../../core-module/rest/services/rest-lti.service';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { LTIRegistrationToken, LTIRegistrationTokens } from '../../../core-module/rest/data-object';
+import { RestLtiService } from '../../../core-module/rest/services/rest-lti.service';
 import { Toast } from '../../../core-ui-module/toast';
-import { AdminComponent } from '../admin.component';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { DialogButton } from '../../../core-module/ui/dialog-button';
+import { DELETE_OR_CANCEL } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
 
 @Component({
     selector: 'es-lti-admin',
@@ -33,29 +32,29 @@ export class LtiAdminComponent implements OnInit {
     keyId: string;
     authTokenUrl: string;
 
-    constructor(private ltiService: RestLtiService, private toast: Toast) {}
+    constructor(
+        private dialogs: DialogsService,
+        private ltiService: RestLtiService,
+        private toast: Toast,
+    ) {}
 
     ngOnInit(): void {
         this.refresh();
     }
 
-    remove(element: LTIRegistrationToken) {
-        this.toast.showConfigurableDialog({
+    async remove(element: LTIRegistrationToken): Promise<void> {
+        const dialogRef = await this.dialogs.openGenericDialog({
             title: 'ADMIN.LTI.REMOVE_TITLE',
             message: 'ADMIN.LTI.REMOVE_MESSAGE',
-            messageParameters: element,
-            buttons: [
-                new DialogButton('CANCEL', { color: 'standard' }, () =>
-                    this.toast.closeModalDialog(),
-                ),
-                new DialogButton('ADMIN.APPLICATIONS.REMOVE', { color: 'danger' }, () => {
-                    this.ltiService.removeToken(element.token).subscribe((t: void) => {
-                        this.refresh();
-                    });
-                    this.toast.closeModalDialog();
-                }),
-            ],
-            isCancelable: true,
+            messageParameters: element as { [key: string]: any },
+            buttons: DELETE_OR_CANCEL,
+        });
+        dialogRef.afterClosed().subscribe((response) => {
+            if (response === 'YES_DELETE') {
+                this.ltiService.removeToken(element.token).subscribe(() => {
+                    this.refresh();
+                });
+            }
         });
     }
 

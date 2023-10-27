@@ -16,13 +16,11 @@ import {
     UIAnimation,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
-import { Observable, forkJoin as observableForkJoin } from 'rxjs';
+import { forkJoin as observableForkJoin } from 'rxjs';
 import { ErrorProcessingService } from 'src/app/core-ui-module/error.processing';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import {
     CollectionReference,
-    DialogButton,
-    LocalPermissions,
     Node,
     NodeVersions,
     RestCollectionService,
@@ -34,6 +32,10 @@ import {
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { Toast } from '../../core-ui-module/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
+import {
+    OK_OR_CANCEL,
+    YES_OR_NO,
+} from '../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { BulkBehavior } from '../../features/mds/types/types';
 
@@ -64,17 +66,6 @@ export class WorkspaceManagementDialogsComponent {
     @Input() addToCollection: Node[];
     @Output() addToCollectionChange = new EventEmitter();
     @Output() onEvent = new EventEmitter<ManagementEvent>();
-    @Input() set nodeImportUnblock(nodeImportUnblock: Node[]) {
-        this.toast.showConfigurableDialog({
-            title: 'WORKSPACE.UNBLOCK_TITLE',
-            message: 'WORKSPACE.UNBLOCK_MESSAGE',
-            buttons: DialogButton.getOkCancel(
-                () => this.toast.closeModalDialog(),
-                () => this.unblockImportedNodes(nodeImportUnblock),
-            ),
-            isCancelable: true,
-        });
-    }
     @Input() addNodesStream: Node[];
     @Output() addNodesStreamChange = new EventEmitter();
     @Input() nodeSimpleEditChange = new EventEmitter<Node[]>();
@@ -189,7 +180,7 @@ export class WorkspaceManagementDialogsComponent {
         this.addToCollection = null;
         this.addToCollectionChange.emit(null);
     }
-    public addToCollectionList(
+    public async addToCollectionList(
         collection: Node,
         list: Node[] = this.addToCollection,
         close = true,
@@ -199,44 +190,50 @@ export class WorkspaceManagementDialogsComponent {
     ) {
         if (!force) {
             if (collection.access.indexOf(RestConstants.ACCESS_WRITE) === -1) {
-                this.toast.showConfigurableDialog({
+                const dialogRef = await this.dialogs.openGenericDialog({
                     title: 'DIALOG.COLLECTION_PROPSE',
                     message: 'DIALOG.COLLECTION_PROPSE_INFO',
                     messageParameters: { collection: RestHelper.getTitle(collection) },
-                    buttons: DialogButton.getNextCancel(
-                        () => this.toast.closeModalDialog(),
-                        () => {
-                            this.toast.closeModalDialog();
-                            this.addToCollectionList(collection, list, close, callback, true, true);
-                        },
-                    ),
+                    buttons: OK_OR_CANCEL,
+                });
+                dialogRef.afterClosed().subscribe((response) => {
+                    if (response === 'OK') {
+                        void this.addToCollectionList(
+                            collection,
+                            list,
+                            close,
+                            callback,
+                            true,
+                            true,
+                        );
+                    }
                 });
                 return;
             } else if (collection.collection.scope !== RestConstants.COLLECTIONSCOPE_MY) {
-                this.toast.showConfigurableDialog({
+                const dialogRef = await this.dialogs.openGenericDialog({
                     title: 'DIALOG.COLLECTION_SHARE_PUBLIC',
                     message: 'DIALOG.COLLECTION_SHARE_PUBLIC_INFO',
                     messageParameters: { collection: RestHelper.getTitle(collection) },
-                    buttons: DialogButton.getNextCancel(
-                        () => this.toast.closeModalDialog(),
-                        () => {
-                            this.toast.closeModalDialog();
-                            this.addToCollectionList(
-                                collection,
-                                list,
-                                close,
-                                callback,
-                                asProposal,
-                                true,
-                            );
-                        },
-                    ),
+                    buttons: OK_OR_CANCEL,
+                });
+                dialogRef.afterClosed().subscribe((response) => {
+                    if (response === 'OK') {
+                        void this.addToCollectionList(
+                            collection,
+                            list,
+                            close,
+                            callback,
+                            asProposal,
+                            true,
+                        );
+                    }
                 });
                 return;
             }
         }
-        if (close) this.cancelAddToCollection();
-        else {
+        if (close) {
+            this.cancelAddToCollection();
+        } else {
             this.toast.closeModalDialog();
         }
         this.toast.showProgressDialog();
@@ -258,17 +255,17 @@ export class WorkspaceManagementDialogsComponent {
         );
     }
 
-    restoreVersion(restore: { version: Version; node: Node }) {
-        this.toast.showConfigurableDialog({
+    async restoreVersion(restore: { version: Version; node: Node }) {
+        const dialogRef = await this.dialogs.openGenericDialog({
             title: 'WORKSPACE.METADATA.RESTORE_TITLE',
             message: 'WORKSPACE.METADATA.RESTORE_MESSAGE',
-            buttons: DialogButton.getYesNo(
-                () => this.toast.closeModalDialog(),
-                () => this.doRestoreVersion(restore.version),
-            ),
-            node: restore.node,
-            isCancelable: true,
-            onCancel: () => this.toast.closeModalDialog(),
+            buttons: YES_OR_NO,
+            nodes: [restore.node],
+        });
+        dialogRef.afterClosed().subscribe((response) => {
+            if (response === 'YES') {
+                this.doRestoreVersion(restore.version);
+            }
         });
     }
     private doRestoreVersion(version: Version): void {
@@ -316,38 +313,6 @@ export class WorkspaceManagementDialogsComponent {
         } else {
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id]);
         }
-    }
-
-    private unblockImportedNodes(nodes: Node[]) {
-        this.toast.showProgressDialog();
-        observableForkJoin(
-            nodes.map((n) => {
-                const properties: any = {};
-                properties[RestConstants.CCM_PROP_IMPORT_BLOCKED] = [null];
-                return new Observable((observer) => {
-                    this.nodeService
-                        .editNodeMetadataNewVersion(
-                            n.ref.id,
-                            RestConstants.COMMENT_BLOCKED_IMPORT,
-                            properties,
-                        )
-                        .subscribe(({ node }) => {
-                            const permissions = new LocalPermissions();
-                            permissions.inherited = true;
-                            permissions.permissions = [];
-                            this.nodeService
-                                .setNodePermissions(node.ref.id, permissions)
-                                .subscribe(() => {
-                                    observer.next(node);
-                                    observer.complete();
-                                });
-                        });
-                });
-            }),
-        ).subscribe((results: Node[]) => {
-            this.toast.closeModalDialog();
-            this.localEvents.nodesChanged.emit(results);
-        });
     }
 
     declineProposals(nodes: ProposalNode[]) {

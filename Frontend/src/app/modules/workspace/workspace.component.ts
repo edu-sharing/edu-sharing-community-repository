@@ -2,9 +2,6 @@ import { trigger } from '@angular/animations';
 import { Component, HostListener, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import * as rxjs from 'rxjs';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { delay, first } from 'rxjs/operators';
 import {
     ActionbarComponent,
     CanDrop,
@@ -24,6 +21,9 @@ import {
     UIAnimation,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
+import * as rxjs from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { delay, first } from 'rxjs/operators';
 import {
     ConfigurationService,
     Connector,
@@ -51,6 +51,7 @@ import { CardService } from '../../core-ui-module/card.service';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { Toast } from '../../core-ui-module/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
+import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import {
@@ -61,7 +62,6 @@ import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcru
 import { WorkspaceExplorerComponent } from './explorer/explorer.component';
 import { WorkspaceTreeComponent } from './tree/tree.component';
 import { canDragDrop, canDropOnNode } from './workspace-utils';
-import { DialogsService } from '../../features/dialogs/dialogs.service';
 
 @Component({
     selector: 'es-workspace-main',
@@ -1033,27 +1033,24 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     }
 
     async createNotAllowed() {
-        const message =
-            (await this.translate.get(this.notAllowedReason).toPromise()) +
-            '\n\n' +
-            (await this.translate.get('WORKSPACE.CREATE_REASON.GENERAL').toPromise());
-        this.toast.showConfigurableDialog({
+        const dialogRef = await this.dialogs.openGenericDialog({
             title: 'WORKSPACE.CREATE_REASON.TITLE',
-            message,
-            isCancelable: true,
+            message:
+                (await this.translate.get(this.notAllowedReason).toPromise()) +
+                '\n' +
+                (await this.translate.get('WORKSPACE.CREATE_REASON.GENERAL').toPromise()),
             buttons: [
-                new DialogButton(
-                    'WORKSPACE.GO_TO_HOME',
-                    { color: 'primary', position: 'opposite' },
-                    () => {
-                        this.openDirectory(RestConstants.USERHOME);
-                        this.toast.closeModalDialog();
-                    },
-                ),
-                new DialogButton('CLOSE', { color: 'standard' }, () =>
-                    this.toast.closeModalDialog(),
-                ),
+                {
+                    label: 'WORKSPACE.GO_TO_HOME',
+                    config: { color: 'primary', position: 'opposite' },
+                },
+                { label: 'CLOSE', config: { color: 'standard' } },
             ],
+        });
+        dialogRef.afterClosed().subscribe((response) => {
+            if (response === 'WORKSPACE.GO_TO_HOME') {
+                this.openDirectory(RestConstants.USERHOME);
+            }
         });
     }
 

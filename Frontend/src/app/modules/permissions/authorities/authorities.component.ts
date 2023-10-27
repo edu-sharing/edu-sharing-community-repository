@@ -1,3 +1,4 @@
+import { trigger } from '@angular/animations';
 import {
     AfterViewInit,
     ApplicationRef,
@@ -10,28 +11,9 @@ import {
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
-import {
-    ConfigurationService,
-    DialogButton,
-    GroupSignupDetails,
-    IamAuthorities,
-    IamGroups,
-    IamUsers,
-    Node,
-    NodeList,
-    Organization,
-    OrganizationOrganizations,
-    RestConnectorService,
-    RestConstants,
-    RestIamService,
-    RestNodeService,
-    RestOrganizationService,
-    SharedFolder,
-    UIService,
-} from '../../../core-module/core.module';
-import { Toast, ToastType } from '../../../core-ui-module/toast';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import { GenericAuthority, Group, User } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     Constrain,
@@ -53,17 +35,35 @@ import {
     Scope,
     UIAnimation,
 } from 'ngx-edu-sharing-ui';
-import { SuggestItem } from '../../../common/ui/autocomplete/autocomplete.component';
-import { Helper } from '../../../core-module/rest/helper';
-import { trigger } from '@angular/animations';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { ModalDialogOptions } from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import { forkJoin } from 'rxjs';
-import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
-import { CsvHelper } from '../../../core-module/csv.helper';
-import { GenericAuthority, Group, User } from 'ngx-edu-sharing-api';
-import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
 import { filter } from 'rxjs/operators';
+import { SuggestItem } from '../../../common/ui/autocomplete/autocomplete.component';
+import {
+    DialogButton,
+    GroupSignupDetails,
+    IamAuthorities,
+    IamGroups,
+    IamUsers,
+    Node,
+    NodeList,
+    Organization,
+    OrganizationOrganizations,
+    RestConnectorService,
+    RestConstants,
+    RestIamService,
+    RestNodeService,
+    RestOrganizationService,
+    SharedFolder,
+    UIService,
+} from '../../../core-module/core.module';
+import { CsvHelper } from '../../../core-module/csv.helper';
+import { Helper } from '../../../core-module/rest/helper';
+import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
+import { Toast, ToastType } from '../../../core-ui-module/toast';
+import { UIHelper } from '../../../core-ui-module/ui-helper';
+import { DELETE_OR_CANCEL } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
 
 @Component({
     selector: 'es-permissions-authorities',
@@ -307,19 +307,19 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     }
 
     constructor(
-        private toast: Toast,
-        private node: RestNodeService,
-        private config: ConfigurationService,
-        private nodeHelper: NodeHelperService,
-        private uiService: UIService,
-        private router: Router,
         private breadcrumbsService: BreadcrumbsService,
-        private ref: ApplicationRef,
-        private translate: TranslateService,
-        private organization: RestOrganizationService,
-        private optionsHelperService: OptionsHelperDataService,
         private connector: RestConnectorService,
+        private dialogs: DialogsService,
         private iam: RestIamService,
+        private node: RestNodeService,
+        private nodeHelper: NodeHelperService,
+        private optionsHelperService: OptionsHelperDataService,
+        private organization: RestOrganizationService,
+        private ref: ApplicationRef,
+        private router: Router,
+        private toast: Toast,
+        private translate: TranslateService,
+        private uiService: UIService,
     ) {
         this.isAdmin = this.connector.getCurrentLogin()?.isAdmin;
         this.organization.getOrganizations().subscribe((data: OrganizationOrganizations) => {
@@ -989,7 +989,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 },
             );
     }
-    private deleteAuthority(data: any, callback: Function) {
+    private async deleteAuthority(data: any, callback: Function) {
         const list = this.getList(data);
         if (
             this._mode == 'GROUP' &&
@@ -998,24 +998,19 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             this.toast.error(null, 'PERMISSIONS.DELETE_ERROR_ADMINISTRATORS');
             return;
         }
-        const options: ModalDialogOptions = {
+        const dialogRef = await this.dialogs.openGenericDialog({
             title: 'PERMISSIONS.DELETE_TITLE',
-            message: 'PERMISSIONS.DELETE_' + this._mode,
+            message: 'PERMISSIONS.DELETE_' + this._mode + (list.length === 1 ? '_SINGLE' : ''),
             messageParameters: {
                 name: this._mode == 'USER' ? list[0].authorityName : list[0].profile.displayName,
             },
-            buttons: [
-                new DialogButton('CANCEL', { color: 'standard' }, () => this.closeDialog()),
-                new DialogButton('PERMISSIONS.MENU_DELETE', { color: 'primary' }, () =>
-                    callback(list),
-                ),
-            ],
-            isCancelable: true,
-        };
-        if (list.length === 1) {
-            options.message += '_SINGLE';
-        }
-        this.toast.showConfigurableDialog(options);
+            buttons: DELETE_OR_CANCEL,
+        });
+        dialogRef.afterClosed().subscribe((response) => {
+            if (response === 'YES_DELETE') {
+                callback(list);
+            }
+        });
     }
     private refresh() {
         this.dataSource.reset();
