@@ -29,6 +29,8 @@ import { UIService } from '../../services/ui.service';
 import { ListItemSort } from '../../types/list-item';
 import { DragData } from '../../types/drag-drop';
 
+let displayedWarnings: string[] = [];
+
 @Component({
     selector: 'es-node-entries-card-grid',
     templateUrl: 'node-entries-card-grid.component.html',
@@ -268,11 +270,15 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
                 )
                 .some((c2) => c2.name === c.name);
             if (!result) {
-                console.warn(
+                const warning =
                     'Sort field ' +
-                        c.name +
-                        ' was specified but is not present as a column. It will be ignored. Please also configure this field in the <lists> section',
-                );
+                    c.name +
+                    ' was specified but is not present as a column. ' +
+                    'It will be ignored. Please also configure this field in the <lists> section';
+                if (!displayedWarnings.includes(warning)) {
+                    console.warn(warning);
+                    displayedWarnings.push(warning);
+                }
             }
             return result;
         });
