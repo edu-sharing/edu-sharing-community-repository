@@ -1644,8 +1644,11 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     wrapOptionCallbacks(data: OptionData) {
         if (data.customOptions?.addOptions) {
             for (const option of data.customOptions.addOptions) {
-                const callback = option.callback;
-                option.callback = (node) => callback(node, this.getObjects(node, data));
+                if (!(option as any).originalCallback) {
+                    (option as any).originalCallback = option.callback;
+                }
+                option.callback = (node) =>
+                    (option as any).originalCallback(node, this.getObjects(node, data));
             }
         }
         return data;
