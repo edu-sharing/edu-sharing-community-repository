@@ -226,6 +226,7 @@
       "CURRENT_VERSION": "aktuelle Version",
       "VIEW_VERSION": "Anzeigen",
       "VERSION": "Version",
+      "RESTORE": "Zurücksetzen",
       "RESTORE_TITLE": "Zurücksetzen?",
       "RESTORE_MESSAGE": "Sind Sie sicher, dass Sie die Version des Elements ändern möchten?",
       "PERMALINK": "Link Zum Objekt",

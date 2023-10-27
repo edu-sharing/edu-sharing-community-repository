@@ -1,5 +1,18 @@
 @import '../../../../core-ui-module/styles/variables';
 
+:host {
+    display: flex;
+    flex-direction: column;
+}
+
+.metadata-container {
+    display: flex;
+}
+
+.metadata {
+    flex-grow: 1;
+}
+
 .description {
     color: $textMain;
     font-size: $fontSizeSmall;

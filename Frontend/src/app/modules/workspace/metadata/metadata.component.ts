@@ -1,6 +1,26 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {
+    Component,
+    ElementRef,
+    EventEmitter,
+    Input,
+    OnInit,
+    Output,
+    ViewChild,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import { ConfigService, NodeService } from 'ngx-edu-sharing-api';
+import {
+    DurationHelper,
+    FormatDatePipe,
+    InteractionType,
+    ListItem,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    NodeImageSizePipe,
+    UIConstants,
+    VCard,
+} from 'ngx-edu-sharing-ui';
 import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, filter } from 'rxjs/operators';
 import {
@@ -20,20 +40,8 @@ import {
     UsageList,
     Version,
 } from '../../../core-module/core.module';
-import {
-    DurationHelper,
-    FormatDatePipe,
-    InteractionType,
-    ListItem,
-    NodeDataSource,
-    NodeEntriesDisplayType,
-    NodeImageSizePipe,
-    UIConstants,
-    VCard,
-} from 'ngx-edu-sharing-ui';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { ConfigService, NodeService } from 'ngx-edu-sharing-api';
 
 // Charts.js
 declare var Chart: any;
@@ -51,6 +59,16 @@ interface Stats {
     styleUrls: ['metadata.component.scss'],
 })
 export class WorkspaceMetadataComponent implements OnInit {
+    private _canvas: ElementRef<HTMLCanvasElement>;
+    @ViewChild('canvas')
+    get canvas(): ElementRef<HTMLCanvasElement> {
+        return this._canvas;
+    }
+    set canvas(value: ElementRef<HTMLCanvasElement>) {
+        this._canvas = value;
+        this.drawBarChart();
+    }
+
     @Input() isAdmin: boolean;
     @Input() set node(node: Node) {
         this.nodeSubject.next(node);
@@ -69,7 +87,6 @@ export class WorkspaceMetadataComponent implements OnInit {
     readonly VERSIONS = 'VERSIONS';
     data: any;
     loading = true;
-    tab = this.INFO;
     permissions: any;
     usagesCollection = new NodeDataSource();
     usagesCollectionData = this.usagesCollection.connect();
@@ -135,9 +152,6 @@ export class WorkspaceMetadataComponent implements OnInit {
             await this.nodeApi.getNodeMetadata(node.ref.id, [RestConstants.ALL]).toPromise()
         ).node;
         this.loading = false;
-        if (this.nodeObject.isDirectory) {
-            this.tab = this.INFO;
-        }
         this.data = this.format(this.nodeObject);
         const currentNode = this.nodeObject;
         this.nodeApi.getNodeVersions(this.nodeObject.ref.id).subscribe((data: NodeVersions) => {
@@ -229,10 +243,6 @@ export class WorkspaceMetadataComponent implements OnInit {
         if (!prop) return false;
 
         return prop[0] == version.version.major + '.' + version.version.minor;
-    }
-
-    setTab(tab: string) {
-        this.tab = tab;
     }
 
     display(version: string = null) {
@@ -398,7 +408,7 @@ export class WorkspaceMetadataComponent implements OnInit {
     }
 
     private drawBarChart() {
-        const canvas = document.getElementById('myChart') as HTMLCanvasElement;
+        const canvas = this.canvas?.nativeElement;
         if (!canvas) {
             return;
         }

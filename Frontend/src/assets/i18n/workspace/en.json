@@ -228,6 +228,7 @@
       "CURRENT_VERSION": "current version",
       "VIEW_VERSION": "View",
       "VERSION": "Version",
+      "RESTORE": "Restore",
       "RESTORE_TITLE": "Restore?",
       "RESTORE_MESSAGE": "Are you sure you want to change the version of this element?",
       "PERMALINK": "Link to object",

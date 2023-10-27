@@ -1,12 +1,16 @@
 @import '../../../core-ui-module/styles/variables';
 
+:host {
+    display: flex;
+}
+
 :host ::ng-deep {
     mat-header-row {
         display: none;
     }
 }
 .main {
-    height: 100%;
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
     > es-spinner {
@@ -34,24 +38,19 @@
     }
 }
 
-.row {
-    padding-top: 0;
-    background-color: $workspaceMetadataBackground;
-    margin-bottom: 0;
-    margin-left: unset;
-    margin-right: unset;
-}
-.row .col {
-    padding: 0;
+mat-tab-group {
+    min-height: 0;
 }
 
-.btn-flat {
-    color: $primary;
+mat-tab-group ::ng-deep mat-tab-header {
+    background-color: $workspaceMetadataBackground;
 }
-.btn-flat {
-    position: relative;
-    top: -5px;
+
+.standalone-container {
+    overflow-y: auto;
+    overflow-x: hidden;
 }
+
 .versionTitle {
     font-weight: bold;
 }
@@ -65,26 +64,25 @@
 .versionDate {
     color: $textLight;
 }
-.versionMain {
-    padding-bottom: 20px;
-}
-.version {
-    padding-top: 20px;
-}
 
 .btnVersion {
     margin-right: 5px;
 }
 .content {
     padding: 0 12px;
-    overflow-x: hidden;
-    overflow-y: auto;
 }
 
-.content-properties:not([hidden]) {
+.content-properties {
     display: flex;
     flex-direction: column;
     padding: 20px 12px;
+}
+
+.content-versions {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 12px;
+    gap: 20px;
 }
 
 p.description {
@@ -92,12 +90,6 @@ p.description {
     margin-bottom: 12px;
 }
 
-/*Value show in memu-tabs*/
-.value-properties {
-    float: right;
-    line-height: 40px;
-    margin-right: 18px;
-}
 canvas {
     align-self: flex-start;
 }
@@ -105,8 +97,7 @@ canvas {
     display: grid;
     width: 100%;
     grid-template-columns: 1fr 1fr 1fr 1fr;
-    margin-left: 20px;
-    padding-right: 5px;
+    padding: 0;
 
     .point {
         display: flex;
