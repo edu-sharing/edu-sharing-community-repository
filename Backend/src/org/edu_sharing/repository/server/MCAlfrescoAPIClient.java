@@ -264,11 +264,19 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 		eduOrganisationService = (org.edu_sharing.alfresco.service.OrganisationService)applicationContext.getBean("eduOrganisationService");
 
+
 		if (_authenticationInfo == null) {
 			try{
 				HashMap<String, String> authInfo = new HashMap<String, String>();
 				authInfo.put(CCConstants.AUTH_USERNAME, serviceRegistry.getAuthenticationService().getCurrentUserName());
-				authInfo.put(CCConstants.AUTH_TICKET, serviceRegistry.getAuthenticationService().getCurrentTicket());
+				/**
+				 * when authentication.ticket.useSingleTicketPerUser=false is set
+				 * and the current user is the System user the call of
+				 * serviceRegistry.getAuthenticationService().getCurrentTicket() leads to new ticket creation
+				 */
+				if(!AuthenticationUtil.isRunAsUserTheSystemUser()){
+					authInfo.put(CCConstants.AUTH_TICKET, serviceRegistry.getAuthenticationService().getCurrentTicket());
+				}
 				authenticationInfo = authInfo;
 				logger.debug("authinfo init parameter is null, using " + " " + authenticationInfo.get(CCConstants.AUTH_USERNAME) + " " + authenticationInfo.get(CCConstants.AUTH_TICKET));
 			}catch(AuthenticationCredentialsNotFoundException e){
@@ -850,11 +858,13 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
             downloadAllowed = (CCConstants.COMMON_LICENSE_EDU_P_NR_ND.equals(commonLicenseKey)) ? false : true;
 
         //allow download for owner, performance only check owner if download not allowed
+
 		if(!downloadAllowed && isOwner(nodeId, authenticationInfo.get(CCConstants.AUTH_USERNAME))){
 			downloadAllowed = true;
 		}
 
-		if(editorType != null && editorType.toLowerCase().equals(ConnectorService.ID_TINYMCE.toLowerCase())){
+		// allow tinymce in safe but not in normal storage
+		if(editorType != null && editorType.toLowerCase().equals(ConnectorService.ID_TINYMCE.toLowerCase()) && (Context.getCurrentInstance() != null && !CCConstants.CCM_VALUE_SCOPE_SAFE.equals(Context.getCurrentInstance().getSessionAttribute(CCConstants.AUTH_SCOPE)))) {
 			downloadAllowed = false;
 		}
 		return downloadAllowed;

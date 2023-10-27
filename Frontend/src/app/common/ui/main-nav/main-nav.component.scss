@@ -65,10 +65,10 @@ user-profile {
     font-size: 7pt;
     a {
         color: rgba(
-            red($workspaceTopBarFontColor),
-            green($workspaceTopBarFontColor),
-            blue($workspaceTopBarFontColor),
-            0.7
+                red($workspaceTopBarFontColor),
+                green($workspaceTopBarFontColor),
+                blue($workspaceTopBarFontColor),
+                0.7
         ) !important;
     }
     a:hover {
@@ -208,16 +208,6 @@ user-profile {
             color: $workspaceTopBarInputText;
             border: none !important;
             -webkit-appearance: none;
-            &:focus {
-                border-radius: 0;
-                &:not(.cdk-keyboard-focused) {
-                    @include setGlobalFocus();
-                }
-                &.cdk-keyboard-focused {
-                    transition: none;
-                    @include setGlobalKeyboardFocus();
-                }
-            }
         }
         >button {
             position: absolute;
@@ -326,6 +316,36 @@ user-profile {
 }
 .tab-nav {
     display: none;
+}
+.topBar:not(.topBar-safe) {
+    .topBarSearch .searchInputGroup input:focus {
+        border-radius: 0;
+        &:not(.cdk-keyboard-focused) {
+            @include setGlobalFocus();
+        }
+        &.cdk-keyboard-focused {
+            transition: none;
+            @include setGlobalKeyboardFocus();
+        }
+    }
+}
+.topBar.topBar-safe {
+    > div {
+        background: $workspaceTopBarSafeBackground;
+    }
+
+    .topBarSearch .searchInputGroup input:focus {
+        border-radius: 0;
+        &:not(.cdk-keyboard-focused) {
+            @include setGlobalFocus(rgba(255, 255, 255, 0.7));
+        }
+
+        &.cdk-keyboard-focused {
+            transition: none;
+            @include setGlobalKeyboardFocus('outline', rgba(255, 255, 255, 0.7));
+        }
+
+    }
 }
 :host .topBar ::ng-deep button.mat-button {
     &:not([disabled]) .mat-button-focus-overlay {

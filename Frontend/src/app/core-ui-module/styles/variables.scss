@@ -36,6 +36,7 @@ $listItemSelectedBackground: #F1F6FA;
 $workspaceSelectedBackgroundEffect: linear-gradient(to right, $primary 0,$primary 5px,rgba(0,0,0,0) 5px,rgba(0,0,0,0) 5px) no-repeat;
 $listItemSelectedBackgroundEffect: linear-gradient(to right, $primary 0,$primary 5px,rgba(red($primary), green($primary), blue($primary), 0.15) 5px,rgba(red($primary), green($primary), blue($primary), 0.15) 5px) no-repeat;
 $workspaceTreeBackground: #f7f7f7;
+$workspaceTopBarSafeBackground: #963a3a;
 $mainnavHeight: 70px;
 $dialogRightWidth: 320px;
 $workspaceTreeSelectedBackground: #fff;

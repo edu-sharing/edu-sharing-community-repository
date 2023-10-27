@@ -40,6 +40,12 @@ CATALINA_OPTS="-Djavax.xml.parsers.DocumentBuilderFactory=org.edu_sharing.xml.se
 
 ```
 
+After install add the following to alfresco-global.properties to prevent initial startup errors with activity enginge that are caused by security settings in org.edu_sharing.xml.security.validation.SchemaFactory:
+
+```bash
+system.workflow.engine.activiti.enabled = false
+```
+
 FAQ
 ---
 On Startup, I see errors like

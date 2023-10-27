@@ -1594,28 +1594,10 @@ public class NodeApi  {
 	    	
 	    	return Response.status(Response.Status.OK).entity(response).build();
 
-    	} catch (DAOValidationException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOSecurityException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOMissingException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
-    		
-    	}catch(DAOVirusDetectedException t){
-			logger.warn(t.getMessage(),t);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
-		} catch (Throwable t) {
+    	}  catch (Throwable t) {
     		
     		logger.error(t.getMessage(), t);
-    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+			return ErrorResponse.createResponse(t, ErrorResponse.ErrorResponseLogging.relaxed);
     	}
 
     }
