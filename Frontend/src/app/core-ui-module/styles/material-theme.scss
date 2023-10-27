@@ -325,6 +325,10 @@ mat-label,
     }
     background-color: $primary !important;
 }
+body {
+    // Background for raised button
+    --mdc-protected-button-container-color: white;
+}
 // improve default positioning of outlined fields with label
 .mat-mdc-text-field-wrapper.mdc-text-field--outlined {
     .mat-mdc-form-field-infix {
