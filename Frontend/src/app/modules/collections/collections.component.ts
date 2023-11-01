@@ -1019,7 +1019,6 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
                         ];
                     this.sortCollections.active =
                         orderCollections?.[0] || RestConstants.CM_MODIFIED_DATE;
-                    console.log(orderCollections);
                     this.sortCollections.direction =
                         orderCollections?.[0] === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
                             ? 'asc'
