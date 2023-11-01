@@ -141,6 +141,11 @@ mat-button-toggle-group {
         gap: 10px; // padding for icons
     }
 }
+mat-tab-group {
+    mat-tab-header {
+        background-color: $backgroundColor;
+    }
+}
 .mat-tab-group.mat-dark {
     .mat-tab-header {
         background-color: $workspaceTopBarBackground;
@@ -451,7 +456,6 @@ button {
         right: 0;
         bottom: 0;
         position: absolute;
-        box-sizing: border-box;
         pointer-events: none;
         @include setGlobalKeyboardFocus($mode: 'border');
     }
@@ -592,7 +596,6 @@ mat-select.mat-select-icon {
 }
 
 .cdk-drag-preview {
-    box-sizing: border-box;
     border-radius: 4px;
     @include materialShadowBottom();
 }

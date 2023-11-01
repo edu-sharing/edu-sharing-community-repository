@@ -1,5 +1,16 @@
 @import '../app/core-ui-module/styles/variables';
 @import '../app/core-ui-module/styles/branding';
+
+*,
+::after,
+::before {
+    box-sizing: border-box;
+}
+
+.cdk-visually-hidden {
+    margin: unset; // Causes scroll bars on surrounding `overflow: auto` containers
+}
+
 .clickable {
     @include clickable();
 }

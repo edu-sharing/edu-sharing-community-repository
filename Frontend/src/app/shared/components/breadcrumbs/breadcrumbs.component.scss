@@ -4,9 +4,6 @@
     display: flex;
     flex-direction: row-reverse; // Automatically scroll to the end
     align-items: center;
-    // Make room for keyboard focus styles.
-    padding: 5px;
-    margin: -5px;
     overflow-y: hidden;
     overflow-x: auto;
     // Firefox
@@ -109,7 +106,7 @@ button {
     color: $primary;
     display: flex;
     padding: 2px 4px;
-    font-size: 95%;
+    gap: 3px;
     white-space: nowrap;
     align-items: center;
 }
@@ -140,10 +137,6 @@ button {
 
 .home-notice {
     color: $textLight;
-}
-
-.dropdown-icon {
-    margin-top: -2px;
 }
 
 .breadcrumb-arrow {

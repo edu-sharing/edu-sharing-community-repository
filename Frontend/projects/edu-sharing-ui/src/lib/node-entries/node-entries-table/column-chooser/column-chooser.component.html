@@ -17,7 +17,9 @@
       <mat-checkbox [checked]="column.visible" (change)="columnChooserToggle(index)">
         {{ column | esListItemLabel | async }}
       </mat-checkbox>
-      <i esIcon="drag_handle" class="drag-handle" cdkDragHandle></i>
+      <div class="drag-handle" cdkDragHandle>
+        <i esIcon="drag_handle"></i>
+      </div>
     </div>
   </div>
 </ng-template>

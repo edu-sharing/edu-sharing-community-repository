@@ -82,10 +82,20 @@ es-user-quota {
     position: fixed;
     width: 250px;
     left: 311px;
-    top: calc(7px + var(--mainnavHeight));
+    top: calc(14px + var(--mainnavHeight));
+    box-shadow: 0 0 5px #0000004d;
+    z-index: 132;
+    cursor: pointer;
+    background-color: $backgroundColor;
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
 }
 .selectRootMenu .collection-item {
+    display: flex;
+    align-items: center;
     color: $textLight;
+    padding: 8px 15px;
+    gap: 8px;
 }
 .rootSelected {
     color: $primary !important;
@@ -186,9 +196,8 @@ es-user-quota {
     .addMobile {
         display: inherit;
     }
-    .breadcrumbFrame > div {
+    .topbarFrame > div > es-breadcrumbs {
         padding-left: 20px;
-        padding-top: 20px;
     }
     .explorer {
         left: 0;
