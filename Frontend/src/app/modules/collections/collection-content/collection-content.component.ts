@@ -297,11 +297,13 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         RestConstants.COLLECTION_ORDER_MODE_CUSTOM
                             ? RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
                             : refMode) || RestConstants.CM_MODIFIED_DATE) as any;
-                        this.sortReferences.direction = RestConstants.COLLECTION_ORDER_MODE_CUSTOM
-                            ? 'asc'
-                            : refAscending
-                            ? 'asc'
-                            : 'desc';
+                        this.sortReferences.direction =
+                            this.sortReferences.active ===
+                            RestConstants.COLLECTION_ORDER_MODE_CUSTOM
+                                ? 'asc'
+                                : refAscending
+                                ? 'asc'
+                                : 'desc';
                         this.collection = collection;
                         this.mainNavUpdateTrigger.next();
                         this.dataSourceCollections.isLoading = false;
@@ -724,6 +726,11 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                     [sort.active, (sort.direction === 'asc') + ''],
                 )
                 .toPromise();
+            if (sort.active !== RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION) {
+                this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_TYPE', {
+                    type: this.translation.instant('NODE.' + sort.active),
+                });
+            }
         } catch (e) {
             this.toast.error(e);
         }
