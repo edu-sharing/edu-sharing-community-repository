@@ -39,6 +39,8 @@ import { ClickSource, InteractionType, NodeEntriesDisplayType } from '../entries
 import { NodeDataSourceRemote } from '../node-data-source-remote';
 import { NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeEntriesDataType } from '../node-entries.component';
+import { TranslateService } from '@ngx-translate/core';
+import { TranslationsService } from '../../../translations/translations.service';
 
 @Component({
     selector: 'es-node-entries-table',
@@ -83,6 +85,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         public entriesGlobalService: NodeEntriesGlobalService,
         private applicationRef: ApplicationRef,
         private toast: Toast,
+        private translations: TranslationsService,
         private changeDetectorRef: ChangeDetectorRef,
         public ui: UIService,
         private ngZone: NgZone,
@@ -109,6 +112,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
             this.entriesService.options$.pipe(startWith(void 0 as void)),
             this.entriesService.dataSource.isLoadingSubject.pipe(startWith(void 0 as void)),
             this.entriesService.selection.changed.pipe(startWith(void 0 as void)),
+            this.translations.waitForInit().pipe(startWith(void 0 as void)),
         ])
             .pipe(takeUntil(this.destroyed))
             .subscribe(() => {
@@ -214,6 +218,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
             .combineLatest([
                 this.maximumColumnsNumber$,
                 this.entriesService.columnsChange.pipe(startWith(void 0)),
+                this.entriesService.columns$,
             ])
             .pipe(
                 map(([maximumColumnsNumber]) => {

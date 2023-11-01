@@ -234,12 +234,21 @@ public class MetadataReader {
                     query.setBasequeryAsFilter(new Boolean(nodeMap.getNamedItem("basequeryAsFilter").getTextContent()));
                 }
 
+
                 List<MetadataQueryParameter> parameters = new ArrayList<>();
 
                 NodeList list2 = node.getChildNodes();
 
                 for (int j = 0; j < list2.getLength(); j++) {
                     Node parameterNode = list2.item(j);
+                    if (parameterNode.getNodeName().equals("specialFilter")) {
+                        if(parameterNode.getTextContent().isEmpty()) {
+                            // in case the mds overrides special filters and wants to remove them
+                            query.addSpecialFilter(null);
+                        } else {
+                            query.addSpecialFilter(MetadataQuery.SpecialFilter.valueOf(parameterNode.getTextContent()));
+                        }
+                    }
                     if (parameterNode.getNodeName().equals("basequery")) {
                         basequeries.put(
                                 parameterNode.getAttributes() == null ? null :

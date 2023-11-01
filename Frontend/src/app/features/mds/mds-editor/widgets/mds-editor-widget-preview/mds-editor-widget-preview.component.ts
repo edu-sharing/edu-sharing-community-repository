@@ -1,9 +1,8 @@
-import { forkJoin as observableForkJoin, BehaviorSubject, Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
-import { Component, OnInit } from '@angular/core';
+import { BehaviorSubject, forkJoin as observableForkJoin, interval, of, ReplaySubject } from 'rxjs';
+import { catchError, map, takeUntil } from 'rxjs/operators';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
-import { FileChangeEvent } from '@angular/compiler-cli/src/perform_watch';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { RestNodeService } from '../../../../../core-module/rest/services/rest-node.service';
 import { Node } from '../../../../../core-module/rest/data-object';
@@ -14,11 +13,12 @@ import { Toast } from '../../../../../core-ui-module/toast';
     templateUrl: './mds-editor-widget-preview.component.html',
     styleUrls: ['./mds-editor-widget-preview.component.scss'],
 })
-export class MdsEditorWidgetPreviewComponent implements OnInit, NativeWidgetComponent {
+export class MdsEditorWidgetPreviewComponent implements OnInit, OnDestroy, NativeWidgetComponent {
     static readonly constraints = {
         requiresNode: true,
         supportsBulk: false,
     };
+    private destroyed$: ReplaySubject<boolean> = new ReplaySubject(1);
     hasChanges = new BehaviorSubject<boolean>(false);
     src: SafeResourceUrl | string;
     nodeSrc: string;
@@ -33,22 +33,27 @@ export class MdsEditorWidgetPreviewComponent implements OnInit, NativeWidgetComp
     ) {}
 
     ngOnInit(): void {
-        this.mdsEditorValues.nodes$.subscribe((nodes) => {
+        // we need to reload the image since we don't know if the image (e.g. video file) is still being processed
+        interval(5000)
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe(() => {
+                if (this.file) {
+                    return;
+                }
+                this.updateSrc();
+            });
+        this.mdsEditorValues.nodes$.pipe(takeUntil(this.destroyed$)).subscribe((nodes) => {
             if (nodes?.length === 1) {
                 this.nodeSrc =
                     nodes[0].preview.url + '&crop=true&width=400&height=300&dontcache=:cache';
                 this.node = nodes[0];
                 this.updateSrc();
-                // we need to reload the image since we don't know if the image (e.g. video file) is still being processed
-                // FIXME: this will run forever!
-                setInterval(() => {
-                    if (this.file) {
-                        return;
-                    }
-                    this.updateSrc();
-                }, 5000);
             }
         });
+    }
+    ngOnDestroy() {
+        this.destroyed$.next(true);
+        this.destroyed$.complete();
     }
     setPreview(event: Event): void {
         this.file = (event.target as HTMLInputElement).files[0];

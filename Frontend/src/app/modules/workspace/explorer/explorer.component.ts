@@ -431,7 +431,8 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             this.node$.next(null);
             return;
         }
-        if (this.dataSource.isLoading) {
+
+        if (this.dataSource?.isLoading) {
             setTimeout(() => this.setNode(current), 10);
             return;
         }

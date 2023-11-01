@@ -16,7 +16,10 @@ export class FormatSizePipe implements PipeTransform {
         }
         //return value+" "+names[i];
         return (
-            value.toLocaleString(this.translate.currentLang, { maximumFractionDigits: 1 }) +
+            value.toLocaleString(
+                this.translate.currentLang === 'none' ? 'en' : this.translate.currentLang,
+                { maximumFractionDigits: 1 },
+            ) +
             ' ' +
             names[i]
         );

@@ -104,6 +104,11 @@ public class SearchToken implements Serializable {
 		}
 		return luceneString;
 	}
+
+	public MetadataQuery getQuery() {
+		return query;
+	}
+
 	/**
 	 * Nulls any existing search criterias
 	 */

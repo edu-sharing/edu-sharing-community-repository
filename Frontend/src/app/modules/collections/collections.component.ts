@@ -8,7 +8,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { Subject } from 'rxjs';
+import { combineLatest, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import * as EduData from '../../core-module/core.module';
 import {
@@ -24,6 +24,7 @@ import {
     RestHelper,
     RestIamService,
     RestMediacenterService,
+    RestNetworkService,
     RestNodeService,
     TemporaryStorageService,
     UIService,
@@ -161,14 +162,18 @@ export class CollectionsMainComponent implements OnDestroy {
         private nodeService: RestNodeService,
         private route: ActivatedRoute,
         private router: Router,
+        private networkService: RestNetworkService,
         private temporaryStorageService: TemporaryStorageService,
         private toast: Toast,
         private translations: TranslationsService,
         private uiService: UIService,
     ) {
         this.translations.waitForInit().subscribe(() => {
-            this.connector.isLoggedIn().subscribe(
-                (data: LoginResult) => {
+            combineLatest([
+                this.connector.isLoggedIn(),
+                this.networkService.getRepositories(),
+            ]).subscribe(
+                ([data]) => {
                     if (data.isValidLogin && data.currentScope == null) {
                         this.isGuest = data.isGuest;
                         this.mediacenterService.getMediacenters().subscribe((mediacenters) => {

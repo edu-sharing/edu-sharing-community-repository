@@ -23,6 +23,9 @@ export class ApiRequestConfiguration {
     setBasicAuthForNextRequest(auth: { username: string; password: string }): void {
         this.authForNextRequest = 'Basic ' + btoa(auth.username + ':' + auth.password);
     }
+    setBearerAuthForNextRequest(accessToken?: string): void {
+        this.authForNextRequest = 'Bearer ' + accessToken;
+    }
 
     /** Apply the current headers to the given request */
     apply(req: HttpRequest<any>): HttpRequest<any> {

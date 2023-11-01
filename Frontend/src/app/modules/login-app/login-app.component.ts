@@ -41,6 +41,7 @@ enum StateUI {
 export class LoginAppComponent implements OnInit {
     public isLoading = true;
     public disabled = true;
+
     username = '';
     password = '';
     private serverurl = 'https://';
@@ -65,6 +66,7 @@ export class LoginAppComponent implements OnInit {
         private configService: ConfigurationService,
         private locator: RestLocatorService,
     ) {
+        console.info('startup app');
         this.isLoading = true;
 
         // WHEN RUNNING ON DESKTOP --> FORWARD TO BASIC LOGIN PAGE
@@ -78,11 +80,14 @@ export class LoginAppComponent implements OnInit {
         });
 
         // 1. Wait until Cordova is Ready
-        this.cordova.subscribeServiceReady().subscribe(() => {
+        this.cordova.subscribeServiceReady().subscribe(async () => {
             // app startup, cordova has valid data ?
             // -> go to default location (this will check oauth)
-            if (this.cordova.hasValidConfig()) {
-                this.goToDefaultLocation();
+            if (await this.cordova.hasValidConfig()) {
+                console.info('app config valid, continuing to default location');
+                this.cordova.refreshOAuth().subscribe(() => {
+                    this.goToDefaultLocation();
+                });
                 return;
             }
 
@@ -156,6 +161,7 @@ export class LoginAppComponent implements OnInit {
                 this.goToDefaultLocation();
             },
             (error) => {
+                console.warn(error);
                 this.isLoading = false;
                 if (typeof error == 'string') {
                     this.toast.error(null, error);
@@ -229,11 +235,16 @@ export class LoginAppComponent implements OnInit {
         }
     }
 
-    private handleCurrentState() {
+    private async handleCurrentState() {
         // a external login, e.g. via shibboleth, may occured. get oauth for the session, and store it
+        if (!(await this.cordova.hasValidConfig())) {
+            console.info('empty app oauth status, show login');
+            this.checkLoginUrl();
+            return;
+        }
         this.connector.isLoggedIn(true).subscribe(
             (data) => {
-                console.log('app login status', data);
+                console.info('app login status', data);
                 if (data.statusCode === RestConstants.STATUS_CODE_OK) {
                     this.cordova
                         .loginOAuth(this.locator.endpointUrl, null, null, 'client_credentials')
