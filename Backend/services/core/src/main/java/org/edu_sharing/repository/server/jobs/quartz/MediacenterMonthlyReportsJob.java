@@ -24,6 +24,7 @@ import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.service.mediacenter.MediacenterService;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.edu_sharing.service.model.NodeRef;
+import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -37,6 +38,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
+import javax.mail.Store;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
@@ -50,6 +52,15 @@ import java.util.stream.Collectors;
 
 @JobDescription(description = "Creates reports for all mediacenters on the 1st of each month for the last month")
 public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams {
+
+	public enum ReportMode {
+		@JobFieldDescription(description = "Use the tracked mediacenter user data. Elements accessed from users assigned to more than one mediacenter are ignored")
+		TrackingMediacenterData,
+		@JobFieldDescription(description = "Use the current licensed node data. Elements not licensed anymore will not be visible. Elements accessed from users assigned to more than one MZ are counted as well (legacy)")
+		AlfrescoPermissionData
+	}
+	@JobFieldDescription(description = "Mode to use for processing")
+	private ReportMode mode;
 
 	protected Logger logger = Logger.getLogger(MediacenterMonthlyReportsJob.class);
 	private org.alfresco.service.cmr.repository.NodeService nodeService;
@@ -103,6 +114,9 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 			logger.info("Job not running because of date: " + localDate.getDayOfMonth());
 			return;
 		}
+		if(mode == null) {
+			mode = ReportMode.TrackingMediacenterData;
+		}
 		AuthenticationUtil.runAsSystem(this::createStats);
 	}
 
@@ -124,16 +138,37 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 					return null;
 				}
 				logger.info("Building stats for mediacenter " + mediacenter);
-				List<NodeRef> nodes = mediacenterService.getAllLicensedNodes(mediacenter);
-				Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> data = trackingService.getListNodeData(
-						nodes.stream().map(
-								ref -> new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ref.getNodeId())
-						).collect(Collectors.toList()),
-						Date.from(from.atStartOfDay().toInstant(ZoneOffset.UTC)),
-						Date.from(to.atTime(23, 59).toInstant(ZoneOffset.UTC)),
-						additionalFields,
-						mediacenter
-				);
+				Date startDate = Date.from(from.atStartOfDay().toInstant(ZoneOffset.UTC));
+				Date endDate = Date.from(to.atTime(23, 59).toInstant(ZoneOffset.UTC));
+				Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> data = null;
+				if(mode.equals(ReportMode.AlfrescoPermissionData)) {
+					List<NodeRef> nodes = mediacenterService.getAllLicensedNodes(mediacenter);
+					data = trackingService.getListNodeData(
+							nodes.stream().map(
+									ref -> new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ref.getNodeId())
+							).collect(Collectors.toList()),
+							startDate,
+							endDate,
+							additionalFields,
+							mediacenter
+					);
+				} else if (mode.equals(ReportMode.TrackingMediacenterData)) {
+					data = trackingService.getListNodeDataByMediacenter(
+							mediacenter,
+							startDate,
+							endDate,
+							additionalFields
+					);
+					List<NodeRef> nodes = mediacenterService.getAllLicensedNodes(mediacenter);
+					for (NodeRef n : nodes) {
+						org.alfresco.service.cmr.repository.NodeRef mappedRef = new org.alfresco.service.cmr.repository.NodeRef(new StoreRef(n.getStoreProtocol(), n.getStoreId()), n.getNodeId());
+						if (data.containsKey(mappedRef)) {
+							continue;
+						}
+						data.put(mappedRef, new StatisticEntry());
+					}
+					data = filterNonMediacenterMedia(data);
+				}
 				String filename = from.format(DateTimeFormatter.ISO_DATE) + " - " + to.format(DateTimeFormatter.ISO_DATE) + ".csv";
 				String parent = new NodeTool().createOrGetNodeByName(new MCAlfrescoAPIClient(), baseFolder, new String[]{mediacenter});
 				PermissionServiceFactory.getLocalService().setPermission(parent, mediacenterService.getMediacenterAdminGroup(mediacenter), CCConstants.PERMISSION_CONSUMER);
@@ -157,6 +192,12 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 			throw new RuntimeException(t);
 		}
 		return null;
+	}
+
+	private Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> filterNonMediacenterMedia(Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> data) {
+		return data.entrySet().stream().filter(
+				e -> "restricted_mz".equals(NodeServiceHelper.getPropertyNative(e.getKey(), CCConstants.CCM_PROP_IO_EDITORIAL_STATE))
+		).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
 	private void writeCSVFile(Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> data, String nodeId) throws Exception {
