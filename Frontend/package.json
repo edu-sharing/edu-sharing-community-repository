@@ -6,7 +6,7 @@
   "scripts": {
     "prestart": "npm run build:edu-sharing-api:dev && npm run build:edu-sharing-graphql  && npm run build:edu-sharing-ui",
     "start": "ng serve",
-    "start-public": "ng serve --host 0.0.0.0 --disable-host-check",
+    "start-public": "npm run prestart && ng serve --host 0.0.0.0 --disable-host-check",
     "start:app-as-web-component-example": "http-server projects/app-as-web-component/example --proxy 'http://repository.127.0.0.1.nip.io:8100' & ng build app-as-web-component --configuration development --output-hashing none --watch",
     "serve-dist": "node scripts/server.js",
     "build:edu-sharing-api": "(cd projects/edu-sharing-api && npm run update-if-needed) && node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build edu-sharing-api",
