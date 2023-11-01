@@ -41,8 +41,6 @@ export class ModalDialogToastComponent {
             Promise.resolve().then(() => {
                 this.title = data.title;
                 this.message = data.message;
-                this.input = data.input;
-                this.toast.dialogInputValue = '';
                 this.progressType = data.progressType;
                 this.cardType = data.cardType;
                 this.dialogType = data.dialogType || DialogType.ModalCard;
@@ -61,10 +59,6 @@ export class ModalDialogToastComponent {
     public visible = false;
 
     isCancelable = true;
-    /**
-     * Name/Label of the input that should be displayed
-     */
-    input: string;
     /**
      * The title, will be translated automatically
      */

@@ -10,7 +10,7 @@ import {
     ToastDuration,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import {
     ModalDialogOptions,
@@ -18,7 +18,6 @@ import {
 } from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import { RestConnectorService } from '../core-module/core.module';
 import { RestConstants } from '../core-module/rest/rest-constants';
-import { DialogButton } from '../core-module/ui/dialog-button';
 import { CardDialogRef } from '../features/dialogs/card-dialog/card-dialog-ref';
 import {
     GenericDialogConfig,
@@ -57,9 +56,6 @@ export type ToastMessage = {
 export class Toast extends ToastAbstract implements OnDestroy {
     private static MIN_TIME_BETWEEN_TOAST = 2000;
 
-    dialogInputValue: string;
-    isModalDialogOpen: Observable<boolean>;
-
     private isInstanceVisible = false;
     private messageQueue = new BehaviorSubject<ToastMessage[]>([]);
     private onShowModal: (params: ModalDialogOptions) => void;
@@ -67,7 +63,6 @@ export class Toast extends ToastAbstract implements OnDestroy {
     private lastToastMessageTime: number;
     private lastToastError: string;
     private lastToastErrorTime: number;
-    private isModalDialogOpenSubject = new BehaviorSubject<boolean>(false);
     private translate: TranslateService;
     private destroyed = new Subject<void>();
     mode: 'important' | 'all' = null;
@@ -94,7 +89,6 @@ export class Toast extends ToastAbstract implements OnDestroy {
             }
             this.showNext();
         });
-        this.isModalDialogOpen = this.isModalDialogOpenSubject.asObservable();
         this.accessibility
             .observe(['toastDuration', 'toastMode'])
             .pipe(takeUntil(this.destroyed))
@@ -268,17 +262,13 @@ export class Toast extends ToastAbstract implements OnDestroy {
     onShowModalDialog(param: (params: any) => void) {
         this.onShowModal = param;
     }
-    hasOpenDialog() {
-        return this.isModalDialogOpenSubject.value;
-    }
+
     closeModalDialog() {
         this.onShowModal({ title: null, message: null });
-        this.isModalDialogOpenSubject.next(false);
     }
 
     showConfigurableDialog(options: ModalDialogOptions) {
         this.onShowModal(options);
-        this.isModalDialogOpenSubject.next(true);
     }
 
     /**
@@ -290,26 +280,6 @@ export class Toast extends ToastAbstract implements OnDestroy {
         config: GenericDialogConfig<R>,
     ): Promise<CardDialogRef<GenericDialogData<R>, R>> {
         return this.dialogs.openGenericDialog(config);
-    }
-
-    showInputDialog(
-        title: string,
-        message: string,
-        label: string,
-        buttons: DialogButton[],
-        isCancelable = true,
-        onCancel: () => void = null,
-        messageParameters: any = null,
-    ) {
-        this.showConfigurableDialog({
-            title,
-            message,
-            input: label,
-            isCancelable,
-            messageParameters,
-            onCancel,
-            buttons,
-        });
     }
 
     showProgressDialog(
@@ -374,22 +344,16 @@ export class Toast extends ToastAbstract implements OnDestroy {
         } else if (dialogTitle) {
             return {
                 label: this.translate.instant('DETAILS'),
-                callback: () => this.openDialog(dialogTitle, dialogMessage, translationParameters),
+                callback: () =>
+                    this.dialogs.openGenericDialog({
+                        title: dialogTitle,
+                        message: dialogMessage,
+                        messageParameters: translationParameters,
+                    }),
             };
         } else {
             return null;
         }
-    }
-
-    private openDialog(title: string, message: string, translationParameters: any) {
-        this.onShowModal({
-            title,
-            message,
-            messageParameters: translationParameters,
-            buttons: null,
-            isCancelable: true,
-        });
-        this.isModalDialogOpenSubject.next(true);
     }
 
     private matSnackbarShowToast(message: ToastMessage): void {

@@ -19,7 +19,6 @@
   [type]="cardType"
   [node]="node"
   height="auto"
-  [captureFocus]="!!input"
 >
   <div class="modal-dialog-toast">
     <span class="modal-dialog-toast-message" *ngIf="messageType === 'text'">{{
@@ -30,10 +29,6 @@
       *ngIf="messageType === 'html'"
       innerHTML="{{ message | translate : messageParameters }}"
     ></span>
-    <mat-form-field *ngIf="input">
-      <mat-label>{{ input | translate }}</mat-label>
-      <input matInput autofocus [(ngModel)]="toast.dialogInputValue" />
-    </mat-form-field>
   </div>
   <mat-progress-bar *ngIf="progressType" [mode]="progressType"></mat-progress-bar>
 </es-card>

@@ -49,6 +49,11 @@ import {
     GenericDialogData,
 } from './dialog-modules/generic-dialog/generic-dialog-data';
 import {
+    InputDialogConfig,
+    InputDialogData,
+    InputDialogResult,
+} from './dialog-modules/input-dialog/input-dialog-data';
+import {
     JoinGroupDialogData,
     JoinGroupDialogResult,
 } from './dialog-modules/join-group-dialog/join-group-dialog-data';
@@ -165,6 +170,26 @@ export class DialogsService {
             maxWidth,
             customHeaderBarContent,
             closable,
+            data,
+        });
+    }
+
+    async openInputDialog(
+        config: InputDialogConfig,
+    ): Promise<CardDialogRef<InputDialogData, InputDialogResult>> {
+        const { title, subtitle, avatar, ...data } = {
+            ...new InputDialogConfig(),
+            ...config,
+        };
+        const { InputDialogComponent } = await import(
+            './dialog-modules/input-dialog/input-dialog.module'
+        );
+        return this.cardDialog.open(InputDialogComponent, {
+            title,
+            subtitle,
+            avatar,
+            width: 600,
+            closable: Closable.Standard,
             data,
         });
     }

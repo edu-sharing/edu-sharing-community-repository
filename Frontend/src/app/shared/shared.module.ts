@@ -7,6 +7,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
@@ -62,8 +63,8 @@ import { AuthorityNamePipe } from './pipes/authority-name.pipe';
 import { BitwisePipe } from './pipes/bitwise.pipe';
 import { PermissionNamePipe } from './pipes/permission-name.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
+import { SplitNewLinesPipe } from './pipes/split-new-lines.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 @NgModule({
     declarations: [
@@ -93,6 +94,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
         SafeHtmlPipe,
         SkipTargetDirective,
         SpinnerSmallComponent,
+        SplitNewLinesPipe,
         TitleDirective,
         TutorialComponent,
         UserAvatarComponent,
@@ -185,6 +187,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
         SafeHtmlPipe,
         SkipTargetDirective,
         SpinnerSmallComponent,
+        SplitNewLinesPipe,
         TitleDirective,
         TutorialComponent,
         UserAvatarComponent,

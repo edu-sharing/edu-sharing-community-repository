@@ -1,6 +1,6 @@
 import { Component, EventEmitter, NgZone, Output, ViewChild } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { Group, IamGroup, Mediacenter, Node } from '../../../core-module/rest/data-object';
+import { MediacenterService } from 'ngx-edu-sharing-api';
 import {
     CustomOptions,
     ElementType,
@@ -14,28 +14,26 @@ import {
     Scope,
     VCard,
 } from 'ngx-edu-sharing-ui';
-import { RestConstants } from '../../../core-module/rest/rest-constants';
-import { RestHelper } from '../../../core-module/rest/rest-helper';
 import {
-    DialogButton,
     RequestObject,
     RestConnectorService,
-    RestIamService,
     RestMdsService,
     RestMediacenterService,
     RestSearchService,
 } from '../../../core-module/core.module';
-import { Helper } from '../../../core-module/rest/helper';
-import { Toast } from '../../../core-ui-module/toast';
-import { MdsHelper } from '../../../core-module/rest/mds-helper';
-import { AuthoritySearchMode } from '../../../shared/components/authority-search-input/authority-search-input.component';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
-import { MediacenterService } from 'ngx-edu-sharing-api';
 import { CsvHelper } from '../../../core-module/csv.helper';
-import { Values } from '../../../features/mds/types/types';
-import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { Group, IamGroup, Mediacenter, Node } from '../../../core-module/rest/data-object';
+import { Helper } from '../../../core-module/rest/helper';
+import { MdsHelper } from '../../../core-module/rest/mds-helper';
+import { RestConstants } from '../../../core-module/rest/rest-constants';
+import { RestHelper } from '../../../core-module/rest/rest-helper';
+import { Toast } from '../../../core-ui-module/toast';
+import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { YES_OR_NO } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { Values } from '../../../features/mds/types/types';
+import { AuthoritySearchMode } from '../../../shared/components/authority-search-input/authority-search-input.component';
 
 @Component({
     selector: 'es-admin-mediacenter',
@@ -235,53 +233,47 @@ export class AdminMediacenterComponent {
         this.currentMediacenterCopy.profile.mediacenter.catalogs.push({ name: '', url: '' });
     }
 
-    addMediacenter() {
-        this.toast.showInputDialog(
-            'ADMIN.MEDIACENTER.ADD_MEDIACENTER_TITLE',
-            'ADMIN.MEDIACENTER.ADD_MEDIACENTER_MESSAGE',
-            'ADMIN.MEDIACENTER.ADD_MEDIACENTER_LABEL',
-            DialogButton.getOkCancel(
-                () => this.toast.closeModalDialog(),
-                () => {
-                    const id = this.toast.dialogInputValue;
-                    const profile = {
-                        displayName: this.translate.instant(
-                            'ADMIN.MEDIACENTER.UNNAMED_MEDIACENTER',
-                            { id },
-                        ),
-                        mediacenter: {
-                            id,
-                        },
-                    };
-                    this.toast.showProgressDialog();
-                    this.mediacenterServiceLegacy.addMediacenter(id, profile).subscribe(
-                        (result) => {
-                            RestHelper.waitForResult(
-                                () => this.mediacenterServiceLegacy.getMediacenters(),
-                                (list: Mediacenter[]) => {
-                                    return (
-                                        list.filter((r) => r.authorityName === result.authorityName)
-                                            .length === 1
-                                    );
-                                },
-                                () => {
-                                    this.toast.closeModalDialog();
-                                    this.toast.toast('ADMIN.MEDIACENTER.CREATED', { name: id });
-                                    this.setMediacenter(null);
-                                    this.refresh();
-                                },
+    async addMediacenter() {
+        const dialogRef = await this.dialogs.openInputDialog({
+            title: 'ADMIN.MEDIACENTER.ADD_MEDIACENTER_TITLE',
+            message: 'ADMIN.MEDIACENTER.ADD_MEDIACENTER_MESSAGE',
+            label: 'ADMIN.MEDIACENTER.ADD_MEDIACENTER_LABEL',
+        });
+        const id = await dialogRef.afterClosed().toPromise();
+        if (id) {
+            const profile = {
+                displayName: this.translate.instant('ADMIN.MEDIACENTER.UNNAMED_MEDIACENTER', {
+                    id,
+                }),
+                mediacenter: {
+                    id,
+                },
+            };
+            this.toast.showProgressDialog();
+            this.mediacenterServiceLegacy.addMediacenter(id, profile).subscribe(
+                (result) => {
+                    RestHelper.waitForResult(
+                        () => this.mediacenterServiceLegacy.getMediacenters(),
+                        (list: Mediacenter[]) => {
+                            return (
+                                list.filter((r) => r.authorityName === result.authorityName)
+                                    .length === 1
                             );
                         },
-                        (error: any) => {
-                            this.toast.error(error);
+                        () => {
                             this.toast.closeModalDialog();
+                            this.toast.toast('ADMIN.MEDIACENTER.CREATED', { name: id });
+                            this.setMediacenter(null);
+                            this.refresh();
                         },
                     );
                 },
-            ),
-            true,
-            () => this.toast.closeModalDialog(),
-        );
+                (error: any) => {
+                    this.toast.error(error);
+                    this.toast.closeModalDialog();
+                },
+            );
+        }
     }
 
     saveChanges() {
