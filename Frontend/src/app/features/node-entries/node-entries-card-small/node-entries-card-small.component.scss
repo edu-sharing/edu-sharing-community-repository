@@ -7,6 +7,24 @@ $collectionIconSize: 25px;
 
 @import '../node-entries-card/node-entries-card.main';
 
+.collection-pin {
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50px;
+    position: absolute;
+    z-index: 1;
+    right: 10px;
+    top: 10px;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    @include materialShadowBottom();
+    > i {
+        font-size: 12px;
+    }
+}
+
 .grid-card .card-meta-row ::ng-deep es-node-url {
     a {
         &.cdk-keyboard-focused {

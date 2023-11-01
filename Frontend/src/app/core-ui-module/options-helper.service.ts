@@ -247,7 +247,7 @@ export class OptionsHelperService implements OnDestroy {
      */
     refreshComponents(refreshListOptions = true) {
         if (this.data == null) {
-            console.info('options helper refresh called but no data previously bound');
+            // console.info('options helper refresh called but no data previously bound');
             return;
         }
         if (this.subscriptions?.length) {

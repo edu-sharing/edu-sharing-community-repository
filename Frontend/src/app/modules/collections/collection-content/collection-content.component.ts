@@ -642,6 +642,14 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         // when loading child collections, we load all of them
         if (!this.isRootLevel) {
             request.count = RestConstants.COUNT_UNLIMITED;
+        } else {
+            // on root level, obey pinned order if collections are pinned
+            request.sortBy = [
+                RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
+                RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
+                ...request.sortBy,
+            ];
+            request.sortAscending = [false, true, ...request.sortAscending];
         }
         this.collectionService
             .getCollectionSubcollections(

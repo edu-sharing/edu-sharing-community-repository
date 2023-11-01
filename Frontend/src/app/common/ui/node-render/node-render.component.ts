@@ -388,14 +388,16 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             this.downloadCurrentNode(),
         );
         download.elementType = OptionsHelperService.DownloadElementTypes;
-        // declare explicitly so that callback will be overriden
-        download.customEnabledCallback = null;
+        // use callback since isEnabled gets ignored
+        download.customEnabledCallback = (nodes) => {
+            return (
+                this._node.downloadUrl != null &&
+                (!this._node.properties[RestConstants.CCM_PROP_IO_WWWURL] ||
+                    !RestNetworkService.isFromHomeRepo(this._node))
+            );
+        };
         download.group = DefaultGroups.View;
         download.priority = 25;
-        download.isEnabled =
-            this._node.downloadUrl != null &&
-            (!this._node.properties[RestConstants.CCM_PROP_IO_WWWURL] ||
-                !RestNetworkService.isFromHomeRepo(this._node));
         download.showAsAction = true;
         if (this.isCollectionRef()) {
             this.nodeApi

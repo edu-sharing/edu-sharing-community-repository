@@ -1822,7 +1822,12 @@ public class NodeDao {
 	}
 	private RatingDetails getRating(){
 		try{
-			return RatingServiceFactory.getRatingService(repoDao.getId()).getAccumulatedRatings(getNodeRef(),null);
+			if(access.contains(CCConstants.PERMISSION_RATE_READ)) {
+				// skip permission checks, this can be useful if the user might have indirect access via collection
+				return AuthenticationUtil.runAsSystem(() -> RatingServiceFactory.getRatingService(repoDao.getId()).getAccumulatedRatings(getNodeRef(), null));
+			} else {
+				return RatingServiceFactory.getRatingService(repoDao.getId()).getAccumulatedRatings(getNodeRef(), null);
+			}
 		}catch(Throwable t){
 			logger.warn("Can not fetch ratings for node "+nodeId+": "+t.getMessage(),t);
 			return null;

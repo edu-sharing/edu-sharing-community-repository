@@ -46,7 +46,13 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     }
     // TODO: Use a subject of an immutable type for columns, so users don't have to monitor
     // `columnsChange` separately.
-    columns: ListItem[];
+    columns$ = new BehaviorSubject<ListItem[]>([]);
+    get columns() {
+        return this.columns$.value;
+    }
+    set columns(columns: ListItem[]) {
+        this.columns$.next(columns);
+    }
     configureColumns: boolean;
     columnsChange: EventEmitter<ListItem[]>;
     displayType: NodeEntriesDisplayType;

@@ -1579,7 +1579,7 @@ public class AdminApi {
 			String content=AdminServiceFactory.getInstance().getConfigFile(filename, pathPrefix);
 			return Response.ok().entity(content).build();
 		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
+			return ErrorResponse.createResponse(DAOException.mapping(t));
 		}
 	}
 

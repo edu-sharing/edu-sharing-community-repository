@@ -9,12 +9,11 @@ import {
     ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { NodeStatistics, Node, Statistics } from '../../../core-module/rest/data-object';
+import { Node, NodeStatistics, Statistics } from '../../../core-module/rest/data-object';
 import { ListItem } from '../../../core-module/ui/list-item';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { ConfigurationService } from '../../../core-module/rest/services/configuration.service';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { RestStatisticsService } from '../../../core-module/rest/services/rest-statistics.service';
 import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
 import { Toast } from '../../../core-ui-module/toast';
@@ -23,18 +22,17 @@ import { CsvHelper } from '../../../core-module/csv.helper';
 import { SessionStorageService } from '../../../core-module/rest/services/session-storage.service';
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
 import { UIService } from '../../../core-module/rest/services/ui.service';
-import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { trigger } from '@angular/animations';
-import { ListCountsComponent } from '../../../features/list-items/list-counts/list-counts.component';
+import { ListCountsComponent } from 'src/app/features/list-items/list-counts/list-counts.component';
+import { Scope } from '../../../core-ui-module/option-item';
 import { NodeDataSource } from '../../../features/node-entries/node-data-source';
 import { DEFAULT, HOME_REPOSITORY, SearchService } from 'ngx-edu-sharing-api';
-import { getRepoUrl } from '../../../util/repo-url';
+import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import {
     InteractionType,
     NodeEntriesDisplayType,
 } from 'src/app/features/node-entries/entries-model';
-import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 
 // Charts.js
 declare var Chart: any;
@@ -56,6 +54,7 @@ type GroupTemplate = {
     ],
 })
 export class AdminStatisticsComponent implements OnInit {
+    readonly Scope = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     @ViewChild('groupedChart') groupedChartRef: ElementRef;

@@ -17,6 +17,7 @@ public class CallSourceHelper {
         Workspace,
         // access from external edu connector tool
         ToolConnector,
+        RatingApi,
         Unknown
     }
 
@@ -51,10 +52,17 @@ public class CallSourceHelper {
             return CallSource.Preview;
         }else if(isSitemap(requestPath)){
             return CallSource.Sitemap;
+        }else if(isRatingApi(requestPath)){
+            return CallSource.RatingApi;
         }else{
             return CallSource.Workspace;
         }
     }
+
+    private static boolean isRatingApi(String requestPath) {
+        return requestPath.startsWith("/edu-sharing/rest/rating");
+    }
+
     private static boolean isToolConnector() {
         return ContextManagementFilter.accessTool.get() != null &&
                 ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getType());
