@@ -796,7 +796,6 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     }
 
     openBreadcrumb(position: number) {
-        console.log(position);
         this.searchQuery = null;
         if (position > 0) {
             // handled automatically via routing

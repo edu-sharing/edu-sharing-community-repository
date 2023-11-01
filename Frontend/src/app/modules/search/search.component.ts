@@ -500,7 +500,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.searchService.sort.direction === sort.direction &&
             this.getDataSource()?.isEmpty() === false
         ) {
-            console.info('init is already done');
             this.initOptions();
             this.mainNavService.getMainNav()?.refreshBanner();
             return;
