@@ -12,11 +12,10 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { forkJoin as observableForkJoin, Subject } from 'rxjs';
-import { filter, first, takeUntil } from 'rxjs/operators';
+import { combineLatest, forkJoin as observableForkJoin, Subject } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
 import {
     DropSource,
-    DropTarget,
     InteractionType,
     ListEventInterface,
     ListSortConfig,
@@ -26,7 +25,6 @@ import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import * as EduData from '../../core-module/core.module';
 import {
-    AbstractList,
     CollectionReference,
     ConfigurationHelper,
     ConfigurationService,
@@ -34,7 +32,6 @@ import {
     FrameEventsService,
     ListItem,
     ListItemSort,
-    LoginResult,
     MdsMetadatasets,
     Mediacenter,
     Node,
@@ -340,8 +337,11 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
         this.collectionsColumns.push(new ListItem('COLLECTION', 'scope'));
         this.setCollectionId(RestConstants.ROOT);
         this.translations.waitForInit().subscribe(() => {
-            this.connector.isLoggedIn().subscribe(
-                (data: LoginResult) => {
+            combineLatest([
+                this.connector.isLoggedIn(),
+                this.networkService.getRepositories(),
+            ]).subscribe(
+                ([data]) => {
                     if (data.isValidLogin && data.currentScope == null) {
                         this.addMaterialBinaryOptionItem.isEnabled =
                             this.connector.hasToolPermissionInstant(
