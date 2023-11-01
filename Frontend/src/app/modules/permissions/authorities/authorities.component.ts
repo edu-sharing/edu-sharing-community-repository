@@ -442,7 +442,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 'PERMISSIONS.ORG_SIGNUP_LIST',
                 'playlist_add',
                 async (data) => {
-                    this.toast.showProgressDialog();
+                    this.toast.showProgressSpinner();
                     this.groupSignup = this.getList(data)[0];
                     this.groupSignupListShown = true;
                     this.ref.tick();
@@ -456,7 +456,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                         actionbar: this.actionbarSignup,
                         customOptions: this.signupActions,
                     });
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                 },
             );
             orgSignupList.elementType = [ElementType.Group];
@@ -601,7 +601,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 'PERMISSIONS.ORG_SIGNUP_ADD',
                 'person_add',
                 (node: User) => {
-                    this.toast.showProgressDialog();
+                    this.toast.showProgressSpinner();
                     const users = NodeHelperService.getActionbarNodes(
                         this.signupList.getSelection().selected,
                         node,
@@ -614,11 +614,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                         () => {
                             this.groupSignupListShown = false;
                             this.toast.toast('PERMISSIONS.ORG_SIGNUP_ADD_CONFIRM');
-                            this.toast.closeModalDialog();
+                            this.toast.closeProgressSpinner();
                         },
                         (error) => {
                             this.toast.error(error);
-                            this.toast.closeModalDialog();
+                            this.toast.closeProgressSpinner();
                         },
                     );
                 },
@@ -629,7 +629,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 'PERMISSIONS.ORG_SIGNUP_REJECT',
                 'close',
                 (node: User) => {
-                    this.toast.showProgressDialog();
+                    this.toast.showProgressSpinner();
                     const users = NodeHelperService.getActionbarNodes(
                         this.signupList.getSelection().selected,
                         node,
@@ -642,11 +642,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                         () => {
                             this.groupSignupListShown = false;
                             this.toast.toast('PERMISSIONS.ORG_SIGNUP_REJECT_CONFIRM');
-                            this.toast.closeModalDialog();
+                            this.toast.closeProgressSpinner();
                         },
                         (error) => {
                             this.toast.error(error);
-                            this.toast.closeModalDialog();
+                            this.toast.closeProgressSpinner();
                         },
                     );
                 },
@@ -673,7 +673,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         // this.refresh();
     }
     private addMembersToGroup() {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.addToSelection = [this.addMembers];
         this.addToList = this.nodeMemberAdd.getSelection().selected;
         this.addMembers = null;
@@ -699,44 +699,39 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 const name = this.edit.profile.displayName;
                 const profile = this.edit.profile;
                 if (this._mode == 'ORG') {
-                    this.toast.showProgressDialog();
+                    this.toast.showProgressSpinner();
                     this.organization.createOrganization(name).subscribe(
                         (result) => {
                             this.edit = null;
                             this.iam.editGroup(result.authorityName, profile).subscribe(
                                 () => {
-                                    this.toast.closeModalDialog();
-                                    this.toast.showProgressDialog(
-                                        'PERMISSIONS.ORG_CREATING',
-                                        'PERMISSIONS.ORG_CREATING_INFO',
-                                    );
                                     setTimeout(() => this.checkOrgExists(name), 2000);
                                 },
                                 (error) => {
                                     this.toast.error(error);
-                                    this.toast.closeModalDialog();
+                                    this.toast.closeProgressSpinner();
                                 },
                             );
                         },
                         (error) => {
                             this.toast.error(error);
-                            this.toast.closeModalDialog();
+                            this.toast.closeProgressSpinner();
                         },
                     );
                 } else {
-                    this.toast.showProgressDialog();
+                    this.toast.showProgressSpinner();
                     this.iam
                         .createGroup(name, this.edit.profile, this.org ? this.org.groupName : '')
                         .subscribe(
                             () => {
                                 this.edit = null;
-                                this.toast.closeModalDialog();
+                                this.toast.closeProgressSpinner();
                                 this.toast.toast('PERMISSIONS.GROUP_CREATED');
                                 this.refresh();
                             },
                             (error: any) => {
                                 this.toast.error(error);
-                                this.toast.closeModalDialog();
+                                this.toast.closeProgressSpinner();
                             },
                         );
                 }
@@ -756,14 +751,14 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 editStore.profile.vcard = this.edit.profile.vcard.copy();
             }
             editStore.profile.sizeQuota *= 1024 * 1024;
-            this.toast.showProgressDialog();
+            this.toast.showProgressSpinner();
             if (this.editId == null) {
                 const name = this.editDetails.authorityName;
                 const password = this.editDetails.password;
                 this.iam.createUser(name, password, editStore.profile).subscribe(
                     () => {
                         this.edit = null;
-                        this.toast.closeModalDialog();
+                        this.toast.closeProgressSpinner();
                         if (this.org) {
                             this.iam.addGroupMember(this.org.authorityName, name).subscribe(
                                 () => {
@@ -779,7 +774,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                     },
                     (error: any) => {
                         this.toast.error(error);
-                        this.toast.closeModalDialog();
+                        this.toast.closeProgressSpinner();
                     },
                 );
             } else {
@@ -788,11 +783,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                         this.edit = null;
                         this.toast.toast('PERMISSIONS.USER_EDITED');
                         this.refresh();
-                        this.toast.closeModalDialog();
+                        this.toast.closeProgressSpinner();
                     },
                     (error: any) => {
                         this.toast.error(error);
-                        this.toast.closeModalDialog();
+                        this.toast.closeProgressSpinner();
                     },
                 );
             }
@@ -964,12 +959,12 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 }
 
                 this.addTo = null;
-                this.toast.closeModalDialog();
+                this.toast.closeProgressSpinner();
                 if (callback) callback();
             }
             return;
         }
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.iam
             .addGroupMember(
                 this.addToSelection[groupPosition].authorityName,
@@ -1020,18 +1015,18 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     }
 
     private closeDialog() {
-        this.toast.closeModalDialog();
+        this.toast.closeProgressSpinner();
     }
 
     private startDelete(data: any, position = 0, error = false) {
         this.closeDialog();
         if (position == data.length) {
-            this.toast.closeModalDialog();
+            this.toast.closeProgressSpinner();
             this.refresh();
             if (!error) this.toast.toast('PERMISSIONS.DELETED_' + this._mode);
             return;
         }
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         if (this._mode == 'USER') {
             console.error('delete for user does not exists');
         } else {
@@ -1047,12 +1042,12 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     private startExclude(data: any, position = 0) {
         this.closeDialog();
         if (position == data.length) {
-            this.toast.closeModalDialog();
+            this.toast.closeProgressSpinner();
             this.refresh();
             this.toast.toast('PERMISSIONS.DELETED_' + this._mode);
             return;
         }
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.organization.removeMember(this.org.groupName, data[position].authorityName).subscribe(
             () => this.startExclude(data, position + 1),
             (error: any) => this.toast.error(error),
@@ -1100,10 +1095,10 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             this.memberOptions.addOptions = this.getMemberOptions();
             this.memberList.reset();
             this.searchMembers();
-            this.toast.closeModalDialog();
+            this.toast.closeProgressSpinner();
             return;
         }
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.iam
             .deleteGroupMember(
                 this.editMembers === 'ALL'
@@ -1124,10 +1119,10 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             this.memberOptions.addOptions = this.getMemberOptions();
             this.memberList.reset();
             this.searchMembers();
-            this.toast.closeModalDialog();
+            this.toast.closeProgressSpinner();
             return;
         }
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.iam
             .deleteGroupMember(list[position].authorityName, this.editGroups.authorityName)
             .subscribe(
@@ -1234,18 +1229,18 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     }
 
     private deleteOrg(list: any) {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         const org = list[0];
         this.organization.deleteOrganization(org.authorityName).subscribe(
             () => {
                 this.toast.toast('PERMISSIONS.ORG_REMOVED');
-                this.toast.closeModalDialog();
+                this.toast.closeProgressSpinner();
                 this.closeDialog();
                 this.refresh();
             },
             (error: any) => {
                 this.toast.error(error);
-                this.toast.closeModalDialog();
+                this.toast.closeProgressSpinner();
                 this.refresh();
             },
         );
@@ -1333,7 +1328,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     }
 
     private savePersonStatus() {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.iam
             .updateUserStatus(
                 this.editStatus.authorityName,
@@ -1342,18 +1337,18 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             )
             .subscribe(
                 () => {
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                     this.editStatus = null;
                 },
                 (error) => {
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                     this.toast.error(error);
                 },
             );
     }
 
     saveGroupSignup() {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         if (this.groupSignupDetails.signupMethod === 'disabled') {
             this.groupSignupDetails.signupMethod = null;
         }
@@ -1362,11 +1357,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 this.groupSignupDetails = null;
                 this.refresh();
                 this.toast.toast('PERMISSIONS.ORG_SIGNUP_SAVED');
-                this.toast.closeModalDialog();
+                this.toast.closeProgressSpinner();
             },
             (error) => {
                 this.toast.error(error);
-                this.toast.closeModalDialog();
+                this.toast.closeProgressSpinner();
             },
         );
     }

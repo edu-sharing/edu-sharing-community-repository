@@ -162,7 +162,7 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private restoreFinished(list: Node[], restoreResult: any) {
-        this.toast.closeModalDialog();
+        this.toast.closeProgressSpinner();
 
         this.prepareResults(restoreResult);
         if (restoreResult.hasDuplicateNames || restoreResult.hasParentFolderMissing) {
@@ -201,7 +201,7 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private deleteNodesWithoutConfirmation(nodes: Node[]) {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.archive.delete(nodes).subscribe(
             () => this.deleteFinished(),
             (error) => this.handleErrors(error),
@@ -209,7 +209,7 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private deleteFinished() {
-        this.toast.closeModalDialog();
+        this.toast.closeProgressSpinner();
         this.toast.toast('RECYCLE.TOAST.DELETE_FINISHED');
         this.list.getSelection().clear();
         this.refresh();
@@ -225,7 +225,7 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
 
     public restoreNodes(list: Node[], toPath = '') {
         // archiveRestore list
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.archive.restore(list, toPath).subscribe(
             (result: ArchiveRestore) => this.restoreFinished(list, result),
             (error: any) => this.handleErrors(error),
@@ -233,7 +233,7 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     private handleErrors(error: any) {
         this.toast.error(error);
-        this.toast.closeModalDialog();
+        this.toast.closeProgressSpinner();
     }
 
     private restoreSingle(node: Node): void {

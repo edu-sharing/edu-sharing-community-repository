@@ -71,7 +71,7 @@ export class UploadDialogService {
      */
     async createLinkNode(data: LinkData): Promise<Node[] | null> {
         const urlData = this._createUrlLink(data);
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         const { node } = await this.nodeService
             .createNode(
                 data.parent?.ref.id,
@@ -82,7 +82,7 @@ export class UploadDialogService {
                 RestConstants.COMMENT_MAIN_FILE_UPLOAD,
             )
             .toPromise();
-        this.toast.closeModalDialog();
+        this.toast.closeProgressSpinner();
         return this._showMetadataAfterUpload([node]);
     }
 
@@ -156,11 +156,11 @@ export class UploadDialogService {
     }
 
     private async _deleteNodes(nodes: Node[]): Promise<void> {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         await rxjs
             .forkJoin(nodes.map((n) => this.nodeService.deleteNode(n.ref.id, false)))
             .toPromise();
-        this.toast.closeModalDialog();
+        this.toast.closeProgressSpinner();
     }
 
     private _createUrlLink(data: LinkData): {

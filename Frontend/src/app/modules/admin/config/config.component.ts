@@ -93,7 +93,7 @@ export class AdminConfigComponent {
     }
     private displayError(error: any) {
         console.warn(error);
-        this.toast.closeModalDialog();
+        this.toast.closeProgressSpinner();
         void this.dialogs.openGenericDialog({
             title: 'ADMIN.GLOBAL_CONFIG.ERROR',
             message: 'ADMIN.GLOBAL_CONFIG.PARSE_ERROR',
@@ -104,7 +104,7 @@ export class AdminConfigComponent {
         });
     }
     save() {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         forkJoin([
             this.adminService.updateConfigFile(
                 AdminConfigComponent.CLIENT_CONFIG_FILE,
@@ -129,10 +129,10 @@ export class AdminConfigComponent {
         ]).subscribe(() => {
             this.adminService.refreshAppInfo().subscribe(
                 () => {
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                     this.configService.observeConfig({ forceUpdate: true }).subscribe(
                         () => {
-                            this.toast.closeModalDialog();
+                            this.toast.closeProgressSpinner();
                             this.toast.toast('ADMIN.GLOBAL_CONFIG.SAVED');
                         },
                         (error) => this.displayError(error),

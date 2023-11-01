@@ -41,7 +41,6 @@ export class ModalDialogToastComponent {
             Promise.resolve().then(() => {
                 this.title = data.title;
                 this.message = data.message;
-                this.progressType = data.progressType;
                 this.cardType = data.cardType;
                 this.dialogType = data.dialogType || DialogType.ModalCard;
                 this.node = data.node;
@@ -79,10 +78,6 @@ export class ModalDialogToastComponent {
     messageParameters: any;
 
     messageType = ModalMessageType.Text;
-    /**
-     * type of the progress to display. Null if this is not an progress dialog
-     */
-    progressType: ProgressType;
     cardType: CardType;
     dialogType: DialogType;
     /* value stored in the input, if enabled */
@@ -102,7 +97,6 @@ export class ModalDialogOptions {
     message: string;
     buttons?: DialogButton[];
     input?: string;
-    progressType?: ProgressType;
     cardType?: CardType;
     dialogType?: DialogType;
     messageParameters?: any;

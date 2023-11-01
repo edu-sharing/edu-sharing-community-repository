@@ -112,7 +112,7 @@ export class CommentsListComponent {
                     dialogRef.afterClosed().subscribe((response) => {
                         if (response === 'YES') {
                             this.onLoading.emit(true);
-                            this.toast.closeModalDialog();
+                            this.toast.closeProgressSpinner();
                             this.commentsApi.deleteComment(comment.ref.id).subscribe(
                                 () => {
                                     this.refresh();

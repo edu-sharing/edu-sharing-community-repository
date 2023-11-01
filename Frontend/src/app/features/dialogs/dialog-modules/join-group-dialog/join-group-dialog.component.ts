@@ -51,7 +51,7 @@ export class JoinGroupDialogComponent implements OnInit {
                 (error) => {
                     this.toast.error(error);
                     this.groupsLoading = false;
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                 },
             );
         });
@@ -92,7 +92,7 @@ export class JoinGroupDialogComponent implements OnInit {
     }
 
     private signup(): void {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.iam.signupGroup(this.group.authorityName, this.password).subscribe(
             (result) => {
                 if (result !== 'Ok') {
@@ -107,11 +107,11 @@ export class JoinGroupDialogComponent implements OnInit {
                     }
                     this.cancel();
                 }
-                this.toast.closeModalDialog();
+                this.toast.closeProgressSpinner();
             },
             (error) => {
                 this.toast.error(error);
-                this.toast.closeModalDialog();
+                this.toast.closeProgressSpinner();
             },
         );
     }

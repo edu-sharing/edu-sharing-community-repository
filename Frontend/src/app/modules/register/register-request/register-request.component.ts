@@ -35,15 +35,15 @@ export class RegisterRequestComponent implements OnDestroy {
     }
     submit() {
         if (!this.emailFormControl.valid) return;
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.register.recoverPassword(this.emailFormControl.value).subscribe(
             () => {
-                this.toast.closeModalDialog();
+                this.toast.closeProgressSpinner();
                 this.toast.toast('REGISTER.TOAST');
                 this.onDone.emit();
             },
             (error) => {
-                this.toast.closeModalDialog();
+                this.toast.closeProgressSpinner();
                 console.log(error);
                 if (error?.error?.error?.includes('DAOInvalidKeyException')) {
                     this.toast.error(null, 'REGISTER.TOAST_INVALID_MAIL');

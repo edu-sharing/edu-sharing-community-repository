@@ -85,12 +85,12 @@ export class LtiAdminComponent implements OnInit {
             .subscribe(
                 (t: void) => {
                     this.toast.toast('ADMIN.LTI.DATA.CREATED', null);
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                     this.onRefreshAppList.emit();
                 },
                 (error: any) => {
                     this.toast.error(error);
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                 },
             );
     }

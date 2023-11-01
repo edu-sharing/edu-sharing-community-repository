@@ -1,4 +1,3 @@
-<es-global-progress *ngIf="visible && progressType"></es-global-progress>
 <es-infobar
   *ngIf="dialogType === DialogType.Infobar"
   [title]="title"
@@ -10,7 +9,7 @@
 >
 </es-infobar>
 <es-card
-  *ngIf="visible && !progressType && dialogType === DialogType.ModalCard"
+  *ngIf="visible && dialogType === DialogType.ModalCard"
   title="{{ title | translate : messageParameters }}"
   (onCancel)="cancel()"
   [isCancelable]="isCancelable"
@@ -30,5 +29,4 @@
       innerHTML="{{ message | translate : messageParameters }}"
     ></span>
   </div>
-  <mat-progress-bar *ngIf="progressType" [mode]="progressType"></mat-progress-bar>
 </es-card>

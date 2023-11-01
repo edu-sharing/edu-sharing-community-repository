@@ -172,7 +172,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             this.addVirtualObjects(components, nodes);
             return;
         }
-        this.bridge.showProgressDialog();
+        this.bridge.showProgressSpinner();
         const target = data.parent.ref.id;
         const source = clip.nodes[nodes.length].ref.id;
         if (clip.copy) {
@@ -1489,7 +1489,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     }
 
     private bookmarkNodes(nodes: Node[]) {
-        this.bridge.showProgressDialog();
+        this.bridge.showProgressSpinner();
         this.addToNodeStore(nodes).subscribe(() => {
             this.bridge.closeModalDialog();
         });
@@ -1876,7 +1876,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     }
 
     private unblockImportedNodes(nodes: Node[]) {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         observableForkJoin(
             nodes.map((n) => {
                 const properties: any = {};
@@ -1902,7 +1902,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 });
             }),
         ).subscribe((results: Node[]) => {
-            this.toast.closeModalDialog();
+            this.toast.closeProgressSpinner();
             this.localEvents.nodesChanged.emit(results);
         });
     }

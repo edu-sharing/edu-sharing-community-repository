@@ -249,7 +249,7 @@ export class AdminMediacenterComponent {
                     id,
                 },
             };
-            this.toast.showProgressDialog();
+            this.toast.showProgressSpinner();
             this.mediacenterServiceLegacy.addMediacenter(id, profile).subscribe(
                 (result) => {
                     RestHelper.waitForResult(
@@ -261,7 +261,7 @@ export class AdminMediacenterComponent {
                             );
                         },
                         () => {
-                            this.toast.closeModalDialog();
+                            this.toast.closeProgressSpinner();
                             this.toast.toast('ADMIN.MEDIACENTER.CREATED', { name: id });
                             this.setMediacenter(null);
                             this.refresh();
@@ -270,14 +270,14 @@ export class AdminMediacenterComponent {
                 },
                 (error: any) => {
                     this.toast.error(error);
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                 },
             );
         }
     }
 
     saveChanges() {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.mediacenterServiceLegacy
             .editMediacenter(
                 this.currentMediacenterCopy.authorityName,
@@ -288,12 +288,12 @@ export class AdminMediacenterComponent {
                     this.toast.toast('ADMIN.MEDIACENTER.UPDATED', {
                         name: this.currentMediacenterCopy.profile.displayName,
                     });
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                     this.refresh();
                 },
                 (error: any) => {
                     this.toast.error(error);
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                     this.refresh();
                 },
             );
@@ -307,7 +307,7 @@ export class AdminMediacenterComponent {
     }
 
     addCurrentGroup() {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.mediacenterServiceLegacy
             .addManagedGroup(this.currentMediacenterCopy.authorityName, this.addGroup.authorityName)
             .subscribe(
@@ -316,12 +316,12 @@ export class AdminMediacenterComponent {
                     this.toast.toast('ADMIN.MEDIACENTER.GROUPS.ADDED', {
                         name: this.addGroup.profile.displayName,
                     });
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                     this.addGroup = null;
                 },
                 (error) => {
                     this.toast.error(error);
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                 },
             );
     }
@@ -335,12 +335,12 @@ export class AdminMediacenterComponent {
         });
         dialogRef.afterClosed().subscribe((response) => {
             if (response === 'YES') {
-                this.toast.showProgressDialog();
+                this.toast.showProgressSpinner();
                 this.mediacenterServiceLegacy
                     .deleteMediacenter(this.currentMediacenter.authorityName)
                     .subscribe(
                         () => {
-                            this.toast.closeModalDialog();
+                            this.toast.closeProgressSpinner();
                             this.toast.toast('ADMIN.MEDIACENTER.DELETED', {
                                 name: this.currentMediacenterCopy.profile.displayName,
                             });
@@ -349,7 +349,7 @@ export class AdminMediacenterComponent {
                         },
                         (error: any) => {
                             this.toast.error(error);
-                            this.toast.closeModalDialog();
+                            this.toast.closeProgressSpinner();
                         },
                     );
             }
@@ -357,7 +357,7 @@ export class AdminMediacenterComponent {
     }
 
     private deleteGroup(authority: Group) {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.mediacenterServiceLegacy
             .removeManagedGroup(this.currentMediacenterCopy.authorityName, authority.authorityName)
             .subscribe(
@@ -366,11 +366,11 @@ export class AdminMediacenterComponent {
                     this.toast.toast('ADMIN.MEDIACENTER.GROUPS.REMOVED', {
                         name: authority.profile.displayName,
                     });
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                 },
                 (error) => {
                     this.toast.error(error);
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                 },
             );
     }
@@ -464,7 +464,7 @@ export class AdminMediacenterComponent {
             .map((c) => c.name)
             .filter((n) => n !== 'ccm:mediacenter');
         const propertiesLabel = properties.map((p) => this.translate.instant('NODE.' + p));
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         const data = (await this.mediacenterService
             .exportMediacenterLicensedNodes({
                 repository: RestConstants.HOME_REPOSITORY,
@@ -477,7 +477,7 @@ export class AdminMediacenterComponent {
                 properties,
             })
             .toPromise()) as unknown as any[];
-        this.toast.closeModalDialog();
+        this.toast.closeProgressSpinner();
         data.forEach((d) => {
             Object.keys(d)
                 .filter((c) => RestConstants.getAllVCardFields().includes(c))

@@ -95,9 +95,9 @@ export class WorkspaceManagementDialogsComponent {
      */
     set globalProgress(globalProgress: boolean) {
         if (globalProgress) {
-            this.toast.showProgressDialog();
+            this.toast.showProgressSpinner();
         } else {
-            this.toast.closeModalDialog();
+            this.toast.closeProgressSpinner();
         }
     }
 
@@ -234,9 +234,9 @@ export class WorkspaceManagementDialogsComponent {
         if (close) {
             this.cancelAddToCollection();
         } else {
-            this.toast.closeModalDialog();
+            this.toast.closeProgressSpinner();
         }
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         UIHelper.addToCollection(
             this.nodeHelper,
             this.collectionService,
@@ -246,7 +246,7 @@ export class WorkspaceManagementDialogsComponent {
             list,
             asProposal,
             (nodes) => {
-                this.toast.closeModalDialog();
+                this.toast.closeProgressSpinner();
                 this.onStoredAddToCollection.emit({ collection, references: nodes });
                 if (callback) {
                     callback();
@@ -269,7 +269,7 @@ export class WorkspaceManagementDialogsComponent {
         });
     }
     private doRestoreVersion(version: Version): void {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.nodeService
             .revertNodeToVersion(
                 version.version.node.id,
@@ -278,7 +278,7 @@ export class WorkspaceManagementDialogsComponent {
             )
             .subscribe(
                 (data: NodeVersions) => {
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                     this.closeSidebar();
                     // @TODO type is not compatible
                     this.nodeService

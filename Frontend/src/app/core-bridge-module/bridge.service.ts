@@ -1,10 +1,6 @@
 import { Injectable, Injector } from '@angular/core';
 import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { CordovaService } from '../common/services/cordova.service';
-import {
-    ModalDialogOptions,
-    ProgressType,
-} from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import { MessageType } from '../core-module/ui/message-type';
 import { Toast } from '../core-ui-module/toast';
 import { CardDialogRef } from '../features/dialogs/card-dialog/card-dialog-ref';
@@ -40,7 +36,7 @@ export class BridgeService {
         }
     }
     closeModalDialog() {
-        this.injector.get(Toast).closeModalDialog();
+        this.injector.get(Toast).closeProgressSpinner();
     }
     openGenericDialog<R extends string>(
         config: GenericDialogConfig<R>,
@@ -50,12 +46,8 @@ export class BridgeService {
     showError(errorObject: any) {
         this.injector.get(Toast).error(errorObject);
     }
-    showProgressDialog(
-        title = 'PROGRESS_DIALOG_DEFAULT_TITLE',
-        message = 'PROGRESS_DIALOG_DEFAULT_MESSAGE',
-        type = ProgressType.Indeterminate,
-    ) {
-        this.injector.get(Toast).showProgressDialog(title, message, type);
+    showProgressSpinner() {
+        this.injector.get(Toast).showProgressSpinner();
     }
     isRunningCordova() {
         return this.cordova.isRunningCordova();

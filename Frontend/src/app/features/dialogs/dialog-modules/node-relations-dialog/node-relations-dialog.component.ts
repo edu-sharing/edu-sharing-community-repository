@@ -148,7 +148,7 @@ export class NodeRelationsDialogComponent implements OnInit {
     }
 
     private async save() {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         try {
             await forkJoin(
                 this.addRelations.map((r) => {
@@ -173,7 +173,7 @@ export class NodeRelationsDialogComponent implements OnInit {
             this.dialogRef.close(true);
             this.localEvents.nodesChanged.emit([this.data.node]);
         } catch (e) {}
-        this.toast.closeModalDialog();
+        this.toast.closeProgressSpinner();
     }
 
     updateButtons() {

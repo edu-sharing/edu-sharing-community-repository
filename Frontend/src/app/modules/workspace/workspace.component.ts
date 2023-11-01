@@ -398,7 +398,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     }
 
     private finishMoveCopy(target: DropTarget, source: Node[], copy: boolean) {
-        this.toast.closeModalDialog();
+        this.toast.closeProgressSpinner();
         const info: any = {
             to: (target as Node).name || this.translate.instant('WORKSPACE.MY_FILES'),
             count: source.length,

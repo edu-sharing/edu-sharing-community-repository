@@ -59,7 +59,7 @@ export class EmbedComponent implements EventListener, OnDestroy {
             show: false,
         });
         this.event.addListener(this, this.destroyed);
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.translations.waitForInit().subscribe(() => {
             this.route.params.subscribe((params) => {
                 this.component = params.component;
@@ -77,11 +77,11 @@ export class EmbedComponent implements EventListener, OnDestroy {
                         UIHelper.waitForComponent(this.ngZone, this, 'mdsRef').subscribe(
                             async () => {
                                 await this.mdsRef.reInit();
-                                this.toast.closeModalDialog();
+                                this.toast.closeProgressSpinner();
                             },
                         );
                     } else {
-                        this.toast.closeModalDialog();
+                        this.toast.closeProgressSpinner();
                     }
                 });
             });

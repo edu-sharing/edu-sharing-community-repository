@@ -13,18 +13,18 @@ export class ErrorProcessingService {
     handleRestRequest<T>(request: Observable<T>, showProgress = true): Promise<T> {
         return new Promise<T>((resolve, reject) => {
             if (showProgress) {
-                this.toast.showProgressDialog();
+                this.toast.showProgressSpinner();
             }
             request.subscribe(
                 (result) => {
                     if (showProgress) {
-                        this.toast.closeModalDialog();
+                        this.toast.closeProgressSpinner();
                     }
                     resolve(result);
                 },
                 (error) => {
                     if (showProgress) {
-                        this.toast.closeModalDialog();
+                        this.toast.closeProgressSpinner();
                     }
                     this.toast.error(error);
                     reject(error);

@@ -25,16 +25,16 @@ export class RegisterResetPasswordComponent {
         }
     }
     public newPassword() {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.register.resetPassword(this.params.key, this.new_password).subscribe(
             () => {
-                this.toast.closeModalDialog();
+                this.toast.closeProgressSpinner();
                 this.toast.toast('REGISTER.RESET.TOAST');
                 this.router.navigate([UIConstants.ROUTER_PREFIX, 'login']);
             },
             (error) => {
                 console.log('error', error);
-                this.toast.closeModalDialog();
+                this.toast.closeProgressSpinner();
                 if (error?.error?.error?.includes('DAOInvalidKeyException')) {
                     this.toast.error(null, 'REGISTER.TOAST_INVALID_RESET_KEY');
                     this.router.navigate([UIConstants.ROUTER_PREFIX, 'register', 'request']);

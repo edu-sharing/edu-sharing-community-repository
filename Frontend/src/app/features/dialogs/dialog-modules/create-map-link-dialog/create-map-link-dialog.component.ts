@@ -78,7 +78,7 @@ export class CreateMapLinkDialogComponent implements OnInit {
         properties[RestConstants.CCM_PROP_MAP_REF_TARGET] = [
             RestHelper.createSpacesStoreRef(this.data.node),
         ];
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.nodeApi
             .createNode(
                 this.breadcrumbsService.breadcrumbs$.value[
@@ -116,11 +116,11 @@ export class CreateMapLinkDialogComponent implements OnInit {
                         null,
                         additional,
                     );
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                     this.dialogRef.close(node);
                 },
                 (error) => {
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                     this.toast.error(error);
                 },
             );

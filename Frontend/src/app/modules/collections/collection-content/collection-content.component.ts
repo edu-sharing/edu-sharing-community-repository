@@ -444,11 +444,11 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         if (source.element[0] === target) {
             return;
         }
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         if (source.element[0].mediatype === 'collection') {
             if (source.mode === 'copy') {
                 this.toast.error(null, 'INVALID_OPERATION');
-                this.toast.closeModalDialog();
+                this.toast.closeProgressSpinner();
                 return;
             }
             this.nodeService
@@ -458,12 +458,12 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 )
                 .subscribe(
                     () => {
-                        this.toast.closeModalDialog();
+                        this.toast.closeProgressSpinner();
                         this.refreshContent();
                     },
                     (error) => {
                         this.handleError(error);
-                        this.toast.closeModalDialog();
+                        this.toast.closeProgressSpinner();
                     },
                 );
         } else {
@@ -477,7 +477,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 false,
                 (nodes) => {
                     if (source.mode === 'copy') {
-                        this.toast.closeModalDialog();
+                        this.toast.closeProgressSpinner();
                         this.refreshContent();
                         return;
                     }
@@ -494,16 +494,16 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         );
                         observableForkJoin(observables).subscribe(
                             () => {
-                                this.toast.closeModalDialog();
+                                this.toast.closeProgressSpinner();
                                 this.refreshContent();
                             },
                             (error) => {
                                 this.handleError(error);
-                                this.toast.closeModalDialog();
+                                this.toast.closeProgressSpinner();
                             },
                         );
                     } else {
-                        this.toast.closeModalDialog();
+                        this.toast.closeProgressSpinner();
                     }
                 },
             );
@@ -574,7 +574,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     private deleteFromCollection(callback: Function = null) {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.collectionService
             .removeFromCollection(this.contentNode.ref.id, this.collection.ref.id)
             .subscribe(
@@ -582,14 +582,14 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                     if (!('proposal' in this.collection)) {
                         this.toast.toast('COLLECTIONS.REMOVED_FROM_COLLECTION');
                     }
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                     this.refreshContent();
                     if (callback) {
                         callback();
                     }
                 },
                 (error: any) => {
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                     this.toast.error(error);
                 },
             );
@@ -881,7 +881,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     addNodesToCollection(nodes: Node[], allowDuplicate: boolean | 'ignore' = false) {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         UIHelper.addToCollection(
             this.nodeHelper,
             this.collectionService,
@@ -892,14 +892,14 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             false,
             () => {
                 this.refreshContent();
-                this.toast.closeModalDialog();
+                this.toast.closeProgressSpinner();
             },
             allowDuplicate,
         );
     }
 
     private async changeReferencesOrder() {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.collectionService
             .setOrder(
                 this.collection.ref.id,
@@ -908,17 +908,17 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             .subscribe(
                 () => {
                     this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_CUSTOM');
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                 },
                 (error: any) => {
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                     this.toast.error(error);
                 },
             );
     }
 
     private async changeCollectionsOrder() {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.collectionService
             .setOrder(
                 this.collection.ref.id,
@@ -928,10 +928,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 () => {
                     this.sortCollections.customSortingInProgress = false;
                     this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_CUSTOM');
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                 },
                 (error: any) => {
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                     this.toast.error(error);
                 },
             );

@@ -336,7 +336,8 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     }
 
     async addFolder(folder: AddFolderDialogResult) {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
+        return;
         const properties = RestHelper.createNameProperty(folder.name);
         if (folder.metadataSet) {
             properties[RestConstants.CM_PROP_METADATASET_EDU_METADATASET] = [folder.metadataSet];
@@ -351,12 +352,12 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             )
             .subscribe(
                 (data: NodeWrapper) => {
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                     this.onCreate.emit([data.node]);
                     this.toast.toast('WORKSPACE.TOAST.FOLDER_ADDED');
                 },
                 (error: any) => {
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                     if (
                         this.nodeHelper.handleNodeError(folder.name, error) ===
                         RestConstants.DUPLICATE_NODE_RESPONSE

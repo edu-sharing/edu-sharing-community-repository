@@ -194,7 +194,7 @@ export class PermissionsDeleteComponent implements OnInit {
     }
 
     start() {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         if (this.job !== 'NONE') {
             this.admin
                 .startJobSync(this.job.name, {
@@ -204,13 +204,13 @@ export class PermissionsDeleteComponent implements OnInit {
                 })
                 .subscribe(
                     (result) => {
-                        this.toast.closeModalDialog();
+                        this.toast.closeProgressSpinner();
                         this.deleteResult = JSON.stringify(result, null, 2);
                         this.refresh();
                     },
                     (error) => {
                         this.toast.error(error);
-                        this.toast.closeModalDialog();
+                        this.toast.closeProgressSpinner();
                     },
                 );
             return;
@@ -232,13 +232,13 @@ export class PermissionsDeleteComponent implements OnInit {
             )
             .subscribe(
                 (result) => {
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                     this.deleteResult = JSON.stringify(result, null, 2);
                     this.refresh();
                 },
                 (error) => {
                     this.toast.error(error);
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                 },
             );
     }

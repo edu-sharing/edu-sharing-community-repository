@@ -1,3 +1,5 @@
+import { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { ComponentPortal } from '@angular/cdk/portal';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, Injector, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -12,10 +14,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import {
-    ModalDialogOptions,
-    ProgressType,
-} from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
+import { ModalDialogOptions } from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import { RestConnectorService } from '../core-module/core.module';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { CardDialogRef } from '../features/dialogs/card-dialog/card-dialog-ref';
@@ -24,6 +23,7 @@ import {
     GenericDialogData,
 } from '../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../features/dialogs/dialogs.service';
+import { GlobalProgressComponent } from '../shared/components/global-progress/global-progress.component';
 import { ToastMessageComponent } from './components/toast-message/toast-message.component';
 
 interface CustomAction {
@@ -79,6 +79,7 @@ export class Toast extends ToastAbstract implements OnDestroy {
         private accessibility: AccessibilityService,
         private dialogs: DialogsService,
         private injector: Injector,
+        private overlay: Overlay,
         private router: Router,
         private snackBar: MatSnackBar,
     ) {
@@ -282,12 +283,21 @@ export class Toast extends ToastAbstract implements OnDestroy {
         return this.dialogs.openGenericDialog(config);
     }
 
-    showProgressDialog(
-        title = 'PROGRESS_DIALOG_DEFAULT_TITLE',
-        message = 'PROGRESS_DIALOG_DEFAULT_MESSAGE',
-        type = ProgressType.Indeterminate,
-    ) {
-        this.showConfigurableDialog({ title, message, progressType: type });
+    private progressSpinnerOverlay: OverlayRef | null;
+
+    showProgressSpinner() {
+        if (!this.progressSpinnerOverlay) {
+            this.progressSpinnerOverlay = this.overlay.create();
+            const userProfilePortal = new ComponentPortal(GlobalProgressComponent);
+            this.progressSpinnerOverlay.attach(userProfilePortal);
+        }
+    }
+
+    closeProgressSpinner(): void {
+        if (this.progressSpinnerOverlay) {
+            this.progressSpinnerOverlay.dispose();
+            this.progressSpinnerOverlay = null;
+        }
     }
 
     clientConfigError(configKey: string, details: string = null) {

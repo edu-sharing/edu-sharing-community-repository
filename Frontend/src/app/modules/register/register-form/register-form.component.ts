@@ -39,7 +39,7 @@ export class RegisterFormComponent implements OnDestroy {
     requiredFields: string[] = [];
 
     public register() {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         const rawData = this.registerForm.getRawValue();
         this.info = rawData;
         // wrap additional fields (at the moment only "title") into an additional vcard
@@ -52,7 +52,7 @@ export class RegisterFormComponent implements OnDestroy {
         this.info.password = this.password;
         this.registerService.register({ body: this.info }).subscribe(
             () => {
-                this.toast.closeModalDialog();
+                this.toast.closeProgressSpinner();
                 this.onRegisterDone.emit();
                 // this.toast.toast("REGISTER.TOAST");
             },
@@ -63,7 +63,7 @@ export class RegisterFormComponent implements OnDestroy {
                 } else {
                     this.toast.error(error);
                 }
-                this.toast.closeModalDialog();
+                this.toast.closeProgressSpinner();
             },
         );
     }

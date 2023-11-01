@@ -91,7 +91,7 @@ export class AdminFrontpageComponent {
         for (const key of Object.keys(this.form.value)) {
             this.config.frontpage[key] = this.form.value[key];
         }
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.adminService.updateRepositoryConfig(this.config).subscribe(() => {
             this.update();
             this.toast.toast('ADMIN.FRONTPAGE.SAVED');
@@ -110,7 +110,7 @@ export class AdminFrontpageComponent {
                 values.timespan = this.form.get('timespan').value;
             }
             this.form.setValue(values);
-            this.toast.closeModalDialog();
+            this.toast.closeProgressSpinner();
             if (this.config.frontpage.collection) {
                 this.collectionService
                     .getCollection(this.config.frontpage.collection)
@@ -120,7 +120,7 @@ export class AdminFrontpageComponent {
             }
         } catch (e) {
             this.toast.error(e);
-            this.toast.closeModalDialog();
+            this.toast.closeProgressSpinner();
             const dialogRef = await this.dialogs.openGenericDialog({
                 title: 'ADMIN.FRONTPAGE.CONFIG_BROKEN',
                 message: 'ADMIN.FRONTPAGE.CONFIG_BROKEN_INFO',
@@ -133,12 +133,12 @@ export class AdminFrontpageComponent {
             });
             dialogRef.afterClosed().subscribe((response) => {
                 if (response === 'ADMIN.FRONTPAGE.RESET') {
-                    this.toast.showProgressDialog();
+                    this.toast.showProgressSpinner();
                     this.adminService.updateRepositoryConfig(null).subscribe(() => {
                         void this.update();
                     });
                 } else {
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                 }
             });
         }

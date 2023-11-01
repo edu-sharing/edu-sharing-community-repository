@@ -31,7 +31,7 @@ export class ViewMaterialFeedbackComponent {
             this.feedbacks = null;
             return;
         }
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         try {
             this.feedbacks = await this.feedbackService
                 .getFeedbacks({
@@ -42,6 +42,6 @@ export class ViewMaterialFeedbackComponent {
         } catch (e) {
             this.onClose.emit();
         }
-        this.toast.closeModalDialog();
+        this.toast.closeProgressSpinner();
     }
 }

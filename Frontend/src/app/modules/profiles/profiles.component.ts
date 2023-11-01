@@ -95,7 +95,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     }
 
     public loadUser(authority: string) {
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.connector.isLoggedIn().subscribe((login) => {
             observableForkJoin(
                 this.iamService.getUser(authority),
@@ -105,7 +105,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
                     this.user = profile.person;
                     this.userStats = stats;
                     this.userEditProfile = profile.editProfile;
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                     this.userEdit = Helper.deepCopy(this.user);
                     if (!(this.user.profile.vcard instanceof VCard)) {
                         this.user.profile.vcard = new VCard(
@@ -126,7 +126,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
                     });
                 },
                 (error: any) => {
-                    this.toast.closeModalDialog();
+                    this.toast.closeProgressSpinner();
                     if (!this.loadingTask.isDone) {
                         this.loadingTask.done();
                     }
@@ -175,12 +175,12 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     }
     public savePassword() {
         if (this.changePassword) {
-            this.toast.showProgressDialog();
+            this.toast.showProgressSpinner();
             if (this.password.length < ProfilesComponent.PASSWORD_MIN_LENGTH) {
                 this.toast.error(null, 'PASSWORD_MIN_LENGTH', {
                     length: ProfilesComponent.PASSWORD_MIN_LENGTH,
                 });
-                this.toast.closeModalDialog();
+                this.toast.closeProgressSpinner();
                 return;
             }
             const credentials = { oldPassword: this.oldPassword, newPassword: this.password };
@@ -191,7 +191,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
                 (error: any) => {
                     if (RestHelper.errorMessageContains(error, 'BadCredentialsException')) {
                         this.toast.error(null, 'WRONG_PASSWORD');
-                        this.toast.closeModalDialog();
+                        this.toast.closeProgressSpinner();
                     } else {
                         this.toast.error(error);
                         this.saveAvatar();
@@ -215,13 +215,13 @@ export class ProfilesComponent implements OnInit, OnDestroy {
             this.toast.error(null, 'PROFILES.ERROR.EMAIL');
             return;
         }
-        this.toast.showProgressDialog();
+        this.toast.showProgressSpinner();
         this.iamService.editUser(this.user.authorityName, this.userEdit.profile).subscribe(
             () => {
                 this.saveProfileSettings();
             },
             (error: any) => {
-                this.toast.closeModalDialog();
+                this.toast.closeProgressSpinner();
                 this.toast.error(error);
             },
         );
@@ -257,7 +257,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
                 },
             );
         } else {
-            this.toast.closeModalDialog();
+            this.toast.closeProgressSpinner();
             this.edit = false;
             this.editAbout = false;
             this.toast.toast('PROFILE_UPDATED');
@@ -271,7 +271,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
                 this.saveAvatar();
             },
             (error) => {
-                this.toast.closeModalDialog();
+                this.toast.closeProgressSpinner();
                 this.toast.error(error);
             },
         );

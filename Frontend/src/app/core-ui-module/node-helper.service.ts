@@ -295,7 +295,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
                             window.open(url);
                             return;
                         }
-                        this.toast.showProgressDialog();
+                        this.toast.showProgressSpinner();
                         this.http.get(url).subscribe(
                             (data: any) => {
                                 if (data.success)
@@ -314,11 +314,11 @@ export class NodeHelperService extends NodeHelperServiceBase {
                                         data.message,
                                     );
                                 else this.toast.error(null);
-                                this.toast.closeModalDialog();
+                                this.toast.closeProgressSpinner();
                             },
                             (error: any) => {
                                 this.toast.error(error);
-                                this.toast.closeModalDialog();
+                                this.toast.closeProgressSpinner();
                             },
                         );
                     };
