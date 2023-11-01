@@ -361,9 +361,11 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                         this.initParams();
                     },
                     (error: any) => {
-                        console.warn(
-                            'could not fetch repository list. Remote repositories can not be shown. Some features might not work properly. Please check the error and re-configure the repository',
-                        );
+                        if (error.status !== RestConstants.HTTP_UNAUTHORIZED) {
+                            console.warn(
+                                'could not fetch repository list. Remote repositories can not be shown. Some features might not work properly. Please check the error and re-configure the repository',
+                            );
+                        }
                         this.repositories = this.getHomeRepoList();
                         this.allRepositories = [];
                         let home: any = {
@@ -448,7 +450,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         sort: Sort,
         { replaceUrl = false, force = false } = {},
     ) {
-        console.info('routing', origin, props, sort, query);
+        // console.info('routing', origin, props, sort, query);
         if (origin === 'mds') {
             this.searchService.mdsInitialized = true;
             // do not route search - it can cause reset of the scroll offset of the page
@@ -515,13 +517,12 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.searchService.sort.direction = sort?.direction;
 
         if (origin === 'uri' && !this.searchService.mdsInitialized) {
-            console.info('ignoring routing - mds not ready yet');
+            // console.info('ignoring routing - mds not ready yet');
             return;
         }
 
         this.searchService.reinit = true;
         if (Object.keys(props)?.length > 0) {
-            console.log(props);
             this.searchService.extendedSearchUsed = true;
         }
         this.updateGroupedRepositories();
@@ -564,7 +565,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     scrollTo(y = 0) {
-        console.info('Scroll to', y);
         this.winRef.getNativeWindow().scrollTo(0, y);
         // fix: prevent upscrolling in prod mode
         setTimeout(() => this.winRef.getNativeWindow().scrollTo(0, y));
