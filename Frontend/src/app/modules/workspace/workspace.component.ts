@@ -696,21 +696,26 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             }
         } else {
             this.selectedNodeTree = id;
-            this.node.getNodeParents(id, false, [RestConstants.ALL]).subscribe(
-                (data: NodeList) => {
-                    if (this.root === 'RECYCLE') {
+            if (id === RestConstants.USERHOME) {
+                this.selectedNodeTree = null;
+                this.path = [];
+            } else {
+                this.node.getNodeParents(id, false, [RestConstants.ALL]).subscribe(
+                    (data: NodeList) => {
+                        if (this.root === 'RECYCLE') {
+                            this.path = [];
+                            this.createAllowed = false;
+                        } else {
+                            this.path = data.nodes.reverse();
+                        }
+                        this.selectedNodeTree = null;
+                    },
+                    (error: any) => {
+                        this.selectedNodeTree = null;
                         this.path = [];
-                        this.createAllowed = false;
-                    } else {
-                        this.path = data.nodes.reverse();
-                    }
-                    this.selectedNodeTree = null;
-                },
-                (error: any) => {
-                    this.selectedNodeTree = null;
-                    this.path = [];
-                },
-            );
+                    },
+                );
+            }
         }
         if (this.currentFolder?.ref.id !== id) {
             this.currentFolder = null;
