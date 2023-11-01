@@ -1,26 +1,31 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, Injector, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import {
-    ModalDialogOptions,
-    ProgressType,
-} from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
-import { RestConstants } from '../core-module/rest/rest-constants';
-import { DialogButton } from '../core-module/ui/dialog-button';
 import {
     AccessibilityService,
     DateHelper,
-    TemporaryStorageService,
     Toast as ToastAbstract,
     ToastDuration,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
-import { ToastMessageComponent } from './components/toast-message/toast-message.component';
-import { RestConnectorService } from '../core-module/core.module';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { HttpErrorResponse } from '@angular/common/http';
+import {
+    ModalDialogOptions,
+    ProgressType,
+} from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
+import { RestConnectorService } from '../core-module/core.module';
+import { RestConstants } from '../core-module/rest/rest-constants';
+import { DialogButton } from '../core-module/ui/dialog-button';
+import { CardDialogRef } from '../features/dialogs/card-dialog/card-dialog-ref';
+import {
+    GenericDialogConfig,
+    GenericDialogData,
+} from '../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import { DialogsService } from '../features/dialogs/dialogs.service';
+import { ToastMessageComponent } from './components/toast-message/toast-message.component';
 
 interface CustomAction {
     link: {
@@ -76,11 +81,11 @@ export class Toast extends ToastAbstract implements OnDestroy {
     }
 
     constructor(
+        private accessibility: AccessibilityService,
+        private dialogs: DialogsService,
         private injector: Injector,
         private router: Router,
         private snackBar: MatSnackBar,
-        private storage: TemporaryStorageService,
-        private accessibility: AccessibilityService,
     ) {
         super();
         this.messageQueue.pipe(takeUntil(this.destroyed)).subscribe((message) => {
@@ -193,10 +198,9 @@ export class Toast extends ToastAbstract implements OnDestroy {
      * @param toolpermission
      */
     toolpermissionError(permission: string) {
-        this.showConfigurableDialog({
+        void this.dialogs.openGenericDialog({
             title: 'TOOLPERMISSION_ERROR_TITLE',
             message: this.getToolpermissionMessage(permission),
-            isCancelable: true,
         });
     }
     /**
@@ -277,22 +281,15 @@ export class Toast extends ToastAbstract implements OnDestroy {
         this.isModalDialogOpenSubject.next(true);
     }
 
-    showModalDialog(
-        title: string,
-        message: string,
-        buttons: DialogButton[],
-        isCancelable = true,
-        onCancel: () => void = null,
-        messageParameters: any = null,
-    ) {
-        this.showConfigurableDialog({
-            title,
-            message,
-            isCancelable,
-            messageParameters,
-            onCancel,
-            buttons,
-        });
+    /**
+     * Pass through function, so it is accessible to static methods that only have access to Toast.
+     *
+     * TODO: Migrate those static methods to regular services, so we don't need this.
+     */
+    async openGenericDialog<R extends string>(
+        config: GenericDialogConfig<R>,
+    ): Promise<CardDialogRef<GenericDialogData<R>, R>> {
+        return this.dialogs.openGenericDialog(config);
     }
 
     showInputDialog(

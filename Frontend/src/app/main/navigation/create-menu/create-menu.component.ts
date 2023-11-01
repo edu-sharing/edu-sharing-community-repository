@@ -28,7 +28,6 @@ import { delay, takeUntil } from 'rxjs/operators';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     Connector,
-    DialogButton,
     Filetype,
     FrameEventsService,
     Node,
@@ -48,6 +47,7 @@ import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { AddFolderDialogResult } from '../../../features/dialogs/dialog-modules/add-folder-dialog/add-folder-dialog-data';
 import { AddWithConnectorDialogResult } from '../../../features/dialogs/dialog-modules/add-with-connector-dialog/add-with-connector-dialog-data';
+import { OK } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { PasteService } from '../../../services/paste.service';
 import { UploadDialogService } from '../../../services/upload-dialog.service';
@@ -406,14 +406,11 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             user.person.quota.enabled &&
             user.person.quota.sizeCurrent >= user.person.quota.sizeQuota
         ) {
-            this.toast.showModalDialog(
-                'CONNECTOR_QUOTA_REACHED_TITLE',
-                'CONNECTOR_QUOTA_REACHED_MESSAGE',
-                DialogButton.getOk(() => {
-                    this.toast.closeModalDialog();
-                }),
-                true,
-            );
+            await this.dialogs.openGenericDialog({
+                title: 'CONNECTOR_QUOTA_REACHED_TITLE',
+                message: 'CONNECTOR_QUOTA_REACHED_MESSAGE',
+                buttons: OK,
+            });
         } else {
             const dialogRef = await this.dialogs.openAddWithConnectorDialog({ connector, name });
             dialogRef.afterClosed().subscribe((result) => {

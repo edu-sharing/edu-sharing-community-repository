@@ -37,9 +37,11 @@ import { RestConnectorService } from '../core-module/rest/services/rest-connecto
 import { RestConnectorsService } from '../core-module/rest/services/rest-connectors.service';
 import { RestIamService } from '../core-module/rest/services/rest-iam.service';
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
-import { DialogButton } from '../core-module/ui/dialog-button';
 import { MessageType } from '../core-module/ui/message-type';
-import { YES_OR_NO } from '../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import {
+    OK,
+    YES_OR_NO,
+} from '../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { NodeHelperService } from './node-helper.service';
 import { RouterHelper } from './router.helper';
 import { Toast } from './toast';
@@ -514,14 +516,11 @@ export class UIHelper {
                             user.person.quota.enabled &&
                             user.person.quota.sizeCurrent >= user.person.quota.sizeQuota
                         ) {
-                            toast.showModalDialog(
-                                'CONNECTOR_QUOTA_REACHED_TITLE',
-                                'CONNECTOR_QUOTA_REACHED_MESSAGE',
-                                DialogButton.getOk(() => {
-                                    toast.closeModalDialog();
-                                }),
-                                true,
-                            );
+                            void toast.openGenericDialog({
+                                title: 'CONNECTOR_QUOTA_REACHED_TITLE',
+                                message: 'CONNECTOR_QUOTA_REACHED_MESSAGE',
+                                buttons: OK,
+                            });
                             if (win) win.close();
                             return;
                         }

@@ -34,6 +34,8 @@ import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-
 import { MediacenterService } from 'ngx-edu-sharing-api';
 import { CsvHelper } from '../../../core-module/csv.helper';
 import { Values } from '../../../features/mds/types/types';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { YES_OR_NO } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 
 @Component({
     selector: 'es-admin-mediacenter',
@@ -99,8 +101,8 @@ export class AdminMediacenterComponent {
         private mdsService: RestMdsService,
         private translate: TranslateService,
         private connector: RestConnectorService,
-        private iamService: RestIamService,
         private ngZone: NgZone,
+        private dialogs: DialogsService,
         private toast: Toast,
     ) {
         this.isAdmin = this.connector.getCurrentLogin().isAdmin;
@@ -115,21 +117,18 @@ export class AdminMediacenterComponent {
         const remove = new OptionItem(
             'ADMIN.MEDIACENTER.GROUPS.REMOVE',
             'delete',
-            (authority: Group) => {
-                this.toast.showModalDialog(
-                    'ADMIN.MEDIACENTER.GROUPS.REMOVE_TITLE',
-                    'ADMIN.MEDIACENTER.GROUPS.REMOVE_MESSAGE',
-                    DialogButton.getYesNo(
-                        () => this.toast.closeModalDialog(),
-                        () => {
-                            this.toast.closeModalDialog();
-                            this.deleteGroup(authority);
-                        },
-                    ),
-                    true,
-                    () => this.toast.closeModalDialog(),
-                    { name: authority.profile.displayName },
-                );
+            async (authority: Group) => {
+                const dialogRef = await this.dialogs.openGenericDialog({
+                    title: 'ADMIN.MEDIACENTER.GROUPS.REMOVE_TITLE',
+                    message: 'ADMIN.MEDIACENTER.GROUPS.REMOVE_MESSAGE',
+                    messageParameters: { name: authority.profile.displayName },
+                    buttons: YES_OR_NO,
+                });
+                dialogRef.afterClosed().subscribe((response) => {
+                    if (response === 'YES') {
+                        this.deleteGroup(authority);
+                    }
+                });
             },
         );
         remove.elementType = [ElementType.Group];
@@ -335,36 +334,34 @@ export class AdminMediacenterComponent {
             );
     }
 
-    deleteMediacenter() {
-        this.toast.showModalDialog(
-            'ADMIN.MEDIACENTER.DELETE_TITLE',
-            'ADMIN.MEDIACENTER.DELETE_MESSAGE',
-            DialogButton.getYesNo(
-                () => this.toast.closeModalDialog(),
-                () => {
-                    this.toast.showProgressDialog();
-                    this.mediacenterServiceLegacy
-                        .deleteMediacenter(this.currentMediacenter.authorityName)
-                        .subscribe(
-                            () => {
-                                this.toast.closeModalDialog();
-                                this.toast.toast('ADMIN.MEDIACENTER.DELETED', {
-                                    name: this.currentMediacenterCopy.profile.displayName,
-                                });
-                                this.setMediacenter(null);
-                                this.refresh();
-                            },
-                            (error: any) => {
-                                this.toast.error(error);
-                                this.toast.closeModalDialog();
-                            },
-                        );
-                },
-            ),
-            true,
-            () => this.toast.closeModalDialog(),
-            { name: this.currentMediacenterCopy.profile.displayName },
-        );
+    async deleteMediacenter() {
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'ADMIN.MEDIACENTER.DELETE_TITLE',
+            message: 'ADMIN.MEDIACENTER.DELETE_MESSAGE',
+            messageParameters: { name: this.currentMediacenterCopy.profile.displayName },
+            buttons: YES_OR_NO,
+        });
+        dialogRef.afterClosed().subscribe((response) => {
+            if (response === 'YES') {
+                this.toast.showProgressDialog();
+                this.mediacenterServiceLegacy
+                    .deleteMediacenter(this.currentMediacenter.authorityName)
+                    .subscribe(
+                        () => {
+                            this.toast.closeModalDialog();
+                            this.toast.toast('ADMIN.MEDIACENTER.DELETED', {
+                                name: this.currentMediacenterCopy.profile.displayName,
+                            });
+                            this.setMediacenter(null);
+                            this.refresh();
+                        },
+                        (error: any) => {
+                            this.toast.error(error);
+                            this.toast.closeModalDialog();
+                        },
+                    );
+            }
+        });
     }
 
     private deleteGroup(authority: Group) {

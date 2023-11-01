@@ -36,6 +36,7 @@ import {
 } from '../../../../mds/mds-editor/mds-editor-instance.service';
 import { DialogsService } from '../../../dialogs.service';
 import { OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
+import { YES_OR_NO } from '../../generic-dialog/generic-dialog-data';
 
 class PublishedNode extends Node {
     status?: 'new' | 'update' | null; // flag if this node is manually added later and didn't came from the repo
@@ -77,18 +78,17 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
     private destroyed = new Subject<void>();
 
     constructor(
-        private connector: RestConnectorService,
-        private translate: TranslateService,
-        private nodeHelper: NodeHelperService,
-        private legacyNodeService: RestNodeService,
-        private nodeService: NodeService,
-        private config: ConfigurationService,
-        private mdsService: MdsEditorInstanceService,
-        private toast: Toast,
-        private router: Router,
         private bridge: BridgeService,
-        private mainNavService: MainNavService,
+        private config: ConfigurationService,
+        private connector: RestConnectorService,
         private dialogs: DialogsService,
+        private legacyNodeService: RestNodeService,
+        private mdsService: MdsEditorInstanceService,
+        private nodeHelper: NodeHelperService,
+        private nodeService: NodeService,
+        private router: Router,
+        private toast: Toast,
+        private translate: TranslateService,
     ) {
         this.doiPermission = this.connector.hasToolPermissionInstant(
             RestConstants.TOOLPERMISSION_HANDLESERVICE,
@@ -215,24 +215,22 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
         this.updatePublishedVersions();
     }
 
-    updateShareMode(type: 'copy' | 'direct', force = false) {
+    async updateShareMode(type: 'copy' | 'direct', force = false) {
         if ((this.shareModeCopy || this.shareModeDirect) && !force) {
             if (this.config.instant('publishingNotice', false)) {
-                let cancel = () => {
-                    this.shareModeDirect = false;
-                    this.shareModeCopy = false;
-                    this.toast.closeModalDialog();
-                };
-                this.toast.showModalDialog(
-                    'WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE',
-                    'WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE',
-                    DialogButton.getYesNo(cancel, () => {
-                        this.updateShareMode(type, true);
-                        this.toast.closeModalDialog();
-                    }),
-                    true,
-                    cancel,
-                );
+                const dialogRef = await this.dialogs.openGenericDialog({
+                    title: 'WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE',
+                    message: 'WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE',
+                    buttons: YES_OR_NO,
+                });
+                dialogRef.afterClosed().subscribe((response) => {
+                    if (response === 'YES') {
+                        void this.updateShareMode(type, true);
+                    } else {
+                        this.shareModeDirect = false;
+                        this.shareModeCopy = false;
+                    }
+                });
                 return;
             }
         }

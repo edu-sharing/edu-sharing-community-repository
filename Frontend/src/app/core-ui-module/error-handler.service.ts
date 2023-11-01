@@ -4,16 +4,21 @@ import { Location } from '@angular/common';
 import { DialogButton, RestConstants } from '../core-module/core.module';
 import { ApiErrorResponse } from 'ngx-edu-sharing-api';
 import { HttpRequest } from '@angular/common/http';
+import { DialogsService } from '../features/dialogs/dialogs.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ErrorHandlerService {
     private toast: Toast;
+    private dialogs: DialogsService;
 
     constructor(private injector: Injector, private location: Location) {
         // Prevent circular dependency.
-        Promise.resolve().then(() => (this.toast = this.injector.get(Toast)));
+        Promise.resolve().then(() => {
+            this.toast = this.injector.get(Toast);
+            this.dialogs = this.injector.get(DialogsService);
+        });
     }
 
     handleError(error: ApiErrorResponse, req: HttpRequest<unknown>): void {
@@ -36,17 +41,17 @@ export class ErrorHandlerService {
         return this.location.prepareExternalUrl('/rest' + path);
     }
 
-    private showReloadNotice() {
-        this.toast.showModalDialog(
-            'API_ERROR.RELOAD_NOTICE_TITLE',
-            'API_ERROR.RELOAD_NOTICE',
-            [
-                new DialogButton('API_ERROR.RELOAD_BUTTON_LABEL', { color: 'primary' }, () =>
-                    location.reload(),
-                ),
-            ],
-            false,
-        );
+    private async showReloadNotice() {
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'API_ERROR.RELOAD_NOTICE_TITLE',
+            message: 'API_ERROR.RELOAD_NOTICE',
+            buttons: [{ label: 'API_ERROR.RELOAD_BUTTON_LABEL', config: { color: 'primary' } }],
+        });
+        dialogRef.afterClosed().subscribe((response) => {
+            if (response === 'API_ERROR.RELOAD_BUTTON_LABEL') {
+                location.reload();
+            }
+        });
     }
 
     private showConfigurationErrorNotice(error: ApiErrorResponse) {

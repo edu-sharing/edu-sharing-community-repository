@@ -1,4 +1,6 @@
+import { trigger } from '@angular/animations';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { OptionItem, UIAnimation } from 'ngx-edu-sharing-ui';
 import {
     Comment,
     Comments,
@@ -9,12 +11,11 @@ import {
     RestConnectorService,
     RestConstants,
     RestIamService,
-    RestNodeService,
     User,
 } from '../../../../core-module/core.module';
-import { trigger } from '@angular/animations';
-import { OptionItem, UIAnimation } from 'ngx-edu-sharing-ui';
 import { Toast } from '../../../../core-ui-module/toast';
+import { DialogsService } from '../../../../features/dialogs/dialogs.service';
+import { YES_OR_NO } from '../../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 
 @Component({
     selector: 'es-comments-list',
@@ -54,11 +55,11 @@ export class CommentsListComponent {
     dropdown = -1;
 
     constructor(
-        private connector: RestConnectorService,
-        private iam: RestIamService,
         private commentsApi: RestCommentsService,
+        private connector: RestConnectorService,
+        private dialogs: DialogsService,
+        private iam: RestIamService,
         private toast: Toast,
-        private nodeApi: RestNodeService,
     ) {
         this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
             this.isGuest = data.isGuest;
@@ -102,32 +103,29 @@ export class CommentsListComponent {
         }
         if (isAuthor || this._node.access.indexOf(RestConstants.ACCESS_WRITE) != -1) {
             options.push(
-                new OptionItem('NODE_COMMENTS.OPTION_DELETE', 'delete', () => {
-                    this.toast.showModalDialog(
-                        'NODE_COMMENTS.DELETE_COMMENT',
-                        'NODE_COMMENTS.DELETE_COMMENT_MESSAGE',
-                        DialogButton.getYesNo(
-                            () => {
-                                this.toast.closeModalDialog();
-                            },
-                            () => {
-                                this.onLoading.emit(true);
-                                this.toast.closeModalDialog();
-                                this.commentsApi.deleteComment(comment.ref.id).subscribe(
-                                    () => {
-                                        this.refresh();
-                                        this.onChange.emit();
-                                        this.onLoading.emit(false);
-                                    },
-                                    (error: any) => {
-                                        this.toast.error(error);
-                                        this.onLoading.emit(false);
-                                    },
-                                );
-                            },
-                        ),
-                        true,
-                    );
+                new OptionItem('NODE_COMMENTS.OPTION_DELETE', 'delete', async () => {
+                    const dialogRef = await this.dialogs.openGenericDialog({
+                        title: 'NODE_COMMENTS.DELETE_COMMENT',
+                        message: 'NODE_COMMENTS.DELETE_COMMENT_MESSAGE',
+                        buttons: YES_OR_NO,
+                    });
+                    dialogRef.afterClosed().subscribe((response) => {
+                        if (response === 'YES') {
+                            this.onLoading.emit(true);
+                            this.toast.closeModalDialog();
+                            this.commentsApi.deleteComment(comment.ref.id).subscribe(
+                                () => {
+                                    this.refresh();
+                                    this.onChange.emit();
+                                    this.onLoading.emit(false);
+                                },
+                                (error: any) => {
+                                    this.toast.error(error);
+                                    this.onLoading.emit(false);
+                                },
+                            );
+                        }
+                    });
                 }),
             );
         }

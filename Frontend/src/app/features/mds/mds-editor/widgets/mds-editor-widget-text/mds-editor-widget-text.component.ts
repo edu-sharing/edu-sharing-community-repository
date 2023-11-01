@@ -1,9 +1,8 @@
-import { filter } from 'rxjs/operators';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { UntypedFormControl, ValidatorFn, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
-import { DialogButton } from '../../../../../core-module/core.module';
 import { DateHelper } from 'ngx-edu-sharing-ui';
+import { filter } from 'rxjs/operators';
 import { Toast } from '../../../../../core-ui-module/toast';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
@@ -132,48 +131,42 @@ class FileNameChecker {
         }
     }
 
-    private warn(
+    private async warn(
         extensionOld: string,
         extensionNew: string,
         callbacks: { onAccept: () => void; onRevert: () => void; onCancel: () => void },
-    ): void {
-        const message = (() => {
-            if (!extensionOld) {
-                return 'EXTENSION_NOT_MATCH_INFO_NEW';
-            } else if (!extensionNew) {
-                return 'EXTENSION_NOT_MATCH_INFO_OLD';
-            } else {
-                return 'EXTENSION_NOT_MATCH_INFO';
-            }
-        })();
-        this.toast.showModalDialog(
-            'EXTENSION_NOT_MATCH',
-            message,
-            [
-                new DialogButton('CANCEL', { color: 'standard' }, () => {
-                    callbacks.onCancel();
-                    this.toast.closeModalDialog();
-                }),
-                new DialogButton('EXTENSION_KEEP', { color: 'standard' }, () => {
-                    callbacks.onRevert();
-                    this.toast.closeModalDialog();
-                }),
-                new DialogButton('EXTENSION_CHANGE', { color: 'primary' }, () => {
-                    callbacks.onAccept();
-                    this.toast.closeModalDialog();
-                }),
-            ],
-            true,
-            () => {
-                callbacks.onCancel();
-                this.toast.closeModalDialog();
-            },
-            {
+    ): Promise<void> {
+        const dialogRef = await this.toast.openGenericDialog({
+            title: 'EXTENSION_NOT_MATCH',
+            message: (() => {
+                if (!extensionOld) {
+                    return 'EXTENSION_NOT_MATCH_INFO_NEW';
+                } else if (!extensionNew) {
+                    return 'EXTENSION_NOT_MATCH_INFO_OLD';
+                } else {
+                    return 'EXTENSION_NOT_MATCH_INFO';
+                }
+            })(),
+            messageParameters: {
                 extensionOld,
                 extensionNew,
                 warning: this.translate.instant('EXTENSION_NOT_MATCH_WARNING'),
             },
-        );
+            buttons: [
+                { label: 'CANCEL', config: { color: 'standard' } },
+                { label: 'EXTENSION_KEEP', config: { color: 'standard' } },
+                { label: 'EXTENSION_CHANGE', config: { color: 'primary' } },
+            ],
+        });
+        dialogRef.afterClosed().subscribe((response) => {
+            if (response === 'EXTENSION_KEEP') {
+                callbacks.onRevert();
+            } else if (response === 'EXTENSION_CHANGE') {
+                callbacks.onAccept();
+            } else {
+                callbacks.onCancel();
+            }
+        });
     }
 
     private shouldWarn(oldValue: string, newValue: string): boolean {

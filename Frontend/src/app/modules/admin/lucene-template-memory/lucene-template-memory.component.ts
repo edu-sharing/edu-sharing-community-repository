@@ -1,7 +1,8 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { DialogButton, SessionStorageService } from '../../../core-module/core.module';
 import { Toast } from '../../../core-ui-module/toast';
-import { TranslateService } from '@ngx-translate/core';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
 
 interface LuceneTemplate {
     query: string;
@@ -112,9 +113,10 @@ export class LuceneTemplateMemoryComponent implements OnInit {
     ];
 
     constructor(
+        private dialogs: DialogsService,
         private storage: SessionStorageService,
-        private translate: TranslateService,
         private toast: Toast,
+        private translate: TranslateService,
     ) {
         this.storage
             .get(LuceneTemplateMemoryComponent.STORAGE_KEY)
@@ -170,56 +172,46 @@ export class LuceneTemplateMemoryComponent implements OnInit {
         this.propertiesChange.emit(this.properties);
     }
 
-    confirmUpdateTemplate(template: string): Promise<boolean> {
-        return new Promise((resolve) => {
-            this.toast.showModalDialog(
-                'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CONFIRM_UPDATE_TITLE',
-                'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CONFIRM_UPDATE_MESSAGE',
-                [
-                    new DialogButton('CANCEL', { color: 'standard' }, () => {
-                        this.toast.closeModalDialog();
-                        resolve(false);
-                    }),
-                    new DialogButton(
-                        'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CONFIRM_UPDATE_BUTTON',
-                        { color: 'primary' },
-                        () => {
-                            this.updateTemplate(template);
-                            this.toast.closeModalDialog();
-                            resolve(true);
-                        },
-                    ),
-                ],
-                true,
-                () => {
-                    resolve(false);
+    async confirmUpdateTemplate(template: string): Promise<boolean> {
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CONFIRM_UPDATE_TITLE',
+            message: 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CONFIRM_UPDATE_MESSAGE',
+            messageParameters: { template },
+            buttons: [
+                { label: 'CANCEL', config: { color: 'standard' } },
+                {
+                    label: 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CONFIRM_UPDATE_BUTTON',
+                    config: { color: 'primary' },
                 },
-                { template },
-            );
+            ],
         });
+        const response = await dialogRef.afterClosed().toPromise();
+        if (response === 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CONFIRM_UPDATE_BUTTON') {
+            this.updateTemplate(template);
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    confirmDeleteTemplate(template: string): void {
-        this.toast.showModalDialog(
-            'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CONFIRM_DELETE_TITLE',
-            'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CONFIRM_DELETE_MESSAGE',
-            [
-                new DialogButton('CANCEL', { color: 'standard' }, () => {
-                    this.toast.closeModalDialog();
-                }),
-                new DialogButton(
-                    'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CONFIRM_DELETE_BUTTON',
-                    { color: 'danger' },
-                    () => {
-                        this.deleteTemplate(template);
-                        this.toast.closeModalDialog();
-                    },
-                ),
+    async confirmDeleteTemplate(template: string): Promise<void> {
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CONFIRM_DELETE_TITLE',
+            message: 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CONFIRM_DELETE_MESSAGE',
+            messageParameters: { template },
+            buttons: [
+                { label: 'CANCEL', config: { color: 'standard' } },
+                {
+                    label: 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CONFIRM_DELETE_BUTTON',
+                    config: { color: 'danger' },
+                },
             ],
-            true,
-            undefined,
-            { template },
-        );
+        });
+        dialogRef.afterClosed().subscribe((response) => {
+            if (response === 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CONFIRM_DELETE_BUTTON') {
+                this.deleteTemplate(template);
+            }
+        });
     }
 
     private updateTemplate(template: string): void {

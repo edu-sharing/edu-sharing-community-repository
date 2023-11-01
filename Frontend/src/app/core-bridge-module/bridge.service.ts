@@ -47,9 +47,6 @@ export class BridgeService {
     ): Promise<CardDialogRef<GenericDialogData<R>, R>> {
         return this.injector.get(DialogsService).openGenericDialog(config);
     }
-    showModalDialog(options: ModalDialogOptions) {
-        this.injector.get(Toast).showConfigurableDialog(options);
-    }
     showError(errorObject: any) {
         this.injector.get(Toast).error(errorObject);
     }

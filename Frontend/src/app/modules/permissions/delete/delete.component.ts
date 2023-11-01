@@ -1,4 +1,13 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
+import { User } from 'ngx-edu-sharing-api';
+import {
+    InteractionType,
+    ListItem,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
+} from 'ngx-edu-sharing-ui';
 import {
     DeleteMode,
     DialogButton,
@@ -9,19 +18,11 @@ import {
     RestIamService,
     SessionStorageService,
 } from '../../../core-module/core.module';
-import { Toast } from '../../../core-ui-module/toast';
-import { TranslateService } from '@ngx-translate/core';
-import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
 import { Helper } from '../../../core-module/rest/helper';
+import { Toast } from '../../../core-ui-module/toast';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { AuthoritySearchMode } from '../../../shared/components/authority-search-input/authority-search-input.component';
-import {
-    InteractionType,
-    ListItem,
-    NodeDataSource,
-    NodeEntriesDisplayType,
-    NodeEntriesWrapperComponent,
-} from 'ngx-edu-sharing-ui';
-import { User } from 'ngx-edu-sharing-api';
+import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
 
 @Component({
     selector: 'es-permissions-delete',
@@ -47,10 +48,11 @@ export class PermissionsDeleteComponent implements OnInit {
     job: JobDescription | 'NONE' = 'NONE';
 
     constructor(
-        private iam: RestIamService,
         private admin: RestAdminService,
-        private toast: Toast,
+        private dialogs: DialogsService,
+        private iam: RestIamService,
         private storage: SessionStorageService,
+        private toast: Toast,
         private translate: TranslateService,
     ) {
         // send list of target users + options for these specific users
@@ -155,7 +157,7 @@ export class PermissionsDeleteComponent implements OnInit {
         );
     }
 
-    prepareStart() {
+    async prepareStart() {
         let message = this.translate.instant('PERMISSIONS.DELETE.CONFIRM.USERS');
         for (const user of this.nodeEntriesWrapperComponent.getSelection().selected) {
             message += '\n' + new AuthorityNamePipe(this.translate).transform(user, null);
@@ -176,10 +178,19 @@ export class PermissionsDeleteComponent implements OnInit {
                 });
         }
         message += '\n\n' + this.translate.instant('PERMISSIONS.DELETE.CONFIRM.FINAL');
-        this.toast.showModalDialog('PERMISSIONS.DELETE.CONFIRM.CAPTION', message, [
-            new DialogButton('CANCEL', { color: 'standard' }, () => this.toast.closeModalDialog()),
-            new DialogButton('PERMISSIONS.DELETE.START', { color: 'primary' }, () => this.start()),
-        ]);
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'PERMISSIONS.DELETE.CONFIRM.CAPTION',
+            message,
+            buttons: [
+                { label: 'CANCEL', config: { color: 'standard' } },
+                { label: 'PERMISSIONS.DELETE.START', config: { color: 'primary' } },
+            ],
+        });
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result === 'PERMISSIONS.DELETE.START') {
+                this.start();
+            }
+        });
     }
 
     start() {

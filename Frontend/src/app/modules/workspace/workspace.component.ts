@@ -27,7 +27,6 @@ import { delay, first } from 'rxjs/operators';
 import {
     ConfigurationService,
     Connector,
-    DialogButton,
     EventListener,
     Filetype,
     FrameEventsService,
@@ -51,6 +50,8 @@ import { CardService } from '../../core-ui-module/card.service';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { Toast } from '../../core-ui-module/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
+import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config';
+import { OK } from '../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
@@ -296,10 +297,6 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             window.addEventListener('scroll', handleScroll);
             this.destroyed$.subscribe(() => window.removeEventListener('scroll', handleScroll));
         });
-    }
-
-    private hideDialog(): void {
-        this.toast.closeModalDialog();
     }
 
     private editConnector(
@@ -863,12 +860,12 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     }
 
     private showAlpha() {
-        this.toast.showModalDialog(
-            'WORKSPACE.ALPHA_TITLE',
-            'WORKSPACE.ALPHA_MESSAGE',
-            DialogButton.getOk(() => this.hideDialog()),
-            false,
-        );
+        void this.dialogs.openGenericDialog({
+            title: 'WORKSPACE.ALPHA_TITLE',
+            message: 'WORKSPACE.ALPHA_MESSAGE',
+            buttons: OK,
+            closable: Closable.Disabled,
+        });
     }
 
     private addToCollection(node: Node) {
