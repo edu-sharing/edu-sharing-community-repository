@@ -506,7 +506,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
         }
         if (this.searchService.searchTerm !== query) {
-            console.info(this.searchService.searchTerm, query);
+            // console.info(this.searchService.searchTerm, query);
             this.searchService.searchTerm = query;
         }
         this.searchService.values = props ?? {};
@@ -522,7 +522,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         }
 
         this.searchService.reinit = true;
-        if (Object.keys(props)?.length > 0) {
+        if (props && Object.keys(props)?.length > 0) {
             this.searchService.extendedSearchUsed = true;
         }
         this.updateGroupedRepositories();
@@ -668,7 +668,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             queryParams.materialsSortBy = sort.active;
             queryParams.materialsSortAscending = sort.direction === 'asc';
         }
-        console.info('route', queryParams);
+        // console.info('route', queryParams);
         return await this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
             queryParams,
             replaceUrl,
