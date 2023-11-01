@@ -9,7 +9,13 @@ import {
     RestConstants,
     TemporaryStorageService,
 } from '../../../core-module/core.module';
-import { CustomOptions, ElementType, OptionItem, Scope } from '../../../core-ui-module/option-item';
+import {
+    CustomOptions,
+    DefaultGroups,
+    ElementType,
+    OptionItem,
+    Scope,
+} from '../../../core-ui-module/option-item';
 import { RecycleRestoreComponent } from './restore/restore.component';
 import { TranslateService } from '@ngx-translate/core';
 import { Toast } from '../../../core-ui-module/toast';
@@ -73,16 +79,20 @@ export class RecycleMainComponent implements AfterViewInit {
         private translate: TranslateService,
         private service: TemporaryStorageService,
     ) {
-        this.options.addOptions.push(
-            new OptionItem('RECYCLE.OPTION.RESTORE_SINGLE', 'undo', (node: Node) =>
-                this.restoreSingle(node),
-            ),
+        const restoreOption = new OptionItem(
+            'RECYCLE.OPTION.RESTORE_SINGLE',
+            'undo',
+            (node: Node) => this.restoreSingle(node),
         );
-        this.options.addOptions.push(
-            new OptionItem('RECYCLE.OPTION.DELETE_SINGLE', 'delete', (node: Node) =>
-                this.deleteSingle(node),
-            ),
+        restoreOption.group = DefaultGroups.Primary;
+        const deleteOption = new OptionItem(
+            'RECYCLE.OPTION.DELETE_SINGLE',
+            'delete',
+            (node: Node) => this.deleteSingle(node),
         );
+        deleteOption.group = DefaultGroups.Primary;
+        this.options.addOptions.push(restoreOption);
+        this.options.addOptions.push(deleteOption);
         this.options.addOptions.forEach((o) => {
             o.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         });
@@ -207,7 +217,6 @@ export class RecycleMainComponent implements AfterViewInit {
     }
 
     updateSort(sort: ListSortConfig) {
-        console.log(sort);
         this.sort = sort;
         this.refresh();
     }
