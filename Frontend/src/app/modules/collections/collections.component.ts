@@ -92,11 +92,6 @@ export class CollectionsMainComponent implements OnDestroy {
     isGuest = true;
     addToOther: EduData.Node[];
     addPinning: string;
-    infoTitle: string;
-    infoMessage: string;
-    infoButtons: DialogButton[];
-    infoClose: Function;
-
     tutorialElement: ElementRef;
 
     // FIXME: `collectionShare` is expected to be of type `Node[]` by `workspace-management` but is
@@ -444,7 +439,6 @@ export class CollectionsMainComponent implements OnDestroy {
                         this.mainnav = params.mainnav !== 'false';
                     }
 
-                    this.infoTitle = null;
                     // get id from route and validate input data
                     const id = params.id;
                     if (params.addToOther) {

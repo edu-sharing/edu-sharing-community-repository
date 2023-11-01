@@ -14,7 +14,6 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { ModalDialogOptions } from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import { RestConnectorService } from '../core-module/core.module';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { CardDialogRef } from '../features/dialogs/card-dialog/card-dialog-ref';
@@ -58,7 +57,6 @@ export class Toast extends ToastAbstract implements OnDestroy {
 
     private isInstanceVisible = false;
     private messageQueue = new BehaviorSubject<ToastMessage[]>([]);
-    private onShowModal: (params: ModalDialogOptions) => void;
     private lastToastMessage: string;
     private lastToastMessageTime: number;
     private lastToastError: string;
@@ -258,18 +256,6 @@ export class Toast extends ToastAbstract implements OnDestroy {
         this.router.navigate([UIConstants.ROUTER_PREFIX + 'login'], {
             queryParams: { next: window.location },
         });
-    }
-
-    onShowModalDialog(param: (params: any) => void) {
-        this.onShowModal = param;
-    }
-
-    closeModalDialog() {
-        this.onShowModal({ title: null, message: null });
-    }
-
-    showConfigurableDialog(options: ModalDialogOptions) {
-        this.onShowModal(options);
     }
 
     /**

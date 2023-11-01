@@ -42,7 +42,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { Subject, forkJoin as observableForkJoin } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { DialogType } from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
+import { InfobarService } from '../../../common/ui/infobar/infobar.service';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import * as EduData from '../../../core-module/core.module';
 import {
@@ -60,7 +60,6 @@ import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { RestCollectionService } from '../../../core-module/rest/services/rest-collection.service';
 import { RestNodeService } from '../../../core-module/rest/services/rest-node.service';
 import { UIService } from '../../../core-module/rest/services/ui.service';
-import { DialogButton } from '../../../core-module/ui/dialog-button';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
@@ -184,6 +183,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         private collectionService: RestCollectionService,
         private configurationService: ConfigService,
         private dialogs: DialogsService,
+        private infobar: InfobarService,
         private loadingScreen: LoadingScreenService,
         private mainNavService: MainNavService,
         private mdsService: MdsService,
@@ -822,10 +822,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 type: this.translation.instant('NODE.' + sort.active),
             });
         }
-        this.sortCollections.customSortingInProgress =
-            this.sortCollections.active === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION;
-        if (this.sortCollections.customSortingInProgress) {
-            this.toggleCollectionsOrder();
+        if (this.sortCollections.active === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION) {
+            void this.toggleCollectionsOrder();
+        } else {
+            this.infobar.close();
         }
     }
 
@@ -837,46 +837,42 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.optionsService.initComponents(this.getInfobar()?.actionbar, this.listReferences);
         this.optionsService.refreshComponents();
     }
-    toggleCollectionsOrder() {
+
+    async toggleCollectionsOrder() {
         if (this.sortCollections.customSortingInProgress) {
-            this.toast.showConfigurableDialog({
-                dialogType: DialogType.Infobar,
+            const response = await this.infobar.open({
                 title: 'COLLECTIONS.ORDER_COLLECTIONS',
                 message: 'COLLECTIONS.ORDER_COLLECTIONS_INFO',
-                isCancelable: true,
-                buttons: DialogButton.getSingleButton('SAVE', () => {
-                    this.changeCollectionsOrder();
-                }),
-                onCancel: () => {
-                    this.sortCollections.customSortingInProgress = false;
-                    this.toggleCollectionsOrder();
-                },
+                buttons: [{ label: 'SAVE', config: { color: 'primary' } }],
             });
+            console.log('response', response);
+            if (response === 'SAVE') {
+                return this.changeCollectionsOrder();
+            } else {
+                this.sortCollections.customSortingInProgress = false;
+            }
         } else {
-            this.toast.closeModalDialog();
-            this.refreshContent();
+            this.infobar.close();
         }
+        this.refreshContent();
     }
-    toggleReferencesOrder() {
+
+    async toggleReferencesOrder() {
         if (this.sortReferences.customSortingInProgress) {
-            this.toast.showConfigurableDialog({
-                dialogType: DialogType.Infobar,
+            const response = await this.infobar.open({
                 title: 'COLLECTIONS.ORDER_ELEMENTS',
                 message: 'COLLECTIONS.ORDER_ELEMENTS_INFO',
-                isCancelable: true,
-                buttons: DialogButton.getSingleButton('SAVE', () => {
-                    this.changeReferencesOrder();
-                    this.sortReferences.customSortingInProgress = false;
-                    this.listReferences.getSelection().clear();
-                }),
-                onCancel: () => {
-                    this.sortReferences.customSortingInProgress = false;
-                    this.toggleReferencesOrder();
-                },
+                buttons: [{ label: 'SAVE', config: { color: 'primary' } }],
             });
+            this.sortReferences.customSortingInProgress = false;
+            if (response === 'SAVE') {
+                void this.changeReferencesOrder();
+                this.listReferences.getSelection().clear();
+            } else {
+                this.refreshContent();
+            }
         } else {
-            this.toast.closeModalDialog();
-            this.refreshContent();
+            this.infobar.close();
         }
     }
 
