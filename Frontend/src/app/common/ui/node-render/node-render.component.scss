@@ -80,47 +80,46 @@ a:active {
     -webkit-box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.25);
     -moz-box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.25);
     box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.25);
-    padding: 5px 20px;
     top: 0;
     left: 0;
     height: var(--mainnavHeight);
     z-index: $topBarZIndex + 1;
     position: sticky;
     width: 100%;
-    line-height: 62px;
     & button {
         color: unset;
     }
 }
-.actionbarFrame {
-    position: relative;
-    top: 5px;
-}
 .displayBar {
     display: flex;
     height: 100%;
-    > button,
-    > .actionbar-container {
-        flex-grow: 2;
+    > div {
+        display: flex;
+        // Make all child containers equal width, so .center is properly centered.
+        flex-grow: 1;
         flex-basis: 0;
-        text-align: center;
+        align-items: center;
         height: 100%;
+        &.left {
+            justify-content: flex-start;
+        }
+        &.center {
+            justify-content: center;
+        }
+        &.right {
+            justify-content: right;
+        }
     }
-    .showDetails {
-        flex-grow: 1 !important;
+    button {
+        height: 100%;
+        padding: 20px;
+    }
+    es-actionbar {
+        margin-right: 10px;
     }
 }
 ::ng-deep .displayBar > button:first-child .mat-button-wrapper {
     justify-content: flex-start !important;
-}
-
-.displayBar > .actionbar-container:last-child {
-    position: relative;
-    top: -5px;
-    text-align: right;
-    align-items: center;
-    justify-content: right;
-    display: grid;
 }
 
 #nodeRenderContentWrapper {

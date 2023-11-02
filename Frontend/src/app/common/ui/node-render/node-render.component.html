@@ -3,21 +3,24 @@
   *ngIf="showTopBar && !mainNavService.getMainNav()?.topBar?.isSidenavOpen()"
 >
   <div class="displayBar">
-    <button mat-button class="clickable" title="{{ 'BACK' | translate }}" (click)="close()">
-      <i esIcon="keyboard_arrow_left"></i> <span class="render-back">{{ 'BACK' | translate }}</span>
-    </button>
-    <button
-      mat-button
-      *ngIf="_node"
-      class="clickable showDetails"
-      (click)="showDetails()"
-      title="{{ 'GOTO' | translate }} {{ 'INFO' | translate }}"
-    >
-      <i esIcon="info_outline"></i> <span class="hidemobile">{{ 'INFO' | translate }}</span>
-    </button>
-    <div class="actionbar-container">
+    <div class="left">
+      <button mat-button title="{{ 'BACK' | translate }}" (click)="close()">
+        <i esIcon="keyboard_arrow_left"></i>
+        <span class="render-back">{{ 'BACK' | translate }}</span>
+      </button>
+    </div>
+    <div class="center">
+      <button
+        mat-button
+        *ngIf="_node"
+        (click)="showDetails()"
+        title="{{ 'GOTO' | translate }} {{ 'INFO' | translate }}"
+      >
+        <i esIcon="info_outline"></i> <span class="hidemobile">{{ 'INFO' | translate }}</span>
+      </button>
+    </div>
+    <div class="right">
       <es-actionbar
-        class="actionbarFrame"
         #actionbar
         [backgroundType]="'dark'"
         [numberOfAlwaysVisibleOptions]="1"
