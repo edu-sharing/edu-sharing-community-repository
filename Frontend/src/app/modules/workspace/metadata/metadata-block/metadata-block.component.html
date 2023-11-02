@@ -79,8 +79,8 @@
       <div class="description" *ngIf="data.license">
         {{ 'NODE.ccm:commonlicense_key' | translate }}
       </div>
-      <div class="value license-value" *ngIf="data.license">
-        <img class="license" [src]="data.license" />
+      <div class="value license-value" *ngIf="data.license | async as license">
+        <img class="license" [src]="license" />
         <div class="licenseName">{{ data.licenseName }}</div>
       </div>
       <div *ngIf="connector.getCurrentLogin()?.isAdmin">
