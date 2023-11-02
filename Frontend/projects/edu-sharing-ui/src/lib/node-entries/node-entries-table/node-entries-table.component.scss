@@ -102,8 +102,8 @@ mat-cell {
     border-radius: 15px;
     display: inline-flex;
     align-items: center;
-    min-width: 35px;
-    min-height: 22px;
+    min-width: 51px;
+    min-height: 26px;
     justify-content: center;
     cursor: default;
     user-select: none;
@@ -120,8 +120,8 @@ mat-cell {
 }
 .cell-icon {
     .icon-bg {
-        width: 30px;
-        height: 30px;
+        width: 36px;
+        height: 36px;
         padding: 3px;
         margin: 1px 0;
         background-color: #fff;
