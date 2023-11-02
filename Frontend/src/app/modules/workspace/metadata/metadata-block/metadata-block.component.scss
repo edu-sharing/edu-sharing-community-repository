@@ -6,17 +6,17 @@
 }
 
 .metadata-container {
-    display: flex;
+    overflow-wrap: anywhere;
 }
 
 .metadata {
     flex-grow: 1;
+    min-width: 0;
 }
 
 .description {
     color: $textMain;
     font-size: $fontSizeSmall;
-    float: left;
     text-transform: uppercase;
     font-weight: bold;
 }
@@ -30,7 +30,6 @@
 }
 .value {
     padding-top: 0;
-    float: left;
     padding-bottom: 20px;
 }
 .aspect:not(:last-child) {
@@ -38,10 +37,6 @@
 }
 .valueFreetext {
     white-space: pre-line;
-}
-.description,
-.value {
-    width: calc(100% - 30px);
 }
 .preview {
     width: calc(100% + 24px);

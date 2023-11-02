@@ -6,21 +6,18 @@
     </div>
     <div class="right">
       <form (ngSubmit)="addComment()">
-        <textarea
-          name="addComment"
-          class="materialize-textarea"
-          [disabled]="sending"
-          placeholder="{{ 'NODE_COMMENTS.NEW_COMMENT_PLACEHOLDER' | translate }}"
-          [(ngModel)]="newComment"
-        ></textarea>
-        <i
-          *ngIf="!sending"
-          tabindex="0"
-          class="material-icons send-icon"
-          (click)="addComment()"
-          (keyup.enter)="addComment()"
-          >send</i
-        >
+        <mat-form-field>
+          <textarea
+            matInput
+            name="addComment"
+            [disabled]="sending"
+            placeholder="{{ 'NODE_COMMENTS.NEW_COMMENT_PLACEHOLDER' | translate }}"
+            [(ngModel)]="newComment"
+          ></textarea>
+        </mat-form-field>
+        <button *ngIf="!sending" mat-icon-button (click)="addComment()">
+          <i esIcon="send"></i>
+        </button>
         <es-spinner-small *ngIf="sending"></es-spinner-small>
       </form>
     </div>
@@ -44,7 +41,6 @@
             <button
               mat-icon-button
               #menuTrigger="matMenuTrigger"
-              mat-button
               class="dropdown-dummy"
               [matMenuTriggerFor]="dropdown.menu"
               (click)="options = getOptions(comment)"
@@ -59,12 +55,14 @@
           <div class="commentText" *ngIf="comment != editComment">{{ comment.comment }}</div>
           <div class="commentTextEdit" *ngIf="comment == editComment">
             <form (ngSubmit)="saveEditComment()">
-              <textarea
-                name="comment"
-                class="materialize-textarea"
-                placeholder="{{ 'NODE_COMMENTS.NEW_COMMENT_PLACEHOLDER' | translate }}"
-                [(ngModel)]="editCommentText"
-              ></textarea>
+              <mat-form-field>
+                <textarea
+                  matInput
+                  name="comment"
+                  placeholder="{{ 'NODE_COMMENTS.NEW_COMMENT_PLACEHOLDER' | translate }}"
+                  [(ngModel)]="editCommentText"
+                ></textarea>
+              </mat-form-field>
             </form>
           </div>
         </div>

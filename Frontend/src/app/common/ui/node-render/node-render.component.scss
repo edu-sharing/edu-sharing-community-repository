@@ -88,6 +88,9 @@ a:active {
     position: sticky;
     width: 100%;
     line-height: 62px;
+    & button {
+        color: unset;
+    }
 }
 .actionbarFrame {
     position: relative;
