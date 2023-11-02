@@ -31,7 +31,11 @@
 </es-mds-editor-widget-container>
 
 <!-- es-mds-editor-widget-container causes issues with textarea -->
-<mat-form-field *ngIf="widget.definition.type === 'textarea'" class="mat-form-textarea">
+<mat-form-field
+  *ngIf="widget.definition.type === 'textarea'"
+  class="mat-form-textarea"
+  [hideRequiredMarker]="true"
+>
   <mat-label>
     {{ widget.definition.caption }}
     <!-- We use our own required marker to show it even on disabled controls for bulk editing.

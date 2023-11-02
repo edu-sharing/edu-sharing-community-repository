@@ -112,7 +112,6 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
         MatCardModule,
         MatDatepickerModule,
         MatInputModule,
-        MatInputModule,
         MatMenuModule,
         MatOptionModule,
         MatProgressSpinnerModule,

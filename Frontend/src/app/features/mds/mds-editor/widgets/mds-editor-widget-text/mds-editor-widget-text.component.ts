@@ -1,5 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { UntypedFormControl, ValidatorFn, Validators } from '@angular/forms';
+import { MAT_FORM_FIELD } from '@angular/material/form-field';
 import { TranslateService } from '@ngx-translate/core';
 import { DateHelper } from 'ngx-edu-sharing-ui';
 import { filter } from 'rxjs/operators';
@@ -11,6 +12,10 @@ import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
     selector: 'es-mds-editor-widget-text',
     templateUrl: './mds-editor-widget-text.component.html',
     styleUrls: ['./mds-editor-widget-text.component.scss'],
+    providers: [
+        // Tell the input that it is inside a form field so it will apply relevant classes.
+        { provide: MAT_FORM_FIELD, useValue: true },
+    ],
 })
 export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements OnInit {
     @ViewChild('inputElement') inputElement: ElementRef;
