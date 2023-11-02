@@ -68,6 +68,10 @@ $dark-dividers: rgba(black, 0.12);
 $dark-disabled-text: rgba(black, 0.54); // increased contrast
 $dark-secondary-text: rgba(black, 0.54);
 
+:root {
+    --mdc-fab-container-color: #{$backgroundColor};
+}
+
 // https://github.com/angular/components/issues/26056
 .mat-mdc-unelevated-button:not(:disabled) {
     color: mat-css-utilities.mat-css-contrast-color(A100) !important;
@@ -179,7 +183,7 @@ mat-tab-group {
         }
     }
 }
-.mat-fab.mat-white,
+.mat-mdc-fab.mat-white,
 .mat-mini-fab.mat-white {
     // white background, primary as content color
     color: $primary;
@@ -322,6 +326,9 @@ mat-label,
 }
 .mat-autocomplete-high {
     max-height: 350px;
+}
+.mdc-button__label {
+    display: inline-flex;
 }
 .mat-flat-button {
     padding: 0 15px !important;
