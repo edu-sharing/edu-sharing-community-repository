@@ -365,12 +365,10 @@ public class LTIJWTUtil {
         /**
          * this is a backend call so we con not use this: req.getSession().getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
          */
-        HttpSession session = AllSessions.userLTISessions.get(token);
-        if(session == null){
-            throw new ValidationException("no session found");
+        LoginInitiationSessionObject sessionObject = AllSessions.userLTISessions.get(token);
+        if(sessionObject == null){
+            throw new ValidationException("no loginInitiationSessionObject found");
         }
-
-        LoginInitiationSessionObject sessionObject = getLoginInitiationSessionObject(token, session);
 
 
         if(!appId.equals(sessionObject.getAppId())){
@@ -378,7 +376,7 @@ public class LTIJWTUtil {
         }
 
 
-        if(!user.equals(session.getAttribute(CCConstants.AUTH_USERNAME))){
+        if(!user.equals(sessionObject.getUser())){
             throw new ValidationException("wrong user");
         }
 
@@ -399,13 +397,13 @@ public class LTIJWTUtil {
 
 
         /**
-         * extend session runtime
+         * extend session runtime: not longer necessary cause content can be written without session (token is used)
          */
-        Field facadeSessionField = StandardSessionFacade.class.getDeclaredField("session");
+        /*Field facadeSessionField = StandardSessionFacade.class.getDeclaredField("session");
         facadeSessionField.setAccessible(true);
         StandardSession stdSession = (StandardSession) facadeSessionField.get(session);
         stdSession.endAccess();
-        logger.info("last AccessTime:" + new Date(session.getLastAccessedTime()));
+        logger.info("last AccessTime:" + new Date(session.getLastAccessedTime()));*/
 
         return jwtObj;
     }
@@ -469,19 +467,10 @@ public class LTIJWTUtil {
             throw new ValidationException("missing "+LTIPlatformConstants.CUSTOM_CLAIM_TOKEN);
         }
 
-        HttpSession session = AllSessions.userLTISessions.get(token);
-        if(session == null){
-            throw new ValidationException("no session found");
+        LoginInitiationSessionObject sessionObject = AllSessions.userLTISessions.get(token);
+        if(sessionObject == null){
+            throw new ValidationException("no LoginInitiationSessionObject found");
         }
-
-        //validate that there a tool session exists for the token
-        LoginInitiationSessionObject sessionObject = null;
-        try {
-            sessionObject = getLoginInitiationSessionObject(token, session);
-        } catch (Exception e) {
-            throw new ValidationException(e.getMessage());
-        }
-
 
         /**
          *  validate token was originally created with tool session
@@ -497,7 +486,7 @@ public class LTIJWTUtil {
         }
 
         String tokenUser = tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_USER);
-        String sessionUser = (String)session.getAttribute(CCConstants.AUTH_USERNAME);
+        String sessionUser = sessionObject.getUser();
 
         //validate that tokenuser is the same as session user
         if(!sessionUser.equals(tokenUser)){

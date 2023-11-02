@@ -756,6 +756,7 @@ public class LTIPlatformApi {
         loginInitiationSessionObject.setMessageType(messageType);
         loginInitiationSessionObject.setContentUrlNodeId(contentUrlNodeId);
         loginInitiationSessionObject.setLaunchPresentation(launchPresentation);
+        loginInitiationSessionObject.setUser(AuthenticationUtil.getFullyAuthenticatedUser());
         //remember session in userLTISessions map to reuse in later backend call
         if(contentUrlNodeId != null){
             Map<String,String> map = new HashMap<>();
@@ -766,7 +767,7 @@ public class LTIPlatformApi {
             String json = new Gson().toJson(map);
             String encryptedToken = ApiTool.encrpt(json);
             loginInitiationSessionObject.setToken(encryptedToken);
-            AllSessions.userLTISessions.put(encryptedToken, req.getSession());
+            AllSessions.userLTISessions.put(encryptedToken, loginInitiationSessionObject);
         }
 
         Map<String,LoginInitiationSessionObject> loginInitiationSessionObjectMap = (Map<String,LoginInitiationSessionObject>)req

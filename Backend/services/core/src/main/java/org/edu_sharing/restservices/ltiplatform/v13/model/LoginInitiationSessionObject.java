@@ -16,9 +16,17 @@ public class LoginInitiationSessionObject implements Serializable {
         return launchPresentation;
     }
 
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
     public static enum MessageType{resourcelink,deeplink}
 
-    String contextId,clientId,appId,resourceLinkNodeId,contentUrlNodeId,version,token,toolNonce,launchPresentation;
+    String contextId,clientId,appId,resourceLinkNodeId,contentUrlNodeId,version,token,toolNonce,launchPresentation,user;
     boolean resourceLinkEditMode = true;
 
     MessageType messageType;
