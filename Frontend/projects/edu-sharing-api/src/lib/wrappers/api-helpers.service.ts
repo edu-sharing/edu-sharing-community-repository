@@ -26,7 +26,9 @@ export class ApiHelpersService {
         if (ApiInterceptor.proxyTarget) {
             baseURL = ApiInterceptor.proxyTarget;
         }
-        if (!baseURL.endsWith('/')) baseURL += '/';
+        if (!baseURL.endsWith('/') && !this.configuration.rootUrl.startsWith('/')) {
+            baseURL += '/';
+        }
         return baseURL + this.configuration.rootUrl;
     }
 }

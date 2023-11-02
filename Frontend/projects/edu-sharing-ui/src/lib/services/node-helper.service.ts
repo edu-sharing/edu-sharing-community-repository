@@ -58,10 +58,8 @@ export class NodeHelperService {
     }
     /**
      * Return the license icon of a node
-     * @param node
-     * @returns {string}
      */
-    public getLicenseIcon(node: Node) {
+    async getLicenseIcon(node: Node): Promise<string> {
         // prefer manual mapping instead of backend data to support custom states from local edits
         const license = node.properties?.[RestConstants.CCM_PROP_LICENSE]?.[0];
         if (license) {
@@ -72,11 +70,8 @@ export class NodeHelperService {
 
     /**
      * Get a license icon by using the property value string
-     * @param string
-     * @param rest
-     * @returns {string}
      */
-    public getLicenseIconByString(string: String, useNoneAsFallback = true) {
+    public getLicenseIconByString(string: String, useNoneAsFallback = true): string {
         let icon = string.replace(/_/g, '-').toLowerCase();
         if (icon == '') icon = 'none';
 
@@ -102,7 +97,9 @@ export class NodeHelperService {
         ];
         if (LICENSE_ICONS.indexOf(icon) == -1 && !useNoneAsFallback) return null; // icon='none';
         if (icon == 'none' && !useNoneAsFallback) return null;
-        return this.apiHelpersService.getServerUrl() + '../ccimages/licenses/' + icon + '.svg';
+        const result =
+            this.apiHelpersService.getServerUrl() + '/../ccimages/licenses/' + icon + '.svg';
+        return this.repoUrlService.withCurrentOrigin(result);
     }
     /**
      * Return a translated name of a license name for a node
