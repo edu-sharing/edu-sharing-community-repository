@@ -1,6 +1,9 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import { ConfigService } from 'ngx-edu-sharing-api';
+import { UIConstants } from 'ngx-edu-sharing-ui';
+import { forkJoin } from 'rxjs';
 import {
     ConfigurationHelper,
     Node,
@@ -9,14 +12,12 @@ import {
     RestConstants,
     RestNodeService,
 } from '../../../../core-module/core.module';
-import { forkJoin } from 'rxjs';
 import { Toast } from '../../../../core-ui-module/toast';
-import { CARD_DIALOG_DATA, configForNodes } from '../../card-dialog/card-dialog-config';
-import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { BreadcrumbsService } from '../../../../shared/components/breadcrumbs/breadcrumbs.service';
-import { UIConstants } from 'ngx-edu-sharing-ui';
-import { ConfigService } from 'ngx-edu-sharing-api';
+import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
+import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { CardDialogUtilsService } from '../../card-dialog/card-dialog-utils.service';
 
 export interface NodeInfoDialogData {
     nodes: Node[];
@@ -45,11 +46,12 @@ export class NodeInfoDialogComponent implements OnInit {
     constructor(
         @Inject(CARD_DIALOG_DATA) public data: NodeInfoDialogData,
         private dialogRef: CardDialogRef,
-        private nodeApi: RestNodeService,
-        private toast: Toast,
-        private config: ConfigService,
-        private router: Router,
         private breadcrumbsService: BreadcrumbsService,
+        private cardDialogUtils: CardDialogUtilsService,
+        private config: ConfigService,
+        private nodeApi: RestNodeService,
+        private router: Router,
+        private toast: Toast,
         private translate: TranslateService,
     ) {}
 
@@ -62,9 +64,9 @@ export class NodeInfoDialogComponent implements OnInit {
         this.translate
             .get('NODE_INFO.TITLE', { name: this._nodes[0].name })
             .subscribe((title) => this.dialogRef.patchConfig({ title }));
-        configForNodes(nodes, this.translate).subscribe((config) =>
-            this.dialogRef.patchConfig(config),
-        );
+        void this.cardDialogUtils
+            .configForNodes(nodes)
+            .then((config) => this.dialogRef.patchConfig(config));
         this._properties = [];
         nodes
             .filter((n) => n.properties)

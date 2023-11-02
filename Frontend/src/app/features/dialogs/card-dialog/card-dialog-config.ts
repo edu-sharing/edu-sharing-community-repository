@@ -61,25 +61,3 @@ export enum Closable {
 }
 
 export type AutoFocusTarget = 'dialog' | 'first-tabbable' | 'first-heading';
-
-export function configForNode(node: Node): Partial<CardDialogConfig> {
-    return {
-        avatar: { kind: 'image', url: node.iconURL },
-        subtitle: RestHelper.getTitle(node),
-    };
-}
-
-export function configForNodes(
-    nodes: Node[],
-    translate: TranslateService,
-): Observable<Partial<CardDialogConfig>> {
-    if (nodes.length === 1) {
-        return of(configForNode(nodes[0]));
-    }
-    return translate.get('CARD_SUBTITLE_MULTIPLE', { count: nodes.length }).pipe(
-        map((subtitle) => ({
-            avatar: null,
-            subtitle,
-        })),
-    );
-}

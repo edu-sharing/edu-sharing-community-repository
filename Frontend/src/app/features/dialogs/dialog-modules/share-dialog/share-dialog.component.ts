@@ -8,8 +8,9 @@ import {
     ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
+import { UIConstants } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { forkJoin as observableForkJoin, Observable, Observer } from 'rxjs';
+import { Observable, Observer, forkJoin as observableForkJoin } from 'rxjs';
 import {
     CollectionUsage,
     ConfigurationService,
@@ -32,16 +33,11 @@ import {
     UsageList,
 } from '../../../../core-module/core.module';
 import { Helper } from '../../../../core-module/rest/helper';
-import { UIConstants } from 'ngx-edu-sharing-ui';
-import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
 import { Toast } from '../../../../core-ui-module/toast';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
-import {
-    CARD_DIALOG_DATA,
-    CardDialogConfig,
-    configForNodes,
-} from '../../card-dialog/card-dialog-config';
+import { CARD_DIALOG_DATA, CardDialogConfig } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { CardDialogUtilsService } from '../../card-dialog/card-dialog-utils.service';
 import { DialogsService } from '../../dialogs.service';
 import { ShareDialogPublishComponent } from './publish/publish.component';
 import { ShareDialogData, ShareDialogResult } from './share-dialog-data';
@@ -153,17 +149,17 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     constructor(
         @Inject(CARD_DIALOG_DATA) public data: ShareDialogData,
         private dialogRef: CardDialogRef<ShareDialogData, ShareDialogResult>,
-        private dialogs: DialogsService,
-        private nodeApi: RestNodeService,
-        private translate: TranslateService,
-        private collectionService: RestCollectionService,
         private applicationRef: ApplicationRef,
+        private cardDialogUtils: CardDialogUtilsService,
+        private collectionService: RestCollectionService,
         private config: ConfigurationService,
-        private nodeHelper: NodeHelperService,
-        private toast: Toast,
-        private usageApi: RestUsageService,
-        private iam: RestIamService,
         private connector: RestConnectorService,
+        private dialogs: DialogsService,
+        private iam: RestIamService,
+        private nodeApi: RestNodeService,
+        private toast: Toast,
+        private translate: TranslateService,
+        private usageApi: RestUsageService,
     ) {
         //this.dataService=new SearchData(iam);
 
@@ -260,10 +256,11 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     }
 
     setNodes(nodes: Node[]) {
-        configForNodes(nodes, this.translate).subscribe(
-            (config: Partial<CardDialogConfig<ShareDialogData>>) =>
+        void this.cardDialogUtils
+            .configForNodes(nodes)
+            .then((config: Partial<CardDialogConfig<ShareDialogData>>) =>
                 this.dialogRef.patchConfig(config),
-        );
+            );
         this._nodes = nodes;
         this.initialize();
     }

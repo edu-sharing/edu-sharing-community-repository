@@ -8,12 +8,7 @@ import {
 } from '../../../../core-module/core.module';
 import { LocalEventsService, VCard } from 'ngx-edu-sharing-ui';
 import { Toast } from '../../../../core-ui-module/toast';
-import {
-    CARD_DIALOG_DATA,
-    CardDialogConfig,
-    Closable,
-    configForNode,
-} from '../../card-dialog/card-dialog-config';
+import { CARD_DIALOG_DATA, CardDialogConfig, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { DialogsService } from '../../dialogs.service';
 import {
@@ -23,6 +18,7 @@ import {
 } from '../contributor-edit-dialog/contributor-edit-dialog-data';
 import { YES_OR_NO } from '../generic-dialog/generic-dialog-data';
 import { ContributorsDialogData, ContributorsDialogResult } from './contributors-dialog-data';
+import { CardDialogUtilsService } from '../../card-dialog/card-dialog-utils.service';
 
 @Component({
     selector: 'es-contributors-dialog',
@@ -40,6 +36,7 @@ export class ContributorsDialogComponent implements OnInit {
     constructor(
         @Inject(CARD_DIALOG_DATA) public data: ContributorsDialogData,
         private dialogRef: CardDialogRef<ContributorsDialogData, ContributorsDialogResult>,
+        private cardDialogUtils: CardDialogUtilsService,
         private dialogs: DialogsService,
         private localEvents: LocalEventsService,
         private nodeService: RestNodeService,
@@ -71,7 +68,9 @@ export class ContributorsDialogComponent implements OnInit {
             this.node = this.data.node;
         }
         this.dialogRef.patchConfig(
-            configForNode(this.node) as Partial<CardDialogConfig<ContributorsDialogData>>,
+            (await this.cardDialogUtils.configForNode(this.node)) as Partial<
+                CardDialogConfig<ContributorsDialogData>
+            >,
         );
         for (let role of this.rolesLifecycle) {
             this.contributorLifecycle[role] = [];

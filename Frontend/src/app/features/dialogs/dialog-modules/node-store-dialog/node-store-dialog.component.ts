@@ -1,9 +1,6 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
 import { Node, NodeListService, SortPolicy } from 'ngx-edu-sharing-api';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { switchMap, takeUntil } from 'rxjs/operators';
 import {
     ActionbarComponent,
     CustomOptions,
@@ -19,10 +16,12 @@ import {
     UIConstants,
     UIService,
 } from 'ngx-edu-sharing-ui';
-import { Toast } from '../../../../core-ui-module/toast';
-import { configForNodes } from '../../card-dialog/card-dialog-config';
-import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { switchMap, takeUntil } from 'rxjs/operators';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
+import { Toast } from '../../../../core-ui-module/toast';
+import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { CardDialogUtilsService } from '../../card-dialog/card-dialog-utils.service';
 
 @Component({
     selector: 'es-search-node-store-dialog',
@@ -55,11 +54,11 @@ export class SearchNodeStoreDialogComponent implements OnInit, AfterViewInit, On
     private readonly destroyed = new Subject<void>();
 
     constructor(
+        private cardDialogUtils: CardDialogUtilsService,
         private dialogRef: CardDialogRef,
-        private toast: Toast,
-        private router: Router,
         private nodeList: NodeListService,
-        private translate: TranslateService,
+        private router: Router,
+        private toast: Toast,
         private ui: UIService,
     ) {
         this.columns.push(new ListItem('NODE', RestConstants.LOM_PROP_TITLE));
@@ -153,9 +152,9 @@ export class SearchNodeStoreDialogComponent implements OnInit, AfterViewInit, On
             .subscribe({
                 next: (nodes) => {
                     this.list.setData(nodes.nodes);
-                    configForNodes(nodes.nodes, this.translate).subscribe((config) =>
-                        this.dialogRef.patchConfig(config),
-                    );
+                    void this.cardDialogUtils
+                        .configForNodes(nodes.nodes)
+                        .then((config) => this.dialogRef.patchConfig(config));
                     this.dialogRef.patchState({ isLoading: false });
                 },
                 error: () => {

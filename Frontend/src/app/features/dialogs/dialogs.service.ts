@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { RestConnectorService } from '../../core-module/core.module';
-import { Closable, configForNode, configForNodes } from './card-dialog/card-dialog-config';
+import { Closable } from './card-dialog/card-dialog-config';
 import { CardDialogRef } from './card-dialog/card-dialog-ref';
+import { CardDialogUtilsService } from './card-dialog/card-dialog-utils.service';
 import { CardDialogService } from './card-dialog/card-dialog.service';
 import {
     AddFolderDialogData,
@@ -136,6 +137,7 @@ export class DialogsService {
 
     constructor(
         private cardDialog: CardDialogService,
+        private cardDialogUtils: CardDialogUtilsService,
         private translate: TranslateService,
         // TODO: Move the methods we use of `RestConnectorService` to a utils function if possible.
         private restConnector: RestConnectorService,
@@ -165,7 +167,7 @@ export class DialogsService {
             title,
             subtitle,
             avatar,
-            ...(nodes ? await configForNodes(nodes, this.translate).toPromise() : {}),
+            ...(nodes ? await this.cardDialogUtils.configForNodes(nodes) : {}),
             minWidth,
             maxWidth,
             customHeaderBarContent,
@@ -198,7 +200,7 @@ export class DialogsService {
         const { QrDialogComponent } = await import('./dialog-modules/qr-dialog/qr-dialog.module');
         return this.cardDialog.open(QrDialogComponent, {
             title: 'OPTIONS.QR_CODE',
-            ...configForNode(data.node),
+            ...(await this.cardDialogUtils.configForNode(data.node)),
             contentPadding: 0,
             data,
         });
@@ -212,7 +214,7 @@ export class DialogsService {
         );
         return this.cardDialog.open(NodeEmbedDialogComponent, {
             title: 'OPTIONS.EMBED',
-            ...configForNode(data.node),
+            ...(await this.cardDialogUtils.configForNode(data.node)),
             // Set size via NodeEmbedDialogComponent, so it can choose fitting values for its
             // responsive layouts.
             contentPadding: 0,
@@ -228,7 +230,7 @@ export class DialogsService {
         );
         return this.cardDialog.open(NodeReportDialogComponent, {
             title: 'NODE_REPORT.TITLE',
-            ...configForNode(data.node),
+            ...(await this.cardDialogUtils.configForNode(data.node)),
             data,
         });
     }
@@ -304,7 +306,7 @@ export class DialogsService {
         );
         return this.cardDialog.open(AddFolderDialogComponent, {
             title: 'WORKSPACE.ADD_FOLDER_TITLE',
-            ...configForNode(data.parent),
+            ...(await this.cardDialogUtils.configForNode(data.parent)),
             avatar: { kind: 'image', url: this.restConnector.getThemeMimeIconSvg('folder.svg') },
             width: 600,
             data,
@@ -368,9 +370,7 @@ export class DialogsService {
         );
         return this.cardDialog.open(LicenseDialogComponent, {
             title: 'WORKSPACE.LICENSE.TITLE',
-            ...(data.kind === 'nodes'
-                ? await configForNodes(data.nodes, this.translate).toPromise()
-                : {}),
+            ...(data.kind === 'nodes' ? await this.cardDialogUtils.configForNodes(data.nodes) : {}),
             width: 700,
             height: 1100,
             closable: Closable.Standard,
@@ -402,7 +402,7 @@ export class DialogsService {
         );
         return this.cardDialog.open(ShareHistoryDialogComponent, {
             title: 'WORKSPACE.SHARE.HISTORY.TITLE',
-            ...configForNode(data.node),
+            ...(await this.cardDialogUtils.configForNode(data.node)),
             contentPadding: 0,
             minWidth: 500,
             minHeight: 300,
@@ -418,7 +418,7 @@ export class DialogsService {
         );
         return this.cardDialog.open(ShareLinkDialogComponent, {
             title: 'WORKSPACE.SHARE_LINK.TITLE',
-            ...configForNode(data.node),
+            ...(await this.cardDialogUtils.configForNode(data.node)),
             width: 500,
             height: 700,
             data,
@@ -433,7 +433,7 @@ export class DialogsService {
         );
         return this.cardDialog.open(CreateMapLinkDialogComponent, {
             title: 'MAP_LINK.TITLE',
-            ...configForNode(data.node),
+            ...(await this.cardDialogUtils.configForNode(data.node)),
             closable: Closable.Standard,
             width: 600,
             data,
@@ -448,7 +448,7 @@ export class DialogsService {
         );
         return this.cardDialog.open(NodeRelationsDialogComponent, {
             title: 'NODE_RELATIONS.TITLE',
-            ...configForNode(data.node),
+            ...(await this.cardDialogUtils.configForNode(data.node)),
             closable: Closable.Standard,
             width: 700,
             minHeight: 700,
@@ -464,7 +464,7 @@ export class DialogsService {
         );
         return this.cardDialog.open(NodeTemplateDialogComponent, {
             title: 'OPTIONS.TEMPLATE',
-            ...configForNode(data.node),
+            ...(await this.cardDialogUtils.configForNode(data.node)),
             width: 600,
             minHeight: 700,
             data,
@@ -487,7 +487,7 @@ export class DialogsService {
         }
         return this.cardDialog.open(MdsEditorDialogComponent, {
             title: 'MDS.TITLE',
-            ...(await configForNodes(data.nodes, this.translate).toPromise()),
+            ...(await this.cardDialogUtils.configForNodes(data.nodes)),
             minWidth: 600,
             minHeight: 700,
             contentPadding: 0,
@@ -518,7 +518,7 @@ export class DialogsService {
             './dialog-modules/simple-edit-dialog/simple-edit-dialog.module'
         );
         return this.cardDialog.open(SimpleEditDialogComponent, {
-            ...(await configForNodes(data.nodes, this.translate).toPromise()),
+            ...(await this.cardDialogUtils.configForNodes(data.nodes)),
             title: 'SIMPLE_EDIT.TITLE',
             // minHeight: 700,
             width: 600,
@@ -535,7 +535,7 @@ export class DialogsService {
         );
         return this.cardDialog.open(SendFeedbackDialogComponent, {
             title: 'FEEDBACK.TITLE',
-            ...configForNode(data.node),
+            ...(await this.cardDialogUtils.configForNode(data.node)),
             minWidth: 500,
             data,
             closable: Closable.Standard,
@@ -593,7 +593,7 @@ export class DialogsService {
             './dialog-modules/delete-nodes-dialog/delete-nodes-dialog.module'
         );
         return this.cardDialog.open(DeleteNodesDialogComponent, {
-            ...(await configForNodes(data.nodes, this.translate).toPromise()),
+            ...(await this.cardDialogUtils.configForNodes(data.nodes)),
             minHeight: 240,
             width: 500,
             data,
@@ -655,7 +655,7 @@ export class DialogsService {
         );
         return this.cardDialog.open(CreateVariantDialogComponent, {
             title: 'NODE_VARIANT.TITLE',
-            ...configForNode(data.node),
+            ...(await this.cardDialogUtils.configForNode(data.node)),
             width: 600,
             data,
             closable: Closable.Casual,
@@ -703,7 +703,7 @@ export class DialogsService {
         );
         return this.cardDialog.open(WorkflowDialogComponent, {
             title: 'WORKSPACE.WORKFLOW.TITLE',
-            ...(await configForNodes(data.nodes, this.translate).toPromise()),
+            ...(await this.cardDialogUtils.configForNodes(data.nodes)),
             width: 700,
             data,
             closable: Closable.Standard,
