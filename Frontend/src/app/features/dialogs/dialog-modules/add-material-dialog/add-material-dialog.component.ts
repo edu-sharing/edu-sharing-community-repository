@@ -10,9 +10,9 @@ import {
     UserService,
     WebsiteInformation,
 } from 'ngx-edu-sharing-api';
-import { ListItem, UIAnimation } from 'ngx-edu-sharing-ui';
+import { ListItem, UIAnimation, notNull } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { catchError, debounce, finalize, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, debounce, filter, finalize, map, switchMap, tap } from 'rxjs/operators';
 import {
     ConfigurationService,
     DialogButton,
@@ -90,10 +90,12 @@ export class AddMaterialDialogComponent implements OnInit {
 
     ngOnInit(): void {
         this.registerLink();
-        this.getBreadcrumbs(this.parent).subscribe((breadcrumbs) => {
-            this.breadcrumbs = breadcrumbs;
-            this.breadcrumbsService.setNodePath(breadcrumbs.nodes);
-        });
+        this.getBreadcrumbs(this.parent)
+            .pipe(filter(notNull))
+            .subscribe((breadcrumbs) => {
+                this.breadcrumbs = breadcrumbs;
+                this.breadcrumbsService.setNodePath(breadcrumbs.nodes);
+            });
     }
 
     private registerLink(): void {
@@ -216,7 +218,7 @@ export class AddMaterialDialogComponent implements OnInit {
 
     updateButtons() {
         const [okButton] = DialogButton.getOk(() => this.setLink());
-        okButton.disabled = this.disabled || (this.chooseParent && !this.parent);
+        okButton.disabled = this.disabled || (this.data.chooseParent && !this.parent);
         const buttons = [...DialogButton.getCancel(() => this.cancel()), okButton];
         this.dialogRef.patchConfig({ buttons });
     }
