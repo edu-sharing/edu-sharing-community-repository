@@ -8,9 +8,7 @@
         align-items: center;
     }
     > .icon {
-        width: 32px;
         position: relative;
-        top: 2px;
         padding-left: 10px;
     }
     > .permissionName {
@@ -20,7 +18,7 @@
         justify-content: center;
         min-height: 40px;
         flex-grow: 1;
-        padding: 3px 5px;
+        padding: 3px 10px;
         > .primary {
             word-break: break-all;
             max-height: 1.5em;

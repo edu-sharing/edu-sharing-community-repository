@@ -35,15 +35,18 @@
     > div {
         display: flex;
         overflow: hidden;
-        padding: 1px 0;
+        padding: 3px 0;
         align-items: center;
+    }
+    > .icon {
+        padding-left: 10px;
     }
     > .name {
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: left;
-        padding: 0 8px;
+        padding: 3px 10px;
         height: 40px;
         > .secondary {
             font-size: 80%;
@@ -74,7 +77,6 @@
 }
 .name {
     flex-grow: 1;
-    padding: 1px 5px !important;
     @include shortenText();
 }
 .icon,
