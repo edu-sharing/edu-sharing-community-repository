@@ -14,7 +14,6 @@ export class RepoUrlService {
     public async getRepoUrl(url: string, node: Node) {
         if (
             !this.configuration.production &&
-            window.location.hostname === 'localhost' &&
             (await this.networkService.isFromHomeRepository(node).pipe(take(1)).toPromise())
         ) {
             return this.withCurrentOrigin(url);
