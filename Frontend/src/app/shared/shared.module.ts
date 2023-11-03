@@ -123,7 +123,6 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
         EduSharingUiModule.forRoot({
             production: environment.production,
         }),
-        TranslationsModule.forRoot(),
     ],
     exports: [
         A11yModule,

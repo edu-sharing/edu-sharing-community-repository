@@ -25,6 +25,7 @@ import {
     KeyboardShortcutsService as KeyboardShortcutsServiceAbstract,
     OptionsHelperService as OptionsHelperServiceAbstract,
     Toast as ToastAbstract,
+    TranslationsModule,
 } from 'ngx-edu-sharing-ui';
 import { IMPORTS } from './imports';
 import { MainModule } from './main/main.module';
@@ -107,6 +108,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         MainModule,
         EduSharingApiModule.forRoot(),
         EduSharingUiModule.forRoot({ production: environment.production }),
+        TranslationsModule.forRoot(),
         EduSharingGraphqlModule,
         DragDropModule,
         extensionImports,

@@ -10,7 +10,6 @@ import { NodeImageSizePipe } from './pipes/node-image-size.pipe';
 import { FormatDatePipe } from './pipes/format-date.pipe';
 import { ListItemLabelPipe } from './node-entries/list-item-label.pipe';
 import { SortDropdownComponent } from './sort-dropdown/sort-dropdown.component';
-import { TranslationsModule } from './translations/translations.module';
 
 @NgModule({
     declarations: [],
@@ -20,7 +19,9 @@ import { TranslationsModule } from './translations/translations.module';
         EduSharingUiCommonModule,
         ListItemsModule,
         NodeEntriesModule,
-        TranslationsModule.forRoot(),
+        // Loading the TranslationsModule here causes errors for lazy-loaded pages like the search
+        // page. For usage outside the context of edu-sharing, we probably need to import the
+        // TranslationsModule at the main module that packages or uses this library.
     ],
     exports: [
         CommonModule,
