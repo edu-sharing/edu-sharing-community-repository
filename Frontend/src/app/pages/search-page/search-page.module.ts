@@ -22,6 +22,7 @@ import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
         SearchPageResultsAllComponent,
     ],
     imports: [SearchPageRoutingModule, SharedModule, EduSharingUiModule, MdsModule],
-    exports: [SmallCollectionComponent],
+    // This module is lazy-loaded and should not export anything.
+    exports: [],
 })
 export class SearchPageModule {}
