@@ -32,6 +32,13 @@ form {
                 border: none;
                 outline: none;
             }
+            // Remove clear button inserted by browsers
+            &::ms-clear {
+                display: none;
+            }
+            &::-webkit-search-cancel-button {
+                display: none;
+            }
         }
         button {
             color: $textMain;
