@@ -154,7 +154,7 @@ public class ApplicationInfoList {
 
 		List<ApplicationInfo> tmpAppInfos = new ArrayList<>();
 		for(String appFile: appFileArray){
-
+			logger.debug("appFile:"+appFile);
 			appFile = appFile.trim();
 			if(appFile.isEmpty()){
 				logger.error("found empty value in Repository Registry");
