@@ -76,15 +76,6 @@ public class SessionListener implements HttpSessionListener{
 		//try to remove Session from AllSessions
 		HttpSession removeedSession = AllSessions.remove(event.getSession().getId());
 
-		//cleanup LTI Cache
-		Map<String, LoginInitiationSessionObject> loginInitiationSessionObjectMap = (Map<String, LoginInitiationSessionObject>)event.
-				getSession().getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
-		if(loginInitiationSessionObjectMap != null){
-			for(Map.Entry<String,LoginInitiationSessionObject> entry : loginInitiationSessionObjectMap.entrySet()){
-				AllSessions.userLTISessions.remove(entry.getValue().getToken());
-			}
-		}
-
 
 		String sessionId = (removeedSession != null) ? removeedSession.getId() : null;
 		String ticket = (removeedSession != null) ? (String)removeedSession.getAttribute(CCConstants.AUTH_TICKET) : null;

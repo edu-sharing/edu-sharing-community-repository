@@ -24,12 +24,22 @@ public class LoginInitiationSessionObject implements Serializable {
         return user;
     }
 
+    public Long getLastAccessed() {
+        return lastAccessed;
+    }
+
+    public void setLastAccessed(long lastAccessed) {
+        this.lastAccessed = lastAccessed;
+    }
+
     public static enum MessageType{resourcelink,deeplink}
 
     String contextId,clientId,appId,resourceLinkNodeId,contentUrlNodeId,version,token,toolNonce,launchPresentation,user;
     boolean resourceLinkEditMode = true;
 
     MessageType messageType;
+
+    Long lastAccessed;
 
     public String getContextId() {
         return contextId;

@@ -40,6 +40,7 @@ import java.security.Key;
 import java.security.PublicKey;
 import java.text.ParseException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class LTIJWTUtil {
 
@@ -394,7 +395,9 @@ public class LTIJWTUtil {
         if(validateNodeId && !nodeId.equals(tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_NODEID))){
             throw new ValidationException("mismatch nodeId");
         }
+        sessionObject.setLastAccessed(System.currentTimeMillis());
 
+        System.out.println(AllSessions.userLTISessions.getKeys().stream().map(k -> new Long(AllSessions.userLTISessions.get(k).getLastAccessed()).toString()).collect(Collectors.joining(",")));
 
         /**
          * extend session runtime: not longer necessary cause content can be written without session (token is used)
@@ -492,6 +495,9 @@ public class LTIJWTUtil {
         if(!sessionUser.equals(tokenUser)){
             throw new ValidationException("mismatch user");
         }
+
+        sessionObject.setLastAccessed(System.currentTimeMillis());
+
         return claims;
     }
 

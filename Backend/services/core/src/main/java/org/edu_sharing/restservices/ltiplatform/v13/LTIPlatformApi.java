@@ -763,10 +763,12 @@ public class LTIPlatformApi {
             map.put(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID,appInfo.getAppId());
             map.put(LTIPlatformConstants.CUSTOM_CLAIM_USER,AuthenticationUtil.getFullyAuthenticatedUser());
             map.put(LTIPlatformConstants.CUSTOM_CLAIM_NODEID,contentUrlNodeId);
-            map.put("ts",System.currentTimeMillis()+"");
+            long timeStamp = System.currentTimeMillis();
+            map.put("ts",timeStamp + "");
             String json = new Gson().toJson(map);
             String encryptedToken = ApiTool.encrpt(json);
             loginInitiationSessionObject.setToken(encryptedToken);
+            loginInitiationSessionObject.setLastAccessed(timeStamp);
             AllSessions.userLTISessions.put(encryptedToken, loginInitiationSessionObject);
         }
 
