@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { forkJoin } from 'rxjs';
 import { RestAdminService } from '../../../core-module/rest/services/rest-admin.service';
@@ -17,6 +17,12 @@ export class AdminConfigComponent {
     public static OVERRIDE_CONFIG_FILE = 'edu-sharing.override.conf';
     public static CONFIG_DEPLOYMENT_FILE = 'edu-sharing.deployment.conf';
     public static CLIENT_CONFIG_FILE = 'client.config.xml';
+
+    @HostListener('keydown.control.s', ['$event']) onCtrlS(event: KeyboardEvent) {
+        event.preventDefault();
+        this.save();
+    }
+
     codeOptionsHocoonRO: any = {
         minimap: { enabled: false },
         language: 'json',
