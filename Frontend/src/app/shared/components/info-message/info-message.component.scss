@@ -6,7 +6,6 @@
     align-items: center;
     border-radius: 2px;
     padding: 15px 20px;
-    color: #674e04;
     .message-container {
         display: flex;
         flex-direction: column;
@@ -15,14 +14,17 @@
     &.warning {
         background-color: lighten($warningMedium, 45%);
         border: 1px solid darken($warningMedium, 10%);
+        color: darken($warningMedium, 30%);
     }
     &.error {
         background-color: lighten($warning, 50%);
         border: 1px solid darken($warning, 20%);
+        color: darken($warning, 30%);
     }
     &.info {
         background-color: var(--palette-primary-50);
         border: 1px solid $primary;
+        color: var(--palette-primary-900);
     }
     > div:first-child {
         display: flex;

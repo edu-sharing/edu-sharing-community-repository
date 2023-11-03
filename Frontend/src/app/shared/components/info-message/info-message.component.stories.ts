@@ -4,6 +4,7 @@ import { SharedModule } from '../../shared.module';
 import { HttpClient, HttpHandler, HttpXhrBackend } from '@angular/common/http';
 import { importProvidersFrom } from '@angular/core';
 import { EduSharingApiModule } from 'ngx-edu-sharing-api';
+import { TranslateModule } from '@ngx-translate/core';
 
 // More on how to set up stories at: https://storybook.js.org/docs/angular/writing-stories/introduction
 const meta: Meta<InfoMessageComponent> = {
@@ -12,7 +13,7 @@ const meta: Meta<InfoMessageComponent> = {
     decorators: [
         moduleMetadata({
             declarations: [], // Prevent duplicate declaration of InfoMessageComponent
-            imports: [SharedModule],
+            imports: [SharedModule, TranslateModule.forRoot()],
         }),
         applicationConfig({
             providers: [
