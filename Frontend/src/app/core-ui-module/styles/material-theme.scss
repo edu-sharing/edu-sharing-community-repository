@@ -238,13 +238,7 @@ mat-tab-group {
 }
 // form border on hover
 .mat-form-field-appearance-outline {
-    .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover {
-        .mdc-notched-outline__leading,
-        .mdc-notched-outline__trailing,
-        .mdc-notched-outline__notch {
-            border-color: mat-css-utilities.mat-css-color-primary(300) !important;
-        }
-    }
+    --mdc-outlined-text-field-hover-outline-color: #{mat-css-utilities.mat-css-color-primary(300)};
 }
 .mat-form-field-dark {
     input,
@@ -262,21 +256,19 @@ mat-tab-group {
         }
     }
 }
-.mat-form-field-bright {
+.mat-mdc-form-field.mat-form-field-bright {
     input,
     textarea {
-        caret-color: $primaryLight;
+        --mdc-outlined-text-field-caret-color: #{$primaryLight};
     }
-    .mat-form-field-outline,
-    .mat-form-field-label {
-        color: rgba(255, 255, 255, 0.6);
+    --mdc-outlined-text-field-label-text-color: rgba(255, 255, 255, 0.87);
+    --mdc-outlined-text-field-outline-color: rgba(255, 255, 255, 0.6);
+    --mdc-outlined-text-field-hover-outline-color: rgba(255, 255, 255, 0.87);
+    --mdc-outlined-text-field-focus-outline-color: #{mat-css-utilities.mat-css-color-primary(100)};
+    .mdc-text-field--focused:not(.mdc-text-field--disabled) .mdc-floating-label {
+        color: mat-css-utilities.mat-css-color-primary(50);
     }
-    &.mat-focused {
-        .mat-form-field-outline,
-        .mat-form-field-label {
-            color: rgba(255, 255, 255, 0.7);
-        }
-    }
+    --mdc-outlined-text-field-input-text-color: rgba(255, 255, 255);
 }
 mat-slide-toggle.mat-primary-bright {
     &.mat-checked {
