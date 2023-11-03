@@ -87,7 +87,7 @@ export class ListTextComponent extends ListWidget implements OnInit {
 
         const mds = await this.mds
             .getMetadataSet({
-                repository: node.ref.repo,
+                repository: node.ref?.repo,
                 metadataSet: node.metadataset || Constants.DEFAULT,
             })
             .toPromise();
