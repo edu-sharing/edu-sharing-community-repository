@@ -17,6 +17,9 @@ fieldset {
         display: block;
         margin-bottom: 0.25em;
     }
+    .buttons {
+        padding: 10px 0;
+    }
     button {
         margin-bottom: 12px;
         &:not(:last-of-type) {

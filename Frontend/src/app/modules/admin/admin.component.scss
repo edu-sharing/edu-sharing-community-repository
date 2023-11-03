@@ -204,14 +204,6 @@
             }
         }
     }
-    .app-type {
-        display: flex;
-        align-items: center;
-        h6 {
-            margin: 25px 0 15px 0;
-            flex-grow: 1;
-        }
-    }
     .btn {
         margin-bottom: 15px;
     }
@@ -371,6 +363,7 @@
     }
     .group .inputGroup {
         padding: 0;
+        gap: 20px;
     }
     .catalina {
         margin-bottom: 40px;
@@ -399,6 +392,7 @@
             padding-top: 30px;
             display: flex;
             align-items: center;
+            gap: 20px;
             > input {
                 margin-bottom: 0;
             }
@@ -471,6 +465,7 @@
         .no-results {
             display: flex;
             justify-content: center;
+            padding: 40px;
             color: $textLight;
             font-size: 120%;
         }

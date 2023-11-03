@@ -50,9 +50,12 @@
 
       <div class="config-timespan" *ngIf="config.frontpage.mode !== 'collection'">
         <mat-form-field>
-          <mat-label>{{ 'ADMIN.FRONTPAGE.TIMESPAN_LABEL' | translate }}</mat-label>
+          <mat-label
+            >{{ 'ADMIN.FRONTPAGE.TIMESPAN_LABEL' | translate }} ({{
+              'ADMIN.FRONTPAGE.TIMESPAN_DAYS' | translate
+            }})</mat-label
+          >
           <mat-hint>{{ 'ADMIN.FRONTPAGE.TIMESPAN_HINT' | translate }}</mat-hint>
-          <span matSuffix>{{ 'ADMIN.FRONTPAGE.TIMESPAN_DAYS' | translate }}</span>
           <input matInput id="timespan" type="number" min="1" formControlName="timespan" />
         </mat-form-field>
         <mat-checkbox formControlName="timespanAll">

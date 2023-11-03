@@ -256,67 +256,58 @@
       <h4 class="mat-heading-4 mat-heading-underline">
         <span>{{ 'ADMIN.APPLICATIONS.LIST' | translate }}</span>
       </h4>
-      <div *ngFor="let type of getAppTypes()">
-        <div class="app-type">
-          <h6 class="mat-heading-6">{{ type }} ({{ getApplications(type).length }})</h6>
-          <button mat-icon-button color="primary">
-            <i
-              [esIcon]="applicationsOpen[type] ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
-              (click)="applicationsOpen[type] = !applicationsOpen[type]"
-            >
-            </i>
-          </button>
-        </div>
-        <div
-          class="app-list"
-          *ngIf="applicationsOpen[type]"
-          [@openOverlay]="applicationsOpen[type]"
-        >
-          <div class="header">
-            <div class="id">{{ 'ADMIN.APPLICATIONS.ID' | translate }}</div>
-            <div class="title">{{ 'ADMIN.APPLICATIONS.TITLE' | translate }}</div>
-            <div class="file">{{ 'ADMIN.APPLICATIONS.FILE' | translate }}</div>
-            <div class="repoType">{{ 'ADMIN.APPLICATIONS.REPOTYPE' | translate }}</div>
-            <div class="subtype">{{ 'ADMIN.APPLICATIONS.SUBTYPE' | translate }}</div>
-            <div class="config">&nbsp;</div>
-            <div class="edit">&nbsp;</div>
-            <div class="download">&nbsp;</div>
-            <div class="delete">&nbsp;</div>
-          </div>
-          <div *ngFor="let app of getApplications(type)">
-            <div class="id">{{ app.id }}</div>
-            <div class="title">{{ app.title }}</div>
-            <div class="file">{{ app.file }}</div>
-            <div class="repoType">{{ app.repositoryType }}</div>
-            <div class="subtype">{{ app.subtype }}</div>
-            <div class="config">
-              <button
-                mat-icon-button
-                color="primary"
-                *ngIf="app.configUrl"
-                (click)="configApp(app)"
-              >
-                <i esIcon="settings" class="clickable"></i>
-              </button>
+      <mat-accordion [multi]="true">
+        <mat-expansion-panel *ngFor="let type of getAppTypes()" [expanded]="true">
+          <mat-expansion-panel-header>
+            <mat-panel-title>{{ type }} ({{ getApplications(type).length }})</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="app-list">
+            <div class="header">
+              <div class="id">{{ 'ADMIN.APPLICATIONS.ID' | translate }}</div>
+              <div class="title">{{ 'ADMIN.APPLICATIONS.TITLE' | translate }}</div>
+              <div class="file">{{ 'ADMIN.APPLICATIONS.FILE' | translate }}</div>
+              <div class="repoType">{{ 'ADMIN.APPLICATIONS.REPOTYPE' | translate }}</div>
+              <div class="subtype">{{ 'ADMIN.APPLICATIONS.SUBTYPE' | translate }}</div>
+              <div class="config">&nbsp;</div>
+              <div class="edit">&nbsp;</div>
+              <div class="download">&nbsp;</div>
+              <div class="delete">&nbsp;</div>
             </div>
-            <div class="edit">
-              <button mat-icon-button color="primary" (click)="editApp(app)">
-                <i esIcon="edit" class="clickable"></i>
-              </button>
-            </div>
-            <div class="download">
-              <button mat-icon-button color="primary" (click)="downloadApp(app)">
-                <i esIcon="cloud_download" class="clickable"></i>
-              </button>
-            </div>
-            <div class="delete">
-              <button mat-icon-button color="primary" (click)="removeApp(app)">
-                <i esIcon="delete" class="clickable"></i>
-              </button>
+            <div *ngFor="let app of getApplications(type)">
+              <div class="id">{{ app.id }}</div>
+              <div class="title">{{ app.title }}</div>
+              <div class="file">{{ app.file }}</div>
+              <div class="repoType">{{ app.repositoryType }}</div>
+              <div class="subtype">{{ app.subtype }}</div>
+              <div class="config">
+                <button
+                  mat-icon-button
+                  color="primary"
+                  *ngIf="app.configUrl"
+                  (click)="configApp(app)"
+                >
+                  <i esIcon="settings" class="clickable"></i>
+                </button>
+              </div>
+              <div class="edit">
+                <button mat-icon-button color="primary" (click)="editApp(app)">
+                  <i esIcon="edit" class="clickable"></i>
+                </button>
+              </div>
+              <div class="download">
+                <button mat-icon-button color="primary" (click)="downloadApp(app)">
+                  <i esIcon="cloud_download" class="clickable"></i>
+                </button>
+              </div>
+              <div class="delete">
+                <button mat-icon-button color="primary" (click)="removeApp(app)">
+                  <i esIcon="delete" class="clickable"></i>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </mat-expansion-panel>
+      </mat-accordion>
     </div>
     <div *ngIf="modeIsActive('UPDATE')" class="content update">
       <div class="hint">
@@ -821,13 +812,16 @@
       </div>
       <div class="group">
         <form (ngSubmit)="getCacheInfo()">
-          <input
-            type="text"
-            name="cacheInfo"
-            class="cacheInfo"
-            [(ngModel)]="cacheInfo"
-            placeholder="{{ 'ADMIN.TOOLKIT.CACHE_NAME' | translate }}"
-          />
+          <mat-form-field>
+            <input
+              matInput
+              type="text"
+              name="cacheInfo"
+              class="cacheInfo"
+              [(ngModel)]="cacheInfo"
+              placeholder="{{ 'ADMIN.TOOLKIT.CACHE_NAME' | translate }}"
+            />
+          </mat-form-field>
           <button mat-raised-button>
             {{ 'ADMIN.TOOLKIT.CACHE_INFO' | translate }}
           </button>
@@ -853,11 +847,14 @@
           </div>
         </div>
         <div class="propertyGroup">
-          <input
-            type="text"
-            [(ngModel)]="propertyName"
-            placeholder="{{ 'ADMIN.TOOLKIT.PROPERTY_NAME' | translate }}"
-          />
+          <mat-form-field>
+            <input
+              matInput
+              type="text"
+              [(ngModel)]="propertyName"
+              placeholder="{{ 'ADMIN.TOOLKIT.PROPERTY_NAME' | translate }}"
+            />
+          </mat-form-field>
           <button mat-raised-button (click)="getPropertyValues()">
             {{ 'ADMIN.TOOLKIT.PROPERTY_VALUESPACE' | translate }}
           </button>

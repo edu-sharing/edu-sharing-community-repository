@@ -199,6 +199,7 @@
       [elementInteractionType]="InteractionType.Emitter"
       [checkbox]="false"
       [displayType]="NodeEntriesDisplayType.Table"
+      [columns]="columns"
       (clickItem)="onOpenNode.emit($event.element)"
     ></es-node-entries-wrapper>
     <es-info-message *ngIf="!nodesNoData">

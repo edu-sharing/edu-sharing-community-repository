@@ -1,11 +1,15 @@
 @import '../../../core-ui-module/styles/variables';
 
+es-info-message {
+    display: flex;
+    padding: 20px 0;
+}
+
 .config {
     width: 100%;
     height: 100%;
     max-width: 1300px;
     padding-right: 20px;
-    overflow-x: hidden;
     .config-hide {
         width: 100%;
         display: flex;
@@ -16,14 +20,6 @@
     }
     .actions {
         margin: 10px 0;
-        info-message {
-            display: flex;
-            margin: 20px 0;
-        }
-    }
-    > es-info-message {
-        display: flex;
-        padding-top: 20px;
     }
 }
 .config-size-medium {
