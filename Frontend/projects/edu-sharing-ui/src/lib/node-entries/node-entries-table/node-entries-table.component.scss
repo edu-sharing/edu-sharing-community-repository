@@ -83,6 +83,18 @@ mat-cell {
         background: linear-gradient(to right, var(--nodeVirtualColor) 5px, transparent 5px)
             no-repeat;
         border-right: 2px dashed var(--nodeVirtualColorLight);
+        .mat-mdc-cell {
+            background: transparent;
+        }
+        &.mat-row-selected {
+            background: linear-gradient(
+                to right,
+                var(--nodeVirtualColor) 0,
+                var(--nodeVirtualColor) 5px,
+                var(--listItemSelectedBackground) 5px,
+                var(--listItemSelectedBackground) 5px
+            );
+        }
     }
     &.mat-row-virtual-first {
         border-top: 2px dashed var(--nodeVirtualColorLight);
