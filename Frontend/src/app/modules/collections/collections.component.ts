@@ -219,7 +219,7 @@ export class CollectionsMainComponent implements OnDestroy {
         this.destroyed.complete();
         this.temporaryStorageService.set(
             TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE,
-            this.collectionContentRef.dataSourceReferences,
+            this.collectionContentRef?.dataSourceReferences,
         );
     }
 
