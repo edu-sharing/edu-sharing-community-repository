@@ -12,6 +12,7 @@ import {
     DropSource,
     DropTarget,
     ElementType,
+    LocalEventsService,
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeRoot,
@@ -63,11 +64,12 @@ import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcru
 import { WorkspaceExplorerComponent } from './explorer/explorer.component';
 import { WorkspaceTreeComponent } from './tree/tree.component';
 import { canDragDrop, canDropOnNode } from './workspace-utils';
+import { WorkspaceService } from './workspace.service';
 
 @Component({
-    selector: 'es-workspace-main',
-    templateUrl: 'workspace.component.html',
-    styleUrls: ['workspace.component.scss'],
+    selector: 'es-workspace-page',
+    templateUrl: 'workspace-page.component.html',
+    styleUrls: ['workspace-page.component.scss'],
     animations: [
         trigger('fade', UIAnimation.fade()),
         trigger('fadeFast', UIAnimation.fade(UIAnimation.ANIMATION_TIME_FAST)),
@@ -76,7 +78,7 @@ import { canDragDrop, canDropOnNode } from './workspace-utils';
         trigger('fromRight', UIAnimation.fromRight()),
     ],
 })
-export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy {
+export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy {
     private static VALID_ROOTS = [
         'MY_FILES',
         'SHARED_FILES',
@@ -168,30 +170,32 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
 
     constructor(
-        private toast: Toast,
-        private route: ActivatedRoute,
-        private router: Router,
-        private nodeHelper: NodeHelperService,
-        private translate: TranslateService,
-        private translations: TranslationsService,
-        private storage: TemporaryStorageService,
-        private config: ConfigurationService,
-        private connectors: RestConnectorsService,
-        private toolService: RestToolService,
-        private session: SessionStorageService,
-        private iam: RestIamService,
-        private mds: RestMdsService,
-        private node: RestNodeService,
-        private ui: UIService,
-        private event: FrameEventsService,
-        private connector: RestConnectorService,
         private breadcrumbsService: BreadcrumbsService,
         private card: CardService,
-        private ngZone: NgZone,
-        private loadingScreen: LoadingScreenService,
-        private mainNavService: MainNavService,
-        private searchField: SearchFieldService,
+        private config: ConfigurationService,
+        private connector: RestConnectorService,
+        private connectors: RestConnectorsService,
         private dialogs: DialogsService,
+        private event: FrameEventsService,
+        private iam: RestIamService,
+        private loadingScreen: LoadingScreenService,
+        private localEvents: LocalEventsService,
+        private mainNavService: MainNavService,
+        private mds: RestMdsService,
+        private ngZone: NgZone,
+        private node: RestNodeService,
+        private nodeHelper: NodeHelperService,
+        private route: ActivatedRoute,
+        private router: Router,
+        private searchField: SearchFieldService,
+        private session: SessionStorageService,
+        private storage: TemporaryStorageService,
+        private toast: Toast,
+        private toolService: RestToolService,
+        private translate: TranslateService,
+        private translations: TranslationsService,
+        private ui: UIService,
+        private workspace: WorkspaceService,
     ) {
         this.event.addListener(this, this.destroyed$);
         this.translations.waitForInit().subscribe(() => {
@@ -214,8 +218,6 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         if (this.currentFolder) {
             this.storage.set(this.getLastLocationStorageId(), this.currentFolder.ref.id);
         }
-        // close sidebar, if open
-        this.mainNavService.getDialogs().closeSidebar();
     }
 
     @HostListener('window:beforeunload', ['$event'])
@@ -496,7 +498,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                 false,
             );
         }
-        if (params.root && WorkspaceMainComponent.VALID_ROOTS.indexOf(params.root) !== -1) {
+        if (params.root && WorkspacePageComponent.VALID_ROOTS.indexOf(params.root) !== -1) {
             this.root = params.root;
         } else {
             this.root = 'MY_FILES';
@@ -551,11 +553,11 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         }
         this.setSelection([node]);
         this.parameterNode = node;
-        this.mainNavService.getDialogs().nodeSidebar = node;
+        this.workspace.nodeSidebar = node;
     }
 
     resetWorkspace() {
-        if (this.mainNavService.getDialogs().nodeSidebar && this.parameterNode) {
+        if (this.workspace.nodeSidebar && this.parameterNode) {
             this.setSelection([this.parameterNode]);
         }
     }
@@ -588,14 +590,8 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         this.setSelection([]);
     }
 
-    private deleteDone() {
-        this.closeMetadata();
-        this.refresh();
-    }
-
     private displayNode(event: Node) {
         const list = this.getNodeList(event);
-        this.closeMetadata();
         if (list[0].isDirectory || list[0].type === RestConstants.SYS_TYPE_CONTAINER) {
             if (list[0].collection) {
                 UIHelper.goToCollection(this.router, list[0]);
@@ -665,12 +661,9 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             .setFixMobileElements(this.explorer.nodeEntries.getSelection().selected?.length > 0);
     }
 
-    private updateLicense() {
-        this.closeMetadata();
-    }
-
     private closeMetadata() {
-        this.mainNavService.getDialogs().closeSidebar();
+        this.workspace.nodeSidebar = null;
+        this.workspace.nodeSidebarChange.emit(null);
     }
 
     private openDirectory(id: string, { replaceUrl = false } = {}) {
@@ -718,7 +711,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             this.currentFolder = null;
         }
         this.allowBinary = true;
-        const root = !id || WorkspaceMainComponent.VALID_ROOTS_NODES.indexOf(id) !== -1;
+        const root = !id || WorkspacePageComponent.VALID_ROOTS_NODES.indexOf(id) !== -1;
         if (!root) {
             this.isRootFolder = false;
             this.node.getNodeMetadata(id).subscribe(

@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { Node } from '../../../core-module/core.module';
 import { CanDrop, DragData, DropSource, NodeRoot, OptionItem } from 'ngx-edu-sharing-ui';
-import { WorkspaceMainComponent } from '../workspace.component';
+import { WorkspacePageComponent } from '../workspace-page.component';
 import { WorkspaceSubTreeComponent } from '../sub-tree/sub-tree.component';
 
 @Component({
@@ -11,7 +11,7 @@ import { WorkspaceSubTreeComponent } from '../sub-tree/sub-tree.component';
 })
 export class WorkspaceTreeComponent {
     @Input() root: NodeRoot;
-    @Input() workspace: WorkspaceMainComponent;
+    @Input() workspace: WorkspacePageComponent;
     @Input() isSafe: boolean;
     @Input() selectedNode: string;
     @Input() set path(path: Node[]) {

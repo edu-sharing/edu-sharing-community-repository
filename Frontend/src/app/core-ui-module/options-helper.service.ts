@@ -60,6 +60,7 @@ import {
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { WorkspaceManagementDialogsComponent } from '../modules/management-dialogs/management-dialogs.component';
+import { WorkspaceService } from '../pages/workspace-page/workspace.service';
 import {
     KeyboardShortcutsService,
     matchesShortcutCondition,
@@ -89,28 +90,28 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     private destroyed = new Subject<void>();
 
     constructor(
-        private networkService: RestNetworkService,
-        private connector: RestConnectorService,
-        private connectors: RestConnectorsService,
-        private iamService: RestIamService,
-        private router: Router,
-        private nodeHelper: NodeHelperService,
-        private route: ActivatedRoute,
-        private eventService: FrameEventsService,
-        private uiService: UIService,
-        private toast: Toast,
-        private translate: TranslateService,
-        private nodeService: RestNodeService,
+        private bridge: BridgeService,
         private collectionService: RestCollectionService,
         private configService: ConfigurationService,
-        private mainNavService: MainNavService,
-        private storage: TemporaryStorageService,
-        private bridge: BridgeService,
-        private nodeList: NodeListService,
+        private connector: RestConnectorService,
+        private connectors: RestConnectorsService,
         private dialogs: DialogsService,
+        private eventService: FrameEventsService,
+        private iamService: RestIamService,
         private keyboardShortcuts: KeyboardShortcutsService,
-        private ngZone: NgZone,
         private localEvents: LocalEventsService,
+        private mainNavService: MainNavService,
+        private ngZone: NgZone,
+        private nodeHelper: NodeHelperService,
+        private nodeList: NodeListService,
+        private nodeService: RestNodeService,
+        private route: ActivatedRoute,
+        private router: Router,
+        private storage: TemporaryStorageService,
+        private toast: Toast,
+        private translate: TranslateService,
+        private uiService: UIService,
+        private workspace: WorkspaceService,
     ) {
         super();
         this.route.queryParams.subscribe((queryParams) => (this.queryParams = queryParams));
@@ -1367,13 +1368,13 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             'OPTIONS.METADATA_SIDEBAR',
             'info_outline',
             (object) => {
-                management.nodeSidebarChange.subscribe((change: Node) => {
+                this.workspace.nodeSidebarChange.subscribe((change: Node) => {
                     metadataSidebar.icon = change ? 'info' : 'info_outline';
                 });
-                management.nodeSidebar = management.nodeSidebar
+                this.workspace.nodeSidebar = this.workspace.nodeSidebar
                     ? null
                     : this.getObjects(object, data)[0];
-                if (management.nodeSidebar == null) {
+                if (this.workspace.nodeSidebar == null) {
                     metadataSidebarSubscription?.unsubscribe();
                 } else {
                     metadataSidebarSubscription = components.list
@@ -1382,15 +1383,15 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                             if (selection.source.selected.length === 0) {
                                 return;
                             }
-                            if (management.nodeSidebar == null) {
+                            if (this.workspace.nodeSidebar == null) {
                                 metadataSidebarSubscription?.unsubscribe();
                                 return;
                             }
-                            management.nodeSidebar = selection.source.selected[0] as Node;
-                            management.nodeSidebarChange.emit(management.nodeSidebar);
+                            this.workspace.nodeSidebar = selection.source.selected[0] as Node;
+                            this.workspace.nodeSidebarChange.emit(this.workspace.nodeSidebar);
                         });
                 }
-                management.nodeSidebarChange.emit(management.nodeSidebar);
+                this.workspace.nodeSidebarChange.emit(this.workspace.nodeSidebar);
             },
         );
         metadataSidebar.elementType = [ElementType.Node, ElementType.NodePublishedCopy];

@@ -8,20 +8,33 @@ import {
     OnInit,
     ViewChild,
 } from '@angular/core';
+import { NavigationEnd, Router, Routes } from '@angular/router';
+import { AuthenticationService } from 'ngx-edu-sharing-api';
+import { AccessibilityService, TranslationsService, UIConstants } from 'ngx-edu-sharing-ui';
+import * as rxjs from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { ThemeService } from '../common/services/theme.service';
 import { MdsTestComponent } from '../common/test/mds-test/mds-test.component';
 import { ApplyToLmsComponent } from '../common/ui/apply-to-lms/apply-to-lms.component';
+import { CookieInfoComponent } from '../common/ui/cookie-info/cookie-info.component';
 import { NodeRenderComponent } from '../common/ui/node-render/node-render.component';
-import { AccessibilityService, TranslationsService, UIConstants } from 'ngx-edu-sharing-ui';
+import { BridgeService } from '../core-bridge-module/bridge.service';
+import { ConfigurationService, RestHelper } from '../core-module/core.module';
+import { extensionRoutes } from '../extension/extension-routes';
+import { DialogsNavigationGuard } from '../features/dialogs/dialogs-navigation.guard';
+import { LoadingScreenService } from '../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../main/navigation/main-nav.service';
 import { AdminComponent } from '../modules/admin/admin.component';
 import { CollectionNewComponent } from '../modules/collections/collection-new/collection-new.component';
 import { CollectionsMainComponent } from '../modules/collections/collections.component';
 import { FileUploadComponent } from '../modules/file-upload/file-upload.component';
 import { LoginAppComponent } from '../modules/login-app/login-app.component';
 import { LoginComponent } from '../modules/login/login.component';
+import { LtiComponent } from '../modules/lti/lti.component';
 import { WorkspaceManagementDialogsComponent } from '../modules/management-dialogs/management-dialogs.component';
+import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';
 import { MessagesComponent } from '../modules/messages/messages.component';
-import { RecycleMainComponent } from '../modules/node-list/recycle/recycle.component';
-import { TasksMainComponent } from '../modules/node-list/tasks/tasks.component';
 import { OerComponent } from '../modules/oer/oer.component';
 import { PermissionsRoutingComponent } from '../modules/permissions/permissions-routing.component';
 import { PermissionsMainComponent } from '../modules/permissions/permissions.component';
@@ -32,25 +45,10 @@ import { ShareAppComponent } from '../modules/share-app/share-app.component';
 import { SharingComponent } from '../modules/sharing/sharing.component';
 import { StartupComponent } from '../modules/startup/startup.component';
 import { StreamComponent } from '../modules/stream/stream.component';
-import { WorkspaceMainComponent } from '../modules/workspace/workspace.component';
-import { NavigationEnd, Router, Routes } from '@angular/router';
-import { CookieInfoComponent } from '../common/ui/cookie-info/cookie-info.component';
-import { BridgeService } from '../core-bridge-module/bridge.service';
-import { extensionRoutes } from '../extension/extension-routes';
-import * as rxjs from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
-import { LtiComponent } from '../modules/lti/lti.component';
-import { printCurrentTaskInfo } from './track-change-detection';
-import { environment } from '../../environments/environment';
-import { LoadingScreenService } from '../main/loading-screen/loading-screen.service';
-import { MainNavService } from '../main/navigation/main-nav.service';
-import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';
-import { ThemeService } from '../common/services/theme.service';
+import { WorkspacePageComponent } from '../pages/workspace-page/workspace-page.component';
 import { LicenseAgreementService } from '../services/license-agreement.service';
-import { DialogsNavigationGuard } from '../features/dialogs/dialogs-navigation.guard';
-import { AuthenticationService } from 'ngx-edu-sharing-api';
-import { ConfigurationService, RestHelper } from '../core-module/core.module';
 import { ScrollPositionRestorationService } from '../services/scroll-position-restoration.service';
+import { printCurrentTaskInfo } from './track-change-detection';
 
 @Component({
     selector: 'es-router',
@@ -273,11 +271,13 @@ const childRoutes: Routes = [
             import('../pages/search-page/search-page.module').then((m) => m.SearchPageModule),
     },
     // workspace
-    { path: UIConstants.ROUTER_PREFIX + 'workspace', component: WorkspaceMainComponent },
-    { path: UIConstants.ROUTER_PREFIX + 'workspace/:mode', component: WorkspaceMainComponent },
-    // recycle/node component
-    { path: UIConstants.ROUTER_PREFIX + 'recycle', component: RecycleMainComponent },
-    { path: UIConstants.ROUTER_PREFIX + 'tasks', component: TasksMainComponent },
+    {
+        path: UIConstants.ROUTER_PREFIX + 'workspace',
+        loadChildren: () =>
+            import('../pages/workspace-page/workspace-page.module').then(
+                (m) => m.WorkspacePageModule,
+            ),
+    },
     // collections
     { path: UIConstants.ROUTER_PREFIX + 'collections', component: CollectionsMainComponent },
     {

@@ -7,10 +7,10 @@ import {
     RestConnectorService,
     RestConstants,
     RestNodeService,
-} from '../../../../core-module/core.module';
+} from '../../../core-module/core.module';
 import { TranslateService } from '@ngx-translate/core';
 import { DurationHelper, FormatDatePipe, NodeImageSizePipe, VCard } from 'ngx-edu-sharing-ui';
-import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
+import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { ConfigService } from 'ngx-edu-sharing-api';
 
 // Charts.js

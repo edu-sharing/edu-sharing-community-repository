@@ -1,22 +1,5 @@
 @import '../../core-ui-module/styles/variables';
 
-.metadata-sidebar {
-    min-width: 350px;
-    max-width: 350px;
-    position: fixed;
-    @include iosScrolling();
-    @include materialShadow();
-    height: calc(100% - (var(--mainnavHeight) + #{$workspaceBreadcrumbsHeight}));
-    top: calc(var(--mainnavHeight) + #{$workspaceBreadcrumbsHeight});
-    right: 0;
-    z-index: 5;
-    background-color: #fff;
-    @media screen and (max-width: ($mobileTabSwitchWidth)) {
-        height: calc(
-            100% - (var(--mainnavHeight) + #{$workspaceBreadcrumbsHeight+$mobileTabNavHeight})
-        );
-    }
-}
 .card-title-actionbar {
     .material-icons {
         position: absolute;

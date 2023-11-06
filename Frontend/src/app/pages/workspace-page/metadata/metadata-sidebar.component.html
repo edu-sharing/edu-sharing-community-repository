@@ -1,0 +1,10 @@
+<es-workspace-metadata
+  *ngIf="nodeSidebar"
+  [@fromRight]="nodeSidebar"
+  class="metadata-sidebar"
+  [node]="nodeSidebar"
+  (onRestore)="restoreVersion($event)"
+  (onDisplay)="goToNode($event)"
+  (onEditMetadata)="openMdsEditor([$event])"
+  (onClose)="closeSidebar()"
+></es-workspace-metadata>

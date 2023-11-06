@@ -22,22 +22,17 @@ import { BridgeService } from '../../core-bridge-module/bridge.service';
 import {
     CollectionReference,
     Node,
-    NodeVersions,
     RestCollectionService,
     RestConstants,
     RestHelper,
     RestNodeService,
-    Version,
 } from '../../core-module/core.module';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { Toast } from '../../core-ui-module/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
-import {
-    OK_OR_CANCEL,
-    YES_OR_NO,
-} from '../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import { OK_OR_CANCEL } from '../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
-import { BulkBehavior } from '../../features/mds/types/types';
+import { WorkspaceService } from '../../pages/workspace-page/workspace.service';
 
 export enum DialogType {
     SimpleEdit = 'SimpleEdit',
@@ -71,12 +66,9 @@ export class WorkspaceManagementDialogsComponent {
     @Input() nodeSimpleEditChange = new EventEmitter<Node[]>();
     @Input() materialViewFeedback: Node;
     @Output() materialViewFeedbackChange = new EventEmitter<Node>();
-    @Input() nodeSidebar: Node;
-    @Output() nodeSidebarChange = new EventEmitter<Node>();
     @Output() onClose = new EventEmitter();
     @Output() onCreate = new EventEmitter();
     @Output() onRefresh = new EventEmitter<Node[] | void>();
-    @Output() onCloseMetadata = new EventEmitter();
     @Output() onCloseAddToCollection = new EventEmitter();
     @Output() onStoredAddToCollection = new EventEmitter<{
         collection: Node;
@@ -104,12 +96,6 @@ export class WorkspaceManagementDialogsComponent {
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
         if (event.key === 'Escape') {
-            if (this.nodeSidebar != null) {
-                this.closeSidebar();
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
             if (this.addToCollection != null) {
                 this.cancelAddToCollection();
                 event.preventDefault();
@@ -119,42 +105,18 @@ export class WorkspaceManagementDialogsComponent {
         }
     }
     public constructor(
-        private nodeService: RestNodeService,
-        private temporaryStorage: TemporaryStorageService,
-        private collectionService: RestCollectionService,
-        private toast: Toast,
-        private errorProcessing: ErrorProcessingService,
-        private nodeHelper: NodeHelperService,
         private bridge: BridgeService,
-        private router: Router,
+        private collectionService: RestCollectionService,
         private dialogs: DialogsService,
+        private errorProcessing: ErrorProcessingService,
         private localEvents: LocalEventsService,
+        private nodeHelper: NodeHelperService,
+        private nodeService: RestNodeService,
+        private router: Router,
+        private temporaryStorage: TemporaryStorageService,
+        private toast: Toast,
+        private workspace: WorkspaceService,
     ) {}
-
-    async openMdsEditor(nodes: Node[]): Promise<void> {
-        const dialogRef = await this.dialogs.openMdsEditorDialogForNodes({
-            nodes,
-            bulkBehavior: BulkBehavior.Default,
-        });
-        dialogRef
-            .afterClosed()
-            .subscribe((updatedNodes) => this.closeMdsEditor(nodes, updatedNodes));
-    }
-
-    private closeMdsEditor(originalNodes: Node[], updatedNodes: Node[] = null) {
-        let refresh = !!updatedNodes;
-        this.onCloseMetadata.emit(updatedNodes);
-        if (
-            this.nodeSidebar &&
-            this.nodeSidebar.ref.id === originalNodes[0]?.ref.id &&
-            updatedNodes
-        ) {
-            this.nodeSidebar = updatedNodes[0];
-        }
-        if (refresh) {
-            this.localEvents.nodesChanged.emit(updatedNodes);
-        }
-    }
 
     public closeStream() {
         this.addNodesStream = null;
@@ -255,64 +217,9 @@ export class WorkspaceManagementDialogsComponent {
         );
     }
 
-    async restoreVersion(restore: { version: Version; node: Node }) {
-        const dialogRef = await this.dialogs.openGenericDialog({
-            title: 'WORKSPACE.METADATA.RESTORE_TITLE',
-            message: 'WORKSPACE.METADATA.RESTORE_MESSAGE',
-            buttons: YES_OR_NO,
-            nodes: [restore.node],
-        });
-        dialogRef.afterClosed().subscribe((response) => {
-            if (response === 'YES') {
-                this.doRestoreVersion(restore.version);
-            }
-        });
-    }
-    private doRestoreVersion(version: Version): void {
-        this.toast.showProgressSpinner();
-        this.nodeService
-            .revertNodeToVersion(
-                version.version.node.id,
-                version.version.major,
-                version.version.minor,
-            )
-            .subscribe(
-                (data: NodeVersions) => {
-                    this.toast.closeProgressSpinner();
-                    this.closeSidebar();
-                    // @TODO type is not compatible
-                    this.nodeService
-                        .getNodeMetadata(version.version.node.id, [RestConstants.ALL])
-                        .subscribe(
-                            (node) => {
-                                this.localEvents.nodesChanged.emit([node.node]);
-                                this.nodeSidebar = node.node;
-                                this.nodeSidebarChange.emit(node.node);
-                                this.toast.toast('WORKSPACE.REVERTED_VERSION');
-                            },
-                            (error: any) => this.toast.error(error),
-                        );
-                },
-                (error: any) => this.toast.error(error),
-            );
-    }
-
     closeMaterialViewFeedback() {
         this.materialViewFeedback = null;
         this.materialViewFeedbackChange.emit(null);
-    }
-
-    closeSidebar() {
-        this.nodeSidebar = null;
-        this.nodeSidebarChange.emit(null);
-    }
-
-    displayNode(node: Node) {
-        if (node.version) {
-            this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id, node.version]);
-        } else {
-            this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id]);
-        }
     }
 
     declineProposals(nodes: ProposalNode[]) {

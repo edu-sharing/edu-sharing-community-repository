@@ -5,16 +5,6 @@
   (onCancel)="closeStream()"
   (onDone)="closeStream()"
 ></es-add-stream>
-<es-workspace-metadata
-  *ngIf="nodeSidebar"
-  [@fromRight]="nodeSidebar"
-  class="metadata-sidebar"
-  [node]="nodeSidebar"
-  (onRestore)="restoreVersion($event)"
-  (onDisplay)="displayNode($event)"
-  (onEditMetadata)="openMdsEditor([$event])"
-  (onClose)="closeSidebar()"
-></es-workspace-metadata>
 <es-view-material-feedback
   *ngIf="materialViewFeedback"
   [node]="materialViewFeedback"

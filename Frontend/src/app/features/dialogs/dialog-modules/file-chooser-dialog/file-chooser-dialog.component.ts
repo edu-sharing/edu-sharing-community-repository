@@ -15,7 +15,7 @@ import {
 } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
-import { WorkspaceExplorerComponent } from '../../../../modules/workspace/explorer/explorer.component';
+import { WorkspaceExplorerComponent } from '../../../../pages/workspace-page/explorer/explorer.component';
 import { CARD_DIALOG_DATA, CardDialogConfig } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { FileChooserDialogData, FileChooserDialogResult } from './file-chooser-dialog-data';

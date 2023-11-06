@@ -50,7 +50,6 @@ import { DECLARATIONS_SHARE_APP } from './modules/share-app/declarations';
 import { DECLARATIONS_SHARING } from './modules/sharing/declarations';
 import { DECLARATIONS_STARTUP } from './modules/startup/declarations';
 import { DECLARATIONS_STREAM } from './modules/stream/declarations';
-import { DECLARATIONS_WORKSPACE } from './modules/workspace/declarations';
 import { PROVIDERS } from './providers';
 import { AppLocationStrategy } from './router/location-strategy';
 import { RouterComponent } from './router/router.component';
@@ -78,7 +77,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     declarations: [
         DECLARATIONS,
         DECLARATIONS_RECYCLE,
-        DECLARATIONS_WORKSPACE,
         DECLARATIONS_COLLECTIONS,
         DECLARATIONS_LOGIN,
         DECLARATIONS_REGISTER,
@@ -153,7 +151,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     exports: [
         DECLARATIONS,
         DECLARATIONS_RECYCLE,
-        DECLARATIONS_WORKSPACE,
         DECLARATIONS_COLLECTIONS,
         DECLARATIONS_LOGIN,
         DECLARATIONS_REGISTER,

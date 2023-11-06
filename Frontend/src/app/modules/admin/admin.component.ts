@@ -63,7 +63,7 @@ import { XmlAppPropertiesDialogData } from '../../features/dialogs/dialog-module
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { AuthoritySearchMode } from '../../shared/components/authority-search-input/authority-search-input.component';
-import { WorkspaceExplorerComponent } from '../workspace/explorer/explorer.component';
+import { WorkspaceExplorerComponent } from '../../pages/workspace-page/explorer/explorer.component';
 
 type LuceneData = {
     mode: 'NODEREF' | 'SOLR' | 'ELASTIC';
