@@ -236,12 +236,14 @@ export class LoginAppComponent implements OnInit {
     }
 
     private async handleCurrentState() {
-        // a external login, e.g. via shibboleth, may occured. get oauth for the session, and store it
-        if (!(await this.cordova.hasValidConfig())) {
+        // an external login, e.g. via shibboleth, may occured. get oauth for the session, and store it
+
+        // this will break shibboleth/sso!
+        /*if (!(await this.cordova.hasValidConfig())) {
             console.info('empty app oauth status, show login');
             this.checkLoginUrl();
             return;
-        }
+        }*/
         this.connector.isLoggedIn(true).subscribe(
             (data) => {
                 console.info('app login status', data);
