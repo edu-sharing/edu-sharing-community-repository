@@ -1754,7 +1754,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             }
         }
         if (constrains.indexOf(Constrain.LTIMode) !== -1) {
-            if (!this.connectors.getRestConnector().getCurrentLogin().ltiSession) {
+            if (!this.connectors.getRestConnector().getCurrentLogin()?.ltiSession) {
                 return Constrain.LTIMode;
             }
         }
