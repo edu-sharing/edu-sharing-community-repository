@@ -41,9 +41,9 @@
 
     <java.version.range>[11,)</java.version.range>
 
-    <node.version.major>14</node.version.major>
-    <node.version.minor>18</node.version.minor>
-    <node.version.patch>1</node.version.patch>
+    <node.version.major>20</node.version.major>
+    <node.version.minor>9</node.version.minor>
+    <node.version.patch>0</node.version.patch>
     <node.version>${node.version.major}.${node.version.minor}.${node.version.patch}</node.version>
 
     <npm.args.install>install</npm.args.install>
