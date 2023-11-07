@@ -33,8 +33,6 @@ import { WorkspaceManagementDialogsComponent } from '../modules/management-dialo
 import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';
 import { MessagesComponent } from '../modules/messages/messages.component';
 import { OerComponent } from '../modules/oer/oer.component';
-import { PermissionsRoutingComponent } from '../modules/permissions/permissions-routing.component';
-import { PermissionsMainComponent } from '../modules/permissions/permissions.component';
 import { ProfilesComponent } from '../modules/profiles/profiles.component';
 import { RegisterComponent } from '../modules/register/register.component';
 import { ServicesComponent } from '../modules/services/services.components';
@@ -305,8 +303,10 @@ const childRoutes: Routes = [
     // permissions
     {
         path: UIConstants.ROUTER_PREFIX + 'permissions',
-        component: PermissionsRoutingComponent,
-        children: [{ path: '', component: PermissionsMainComponent }],
+        loadChildren: () =>
+            import('../pages/user-management-page/user-management-page.module').then(
+                (m) => m.UserManagementPageModule,
+            ),
     },
     // oer
     { path: UIConstants.ROUTER_PREFIX + 'oer', component: OerComponent },

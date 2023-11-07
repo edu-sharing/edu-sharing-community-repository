@@ -19,12 +19,12 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { PlatformLocation } from '@angular/common';
 
 @Component({
-    selector: 'es-permissions-main',
-    templateUrl: 'permissions.component.html',
-    styleUrls: ['permissions.component.scss'],
+    selector: 'es-user-management-page',
+    templateUrl: 'user-management-page.component.html',
+    styleUrls: ['user-management-page.component.scss'],
     animations: [],
 })
-export class PermissionsMainComponent implements OnInit, OnDestroy {
+export class UserManagementPageComponent implements OnInit, OnDestroy {
     public tab: number = 0;
     public searchQuery: string;
     selected: Organization;

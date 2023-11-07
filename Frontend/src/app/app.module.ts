@@ -37,7 +37,6 @@ import { DECLARATIONS_MANAGEMENT_DIALOGS } from './modules/management-dialogs/de
 import { DECLARATIONS_MESSAGES } from './modules/messages/declarations';
 import { DECLARATIONS_RECYCLE } from './modules/node-list/declarations';
 import { DECLARATIONS_OER } from './modules/oer/declarations';
-import { DECLARATIONS_PERMISSIONS } from './modules/permissions/declarations';
 import { DECLARATIONS_PROFILES } from './modules/profiles/declarations';
 import { DECLARATIONS_REGISTER } from './modules/register/declarations';
 import { DECLARATIONS_SERVICES } from './modules/services/declarations';
@@ -77,7 +76,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS_LOGINAPP,
         DECLARATIONS_FILE_UPLOAD,
         DECLARATIONS_STARTUP,
-        DECLARATIONS_PERMISSIONS,
         DECLARATIONS_OER,
         DECLARATIONS_STREAM,
         DECLARATIONS_MANAGEMENT_DIALOGS,
@@ -146,7 +144,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS_LOGINAPP,
         DECLARATIONS_FILE_UPLOAD,
         DECLARATIONS_STARTUP,
-        DECLARATIONS_PERMISSIONS,
         DECLARATIONS_OER,
         DECLARATIONS_STREAM,
         DECLARATIONS_MANAGEMENT_DIALOGS,
