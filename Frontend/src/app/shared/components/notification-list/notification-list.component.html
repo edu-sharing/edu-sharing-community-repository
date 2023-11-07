@@ -1,0 +1,69 @@
+<ng-container *ngIf="show">
+  <button mat-icon-button [matMenuTriggerFor]="dropdown" #menuTrigger="matMenuTrigger">
+    <i esIcon="notifications"></i>
+    <div
+      class="unread"
+      *ngIf="unreadNotificationsCount > 0"
+      attr.aria-label="{{
+        'NOTIFICATION_LIST.UNREAD_COUNT' | translate: { count: unreadNotificationsCount }
+      }}"
+    >
+      {{ unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount }}
+    </div>
+  </button>
+  <mat-menu
+    #menu
+    #dropdown="matMenu"
+    class="mat-notification-menu"
+    backdropClass="mat-dropdown-menu"
+    (close)="viewRead = false"
+    [xPosition]="'before'"
+  >
+    <div class="menu-wrapper" (click)="$event.stopPropagation()">
+      <div class="dialog-title">
+        <div>{{ 'NOTIFICATION_LIST.TITLE' | translate }}</div>
+        <button
+          mat-icon-button
+          color="primary"
+          (click)="loadNotifications()"
+          matTooltip="{{ 'NOTIFICATION_LIST.RELOAD' | translate }}"
+        >
+          <i esIcon="refresh" [aria]="false"></i>
+        </button>
+        <button
+          mat-icon-button
+          color="primary"
+          [disabled]="!allowMarkRead()"
+          (click)="markAllRead()"
+          matTooltip="{{ 'NOTIFICATION_LIST.MARK_ALL_READ' | translate }}"
+        >
+          <i esIcon="done_all" [aria]="false"></i>
+        </button>
+        <button
+          mat-icon-button
+          color="primary"
+          (click)="openSettings()"
+          matTooltip="{{ 'NOTIFICATION_LIST.SETTINGS' | translate }}"
+        >
+          <i esIcon="settings" [aria]="false"></i>
+        </button>
+      </div>
+      <div class="toggle-reverse">
+        <mat-slide-toggle [ngModel]="viewRead" (ngModelChange)="setViewRead($event)">
+          <mat-label>{{ 'NOTIFICATION_LIST.SHOW_READ' | translate }}</mat-label>
+        </mat-slide-toggle>
+      </div>
+      <div class="list">
+        <es-spinner-small *ngIf="dataSource.isLoading"></es-spinner-small>
+        <es-notification-list-entry
+          *ngFor="let entry of dataSource.connect() | async"
+          [entry]="entry"
+          (statusChange)="updateStatus(entry, $event)"
+        ></es-notification-list-entry>
+        <div class="empty" *ngIf="!dataSource.isLoading && dataSource.isEmpty()">
+          {{ 'NOTIFICATION_LIST.EMPTY_' + (viewRead ? 'ALL' : 'UNREAD') | translate }}
+        </div>
+      </div>
+    </div>
+  </mat-menu>
+</ng-container>

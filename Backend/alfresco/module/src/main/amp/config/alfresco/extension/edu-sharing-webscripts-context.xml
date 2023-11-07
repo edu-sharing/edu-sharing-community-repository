@@ -10,7 +10,7 @@
     <bean id="webscript.org.edu_sharing.alfresco.webscripts.tracker.metadata-uuid.get"
           class="org.edu_sharing.alfresco.webscripts.tracker.MetadataUUIDGet" parent="webscript">
         <property name="nodeService" ref="dbNodeService"/>
-        <property name="solrTrackingComponent" ref="solrTrackingComponent"/>
+        <property name="solrTrackingComponent" ref="searchTrackingComponent"/>
         <property name="solrSerializer" ref="solrSerializer"/>
     </bean>
 </beans>

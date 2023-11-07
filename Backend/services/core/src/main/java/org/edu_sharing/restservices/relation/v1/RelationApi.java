@@ -1,6 +1,5 @@
 package org.edu_sharing.restservices.relation.v1;
 
-import groovy.util.logging.Log4j;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -8,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.alfresco.rest.api.model.NodeRating;
+import lombok.extern.slf4j.Slf4j;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.RelationDao;
 import org.edu_sharing.restservices.RepositoryDao;
@@ -25,7 +24,7 @@ import javax.ws.rs.core.Response;
 @ApiService(value = "RELATION", major = 1, minor = 0)
 @Consumes({"application/json"})
 @Produces({"application/json"})
-@Log4j
+@Slf4j
 public class RelationApi {
     @PUT
     @Path("/relation/{repository}/{source}/{type}/{target}")

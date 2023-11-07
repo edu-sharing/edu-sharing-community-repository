@@ -17,11 +17,7 @@ import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.*;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.MimeTypes;
@@ -111,7 +107,7 @@ public class ExcelLOMImporter {
 						
 						int colIdxIdx = cell.getColumnIndex();
 						
-						if(Cell.CELL_TYPE_STRING != cell.getCellType()){
+						if(CellType.STRING != cell.getCellType()){
 							continue;
 						}
 
@@ -213,7 +209,7 @@ public class ExcelLOMImporter {
 				}else{
 				//build the headers
 					for(Cell cell : row){
-						if(Cell.CELL_TYPE_STRING == cell.getCellType()){
+						if(CellType.STRING == cell.getCellType()){
 							IdxColumnMap.put(cell.getColumnIndex(),cell.getStringCellValue());
 						}
 					}

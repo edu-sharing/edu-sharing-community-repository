@@ -4,8 +4,12 @@ variables:
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
 
 default:
-  image: maven:3.8.4-jdk-8
-
+  image: maven:3.8.4-eclipse-temurin-17
+  services:
+    - name: "$DIND_IMAGE"
+      alias: docker
+      entrypoint: [ "env", "-u", "DOCKER_HOST" ]
+      command: [ "dockerd-entrypoint.sh" ]
 stages:
   - test
   - deploy

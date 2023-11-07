@@ -25,8 +25,6 @@
  */
 package org.alfresco.repo.webdav;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
@@ -34,6 +32,8 @@ import org.alfresco.service.cmr.model.FileNotFoundException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.cmr.webdav.WebDavService;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Implements the WebDAV MKCOL method

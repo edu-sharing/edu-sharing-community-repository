@@ -25,15 +25,18 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.I18nServer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 public class HomeFolderTool {
 	
-	NodeService nodeService;
-	PersonService personService;
-	OwnableService ownableService;
+	private final NodeService nodeService;
+	private final PersonService personService;
+	private final OwnableService ownableService;
 	
 	Logger logger = Logger.getLogger(HomeFolderTool.class);
-	
+
 	public HomeFolderTool(ServiceRegistry serviceRegistry) {
 		this.nodeService = serviceRegistry.getNodeService();
 		this.personService = serviceRegistry.getPersonService();

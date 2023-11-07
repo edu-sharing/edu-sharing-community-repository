@@ -34,7 +34,7 @@ content.transformer.ffmpeg.thumbnail.extensions.wmv.jpg.supported=true
 <beans>
   <!-- Content Transformations -->
 
-  <!-- Video Thumbnails FFmpeg transformation worker -->
+  <!-- Video Thumbnails FFmpeg transformation worker
   <bean id="transformer.worker.ffmpeg.thumbnail" class="org.alfresco.repo.content.transform.RuntimeExecutableContentTransformerWorker">
     <property name="checkCommand">
       <bean class="org.alfresco.util.exec.RuntimeExec">
@@ -112,32 +112,32 @@ content.transformer.ffmpeg.thumbnail.extensions.wmv.jpg.supported=true
       </list>
     </property>
   </bean>
-
+-->
  
   <!-- Register extra Thumbnail Definitions -->
 
   <!-- FLV preview thumbnail options -->
-  <bean id="thumbnail.register.flvpreview" class="org.alfresco.repo.thumbnail.ThumbnailDefinitionSpringRegisterer">
-    <property name="thumbnailRegistry" ref="thumbnailRegistry" />
-    <property name="thumbnailDefinition">
-        <bean class="org.alfresco.repo.thumbnail.ThumbnailDefinition">
-          <property name="name" value="flvpreview"/>
-          <property name="mimetype" value="video/x-flv"/>
-          <property name="transformationOptions">
-            <bean class="org.alfresco.repo.content.transform.RuntimeExecutableContentTransformerOptions">
-              <property name="propertyValues">
-                <props>
-                  <prop key="outfile_opts">-f flv -ab 56 -ar 44100 -b 200 -r 15 -s 320x240</prop>
-                </props>
-              </property>
-            </bean>
-          </property>
-          <property name="runAs" value="System"/>
-        </bean>
-    </property>
-  </bean>
-
-  <!-- H264 preview thumbnail options -->
+  <!-- <bean id="thumbnail.register.flvpreview" class="org.alfresco.repo.thumbnail.ThumbnailDefinitionSpringRegisterer">
+   <property name="thumbnailRegistry" ref="thumbnailRegistry" />
+   <property name="thumbnailDefinition">
+       <bean class="org.alfresco.repo.thumbnail.ThumbnailDefinition">
+         <property name="name" value="flvpreview"/>
+         <property name="mimetype" value="video/x-flv"/>
+         <property name="transformationOptions">
+           <bean class="org.alfresco.repo.content.transform.RuntimeExecutableContentTransformerOptions">
+             <property name="propertyValues">
+               <props>
+                 <prop key="outfile_opts">-f flv -ab 56 -ar 44100 -b 200 -r 15 -s 320x240</prop>
+               </props>
+             </property>
+           </bean>
+         </property>
+         <property name="runAs" value="System"/>
+       </bean>
+   </property>
+ </bean>
+-->
+ <!-- H264 preview thumbnail options
   <bean id="thumbnail.register.h264preview" class="org.alfresco.repo.thumbnail.ThumbnailDefinitionSpringRegisterer">
     <property name="thumbnailRegistry" ref="thumbnailRegistry" />
     <property name="thumbnailDefinition">
@@ -148,9 +148,7 @@ content.transformer.ffmpeg.thumbnail.extensions.wmv.jpg.supported=true
             <bean class="org.alfresco.repo.content.transform.RuntimeExecutableContentTransformerOptions">
               <property name="propertyValues">
                 <props>
-                  <!--
-	    							<prop key="outfile_opts">-f mpeg4 -acodec aac -ab 128kb -vcodec mpeg4 -b 1200kb -mbd 2 -flags +4mv+trell -aic 2 -cmp 2 -subcmp 2 -s 320x180</prop>
-	    							-->
+
                   <prop key="outfile_opts">-f mp4 -ar 44100 -ab 96k -vcodec libx264 -crf 25 -g 250 -r 25</prop>
                   <prop key="vpre">medium</prop>
                 </props>
@@ -161,8 +159,9 @@ content.transformer.ffmpeg.thumbnail.extensions.wmv.jpg.supported=true
         </bean>
     </property>
   </bean>
+  -->
 
-  <!-- MP3 preview thumbnail options -->
+  <!-- MP3 preview thumbnail options
   <bean id="thumbnail.register.mp3preview" class="org.alfresco.repo.thumbnail.ThumbnailDefinitionSpringRegisterer">
     <property name="thumbnailRegistry" ref="thumbnailRegistry" />
     <property name="thumbnailDefinition">
@@ -182,5 +181,6 @@ content.transformer.ffmpeg.thumbnail.extensions.wmv.jpg.supported=true
         </bean>
     </property>
   </bean>
+  -->
 
 </beans>

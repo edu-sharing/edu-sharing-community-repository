@@ -52,9 +52,15 @@
             "format": "int64",
             "type": "integer"
           },
+          "plugins": {
+            "items": {
+              "$ref": "#/components/schemas/PluginInfo"
+            },
+            "type": "array"
+          },
           "services": {
             "items": {
-              "$ref": "#/components/schemas/Service"
+              "$ref": "#/components/schemas/AboutService"
             },
             "type": "array"
           },
@@ -68,6 +74,24 @@
         "required": [
           "services",
           "version"
+        ],
+        "type": "object"
+      },
+      "AboutService": {
+        "properties": {
+          "instances": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceInstance"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "instances",
+          "name"
         ],
         "type": "object"
       },
@@ -86,6 +110,25 @@
         "required": [
           "nodes",
           "pagination"
+        ],
+        "type": "object"
+      },
+      "AddToCollectionEventDTO": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationEventDTO"
+          },
+          {
+            "properties": {
+              "collection": {
+                "$ref": "#/components/schemas/CollectionDTO"
+              },
+              "node": {
+                "$ref": "#/components/schemas/NodeDataDTO"
+              }
+            },
+            "type": "object"
+          }
         ],
         "type": "object"
       },
@@ -470,6 +513,26 @@
         },
         "type": "object"
       },
+      "CollectionDTO": {
+        "properties": {
+          "aspects": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "properties": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CollectionEntries": {
         "properties": {
           "collections": {
@@ -725,6 +788,31 @@
             "$ref": "#/components/schemas/NodeRef"
           }
         },
+        "type": "object"
+      },
+      "CommentEventDTO": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationEventDTO"
+          },
+          {
+            "properties": {
+              "commentContent": {
+                "type": "string"
+              },
+              "commentReference": {
+                "type": "string"
+              },
+              "event": {
+                "type": "string"
+              },
+              "node": {
+                "$ref": "#/components/schemas/NodeDataDTO"
+              }
+            },
+            "type": "object"
+          }
+        ],
         "type": "object"
       },
       "Comments": {
@@ -1644,6 +1732,40 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "InviteEventDTO": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationEventDTO"
+          },
+          {
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "node": {
+                "$ref": "#/components/schemas/NodeDataDTO"
+              },
+              "permissions": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "type": {
+                "type": "string"
+              },
+              "userComment": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "type": "object"
+      },
+      "JSONObject": {
         "type": "object"
       },
       "Job": {
@@ -2892,6 +3014,37 @@
         ],
         "type": "object"
       },
+      "MetadataSuggestionEventDTO": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationEventDTO"
+          },
+          {
+            "properties": {
+              "caption": {
+                "type": "string"
+              },
+              "captionId": {
+                "type": "string"
+              },
+              "node": {
+                "$ref": "#/components/schemas/NodeDataDTO"
+              },
+              "parentCaption": {
+                "type": "string"
+              },
+              "parentId": {
+                "type": "string"
+              },
+              "widget": {
+                "$ref": "#/components/schemas/WidgetDataDTO"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "type": "object"
+      },
       "Node": {
         "properties": {
           "access": {
@@ -3198,6 +3351,26 @@
         },
         "type": "object"
       },
+      "NodeDataDTO": {
+        "properties": {
+          "aspects": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "properties": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "NodeEntries": {
         "properties": {
           "nodes": {
@@ -3224,6 +3397,28 @@
         },
         "required": [
           "node"
+        ],
+        "type": "object"
+      },
+      "NodeIssueEventDTO": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationEventDTO"
+          },
+          {
+            "properties": {
+              "node": {
+                "$ref": "#/components/schemas/NodeDataDTO"
+              },
+              "reason": {
+                "type": "string"
+              },
+              "userComment": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
         ],
         "type": "object"
       },
@@ -3454,6 +3649,189 @@
         "required": [
           "versions"
         ],
+        "type": "object"
+      },
+      "NotificationConfig": {
+        "properties": {
+          "configMode": {
+            "enum": [
+              "uniformly",
+              "individual"
+            ],
+            "type": "string"
+          },
+          "defaultInterval": {
+            "enum": [
+              "immediately",
+              "disabled",
+              "daily",
+              "weekly"
+            ],
+            "type": "string"
+          },
+          "intervals": {
+            "$ref": "#/components/schemas/NotificationIntervals"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationEventDTO": {
+        "discriminator": {
+          "propertyName": "_class"
+        },
+        "properties": {
+          "_class": {
+            "type": "string"
+          },
+          "_id": {
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/UserDataDTO"
+          },
+          "receiver": {
+            "$ref": "#/components/schemas/UserDataDTO"
+          },
+          "status": {
+            "enum": [
+              "PENDING",
+              "SENT",
+              "READ",
+              "IGNORED"
+            ],
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "_class"
+        ],
+        "type": "object"
+      },
+      "NotificationIntervals": {
+        "properties": {
+          "addToCollectionEvent": {
+            "enum": [
+              "immediately",
+              "disabled",
+              "daily",
+              "weekly"
+            ],
+            "type": "string"
+          },
+          "commentEvent": {
+            "enum": [
+              "immediately",
+              "disabled",
+              "daily",
+              "weekly"
+            ],
+            "type": "string"
+          },
+          "inviteEvent": {
+            "enum": [
+              "immediately",
+              "disabled",
+              "daily",
+              "weekly"
+            ],
+            "type": "string"
+          },
+          "metadataSuggestionEvent": {
+            "enum": [
+              "immediately",
+              "disabled",
+              "daily",
+              "weekly"
+            ],
+            "type": "string"
+          },
+          "nodeIssueEvent": {
+            "enum": [
+              "immediately",
+              "disabled",
+              "daily",
+              "weekly"
+            ],
+            "type": "string"
+          },
+          "proposeForCollectionEvent": {
+            "enum": [
+              "immediately",
+              "disabled",
+              "daily",
+              "weekly"
+            ],
+            "type": "string"
+          },
+          "ratingEvent": {
+            "enum": [
+              "immediately",
+              "disabled",
+              "daily",
+              "weekly"
+            ],
+            "type": "string"
+          },
+          "workflowEvent": {
+            "enum": [
+              "immediately",
+              "disabled",
+              "daily",
+              "weekly"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationResponsePage": {
+        "properties": {
+          "content": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationEventDTO"
+            },
+            "type": "array"
+          },
+          "empty": {
+            "type": "boolean"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "number": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "numberOfElements": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/Pageable"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/Sort"
+          },
+          "totalElements": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
         "type": "object"
       },
       "NotifyEntry": {
@@ -3687,6 +4065,32 @@
         ],
         "type": "object"
       },
+      "Pageable": {
+        "properties": {
+          "offset": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pageNumber": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "paged": {
+            "type": "boolean"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/Sort"
+          },
+          "unpaged": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "Pagination": {
         "properties": {
           "count": {
@@ -3852,6 +4256,14 @@
         },
         "type": "object"
       },
+      "PluginInfo": {
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "PluginStatus": {
         "properties": {
           "enabled": {
@@ -3944,6 +4356,25 @@
         ],
         "type": "object"
       },
+      "ProposeForCollectionEventDTO": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationEventDTO"
+          },
+          {
+            "properties": {
+              "collection": {
+                "$ref": "#/components/schemas/CollectionDTO"
+              },
+              "node": {
+                "$ref": "#/components/schemas/NodeDataDTO"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "type": "object"
+      },
       "Provider": {
         "properties": {
           "areaServed": {
@@ -4016,6 +4447,34 @@
             "type": "number"
           }
         },
+        "type": "object"
+      },
+      "RatingEventDTO": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationEventDTO"
+          },
+          {
+            "properties": {
+              "newRating": {
+                "format": "double",
+                "type": "number"
+              },
+              "node": {
+                "$ref": "#/components/schemas/NodeDataDTO"
+              },
+              "ratingCount": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "ratingSum": {
+                "format": "double",
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        ],
         "type": "object"
       },
       "RatingHistory": {
@@ -4457,6 +4916,43 @@
         ],
         "type": "object"
       },
+      "SearchResultLrmi": {
+        "properties": {
+          "facets": {
+            "items": {
+              "$ref": "#/components/schemas/Facet"
+            },
+            "type": "array"
+          },
+          "ignored": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "nodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          },
+          "suggests": {
+            "items": {
+              "$ref": "#/components/schemas/Suggest"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "facets",
+          "nodes",
+          "pagination"
+        ],
+        "type": "object"
+      },
       "SearchResultNode": {
         "properties": {
           "facets": {
@@ -4504,6 +5000,9 @@
       },
       "ServerUpdateInfo": {
         "properties": {
+          "auto": {
+            "type": "boolean"
+          },
           "description": {
             "type": "string"
           },
@@ -4513,6 +5012,13 @@
           },
           "id": {
             "type": "string"
+          },
+          "order": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "testable": {
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -4715,6 +5221,20 @@
               "type": "string"
             },
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Sort": {
+        "properties": {
+          "empty": {
+            "type": "boolean"
+          },
+          "sorted": {
+            "type": "boolean"
+          },
+          "unsorted": {
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -5376,6 +5896,23 @@
         "required": [
           "newPassword"
         ],
+        "type": "object"
+      },
+      "UserDataDTO": {
+        "properties": {
+          "firstName": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "mailbox": {
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "UserEntries": {
@@ -6056,6 +6593,39 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "WidgetDataDTO": {
+        "properties": {
+          "caption": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WorkflowEventDTO": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationEventDTO"
+          },
+          {
+            "properties": {
+              "node": {
+                "$ref": "#/components/schemas/NodeDataDTO"
+              },
+              "userComment": {
+                "type": "string"
+              },
+              "workflowStatus": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ],
         "type": "object"
       },
       "WorkflowHistory": {
@@ -25242,6 +25812,107 @@
         ]
       }
     },
+    "/node/v1/nodes/{repository}/{node}/lrmi": {
+      "get": {
+        "description": "Get lrmi data of node.",
+        "operationId": "getLrmiData",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of node",
+            "in": "path",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Version of the node",
+            "in": "query",
+            "name": "version",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSONObject"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Get lrmi data.",
+        "tags": [
+          "NODE v1"
+        ]
+      }
+    },
     "/node/v1/nodes/{repository}/{node}/metadata": {
       "get": {
         "description": "Get metadata of node.",
@@ -28565,6 +29236,249 @@
         ]
       }
     },
+    "/notification/v1/config": {
+      "get": {
+        "operationId": "getConfig_2",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationConfig"
+                }
+              }
+            },
+            "description": "OK."
+          }
+        },
+        "summary": "get the config for notifications of the current user",
+        "tags": [
+          "NOTIFICATION v1"
+        ]
+      },
+      "put": {
+        "operationId": "setConfig_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {}
+            },
+            "description": "OK."
+          }
+        },
+        "summary": "Update the config for notifications of the current user",
+        "tags": [
+          "NOTIFICATION v1"
+        ]
+      }
+    },
+    "/notification/v1/notifications": {
+      "delete": {
+        "operationId": "deleteNotification",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "deleted notification"
+          }
+        },
+        "summary": "Endpoint to delete notification by id",
+        "tags": [
+          "NOTIFICATION v1"
+        ]
+      },
+      "get": {
+        "operationId": "getNotifications",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "receiverId",
+            "schema": {
+              "default": "-me-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "status (or conjunction)",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "items": {
+                "enum": [
+                  "PENDING",
+                  "SENT",
+                  "READ",
+                  "IGNORED"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "page number",
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "page size",
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "default": 25,
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Sorting criteria in the format: property(,asc|desc)(,ignoreCase). Default sort order is ascending. Multiple sort criteria are supported.",
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationResponsePage"
+                }
+              }
+            },
+            "description": "get the received notifications"
+          }
+        },
+        "summary": "Retrieve stored notification, filtered by receiver and status",
+        "tags": [
+          "NOTIFICATION v1"
+        ]
+      }
+    },
+    "/notification/v1/notifications/receiver/status": {
+      "put": {
+        "operationId": "updateNotificationStatusByReceiverId",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "receiverId",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The old status (or conjunction)",
+            "in": "query",
+            "name": "oldStatus",
+            "schema": {
+              "items": {
+                "enum": [
+                  "PENDING",
+                  "SENT",
+                  "READ",
+                  "IGNORED"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "newStatus",
+            "schema": {
+              "default": "READ",
+              "enum": [
+                "PENDING",
+                "SENT",
+                "READ",
+                "IGNORED"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "set notification status"
+          }
+        },
+        "summary": "Endpoint to update the notification status",
+        "tags": [
+          "NOTIFICATION v1"
+        ]
+      }
+    },
+    "/notification/v1/notifications/status": {
+      "put": {
+        "operationId": "updateNotificationStatus",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "default": "READ",
+              "enum": [
+                "PENDING",
+                "SENT",
+                "READ",
+                "IGNORED"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationEventDTO"
+                }
+              }
+            },
+            "description": "set notification status"
+          }
+        },
+        "summary": "Endpoint to update the notification status",
+        "tags": [
+          "NOTIFICATION v1"
+        ]
+      }
+    },
     "/organization/v1/organizations/{repository}": {
       "get": {
         "description": "Get organizations of repository the current user is member. May returns an empty list.",
@@ -31304,6 +32218,191 @@
           }
         },
         "summary": "Search in facets.",
+        "tags": [
+          "SEARCH v1"
+        ]
+      }
+    },
+    "/search/v1/queries/{repository}/{metadataset}/{query}/lrmi": {
+      "post": {
+        "description": "Perform queries based on metadata sets.",
+        "operationId": "search-lrmi",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of metadataset (or \"-default-\" for default metadata set)",
+            "in": "path",
+            "name": "metadataset",
+            "required": true,
+            "schema": {
+              "default": "-default-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of query",
+            "in": "path",
+            "name": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Type of element",
+            "in": "query",
+            "name": "contentType",
+            "schema": {
+              "enum": [
+                "FILES",
+                "FOLDERS",
+                "FILES_AND_FOLDERS",
+                "COLLECTIONS",
+                "TOOLPERMISSIONS",
+                "COLLECTION_PROPOSALS",
+                "ALL"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "maximum items per page",
+            "in": "query",
+            "name": "maxItems",
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "skip a number of items",
+            "in": "query",
+            "name": "skipCount",
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "sort properties",
+            "in": "query",
+            "name": "sortProperties",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index",
+            "in": "query",
+            "name": "sortAscending",
+            "schema": {
+              "items": {
+                "type": "boolean"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "property filter for result nodes (or \"-all-\" for all properties)",
+            "in": "query",
+            "name": "propertyFilter",
+            "schema": {
+              "items": {
+                "default": "-all-",
+                "type": "string"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchParameters"
+              }
+            }
+          },
+          "description": "search parameters",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResultLrmi"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Perform queries based on metadata sets.",
         "tags": [
           "SEARCH v1"
         ]

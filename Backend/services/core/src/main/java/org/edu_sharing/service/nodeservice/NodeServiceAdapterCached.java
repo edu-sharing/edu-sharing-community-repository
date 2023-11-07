@@ -1,16 +1,16 @@
 package org.edu_sharing.service.nodeservice;
 
-import org.apache.commons.collections.map.LRUMap;
-import org.apache.lucene.util.cache.Cache;
-import org.apache.lucene.util.cache.SimpleLRUCache;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+
 import org.edu_sharing.repository.client.tools.CCConstants;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 public class NodeServiceAdapterCached extends NodeServiceAdapter{
-    private static final Cache propertyCache = Cache.synchronizedCache(new SimpleLRUCache(1000));
+    private static final ConcurrentMap propertyCache = new ConcurrentLinkedHashMap.Builder()
+            .maximumWeightedCapacity(1000)
+            .build();
 
     public NodeServiceAdapterCached(String appId) {
         super(appId);

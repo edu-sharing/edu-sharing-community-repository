@@ -57,7 +57,9 @@ import org.alfresco.repo.content.filestore.FileContentReader;
 import org.alfresco.repo.management.subsystems.SwitchableApplicationContextFactory;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.policy.BehaviourFilter;
-import org.alfresco.repo.search.impl.lucene.SolrJSONResultSet;
+import org.alfresco.repo.rendition2.RenditionService2;
+import org.alfresco.repo.rendition2.TransformClient;
+import org.alfresco.repo.search.impl.solr.SolrJSONResultSet;
 import org.alfresco.repo.search.impl.solr.ESSearchParameters;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -103,7 +105,6 @@ import org.alfresco.util.ISO9075;
 import org.alfresco.util.Pair;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.HasPermissionsWork;
 import org.edu_sharing.alfresco.fixes.VirtualEduGroupFolderTool;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
@@ -1885,7 +1886,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	public String createNode(StoreRef store, String parentID, String nodeTypeString, String childAssociation, HashMap<String, Object> _props) {
 
 		String name = (String)_props.get(CCConstants.CM_NAME);
-		_props.put(CCConstants.CM_NAME,CharMatcher.JAVA_ISO_CONTROL.removeFrom(name));
+		_props.put(CCConstants.CM_NAME,CharMatcher.javaIsoControl().removeFrom(name));
 		Map<QName, Serializable> properties = transformPropMap(_props);
 
 		NodeRef parentNodeRef = new NodeRef(store, parentID);
@@ -1919,7 +1920,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 		try {
 			String name = (String)_props.get(CCConstants.CM_NAME);
-			_props.put(CCConstants.CM_NAME,CharMatcher.JAVA_ISO_CONTROL.removeFrom(name));
+			_props.put(CCConstants.CM_NAME,CharMatcher.javaIsoControl().removeFrom(name));
 			Map<QName, Serializable> props = transformPropMap(_props);
 			NodeRef nodeRef = new NodeRef(store, nodeId);
 
@@ -1941,12 +1942,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 			nodeService.setProperties(nodeRef, props);
 
-		} catch (org.hibernate.StaleObjectStateException e) {
-			// this occurs sometimes in workspace
-			// it seems it is an alfresco bug:
-			// https://issues.alfresco.com/jira/browse/ETHREEOH-2461
-			logger.error("Thats maybe an alfreco bug: https://issues.alfresco.com/jira/browse/ETHREEOH-2461", e);
-		} catch (org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException e) {
+		} catch (Exception e) {
 			// this occurs sometimes in workspace
 			// it seems it is an alfresco bug:
 			// https://issues.alfresco.com/jira/browse/ETHREEOH-2461
@@ -2131,11 +2127,15 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				ThumbnailRegistry thumbnailRegistry = (ThumbnailRegistry) applicationContext.getBean("thumbnailRegistry");
 				ThumbnailDefinition thumbDef = thumbnailRegistry.getThumbnailDefinition("imgpreview");
 
-				if (contentService.isTransformable(reader, writer, thumbDef.getTransformationOptions())) {
+
+
+				/**
+				 * @TODO fix alf 7.0
+				 * if (contentService.isTransformable(reader, writer, thumbDef.getTransformationOptions())) {
 					contentService.transform(reader, writer, thumbDef.getTransformationOptions());
 				} else {
 					logger.error(reader.getMimetype() + " is not transformable to image/png");
-				}
+				}**/
 				
 			} finally {
 				behaviourFilter.enableBehaviour(ioNodeRef);
@@ -3874,7 +3874,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				+ ContentModel.TYPE_AUTHORITY_CONTAINER
 				+ "\""
 				+ " +@"
-				+ QueryParser.escape("{" + ContentModel.PROP_AUTHORITY_NAME.getNamespaceURI() + "}"
+				+ org.edu_sharing.repackaged.elasticsearch.org.apache.lucene.queryparser.classic.QueryParser.escape("{" + ContentModel.PROP_AUTHORITY_NAME.getNamespaceURI() + "}"
 						+ ISO9075.encode(ContentModel.PROP_AUTHORITY_NAME.getLocalName())) + ":\"" + name + "\"");
 		ResultSet rs = null;
 		try {
@@ -4200,6 +4200,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	 * @return
 	 */
 	public String getNodeTextContent(String nodeId,String mimetype) {
+		/*
+		@TODO fix alf 7.0
 		ContentReader reader = contentService.getReader(new NodeRef(storeRef,nodeId), QName.createQName(CCConstants.CM_PROP_CONTENT));
         if (reader != null && reader.exists())
         {
@@ -4235,6 +4237,9 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
             }
         throw new ContentIOException("No reader found");
+
+		 */
+		return null;
 	}
 
 	public NodeRef findFolderNodeRef(StoreRef storeRef, String folderXPath)

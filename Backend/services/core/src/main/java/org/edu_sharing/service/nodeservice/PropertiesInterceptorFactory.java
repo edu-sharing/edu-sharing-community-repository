@@ -28,7 +28,7 @@ public class PropertiesInterceptorFactory {
                     } catch (ClassNotFoundException e) {
                         throw new RuntimeException(e);
                     }
-                }).collect(Collectors.toCollection((Supplier<ArrayList>) ArrayList::new));
+                }).collect(Collectors.toCollection((Supplier<ArrayList<Class<?>>>) ArrayList::new));
                 return clazz.stream().map((c) -> {
                     try {
                         return c.newInstance();

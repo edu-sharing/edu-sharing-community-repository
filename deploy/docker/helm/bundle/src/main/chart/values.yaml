@@ -1,0 +1,156 @@
+########################################################################################################################
+# GLOBAL
+########################################################################################################################
+
+global:
+
+  cluster:
+
+    istio:
+      enabled: false
+
+  metrics:
+    prometheus:
+      enabled: false
+      retention: 1w
+    scrape:
+      interval: 10s
+      timeout: 10s
+    servicemonitor:
+      enabled: false
+
+########################################################################################################################
+# LOCAL
+########################################################################################################################
+
+nameOverride: edusharing
+
+image:
+  pullSecrets: []
+#  - name: registry
+#    server: docker.edu-sharing.com
+#    username: someone
+#    password: secret
+
+########################################################################################################################
+# DEPENDENCY
+########################################################################################################################
+
+edusharing_rediscluster:
+
+  enabled: true
+
+  nameOverride: &redisclusterNameOverride edusharing-rediscluster
+
+  service:
+    port:
+      api: &redisclusterServicePortApi 6379
+
+########################################################################################################################
+
+edusharing_repository:
+
+  enabled: true
+
+  edusharing_repository_rediscluster:
+
+    enabled: false
+
+  edusharing_repository_service:
+
+    nameOverride: &repositoryNameOverride edusharing-repository-service
+
+    service:
+      port:
+        api:
+          internal: &repositoryServicePostApiInternal 8080
+
+    config:
+
+      cache:
+        host: *redisclusterNameOverride
+        port: *redisclusterServicePortApi
+
+########################################################################################################################
+
+edusharing_repository_postgresql:
+
+  enabled: true
+
+  nameOverride: *postgresqlNameOverride
+
+  service:
+
+    port:
+      api: &postgresqlServicePortApi 5432
+
+  config:
+
+    database: &postgresqlConfigDatabase repository
+    username: &postgresqlConfigUsername repository
+
+########################################################################################################################
+
+edusharing_repository_rediscluster:
+
+  enabled: true
+
+  nameOverride: &redisclusterNameOverride edusharing-repository-rediscluster
+
+  service:
+
+    port:
+      api: &redisclusterServicePortApi 6379
+
+########################################################################################################################
+
+edusharing_repository_search_solr:
+
+  enabled: true
+
+  nameOverride: &searchSolrNameOverride edusharing-repository-search-solr
+
+  service:
+
+    port:
+      api: &searchSolrServicePortApi 9200
+
+  config:
+
+    repository:
+      host: &serviceNameOverride edusharing-repository-service
+      port: &serviceServicePortApiInternal 8080
+
+########################################################################################################################
+
+edusharing_repository_service:
+
+  enabled: true
+
+  nameOverride: *serviceNameOverride
+
+  service:
+
+    port:
+      api:
+        internal: *serviceServicePortApiInternal
+
+  config:
+
+    cache:
+      host: *redisclusterNameOverride
+      port: *redisclusterServicePortApi
+
+    database:
+      host: *postgresqlNameOverride
+      port: *postgresqlServicePortApi
+      database: *postgresqlConfigDatabase
+      username: *postgresqlConfigUsername
+
+    search:
+
+      solr:
+        host: *searchSolrNameOverride
+        port: *searchSolrServicePortApi
+
+########################################################################################################################

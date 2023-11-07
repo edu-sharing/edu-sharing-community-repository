@@ -9,7 +9,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
-import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.repackaged.elasticsearch.org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.EduGroup;
@@ -35,6 +35,7 @@ import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
@@ -741,23 +742,13 @@ public class PersonDao {
 		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUS,status.name(), false);
 		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE,new Date(), false);
 		if(notifyMail){
-			Mail mail=new Mail();
-			Map<String, String> replace=new HashMap<>();
-			replace.put("firstName", getFirstName());
-			replace.put("lastName", getLastName());
-			replace.put("oldStatus", I18nAngular.getTranslationAngular("permissions","PERMISSIONS.USER_STATUS."+oldStatus));
-			replace.put("newStatus", I18nAngular.getTranslationAngular("permissions","PERMISSIONS.USER_STATUS."+status.name()));
-			try {
-				String template="userStatusChanged";
-				mail.sendMailHtml(Context.getCurrentInstance().getRequest().getSession().getServletContext(),
-						(String) userInfo.get(CCConstants.CM_PROP_PERSON_EMAIL),
-						MailTemplate.getSubject(template,new AuthenticationToolAPI().getCurrentLocale()),
-						MailTemplate.getContent(template,new AuthenticationToolAPI().getCurrentLocale(),true),
-
-						replace);
-			} catch (Exception e) {
-				logger.warn("Can not send status notify mail to user: "+e.getMessage(),e);
-			}
+			NotificationServiceFactoryUtility.getLocalService()
+					.notifyPersonStatusChanged(
+							(String) userInfo.get(CCConstants.CM_PROP_PERSON_EMAIL),
+							getFirstName(),
+							getLastName(),
+							oldStatus,
+							status.name());
 		}
 	}
 }

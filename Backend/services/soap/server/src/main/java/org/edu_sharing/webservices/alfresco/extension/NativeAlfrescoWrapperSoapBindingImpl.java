@@ -172,17 +172,7 @@ public class NativeAlfrescoWrapperSoapBindingImpl implements org.edu_sharing.web
 			for (Map.Entry<QName, Serializable> entry : props.entrySet()) {
 				nodeService.setProperty(nodeRef, entry.getKey(), entry.getValue());
 			}
-		} catch (org.hibernate.StaleObjectStateException e) {
-			// this occurs sometimes in workspace
-			// it seems it is an alfresco bug:
-			// https://issues.alfresco.com/jira/browse/ETHREEOH-2461
-			logger.error("Thats maybe an alfreco bug: https://issues.alfresco.com/jira/browse/ETHREEOH-2461", e);
-		} catch (org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException e) {
-			// this occurs sometimes in workspace
-			// it seems it is an alfresco bug:
-			// https://issues.alfresco.com/jira/browse/ETHREEOH-2461
-			logger.error("Thats maybe an alfreco bug: https://issues.alfresco.com/jira/browse/ETHREEOH-2461", e);
-		}catch(Exception e){
+		} catch(Exception e){
 			logger.error(e.getMessage(), e);
 			throw new RemoteException(e.getMessage());
 		}
@@ -204,17 +194,7 @@ public class NativeAlfrescoWrapperSoapBindingImpl implements org.edu_sharing.web
 			for (Map.Entry<QName, Serializable> entry : props.entrySet()) {
 				nodeService.setProperty(nodeRef, entry.getKey(), entry.getValue());
 			}
-		} catch (org.hibernate.StaleObjectStateException e) {
-			// this occurs sometimes in workspace
-			// it seems it is an alfresco bug:
-			// https://issues.alfresco.com/jira/browse/ETHREEOH-2461
-			logger.error("Thats maybe an alfreco bug: https://issues.alfresco.com/jira/browse/ETHREEOH-2461", e);
-		} catch (org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException e) {
-			// this occurs sometimes in workspace
-			// it seems it is an alfresco bug:
-			// https://issues.alfresco.com/jira/browse/ETHREEOH-2461
-			logger.error("Thats maybe an alfreco bug: https://issues.alfresco.com/jira/browse/ETHREEOH-2461", e);
-		}catch(Exception e){
+		} catch(Exception e){
 			logger.error(e.getMessage(), e);
 			throw new RemoteException(e.getMessage());
 		}

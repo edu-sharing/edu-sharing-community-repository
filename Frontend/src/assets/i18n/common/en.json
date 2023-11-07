@@ -1163,7 +1163,7 @@
     "DELETE_RATING": "Remove rating",
     "TOAST": {
       "LIKED": "Recommended material \"{{name}}\". Thank you!",
-      "RATED": "Rated material \"{{name}}\" with {{rating}} stars. Thank you!",
+      "RATED": "You rated material \"{{name}}\" with {{rating}} stars. Thank you!",
       "LIKE_REMOVED": "Removed recommendation for material \"{{name}}\"",
       "RATING_REMOVED": "Removed rating for material \"{{name}}\""
     }
@@ -1194,6 +1194,73 @@
       "NEWEST": "Always the newest version"
     },
     "COPIED_TO_CLIPBOARD_NOTICE": "The embed code was copied to the clipboard."
+  },
+  "NOTIFICATION_LIST": {
+    "UNREAD_COUNT": "{{count}} unread notifications",
+    "TITLE": "Notifications",
+    "SETTINGS": "Notification settings",
+    "RELOAD": "Refresh",
+    "MARK_ALL_READ": "Mark all as read",
+    "SHOW_READ": "View read notifications",
+    "EMPTY_UNREAD": "No unread notifications",
+    "EMPTY_ALL": "No notifications",
+    "DESCRIPTIONS": {
+      "AddToCollectionEvent": "{{creator}} has added the material \"{{title}}\" to the collection {{collection}}.",
+      "ProposeForCollectionEvent": "{{creator}} has proposed the material \"{{title}}\" for the collection {{collection}}.",
+      "CommentEvent": "{{creator}} added a comment to \"{{title}}\".",
+      "InviteEvent": "{{creator}} has shared the object \"{{title}}\" with you.",
+      "NodeIssueEvent": "{{creator}} has reported the issue \"{{reason}}\" for the object \"{{title}}\".",
+      "RatingEvent": "The object \"{{title}}\" was rated.",
+      "WorkflowEvent": "{{creator}} has changed the workflow state of the material \"{{title}}\" to \"{{workflowStatus}}\".",
+      "MetadataSuggestionEvent": "",
+      "proposeForCollectionEvent": "Proposals for collection"
+    }
+  },
+  "NOTIFICATION": {
+    "MENU": "Notifications",
+    "TITLE": "Notification settings",
+    "SUBTITLE": "Settings for notifications & updates",
+    "CONFIG": {
+      "uniformly": "For all event types",
+      "uniformly_DESCRIPTION": "The interval will be configured for any messages regardless of their type",
+      "individual": "Individual",
+      "individual_DESCRIPTION": "The interval will be configured for each message type individually"
+    },
+    "PERMISSION": {
+      "consumer": "You got the permission to view the object.",
+      "collaborator": "You got the permission to modify the object.",
+      "read": "read",
+      "write": "write",
+      "delete": "delete",
+      "deletechildren": "delete subordinate elements",
+      "deletenode": "delete node",
+      "addchildren": "add subordinate elements",
+      "editor": "editor",
+      "contributer": "contributor",
+      "coordinator": "You got all permissions on this object.",
+      "ccpublish": "You got the permission to use the content in a connected System (e.g. a learning management system).",
+      "readpermissions": "read permissions",
+      "changepermissions": "change permissions",
+      "all": "all"
+    },
+    "SAVED": "Notification settings saved",
+    "INTERVAL_LABEL": "Notification interval",
+    "INTERVAL": {
+      "immediately": "Immediately",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "disabled": "Notifications disabled"
+    },
+    "GROUP": {
+      "addToCollectionEvent": "Content added to collection",
+      "commentEvent": "Comment on materials",
+      "inviteEvent": "Invitation to materials",
+      "nodeIssueEvent": "Issue reported for materials",
+      "ratingEvent": "Ratings for materials",
+      "workflowEvent": "Materials assigned to a workflow",
+      "metadataSuggestionEvent": "Suggestions for metadata",
+      "proposeForCollectionEvent": "Materials proposed for collections"
+    }
   },
   "API_ERROR": {
     "RELOAD_NOTICE_TITLE": "The page has to be reloaded",

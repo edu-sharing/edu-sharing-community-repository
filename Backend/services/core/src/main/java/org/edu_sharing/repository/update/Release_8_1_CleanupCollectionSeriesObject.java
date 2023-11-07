@@ -1,49 +1,37 @@
 package org.edu_sharing.repository.update;
 
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
-import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
+import org.edu_sharing.repository.server.update.UpdateRoutine;
+import org.edu_sharing.repository.server.update.UpdateService;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.RecurseMode;
 
-import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-public class Release_8_1_CleanupCollectionSeriesObject extends UpdateAbstract {
-	NodeService nodeService = serviceRegistry.getNodeService();
-
-	@Override
-	public String getId() {
-		return "Release_8_1_CleanupCollectionSeriesObject";
-	}
-
-	@Override
-	public String getDescription() {
-		return "Removing all child object duplicates in collections, they're now always handled via the original element";
-	}
-
-
-	public Release_8_1_CleanupCollectionSeriesObject(PrintWriter out) {
-		this.out = out;
-		this.logger = Logger.getLogger(Release_8_1_CleanupCollectionSeriesObject.class);
-	}
-	@Override
-	public void execute() {
-		executeWithProtocolEntryNoGlobalTx();
-	}
-	@Override
-	public boolean runAndReport() {
+@Slf4j
+@UpdateService
+public class Release_8_1_CleanupCollectionSeriesObject {
+	
+	@UpdateRoutine(
+			id= "Release_8_1_CleanupCollectionSeriesObject",
+			description = "Removing all child object duplicates in collections, they're now always handled via the original element",
+			order = 8100,
+			isNonTransactional = true)
+	public boolean execute(boolean test) {
 		int count = doTransform((ref) -> {
-			logInfo("Deleting " + ref);
-			NodeServiceFactory.getLocalService().removeNode(ref.getId(), null, false);
+			log.info("Deleting " + ref);
+			if(!test) {
+				NodeServiceFactory.getLocalService().removeNode(ref.getId(), null, false);
+			}
 		});
-		logInfo("Deleted " + count + " objects");
+		log.info("Deleted " + count + " objects");
 		return true;
 	}
 
@@ -72,13 +60,4 @@ public class Release_8_1_CleanupCollectionSeriesObject extends UpdateAbstract {
 		runner.run();
 		return count.get();
 	}
-
-	@Override
-	public void test() {
-		int count = doTransform((ref) -> {
-			logInfo("Would delete " + ref);
-		});
-		logInfo("Would delete " + count + " objects");
-	}
-
 }

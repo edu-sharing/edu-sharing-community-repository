@@ -25,10 +25,6 @@
  */
 package org.alfresco.repo.webdav;
 
-import java.io.InputStream;
-
-import javax.servlet.http.HttpServletResponse;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.executer.ContentMetadataExtracter;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
@@ -44,6 +40,9 @@ import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.webdav.WebDavService;
 import org.springframework.dao.ConcurrencyFailureException;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
 
 /**
  * Implements the WebDAV PUT method

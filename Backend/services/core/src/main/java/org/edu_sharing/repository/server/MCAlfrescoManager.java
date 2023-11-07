@@ -68,7 +68,6 @@ public class MCAlfrescoManager implements ServletContextListener {
 			applicationContext = AlfAppContextGate.getApplicationContext();
 			serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 			//generate security keys if not there
-			new KeyGenerator(null).execute();
 			ApplicationInfoList.refresh();
 			
 			logger.info("load ApplicationInfos");			
@@ -92,33 +91,33 @@ public class MCAlfrescoManager implements ServletContextListener {
 			}else{
 				logger.info("edugroup cache has "+EduGroupCache.getKeys().size() +" entries, getting(got) cache entries by another cluster node");
 			}
-			
-			logger.info("check for updates");
+
+
 
 			// run this BEFORE any other update because it depends on checking if edu-sharing is already installed!
-			new Release_8_1_SetCompanyHomePermissions(null).execute();
+//			new Release_8_1_SetCompanyHomePermissions(null).execute();
 
 			//remove lom subobjects
-			new Release_1_7_SubObjectsToFlatObjects(null).execute();
+//			new Release_1_7_SubObjectsToFlatObjects(null).execute();
 			
 			//unmount groupfolderes cause they are virtual mounted
-			new Release_1_7_UnmountGroupFolders(null).execute();
+//			new Release_1_7_UnmountGroupFolders(null).execute();
 			
 			//make admin and other users get edu folders in userhome
-			new Edu_SharingAuthoritiesUpdate(null).execute();
+//			new Edu_SharingAuthoritiesUpdate(null).execute();
 			
-			new Release_3_2_DefaultScope(null).execute();
+//			new Release_3_2_DefaultScope(null).execute();
 			
 			//fill original property of all IO's
-			new Release_3_2_FillOriginalId(null).execute();
+//			new Release_3_2_FillOriginalId(null).execute();
 			
-			new Release_3_2_PermissionInheritFalse(null).execute();
+//			new Release_3_2_PermissionInheritFalse(null).execute();
 
-			new Release_8_0_Migrate_Database_Scripts(null).execute();
+//			new Release_8_0_Migrate_Database_Scripts(null).execute();
 
-			new SQLUpdater().execute();
+//			new SQLUpdater().execute();
 			
-			new Release_4_2_PersonStatusUpdater(null).execute();
+//			new Release_4_2_PersonStatusUpdater(null).execute();
 
 			//init the system folders so that are created with a admin
 			UserEnvironmentTool uet = new UserEnvironmentTool(appInfo.getUsername());

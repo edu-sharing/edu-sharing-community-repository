@@ -1,7 +1,9 @@
 package org.edu_sharing.service.util;
 
+import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVStrategy;
+
+import org.apache.commons.csv.CSVRecord;
 import org.apache.log4j.Logger;
 import org.edu_sharing.service.foldertemplates.LoggingErrorHandler;
 
@@ -40,27 +42,17 @@ public class CSVTool {
 
 	public static CSVResult readCSV(BufferedReader in, char delimiter) {
 		try {
-			CSVStrategy tmpl = CSVStrategy.DEFAULT_STRATEGY;
-			CSVStrategy csvStrategy = new CSVStrategy(delimiter, tmpl.getEncapsulator(), tmpl.getCommentStart());
-			CSVParser parser = new CSVParser(in, csvStrategy);
 
-			String[][] values = parser.getAllValues();
+			CSVParser parser = CSVParser.parse(in,CSVFormat.newFormat(delimiter));
 			CSVResult result = new CSVResult();
-			result.setHeaders(Arrays.asList(values[0].clone()));
+			result.setHeaders(parser.getHeaderNames());
 			ArrayList<Map<String, String>> lines = new ArrayList<>();
-			for (int i = 1; i < values.length; i++) {
-				Map<String, String> entry = new HashMap<>();
-				try {
-					for (int j = 0; j < values[i].length; j++) {
-						entry.put(values[0][j], values[i][j]);
-					}
-				}catch(IndexOutOfBoundsException e){
-					throw new IllegalArgumentException("The given csv has invalid structure at line " + i + ": The line rows do not match the heading rows");
-				}
-				lines.add(entry);
+			for(CSVRecord record : parser.getRecords()){
+				lines.add(record.toMap());
 			}
 			result.setLines(lines);
 			return result;
+
 		}catch(IOException e){
 			logger.warn(e);
 		}finally {
@@ -91,15 +83,10 @@ public class CSVTool {
 					new InputStreamReader(
 							input, enc));
 
-			CSVStrategy tmpl = CSVStrategy.DEFAULT_STRATEGY;
-			CSVStrategy csvStrategy = new CSVStrategy(';',tmpl.getEncapsulator(),tmpl.getCommentStart());
-			CSVParser parser = new CSVParser(in,csvStrategy);
-			for(String[] val : parser.getAllValues()) {
-				result.add(Arrays.asList(val));
+			CSVParser parser = CSVParser.parse(in,CSVFormat.newFormat(';'));
+			for(CSVRecord record : parser.getRecords()){
+				result.add(record.toList());
 			}
-
-			//remove header
-            result.remove(0);
 
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block

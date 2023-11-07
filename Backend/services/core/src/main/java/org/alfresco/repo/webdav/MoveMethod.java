@@ -25,10 +25,6 @@
  */
 package org.alfresco.repo.webdav;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletResponse;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -39,6 +35,9 @@ import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.NodeRef;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * Implements the WebDAV MOVE method

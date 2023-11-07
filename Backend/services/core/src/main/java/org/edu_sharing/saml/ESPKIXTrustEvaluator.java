@@ -1,22 +1,16 @@
 package org.edu_sharing.saml;
 
 import org.apache.log4j.Logger;
-import org.opensaml.xml.security.SecurityException;
-import org.opensaml.xml.security.x509.PKIXTrustEvaluator;
-import org.opensaml.xml.security.x509.PKIXValidationInformation;
-import org.opensaml.xml.security.x509.PKIXValidationOptions;
-import org.opensaml.xml.security.x509.X509Credential;
+import org.opensaml.security.x509.PKIXTrustEvaluator;
+import org.opensaml.security.x509.PKIXValidationInformation;
+import org.opensaml.security.x509.PKIXValidationOptions;
+import org.opensaml.security.x509.X509Credential;
 
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.URL;
-import java.security.*;
+import java.security.KeyStore;
 import java.security.cert.*;
-import java.security.cert.Certificate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Enumeration;
 
 public class ESPKIXTrustEvaluator implements PKIXTrustEvaluator {
 

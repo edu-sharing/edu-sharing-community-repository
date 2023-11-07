@@ -7,7 +7,7 @@ import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
 import org.alfresco.repo.solr.MetaDataResultsFilter;
 import org.alfresco.repo.solr.NodeMetaData;
 import org.alfresco.repo.solr.NodeMetaDataParameters;
-import org.alfresco.repo.solr.SOLRTrackingComponent;
+import org.alfresco.repo.search.SearchTrackingComponent;
 import org.alfresco.repo.web.scripts.solr.NodesMetaDataGet;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -31,7 +31,7 @@ public class MetadataUUIDGet extends DeclarativeWebScript {
 
     private NodeService nodeService;
 
-    private SOLRTrackingComponent solrTrackingComponent;
+    private SearchTrackingComponent solrTrackingComponent;
     // SolrSerializer
     private Object solrSerializer;
 
@@ -71,7 +71,7 @@ public class MetadataUUIDGet extends DeclarativeWebScript {
         NodeMetaDataParameters params = new NodeMetaDataParameters();
         params.setNodeIds(Collections.singletonList(dbid));
         final NodesMetaDataGet.FreemarkerNodeMetaData[] result = new NodesMetaDataGet.FreemarkerNodeMetaData[1];
-        solrTrackingComponent.getNodesMetadata(params, null, new SOLRTrackingComponent.NodeMetaDataQueryCallback() {
+        solrTrackingComponent.getNodesMetadata(params, null, new SearchTrackingComponent.NodeMetaDataQueryCallback() {
             @Override
             public boolean handleNodeMetaData(NodeMetaData nodeMetaData)
             {
@@ -103,7 +103,7 @@ public class MetadataUUIDGet extends DeclarativeWebScript {
         this.nodeService = nodeService;
     }
 
-    public void setSolrTrackingComponent(SOLRTrackingComponent solrTrackingComponent) {
+    public void setSolrTrackingComponent(SearchTrackingComponent solrTrackingComponent) {
         this.solrTrackingComponent = solrTrackingComponent;
     }
 

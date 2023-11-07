@@ -88,7 +88,7 @@ public abstract class AbstractJob implements Job,InterruptableJob {
 	 * Only used when the job was called via a synchronized wait
 	 */
 	public void storeJobResultData(Object data) {
-		jobDataMap.put(JobHandler.KEY_RESULT_DATA, data);
+		jobDataMap.put(JobHandler.KEY_RESULT_DATA.toString(), data);
 	}
 
 	@Override

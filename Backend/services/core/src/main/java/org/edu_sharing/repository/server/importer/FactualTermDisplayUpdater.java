@@ -1,6 +1,5 @@
 package org.edu_sharing.repository.server.importer;
 
-import com.sun.star.lang.IllegalArgumentException;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.version.Version2Model;

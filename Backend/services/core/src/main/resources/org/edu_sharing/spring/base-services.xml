@@ -37,9 +37,7 @@
 
 	<bean id="authorityService" class=" org.edu_sharing.service.authority.AuthorityServiceImpl"/>
 	<bean id="permissionService" class="org.springframework.aop.framework.ProxyFactoryBean" >
-		<property name="targetName">
-			<value>permissionServiceImpl</value>
-		</property>
+		<property name="targetName" value="permissionServiceImpl"/>
 		<property name="proxyInterfaces">
 			<list>
 				<value>org.edu_sharing.service.permission.PermissionService</value>
@@ -52,31 +50,22 @@
 		</property>
 	</bean>
 	<bean id="permissionServiceImpl" class="org.edu_sharing.service.permission.PermissionServiceImpl">
-		<property name="toolPermission">
-			<ref bean="toolPermissionService" />
-		</property>
+		<constructor-arg name="toolPermission" ref="toolPermissionService"/>
+		<constructor-arg name="eduNodeService" ref="nodeService"/>
 	</bean>
 	<bean id="permissionServiceInterceptor" class="org.edu_sharing.service.permission.PermissionServiceInterceptor"
 		  init-method="init"/>
 
 	<bean id="toolPermissionService" class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="targetName">
-			<value>toolPermissionServiceImpl</value>
-		</property>
+		<property name="targetName" value="toolPermissionServiceImpl"/>
 	</bean>
 	<bean id="toolPermissionServiceImpl" class="org.edu_sharing.service.toolpermission.ToolPermissionService">
-		<property name="eduNodeService">
-			<ref bean="nodeService" />
-		</property>
+		<property name="eduNodeService" ref="nodeService"/>
 	</bean>
 
 	<bean id="collectionServiceConfig" class="org.edu_sharing.service.collection.CollectionServiceConfig">
-		<property name="pattern">
-			<value>yyyy/MM/dd/HH/mm/ss/SS</value>
-		</property>
-		<property name="path">
-			<value>/app:company_home/ccm:collections</value>
-		</property>
+		<property name="pattern" value="yyyy/MM/dd/HH/mm/ss/SS"/>
+		<property name="path" value="/app:company_home/ccm:collections"/>
 	</bean>
 	
 	<bean id="repoProxy" class="org.edu_sharing.service.repoproxy.RepoProxyDummyImpl">
@@ -85,7 +74,7 @@
 	<bean id="mediacenterLicenseProvider" class="org.edu_sharing.service.mediacenter.MediacenterLicenseProviderImpl"/>
 	<bean id="ratingService" class="org.edu_sharing.service.rating.RatingServiceImpl" init-method="init" lazy-init="true"/>
 	<bean id="relationService" class="org.edu_sharing.service.relations.RelationServiceDefaultImpl"/>
-
+	<bean id="notificationServiceFactory" class="org.edu_sharing.service.notification.NotificationServiceFactoryImpl"/>
 	<bean class="org.edu_sharing.service.permission.PermissionChecking"/>
 
 </beans>

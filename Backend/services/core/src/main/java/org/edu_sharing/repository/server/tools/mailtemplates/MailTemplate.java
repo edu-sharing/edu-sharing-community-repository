@@ -3,7 +3,6 @@ package org.edu_sharing.repository.server.tools.mailtemplates;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AuthorityType;
-import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
@@ -55,6 +54,18 @@ public class MailTemplate {
 	    		(addFooter ? ("<div class='footer'>"+getChildContent(locale,"footer","message")+"</div>") : "");
 	    return data;
 	}
+
+	public static void sendMail(String templateId, Map<String, String> replace) throws Exception {
+		Mail mail = new Mail();
+
+		String receiver = mail.getConfig().getString("report.receiver");
+		if (receiver == null) {
+			throw new IllegalArgumentException("no mail.report.receiver registered in ccmail.properties");
+		}
+
+		MailTemplate.sendMail(receiver, templateId, replace);
+	}
+
 	public static void sendMail(String receiver, String templateId, Map<String, String> replace) throws Exception {
 		Mail mail = new Mail();
 		ServletContext context;
@@ -71,6 +82,26 @@ public class MailTemplate {
 				MailTemplate.getContent(templateId,currentLocale, true),
 				replace);
 	}
+
+	public static void sendMail(String senderName, String sendMail, String receiver, String templateId, Map<String, String> replace) throws Exception {
+		Mail mail = new Mail();
+		ServletContext context;
+		try {
+			context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
+		} catch(Throwable t) {
+			context = Context.getGlobalContext();
+		}
+		String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
+		mail.sendMailHtml(
+				context,
+				senderName,
+				sendMail,
+				receiver,
+				MailTemplate.getSubject(templateId,currentLocale),
+				MailTemplate.getContent(templateId,currentLocale, true),
+				replace);
+	}
+
 	public static void addContentLinks(ApplicationInfo appInfo,String nodeId, Map<String, String> target, String keyName) throws Throwable{
 		NodeService nodeService=NodeServiceFactory.getNodeService(appInfo.getAppId());
 		String mime=MimeTypesV2.getMimeType(nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
@@ -175,7 +206,7 @@ public class MailTemplate {
 		return builder.parse(in);
 	}
 
-	public static void applyNodePropertiesToMap(String prefix, HashMap<String, Object> properties, Map<String, String> map) {
+	public static void applyNodePropertiesToMap(String prefix, Map<String, Object> properties, Map<String, String> map) {
 		properties.forEach((key, value) -> map.put(prefix + CCConstants.getValidLocalName(key), value instanceof Collection ?
 				StringUtils.join((Collection)value, ", ") : value == null ? "" : value.toString()));
 	}

@@ -1,23 +1,18 @@
 package org.edu_sharing.repository.update;
 
-import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
-import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.SearchParameters;
-import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
-import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
@@ -30,53 +25,30 @@ import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 
 
 import com.google.gson.Gson;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
-import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.repository.server.update.UpdateRoutine;
+import org.edu_sharing.repository.server.update.UpdateService;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
+@Slf4j
+@UpdateService
+public class Release_5_0_NotifyRefactoring {
 
-	public static final String ID = "Release_5_0_NotifyRefactoring";
+	private final NodeService nodeService;
+	private final MCAlfrescoAPIClient apiClient=new MCAlfrescoAPIClient();
 
-	public static final String description = "remove notify objects, use permission_history aspect";
-
-	NodeService nodeService = serviceRegistry.getNodeService();
-	MCAlfrescoAPIClient apiClient=new MCAlfrescoAPIClient();
-
-	public Release_5_0_NotifyRefactoring(PrintWriter out) {
-		this.out = out;
-		this.logger = Logger.getLogger(Release_5_0_NotifyRefactoring.class);
+	@Autowired
+	public Release_5_0_NotifyRefactoring(NodeService nodeService) {
+		this.nodeService = nodeService;
 	}
 
-	@Override
-	public void execute() {
-		this.executeWithProtocolEntryNoGlobalTx();
-	}
-
-	@Override
-	public String getDescription() {
-		// TODO Auto-generated method stub
-		return description;
-	}
-
-	@Override
-	public String getId() {
-		// TODO Auto-generated method stub
-		return ID;
-	}
-
-	@Override
-	public void run() throws Throwable {
-
-	}
-
-	@Override
-	public boolean runAndReport() {
-		return doTask();
-	}
-
-
-	public boolean doTask(){
+	@UpdateRoutine(
+			id = "Release_5_0_NotifyRefactoring",
+			description = "remove notify objects, use permission_history aspect",
+			order = 5000,
+			isNonTransactional = true
+	)
+	public boolean execute(){
 		NodeRunner runner=new NodeRunner();
 		runner.setRunAsSystem(true);
 		runner.setTypes(Arrays.asList(CCConstants.CCM_TYPE_IO,CCConstants.CCM_TYPE_MAP));
@@ -91,13 +63,13 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 				processed[0]++;
 			}catch (Throwable e){
 				result.set(false);
-				logger.error("problem with noderef:"+ref+". "+e.getMessage(),e);
+				log.error("problem with noderef:"+ref+". "+e.getMessage(),e);
 			}
 		});
 		runner.run();
-		logInfo("Converted a total of "+processed[0]+" nodes");
+		log.info("Converted a total of "+processed[0]+" nodes");
 		if(!result.get()){
-			logger.error("migration of some nodes caused errors. go to catalina.out for more information. will not delete notify folders");
+			log.error("migration of some nodes caused errors. go to catalina.out for more information. will not delete notify folders");
 			return result.get();
 		}
 		try {
@@ -105,10 +77,10 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
             NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, notify);
             nodeService.addAspect(ref, ContentModel.ASPECT_TEMPORARY, null);
             nodeService.deleteNode(ref);
-            logInfo("removed the notify folder");
+            log.info("removed the notify folder");
         }catch(Throwable t) {
 			result.set(false);
-            logger.error(t.getMessage(),t);
+            log.error(t.getMessage(),t);
         }
 		try{
             NodeServiceInterceptor.setEduSharingScope(CCConstants.CCM_VALUE_SCOPE_SAFE);
@@ -116,10 +88,10 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
             NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, notifySafe);
 			nodeService.addAspect(ref, ContentModel.ASPECT_TEMPORARY, null);
 			nodeService.deleteNode(ref);
-            logInfo("removed the notify safe folder");
+            log.info("removed the notify safe folder");
 		} catch (Throwable t) {
 			result.set(false);
-			logger.error(t.getMessage(),t);
+			log.error(t.getMessage(),t);
 		}
 		finally {
             NodeServiceInterceptor.setEduSharingScope(null);;
@@ -152,7 +124,7 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 		 */
 		int i=0;
 		for (Map.Entry<NodeRef, Map<QName, Serializable>> entry : toSort) {
-			logger.info("transforming notify from: " +entry.getKey()+" "+entry.getValue().get(ContentModel.PROP_CREATED));
+			log.info("transforming notify from: " +entry.getKey()+" "+entry.getValue().get(ContentModel.PROP_CREATED));
 
 			Gson gson = new Gson();
 			Notify n = new Notify();
@@ -165,7 +137,7 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 			try {
 				acl = apiClient.getPermissions(entry.getKey().getId());
 			} catch (Exception e) {
-				logger.warn("getPermissions() failed: "+e.getMessage());
+				log.warn("getPermissions() failed: "+e.getMessage());
 				throw new RuntimeException(e);
 			}
 			List<ACE> directlySetAces = new ArrayList<ACE>();
@@ -220,13 +192,5 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 			nodeService.deleteNode(entry.getKey());
 			i++;
 		}
-
 	}
-
-	@Override
-	public void test() {
-		logInfo("not implemented");
-
-	}
-
 }

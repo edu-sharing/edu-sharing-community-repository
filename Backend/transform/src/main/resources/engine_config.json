@@ -1,0 +1,131 @@
+{
+  "transformOptions": {
+    "eduVideoThumbnail": [
+      {
+        "group": {
+          "required": false,
+          "transformOptions": [
+            {
+              "value": {
+                "required": false,
+                "name": "resizeHeight"
+              }
+            },
+            {
+              "value": {
+                "required": false,
+                "name": "maintainAspectRatio"
+              }
+            },
+            {
+              "value": {
+                "required": false,
+                "name": "resizePercentage"
+              }
+            },
+            {
+              "value": {
+                "required": false,
+                "name": "thumbnail"
+              }
+            },
+            {
+              "value": {
+                "required": false,
+                "name": "resizeWidth"
+              }
+            },
+            {
+              "value": {
+                "required": false,
+                "name": "allowEnlargement"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "value": {
+          "required": false,
+          "name": "startPage"
+        }
+      },
+      {
+        "value": {
+          "required": false,
+          "name": "autoOrient"
+        }
+      },
+      {
+        "value": {
+          "required": false,
+          "name": "endPage"
+        }
+      }
+    ],
+    "directAccessUrl": [
+      {
+        "value": {
+          "required": false,
+          "name": "directAccessUrl"
+        }
+      }
+    ],
+    "metadataOptions": [
+      {"value": {"name": "extractMapping"}}
+    ]
+  },
+  "transformers": [
+    {
+      "transformerName": "EduSharingVideoThumbnailExecutor",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "video/mp4", "targetMediaType": "image/png"},
+        {"sourceMediaType": "video/mp4", "targetMediaType": "image/jpeg"},
+        {"sourceMediaType": "video/quicktime", "targetMediaType": "image/png"},
+        {"sourceMediaType": "video/quicktime", "targetMediaType": "image/jpeg"},
+        {"sourceMediaType": "video/x-matroska", "targetMediaType": "image/png"},
+        {"sourceMediaType": "video/x-matroska", "targetMediaType": "image/jpeg"}
+      ],
+      "transformOptions": [
+        "eduVideoThumbnail",
+        "directAccessUrl"
+      ]
+    },
+    {
+      "transformerName": "EduSharingH5pThumbnailExecutor",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/zip", "targetMediaType": "image/png"},
+        {"sourceMediaType": "application/gzip", "targetMediaType": "image/png"},
+
+        {"sourceMediaType": "application/zip", "priority": 49, "targetMediaType": "image/jpeg"},
+        {"sourceMediaType": "application/gzip", "targetMediaType": "image/jpeg"}
+      ],
+      "transformOptions": [
+        "eduVideoThumbnail",
+        "directAccessUrl"
+      ]
+    },
+    {
+      "transformerName": "EduSharingSerloIndexExecutor",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/json", "targetMediaType": "text/plain"}
+      ],
+      "transformOptions": [
+        "eduVideoThumbnail",
+        "directAccessUrl"
+      ]
+    },
+    {
+      "transformerName": "EduSharingVideoMetadataExecutor",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "video/quicktime", "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "video/mp4", "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "video/x-matroska", "targetMediaType": "alfresco-metadata-extract"}
+      ],
+      "transformOptions": [
+        "metadataOptions"
+      ]
+    }
+
+  ]
+}

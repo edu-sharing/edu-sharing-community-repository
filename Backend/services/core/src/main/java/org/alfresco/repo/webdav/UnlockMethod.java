@@ -25,10 +25,6 @@
  */
 package org.alfresco.repo.webdav;
 
-import java.util.Set;
-
-import javax.servlet.http.HttpServletResponse;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.lock.UnableToReleaseLockException;
 import org.alfresco.service.cmr.model.FileInfo;
@@ -36,6 +32,9 @@ import org.alfresco.service.cmr.model.FileNotFoundException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.rule.RuleService;
 import org.alfresco.service.cmr.rule.RuleType;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.Set;
 
 /**
  * Implements the WebDAV UNLOCK method
@@ -82,8 +81,6 @@ public class UnlockMethod extends WebDAVMethod
         {
             if (!(strLockTokenHeader.startsWith("<") && strLockTokenHeader.endsWith(">")))
             {
-                // ALF-13904: Header isn't correctly enclosed in < and > characters. Try correcting this
-                // to allow for Windows 7 + OpenOffice.org bug.
                 strLockTokenHeader = "<" + strLockTokenHeader + ">";
             }
             if (strLockTokenHeader.startsWith("<" + WebDAV.OPAQUE_LOCK_TOKEN) && strLockTokenHeader.endsWith(">"))

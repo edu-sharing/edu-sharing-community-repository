@@ -25,9 +25,6 @@
  */
 package org.alfresco.repo.webdav;
 
-import org.alfresco.service.cmr.model.FileFolderService;
-import org.alfresco.service.cmr.repository.NodeRef;
-
 /**
  * Implements the WebDAV COPY method
  * 

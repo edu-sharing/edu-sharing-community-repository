@@ -39,7 +39,7 @@ public class MetadataServlet extends HttpServlet {
 		
 		String paramFormat = req.getParameter("format");
 		
-		boolean external = new Boolean(req.getParameter("external"));
+		boolean external = Boolean.parseBoolean(req.getParameter("external"));
 		
 		if(paramFormat == null || !Arrays.asList(formats).contains(paramFormat)){
 			

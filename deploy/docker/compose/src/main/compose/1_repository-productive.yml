@@ -1,0 +1,30 @@
+version: '3.7'
+
+services:
+
+  repository-cache:
+    restart: unless-stopped
+
+  repository-database:
+    restart: unless-stopped
+
+  repository-mailcatcher:
+    restart: unless-stopped
+
+  repository-search-solr:
+    restart: unless-stopped
+
+  repository-service:
+    restart: unless-stopped
+
+  repository-transform:
+    restart: unless-stopped
+
+  repository-alfresco-transform-core-aio:
+    restart: unless-stopped
+
+  repository-transform-edu-sharing:
+    restart: unless-stopped
+
+  repository-activemq:
+    restart: unless-stopped

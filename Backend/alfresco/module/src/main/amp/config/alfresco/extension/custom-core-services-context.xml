@@ -11,6 +11,9 @@
         <value>classpath:alfresco/domain/transaction.properties</value>
         <value>classpath:alfresco/caches.properties</value>
 
+        <!-- Defaults for "decomposed" non-enterprise projects, e.g. alfresco-remote-api -->
+        <value>classpath*:alfresco/project-*.properties</value>
+
         <value>classpath*:alfresco/extension/alfresco-global.properties</value>
         <value>classpath*:alfresco/extension/caches.properties</value>
 
@@ -364,7 +367,7 @@
             <ref bean="nodeService" />
         </property>
     </bean>
-   	 
+
    	  <bean id="beforeEduGroupDeletePolicy" class="org.edu_sharing.alfresco.policy.BeforeEduGroupDeletePolicy" init-method="init">
    	  <property name="policyComponent">
             <ref bean="policyComponent"/>
@@ -508,9 +511,6 @@
       <property name="storeArchiveMap">
          <ref bean="storeArchiveMap"/>
       </property>
-      <property name="nodeIndexer">
-         <ref bean="nodeIndexer"/>
-      </property>
       <property name="policyBehaviourFilter" ref="policyBehaviourFilter" />
       <property name="tenantService">
          <ref bean="tenantService"/>
@@ -533,7 +533,6 @@
       <property name="permissionService" ref="permissionServiceImpl" />
       <property name="policyComponent" ref="policyComponent"/>
       <property name="storeArchiveMap" ref="storeArchiveMap"/>
-      <property name="nodeIndexer" ref="nodeIndexer"/>
       <property name="policyBehaviourFilter" ref="policyBehaviourFilter" />
       <property name="tenantService" ref="tenantService"/>
       <property name="storesToIgnorePolicies">
@@ -603,66 +602,7 @@
         </property>
    	 </bean>
     -->
-    
-    <bean id="transformer.worker.ESVideoTransformerWorker" class="org.edu_sharing.alfresco.transformer.VideoTransformerWorker">
-    	<property name="mimetypeService" ref="mimetypeService"/>
-    	 <property name="transformerConfig">
-         <ref bean="transformerConfig" />
-      </property>
-      <property name="nodeService">
-    	   <ref bean="NodeService" />
-      </property>
-       <property name="transactionService">
-    	   <ref bean="TransactionService" />
-      </property>
-    </bean>
-    <bean id="transformer.worker.ESH5PTransformerWorker" class="org.edu_sharing.alfresco.transformer.H5PTransformerWorker">
-        <property name="mimetypeService" ref="mimetypeService"/>
-        <property name="transformerConfig">
-            <ref bean="transformerConfig" />
-        </property>
-        <property name="nodeService">
-            <ref bean="NodeService" />
-        </property>
-        <property name="transactionService">
-            <ref bean="TransactionService" />
-        </property>
-    </bean>
-    <bean id="transformer.ESVideoTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
-      <property name="worker">
-         <ref bean="transformer.worker.ESVideoTransformerWorker" />
-      </property>
-   </bean>
-    <bean id="transformer.ESH5PTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
-        <property name="worker">
-            <ref bean="transformer.worker.ESH5PTransformerWorker" />
-        </property>
-    </bean>
-     <bean id="transformer.worker.ESCollectionRefTransformerWorker" class="org.edu_sharing.alfresco.transformer.CollectionRefTransformerWorker">
-    	<property name="mimetypeService" ref="mimetypeService"/>
-    	 <property name="transformerConfig">
-         <ref bean="transformerConfig" />
-      </property>
-      <property name="nodeService">
-    	   <ref bean="NodeService" />
-      </property>
-       <property name="contentService">
-            <ref bean="contentService" />
-        </property>
-    </bean>
-    <bean id="transformer.ESCollectionRefTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
-      <property name="worker">
-         <ref bean="transformer.worker.ESCollectionRefTransformerWorker" />
-      </property>
-   </bean>
-    <bean id="transformer.worker.SerloIndexTransformerWorker" class="org.edu_sharing.alfresco.transformer.SerloIndexTransformerWorker">
-    </bean>
-    <bean id="transformer.SerloIndexTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
-        <property name="worker">
-            <ref bean="transformer.worker.SerloIndexTransformerWorker" />
-        </property>
-    </bean>
-   
+
     <bean id="eduNodeServiceInterceptor" class="org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor" init-method="init">
       <property name="nodeService">
          <ref bean="mlAwareNodeService" />
@@ -717,28 +657,30 @@
     </bean>
     
     <!-- Preview Job -->
-     <bean id="eduPreviewJobTrigger" class="org.alfresco.util.CronTriggerBean">
-        <property name="jobDetail">
-            <bean id="previewJob" class="org.springframework.scheduling.quartz.JobDetailBean">
-                <property name="jobClass">
-                    <value>org.edu_sharing.alfresco.jobs.PreviewJob</value>
-                </property>
-                <property name="jobDataAsMap">
-                    <map>
-                    </map>
-                </property>
-            </bean>
-        </property>
+     <bean id="eduPreviewJob" class="org.springframework.scheduling.quartz.SchedulerAccessorBean">
         <property name="scheduler">
             <ref bean="schedulerFactory" />
         </property>
         <!-- Repeat hourly on the half hour -->
-        <property name="cronExpression">
-            <value>0/5 * * * * ?</value>
-        </property>
-        <property name="startDelayMinutes">
-            <value>0</value>
-        </property>
+         <property name="triggers">
+             <list>
+                 <bean id="eduPreviewJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+                     <property name="startDelay" value="0"/>
+                     <property name="cronExpression" value="0/5 * * * * ?" />
+                     <property name="jobDetail">
+                         <bean id="eduPreviewJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+                             <property name="jobClass">
+                                 <value>org.edu_sharing.alfresco.jobs.PreviewJob</value>
+                             </property>
+                             <property name="jobDataAsMap">
+                                 <map>
+                                 </map>
+                             </property>
+                         </bean>
+                     </property>
+                 </bean>
+             </list>
+         </property>
     </bean>
     
     <bean id="eduAuthorityService" class="org.edu_sharing.alfresco.service.AuthorityService">

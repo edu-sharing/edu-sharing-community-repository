@@ -62,7 +62,7 @@ import org.edu_sharing.webservices.types.KeyValue;
 import org.edu_sharing.webservices.util.AuthenticationDetails;
 import org.edu_sharing.webservices.util.AuthenticationUtils;
 import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.filter.LoggingFilter;
+import org.glassfish.jersey.logging.LoggingFeature;
 import org.springframework.context.ApplicationContext;
 
 import javax.ws.rs.client.Client;
@@ -201,7 +201,7 @@ public class AuthenticatorRemoteRepository {
 		signature = new Base64().encode(signature);
 
 		java.util.logging.Logger jaxlogger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-		Client client = ClientBuilder.newClient(new ClientConfig().register(new LoggingFilter(jaxlogger,true)));
+		Client client = ClientBuilder.newClient(new ClientConfig().register(new LoggingFeature(jaxlogger)));
 
 		WebTarget webTarget = client.target(appInfoRemoteApp.getClientBaseUrl() + "/rest/");
 		WebTarget currentWebTarget = webTarget.path("authentication/v1/appauth").path(remoteUsername);
