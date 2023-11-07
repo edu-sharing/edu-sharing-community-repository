@@ -1219,14 +1219,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         relationNode.group = DefaultGroups.Edit;
         relationNode.priority = 70;
 
-        /**
-         * if (this.isAllowedToEditCollection()) {
-            this.optionsCollection.push(
-                new OptionItem('COLLECTIONS.ACTIONBAR.EDIT', 'edit', () =>
-                    this.collectionEdit(),
-                ),
-            );
-        }*/
         const editCollection = new OptionItem('OPTIONS.COLLECTION_EDIT', 'edit', (object) =>
             this.editCollection(this.getObjects(object, data)[0]),
         );
