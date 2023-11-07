@@ -20,7 +20,7 @@ import { ApplyToLmsComponent } from '../common/ui/apply-to-lms/apply-to-lms.comp
 import { CookieInfoComponent } from '../common/ui/cookie-info/cookie-info.component';
 import { NodeRenderComponent } from '../common/ui/node-render/node-render.component';
 import { BridgeService } from '../core-bridge-module/bridge.service';
-import { ConfigurationService, RestHelper } from '../core-module/core.module';
+import { ConfigurationService, RestHelper, RestNetworkService } from '../core-module/core.module';
 import { extensionRoutes } from '../extension/extension-routes';
 import { DialogsNavigationGuard } from '../features/dialogs/dialogs-navigation.guard';
 import { LoadingScreenService } from '../main/loading-screen/loading-screen.service';
@@ -118,6 +118,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
         private authentication: AuthenticationService,
         private configuration: ConfigurationService,
         private scrollPositionRestoration: ScrollPositionRestorationService,
+        private legacyRestService: RestNetworkService,
     ) {
         this.injector.get(Router).events.subscribe((event) => {
             // if (event instanceof NavigationStart) {
@@ -150,6 +151,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
         this.registerContrastMode();
         this.licenseAgreement.setup();
         this.scrollPositionRestoration.setup();
+        this.legacyRestService.init();
     }
 
     ngDoCheck(): void {
