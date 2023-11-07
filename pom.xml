@@ -41,9 +41,9 @@
 
     <java.version.range>[1.8.0, 9)</java.version.range>
 
-    <node.version.major>14</node.version.major>
-    <node.version.minor>18</node.version.minor>
-    <node.version.patch>1</node.version.patch>
+    <node.version.major>20</node.version.major>
+    <node.version.minor>9</node.version.minor>
+    <node.version.patch>0</node.version.patch>
     <node.version>${node.version.major}.${node.version.minor}.${node.version.patch}</node.version>
 
     <npm.args.install>install</npm.args.install>
@@ -195,12 +195,6 @@
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm</artifactId>
         <version>9.1</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.aspectj</groupId>
-        <artifactId>aspectjweaver</artifactId>
-        <version>1.8.9</version>
       </dependency>
 
       <dependency>
