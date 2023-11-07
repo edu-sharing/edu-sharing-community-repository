@@ -26,12 +26,12 @@ import { MainNavService } from '../../main/navigation/main-nav.service';
 import { Subject } from 'rxjs';
 
 @Component({
-    selector: 'es-workspace-login',
-    templateUrl: 'login.component.html',
-    styleUrls: ['login.component.scss'],
+    selector: 'es-login-page',
+    templateUrl: 'login-page.component.html',
+    styleUrls: ['login-page.component.scss'],
     animations: [trigger('dialog', UIAnimation.switchDialog(UIAnimation.ANIMATION_TIME_FAST))],
 })
-export class LoginComponent implements OnInit, OnDestroy {
+export class LoginPageComponent implements OnInit, OnDestroy {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     @ViewChild('loginForm') loginForm: ElementRef;
     @ViewChild('passwordInput') passwordInput: InputPasswordComponent;

@@ -1,6 +1,6 @@
 import { PipeTransform, Pipe } from '@angular/core';
 
-@Pipe({ name: 'url' })
+@Pipe({ name: 'esUrl' })
 export class UrlPipe implements PipeTransform {
     transform(value: any, args: any): any {
         let url = new URL(value);

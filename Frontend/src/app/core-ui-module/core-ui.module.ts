@@ -24,7 +24,6 @@ import { VideoControlsComponent } from './components/video-controls/video-contro
 import { DistinctClickDirective } from './directives/distinct-click.directive';
 import { NodeHelperService } from './node-helper.service';
 import { OptionsHelperService } from './options-helper.service';
-import { UrlPipe } from './pipes/url.pipe';
 import { Toast } from './toast';
 import { ImageConfigDirective } from './directives/image-config.directive';
 import { ErrorProcessingService } from './error.processing';
@@ -44,7 +43,6 @@ import { SharedModule } from '../shared/shared.module';
         NodeEntriesDragDirective,
         VideoControlsComponent,
         ToastMessageComponent,
-        UrlPipe,
         ImageConfigDirective,
         ListOptionItemComponent,
         DistinctClickDirective,
@@ -85,12 +83,6 @@ import { SharedModule } from '../shared/shared.module';
         RenderHelperService,
         OptionsHelperService,
     ],
-    exports: [
-        SharedModule,
-        ListOptionItemComponent,
-        VideoControlsComponent,
-        ImageConfigDirective,
-        UrlPipe,
-    ],
+    exports: [SharedModule, ListOptionItemComponent, VideoControlsComponent, ImageConfigDirective],
 })
 export class CoreUiModule {}

@@ -26,7 +26,6 @@ import { LoadingScreenService } from '../main/loading-screen/loading-screen.serv
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { FileUploadComponent } from '../modules/file-upload/file-upload.component';
 import { LoginAppComponent } from '../modules/login-app/login-app.component';
-import { LoginComponent } from '../modules/login/login.component';
 import { LtiComponent } from '../modules/lti/lti.component';
 import { WorkspaceManagementDialogsComponent } from '../modules/management-dialogs/management-dialogs.component';
 import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';
@@ -284,7 +283,11 @@ const childRoutes: Routes = [
             ),
     },
     // login
-    { path: UIConstants.ROUTER_PREFIX + 'login', component: LoginComponent },
+    {
+        path: UIConstants.ROUTER_PREFIX + 'login',
+        loadChildren: () =>
+            import('../pages/login-page/login-page.module').then((m) => m.LoginPageModule),
+    },
     // register
     { path: UIConstants.ROUTER_PREFIX + 'register', component: RegisterComponent },
     { path: UIConstants.ROUTER_PREFIX + 'register/:status', component: RegisterComponent },

@@ -31,7 +31,6 @@ import { IMPORTS } from './imports';
 import { MainModule } from './main/main.module';
 import { DECLARATIONS_FILE_UPLOAD } from './modules/file-upload/declarations';
 import { DECLARATIONS_LOGINAPP } from './modules/login-app/declarations';
-import { DECLARATIONS_LOGIN } from './modules/login/declarations';
 import { LtiComponent } from './modules/lti/lti.component';
 import { DECLARATIONS_MANAGEMENT_DIALOGS } from './modules/management-dialogs/declarations';
 import { DECLARATIONS_MESSAGES } from './modules/messages/declarations';
@@ -70,7 +69,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     declarations: [
         DECLARATIONS,
         DECLARATIONS_RECYCLE,
-        DECLARATIONS_LOGIN,
         DECLARATIONS_REGISTER,
         DECLARATIONS_LOGINAPP,
         DECLARATIONS_FILE_UPLOAD,
@@ -137,7 +135,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     exports: [
         DECLARATIONS,
         DECLARATIONS_RECYCLE,
-        DECLARATIONS_LOGIN,
         DECLARATIONS_REGISTER,
         DECLARATIONS_LOGINAPP,
         DECLARATIONS_FILE_UPLOAD,
