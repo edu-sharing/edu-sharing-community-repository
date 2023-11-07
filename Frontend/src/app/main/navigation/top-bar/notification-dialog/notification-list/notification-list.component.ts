@@ -2,20 +2,19 @@
  * Created by Torsten on 13.01.2017.
  */
 
-import { Component, NgZone, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import {
     About,
     AboutService,
     AuthenticationService,
     ME,
-    NotificationV1Service,
     Notification,
+    NotificationV1Service,
 } from 'ngx-edu-sharing-api';
-import { RestConstants } from '../../../core-module/rest/rest-constants';
-import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import { TranslationsService } from '../../../translations/translations.service';
-import { NodeDataSource } from '../../../features/node-entries/node-data-source';
+import { RestConstants } from '../../../../../core-module/rest/rest-constants';
+import { DialogsService } from '../../../../../features/dialogs/dialogs.service';
 import { MatMenuTrigger } from '@angular/material/menu';
+import { NodeDataSource, TranslationsService } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-notification-list',
@@ -38,7 +37,6 @@ export class NotificationListComponent implements OnInit {
         private translations: TranslationsService,
         private notificationService: NotificationV1Service,
         private dialogs: DialogsService,
-        private ngZone: NgZone,
     ) {}
 
     async ngOnInit() {

@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
-import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { CardDialogRef } from '../../../../features/dialogs/card-dialog/card-dialog-ref';
 import { DialogButton } from '../../../../core-module/ui/dialog-button';
 import { ClientConfig, NotificationConfig, NotificationV1Service } from 'ngx-edu-sharing-api';
 import { FormControl, FormGroup } from '@angular/forms';
@@ -79,7 +79,7 @@ export class NotificationDialogComponent implements OnInit, OnDestroy {
             isLoading: true,
         });
         this.config = await this.notificationService.getConfig2().toPromise();
-        this.notificationForm.setValue(this.config);
+        this.notificationForm.patchValue(this.config);
         this.dialogRef.patchState({
             isLoading: false,
         });

@@ -126,7 +126,7 @@ import {
     XmlAppPropertiesDialogData,
     XmlAppPropertiesDialogResult,
 } from './dialog-modules/xml-app-properties-dialog/xml-app-properties-dialog-data';
-import { NotificationDialogComponent } from './dialog-modules/notification-dialog/notification-dialog.component';
+import { NotificationDialogComponent } from '../../main/navigation/top-bar/notification-dialog/notification-dialog.component';
 
 @Injectable({
     providedIn: 'root',
@@ -288,7 +288,7 @@ export class DialogsService {
 
     async openNotificationDialog(): Promise<CardDialogRef<void, void>> {
         const { NotificationDialogComponent } = await import(
-            './dialog-modules/notification-dialog/notification-dialog.module'
+            '../../main/navigation/top-bar/notification-dialog/notification-dialog.module'
         );
         return this.cardDialog.open(NotificationDialogComponent, {
             title: 'NOTIFICATION.TITLE',

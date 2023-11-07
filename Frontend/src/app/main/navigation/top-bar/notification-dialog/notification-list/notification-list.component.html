@@ -5,7 +5,7 @@
       class="unread"
       *ngIf="unreadNotificationsCount > 0"
       attr.aria-label="{{
-        'NOTIFICATION_LIST.UNREAD_COUNT' | translate: { count: unreadNotificationsCount }
+        'NOTIFICATION_LIST.UNREAD_COUNT' | translate : { count: unreadNotificationsCount }
       }}"
     >
       {{ unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount }}

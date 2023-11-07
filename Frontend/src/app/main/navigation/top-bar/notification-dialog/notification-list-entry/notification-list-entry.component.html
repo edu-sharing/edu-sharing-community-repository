@@ -3,7 +3,7 @@
     <div class="entry" [class.read]="entry.status === 'READ'">
       <div class="heading">
         <div>{{ entry.creator | authorityName }}</div>
-        <div>{{ entry.timestamp | formatDate: { relative: true } }}</div>
+        <div>{{ entry.timestamp | formatDate : { relative: true } }}</div>
       </div>
       <div class="main-info">
         <i [esIcon]="getIcon()"></i>
@@ -30,7 +30,7 @@
         <li *ngFor="let permission of $any(permissions)">
           {{
             'NOTIFICATION.PERMISSION.' + permission.toLowerCase()
-              | translate: { fallback: permission }
+              | translate : { fallback: permission }
           }}
         </li>
       </ul>

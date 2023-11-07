@@ -3,11 +3,10 @@
  */
 
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { UIService } from '../../../core-module/rest/services/ui.service';
-import { Node } from '../../../core-module/rest/data-object';
+import { UIService } from '../../../../../core-module/rest/services/ui.service';
+import { Node } from '../../../../../core-module/rest/data-object';
 import { Notification } from 'ngx-edu-sharing-api';
-import { RestConstants } from '../../../core-module/rest/rest-constants';
-import { Values } from '../../../features/mds/types/types';
+import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 
 @Component({
     selector: 'es-notification-list-entry',

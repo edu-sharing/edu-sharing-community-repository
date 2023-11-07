@@ -15,6 +15,7 @@ import { SearchFieldComponent } from './navigation/search-field/search-field.com
 import { SkipNavComponent } from './navigation/skip-nav/skip-nav.component';
 import { TopBarComponent } from './navigation/top-bar/top-bar.component';
 import { UserProfileComponent } from './navigation/user-profile/user-profile.component';
+import { NotificationDialogModule } from './navigation/top-bar/notification-dialog/notification-dialog.module';
 
 @NgModule({
     declarations: [
@@ -33,7 +34,7 @@ import { UserProfileComponent } from './navigation/user-profile/user-profile.com
         SearchFieldComponent,
         extensionDeclarationsMap['MainModule'] || [],
     ],
-    imports: [SharedModule, MdsModule],
+    imports: [SharedModule, MdsModule, NotificationDialogModule],
     exports: [MainNavComponent, SearchFieldComponent, CreateMenuComponent],
 })
 export class MainModule {}
