@@ -18,7 +18,6 @@ import { ThemeService } from '../common/services/theme.service';
 import { MdsTestComponent } from '../common/test/mds-test/mds-test.component';
 import { ApplyToLmsComponent } from '../common/ui/apply-to-lms/apply-to-lms.component';
 import { CookieInfoComponent } from '../common/ui/cookie-info/cookie-info.component';
-import { NodeRenderComponent } from '../common/ui/node-render/node-render.component';
 import { BridgeService } from '../core-bridge-module/bridge.service';
 import { ConfigurationService, RestHelper, RestNetworkService } from '../core-module/core.module';
 import { extensionRoutes } from '../extension/extension-routes';
@@ -253,8 +252,11 @@ const childRoutes: Routes = [
     { path: UIConstants.ROUTER_PREFIX + 'app/share', component: ShareAppComponent },
     { path: UIConstants.ROUTER_PREFIX + 'sharing', component: SharingComponent },
     { path: UIConstants.ROUTER_PREFIX + 'test/mds', component: MdsTestComponent },
-    { path: UIConstants.ROUTER_PREFIX + 'render/:node', component: NodeRenderComponent },
-    { path: UIConstants.ROUTER_PREFIX + 'render/:node/:version', component: NodeRenderComponent },
+    {
+        path: UIConstants.ROUTER_PREFIX + 'render',
+        loadChildren: () =>
+            import('../pages/render-page/render-page.module').then((m) => m.RenderPageModule),
+    },
     {
         path: UIConstants.ROUTER_PREFIX + 'apply-to-lms/:repo/:node',
         component: ApplyToLmsComponent,

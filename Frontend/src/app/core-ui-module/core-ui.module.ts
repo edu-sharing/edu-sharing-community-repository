@@ -29,7 +29,7 @@ import { Toast } from './toast';
 import { ImageConfigDirective } from './directives/image-config.directive';
 import { ErrorProcessingService } from './error.processing';
 import { ToastMessageComponent } from './components/toast-message/toast-message.component';
-import { RenderHelperService } from './render-helper.service';
+import { RenderHelperService } from '../pages/render-page/render-helper.service';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { NodeEntriesDragDirective } from './directives/node-entries-drag';
@@ -38,13 +38,11 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { SharedModule } from '../shared/shared.module';
-import { MdsNodeRelationsWidgetComponent } from '../common/ui/node-render/node-relations/node-relations-widget.component';
 
 @NgModule({
     declarations: [
         NodeEntriesDragDirective,
         VideoControlsComponent,
-        MdsNodeRelationsWidgetComponent,
         ToastMessageComponent,
         UrlPipe,
         ImageConfigDirective,

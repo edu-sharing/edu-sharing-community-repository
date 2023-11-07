@@ -1,10 +1,10 @@
 import { ComponentFactoryResolver, Injectable, ViewContainerRef } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { EventType, Node } from '../core-module/rest/data-object';
-import { RestConstants } from '../core-module/rest/rest-constants';
-import { RestUsageService } from '../core-module/rest/services/rest-usage.service';
-import { CommentsListComponent } from '../modules/management-dialogs/node-comments/comments-list/comments-list.component';
+import { EventType, Node } from '../../core-module/rest/data-object';
+import { RestConstants } from '../../core-module/rest/rest-constants';
+import { RestUsageService } from '../../core-module/rest/services/rest-usage.service';
+import { CommentsListComponent } from '../../modules/management-dialogs/node-comments/comments-list/comments-list.component';
 import {
     ListItem,
     NodeDataSource,
@@ -15,12 +15,12 @@ import {
     SpinnerComponent,
     Target,
 } from 'ngx-edu-sharing-ui';
-import { UIHelper } from './ui-helper';
-import { MdsNodeRelationsWidgetComponent } from '../common/ui/node-render/node-relations/node-relations-widget.component';
-import { replaceElementWithDiv } from '../features/mds/mds-editor/util/replace-element-with-div';
-import { MdsEditorWrapperComponent } from '../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
-import { RestTrackingService } from '../core-module/rest/services/rest-tracking.service';
-import { VideoControlsComponent } from './components/video-controls/video-controls.component';
+import { UIHelper } from '../../core-ui-module/ui-helper';
+import { replaceElementWithDiv } from '../../features/mds/mds-editor/util/replace-element-with-div';
+import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { RestTrackingService } from '../../core-module/rest/services/rest-tracking.service';
+import { VideoControlsComponent } from '../../core-ui-module/components/video-controls/video-controls.component';
+import { MdsNodeRelationsWidgetComponent } from './node-relations/node-relations-widget.component';
 
 @Injectable()
 export class RenderHelperService {

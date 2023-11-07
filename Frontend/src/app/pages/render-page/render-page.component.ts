@@ -1,8 +1,7 @@
-import { filter, skipWhile, takeUntil } from 'rxjs/operators';
+import { trigger } from '@angular/animations';
+import { Location, PlatformLocation } from '@angular/common';
 import {
-    ChangeDetectorRef,
     Component,
-    ComponentFactoryResolver,
     ElementRef,
     EventEmitter,
     HostListener,
@@ -14,9 +13,9 @@ import {
     ViewChild,
     ViewContainerRef,
 } from '@angular/core';
-import { Toast } from '../../../core-ui-module/toast';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import { ConfigService, ProposalNode } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     DefaultGroups,
@@ -35,10 +34,9 @@ import {
     UIAnimation,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { trigger } from '@angular/animations';
-import { Location, PlatformLocation } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { Subject } from 'rxjs';
+import { filter, skipWhile, takeUntil } from 'rxjs/operators';
+import { OptionsHelperService } from 'src/app/core-ui-module/options-helper.service';
 import {
     ConfigurationHelper,
     ConfigurationService,
@@ -58,31 +56,28 @@ import {
     RestNodeService,
     RestSearchService,
     RestToolService,
-    RestUsageService,
     UIService,
-} from '../../../core-module/core.module';
-import { MdsHelper } from '../../../core-module/rest/mds-helper';
-import { RestTrackingService } from '../../../core-module/rest/services/rest-tracking.service';
-import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
-import { CardComponent } from '../../../shared/components/card/card.component';
-import { CardService } from '../../../core-ui-module/card.service';
-import { RouterComponent } from '../../../router/router.component';
-import { RenderHelperService } from '../../../core-ui-module/render-helper.service';
-import { Subject } from 'rxjs';
-import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
-import { MainNavService } from '../../../main/navigation/main-nav.service';
-import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
-import { ConfigService, ProposalNode } from 'ngx-edu-sharing-api';
-import { OptionsHelperService } from 'src/app/core-ui-module/options-helper.service';
+} from '../../core-module/core.module';
+import { MdsHelper } from '../../core-module/rest/mds-helper';
+import { CardService } from '../../core-ui-module/card.service';
+import { NodeHelperService } from '../../core-ui-module/node-helper.service';
+import { Toast } from '../../core-ui-module/toast';
+import { UIHelper } from '../../core-ui-module/ui-helper';
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../../main/navigation/main-nav.service';
+import { RouterComponent } from '../../router/router.component';
+import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
+import { CardComponent } from '../../shared/components/card/card.component';
+import { RenderHelperService } from './render-helper.service';
 
 @Component({
-    selector: 'es-node-render',
-    templateUrl: 'node-render.component.html',
-    styleUrls: ['node-render.component.scss'],
+    selector: 'es-render-page',
+    templateUrl: 'render-page.component.html',
+    styleUrls: ['render-page.component.scss'],
     providers: [OptionsHelperDataService, RenderHelperService],
     animations: [trigger('fadeFast', UIAnimation.fade(UIAnimation.ANIMATION_TIME_FAST))],
 })
-export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
+export class RenderPageComponent implements EventListener, OnInit, OnDestroy {
     readonly DisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     @Input() set node(node: Node | string) {
@@ -95,31 +90,26 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         private translate: TranslateService,
         private translations: TranslationsService,
         private uiService: UIService,
-        private tracking: RestTrackingService,
         private nodeHelper: NodeHelperService,
         private renderHelper: RenderHelperService,
         private location: Location,
         private connector: RestConnectorService,
-        private http: HttpClient,
         private connectors: RestConnectorsService,
         private iam: RestIamService,
         private mdsApi: RestMdsService,
         private nodeApi: RestNodeService,
         private searchApi: RestSearchService,
-        private usageApi: RestUsageService,
         private toolService: RestToolService,
-        private componentFactoryResolver: ComponentFactoryResolver,
         private cardServcie: CardService,
-        private viewContainerRef: ViewContainerRef,
+        viewContainerRef: ViewContainerRef,
         private frame: FrameEventsService,
         private toast: Toast,
-        private cd: ChangeDetectorRef,
         private configLegacy: ConfigurationService,
         private configService: ConfigService,
         private route: ActivatedRoute,
         private networkService: RestNetworkService,
         private breadcrumbsService: BreadcrumbsService,
-        private _ngZone: NgZone,
+        _ngZone: NgZone,
         private router: Router,
         private platformLocation: PlatformLocation,
         private optionsHelper: OptionsHelperDataService,
@@ -289,7 +279,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                         false,
                     );
                 } else {
-                    NodeRenderComponent.close(this.location);
+                    RenderPageComponent.close(this.location);
                     // use a timeout to let the browser try to go back in history first
                     setTimeout(() => {
                         console.log(this.mainNavService.getMainNav());

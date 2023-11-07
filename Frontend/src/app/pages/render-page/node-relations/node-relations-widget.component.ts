@@ -1,11 +1,10 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
-import { RestConstants } from '../../../../core-module/rest/rest-constants';
-import { TranslateService } from '@ngx-translate/core';
-import { Node } from '../../../../core-module/rest/data-object';
 import { NodeService, RelationData, RelationService } from 'ngx-edu-sharing-api';
 import { ListItem } from 'ngx-edu-sharing-ui';
 import { forkJoin as observableForkJoin } from 'rxjs';
-import { RestHelper } from '../../../../core-module/rest/rest-helper';
+import { Node } from '../../../core-module/rest/data-object';
+import { RestConstants } from '../../../core-module/rest/rest-constants';
+import { RestHelper } from '../../../core-module/rest/rest-helper';
 
 @Component({
     selector: 'es-mds-node-relations-widget',
@@ -21,11 +20,7 @@ export class MdsNodeRelationsWidgetComponent implements OnInit, OnChanges {
     forkedOrigin: Node;
     forkedChilds: Node[];
 
-    constructor(
-        private translate: TranslateService,
-        private relationService: RelationService,
-        private nodeService: NodeService,
-    ) {}
+    constructor(private relationService: RelationService, private nodeService: NodeService) {}
 
     ngOnInit(): void {}
 
