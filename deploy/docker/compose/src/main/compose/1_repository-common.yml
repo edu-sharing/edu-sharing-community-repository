@@ -4,7 +4,7 @@ services:
 
   repository-cache:
     image: "${docker.edu_sharing.community.common.redis}"
-    container_name: "cache_${COMPOSE_PROJECT_NAME}"
+    container_name: "repository-cache_${COMPOSE_PROJECT_NAME}"
     environment:
       ALLOW_EMPTY_PASSWORD: "yes"
     expose:
