@@ -33,7 +33,6 @@ import { WorkspaceManagementDialogsComponent } from '../modules/management-dialo
 import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';
 import { MessagesComponent } from '../modules/messages/messages.component';
 import { OerComponent } from '../modules/oer/oer.component';
-import { ProfilesComponent } from '../modules/profiles/profiles.component';
 import { RegisterComponent } from '../modules/register/register.component';
 import { ServicesComponent } from '../modules/services/services.components';
 import { ShareAppComponent } from '../modules/share-app/share-app.component';
@@ -313,8 +312,11 @@ const childRoutes: Routes = [
     // stream
     { path: UIConstants.ROUTER_PREFIX + 'stream', component: StreamComponent },
     // profiles
-    { path: UIConstants.ROUTER_PREFIX + 'profiles/:authority', component: ProfilesComponent },
-
+    {
+        path: UIConstants.ROUTER_PREFIX + 'profiles',
+        loadChildren: () =>
+            import('../pages/profile-page/profile-page.module').then((m) => m.ProfilePageModule),
+    },
     // messages
     { path: UIConstants.ROUTER_PREFIX + 'messages/:message', component: MessagesComponent },
     { path: UIConstants.ROUTER_PREFIX + 'messages/:message/:text', component: MessagesComponent },

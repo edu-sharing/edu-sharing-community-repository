@@ -26,12 +26,12 @@ import { LoadingScreenService } from '../../main/loading-screen/loading-screen.s
 import { MainNavService } from '../../main/navigation/main-nav.service';
 
 @Component({
-    selector: 'es-profiles',
-    templateUrl: 'profiles.component.html',
-    styleUrls: ['profiles.component.scss'],
+    selector: 'es-profile-page',
+    templateUrl: 'profile-page.component.html',
+    styleUrls: ['profile-page.component.scss'],
     animations: [trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
 })
-export class ProfilesComponent implements OnInit, OnDestroy {
+export class ProfilePageComponent implements OnInit, OnDestroy {
     private destroyed = new Subject<void>();
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
     constructor(
@@ -176,9 +176,9 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     public savePassword() {
         if (this.changePassword) {
             this.toast.showProgressSpinner();
-            if (this.password.length < ProfilesComponent.PASSWORD_MIN_LENGTH) {
+            if (this.password.length < ProfilePageComponent.PASSWORD_MIN_LENGTH) {
                 this.toast.error(null, 'PASSWORD_MIN_LENGTH', {
-                    length: ProfilesComponent.PASSWORD_MIN_LENGTH,
+                    length: ProfilePageComponent.PASSWORD_MIN_LENGTH,
                 });
                 this.toast.closeProgressSpinner();
                 return;
