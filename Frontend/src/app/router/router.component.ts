@@ -31,7 +31,6 @@ import { WorkspaceManagementDialogsComponent } from '../modules/management-dialo
 import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';
 import { MessagesComponent } from '../modules/messages/messages.component';
 import { OerComponent } from '../modules/oer/oer.component';
-import { RegisterComponent } from '../modules/register/register.component';
 import { ServicesComponent } from '../modules/services/services.components';
 import { ShareAppComponent } from '../modules/share-app/share-app.component';
 import { SharingComponent } from '../modules/sharing/sharing.component';
@@ -289,12 +288,10 @@ const childRoutes: Routes = [
             import('../pages/login-page/login-page.module').then((m) => m.LoginPageModule),
     },
     // register
-    { path: UIConstants.ROUTER_PREFIX + 'register', component: RegisterComponent },
-    { path: UIConstants.ROUTER_PREFIX + 'register/:status', component: RegisterComponent },
-    { path: UIConstants.ROUTER_PREFIX + 'register/:status/:key', component: RegisterComponent },
     {
-        path: UIConstants.ROUTER_PREFIX + 'register/:status/:key/:email',
-        component: RegisterComponent,
+        path: UIConstants.ROUTER_PREFIX + 'register',
+        loadChildren: () =>
+            import('../pages/register-page/register-page.module').then((m) => m.RegisterPageModule),
     },
     // file upload
     { path: UIConstants.ROUTER_PREFIX + 'upload', component: FileUploadComponent },

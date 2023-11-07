@@ -18,12 +18,12 @@ import { RegisterRequestComponent } from './register-request/register-request.co
 import { RegisterResetPasswordComponent } from './register-reset-password/register-reset-password.component';
 
 @Component({
-    selector: 'es-register',
-    templateUrl: 'register.component.html',
-    styleUrls: ['register.component.scss'],
+    selector: 'es-register-page',
+    templateUrl: 'register-page.component.html',
+    styleUrls: ['register-page.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class RegisterComponent {
+export class RegisterPageComponent {
     @ViewChild('registerForm') registerForm: RegisterFormComponent;
     @ViewChild('registerDone') registerDone: RegisterDoneComponent;
     @ViewChild('request') request: RegisterRequestComponent;

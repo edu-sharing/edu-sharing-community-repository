@@ -36,7 +36,6 @@ import { DECLARATIONS_MANAGEMENT_DIALOGS } from './modules/management-dialogs/de
 import { DECLARATIONS_MESSAGES } from './modules/messages/declarations';
 import { DECLARATIONS_RECYCLE } from './modules/node-list/declarations';
 import { DECLARATIONS_OER } from './modules/oer/declarations';
-import { DECLARATIONS_REGISTER } from './modules/register/declarations';
 import { DECLARATIONS_SERVICES } from './modules/services/declarations';
 import { DECLARATIONS_SHARE_APP } from './modules/share-app/declarations';
 import { DECLARATIONS_SHARING } from './modules/sharing/declarations';
@@ -69,7 +68,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     declarations: [
         DECLARATIONS,
         DECLARATIONS_RECYCLE,
-        DECLARATIONS_REGISTER,
         DECLARATIONS_LOGINAPP,
         DECLARATIONS_FILE_UPLOAD,
         DECLARATIONS_STARTUP,
@@ -135,7 +133,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     exports: [
         DECLARATIONS,
         DECLARATIONS_RECYCLE,
-        DECLARATIONS_REGISTER,
         DECLARATIONS_LOGINAPP,
         DECLARATIONS_FILE_UPLOAD,
         DECLARATIONS_STARTUP,
