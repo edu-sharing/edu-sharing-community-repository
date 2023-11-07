@@ -33,7 +33,6 @@ import { DECLARATIONS_ADMIN } from './modules/admin/declarations';
 import { LtiAdminComponent } from './modules/admin/lti-admin/lti-admin.component';
 import { LtitoolAdminComponent } from './modules/admin/ltitool-admin/ltitool-admin.component';
 import { LuceneTemplateMemoryComponent } from './modules/admin/lucene-template-memory/lucene-template-memory.component';
-import { DECLARATIONS_COLLECTIONS } from './modules/collections/declarations';
 import { DECLARATIONS_FILE_UPLOAD } from './modules/file-upload/declarations';
 import { DECLARATIONS_LOGINAPP } from './modules/login-app/declarations';
 import { DECLARATIONS_LOGIN } from './modules/login/declarations';
@@ -77,7 +76,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     declarations: [
         DECLARATIONS,
         DECLARATIONS_RECYCLE,
-        DECLARATIONS_COLLECTIONS,
         DECLARATIONS_LOGIN,
         DECLARATIONS_REGISTER,
         DECLARATIONS_LOGINAPP,
@@ -151,7 +149,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     exports: [
         DECLARATIONS,
         DECLARATIONS_RECYCLE,
-        DECLARATIONS_COLLECTIONS,
         DECLARATIONS_LOGIN,
         DECLARATIONS_REGISTER,
         DECLARATIONS_LOGINAPP,

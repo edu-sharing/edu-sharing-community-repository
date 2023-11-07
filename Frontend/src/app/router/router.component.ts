@@ -26,8 +26,6 @@ import { DialogsNavigationGuard } from '../features/dialogs/dialogs-navigation.g
 import { LoadingScreenService } from '../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { AdminComponent } from '../modules/admin/admin.component';
-import { CollectionNewComponent } from '../modules/collections/collection-new/collection-new.component';
-import { CollectionsMainComponent } from '../modules/collections/collections.component';
 import { FileUploadComponent } from '../modules/file-upload/file-upload.component';
 import { LoginAppComponent } from '../modules/login-app/login-app.component';
 import { LoginComponent } from '../modules/login/login.component';
@@ -45,7 +43,6 @@ import { ShareAppComponent } from '../modules/share-app/share-app.component';
 import { SharingComponent } from '../modules/sharing/sharing.component';
 import { StartupComponent } from '../modules/startup/startup.component';
 import { StreamComponent } from '../modules/stream/stream.component';
-import { WorkspacePageComponent } from '../pages/workspace-page/workspace-page.component';
 import { LicenseAgreementService } from '../services/license-agreement.service';
 import { ScrollPositionRestorationService } from '../services/scroll-position-restoration.service';
 import { printCurrentTaskInfo } from './track-change-detection';
@@ -279,10 +276,12 @@ const childRoutes: Routes = [
             ),
     },
     // collections
-    { path: UIConstants.ROUTER_PREFIX + 'collections', component: CollectionsMainComponent },
     {
-        path: UIConstants.ROUTER_PREFIX + 'collections/collection/:mode/:id',
-        component: CollectionNewComponent,
+        path: UIConstants.ROUTER_PREFIX + 'collections',
+        loadChildren: () =>
+            import('../pages/collections-page/collections-page.module').then(
+                (m) => m.CollectionsPageModule,
+            ),
     },
     // login
     { path: UIConstants.ROUTER_PREFIX + 'login', component: LoginComponent },

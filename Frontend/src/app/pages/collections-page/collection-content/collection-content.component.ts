@@ -69,7 +69,7 @@ import { MainNavService } from '../../../main/navigation/main-nav.service';
 import {
     ManagementEvent,
     ManagementEventType,
-} from '../../management-dialogs/management-dialogs.component';
+} from '../../../modules/management-dialogs/management-dialogs.component';
 import { CollectionInfoBarComponent } from '../collection-info-bar/collection-info-bar.component';
 
 @Component({

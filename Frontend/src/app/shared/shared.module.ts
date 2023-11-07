@@ -31,13 +31,14 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTreeModule } from '@angular/material/tree';
 import { RouterModule } from '@angular/router';
-import { EduSharingUiModule, TranslationsModule } from 'ngx-edu-sharing-ui';
+import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
 import { environment } from '../../environments/environment';
 import { AuthorityRowComponent } from './components/authority-search-input/authority-row/authority-row.component';
 import { AuthoritySearchInputComponent } from './components/authority-search-input/authority-search-input.component';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { CalendarComponent } from './components/calendar/calendar.component';
 import { CardComponent } from './components/card/card.component';
+import { FooterComponent } from './components/footer/footer.component';
 import { GlobalProgressComponent } from './components/global-progress/global-progress.component';
 import { InfoMessageComponent } from './components/info-message/info-message.component';
 import { InputPasswordComponent } from './components/input-password/input-password.component';
@@ -81,6 +82,7 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
         ElementRefDirective,
         EscapeHtmlPipe,
         FileDropDirective,
+        FooterComponent,
         GlobalProgressComponent,
         InfiniteScrollDirective,
         InfoMessageComponent,
@@ -142,6 +144,7 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
         ElementRefDirective,
         EscapeHtmlPipe,
         FileDropDirective,
+        FooterComponent,
         FormsModule,
         GlobalProgressComponent,
         InfiniteScrollDirective,

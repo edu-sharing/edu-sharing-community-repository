@@ -8,7 +8,6 @@ import {
     ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { Subject } from 'rxjs';
 import {
     ColorHelper,
     LocalEventsService,
@@ -20,7 +19,8 @@ import {
     TranslationsService,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
-import { BridgeService } from '../../core-bridge-module/bridge.service';
+import { Subject } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
 import * as EduData from '../../core-module/core.module';
 import {
     ConfigurationService,
@@ -39,27 +39,23 @@ import {
     TemporaryStorageService,
     UIService,
 } from '../../core-module/core.module';
+import { Helper } from '../../core-module/rest/helper';
+import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { Toast } from '../../core-ui-module/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
-import { NodeHelperService } from '../../core-ui-module/node-helper.service';
-import { Location } from '@angular/common';
-import { Helper } from '../../core-module/rest/helper';
-import { HttpClient } from '@angular/common/http';
-import { MainNavService } from '../../main/navigation/main-nav.service';
-import { CollectionInfoBarComponent } from './collection-info-bar/collection-info-bar.component';
-import { CollectionContentComponent } from './collection-content/collection-content.component';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
-import { filter, takeUntil } from 'rxjs/operators';
+import { CollectionContentComponent } from './collection-content/collection-content.component';
+import { CollectionInfoBarComponent } from './collection-info-bar/collection-info-bar.component';
 
 // component class
 @Component({
-    selector: 'es-collections',
-    templateUrl: 'collections.component.html',
-    styleUrls: ['collections.component.scss'],
+    selector: 'es-collections-page',
+    templateUrl: 'collections-page.component.html',
+    styleUrls: ['collections-page.component.scss'],
     // provide a new instance so to not get conflicts with other service instances
     providers: [OptionsHelperDataService],
 })
-export class CollectionsMainComponent implements OnDestroy {
+export class CollectionsPageComponent implements OnDestroy {
     static INDEX_MAPPING = [
         RestConstants.COLLECTIONSCOPE_MY,
         RestConstants.COLLECTIONSCOPE_ORGA,
@@ -117,11 +113,11 @@ export class CollectionsMainComponent implements OnDestroy {
         if (!this.hasMediacenter && pos > 2) {
             pos++; // skip mediacenter
         }
-        this.selectTab(CollectionsMainComponent.INDEX_MAPPING[pos]);
+        this.selectTab(CollectionsPageComponent.INDEX_MAPPING[pos]);
     }
 
     get tabSelectedIndex() {
-        let pos = CollectionsMainComponent.INDEX_MAPPING.indexOf(this.tabSelected);
+        let pos = CollectionsPageComponent.INDEX_MAPPING.indexOf(this.tabSelected);
         if (this.isGuest) {
             pos -= 2;
         }
