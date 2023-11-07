@@ -24,7 +24,7 @@ import {
     PROPERTY_FILTER_ALL,
     SearchService,
 } from 'ngx-edu-sharing-api';
-import { Toast } from '../../toast';
+import { Toast } from '../../../core-ui-module/toast';
 import {
     InteractionType,
     ListItem,

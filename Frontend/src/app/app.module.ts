@@ -29,10 +29,6 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { IMPORTS } from './imports';
 import { MainModule } from './main/main.module';
-import { DECLARATIONS_ADMIN } from './modules/admin/declarations';
-import { LtiAdminComponent } from './modules/admin/lti-admin/lti-admin.component';
-import { LtitoolAdminComponent } from './modules/admin/ltitool-admin/ltitool-admin.component';
-import { LuceneTemplateMemoryComponent } from './modules/admin/lucene-template-memory/lucene-template-memory.component';
 import { DECLARATIONS_FILE_UPLOAD } from './modules/file-upload/declarations';
 import { DECLARATIONS_LOGINAPP } from './modules/login-app/declarations';
 import { DECLARATIONS_LOGIN } from './modules/login/declarations';
@@ -85,17 +81,13 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS_OER,
         DECLARATIONS_STREAM,
         DECLARATIONS_MANAGEMENT_DIALOGS,
-        DECLARATIONS_ADMIN,
         DECLARATIONS_PROFILES,
         DECLARATIONS_MESSAGES,
         DECLARATIONS_SHARING,
         DECLARATIONS_SHARE_APP,
         DECLARATIONS_SERVICES,
-        LuceneTemplateMemoryComponent,
         extensionDeclarations,
         LtiComponent,
-        LtiAdminComponent,
-        LtitoolAdminComponent,
     ],
     imports: [
         IMPORTS,
@@ -158,7 +150,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS_OER,
         DECLARATIONS_STREAM,
         DECLARATIONS_MANAGEMENT_DIALOGS,
-        DECLARATIONS_ADMIN,
         DECLARATIONS_PROFILES,
         DECLARATIONS_MESSAGES,
         DECLARATIONS_SHARING,

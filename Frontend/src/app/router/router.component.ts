@@ -25,7 +25,6 @@ import { extensionRoutes } from '../extension/extension-routes';
 import { DialogsNavigationGuard } from '../features/dialogs/dialogs-navigation.guard';
 import { LoadingScreenService } from '../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../main/navigation/main-nav.service';
-import { AdminComponent } from '../modules/admin/admin.component';
 import { FileUploadComponent } from '../modules/file-upload/file-upload.component';
 import { LoginAppComponent } from '../modules/login-app/login-app.component';
 import { LoginComponent } from '../modules/login/login.component';
@@ -298,7 +297,11 @@ const childRoutes: Routes = [
     // file upload
     { path: UIConstants.ROUTER_PREFIX + 'upload', component: FileUploadComponent },
     // admin
-    { path: UIConstants.ROUTER_PREFIX + 'admin', component: AdminComponent },
+    {
+        path: UIConstants.ROUTER_PREFIX + 'admin',
+        loadChildren: () =>
+            import('../pages/admin-page/admin-page.module').then((m) => m.AdminPageModule),
+    },
     // permissions
     {
         path: UIConstants.ROUTER_PREFIX + 'permissions',

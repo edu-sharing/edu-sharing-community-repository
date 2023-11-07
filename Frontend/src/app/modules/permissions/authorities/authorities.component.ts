@@ -37,7 +37,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { forkJoin } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { SuggestItem } from '../../../common/ui/autocomplete/autocomplete.component';
+import { SuggestItem } from '../../../pages/admin-page/autocomplete/autocomplete.component';
 import {
     DialogButton,
     GroupSignupDetails,

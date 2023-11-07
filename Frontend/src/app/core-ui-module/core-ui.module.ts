@@ -18,7 +18,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { NgxSliderModule } from 'ngx-slider-v2';
-import { CollectionChooserComponent } from './components/collection-chooser/collection-chooser.component';
 import { ListOptionItemComponent } from './components/list-option-item/list-option-item.component';
 import { DurationPipe } from './components/video-controls/duration.pipe';
 import { VideoControlsComponent } from './components/video-controls/video-controls.component';
@@ -43,7 +42,6 @@ import { MdsNodeRelationsWidgetComponent } from '../common/ui/node-render/node-r
 
 @NgModule({
     declarations: [
-        CollectionChooserComponent,
         NodeEntriesDragDirective,
         VideoControlsComponent,
         MdsNodeRelationsWidgetComponent,
@@ -94,7 +92,6 @@ import { MdsNodeRelationsWidgetComponent } from '../common/ui/node-render/node-r
         ListOptionItemComponent,
         VideoControlsComponent,
         ImageConfigDirective,
-        CollectionChooserComponent,
         UrlPipe,
     ],
 })

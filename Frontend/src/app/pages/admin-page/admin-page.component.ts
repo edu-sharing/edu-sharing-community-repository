@@ -27,7 +27,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { Observable, Observer } from 'rxjs';
 import { CustomHelper } from '../../common/custom-helper';
-import { SuggestItem } from '../../common/ui/autocomplete/autocomplete.component';
+import { SuggestItem } from './autocomplete/autocomplete.component';
 import {
     Application,
     Authority,
@@ -63,7 +63,7 @@ import { XmlAppPropertiesDialogData } from '../../features/dialogs/dialog-module
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { AuthoritySearchMode } from '../../shared/components/authority-search-input/authority-search-input.component';
-import { WorkspaceExplorerComponent } from '../../pages/workspace-page/explorer/explorer.component';
+import { WorkspaceExplorerComponent } from '../workspace-page/explorer/explorer.component';
 
 type LuceneData = {
     mode: 'NODEREF' | 'SOLR' | 'ELASTIC';
@@ -79,12 +79,12 @@ type LuceneData = {
 };
 
 @Component({
-    selector: 'es-admin-main',
-    templateUrl: 'admin.component.html',
-    styleUrls: ['admin.component.scss'],
+    selector: 'es-admin-page',
+    templateUrl: 'admin-page.component.html',
+    styleUrls: ['admin-page.component.scss'],
     animations: [trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
 })
-export class AdminComponent implements OnInit, OnDestroy {
+export class AdminPageComponent implements OnInit, OnDestroy {
     readonly AuthoritySearchMode = AuthoritySearchMode;
     readonly SCOPES = Scope;
     readonly InteractionType = InteractionType;
@@ -1125,7 +1125,7 @@ export class AdminComponent implements OnInit, OnDestroy {
                 status: domainRepo == domainRender ? 'FAIL' : home.allow_origin ? 'OK' : 'INFO',
                 translate: { repo: domainRepo, render: domainRender },
                 callback: () => {
-                    window.open(AdminComponent.RS_CONFIG_HELP);
+                    window.open(AdminPageComponent.RS_CONFIG_HELP);
                 },
             });
         });

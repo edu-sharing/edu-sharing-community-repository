@@ -25,7 +25,7 @@ import {
 } from '../../../core-module/core.module';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { PermissionNamePipe } from '../../pipes/permission-name.pipe';
-import { SuggestItem } from '../../../common/ui/autocomplete/autocomplete.component';
+import { SuggestItem } from '../../../pages/admin-page/autocomplete/autocomplete.component';
 
 interface SuggestionGroup {
     label: string;

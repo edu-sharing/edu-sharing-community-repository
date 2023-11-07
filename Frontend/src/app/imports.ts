@@ -1,11 +1,7 @@
-import { RouterModule } from '@angular/router';
-import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
+import { A11yModule } from '@angular/cdk/a11y';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BrowserModule } from '@angular/platform-browser';
-import { ROUTES } from './router/router.component';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -13,7 +9,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatNativeDateModule, MatOptionModule, MatRippleModule } from '@angular/material/core';
-import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -28,15 +23,15 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { LazyLoadImageModule } from 'ng-lazyload-image';
-import { CustomModule } from './custom-module/custom.module';
-import { RestLocatorService, CoreModule } from './core-module/core.module';
-import { CoreBridgeModule } from './core-bridge-module/core.bridge.module';
-import { CoreUiModule } from './core-ui-module/core-ui.module';
-import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
-import { A11yModule } from '@angular/cdk/a11y';
 import { MatTreeModule } from '@angular/material/tree';
-import { OverlayModule } from '@angular/cdk/overlay';
+import { BrowserModule } from '@angular/platform-browser';
+import { RouterModule } from '@angular/router';
+import { LazyLoadImageModule } from 'ng-lazyload-image';
+import { CoreBridgeModule } from './core-bridge-module/core.bridge.module';
+import { CoreModule } from './core-module/core.module';
+import { CoreUiModule } from './core-ui-module/core-ui.module';
+import { CustomModule } from './custom-module/custom.module';
+import { ROUTES } from './router/router.component';
 
 export const IMPORTS = [
     A11yModule,
@@ -63,7 +58,6 @@ export const IMPORTS = [
     MatProgressBarModule,
     MatRadioModule,
     MatCardModule,
-    MatDatepickerModule,
     MatNativeDateModule,
     MatTooltipModule,
     MatAutocompleteModule,
@@ -78,7 +72,6 @@ export const IMPORTS = [
     CoreBridgeModule,
     CoreUiModule,
     CustomModule,
-    MonacoEditorModule.forRoot({ baseUrl: './assets' }),
     RouterModule.forRoot(ROUTES, {
         // scrollPositionRestoration: 'enabled' emulated via ScrollPositionRestorationService.
         // This prevents the browser history from getting messed up when navigation attempts are

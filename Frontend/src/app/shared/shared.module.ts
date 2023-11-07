@@ -66,6 +66,7 @@ import { PermissionNamePipe } from './pipes/permission-name.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { SplitNewLinesPipe } from './pipes/split-new-lines.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
+import { CollectionChooserComponent } from './components/collection-chooser/collection-chooser.component';
 
 @NgModule({
     declarations: [
@@ -78,6 +79,7 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
         BreadcrumbsComponent,
         CalendarComponent,
         CardComponent,
+        CollectionChooserComponent,
         CreateLtitoolComponent,
         ElementRefDirective,
         EscapeHtmlPipe,
@@ -137,6 +139,7 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
         BreadcrumbsComponent,
         CalendarComponent,
         CardComponent,
+        CollectionChooserComponent,
         CommonModule,
         CreateLtitoolComponent,
         DragDropModule,
@@ -159,6 +162,7 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
         MatCardModule,
         MatCheckboxModule,
         MatChipsModule,
+        MatDatepickerModule,
         MatExpansionModule,
         MatFormFieldModule,
         MatIconModule,
