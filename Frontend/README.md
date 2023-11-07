@@ -25,7 +25,39 @@ Then edit `.env` to configure the environment. At least, you need `BACKEND_URL` 
 
 Run `npm start` for a dev server. Navigate to `http://localhost:4200/edu-sharing`. The app will automatically reload if you change any of the source files.
 
-## API
+## Project Layout
+
+### `src/app`
+
+-   `extension`: Placeholder files to be overridden by edu-sharing extensions.
+-   `features`: Angular modules that contain application parts to be imported by other modules.  
+    Feature Modules allow encapsulation to some extend in that they don't export all declared members,
+    but they always have some exports.
+-   `main`: Angular module that contains global application components that are imported directly by
+    the main app module.  
+    Contents of this module should be limited to the absolute necessary since they will not support
+    lazy-loading. Other modules cannot use members of `main`.
+-   `pages`: Lazy-Loaded page modules.  
+    Page modules are lazily imported by the router and have **no exports**. Importing any of the
+    members of these modules would break lazy-loading. They implement their own routing under their
+    respective base path using a separate routing module.
+-   `services`: Global application services.  
+    The location of service files is not that crucial since services are generally not part of a
+    module. Here is a good location for globally used services, but if a service is used only
+    internally of a feature- or page module, it is better placed inside this module's directory.
+-   `shared`: A catch-all feature module.  
+    The `Shared` module is imported by the main app module and by all other modules. It contains
+    general dependencies that are used throughout the application like the Material UI modules and
+    custom shared UI components.
+-   `util`: Plain TypeScript files with no state or outside dependencies.
+
+#### Legacy Directories
+
+The remaining directories under `src/app` are part of a legacy project layout and can be migrated to
+the new structure. This often means breaking apart cyclic or in other ways entangled dependency
+graphs and restructuring components and services.
+
+### API
 
 API-specific code is maintained in `projects/edu-sharing-api` and compiled separately.
 
