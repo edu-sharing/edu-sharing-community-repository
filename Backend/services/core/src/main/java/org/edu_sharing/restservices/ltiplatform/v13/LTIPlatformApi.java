@@ -756,17 +756,20 @@ public class LTIPlatformApi {
         loginInitiationSessionObject.setMessageType(messageType);
         loginInitiationSessionObject.setContentUrlNodeId(contentUrlNodeId);
         loginInitiationSessionObject.setLaunchPresentation(launchPresentation);
+        loginInitiationSessionObject.setUser(AuthenticationUtil.getFullyAuthenticatedUser());
         //remember session in userLTISessions map to reuse in later backend call
         if(contentUrlNodeId != null){
             Map<String,String> map = new HashMap<>();
             map.put(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID,appInfo.getAppId());
             map.put(LTIPlatformConstants.CUSTOM_CLAIM_USER,AuthenticationUtil.getFullyAuthenticatedUser());
             map.put(LTIPlatformConstants.CUSTOM_CLAIM_NODEID,contentUrlNodeId);
-            map.put("ts",System.currentTimeMillis()+"");
+            long timeStamp = System.currentTimeMillis();
+            map.put("ts",timeStamp + "");
             String json = new Gson().toJson(map);
             String encryptedToken = ApiTool.encrpt(json);
             loginInitiationSessionObject.setToken(encryptedToken);
-            AllSessions.userLTISessions.put(encryptedToken, req.getSession());
+            loginInitiationSessionObject.setLastAccessed(timeStamp);
+            AllSessions.userLTISessions.put(encryptedToken, loginInitiationSessionObject);
         }
 
         Map<String,LoginInitiationSessionObject> loginInitiationSessionObjectMap = (Map<String,LoginInitiationSessionObject>)req

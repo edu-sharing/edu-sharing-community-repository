@@ -59,9 +59,6 @@
         *ngIf="!isRootLevel && dataSourceCollections.isEmpty() && !dataSourceCollections.isLoading"
         class="section-headline collection-nocontent-container"
       >
-        <div class="collection-nocontent-big">
-          {{ 'COLLECTIONS.NO_SUBCOLLECTIONS' | translate }}
-        </div>
         <div class="collection-nocontent-small" *ngIf="isUserAllowedToEdit(collection)">
           {{ 'COLLECTIONS.NO_SUBCOLLECTIONS_HINT' | translate }}
         </div>

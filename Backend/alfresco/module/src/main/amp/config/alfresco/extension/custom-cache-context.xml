@@ -72,4 +72,8 @@
     <bean name="eduSharingUserCache" factory-bean="cacheFactory" factory-method="createCache">
         <constructor-arg value="cache.eduSharingUserCache"/>
     </bean>
+
+    <bean name="eduSharingLtiSessionsCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingLtiSessionsCache"/>
+    </bean>
 </beans>
