@@ -714,6 +714,9 @@ xmlstarlet ed -L \
 	hocon -f ${eduSConf} set "angular.headers.Content-Security-Policy.style-src" '"'"${my_http_server_csp_style}"'"'
 }
 
+# clean up empty lines in config after hocon commands
+sed -i '/^[[:space:]]*$/d' ${eduSConf}
+
 xmlstarlet ed -L \
   -N x="http://java.sun.com/xml/ns/javaee" \
 	-u '/x:web-app/x:session-config/x:session-timeout' -v "${my_http_server_session_timeout}" \
