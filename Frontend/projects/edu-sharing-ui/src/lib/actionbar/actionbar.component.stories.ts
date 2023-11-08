@@ -58,6 +58,14 @@ const actionbar: Meta<ActionbarComponent> = {
         backgroundType: 'primary',
         appearance: 'button',
         options: defaultOptions,
+        numberOfAlwaysVisibleOptions: 2,
+        numberOfAlwaysVisibleOptionsMobile: 1,
+    },
+    argTypes: {
+        appearance: {
+            control: 'button',
+            options: ['button', 'round', 'icon-button'],
+        },
     },
     tags: ['autodocs'],
 };
