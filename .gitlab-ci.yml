@@ -1,7 +1,13 @@
 variables:
-  GIT_SUBMODULE_STRATEGY: recursive
+  COMMON_BIND_HOST: "0.0.0.0"
+  DEPLOY_DOCKER_HELM: "true"
+  DEPLOY_TIMESTAMP: "$DEPLOY_TIMESTAMP"
+  DOCKER_DRIVER: "$DIND_DRIVER"
+  DOCKER_HOST: "$DIND_HOST"
+  DOCKER_TLS_CERTDIR: "$DIND_TLS_CERTDIR"
   MAVEN_CLI: "-Ddocker.registry=$DOCKER_REGISTRY -Dhelm.deploy.url=$HELM_REGISTRY -Dhelm.deploy.type=$HELM_TYPE -Dmaven.deploy.releases=$MAVEN_DEPLOY_RELEASES -Dmaven.deploy.snapshots=$MAVEN_DEPLOY_SNAPSHOTS --batch-mode --errors --fail-fast --show-version"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+  GIT_SUBMODULE_STRATEGY: recursive
 
 default:
   image: maven:3.8.4-eclipse-temurin-17
