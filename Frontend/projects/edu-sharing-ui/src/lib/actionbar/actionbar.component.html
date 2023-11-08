@@ -12,22 +12,38 @@
   [class.actionbar-round]="appearance === 'round'"
   [class.actionbar-icon-button]="appearance === 'icon-button'"
 >
-  <button
-    *ngFor="let option of optionsAlways; let i = index"
-    mat-button
-    color="primary"
-    [disabled]="!option.isEnabled"
-    [class.display-none]="!option.isEnabled && !showDisabled"
-    [class.mat-flat-button]="shouldHighlight(i, option)"
-    matTooltip="{{ option | optionTooltip }}"
-    [attr.aria-label]="option.name | translate"
-    (click)="click(option)"
-  >
-    <i [esIcon]="option.icon"></i>
-    <span class="action-always-caption" *ngIf="option.showName && appearance === 'button'">
-      {{ option.name | translate }}</span
+  <ng-container *ngFor="let option of optionsAlways; let i = index">
+    <button
+      *ngIf="shouldHighlight(i, option)"
+      mat-flat-button
+      color="primary"
+      [disabled]="!option.isEnabled"
+      [class.display-none]="!option.isEnabled && !showDisabled"
+      matTooltip="{{ option | optionTooltip }}"
+      [attr.aria-label]="option.name | translate"
+      (click)="click(option)"
     >
-  </button>
+      <i [esIcon]="option.icon"></i>
+      <span class="action-always-caption" *ngIf="option.showName && appearance === 'button'">
+        {{ option.name | translate }}</span
+      >
+    </button>
+    <button
+      *ngIf="!shouldHighlight(i, option)"
+      mat-button
+      color="primary"
+      [disabled]="!option.isEnabled"
+      [class.display-none]="!option.isEnabled && !showDisabled"
+      matTooltip="{{ option | optionTooltip }}"
+      [attr.aria-label]="option.name | translate"
+      (click)="click(option)"
+    >
+      <i [esIcon]="option.icon"></i>
+      <span class="action-always-caption" *ngIf="option.showName && appearance === 'button'">
+        {{ option.name | translate }}</span
+      >
+    </button>
+  </ng-container>
   <button
     mat-button
     color="primary"
