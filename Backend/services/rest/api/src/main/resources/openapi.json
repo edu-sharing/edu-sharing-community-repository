@@ -1766,6 +1766,11 @@
         "type": "object"
       },
       "JSONObject": {
+        "properties": {
+          "empty": {
+            "type": "boolean"
+          }
+        },
         "type": "object"
       },
       "Job": {
@@ -1781,6 +1786,14 @@
           "id",
           "status"
         ],
+        "type": "object"
+      },
+      "JobBuilder": {
+        "properties": {
+          "jobData": {
+            "$ref": "#/components/schemas/JobBuilder"
+          }
+        },
         "type": "object"
       },
       "JobDataMap": {
@@ -1840,21 +1853,17 @@
       },
       "JobDetail": {
         "properties": {
+          "concurrentExectionDisallowed": {
+            "type": "boolean"
+          },
           "description": {
             "type": "string"
-          },
-          "durability": {
-            "type": "boolean",
-            "writeOnly": true
           },
           "durable": {
             "type": "boolean"
           },
-          "fullName": {
-            "type": "string"
-          },
-          "group": {
-            "type": "string"
+          "jobBuilder": {
+            "$ref": "#/components/schemas/JobBuilder"
           },
           "jobDataMap": {
             "additionalProperties": {
@@ -1885,31 +1894,11 @@
             },
             "type": "object"
           },
-          "jobListenerNames": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
           "key": {
-            "$ref": "#/components/schemas/Key"
+            "$ref": "#/components/schemas/JobKey"
           },
-          "name": {
-            "type": "string"
-          },
-          "requestsRecovery": {
-            "type": "boolean",
-            "writeOnly": true
-          },
-          "stateful": {
+          "persistJobDataAfterExecution": {
             "type": "boolean"
-          },
-          "volatile": {
-            "type": "boolean"
-          },
-          "volatility": {
-            "type": "boolean",
-            "writeOnly": true
           }
         },
         "type": "object"
@@ -2018,19 +2007,13 @@
         },
         "type": "object"
       },
-      "Key": {
+      "JobKey": {
         "properties": {
-          "first": {
-            "type": "object"
-          },
           "group": {
             "type": "string"
           },
           "name": {
             "type": "string"
-          },
-          "second": {
-            "type": "object"
           }
         },
         "type": "object"
@@ -10540,6 +10523,85 @@
           }
         },
         "summary": "Test a mail template",
+        "tags": [
+          "ADMIN v1"
+        ]
+      }
+    },
+    "/admin/v1/nodes/preview/{node}": {
+      "get": {
+        "description": "create preview.",
+        "operationId": "createPreview",
+        "parameters": [
+          {
+            "description": "ID of node",
+            "in": "path",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {}
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "create preview.",
         "tags": [
           "ADMIN v1"
         ]
