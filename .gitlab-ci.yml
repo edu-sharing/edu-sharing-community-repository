@@ -95,8 +95,8 @@ test docker:
   stage: test
   artifacts:
     paths:
-      - deploy/docker/openapi.json
-      - deploy/docker/repository/build/service/target/build/rest-api/openapi.json
+      - deploy/docker/compose/target/compose/openapi.json
+      - deploy/docker/build/service/target/build/rest-api/openapi.json
     when: always
     expire_in: 3 day
   before_script:
@@ -120,7 +120,7 @@ test docker:
     - "until [[ $(curl -sSf -w '%{http_code}\n' -o /dev/null -H 'Accept: application/json' http://docker:8100/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3) -eq 200 ]]; do sleep 1; done"
     - "curl -m 300 -H 'Accept: application/json' --user 'admin:admin' http://docker:8100/edu-sharing/rest/openapi.json | jq -S . > openapi.json"
     - docker compose -f 1_repository-common.yml down -v
-    - cmp -s openapi.json repository/build/service/target/build/rest-api/openapi.json || exit 1
+    - cmp -s openapi.json ../../../build/service/target/build/rest-api/openapi.json || exit 1
     - popd
   rules:
     - if: $CI_COMMIT_BRANCH =~ /^maven\/release\/.*/ && $CI_PIPELINE_SOURCE == "pipeline"
