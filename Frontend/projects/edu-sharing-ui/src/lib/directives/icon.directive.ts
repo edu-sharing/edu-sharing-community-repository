@@ -3,7 +3,7 @@
  */
 
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
-import { Directive, ElementRef, Input, OnInit, OnDestroy } from '@angular/core';
+import { Directive, ElementRef, Input, OnInit, OnDestroy, Optional } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { take } from 'rxjs/operators';
@@ -59,7 +59,7 @@ export class IconDirective implements OnInit, OnDestroy {
     constructor(
         private element: ElementRef<HTMLElement>,
         private translate: TranslateService,
-        private config: ConfigService,
+        @Optional() private config: ConfigService,
     ) {}
 
     async ngOnInit() {

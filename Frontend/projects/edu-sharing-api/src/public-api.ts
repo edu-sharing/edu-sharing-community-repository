@@ -6,6 +6,7 @@ export {
     EduSharingApiConfigurationParams,
     EDU_SHARING_API_CONFIG,
 } from './lib/edu-sharing-api-configuration';
+export { ApiRequestConfiguration } from './lib/api-request-configuration';
 export * from './lib/constants';
 export * from './lib/edu-sharing-api.module';
 export * from './lib/models';

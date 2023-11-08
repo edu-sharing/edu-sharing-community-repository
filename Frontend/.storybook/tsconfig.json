@@ -6,7 +6,7 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true
   },
-  "exclude": ["../src/test.ts", "../src/**/*.spec.ts"],
-  "include": ["../src/**/*", "./preview.ts"],
+  "exclude": ["../src/test.ts", "../src/**/*.spec.ts", "../projects/edu-sharing-ui/**/*.spec.ts"],
+  "include": ["../src/**/*", "../projects/edu-sharing-ui/**/*", "./preview.ts"],
   "files": ["./typings.d.ts"]
 }
