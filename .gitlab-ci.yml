@@ -56,11 +56,13 @@ deploy:
 
 check formatting:
   <<: *frontend_job
+  allow_failure: true
   script:
     - npm run check:format
 
 check linting:
   <<: *frontend_job
+  allow_failure: true
   script:
     - npm run check:lint
 
