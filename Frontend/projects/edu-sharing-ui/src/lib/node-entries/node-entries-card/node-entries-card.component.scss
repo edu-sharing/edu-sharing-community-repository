@@ -8,7 +8,7 @@ $collectionIconSize: 40px;
 @import 'node-entries-card.main';
 
 .grid-card {
-    grid-template-rows: $topBarHeight auto $optionBarHeight;
+    grid-template-rows: $topBarHeight auto auto;
     .card-meta {
         .card-meta-row {
             > es-list-base {
