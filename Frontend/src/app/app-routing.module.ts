@@ -9,7 +9,6 @@ import { FileUploadComponent } from './modules/file-upload/file-upload.component
 import { LtiComponent } from './modules/lti/lti.component';
 import { OerComponent } from './modules/oer/oer.component';
 import { ServicesComponent } from './modules/services/services.components';
-import { SharingComponent } from './modules/sharing/sharing.component';
 import { StartupComponent } from './modules/startup/startup.component';
 import { StreamComponent } from './modules/stream/stream.component';
 
@@ -34,7 +33,6 @@ const routes: Routes = [
                 (m) => m.AppSharePageModule,
             ),
     },
-    { path: UIConstants.ROUTER_PREFIX + 'sharing', component: SharingComponent },
     { path: UIConstants.ROUTER_PREFIX + 'test/mds', component: MdsTestComponent },
     {
         path: UIConstants.ROUTER_PREFIX + 'render',
@@ -107,7 +105,11 @@ const routes: Routes = [
     },
 
     // link-share
-    { path: UIConstants.ROUTER_PREFIX + 'sharing', component: SharingComponent },
+    {
+        path: UIConstants.ROUTER_PREFIX + 'sharing',
+        loadChildren: () =>
+            import('./pages/sharing-page/sharing-page.module').then((m) => m.SharingPageModule),
+    },
     // services
     { path: UIConstants.ROUTER_PREFIX + 'services', component: ServicesComponent },
 

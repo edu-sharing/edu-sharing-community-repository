@@ -2,7 +2,7 @@
  * Created by Torsten on 13.01.2017.
  */
 
-import { Component, EventEmitter, Input, Output, HostBinding } from '@angular/core';
+import { Component, HostBinding, Input } from '@angular/core';
 
 @Component({
     selector: 'es-powered-by',

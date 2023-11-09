@@ -8,7 +8,7 @@
       [ngClass]="{ 'details-opacity': !(!sharingInfo.password || sharingInfo.passwordMatches) }"
     >
       <div class="details-type">
-        <img class="icon" [src]="sharingInfo.node | esNodeIcon" />
+        <img class="icon" [src]="sharingInfo.node | esNodeIcon | async" />
         <div>
           <div class="name">{{ sharingInfo.node.name }}</div>
           <div class="subobjects" *ngIf="childCount() > 0">
@@ -56,12 +56,12 @@
         *ngIf="sharingInfo.password && sharingInfo.passwordMatches && !sharingInfo.node.isDirectory"
         class="password-correct"
       >
-        <i class="material-icons">done</i>{{ 'SHARING.PASSWORD_CORRECT' | translate }}
+        <i esIcon="done"></i>{{ 'SHARING.PASSWORD_CORRECT' | translate }}
       </div>
       <div *ngIf="sharingInfo.node.isDirectory">
         <div class="download-top">
           <button mat-raised-button color="primary" (click)="download()">
-            <i class="material-icons">cloud_download</i>{{ 'SHARING.DOWNLOAD_ZIP' | translate }}
+            <i esIcon="cloud_download"></i>{{ 'SHARING.DOWNLOAD_ZIP' | translate }}
           </button>
         </div>
         <div class="folder">
@@ -80,7 +80,7 @@
       </div>
       <div class="download">
         <button mat-raised-button color="primary" (click)="download()">
-          <i class="material-icons">cloud_download</i
+          <i esIcon="cloud_download"></i
           >{{
             'SHARING.' +
               (sharingInfo.node.mediatype === 'link'

@@ -67,6 +67,7 @@ import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { SplitNewLinesPipe } from './pipes/split-new-lines.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
 import { CollectionChooserComponent } from './components/collection-chooser/collection-chooser.component';
+import { PoweredByComponent } from './components/powered-by/powered-by.component';
 
 @NgModule({
     declarations: [
@@ -94,6 +95,7 @@ import { CollectionChooserComponent } from './components/collection-chooser/coll
         MultiLineLabelComponent,
         OnAttributeChangeDirective,
         PermissionNamePipe,
+        PoweredByComponent,
         RegisterCustomPropertyDirective,
         SafeHtmlPipe,
         SkipTargetDirective,
@@ -186,6 +188,7 @@ import { CollectionChooserComponent } from './components/collection-chooser/coll
         OnAttributeChangeDirective,
         OverlayModule,
         PermissionNamePipe,
+        PoweredByComponent,
         ReactiveFormsModule,
         RegisterCustomPropertyDirective,
         RouterModule,

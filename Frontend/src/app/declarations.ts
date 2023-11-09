@@ -5,7 +5,6 @@ import { ToolListComponent } from './common/ui/tool-list/tool-list.component';
 import { ToucheventDirective } from './common/ui/touchevents/touchevents';
 import { InfobarComponent } from './common/ui/infobar/infobar.component';
 import { CookieInfoComponent } from './common/ui/cookie-info/cookie-info.component';
-import { PoweredByComponent } from './common/ui/powered-by/powered-by.component';
 import { GlobalContainerComponent } from './common/ui/global-container/global-container.component';
 import { RocketchatComponent } from './common/ui/global-container/rocketchat/rocketchat.component';
 import { ButtonsTestComponent } from './common/test/buttons/buttons-test.component';
@@ -35,7 +34,6 @@ export const DECLARATIONS = [
     ApplyToLmsComponent,
     ToolListComponent,
     ToucheventDirective,
-    PoweredByComponent,
     CookieInfoComponent,
     MatConfirmGroupComponent,
     ToolpermissionCheckDirective,

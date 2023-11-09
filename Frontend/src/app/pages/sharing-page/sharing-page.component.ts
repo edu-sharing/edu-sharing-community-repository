@@ -36,11 +36,11 @@ import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { ConfigService } from 'ngx-edu-sharing-api';
 
 @Component({
-    selector: 'es-sharing',
-    templateUrl: 'sharing.component.html',
-    styleUrls: ['sharing.component.scss'],
+    selector: 'es-sharing-page',
+    templateUrl: 'sharing-page.component.html',
+    styleUrls: ['sharing-page.component.scss'],
 })
-export class SharingComponent {
+export class SharingPageComponent {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     readonly Scope = Scope;
