@@ -8,32 +8,20 @@ import {
     OnInit,
     ViewChild,
 } from '@angular/core';
-import { NavigationEnd, Router, Routes } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { AuthenticationService } from 'ngx-edu-sharing-api';
 import { AccessibilityService, TranslationsService, UIConstants } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ThemeService } from '../common/services/theme.service';
-import { MdsTestComponent } from '../common/test/mds-test/mds-test.component';
-import { ApplyToLmsComponent } from '../common/ui/apply-to-lms/apply-to-lms.component';
 import { CookieInfoComponent } from '../common/ui/cookie-info/cookie-info.component';
 import { BridgeService } from '../core-bridge-module/bridge.service';
 import { ConfigurationService, RestHelper, RestNetworkService } from '../core-module/core.module';
-import { extensionRoutes } from '../extension/extension-routes';
-import { DialogsNavigationGuard } from '../features/dialogs/dialogs-navigation.guard';
 import { LoadingScreenService } from '../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../main/navigation/main-nav.service';
-import { FileUploadComponent } from '../modules/file-upload/file-upload.component';
-import { LtiComponent } from '../modules/lti/lti.component';
 import { WorkspaceManagementDialogsComponent } from '../modules/management-dialogs/management-dialogs.component';
 import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';
-import { OerComponent } from '../modules/oer/oer.component';
-import { ServicesComponent } from '../modules/services/services.components';
-import { ShareAppComponent } from '../modules/share-app/share-app.component';
-import { SharingComponent } from '../modules/sharing/sharing.component';
-import { StartupComponent } from '../modules/startup/startup.component';
-import { StreamComponent } from '../modules/stream/stream.component';
 import { LicenseAgreementService } from '../services/license-agreement.service';
 import { ScrollPositionRestorationService } from '../services/scroll-position-restoration.service';
 import { printCurrentTaskInfo } from './track-change-detection';
@@ -217,123 +205,3 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
         });
     }
 }
-
-// Due to ahead of time, we need to create all routes manually.
-const childRoutes: Routes = [
-    // overrides and additional routes
-    ...extensionRoutes,
-
-    // global
-    { path: '', component: StartupComponent },
-
-    {
-        path: UIConstants.ROUTER_PREFIX + 'app',
-        loadChildren: () =>
-            import('../pages/app-login-page/app-login-page.module').then(
-                (m) => m.AppLoginPageModule,
-            ),
-    },
-    { path: UIConstants.ROUTER_PREFIX + 'app/share', component: ShareAppComponent },
-    { path: UIConstants.ROUTER_PREFIX + 'sharing', component: SharingComponent },
-    { path: UIConstants.ROUTER_PREFIX + 'test/mds', component: MdsTestComponent },
-    {
-        path: UIConstants.ROUTER_PREFIX + 'render',
-        loadChildren: () =>
-            import('../pages/render-page/render-page.module').then((m) => m.RenderPageModule),
-    },
-    {
-        path: UIConstants.ROUTER_PREFIX + 'apply-to-lms/:repo/:node',
-        component: ApplyToLmsComponent,
-    },
-    // search
-    {
-        path: UIConstants.ROUTER_PREFIX + 'search',
-        loadChildren: () =>
-            import('../pages/search-page/search-page.module').then((m) => m.SearchPageModule),
-    },
-    // workspace
-    {
-        path: UIConstants.ROUTER_PREFIX + 'workspace',
-        loadChildren: () =>
-            import('../pages/workspace-page/workspace-page.module').then(
-                (m) => m.WorkspacePageModule,
-            ),
-    },
-    // collections
-    {
-        path: UIConstants.ROUTER_PREFIX + 'collections',
-        loadChildren: () =>
-            import('../pages/collections-page/collections-page.module').then(
-                (m) => m.CollectionsPageModule,
-            ),
-    },
-    // login
-    {
-        path: UIConstants.ROUTER_PREFIX + 'login',
-        loadChildren: () =>
-            import('../pages/login-page/login-page.module').then((m) => m.LoginPageModule),
-    },
-    // register
-    {
-        path: UIConstants.ROUTER_PREFIX + 'register',
-        loadChildren: () =>
-            import('../pages/register-page/register-page.module').then((m) => m.RegisterPageModule),
-    },
-    // file upload
-    { path: UIConstants.ROUTER_PREFIX + 'upload', component: FileUploadComponent },
-    // admin
-    {
-        path: UIConstants.ROUTER_PREFIX + 'admin',
-        loadChildren: () =>
-            import('../pages/admin-page/admin-page.module').then((m) => m.AdminPageModule),
-    },
-    // permissions
-    {
-        path: UIConstants.ROUTER_PREFIX + 'permissions',
-        loadChildren: () =>
-            import('../pages/user-management-page/user-management-page.module').then(
-                (m) => m.UserManagementPageModule,
-            ),
-    },
-    // oer
-    { path: UIConstants.ROUTER_PREFIX + 'oer', component: OerComponent },
-    // stream
-    { path: UIConstants.ROUTER_PREFIX + 'stream', component: StreamComponent },
-    // profiles
-    {
-        path: UIConstants.ROUTER_PREFIX + 'profiles',
-        loadChildren: () =>
-            import('../pages/profile-page/profile-page.module').then((m) => m.ProfilePageModule),
-    },
-
-    // link-share
-    { path: UIConstants.ROUTER_PREFIX + 'sharing', component: SharingComponent },
-    // services
-    { path: UIConstants.ROUTER_PREFIX + 'services', component: ServicesComponent },
-
-    // embed
-    {
-        path: UIConstants.ROUTER_PREFIX + 'embed/:component',
-        loadChildren: () => import('../common/ui/embed/embed.module').then((m) => m.EmbedModule),
-    },
-
-    { path: UIConstants.ROUTER_PREFIX + 'lti', component: LtiComponent },
-
-    // error page / 404
-    {
-        path: '',
-        loadChildren: () =>
-            import('../pages/error-page/error-page.module').then((m) => m.ErrorPageModule),
-    },
-];
-
-export const ROUTES: Routes = [
-    // Add a `canDeactivate` guard to all routes, that closes any open dialogs before allowing
-    // navigation.
-    {
-        path: '',
-        canDeactivate: [DialogsNavigationGuard],
-        children: childRoutes,
-        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
-    },
-];

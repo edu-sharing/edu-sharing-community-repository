@@ -25,13 +25,11 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTreeModule } from '@angular/material/tree';
 import { BrowserModule } from '@angular/platform-browser';
-import { RouterModule } from '@angular/router';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
 import { CoreBridgeModule } from './core-bridge-module/core.bridge.module';
 import { CoreModule } from './core-module/core.module';
 import { CoreUiModule } from './core-ui-module/core-ui.module';
 import { CustomModule } from './custom-module/custom.module';
-import { ROUTES } from './router/router.component';
 
 export const IMPORTS = [
     A11yModule,
@@ -72,10 +70,4 @@ export const IMPORTS = [
     CoreBridgeModule,
     CoreUiModule,
     CustomModule,
-    RouterModule.forRoot(ROUTES, {
-        // scrollPositionRestoration: 'enabled' emulated via ScrollPositionRestorationService.
-        // This prevents the browser history from getting messed up when navigation attempts are
-        // cancelled by guards.
-        canceledNavigationResolution: 'computed',
-    }),
 ];

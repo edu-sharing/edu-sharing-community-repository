@@ -3,22 +3,17 @@ import { LocationStrategy } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions } from '@angular/material/tooltip';
+import { InMemoryCache } from '@apollo/client/core';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { ResizableModule } from 'angular-resizable-element';
+import { APOLLO_OPTIONS, ApolloModule } from 'apollo-angular';
+import { HttpLink } from 'apollo-angular/http';
 import {
     EDU_SHARING_API_CONFIG,
     EduSharingApiConfigurationParams,
     EduSharingApiModule,
 } from 'ngx-edu-sharing-api';
-import { CoreUiModule } from './core-ui-module/core-ui.module';
-import { ErrorHandlerService } from './core-ui-module/error-handler.service';
-import { DECLARATIONS } from './declarations';
-import { extensionDeclarations } from './extension/extension-declarations';
-import { extensionImports } from './extension/extension-imports';
-import { extensionProviders } from './extension/extension-providers';
-import { extensionSchemas } from './extension/extension-schemas';
-import { DialogsModule } from './features/dialogs/dialogs.module';
-import { MdsModule } from './features/mds/mds.module';
+import { EduSharingGraphqlModule } from 'ngx-edu-sharing-graphql';
 import {
     AppService as AppServiceAbstract,
     EduSharingUiModule,
@@ -27,6 +22,20 @@ import {
     Toast as ToastAbstract,
     TranslationsModule,
 } from 'ngx-edu-sharing-ui';
+import { environment } from '../environments/environment';
+import { AppRoutingModule } from './app-routing.module';
+import { CordovaService } from './common/services/cordova.service';
+import { CoreUiModule } from './core-ui-module/core-ui.module';
+import { ErrorHandlerService } from './core-ui-module/error-handler.service';
+import { OptionsHelperService } from './core-ui-module/options-helper.service';
+import { Toast } from './core-ui-module/toast';
+import { DECLARATIONS } from './declarations';
+import { extensionDeclarations } from './extension/extension-declarations';
+import { extensionImports } from './extension/extension-imports';
+import { extensionProviders } from './extension/extension-providers';
+import { extensionSchemas } from './extension/extension-schemas';
+import { DialogsModule } from './features/dialogs/dialogs.module';
+import { MdsModule } from './features/mds/mds.module';
 import { IMPORTS } from './imports';
 import { MainModule } from './main/main.module';
 import { DECLARATIONS_FILE_UPLOAD } from './modules/file-upload/declarations';
@@ -42,16 +51,8 @@ import { DECLARATIONS_STREAM } from './modules/stream/declarations';
 import { PROVIDERS } from './providers';
 import { AppLocationStrategy } from './router/location-strategy';
 import { RouterComponent } from './router/router.component';
-import { SharedModule } from './shared/shared.module';
-import { environment } from '../environments/environment';
-import { Toast } from './core-ui-module/toast';
-import { OptionsHelperService } from './core-ui-module/options-helper.service';
 import { KeyboardShortcutsService } from './services/keyboard-shortcuts.service';
-import { CordovaService } from './common/services/cordova.service';
-import { InMemoryCache } from '@apollo/client/core';
-import { HttpLink } from 'apollo-angular/http';
-import { APOLLO_OPTIONS, ApolloModule } from 'apollo-angular';
-import { EduSharingGraphqlModule } from 'ngx-edu-sharing-graphql';
+import { SharedModule } from './shared/shared.module';
 
 // http://blog.angular-university.io/angular2-ngmodule/
 // -> Making modules more readable using the spread operator
@@ -79,6 +80,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     ],
     imports: [
         IMPORTS,
+        AppRoutingModule,
         ApolloModule,
         SharedModule,
         MainModule,
