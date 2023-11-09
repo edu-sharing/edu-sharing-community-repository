@@ -33,7 +33,6 @@ import { DECLARATIONS_FILE_UPLOAD } from './modules/file-upload/declarations';
 import { DECLARATIONS_LOGINAPP } from './modules/login-app/declarations';
 import { LtiComponent } from './modules/lti/lti.component';
 import { DECLARATIONS_MANAGEMENT_DIALOGS } from './modules/management-dialogs/declarations';
-import { DECLARATIONS_MESSAGES } from './modules/messages/declarations';
 import { DECLARATIONS_RECYCLE } from './modules/node-list/declarations';
 import { DECLARATIONS_OER } from './modules/oer/declarations';
 import { DECLARATIONS_SERVICES } from './modules/services/declarations';
@@ -74,7 +73,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS_OER,
         DECLARATIONS_STREAM,
         DECLARATIONS_MANAGEMENT_DIALOGS,
-        DECLARATIONS_MESSAGES,
         DECLARATIONS_SHARING,
         DECLARATIONS_SHARE_APP,
         DECLARATIONS_SERVICES,
@@ -139,7 +137,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS_OER,
         DECLARATIONS_STREAM,
         DECLARATIONS_MANAGEMENT_DIALOGS,
-        DECLARATIONS_MESSAGES,
         DECLARATIONS_SHARING,
         DECLARATIONS_SHARE_APP,
         DECLARATIONS_SERVICES,

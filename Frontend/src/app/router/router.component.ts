@@ -29,7 +29,6 @@ import { LoginAppComponent } from '../modules/login-app/login-app.component';
 import { LtiComponent } from '../modules/lti/lti.component';
 import { WorkspaceManagementDialogsComponent } from '../modules/management-dialogs/management-dialogs.component';
 import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';
-import { MessagesComponent } from '../modules/messages/messages.component';
 import { OerComponent } from '../modules/oer/oer.component';
 import { ServicesComponent } from '../modules/services/services.components';
 import { ShareAppComponent } from '../modules/share-app/share-app.component';
@@ -220,25 +219,6 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
     }
 }
 
-// RouterComponent.transformRoute
-// this fails for aot because it can't call static functions
-/*
-
- export var ROUTES_COMMON:any=[
- { path: '', component: NoRouteComponent },
- { path: 'rest-test',component: RestTestComponent},
- { path: 'render/:node', component: NodeRenderComponent},
- { path: 'render/:node/:version', component: NodeRenderComponent},
- { path: 'apply-to-lms/:node', component: ApplyToLmsComponent}
- ];
- .concat(ROUTES_SEARCH)
- .concat(ROUTES_WORKSPACE)
- .concat(ROUTES_RECYCLE)
- .concat(ROUTES_COLLECTIONS)
- .concat(ROUTES_LOGIN)
- .concat(ROUTES_PERMISSIONS)
- */
-
 // Due to ahead of time, we need to create all routes manually.
 const childRoutes: Routes = [
     // overrides and additional routes
@@ -319,12 +299,6 @@ const childRoutes: Routes = [
         loadChildren: () =>
             import('../pages/profile-page/profile-page.module').then((m) => m.ProfilePageModule),
     },
-    // messages
-    { path: UIConstants.ROUTER_PREFIX + 'messages/:message', component: MessagesComponent },
-    { path: UIConstants.ROUTER_PREFIX + 'messages/:message/:text', component: MessagesComponent },
-    // error (same as message)
-    { path: UIConstants.ROUTER_PREFIX + 'error/:message', component: MessagesComponent },
-    { path: UIConstants.ROUTER_PREFIX + 'error/:message/:text', component: MessagesComponent },
 
     // link-share
     { path: UIConstants.ROUTER_PREFIX + 'sharing', component: SharingComponent },
@@ -339,8 +313,12 @@ const childRoutes: Routes = [
 
     { path: UIConstants.ROUTER_PREFIX + 'lti', component: LtiComponent },
 
-    // wildcard 404
-    { path: '**', component: MessagesComponent, data: { message: 404 } },
+    // error page / 404
+    {
+        path: '',
+        loadChildren: () =>
+            import('../pages/error-page/error-page.module').then((m) => m.ErrorPageModule),
+    },
 ];
 
 export const ROUTES: Routes = [
