@@ -3,7 +3,6 @@ import { RouterModule, Routes } from '@angular/router';
 import { UIConstants } from './core-module/core.module';
 import { extensionRoutes } from './extension/extension-routes';
 import { DialogsNavigationGuard } from './features/dialogs/dialogs-navigation.guard';
-import { LtiComponent } from './modules/lti/lti.component';
 import { StartupComponent } from './modules/startup/startup.component';
 
 const routes: Routes = [
@@ -144,7 +143,10 @@ const routes: Routes = [
     },
 
     // LTI
-    { path: UIConstants.ROUTER_PREFIX + 'lti', component: LtiComponent },
+    {
+        path: UIConstants.ROUTER_PREFIX + 'lti',
+        loadChildren: () => import('./pages/lti-page/lti-page.module').then((m) => m.LtiPageModule),
+    },
 
     // Error page / 404
     {

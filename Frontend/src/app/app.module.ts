@@ -24,6 +24,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { environment } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
 import { CordovaService } from './common/services/cordova.service';
 import { CoreUiModule } from './core-ui-module/core-ui.module';
 import { ErrorHandlerService } from './core-ui-module/error-handler.service';
@@ -37,14 +38,12 @@ import { extensionSchemas } from './extension/extension-schemas';
 import { DialogsModule } from './features/dialogs/dialogs.module';
 import { MdsModule } from './features/mds/mds.module';
 import { IMPORTS } from './imports';
+import { AppLocationStrategy } from './main/location-strategy';
 import { MainModule } from './main/main.module';
-import { LtiComponent } from './modules/lti/lti.component';
 import { DECLARATIONS_MANAGEMENT_DIALOGS } from './modules/management-dialogs/declarations';
 import { DECLARATIONS_RECYCLE } from './modules/node-list/declarations';
 import { DECLARATIONS_STARTUP } from './modules/startup/declarations';
 import { PROVIDERS } from './providers';
-import { AppLocationStrategy } from './main/location-strategy';
-import { AppComponent } from './app.component';
 import { KeyboardShortcutsService } from './services/keyboard-shortcuts.service';
 import { SharedModule } from './shared/shared.module';
 
@@ -64,7 +63,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS_STARTUP,
         DECLARATIONS_MANAGEMENT_DIALOGS,
         extensionDeclarations,
-        LtiComponent,
     ],
     imports: [
         IMPORTS,

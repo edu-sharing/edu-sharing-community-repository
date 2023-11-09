@@ -6,10 +6,10 @@ import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 
 @Component({
-    selector: 'es-lti',
+    selector: 'es-lti-page',
     template: '',
 })
-export class LtiComponent implements OnInit {
+export class LtiPageComponent implements OnInit {
     constructor(
         private dialogs: DialogsService,
         private mainNav: MainNavService,
