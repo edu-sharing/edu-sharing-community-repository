@@ -337,7 +337,6 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
 
     async addFolder(folder: AddFolderDialogResult) {
         this.toast.showProgressSpinner();
-        return;
         const properties = RestHelper.createNameProperty(folder.name);
         if (folder.metadataSet) {
             properties[RestConstants.CM_PROP_METADATASET_EDU_METADATASET] = [folder.metadataSet];
