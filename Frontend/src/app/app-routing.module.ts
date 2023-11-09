@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { MdsTestComponent } from './common/test/mds-test/mds-test.component';
 import { ApplyToLmsComponent } from './common/ui/apply-to-lms/apply-to-lms.component';
 import { UIConstants } from './core-module/core.module';
 import { extensionRoutes } from './extension/extension-routes';
@@ -33,7 +32,6 @@ const routes: Routes = [
                 (m) => m.AppSharePageModule,
             ),
     },
-    { path: UIConstants.ROUTER_PREFIX + 'test/mds', component: MdsTestComponent },
     {
         path: UIConstants.ROUTER_PREFIX + 'render',
         loadChildren: () =>

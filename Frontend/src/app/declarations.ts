@@ -1,6 +1,5 @@
 import { AppComponent } from './app.component';
 import { ApplyToLmsComponent } from './common/ui/apply-to-lms/apply-to-lms.component';
-import { MdsTestComponent } from './common/test/mds-test/mds-test.component';
 import { ToolListComponent } from './common/ui/tool-list/tool-list.component';
 import { ToucheventDirective } from './common/ui/touchevents/touchevents';
 import { InfobarComponent } from './common/ui/infobar/infobar.component';
@@ -19,7 +18,6 @@ import { ScrollToTopButtonComponent } from './common/ui/scroll-to-top-button/scr
 import { CustomGlobalExtensionsComponent } from './extension/custom-global-component/custom-global-extensions.component';
 
 export const DECLARATIONS = [
-    MdsTestComponent,
     ButtonsTestComponent,
     InputsTestComponent,
     UserAvatarTestComponent,
