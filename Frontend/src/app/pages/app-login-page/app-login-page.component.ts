@@ -25,12 +25,12 @@ enum StateUI {
 }
 
 @Component({
-    selector: 'es-login',
-    templateUrl: 'login-app.component.html',
-    styleUrls: ['login-app.component.scss'],
+    selector: 'es-app-login-page',
+    templateUrl: 'app-login-page.component.html',
+    styleUrls: ['app-login-page.component.scss'],
 })
 // tslint:disable:no-console
-export class LoginAppComponent implements OnInit {
+export class AppLoginPageComponent implements OnInit {
     public isLoading = true;
     public disabled = true;
     username = '';

@@ -25,7 +25,6 @@ import { DialogsNavigationGuard } from '../features/dialogs/dialogs-navigation.g
 import { LoadingScreenService } from '../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { FileUploadComponent } from '../modules/file-upload/file-upload.component';
-import { LoginAppComponent } from '../modules/login-app/login-app.component';
 import { LtiComponent } from '../modules/lti/lti.component';
 import { WorkspaceManagementDialogsComponent } from '../modules/management-dialogs/management-dialogs.component';
 import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';
@@ -226,7 +225,14 @@ const childRoutes: Routes = [
 
     // global
     { path: '', component: StartupComponent },
-    { path: UIConstants.ROUTER_PREFIX + 'app', component: LoginAppComponent },
+
+    {
+        path: UIConstants.ROUTER_PREFIX + 'app',
+        loadChildren: () =>
+            import('../pages/app-login-page/app-login-page.module').then(
+                (m) => m.AppLoginPageModule,
+            ),
+    },
     { path: UIConstants.ROUTER_PREFIX + 'app/share', component: ShareAppComponent },
     { path: UIConstants.ROUTER_PREFIX + 'sharing', component: SharingComponent },
     { path: UIConstants.ROUTER_PREFIX + 'test/mds', component: MdsTestComponent },
