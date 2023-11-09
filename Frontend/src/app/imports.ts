@@ -25,7 +25,6 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTreeModule } from '@angular/material/tree';
 import { BrowserModule } from '@angular/platform-browser';
-import { LazyLoadImageModule } from 'ng-lazyload-image';
 import { CoreBridgeModule } from './core-bridge-module/core.bridge.module';
 import { CoreModule } from './core-module/core.module';
 import { CoreUiModule } from './core-ui-module/core-ui.module';
@@ -37,7 +36,6 @@ export const IMPORTS = [
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
-    LazyLoadImageModule,
     OverlayModule,
     MatButtonModule,
     MatTabsModule,

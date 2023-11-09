@@ -51,17 +51,24 @@ import {
 } from '../../main/navigation/search-field/search-field.service';
 
 @Component({
-    selector: 'es-stream',
-    templateUrl: 'stream.component.html',
-    styleUrls: ['stream.component.scss'],
+    selector: 'es-stream-page',
+    templateUrl: 'stream-page.component.html',
+    styleUrls: ['stream-page.component.scss'],
     animations: [trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
     providers: [OptionsHelperDataService],
 })
-export class StreamComponent implements OnInit, AfterViewInit, OnDestroy {
+export class StreamPageComponent implements OnInit, AfterViewInit, OnDestroy {
     connectorList: ConnectorList;
     createAllowed: boolean;
     showCreate = false;
-    public collectionNodes: EduData.Node[];
+    private _collectionNodes: EduData.Node[];
+    public get collectionNodes(): EduData.Node[] {
+        return this._collectionNodes;
+    }
+    public set collectionNodes(value: EduData.Node[]) {
+        this._collectionNodes = value;
+        this.mainNavService.getDialogs().addToCollection = this.collectionNodes;
+    }
     public tabSelected: string = RestConstants.COLLECTIONSCOPE_MY;
     public mainnav = true;
     public nodeReport: Node;

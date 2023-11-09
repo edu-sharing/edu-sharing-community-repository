@@ -6,7 +6,6 @@ import { DialogsNavigationGuard } from './features/dialogs/dialogs-navigation.gu
 import { LtiComponent } from './modules/lti/lti.component';
 import { ServicesComponent } from './modules/services/services.components';
 import { StartupComponent } from './modules/startup/startup.component';
-import { StreamComponent } from './modules/stream/stream.component';
 
 const routes: Routes = [
     // Overrides and additional routes
@@ -118,7 +117,11 @@ const routes: Routes = [
     },
 
     // Stream
-    { path: UIConstants.ROUTER_PREFIX + 'stream', component: StreamComponent },
+    {
+        path: UIConstants.ROUTER_PREFIX + 'stream',
+        loadChildren: () =>
+            import('./pages/stream-page/stream-page.module').then((m) => m.StreamPageModule),
+    },
 
     // Profile
     {

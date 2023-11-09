@@ -43,7 +43,6 @@ import { DECLARATIONS_MANAGEMENT_DIALOGS } from './modules/management-dialogs/de
 import { DECLARATIONS_RECYCLE } from './modules/node-list/declarations';
 import { DECLARATIONS_SERVICES } from './modules/services/declarations';
 import { DECLARATIONS_STARTUP } from './modules/startup/declarations';
-import { DECLARATIONS_STREAM } from './modules/stream/declarations';
 import { PROVIDERS } from './providers';
 import { AppLocationStrategy } from './main/location-strategy';
 import { AppComponent } from './app.component';
@@ -64,7 +63,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS,
         DECLARATIONS_RECYCLE,
         DECLARATIONS_STARTUP,
-        DECLARATIONS_STREAM,
         DECLARATIONS_MANAGEMENT_DIALOGS,
         DECLARATIONS_SERVICES,
         extensionDeclarations,
@@ -124,7 +122,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS,
         DECLARATIONS_RECYCLE,
         DECLARATIONS_STARTUP,
-        DECLARATIONS_STREAM,
         DECLARATIONS_MANAGEMENT_DIALOGS,
         DECLARATIONS_SERVICES,
     ],
