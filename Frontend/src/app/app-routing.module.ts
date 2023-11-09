@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { ApplyToLmsComponent } from './common/ui/apply-to-lms/apply-to-lms.component';
 import { UIConstants } from './core-module/core.module';
 import { extensionRoutes } from './extension/extension-routes';
 import { DialogsNavigationGuard } from './features/dialogs/dialogs-navigation.guard';
@@ -11,12 +10,13 @@ import { StartupComponent } from './modules/startup/startup.component';
 import { StreamComponent } from './modules/stream/stream.component';
 
 const routes: Routes = [
-    // overrides and additional routes
+    // Overrides and additional routes
     ...extensionRoutes,
 
-    // global
+    // Entrypoint
     { path: '', component: StartupComponent },
 
+    // App login
     {
         path: UIConstants.ROUTER_PREFIX + 'app',
         loadChildren: () =>
@@ -24,6 +24,8 @@ const routes: Routes = [
                 (m) => m.AppLoginPageModule,
             ),
     },
+
+    // App share
     {
         path: UIConstants.ROUTER_PREFIX + 'app/share',
         loadChildren: () =>
@@ -31,22 +33,31 @@ const routes: Routes = [
                 (m) => m.AppSharePageModule,
             ),
     },
+
+    // Render
     {
         path: UIConstants.ROUTER_PREFIX + 'render',
         loadChildren: () =>
             import('./pages/render-page/render-page.module').then((m) => m.RenderPageModule),
     },
+
+    // Apply to LMS
     {
-        path: UIConstants.ROUTER_PREFIX + 'apply-to-lms/:repo/:node',
-        component: ApplyToLmsComponent,
+        path: UIConstants.ROUTER_PREFIX + 'apply-to-lms',
+        loadChildren: () =>
+            import('./pages/apply-to-lms-page/apply-to-lms-page.module').then(
+                (m) => m.ApplyToLmsPageModule,
+            ),
     },
-    // search
+
+    // Search
     {
         path: UIConstants.ROUTER_PREFIX + 'search',
         loadChildren: () =>
             import('./pages/search-page/search-page.module').then((m) => m.SearchPageModule),
     },
-    // workspace
+
+    // Workspace
     {
         path: UIConstants.ROUTER_PREFIX + 'workspace',
         loadChildren: () =>
@@ -54,7 +65,8 @@ const routes: Routes = [
                 (m) => m.WorkspacePageModule,
             ),
     },
-    // collections
+
+    // Collections
     {
         path: UIConstants.ROUTER_PREFIX + 'collections',
         loadChildren: () =>
@@ -62,31 +74,36 @@ const routes: Routes = [
                 (m) => m.CollectionsPageModule,
             ),
     },
-    // login
+
+    // Login
     {
         path: UIConstants.ROUTER_PREFIX + 'login',
         loadChildren: () =>
             import('./pages/login-page/login-page.module').then((m) => m.LoginPageModule),
     },
-    // register
+
+    // Register
     {
         path: UIConstants.ROUTER_PREFIX + 'register',
         loadChildren: () =>
             import('./pages/register-page/register-page.module').then((m) => m.RegisterPageModule),
     },
-    // file upload
+
+    // Upload
     {
         path: UIConstants.ROUTER_PREFIX + 'upload',
         loadChildren: () =>
             import('./pages/upload-page/upload-page.module').then((m) => m.UploadPageModule),
     },
-    // admin
+
+    // Admin
     {
         path: UIConstants.ROUTER_PREFIX + 'admin',
         loadChildren: () =>
             import('./pages/admin-page/admin-page.module').then((m) => m.AdminPageModule),
     },
-    // permissions
+
+    // User management
     {
         path: UIConstants.ROUTER_PREFIX + 'permissions',
         loadChildren: () =>
@@ -94,35 +111,40 @@ const routes: Routes = [
                 (m) => m.UserManagementPageModule,
             ),
     },
-    // oer
+
+    // OER
     { path: UIConstants.ROUTER_PREFIX + 'oer', component: OerComponent },
-    // stream
+
+    // Stream
     { path: UIConstants.ROUTER_PREFIX + 'stream', component: StreamComponent },
-    // profiles
+
+    // Profile
     {
         path: UIConstants.ROUTER_PREFIX + 'profiles',
         loadChildren: () =>
             import('./pages/profile-page/profile-page.module').then((m) => m.ProfilePageModule),
     },
 
-    // link-share
+    // Link share
     {
         path: UIConstants.ROUTER_PREFIX + 'sharing',
         loadChildren: () =>
             import('./pages/sharing-page/sharing-page.module').then((m) => m.SharingPageModule),
     },
-    // services
+
+    // Services
     { path: UIConstants.ROUTER_PREFIX + 'services', component: ServicesComponent },
 
-    // embed
+    // Embed
     {
         path: UIConstants.ROUTER_PREFIX + 'embed/:component',
         loadChildren: () => import('./common/ui/embed/embed.module').then((m) => m.EmbedModule),
     },
 
+    // LTI
     { path: UIConstants.ROUTER_PREFIX + 'lti', component: LtiComponent },
 
-    // error page / 404
+    // Error page / 404
     {
         path: '',
         loadChildren: () =>

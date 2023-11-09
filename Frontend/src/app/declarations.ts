@@ -1,5 +1,4 @@
 import { AppComponent } from './app.component';
-import { ApplyToLmsComponent } from './common/ui/apply-to-lms/apply-to-lms.component';
 import { ToolListComponent } from './common/ui/tool-list/tool-list.component';
 import { ToucheventDirective } from './common/ui/touchevents/touchevents';
 import { InfobarComponent } from './common/ui/infobar/infobar.component';
@@ -29,7 +28,6 @@ export const DECLARATIONS = [
     RocketchatComponent,
     AppComponent,
     InfobarComponent,
-    ApplyToLmsComponent,
     ToolListComponent,
     ToucheventDirective,
     CookieInfoComponent,

@@ -10,11 +10,11 @@ import {
     RestLocatorService,
     RestNodeService,
     TemporaryStorageService,
-} from '../../../core-module/core.module';
-import { Toast } from '../../../core-ui-module/toast';
-import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
+} from '../../core-module/core.module';
+import { Toast } from '../../core-ui-module/toast';
+import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { TranslationsService } from 'ngx-edu-sharing-ui';
-import { RouterHelper } from '../../../core-ui-module/router.helper';
+import { RouterHelper } from '../../core-ui-module/router.helper';
 import { PlatformLocation } from '@angular/common';
 
 export class NodeLMS extends Node {
@@ -23,11 +23,10 @@ export class NodeLMS extends Node {
 }
 
 @Component({
-    selector: 'es-add-node-to-lms',
-    templateUrl: 'apply-to-lms.component.html',
-    styleUrls: ['apply-to-lms.component.scss'],
+    selector: 'es-apply-to-lms-page',
+    templateUrl: 'apply-to-lms-page.component.html',
 })
-export class ApplyToLmsComponent {
+export class ApplyToLmsPageComponent {
     constructor(
         private connector: RestConnectorService,
         private locator: RestLocatorService,
@@ -128,9 +127,11 @@ export class ApplyToLmsComponent {
         params += '&mimeType=' + encodeURIComponent(node.mimetype);
         params += '&mediatype=' + encodeURIComponent(node.mediatype);
         params +=
-            '&h=' + ApplyToLmsComponent.roundNumber(node.properties[RestConstants.CCM_PROP_HEIGHT]);
+            '&h=' +
+            ApplyToLmsPageComponent.roundNumber(node.properties[RestConstants.CCM_PROP_HEIGHT]);
         params +=
-            '&w=' + ApplyToLmsComponent.roundNumber(node.properties[RestConstants.CCM_PROP_WIDTH]);
+            '&w=' +
+            ApplyToLmsPageComponent.roundNumber(node.properties[RestConstants.CCM_PROP_WIDTH]);
         if (node.content.version) params += '&v=' + node.content.version;
         if (node.properties[RestConstants.CCM_PROP_CCRESSOURCETYPE])
             params +=
