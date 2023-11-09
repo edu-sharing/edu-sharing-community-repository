@@ -20,11 +20,11 @@ import { SearchFieldService } from '../../main/navigation/search-field/search-fi
 import { Node } from 'ngx-edu-sharing-api';
 
 @Component({
-    selector: 'es-oer',
-    templateUrl: 'oer.component.html',
-    styleUrls: ['oer.component.scss'],
+    selector: 'es-oer-page',
+    templateUrl: 'oer-page.component.html',
+    styleUrls: ['oer-page.component.scss'],
 })
-export class OerComponent implements OnInit, OnDestroy {
+export class OerPageComponent implements OnInit, OnDestroy {
     readonly SCOPES = Scope;
     public COLLECTIONS = 0;
     public MATERIALS = 1;

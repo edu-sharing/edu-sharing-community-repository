@@ -4,7 +4,6 @@ import { UIConstants } from './core-module/core.module';
 import { extensionRoutes } from './extension/extension-routes';
 import { DialogsNavigationGuard } from './features/dialogs/dialogs-navigation.guard';
 import { LtiComponent } from './modules/lti/lti.component';
-import { OerComponent } from './modules/oer/oer.component';
 import { ServicesComponent } from './modules/services/services.components';
 import { StartupComponent } from './modules/startup/startup.component';
 import { StreamComponent } from './modules/stream/stream.component';
@@ -113,7 +112,10 @@ const routes: Routes = [
     },
 
     // OER
-    { path: UIConstants.ROUTER_PREFIX + 'oer', component: OerComponent },
+    {
+        path: UIConstants.ROUTER_PREFIX + 'oer',
+        loadChildren: () => import('./pages/oer-page/oer-page.module').then((m) => m.OerPageModule),
+    },
 
     // Stream
     { path: UIConstants.ROUTER_PREFIX + 'stream', component: StreamComponent },

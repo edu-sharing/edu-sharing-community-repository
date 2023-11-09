@@ -41,7 +41,6 @@ import { MainModule } from './main/main.module';
 import { LtiComponent } from './modules/lti/lti.component';
 import { DECLARATIONS_MANAGEMENT_DIALOGS } from './modules/management-dialogs/declarations';
 import { DECLARATIONS_RECYCLE } from './modules/node-list/declarations';
-import { DECLARATIONS_OER } from './modules/oer/declarations';
 import { DECLARATIONS_SERVICES } from './modules/services/declarations';
 import { DECLARATIONS_STARTUP } from './modules/startup/declarations';
 import { DECLARATIONS_STREAM } from './modules/stream/declarations';
@@ -65,7 +64,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS,
         DECLARATIONS_RECYCLE,
         DECLARATIONS_STARTUP,
-        DECLARATIONS_OER,
         DECLARATIONS_STREAM,
         DECLARATIONS_MANAGEMENT_DIALOGS,
         DECLARATIONS_SERVICES,
@@ -126,7 +124,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS,
         DECLARATIONS_RECYCLE,
         DECLARATIONS_STARTUP,
-        DECLARATIONS_OER,
         DECLARATIONS_STREAM,
         DECLARATIONS_MANAGEMENT_DIALOGS,
         DECLARATIONS_SERVICES,
