@@ -32,12 +32,12 @@ import { Helper } from '../../core-module/rest/helper';
 import { CordovaService, OnBackBehaviour } from '../../common/services/cordova.service';
 
 @Component({
-    selector: 'es-share-app',
-    templateUrl: 'share-app.component.html',
-    styleUrls: ['share-app.component.scss'],
+    selector: 'es-app-share-page',
+    templateUrl: 'app-share-page.component.html',
+    styleUrls: ['app-share-page.component.scss'],
     animations: [],
 })
-export class ShareAppComponent {
+export class AppSharePageComponent {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     globalProgress = true;

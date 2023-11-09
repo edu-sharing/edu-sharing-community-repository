@@ -44,7 +44,6 @@ import { DECLARATIONS_MANAGEMENT_DIALOGS } from './modules/management-dialogs/de
 import { DECLARATIONS_RECYCLE } from './modules/node-list/declarations';
 import { DECLARATIONS_OER } from './modules/oer/declarations';
 import { DECLARATIONS_SERVICES } from './modules/services/declarations';
-import { DECLARATIONS_SHARE_APP } from './modules/share-app/declarations';
 import { DECLARATIONS_SHARING } from './modules/sharing/declarations';
 import { DECLARATIONS_STARTUP } from './modules/startup/declarations';
 import { DECLARATIONS_STREAM } from './modules/stream/declarations';
@@ -73,7 +72,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS_STREAM,
         DECLARATIONS_MANAGEMENT_DIALOGS,
         DECLARATIONS_SHARING,
-        DECLARATIONS_SHARE_APP,
         DECLARATIONS_SERVICES,
         extensionDeclarations,
         LtiComponent,
@@ -137,7 +135,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS_STREAM,
         DECLARATIONS_MANAGEMENT_DIALOGS,
         DECLARATIONS_SHARING,
-        DECLARATIONS_SHARE_APP,
         DECLARATIONS_SERVICES,
     ],
     schemas: [].concat(extensionSchemas),

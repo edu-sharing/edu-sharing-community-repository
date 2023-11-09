@@ -9,7 +9,6 @@ import { FileUploadComponent } from './modules/file-upload/file-upload.component
 import { LtiComponent } from './modules/lti/lti.component';
 import { OerComponent } from './modules/oer/oer.component';
 import { ServicesComponent } from './modules/services/services.components';
-import { ShareAppComponent } from './modules/share-app/share-app.component';
 import { SharingComponent } from './modules/sharing/sharing.component';
 import { StartupComponent } from './modules/startup/startup.component';
 import { StreamComponent } from './modules/stream/stream.component';
@@ -28,7 +27,13 @@ const routes: Routes = [
                 (m) => m.AppLoginPageModule,
             ),
     },
-    { path: UIConstants.ROUTER_PREFIX + 'app/share', component: ShareAppComponent },
+    {
+        path: UIConstants.ROUTER_PREFIX + 'app/share',
+        loadChildren: () =>
+            import('./pages/app-share-page/app-share-page.module').then(
+                (m) => m.AppSharePageModule,
+            ),
+    },
     { path: UIConstants.ROUTER_PREFIX + 'sharing', component: SharingComponent },
     { path: UIConstants.ROUTER_PREFIX + 'test/mds', component: MdsTestComponent },
     {
