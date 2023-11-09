@@ -49,8 +49,8 @@ import { DECLARATIONS_SHARING } from './modules/sharing/declarations';
 import { DECLARATIONS_STARTUP } from './modules/startup/declarations';
 import { DECLARATIONS_STREAM } from './modules/stream/declarations';
 import { PROVIDERS } from './providers';
-import { AppLocationStrategy } from './router/location-strategy';
-import { RouterComponent } from './router/router.component';
+import { AppLocationStrategy } from './main/location-strategy';
+import { AppComponent } from './app.component';
 import { KeyboardShortcutsService } from './services/keyboard-shortcuts.service';
 import { SharedModule } from './shared/shared.module';
 
@@ -141,6 +141,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS_SERVICES,
     ],
     schemas: [].concat(extensionSchemas),
-    bootstrap: [RouterComponent],
+    bootstrap: [AppComponent],
 })
 export class AppModule {}

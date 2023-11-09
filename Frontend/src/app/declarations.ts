@@ -1,4 +1,4 @@
-import { RouterComponent } from './router/router.component';
+import { AppComponent } from './app.component';
 import { ApplyToLmsComponent } from './common/ui/apply-to-lms/apply-to-lms.component';
 import { MdsTestComponent } from './common/test/mds-test/mds-test.component';
 import { ToolListComponent } from './common/ui/tool-list/tool-list.component';
@@ -30,7 +30,7 @@ export const DECLARATIONS = [
     CustomGlobalExtensionsComponent,
     GlobalContainerComponent,
     RocketchatComponent,
-    RouterComponent,
+    AppComponent,
     InfobarComponent,
     ApplyToLmsComponent,
     ToolListComponent,

@@ -13,31 +13,31 @@ import { AuthenticationService } from 'ngx-edu-sharing-api';
 import { AccessibilityService, TranslationsService, UIConstants } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { environment } from '../../environments/environment';
-import { ThemeService } from '../common/services/theme.service';
-import { CookieInfoComponent } from '../common/ui/cookie-info/cookie-info.component';
-import { BridgeService } from '../core-bridge-module/bridge.service';
-import { ConfigurationService, RestHelper, RestNetworkService } from '../core-module/core.module';
-import { LoadingScreenService } from '../main/loading-screen/loading-screen.service';
-import { MainNavService } from '../main/navigation/main-nav.service';
-import { WorkspaceManagementDialogsComponent } from '../modules/management-dialogs/management-dialogs.component';
-import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';
-import { LicenseAgreementService } from '../services/license-agreement.service';
-import { ScrollPositionRestorationService } from '../services/scroll-position-restoration.service';
-import { printCurrentTaskInfo } from './track-change-detection';
+import { environment } from '../environments/environment';
+import { ThemeService } from './common/services/theme.service';
+import { CookieInfoComponent } from './common/ui/cookie-info/cookie-info.component';
+import { BridgeService } from './core-bridge-module/bridge.service';
+import { ConfigurationService, RestHelper, RestNetworkService } from './core-module/core.module';
+import { LoadingScreenService } from './main/loading-screen/loading-screen.service';
+import { MainNavService } from './main/navigation/main-nav.service';
+import { WorkspaceManagementDialogsComponent } from './modules/management-dialogs/management-dialogs.component';
+import { ManagementDialogsService } from './modules/management-dialogs/management-dialogs.service';
+import { LicenseAgreementService } from './services/license-agreement.service';
+import { ScrollPositionRestorationService } from './services/scroll-position-restoration.service';
+import { printCurrentTaskInfo } from './main/track-change-detection';
 
 @Component({
-    selector: 'es-router',
-    templateUrl: 'router.component.html',
+    selector: 'es-app',
+    templateUrl: 'app.component.html',
     providers: [],
 })
-export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
+export class AppComponent implements OnInit, DoCheck, AfterViewInit {
     private static readonly CHECKS_PER_SECOND_WARNING_THRESHOLD = 0;
     private static readonly CONSECUTIVE_TRANSGRESSION_THRESHOLD = 10;
     private static history = new BehaviorSubject<string[]>([]);
 
     public static isRedirectedFromLogin() {
-        const history = RouterComponent.history.value;
+        const history = AppComponent.history.value;
         if (history.length < 2) {
             return false;
         }
@@ -104,8 +104,8 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
             //     console.log('NavigationStart', event.url);
             // }
             if (event instanceof NavigationEnd) {
-                RouterComponent.history.value.push(event.url);
-                RouterComponent.history.next(RouterComponent.history.value);
+                AppComponent.history.value.push(event.url);
+                AppComponent.history.next(AppComponent.history.value);
             }
         });
         this.ngZone.runOutsideAngular(() => {
@@ -148,16 +148,14 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
 
     private monitorChecks(): void {
         // console.log('Change detections run in the past second:', this.numberOfChecks);
-        if (this.numberOfChecks > RouterComponent.CHECKS_PER_SECOND_WARNING_THRESHOLD) {
+        if (this.numberOfChecks > AppComponent.CHECKS_PER_SECOND_WARNING_THRESHOLD) {
             this.consecutiveTransgression++;
-            if (
-                this.consecutiveTransgression >= RouterComponent.CONSECUTIVE_TRANSGRESSION_THRESHOLD
-            ) {
+            if (this.consecutiveTransgression >= AppComponent.CONSECUTIVE_TRANSGRESSION_THRESHOLD) {
                 console.warn(
                     'Change detection triggered more than ' +
-                        RouterComponent.CHECKS_PER_SECOND_WARNING_THRESHOLD +
+                        AppComponent.CHECKS_PER_SECOND_WARNING_THRESHOLD +
                         ' times per second for the past ' +
-                        RouterComponent.CONSECUTIVE_TRANSGRESSION_THRESHOLD +
+                        AppComponent.CONSECUTIVE_TRANSGRESSION_THRESHOLD +
                         ' seconds consecutively.' +
                         ' Not showing any more warnings.',
                 );

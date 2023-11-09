@@ -65,7 +65,7 @@ import { Toast } from '../../core-ui-module/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
-import { RouterComponent } from '../../router/router.component';
+import { AppComponent } from '../../app.component';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { RenderHelperService } from './render-helper.service';
@@ -271,7 +271,7 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy {
             if (this.closeOnBack) {
                 window.close();
             } else {
-                if (this.fromLogin && !RouterComponent.isRedirectedFromLogin()) {
+                if (this.fromLogin && !AppComponent.isRedirectedFromLogin()) {
                     UIHelper.goToDefaultLocation(
                         this.router,
                         this.platformLocation,

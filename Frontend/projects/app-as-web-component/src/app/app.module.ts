@@ -5,7 +5,7 @@ import { AppComponent } from './app.component';
 
 import { createCustomElement } from '@angular/elements';
 import { AppModule as EduSharingModule } from 'src/app/app.module';
-import { RouterComponent } from '../../../../src/app/router/router.component';
+import { AppComponent } from '../../../../src/app/app.component';
 import { LocationStrategy } from '@angular/common';
 import { MockLocationStrategy } from '@angular/common/testing';
 import { EduSharingApiModule } from 'ngx-edu-sharing-api';
