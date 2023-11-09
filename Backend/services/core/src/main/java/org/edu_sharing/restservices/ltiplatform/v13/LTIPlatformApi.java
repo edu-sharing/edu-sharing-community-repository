@@ -1127,6 +1127,11 @@ public class LTIPlatformApi {
                     }
                 }
 
+                if(serviceRegistry.getNodeService().hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
+                    nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,(String)serviceRegistry.getNodeService()
+                            .getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)));
+                }
+
                 String toolUrl = (String)serviceRegistry.getNodeService().getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_TOOLURL));
                 if(toolUrl == null || !toolUrl.equals(appInfo.getLtitoolUrl())){
                     throw new ValidationException("tool is not allowed to access this node");
