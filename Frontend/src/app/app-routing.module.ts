@@ -4,7 +4,6 @@ import { UIConstants } from './core-module/core.module';
 import { extensionRoutes } from './extension/extension-routes';
 import { DialogsNavigationGuard } from './features/dialogs/dialogs-navigation.guard';
 import { LtiComponent } from './modules/lti/lti.component';
-import { ServicesComponent } from './modules/services/services.components';
 import { StartupComponent } from './modules/startup/startup.component';
 
 const routes: Routes = [
@@ -136,9 +135,6 @@ const routes: Routes = [
         loadChildren: () =>
             import('./pages/sharing-page/sharing-page.module').then((m) => m.SharingPageModule),
     },
-
-    // Services
-    { path: UIConstants.ROUTER_PREFIX + 'services', component: ServicesComponent },
 
     // Embed
     {

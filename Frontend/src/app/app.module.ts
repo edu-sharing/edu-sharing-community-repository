@@ -41,7 +41,6 @@ import { MainModule } from './main/main.module';
 import { LtiComponent } from './modules/lti/lti.component';
 import { DECLARATIONS_MANAGEMENT_DIALOGS } from './modules/management-dialogs/declarations';
 import { DECLARATIONS_RECYCLE } from './modules/node-list/declarations';
-import { DECLARATIONS_SERVICES } from './modules/services/declarations';
 import { DECLARATIONS_STARTUP } from './modules/startup/declarations';
 import { PROVIDERS } from './providers';
 import { AppLocationStrategy } from './main/location-strategy';
@@ -64,7 +63,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS_RECYCLE,
         DECLARATIONS_STARTUP,
         DECLARATIONS_MANAGEMENT_DIALOGS,
-        DECLARATIONS_SERVICES,
         extensionDeclarations,
         LtiComponent,
     ],
@@ -123,7 +121,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS_RECYCLE,
         DECLARATIONS_STARTUP,
         DECLARATIONS_MANAGEMENT_DIALOGS,
-        DECLARATIONS_SERVICES,
     ],
     schemas: [].concat(extensionSchemas),
     bootstrap: [AppComponent],
