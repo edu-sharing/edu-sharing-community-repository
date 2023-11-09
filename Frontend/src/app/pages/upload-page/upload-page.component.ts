@@ -11,11 +11,11 @@ import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { UploadDialogService } from '../../services/upload-dialog.service';
 
 @Component({
-    selector: 'es-file-upload',
-    templateUrl: 'file-upload.component.html',
-    styleUrls: ['file-upload.component.scss'],
+    selector: 'es-upload-page',
+    templateUrl: 'upload-page.component.html',
+    styleUrls: ['upload-page.component.scss'],
 })
-export class FileUploadComponent {
+export class UploadPageComponent {
     loading = true;
     parent: Node;
 

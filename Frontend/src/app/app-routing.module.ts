@@ -4,7 +4,6 @@ import { ApplyToLmsComponent } from './common/ui/apply-to-lms/apply-to-lms.compo
 import { UIConstants } from './core-module/core.module';
 import { extensionRoutes } from './extension/extension-routes';
 import { DialogsNavigationGuard } from './features/dialogs/dialogs-navigation.guard';
-import { FileUploadComponent } from './modules/file-upload/file-upload.component';
 import { LtiComponent } from './modules/lti/lti.component';
 import { OerComponent } from './modules/oer/oer.component';
 import { ServicesComponent } from './modules/services/services.components';
@@ -76,7 +75,11 @@ const routes: Routes = [
             import('./pages/register-page/register-page.module').then((m) => m.RegisterPageModule),
     },
     // file upload
-    { path: UIConstants.ROUTER_PREFIX + 'upload', component: FileUploadComponent },
+    {
+        path: UIConstants.ROUTER_PREFIX + 'upload',
+        loadChildren: () =>
+            import('./pages/upload-page/upload-page.module').then((m) => m.UploadPageModule),
+    },
     // admin
     {
         path: UIConstants.ROUTER_PREFIX + 'admin',

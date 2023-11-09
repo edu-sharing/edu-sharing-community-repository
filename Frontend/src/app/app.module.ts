@@ -38,7 +38,6 @@ import { DialogsModule } from './features/dialogs/dialogs.module';
 import { MdsModule } from './features/mds/mds.module';
 import { IMPORTS } from './imports';
 import { MainModule } from './main/main.module';
-import { DECLARATIONS_FILE_UPLOAD } from './modules/file-upload/declarations';
 import { LtiComponent } from './modules/lti/lti.component';
 import { DECLARATIONS_MANAGEMENT_DIALOGS } from './modules/management-dialogs/declarations';
 import { DECLARATIONS_RECYCLE } from './modules/node-list/declarations';
@@ -65,7 +64,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     declarations: [
         DECLARATIONS,
         DECLARATIONS_RECYCLE,
-        DECLARATIONS_FILE_UPLOAD,
         DECLARATIONS_STARTUP,
         DECLARATIONS_OER,
         DECLARATIONS_STREAM,
@@ -127,7 +125,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     exports: [
         DECLARATIONS,
         DECLARATIONS_RECYCLE,
-        DECLARATIONS_FILE_UPLOAD,
         DECLARATIONS_STARTUP,
         DECLARATIONS_OER,
         DECLARATIONS_STREAM,
