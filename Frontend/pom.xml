@@ -4,133 +4,168 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                              https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.edu_sharing</groupId>
-    <artifactId>edu_sharing-community-repository</artifactId>
-    <version>git</version>
-    <relativePath>../pom.xml</relativePath>
-  </parent>
+    <parent>
+        <groupId>org.edu_sharing</groupId>
+        <artifactId>edu_sharing-community-repository</artifactId>
+        <version>git</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
 
-  <artifactId>edu_sharing-community-repository-frontend</artifactId>
-  <packaging>jar</packaging>
+    <artifactId>edu_sharing-community-repository-frontend</artifactId>
+    <packaging>war</packaging>
 
-  <name>edu_sharing-community-repository-frontend</name>
+    <name>edu_sharing-community-repository-frontend</name>
 
-  <build>
+    <build>
 
-    <plugins>
+        <plugins>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>openapi</id>
-            <goals>
-              <goal>unpack-dependencies</goal>
-            </goals>
-            <phase>generate-sources</phase>
-            <configuration>
-              <includeArtifactIds>edu_sharing-community-repository-backend-services-rest-api</includeArtifactIds>
-              <outputDirectory>projects/edu-sharing-api/build</outputDirectory>
-              <excludes>META-INF/**</excludes>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>openapi</id>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <includeArtifactIds>
+                                edu_sharing-community-repository-backend-services-rest-api
+                            </includeArtifactIds>
+                            <outputDirectory>projects/edu-sharing-api/build</outputDirectory>
+                            <excludes>META-INF/**</excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
-      <plugin>
-        <groupId>com.github.eirslett</groupId>
-        <artifactId>frontend-maven-plugin</artifactId>
-        <configuration>
-          <!--suppress UnresolvedMavenProperty -->
-          <nodeVersion>v${node.version}</nodeVersion>
-          <!--suppress UnresolvedMavenProperty -->
-          <npmVersion>${npm.version}</npmVersion>
-          <workingDirectory>projects/edu-sharing-api</workingDirectory>
-        </configuration>
-        <executions>
-          <execution>
-            <id>bootstrap</id>
-            <goals>
-              <goal>install-node-and-npm</goal>
-            </goals>
-            <phase>process-sources</phase>
-          </execution>
-          <execution>
-            <id>install</id>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-            <phase>process-sources</phase>
-            <configuration>
-              <arguments>${npm.args.install}</arguments>
-            </configuration>
-          </execution>
-          <execution>
-            <id>build</id>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-            <phase>compile</phase>
-            <configuration>
-              <arguments>run generate-api</arguments>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <configuration>
+                    <nodeVersion>v${node.version}</nodeVersion>
+                    <npmVersion>${npm.version}</npmVersion>
+                </configuration>
+                <executions>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-clean-plugin</artifactId>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>projects/edu-sharing-api/build</directory>
-              <includes>
-                  <include>openapi.json</include>
-              </includes>
-            </fileset>
-            <fileset>
-              <directory>projects/edu-sharing-api/src/lib/api</directory>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
+                    <execution>
+                        <id>frontend-bootstrap</id>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                    </execution>
+                    <execution>
+                        <id>frontend-install</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                        <configuration>
+                            <arguments>${npm.args.install}</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>frontend-build</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>compile</phase>
+                        <configuration>
+                            <arguments>${npm.args.build}</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>frontend-licenses</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                        <configuration>
+                            <arguments>run print-licenses</arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>package-sources</id>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <descriptors>
-                <descriptor>sources.xml</descriptor>
-              </descriptors>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>projects/edu-sharing-api/build</directory>
+                            <includes>
+                                <include>openapi.json</include>
+                            </includes>
+                        </fileset>
+                        <fileset>
+                            <directory>projects/edu-sharing-api/src/lib/api</directory>
+                        </fileset>
 
-    </plugins>
+                        <fileset>
+                            <directory>dist</directory>
+                        </fileset>
+                        <fileset>
+                            <directory>node_modules/@angular/compiler-cli/ngcc</directory>
+                            <includes>
+                                <include>**/ngcc_lock_file</include>
+                                <include>**/__ngcc_lock_file__</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
 
-  </build>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>package-sources</id>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>sources.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
-  <dependencies>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <webResources>
+                        <resource>
+                            <directory>dist</directory>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
 
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-repository-backend-services-rest-api</artifactId>
-      <scope>provided</scope>
-    </dependency>
 
-  </dependencies>
+        </plugins>
+
+    </build>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>edu_sharing-community-repository-backend-services-rest-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
 
 </project>

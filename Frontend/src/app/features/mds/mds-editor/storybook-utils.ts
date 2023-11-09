@@ -7,13 +7,21 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { TranslateService } from '@ngx-translate/core';
 import { EduSharingApiModule, MdsWidget } from 'ngx-edu-sharing-api';
-import { BehaviorSubject, Observable, Subject, of } from 'rxjs';
+import { BehaviorSubject, Subject, Observable } from 'rxjs';
 import { CordovaService } from '../../../common/services/cordova.service';
 import { Toast } from '../../../core-ui-module/toast';
 import { InputStatus, MdsWidgetValue } from '../types/types';
 import { InitialValues, MdsEditorInstanceService } from './mds-editor-instance.service';
 import { ViewInstanceService } from './mds-editor-view/view-instance.service';
+import { of } from 'rxjs';
 
+export const translateProvider = {
+    instant: (v: string) => v,
+    get: (v: string) => of(v),
+    onTranslationChange: of({ lang: 'none' }),
+    onDefaultLangChange: of({ lang: 'none' }),
+    onLangChange: of({}),
+};
 export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     HttpClient,
     {
@@ -32,7 +40,7 @@ export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     Toast,
     {
         provide: TranslateService,
-        useValue: {},
+        useValue: translateProvider,
     },
     MatSnackBar,
     provideAnimations(),

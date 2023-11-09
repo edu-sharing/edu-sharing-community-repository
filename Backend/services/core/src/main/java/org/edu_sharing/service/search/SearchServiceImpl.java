@@ -20,7 +20,7 @@ import org.alfresco.util.ISO9075;
 import org.alfresco.util.Pair;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
-import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.repackaged.elasticsearch.org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.policy.Helper;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;

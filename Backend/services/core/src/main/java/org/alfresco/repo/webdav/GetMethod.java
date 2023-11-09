@@ -4,27 +4,41 @@
  * %%
  * Copyright (C) 2005 - 2016 Alfresco Software Limited
  * %%
- * This file is part of the Alfresco software.
- * If the software was purchased under a paid Alfresco license, the terms of
- * the paid license agreement will prevail.  Otherwise, the software is
+ * This file is part of the Alfresco software. 
+ * If the software was purchased under a paid Alfresco license, the terms of 
+ * the paid license agreement will prevail.  Otherwise, the software is 
  * provided under the following open source license terms:
- *
+ * 
  * Alfresco is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Alfresco is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
 package org.alfresco.repo.webdav;
 
+import org.alfresco.model.ContentModel;
+import org.alfresco.repo.content.filestore.FileContentReader;
+import org.alfresco.repo.web.util.HttpRangeProcessor;
+import org.alfresco.service.cmr.model.FileFolderService;
+import org.alfresco.service.cmr.model.FileInfo;
+import org.alfresco.service.cmr.model.FileNotFoundException;
+import org.alfresco.service.cmr.repository.*;
+import org.alfresco.service.cmr.repository.datatype.DefaultTypeConverter;
+import org.alfresco.service.cmr.repository.datatype.TypeConverter;
+import org.alfresco.service.namespace.QName;
+import org.springframework.extensions.surf.util.I18NUtil;
+import org.springframework.extensions.surf.util.URLEncoder;
+
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
@@ -35,25 +49,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.StringTokenizer;
-
-import javax.servlet.http.HttpServletResponse;
-
-import org.alfresco.model.ContentModel;
-import org.alfresco.repo.content.filestore.FileContentReader;
-import org.alfresco.repo.web.util.HttpRangeProcessor;
-import org.alfresco.service.cmr.model.FileFolderService;
-import org.alfresco.service.cmr.model.FileInfo;
-import org.alfresco.service.cmr.model.FileNotFoundException;
-import org.alfresco.service.cmr.repository.ContentData;
-import org.alfresco.service.cmr.repository.ContentReader;
-import org.alfresco.service.cmr.repository.MimetypeService;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.Path;
-import org.alfresco.service.cmr.repository.datatype.DefaultTypeConverter;
-import org.alfresco.service.cmr.repository.datatype.TypeConverter;
-import org.alfresco.service.namespace.QName;
-import org.springframework.extensions.surf.util.I18NUtil;
 
 /**
  * Implements the WebDAV GET method
@@ -259,6 +254,8 @@ public class GetMethod extends WebDAVMethod
                 long modDate = DefaultTypeConverter.INSTANCE.longValue(modifiedDate);
                 m_response.setHeader(WebDAV.HEADER_LAST_MODIFIED, WebDAV.formatHeaderDate(modDate));
             }
+            
+            m_response.setHeader("Content-Disposition", getContentDispositionHeader(nodeInfo));
 
             ContentReader reader = fileFolderService.getReader(realNodeInfo.getNodeRef());
             // ensure that we generate something, even if the content is missing
@@ -348,6 +345,42 @@ public class GetMethod extends WebDAVMethod
                 reader.getContent(m_response.getOutputStream());
             }
         }
+    }
+
+    protected String getContentDispositionHeader(FileInfo nodeInfo)
+    {
+        String filename = nodeInfo.getName();
+        StringBuilder sb = new StringBuilder();
+        sb.append("attachment; filename=\"");
+        for(int i = 0; i < filename.length(); i++)
+        {
+            char c = filename.charAt(i);
+            if(isValidQuotedStringHeaderParamChar(c))
+            {
+                sb.append(c);
+            }
+            else
+            {
+                sb.append(" ");
+            }
+        }
+        sb.append("\"; filename*=UTF-8''");
+        sb.append(URLEncoder.encode(filename));
+        return sb.toString();
+    }
+    
+    protected boolean isValidQuotedStringHeaderParamChar(char c)
+    {
+        // see RFC2616 section 2.2: 
+        // qdtext         = <any TEXT except <">>
+        // TEXT           = <any OCTET except CTLs, but including LWS>
+        // CTL            = <any US-ASCII control character (octets 0 - 31) and DEL (127)>
+        // A CRLF is allowed in the definition of TEXT only as part of a header field continuation.
+        // Note: we dis-allow header field continuation
+        return     (c < 256)  // message header param fields must be ISO-8859-1. Lower 256 codepoints of Unicode represent ISO-8859-1
+                && (c != 127) // CTL - see RFC2616 section 2.2
+                && (c != '"') // <">
+                && (c > 31);  // CTL - see RFC2616 section 2.2
     }
 
     /**
@@ -655,7 +688,7 @@ public class GetMethod extends WebDAVMethod
         }
         catch (Throwable e)
         {
-            logger.error(e.getMessage(),e);
+            logger.error(e);
 
             if (writer != null)
             {

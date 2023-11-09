@@ -25,17 +25,17 @@
  */
 package org.alfresco.repo.webdav;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.alfresco.error.AlfrescoRuntimeException;
-import org.alfresco.repo.Client;
-import org.alfresco.repo.Client.ClientType;
 import org.alfresco.repo.activities.ActivityType;
 import org.alfresco.service.cmr.activities.ActivityPoster;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.sync.repo.Client;
+import org.alfresco.sync.repo.Client.ClientType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * WebDAV methods may use an instance of this class to post activity data.

@@ -34,8 +34,8 @@
             </goals>
             <phase>package</phase>
             <configuration>
-              <sourceFile>${project.build.directory}/classes/org/alfresco/repo/search/impl/lucene/SolrJSONResultSet.class</sourceFile>
-              <destinationFile>${project.build.directory}/fixes/org/alfresco/repo/search/impl/lucene/SolrJSONResultSet.class</destinationFile>
+              <sourceFile>${project.build.directory}/classes/org/alfresco/repo/search/impl/solr/SolrJSONResultSet.class</sourceFile>
+              <destinationFile>${project.build.directory}/fixes/org/alfresco/repo/search/impl/solr/SolrJSONResultSet.class</destinationFile>
             </configuration>
           </execution>
           <execution>
@@ -91,6 +91,17 @@
             <configuration>
               <sourceFile>${project.build.directory}/classes/net/sf/jooreports/converter/DocumentFamily.class</sourceFile>
               <destinationFile>${project.build.directory}/fixes/net/sf/jooreports/converter/DocumentFamily.class</destinationFile>
+            </configuration>
+          </execution>
+          <execution>
+            <id>fix7</id>
+            <goals>
+              <goal>rename</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <sourceFile>${project.build.directory}/classes/org/alfresco/repo/web/scripts/solr/NodesMetaDataGet.class</sourceFile>
+              <destinationFile>${project.build.directory}/fixes/org/alfresco/repo/web/scripts/solr/NodesMetaDataGet.class</destinationFile>
             </configuration>
           </execution>
         </executions>
@@ -229,6 +240,7 @@
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -282,6 +294,11 @@
     </dependency>
 
     <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-queryparser</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
@@ -289,11 +306,12 @@
     <dependency>
       <groupId>org.springframework.security.extensions</groupId>
       <artifactId>spring-security-saml2-core</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.aspectj</groupId>
-      <artifactId>aspectjweaver</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcprov-jdk15</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -390,6 +408,12 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.reactivestreams</groupId>
+      <artifactId>reactive-streams</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -528,6 +552,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.glassfish.jersey.inject</groupId>
+      <artifactId>jersey-hk2</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.glassfish.jersey.media</groupId>
       <artifactId>jersey-media-jaxb</artifactId>
       <scope>runtime</scope>
@@ -650,7 +680,13 @@
     </dependency>
 
     <dependency>
-      <groupId>io.swagger</groupId>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-commons</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>io.swagger.core.v3</groupId>
       <artifactId>swagger-annotations</artifactId>
       <scope>runtime</scope>
     </dependency>
@@ -658,6 +694,12 @@
     <dependency>
       <groupId>io.swagger.core.v3</groupId>
       <artifactId>swagger-jaxrs2</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>io.swagger.parser.v3</groupId>
+      <artifactId>swagger-parser</artifactId>
       <scope>runtime</scope>
     </dependency>
 
@@ -679,6 +721,10 @@
         <exclusion>
           <groupId>log4j</groupId>
           <artifactId>log4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>dom4j</groupId>
+          <artifactId>dom4j</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -713,34 +759,24 @@
       <scope>runtime</scope>
     </dependency>
 
-
     <!--test-->
 
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>5.8.2</version>
+      <version>5.9.2</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>3.6.28</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-inline</artifactId>
-      <version>3.6.28</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-junit-jupiter</artifactId>
-      <version>3.6.28</version>
       <scope>test</scope>
     </dependency>
 

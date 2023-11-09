@@ -2,7 +2,7 @@ package org.edu_sharing.metadataset.v2;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.log4j.Logger;
-import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.json.simple.JSONValue;

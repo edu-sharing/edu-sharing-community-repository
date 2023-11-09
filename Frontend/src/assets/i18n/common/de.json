@@ -1271,6 +1271,72 @@
     },
     "COPIED_TO_CLIPBOARD_NOTICE": "Der Einbettungscode wurde in die Zwischenablage kopiert."
   },
+  "NOTIFICATION_LIST": {
+    "UNREAD_COUNT": "{{count}} ungelesene Benachrichtigungen",
+    "TITLE": "Benachrichtigungen",
+    "SETTINGS": "Benachrichtigungseinstellungen",
+    "RELOAD": "Aktualisieren",
+    "MARK_ALL_READ": "Alles als gelesen markieren",
+    "SHOW_READ": "Gelesene Benachrichtigungen anzeigen",
+    "EMPTY_UNREAD": "Keine ungelesenen Benachrichtigungen",
+    "EMPTY_ALL": "Keine Benachrichtigungen",
+    "DESCRIPTIONS": {
+      "AddToCollectionEvent": "{{creator}} hat das Material \"{{title}}\" der Sammlung {{collection}} hinzugefügt.",
+      "ProposeForCollectionEvent": "{{creator}} hat das Material \"{{title}}\" für die Sammlung {{collection}} vorgeschlagen.",
+      "CommentEvent": "{{creator}} hat einen Kommentar am Material \"{{title}}\" verfasst.",
+      "InviteEvent": "{{creator}} hat das Objekt \"{{title}}\" für Sie freigegeben.",
+      "NodeIssueEvent": "{{creator}} hat das Problem \"{{reason}}\" am Material \"{{title}}\" gemeldet.",
+      "RatingEvent": "Es wurde eine Bewertung für das Material \"{{title}}\" abgegeben.",
+      "WorkflowEvent": "{{creator}} hat den Workflow-Status vom Material \"{{title}}\" auf \"{{workflowStatus}}\" geändert.",
+      "MetadataSuggestionEvent": ""
+    }
+  },
+  "NOTIFICATION": {
+    "MENU": "Benachrichtigungen",
+    "TITLE": "Benachrichtigungseinstellungen",
+    "SUBTITLE": "Einstellungen zu Benachrichtigungen & Aktualisierungen",
+    "CONFIG": {
+      "uniformly": "Für alle Benachrichtigungstypen",
+      "uniformly_DESCRIPTION": "Der Intervall für Benachrichtigungen wird, unabhängig von der Art der Nachricht, global festgelegt",
+      "individual": "Pro Benachrichtigungstyp",
+      "individual_DESCRIPTION": "Der Intervall für Benachrichtigungen kann pro Benachrichtigungstyp individuell festgelegt werden"
+    },
+    "PERMISSION": {
+      "consumer": "Sie haben Leserechte auf das Objekt.",
+      "collaborator": "Sie haben Änderungsrechte für das Objekt.",
+      "read": "read",
+      "write": "write",
+      "delete": "delete",
+      "deletechildren": "delete subordinate elements",
+      "deletenode": "delete node",
+      "addchildren": "add subordinate elements",
+      "editor": "editor",
+      "contributer": "contributor",
+      "coordinator": "Sie haben alle Rechte auf das Objekt.",
+      "ccpublish": "Sie können das Objekt in einem angebundenen System (z.B. ein Lernmanagementsystem) verwenden.",
+      "readpermissions": "read permissions",
+      "changepermissions": "change permissions",
+      "all": "all"
+    },
+    "SAVED": "Benachrichtigungs-Einstellungen wurden gespeichert",
+    "INTERVAL_LABEL": "Benachrichtigungsintervall",
+    "INTERVAL": {
+      "immediately": "Sofort",
+      "daily": "Täglich",
+      "weekly": "Wöchentlich",
+      "disabled": "Keine Benachrichtigungen"
+    },
+    "GROUP": {
+      "addToCollectionEvent": "Inhalte in Sammlung eingefügt",
+      "commentEvent": "Kommentare an Inhalten",
+      "inviteEvent": "Einladungen zu Materialien",
+      "nodeIssueEvent": "Problemmeldungen zu Materialien",
+      "ratingEvent": "Bewertungen an Materialien",
+      "workflowEvent": "Als Workflow-Zuständiger zugewiesen",
+      "metadataSuggestionEvent": "Vorschlag für Metadaten",
+      "proposeForCollectionEvent": "Vorschläge für Sammlungen"
+    }
+  },
   "API_ERROR": {
     "RELOAD_NOTICE_TITLE": "Seite muss neugeladen werden",
     "RELOAD_NOTICE": "Beim Laden von wichtigen Informationen ist etwas schief gegangen. Bitte laden Sie die Seite neu.",

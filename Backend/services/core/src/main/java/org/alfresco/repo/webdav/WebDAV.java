@@ -25,25 +25,18 @@
  */
 package org.alfresco.repo.webdav;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.Locale;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.TimeZone;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.ContentData;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
-import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.io.Serializable;
+import java.util.*;
 
 /**
  * Helper class used by the WebDAV protocol handling classes

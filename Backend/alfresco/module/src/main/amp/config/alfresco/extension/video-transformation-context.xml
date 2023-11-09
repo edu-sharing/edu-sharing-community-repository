@@ -60,7 +60,7 @@ content.transformer.ffmpeg.mp3.extensions.wav.mp3.supported=true
 <beans>
   <!-- Content Transformations -->
 
-  <!-- Generic FFmpeg transformation worker -->
+  <!-- Generic FFmpeg transformation worker
   <bean id="transformer.worker.ffmpeg.flv" class="org.alfresco.repo.content.transform.RuntimeExecutableContentTransformerWorker">
     <property name="checkCommand">
       <bean class="org.alfresco.util.exec.RuntimeExec">
@@ -119,7 +119,9 @@ content.transformer.ffmpeg.mp3.extensions.wav.mp3.supported=true
     </property>
   </bean>
 
-  <!-- Generic FFmpeg transformation worker -->
+  -->
+
+  <!-- Generic FFmpeg transformation worker
   <bean id="transformer.worker.ffmpeg.mp4" class="org.alfresco.repo.content.transform.RuntimeExecutableContentTransformerWorker">
     <property name="checkCommand">
       <bean class="org.alfresco.util.exec.RuntimeExec">
@@ -142,7 +144,7 @@ content.transformer.ffmpeg.mp3.extensions.wav.mp3.supported=true
               <list>
                 <value>cmd</value>
                 <value>/C</value>
-                <!-- -vpre does not work on Windows - see https://roundup.ffmpeg.org/issue659 -->
+
                 <value>${ffmpeg.exe} ${opts} ${infile_opts} -i "${source}" ${outfile_opts} -fpre "${ffmpeg.base}\share\ffmpeg\libx264-${vpre}.ffpreset" "${target}" 2&gt; NUL</value>
               </list>
             </entry>
@@ -179,8 +181,9 @@ content.transformer.ffmpeg.mp3.extensions.wav.mp3.supported=true
       <ref bean="mimetypeService"/>
     </property>
   </bean>
+  -->
 
-  <!-- Generic MP3 transformation worker -->
+  <!-- Generic MP3 transformation worker
   <bean id="transformer.worker.ffmpeg.mp3" class="org.alfresco.repo.content.transform.RuntimeExecutableContentTransformerWorker">
     <property name="checkCommand">
       <bean class="org.alfresco.util.exec.RuntimeExec">
@@ -256,4 +259,5 @@ content.transformer.ffmpeg.mp3.extensions.wav.mp3.supported=true
       <ref bean="transformer.worker.ffmpeg.mp3"/>
     </property>
   </bean>
+  -->
 </beans>

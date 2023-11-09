@@ -610,6 +610,11 @@
 					<type>d:text</type>
 					<mandatory>true</mandatory>
 				</property>
+				<!-- edu-sharing customization: notification config as json -->
+				<property name="ccm:userNotificationPreferences">
+					<type>d:text</type>
+					<mandatory>true</mandatory>
+				</property>
 				<!-- edu-sharing show or hide email in profile: true=show , false=hide   -->
 				<property name="ccm:showEmail">
 					<type>d:boolean</type>

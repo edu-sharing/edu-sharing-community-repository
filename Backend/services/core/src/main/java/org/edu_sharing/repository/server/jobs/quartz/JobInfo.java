@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.log4j.Level;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
+import org.quartz.impl.JobDetailImpl;
 import org.quartz.utils.Key;
 
 import java.io.Serializable;
@@ -36,8 +37,8 @@ public class JobInfo implements Serializable {
 
     public boolean equalsDetail(JobDetail other) {
         return
-                Objects.equals(other.getName(), jobName) &&
-                        Objects.equals(other.getGroup(), jobGroup);
+                Objects.equals(((JobDetailImpl)other).getName(), jobName) &&
+                        Objects.equals(((JobDetailImpl)other).getGroup(), jobGroup);
     }
 
     @Override
@@ -69,8 +70,8 @@ public class JobInfo implements Serializable {
 
     public void setJobDetail(JobDetail jobDetail) {
         jobClass = jobDetail.getJobClass();
-        jobName = jobDetail.getName();
-        jobGroup = jobDetail.getGroup();
+        jobName = ((JobDetailImpl)jobDetail).getName();
+        jobGroup = ((JobDetailImpl)jobDetail).getGroup();
         jobDataMap = jobDetail.getJobDataMap();
     }
 

@@ -1,9 +1,11 @@
 package org.edu_sharing.repository.server.importer;
 
 import org.apache.commons.collections.CollectionUtils;
+
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
+
 
 import java.sql.*;
 import java.text.Normalizer;

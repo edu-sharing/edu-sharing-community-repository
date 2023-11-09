@@ -1,48 +1,29 @@
 /*
- * Copyright (C) 2005-2013 Alfresco Software Limited.
- *
- * This file is part of Alfresco
- *
+ * #%L
+ * Alfresco Remote API
+ * %%
+ * Copyright (C) 2005 - 2016 Alfresco Software Limited
+ * %%
+ * This file is part of the Alfresco software. 
+ * If the software was purchased under a paid Alfresco license, the terms of 
+ * the paid license agreement will prevail.  Otherwise, the software is 
+ * provided under the following open source license terms:
+ * 
  * Alfresco is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Alfresco is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
+ * #L%
  */
 package org.alfresco.repo.webdav;
-
-import java.io.BufferedReader;
-import java.io.CharArrayWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.SocketException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.regex.Pattern;
-
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.LimitedStreamCopier;
@@ -56,11 +37,7 @@ import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.model.FileNotFoundException;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.ContentService;
-import org.alfresco.service.cmr.repository.MimetypeService;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -72,12 +49,24 @@ import org.apache.commons.logging.LogFactory;
 import org.dom4j.DocumentHelper;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.w3c.dom.Document;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.*;
+import java.net.SocketException;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 
 /**
@@ -170,8 +159,8 @@ public abstract class WebDAVMethod
      *            HttpServletRequest
      * @param resp
      *            HttpServletResponse
-     * @param registry
-     *            ServiceRegistry
+     * @param davHelper
+     *            WebDAVHelper
      * @param rootNode
      *            NodeRef
      */
@@ -333,7 +322,7 @@ public abstract class WebDAVMethod
     /**
      * Executes the method, wrapping the call to {@link #executeImpl()} in an appropriate transaction
      * and handling the error conditions.
-     * @throws IOException 
+     * @throws WebDAVServerException
      */
     public void execute() throws WebDAVServerException
     {
@@ -880,8 +869,8 @@ public abstract class WebDAVMethod
      * Generates the lock discovery XML response
      * 
      * @param xml XMLWriter
-     * @param lockNode NodeRef
-     * @param lockInfo
+     * @param lockNodeInfo FileInfo
+     * @param lockInfo LockInfo
      */
     protected void generateLockDiscoveryXML(XMLWriter xml, FileInfo lockNodeInfo, LockInfo lockInfo) throws Exception
     {
@@ -901,7 +890,7 @@ public abstract class WebDAVMethod
      * Generates the lock discovery XML response
      * 
      * @param xml XMLWriter
-     * @param lockNode NodeRef
+     * @param lockNodeInfo FileInfo
      * @param emptyNamespace boolean True if namespace should be empty. Used to avoid bugs in WebDAV clients.
      * @param scope String lock scope
      * @param depth String lock depth
@@ -1013,32 +1002,8 @@ public abstract class WebDAVMethod
      */
     protected LockInfo checkNode(FileInfo fileInfo, boolean ignoreShared, boolean lockMethod) throws WebDAVServerException
     {
-       // LockInfo nodeLockInfo = getNodeLockInfo(fileInfo);
-        
-    	/**
-    	 * 130215
-    	 * 
-    	 * edu-sharing customization: we have to run this as admin cause of linked group folders
-    	 * 
-    	 * this Problem only occurs on windows clients
-    	 * there is a method that asks all parents of the current groupfolder which leads to an
-    	 * AccessDeniedException 
-    	 *  
-    	 *  !!!TODO can cause perfomance Problems when many groupfolder exsist
-    	 */
-    	//LockInfo nodeLockInfo = getNodeLockInfo(fileInfo.getNodeRef());
-    	
-    	final FileInfo finalFileInfo = fileInfo;
-    	AuthenticationUtil.RunAsWork<LockInfo> runAsAdmin = new AuthenticationUtil.RunAsWork<LockInfo>(){
-    		@Override
-    		public LockInfo doWork() throws Exception {
-    			LockInfo lockInfo = getNodeLockInfo(finalFileInfo);
-    	        return lockInfo;
-    		}
-    	};
-    	LockInfo nodeLockInfo = AuthenticationUtil.runAs(runAsAdmin, ApplicationInfoList.getHomeRepository().getUsername());
-    	
-    	NodeRef nodeRef = fileInfo.getNodeRef();
+        LockInfo nodeLockInfo = getNodeLockInfo(fileInfo);
+        NodeRef nodeRef = fileInfo.getNodeRef();
 
         // Regardless of WebDAV locks, if we can't write to this node, then it's locked!
         if (getDAVHelper().isLockedAndReadOnly(nodeRef))
@@ -1074,8 +1039,8 @@ public abstract class WebDAVMethod
     /**
      * Checks if write operation can be performed on node.
      * 
-     * @param fileInfo
-     * @return
+     * @param fileInfo FileInfo
+     * @return LockInfo
      * @throws WebDAVServerException if node has shared or exclusive lock
      *                               or If header preconditions failed
      */
@@ -1231,7 +1196,7 @@ public abstract class WebDAVMethod
     /**
      * Returns node Lock token in consideration of WebDav lock depth. 
      * 
-     * @param fileInfo node
+     * @param nodeInfo FileInfo
      * @return String Lock token
      */
     protected LockInfo getNodeLockInfo(final FileInfo nodeInfo)
@@ -1340,7 +1305,7 @@ public abstract class WebDAVMethod
      * Checks if a node is directly locked. A direct lock is one associated with the node itself
      * rather than associated with some ancestor.
      * 
-     * @param nodeInfo
+     * @param nodeInfo FileInfo
      * @return The LockInfo if the node is <strong>locked</strong>, or null otherwise.
      */
     private LockInfo getNodeLockInfoDirect(FileInfo nodeInfo)
@@ -1362,7 +1327,7 @@ public abstract class WebDAVMethod
     /**
      * Checks whether a parent node has a lock that is valid for all its descendants.
      * 
-     * @param parent
+     * @param parent NodeRef
      * @return The LockInfo if the node is <strong>locked</strong>, or null otherwise.
      */
     private LockInfo getNodeLockInfoIndirect(NodeRef parent)
@@ -1436,7 +1401,7 @@ public abstract class WebDAVMethod
     /**
      * Flushes all XML written so far to the response
      * 
-     * @param xml XMLWriter that should be flushed
+     * @param writer XMLWriter that should be flushed
      */
     protected final void flushXML(XMLWriter writer) throws IOException
     {
@@ -1631,7 +1596,7 @@ public abstract class WebDAVMethod
 
     /**
      * Get the site ID (short-name) that the current request relates to. The site ID
-     * will be {@link DEFAULT_SITE_ID} if not specifically set. 
+     * will be {@code DEFAULT_SITE_ID} if not specifically set.
      * 
      * @return The site ID
      */
@@ -1639,24 +1604,7 @@ public abstract class WebDAVMethod
     {
         if (siteId == null)
         {
-        	/**
-        	 * edu-sharing fix: determineSiteId runs the parent's up. 
-        	 * this leads to an accessdenied exception when the object is in edugroup context
-        	 * and there is a parent where the user don't has read permissions.
-        	 * 
-        	 * so we use admin here
-        	 */
-        	AuthenticationUtil.RunAsWork<String> runAsAdmin = new AuthenticationUtil.RunAsWork<String>(){
-        		@Override
-        		public String doWork() throws Exception {
-        			
-        	        return getDAVHelper().determineSiteId(WebDAVMethod.this);
-        		}
-        	};
-        	siteId = AuthenticationUtil.runAs(runAsAdmin, ApplicationInfoList.getHomeRepository().getUsername());
-        	
-        	
-            //siteId = getDAVHelper().determineSiteId(this);
+            siteId = getDAVHelper().determineSiteId(this);
         }
         return siteId;
     }

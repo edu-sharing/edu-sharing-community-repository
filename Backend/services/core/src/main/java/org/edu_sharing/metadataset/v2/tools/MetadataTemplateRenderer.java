@@ -1,6 +1,6 @@
 package org.edu_sharing.metadataset.v2.tools;
 
-import jersey.repackaged.com.google.common.collect.Lists;
+import com.google.common.collect.Lists;
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.vcard.VCard;
 import net.sourceforge.cardme.vcard.types.ExtendedType;
@@ -586,7 +586,7 @@ public class MetadataTemplateRenderer {
 			}
 			if(widget.getType().equals("checkbox")) {
 				try{
-					value = MetadataHelper.getTranslation(new Boolean(value) ? "boolean_yes" : "boolean_no");
+					value = MetadataHelper.getTranslation(Boolean.parseBoolean(value) ? "boolean_yes" : "boolean_no");
 				}catch(Throwable t){
 					logger.info("Error parsing value "+value+" for checkbox widget "+widget.getId(),t);
 				}

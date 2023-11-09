@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.edu_sharing</groupId>
+    <artifactId>edu_sharing-community-repository-deploy-docker-build</artifactId>
+    <version>git</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>edu_sharing-community-repository-deploy-docker-build-service</artifactId>
+  <packaging>jar</packaging>
+
+  <name>edu_sharing-community-repository-deploy-docker-build-service</name>
+
+  <build>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+
+          <execution>
+            <id>artifacts</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                alfresco-content-services-share-distribution,
+                alfresco-pdf-renderer,
+                alfresco-content-services-community-distribution,
+                edu_sharing-community-repository-backend-tomcat,
+                jmx_prometheus_javaagent,
+                postgresql,
+                redisson-all,
+                redisson-tomcat-9
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/build/artifacts</outputDirectory>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>webapp</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-webapp
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/build/webapp</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>config-defaults</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-config-defaults
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/build/shared/classes/config/defaults</outputDirectory>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>config-node</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-config-node
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/build/shared/assets/node</outputDirectory>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>config-cluster</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-config-cluster
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/build/shared/assets/cluster</outputDirectory>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>alfresco-1</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-backend-alfresco-module
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/build/amps/alfresco/1</outputDirectory>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>rest-api</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-backend-services-rest-api
+              </includeArtifactIds>
+              <excludes>META-INF/**</excludes>
+              <outputDirectory>${project.build.directory}/build/rest-api</outputDirectory>
+            </configuration>
+          </execution>
+
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>build</id>
+            <goals>
+              <goal>build</goal>
+            </goals>
+            <phase>install</phase>
+          </execution>
+          <execution>
+            <id>push</id>
+            <goals>
+              <goal>push</goal>
+            </goals>
+            <phase>deploy</phase>
+          </execution>
+        </executions>
+        <configuration>
+          <images>
+            <image>
+              <name>${docker.repository}/${docker.prefix}-deploy-docker-build-service:${docker.tag}</name>
+            </image>
+          </images>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-alfresco-module</artifactId>
+      <type>amp</type>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-services-rest-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-tomcat</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-config-defaults</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-config-node</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-config-cluster</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-webapp</artifactId>
+      <type>war</type>
+    </dependency>
+
+  </dependencies>
+</project>

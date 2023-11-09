@@ -1,3 +1,9 @@
+alf 7.2
+----------
+Alle Klassen außer Webdavlockservice wurden kopiert von alfresco sourcen.
+Edu_SharingPutMethod erstmal nicht mehr verwendet evt. ist der bug von alfresco gefixt
+WebdavMethod wie beim vorgänger (keine Änderungen)
+
 alf5.2
 -----------
 Alle Klassen außer Webdavlockservice wurden kopiert von alfresco sourcen.

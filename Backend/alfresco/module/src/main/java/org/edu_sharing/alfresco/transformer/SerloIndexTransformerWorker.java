@@ -1,7 +1,5 @@
 package org.edu_sharing.alfresco.transformer;
 
-import org.alfresco.repo.content.transform.ContentTransformerHelper;
-import org.alfresco.repo.content.transform.ContentTransformerWorker;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.TransformationOptions;
@@ -13,7 +11,8 @@ import org.json.simple.parser.JSONParser;
 import java.util.Map;
 import java.util.Set;
 
-public class SerloIndexTransformerWorker extends ContentTransformerHelper implements ContentTransformerWorker {
+public class SerloIndexTransformerWorker {};
+/*extends ContentTransformerHelper implements ContentTransformerWorker {
 
     Logger logger = Logger.getLogger(SerloIndexTransformerWorker.class);
 
@@ -81,4 +80,4 @@ public class SerloIndexTransformerWorker extends ContentTransformerHelper implem
         }
 
     }
-}
+}*/

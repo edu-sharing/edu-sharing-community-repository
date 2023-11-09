@@ -1,6 +1,5 @@
 package org.edu_sharing.service.tracking;
 
-import bsh.StringUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;

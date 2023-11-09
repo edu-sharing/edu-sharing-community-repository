@@ -20,6 +20,7 @@ import { ColorHelper, PreferredColor } from '../../util/color-helper';
 import { take } from 'rxjs/operators';
 import { DropdownComponent } from '../../dropdown/dropdown.component';
 import { Toast } from '../../services/abstract/toast.service';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
     selector: 'es-node-entries-card',
@@ -38,7 +39,7 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
     @Input() node: T;
     dropdownLeft: number;
     dropdownTop: number;
-    showRatings: boolean;
+    showRatings = new BehaviorSubject(false);
     isCollection: boolean;
     constructor(
         public entriesService: NodeEntriesService<T>,
@@ -113,11 +114,12 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
 
     async ngOnInit() {
         await this.configService.observeConfig().pipe(take(1)).toPromise();
-        this.showRatings =
-            this.configService.instant('', 'none') !== 'none' &&
-            (await this.authenticationService.hasToolpermission(
-                RestConstants.TOOLPERMISSION_RATE_READ,
-            ));
+        this.showRatings.next(
+            this.configService.instant('rating.mode', 'none') !== 'none' &&
+                (await this.authenticationService.hasToolpermission(
+                    RestConstants.TOOLPERMISSION_RATE_READ,
+                )),
+        );
     }
 
     getTemplate(name: CustomFieldSpecialType) {

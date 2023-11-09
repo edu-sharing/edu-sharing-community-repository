@@ -1,0 +1,515 @@
+########################################################################################################################
+# GLOBAL
+########################################################################################################################
+
+global:
+
+  annotations: {}
+
+  cluster:
+
+    cert:
+      annotations: {}
+
+    domain: cluster.local
+
+    ingress:
+      ingressClassName: ""
+
+    istio:
+      enabled: false
+      gateway:
+        selector:
+          app: istio-ingressgateway
+
+    pdb:
+      enabled: false
+
+    storage:
+
+      data:
+        permission: false
+        spec: {}
+
+      share:
+        permission: false
+        spec: {}
+
+  debug: false
+
+  image:
+    pullPolicy: Always
+    pullSecrets: []
+    registry: ${docker.registry}
+    repository: ${docker.repository}
+
+  metrics:
+    scrape:
+      interval: 10s
+      timeout: 10s
+    servicemonitor:
+      enabled: false
+
+  patroni:
+    enabled: false
+    name: edusharing-repository-postgresql
+    secrets: "credentials.postgresql.acid.zalan.do"
+    team: edusharing
+
+  password: ""
+
+  security: {}
+
+########################################################################################################################
+# LOCAL
+########################################################################################################################
+
+nameOverride: edusharing-repository-service
+
+image:
+  prefix: ${docker.prefix}
+  tag: ${docker.tag}
+
+images:
+  minideb: ${docker.edu_sharing.community.common.minideb}
+  varnish:
+    cache: ${docker.edu_sharing.community.common.varnish}
+    exporter: ${docker.edu_sharing.community.common.varnish}
+
+########################################################################################################################
+
+replicaCount: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 3
+  maxReplicas: 5
+  targetCPU: 80
+
+########################################################################################################################
+
+service:
+
+  port:
+    api:
+      internal: 8080
+      external: 8081
+    gossip: 5701
+    metrics:
+      api: 9090
+      proxy: 9091
+
+########################################################################################################################
+
+ingress:
+
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/app-root: /edu-sharing
+    nginx.ingress.kubernetes.io/proxy-body-size: "5g"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
+
+  hosts:
+  - repository.127.0.0.1.nip.io
+
+  tls: []
+#  - secretName: edusharing-repository-tls
+#    hosts:
+#    - repository.127.0.0.1.nip.io
+
+  paths:
+  - /edu-sharing
+
+########################################################################################################################
+
+proxy:
+
+  enabled: false
+  config:
+    backend:
+      connectTimeout: 60
+      firstByteTimeout: 180
+      betweenBytesTimeout: 180
+      maxConnections: 200
+    cache:
+      control: public
+      ttl: 3600
+    deliver:
+      gzip: false
+
+########################################################################################################################
+
+config:
+
+  admin:
+    password: ""
+
+  antivirus:
+    enabled: ${helm.config.antivirus.enabled}
+    host: edusharing-repository-antivirus
+    port: 1344
+    service: squidclamav
+
+  cache:
+    cluster: true
+    database: 0
+    host: edusharing-rediscluster
+    port: 6379
+
+  cluster:
+    enabled: ${helm.config.cluster.enabled}
+    backup:
+      count: 1
+      read: false
+
+  connector:
+
+    external:
+      threads: 200
+      timeout: 20000
+
+    internal:
+      threads: 200
+      timeout: -1
+
+  database:
+    driver: org.postgresql.Driver
+    host: edusharing-repository-postgresql
+    port: 5432
+    database: repository
+    username: repository
+    password: ""
+    protocol: postgresql
+    options: "?sslmode=disable"
+    patroni: {}
+
+    pool:
+      max: 80
+      sql: "SELECT 1"
+
+  guest:
+    username: ""
+    password: ""
+
+  home:
+    appid: local
+    cookieAttributes: ""
+
+  jvm:
+    ram:
+      minPercentage: "75.0"
+      maxPercentage: "75.0"
+
+  metrics:
+    enabled: true
+    relabelings: []
+
+  http:
+    client:
+      disablesni4host: ""
+      proxy:
+        host: ""
+        nonproxyhosts: []
+        proxyhost: ""
+        proxyport: ""
+        proxyuser: ""
+        proxypass: ""
+    server:
+      # additional, allowed origins to allow CORS-Access from
+      allowOrigin: []
+      csp:
+        connect: ""
+        default: ""
+        font: ""
+        frame: ""
+        img: ""
+        media: ""
+        object: ""
+        script: ""
+        style: ""
+      session:
+        timeout: 60
+
+  mail:
+    from: ""
+    addReplyTo: true
+    register:
+      receiver: ""
+    report:
+      receiver: ""
+    server:
+      smtp:
+        host: ""
+        port: ""
+        username: ""
+        password: ""
+        authtype: ""
+
+  mongo:
+    enabled: false
+    host: edusharing-repository-mongo
+    port: 27017
+    database: repository
+    username: repository
+    password: ""
+
+  override:
+    config:
+      application:
+        client: ""
+        mds: ""
+    logging:
+      application: ""
+      server: ""
+
+  saml:
+    enabled: false
+#    config: ""
+#    files: {}
+
+  search:
+
+    elastic:
+      enabled: false
+      host: edusharing-repository-search-elastic-index
+      port: 9200
+
+    solr:
+      host: edusharing-repository-search-solr
+      port: 8080
+
+  transform:
+
+    server:
+      enabled: ${helm.config.transform.enabled}
+      host: edusharing-repository-transform
+      port: 8080
+
+########################################################################################################################
+
+debug: false
+
+########################################################################################################################
+
+persistence:
+
+  data:
+
+    config:
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi
+
+  share:
+
+    config:
+      create: true
+      spec:
+        accessModes: [ "ReadWriteMany" ]
+        resources:
+          requests:
+            storage: 1Gi
+    data:
+      create: true
+      spec:
+        accessModes: [ "ReadWriteMany" ]
+        resources:
+          requests:
+            storage: 5Gi
+
+########################################################################################################################
+
+nodeAffinity: {}
+podAntiAffinity: "soft"
+
+tolerations: []
+
+########################################################################################################################
+
+podAnnotations: {}
+
+podSecurityContext:
+
+  fsGroup: 1000
+  fsGroupChangePolicy: OnRootMismatch
+
+securityContext:
+
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  runAsUser: 1000
+
+########################################################################################################################
+
+terminationGracePeriod: 120
+
+startupProbe:
+
+  failureThreshold: 30
+  initialDelaySeconds: 0
+  periodSeconds: 30
+  successThreshold: 1
+  timeoutSeconds: 10
+
+livenessProbe:
+
+  failureThreshold: 3
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 10
+
+readinessProbe:
+
+  failureThreshold: 1
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 10
+
+########################################################################################################################
+
+resources:
+
+  limits:
+    cpu: 1000m
+    memory: 4Gi
+  requests:
+    cpu: 1000m
+    memory: 4Gi
+
+########################################################################################################################
+
+init:
+
+  permission:
+
+    resources:
+
+      limits:
+        cpu: 125m
+        memory: 512Mi
+      requests:
+        cpu: 125m
+        memory: 512Mi
+
+    securityContext:
+
+      runAsUser: 0
+
+########################################################################################################################
+
+sidecar:
+
+  proxyCache:
+
+    startupProbe:
+
+      failureThreshold: 30
+      initialDelaySeconds: 0
+      periodSeconds: 20
+      successThreshold: 1
+      timeoutSeconds: 10
+
+    livenessProbe:
+
+      failureThreshold: 3
+      initialDelaySeconds: 30
+      periodSeconds: 30
+      timeoutSeconds: 10
+
+    readinessProbe:
+
+      failureThreshold: 1
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 10
+
+    resources:
+
+      limits:
+        cpu: 500m
+        memory: 2Gi
+      requests:
+        cpu: 500m
+        memory: 2Gi
+
+    securityContext:
+
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      runAsUser: 101
+
+  proxyMetrics:
+
+    relabelings: []
+
+    resources:
+
+      limits:
+        cpu: 250m
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 1Gi
+
+    securityContext:
+
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      runAsUser: 101
+
+  transform:
+
+    startupProbe:
+
+      failureThreshold: 30
+      initialDelaySeconds: 0
+      periodSeconds: 20
+      successThreshold: 1
+      timeoutSeconds: 10
+
+    livenessProbe:
+
+      failureThreshold: 3
+      initialDelaySeconds: 30
+      periodSeconds: 30
+      timeoutSeconds: 10
+
+    readinessProbe:
+
+      failureThreshold: 1
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 10
+
+    resources:
+
+      limits:
+        cpu: 500m
+        memory: 2Gi
+      requests:
+        cpu: 500m
+        memory: 2Gi
+
+    securityContext:
+
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      runAsUser: 1000
+
+########################################################################################################################

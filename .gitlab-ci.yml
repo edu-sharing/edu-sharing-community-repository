@@ -1,56 +1,54 @@
 variables:
-  GIT_SUBMODULE_STRATEGY: recursive
+  COMMON_BIND_HOST: "0.0.0.0"
+  DEPLOY_DOCKER_HELM: "false"
+  DEPLOY_TIMESTAMP: "$DEPLOY_TIMESTAMP"
+  DOCKER_DRIVER: "$DIND_DRIVER"
+  DOCKER_HOST: "$DIND_HOST"
+  DOCKER_TLS_CERTDIR: "$DIND_TLS_CERTDIR"
   MAVEN_CLI: "-Ddocker.registry=$DOCKER_REGISTRY -Dhelm.deploy.url=$HELM_REGISTRY -Dhelm.deploy.type=$HELM_TYPE -Dmaven.deploy.releases=$MAVEN_DEPLOY_RELEASES -Dmaven.deploy.snapshots=$MAVEN_DEPLOY_SNAPSHOTS --batch-mode --errors --fail-fast --show-version"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+  GIT_SUBMODULE_STRATEGY: recursive
 
 default:
-  image: maven:3.8.4-jdk-8
+  #image: maven:3.8.4-eclipse-temurin-17
+  image: maven:3.9.2-amazoncorretto-17-debian-bullseye
+  services:
+    - name: "$DIND_IMAGE"
+      alias: docker
+      entrypoint: [ "env", "-u", "DOCKER_HOST" ]
+      command: [ "dockerd-entrypoint.sh" ]
 
 stages:
   - test
   - deploy
 
-unittest frontend:
-  stage: test
-  variables:
-    NODE_VERSION: 16
-    CHROME_BIN: /usr/bin/chromium-browser
-  image: node:$NODE_VERSION-alpine3.16
-  cache:
-    key:
-      files:
-        - Frontend/package-lock.json
-      prefix: node-modules-$NODE_VERSION
-    paths:
-      - Frontend/node_modules
-  before_script:
-    - apk add chromium
-    - mkdir -p Frontend/projects/edu-sharing-api/build/
-    - cp Backend/services/rest/api/src/main/resources/openapi.json Frontend/projects/edu-sharing-api/build/openapi.json
-    - cd Frontend/projects/edu-sharing-api
-    - npm ci
-    - npm run generate-api
-    - cd ../..
-    # Install dependencies on cache miss, e.g., when first running on a ci runner.
-    - ([[ -d node_modules ]] || npm ci)
-  script:
-    - npm run prebuild
-    - npm run test-ci
-
 deploy:
   stage: deploy
-  needs: []
+  cache:
+    - key: $CI_BUILD_REF_NAME
+      paths:
+        - .m2/repository
+    - key:
+        files:
+          - Frontend/package-lock.json
+        prefix: node-modules-$NODE_VERSION
+      paths:
+        - Frontend/node_modules
   rules:
     - if: $CI_COMMIT_BRANCH =~ /^maven\/release\/.*/ && $CI_PIPELINE_SOURCE == "pipeline"
     - if: $CI_COMMIT_TAG && $CI_PIPELINE_SOURCE == "pipeline"
     - if: $CI_COMMIT_BRANCH =~ /^maven\// && $CI_COMMIT_BRANCH !~ /^maven\/release\/.*/ && $CI_COMMIT_TAG == null
+  before_script:
+    - apt-get update -y
+    - apt-get install -y git
   script:
     - mvn $MAVEN_CLI -s .mvn/settings.xml deploy
 
 .frontend_job: &frontend_job
   variables:
     NODE_VERSION: 16
-  image: node:$NODE_VERSION
+  stage: test
+  image: node:$NODE_VERSION-alpine3.16
   rules:
     - if: $CI_COMMIT_BRANCH =~ /^maven\/release\/.*/ && $CI_PIPELINE_SOURCE == "pipeline"
     - if: $CI_COMMIT_TAG && $CI_PIPELINE_SOURCE == "pipeline"
@@ -69,48 +67,135 @@ deploy:
     # Install dependencies on cache miss, e.g., when first running on a ci runner.
     - ([[ -d node_modules ]] || npm ci)
 
-# build:
-#   <<: *frontend_job
-#   stage: build
-#   script:
-#     - npm run build
 
 check formatting:
   <<: *frontend_job
-  stage: test
-  needs: []
+  allow_failure: true
   script:
     - npm run check:format
 
 check linting:
   <<: *frontend_job
-  stage: test
-  needs: []
+  allow_failure: true
   script:
     - npm run check:lint
 
-# e2e:
-#   <<: *frontend_job
-#   stage: test
-#   needs: []
-#   image: mcr.microsoft.com/playwright:v1.22.0-focal
-#   variables:
-#     NODE_VERSION: 16  # Matches the preinstalled version of node in the image.
-#     # Test against external frontend.
-#     # E2E_TEST_BASE_URL: http://192.168.16.171/edu-sharing/ 
-#     BACKEND_URL: http://192.168.16.171
-#   script:
-#     - node -v
-#     - npm -v
-#     - npm start &
-#     - sleep 120
-#     - npm run e2e
-#   artifacts:
-#     paths:
-#       - Frontend/playwright-report/
-#     when: on_failure
-#   rules:
-#     - if: $CI_COMMIT_BRANCH =~ /^maven\/release\/.*/ && $CI_PIPELINE_SOURCE == "pipeline"
-#     - if: $CI_COMMIT_TAG && $CI_PIPELINE_SOURCE == "pipeline"
-#     - if: $CI_COMMIT_BRANCH !~ /^maven\/release\/.*/ && $CI_COMMIT_TAG == null
-#
+
+unittest frontend:
+  <<: *frontend_job
+  variables:
+    NODE_VERSION: 16
+    CHROME_BIN: /usr/bin/chromium-browser
+  before_script:
+    - apk add chromium
+    - mkdir -p Frontend/projects/edu-sharing-api/build/
+    - cp Backend/services/rest/api/src/main/resources/openapi.json Frontend/projects/edu-sharing-api/build/openapi.json
+    - cd Frontend/projects/edu-sharing-api
+    - node -v
+    - npm -v
+    - npm ci
+    - npm run generate-api
+    - cd ../..
+    # Install dependencies on cache miss, e.g., when first running on a ci runner.
+    - ([[ -d node_modules ]] || npm ci)
+  script:
+    - npm run prebuild
+    - npm run test-ci
+
+
+
+test docker:
+  stage: test
+  cache:
+    - key: $CI_BUILD_REF_NAME
+      paths:
+        - .m2/repository
+    - key:
+        files:
+          - Frontend/package-lock.json
+        prefix: node-modules-$NODE_VERSION
+      paths:
+        - Frontend/node_modules
+  artifacts:
+    paths:
+      - deploy/docker/compose/target/compose/openapi.json
+      - deploy/docker/build/service/target/build/rest-api/openapi.json
+    when: always
+    expire_in: 3 day
+  before_script:
+    - apt-get update -y
+    - apt-get install -y ca-certificates curl gnupg jq lsb-release wait-for-it
+    - mkdir -p /etc/apt/keyrings
+    - curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    - echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+    - apt-get update -y
+    - apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-compose
+    - apt-get install -y php php-curl php-dom php-gd php-mbstring php-xml php-zip
+    - docker info
+    - docker version
+    - docker login $DOCKER_REGISTRY -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  script:
+    - mkdir -p "$MAVEN_HOME"
+    - mvn $MAVEN_CLI -s .mvn/settings.xml install
+    - pushd deploy/docker/compose/target/compose
+    - docker compose -f 1_repository-common.yml up -d
+    - "until wait-for-it docker:8100 -t 3; do sleep 1; done"
+    - "until [[ $(curl -sSf -w '%{http_code}\n' -o /dev/null -H 'Accept: application/json' http://docker:8100/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3) -eq 200 ]]; do sleep 1; done"
+    - "curl -m 300 -H 'Accept: application/json' --user 'admin:admin' http://docker:8100/edu-sharing/rest/openapi.json | jq -S . > openapi.json"
+    - docker compose -f 1_repository-common.yml down -v
+    - cmp -s openapi.json ../../../build/service/target/build/rest-api/openapi.json || exit 1
+    - popd
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^maven\/release\/.*/ && $CI_PIPELINE_SOURCE == "pipeline"
+    - if: $CI_COMMIT_TAG && $CI_PIPELINE_SOURCE == "pipeline"
+    - if: $CI_COMMIT_BRANCH !~ /^maven\/release\/.*/ && $CI_COMMIT_TAG == null
+
+
+e2e:
+  stage: test
+  cache:
+    - key: $CI_BUILD_REF_NAME
+      paths:
+        - .m2/repository
+    - key:
+        files:
+          - Frontend/package-lock.json
+        prefix: node-modules-$NODE_VERSION
+      paths:
+        - Frontend/node_modules
+  artifacts:
+    paths:
+      - repository/Frontend/src/generated/ng/playwright-report/
+    when: always
+  before_script:
+    - apt-get update -y
+    - apt-get install -y ca-certificates curl gnupg jq lsb-release wait-for-it
+    - mkdir -p /etc/apt/keyrings
+    - curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    - echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+    - apt-get update -y
+    - apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-compose
+    - apt-get install -y php php-curl php-dom php-gd php-mbstring php-xml php-zip
+    - curl -fsSL https://deb.nodesource.com/setup_16.x | bash - && apt-get install -y nodejs
+    - docker login $DOCKER_REGISTRY -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  variables:
+    E2E_TEST_BASE_URL: http://docker:8100/edu-sharing/
+    REPOSITORY_SERVICE_HOST: docker
+    REPOSITORY_SERVICE_PORT: 8100
+  script:
+    - mkdir -p "$MAVEN_HOME"
+    - mvn $MAVEN_CLI -s .mvn/settings.xml install
+    - pushd deploy/docker/compose/target/compose
+    - docker compose -f 1_repository-common.yml up -d
+    - pushd ../../../../../repository/Frontend
+    - npx playwright install --with-deps
+    - "until wait-for-it docker:8100 -t 3; do sleep 1; done"
+    - "until [[ $(curl -sSf -w '%{http_code}\n' -o /dev/null -H 'Accept: application/json' http://docker:8100/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3) -eq 200 ]]; do sleep 1; done"
+    - npm run e2e-prepare-edu-sharing
+    - npm run e2e
+    - popd
+    - docker compose -f 1_repository-common.yml down -v
+    - popd
+  only:
+    variables:
+      - $E2E_TEST == "true"

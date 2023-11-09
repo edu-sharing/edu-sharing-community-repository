@@ -52,7 +52,7 @@ $optionBarHeight: 50px;
     }
     &:not(.grid-card-collection) {
         .card-top-bar {
-            background-color: rgb(var(--palette-primary-200));
+            background-color: var(--palette-primary-200);
         }
     }
     &.grid-card-virtual {

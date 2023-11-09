@@ -1,7 +1,13 @@
 /*
- * Copyright (C) 2005-2013 Alfresco Software Limited.
- *
- * This file is part of Alfresco
+ * #%L
+ * Alfresco Remote API
+ * %%
+ * Copyright (C) 2005 - 2019 Alfresco Software Limited
+ * %%
+ * This file is part of the Alfresco software.
+ * If the software was purchased under a paid Alfresco license, the terms of
+ * the paid license agreement will prevail.  Otherwise, the software is
+ * provided under the following open source license terms:
  *
  * Alfresco is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -15,32 +21,17 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
+ * #L%
  */
 package org.edu_sharing.alfresco.repo.web.scripts.solr;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
-import javax.servlet.http.HttpServletResponse;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
-import org.alfresco.repo.content.transform.ContentTransformer;
-import org.alfresco.repo.content.transform.TransformerDebug;
 import org.alfresco.repo.content.transform.UnsupportedTransformationException;
 import org.alfresco.repo.domain.node.NodeDAO;
+import org.alfresco.repo.rendition2.SynchronousTransformClient;
 import org.alfresco.repo.web.scripts.content.StreamContent;
-import org.alfresco.service.cmr.repository.AssociationRef;
-import org.alfresco.service.cmr.repository.ContentIOException;
-import org.alfresco.service.cmr.repository.ContentReader;
-import org.alfresco.service.cmr.repository.ContentService;
-import org.alfresco.service.cmr.repository.ContentWriter;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.TransformationOptions;
+import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.Pair;
 import org.apache.commons.httpclient.HttpStatus;
@@ -51,10 +42,15 @@ import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
 /**
  * A web service to return the text content (transformed if required) of a node's
  * content property.
- * 
+ *
  * @since 4.0
  */
 public class NodeContentGet extends StreamContent
@@ -62,23 +58,18 @@ public class NodeContentGet extends StreamContent
     private static final String TRANSFORM_STATUS_HEADER = "X-Alfresco-transformStatus";
     private static final String TRANSFORM_EXCEPTION_HEADER = "X-Alfresco-transformException";
     private static final String TRANSFORM_DURATION_HEADER = "X-Alfresco-transformDuration";
-    
+
     private static final Log logger = LogFactory.getLog(NodeContentGet.class);
 
     /**
-     * format definied by RFC 822, see http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.3 
+     * format definied by RFC 822, see http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.3
      */
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z", Locale.US);
 
     private NodeDAO nodeDAO;
     private NodeService nodeService;
     private ContentService contentService;
-    private TransformerDebug transformerDebug;
-    
-    
-    public NodeContentGet() {
-    	logger.info("using edu-sharing Version of NodeContentGet");
-	}
+    private SynchronousTransformClient synchronousTransformClient;
 
     public void setNodeDAO(NodeDAO nodeDAO)
     {
@@ -94,18 +85,17 @@ public class NodeContentGet extends StreamContent
     {
         this.contentService = contentService;
     }
-    
-    /**
-     * Setter of the transformer debug. 
-     * @param transformerDebug
-     */
-    public void setTransformerDebug(TransformerDebug transformerDebug)
+
+    public void setSynchronousTransformClient(SynchronousTransformClient synchronousTransformClient)
     {
-        this.transformerDebug = transformerDebug;
+        this.synchronousTransformClient = synchronousTransformClient;
     }
 
     /**
-     * @in
+     *
+     * @param req WebScriptRequest
+     * @param res WebScriptResponse
+     * @throws IOException
      */
     public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException
     {
@@ -135,13 +125,13 @@ public class NodeContentGet extends StreamContent
             // If the node does not exists we treat it as if it has no content
             // We could be trying to update the content of a node in the index that has been deleted.
             res.setStatus(HttpStatus.SC_NO_CONTENT);
-            return;            
+            return;
         }
         NodeRef nodeRef = pair.getSecond();
 
         // check If-Modified-Since header and set Last-Modified header as appropriate
         Date modified = (Date)nodeService.getProperty(nodeRef, ContentModel.PROP_MODIFIED);
-        // May be null - if so treat as just changed 
+        // May be null - if so treat as just changed
         if(modified == null)
         {
             modified = new Date();
@@ -161,7 +151,7 @@ public class NodeContentGet extends StreamContent
                     logger.warn("Browser sent badly-formatted If-Modified-Since header: " + modifiedSinceStr);
                 }
             }
-            
+
             if (modifiedSince > 0L)
             {
                 // round the date to the ignore millisecond value which is not supplied by header
@@ -173,99 +163,82 @@ public class NodeContentGet extends StreamContent
                 }
             }
         }
-        
+
         /**
          * edu-sharing customization: check if collection ref object if true get content of the original
          */
         boolean isCollectionRefObject = false;
         NodeRef parent = nodeService.getPrimaryParent(nodeRef).getParentRef();
-        
-        if(nodeService.getAspects(parent).contains(QName.createQName(CCConstants.CCM_ASPECT_COLLECTION)) || 
-        		nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
-        	isCollectionRefObject = true;
+
+        if(nodeService.getAspects(parent).contains(QName.createQName(CCConstants.CCM_ASPECT_COLLECTION)) ||
+                nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
+            isCollectionRefObject = true;
         }
-        
+
         if(isCollectionRefObject){
-        	
+
         	logger.debug("it's an collection ref object: switching nodeId");
-        	List<AssociationRef> assocRef = nodeService.getTargetAssocs(nodeRef, ContentModel.ASSOC_ORIGINAL);
-        	if(assocRef != null && assocRef.size() > 0){
-        		nodeRef = assocRef.get(0).getTargetRef();
-        	}
-        	
+            List<AssociationRef> assocRef = nodeService.getTargetAssocs(nodeRef, ContentModel.ASSOC_ORIGINAL);
+            if(assocRef != null && assocRef.size() > 0){
+                nodeRef = assocRef.get(0).getTargetRef();
+            }
+
         }
 
         ContentReader reader = contentService.getReader(nodeRef, propertyName);
         if(reader == null)
         {
             res.setStatus(HttpStatus.SC_NO_CONTENT);
-            return;            
+            return;
         }
-        
+
+        // Perform transformation catering for mimetype AND encoding
+        ContentWriter writer = contentService.getTempWriter();
+        writer.setMimetype(MimetypeMap.MIMETYPE_TEXT_PLAIN);
+        writer.setEncoding("UTF-8"); // Expect transformers to produce UTF-8
+
         try
         {
-            // get the transformer
-            TransformationOptions options = new TransformationOptions();
-            options.setUse("index");
-            options.setSourceNodeRef(nodeRef);
-            transformerDebug.pushAvailable(reader.getContentUrl(), reader.getMimetype(), MimetypeMap.MIMETYPE_TEXT_PLAIN, options);
-            long sourceSize = reader.getSize();
-            List<ContentTransformer> transformers = contentService.getActiveTransformers(reader.getMimetype(), sourceSize, MimetypeMap.MIMETYPE_TEXT_PLAIN, options);
-            transformerDebug.availableTransformers(transformers, sourceSize, options, "SolrIndexer");
+            long start = System.currentTimeMillis();
+            Map<String, String> options = Collections.emptyMap();
+            synchronousTransformClient.transform(reader, writer, options, "SolrIndexer", nodeRef);
+            long transformDuration = System.currentTimeMillis() - start;
+            res.setHeader(TRANSFORM_DURATION_HEADER, String.valueOf(transformDuration));
+        }
+        catch (UnsupportedTransformationException e)
+        {
+            res.setHeader(TRANSFORM_STATUS_HEADER, "noTransform");
+            res.setStatus(HttpStatus.SC_NO_CONTENT);
+            return;
+        }
+        catch (Exception e)
+        {
+            transformException = e;
+        }
 
-            if (transformers.isEmpty())
+        if(transformException == null)
+        {
+            // point the reader to the new-written content
+            textReader = writer.getReader();
+            // Check that the reader is a view onto something concrete
+            if (textReader == null || !textReader.exists())
             {
-                res.setHeader(TRANSFORM_STATUS_HEADER, "noTransform");
-                res.setStatus(HttpStatus.SC_NO_CONTENT);
-                return;
-            }
-            ContentTransformer transformer = transformers.get(0);
-            
-            // Perform transformation catering for mimetype AND encoding
-            ContentWriter writer = contentService.getTempWriter();
-            writer.setMimetype(MimetypeMap.MIMETYPE_TEXT_PLAIN);
-            writer.setEncoding("UTF-8");                            // Expect transformers to produce UTF-8
-            
-            try
-            {
-                long start = System.currentTimeMillis();
-                transformer.transform(reader, writer, options);
-                long transformDuration = System.currentTimeMillis() - start;
-                res.setHeader(TRANSFORM_DURATION_HEADER, String.valueOf(transformDuration));
-            }
-            catch (ContentIOException|UnsupportedTransformationException e)
-            {
-                transformException = e;
-            }
-
-            if(transformException == null)
-            {
-                // point the reader to the new-written content
-                textReader = writer.getReader();
-                // Check that the reader is a view onto something concrete
-                if (textReader == null || !textReader.exists())
-                {
-                    transformException = new ContentIOException(
-                            "The transformation did not write any content, yet: \n"
-                            + "   transformer:     " + transformer + "\n" + "   temp writer:     " + writer);
-                }
-            }
-
-            if(transformException != null)
-            {
-                res.setHeader(TRANSFORM_STATUS_HEADER, "transformFailed");
-                res.setHeader(TRANSFORM_EXCEPTION_HEADER, transformException.getMessage());
-                res.setStatus(HttpStatus.SC_NO_CONTENT);
-            }
-            else
-            {
-                res.setStatus(HttpStatus.SC_OK);
-                streamContentImpl(req, res, textReader, null, null, false, modified, String.valueOf(modified.getTime()), null, null);            
+                transformException = new ContentIOException(
+                        "The transformation did not write any content, yet: \n"
+                                + "   temp writer:     " + writer);
             }
         }
-        finally
+
+        if(transformException != null)
         {
-            transformerDebug.popAvailable();
+            res.setHeader(TRANSFORM_STATUS_HEADER, "transformFailed");
+            res.setHeader(TRANSFORM_EXCEPTION_HEADER, transformException.getMessage());
+            res.setStatus(HttpStatus.SC_NO_CONTENT);
+        }
+        else
+        {
+            res.setStatus(HttpStatus.SC_OK);
+            streamContentImpl(req, res, textReader, null, null, false, modified, String.valueOf(modified.getTime()), null, null);
         }
     }
 }

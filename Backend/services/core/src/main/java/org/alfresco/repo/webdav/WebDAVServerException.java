@@ -84,7 +84,7 @@ public class WebDAVServerException extends Exception
     }
 
     /**
-     * @see java.lang.Object#toString()
+     * @see Object#toString()
      */
     public String toString()
     {

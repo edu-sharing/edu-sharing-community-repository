@@ -6,6 +6,7 @@ export interface DragDataLegacy {
     nodes?: Node[];
     dropAction?: DropAction;
 }
+export type DropActionLegacy = 'copy' | 'move' | 'link';
 
 export interface DropDataLegacy extends DragDataLegacy {
     target: DragNodeTarget;

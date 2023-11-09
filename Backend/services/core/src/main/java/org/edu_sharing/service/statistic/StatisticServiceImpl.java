@@ -10,7 +10,7 @@ import org.alfresco.service.cmr.search.SearchParameters.FieldFacet;
 import org.alfresco.service.cmr.search.SearchParameters.FieldFacetMethod;
 import org.alfresco.service.cmr.search.SearchParameters.FieldFacetSort;
 import org.alfresco.util.Pair;
-import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.repackaged.elasticsearch.org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.metadataset.v2.MetadataSet;

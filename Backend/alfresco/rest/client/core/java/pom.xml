@@ -151,10 +151,10 @@
       <artifactId>okhttp</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>io.swagger</groupId>
-      <artifactId>swagger-annotations</artifactId>
-    </dependency>
+<!--    <dependency>-->
+<!--      <groupId>io.swagger.core.v3</groupId>-->
+<!--      <artifactId>swagger-annotations</artifactId>-->
+<!--    </dependency>-->
 
     <dependency>
       <groupId>org.threeten</groupId>
@@ -167,6 +167,19 @@
       <groupId>org.alfresco</groupId>
       <artifactId>api-explorer</artifactId>
       <type>war</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>javax.ws.rs-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+
+    <dependency>
+      <groupId>io.swagger.parser.v3</groupId>
+      <artifactId>swagger-parser</artifactId>
       <scope>provided</scope>
     </dependency>
 

@@ -1,0 +1,63 @@
+{{- if .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" }}
+{{- if .Values.global.metrics.servicemonitor.enabled }}
+{{- if .Values.config.metrics.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "edusharing_repository_search_solr.name" . }}
+  labels: {{ include "edusharing_repository_search_solr.labels.app" . | nindent 4 }}
+    app.kubernetes.io/component: "metrics"
+    {{- if .Values.multistage.enabled }}
+    app.kubernetes.io/stage: ""
+    {{- end }}
+spec:
+  endpoints:
+  - path: "/metrics"
+    port: http-metrics
+    interval: {{ .Values.global.metrics.scrape.interval }}
+    scrapeTimeout: {{ .Values.global.metrics.scrape.timeout }}
+    {{- with .Values.config.metrics.relabelings }}
+    metricRelabelings: {{ toYaml . | nindent 6 }}
+    {{- end }}
+  selector:
+    matchLabels: {{ include "edusharing_repository_search_solr.labels.app" . | nindent 6 }}
+      app.kubernetes.io/component: "metrics"
+      {{- if .Values.multistage.enabled }}
+      app.kubernetes.io/stage: ""
+      {{- end }}
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+{{- if .Values.multistage.enabled }}
+{{- range .Values.multistage.stages }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "edusharing_repository_search_solr.name" $ }}-{{ .name }}
+  labels: {{ include "edusharing_repository_search_solr.labels.app" $ | nindent 4 }}
+    app.kubernetes.io/component: "metrics"
+    app.kubernetes.io/stage: {{ .name }}
+spec:
+  endpoints:
+  - path: "/metrics"
+    port: http-metrics
+    interval: {{ $.Values.global.metrics.scrape.interval }}
+    scrapeTimeout: {{ $.Values.global.metrics.scrape.timeout }}
+    {{- with $.Values.config.metrics.relabelings }}
+    metricRelabelings: {{ toYaml . | nindent 6 }}
+    {{- end }}
+  selector:
+    matchLabels: {{ include "edusharing_repository_search_solr.labels.app" $ | nindent 6 }}
+      app.kubernetes.io/component: "metrics"
+      app.kubernetes.io/stage: {{ .name }}
+  targetLabels:
+    - app.kubernetes.io/stage
+  namespaceSelector:
+    matchNames:
+    - {{ $.Release.Namespace }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

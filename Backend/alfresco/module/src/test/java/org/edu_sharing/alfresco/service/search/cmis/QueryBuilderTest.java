@@ -2,6 +2,7 @@ package org.edu_sharing.alfresco.service.search.cmis;
 
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
+import org.alfresco.service.namespace.QName;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 public class QueryBuilderTest {
@@ -68,12 +71,13 @@ public class QueryBuilderTest {
   @Test
   void selectWithJoinFields(){
 
-    String expected = "SELECT iometadata.ccm:original FROM ccm:io AS io JOIN null AS iometadata ON iometadata.cmis:objectId = io.cmis:objectId";
+    String expected = "SELECT iometadata.ccm:original FROM ccm:io AS io LEFT JOIN null AS iometadata ON iometadata.cmis:objectId = io.cmis:objectId";
 
+    QName qName1 = QName.createQName("ccm:iometadata", "iometadata");
+    QName qName2 = QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL);
     Mockito.when(dictionaryService.getProperty(ArgumentMatchers.notNull())).thenReturn(propertyDefinition);
-    Mockito.when(propertyDefinition.getContainerClass().getName().getLocalName()).thenReturn("iometadata");
-    Mockito.when(propertyDefinition.getContainerClass().getName().toString()).thenReturn("ccm:iometadata");
-    Mockito.when(propertyDefinition.getName().toString()).thenReturn(CCConstants.CCM_PROP_IO_ORIGINAL);
+    Mockito.when(propertyDefinition.getContainerClass().getName()).thenReturn(qName1);
+    Mockito.when(propertyDefinition.getName()).thenReturn(qName2);
 
     QueryStatement query = Query
             .select(CCConstants.CCM_PROP_IO_ORIGINAL)

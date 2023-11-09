@@ -25,18 +25,6 @@
  */
 package org.alfresco.repo.webdav;
 
-import java.io.IOException;
-import java.util.Hashtable;
-import java.util.List;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.UnavailableException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
-
 import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.repo.security.authentication.AuthenticationContext;
 import org.alfresco.repo.tenant.TenantService;
@@ -55,6 +43,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.transaction.UserTransaction;
+import java.io.IOException;
+import java.util.Hashtable;
+import java.util.List;
 
 /**
  * Servlet that accepts WebDAV requests for the hub. The request is served by the hub's content
@@ -104,8 +102,8 @@ public class WebDAVServlet extends HttpServlet
     private transient WebDAVInitParameters initParams;
 
     /**
-     * @see javax.servlet.http.HttpServlet#service(javax.servlet.http.HttpServletRequest,
-     *      javax.servlet.http.HttpServletResponse)
+     * @see HttpServlet#service(HttpServletRequest,
+     *      HttpServletResponse)
      */
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException,
             IOException

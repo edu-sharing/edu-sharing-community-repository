@@ -5,7 +5,7 @@
 <beans>
     <!-- edu sharing customization -->
     <!-- Abstract bean definition defining base definition for all metadata extracters -->
-    <bean id="esBaseMetadataExtracter"
+    <!--<bean id="esBaseMetadataExtracter"
           abstract="true"
           init-method="register">
         <property name="registry">
@@ -28,50 +28,45 @@
                 <prop key="namespace.prefix.cm">http://www.alfresco.org/model/content/1.0</prop>
                 <prop key="namespace.prefix.ccm">http://www.campuscontent.de/model/1.0</prop>
                 <prop key="namespace.prefix.cclom">http://www.campuscontent.de/model/lom/1.0</prop>
-                <!-- name of the author -->
+                 name of the author
                 <prop key="author">ccm:author_freetext</prop>
-                <!-- primary title -->
+                 primary title
                 <prop key="dc:title">cclom:title</prop>
-                <!-- keywords, single value -->
+                 keywords, single value
                 <prop key="cp:category">cclom:general_keyword</prop>
                 <prop key="description">cclom:general_description</prop>
-                <!-- copyright info -->
+                < copyright info
                 <prop key="Copyright Notice">ccm:license_description</prop>
             </props>
         </property>
     </bean>
+    -->
 
     <!-- overwrite alfresco version of Audio/Auto extractor cause of 100%
          cpu problem with some videos.
          MP4Parser is fixed -->
-    <bean id="extracter.Audio" class="org.edu_sharing.alfresco.metadata.TikaAudioMetadataExtracter" parent="esBaseMetadataExtracter">
+   <!-- <bean id="extracter.Audio" class="org.edu_sharing.alfresco.metadata.TikaAudioMetadataExtracter" parent="esBaseMetadataExtracter">
         <property name="tikaConfig" ref="tikaConfig"/>
     </bean>
     <bean id="extracter.Office" class="org.alfresco.repo.content.metadata.OfficeMetadataExtracter"
           parent="esBaseMetadataExtracter"/>
     <bean id="extracter.OpenDocument"  class="org.alfresco.repo.content.metadata.OpenDocumentMetadataExtracter"  parent="esBaseMetadataExtracter" />
-
-    <bean id="extracter.TikaAuto" class="org.alfresco.repo.content.metadata.TikaAutoMetadataExtracter" parent="esBaseMetadataExtracter">
+-->
+<!--    <bean id="extracter.TikaAuto" class="org.alfresco.repo.content.metadata.TikaAutoMetadataExtracter" parent="esBaseMetadataExtracter">
         <constructor-arg><ref bean="tikaConfig"/></constructor-arg>
-        <!-- cutom mapping for tika! -->
         <property name="mappingProperties">
             <props>
                 <prop key="namespace.prefix.cm">http://www.alfresco.org/model/content/1.0</prop>
                 <prop key="namespace.prefix.ccm">http://www.campuscontent.de/model/1.0</prop>
                 <prop key="namespace.prefix.cclom">http://www.campuscontent.de/model/lom/1.0</prop>
-                <!-- name of the author -->
                 <prop key="author">ccm:author_freetext</prop>
-                <!-- primary title -->
                 <prop key="dc:title">cclom:title</prop>
-                <!-- keywords, multi value -->
                 <prop key="dc:subject">cclom:general_keyword</prop>
                 <prop key="description">cclom:general_description</prop>
-                <!-- copyright info -->
                 <prop key="Copyright Notice">ccm:license_description</prop>
             </props>
         </property>
     </bean>
 
-    <bean id="extracter.FFMPEG" class="org.edu_sharing.alfresco.metadata.FFMPEGMetadataExtractor" parent="esBaseMetadataExtracter">
-    </bean>
+    -->
 </beans>

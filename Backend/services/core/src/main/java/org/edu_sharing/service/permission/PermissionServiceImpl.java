@@ -8,8 +8,7 @@ import javax.servlet.ServletContext;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
-import org.alfresco.repo.search.impl.lucene.LuceneQueryParser;
-import org.alfresco.repo.search.impl.lucene.SolrJSONResultSet;
+import org.alfresco.repo.search.impl.solr.SolrJSONResultSet;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.impl.acegi.FilteringResultSet;
@@ -28,7 +27,7 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.log4j.Logger;
-import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.repackaged.elasticsearch.org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
@@ -53,6 +52,7 @@ import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
 import org.edu_sharing.service.oai.OAIExporterService;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.share.ShareService;
@@ -76,6 +76,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	private PersonService personService;
 	private ApplicationInfo appInfo;
 	private ToolPermissionService toolPermission;
+	private org.edu_sharing.service.nodeservice.NodeService eduNodeService;
 
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	OrganisationService organisationService = (OrganisationService)applicationContext.getBean("eduOrganisationService");
@@ -86,22 +87,19 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	Logger logger = Logger.getLogger(PermissionServiceImpl.class);
 	private PermissionService permissionService;
 
-	public PermissionServiceImpl(String appId) {
+	public PermissionServiceImpl(ToolPermissionService toolPermission, org.edu_sharing.service.nodeservice.NodeService eduNodeService) {
 		appInfo = ApplicationInfoList.getHomeRepository();
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext
 				.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
+		this.eduNodeService=eduNodeService;
+		this.toolPermission=toolPermission;
 		nodeService = serviceRegistry.getNodeService();
 		shareService = new ShareServiceImpl(this);
 		permissionService = serviceRegistry.getPermissionService();
 
 		personService = serviceRegistry.getPersonService();
-
-	}
-
-	public PermissionServiceImpl() {
-		this(ApplicationInfoList.getHomeRepository().getAppId());
 	}
 	
 	public PermissionServiceImpl(boolean test) {
@@ -270,21 +268,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public void addPermissions(String _nodeId, HashMap<String, String[]> _authPerm, Boolean _inheritPermissions,
 							   String _mailText, Boolean _sendMail, Boolean _sendCopy) throws Throwable {
 
-		EmailValidator mailValidator = EmailValidator.getInstance(true, true);
-
-		String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
-
-		// used for sending copy to user
-		String copyMailText = "";
-
 		String user = new AuthenticationToolAPI().getCurrentUser();
-		MailTemplate.UserMail sender = MailTemplate.getUserMailData(user);
-
 		for (String authority : _authPerm.keySet()) {
 			String[] permissions = _authPerm.get(authority);
 			setPermissions(_nodeId, authority, permissions, _inheritPermissions);
 
-			MailTemplate.UserMail receiver = MailTemplate.getUserMailData(authority);
 			AuthorityType authorityType = AuthorityType.getAuthorityType(authority);
 
 
@@ -292,87 +280,17 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				addToRecent(personService.getPerson(authority));
 			}
 			// send group email notifications
-			if(AuthorityType.GROUP.equals(authorityType)){
+			if (AuthorityType.GROUP.equals(authorityType)) {
 				addToRecent(authorityService.getAuthorityNodeRef(authority));
 			}
 
-
-			if (mailValidator.isValid(receiver.getEmail()) && _sendMail) {
-				Mail mail = new Mail();
-				HashMap<String, Object> props = repoClient.getProperties(_nodeId);
-				String nodeType = (String) props.get(CCConstants.NODETYPE);
-
-				String name;
-				if (nodeType.equals(CCConstants.CCM_TYPE_IO)) {
-					name = (String) props.get(CCConstants.LOM_PROP_GENERAL_TITLE);
-					name = (name == null || name.trim().isEmpty()) ? (String) props.get(CCConstants.CM_NAME) : name;
-				} else {
-					name = (String) props.get(CCConstants.CM_PROP_C_TITLE);
-					name = (name == null || name.trim().isEmpty()) ? (String) props.get(CCConstants.CM_NAME) : name;
-				}
-
-				String permText = "";
-				for (String perm : permissions) {
-					if(CCConstants.CCM_VALUE_SCOPE_SAFE.equals(NodeServiceInterceptor.getEduSharingScope())){
-						// do not show some permission infos in safe invitations since they don't make sense
-						if(Arrays.asList(CCConstants.PERMISSION_CC_PUBLISH).contains(perm)){
-							continue;
-						}
-					}
-					String i18nPerm = I18nServer
-							.getTranslationDefaultResourcebundle(I18nServer.getPermissionCaption(perm), "en_EN");
-					String i18nPermDesc = I18nServer.getTranslationDefaultResourcebundle(
-							I18nServer.getPermissionDescription(perm), currentLocale);
-
-					if (i18nPermDesc != null) {
-						if (!permText.isEmpty())
-							permText += "\n";
-						permText += i18nPermDesc;
-					}
-
-				}
-
-				String linkText = I18nServer.getTranslationDefaultResourcebundle("dialog_inviteusers_mailtext_link",
-						currentLocale);
-				String localeStr = currentLocale;
-				if (localeStr == null || localeStr.equals("default")) {
-					localeStr = "de_DE";
-				}
-
-				ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
-				Map<String, String> replace = new HashMap<>();
-				receiver.applyToMap("", replace);
-				sender.applyToMap("inviter.", replace);
-				MailTemplate.applyNodePropertiesToMap("node.", props, replace);
-				replace.put("name", name.trim());
-				replace.put("message", _mailText.replace("\n", "<br />").trim());
-				replace.put("permissions", permText.trim());
-				MailTemplate.addContentLinks(appInfo, _nodeId, replace, "link");
-				String template="invited";
-				boolean send=true;
-				org.edu_sharing.service.nodeservice.NodeService nodeServiceApp = NodeServiceFactory.getNodeService(appInfo.getAppId());
-				if(nodeType.equals(CCConstants.CCM_TYPE_MAP) &&
-						nodeServiceApp.hasAspect(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),_nodeId,CCConstants.CCM_ASPECT_COLLECTION)){
-					template="invited_collection";
-					// if the receiver is the creator itself, skip it (because it is automatically added)
-					if(authority.equals(nodeServiceApp.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),_nodeId,CCConstants.CM_PROP_C_CREATOR))){
-						send=false;
-					}
-				}
-				if(CCConstants.CCM_VALUE_SCOPE_SAFE.equals(NodeServiceInterceptor.getEduSharingScope())){
-					template = "invited_safe";
-				}
-				if(send) {
-					mail.sendMailHtml(context, sender.getFullName(), sender.getEmail(), receiver.getEmail(), MailTemplate.getSubject(template, currentLocale),
-							MailTemplate.getContent(template, currentLocale, true), replace);
-				}
-
-			} else {
-				if(_sendMail) {
-					logger.info("username/authority: " + authority + " has no valid emailaddress:" + receiver.getEmail());
-				}
+			if (_sendMail) {
+				String nodeType = eduNodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), _nodeId);
+				HashMap<String, Object> props = eduNodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), _nodeId);
+				List<String> aspects = Arrays.asList(eduNodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), _nodeId));
+				NotificationServiceFactoryUtility.getLocalService()
+						.notifyPermissionChanged(user, authority, _nodeId, nodeType, aspects, props, permissions, _mailText);
 			}
-
 		}
 
 		org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory
@@ -1085,16 +1003,16 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 						subQuery.append((furtherToken ? " AND( " : "("))
 								.append("@cm\\:authorityDisplayName:")
-								.append("\"").append(LuceneQueryParser.escape(token)).append("\"").
+								.append("\"").append(QueryParser.escape(token)).append("\"").
 								// boost groups so that they'll appear before users
 								append("^10 OR ")
 								.append("@ccm\\:groupEmail:")
-								.append("\"").append(LuceneQueryParser.escape(token)).append("\"");
+								.append("\"").append(QueryParser.escape(token)).append("\"");
 						// allow global admins to find groups based on authority name (e.g. default system groups)
 						if(isAdminOrSystem()) {
 							subQuery.append(" OR ")
 									.append("@cm\\:authorityName:")
-									.append("\"").append(LuceneQueryParser.escape(token)).append("\"");
+									.append("\"").append(QueryParser.escape(token)).append("\"");
 						}
 						subQuery.append(")");
 	

@@ -1,18 +1,15 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.compressors.CompressorException;
-import org.apache.commons.compress.compressors.CompressorInputStream;
-import org.apache.commons.compress.compressors.CompressorStreamFactory;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.apache.tika.io.IOUtils;
 import org.edu_sharing.repository.server.importer.PersistenHandlerKeywordsDNBMarc;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-import java.io.*;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -37,7 +34,7 @@ public class ImportFactualTermMarc21 extends AbstractJob{
 
         fileUri = (String) jobExecutionContext.getJobDetail().getJobDataMap().get("fileUri");
         String pCheckDone = (String) jobExecutionContext.getJobDetail().getJobDataMap().get("checkAlreadyDone");
-        checkAlreadyDone = new Boolean(pCheckDone);
+        checkAlreadyDone = Boolean.parseBoolean(pCheckDone);
 
 
         URI url = null;

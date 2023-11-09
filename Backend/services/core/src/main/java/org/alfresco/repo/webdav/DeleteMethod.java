@@ -25,11 +25,6 @@
  */
 package org.alfresco.repo.webdav;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
-import javax.servlet.http.HttpServletResponse;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -37,12 +32,16 @@ import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.model.FileNotFoundException;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.site.SiteService;
-import org.alfresco.service.cmr.webdav.WebDavService;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.site.SiteService;
+import org.alfresco.service.cmr.webdav.WebDavService;
 import org.alfresco.util.FileFilterMode;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Implements the WebDAV DELETE method

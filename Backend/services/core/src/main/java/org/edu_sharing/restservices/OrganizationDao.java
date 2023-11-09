@@ -24,7 +24,6 @@ import org.edu_sharing.service.organization.OrganizationServiceFactory;
 import org.edu_sharing.service.organization.GroupSignupMethod;
 import org.edu_sharing.service.search.SearchServiceFactory;
 
-import com.sun.star.lang.IllegalArgumentException;
 
 public class OrganizationDao {
 

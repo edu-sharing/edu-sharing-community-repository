@@ -1,39 +1,31 @@
 /*
- * Copyright (C) 2005-2012 Alfresco Software Limited.
- *
- * This file is part of Alfresco
- *
+ * #%L
+ * Alfresco Remote API
+ * %%
+ * Copyright (C) 2005 - 2016 Alfresco Software Limited
+ * %%
+ * This file is part of the Alfresco software. 
+ * If the software was purchased under a paid Alfresco license, the terms of 
+ * the paid license agreement will prevail.  Otherwise, the software is 
+ * provided under the following open source license terms:
+ * 
  * Alfresco is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Alfresco is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
+ * #L%
  */
 package org.alfresco.repo.webdav;
 
-import java.io.IOException;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Properties;
-import java.util.regex.Pattern;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.UnavailableException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
-
 import org.alfresco.repo.cache.SimpleCache;
-import org.alfresco.repo.events.EventPublisher;
 import org.alfresco.repo.model.filefolder.HiddenAspect;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationContext;
@@ -48,6 +40,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.transaction.TransactionService;
+import org.alfresco.sync.repo.events.EventPublisher;
 import org.alfresco.util.FileFilterMode;
 import org.alfresco.util.FileFilterMode.Client;
 import org.alfresco.util.PropertyCheck;
@@ -57,6 +50,18 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.transaction.UserTransaction;
+import java.io.IOException;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Properties;
+import java.util.regex.Pattern;
 
 /**
  * Servlet that accepts WebDAV requests for the hub. The request is served by the hub's content
@@ -98,8 +103,7 @@ public class Edu_SharingWebDAVServlet extends HttpServlet
     private static String rootPath;
     
     private static NodeRef defaultRootNode; // for default domain
-    
-    
+
     // WebDAV helper class
 
     private transient WebDAVHelper m_davHelper;
@@ -122,7 +126,7 @@ public class Edu_SharingWebDAVServlet extends HttpServlet
             IOException
     {
         long startTime = 0;
-        if (logger.isInfoEnabled())
+        if (logger.isTraceEnabled())
         {
             startTime = System.currentTimeMillis();
         }
@@ -167,9 +171,9 @@ public class Edu_SharingWebDAVServlet extends HttpServlet
         }
         finally
         {
-            if (logger.isInfoEnabled())
+            if (logger.isTraceEnabled())
             {
-                logger.info(request.getMethod() + " took " + (System.currentTimeMillis()-startTime) + "ms to execute ["+request.getRequestURI()+"]");
+                logger.trace(request.getMethod() + " took " + (System.currentTimeMillis()-startTime) + "ms to execute ["+request.getRequestURI()+"]");
             }
 
             FileFilterMode.clearClient();
@@ -314,17 +318,11 @@ public class Edu_SharingWebDAVServlet extends HttpServlet
         ActivityPoster poster = (ActivityPoster) context.getBean("activitiesPoster");
         singletonCache = (SimpleCache<String, NodeRef>)context.getBean("immutableSingletonCache");
         
-        
-       
-        
-        
-        
+
+
         // Collaborator used by WebDAV methods to create activity posts.
         activityPoster = new ActivityPosterImpl("WebDAV", poster);
-        
-        
-        
-        
+
         // Create the WebDAV helper
         
         /**

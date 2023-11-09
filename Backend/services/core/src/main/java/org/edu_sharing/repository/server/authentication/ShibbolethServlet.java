@@ -42,8 +42,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.HttpHeaders;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -59,7 +57,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.saml.SAMLCredential;
+import org.springframework.security.saml.SamlAuthentication;
 
 public class ShibbolethServlet extends HttpServlet {
 
@@ -286,13 +284,9 @@ public class ShibbolethServlet extends HttpServlet {
 	 private String getShibValue(String attName, HttpServletRequest req){
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication != null && authentication.isAuthenticated()) {
-            	Object credential = authentication.getCredentials();
-            	if(credential instanceof SAMLCredential) {
-            		 SAMLCredential samlCredential = (SAMLCredential) credential;
-            	     return samlCredential.getAttributeAsString(attName);
-            	}
-
+            if (authentication != null && authentication.isAuthenticated() && authentication instanceof SamlAuthentication) {
+                SamlAuthentication samlAuthentication = (SamlAuthentication) authentication;
+				return samlAuthentication.getAssertion().getFirstAttribute(attName).getValues().stream().findFirst().map(Object::toString).orElse(null);
             }
 
 	    	String attValue = null;
