@@ -138,8 +138,9 @@ const routes: Routes = [
 
     // Embed
     {
-        path: UIConstants.ROUTER_PREFIX + 'embed/:component',
-        loadChildren: () => import('./common/ui/embed/embed.module').then((m) => m.EmbedModule),
+        path: UIConstants.ROUTER_PREFIX + 'embed',
+        loadChildren: () =>
+            import('./pages/embed-page/embed-page.module').then((m) => m.EmbedPageModule),
     },
 
     // LTI

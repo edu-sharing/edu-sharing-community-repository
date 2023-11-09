@@ -3,14 +3,14 @@ import { ActivatedRoute } from '@angular/router';
 import {
     EventListener,
     FrameEventsService,
-} from '../../../core-module/rest/services/frame-events.service';
+} from '../../core-module/rest/services/frame-events.service';
 import { TranslationsService } from 'ngx-edu-sharing-ui';
-import { LicenseDialogContentComponent } from '../../../features/dialogs/dialog-modules/license-dialog/license-dialog-content.component';
-import { Toast } from '../../../core-ui-module/toast';
-import { RestConstants } from '../../../core-module/rest/rest-constants';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { MainNavService } from '../../../main/navigation/main-nav.service';
-import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { LicenseDialogContentComponent } from '../../features/dialogs/dialog-modules/license-dialog/license-dialog-content.component';
+import { Toast } from '../../core-ui-module/toast';
+import { RestConstants } from '../../core-module/rest/rest-constants';
+import { UIHelper } from '../../core-ui-module/ui-helper';
+import { MainNavService } from '../../main/navigation/main-nav.service';
+import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Subject } from 'rxjs';
 
 @Component({
@@ -32,9 +32,9 @@ import { Subject } from 'rxjs';
             [data]="{ kind: 'properties', properties: data }"
         ></es-license-dialog-content>
     `,
-    styleUrls: ['embed.component.scss'],
+    styleUrls: ['embed-page.component.scss'],
 })
-export class EmbedComponent implements EventListener, OnDestroy {
+export class EmbedPageComponent implements EventListener, OnDestroy {
     @ViewChild('mdsRef') mdsRef: MdsEditorWrapperComponent;
     @ViewChild('licenseRef') licenseRef: LicenseDialogContentComponent;
     component: string;
