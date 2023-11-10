@@ -701,7 +701,7 @@ public class SearchServiceImpl implements SearchService {
 
 			searchParameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
 
-			if(searchToken.getQuery() != null && searchToken.getQuery().getSpecialFilter().isEmpty()) {
+			if(searchToken.getQuery() != null && !searchToken.getQuery().getSpecialFilter().isEmpty()) {
 				throw new RuntimeException("specialFilter is not supported for query syntax " + MetadataReader.QUERY_SYNTAX_LUCENE);
 			}
 			searchParameters.setQuery(searchToken.getLuceneString());

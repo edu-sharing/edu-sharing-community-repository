@@ -283,7 +283,7 @@ export class WorkspaceFileUploadSelectComponent implements OnInit, OnChanges {
     }
 
     private getBreadcrumbs(node: Node) {
-        if (node) {
+        if (node && node.ref.id !== RestConstants.USERHOME) {
             return this.nodeService.getNodeParents(node.ref.id).pipe(
                 map((parentList) => this.getBreadcrumbsByParentList(parentList)),
                 catchError(() =>
@@ -305,6 +305,8 @@ export class WorkspaceFileUploadSelectComponent implements OnInit, OnChanges {
         const nodes = parentList.nodes.reverse();
         switch (parentList.scope) {
             case 'MY_FILES':
+            // api will return null if fullPath was requested (i.e. as admin)
+            case null:
                 return {
                     nodes,
                     homeLabel: 'WORKSPACE.MY_FILES',
@@ -316,7 +318,6 @@ export class WorkspaceFileUploadSelectComponent implements OnInit, OnChanges {
                     homeLabel: 'WORKSPACE.SHARED_FILES',
                     homeIcon: 'group',
                 };
-
             case 'UNKNOWN':
                 return {
                     nodes,

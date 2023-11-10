@@ -13,7 +13,7 @@ import { first, map, switchMap, takeUntil } from 'rxjs/operators';
 import { Node, RestConstants } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
 import { MdsComponent } from '../../legacy/mds/mds.component';
-import { MdsEditorInstanceService } from '../mds-editor-instance.service';
+import { MdsEditorInstanceService, UnauthoritzedException } from '../mds-editor-instance.service';
 import { EditorMode } from '../../types/mds-types';
 import {
     BulkBehavior,
@@ -267,13 +267,17 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
                     editorMode: this.editorMode ?? 'nodes',
                 });
             } else {
-                this.editorType = await this.mdsEditorInstance.initWithoutNodes(
-                    this.groupId,
-                    this.setId,
-                    this.repository,
-                    this.editorMode ?? 'search',
-                    this.currentValues,
-                );
+                try {
+                    this.editorType = await this.mdsEditorInstance.initWithoutNodes(
+                        this.groupId,
+                        this.setId,
+                        this.repository,
+                        this.editorMode ?? 'search',
+                        this.currentValues,
+                    );
+                } catch (e) {
+                    return;
+                }
             }
             if (!this.editorType) {
                 console.warn(
@@ -281,7 +285,10 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
                         this.setId +
                         ' at ' +
                         this.repository +
-                        ' did not specify any rendering type',
+                        ' did not specify any rendering type ' +
+                        '(group ' +
+                        this.groupId +
+                        ')',
                 );
                 this.editorType = 'legacy';
             }

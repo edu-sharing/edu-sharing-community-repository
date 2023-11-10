@@ -150,14 +150,6 @@ export class SimpleEditDialogComponent {
         );
     }
     checkIsDirty() {
-        console.log(
-            'mds dirty: ' +
-                this.metadata.isDirty() +
-                ' invite: ' +
-                this.invite.isDirty() +
-                ' license: ' +
-                this.license.isDirty(),
-        );
         return this.metadata.isDirty() || this.invite.isDirty() || this.license.isDirty();
     }
     openDialog(callback: () => void, force = false) {

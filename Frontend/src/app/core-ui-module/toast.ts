@@ -468,7 +468,7 @@ export class Toast implements OnDestroy {
                 error += '\n\n' + errorObject.url;
             }
         } catch (e) {
-            if (errorObject) {
+            if (errorObject && errorObject.status !== RestConstants.HTTP_UNAUTHORIZED) {
                 console.error(errorObject);
             }
             error = errorObject?.toString();

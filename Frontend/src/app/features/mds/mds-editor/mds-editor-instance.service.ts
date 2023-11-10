@@ -111,6 +111,11 @@ export abstract class MdsEditorWidgetCore {
     }
 }
 
+export class UnauthoritzedException implements Error {
+    message: string;
+    name: string;
+}
+
 /**
  * Manages state for an MDS editor instance.
  *
@@ -874,7 +879,11 @@ export class MdsEditorInstanceService implements OnDestroy {
                 );
                 mdsId = sets[0]?.id;
             } catch (e) {
-                console.warn('Error while resolving primary mds', e);
+                if (e?.status !== RestConstants.HTTP_UNAUTHORIZED) {
+                    console.warn('Error while resolving primary mds', e);
+                } else {
+                    throw new UnauthoritzedException();
+                }
             }
             if (!mdsId) {
                 mdsId = RestConstants.DEFAULT;
@@ -882,7 +891,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
         const hasInitialized = await this.initMds(groupId, mdsId, repository, null, initialValues);
         if (!hasInitialized) {
-            return null;
+            throw new Error('Could not initalize mds');
         }
         for (const widget of this.widgets.value) {
             widget.initWithValues(initialValues);
@@ -1157,7 +1166,9 @@ export class MdsEditorInstanceService implements OnDestroy {
                     this._new_initializingStateSubject.next('complete');
                 },
                 error: (error) => {
-                    console.warn('Failed to initialize MDS:', error);
+                    if (error.status != RestConstants.HTTP_UNAUTHORIZED) {
+                        console.warn('Failed to initialize MDS:', error);
+                    }
                     this._new_initializingStateSubject.next('failed');
                 },
             });

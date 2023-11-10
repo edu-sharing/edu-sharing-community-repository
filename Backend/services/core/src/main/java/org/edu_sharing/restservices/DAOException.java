@@ -15,6 +15,8 @@ import org.edu_sharing.service.collection.DuplicateNodeException;
 import org.edu_sharing.service.permission.PermissionException;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.alfresco.RestrictedAccessException;
+
+import java.io.FileNotFoundException;
 import java.security.InvalidKeyException;
 
 import java.lang.reflect.UndeclaredThrowableException;
@@ -95,6 +97,7 @@ public class DAOException extends Exception {
 
 		if (   t instanceof NoSuchPersonException
 			|| t instanceof InvalidStoreRefException
+			|| t instanceof FileNotFoundException
 			|| t instanceof InvalidNodeRefException) {
 			
 			return new DAOMissingException(t,nodeId); 

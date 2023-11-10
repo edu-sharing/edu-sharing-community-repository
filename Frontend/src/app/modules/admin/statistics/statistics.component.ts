@@ -27,6 +27,7 @@ import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { trigger } from '@angular/animations';
 import { ListCountsComponent } from 'src/app/features/list-items/list-counts/list-counts.component';
+import { Scope } from '../../../core-ui-module/option-item';
 
 // Charts.js
 declare var Chart: any;
@@ -48,6 +49,7 @@ type GroupTemplate = {
     ],
 })
 export class AdminStatisticsComponent implements OnInit {
+    readonly Scope = Scope;
     @ViewChild('groupedChart') groupedChartRef: ElementRef;
     _mediacenter: any;
     private groupedChartData: { node: NodeStatistics[]; user: Statistics[] };
