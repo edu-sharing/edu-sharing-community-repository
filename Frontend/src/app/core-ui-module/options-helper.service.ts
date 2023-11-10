@@ -1474,7 +1474,7 @@ export class OptionsHelperService implements OnDestroy {
         connectorType: Connector = null,
     ) {
         if (node.aspects?.includes('ccm:ltitool_node')) {
-            UIHelper.openLTIResourceLink(node);
+            UIHelper.openLTIResourceLink(win,node);
         } else {
             UIHelper.openConnector(
                 this.connectors,

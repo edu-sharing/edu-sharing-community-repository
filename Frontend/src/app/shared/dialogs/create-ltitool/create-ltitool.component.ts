@@ -99,6 +99,8 @@ export class CreateLtitoolComponent implements OnInit {
 
     public createLtiContentOptionNode() {
         // @TODO cordova handling, popup problem
+        console.log("popup problem open winodw in createLtiContentOptionNode");
+        let w = window.open('');
         console.log('open() this._name:' + this._name);
         if (this._name == undefined) {
             return;
@@ -116,7 +118,7 @@ export class CreateLtitoolComponent implements OnInit {
                                 /**
                                  * auto close when customContentOption and open resourcelink
                                  */
-                                this.onCreate.emit({ nodes: this.nodes, tool: this._tool });
+                                this.onCreate.emit({ nodes: this.nodes, tool: this._tool, window : w });
                             },
                             (error: any) => {
                                 this.nodeHelper.handleNodeError(this._name, error);
