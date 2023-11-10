@@ -368,7 +368,7 @@ public class MetadataTemplateRenderer {
 											type.getExtendedName().equals(CCConstants.VCARD_T_X_GND_URI) ||
 											type.getExtendedName().equals(CCConstants.VCARD_T_X_ROR) ||
 											type.getExtendedName().equals(CCConstants.VCARD_T_X_WIKIDATA)
-									) && !type.getExtendedValue().isEmpty()) {
+									) && (type.getExtendedValue() != null && !type.getExtendedValue().isEmpty())) {
 										persistentIdUrl = type.getExtendedValue();
 										break;
 									}
