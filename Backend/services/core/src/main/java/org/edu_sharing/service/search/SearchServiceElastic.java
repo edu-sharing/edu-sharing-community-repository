@@ -177,11 +177,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
         MatchQueryBuilder collectionTypeProposal = QueryBuilders.matchQuery("collections.relation.type", "ccm:collection_proposal");
         // @TODO: FIX after DESP-840
         BoolQueryBuilder collectionPermissions = getPermissionsQuery("collections.permissions.read.keyword");
-        collectionPermissions.should(QueryBuilders.matchQuery("collections.owner", user));
+        collectionPermissions.should(QueryBuilders.matchQuery("collections.owner.keyword", user));
         collectionPermissions.mustNot(collectionTypeProposal);
 
-        BoolQueryBuilder proposalPermissions = getPermissionsQuery("collections.permissions.Coordinator",getUserAuthorities().stream().filter(a -> !a.equals(CCConstants.AUTHORITY_GROUP_EVERYONE)).collect(Collectors.toSet()));
-        proposalPermissions.should(QueryBuilders.matchQuery("collections.owner", user));
+        BoolQueryBuilder proposalPermissions = getPermissionsQuery("collections.permissions.Coordinator.keyword",getUserAuthorities().stream().filter(a -> !a.equals(CCConstants.AUTHORITY_GROUP_EVERYONE)).collect(Collectors.toSet()));
+        proposalPermissions.should(QueryBuilders.matchQuery("collections.owner.keyword", user));
         proposalPermissions.must(collectionTypeProposal);
 
         BoolQueryBuilder subPermissions = QueryBuilders.boolQuery().minimumShouldMatch(1)
@@ -190,7 +190,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
 
         BoolQueryBuilder audienceQueryBuilderCollections = QueryBuilders.boolQuery()
-                .mustNot(QueryBuilders.termQuery("properties.ccm:restricted_access",true))
+                .mustNot(QueryBuilders.termQuery("properties.ccm:restricted_access.keyword",true))
                 .must(subPermissions);
         audienceQueryBuilder.should(audienceQueryBuilderCollections);
 
