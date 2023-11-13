@@ -1,6 +1,6 @@
 {
   "name": "ngx-edu-sharing-api",
-  "version": "0.7.2",
+  "version": "9.0.1",
   "license": "GNU GPL v2",
   "description": "Angular bindings for Edu-Sharing's API",
   "repository": {
@@ -18,11 +18,12 @@
     "generate-api-dev:generate-code": "ng-openapi-gen --input ../../../Backend/services/rest/api/src/main/resources/openapi.json --output src/lib/api",
     "generate-api-dev": "npm run generate-api-dev:generate-code && npm run generate-api:prettify-code",
     "update": "npm i && npm run copy-api-spec && npm run generate-api",
-    "update-if-needed": "npm run check-if-up-to-date || npm run update"
+    "update-if-needed": "npm run check-if-up-to-date || npm run update",
+    "publish": "ng build && cd ../../dist/edu-sharing-api && npm publish"
   },
   "peerDependencies": {
-    "@angular/common": "^12.2.0 || ^13.0.0 || ^14.0.0 || ^15.0.0 || ^16.0.0",
-    "@angular/core": "^12.2.0  || ^13.0.0 || ^14.0.0 || ^15.0.0 || ^16.0.0",
+    "@angular/common": "^12.2.0 || ^13.0.0 || ^14.0.0 || ^15.0.0 || ^16.0.00 || ^17.0.0",
+    "@angular/core": "^12.2.0  || ^13.0.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0",
     "rxjs": "^6.0.0 || ^7.0.0",
     "uuid": "^3.3.2"
   },
