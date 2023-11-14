@@ -3,15 +3,18 @@
   "version": "9.1.0",
   "license": "GNU GPL v2",
   "description": "Angular components for Edu-Sharing UX parts",
+  "scripts": {
+    "publish": "ng build && cd ../../dist/edu-sharing-ui && npm publish"
+  },
   "peerDependencies": {
-    "@angular/cdk": "~13.3.9",
-    "@angular/common": "^13.3.0",
-    "@angular/core": "^13.3.0",
-    "@angular/material": "13.3.9",
+    "@angular/cdk": "^13.0.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0",
+    "@angular/common": "^13.0.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0",
+    "@angular/core": "^^13.0.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0",
+    "@angular/material": "^13.0.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0",
     "material-design-icons": "^3.0.1",
-    "@ngx-translate/core": "^14.0.0",
+    "@ngx-translate/core": "^14.0.0 || ^15.0.0",
     "angular-material-css-vars": "^3.0.0",
-    "rxjs": "^6.6.7"
+    "rxjs": "^6.6.7 || ^7.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
