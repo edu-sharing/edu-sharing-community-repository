@@ -5,7 +5,7 @@ import {
     RestLocatorService,
     RestRegisterService,
 } from '../../../core-module/core.module';
-import { Toast } from '../../../core-ui-module/toast';
+import { Toast } from '../../../services/toast';
 import { PlatformLocation } from '@angular/common';
 import { Router } from '@angular/router';
 import { UIConstants } from 'ngx-edu-sharing-ui';

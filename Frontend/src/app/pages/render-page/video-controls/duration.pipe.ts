@@ -1,7 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-    name: 'duration',
+    name: 'esDuration',
 })
 export class DurationPipe implements PipeTransform {
     transform(value: number, maxValue: number = value): string {

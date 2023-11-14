@@ -5,13 +5,17 @@ import { MdsNodeRelationsWidgetComponent } from './node-relations/node-relations
 import { RenderPageRoutingModule } from './render-page-routing.module';
 import { RenderPageComponent } from './render-page.component';
 import { TouchEventDirective } from './touchevents.directive';
+import { DurationPipe } from './video-controls/duration.pipe';
+import { VideoControlsComponent } from './video-controls/video-controls.component';
 
 @NgModule({
     declarations: [
         CommentsListComponent,
+        DurationPipe,
         MdsNodeRelationsWidgetComponent,
         RenderPageComponent,
         TouchEventDirective,
+        VideoControlsComponent,
     ],
     imports: [SharedModule, RenderPageRoutingModule],
 })

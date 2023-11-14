@@ -47,9 +47,9 @@ import {
     UIService,
 } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
-import { CardService } from '../../core-ui-module/card.service';
-import { NodeHelperService } from '../../core-ui-module/node-helper.service';
-import { Toast } from '../../core-ui-module/toast';
+import { CardService } from '../../services/card.service';
+import { NodeHelperService } from '../../services/node-helper.service';
+import { Toast } from '../../services/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config';
 import { OK } from '../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';

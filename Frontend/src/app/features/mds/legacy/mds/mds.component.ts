@@ -2,10 +2,10 @@ import { forkJoin as observableForkJoin, throwError } from 'rxjs';
 import { Component, EventEmitter, Input, NgZone, Output } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { Toast } from '../../../../core-ui-module/toast';
+import { Toast } from '../../../../services/toast';
 import { DateHelper, UIAnimation, VCard } from 'ngx-edu-sharing-ui';
 import { Helper } from '../../../../core-module/rest/helper';
-import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
+import { NodeHelperService } from '../../../../services/node-helper.service';
 import { trigger } from '@angular/animations';
 import {
     DialogButton,

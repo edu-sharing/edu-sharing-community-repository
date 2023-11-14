@@ -7,7 +7,7 @@ import {
     RestNodeService,
     ToolPermission,
 } from '../../../core-module/core.module';
-import { Toast } from '../../../core-ui-module/toast';
+import { Toast } from '../../../services/toast';
 import { TranslateService } from '@ngx-translate/core';
 import { Helper } from '../../../core-module/rest/helper';
 import { trigger } from '@angular/animations';

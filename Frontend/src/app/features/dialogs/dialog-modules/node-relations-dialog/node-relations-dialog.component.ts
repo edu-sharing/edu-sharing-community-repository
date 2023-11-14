@@ -18,8 +18,8 @@ import {
     RestHelper,
     SearchRequestCriteria,
 } from '../../../../core-module/core.module';
-import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
-import { Toast } from '../../../../core-ui-module/toast';
+import { NodeHelperService } from '../../../../services/node-helper.service';
+import { Toast } from '../../../../services/toast';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';

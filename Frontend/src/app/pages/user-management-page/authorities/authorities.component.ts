@@ -58,8 +58,8 @@ import {
 } from '../../../core-module/core.module';
 import { CsvHelper } from '../../../core-module/csv.helper';
 import { Helper } from '../../../core-module/rest/helper';
-import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
-import { Toast, ToastType } from '../../../core-ui-module/toast';
+import { NodeHelperService } from '../../../services/node-helper.service';
+import { Toast, ToastType } from '../../../services/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { DELETE_OR_CANCEL } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';

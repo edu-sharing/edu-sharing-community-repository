@@ -36,7 +36,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
 import { filter, skipWhile, takeUntil } from 'rxjs/operators';
-import { OptionsHelperService } from 'src/app/core-ui-module/options-helper.service';
+import { AppComponent } from '../../app.component';
 import {
     ConfigurationHelper,
     ConfigurationService,
@@ -59,13 +59,13 @@ import {
     UIService,
 } from '../../core-module/core.module';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
-import { CardService } from '../../core-ui-module/card.service';
-import { NodeHelperService } from '../../core-ui-module/node-helper.service';
-import { Toast } from '../../core-ui-module/toast';
+import { CardService } from '../../services/card.service';
+import { NodeHelperService } from '../../services/node-helper.service';
+import { Toast } from '../../services/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
-import { AppComponent } from '../../app.component';
+import { OptionsHelperService } from '../../services/options-helper.service';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { RenderHelperService } from './render-helper.service';

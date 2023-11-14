@@ -40,8 +40,8 @@ import {
     UIService,
 } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
-import { NodeHelperService } from '../../core-ui-module/node-helper.service';
-import { Toast } from '../../core-ui-module/toast';
+import { NodeHelperService } from '../../services/node-helper.service';
+import { Toast } from '../../services/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 import { CollectionContentComponent } from './collection-content/collection-content.component';

@@ -19,7 +19,7 @@ import {
 import { BehaviorSubject, Subject } from 'rxjs';
 import { switchMap, takeUntil } from 'rxjs/operators';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
-import { Toast } from '../../../../core-ui-module/toast';
+import { Toast } from '../../../../services/toast';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { CardDialogUtilsService } from '../../card-dialog/card-dialog-utils.service';
 

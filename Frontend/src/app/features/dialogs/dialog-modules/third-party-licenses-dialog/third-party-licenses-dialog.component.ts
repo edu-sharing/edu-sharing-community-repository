@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { RestConnectorService } from '../../../../core-module/core.module';
-import { Toast } from '../../../../core-ui-module/toast';
+import { Toast } from '../../../../services/toast';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 
 @Component({

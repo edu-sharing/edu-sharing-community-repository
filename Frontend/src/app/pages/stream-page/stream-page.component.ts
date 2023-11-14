@@ -38,8 +38,8 @@ import {
     STREAM_STATUS,
     TemporaryStorageService,
 } from '../../core-module/core.module'; //
-import { NodeHelperService } from '../../core-ui-module/node-helper.service';
-import { Toast } from '../../core-ui-module/toast'; //
+import { NodeHelperService } from '../../services/node-helper.service';
+import { Toast } from '../../services/toast'; //
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { AddWithConnectorDialogResult } from '../../features/dialogs/dialog-modules/add-with-connector-dialog/add-with-connector-dialog-data';
 import { DialogsService } from '../../features/dialogs/dialogs.service';

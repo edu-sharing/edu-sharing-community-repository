@@ -1,7 +1,7 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { LtiPlatformV13Service, ManualRegistrationData } from 'ngx-edu-sharing-api';
-import { Toast } from '../../../core-ui-module/toast';
+import { Toast } from '../../../services/toast';
 
 @Component({
     selector: 'es-ltitool-admin',

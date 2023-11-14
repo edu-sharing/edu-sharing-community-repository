@@ -20,7 +20,7 @@ import {
     RestOrganizationService,
 } from '../../../../../core-module/core.module';
 import { Helper } from '../../../../../core-module/rest/helper';
-import { Toast } from '../../../../../core-ui-module/toast';
+import { Toast } from '../../../../../services/toast';
 import { UIHelper } from '../../../../../core-ui-module/ui-helper';
 
 type Org = { organization: Organization; groups?: any };

@@ -2,21 +2,11 @@
  * Created by Torsten on 13.01.2017.
  */
 
-import {
-    AfterViewInit,
-    Component,
-    ContentChildren,
-    Directive,
-    ElementRef,
-    Input,
-    Type,
-    ViewChild,
-} from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
+import { Directive, ElementRef } from '@angular/core';
 import { ConfigurationService } from '../../core-module/core.module';
 
 @Directive({
-    selector: '[esImage-config]',
+    selector: '[esImageConfig]',
 })
 export class ImageConfigDirective {
     private element: ElementRef;

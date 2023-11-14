@@ -1,7 +1,7 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { LTIRegistrationToken, LTIRegistrationTokens } from '../../../core-module/rest/data-object';
 import { RestLtiService } from '../../../core-module/rest/services/rest-lti.service';
-import { Toast } from '../../../core-ui-module/toast';
+import { Toast } from '../../../services/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { DELETE_OR_CANCEL } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';

@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { WorkflowDefinition } from 'ngx-edu-sharing-ui';
 import { WorkflowEntry } from '../../../../../core-module/rest/data-object';
-import { NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
+import { NodeHelperService } from '../../../../../services/node-helper.service';
 
 @Component({
     selector: 'es-workflow-list',

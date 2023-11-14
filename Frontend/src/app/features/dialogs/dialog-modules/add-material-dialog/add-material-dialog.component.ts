@@ -20,7 +20,7 @@ import {
     RestNodeService,
     SessionStorageService,
 } from '../../../../core-module/core.module';
-import { Toast } from '../../../../core-ui-module/toast';
+import { Toast } from '../../../../services/toast';
 import { BreadcrumbsService } from '../../../../shared/components/breadcrumbs/breadcrumbs.service';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';

@@ -42,7 +42,7 @@ import {
 } from '../../core-module/core.module';
 import { CsvHelper } from '../../core-module/csv.helper';
 import { Helper } from '../../core-module/rest/helper';
-import { Toast } from '../../core-ui-module/toast';
+import { Toast } from '../../services/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config';
 import {

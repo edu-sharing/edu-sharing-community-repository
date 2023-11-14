@@ -15,7 +15,7 @@ import { EventType, Node } from '../../core-module/rest/data-object';
 import { RestConstants } from '../../core-module/rest/rest-constants';
 import { RestTrackingService } from '../../core-module/rest/services/rest-tracking.service';
 import { RestUsageService } from '../../core-module/rest/services/rest-usage.service';
-import { VideoControlsComponent } from '../../core-ui-module/components/video-controls/video-controls.component';
+import { VideoControlsComponent } from './video-controls/video-controls.component';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { replaceElementWithDiv } from '../../features/mds/mds-editor/util/replace-element-with-div';

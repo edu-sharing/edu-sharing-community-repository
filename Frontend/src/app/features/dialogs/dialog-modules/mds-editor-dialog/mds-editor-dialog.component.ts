@@ -2,7 +2,7 @@ import { AfterViewInit, Component, Inject, OnInit, TemplateRef, ViewChild } from
 import * as rxjs from 'rxjs';
 import { delay, filter, first, map } from 'rxjs/operators';
 import { DialogButton, Node } from '../../../../core-module/core.module';
-import { Toast } from '../../../../core-ui-module/toast';
+import { Toast } from '../../../../services/toast';
 import { JumpMark } from '../../../../services/jump-marks.service';
 import { LocalEventsService } from 'ngx-edu-sharing-ui';
 import { MdsEditorCoreComponent } from '../../../mds/mds-editor/mds-editor-core/mds-editor-core.component';

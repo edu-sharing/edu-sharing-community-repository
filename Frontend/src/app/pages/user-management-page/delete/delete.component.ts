@@ -19,7 +19,7 @@ import {
     SessionStorageService,
 } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
-import { Toast } from '../../../core-ui-module/toast';
+import { Toast } from '../../../services/toast';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { AuthoritySearchMode } from '../../../shared/components/authority-search-input/authority-search-input.component';
 import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';

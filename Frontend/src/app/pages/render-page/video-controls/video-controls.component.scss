@@ -1,4 +1,4 @@
-@import '../../styles/variables';
+@import '../../../core-ui-module/styles/variables';
 
 // ngx-slider sets `visibility: visible` on some elements. This reintroduces interactive elements to
 // the tab order although the parent container sets `visibility: hidden`. We fix this be hiding

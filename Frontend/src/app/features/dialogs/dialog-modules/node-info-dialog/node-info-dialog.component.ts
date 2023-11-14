@@ -12,7 +12,7 @@ import {
     RestConstants,
     RestNodeService,
 } from '../../../../core-module/core.module';
-import { Toast } from '../../../../core-ui-module/toast';
+import { Toast } from '../../../../services/toast';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { BreadcrumbsService } from '../../../../shared/components/breadcrumbs/breadcrumbs.service';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';

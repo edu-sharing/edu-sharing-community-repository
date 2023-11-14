@@ -21,7 +21,7 @@ import {
     UIService,
 } from '../../../core-module/core.module';
 import { TranslateService } from '@ngx-translate/core';
-import { Toast } from '../../../core-ui-module/toast';
+import { Toast } from '../../../services/toast';
 import { Helper } from '../../../core-module/rest/helper';
 import {
     ActionbarComponent,

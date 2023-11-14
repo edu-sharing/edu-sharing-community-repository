@@ -4,7 +4,7 @@ import { MAT_FORM_FIELD } from '@angular/material/form-field';
 import { TranslateService } from '@ngx-translate/core';
 import { DateHelper } from 'ngx-edu-sharing-ui';
 import { filter } from 'rxjs/operators';
-import { Toast } from '../../../../../core-ui-module/toast';
+import { Toast } from '../../../../../services/toast';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 

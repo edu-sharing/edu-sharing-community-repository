@@ -21,8 +21,8 @@ import {
     UserSimple,
     WorkflowEntry,
 } from '../../../../core-module/core.module';
-import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
-import { Toast } from '../../../../core-ui-module/toast';
+import { NodeHelperService } from '../../../../services/node-helper.service';
+import { Toast } from '../../../../services/toast';
 import { AuthorityNamePipe } from '../../../../shared/pipes/authority-name.pipe';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';

@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { Repository } from '../../core-module/core.module';
-import { NodeHelperService } from '../../core-ui-module/node-helper.service';
+import { NodeHelperService } from '../../services/node-helper.service';
 
 @Pipe({
     name: 'repositoryIcon',

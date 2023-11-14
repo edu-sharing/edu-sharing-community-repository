@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { Toast } from '../../core-ui-module/toast';
+import { Toast } from '../../services/toast';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
     ConfigurationService,

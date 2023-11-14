@@ -9,7 +9,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Toast } from '../../core-ui-module/toast';
+import { Toast } from '../../services/toast';
 import {
     Connector,
     ConnectorList,

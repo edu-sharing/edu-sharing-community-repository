@@ -2,7 +2,7 @@ import { Component, HostListener } from '@angular/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { forkJoin } from 'rxjs';
 import { RestAdminService } from '../../../core-module/rest/services/rest-admin.service';
-import { Toast } from '../../../core-ui-module/toast';
+import { Toast } from '../../../services/toast';
 import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 

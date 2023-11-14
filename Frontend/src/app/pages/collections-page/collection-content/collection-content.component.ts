@@ -58,8 +58,8 @@ import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { RestCollectionService } from '../../../core-module/rest/services/rest-collection.service';
 import { RestNodeService } from '../../../core-module/rest/services/rest-node.service';
 import { UIService } from '../../../core-module/rest/services/ui.service';
-import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
-import { Toast } from '../../../core-ui-module/toast';
+import { NodeHelperService } from '../../../services/node-helper.service';
+import { Toast } from '../../../services/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import {

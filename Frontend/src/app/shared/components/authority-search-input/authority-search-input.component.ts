@@ -23,7 +23,7 @@ import {
     RestOrganizationService,
     User,
 } from '../../../core-module/core.module';
-import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
+import { NodeHelperService } from '../../../services/node-helper.service';
 import { PermissionNamePipe } from '../../pipes/permission-name.pipe';
 import { SuggestItem } from '../../../pages/admin-page/autocomplete/autocomplete.component';
 

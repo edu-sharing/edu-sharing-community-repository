@@ -10,7 +10,7 @@ import {
     RestHelper,
     UIService,
 } from '../../core-module/core.module';
-import { Toast } from '../../core-ui-module/toast';
+import { Toast } from '../../services/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { RegisterDoneComponent } from './register-done/register-done.component';
 import { RegisterFormComponent } from './register-form/register-form.component';

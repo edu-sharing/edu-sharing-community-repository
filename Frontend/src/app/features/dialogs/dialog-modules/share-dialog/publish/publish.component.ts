@@ -26,8 +26,8 @@ import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { RestHelper } from '../../../../../core-module/rest/rest-helper';
 import { RestConnectorService } from '../../../../../core-module/rest/services/rest-connector.service';
 import { RestNodeService } from '../../../../../core-module/rest/services/rest-node.service';
-import { NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
-import { Toast } from '../../../../../core-ui-module/toast';
+import { NodeHelperService } from '../../../../../services/node-helper.service';
+import { Toast } from '../../../../../services/toast';
 import { UIHelper } from '../../../../../core-ui-module/ui-helper';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
 import {

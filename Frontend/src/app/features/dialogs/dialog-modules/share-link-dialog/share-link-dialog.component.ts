@@ -8,7 +8,7 @@ import {
     RestNodeService,
 } from '../../../../core-module/core.module';
 import { DateHelper } from 'ngx-edu-sharing-ui';
-import { Toast } from '../../../../core-ui-module/toast';
+import { Toast } from '../../../../services/toast';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';

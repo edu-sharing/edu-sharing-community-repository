@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { extensionDeclarationsMap } from '../extension/extension-declarations-map';
-import { ManagementDialogsModule } from '../features/management-dialogs/management-dialogs.module';
 import { MdsModule } from '../features/mds/mds.module';
 import { SharedModule } from '../shared/shared.module';
 import { CookieInfoComponent } from './cookie-info/cookie-info.component';
@@ -21,6 +20,7 @@ import { UserProfileComponent } from './navigation/user-profile/user-profile.com
 import { RocketchatComponent } from './rocketchat/rocketchat.component';
 import { ScrollToTopButtonComponent } from './scroll-to-top-button/scroll-to-top-button.component';
 import { StartupComponent } from './startup.component';
+import { ToastMessageComponent } from './toast-message/toast-message.component';
 
 @NgModule({
     declarations: [
@@ -40,6 +40,7 @@ import { StartupComponent } from './startup.component';
         SkipNavComponent,
         StartupComponent,
         TopBarComponent,
+        ToastMessageComponent,
         UserProfileComponent,
         extensionDeclarationsMap['MainModule'] || [],
     ],

@@ -31,7 +31,7 @@ import {
     switchMap,
     throttleTime,
 } from 'rxjs/operators';
-import { Toast, ToastType } from '../../../../../core-ui-module/toast';
+import { Toast, ToastType } from '../../../../../services/toast';
 import { UIHelper } from '../../../../../core-ui-module/ui-helper';
 import { MdsWidget, MdsWidgetType, MdsWidgetValue } from '../../../types/types';
 import { MdsEditorInstanceService, SuggestionGroup } from '../../mds-editor-instance.service';

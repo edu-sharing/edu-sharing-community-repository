@@ -19,7 +19,7 @@ import { HttpClient } from '@angular/common/http';
 import { MessageType } from '../util/message-type';
 import { Toast } from './toast';
 import { ComponentFactoryResolver, Injectable, ViewContainerRef } from '@angular/core';
-import { BridgeService } from '../services/bridge.service';
+import { BridgeService } from './bridge.service';
 import {
     AuthorityProfile,
     CollectionReference,
@@ -62,7 +62,7 @@ export interface ConfigOptionItem extends ConfigEntry {
     changeStrategy: string;
 }
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class NodeHelperService extends NodeHelperServiceBase {
     private viewContainerRef: ViewContainerRef;
     constructor(

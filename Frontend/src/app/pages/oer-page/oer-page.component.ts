@@ -14,7 +14,7 @@ import {
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
 import { Helper } from '../../core-module/rest/helper';
-import { NodeHelperService } from '../../core-ui-module/node-helper.service';
+import { NodeHelperService } from '../../services/node-helper.service';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { SearchFieldService } from '../../main/navigation/search-field/search-field.service';
 import { Node } from 'ngx-edu-sharing-api';

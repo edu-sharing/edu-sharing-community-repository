@@ -15,7 +15,7 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { Repository, UIConstants } from '../../core-module/core.module';
 import { CustomOptions, DefaultGroups, ElementType, notNull, OptionItem } from 'ngx-edu-sharing-ui';
-import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
+import { OptionsHelperService } from '../../services/options-helper.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import {
     SearchFieldInstance,

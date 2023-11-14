@@ -5,7 +5,7 @@ import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
-import { Toast } from '../../../../../core-ui-module/toast';
+import { Toast } from '../../../../../services/toast';
 import { MatTabGroup } from '@angular/material/tabs';
 import { MdsWidget } from '../../../types/types';
 

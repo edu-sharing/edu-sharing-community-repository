@@ -35,7 +35,7 @@ import {
     RestoreResult,
     TemporaryStorageService,
 } from '../../../core-module/core.module';
-import { Toast } from '../../../core-ui-module/toast';
+import { Toast } from '../../../services/toast';
 import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
 import {
     CLOSE,

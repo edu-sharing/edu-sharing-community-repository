@@ -42,9 +42,9 @@ import {
     OK,
     YES_OR_NO,
 } from '../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
-import { NodeHelperService } from './node-helper.service';
-import { RouterHelper } from './router.helper';
-import { Toast } from './toast';
+import { NodeHelperService } from '../services/node-helper.service';
+import { RouterHelper } from '../util/router.helper';
+import { Toast } from '../services/toast';
 
 export class UIHelper {
     static COPY_URL_PARAMS = ['mainnav', 'reurl', 'reurlTypes', 'reurlCreate', 'applyDirectories'];

@@ -7,7 +7,7 @@ import {
     RestNodeService,
 } from '../../../../core-module/core.module';
 import { LocalEventsService, VCard } from 'ngx-edu-sharing-ui';
-import { Toast } from '../../../../core-ui-module/toast';
+import { Toast } from '../../../../services/toast';
 import { CARD_DIALOG_DATA, CardDialogConfig, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { DialogsService } from '../../dialogs.service';

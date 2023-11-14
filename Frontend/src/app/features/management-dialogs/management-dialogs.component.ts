@@ -17,8 +17,6 @@ import {
     UIConstants,
 } from 'ngx-edu-sharing-ui';
 import { forkJoin as observableForkJoin } from 'rxjs';
-import { ErrorProcessingService } from 'src/app/core-ui-module/error.processing';
-import { BridgeService } from '../../services/bridge.service';
 import {
     CollectionReference,
     Node,
@@ -27,12 +25,13 @@ import {
     RestHelper,
     RestNodeService,
 } from '../../core-module/core.module';
-import { NodeHelperService } from '../../core-ui-module/node-helper.service';
-import { Toast } from '../../core-ui-module/toast';
+import { Toast } from '../../services/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { OK_OR_CANCEL } from '../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
-import { WorkspaceService } from '../../pages/workspace-page/workspace.service';
+import { BridgeService } from '../../services/bridge.service';
+import { NodeHelperService } from '../../services/node-helper.service';
+import { ErrorProcessingService } from './error.processing';
 
 export enum DialogType {
     SimpleEdit = 'SimpleEdit',
@@ -115,7 +114,6 @@ export class WorkspaceManagementDialogsComponent {
         private router: Router,
         private temporaryStorage: TemporaryStorageService,
         private toast: Toast,
-        private workspace: WorkspaceService,
     ) {}
 
     public closeStream() {

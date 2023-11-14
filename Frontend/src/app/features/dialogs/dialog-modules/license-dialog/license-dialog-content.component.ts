@@ -25,8 +25,8 @@ import {
     RestIamService,
     RestNodeService,
 } from '../../../../core-module/core.module';
-import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
-import { Toast } from '../../../../core-ui-module/toast';
+import { NodeHelperService } from '../../../../services/node-helper.service';
+import { Toast } from '../../../../services/toast';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { UserPresentableError } from '../../../../features/mds/mds-editor/mds-editor-common.service';
 import { MdsEditorInstanceService } from '../../../../features/mds/mds-editor/mds-editor-instance.service';

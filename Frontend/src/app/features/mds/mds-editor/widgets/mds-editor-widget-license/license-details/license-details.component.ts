@@ -3,7 +3,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { Metadata } from 'ngx-edu-sharing-graphql';
 import { Node } from 'ngx-edu-sharing-api';
 import { RestConnectorService, RestConstants } from '../../../../../../core-module/core.module';
-import { NodeHelperService } from '../../../../../../core-ui-module/node-helper.service';
+import { NodeHelperService } from '../../../../../../services/node-helper.service';
 import { Values } from '../../../../types/types';
 import { Helper } from '../../../../../../core-module/rest/helper';
 

@@ -7,7 +7,7 @@ import {
     RestConnectorService,
     RestConstants,
 } from '../../core-module/core.module';
-import { NodeHelperService } from '../../core-ui-module/node-helper.service';
+import { NodeHelperService } from '../../services/node-helper.service';
 import { UploadDialogService } from '../../services/upload-dialog.service';
 
 @Component({

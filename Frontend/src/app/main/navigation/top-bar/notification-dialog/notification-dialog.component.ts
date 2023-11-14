@@ -5,7 +5,7 @@ import { DialogButton } from '../../../../util/dialog-button';
 import { ClientConfig, NotificationConfig, NotificationV1Service } from 'ngx-edu-sharing-api';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ConfigService } from 'ngx-edu-sharing-api';
-import { Toast } from '../../../../core-ui-module/toast';
+import { Toast } from '../../../../services/toast';
 import { first } from 'rxjs/operators';
 
 enum NotificationEvents {

@@ -11,8 +11,8 @@ import {
     RestUsageService,
     TemporaryStorageService,
 } from '../../../../core-module/core.module';
-import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
-import { Toast } from '../../../../core-ui-module/toast';
+import { NodeHelperService } from '../../../../services/node-helper.service';
+import { Toast } from '../../../../services/toast';
 import { ClipboardObject, LocalEventsService } from 'ngx-edu-sharing-ui';
 import { forkJoinWithErrors } from '../../../../util/rxjs/forkJoinWithErrors';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';

@@ -1,4 +1,4 @@
-import { RestAdminService } from '../../../core-module/rest/services/rest-admin.service';
+import { trigger } from '@angular/animations';
 import {
     Component,
     ElementRef,
@@ -9,25 +9,29 @@ import {
     ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
+import { DEFAULT, HOME_REPOSITORY, SearchService } from 'ngx-edu-sharing-api';
+import {
+    InteractionType,
+    ListCountsComponent,
+    ListItem,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    UIAnimation,
+} from 'ngx-edu-sharing-ui';
+import { CsvHelper } from '../../../core-module/csv.helper';
 import { Node, NodeStatistics, Statistics } from '../../../core-module/rest/data-object';
-import { ListItem, UIAnimation } from 'ngx-edu-sharing-ui';
+import { Helper } from '../../../core-module/rest/helper';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { ConfigurationService } from '../../../core-module/rest/services/configuration.service';
-import { RestStatisticsService } from '../../../core-module/rest/services/rest-statistics.service';
-import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
-import { Toast } from '../../../core-ui-module/toast';
-import { Helper } from '../../../core-module/rest/helper';
-import { CsvHelper } from '../../../core-module/csv.helper';
-import { SessionStorageService } from '../../../core-module/rest/services/session-storage.service';
+import { RestAdminService } from '../../../core-module/rest/services/rest-admin.service';
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
+import { RestStatisticsService } from '../../../core-module/rest/services/rest-statistics.service';
+import { SessionStorageService } from '../../../core-module/rest/services/session-storage.service';
 import { UIService } from '../../../core-module/rest/services/ui.service';
-import { trigger } from '@angular/animations';
-import { ListCountsComponent } from 'ngx-edu-sharing-ui';
-import { NodeDataSource } from 'ngx-edu-sharing-ui';
-import { DEFAULT, HOME_REPOSITORY, SearchService } from 'ngx-edu-sharing-api';
-import { InteractionType, NodeEntriesDisplayType } from 'ngx-edu-sharing-ui';
-import { NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
+import { Toast } from '../../../services/toast';
+import { NodeHelperService } from '../../../services/node-helper.service';
+import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
 
 // Charts.js
 declare var Chart: any;

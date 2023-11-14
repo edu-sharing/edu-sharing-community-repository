@@ -5,7 +5,7 @@ import { BehaviorSubject } from 'rxjs';
 import { Node } from '../../../../../core-module/rest/data-object';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { RestConnectorService } from '../../../../../core-module/rest/services/rest-connector.service';
-import { NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
+import { NodeHelperService } from '../../../../../services/node-helper.service';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { Constraints, MdsWidgetValue, NativeWidgetComponent, Values } from '../../../types/types';

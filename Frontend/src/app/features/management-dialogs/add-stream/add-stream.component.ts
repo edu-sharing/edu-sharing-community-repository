@@ -13,7 +13,7 @@ import {
     RestStreamService,
     STREAM_STATUS,
 } from '../../../core-module/core.module';
-import { Toast } from '../../../core-ui-module/toast';
+import { Toast } from '../../../services/toast';
 import { MdsComponent } from '../../../features/mds/legacy/mds/mds.component';
 import { trigger } from '@angular/animations';
 import { Helper } from '../../../core-module/rest/helper';

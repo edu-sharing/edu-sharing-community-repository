@@ -1,4 +1,4 @@
-import { BrowserPlatformLocation, PlatformLocation } from '@angular/common';
+import { PlatformLocation } from '@angular/common';
 import { Router } from '@angular/router';
 
 export class RouterHelper {

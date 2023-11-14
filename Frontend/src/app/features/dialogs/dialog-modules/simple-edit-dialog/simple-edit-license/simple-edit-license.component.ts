@@ -13,8 +13,8 @@ import {
     RestNodeService,
     RestOrganizationService,
 } from '../../../../../core-module/core.module';
-import { NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
-import { Toast } from '../../../../../core-ui-module/toast';
+import { NodeHelperService } from '../../../../../services/node-helper.service';
+import { Toast } from '../../../../../services/toast';
 import { Values } from '../../../../../features/mds/types/types';
 
 @Component({

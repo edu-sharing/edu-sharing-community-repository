@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Toast } from '../../../core-ui-module/toast';
+import { Toast } from '../../../services/toast';
 import { Params, Router } from '@angular/router';
 import { RestConnectorService, RestRegisterService } from '../../../core-module/core.module';
 import { UIHelper } from '../../../core-ui-module/ui-helper';

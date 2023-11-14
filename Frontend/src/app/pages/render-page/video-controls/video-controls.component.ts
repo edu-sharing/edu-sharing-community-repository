@@ -10,9 +10,9 @@ import { Node } from '../../../core-module/rest/data-object';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestNodeService } from '../../../core-module/rest/services/rest-node.service';
 import { NodesRightMode, TemporaryStorageService, UIAnimation } from 'ngx-edu-sharing-ui';
-import { Toast } from '../../toast';
+import { Toast } from '../../../services/toast';
 import { DurationPipe } from './duration.pipe';
-import { NodeHelperService } from '../../node-helper.service';
+import { NodeHelperService } from '../../../services/node-helper.service';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
 
 interface VideoControlsValues {

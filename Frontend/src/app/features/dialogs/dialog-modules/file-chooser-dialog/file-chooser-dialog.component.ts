@@ -13,7 +13,7 @@ import {
     RestConstants,
     RestNodeService,
 } from '../../../../core-module/core.module';
-import { Toast } from '../../../../core-ui-module/toast';
+import { Toast } from '../../../../services/toast';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { WorkspaceExplorerComponent } from '../../../../pages/workspace-page/explorer/explorer.component';
 import { CARD_DIALOG_DATA, CardDialogConfig } from '../../card-dialog/card-dialog-config';

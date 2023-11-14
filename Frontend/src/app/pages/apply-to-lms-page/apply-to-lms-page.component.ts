@@ -11,10 +11,10 @@ import {
     RestNodeService,
     TemporaryStorageService,
 } from '../../core-module/core.module';
-import { Toast } from '../../core-ui-module/toast';
-import { NodeHelperService } from '../../core-ui-module/node-helper.service';
+import { Toast } from '../../services/toast';
+import { NodeHelperService } from '../../services/node-helper.service';
 import { TranslationsService } from 'ngx-edu-sharing-ui';
-import { RouterHelper } from '../../core-ui-module/router.helper';
+import { RouterHelper } from '../../util/router.helper';
 import { PlatformLocation } from '@angular/common';
 
 export class NodeLMS extends Node {

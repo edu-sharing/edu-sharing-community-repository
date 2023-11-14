@@ -30,22 +30,21 @@ import { environment } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CoreModule } from './core-module/core.module';
-import { CoreUiModule } from './core-ui-module/core-ui.module';
-import { ErrorHandlerService } from './core-ui-module/error-handler.service';
-import { OptionsHelperService } from './core-ui-module/options-helper.service';
-import { Toast } from './core-ui-module/toast';
 import { extensionDeclarations } from './extension/extension-declarations';
 import { extensionImports } from './extension/extension-imports';
 import { extensionProviders } from './extension/extension-providers';
 import { extensionSchemas } from './extension/extension-schemas';
 import { DialogsModule } from './features/dialogs/dialogs.module';
+import { ManagementDialogsModule } from './features/management-dialogs/management-dialogs.module';
 import { MdsModule } from './features/mds/mds.module';
+import { ErrorHandlerService } from './main/error-handler.service';
 import { AppLocationStrategy } from './main/location-strategy';
 import { MainModule } from './main/main.module';
 import { CordovaService } from './services/cordova.service';
 import { KeyboardShortcutsService } from './services/keyboard-shortcuts.service';
+import { OptionsHelperService } from './services/options-helper.service';
+import { Toast } from './services/toast';
 import { SharedModule } from './shared/shared.module';
-import { ManagementDialogsModule } from './features/management-dialogs/management-dialogs.module';
 
 // http://blog.angular-university.io/angular2-ngmodule/
 // -> Making modules more readable using the spread operator
@@ -64,8 +63,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         BrowserAnimationsModule,
         BrowserModule,
         CoreModule,
-        CoreUiModule,
-        CoreUiModule,
         DialogsModule,
         DragDropModule,
         EduSharingApiModule.forRoot(),

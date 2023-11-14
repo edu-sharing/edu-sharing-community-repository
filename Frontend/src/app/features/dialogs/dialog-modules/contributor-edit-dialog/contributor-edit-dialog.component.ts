@@ -11,7 +11,7 @@ import {
     VCardResult,
 } from '../../../../core-module/core.module';
 import { DateHelper, UIAnimation, VCard } from 'ngx-edu-sharing-ui';
-import { Toast } from '../../../../core-ui-module/toast';
+import { Toast } from '../../../../services/toast';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import {

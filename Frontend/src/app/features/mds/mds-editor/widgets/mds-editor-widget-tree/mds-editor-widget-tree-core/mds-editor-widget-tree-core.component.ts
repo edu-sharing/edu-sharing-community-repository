@@ -19,7 +19,7 @@ import { MdsEditorInstanceService, Widget } from '../../../mds-editor-instance.s
 import { MdsWidgetType } from '../../../../types/types';
 import { DisplayValue } from '../../DisplayValues';
 import { Tree, TreeNode } from '../tree';
-import { Toast } from '../../../../../../core-ui-module/toast';
+import { Toast } from '../../../../../../services/toast';
 import { Helper } from '../../../../../../core-module/rest/helper';
 import { RestConstants } from '../../../../../../core-module/rest/rest-constants';
 import { MdsV1Service } from 'ngx-edu-sharing-api';

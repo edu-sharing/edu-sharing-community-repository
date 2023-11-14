@@ -7,7 +7,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { trigger } from '@angular/animations';
-import { Toast } from '../../../core-ui-module/toast';
+import { Toast } from '../../../services/toast';
 import {
     IamUser,
     RestConstants,

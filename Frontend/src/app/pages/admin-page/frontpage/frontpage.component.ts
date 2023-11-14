@@ -17,7 +17,7 @@ import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { ConfigurationService } from '../../../core-module/rest/services/configuration.service';
 import { RestAdminService } from '../../../core-module/rest/services/rest-admin.service';
-import { Toast } from '../../../core-ui-module/toast';
+import { Toast } from '../../../services/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';

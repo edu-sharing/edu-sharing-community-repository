@@ -10,7 +10,7 @@ import {
     RestOrganizationService,
 } from '../../core-module/core.module';
 import { Router } from '@angular/router';
-import { Toast } from '../../core-ui-module/toast';
+import { Toast } from '../../services/toast';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { Subject } from 'rxjs';

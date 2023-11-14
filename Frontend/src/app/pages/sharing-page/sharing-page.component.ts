@@ -28,11 +28,11 @@ import {
     RestSharingService,
     SharingInfo,
 } from '../../core-module/core.module';
-import { Toast } from '../../core-ui-module/toast';
+import { Toast } from '../../services/toast';
 import { Helper } from '../../core-module/rest/helper';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { BridgeService } from '../../services/bridge.service';
-import { NodeHelperService } from '../../core-ui-module/node-helper.service';
+import { NodeHelperService } from '../../services/node-helper.service';
 import { ConfigService } from 'ngx-edu-sharing-api';
 
 @Component({

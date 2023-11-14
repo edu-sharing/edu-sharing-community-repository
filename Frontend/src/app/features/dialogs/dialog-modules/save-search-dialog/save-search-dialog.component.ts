@@ -6,7 +6,7 @@ import * as rxjs from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { first, map, take } from 'rxjs/operators';
 import { DialogButton, RestConstants } from '../../../../core-module/core.module';
-import { Toast } from '../../../../core-ui-module/toast';
+import { Toast } from '../../../../services/toast';
 import { DateHelper, notNull } from 'ngx-edu-sharing-ui';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';

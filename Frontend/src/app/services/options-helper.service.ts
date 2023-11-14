@@ -59,16 +59,13 @@ import { DialogsService } from '../features/dialogs/dialogs.service';
 import { WorkspaceManagementDialogsComponent } from '../features/management-dialogs/management-dialogs.component';
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { WorkspaceService } from '../pages/workspace-page/workspace.service';
-import { BridgeService } from '../services/bridge.service';
-import {
-    KeyboardShortcutsService,
-    matchesShortcutCondition,
-} from '../services/keyboard-shortcuts.service';
+import { BridgeService } from './bridge.service';
+import { KeyboardShortcutsService, matchesShortcutCondition } from './keyboard-shortcuts.service';
 import { MessageType } from '../util/message-type';
 import { forkJoinWithErrors } from '../util/rxjs/forkJoinWithErrors';
 import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
 import { Toast } from './toast';
-import { UIHelper } from './ui-helper';
+import { UIHelper } from '../core-ui-module/ui-helper';
 
 @Injectable()
 export class OptionsHelperService extends OptionsHelperServiceAbstract implements OnDestroy {

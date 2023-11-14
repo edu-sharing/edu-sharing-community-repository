@@ -23,7 +23,7 @@ import {
 } from '../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { GlobalProgressComponent } from '../shared/components/global-progress/global-progress.component';
-import { ToastMessageComponent } from './components/toast-message/toast-message.component';
+import { ToastMessageComponent } from '../main/toast-message/toast-message.component';
 
 interface CustomAction {
     link: {
@@ -51,7 +51,7 @@ export type ToastMessage = {
     subtype: ToastType;
     action?: Action;
 };
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class Toast extends ToastAbstract implements OnDestroy {
     private static MIN_TIME_BETWEEN_TOAST = 2000;
 

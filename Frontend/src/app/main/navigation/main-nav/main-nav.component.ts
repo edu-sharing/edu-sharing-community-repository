@@ -38,7 +38,7 @@ import {
     TemporaryStorageService,
     UIService,
 } from '../../../core-module/core.module';
-import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
+import { NodeHelperService } from '../../../services/node-helper.service';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';

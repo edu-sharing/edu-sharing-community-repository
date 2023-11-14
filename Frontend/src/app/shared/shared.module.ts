@@ -11,7 +11,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatOptionModule, MatRippleModule } from '@angular/material/core';
+import { MatNativeDateModule, MatOptionModule, MatRippleModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -32,12 +32,14 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTreeModule } from '@angular/material/tree';
 import { RouterModule } from '@angular/router';
 import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
+import { NgxSliderModule } from 'ngx-slider-v2';
 import { environment } from '../../environments/environment';
 import { AuthorityRowComponent } from './components/authority-search-input/authority-row/authority-row.component';
 import { AuthoritySearchInputComponent } from './components/authority-search-input/authority-search-input.component';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { CalendarComponent } from './components/calendar/calendar.component';
 import { CardComponent } from './components/card/card.component';
+import { CollectionChooserComponent } from './components/collection-chooser/collection-chooser.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { GlobalProgressComponent } from './components/global-progress/global-progress.component';
 import { InfoMessageComponent } from './components/info-message/info-message.component';
@@ -45,6 +47,7 @@ import { InputPasswordComponent } from './components/input-password/input-passwo
 import { LicenseSourceComponent } from './components/license-source/license-source.component';
 import { LinkComponent } from './components/link/link.component';
 import { MultiLineLabelComponent } from './components/multi-line-label/multi-line-label.component';
+import { PoweredByComponent } from './components/powered-by/powered-by.component';
 import { SpinnerSmallComponent } from './components/spinner-small/spinner-small.component';
 import { TutorialComponent } from './components/tutorial/tutorial.component';
 import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
@@ -53,11 +56,13 @@ import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.
 import { ElementRefDirective } from './directives/element-ref.directive';
 import { EscapeHtmlPipe } from './directives/escape-html.pipe';
 import { FileDropDirective } from './directives/file-drop';
+import { ImageConfigDirective } from './directives/image-config.directive';
 import { InfiniteScrollDirective } from './directives/infinite-scroll.directive';
 import { OnAttributeChangeDirective } from './directives/on-attribute-change.directive';
 import { RegisterCustomPropertyDirective } from './directives/register-custom-property.directive';
 import { SkipTargetDirective } from './directives/skip-target.directive';
 import { TitleDirective } from './directives/title.directive';
+import { ToolpermissionCheckDirective } from './directives/toolpermission-check.directive';
 import { AuthorityAffiliationPipe } from './pipes/authority-affiliation.pipe';
 import { AuthorityColorPipe } from './pipes/authority-color.pipe';
 import { AuthorityNamePipe } from './pipes/authority-name.pipe';
@@ -66,9 +71,7 @@ import { PermissionNamePipe } from './pipes/permission-name.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { SplitNewLinesPipe } from './pipes/split-new-lines.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
-import { CollectionChooserComponent } from './components/collection-chooser/collection-chooser.component';
-import { PoweredByComponent } from './components/powered-by/powered-by.component';
-import { ToolpermissionCheckDirective } from './directives/toolpermission-check.directive';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 @NgModule({
     declarations: [
@@ -88,6 +91,7 @@ import { ToolpermissionCheckDirective } from './directives/toolpermission-check.
         FileDropDirective,
         FooterComponent,
         GlobalProgressComponent,
+        ImageConfigDirective,
         InfiniteScrollDirective,
         InfoMessageComponent,
         InputPasswordComponent,
@@ -126,6 +130,7 @@ import { ToolpermissionCheckDirective } from './directives/toolpermission-check.
         MatRippleModule,
         MatSelectModule,
         MatTooltipModule,
+        NgxSliderModule,
         ReactiveFormsModule,
         RouterModule,
         EduSharingUiModule.forRoot({
@@ -154,6 +159,7 @@ import { ToolpermissionCheckDirective } from './directives/toolpermission-check.
         FooterComponent,
         FormsModule,
         GlobalProgressComponent,
+        ImageConfigDirective,
         InfiniteScrollDirective,
         InfoMessageComponent,
         InputPasswordComponent,
@@ -172,6 +178,7 @@ import { ToolpermissionCheckDirective } from './directives/toolpermission-check.
         MatIconModule,
         MatInputModule,
         MatMenuModule,
+        MatNativeDateModule,
         MatOptionModule,
         MatPaginatorModule,
         MatProgressBarModule,
@@ -181,12 +188,14 @@ import { ToolpermissionCheckDirective } from './directives/toolpermission-check.
         MatSelectModule,
         MatSidenavModule,
         MatSlideToggleModule,
+        MatSnackBarModule,
         MatSortModule,
         MatTableModule,
         MatTabsModule,
         MatTooltipModule,
         MatTreeModule,
         MultiLineLabelComponent,
+        NgxSliderModule,
         OnAttributeChangeDirective,
         OverlayModule,
         PermissionNamePipe,

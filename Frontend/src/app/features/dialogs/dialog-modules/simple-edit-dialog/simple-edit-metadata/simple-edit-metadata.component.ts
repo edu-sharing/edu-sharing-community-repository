@@ -4,7 +4,7 @@ import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { Observable, forkJoin, from, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { Node, RestConstants, RestNodeService } from '../../../../../core-module/core.module';
-import { Toast } from '../../../../../core-ui-module/toast';
+import { Toast } from '../../../../../services/toast';
 import { MdsEditorWrapperComponent } from '../../../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { BulkBehavior } from '../../../../../features/mds/types/types';
 

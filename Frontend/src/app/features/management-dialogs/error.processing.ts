@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Toast } from './toast';
-import { Observable, Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
+import { Toast } from '../../services/toast';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class ErrorProcessingService {
     constructor(private toast: Toast) {}
 

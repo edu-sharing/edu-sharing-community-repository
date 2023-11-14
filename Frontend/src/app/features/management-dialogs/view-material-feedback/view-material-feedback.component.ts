@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { DialogButton, Node, RestConstants } from '../../../core-module/core.module';
-import { Toast } from '../../../core-ui-module/toast';
+import { Toast } from '../../../services/toast';
 import { FeedbackData, FeedbackV1Service } from 'ngx-edu-sharing-api';
 
 @Component({

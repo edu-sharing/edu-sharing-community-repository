@@ -4,7 +4,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { applicationConfig, moduleMetadata, type Meta, type StoryObj } from '@storybook/angular';
 import { injectInjectorToProps } from '../../../../storybook/custom-decorators';
 import { SharedModule } from '../../../shared/shared.module';
-import { Toast } from '../../toast';
+import { Toast } from '../../../services/toast';
 import { ToastMessageComponent } from './toast-message.component';
 
 interface ToastStories {

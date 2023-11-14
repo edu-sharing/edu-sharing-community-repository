@@ -1,10 +1,9 @@
-import { Injectable, Injector } from '@angular/core';
-import { Toast } from './toast';
 import { Location } from '@angular/common';
-import { DialogButton, RestConstants } from '../core-module/core.module';
-import { ApiErrorResponse } from 'ngx-edu-sharing-api';
 import { HttpRequest } from '@angular/common/http';
+import { Injectable, Injector } from '@angular/core';
+import { ApiErrorResponse } from 'ngx-edu-sharing-api';
 import { DialogsService } from '../features/dialogs/dialogs.service';
+import { Toast } from '../services/toast';
 
 @Injectable({
     providedIn: 'root',

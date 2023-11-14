@@ -16,7 +16,7 @@ import {
     RestHelper,
     RestNodeService,
 } from '../../../core-module/core.module';
-import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
+import { NodeHelperService } from '../../../services/node-helper.service';
 
 @Component({
     selector: 'es-create-ltitool',

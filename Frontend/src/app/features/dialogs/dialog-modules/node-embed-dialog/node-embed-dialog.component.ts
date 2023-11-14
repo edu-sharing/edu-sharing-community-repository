@@ -15,7 +15,7 @@ import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { startWith, take } from 'rxjs/operators';
 import { DialogButton, RestConstants, RestHelper } from '../../../../core-module/core.module';
-import { Toast, ToastType } from '../../../../core-ui-module/toast';
+import { Toast, ToastType } from '../../../../services/toast';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { Node } from '../../../../core-module/rest/data-object';
 import { MainNavService } from '../../../../main/navigation/main-nav.service';

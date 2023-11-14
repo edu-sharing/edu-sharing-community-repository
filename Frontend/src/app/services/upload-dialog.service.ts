@@ -3,7 +3,7 @@ import { Node } from 'ngx-edu-sharing-api';
 import { LocalEventsService } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { ConfigurationService, RestConstants, RestNodeService } from '../core-module/core.module';
-import { Toast } from '../core-ui-module/toast';
+import { Toast } from './toast';
 import {
     FileData,
     LinkData,
