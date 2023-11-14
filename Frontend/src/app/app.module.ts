@@ -45,7 +45,6 @@ import { MainModule } from './main/main.module';
 import { DECLARATIONS_MANAGEMENT_DIALOGS } from './modules/management-dialogs/declarations';
 import { DECLARATIONS_RECYCLE } from './modules/node-list/declarations';
 import { DECLARATIONS_STARTUP } from './modules/startup/declarations';
-import { PROVIDERS } from './providers';
 import { CordovaService } from './services/cordova.service';
 import { KeyboardShortcutsService } from './services/keyboard-shortcuts.service';
 import { SharedModule } from './shared/shared.module';
@@ -94,7 +93,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         { provide: ToastAbstract, useClass: Toast },
         { provide: OptionsHelperServiceAbstract, useClass: OptionsHelperService },
         { provide: KeyboardShortcutsServiceAbstract, useClass: KeyboardShortcutsService },
-        { provide: CordovaService, useClass: AppServiceAbstract },
+        { provide: AppServiceAbstract, useClass: CordovaService },
         {
             provide: EDU_SHARING_API_CONFIG,
             deps: [ErrorHandlerService],
@@ -114,7 +113,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
             deps: [HttpLink],
         },
         { provide: LocationStrategy, useClass: AppLocationStrategy },
-        PROVIDERS,
         { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
         { provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: matTooltipDefaultOptions },
         extensionProviders,

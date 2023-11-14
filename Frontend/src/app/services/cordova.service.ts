@@ -21,7 +21,7 @@ export enum OnBackBehaviour {
 /**
  * All services that touch the mobile app or cordova plugins are available here.
  */
-@Injectable()
+@Injectable({ providedIn: 'root' })
 // tslint:disable:no-console
 export class CordovaService extends AppServiceAbstract {
     private onBackBehaviour = OnBackBehaviour.default;
