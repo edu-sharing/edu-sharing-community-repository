@@ -70,6 +70,7 @@ public class KeyStoreService {
             ks = KeyStore.getInstance("JCEKS");
             File f = getKeyStoreLocation(name);
             if (!f.exists()) {
+                logger.info("keystore file does not exist." + f.getAbsolutePath() +" creating...");
                 //init keystore
                 ks.load(null,keyStorePassword.toCharArray());
                 storeKeyStore(ks,keyStorePassword,f);
@@ -144,6 +145,11 @@ public class KeyStoreService {
 
         KeyStore.SecretKeyEntry ske =
                 (KeyStore.SecretKeyEntry)keyStore.getEntry(passwordAlias, keyStorePP);
+
+        if(ske == null){
+            logger.warn("alias not found in keystore:" + passwordAlias);
+            return null;
+        }
 
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBE");
         PBEKeySpec keySpec = (PBEKeySpec)factory.getKeySpec(
