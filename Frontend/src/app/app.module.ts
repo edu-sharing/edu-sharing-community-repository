@@ -43,7 +43,6 @@ import { MdsModule } from './features/mds/mds.module';
 import { AppLocationStrategy } from './main/location-strategy';
 import { MainModule } from './main/main.module';
 import { DECLARATIONS_MANAGEMENT_DIALOGS } from './modules/management-dialogs/declarations';
-import { DECLARATIONS_STARTUP } from './modules/startup/declarations';
 import { CordovaService } from './services/cordova.service';
 import { KeyboardShortcutsService } from './services/keyboard-shortcuts.service';
 import { SharedModule } from './shared/shared.module';
@@ -61,7 +60,6 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     declarations: [
         AppComponent,
         CustomGlobalExtensionsComponent,
-        DECLARATIONS_STARTUP,
         DECLARATIONS_MANAGEMENT_DIALOGS,
         extensionDeclarations,
     ],
@@ -116,7 +114,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         extensionProviders,
         ErrorHandlerService,
     ],
-    exports: [DECLARATIONS_STARTUP, DECLARATIONS_MANAGEMENT_DIALOGS],
+    exports: [DECLARATIONS_MANAGEMENT_DIALOGS],
     schemas: [].concat(extensionSchemas),
     bootstrap: [AppComponent],
 })

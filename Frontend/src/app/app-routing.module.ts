@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { UIConstants } from './core-module/core.module';
 import { extensionRoutes } from './extension/extension-routes';
 import { DialogsNavigationGuard } from './features/dialogs/dialogs-navigation.guard';
-import { StartupComponent } from './modules/startup/startup.component';
+import { StartupComponent } from './main/startup.component';
 
 const routes: Routes = [
     // Overrides and additional routes

@@ -19,6 +19,7 @@ import { TopBarComponent } from './navigation/top-bar/top-bar.component';
 import { UserProfileComponent } from './navigation/user-profile/user-profile.component';
 import { RocketchatComponent } from './rocketchat/rocketchat.component';
 import { ScrollToTopButtonComponent } from './scroll-to-top-button/scroll-to-top-button.component';
+import { StartupComponent } from './startup.component';
 
 @NgModule({
     declarations: [
@@ -36,6 +37,7 @@ import { ScrollToTopButtonComponent } from './scroll-to-top-button/scroll-to-top
         SearchFieldComponent,
         SearchHeaderComponent,
         SkipNavComponent,
+        StartupComponent,
         TopBarComponent,
         UserProfileComponent,
         extensionDeclarationsMap['MainModule'] || [],
@@ -48,6 +50,7 @@ import { ScrollToTopButtonComponent } from './scroll-to-top-button/scroll-to-top
         RocketchatComponent,
         ScrollToTopButtonComponent,
         SearchFieldComponent,
+        StartupComponent,
     ],
 })
 export class MainModule {}

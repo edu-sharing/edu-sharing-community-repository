@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CordovaService } from '../../services/cordova.service';
+import { CordovaService } from '../services/cordova.service';
 import { UIConstants } from 'ngx-edu-sharing-ui';
 import { Router } from '@angular/router';
 
