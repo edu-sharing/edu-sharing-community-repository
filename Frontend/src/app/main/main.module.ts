@@ -17,6 +17,7 @@ import { SkipNavComponent } from './navigation/skip-nav/skip-nav.component';
 import { NotificationDialogModule } from './navigation/top-bar/notification-dialog/notification-dialog.module';
 import { TopBarComponent } from './navigation/top-bar/top-bar.component';
 import { UserProfileComponent } from './navigation/user-profile/user-profile.component';
+import { RocketchatComponent } from './rocketchat/rocketchat.component';
 import { ScrollToTopButtonComponent } from './scroll-to-top-button/scroll-to-top-button.component';
 
 @NgModule({
@@ -30,6 +31,7 @@ import { ScrollToTopButtonComponent } from './scroll-to-top-button/scroll-to-top
         MainMenuDropdownComponent,
         MainMenuSidebarComponent,
         MainNavComponent,
+        RocketchatComponent,
         ScrollToTopButtonComponent,
         SearchFieldComponent,
         SearchHeaderComponent,
@@ -43,6 +45,7 @@ import { ScrollToTopButtonComponent } from './scroll-to-top-button/scroll-to-top
         CookieInfoComponent,
         CreateMenuComponent,
         MainNavComponent,
+        RocketchatComponent,
         ScrollToTopButtonComponent,
         SearchFieldComponent,
     ],

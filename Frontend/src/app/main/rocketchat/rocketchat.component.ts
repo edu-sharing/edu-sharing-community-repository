@@ -1,3 +1,4 @@
+import { trigger } from '@angular/animations';
 import {
     ChangeDetectorRef,
     Component,
@@ -7,15 +8,14 @@ import {
     ViewChild,
 } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { trigger } from '@angular/animations';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
+import { first } from 'rxjs/operators';
+import { ConfigurationService, RestConnectorService } from '../../core-module/core.module';
 import {
     EventListener,
     FrameEventsService,
-} from '../../../../core-module/rest/services/frame-events.service';
-import { UIAnimation } from 'ngx-edu-sharing-ui';
-import { ConfigurationService, RestConnectorService } from '../../../../core-module/core.module';
-import { first } from 'rxjs/operators';
-import { LoadingScreenService } from '../../../../main/loading-screen/loading-screen.service';
+} from '../../core-module/rest/services/frame-events.service';
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { RocketChatService } from './rocket-chat.service';
 
 @Component({

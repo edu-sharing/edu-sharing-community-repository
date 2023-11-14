@@ -1,5 +1,4 @@
 import { trigger } from '@angular/animations';
-import { HttpClient } from '@angular/common/http';
 import {
     AfterViewInit,
     Component,
@@ -20,12 +19,16 @@ import {
     User,
     UserService,
 } from 'ngx-edu-sharing-api';
+import {
+    OPEN_URL_MODE,
+    OptionGroup,
+    OptionItem,
+    UIAnimation,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { Observable, ReplaySubject, Subject } from 'rxjs';
 import { delay, filter, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
-import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
-import { RocketChatService } from '../../../common/ui/global-container/rocketchat/rocket-chat.service';
-import { BridgeService } from '../../../services/bridge.service';
 import {
     ConfigurationService,
     RestConnectorService,
@@ -35,18 +38,14 @@ import {
     TemporaryStorageService,
     UIService,
 } from '../../../core-module/core.module';
-import {
-    OPEN_URL_MODE,
-    OptionGroup,
-    OptionItem,
-    UIAnimation,
-    UIConstants,
-} from 'ngx-edu-sharing-ui';
+import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { BridgeService } from '../../../services/bridge.service';
 import { LicenseAgreementService } from '../../../services/license-agreement.service';
+import { RocketChatService } from '../../rocketchat/rocket-chat.service';
 import { MainMenuEntriesService } from '../main-menu-entries.service';
 import { MainNavConfig, MainNavService } from '../main-nav.service';
 import { SearchFieldService } from '../search-field/search-field.service';
@@ -113,7 +112,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         private uiService: UIService,
         private mainNavService: MainNavService,
         private storage: TemporaryStorageService,
-        private http: HttpClient,
         private router: Router,
         private route: ActivatedRoute,
         private nodeHelper: NodeHelperService,
