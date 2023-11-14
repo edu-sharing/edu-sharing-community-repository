@@ -4,7 +4,6 @@ import { OptionItem, UIAnimation } from 'ngx-edu-sharing-ui';
 import {
     Comment,
     Comments,
-    DialogButton,
     LoginResult,
     Node,
     RestCommentsService,
@@ -12,10 +11,10 @@ import {
     RestConstants,
     RestIamService,
     User,
-} from '../../../../core-module/core.module';
-import { Toast } from '../../../../core-ui-module/toast';
-import { DialogsService } from '../../../../features/dialogs/dialogs.service';
-import { YES_OR_NO } from '../../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+} from '../../../core-module/core.module';
+import { Toast } from '../../../core-ui-module/toast';
+import { YES_OR_NO } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
 
 @Component({
     selector: 'es-comments-list',
