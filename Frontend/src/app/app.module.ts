@@ -42,10 +42,10 @@ import { DialogsModule } from './features/dialogs/dialogs.module';
 import { MdsModule } from './features/mds/mds.module';
 import { AppLocationStrategy } from './main/location-strategy';
 import { MainModule } from './main/main.module';
-import { DECLARATIONS_MANAGEMENT_DIALOGS } from './modules/management-dialogs/declarations';
 import { CordovaService } from './services/cordova.service';
 import { KeyboardShortcutsService } from './services/keyboard-shortcuts.service';
 import { SharedModule } from './shared/shared.module';
+import { ManagementDialogsModule } from './features/management-dialogs/management-dialogs.module';
 
 // http://blog.angular-university.io/angular2-ngmodule/
 // -> Making modules more readable using the spread operator
@@ -57,12 +57,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
 };
 
 @NgModule({
-    declarations: [
-        AppComponent,
-        CustomGlobalExtensionsComponent,
-        DECLARATIONS_MANAGEMENT_DIALOGS,
-        extensionDeclarations,
-    ],
+    declarations: [AppComponent, CustomGlobalExtensionsComponent, extensionDeclarations],
     imports: [
         ApolloModule,
         AppRoutingModule,
@@ -79,6 +74,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         extensionImports,
         HttpClientModule,
         MainModule,
+        ManagementDialogsModule,
         MaterialCssVarsModule.forRoot({ isAutoContrast: true }),
         MdsModule,
         ResizableModule,
@@ -114,7 +110,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         extensionProviders,
         ErrorHandlerService,
     ],
-    exports: [DECLARATIONS_MANAGEMENT_DIALOGS],
+    exports: [],
     schemas: [].concat(extensionSchemas),
     bootstrap: [AppComponent],
 })

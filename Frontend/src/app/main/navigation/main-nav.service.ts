@@ -4,8 +4,8 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { FrameEventsService, Node } from '../../core-module/core.module';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
+import { ManagementDialogsService } from '../../features/management-dialogs/management-dialogs.service';
 import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.component';
-import { ManagementDialogsService } from '../../modules/management-dialogs/management-dialogs.service';
 import { CookieInfoComponent } from '../cookie-info/cookie-info.component';
 import { SkipNavService } from './skip-nav/skip-nav.service';
 

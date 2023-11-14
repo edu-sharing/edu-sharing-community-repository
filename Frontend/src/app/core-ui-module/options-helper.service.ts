@@ -30,7 +30,6 @@ import {
     of,
 } from 'rxjs';
 import { catchError, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
-import { BridgeService } from '../services/bridge.service';
 import {
     ConfigurationService,
     FrameEventsService,
@@ -52,19 +51,20 @@ import { RestConnectorsService } from '../core-module/rest/services/rest-connect
 import { RestNetworkService } from '../core-module/rest/services/rest-network.service';
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
 import { UIService } from '../core-module/rest/services/ui.service';
-import { MessageType } from '../util/message-type';
 import {
     DELETE_OR_CANCEL,
     OK_OR_CANCEL,
 } from '../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../features/dialogs/dialogs.service';
+import { WorkspaceManagementDialogsComponent } from '../features/management-dialogs/management-dialogs.component';
 import { MainNavService } from '../main/navigation/main-nav.service';
-import { WorkspaceManagementDialogsComponent } from '../modules/management-dialogs/management-dialogs.component';
 import { WorkspaceService } from '../pages/workspace-page/workspace.service';
+import { BridgeService } from '../services/bridge.service';
 import {
     KeyboardShortcutsService,
     matchesShortcutCondition,
 } from '../services/keyboard-shortcuts.service';
+import { MessageType } from '../util/message-type';
 import { forkJoinWithErrors } from '../util/rxjs/forkJoinWithErrors';
 import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
 import { Toast } from './toast';

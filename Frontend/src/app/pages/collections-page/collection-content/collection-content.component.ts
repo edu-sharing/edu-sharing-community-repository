@@ -42,8 +42,6 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { Subject, forkJoin as observableForkJoin } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { InfobarService } from '../infobar/infobar.service';
-import { BridgeService } from '../../../services/bridge.service';
 import * as EduData from '../../../core-module/core.module';
 import {
     CollectionReference,
@@ -64,13 +62,15 @@ import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
-import { MainNavService } from '../../../main/navigation/main-nav.service';
 import {
     ManagementEvent,
     ManagementEventType,
-} from '../../../modules/management-dialogs/management-dialogs.component';
+} from '../../../features/management-dialogs/management-dialogs.component';
+import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../../../main/navigation/main-nav.service';
+import { BridgeService } from '../../../services/bridge.service';
 import { CollectionInfoBarComponent } from '../collection-info-bar/collection-info-bar.component';
+import { InfobarService } from '../infobar/infobar.service';
 
 @Component({
     selector: 'es-collection-content',

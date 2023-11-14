@@ -9,8 +9,8 @@ import {
     LinkData,
 } from '../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog-data';
 import { DialogsService } from '../features/dialogs/dialogs.service';
+import { DialogType } from '../features/management-dialogs/management-dialogs.component';
 import { BulkBehavior } from '../features/mds/types/types';
-import { DialogType } from '../modules/management-dialogs/management-dialogs.component';
 
 /**
  * Provides high-level methods to allow uploading and saving new material.

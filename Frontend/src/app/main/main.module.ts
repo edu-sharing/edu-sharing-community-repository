@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { extensionDeclarationsMap } from '../extension/extension-declarations-map';
+import { ManagementDialogsModule } from '../features/management-dialogs/management-dialogs.module';
 import { MdsModule } from '../features/mds/mds.module';
 import { SharedModule } from '../shared/shared.module';
 import { CookieInfoComponent } from './cookie-info/cookie-info.component';
