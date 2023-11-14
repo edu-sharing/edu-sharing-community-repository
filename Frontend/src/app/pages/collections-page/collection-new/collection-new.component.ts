@@ -57,7 +57,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
-import { BridgeService } from '../../../core-bridge-module/bridge.service';
+import { BridgeService } from '../../../services/bridge.service';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { Observable, Subject } from 'rxjs';
 import { PlatformLocation } from '@angular/common';

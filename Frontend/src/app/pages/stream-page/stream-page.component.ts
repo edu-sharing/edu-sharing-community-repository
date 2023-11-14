@@ -17,7 +17,7 @@ import {
 import { Observable, Subject, Subscription } from 'rxjs';
 import { filter, pairwise } from 'rxjs/operators';
 import { CordovaService } from '../../services/cordova.service';
-import { BridgeService } from '../../core-bridge-module/bridge.service';
+import { BridgeService } from '../../services/bridge.service';
 import * as EduData from '../../core-module/core.module';
 import {
     Connector,

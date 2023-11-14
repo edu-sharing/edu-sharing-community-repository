@@ -10,7 +10,7 @@ import { NodeService, RelationData, RelationService, UserService } from 'ngx-edu
 import { forkJoin } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { UniversalNode } from '../../../../core-module/rest/definitions';
-import { BridgeService } from '../../../../core-bridge-module/bridge.service';
+import { BridgeService } from '../../../../services/bridge.service';
 import {
     DialogButton,
     Node,

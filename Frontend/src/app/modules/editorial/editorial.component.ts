@@ -26,7 +26,7 @@ import { Toast } from '../../core-ui-module/toast';
 import { trigger } from '@angular/animations';
 import { CordovaService } from '../../services/cordova.service';
 import { HttpClient } from '@angular/common/http';
-import { BridgeService } from '../../core-bridge-module/bridge.service';
+import { BridgeService } from '../../services/bridge.service';
 import { CardService } from '../../core-ui-module/card.service';
 
 @Component({

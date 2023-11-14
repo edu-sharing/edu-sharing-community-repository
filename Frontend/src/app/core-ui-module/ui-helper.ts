@@ -15,7 +15,7 @@ import { LoginInfo } from 'ngx-edu-sharing-api';
 import { ListItem, OPEN_URL_MODE, UIConstants } from 'ngx-edu-sharing-ui';
 import { Observable, Observer, forkJoin as observableForkJoin, of } from 'rxjs';
 import { catchError, first, take } from 'rxjs/operators';
-import { BridgeService } from '../core-bridge-module/bridge.service';
+import { BridgeService } from '../services/bridge.service';
 import {
     CollectionReference,
     Connector,

@@ -25,7 +25,7 @@ import { Observable, ReplaySubject, Subject } from 'rxjs';
 import { delay, filter, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { RocketChatService } from '../../../common/ui/global-container/rocketchat/rocket-chat.service';
-import { BridgeService } from '../../../core-bridge-module/bridge.service';
+import { BridgeService } from '../../../services/bridge.service';
 import {
     ConfigurationService,
     RestConnectorService,

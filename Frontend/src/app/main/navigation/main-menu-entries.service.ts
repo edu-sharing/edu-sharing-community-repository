@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
-import { BridgeService } from '../../core-bridge-module/bridge.service';
+import { BridgeService } from '../../services/bridge.service';
 import {
     ConfigurationService,
     FrameEventsService,

@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthenticationService } from 'ngx-edu-sharing-api';
 import { Observable, of } from 'rxjs';
-import { BridgeService } from '../../core-bridge-module/bridge.service';
+import { BridgeService } from '../../services/bridge.service';
 import {
     ConfigurationService,
     FrameEventsService,

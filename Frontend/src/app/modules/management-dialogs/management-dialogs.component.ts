@@ -18,7 +18,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { forkJoin as observableForkJoin } from 'rxjs';
 import { ErrorProcessingService } from 'src/app/core-ui-module/error.processing';
-import { BridgeService } from '../../core-bridge-module/bridge.service';
+import { BridgeService } from '../../services/bridge.service';
 import {
     CollectionReference,
     Node,

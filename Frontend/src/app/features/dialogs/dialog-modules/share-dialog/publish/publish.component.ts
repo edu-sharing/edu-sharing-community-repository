@@ -14,7 +14,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { NodeService } from 'ngx-edu-sharing-api';
 import { Observable, Observer, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
-import { BridgeService } from '../../../../../core-bridge-module/bridge.service';
+import { BridgeService } from '../../../../../services/bridge.service';
 import {
     ConfigurationService,
     DialogButton,

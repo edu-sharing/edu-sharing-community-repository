@@ -25,7 +25,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { Observable, Subject } from 'rxjs';
 import { delay, takeUntil } from 'rxjs/operators';
-import { BridgeService } from '../../../core-bridge-module/bridge.service';
+import { BridgeService } from '../../../services/bridge.service';
 import {
     Connector,
     Filetype,

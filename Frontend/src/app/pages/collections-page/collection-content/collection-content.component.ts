@@ -43,7 +43,7 @@ import {
 import { Subject, forkJoin as observableForkJoin } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { InfobarService } from '../infobar/infobar.service';
-import { BridgeService } from '../../../core-bridge-module/bridge.service';
+import { BridgeService } from '../../../services/bridge.service';
 import * as EduData from '../../../core-module/core.module';
 import {
     CollectionReference,

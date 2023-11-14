@@ -14,7 +14,7 @@ import { AccessibilityService, TranslationsService, UIConstants } from 'ngx-edu-
 import * as rxjs from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { environment } from '../environments/environment';
-import { BridgeService } from './core-bridge-module/bridge.service';
+import { BridgeService } from './services/bridge.service';
 import { ConfigurationService, RestHelper, RestNetworkService } from './core-module/core.module';
 import { CookieInfoComponent } from './main/cookie-info/cookie-info.component';
 import { LoadingScreenService } from './main/loading-screen/loading-screen.service';

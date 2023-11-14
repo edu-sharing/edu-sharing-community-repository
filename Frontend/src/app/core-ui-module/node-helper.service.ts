@@ -19,7 +19,7 @@ import { HttpClient } from '@angular/common/http';
 import { MessageType } from '../core-module/ui/message-type';
 import { Toast } from './toast';
 import { ComponentFactoryResolver, Injectable, ViewContainerRef } from '@angular/core';
-import { BridgeService } from '../core-bridge-module/bridge.service';
+import { BridgeService } from '../services/bridge.service';
 import {
     AuthorityProfile,
     CollectionReference,

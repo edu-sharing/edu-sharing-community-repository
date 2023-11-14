@@ -4,7 +4,7 @@ import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angu
 import { Router } from '@angular/router';
 import { Options } from 'ngx-slider-v2';
 import { of, ReplaySubject } from 'rxjs';
-import { BridgeService } from '../../../core-bridge-module/bridge.service';
+import { BridgeService } from '../../../services/bridge.service';
 import { RestCollectionService, RestConnectorService } from '../../../core-module/core.module';
 import { Node } from '../../../core-module/rest/data-object';
 import { RestConstants } from '../../../core-module/rest/rest-constants';

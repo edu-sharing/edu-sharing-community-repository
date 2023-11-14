@@ -13,7 +13,7 @@ import {
 import { OPEN_URL_MODE, TranslationsService, UIConstants } from 'ngx-edu-sharing-ui';
 import { CordovaService } from '../../services/cordova.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
-import { BridgeService } from '../../core-bridge-module/bridge.service';
+import { BridgeService } from '../../services/bridge.service';
 import { PlatformLocation } from '@angular/common';
 
 // possible states this UI component can be in

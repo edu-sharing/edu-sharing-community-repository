@@ -30,7 +30,7 @@ import {
     of,
 } from 'rxjs';
 import { catchError, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
-import { BridgeService } from '../core-bridge-module/bridge.service';
+import { BridgeService } from '../services/bridge.service';
 import {
     ConfigurationService,
     FrameEventsService,

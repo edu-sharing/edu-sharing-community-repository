@@ -5,7 +5,7 @@ import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/co
 import { UntypedFormControl } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { first, map, startWith } from 'rxjs/operators';
-import { BridgeService } from '../../core-bridge-module/bridge.service';
+import { BridgeService } from '../../services/bridge.service';
 import {
     ConfigurationService,
     DialogButton,
