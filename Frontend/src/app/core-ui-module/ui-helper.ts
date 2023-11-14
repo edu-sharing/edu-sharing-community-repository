@@ -37,7 +37,7 @@ import { RestConnectorService } from '../core-module/rest/services/rest-connecto
 import { RestConnectorsService } from '../core-module/rest/services/rest-connectors.service';
 import { RestIamService } from '../core-module/rest/services/rest-iam.service';
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
-import { MessageType } from '../core-module/ui/message-type';
+import { MessageType } from '../util/message-type';
 import {
     OK,
     YES_OR_NO,

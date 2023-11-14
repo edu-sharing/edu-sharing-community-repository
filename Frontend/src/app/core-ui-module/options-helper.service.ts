@@ -52,7 +52,7 @@ import { RestConnectorsService } from '../core-module/rest/services/rest-connect
 import { RestNetworkService } from '../core-module/rest/services/rest-network.service';
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
 import { UIService } from '../core-module/rest/services/ui.service';
-import { MessageType } from '../core-module/ui/message-type';
+import { MessageType } from '../util/message-type';
 import {
     DELETE_OR_CANCEL,
     OK_OR_CANCEL,

@@ -1,7 +1,7 @@
 import { Injectable, Injector } from '@angular/core';
 import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { CordovaService } from './cordova.service';
-import { MessageType } from '../core-module/ui/message-type';
+import { MessageType } from '../util/message-type';
 import { Toast } from '../core-ui-module/toast';
 import { CardDialogRef } from '../features/dialogs/card-dialog/card-dialog-ref';
 import {

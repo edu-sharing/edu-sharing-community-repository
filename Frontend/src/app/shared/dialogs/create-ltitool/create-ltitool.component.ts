@@ -8,7 +8,7 @@ import {
     Output,
 } from '@angular/core';
 import { LtiPlatformService, Tool } from 'ngx-edu-sharing-api';
-import { DialogButton } from '../../../core-module/ui/dialog-button';
+import { DialogButton } from '../../../util/dialog-button';
 import {
     Node,
     NodeWrapper,

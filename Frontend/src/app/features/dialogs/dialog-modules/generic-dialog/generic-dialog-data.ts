@@ -1,6 +1,6 @@
 import { TemplateRef } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
-import { ButtonConfig } from '../../../../core-module/ui/dialog-button';
+import { ButtonConfig } from '../../../../util/dialog-button';
 import { CardDialogConfig } from '../../card-dialog/card-dialog-config';
 
 export class GenericDialogData<R extends string, P extends string = string> {

@@ -1,7 +1,7 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { Injectable } from '@angular/core';
-import { DialogButton } from '../../../core-module/ui/dialog-button';
+import { DialogButton } from '../../../util/dialog-button';
 import { GenericDialogButton } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { InfobarComponent } from './infobar.component';
 

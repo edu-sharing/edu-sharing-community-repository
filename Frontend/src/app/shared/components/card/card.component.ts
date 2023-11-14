@@ -22,7 +22,7 @@ import {
     RestHelper,
     UIService,
 } from '../../../core-module/core.module';
-import { KeyEvents } from '../../../core-module/ui/key-events';
+import { KeyEvents } from '../../../util/key-events';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { CardService } from '../../../core-ui-module/card.service';
 import { JumpMark, JumpMarksService } from '../../../services/jump-marks.service';

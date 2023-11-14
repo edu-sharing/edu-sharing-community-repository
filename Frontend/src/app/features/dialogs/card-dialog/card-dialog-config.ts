@@ -1,10 +1,5 @@
 import { InjectionToken, TemplateRef } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
-import { Node } from 'ngx-edu-sharing-api';
-import { Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { RestHelper } from '../../../core-module/core.module';
-import { DialogButton } from '../../../core-module/ui/dialog-button';
+import { DialogButton } from '../../../util/dialog-button';
 import { JumpMark } from '../../../services/jump-marks.service';
 import { CardAvatar } from './card-dialog-container/card-header/card-avatar';
 

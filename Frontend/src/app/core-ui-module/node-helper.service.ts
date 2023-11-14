@@ -16,7 +16,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { Helper } from '../core-module/rest/helper';
 import { HttpClient } from '@angular/common/http';
-import { MessageType } from '../core-module/ui/message-type';
+import { MessageType } from '../util/message-type';
 import { Toast } from './toast';
 import { ComponentFactoryResolver, Injectable, ViewContainerRef } from '@angular/core';
 import { BridgeService } from '../services/bridge.service';

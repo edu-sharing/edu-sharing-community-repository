@@ -1,7 +1,7 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { KeyEvents } from '../core-module/ui/key-events';
+import { KeyEvents } from '../util/key-events';
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { CardComponent } from '../shared/components/card/card.component';
 import { KeyboardShortcut, KeyboardShortcutCondition, Modifier } from 'ngx-edu-sharing-ui';

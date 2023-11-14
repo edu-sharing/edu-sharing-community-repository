@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { CardDialogRef } from '../../../../features/dialogs/card-dialog/card-dialog-ref';
-import { DialogButton } from '../../../../core-module/ui/dialog-button';
+import { DialogButton } from '../../../../util/dialog-button';
 import { ClientConfig, NotificationConfig, NotificationV1Service } from 'ngx-edu-sharing-api';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ConfigService } from 'ngx-edu-sharing-api';

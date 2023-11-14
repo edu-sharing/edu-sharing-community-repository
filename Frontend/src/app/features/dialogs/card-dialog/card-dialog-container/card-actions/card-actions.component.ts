@@ -7,7 +7,7 @@ import {
     ViewChildren,
 } from '@angular/core';
 import { MatButton } from '@angular/material/button';
-import { DialogButton } from '../../../../../core-module/ui/dialog-button';
+import { DialogButton } from '../../../../../util/dialog-button';
 
 @Component({
     selector: 'es-card-actions',
