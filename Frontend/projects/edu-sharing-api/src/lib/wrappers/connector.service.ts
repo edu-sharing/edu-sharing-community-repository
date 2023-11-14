@@ -21,7 +21,7 @@ export class ConnectorService {
     @shareReturnValue()
     observeConnectorList({ repository = HOME_REPOSITORY } = {}): Observable<ConnectorList | null> {
         return this.authentication.observeLoginInfo().pipe(
-            map(({ isValidLogin }) => isValidLogin),
+            map(({ toolPermissions }) => toolPermissions),
             distinctUntilChanged(),
             switchReplay((isValidLogin) => {
                 if (isValidLogin) {
