@@ -27,7 +27,6 @@ import { MatTreeModule } from '@angular/material/tree';
 import { BrowserModule } from '@angular/platform-browser';
 import { CoreModule } from './core-module/core.module';
 import { CoreUiModule } from './core-ui-module/core-ui.module';
-import { CustomModule } from './custom-module/custom.module';
 
 export const IMPORTS = [
     A11yModule,
@@ -65,5 +64,4 @@ export const IMPORTS = [
     MatTreeModule,
     CoreModule,
     CoreUiModule,
-    CustomModule,
 ];

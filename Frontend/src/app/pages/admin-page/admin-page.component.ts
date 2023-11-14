@@ -1,14 +1,6 @@
 import { trigger } from '@angular/animations';
 import { PlatformLocation } from '@angular/common';
-import {
-    Component,
-    ComponentFactoryResolver,
-    ElementRef,
-    OnDestroy,
-    OnInit,
-    TemplateRef,
-    ViewChild,
-} from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { AboutService, NetworkService, Store } from 'ngx-edu-sharing-api';
@@ -26,7 +18,6 @@ import {
     UIConstants,
 } from 'ngx-edu-sharing-ui';
 import { Observable, Observer } from 'rxjs';
-import { CustomHelper } from './custom-helper';
 import { SuggestItem } from './autocomplete/autocomplete.component';
 import {
     Application,
@@ -97,7 +88,6 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     constructor(
         private about: AboutService,
         private admin: RestAdminService,
-        private componentFactoryResolver: ComponentFactoryResolver,
         private config: ConfigurationService,
         private connector: RestConnectorService,
         private dialogs: DialogsService,
@@ -116,9 +106,6 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         private translate: TranslateService,
         private translations: TranslationsService,
     ) {
-        this.addCustomComponents(
-            CustomHelper.getCustomComponents('AdminComponent', this.componentFactoryResolver),
-        );
         this.searchColumns.push(new ListItem('NODE', RestConstants.CM_NAME));
         this.searchColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
         this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
@@ -1270,22 +1257,6 @@ export class AdminPageComponent implements OnInit, OnDestroy {
                     CsvHelper.download(filename, props, data);
                 }
             });
-    }
-
-    private addCustomComponents(customComponents: any[]) {
-        for (const c of customComponents) {
-            if (c.targetType == 'BUTTON') {
-                const item = c.payload;
-                item.factory = c.factory;
-                this.buttons.splice(
-                    c.payload.position >= 0
-                        ? c.payload.position
-                        : this.buttons.length + c.payload.position,
-                    0,
-                    item,
-                );
-            }
-        }
     }
 
     private initButtons() {
