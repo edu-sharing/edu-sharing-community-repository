@@ -577,11 +577,12 @@ export class UIHelper {
 
     static openLTIResourceLink(w: any, node: Node) {
         //let w = window.open('');
-        if(w == null){
-            console.log("window is null");
+        if (w == null) {
+            console.log('window is null');
             w = window.open('');
         }
-        w.location.href = '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId=' +
+        w.location.href =
+            '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId=' +
             node.ref.id;
 
         /*let w = window.open(

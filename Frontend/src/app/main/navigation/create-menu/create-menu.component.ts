@@ -580,7 +580,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         if (nodes) {
             nodes.forEach((n) => {
                 if (event.tool.customContentOption == true) {
-                    UIHelper.openLTIResourceLink(w,n);
+                    UIHelper.openLTIResourceLink(w, n);
 
                     this.onCreate.emit([n]);
                     this.createToolType = null;
