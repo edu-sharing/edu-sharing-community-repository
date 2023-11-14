@@ -1,8 +1,11 @@
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LocationStrategy } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions } from '@angular/material/tooltip';
+import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { InMemoryCache } from '@apollo/client/core';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { ResizableModule } from 'angular-resizable-element';
@@ -22,28 +25,28 @@ import {
     Toast as ToastAbstract,
     TranslationsModule,
 } from 'ngx-edu-sharing-ui';
+import { CustomGlobalExtensionsComponent } from 'src/app/extension/custom-global-component/custom-global-extensions.component';
 import { environment } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { CordovaService } from './services/cordova.service';
+import { CoreModule } from './core-module/core.module';
 import { CoreUiModule } from './core-ui-module/core-ui.module';
 import { ErrorHandlerService } from './core-ui-module/error-handler.service';
 import { OptionsHelperService } from './core-ui-module/options-helper.service';
 import { Toast } from './core-ui-module/toast';
-import { DECLARATIONS } from './declarations';
 import { extensionDeclarations } from './extension/extension-declarations';
 import { extensionImports } from './extension/extension-imports';
 import { extensionProviders } from './extension/extension-providers';
 import { extensionSchemas } from './extension/extension-schemas';
 import { DialogsModule } from './features/dialogs/dialogs.module';
 import { MdsModule } from './features/mds/mds.module';
-import { IMPORTS } from './imports';
 import { AppLocationStrategy } from './main/location-strategy';
 import { MainModule } from './main/main.module';
 import { DECLARATIONS_MANAGEMENT_DIALOGS } from './modules/management-dialogs/declarations';
 import { DECLARATIONS_RECYCLE } from './modules/node-list/declarations';
 import { DECLARATIONS_STARTUP } from './modules/startup/declarations';
 import { PROVIDERS } from './providers';
+import { CordovaService } from './services/cordova.service';
 import { KeyboardShortcutsService } from './services/keyboard-shortcuts.service';
 import { SharedModule } from './shared/shared.module';
 
@@ -58,31 +61,34 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
 
 @NgModule({
     declarations: [
-        DECLARATIONS,
+        AppComponent,
+        CustomGlobalExtensionsComponent,
         DECLARATIONS_RECYCLE,
         DECLARATIONS_STARTUP,
         DECLARATIONS_MANAGEMENT_DIALOGS,
         extensionDeclarations,
     ],
     imports: [
-        IMPORTS,
-        AppRoutingModule,
         ApolloModule,
-        SharedModule,
-        MainModule,
-        EduSharingApiModule.forRoot(),
-        EduSharingUiModule.forRoot({ production: environment.production }),
-        TranslationsModule.forRoot(),
-        EduSharingGraphqlModule,
-        DragDropModule,
-        extensionImports,
-        ResizableModule,
-        MdsModule,
-        DialogsModule,
+        AppRoutingModule,
+        BrowserAnimationsModule,
+        BrowserModule,
+        CoreModule,
         CoreUiModule,
-        MaterialCssVarsModule.forRoot({
-            isAutoContrast: true,
-        }),
+        CoreUiModule,
+        DialogsModule,
+        DragDropModule,
+        EduSharingApiModule.forRoot(),
+        EduSharingGraphqlModule,
+        EduSharingUiModule.forRoot({ production: environment.production }),
+        extensionImports,
+        HttpClientModule,
+        MainModule,
+        MaterialCssVarsModule.forRoot({ isAutoContrast: true }),
+        MdsModule,
+        ResizableModule,
+        SharedModule,
+        TranslationsModule.forRoot(),
     ],
     providers: [
         { provide: ToastAbstract, useClass: Toast },
@@ -114,12 +120,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         extensionProviders,
         ErrorHandlerService,
     ],
-    exports: [
-        DECLARATIONS,
-        DECLARATIONS_RECYCLE,
-        DECLARATIONS_STARTUP,
-        DECLARATIONS_MANAGEMENT_DIALOGS,
-    ],
+    exports: [DECLARATIONS_RECYCLE, DECLARATIONS_STARTUP, DECLARATIONS_MANAGEMENT_DIALOGS],
     schemas: [].concat(extensionSchemas),
     bootstrap: [AppComponent],
 })

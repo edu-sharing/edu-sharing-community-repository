@@ -50,11 +50,6 @@ import { SharedModule } from '../shared/shared.module';
     ],
     imports: [
         SharedModule,
-        A11yModule,
-        BrowserModule,
-        BrowserAnimationsModule,
-        FormsModule,
-        DragDropModule,
         MatButtonModule,
         MatCardModule,
         MatCheckboxModule,
