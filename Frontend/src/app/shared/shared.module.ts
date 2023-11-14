@@ -68,6 +68,7 @@ import { SplitNewLinesPipe } from './pipes/split-new-lines.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
 import { CollectionChooserComponent } from './components/collection-chooser/collection-chooser.component';
 import { PoweredByComponent } from './components/powered-by/powered-by.component';
+import { ToolpermissionCheckDirective } from './directives/toolpermission-check.directive';
 
 @NgModule({
     declarations: [
@@ -102,6 +103,7 @@ import { PoweredByComponent } from './components/powered-by/powered-by.component
         SpinnerSmallComponent,
         SplitNewLinesPipe,
         TitleDirective,
+        ToolpermissionCheckDirective,
         TutorialComponent,
         UserAvatarComponent,
         UserQuotaComponent,
@@ -197,6 +199,7 @@ import { PoweredByComponent } from './components/powered-by/powered-by.component
         SpinnerSmallComponent,
         SplitNewLinesPipe,
         TitleDirective,
+        ToolpermissionCheckDirective,
         TutorialComponent,
         UserAvatarComponent,
         UserQuotaComponent,

@@ -9,7 +9,7 @@ import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms
 import { NodeService, RelationData, RelationService, UserService } from 'ngx-edu-sharing-api';
 import { forkJoin } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { UniversalNode } from '../../../../common/definitions';
+import { UniversalNode } from '../../../../core-module/rest/definitions';
 import { BridgeService } from '../../../../core-bridge-module/bridge.service';
 import {
     DialogButton,

@@ -10,7 +10,7 @@ import { PlatformLocation } from '@angular/common';
 import { Router } from '@angular/router';
 import { UIConstants } from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { CordovaService } from '../../../common/services/cordova.service';
+import { CordovaService } from '../../../services/cordova.service';
 
 @Component({
     selector: 'es-register-done',

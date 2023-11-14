@@ -1,5 +1,5 @@
 import { ComponentFactoryResolver } from '@angular/core';
-import { CUSTOM_COMPONENTS } from '../custom-module/custom.module';
+import { CUSTOM_COMPONENTS } from '../../custom-module/custom.module';
 
 export class CustomHelper {
     static getCustomComponents(

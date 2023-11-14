@@ -6,10 +6,10 @@ import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { HttpClient } from '@angular/common/http';
 import { AppService as AppServiceAbstract, DateHelper, UIConstants } from 'ngx-edu-sharing-ui';
-import { FrameEventsService } from '../../core-module/rest/services/frame-events.service';
-import { OAuthResult } from '../../core-module/rest/data-object';
-import { RestConstants } from '../../core-module/rest/rest-constants';
-import { RestConnectorService } from '../../core-module/rest/services/rest-connector.service';
+import { FrameEventsService } from '../core-module/rest/services/frame-events.service';
+import { OAuthResult } from '../core-module/rest/data-object';
+import { RestConstants } from '../core-module/rest/rest-constants';
+import { RestConnectorService } from '../core-module/rest/services/rest-connector.service';
 
 declare var cordova: any;
 

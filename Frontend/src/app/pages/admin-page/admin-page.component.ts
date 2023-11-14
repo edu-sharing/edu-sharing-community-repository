@@ -26,7 +26,7 @@ import {
     UIConstants,
 } from 'ngx-edu-sharing-ui';
 import { Observable, Observer } from 'rxjs';
-import { CustomHelper } from '../../common/custom-helper';
+import { CustomHelper } from './custom-helper';
 import { SuggestItem } from './autocomplete/autocomplete.component';
 import {
     Application,

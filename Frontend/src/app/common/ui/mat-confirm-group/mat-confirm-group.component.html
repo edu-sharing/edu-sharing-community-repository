@@ -1,9 +1,0 @@
-<mat-menu #menu="matMenu" class="mat-confirm-group-menu">
-  <div [style.width.px]="getParentWidth()" class="confirm-wrapper">
-    <div class="description">{{ description }}</div>
-    <button mat-flat-button color="primary" (click)="click.emit($event)">
-      <i [esIcon]="icon" *ngIf="icon"></i>
-      <span>{{ label }}</span>
-    </button>
-  </div>
-</mat-menu>

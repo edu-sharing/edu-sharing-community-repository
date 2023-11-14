@@ -11,7 +11,7 @@ import {
     RestLocatorService,
 } from '../../core-module/core.module';
 import { OPEN_URL_MODE, TranslationsService, UIConstants } from 'ngx-edu-sharing-ui';
-import { CordovaService } from '../../common/services/cordova.service';
+import { CordovaService } from '../../services/cordova.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { PlatformLocation } from '@angular/common';

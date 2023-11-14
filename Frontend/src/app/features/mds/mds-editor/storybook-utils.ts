@@ -8,7 +8,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { TranslateService } from '@ngx-translate/core';
 import { EduSharingApiModule, MdsWidget } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, Subject, Observable } from 'rxjs';
-import { CordovaService } from '../../../common/services/cordova.service';
+import { CordovaService } from '../../../services/cordova.service';
 import { Toast } from '../../../core-ui-module/toast';
 import { InputStatus, MdsWidgetValue } from '../types/types';
 import { InitialValues, MdsEditorInstanceService } from './mds-editor-instance.service';

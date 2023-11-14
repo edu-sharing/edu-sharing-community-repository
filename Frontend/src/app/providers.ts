@@ -4,7 +4,7 @@ import {
     SessionStorageService,
     UIService,
 } from './core-module/core.module';
-import { CordovaService } from './common/services/cordova.service';
+import { CordovaService } from './services/cordova.service';
 
 export const PROVIDERS: any = [
     FrameEventsService,

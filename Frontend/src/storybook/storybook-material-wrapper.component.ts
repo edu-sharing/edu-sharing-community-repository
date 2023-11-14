@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ThemeService, Variable } from '../services/theme.service';
+import { ThemeService, Variable } from '../app/services/theme.service';
 
 /***
  @TODO: This component was intented to be injected in each storybook story to handle global styles

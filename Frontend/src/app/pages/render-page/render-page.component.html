@@ -91,7 +91,7 @@
     <div
       id="nodeRenderContent"
       [class.hide]="isLoading"
-      ng-touchevent
+      esTouchEvent
       (ngSwipeRight)="canSwitchBack() ? switchPosition(getPosition() - 1) : null"
       (ngSwipeLeft)="canSwitchForward() ? switchPosition(getPosition() + 1) : null"
     ></div>

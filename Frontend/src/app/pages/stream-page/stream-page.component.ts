@@ -16,7 +16,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { Observable, Subject, Subscription } from 'rxjs';
 import { filter, pairwise } from 'rxjs/operators';
-import { CordovaService } from '../../common/services/cordova.service';
+import { CordovaService } from '../../services/cordova.service';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import * as EduData from '../../core-module/core.module';
 import {

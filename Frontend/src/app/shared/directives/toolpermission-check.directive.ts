@@ -1,22 +1,6 @@
-import {
-    AfterViewInit,
-    Directive,
-    ElementRef,
-    HostBinding,
-    Input,
-    OnChanges,
-    OnDestroy,
-    Renderer2,
-} from '@angular/core';
-import {
-    ConfigurationService,
-    RestConnectorService,
-    RestConstants,
-    TemporaryStorageService,
-} from '../../core-module/core.module';
-import { MatTooltip } from '@angular/material/tooltip';
+import { Directive, ElementRef, Input, OnChanges } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { MatButton } from '@angular/material/button';
+import { RestConnectorService } from '../../core-module/core.module';
 
 /**
  * Directive to automatically disable buttons if a required toolpermission is missing for the action
@@ -27,15 +11,16 @@ export class ToolpermissionCheckDirective implements OnChanges {
     @Input() toolpermissionDisplayHint = true;
     constructor(
         private element: ElementRef,
-        private renderer: Renderer2,
         private translate: TranslateService,
         private connector: RestConnectorService,
     ) {
         this.element = element;
     }
+
     async ngOnChanges() {
         this.handlePermission();
     }
+
     async handlePermission() {
         const hasPermission = await this.connector
             .hasToolPermission(this.toolpermission)

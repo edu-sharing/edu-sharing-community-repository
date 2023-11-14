@@ -29,7 +29,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
 import { Component } from '@angular/core';
 import { Helper } from '../../core-module/rest/helper';
-import { CordovaService, OnBackBehaviour } from '../../common/services/cordova.service';
+import { CordovaService, OnBackBehaviour } from '../../services/cordova.service';
 
 @Component({
     selector: 'es-app-share-page',

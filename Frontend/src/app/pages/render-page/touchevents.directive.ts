@@ -1,17 +1,16 @@
-import { Directive, ElementRef, EventEmitter, HostListener, Input, Output } from '@angular/core';
+import { Directive, EventEmitter, HostListener, Output } from '@angular/core';
 
-@Directive({ selector: '[ng-touchevent]' })
-export class ToucheventDirective {
-    private element: ElementRef;
+@Directive({ selector: '[esTouchEvent]' })
+export class TouchEventDirective {
     @Output() ngSwipeLeft = new EventEmitter();
     @Output() ngSwipeRight = new EventEmitter();
+
     private touchStart: any;
-    constructor(e: ElementRef) {
-        this.element = e;
-    }
+
     @HostListener('touchstart', ['$event']) onTouchStart(event: any) {
         this.touchStart = event;
     }
+
     @HostListener('touchend', ['$event']) onTouchEnd(event: any) {
         let horizontal =
             event.changedTouches[0].clientX - this.touchStart.changedTouches[0].clientX;

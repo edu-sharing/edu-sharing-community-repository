@@ -13,7 +13,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { UniversalNode } from '../../../common/definitions';
+import { UniversalNode } from '../../../core-module/rest/definitions';
 import {
     DialogButton,
     Group,

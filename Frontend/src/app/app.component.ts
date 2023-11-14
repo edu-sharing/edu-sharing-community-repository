@@ -14,17 +14,17 @@ import { AccessibilityService, TranslationsService, UIConstants } from 'ngx-edu-
 import * as rxjs from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { environment } from '../environments/environment';
-import { ThemeService } from './common/services/theme.service';
-import { CookieInfoComponent } from './common/ui/cookie-info/cookie-info.component';
 import { BridgeService } from './core-bridge-module/bridge.service';
 import { ConfigurationService, RestHelper, RestNetworkService } from './core-module/core.module';
+import { CookieInfoComponent } from './main/cookie-info/cookie-info.component';
 import { LoadingScreenService } from './main/loading-screen/loading-screen.service';
 import { MainNavService } from './main/navigation/main-nav.service';
+import { printCurrentTaskInfo } from './main/track-change-detection';
 import { WorkspaceManagementDialogsComponent } from './modules/management-dialogs/management-dialogs.component';
 import { ManagementDialogsService } from './modules/management-dialogs/management-dialogs.service';
 import { LicenseAgreementService } from './services/license-agreement.service';
 import { ScrollPositionRestorationService } from './services/scroll-position-restoration.service';
-import { printCurrentTaskInfo } from './main/track-change-detection';
+import { ThemeService } from './services/theme.service';
 
 @Component({
     selector: 'es-app',
