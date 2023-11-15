@@ -9,6 +9,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.PermissionReference;
 import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -598,7 +599,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 } else if(MetadataQuery.SpecialFilter.exclude_sites_folder.equals(filter)) {
                     queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + SystemFolder.getSitesFolder().getId() + "*"));
                 } else if(MetadataQuery.SpecialFilter.exclude_people_folder.equals(filter)) {
-                    queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + repositoryHelper.getPerson().getId() + "*"));
+                    org.alfresco.service.cmr.repository.NodeRef personFolder = SystemFolder.getPersonFolder();
+                    if(personFolder != null) {
+                        queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + SystemFolder.getPersonFolder().getId() + "*"));
+                    }  else {
+                        logger.warn("People folder unknown, elastic query is skipping special filter");
+                    }
                 }
             }
         }

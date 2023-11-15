@@ -574,12 +574,13 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     }
 
     createLtiTool(event: any) {
+        let w = event.window;
         console.log('createLtiTool called' + event + ' nodes:' + event.nodes);
         let nodes: Node[] = event.nodes;
         if (nodes) {
             nodes.forEach((n) => {
                 if (event.tool.customContentOption == true) {
-                    UIHelper.openLTIResourceLink(n);
+                    UIHelper.openLTIResourceLink(w, n);
 
                     this.onCreate.emit([n]);
                     this.createToolType = null;

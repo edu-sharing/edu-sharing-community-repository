@@ -605,7 +605,10 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             });
     }
     setDownloadUrl(url: string) {
-        if (this.downloadButton != null) this.downloadButton.isEnabled = url != null;
+        console.info('url from rendering', url);
+        if (this.downloadButton != null) {
+            this.downloadButton.customEnabledCallback = () => url != null;
+        }
         this.downloadUrl = url;
         this.initOptions();
     }
