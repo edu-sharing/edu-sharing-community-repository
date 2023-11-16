@@ -113,7 +113,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		String nodeType = getType(nodeId);
 		String[] aspects = getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
 		String parentId = nodeService.getPrimaryParent(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)).getParentRef().getId();
-		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,aspects, parentId,null);
+		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,aspects, nodeId, parentId,null);
 		updateNodeNative(nodeId, toSafeProps);
 	}
 
@@ -177,14 +177,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props) throws Throwable{
-		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,null,parentId,null);
+		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,null, null,parentId,null);
 		return createNodeBasic(parentId, nodeType, toSafeProps);
 	}
 
 	@Override
 	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props, String childAssociation)
 			throws Throwable {
-		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,null,parentId,null);
+		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,null, null,parentId,null);
 		return this.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId, nodeType,childAssociation, toSafeProps);
 	}
 	@Override
@@ -245,11 +245,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return repositoryHelper.getCompanyHome().getId();
 	}
 
-	private HashMap<String,Object> getToSafeProps(HashMap<String, String[]> props, String nodeType, String[] aspects, String parentId,String templateName) throws Throwable{
+	private HashMap<String,Object> getToSafeProps(HashMap<String, String[]> props, String nodeType, String[] aspects, String nodeId, String parentId,String templateName) throws Throwable{
 		String[] metadataSetIdArr = props.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
 
 		String metadataSetId = (metadataSetIdArr != null && metadataSetIdArr.length > 0) ? metadataSetIdArr[0] : null;
-
+		if(metadataSetId == null && nodeId != null) {
+			// check if the node already as a metadata set id -> in this case, skip overwriting
+			metadataSetId = (String) getPropertyNative(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
+		}
 		if(metadataSetId == null) {
 			// allow to run as admin since user might don't have access to the parent ref
 			metadataSetId = AuthenticationUtil.runAsSystem(() -> {
@@ -1376,7 +1379,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		//updateNode(getOrCreateTemplateNode(nodeId),props);
 		String template = getTemplateNode(nodeId,true);
 		String nodeType = getType(template);
-		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,null, nodeId,"io_template");
+		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,null, template, nodeId,"io_template");
 		updateNodeNative(template, toSafeProps);
 	}
 
