@@ -3,6 +3,8 @@ package org.edu_sharing.service.search;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.provider.ElasticSearchProvider;
+import org.edu_sharing.service.provider.Provider;
 import org.edu_sharing.service.provider.ProviderHelper;
 
 public class SearchServiceFactory {
@@ -26,7 +28,16 @@ public class SearchServiceFactory {
 	public static SearchService getLocalService() {
 		ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
 		if(ProviderHelper.hasProvider(appInfo)){
-			return ProviderHelper.getProviderByApp(appInfo).getSearchService();
+			Provider provider = ProviderHelper.getProviderByApp(appInfo);
+			if(appInfo.ishomeNode()) {
+				if(provider instanceof ElasticSearchProvider) {
+					return provider.getSearchService();
+				} else {
+					logger.error("Invalid provider for home repo: " + provider.getClass().getName() + ". Check your homeApp config key for " + ApplicationInfo.KEY_REMOTE_PROVIDER);
+					return new SearchServiceImpl(appInfo.getAppId());
+				}
+			}
+			return provider.getSearchService();
 		}else{
 			return new SearchServiceImpl(appInfo.getAppId());
 		}
