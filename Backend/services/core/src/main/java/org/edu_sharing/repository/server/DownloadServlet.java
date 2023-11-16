@@ -252,6 +252,9 @@ public class DownloadServlet extends HttpServlet{
 		zos.setMethod( ZipOutputStream.DEFLATED );
 
         List<String> errors=new ArrayList<>();
+        List<String> filenames=new ArrayList<>();
+
+
 		try{
 			AuthenticationUtil.RunAsWork<Boolean> runAll= () ->{
 				for(String nodeId : nodeIds){
@@ -296,7 +299,12 @@ public class DownloadServlet extends HttpServlet{
                             resp.setContentType("application/zip");
 
                             DataInputStream in = new DataInputStream(reader);
-
+							if(filenames.contains(filename)) {
+								String[] splitted = filename.split("\\.");
+								splitted[Math.max(0, splitted.length - 2)] += " - " + finalNodeId;
+								filename = StringUtils.join(splitted, ".");
+							}
+							filenames.add(filename);
                             ZipEntry entry = new ZipEntry(filename);
                             zos.putNextEntry(entry);
                             byte[] buffer=new byte[1024];
