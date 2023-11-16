@@ -1,19 +1,15 @@
 import { ApplicationConfig } from '@angular/core';
-
-import { HttpClient, HttpHandler, HttpXhrBackend } from '@angular/common/http';
-import { importProvidersFrom } from '@angular/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { TranslateService } from '@ngx-translate/core';
-import { EduSharingApiModule, MdsWidget } from 'ngx-edu-sharing-api';
-import { BehaviorSubject, Subject, Observable } from 'rxjs';
+import { MdsWidget } from 'ngx-edu-sharing-api';
+import { BehaviorSubject, Observable, Subject, of } from 'rxjs';
 import { CordovaService } from '../../../services/cordova.service';
 import { Toast } from '../../../services/toast';
 import { InputStatus, MdsWidgetValue } from '../types/types';
 import { InitialValues, MdsEditorInstanceService } from './mds-editor-instance.service';
 import { ViewInstanceService } from './mds-editor-view/view-instance.service';
-import { of } from 'rxjs';
 
 export const translateProvider = {
     instant: (v: string) => v,
@@ -23,16 +19,6 @@ export const translateProvider = {
     onLangChange: of({}),
 };
 export const mdsStorybookProviders: ApplicationConfig['providers'] = [
-    HttpClient,
-    {
-        provide: HttpHandler,
-        useValue: new HttpXhrBackend({ build: () => new XMLHttpRequest() }),
-    },
-    importProvidersFrom(
-        EduSharingApiModule.forRoot({
-            rootUrl: '/api',
-        }),
-    ),
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
     MdsEditorInstanceService,
     ViewInstanceService,

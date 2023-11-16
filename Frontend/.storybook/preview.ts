@@ -1,29 +1,29 @@
 import type { Preview } from '@storybook/angular';
-import { componentWrapperDecorator } from '@storybook/angular';
+import { Themes, withTheme } from './theme-wrapper';
 
-export const withTheme = componentWrapperDecorator(
-    (story) =>
-        `<es-storybook-material-wrapper [theme]="theme"></es-storybook-material-wrapper>${story}`,
-    ({ globals }) => {
-        return { theme: globals['theme'] };
+const themes: Themes = {
+    default: {
+        primary: '#48708e',
+        accent: '#48708e',
+        warn: '#cd2457',
     },
-);
+    red: {
+        primary: '#ff0000',
+        accent: '#ff0000',
+        warn: '#cd2457',
+    },
+};
+
 const preview: Preview = {
-    decorators: [
-        // withTheme
-    ],
+    decorators: [withTheme(themes)],
     globalTypes: {
         theme: {
-            description: 'Global theme for components',
-            defaultValue: 'light',
+            description: 'Material color scheme',
+            defaultValue: 'default',
             toolbar: {
-                // The label to show for this toolbar item
-                title: 'Theme Color',
+                title: 'Theme',
                 icon: 'circlehollow',
-                // Array of plain string values or MenuItem shape (see below)
-                items: ['edu-blue', 'dark-blue', 'red', 'orange'],
-                // Change title based on selected value
-                dynamicTitle: true,
+                items: Object.keys(themes),
             },
         },
     },
