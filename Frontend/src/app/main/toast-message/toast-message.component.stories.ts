@@ -2,9 +2,9 @@ import { Injector, importProvidersFrom } from '@angular/core';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { applicationConfig, moduleMetadata, type Meta, type StoryObj } from '@storybook/angular';
-import { injectInjectorToProps } from '../../../../storybook/custom-decorators';
-import { SharedModule } from '../../../shared/shared.module';
-import { Toast } from '../../../services/toast';
+import { injectInjectorToProps } from '../../../storybook/custom-decorators';
+import { Toast } from '../../services/toast';
+import { SharedModule } from '../../shared/shared.module';
 import { ToastMessageComponent } from './toast-message.component';
 
 interface ToastStories {
