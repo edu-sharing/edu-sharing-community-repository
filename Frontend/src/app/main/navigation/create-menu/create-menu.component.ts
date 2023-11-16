@@ -59,6 +59,7 @@ import {
 import { PasteService } from '../../../services/paste.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
+import { MainNavConfig, MainNavService } from '../main-nav.service';
 
 @Component({
     selector: 'es-create-menu',
@@ -79,6 +80,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
      */
     @Input() allowBinary = true;
     @Input() scope: string;
+    private mainNavConfig: MainNavConfig;
 
     /**
      * Parent location. If null, the folder picker will be shown
@@ -121,6 +123,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         private connector: RestConnectorService,
         private connectors: RestConnectorsService,
         private connectorApi: ConnectorService,
+        private mainNavService: MainNavService,
         private iamService: RestIamService,
         private nodeService: RestNodeService,
         private managementService: ManagementDialogsService,
@@ -157,7 +160,13 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             }
         });
         this.cardHasOpenModals$ = cardService.hasOpenModals.pipe(delay(0));
-
+        this.mainNavService
+            .observeMainNavConfig()
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((config) => {
+                this.mainNavConfig = config;
+                this.updateOptions();
+            });
         this.ltiPlatformService.getTools().subscribe((t) => {
             this.tools = t;
             this.updateOptions();
@@ -278,6 +287,9 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                         return option;
                     }),
                 );
+            }
+            if (this.mainNavConfig?.customCreateOptions) {
+                this.options.push(...this.mainNavConfig?.customCreateOptions);
             }
             // handle app
             if (this.bridge.isRunningCordova()) {

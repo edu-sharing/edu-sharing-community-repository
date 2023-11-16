@@ -8,6 +8,7 @@ import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.component';
 import { ManagementDialogsService } from '../../modules/management-dialogs/management-dialogs.service';
 import { SkipNavService } from './skip-nav/skip-nav.service';
+import { OptionItem } from '../../core-ui-module/option-item';
 
 export class MainNavCreateConfig {
     /** allowed / display new material button */
@@ -59,6 +60,10 @@ export class MainNavConfig {
      * Use if you include the search-field component yourself in your page.
      */
     hideSearchField? = false;
+    /**
+     * Custom options that should be placed in the "New" menu
+     */
+    customCreateOptions?: OptionItem[];
 
     /**
      * If create is allowed, this event will fire the new nodes
