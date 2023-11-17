@@ -622,11 +622,13 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                                 },
                                 (error: any) => {
                                     this.nodeHelper.handleNodeError(name, error);
+                                    w.close();
                                 },
                             );
                     },
                     (error: any) => {
                         this.nodeHelper.handleNodeError(name, error);
+                        w.close();
                     },
                 );
         });
