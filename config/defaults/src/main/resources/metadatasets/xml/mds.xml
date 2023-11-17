@@ -506,6 +506,7 @@
 			<caption>dialog_upload_tab_basic</caption>
 			<icon>description</icon>
 			<html><![CDATA[
+			  <preview>
               <ccm:wwwurl>
               <cm:name>
               <cclom:title>

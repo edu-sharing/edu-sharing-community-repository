@@ -7,6 +7,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { RestNodeService } from '../../../../../core-module/rest/services/rest-node.service';
 import { Node } from '../../../../../core-module/rest/data-object';
 import { Toast } from '../../../../../core-ui-module/toast';
+import { Constraints } from '../../../types/types';
 
 @Component({
     selector: 'es-mds-editor-widget-preview',
@@ -14,9 +15,10 @@ import { Toast } from '../../../../../core-ui-module/toast';
     styleUrls: ['./mds-editor-widget-preview.component.scss'],
 })
 export class MdsEditorWidgetPreviewComponent implements OnInit, OnDestroy, NativeWidgetComponent {
-    static readonly constraints = {
+    static readonly constraints: Constraints = {
         requiresNode: true,
         supportsBulk: false,
+        onConstrainFails: 'hide',
     };
     private destroyed$: ReplaySubject<boolean> = new ReplaySubject(1);
     hasChanges = new BehaviorSubject<boolean>(false);
