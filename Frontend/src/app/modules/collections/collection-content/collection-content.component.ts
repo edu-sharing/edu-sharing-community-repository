@@ -613,6 +613,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 filter((nodes) => !!nodes),
             )
             .subscribe((nodes) => this.addNodesToCollection(nodes));
+        this.mainNavService.onConnectorCreated
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((node) => this.addNodesToCollection([node]));
         this.mainNavUpdateTrigger.pipe(takeUntil(this.destroyed$)).subscribe(async () => {
             this.mainNavService.patchMainNavConfig({
                 create: {

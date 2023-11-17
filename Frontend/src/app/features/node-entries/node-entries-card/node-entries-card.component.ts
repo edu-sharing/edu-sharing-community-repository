@@ -52,7 +52,7 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
     ) {}
 
     ngOnChanges(changes: SimpleChanges): void {
-        this.isCollection = this.nodeHelper.isNodeCollection(changes.node);
+        this.isCollection = this.nodeHelper.isNodeCollection(changes.node.currentValue);
     }
 
     getTextColor() {

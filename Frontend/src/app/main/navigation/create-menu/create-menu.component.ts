@@ -59,6 +59,7 @@ import {
 import { PasteService } from '../../../services/paste.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
+import { MainNavConfig, MainNavService } from '../main-nav.service';
 
 @Component({
     selector: 'es-create-menu',
@@ -79,6 +80,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
      */
     @Input() allowBinary = true;
     @Input() scope: string;
+    private mainNavConfig: MainNavConfig;
 
     /**
      * Parent location. If null, the folder picker will be shown
@@ -121,6 +123,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         private connector: RestConnectorService,
         private connectors: RestConnectorsService,
         private connectorApi: ConnectorService,
+        private mainNavService: MainNavService,
         private iamService: RestIamService,
         private nodeService: RestNodeService,
         private managementService: ManagementDialogsService,
@@ -157,7 +160,13 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             }
         });
         this.cardHasOpenModals$ = cardService.hasOpenModals.pipe(delay(0));
-
+        this.mainNavService
+            .observeMainNavConfig()
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((config) => {
+                this.mainNavConfig = config;
+                this.updateOptions();
+            });
         this.ltiPlatformService.getTools().subscribe((t) => {
             this.tools = t;
             this.updateOptions();
@@ -278,6 +287,9 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                         return option;
                     }),
                 );
+            }
+            if (this.mainNavConfig?.customCreateOptions) {
+                this.options.push(...this.mainNavConfig?.customCreateOptions);
             }
             // handle app
             if (this.bridge.isRunningCordova()) {
@@ -560,6 +572,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                 (data: NodeWrapper) => {
                     this.editConnector(data.node, event.type, win, this.createConnectorType);
                     this.onCreate.emit([data.node]);
+                    this.mainNavService.onConnectorCreated.next(data.node);
                 },
                 (error: any) => {
                     win.close();
@@ -574,15 +587,60 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     }
 
     createLtiTool(event: any) {
-        let w = event.window;
-        console.log('createLtiTool called' + event + ' nodes:' + event.nodes);
-        let nodes: Node[] = event.nodes;
+        if (this.createToolType.customContentOption) {
+            this.createLtiContentOptionNode(event.name);
+            return;
+        } else {
+            if (!event.nodes) {
+                return;
+            }
+            this.afterCreateLtiTool(event.nodes, null, event.name);
+        }
+    }
+
+    createLtiContentOptionNode(name: string) {
+        // @TODO cordova handling
+        //fix popup problem
+        let w = window.open('');
+        if (name == undefined) {
+            return;
+        }
+        const properties = RestHelper.createNameProperty(name);
+        this.getParent().then((parent) => {
+            this.nodeService
+                .createNode(parent.ref.id, RestConstants.CCM_TYPE_IO, [], properties)
+                .subscribe(
+                    (data: NodeWrapper) => {
+                        this.ltiPlatformService
+                            .convertToLtiResourceLink(data.node.ref.id, this.createToolType.appId)
+                            .subscribe(
+                                (result: any) => {
+                                    let nodesArr: Node[] = [];
+                                    nodesArr.push(data.node);
+                                    this.afterCreateLtiTool(nodesArr, w, name);
+                                },
+                                (error: any) => {
+                                    this.nodeHelper.handleNodeError(name, error);
+                                    w.close();
+                                },
+                            );
+                    },
+                    (error: any) => {
+                        this.nodeHelper.handleNodeError(name, error);
+                        w.close();
+                    },
+                );
+        });
+    }
+
+    afterCreateLtiTool(nodes: Node[], w: Window, name: string) {
         if (nodes) {
             nodes.forEach((n) => {
-                if (event.tool.customContentOption == true) {
+                if (this.createToolType.customContentOption == true) {
                     UIHelper.openLTIResourceLink(w, n);
 
                     this.onCreate.emit([n]);
+                    this.mainNavService.onConnectorCreated.next(n);
                     this.createToolType = null;
                 } else {
                     const prop = RestHelper.createNameProperty(n.name);
@@ -596,7 +654,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                                 this.nodeHelper.handleNodeError(n.name, error) ===
                                 RestConstants.DUPLICATE_NODE_RESPONSE
                             ) {
-                                this.createConnectorName = event.name;
+                                this.createConnectorName = name;
                             }
                         },
                     );
@@ -606,7 +664,6 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     }
 
     cancelLtiTool(event: any) {
-        console.log('cancelLtiTool called' + event);
         let nodes: Node[] = event.nodes;
         if (nodes) {
             nodes.forEach((n) => {

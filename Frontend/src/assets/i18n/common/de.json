@@ -291,7 +291,7 @@
     "ccm:taxonid": "Fachgebiet",
     "sys:archivedDate": "gelöscht",
     "cclom:version": "Version",
-    "virtual:usagecount": "Anz. Verwendungen",
+    "virtual:usagecount": "Anz. Einbettungen",
     "ccm:author_freetext": "Freie Urheber{{GENDER_SEPARATOR}}in-Angabe",
     "ccm:lifecyclecontributer_authorFN": "Autor{{GENDER_SEPARATOR}}in",
     "ccm:wf_status": "Status",

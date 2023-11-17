@@ -417,7 +417,8 @@
     },
     "STATISTICS": {
       "NO_DATA": "No data for the selected period",
-      "CSV_FILENAME": "Statistics",
+      "CSV_FILENAME": "Statistics ({{from}} - {{to}})",
+      "CSV_FILENAME_MZ": "Statistics {{mz}} ({{from}} - {{to}})",
       "GROUPED": "By time period",
       "SINGLE": "Individual evaluation",
       "NODES": "By object",

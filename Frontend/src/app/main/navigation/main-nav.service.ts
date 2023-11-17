@@ -1,6 +1,6 @@
 import { Injectable, TemplateRef } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CookieInfoComponent } from '../../common/ui/cookie-info/cookie-info.component';
 import { FrameEventsService, Node } from '../../core-module/core.module';
@@ -8,6 +8,7 @@ import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.component';
 import { ManagementDialogsService } from '../../modules/management-dialogs/management-dialogs.service';
 import { SkipNavService } from './skip-nav/skip-nav.service';
+import { OptionItem } from '../../core-ui-module/option-item';
 
 export class MainNavCreateConfig {
     /** allowed / display new material button */
@@ -59,6 +60,10 @@ export class MainNavConfig {
      * Use if you include the search-field component yourself in your page.
      */
     hideSearchField? = false;
+    /**
+     * Custom options that should be placed in the "New" menu
+     */
+    customCreateOptions?: OptionItem[];
 
     /**
      * If create is allowed, this event will fire the new nodes
@@ -82,6 +87,11 @@ export class MainNavService {
     private mainNavConfigSubject = new BehaviorSubject<MainNavConfig>(new MainNavConfig());
     private mainNavConfigOverrideSubject = new BehaviorSubject<Partial<MainNavConfig> | null>(null);
     private customTemplates: { [key in TemplateSlot]?: TemplateRef<any> } = {};
+    /**
+     * is triggered when a connector or lti element was successfully created
+     * The observable will receive the newly generated node
+     */
+    onConnectorCreated = new Subject<Node>();
 
     constructor(
         private managementDialogs: ManagementDialogsService,

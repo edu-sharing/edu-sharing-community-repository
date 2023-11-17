@@ -169,7 +169,7 @@
         </div>
       </div>
     </div>
-    <div class="export" *ngIf="!nodesNoData && !singleLoading">
+    <div class="export" *ngIf="!nodesNoData && !nodesLoading">
       <h4 class="mat-heading-4 mat-heading-underline clickable" (click)="showExport = !showExport">
         <i esIcon="cloud_download"></i>
         <span>{{ 'ADMIN.STATISTICS.EXPORT_LABEL' | translate }}</span>
@@ -209,7 +209,7 @@
       [isLoading]="nodesLoading"
       [nodes]="nodes"
     ></es-listTable>
-    <es-info-message *ngIf="!nodesNoData">
+    <es-info-message *ngIf="!nodesNoData && !nodesLoading">
       {{ 'ADMIN.STATISTICS.SLICE_INFO_DOWNLOAD' | translate }}
     </es-info-message>
   </mat-tab>
@@ -329,29 +329,15 @@
 <div
   class="export"
   *ngIf="
-    currentTab != 2 &&
-    currentTab != 4 &&
-    !groupedLoading &&
-    !customGroupLoading &&
-    !nodesLoading &&
-    !singleLoading
+    (currentTab === 0 && !groupedLoading) ||
+    (currentTab === 1 && !customGroupLoading) ||
+    (currentTab === 3 && !singleLoading)
   "
 >
   <h4 class="mat-heading-4 mat-heading-underline">
     <i esIcon="cloud_download"></i>{{ 'ADMIN.STATISTICS.EXPORT_LABEL' | translate }}
   </h4>
   <div>
-    <mat-form-field *ngIf="currentTab == 2">
-      <mat-label>{{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES' | translate }}</mat-label>
-      <textarea
-        matInput
-        cdkTextareaAutosize
-        cdkAutosizeMinRows="4"
-        cdkAutosizeMaxRows="6"
-        [(ngModel)]="exportProperties"
-      ></textarea>
-      <mat-hint>{{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES_HINT' | translate }}</mat-hint>
-    </mat-form-field>
     <div>
       <button mat-raised-button color="primary" (click)="export()">
         {{ 'ADMIN.STATISTICS.EXPORT' | translate }}

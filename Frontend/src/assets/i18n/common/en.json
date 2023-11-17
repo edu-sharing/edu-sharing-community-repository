@@ -272,7 +272,7 @@
     "ccm:taxonid": "Discipline",
     "sys:archivedDate": "deleted",
     "cclom:version": "version",
-    "virtual:usagecount": "usage count",
+    "virtual:usagecount": "embed count",
     "ccm:author_freetext": "General author information",
     "ccm:lifecyclecontributer_authorFN": "author",
     "ccm:wf_status": "status",

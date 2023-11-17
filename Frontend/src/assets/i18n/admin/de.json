@@ -430,7 +430,8 @@
     },
     "STATISTICS": {
       "NO_DATA": "Keine Daten für den gewählten Zeitraum",
-      "CSV_FILENAME": "Statistiken",
+      "CSV_FILENAME": "Statistiken ({{from}} - {{to}})",
+      "CSV_FILENAME_MZ": "Statistiken {{mz}} ({{from}} - {{to}})",
       "GROUPED": "Nach Zeitraum",
       "SINGLE": "Einzelauswertung",
       "NODES": "Nach Objekt",

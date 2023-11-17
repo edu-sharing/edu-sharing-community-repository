@@ -491,7 +491,7 @@ public class JobHandler {
 				return false;
 			}
 		} else {
-			logger.info("No primaryHostname key, assuming no cluster, jobs are active on this repository");
+			logger.debug("No primaryHostname key, assuming no cluster, jobs are active on this repository");
 			return true;
 		}
 
