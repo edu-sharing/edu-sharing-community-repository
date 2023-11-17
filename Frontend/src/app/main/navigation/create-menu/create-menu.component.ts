@@ -587,15 +587,59 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     }
 
     createLtiTool(event: any) {
-        let w = event.window;
-        console.log('createLtiTool called' + event + ' nodes:' + event.nodes);
-        let nodes: Node[] = event.nodes;
+        if (this.createToolType.customContentOption) {
+            this.createLtiContentOptionNode(event.name);
+            return;
+        } else {
+            if (!event.nodes) {
+                return;
+            }
+            this.afterCreateLtiTool(event.nodes, null, event.name);
+        }
+    }
+
+    createLtiContentOptionNode(name: string) {
+        // @TODO cordova handling, popup problem
+        console.log('popup problem open winodw in createLtiContentOptionNode');
+        let w = window.open('');
+        console.log('open() this._name:' + name);
+        if (name == undefined) {
+            return;
+        }
+        const properties = RestHelper.createNameProperty(name);
+        this.getParent().then((parent) => {
+            this.nodeService
+                .createNode(parent.ref.id, RestConstants.CCM_TYPE_IO, [], properties)
+                .subscribe(
+                    (data: NodeWrapper) => {
+                        this.ltiPlatformService
+                            .convertToLtiResourceLink(data.node.ref.id, this.createToolType.appId)
+                            .subscribe(
+                                (result: any) => {
+                                    let nodesArr: Node[] = [];
+                                    nodesArr.push(data.node);
+                                    this.afterCreateLtiTool(nodesArr, w, name);
+                                },
+                                (error: any) => {
+                                    this.nodeHelper.handleNodeError(name, error);
+                                },
+                            );
+                    },
+                    (error: any) => {
+                        this.nodeHelper.handleNodeError(name, error);
+                    },
+                );
+        });
+    }
+
+    afterCreateLtiTool(nodes: Node[], w: Window, name: string) {
         if (nodes) {
             nodes.forEach((n) => {
-                if (event.tool.customContentOption == true) {
+                if (this.createToolType.customContentOption == true) {
                     UIHelper.openLTIResourceLink(w, n);
 
                     this.onCreate.emit([n]);
+                    this.mainNavService.onConnectorCreated.next(n);
                     this.createToolType = null;
                 } else {
                     const prop = RestHelper.createNameProperty(n.name);
@@ -609,7 +653,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                                 this.nodeHelper.handleNodeError(n.name, error) ===
                                 RestConstants.DUPLICATE_NODE_RESPONSE
                             ) {
-                                this.createConnectorName = event.name;
+                                this.createConnectorName = name;
                             }
                         },
                     );
