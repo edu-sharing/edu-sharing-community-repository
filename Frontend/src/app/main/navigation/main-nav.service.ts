@@ -1,6 +1,6 @@
 import { Injectable, TemplateRef } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CookieInfoComponent } from '../../common/ui/cookie-info/cookie-info.component';
 import { FrameEventsService, Node } from '../../core-module/core.module';
@@ -87,6 +87,11 @@ export class MainNavService {
     private mainNavConfigSubject = new BehaviorSubject<MainNavConfig>(new MainNavConfig());
     private mainNavConfigOverrideSubject = new BehaviorSubject<Partial<MainNavConfig> | null>(null);
     private customTemplates: { [key in TemplateSlot]?: TemplateRef<any> } = {};
+    /**
+     * is triggered when a connector or lti element was successfully created
+     * The observable will receive the newly generated node
+     */
+    onConnectorCreated = new Subject<Node>();
 
     constructor(
         private managementDialogs: ManagementDialogsService,

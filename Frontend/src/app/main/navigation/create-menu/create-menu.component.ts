@@ -572,6 +572,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                 (data: NodeWrapper) => {
                     this.editConnector(data.node, event.type, win, this.createConnectorType);
                     this.onCreate.emit([data.node]);
+                    this.mainNavService.onConnectorCreated.next(data.node);
                 },
                 (error: any) => {
                     win.close();
