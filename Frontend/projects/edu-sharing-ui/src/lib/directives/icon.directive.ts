@@ -3,10 +3,10 @@
  */
 
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
-import { Directive, ElementRef, Input, OnInit, OnDestroy, Optional } from '@angular/core';
+import { Directive, ElementRef, Input, OnDestroy, OnInit, Optional } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
-import { take } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 
 /**
  * Replaces the element's content with an icon.
@@ -24,6 +24,7 @@ import { take } from 'rxjs/operators';
     selector: 'i[esIcon], i.material-icons',
 })
 export class IconDirective implements OnInit, OnDestroy {
+    private originalId$ = new BehaviorSubject<string>(null);
     private _id: string;
     private _aria: boolean;
     private iconsConfig: Array<{ original: string; replace?: string; cssClass?: string }>;
@@ -53,7 +54,7 @@ export class IconDirective implements OnInit, OnDestroy {
     }
 
     @Input() set esIcon(id: string) {
-        this.setIcon(id);
+        this.originalId$.next(id);
     }
 
     constructor(
@@ -66,10 +67,10 @@ export class IconDirective implements OnInit, OnDestroy {
         this.isReady = true;
         this.element.nativeElement.setAttribute('aria-hidden', 'true');
         this.updateAria();
-
-        // FIXME: This might resolve after `setIcon` was called and mappings might be ignored.
-        await this.config.observeConfig().pipe(take(1)).toPromise();
-        this.iconsConfig = this.config.instant('icons', null);
+        combineLatest([this.originalId$, this.config.observeConfig()]).subscribe(() => {
+            this.iconsConfig = this.config.instant('icons', null);
+            this.setIcon();
+        });
     }
 
     ngOnDestroy(): void {
@@ -78,7 +79,8 @@ export class IconDirective implements OnInit, OnDestroy {
         }
     }
 
-    private setIcon(id: string) {
+    private setIcon() {
+        let id = this.originalId$.value;
         if (this._id) {
             this.element.nativeElement.classList.remove(
                 'edu-icons',
