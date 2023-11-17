@@ -54,7 +54,7 @@ export class CreateLtitoolComponent implements OnInit {
         if (!this._tool) {
             return;
         }
-        console.log(
+        console.debug(
             'this._tool.appId:' +
                 this._tool.appId +
                 ' parentId:' +

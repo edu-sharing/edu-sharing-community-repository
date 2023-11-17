@@ -599,10 +599,9 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     }
 
     createLtiContentOptionNode(name: string) {
-        // @TODO cordova handling, popup problem
-        console.log('popup problem open winodw in createLtiContentOptionNode');
+        // @TODO cordova handling
+        //fix popup problem
         let w = window.open('');
-        console.log('open() this._name:' + name);
         if (name == undefined) {
             return;
         }
@@ -665,7 +664,6 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     }
 
     cancelLtiTool(event: any) {
-        console.log('cancelLtiTool called' + event);
         let nodes: Node[] = event.nodes;
         if (nodes) {
             nodes.forEach((n) => {
