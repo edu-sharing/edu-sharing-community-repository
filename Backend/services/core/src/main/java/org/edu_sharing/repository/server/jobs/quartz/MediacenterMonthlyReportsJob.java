@@ -88,6 +88,9 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 	@JobFieldDescription(description = "force run, even if the date is currently not the 1st")
 	private boolean force = false;
 
+	@JobFieldDescription(description = "When set to true, the job will generate a yearly report as well (only on 1st January)")
+	private boolean generateYearly = false;
+
 	@JobFieldDescription(description = "use a custom date (month) to run the job for. Note: The job will run the month BEFORE the given date!", sampleValue = "YYYY-MM-DD")
 	private Date customDate = null;
 
@@ -127,12 +130,16 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 			if(customDate != null) {
 				localDate = customDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 			}
-			LocalDate from = LocalDate.of(localDate.getYear(), localDate.getMonthValue() - 1, 1);
+			LocalDate from;
+			// January -> Dec. previous year
+			if(localDate.getMonthValue() == 1) {
+				from = LocalDate.of(localDate.getYear() -1, 12, 1);
+			} else {
+				from = LocalDate.of(localDate.getYear(), localDate.getMonthValue() - 1, 1);
+			}
 			YearMonth month = YearMonth.from(from);
 			LocalDate to = month.atEndOfMonth();
-			TrackingService trackingService = TrackingServiceFactory.getTrackingService();
-			MediacenterService mediacenterService = MediacenterServiceFactory.getLocalService();
-			String baseFolder = new UserEnvironmentTool().getEdu_SharingMediacenterFolder();
+
 			for (String mediacenter : mediacenters == null ? SearchServiceFactory.getLocalService().getAllMediacenters() : mediacenters) {
 				if(isInterrupted()) {
 					return null;
@@ -140,58 +147,72 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 				logger.info("Building stats for mediacenter " + mediacenter);
 				Date startDate = Date.from(from.atStartOfDay().toInstant(ZoneOffset.UTC));
 				Date endDate = Date.from(to.atTime(23, 59).toInstant(ZoneOffset.UTC));
-				Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> data = null;
-				if(mode.equals(ReportMode.AlfrescoPermissionData)) {
-					List<NodeRef> nodes = mediacenterService.getAllLicensedNodes(mediacenter);
-					data = trackingService.getListNodeData(
-							nodes.stream().map(
-									ref -> new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ref.getNodeId())
-							).collect(Collectors.toList()),
-							startDate,
-							endDate,
-							additionalFields,
-							mediacenter
-					);
-				} else if (mode.equals(ReportMode.TrackingMediacenterData)) {
-					data = trackingService.getListNodeDataByMediacenter(
-							mediacenter,
-							startDate,
-							endDate,
-							additionalFields
-					);
-					List<NodeRef> nodes = mediacenterService.getAllLicensedNodes(mediacenter);
-					for (NodeRef n : nodes) {
-						org.alfresco.service.cmr.repository.NodeRef mappedRef = new org.alfresco.service.cmr.repository.NodeRef(new StoreRef(n.getStoreProtocol(), n.getStoreId()), n.getNodeId());
-						if (data.containsKey(mappedRef)) {
-							continue;
-						}
-						data.put(mappedRef, new StatisticEntry());
-					}
-					data = filterNonMediacenterMedia(data);
-				}
-				String filename = from.format(DateTimeFormatter.ISO_DATE) + " - " + to.format(DateTimeFormatter.ISO_DATE) + ".csv";
-				String parent = new NodeTool().createOrGetNodeByName(new MCAlfrescoAPIClient(), baseFolder, new String[]{mediacenter});
-				PermissionServiceFactory.getLocalService().setPermission(parent, mediacenterService.getMediacenterAdminGroup(mediacenter), CCConstants.PERMISSION_CONSUMER);
-				if(delete) {
-					String node = NodeServiceFactory.getLocalService().findNodeByName(parent, filename);
-					if(node != null) {
-						NodeServiceFactory.getLocalService().removeNode(node, null, false);
-					}
-				}
-				String nodeId = NodeServiceFactory.getLocalService().createNode(parent, CCConstants.CCM_TYPE_IO, NodeServiceFactory.getLocalService().getNameProperty(filename));
-				NodeServiceHelper.addAspect(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), CCConstants.CCM_MEDIACENTER_STATISTICS);
-				NodeServiceHelper.setProperty(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), CCConstants.CCM_PROP_MEDIACENTER_ID, mediacenter, false);
-				try {
-					writeCSVFile(data, nodeId);
-				} catch(Throwable t) {
-					logger.warn("Error writing csv data for mediacenter " + mediacenter, t);
-					NodeServiceHelper.removeNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), false);
+				generateReportByTimeRange(mediacenter, startDate, endDate);
+				if(generateYearly && localDate.getMonthValue() == 1){
+					from = LocalDate.of(localDate.getYear() - 1, 1, 1);
+					startDate = Date.from(from.atStartOfDay().toInstant(ZoneOffset.UTC));
+					generateReportByTimeRange(mediacenter, startDate, endDate);
 				}
 			}
 		} catch (Throwable t) {
 			throw new RuntimeException(t);
 		}
 		return null;
+	}
+
+	private void generateReportByTimeRange(String mediacenter, Date startDate, Date endDate) throws Throwable {
+		TrackingService trackingService = TrackingServiceFactory.getTrackingService();
+		MediacenterService mediacenterService = MediacenterServiceFactory.getLocalService();
+		String baseFolder = new UserEnvironmentTool().getEdu_SharingMediacenterFolder();
+		Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> data = null;
+		if(mode.equals(ReportMode.AlfrescoPermissionData)) {
+			List<NodeRef> nodes = mediacenterService.getAllLicensedNodes(mediacenter);
+			data = trackingService.getListNodeData(
+					nodes.stream().map(
+							ref -> new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ref.getNodeId())
+					).collect(Collectors.toList()),
+					startDate,
+					endDate,
+					additionalFields,
+					mediacenter
+			);
+		} else if (mode.equals(ReportMode.TrackingMediacenterData)) {
+			data = trackingService.getListNodeDataByMediacenter(
+					mediacenter,
+					startDate,
+					endDate,
+					additionalFields
+			);
+			List<NodeRef> nodes = mediacenterService.getAllLicensedNodes(mediacenter);
+			for (NodeRef n : nodes) {
+				org.alfresco.service.cmr.repository.NodeRef mappedRef = new org.alfresco.service.cmr.repository.NodeRef(new StoreRef(n.getStoreProtocol(), n.getStoreId()), n.getNodeId());
+				if (data.containsKey(mappedRef)) {
+					continue;
+				}
+				data.put(mappedRef, new StatisticEntry());
+			}
+			data = filterNonMediacenterMedia(data);
+		}
+		String filename =
+				startDate.toInstant().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " - " +
+				endDate.toInstant().atZone(ZoneId.systemDefault()).format((DateTimeFormatter.ofPattern("yyyy-MM-dd"))) + ".csv";
+		String parent = new NodeTool().createOrGetNodeByName(new MCAlfrescoAPIClient(), baseFolder, new String[]{mediacenter});
+		PermissionServiceFactory.getLocalService().setPermission(parent, mediacenterService.getMediacenterAdminGroup(mediacenter), CCConstants.PERMISSION_CONSUMER);
+		if(delete) {
+			String node = NodeServiceFactory.getLocalService().findNodeByName(parent, filename);
+			if(node != null) {
+				NodeServiceFactory.getLocalService().removeNode(node, null, false);
+			}
+		}
+		String nodeId = NodeServiceFactory.getLocalService().createNode(parent, CCConstants.CCM_TYPE_IO, NodeServiceFactory.getLocalService().getNameProperty(filename));
+		NodeServiceHelper.addAspect(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), CCConstants.CCM_MEDIACENTER_STATISTICS);
+		NodeServiceHelper.setProperty(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), CCConstants.CCM_PROP_MEDIACENTER_ID, mediacenter, false);
+		try {
+			writeCSVFile(data, nodeId);
+		} catch(Throwable t) {
+			logger.warn("Error writing csv data for mediacenter " + mediacenter, t);
+			NodeServiceHelper.removeNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), false);
+		}
 	}
 
 	private Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> filterNonMediacenterMedia(Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> data) {
