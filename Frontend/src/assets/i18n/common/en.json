@@ -253,6 +253,7 @@
     "ccm:commonlicense_key": "license",
     "ccm:collection_ordered_position": "custom",
     "ccm:educationallearningresourcetype": "Type",
+    "ccm:educationalintendedenduserrole": "target audience",
     "ccm:replicationsourceid": "Original-ID",
     "ccm:educationalcontext": "Educational Context",
     "ccm:lifecyclecontributer_publisher": "publisher",
