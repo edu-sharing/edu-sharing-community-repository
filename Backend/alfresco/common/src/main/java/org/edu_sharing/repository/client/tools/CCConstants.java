@@ -1963,9 +1963,8 @@ public class CCConstants {
 	 * Permissions allowed if the node was opened via usage (lms) or signature
 	 * @return
 	 */
-	public static ArrayList<String> getUsagePermissions(){
+	public static synchronized ArrayList<String> getUsagePermissions(){
 		if(usagePermissions == null){
-			synchronized (usagePermissions) {
 				usagePermissions = new ArrayList<>();
 				usagePermissions.add(PERMISSION_READ);
 				usagePermissions.add(PERMISSION_READ_PREVIEW);
@@ -1974,7 +1973,6 @@ public class CCConstants {
 				usagePermissions.add(PERMISSION_COMMENT);
 				usagePermissions.add(PERMISSION_RATE);
 				usagePermissions.add(PERMISSION_RATE_READ);
-			}
 		}
 		return usagePermissions;
 	}
