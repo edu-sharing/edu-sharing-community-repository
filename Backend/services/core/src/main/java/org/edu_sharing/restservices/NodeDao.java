@@ -138,7 +138,7 @@ public class NodeDao {
 		isCollectionHomePath=false; // TODO do we need to resolve this here?
 	}
 
-	private org.edu_sharing.service.model.NodeRef getNodeRef() {
+	public org.edu_sharing.service.model.NodeRef getNodeRef() {
 		if(this.nodeRef != null) {
 			return this.nodeRef;
 		}

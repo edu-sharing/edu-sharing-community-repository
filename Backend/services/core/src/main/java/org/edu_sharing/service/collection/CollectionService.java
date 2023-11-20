@@ -65,7 +65,7 @@ public interface CollectionService {
 	
 	public List<NodeRef> getChildren(String parentId, String scope, SortDefinition sortDefinition,List<String> filter);
 
-	public Collection get(String storeId, String storeProtocol, String collectionId, boolean fetchCounts);
+	public Collection get(org.edu_sharing.service.model.NodeRef collection, boolean fetchCounts);
 
 	void removePreviewImage(String collectionId) throws Exception;
 
