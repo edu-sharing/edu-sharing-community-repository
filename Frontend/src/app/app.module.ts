@@ -107,7 +107,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         extensionProviders,
         ErrorHandlerService,
     ],
-    exports: [],
+    exports: [AppComponent],
     schemas: [].concat(extensionSchemas),
     bootstrap: [AppComponent],
 })

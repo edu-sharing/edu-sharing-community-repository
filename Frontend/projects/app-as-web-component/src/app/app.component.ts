@@ -20,7 +20,9 @@ export class AppComponent implements OnInit {
     constructor(private router: Router) {}
 
     ngOnInit(): void {
-        // this.router.initialNavigation();
+        // We need this to hook up routing to our LocationStrategy. Otherwise calls on Location
+        // won't work.
+        this.router.initialNavigation();
         this.goToSearch();
     }
 
