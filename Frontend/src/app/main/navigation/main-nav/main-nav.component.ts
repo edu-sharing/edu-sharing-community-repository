@@ -299,14 +299,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         await this.handleScroll(null);
     }
 
-    editProfile() {
-        if (this.bridge.isRunningCordova()) {
-            window.open(this.editUrl, '_system');
-        } else {
-            window.location.href = this.editUrl;
-        }
-    }
-
     showHelp(url: string) {
         UIHelper.openUrl(url, this.bridge, OPEN_URL_MODE.BlankSystemBrowser);
     }

@@ -305,7 +305,6 @@ export class LoginPageComponent implements OnInit, OnDestroy {
         if (this.next) {
             this.next = Helper.addGetParameter('fromLogin', 'true', this.next);
             RouterHelper.navigateToAbsoluteUrl(this.platformLocation, this.router, this.next);
-            // window.location.assign(this.next);
         } else if (data.currentScope === RestConstants.SAFE_SCOPE) {
             this.router.navigate([UIConstants.ROUTER_PREFIX, 'workspace', 'safe']);
         } else {

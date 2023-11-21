@@ -320,14 +320,6 @@ export class CollectionsPageComponent implements OnDestroy {
         }
     }
 
-    // gets called by user if something went wrong to start fresh from beginning
-    resetCollections(): void {
-        let url = window.location.href;
-        url = url.substring(0, url.indexOf('collections') + 11);
-        window.location.href = url;
-        return;
-    }
-
     getScope() {
         return this.tabSelected ? this.tabSelected : RestConstants.COLLECTIONSCOPE_ALL;
     }
