@@ -326,7 +326,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                 switchMap(() => this.uiService.waitForComponent(this, 'topBar')),
                 switchMap(() => this.uiService.waitForComponent(this.topBar, 'userRef')),
             )
-            .subscribe(() => (this.tutorialElement = this.topBar.userRef));
+            .subscribe((userRef) => (this.tutorialElement = userRef));
     }
 
     setFixMobileElements(fix: boolean) {
@@ -440,7 +440,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     private updateUserOptions() {
         this.userMenuOptions = [];
         if (
-            this.connector.getCurrentLogin().statusCode === RestConstants.STATUS_CODE_OK &&
+            this.connector.getCurrentLogin()?.statusCode === RestConstants.STATUS_CODE_OK &&
             this.about.plugins?.filter((s) => s.id === 'kafka-notification-plugin').length > 0
         ) {
             /*

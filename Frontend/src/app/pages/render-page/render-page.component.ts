@@ -233,10 +233,6 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy {
     @Output() onClose = new EventEmitter();
     similarNodeColumns: ListItem[] = [];
 
-    public static close(location: Location) {
-        location.back();
-    }
-
     @HostListener('window:beforeunload', ['$event'])
     beforeunloadHandler(event: any) {
         if (this.isSafe) {
@@ -279,12 +275,11 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy {
                         false,
                     );
                 } else {
-                    RenderPageComponent.close(this.location);
+                    this.location.back();
                     // use a timeout to let the browser try to go back in history first
                     setTimeout(() => {
-                        console.log(this.mainNavService.getMainNav());
                         if (!this.isDestroyed) {
-                            this.mainNavService.getMainNav().topBar.toggleMenuSidebar();
+                            this.mainNavService.getMainNav().topBar?.toggleMenuSidebar();
                         }
                     }, 250);
                 }
