@@ -51,7 +51,7 @@ public class NotificationConfig implements Serializable {
     @JsonIgnore
     public NotificationInterval getProposeForCollectionEvent() {
         return configMode == NotificationConfigMode.individual
-                ? intervals.getAddToCollectionEvent()
+                ? intervals.getProposeForCollectionEvent()
                 : defaultInterval;
     }
 
