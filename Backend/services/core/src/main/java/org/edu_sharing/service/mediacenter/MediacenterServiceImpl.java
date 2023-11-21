@@ -1,7 +1,6 @@
 package org.edu_sharing.service.mediacenter;
 
 import org.alfresco.model.ContentModel;
-import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -19,12 +18,10 @@ import org.apache.cxf.common.util.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.AuthorityService;
 import org.edu_sharing.alfresco.service.OrganisationService;
-import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.importer.PersistentHandlerEdusharing;
 import org.edu_sharing.repository.server.importer.RecordHandlerInterfaceBase;
 import org.edu_sharing.repository.server.jobs.helper.NodeHelper;
@@ -33,6 +30,7 @@ import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.service.util.CSVTool;
 import org.jetbrains.annotations.NotNull;
@@ -926,24 +924,25 @@ public class MediacenterServiceImpl implements MediacenterService {
         }
     }
     @Override
-    public List<org.edu_sharing.service.model.NodeRef> getAllLicensedNodes(String mediacenter) throws Throwable {
+    public List<org.edu_sharing.service.model.NodeRef> getAllLicensedNodes(String mediacenter, Map<String, String[]> criteria, SortDefinition sortDefinition) throws Throwable {
         List<org.edu_sharing.service.model.NodeRef> data = new ArrayList<>();
         boolean hasMore = true;
-        int pageSize = 1000;
+        int pageSize = 100;
         int page = 0;
         SearchToken searchToken = new SearchToken();
         searchToken.setAuthorityScope(Collections.singletonList(getAuthorityScope(mediacenter)));
         searchToken.setFacets(new ArrayList<>());
         searchToken.setMaxResult(pageSize);
+        if(sortDefinition != null) {
+            searchToken.setSortDefinition(sortDefinition);
+        }
+        SearchResultNodeRef search;
         do {
             searchToken.setFrom(page);
-            SearchResultNodeRef search = SearchServiceFactory.getLocalService().search(MetadataHelper.getLocalDefaultMetadataset(), "mediacenter_filter", Collections.emptyMap(), searchToken);
+            search = SearchServiceFactory.getLocalService().search(MetadataHelper.getLocalDefaultMetadataset(), "mediacenter_filter", criteria, searchToken);
             page = page + pageSize;
-            if((search.getData().size() - 1) <= page){
-                hasMore = false;
-            }
             data.addAll(search.getData());
-        }while (hasMore);
+        }while (!search.getData().isEmpty());
         logger.info("result:" + data.size());
         return data;
     }

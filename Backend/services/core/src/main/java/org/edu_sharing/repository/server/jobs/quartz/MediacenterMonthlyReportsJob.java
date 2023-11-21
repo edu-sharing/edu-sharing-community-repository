@@ -166,7 +166,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 		String baseFolder = new UserEnvironmentTool().getEdu_SharingMediacenterFolder();
 		Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> data = null;
 		if(mode.equals(ReportMode.AlfrescoPermissionData)) {
-			List<NodeRef> nodes = mediacenterService.getAllLicensedNodes(mediacenter);
+			List<NodeRef> nodes = mediacenterService.getAllLicensedNodes(mediacenter, Collections.emptyMap(), null);
 			data = trackingService.getListNodeData(
 					nodes.stream().map(
 							ref -> new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ref.getNodeId())
@@ -183,7 +183,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 					endDate,
 					additionalFields
 			);
-			List<NodeRef> nodes = mediacenterService.getAllLicensedNodes(mediacenter);
+			List<NodeRef> nodes = mediacenterService.getAllLicensedNodes(mediacenter, Collections.emptyMap(), null);
 			for (NodeRef n : nodes) {
 				org.alfresco.service.cmr.repository.NodeRef mappedRef = new org.alfresco.service.cmr.repository.NodeRef(new StoreRef(n.getStoreProtocol(), n.getStoreId()), n.getNodeId());
 				if (data.containsKey(mappedRef)) {

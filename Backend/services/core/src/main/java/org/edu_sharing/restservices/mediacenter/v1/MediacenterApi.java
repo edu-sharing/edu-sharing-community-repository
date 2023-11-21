@@ -12,6 +12,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.*;
@@ -24,6 +25,7 @@ import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.edu_sharing.service.mediacenter.MediacenterServiceImpl;
+import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -315,45 +317,30 @@ public class MediacenterApi {
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			MdsDao mdsDao = MdsDao.getMds(repoDao, MdsDao.DEFAULT);
+			List<Map<String, List<Serializable>>> data = new ArrayList<>();
 
-			List<Map<String, Serializable>> data = new ArrayList<>();
-			boolean hasMore = true;
-			int pageSize = 1000;
-			int page = 0;
-
-			do {
-				SearchToken searchToken = new SearchToken();
-				searchToken.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
-				searchToken.setAuthorityScope(Collections.singletonList(MediacenterServiceImpl.getAuthorityScope(mediacenter)));
-				searchToken.setFacets(new ArrayList<>());
-				searchToken.setFrom(page);
-				searchToken.setMaxResult(pageSize);
-
-				NodeSearch search = NodeDao.search(repoDao, mdsDao, "mediacenter_filter", parameters.getCriteria(), searchToken, Filter.createShowAllFilter());
-				logger.info("page: "+ page +" count:"+search.getCount() +" t:"+Thread.currentThread().getId());
-				page = page + pageSize;
-				if((search.getCount() - 1) <= page){
-					hasMore = false;
-				}
-
-				for (org.edu_sharing.restservices.shared.NodeRef ref : search.getResult()) {
-					org.alfresco.service.cmr.repository.NodeRef alfRef=new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ref.getId());
-					Map<String, Serializable> props=new HashMap<>();
-					for(String prop : properties){
-						if(prop.startsWith("parent::")){
-							String parentId = NodeServiceFactory.getLocalService().getPrimaryParent(ref.getId());
-							String realProp=prop.substring("parent::".length());
-							props.put(prop, NodeServiceHelper.getPropertyNative(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentId),CCConstants.getValidGlobalName(realProp)));
-						}
-						else{
-							props.put(prop, NodeServiceHelper.getPropertyNative(alfRef,CCConstants.getValidGlobalName(prop)));
-						}
+			List<NodeRef> nodes = MediacenterServiceFactory.getLocalService().getAllLicensedNodes(mediacenter, MetadataSearchHelper.convertCriterias(parameters.getCriteria()), new SortDefinition(sortProperties, sortAscending));
+			for (NodeRef ref : nodes) {
+				Map<String, List<Serializable>> props=new HashMap<>();
+				for(String prop : properties){
+					Object value;
+					if(prop.startsWith("parent::")){
+						String parentId = NodeServiceFactory.getLocalService().getPrimaryParent(ref.getNodeId());
+						String realProp=prop.substring("parent::".length());
+						value = NodeServiceHelper.getPropertyNative(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentId),CCConstants.getValidGlobalName(realProp));
 					}
-					data.add(props);
+					else{
+						//props.put(prop, NodeServiceHelper.getPropertyNative(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ref.getRef().getId()),CCConstants.getValidGlobalName(prop)));
+						value = ref.getProperties().get(CCConstants.getValidGlobalName(prop));
+					}
+					if(value instanceof Collection) {
+						props.put(prop, (List<Serializable>) value);
+					} else {
+						props.put(prop, Collections.singletonList((Serializable) value));
+					}
 				}
-
-			}while (hasMore);
-
+				data.add(props);
+			}
 			logger.info("result:" + data.size());
 			return Response.status(Response.Status.OK).entity(data).build();
 
