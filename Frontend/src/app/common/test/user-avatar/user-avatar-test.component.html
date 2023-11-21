@@ -5,7 +5,7 @@
       <es-user-avatar
         *ngFor="let size of sizes"
         [user]="user"
-        [size]="size"
+        [size]="$any(size)"
         [customImage]="$any(user).avatar ? $any(user).avatar : null"
       ></es-user-avatar>
     </div>
