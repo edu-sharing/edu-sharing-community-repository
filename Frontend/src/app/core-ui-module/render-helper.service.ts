@@ -1,4 +1,9 @@
-import { ComponentFactoryResolver, Injectable, ViewContainerRef } from '@angular/core';
+import {
+    ComponentFactoryResolver,
+    ComponentRef,
+    Injectable,
+    ViewContainerRef,
+} from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { EventType, Node } from '../core-module/rest/data-object';
@@ -21,6 +26,7 @@ import { RestTrackingService } from '../core-module/rest/services/rest-tracking.
 
 @Injectable()
 export class RenderHelperService {
+    videoControlsRef: ComponentRef<VideoControlsComponent>;
     private static isCollectionRef(node: Node) {
         return node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1;
     }
@@ -241,7 +247,7 @@ export class RenderHelperService {
             video: videoElement,
             node,
         };
-        UIHelper.injectAngularComponent(
+        this.videoControlsRef = UIHelper.injectAngularComponent(
             this.componentFactoryResolver,
             this.viewContainerRef,
             VideoControlsComponent,
