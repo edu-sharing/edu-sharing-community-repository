@@ -1,7 +1,4 @@
 import { Injectable, InjectionToken, Provider } from '@angular/core';
-import { Observable } from 'rxjs';
-import { AccessibilitySettings } from './types/accessibillity';
-import { KeyboardShortcut } from './types/keyboard-shortcuts';
 
 export const EDU_SHARING_UI_CONFIG = new InjectionToken<EduSharingUiConfigurationParams>(
     'EDU_SHARING_API_CONFIG',
@@ -12,6 +9,12 @@ export const EDU_SHARING_UI_CONFIG = new InjectionToken<EduSharingUiConfiguratio
 })
 export class EduSharingUiConfiguration {
     production: boolean;
+    /**
+     * Whether this Angular application is being used embedded as a web component by a third-party
+     * web page.
+     */
+    isEmbedded = false;
+
     static create(params: EduSharingUiConfigurationParams = {}): EduSharingUiConfiguration {
         return { ...new EduSharingUiConfiguration(), ...params };
     }

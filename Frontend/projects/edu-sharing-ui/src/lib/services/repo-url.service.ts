@@ -24,6 +24,7 @@ export class RepoUrlService {
     async getRepoUrl(url: string, node: Node) {
         if (
             !this.configuration.production &&
+            !this.configuration.isEmbedded &&
             (await this.networkService.isFromHomeRepository(node).pipe(take(1)).toPromise())
         ) {
             return this.withCurrentOrigin(url);

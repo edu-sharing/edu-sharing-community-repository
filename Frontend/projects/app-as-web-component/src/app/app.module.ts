@@ -4,7 +4,7 @@ import { ApplicationRef, DoBootstrap, Injector, NgModule } from '@angular/core';
 import { createCustomElement } from '@angular/elements';
 import { BrowserModule } from '@angular/platform-browser';
 import { EduSharingApiModule } from 'ngx-edu-sharing-api';
-import { ASSETS_BASE_PATH } from 'ngx-edu-sharing-ui';
+import { ASSETS_BASE_PATH, EduSharingUiModule } from 'ngx-edu-sharing-ui';
 import { AppModule as EduSharingModule } from 'src/app/app.module';
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
@@ -15,6 +15,7 @@ import { AppComponent } from './app.component';
         BrowserModule,
         EduSharingModule,
         EduSharingApiModule.forRoot({ rootUrl: environment.eduSharingApiUrl }),
+        EduSharingUiModule.forRoot({ production: environment.production, isEmbedded: true }),
     ],
     providers: [
         {
