@@ -21,6 +21,7 @@ import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescript
 import org.edu_sharing.repository.server.tools.NodeTool;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.mediacenter.MediacenterService;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.edu_sharing.service.model.NodeRef;
@@ -193,9 +194,8 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 			}
 			data = filterNonMediacenterMedia(data);
 		}
-		String filename =
-				startDate.toInstant().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " - " +
-				endDate.toInstant().atZone(ZoneId.systemDefault()).format((DateTimeFormatter.ofPattern("yyyy-MM-dd"))) + ".csv";
+		String filename = startDate.toInstant().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern((startDate.getMonth() == endDate.getMonth() ? "yyyy-MM" : "yyyy"))) + "_" +
+				NodeServiceHelper.getPropertyNative(AuthorityServiceHelper.getAuthorityNodeRef(mediacenter), CCConstants.CCM_PROP_MEDIACENTER_ID) + "_nach-Medien.csv";
 		String parent = new NodeTool().createOrGetNodeByName(new MCAlfrescoAPIClient(), baseFolder, new String[]{mediacenter});
 		PermissionServiceFactory.getLocalService().setPermission(parent, mediacenterService.getMediacenterAdminGroup(mediacenter), CCConstants.PERMISSION_CONSUMER);
 		if(delete) {
