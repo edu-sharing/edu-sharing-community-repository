@@ -223,16 +223,23 @@ export class NodeHelperService {
     /**
      * Download (a single) node
      */
-    public downloadNode(node: any, version = RestConstants.NODE_VERSION_CURRENT, metadata = false) {
-        this.downloadUrl(
-            getRepoUrl(node.downloadUrl, node) +
-                (version && version != RestConstants.NODE_VERSION_CURRENT
-                    ? '&version=' + version
-                    : '') +
-                '&metadata=' +
-                metadata,
-            node.name + (metadata ? '.txt' : ''),
-        );
+    public downloadNode(
+        node: Node,
+        version = RestConstants.NODE_VERSION_CURRENT,
+        metadata = false,
+    ) {
+        const downloadUrl =
+            this.connector.getAbsoluteEndpointUrl() +
+            '../eduservlet/download?appId=' +
+            encodeURIComponent(node.ref.repo) +
+            '&nodeId=' +
+            encodeURIComponent(node.ref.id) +
+            (version && version != RestConstants.NODE_VERSION_CURRENT
+                ? '&version=' + version
+                : '') +
+            '&metadata=' +
+            metadata;
+        this.downloadUrl(downloadUrl, node.name + (metadata ? '.txt' : ''));
     }
 
     /**
