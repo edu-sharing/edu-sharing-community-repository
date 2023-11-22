@@ -1,5 +1,6 @@
 package org.edu_sharing.service.mediacenter;
 
+import com.google.common.collect.Lists;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -28,6 +29,7 @@ import org.edu_sharing.repository.server.jobs.helper.NodeHelper;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -926,24 +928,17 @@ public class MediacenterServiceImpl implements MediacenterService {
     @Override
     public List<org.edu_sharing.service.model.NodeRef> getAllLicensedNodes(String mediacenter, Map<String, String[]> criteria, SortDefinition sortDefinition) throws Throwable {
         List<org.edu_sharing.service.model.NodeRef> data = new ArrayList<>();
-        boolean hasMore = true;
-        int pageSize = 100;
-        int page = 0;
         SearchToken searchToken = new SearchToken();
         searchToken.setAuthorityScope(Collections.singletonList(getAuthorityScope(mediacenter)));
         searchToken.setFacets(new ArrayList<>());
-        searchToken.setMaxResult(pageSize);
+        searchToken.setExcludes(Collections.singletonList("preview"));
         if(sortDefinition != null) {
             searchToken.setSortDefinition(sortDefinition);
         }
-        SearchResultNodeRef search;
-        do {
-            searchToken.setFrom(page);
-            search = SearchServiceFactory.getLocalService().search(MetadataHelper.getLocalDefaultMetadataset(), "mediacenter_filter", criteria, searchToken);
-            page = page + pageSize;
-            data.addAll(search.getData());
-        }while (!search.getData().isEmpty());
-        logger.info("result:" + data.size());
-        return data;
+        if(SearchServiceFactory.getLocalService() instanceof SearchServiceElastic) {
+            return ((SearchServiceElastic) SearchServiceFactory.getLocalService()).searchAll(MetadataHelper.getLocalDefaultMetadataset(), "mediacenter_filter", criteria, searchToken);
+        } else {
+            throw new RuntimeException("getAllLicensedNodes requires Elasticsearch");
+        }
     }
 }
