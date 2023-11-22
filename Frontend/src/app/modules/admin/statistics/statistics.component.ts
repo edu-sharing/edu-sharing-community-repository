@@ -841,7 +841,8 @@ export class AdminStatisticsComponent implements OnInit {
                 });
                 break;
             }
-            case 3: {
+            // was single, but is removed for now
+            case undefined: {
                 from = this.singleStart;
                 to = this.singleEnd;
                 csvHeadersMapping = this.singleDataRows;
