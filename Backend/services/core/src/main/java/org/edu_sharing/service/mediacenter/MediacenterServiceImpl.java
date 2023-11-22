@@ -931,7 +931,7 @@ public class MediacenterServiceImpl implements MediacenterService {
         SearchToken searchToken = new SearchToken();
         searchToken.setAuthorityScope(Collections.singletonList(getAuthorityScope(mediacenter)));
         searchToken.setFacets(new ArrayList<>());
-        searchToken.setExcludes(Collections.singletonList("preview"));
+        searchToken.setExcludes(Arrays.asList("preview", "collections", "children"));
         if(sortDefinition != null) {
             searchToken.setSortDefinition(sortDefinition);
         }
