@@ -48,6 +48,7 @@ export class ThemeService {
                     MaterialCssVariables.ForegroundDivider,
                     this.fromPalette(color, '500'),
                 );
+                document.querySelector('meta[name="theme-color"]').setAttribute('content', color);
                 break;
             case Variable.Accent:
                 this.materialCssVarsService.setAccentColor(color);
