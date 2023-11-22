@@ -1,12 +1,17 @@
 {
   "name": "app-as-web-component",
   "version": "0.1.0",
+  "//": [
+    "We use --deploy-url here although Angular complains it is deprecated since this seems to be ",
+    "the only way to get Angular to load lazy scripts from a route that differs from base HREF as ", 
+    "given by index.html (which belongs to the host page and we don't control)."
+  ],
   "scripts": {
-    "build": "cd ../.. && npm run build -- app-as-web-component --output-hashing none",
-    "build-watch": "cd ../.. && ng build app-as-web-component --output-hashing none --configuration development --watch",
-    "copy-example-files": "cp -r example/index.html ../../dist/app-as-web-component/",
-    "preview-example": "http-server --port 4200 --proxy http://repository.127.0.0.1.nip.io:8100 ../../dist/app-as-web-component",
-    "example": "npm run build && npm run copy-example-files && npm run preview-example"
+    "build": "cd ../.. && npm run build -- app-as-web-component --output-hashing none --deploy-url edu-sharing/",
+    "build-watch": "cd ../.. && ng build app-as-web-component --output-hashing none --deploy-url edu-sharing/ --configuration development --watch",
+    "preview-example": "http-server --port 4200 --proxy http://repository.127.0.0.1.nip.io:8100 example",
+    "example": "npm run build && npm run preview-example",
+    "example-watch": "npm run build-watch & npm run preview-example"
   },
   "devDependencies": {
     "@angular/elements": "^16.2.12"

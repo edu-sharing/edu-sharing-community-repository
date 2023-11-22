@@ -1,9 +1,10 @@
-import { HashLocationStrategy, LocationStrategy } from '@angular/common';
+import { LocationStrategy } from '@angular/common';
 import { MockLocationStrategy } from '@angular/common/testing';
 import { ApplicationRef, DoBootstrap, Injector, NgModule } from '@angular/core';
 import { createCustomElement } from '@angular/elements';
 import { BrowserModule } from '@angular/platform-browser';
 import { EduSharingApiModule } from 'ngx-edu-sharing-api';
+import { ASSETS_BASE_PATH } from 'ngx-edu-sharing-ui';
 import { AppModule as EduSharingModule } from 'src/app/app.module';
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
@@ -20,6 +21,7 @@ import { AppComponent } from './app.component';
             provide: LocationStrategy,
             useClass: MockLocationStrategy,
         },
+        { provide: ASSETS_BASE_PATH, useValue: 'edu-sharing/' },
     ],
 })
 // export class AppModule {}
