@@ -49,7 +49,16 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         if(asFilter == null || (asFilter.booleanValue() == query.getBasequeryAsFilter())){
             result.must(baseQueryBuilder);
         }
-
+        if(parameters.isEmpty()) {
+            if(query.isApplyBasequery()){
+                if(queries.findBasequery(parameters.keySet())!=null &&
+                        !queries.findBasequery(parameters.keySet()).isEmpty()) {
+                    result.must(new ESRestHighLevelClient.ReadableWrapperQueryBuilder(queries.findBasequery(parameters.keySet())));
+                }
+                result = applyCondition(queries, result);
+            }
+            result = applyCondition(query, result);
+        }
         for (String name : parameters.keySet()) {
             MetadataQueryParameter parameter = query.findParameterByName(name);
             if (parameter == null)
