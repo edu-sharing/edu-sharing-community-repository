@@ -43,7 +43,7 @@ public class CommentDao {
 				comment.setRef(node.getRef());
 				try {
 					PersonDao person=PersonDao.getPerson(repoDao, (String) node.getNativeProperties().get(CCConstants.CM_PROP_C_CREATOR));
-					comment.setCreator(person.asPersonSimple());
+					comment.setCreator(person.asPersonSimple(false));
 				}catch(Throwable t) {
 					comment.setCreator(UserSimple.getDummy((String) node.getNativeProperties().get(CCConstants.CM_PROP_C_CREATOR)));
 				}

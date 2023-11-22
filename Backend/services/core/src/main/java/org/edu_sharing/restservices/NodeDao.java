@@ -1998,7 +1998,7 @@ public class NodeDao {
 				if(json.has("comment"))
 					history.setComment(json.getString("comment"));
 				try{
-					history.setEditor(new PersonDao(repoDao,json.getString("editor")).asPersonSimple());
+					history.setEditor(new PersonDao(repoDao,json.getString("editor")).asPersonSimple(false));
 				}catch(Throwable t){
 					// The user may has no permission or entry deleted
 					history.setEditor(new UserSimple());
@@ -2010,9 +2010,9 @@ public class NodeDao {
 					try{
 						String authority = arr.getString(i);
 						if(authority.startsWith(PermissionService.GROUP_PREFIX)) {
-							list[i]=new GroupDao(repoDao, authority).asGroup();
+							list[i]=new GroupDao(repoDao, authority).asGroup(false);
 						}else {
-							list[i]=new PersonDao(repoDao,authority).asPersonSimple();
+							list[i]=new PersonDao(repoDao,authority).asPersonSimple(false);
 						}
 					}catch(Throwable t){
 						// The user may has no permission or entry deleted
