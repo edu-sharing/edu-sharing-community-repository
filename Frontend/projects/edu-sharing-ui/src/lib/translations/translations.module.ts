@@ -2,9 +2,10 @@ import { HttpClient } from '@angular/common/http';
 import { ModuleWithProviders, NgModule, Optional, SkipSelf } from '@angular/core';
 import { MissingTranslationHandler, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
+import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
+import { ASSETS_BASE_PATH } from '../types/injection-tokens';
 import { FallbackTranslationHandler } from './fallback-translation-handler';
 import { TranslationLoader } from './translation-loader';
-import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
 
 /**
  * Import this module once in the app module to provide the `TranslateService`.
@@ -18,7 +19,12 @@ import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
             loader: {
                 provide: TranslateLoader,
                 useFactory: TranslationLoader.create,
-                deps: [HttpClient, ConfigService, EduSharingUiConfiguration],
+                deps: [
+                    HttpClient,
+                    ConfigService,
+                    EduSharingUiConfiguration,
+                    [new Optional(), ASSETS_BASE_PATH],
+                ],
             },
             missingTranslationHandler: {
                 provide: MissingTranslationHandler,

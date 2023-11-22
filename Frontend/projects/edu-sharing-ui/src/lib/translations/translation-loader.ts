@@ -1,10 +1,12 @@
 import { HttpClient } from '@angular/common/http';
+import { Inject, Optional } from '@angular/core';
 import { TranslateLoader } from '@ngx-translate/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { concat, Observable, of } from 'rxjs';
 import { catchError, first, map, reduce } from 'rxjs/operators';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
+import { ASSETS_BASE_PATH } from '../types/injection-tokens';
 import { LANGUAGES } from './languages';
 import { TranslationSource } from './translation-source';
 
@@ -33,15 +35,17 @@ export class TranslationLoader implements TranslateLoader {
         http: HttpClient,
         configService: ConfigService,
         configuration: EduSharingUiConfiguration,
+        @Optional() @Inject(ASSETS_BASE_PATH) assetsBasePath: string,
     ) {
-        return new TranslationLoader(http, configService, configuration);
+        return new TranslationLoader(assetsBasePath, http, configService, configuration);
     }
 
     private constructor(
+        @Optional() @Inject(ASSETS_BASE_PATH) private assetsBasePath: string,
         private http: HttpClient,
         private configService: ConfigService,
         private configuration: EduSharingUiConfiguration,
-        private prefix: string = 'assets/i18n',
+        private prefix: string = (assetsBasePath ?? '') + 'assets/i18n',
         private suffix: string = '.json',
     ) {}
 

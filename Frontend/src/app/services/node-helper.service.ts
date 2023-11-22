@@ -3,6 +3,7 @@ import { Observable, Observer } from 'rxjs';
 import { Params, Router } from '@angular/router';
 import { Location } from '@angular/common';
 import {
+    ASSETS_BASE_PATH,
     DefaultGroups,
     ListItem,
     NodeHelperService as NodeHelperServiceBase,
@@ -18,7 +19,13 @@ import { Helper } from '../core-module/rest/helper';
 import { HttpClient } from '@angular/common/http';
 import { MessageType } from '../util/message-type';
 import { Toast } from './toast';
-import { ComponentFactoryResolver, Injectable, ViewContainerRef } from '@angular/core';
+import {
+    ComponentFactoryResolver,
+    Inject,
+    Injectable,
+    Optional,
+    ViewContainerRef,
+} from '@angular/core';
 import { BridgeService } from './bridge.service';
 import {
     AuthorityProfile,
@@ -71,6 +78,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
         networkService: NetworkService,
         configService: ConfigService,
         repoUrlService: RepoUrlService,
+        @Optional() @Inject(ASSETS_BASE_PATH) assetsBasePath: string,
         private componentFactoryResolver: ComponentFactoryResolver,
         private config: ConfigService,
         private rest: RestConnectorService,
@@ -84,7 +92,14 @@ export class NodeHelperService extends NodeHelperServiceBase {
         private storage: TemporaryStorageService,
         private location: Location,
     ) {
-        super(translate, apiHelpersService, networkService, configService, repoUrlService);
+        super(
+            translate,
+            apiHelpersService,
+            networkService,
+            configService,
+            repoUrlService,
+            assetsBasePath,
+        );
     }
     setViewContainerRef(viewContainerRef: ViewContainerRef) {
         this.viewContainerRef = viewContainerRef;

@@ -46,9 +46,6 @@ import { OptionsHelperService } from './services/options-helper.service';
 import { Toast } from './services/toast';
 import { SharedModule } from './shared/shared.module';
 
-// http://blog.angular-university.io/angular2-ngmodule/
-// -> Making modules more readable using the spread operator
-
 const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     showDelay: 500,
     hideDelay: 0,

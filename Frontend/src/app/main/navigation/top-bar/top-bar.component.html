@@ -25,7 +25,7 @@
         [class.clickable]="canOpen"
         title="{{ 'CHOOSEENVIRONMENT' | translate }}"
       >
-        <img class="material-icons eduImage" [src]="getIconSource()" alt="" />
+        <img class="material-icons eduImage" [src]="getIconSource() | esAssetsPath" alt="" />
         <span>{{ title | translate }}</span>
         <i aria-hidden="true" class="material-icons barIcon">keyboard_arrow_down</i>
       </button>
@@ -47,7 +47,7 @@
         title="{{ 'CHOOSEENVIRONMENT' | translate }}"
         data-test="main-nav-scope-button"
       >
-        <img class="material-icons eduImage" [src]="getIconSource()" alt="" />
+        <img class="material-icons eduImage" [src]="getIconSource() | esAssetsPath" alt="" />
         <span>{{ title | translate }}</span>
         <i aria-hidden="true" class="material-icons barIcon">keyboard_arrow_right</i>
       </button>

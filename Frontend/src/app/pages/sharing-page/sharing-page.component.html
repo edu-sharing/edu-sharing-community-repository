@@ -2,7 +2,9 @@
 <h1 esTitle class="cdk-visually-hidden">{{ 'SHARING.TITLE' | translate }}</h1>
 <div *ngIf="!loading && sharingInfo" class="container">
   <div class="container-inside">
-    <div class="branding"><img src="assets/images/logo.svg" esImageConfig alt="logo" /></div>
+    <div class="branding">
+      <img [src]="'assets/images/logo.svg' | esAssetsPath" esImageConfig alt="logo" />
+    </div>
     <div
       class="details"
       [ngClass]="{ 'details-opacity': !(!sharingInfo.password || sharingInfo.passwordMatches) }"

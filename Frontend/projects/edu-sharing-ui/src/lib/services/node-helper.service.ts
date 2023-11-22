@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable, Optional } from '@angular/core';
 import {
     ApiHelpersService,
     ConfigService,
@@ -12,6 +12,7 @@ import * as Workflow from '../types/workflow';
 import { RepoUrlService } from './repo-url.service';
 import { Params } from '@angular/router';
 import { UIConstants } from '../util/ui-constants';
+import { ASSETS_BASE_PATH } from '../types/injection-tokens';
 @Injectable({
     providedIn: 'root',
 })
@@ -22,6 +23,7 @@ export class NodeHelperService {
         protected networkService: NetworkService,
         protected configService: ConfigService,
         protected repoUrlService: RepoUrlService,
+        @Optional() @Inject(ASSETS_BASE_PATH) private assetsBasePath: string,
     ) {}
 
     public getCollectionScopeInfo(node: Node): { icon: string; scopeName: string } {
@@ -186,7 +188,7 @@ export class NodeHelperService {
         return node.aspects?.includes(RestConstants.CCM_ASPECT_COLLECTION) || !!node.collection;
     }
     public getSourceIconPath(src: string) {
-        return 'assets/images/sources/' + src.toLowerCase() + '.png';
+        return (this.assetsBasePath ?? '') + 'assets/images/sources/' + src.toLowerCase() + '.png';
     }
 
     getNodeLink(mode: 'routerLink' | 'queryParams', node: Node) {

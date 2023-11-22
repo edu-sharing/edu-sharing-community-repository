@@ -17,7 +17,11 @@
     <div class="login-content">
       <h1 esTitle class="cdk-visually-hidden">{{ 'LOGIN.TITLE' | translate }}</h1>
       <div class="branding">
-        <img src="assets/images/logo.svg" esImageConfig alt="{{ 'LOGIN.APP_LOGO' | translate }}" />
+        <img
+          [src]="'assets/images/logo.svg' | esAssetsPath"
+          esImageConfig
+          alt="{{ 'LOGIN.APP_LOGO' | translate }}"
+        />
       </div>
       <div class="groups">
         <div class="providers-select" *ngIf="showProviders">
@@ -56,7 +60,7 @@
             </mat-autocomplete>
           </mat-form-field>
           <div class="sso-group">
-            <img class="sso-logo" src="assets/images/sso_logo.svg" />
+            <img class="sso-logo" [src]="'assets/images/sso_logo.svg' | esAssetsPath" />
             <div class="group-actions">
               <button mat-raised-button color="primary" (click)="goToProvider()">
                 {{ 'LOGIN.GO_TO_PROVIDER' | translate }}

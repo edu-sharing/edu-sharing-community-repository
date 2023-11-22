@@ -266,7 +266,7 @@
     >
       <i class="material-icons">{{ connector.icon }}</i>
       {{ 'CONNECTOR.' + connector.id + '.NAME' | translate
-      }}<img class="connectorBeta" src="assets/images/beta.svg"
+      }}<img class="connectorBeta" [src]="'assets/images/beta.svg' | esAssetsPath"
     /></a>
   </div>
 </div>

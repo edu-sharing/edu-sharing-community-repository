@@ -1,6 +1,6 @@
 <div>
   <div class="header" (esBorderBoxObserver)="setMainNavOffset($event.height - 75)">
-    <img src="assets/images/layout/oer_bg.jpg" esImageConfig alt="" />
+    <img [src]="'assets/images/layout/oer_bg.jpg' | esAssetsPath" esImageConfig alt="" />
     <div class="headerGradient"></div>
   </div>
   <div class="heading">

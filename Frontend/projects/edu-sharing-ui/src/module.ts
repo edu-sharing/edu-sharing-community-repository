@@ -61,6 +61,7 @@ export * from './lib/types/option-item';
 export * from './lib/types/keyboard-shortcuts';
 export * from './lib/types/list-item';
 export * from './lib/types/accessibillity';
+export * from './lib/types/injection-tokens';
 export * from './lib/util/color-helper';
 export * from './lib/util/VCard';
 export * from './lib/util/functions';

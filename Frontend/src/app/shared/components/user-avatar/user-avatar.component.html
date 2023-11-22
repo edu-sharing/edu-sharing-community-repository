@@ -12,7 +12,7 @@ with the W3C spec. -->
     <img
       *ngIf="isEditorialUser()"
       class="editorial-badge"
-      src="assets/images/editorial-badge.svg"
+      [src]="'assets/images/editorial-badge.svg' | esAssetsPath"
       alt=""
     />
     <span

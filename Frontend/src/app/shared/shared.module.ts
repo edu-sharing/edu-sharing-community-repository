@@ -25,6 +25,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -63,6 +64,7 @@ import { RegisterCustomPropertyDirective } from './directives/register-custom-pr
 import { SkipTargetDirective } from './directives/skip-target.directive';
 import { TitleDirective } from './directives/title.directive';
 import { ToolpermissionCheckDirective } from './directives/toolpermission-check.directive';
+import { AssetsPathPipe } from './pipes/assets-path.pipe';
 import { AuthorityAffiliationPipe } from './pipes/authority-affiliation.pipe';
 import { AuthorityColorPipe } from './pipes/authority-color.pipe';
 import { AuthorityNamePipe } from './pipes/authority-name.pipe';
@@ -71,10 +73,10 @@ import { PermissionNamePipe } from './pipes/permission-name.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { SplitNewLinesPipe } from './pipes/split-new-lines.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 @NgModule({
     declarations: [
+        AssetsPathPipe,
         AuthorityAffiliationPipe,
         AuthorityColorPipe,
         AuthorityNamePipe,
@@ -139,6 +141,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     ],
     exports: [
         A11yModule,
+        AssetsPathPipe,
         AuthorityAffiliationPipe,
         AuthorityColorPipe,
         AuthorityNamePipe,

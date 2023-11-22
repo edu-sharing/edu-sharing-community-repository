@@ -25,7 +25,7 @@
     ></es-card-header> -->
     <mat-card-header *ngIf="header">
       <div *ngIf="avatar" class="avatar" mat-card-avatar>
-        <img [src]="avatar" alt="" esImageConfig />
+        <img [src]="avatar | esAssetsPath" alt="" esImageConfig />
       </div>
       <div *ngIf="icon" class="avatar" mat-card-avatar><i [esIcon]="icon"></i></div>
       <mat-card-title [class.no-subtitle]="!subtitle">{{ title }}</mat-card-title>
