@@ -265,6 +265,16 @@ export class RenderHelperService {
         htmlElement.innerHTML = detailsSnippet;
         Array.from(htmlElement.querySelectorAll('script')).forEach((script) => {
             const newScriptElement = document.createElement('script');
+            if (
+                !Array.from(script.attributes)
+                    .map((a) => a.name)
+                    .includes('src')
+            ) {
+                console.warn(
+                    'Rendering provided an inline script without a src! This script can not be executed!',
+                    script,
+                );
+            }
             Array.from(script.attributes).forEach((attr) => {
                 newScriptElement.setAttribute(attr.name, attr.value);
             });
