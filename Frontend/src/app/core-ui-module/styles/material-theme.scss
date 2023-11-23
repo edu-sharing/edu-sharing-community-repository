@@ -271,15 +271,17 @@ mat-tab-group {
     --mdc-outlined-text-field-input-text-color: rgba(255, 255, 255);
 }
 mat-slide-toggle.mat-primary-bright {
-    &.mat-checked {
-        .mat-slide-toggle-thumb {
-            background-color: $primaryMediumLight;
-        }
-        .mat-slide-toggle-bar {
-            background-color: $primaryLight;
-        }
-    }
-    .mat-slide-toggle-content {
+    --mdc-switch-unselected-handle-color: #fff;
+    --mdc-switch-unselected-hover-handle-color: #{$primaryVeryLight};
+    --mdc-switch-unselected-focus-handle-color: #{$primaryVeryLight};
+    --mdc-switch-unselected-pressed-handle-color: #{$primaryVeryLight};
+    --mdc-switch-unselected-icon-color: #{$textLight};
+    --mdc-switch-selected-handle-color: #fff;
+    --mdc-switch-selected-hover-handle-color: #{$primaryVeryLight};
+    --mdc-switch-selected-focus-handle-color: #{$primaryVeryLight};
+    --mdc-switch-selected-pressed-handle-color: #{$primaryVeryLight};
+    --mdc-switch-selected-icon-color: #{$primary};
+    .mdc-form-field label {
         color: #fff;
     }
 }
