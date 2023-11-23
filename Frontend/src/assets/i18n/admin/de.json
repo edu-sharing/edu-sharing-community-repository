@@ -477,6 +477,7 @@
         "node": "Element",
         "authority": "Nutzende/Session",
         "authority_organization": "Organisation",
+        "authority_organization_id": "Organisations-ID",
         "authority_mediacenter": "Medienzentrum",
         "date": "Datum"
       },
