@@ -526,7 +526,10 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
 
     private downloadCurrentNode() {
         if (this.downloadUrl) {
-            this.nodeHelper.downloadUrl(this.downloadUrl);
+            this.nodeHelper.downloadUrl(this.downloadUrl, 'download', {
+                node: this._node,
+                triggerTrackingEvent: true,
+            });
         } else {
             this.nodeHelper.downloadNode(this._node, this.isChildobject ? null : this.version);
         }
