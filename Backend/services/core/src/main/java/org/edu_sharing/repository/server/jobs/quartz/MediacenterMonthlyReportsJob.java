@@ -199,11 +199,13 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 
 			List<String[]> csvList = organizations.stream().filter((org) -> {
 				Serializable groupType = NodeServiceHelper.getPropertyNative(AuthorityServiceHelper.getAuthorityNodeRef(org), CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
-				return groupType == null || !groupType.equals(MEDIACENTER_ADMINISTRATORS_GROUP);
+				return
+						!org.startsWith(PermissionService.GROUP_PREFIX + ORG_GROUP_PREFIX) ||
+						groupType == null || !groupType.equals(MEDIACENTER_ADMINISTRATORS_GROUP);
 			}).sorted((a,b) -> {
-				String numA = a.substring((PermissionService.GROUP_PREFIX + ORG_GROUP_PREFIX).length());
-				String numB = b.substring((PermissionService.GROUP_PREFIX + ORG_GROUP_PREFIX).length());
 				try {
+					String numA = a.substring((PermissionService.GROUP_PREFIX + ORG_GROUP_PREFIX).length());
+					String numB = b.substring((PermissionService.GROUP_PREFIX + ORG_GROUP_PREFIX).length());
 					return Long.compare(Long.parseLong(numA), Long.parseLong(numB));
 				} catch(Throwable t) {
 					return a.compareToIgnoreCase(b);
