@@ -34,7 +34,7 @@ import { SessionStorageService } from '../core-module/rest/services/session-stor
 import { map } from 'rxjs/operators';
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
 import { getRepoUrl } from '../util/repo-url';
-import { Node } from 'ngx-edu-sharing-api';
+import { HOME_REPOSITORY, Node, TrackingV1Service } from 'ngx-edu-sharing-api';
 
 export type WorkflowDefinitionStatus = {
     current: WorkflowDefinition;
@@ -81,6 +81,7 @@ export class NodeHelperService {
         private router: Router,
         private sessionStorage: SessionStorageService,
         private storage: TemporaryStorageService,
+        private trackingV1Service: TrackingV1Service,
         private location: Location,
     ) {}
     setViewContainerRef(viewContainerRef: ViewContainerRef) {
@@ -177,7 +178,20 @@ export class NodeHelperService {
         return { icon, scopeName };
     }
 
-    public downloadUrl(url: string, fileName = 'download') {
+    public downloadUrl(
+        url: string,
+        fileName = 'download',
+        details?: { triggerTrackingEvent: boolean; node: Node },
+    ) {
+        if (details?.triggerTrackingEvent) {
+            this.trackingV1Service
+                .trackEvent({
+                    repository: HOME_REPOSITORY,
+                    node: details.node.ref.id,
+                    event: 'DOWNLOAD_MATERIAL',
+                })
+                .subscribe(() => {});
+        }
         if (this.bridge.isRunningCordova()) {
             this.bridge.showTemporaryMessage(MessageType.info, 'TOAST.DOWNLOAD_STARTED', {
                 name: fileName,

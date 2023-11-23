@@ -46,7 +46,7 @@ public class TrackingApi {
 	    	@Parameter(description = "node id for which the event is tracked. For some event, this can be null",required=false ) @QueryParam("node") String node,
 			@Context HttpServletRequest req) {
     	try {
-	    	if(Arrays.asList(TrackingService.EventType.VIEW_MATERIAL_PLAY_MEDIA, TrackingService.EventType.VIEW_MATERIAL).contains(event)){
+	    	if(Arrays.asList(TrackingService.EventType.VIEW_MATERIAL_PLAY_MEDIA, TrackingService.EventType.VIEW_MATERIAL, TrackingService.EventType.DOWNLOAD_MATERIAL).contains(event)){
 				TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, event);
 				return Response.status(Response.Status.OK).build();
 			} else {
