@@ -192,8 +192,8 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 
 			List<TrackingService.EventType> eventList = new ArrayList<>(result.keySet());
 			List<String> header = new ArrayList<>();
-			header.add(I18nAngular.getTranslationAngular("admin", "ADMIN.STATISTICS.HEADERS.authority_organization"));
 			header.add(I18nAngular.getTranslationAngular("admin", "ADMIN.STATISTICS.HEADERS.authority_organization_id"));
+			header.add(I18nAngular.getTranslationAngular("admin", "ADMIN.STATISTICS.HEADERS.authority_organization"));
 			eventList.forEach(eventType -> header.add(I18nAngular.getTranslationAngular("admin", "ADMIN.STATISTICS.ACTIONS." + eventType)));
 
 
@@ -212,8 +212,8 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 			}).map(org -> {
 				List<String> resultArray = new ArrayList<>();
 				org.alfresco.service.cmr.repository.NodeRef ref = AuthorityServiceHelper.getAuthorityNodeRef(org);
-				resultArray.add((String) NodeServiceHelper.getPropertyNative(ref, ContentModel.PROP_AUTHORITY_DISPLAY_NAME.toString()));
 				resultArray.add(org.substring((PermissionService.GROUP_PREFIX+ ORG_GROUP_PREFIX).length()));
+				resultArray.add((String) NodeServiceHelper.getPropertyNative(ref, ContentModel.PROP_AUTHORITY_DISPLAY_NAME.toString()));
 				for (TrackingService.EventType eventType : eventList) {
 					resultArray.add(result.get(eventType).getOrDefault(org, 0L).toString());
 				}
