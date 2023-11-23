@@ -220,9 +220,8 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 				return resultArray.toArray(new String[0]);
 			}).collect(Collectors.toList());
 			String nodeId = generateCSVNode(mediacenter, "nach-Schulen", startDate, endDate);
-			writeCSVFileInternal(nodeId, header, csvList);
-
 			try {
+				writeCSVFileInternal(nodeId, header, csvList);
 			} catch(Throwable t) {
 				logger.warn("Error writing csv school data for mediacenter " + mediacenter, t);
 				NodeServiceHelper.removeNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), false);
