@@ -113,7 +113,13 @@ export class SearchPageRestoreService {
             .subscribe((event) => {
                 this._currentNavigationId = event.id;
                 if (event.navigationTrigger === 'popstate') {
-                    const restoredId = event.restoredState.navigationId;
+                    // `restoredState` can be undefined when using `MockLocationStrategy`. This is
+                    // the case for the app-as-web-component project. In this case, we restoring
+                    // will not work.
+                    //
+                    // TODO: If this is a use case, extend `MockLocationStrategy` to implement
+                    // `onPopState` in a way that provides `state.navigationId`.
+                    const restoredId = event.restoredState?.navigationId;
                     const entry = this._entries.find(
                         ({ navigationId }) => navigationId === restoredId,
                     );
