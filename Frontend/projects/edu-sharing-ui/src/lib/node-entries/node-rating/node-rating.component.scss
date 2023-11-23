@@ -9,19 +9,23 @@
     display: flex;
     align-items: center;
 }
-.mat-icon-button.mat-primary {
+.mdc-icon-button.mat-primary {
     color: var(--textLight);
-    &.likes {
-    }
+    display: flex;
+    align-items: center;
+    padding: 0;
     &.star,
     &.delete {
         min-width: unset;
         width: 18px;
         height: 18px;
+        i {
+            font-size: 17px;
+            line-height: 1;
+        }
         ::ng-deep {
-            i {
-                font-size: 17px;
-                line-height: 1;
+            .mat-mdc-button-touch-target {
+                display: none;
             }
         }
         &.star-hover {

@@ -18,6 +18,7 @@ export * from './lib/node-entries/node-entries-global.service';
 export * from './lib/node-entries/node-cache';
 export * from './lib/node-entries/node-entries.module';
 export * from './lib/node-entries/node-entries-wrapper.component';
+export * from './lib/node-entries/custom-templates-data-source';
 export * from './lib/node-entries/list-item-label.pipe';
 export * from './lib/directives/icon.directive';
 export * from './lib/directives/border-box-observer.directive';

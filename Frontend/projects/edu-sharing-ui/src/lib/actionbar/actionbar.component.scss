@@ -69,9 +69,9 @@ button {
     }
     &.actionbar-all-flat button {
         background: white;
-        color: var(--primary);
+        color: var(--primary) !important;
         &:disabled {
-            color: var(--textLight);
+            color: var(--textLight) !important;
         }
     }
     .more,

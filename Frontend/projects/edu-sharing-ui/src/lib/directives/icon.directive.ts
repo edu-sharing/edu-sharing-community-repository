@@ -3,10 +3,15 @@
  */
 
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
-import { Directive, ElementRef, Input, OnInit, OnDestroy, Optional } from '@angular/core';
+import { Directive, ElementRef, Input, OnDestroy, OnInit, Optional } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
-import { take } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest } from 'rxjs';
+import { filter } from 'rxjs/operators';
+import { notNull } from '../util/functions';
+
+type IconsConfig = Array<{ original: string; replace?: string; cssClass?: string }>;
 
 /**
  * Replaces the element's content with an icon.
@@ -24,9 +29,9 @@ import { take } from 'rxjs/operators';
     selector: 'i[esIcon], i.material-icons',
 })
 export class IconDirective implements OnInit, OnDestroy {
+    private originalId$ = new BehaviorSubject<string>(null);
     private _id: string;
     private _aria: boolean;
-    private iconsConfig: Array<{ original: string; replace?: string; cssClass?: string }>;
     private altTextSpan: HTMLElement;
     private isReady = false;
 
@@ -53,23 +58,23 @@ export class IconDirective implements OnInit, OnDestroy {
     }
 
     @Input() set esIcon(id: string) {
-        this.setIcon(id);
+        this.originalId$.next(id);
     }
 
     constructor(
         private element: ElementRef<HTMLElement>,
         private translate: TranslateService,
         @Optional() private config: ConfigService,
-    ) {}
+    ) {
+        combineLatest([this.originalId$.pipe(filter(notNull)), this.config.get('icons', null)])
+            .pipe(takeUntilDestroyed())
+            .subscribe(([originalId, iconsConfig]) => this.setIcon(originalId, iconsConfig));
+    }
 
     async ngOnInit() {
         this.isReady = true;
         this.element.nativeElement.setAttribute('aria-hidden', 'true');
         this.updateAria();
-
-        // FIXME: This might resolve after `setIcon` was called and mappings might be ignored.
-        await this.config.observeConfig().pipe(take(1)).toPromise();
-        this.iconsConfig = this.config.instant('icons', null);
     }
 
     ngOnDestroy(): void {
@@ -78,7 +83,7 @@ export class IconDirective implements OnInit, OnDestroy {
         }
     }
 
-    private setIcon(id: string) {
+    private setIcon(id: string, iconsConfig: IconsConfig) {
         if (this._id) {
             this.element.nativeElement.classList.remove(
                 'edu-icons',
@@ -87,7 +92,7 @@ export class IconDirective implements OnInit, OnDestroy {
             );
         }
         let customClass: string = null;
-        const mapping = this.iconsConfig?.filter((i) => i.original === id);
+        const mapping = iconsConfig?.filter((i) => i.original === id);
         if (mapping?.length === 1) {
             id = mapping[0].replace || '';
             customClass = mapping[0].cssClass;

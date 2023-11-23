@@ -89,8 +89,8 @@ $path: '../../../assets/images/';
                 z-index: 10;
             }
             ::ng-deep {
-                .mat-flat-button,
-                .mat-button {
+                [mat-button],
+                [mat-flat-button] {
                     background-color: transparent;
                     color: #fff;
                     &:disabled {
@@ -342,4 +342,8 @@ $path: '../../../assets/images/';
             }
         }
     }
+}
+
+.hide {
+    display: none;
 }

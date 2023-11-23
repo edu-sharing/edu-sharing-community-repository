@@ -230,22 +230,12 @@
       </div>
       <div *ngIf="isMe && editProfile && userEditProfile" class="changePassword">
         <div class="toggle">
-          <button
-            mat-button
-            color="primary"
-            tabindex="0"
-            class="clickable"
-            (click)="editPassword()"
-          >
-            <i *ngIf="!changePassword" class="material-icons">lock</i>
-            <i *ngIf="changePassword" class="material-icons">lock_open</i>
-            {{ 'CHANGE_PASSWORD' | translate }}
-            <i aria-hidden="true" class="material-icons" *ngIf="!changePassword"
-              >keyboard_arrow_right</i
-            >
-            <i aria-hidden="true" class="material-icons" *ngIf="changePassword"
-              >keyboard_arrow_down</i
-            >
+          <button mat-button color="primary" (click)="editPassword()">
+            <i *ngIf="!changePassword" esIcon="lock"></i>
+            <i *ngIf="changePassword" esIcon="lock_open"></i>
+            <span>{{ 'CHANGE_PASSWORD' | translate }}</span>
+            <i aria-hidden="true" esIcon="keyboard_arrow_right" *ngIf="!changePassword"></i>
+            <i aria-hidden="true" esIcon="keyboard_arrow_down" *ngIf="changePassword"></i>
           </button>
         </div>
         <div *ngIf="changePassword" class="password" [@overlay]="changePassword">

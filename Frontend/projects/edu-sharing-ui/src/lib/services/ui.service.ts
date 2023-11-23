@@ -16,7 +16,7 @@ import { distinctUntilChanged, map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class UIService {
-    private isTouchSubject = new BehaviorSubject(false);
+    isTouchSubject = new BehaviorSubject(false);
     private metaKeyPressedSubject = new BehaviorSubject(false);
     private shiftKeyPressedSubject = new BehaviorSubject(false);
     private ctrlKeyPressedSubject = new BehaviorSubject(false);
