@@ -35,7 +35,7 @@ export class TranslationLoader implements TranslateLoader {
         http: HttpClient,
         configService: ConfigService,
         configuration: EduSharingUiConfiguration,
-        @Optional() @Inject(ASSETS_BASE_PATH) assetsBasePath: string,
+        @Optional() @Inject(ASSETS_BASE_PATH) assetsBasePath?: string,
     ) {
         return new TranslationLoader(assetsBasePath, http, configService, configuration);
     }
