@@ -44,7 +44,7 @@
     </docker.edu_sharing.community.common.alfresco.transform.core.aio>
 
     <docker.edu_sharing.community.common.alfresco.search.service>
-      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-alfresco-search-service:2.0.3
+      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-alfresco-search-service:2.0.8.2
     </docker.edu_sharing.community.common.alfresco.search.service>
 
     <docker.edu_sharing.community.common.postgresql>
