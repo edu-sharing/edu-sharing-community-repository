@@ -14,15 +14,8 @@ RUN set -eux \
 #USER worker
 RUN set -eux \
     && rm \
-        tomcat/webapps/alfresco/WEB-INF/classes/logging.properties \
-        tomcat/webapps/alfresco/WEB-INF/classes/log4j.properties \
-        tomcat/webapps/alfresco/WEB-INF/lib/commons-lang3-* \
-        tomcat/webapps/alfresco/WEB-INF/lib/jackson-* \
-        tomcat/webapps/alfresco/WEB-INF/lib/slf4j-* \
         tomcat/webapps/alfresco/WEB-INF/lib/jsr305-* \
-        tomcat/webapps/alfresco/WEB-INF/lib/woodstox-core-* \
-        tomcat/webapps/alfresco/WEB-INF/lib/owasp-java-html-sanitizer-* \
-        tomcat/webapps/alfresco/WEB-INF/lib/reload4j-1.2.18.3*
+        tomcat/webapps/alfresco/WEB-INF/classes/log4j2.properties
 
 COPY --chown=worker:worker artifacts/edu_sharing-community-repository-backend-tomcat-${org.edu_sharing:edu_sharing-community-repository-backend-tomcat:jar.version}.jar tomcat/lib/
 COPY --chown=worker:worker webapp/*.war tomcat/webapps/edu-sharing.war
