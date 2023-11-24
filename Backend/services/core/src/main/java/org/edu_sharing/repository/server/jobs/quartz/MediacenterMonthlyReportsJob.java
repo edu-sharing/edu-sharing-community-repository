@@ -176,7 +176,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 					endDate,
 					Collections.singletonList("authority_organization")
 			);
-			// dataNodes = filterNonMediacenterMedia(dataNodes);
+			dataNodes = filterNonMediacenterMedia(dataNodes);
 
 			// Holds for each event (VIEW, DOWNLOAD...) a list of Org ids + counts
 			Map<TrackingService.EventType, Map<String, Long>> result = new HashMap<>();
