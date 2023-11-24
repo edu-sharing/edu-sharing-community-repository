@@ -8,7 +8,7 @@ import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.component';
 import { ManagementDialogsService } from '../../modules/management-dialogs/management-dialogs.service';
 import { SkipNavService } from './skip-nav/skip-nav.service';
-import { OptionItem } from '../../core-ui-module/option-item';
+import { OptionItem } from 'ngx-edu-sharing-ui';
 
 export class MainNavCreateConfig {
     /** allowed / display new material button */

@@ -169,7 +169,7 @@
         </div>
       </div>
     </div>
-    <div class="export" *ngIf="!nodesNoData && !nodesLoading">
+    <div class="export" *ngIf="!nodesNoData && !nodesDataSource.isLoading">
       <h4 class="mat-heading-4 mat-heading-underline clickable" (click)="showExport = !showExport">
         <i esIcon="cloud_download"></i>
         <span>{{ 'ADMIN.STATISTICS.EXPORT_LABEL' | translate }}</span>

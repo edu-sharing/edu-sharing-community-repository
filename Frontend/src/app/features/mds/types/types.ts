@@ -32,7 +32,7 @@ export interface Constraints {
     /**
      * shall the widget show an error or only be hidden
      */
-    onConstrainFails?: 'showError' | 'hide';
+    onConstraintFailed?: 'showError' | 'hide';
 }
 
 export type Values = { [property: string]: string[] | null };

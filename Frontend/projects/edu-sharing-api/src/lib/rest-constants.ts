@@ -1,4 +1,6 @@
 export class RestConstants {
+    public static USERHOME = '-userhome-';
+
     public static COLLECTIONSCOPE_MY = 'MY';
     public static COLLECTIONSCOPE_ORGA = 'EDU_GROUPS';
     public static COLLECTIONSCOPE_ALL = 'EDU_ALL';

@@ -37,7 +37,6 @@
         ></es-main-menu-dropdown>
         <button
           *ngIf="showScope"
-          *ngIf="showScope"
           [matMenuTriggerFor]="mainMenuDropdown.dropdown.menu"
           [disabled]="!canOpen"
           matRipple
@@ -58,7 +57,6 @@
           (showLicenses)="showLicenses.emit()"
         ></es-main-menu-sidebar>
         <button
-          *ngIf="showScope"
           *ngIf="showScope"
           (click)="mainMenuSidebar.toggle()"
           [disabled]="!canOpen"

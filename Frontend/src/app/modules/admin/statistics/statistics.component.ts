@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Node, NodeStatistics, Statistics } from '../../../core-module/rest/data-object';
-import { ListItem, Scope, UIAnimation } from 'ngx-edu-sharing-ui';
+import { FormatDatePipe, ListItem, Scope, UIAnimation } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { ConfigurationService } from '../../../core-module/rest/services/configuration.service';

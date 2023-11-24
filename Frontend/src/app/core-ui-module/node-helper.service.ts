@@ -41,6 +41,7 @@ import {
     HOME_REPOSITORY,
     NetworkService,
     Node,
+    TrackingV1Service,
 } from 'ngx-edu-sharing-api';
 
 export interface ConfigEntry {

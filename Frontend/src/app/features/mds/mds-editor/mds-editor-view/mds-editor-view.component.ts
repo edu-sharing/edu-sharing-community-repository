@@ -301,8 +301,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         const constraintViolation = this.violatesConstraints(WidgetComponent.constraints);
         if (constraintViolation) {
             if (
-                !WidgetComponent.constraints.onConstrainFails ||
-                WidgetComponent.constraints.onConstrainFails === 'showError'
+                !WidgetComponent.constraints.onConstraintFailed ||
+                WidgetComponent.constraints.onConstraintFailed === 'showError'
             ) {
                 UIHelper.injectAngularComponent(
                     this.factoryResolver,

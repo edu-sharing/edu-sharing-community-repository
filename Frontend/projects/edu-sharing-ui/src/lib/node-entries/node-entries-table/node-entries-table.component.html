@@ -242,7 +242,6 @@ available. -->
   [(columns)]="entriesService.columns"
   [(columnChooserVisible)]="columnChooserVisible"
   [origin]="columnChooserTrigger"
-  (columnsChange)="entriesService.columnsChange.emit($event)"
 ></es-column-chooser>
 <ng-template #loading>
   <es-spinner></es-spinner>

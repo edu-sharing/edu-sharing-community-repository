@@ -583,7 +583,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                                 this.nodeHelper.handleNodeError(n.name, error) ===
                                 RestConstants.DUPLICATE_NODE_RESPONSE
                             ) {
-                                this.createConnectorName = name;
+                                // this.createConnectorName = name;
                             }
                         },
                     );

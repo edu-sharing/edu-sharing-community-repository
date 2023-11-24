@@ -21,7 +21,7 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent {
     static readonly constraints: Constraints = {
         requiresNode: true,
         supportsBulk: false,
-        onConstrainFails: 'hide',
+        onConstraintFailed: 'hide',
     };
     static readonly graphqlIds = [
         'info.preview.url',

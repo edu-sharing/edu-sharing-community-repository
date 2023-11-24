@@ -63,6 +63,8 @@ import { WorkspaceExplorerComponent } from './explorer/explorer.component';
 import { WorkspaceTreeComponent } from './tree/tree.component';
 import { canDragDrop, canDropOnNode } from './workspace-utils';
 import { UserService } from 'ngx-edu-sharing-api';
+import { mapVCard } from '../../core-module/rest/services/rest-iam.service';
+import { DialogsService } from '../../features/dialogs/dialogs.service';
 
 @Component({
     selector: 'es-workspace-main',
