@@ -10,13 +10,12 @@ import java.io.*;
 
 import javax.imageio.ImageIO;
 
-
+import org.apache.commons.io.IOUtils;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
 import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
-import com.sun.star.uno.Exception;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.detect.Detector;
 import org.apache.tika.io.TikaInputStream;
@@ -151,7 +150,7 @@ public class ImageTool {
 	 * checks if given input stream is an image mimetype and throws an exception otherwise
 	 */
 	public static InputStream verifyImage(InputStream is) throws MimeTypeException, IOException {
-		byte[] data=org.apache.poi.util.IOUtils.toByteArray(is);
+		byte[] data=IOUtils.toByteArray(is);
 		TikaConfig config = TikaConfig.getDefaultConfig();
 		Detector detector = config.getDetector();
 		TikaInputStream stream = TikaInputStream.get(data);
