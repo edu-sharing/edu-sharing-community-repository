@@ -86,6 +86,12 @@ export class UIService {
         );
     }
 
+    /**
+     * @Deprecated
+     * Prefer to subscribe to the isTouchSubject directly if viable
+     *
+     * Returns true if the current sessions seems to be running on a mobile device
+     */
     public isMobile() {
         return this.isTouchSubject.value;
     }
