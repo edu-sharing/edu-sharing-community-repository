@@ -1,16 +1,22 @@
 import { Injectable, Injector, OnDestroy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { MdsDefinition, MdsService, MetadataSetInfo, SearchService } from 'ngx-edu-sharing-api';
+import {
+    MdsDefinition,
+    MdsService,
+    MdsSortDefault,
+    MetadataSetInfo,
+    SearchService,
+} from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { ListItem, Node, Repository, RestConstants } from '../../core-module/core.module';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
 import {
-    fromSearchResults,
     NodeDataSourceRemote,
     NodeRemote,
     NodeRequestParams,
+    fromSearchResults,
 } from '../../features/node-entries/node-data-source-remote';
 import { SearchPageRestoreService } from './search-page-restore.service';
 import { SearchPageResults } from './search-page-results.service';
@@ -64,6 +70,14 @@ export class SearchPageResultsAllService implements SearchPageResults, OnDestroy
             });
     }
 
+    private _registerPageRestore() {
+        this.repoData.subscribe((repoData) => {
+            for (const repo of repoData) {
+                this._searchPageRestore.registerDataSource(repo.id, repo.dataSource);
+            }
+        });
+    }
+
     private _getRepoData(repository: Repository): RepoData {
         const loadingParams = new BehaviorSubject(true);
         const loadingContent = new BehaviorSubject(true);
@@ -75,13 +89,18 @@ export class SearchPageResultsAllService implements SearchPageResults, OnDestroy
         const columns: Observable<ListItem[]> = mdsDefinition.pipe(
             switchMap((mdsDefinition) => this._getColumns(mdsDefinition)),
         );
-        rxjs.combineLatest([metadataSet, this._searchPage.searchString.observeValue()])
+        const sort = mdsDefinition.pipe(
+            map((mdsDefinition) => this._getDefaultSort(mdsDefinition)),
+        );
+        rxjs.combineLatest([metadataSet, sort, this._searchPage.searchString.observeValue()])
             .pipe(
                 tap(() => loadingParams.next(false)),
                 takeUntil(this._destroyed),
             )
-            .subscribe(([metadataSet, searchString]) => {
-                dataSource.setRemote(this._getSearchRemote(repository, metadataSet, searchString));
+            .subscribe(([metadataSet, sort, searchString]) => {
+                dataSource.setRemote(
+                    this._getSearchRemote(repository, metadataSet, sort, searchString),
+                );
             });
         dataSource.isLoadingSubject.subscribe((isLoading) => loadingContent.next(!!isLoading));
         return {
@@ -118,9 +137,14 @@ export class SearchPageResultsAllService implements SearchPageResults, OnDestroy
         );
     }
 
+    private _getDefaultSort(mdsDefinition: MdsDefinition): MdsSortDefault {
+        return MdsHelper.getSortInfo(mdsDefinition, 'search')?.default;
+    }
+
     private _getSearchRemote(
         repository: Repository,
         metadataSet: MetadataSetInfo,
+        sort: MdsSortDefault,
         searchString: string,
     ): NodeRemote<Node> {
         const criteria = searchString ? [{ property: 'ngsearchword', values: [searchString] }] : [];
@@ -133,8 +157,8 @@ export class SearchPageResultsAllService implements SearchPageResults, OnDestroy
                     },
                     maxItems: request.range.endIndex - request.range.startIndex,
                     skipCount: request.range.startIndex,
-                    sortAscending: request.sort ? [request.sort.direction === 'asc'] : null,
-                    sortProperties: request.sort ? [request.sort.active] : null,
+                    sortAscending: sort ? [sort.sortAscending] : null,
+                    sortProperties: sort ? [sort.sortBy] : null,
                     contentType: 'FILES',
                     repository: repository.id,
                     metadataset: metadataSet.id,
@@ -143,14 +167,6 @@ export class SearchPageResultsAllService implements SearchPageResults, OnDestroy
                 })
                 .pipe(map(fromSearchResults));
         };
-    }
-
-    private _registerPageRestore() {
-        this.repoData.subscribe((repoData) => {
-            for (const repo of repoData) {
-                this._searchPageRestore.registerDataSource(repo.id, repo.dataSource);
-            }
-        });
     }
 
     private _registerLoadingProgress(): void {
