@@ -23,7 +23,7 @@ public abstract class AbstractInterruptableJob extends AbstractJobMapAnnotationP
         try {
             thread.join();
         } catch (Throwable t) {
-            logger.warn("Job " + jobExecutionContext.getJobDetail().getFullName() + " interrupted or crashed", t);
+            logger.warn("Job " + jobExecutionContext.getJobDetail().getKey().getName() + " interrupted or crashed", t);
             throw new JobExecutionException(t);
         }
     }

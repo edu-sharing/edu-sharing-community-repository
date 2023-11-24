@@ -86,13 +86,13 @@ public class JobHandler {
 	public Job getJobByName(String jobName) throws SchedulerException {
 		return (Job) quartzScheduler.getCurrentlyExecutingJobs().
 				stream()
-				.filter(j -> ((JobExecutionContext)j).getJobDetail().getName().equals(jobName))
+				.filter(j -> ((JobExecutionContext)j).getJobDetail().getKey().getName().equals(jobName))
 				.map(j -> ((JobExecutionContext)j).getJobInstance())
 				.findFirst().orElse(null);
 	}
 	public boolean cancelJob(String jobName, boolean force) throws SchedulerException {
 		checkPrimaryRepository();
-		JobDetail jobDetail = quartzScheduler.getJobDetail(jobName, null);
+		JobDetail jobDetail = quartzScheduler.getJobDetail(JobKey.jobKey(jobName));
 		Job jobInstance = getJobByName(jobName);
 		if(force) {
 			if(jobInstance != null) {
@@ -107,13 +107,13 @@ public class JobHandler {
 				// we're on the primary instance - so if the job is not existing, we can still assume it's dead and cancel it
 			}
 		}
-		boolean result=quartzScheduler.interrupt(jobName, null);
+		boolean result=quartzScheduler.interrupt(JobKey.jobKey(jobName));
 		if(!result){
 			if(jobInstance == null && !force) {
 				throw new RuntimeException("Job " + jobName + " was not found as a running job. Use force parameter if you want to remove the entry anyway.");
 			}
 		} else if(force) {
-			quartzScheduler.deleteJob(jobName, null);
+			quartzScheduler.deleteJob(JobKey.jobKey(jobName));
 		}
 		if(force) {
 			try {
@@ -281,7 +281,7 @@ public class JobHandler {
 			}
 
 			@Override
-			public void triggerComplete(Trigger arg0, JobExecutionContext arg1, int arg2) {
+			public void triggerComplete(Trigger trigger, JobExecutionContext context, Trigger.CompletedExecutionInstruction triggerInstructionCode) {
 			}
 
 			@Override
@@ -506,8 +506,8 @@ public class JobHandler {
 				dailyConfig = dailyConfig.replaceAll("\\[", "").replaceAll("\\]", "");
 				String[] splittedConfig = dailyConfig.split(",");
 				if (splittedConfig.length == 2) {
-					hour = new Integer(splittedConfig[0]);
-					minute = new Integer(splittedConfig[1]);
+					hour = Integer.parseInt(splittedConfig[0]);
+					minute = Integer.parseInt(splittedConfig[1]);
 				}
 			}
 
