@@ -29,6 +29,10 @@ export interface Constraints {
     supportsInlineEditing?: boolean;
     requiresNode?: boolean;
     supportsBulk?: boolean;
+    /**
+     * shall the widget show an error or only be hidden
+     */
+    onConstrainFails?: 'showError' | 'hide';
 }
 
 export type Values = { [property: string]: string[] | null };

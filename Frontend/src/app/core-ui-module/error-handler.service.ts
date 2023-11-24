@@ -5,6 +5,7 @@ import { DialogButton, RestConstants } from '../core-module/core.module';
 import { ApiErrorResponse } from 'ngx-edu-sharing-api';
 import { HttpRequest } from '@angular/common/http';
 import { DialogsService } from '../features/dialogs/dialogs.service';
+import { CordovaService } from '../common/services/cordova.service';
 
 @Injectable({
     providedIn: 'root',
@@ -21,7 +22,7 @@ export class ErrorHandlerService {
         });
     }
 
-    handleError(error: ApiErrorResponse, req: HttpRequest<unknown>): void {
+    async handleError(error: ApiErrorResponse, req: HttpRequest<unknown>) {
         // console.log('handleError', error, req);
         if (req.method === 'GET' && req.url === this.getApiUrl('/config/v1/values')) {
             this.showConfigurationErrorNotice(error);
@@ -32,6 +33,11 @@ export class ErrorHandlerService {
                 req.url === this.getApiUrl('/iam/v1/people/-home-/-me-'))
         ) {
             this.showReloadNotice();
+        } else if (this.injector.get(CordovaService).isRunningCordova()) {
+            console.info('corodva api error received', error);
+            if (error.status === RestConstants.HTTP_UNAUTHORIZED) {
+                await this.injector.get(CordovaService).handleAppReAuthentication(true);
+            }
         } else {
             this.toast.error(error);
         }

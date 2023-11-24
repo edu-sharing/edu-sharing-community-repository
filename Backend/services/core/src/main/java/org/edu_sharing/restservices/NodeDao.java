@@ -138,7 +138,7 @@ public class NodeDao {
         isCollectionHomePath = false; // TODO do we need to resolve this here?
     }
 
-	private org.edu_sharing.service.model.NodeRef getNodeRef() {
+	public org.edu_sharing.service.model.NodeRef getNodeRef() {
 		if(this.nodeRef != null) {
 			return this.nodeRef;
 		}
@@ -1120,6 +1120,7 @@ public class NodeDao {
     public NodeDao changePreview(InputStream is, String mimetype, boolean version) throws DAOException {
 
         try {
+			is = ImageTool.verifyImage(is);
             is = ImageTool.autoRotateImage(is, ImageTool.MAX_THUMB_SIZE);
 
             HashMap<String, String[]> props = new HashMap<>();
@@ -1857,7 +1858,12 @@ public class NodeDao {
 
     private RatingDetails getRating() {
         try {
-			return RatingServiceFactory.getRatingService(repoDao.getId()).getAccumulatedRatings(getNodeRef(),null);
+			if(access.contains(CCConstants.PERMISSION_RATE_READ)) {
+				// skip permission checks, this can be useful if the user might have indirect access via collection
+				return AuthenticationUtil.runAsSystem(() -> RatingServiceFactory.getRatingService(repoDao.getId()).getAccumulatedRatings(getNodeRef(), null));
+			} else {
+				return RatingServiceFactory.getRatingService(repoDao.getId()).getAccumulatedRatings(getNodeRef(), null);
+			}
         } catch (Throwable t) {
             logger.warn("Can not fetch ratings for node " + nodeId + ": " + t.getMessage(), t);
             return null;
@@ -2013,7 +2019,7 @@ public class NodeDao {
                 if (json.has("comment"))
                     history.setComment(json.getString("comment"));
                 try {
-                    history.setEditor(new PersonDao(repoDao, json.getString("editor")).asPersonSimple());
+					history.setEditor(new PersonDao(repoDao,json.getString("editor")).asPersonSimple(false));
                 } catch (Throwable t) {
                     // The user may has no permission or entry deleted
                     history.setEditor(new UserSimple());
@@ -2025,9 +2031,9 @@ public class NodeDao {
                     try {
                         String authority = arr.getString(i);
                         if (authority.startsWith(PermissionService.GROUP_PREFIX)) {
-                            list[i] = new GroupDao(repoDao, authority).asGroup();
+							list[i]=new GroupDao(repoDao, authority).asGroup(false);
                         } else {
-                            list[i] = new PersonDao(repoDao, authority).asPersonSimple();
+							list[i]=new PersonDao(repoDao,authority).asPersonSimple(false);
                         }
                     } catch (Throwable t) {
                         // The user may has no permission or entry deleted

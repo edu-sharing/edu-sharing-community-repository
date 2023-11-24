@@ -1,7 +1,7 @@
 package org.edu_sharing.service.mediacenter;
 
+import com.google.common.collect.Lists;
 import org.alfresco.model.ContentModel;
-import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -19,20 +19,20 @@ import org.apache.cxf.common.util.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.AuthorityService;
 import org.edu_sharing.alfresco.service.OrganisationService;
-import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.importer.PersistentHandlerEdusharing;
 import org.edu_sharing.repository.server.importer.RecordHandlerInterfaceBase;
 import org.edu_sharing.repository.server.jobs.helper.NodeHelper;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.service.util.CSVTool;
 import org.jetbrains.annotations.NotNull;
@@ -48,6 +48,7 @@ import java.util.stream.Collectors;
 
 public class MediacenterServiceImpl implements MediacenterService {
 
+    private PersistentHandlerEdusharing persistentHandlerEdusharing;
     Logger logger = Logger.getLogger(MediacenterServiceImpl.class);
 
     ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
@@ -61,12 +62,15 @@ public class MediacenterServiceImpl implements MediacenterService {
     SearchService searchService = serviceregistry.getSearchService();
     PermissionService permissionService = serviceregistry.getPermissionService();
     BehaviourFilter policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
+    public MediacenterServiceImpl() {
+
+    }
 
     @NotNull
     public static String getAuthorityScope(String mediacenter) throws Exception {
-        String authorityScope = MediacenterServiceFactory.getLocalService().getMediacenterAdminGroup(mediacenter);
+        String authorityScope = MediacenterServiceFactory.getLocalService().getMediacenterProxyGroup(mediacenter);
         if(authorityScope == null){
-            throw new Exception("No mediacenter admin group found.");
+            throw new Exception("No mediacenter proxy group found.");
         }
         return authorityScope;
     }
@@ -616,13 +620,7 @@ public class MediacenterServiceImpl implements MediacenterService {
         List<String> allMediacenterIds = getAllMediacenterIds();
         logger.info("cache mediacenter nodes");
 
-        Repository repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
-        String impFolderId = null;
-        for(ChildAssociationRef ref : nodeService.getChildAssocs(repositoryHelper.getCompanyHome())){
-            if(OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS.equals(nodeService.getProperty(ref.getChildRef(),ContentModel.PROP_NAME))){
-                impFolderId = ref.getChildRef().getId();
-            }
-        }
+        String impFolderId = getPersistentHandlerEdusharing().getImportFolderId();
         if(impFolderId == null){
             logger.error("no imported objects folder found");
             return;
@@ -707,6 +705,20 @@ public class MediacenterServiceImpl implements MediacenterService {
             }
             return null;
         });
+    }
+
+    private PersistentHandlerEdusharing getPersistentHandlerEdusharing() {
+        if(persistentHandlerEdusharing != null) {
+            return persistentHandlerEdusharing;
+        }
+        persistentHandlerEdusharing = AuthenticationUtil.runAsSystem(() -> {
+            try {
+                return new PersistentHandlerEdusharing(null,null,false);
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        });
+        return persistentHandlerEdusharing;
     }
 
     @Override
@@ -810,7 +822,7 @@ public class MediacenterServiceImpl implements MediacenterService {
                     permissionService.setPermission(nodeRef, mediacenterAdminGroup, CCConstants.PERMISSION_CONSUMER, true);
                 }
 
-               fixMediacenterStatus(nodeRef,mediacenterGroupName,false);
+                fixMediacenterStatus(nodeRef,mediacenterGroupName,false);
             }
         }
     }
@@ -856,7 +868,11 @@ public class MediacenterServiceImpl implements MediacenterService {
     }
 
     private NodeRef getNodeRefByReplicationSourceId(String replicationSourceId){
-        NodeRef nodeRef =  CMISSearchHelper.getNodeRefByReplicationSourceId(replicationSourceId);
+        NodeRef nodeRef = getPersistentHandlerEdusharing().getNodeIfExists(new HashMap<String, Object>() {
+            {
+                put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID, replicationSourceId);
+            }}
+        );
 
         if(nodeRef == null){
             logger.info("creating dummy object for:"+replicationSourceId);
@@ -866,8 +882,8 @@ public class MediacenterServiceImpl implements MediacenterService {
             properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID,replicationSourceId);
             properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,MediacenterLicenseProviderFactory.getMediacenterLicenseProvider().getCatalogId());
             properties.put(CCConstants.CCM_PROP_IO_TECHNICAL_STATE,"problem_notAvailable");
-              try {
-                String nodeId = new PersistentHandlerEdusharing(null,null,false).safe(new RecordHandlerInterfaceBase() {
+            try {
+                String nodeId = getPersistentHandlerEdusharing().safe(new RecordHandlerInterfaceBase() {
                     @Override
                     public HashMap<String, Object> getProperties() {
                         return properties;
@@ -910,25 +926,19 @@ public class MediacenterServiceImpl implements MediacenterService {
         }
     }
     @Override
-    public List<org.edu_sharing.service.model.NodeRef> getAllLicensedNodes(String mediacenter) throws Throwable {
+    public List<org.edu_sharing.service.model.NodeRef> getAllLicensedNodes(String mediacenter, Map<String, String[]> criteria, SortDefinition sortDefinition) throws Throwable {
         List<org.edu_sharing.service.model.NodeRef> data = new ArrayList<>();
-        boolean hasMore = true;
-        int pageSize = 1000;
-        int page = 0;
         SearchToken searchToken = new SearchToken();
         searchToken.setAuthorityScope(Collections.singletonList(getAuthorityScope(mediacenter)));
         searchToken.setFacets(new ArrayList<>());
-        searchToken.setMaxResult(pageSize);
-        do {
-            searchToken.setFrom(page);
-            SearchResultNodeRef search = SearchServiceFactory.getLocalService().search(MetadataHelper.getLocalDefaultMetadataset(), "mediacenter_filter", Collections.emptyMap(), searchToken);
-            page = page + pageSize;
-            if((search.getData().size() - 1) <= page){
-                hasMore = false;
-            }
-            data.addAll(search.getData());
-        }while (hasMore);
-        logger.info("result:" + data.size());
-        return data;
+        searchToken.setExcludes(Arrays.asList("preview", "collections", "children"));
+        if(sortDefinition != null) {
+            searchToken.setSortDefinition(sortDefinition);
+        }
+        if(SearchServiceFactory.getLocalService() instanceof SearchServiceElastic) {
+            return ((SearchServiceElastic) SearchServiceFactory.getLocalService()).searchAll(MetadataHelper.getLocalDefaultMetadataset(), "mediacenter_filter", criteria, searchToken);
+        } else {
+            throw new RuntimeException("getAllLicensedNodes requires Elasticsearch");
+        }
     }
 }

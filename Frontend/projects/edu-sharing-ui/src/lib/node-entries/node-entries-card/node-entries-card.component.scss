@@ -12,7 +12,7 @@ $collectionIconSize: 40px;
     .card-meta {
         .card-meta-row {
             > es-list-base {
-                @include limitLineCount(2, 1.25);
+                @include limitLineCount(2, $cardLineHeight);
             }
         }
     }

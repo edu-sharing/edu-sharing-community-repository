@@ -30,6 +30,11 @@ type LoginAction =
           scope?: string;
       }
     | {
+          // Logs the user in with the provided credentials.
+          kind: 'loginToken';
+          accessToken: string;
+      }
+    | {
           // Logs the user out.
           kind: 'logout';
       }
@@ -136,6 +141,13 @@ export class AuthenticationService {
             username,
             password,
             scope,
+        });
+        return this.loginInfo$.pipe(first());
+    }
+    loginToken(accessToken: string): Observable<LoginInfo> {
+        this.loginActionTrigger.next({
+            kind: 'loginToken',
+            accessToken,
         });
         return this.loginInfo$.pipe(first());
     }
@@ -358,6 +370,8 @@ export class AuthenticationService {
                 } else {
                     return this.loginWithBasicAuth(action.username, action.password);
                 }
+            case 'loginToken':
+                return this.loginWithToken(action.accessToken);
             case 'logout':
                 return this.authentication.logout().pipe(switchMap(() => this.fetchLoginInfo()));
             case 'initial':
@@ -379,6 +393,14 @@ export class AuthenticationService {
             tap(() =>
                 this.apiRequestConfiguration.setBasicAuthForNextRequest({ username, password }),
             ),
+            switchMap(() => this.authentication.login()),
+        );
+    }
+    private loginWithToken(accessToken: string): Observable<LoginInfo> {
+        return rxjs.of(void 0).pipe(
+            // Make `setBasicAuthForNextRequest` part of the observable, so it is guaranteed to
+            // be run together with the login request.
+            tap(() => this.apiRequestConfiguration.setBearerAuthForNextRequest(accessToken)),
             switchMap(() => this.authentication.login()),
         );
     }

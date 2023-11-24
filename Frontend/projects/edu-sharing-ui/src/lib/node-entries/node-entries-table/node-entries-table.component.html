@@ -10,7 +10,7 @@
   aria-hidden="true"
 ></button>
 <es-node-entries-global-options
-  *ngIf="entriesService.globalOptions?.length"
+  *ngIf="(entriesService.globalOptionsSubject | async)?.length"
   [displayType]="NodeEntriesDisplayType.Table"
 >
 </es-node-entries-global-options>
@@ -33,6 +33,7 @@
           entriesService.selection.selected.length !== entriesService.dataSource.getData().length
         "
         (ngModelChange)="toggleAll($event)"
+        color="primary"
         aria-label="{{ 'LIST_TABLE.TOGGLE_ALL' | translate }}"
       ></mat-checkbox>
     </mat-header-cell>
@@ -41,6 +42,7 @@
         [checked]="entriesService.selection.isSelected(node)"
         (change)="entriesService.onCheckboxChanged(node, $event.checked)"
         aria-label="{{ 'SELECT' | translate : { element: (node | nodeTitle) } }}"
+        color="primary"
       ></mat-checkbox>
     </mat-cell>
   </ng-container>
@@ -182,7 +184,7 @@
     matRipple
     cdkDrag
     esNodesDrag
-    [cdkDragDisabled]="!entriesService.dragDrop?.dragAllowed || ui.isMobile()"
+    [cdkDragDisabled]="!entriesService.dragDrop?.dragAllowed || (ui.isTouchSubject | async)"
     [cdkDragData]="getDragData(node)"
     (cdkDragStarted)="onDragStarted(node)"
     (cdkDragEnded)="onDragEnded()"

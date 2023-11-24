@@ -8,7 +8,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { Subject } from 'rxjs';
+import { combineLatest, Subject } from 'rxjs';
 import {
     ColorHelper,
     LocalEventsService,
@@ -35,6 +35,7 @@ import {
     RestHelper,
     RestIamService,
     RestMediacenterService,
+    RestNetworkService,
     RestNodeService,
     TemporaryStorageService,
     UIService,
@@ -162,13 +163,19 @@ export class CollectionsMainComponent implements OnDestroy {
         private router: Router,
         private tempStorage: TemporaryStorageService,
         private optionsService: OptionsHelperDataService,
+        private networkService: RestNetworkService,
+        private temporaryStorageService: TemporaryStorageService,
         private toast: Toast,
         private translations: TranslationsService,
         private uiService: UIService,
     ) {
         this.translations.waitForInit().subscribe(() => {
-            this.connector.isLoggedIn().subscribe(
-                (data: LoginResult) => {
+            combineLatest([
+                this.connector.isLoggedIn(),
+                // FIXME: The sub components should be obserable-aware!
+                this.networkService.getRepositories(),
+            ]).subscribe(
+                ([data]) => {
                     if (data.isValidLogin && data.currentScope == null) {
                         this.isGuest = data.isGuest;
                         this.mediacenterService.getMediacenters().subscribe((mediacenters) => {

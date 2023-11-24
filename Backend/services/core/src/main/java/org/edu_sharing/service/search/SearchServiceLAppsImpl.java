@@ -101,9 +101,7 @@ public class SearchServiceLAppsImpl extends SearchServiceAdapter{
 		Integer nc = lAppNode.getLength();
 		SearchResultNodeRef searchResultNodeRef = new SearchResultNodeRef();
 		List<NodeRef> data=new ArrayList<>();
-		searchResultNodeRef.setNodeCount(nc); //@todo
-		searchResultNodeRef.setData(data);
-		
+
 		for(int i=0;i<lAppNode.getLength();i++){
 			
 			Node node = lAppNode.item(i);
@@ -118,7 +116,8 @@ public class SearchServiceLAppsImpl extends SearchServiceAdapter{
 					
 			data.add(ref);
 		}
-		
+		searchResultNodeRef.setNodeCount(data.size());
+		searchResultNodeRef.setData(data);
 		return searchResultNodeRef;
 	}
 	
@@ -177,8 +176,20 @@ public class SearchServiceLAppsImpl extends SearchServiceAdapter{
 			int page = 0;
 			String uri="&search="+URLEncoder.encodeUriComponent(searchWord)+cat+edusector;
 			searchToken.setQueryString(uri);
-			return searchLApps(repositoryId,APIKey,uri);
-			
+			SearchResultNodeRef result = searchLApps(repositoryId, APIKey, uri);
+			if(result.getData() != null) {
+				if(searchToken.getFrom() < result.getData().size()) {
+					result.setData(result.getData().subList(searchToken.getFrom(), result.getData().size()));
+				}
+				int toIdx = searchToken.getMaxResult();
+				if((result.getData().size() - 1) < toIdx) {
+					result.setData(result.getData());
+				} else {
+					result.setData(result.getData().subList(0, toIdx));
+				}
+
+			}
+			return result;
 		}
 		catch (IOException e) {
 			InputStream is=connection.getErrorStream();

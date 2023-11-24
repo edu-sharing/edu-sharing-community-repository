@@ -44,6 +44,7 @@
 		<groups>
 			<group>
 				<id>ngsearch</id>
+				<rendering>angular</rendering>
 				<views>
 					<view>search</view>
 				</views>

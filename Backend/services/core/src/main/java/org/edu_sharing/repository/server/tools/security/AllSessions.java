@@ -1,5 +1,10 @@
 package org.edu_sharing.repository.server.tools.security;
 
+import org.alfresco.repo.cache.SimpleCache;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.client.rpc.User;
+import org.edu_sharing.restservices.ltiplatform.v13.model.LoginInitiationSessionObject;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +16,8 @@ import javax.servlet.http.HttpSession;
 public class AllSessions {
 	static Map<String,HttpSession> allSessions = null;
 
-	public static Map<String,HttpSession> userLTISessions = Collections.synchronizedMap(new HashMap<>());
+	public static SimpleCache<String, LoginInitiationSessionObject> userLTISessions =
+			(SimpleCache<String, LoginInitiationSessionObject>) AlfAppContextGate.getApplicationContext().getBean("eduSharingLtiSessionsCache");
 	
 	static Map<String,HttpSession>  getInstance(){
 		ReentrantReadWriteLock rw = new ReentrantReadWriteLock(); 

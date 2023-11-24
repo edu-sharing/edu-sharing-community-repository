@@ -79,7 +79,7 @@ import { OptionsHelperService } from 'src/app/core-ui-module/options-helper.serv
     selector: 'es-node-render',
     templateUrl: 'node-render.component.html',
     styleUrls: ['node-render.component.scss'],
-    providers: [OptionsHelperDataService, RenderHelperService],
+    providers: [OptionsHelperService, RenderHelperService],
     animations: [trigger('fadeFast', UIAnimation.fade(UIAnimation.ANIMATION_TIME_FAST))],
 })
 export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
@@ -394,14 +394,16 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             this.downloadCurrentNode(),
         );
         download.elementType = OptionsHelperService.DownloadElementTypes;
-        // declare explicitly so that callback will be overriden
-        download.customEnabledCallback = null;
+        // use callback since isEnabled gets ignored
+        download.customEnabledCallback = (nodes) => {
+            return (
+                this._node.downloadUrl != null &&
+                (!this._node.properties[RestConstants.CCM_PROP_IO_WWWURL] ||
+                    !RestNetworkService.isFromHomeRepo(this._node))
+            );
+        };
         download.group = DefaultGroups.View;
         download.priority = 25;
-        download.isEnabled =
-            this._node.downloadUrl != null &&
-            (!this._node.properties[RestConstants.CCM_PROP_IO_WWWURL] ||
-                !RestNetworkService.isFromHomeRepo(this._node));
         download.showAsAction = true;
         if (this.isCollectionRef()) {
             this.nodeApi
@@ -530,7 +532,10 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
 
     private downloadCurrentNode() {
         if (this.downloadUrl) {
-            this.nodeHelper.downloadUrl(this.downloadUrl);
+            this.nodeHelper.downloadUrl(this.downloadUrl, 'download', {
+                node: this._node,
+                triggerTrackingEvent: true,
+            });
         } else {
             this.nodeHelper.downloadNode(this._node, this.isChildobject ? null : this.version);
         }
@@ -609,7 +614,10 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             });
     }
     setDownloadUrl(url: string) {
-        if (this.downloadButton != null) this.downloadButton.isEnabled = url != null;
+        console.info('url from rendering', url);
+        if (this.downloadButton != null) {
+            this.downloadButton.customEnabledCallback = () => url != null;
+        }
         this.downloadUrl = url;
         this.initOptions();
     }

@@ -182,7 +182,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.columns = this.columns;
         this.entriesService.configureColumns = this.configureColumns;
         this.entriesService.checkbox = this.checkbox;
-        this.entriesService.columnsChange = this.columnsChange;
         this.entriesService.displayType = this.displayType;
         this.entriesService.elementInteractionType = this.elementInteractionType;
         this.entriesService.gridConfig = this.gridConfig;

@@ -82,6 +82,11 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             " WHERE node_uuid = ANY(?) AND time BETWEEN ? AND ? AND (ARRAY[?] <@ authority_mediacenter)" +
             " GROUP BY node_uuid, type" +
             " ORDER BY count DESC";
+
+    public static String TRACKING_STATISTICS_NODE_MEDIACENTER = "SELECT node_uuid, type,COUNT(*) :fields from edu_tracking_node as tracking" +
+            " WHERE (ARRAY[?] <@ authority_mediacenter) AND time BETWEEN ? AND ? AND ARRAY_LENGTH(authority_mediacenter, 1) = 1" +
+            " GROUP BY node_uuid, type" +
+            " ORDER BY count DESC";
     public static String TRACKING_STATISTICS_DAILY = "SELECT type,COUNT(*),TO_CHAR(time,'yyyy-mm-dd') as date :fields from :table as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY type,date :grouping" +
@@ -268,7 +273,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             while (resultSet.next()) {
                 StatisticEntry entry = new StatisticEntry();
                 boolean grouping=!type.equals(GroupingType.None);
-                mapResult(EventType.valueOf(resultSet.getString("type")), additionalFields, groupFields, resultSet, entry);
+                mapResult(EventType.valueOf(resultSet.getString("type")), additionalFields, groupFields, resultSet, entry, mediacenter);
 
                 if (result.contains(entry) && grouping) {
                     entry = result.get(result.indexOf(entry));
@@ -288,10 +293,10 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         }
     }
 
-    private void mapResult(EventType type, List<String> additionalFields, List<String> groupFields, ResultSet resultSet, StatisticEntry entry) throws SQLException {
-        setAuthorityFromResult(resultSet, entry);
+    private void mapResult(EventType type, List<String> additionalFields, List<String> groupFields, ResultSet resultSet, StatisticEntry entry, String mediacenter) throws SQLException {
+        setAuthorityFromResult(resultSet, entry, mediacenter);
         if (additionalFields != null && additionalFields.size() > 0) {
-            mapAdditionalFields(type, additionalFields, resultSet, entry);
+            mapAdditionalFields(type, additionalFields, resultSet, entry, mediacenter);
         }
         try{
             entry.setDate(resultSet.getString("date"));
@@ -305,13 +310,19 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         }
     }
 
-    private static void mapAdditionalFields(EventType type, List<String> additionalFields, ResultSet resultSet, StatisticEntry entry) throws SQLException {
+    private static void mapAdditionalFields(EventType type, List<String> additionalFields, ResultSet resultSet, StatisticEntry entry, String mediacenter) throws SQLException {
         for (String field : additionalFields) {
+
             Map<String, Map<String, Long>> current = entry.getGroups().get(type);
             if(current==null) {
                 current = new HashMap<>();
             }
             HashMap<String, Long> counted = getArrayAggToCounts((String[]) resultSet.getArray(field).getArray());
+            if(field.equals("authority_mediacenter") && mediacenter != null) {
+                counted = counted.entrySet().stream().filter(
+                        e -> mediacenter.equals(e.getKey())
+                ).collect(HashMap::new, (m,v)->m.put(v.getKey(), v.getValue()), HashMap::putAll);
+            }
             current.put(field,counted);
             entry.getGroups().put(type, current);
         }
@@ -365,7 +376,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
                     }
                 }
 
-                mapResult(EventType.valueOf(resultSet.getString("type")), additionalFields, groupFields, resultSet, entry);
+                mapResult(EventType.valueOf(resultSet.getString("type")), additionalFields, groupFields, resultSet, entry, mediacenter);
 
                 if (result.contains(entry) && grouping) {
                     entry = result.get(result.indexOf(entry));
@@ -468,7 +479,49 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
                 EventType event = EventType.valueOf(resultSet.getString("type"));
                 data.get(nodeRef).getCounts().put(event, resultSet.getInt("count"));
                 if(!additionalFields.isEmpty()) {
-                    mapAdditionalFields(event, additionalFields, resultSet, data.get(nodeRef));
+                    mapAdditionalFields(event, additionalFields, resultSet, data.get(nodeRef), mediacenter);
+                }
+            }
+            return data;
+        }catch(Throwable t){
+            throw t;
+        }finally {
+            dbAlf.cleanUp(con, statement);
+        }
+    }
+
+    @Override
+    public Map<NodeRef, StatisticEntry> getListNodeDataByMediacenter(String mediacenter, java.util.Date dateFrom,java.util.Date dateTo, List<String> additionalFields) throws Throwable{
+        ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
+        Connection con = null;
+        PreparedStatement statement = null;
+        Map<NodeRef, StatisticEntry> data = new HashMap<>();
+        try {
+            con = dbAlf.getConnection();
+            String query = TRACKING_STATISTICS_NODE_MEDIACENTER;
+            String fields = "";
+            if(!additionalFields.isEmpty()) {
+                fields = "," + StringUtils.join(additionalFields.stream().map(f -> "ARRAY_AGG(" + makeDbField(f, true) + ") as " + f).collect(Collectors.toList()), ",");
+            }
+            query = query.replace(":fields", fields);
+            statement=con.prepareStatement(query);
+            int index=1;
+            statement.setString(index++,mediacenter);
+            if(dateFrom==null)
+                dateFrom = new java.util.Date(0);
+            statement.setTimestamp(index++, Timestamp.valueOf(dateFrom.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
+            if(dateTo==null)
+                dateTo = new java.util.Date();
+            statement.setTimestamp(index++, Timestamp.valueOf(dateTo.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
+
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, resultSet.getString("node_uuid"));
+                EventType event = EventType.valueOf(resultSet.getString("type"));
+                data.put(nodeRef, new StatisticEntry());
+                data.get(nodeRef).getCounts().put(event, resultSet.getInt("count"));
+                if(!additionalFields.isEmpty()) {
+                    mapAdditionalFields(event, additionalFields, resultSet, data.get(nodeRef), mediacenter);
                 }
             }
             return data;
@@ -513,7 +566,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         });
     }
 
-    private void setAuthorityFromResult(ResultSet resultSet, StatisticEntry entry) throws SQLException {
+    private void setAuthorityFromResult(ResultSet resultSet, StatisticEntry entry, String mediacenter) throws SQLException {
         try {
             entry.getAuthorityInfo().setAuthority(resultSet.getString("authority"));
         }catch(PSQLException e){}
@@ -526,7 +579,12 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         try{
             Array mediacenters = resultSet.getArray("authority_mediacenter");
             if (mediacenters != null) {
-                entry.getAuthorityInfo().setMediacenters((String[]) mediacenters.getArray());
+                if(mediacenter != null) {
+                    // filter only for the current mediacenter
+                    entry.getAuthorityInfo().setMediacenters(Arrays.stream((String[]) mediacenters.getArray()).filter(mediacenter::equals).toArray(String[]::new));
+                } else {
+                    entry.getAuthorityInfo().setMediacenters((String[]) mediacenters.getArray());
+                }
             }
         }catch(PSQLException e){}
     }

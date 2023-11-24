@@ -33,6 +33,7 @@ import {
     Authority,
     CacheInfo,
     ConfigurationService,
+    DialogButton,
     JobDescription,
     LoginResult,
     Node,
@@ -78,6 +79,10 @@ type LuceneData = {
     exportFormat?: 'json' | 'csv';
 };
 
+type Job = {
+    jobName: string;
+};
+
 @Component({
     selector: 'es-admin-main',
     templateUrl: 'admin.component.html',
@@ -93,6 +98,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     @ViewChild('actionbarComponent') actionbarComponent: ActionbarComponent;
     @ViewChild('keyValueTable') keyValueTable: TemplateRef<undefined>;
     elasticResponse: NodeListElastic;
+    cancelJobInfo: Job;
 
     constructor(
         private about: AboutService,
@@ -126,10 +132,14 @@ export class AdminComponent implements OnInit, OnDestroy {
             this.getTemplates();
             this.connector.isLoggedIn().subscribe((data: LoginResult) => {
                 this.loginResult = data;
-                this.mediacenterService.getMediacenters().subscribe((mediacenters) => {
-                    this.mediacenters = mediacenters;
+                if (data.isAdmin) {
                     this.init();
-                });
+                } else {
+                    this.mediacenterService.getMediacenters().subscribe((mediacenters) => {
+                        this.mediacenters = mediacenters;
+                        this.init();
+                    });
+                }
             });
         });
     }
@@ -164,7 +174,7 @@ export class AdminComponent implements OnInit, OnDestroy {
         class?: string;
         object?: JobDescription;
     } = {};
-    public jobs: any;
+    public jobs: any[] = [];
     public jobsOpen: boolean[] = [];
     public jobsLogFilter: any = [];
     public jobsLogLevel: any = [];
@@ -237,6 +247,22 @@ export class AdminComponent implements OnInit, OnDestroy {
     ownAppMode = 'repository';
     authenticateAuthority: Authority;
     private readonly onDestroyTasks: Array<() => void> = [];
+    cancelJobButtons = DialogButton.getYesNo(
+        () => (this.cancelJobInfo = null),
+        () => {
+            this.cancelJobFinally();
+        },
+    );
+    private _jobForceCancel = false;
+
+    get jobForceCancel(): boolean {
+        return this._jobForceCancel ?? false;
+    }
+
+    set jobForceCancel(value: boolean) {
+        this._jobForceCancel = value;
+        this.cancelJobButtons[1].color = this._jobForceCancel ? 'danger' : 'primary';
+    }
 
     ngOnInit(): void {
         this.mainNav.setMainNavConfig({
@@ -956,30 +982,28 @@ export class AdminComponent implements OnInit, OnDestroy {
         if (log.length <= 200) return log;
         return log.slice(0, 200);
     }
-    async cancelJob(job: any) {
-        const dialogRef = await this.dialogs.openGenericDialog({
-            title: 'ADMIN.JOBS.CANCEL_TITLE',
-            message: 'ADMIN.JOBS.CANCEL_MESSAGE',
-            buttons: YES_OR_NO,
-        });
-        dialogRef.afterClosed().subscribe((result) => {
-            if (result === 'YES') {
-                this.globalProgress = true;
-                this.admin.cancelJob(job.jobDetail.name).subscribe(
-                    () => {
-                        this.toast.toast('ADMIN.JOBS.TOAST_CANCELED');
-                        this.globalProgress = false;
-                    },
-                    (error) => {
-                        this.toast.error(error);
-                        this.globalProgress = false;
-                    },
-                );
-            }
-        });
+    cancelJob(job: Job) {
+        this.cancelJobInfo = job;
+    }
+    cancelJobFinally() {
+        const jobInfo = this.cancelJobInfo;
+        this.cancelJobInfo = null;
+        this.admin.cancelJob(jobInfo.jobName, this.jobForceCancel).subscribe(
+            () => {
+                this.toast.toast('ADMIN.JOBS.TOAST_CANCELED');
+                this.globalProgress = false;
+            },
+            (error) => {
+                this.toast.error(error);
+                this.globalProgress = false;
+            },
+        );
     }
     reloadJobStatus() {
         this.admin.getJobs().subscribe((jobs) => {
+            if (!jobs) {
+                this.jobs = null;
+            }
             this.jobs = jobs.filter((j: any) => !!j);
             this.updateJobLogs();
         });
@@ -1357,7 +1381,7 @@ export class AdminComponent implements OnInit, OnDestroy {
         }
         if (
             this.loginResult.isAdmin ||
-            this.mediacenters.filter((mc) => mc.administrationAccess).length
+            this.mediacenters?.filter((mc) => mc.administrationAccess).length
         ) {
             this.buttons.splice(3, 0, {
                 id: 'MEDIACENTER',
@@ -1537,6 +1561,9 @@ export class AdminComponent implements OnInit, OnDestroy {
             }
             data[param.name] =
                 param.type === 'boolean' ? param.sampleValue === 'true' : param.sampleValue ?? '';
+            if (param.type?.includes('Integer') && data[param.name] === '') {
+                data[param.name] = null;
+            }
             if (param.values) {
                 data[param.name] = param.values.map((v) => v.name).join('|');
             }

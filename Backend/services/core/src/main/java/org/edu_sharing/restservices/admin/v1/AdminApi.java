@@ -325,9 +325,11 @@ public class AdminApi {
 			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response cancelJob(@Context HttpServletRequest req,
-							  @PathParam("job") String name) {
+							  @PathParam("job") String name,
+							  @QueryParam("force") boolean force
+							  ) {
 		try {
-			AdminServiceFactory.getInstance().cancelJob(name);
+			AdminServiceFactory.getInstance().cancelJob(name, force);
 			return Response.ok().build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
@@ -863,6 +865,7 @@ public class AdminApi {
 
 	@POST
 	@Path("/import/oai/xml")
+	@Consumes({ "multipart/form-data" })
 	@Operation(summary = "Import single xml via oai (for testing)")
 	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Node.class))),
 			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -1579,7 +1582,7 @@ public class AdminApi {
 			String content=AdminServiceFactory.getInstance().getConfigFile(filename, pathPrefix);
 			return Response.ok().entity(content).build();
 		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
+			return ErrorResponse.createResponse(DAOException.mapping(t));
 		}
 	}
 

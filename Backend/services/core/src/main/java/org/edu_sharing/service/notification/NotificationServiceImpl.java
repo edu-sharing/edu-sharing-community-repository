@@ -60,6 +60,17 @@ public class NotificationServiceImpl implements NotificationService {
         replace.put("link", URLTool.getNgRenderNodeUrl(nodeId, null, true));
         replace.put("link.static", URLTool.getNgRenderNodeUrl(nodeId, null, false));
         MailTemplate.applyNodePropertiesToMap("node.", properties, replace);
+
+		if(Context.getCurrentInstance() != null && Context.getCurrentInstance().getRequest() != null) {
+			// add request headers to evaluate in template (i.e. user-agent)
+			replace.putAll(
+					Collections.list(Context.getCurrentInstance().getRequest().getHeaderNames()).stream().collect(
+							HashMap::new,
+							(m, entry) -> m.put("request." + entry, Context.getCurrentInstance().getRequest().getHeader(entry)),
+							HashMap::putAll
+					)
+			);
+		}
         try {
             HashMap<String, Object> userProps = NodeServiceHelper.getProperties(AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(AuthenticationUtil.getFullyAuthenticatedUser()));
             MailTemplate.applyNodePropertiesToMap("user.", userProps, replace);

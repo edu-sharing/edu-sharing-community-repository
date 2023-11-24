@@ -283,7 +283,10 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
                     );
                     this.mediacenterService.getMediacenters().subscribe((mediacenters) => {
                         this.createMediacenter =
-                            mediacenters.filter((m) => m.administrationAccess).length === 1;
+                            mediacenters.filter((m) => m.administrationAccess).length === 1 &&
+                            this.connector.hasToolPermissionInstant(
+                                RestConstants.TOOLPERMISSION_INVITE,
+                            );
                         if (this.createMediacenter) this.mediacenter = mediacenters[0];
                     });
                     this.authorFreetextAllowed = this.connector.hasToolPermissionInstant(
@@ -582,9 +585,15 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         if (this.imageData != null) {
             this.collectionService
                 .uploadCollectionImage(collection.ref.id, this.imageFile, 'image/png')
-                .subscribe(() => {
-                    this.navigateToCollectionId(collection.ref.id);
-                });
+                .subscribe(
+                    () => {
+                        this.navigateToCollectionId(collection.ref.id);
+                    },
+                    (error) => {
+                        this.toast.error(null, 'COLLECTIONS.TOAST.ERROR_IMAGE_APPLY');
+                        this.navigateToCollectionId(collection.ref.id);
+                    },
+                );
         } else if (collection.preview == null) {
             this.collectionService.deleteCollectionImage(collection.ref.id).subscribe(() => {
                 this.navigateToCollectionId(collection.ref.id);

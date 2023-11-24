@@ -300,18 +300,27 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         }
         const constraintViolation = this.violatesConstraints(WidgetComponent.constraints);
         if (constraintViolation) {
-            UIHelper.injectAngularComponent(
-                this.factoryResolver,
-                this.containerRef,
-                MdsEditorWidgetErrorComponent,
-                element,
-                {
-                    widgetName,
-                    reason: constraintViolation,
-                },
-                { replace: false },
-                this.injector,
-            );
+            if (
+                !WidgetComponent.constraints.onConstrainFails ||
+                WidgetComponent.constraints.onConstrainFails === 'showError'
+            ) {
+                UIHelper.injectAngularComponent(
+                    this.factoryResolver,
+                    this.containerRef,
+                    MdsEditorWidgetErrorComponent,
+                    element,
+                    {
+                        widgetName,
+                        reason: constraintViolation,
+                    },
+                    { replace: false },
+                    this.injector,
+                );
+            } else {
+                console.info(
+                    'Widget ' + widgetName + ' violates constrain: ' + constraintViolation,
+                );
+            }
             return;
         }
         this.ngZone.runOutsideAngular(() => {

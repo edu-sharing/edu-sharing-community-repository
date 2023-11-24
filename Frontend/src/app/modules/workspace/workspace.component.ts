@@ -23,7 +23,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { delay, first } from 'rxjs/operators';
+import { delay, first, map, takeUntil } from 'rxjs/operators';
 import {
     ConfigurationService,
     Connector,
@@ -52,7 +52,6 @@ import { Toast } from '../../core-ui-module/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config';
 import { OK } from '../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
-import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import {
@@ -63,6 +62,7 @@ import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcru
 import { WorkspaceExplorerComponent } from './explorer/explorer.component';
 import { WorkspaceTreeComponent } from './tree/tree.component';
 import { canDragDrop, canDropOnNode } from './workspace-utils';
+import { UserService } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-workspace-main',
@@ -169,6 +169,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
 
     constructor(
         private toast: Toast,
+        private userService: UserService,
         private route: ActivatedRoute,
         private router: Router,
         private nodeHelper: NodeHelperService,
@@ -412,15 +413,24 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     }
 
     private async initialize() {
+        this.route.params
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((routeParams: Params) => this.handleParamsUpdate(routeParams));
+        this.route.queryParams
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((params: Params) => this.handleQueryParamsUpdate(params));
+    }
+    private async initUser() {
         try {
-            this.user = await this.iam.getCurrentUserAsync();
+            // wait until a valid user is present (issues after app login otherwise)
+            this.user = await this.userService
+                .observeCurrentUser()
+                .pipe(first(notNull), map(mapVCard))
+                .toPromise();
         } catch (e) {
             this.toast.error(e);
             return;
         }
-
-        this.route.params.subscribe((routeParams: Params) => this.handleParamsUpdate(routeParams));
-        this.route.queryParams.subscribe((params: Params) => this.handleQueryParamsUpdate(params));
     }
 
     private async handleParamsUpdate(routeParams: Params) {
@@ -457,6 +467,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             return;
         }
         await this.prepareActionbar();
+        await this.initUser();
         this.loadFolders(this.user);
 
         this.connector.scope = this.isSafe ? RestConstants.SAFE_SCOPE : null;
@@ -695,24 +706,29 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             }
         } else {
             this.selectedNodeTree = id;
-            this.node.getNodeParents(id, false, [RestConstants.ALL]).subscribe(
-                (data: NodeList) => {
-                    if (this.root === 'RECYCLE') {
+            if (id === RestConstants.USERHOME) {
+                this.selectedNodeTree = null;
+                this.path = [];
+            } else {
+                this.node.getNodeParents(id, false, [RestConstants.ALL]).subscribe(
+                    (data: NodeList) => {
+                        if (this.root === 'RECYCLE') {
+                            this.path = [];
+                            this.breadcrumbsService.setNodePath(this.path);
+                            this.createAllowed = false;
+                        } else {
+                            this.path = data.nodes.reverse();
+                            this.breadcrumbsService.setNodePath(this.path);
+                        }
+                        this.selectedNodeTree = null;
+                    },
+                    (error: any) => {
+                        this.selectedNodeTree = null;
                         this.path = [];
                         this.breadcrumbsService.setNodePath(this.path);
-                        this.createAllowed = false;
-                    } else {
-                        this.path = data.nodes.reverse();
-                        this.breadcrumbsService.setNodePath(this.path);
-                    }
-                    this.selectedNodeTree = null;
-                },
-                (error: any) => {
-                    this.selectedNodeTree = null;
-                    this.path = [];
-                    this.breadcrumbsService.setNodePath(this.path);
-                },
-            );
+                    },
+                );
+            }
         }
         if (this.currentFolder?.ref.id !== id) {
             this.currentFolder = null;
@@ -793,7 +809,6 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     }
 
     openBreadcrumb(position: number) {
-        console.log(position);
         this.searchQuery = null;
         if (position > 0) {
             // handled automatically via routing

@@ -3,7 +3,6 @@ package org.edu_sharing.service.admin;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +28,7 @@ public interface AdminService {
 
     List<JobInfo> getJobs() throws Throwable;
 
-	void cancelJob(String jobName) throws Throwable;
+	void cancelJob(String jobName, boolean force) throws Throwable;
 
 	void refreshApplicationInfo();
 

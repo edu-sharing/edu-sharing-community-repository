@@ -82,13 +82,7 @@ import { MdsNodeRelationsWidgetComponent } from '../common/ui/node-render/node-r
         MatSortModule,
         OverlayModule,
     ],
-    providers: [
-        Toast,
-        ErrorProcessingService,
-        NodeHelperService,
-        RenderHelperService,
-        OptionsHelperService,
-    ],
+    providers: [Toast, ErrorProcessingService, NodeHelperService, OptionsHelperService],
     exports: [
         SharedModule,
         ListOptionItemComponent,

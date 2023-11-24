@@ -44,6 +44,9 @@ public class CCConstants {
 	 */
 	public final static String DOWNLOADURL = "DownloadURL";
 
+
+	public final static String CCREP_PROTOCOL = "ccrep://";
+
 	/**
 	 * will be used when there is an Alfresco content
 	 */
@@ -1962,14 +1965,16 @@ public class CCConstants {
 	 * Permissions allowed if the node was opened via usage (lms) or signature
 	 * @return
 	 */
-	public static ArrayList<String> getUsagePermissions(){
+	public static synchronized ArrayList<String> getUsagePermissions(){
 		if(usagePermissions == null){
-			usagePermissions = new ArrayList<>();
-			usagePermissions.add(PERMISSION_READ);
-			usagePermissions.add(PERMISSION_READ_PREVIEW);
-			usagePermissions.add(PERMISSION_READ_ALL);
-			usagePermissions.add(PERMISSION_CONSUMER);
-			usagePermissions.add(PERMISSION_COMMENT);
+				usagePermissions = new ArrayList<>();
+				usagePermissions.add(PERMISSION_READ);
+				usagePermissions.add(PERMISSION_READ_PREVIEW);
+				usagePermissions.add(PERMISSION_READ_ALL);
+				usagePermissions.add(PERMISSION_CONSUMER);
+				usagePermissions.add(PERMISSION_COMMENT);
+				usagePermissions.add(PERMISSION_RATE);
+				usagePermissions.add(PERMISSION_RATE_READ);
 		}
 		return usagePermissions;
 	}

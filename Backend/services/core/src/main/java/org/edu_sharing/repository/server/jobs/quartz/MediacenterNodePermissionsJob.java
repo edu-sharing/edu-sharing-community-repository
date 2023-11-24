@@ -1,51 +1,27 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
-import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.SearchParameters;
-import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.security.AccessPermission;
-import org.alfresco.service.cmr.security.AuthorityService;
-import org.alfresco.service.cmr.security.AuthorityType;
-import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.namespace.QName;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
-import org.edu_sharing.repository.server.tools.HttpException;
-import org.edu_sharing.repository.server.tools.HttpQueryTool;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.springframework.context.ApplicationContext;
 
-public class MediacenterNodePermissionsJob extends AbstractJob implements JobClusterLocker.ClusterSingelton{
-	
+import java.text.ParseException;
+import java.util.Date;
+
+@JobDescription(description = "Sync permissions for imported objects based on a custom implementation of a MediacenterLicenseProvider")
+public class MediacenterNodePermissionsJob extends AbstractInterruptableJob implements JobClusterLocker.ClusterSingelton{
+
+	@JobFieldDescription(description = "Period in days to look back for license changes, empty value for full refresh")
+	Integer period_in_days;
+
 	Logger logger = Logger.getLogger(MediacenterNodePermissionsJob.class);
 	
 	@Override
-	public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+	public void executeInterruptable(JobExecutionContext jobExecutionContext) throws JobExecutionException {
 
 		JobDataMap jobDataMap = jobExecutionContext.getJobDetail().getJobDataMap();
 
@@ -54,16 +30,13 @@ public class MediacenterNodePermissionsJob extends AbstractJob implements JobClu
 		try {
 			fromLocal = OAIConst.DATE_FORMAT.parse((String)jobDataMap.get(OAIConst.PARAM_FROM));
 			untilLocal = OAIConst.DATE_FORMAT.parse((String)jobDataMap.get(OAIConst.PARAM_UNTIL));
-		} catch (ParseException e) {
-			logger.error(e.getMessage());
-		}catch (NullPointerException e){
-			logger.error(e.getMessage());
+		} catch (ParseException|NullPointerException e) {
+			logger.info(OAIConst.PARAM_FROM + " and " + OAIConst.PARAM_UNTIL + " was not set or could not be parsed and will be ignored: " + e.getMessage());
 		}
 
 		if(fromLocal == null && untilLocal == null){
-			String periodInDaysStr = (String)jobDataMap.get(OAIConst.PARAM_PERIOD_IN_DAYS);
-			if(periodInDaysStr != null && !periodInDaysStr.trim().equals("")) {
-				Long periodInDays = new Long(periodInDaysStr);
+			if(period_in_days != null) {
+				Long periodInDays = new Long(period_in_days);
 				Long periodInMs = periodInDays * 24 * 60 * 60 * 1000;
 				untilLocal = new Date();
 				fromLocal = new Date((untilLocal.getTime() - periodInMs));

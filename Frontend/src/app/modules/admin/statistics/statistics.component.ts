@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Node, NodeStatistics, Statistics } from '../../../core-module/rest/data-object';
-import { ListItem, UIAnimation } from 'ngx-edu-sharing-ui';
+import { ListItem, Scope, UIAnimation } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { ConfigurationService } from '../../../core-module/rest/services/configuration.service';
@@ -49,6 +49,7 @@ type GroupTemplate = {
     ],
 })
 export class AdminStatisticsComponent implements OnInit {
+    readonly Scope = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     @ViewChild('groupedChart') groupedChartRef: ElementRef;
@@ -738,10 +739,14 @@ export class AdminStatisticsComponent implements OnInit {
         let csvHeadersTranslated: string[];
         let csvHeadersMapping: string[];
         let csvData: any;
+        let from: Date;
+        let to: Date;
         // node export
         switch (this.currentTab) {
             // chart per day/month/year data
             case 0: {
+                from = this.groupedStart;
+                to = this.groupedEnd;
                 if (this.groupedChartData.node) {
                     // map the headings for the file
                     const data = (this.groupedChartData.node as any).concat(
@@ -778,6 +783,8 @@ export class AdminStatisticsComponent implements OnInit {
             }
             case 1: {
                 // grouped / folded data
+                from = this.customGroupStart;
+                to = this.customGroupEnd;
                 csvHeadersMapping = this.customGroupRows.map((h) => {
                     return this.customGroupLabels?.[h] || h;
                 });
@@ -800,6 +807,8 @@ export class AdminStatisticsComponent implements OnInit {
                 break;
             }
             case 2: {
+                from = this.nodesStart;
+                to = this.nodesEnd;
                 // counts by node including custom properties
                 const properties = this.exportProperties.split('\n').map((e) => e.trim());
                 this.storage.set('admin_statistics_properties', this.exportProperties);
@@ -827,7 +836,10 @@ export class AdminStatisticsComponent implements OnInit {
                 });
                 break;
             }
-            case 3: {
+            // was single, but is removed for now
+            case undefined: {
+                from = this.singleStart;
+                to = this.singleEnd;
                 csvHeadersMapping = this.singleDataRows;
                 csvHeadersTranslated = this.singleDataRows.map((s) =>
                     this.translate.instant('ADMIN.STATISTICS.HEADERS.' + s),
@@ -855,7 +867,20 @@ export class AdminStatisticsComponent implements OnInit {
             }
         }
         CsvHelper.download(
-            this.translate.instant('ADMIN.STATISTICS.CSV_FILENAME'),
+            this.translate.instant(
+                'ADMIN.STATISTICS.CSV_FILENAME' + (this.getMediacenter() ? '_MZ' : ''),
+                {
+                    mz: this._mediacenter?.profile?.displayName,
+                    from: new FormatDatePipe(this.translate).transform(from, {
+                        relative: false,
+                        time: false,
+                    }),
+                    to: new FormatDatePipe(this.translate).transform(to, {
+                        relative: false,
+                        time: false,
+                    }),
+                },
+            ),
             csvHeadersTranslated,
             csvData,
             csvHeadersMapping,

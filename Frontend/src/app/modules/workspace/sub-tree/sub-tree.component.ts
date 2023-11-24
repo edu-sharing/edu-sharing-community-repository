@@ -22,7 +22,13 @@ import {
     Scope,
     UIAnimation,
 } from 'ngx-edu-sharing-ui';
-import { Node, NodeList, RestConstants, RestNodeService } from '../../../core-module/core.module';
+import {
+    Node,
+    NodeList,
+    RestConstants,
+    RestNodeService,
+    UIService,
+} from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { canDropOnNode } from '../workspace-utils';
 
@@ -86,6 +92,7 @@ export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
         private nodeApi: RestNodeService,
         private optionsService: OptionsHelperDataService,
         private localEvents: LocalEventsService,
+        public ui: UIService,
     ) {}
 
     ngOnInit(): void {

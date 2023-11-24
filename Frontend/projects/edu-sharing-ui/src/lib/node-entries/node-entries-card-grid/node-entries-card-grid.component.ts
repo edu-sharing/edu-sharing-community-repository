@@ -15,7 +15,7 @@ import {
 import { Sort } from '@angular/material/sort';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, map, switchMap, take, takeUntil } from 'rxjs/operators';
 import { GridLayout, NodeEntriesDisplayType } from '../entries-model';
 import { ItemsCap } from '../items-cap';
@@ -28,6 +28,7 @@ import { NodeEntriesService } from '../../services/node-entries.service';
 import { UIService } from '../../services/ui.service';
 import { ListItemSort } from '../../types/list-item';
 import { DragData } from '../../types/drag-drop';
+import { CdkOverlayOrigin } from '@angular/cdk/overlay';
 
 let displayedWarnings: string[] = [];
 
@@ -46,6 +47,8 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
      */
     readonly ScrollingOffsetPercentage = 0.4;
 
+    columnChooserVisible$ = new BehaviorSubject(false);
+    @ViewChild('columnChooserTrigger') columnChooserTrigger: CdkOverlayOrigin;
     @ViewChild('gridTop', { static: true }) set gridTop(value: TemplateRef<unknown>) {
         this.registerGridTop(value);
     }
@@ -269,7 +272,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
                     new ListItemSort('NODE', RestConstants.CCM_PROP_REPLICATIONSOURCETIMESTAMP),
                 )
                 .some((c2) => c2.name === c.name);
-            if (!result) {
+            if (!result && !this.entriesService.configureColumns) {
                 const warning =
                     'Sort field ' +
                     c.name +
@@ -293,8 +296,10 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
         });
     }
 
-    getDragEnabled(): boolean {
-        return this.entriesService.dragDrop?.dragAllowed && !this.ui.isMobile();
+    getDragEnabled() {
+        return this.ui.isTouchSubject.pipe(
+            map((touch) => !touch && this.entriesService.dragDrop?.dragAllowed),
+        );
     }
 
     getDragData(node: T): T[] {
