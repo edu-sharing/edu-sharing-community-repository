@@ -133,7 +133,7 @@ public class StreamDao {
 				}
 				entry.setNodes(nodes);
 				entry.setId(contentEntry.id);
-				entry.setAuthor(new PersonDao(repoDao, contentEntry.author).asPersonSimple());
+				entry.setAuthor(new PersonDao(repoDao, contentEntry.author).asPersonSimple(false));
 				entry.setProperties(contentEntry.properties);
 				entry.setCreated((long) contentEntry.created);
 				entry.setModified((long) contentEntry.modified);

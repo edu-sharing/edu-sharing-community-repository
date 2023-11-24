@@ -270,6 +270,7 @@
     "ccm:commonlicense_key": "Lizenz",
     "ccm:collection_ordered_position": "Manuelle Sortierung",
     "ccm:educationallearningresourcetype": "Medienart",
+    "ccm:educationalintendedenduserrole": "Zielgruppe",
     "ccm:replicationsourceid": "Original-ID",
     "ccm:educationalcontext": "Bildungsbereich",
     "ccm:lifecyclecontributer_publisher": "Herausgeber{{GENDER_SEPARATOR}}in",

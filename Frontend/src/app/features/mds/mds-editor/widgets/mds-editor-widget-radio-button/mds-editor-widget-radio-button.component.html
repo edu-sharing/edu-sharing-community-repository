@@ -13,7 +13,7 @@
     [attr.aria-describedby]="container.descriptionId"
     [class]="mode"
   >
-    <mat-radio-button *ngFor="let value of values.values" [value]="value">
+    <mat-radio-button *ngFor="let value of values.values" [value]="value" color="primary">
       {{ value.label }}
     </mat-radio-button>
   </mat-radio-group>

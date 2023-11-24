@@ -294,16 +294,19 @@ public class GroupDao {
 			throw DAOException.mapping(e);
 		}
 	}
-	
 	public Group asGroup() {
+		return asGroup(true);
+	}
+	public Group asGroup(boolean resolveOrganizations) {
 		
     	Group data = new Group();
     	
     	data.setRef(getRef());
     	data.setAuthorityName(getAuthorityName());
     	data.setAuthorityType(Authority.Type.GROUP);
-
-    	data.setOrganizations(OrganizationDao.mapOrganizations(parentOrganizations));
+		if(resolveOrganizations) {
+			data.setOrganizations(OrganizationDao.mapOrganizations(parentOrganizations));
+		}
 
     	data.setGroupName(getGroupName());
 

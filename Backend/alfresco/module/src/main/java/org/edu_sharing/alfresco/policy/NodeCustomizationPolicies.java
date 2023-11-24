@@ -508,7 +508,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			 * cause aspect ccm:collection would not be present onCreate
 			 */
 			String collectionType = (String)after.get(QName.createQName(CCConstants.CCM_PROP_MAP_COLLECTIONTYPE));
-			logger.info("collectionType:" +collectionType);
+			logger.debug("collectionType:" +collectionType);
 			if(collectionType == null){
 				if(nameAfter != null && !nameAfter.equals(nameBefore)){
 					try{

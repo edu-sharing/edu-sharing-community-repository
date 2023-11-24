@@ -53,6 +53,7 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -274,6 +275,82 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return searchResultNodeRef;
     }
 
+    /**
+     * fetches all nodes with the given query using the scroll api
+     * ignores maxCount & skipCount set!
+     * Does not evaluate any suggestions or facettes, only returns nodes
+     *
+     * @param mds
+     * @param query
+     * @param criterias
+     * @param searchToken
+     * @return
+     * @throws Throwable
+     */
+    public List<NodeRef> searchAll(MetadataSet mds, String query, Map<String,String[]> criterias,
+                                   SearchToken searchToken) throws Throwable {
+        checkClient();
+        MetadataQuery queryData = mds.findQuery(query, MetadataReader.QUERY_SYNTAX_DSL);
+
+        Set<String> authorities = getUserAuthorities();
+        String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
+
+
+        SearchResultNodeRef sr = new SearchResultNodeRef();
+        List<NodeRef> data = new ArrayList<>();
+        sr.setData(data);
+
+        SearchRequest searchRequest = new SearchRequest("workspace");
+        searchRequest.scroll(TimeValue.timeValueSeconds(60));
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.fetchSource(null, searchToken.getExcludes().toArray(new String[]{}));
+        searchSourceBuilder.size(100);
+        if(searchToken.getSortDefinition() != null) {
+            searchToken.getSortDefinition().applyToSearchSourceBuilder(searchSourceBuilder);
+        }
+
+        QueryBuilder metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criterias, true);
+        QueryBuilder metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criterias, false);
+        BoolQueryBuilder queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData);
+
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+        BoolQueryBuilder filterBuilder = QueryBuilders.boolQuery().must(metadataQueryBuilderFilter).must(queryBuilderGlobalConditions);
+
+        queryBuilder = queryBuilder.filter(filterBuilder);
+        queryBuilder = queryBuilder.must(metadataQueryBuilderAsQuery);
+        searchSourceBuilder.query(queryBuilder);
+        searchRequest.source(searchSourceBuilder);
+
+        try {
+            String scrollId = null;
+            while(true) {
+                SearchResponse searchResponse;
+                if(scrollId == null) {
+                    searchResponse = client.search(searchRequest, getRequestOptions());
+                } else {
+                    SearchScrollRequest searchRequestScroll = new SearchScrollRequest(scrollId);
+                    searchRequestScroll.scroll(TimeValue.timeValueSeconds(60));
+                    searchResponse = client.scroll(searchRequestScroll, getRequestOptions());
+                }
+                scrollId = searchResponse.getScrollId();
+
+                SearchHits hits = searchResponse.getHits();
+                for (SearchHit hit : hits) {
+                    data.add(transformSearchHit(authorities, user, hit, searchToken.isResolveCollections()));
+                }
+                if(hits.getHits().length == 0) {
+                    break;
+                }
+            }
+        } catch(ElasticsearchException e) {
+            logger.error("Error running query. The query is logged below for debugging reasons");
+            logger.error(e.getMessage(), e);
+            logger.error(queryBuilder.toString());
+            throw e;
+        }
+        logger.info("result count: " + data.size());
+        return data;
+    }
     @Override
     public SearchResultNodeRef search(MetadataSet mds, String query, Map<String,String[]> criterias,
                                       SearchToken searchToken) throws Throwable {

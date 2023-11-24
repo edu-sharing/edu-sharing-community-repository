@@ -640,21 +640,21 @@ public class CollectionServiceImpl implements CollectionService{
 		collection.setChildCollectionsCount((int) serviceRegistry.getSearchService().query(params).getNumberFound());
 	}
 	@Override
-	public Collection get(String storeId, String storeProtocol, String collectionId, boolean fetchCounts) {
+	public Collection get(org.edu_sharing.service.model.NodeRef nodeRef, boolean fetchCounts) {
 		try{
-			HashMap<String,Object> props = nodeService.getProperties(storeProtocol,storeId,collectionId);
-			throwIfNotACollection(storeProtocol,storeId,collectionId);
+			HashMap<String,Object> props = nodeRef.getProperties() == null ? nodeService.getProperties(nodeRef.getStoreProtocol(),nodeRef.getStoreId(),nodeRef.getNodeId()) : nodeRef.getProperties();
+			throwIfNotACollection(nodeRef.getStoreProtocol(),nodeRef.getStoreId(),nodeRef.getNodeId());
 
 			Collection collection = asCollection(props);
 
 			// using solr to count all underlying refs recursive
 			if(fetchCounts) {
-				addCollectionCountProperties(new NodeRef(new StoreRef(storeProtocol, storeId), collectionId), collection);
+				addCollectionCountProperties(new NodeRef(new StoreRef(nodeRef.getStoreProtocol(), nodeRef.getStoreId()), nodeRef.getNodeId()), collection);
 			}
 			//collection.setChildReferencesCount(client.getChildAssociationByType(storeProtocol,storeId,collectionId, CCConstants.CCM_TYPE_IO).size());
 			//collection.setChildCollectionsCount(client.getChildAssociationByType(storeProtocol,storeId,collectionId, CCConstants.CCM_TYPE_MAP).size());
 
-			User owner = client.getOwner(storeId,storeProtocol,collectionId);
+			User owner = client.getOwner(nodeRef.getStoreId(),nodeRef.getStoreProtocol(),nodeRef.getNodeId());
 
 			String currentUser = client.getAuthenticationInfo().get(CCConstants.AUTH_USERNAME);
 			if(!currentUser.equals(owner.getUsername()) && !client.isAdmin(currentUser)){
@@ -672,8 +672,8 @@ public class CollectionServiceImpl implements CollectionService{
 
 				@Override
 				public Void doWork() throws Exception {
-					if(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.equals(new StoreRef(storeProtocol, storeId))){
-						if(Arrays.asList(client.getAspects(storeProtocol,storeId,parentId)).contains(CCConstants.CCM_ASPECT_COLLECTION)){
+					if(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.equals(new StoreRef(nodeRef.getStoreProtocol(), nodeRef.getStoreId()))){
+						if(Arrays.asList(client.getAspects(nodeRef.getStoreProtocol(), nodeRef.getStoreId(),parentId)).contains(CCConstants.CCM_ASPECT_COLLECTION)){
 							collection.setLevel0(false);
 						}else{
 							collection.setLevel0(true);
@@ -682,7 +682,7 @@ public class CollectionServiceImpl implements CollectionService{
 					return null;
 				}
 			});
-			detectAndSetCollectionScope(collectionId,collection);
+			detectAndSetCollectionScope(nodeRef,collection);
 			return collection;
 
 		} catch(Throwable e) {
@@ -691,14 +691,20 @@ public class CollectionServiceImpl implements CollectionService{
 		}
 	}
 
-	private void detectAndSetCollectionScope(String collectionId,Collection collection) {
+	private void detectAndSetCollectionScope(org.edu_sharing.service.model.NodeRef nodeRef, Collection collection) {
 		if(!CollectionDao.Scope.CUSTOM.name().equals(collection.getScope())){
 			return;
 		}
 		AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
 			@Override
 			public Void doWork() throws Exception {
-				ACL permissions = permissionService.getPermissions(collectionId);
+				if(nodeRef.getPublic() != null) {
+					 if(nodeRef.getPublic().equals(true)) {
+						 collection.setScope(CollectionDao.Scope.CUSTOM_PUBLIC.name());
+					 }
+					return null;
+				}
+				ACL permissions = permissionService.getPermissions(nodeRef.getNodeId());
 				for(ACE acl : permissions.getAces()){
 					if(acl.getAuthority().equals(CCConstants.AUTHORITY_GROUP_EVERYONE)){
 						collection.setScope(CollectionDao.Scope.CUSTOM_PUBLIC.name());

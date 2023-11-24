@@ -213,6 +213,7 @@
       {{ 'ADMIN.STATISTICS.SLICE_INFO_DOWNLOAD' | translate }}
     </es-info-message>
   </mat-tab>
+  <!--
   <mat-tab label="{{ 'ADMIN.STATISTICS.SINGLE' | translate }}" class="stats-single">
     <h4 class="mat-heading-4 mat-heading-underline">
       <i esIcon="view_headline"></i> {{ 'ADMIN.STATISTICS.SINGLE' | translate }}
@@ -301,6 +302,7 @@
       </es-info-message>
     </div>
   </mat-tab>
+  -->
   <mat-tab label="{{ 'ADMIN.STATISTICS.ARCHIVED' | translate }}" *ngIf="_mediacenter">
     <h4 class="mat-heading-4 mat-heading-underline">
       <i esIcon="archive"></i> {{ 'ADMIN.STATISTICS.ARCHIVED' | translate }}
@@ -331,7 +333,7 @@
   *ngIf="
     (currentTab === 0 && !groupedLoading) ||
     (currentTab === 1 && !customGroupLoading) ||
-    (currentTab === 3 && !singleLoading)
+    (currentTab === 2 && !singleLoading)
   "
 >
   <h4 class="mat-heading-4 mat-heading-underline">

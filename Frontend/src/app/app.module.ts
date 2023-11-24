@@ -50,6 +50,9 @@ import { AppLocationStrategy } from './router/location-strategy';
 import { RouterComponent } from './router/router.component';
 import { SharedModule } from './shared/shared.module';
 import { TranslationsModule } from './translations/translations.module';
+import { MAT_CHECKBOX_DEFAULT_OPTIONS } from '@angular/material/checkbox';
+import { MAT_RADIO_DEFAULT_OPTIONS } from '@angular/material/radio';
+import { MAT_SLIDE_TOGGLE_DEFAULT_OPTIONS } from '@angular/material/slide-toggle';
 
 // http://blog.angular-university.io/angular2-ngmodule/
 // -> Making modules more readable using the spread operator
@@ -118,6 +121,9 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         PROVIDERS,
         { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
         { provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: matTooltipDefaultOptions },
+        { provide: MAT_CHECKBOX_DEFAULT_OPTIONS, useValue: { color: 'primary' } },
+        { provide: MAT_RADIO_DEFAULT_OPTIONS, useValue: { color: 'primary' } },
+        { provide: MAT_SLIDE_TOGGLE_DEFAULT_OPTIONS, useValue: { color: 'primary' } },
         extensionProviders,
         ErrorHandlerService,
     ],

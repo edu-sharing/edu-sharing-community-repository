@@ -41,9 +41,9 @@ export class UserAvatarComponent {
      */
     @Input() icon: string;
     /**
-     * either xsmall, small, medium or large
+     * either xxsmall, xsmall, small, medium or large
      */
-    @Input() size = 'large';
+    @Input() size: 'xxsmall' | 'xsmall' | 'small' | 'medium' | 'large' = 'large';
 
     // random view id
     public id = Math.random();

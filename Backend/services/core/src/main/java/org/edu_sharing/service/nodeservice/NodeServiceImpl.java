@@ -252,6 +252,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		if(metadataSetId == null && nodeId != null) {
 			// check if the node already as a metadata set id -> in this case, skip overwriting
 			metadataSetId = (String) getPropertyNative(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
+			if("default".equals(metadataSetId)) {
+				metadataSetId = null;
+			}
 		}
 		if(metadataSetId == null) {
 			// allow to run as admin since user might don't have access to the parent ref

@@ -33,6 +33,7 @@
           entriesService.selection.selected.length !== entriesService.dataSource.getData().length
         "
         (ngModelChange)="toggleAll($event)"
+        color="primary"
         aria-label="{{ 'LIST_TABLE.TOGGLE_ALL' | translate }}"
       ></mat-checkbox>
     </mat-header-cell>
@@ -41,6 +42,7 @@
         [checked]="entriesService.selection.isSelected(node)"
         (change)="entriesService.onCheckboxChanged(node, $event.checked)"
         aria-label="{{ 'SELECT' | translate: { element: (node | nodeTitle) } }}"
+        color="primary"
       ></mat-checkbox>
     </mat-cell>
   </ng-container>

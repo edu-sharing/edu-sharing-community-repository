@@ -199,7 +199,7 @@ public class CollectionDao {
 			this.collectionId = collectionId;
 			this.nodeDao=NodeDao.getNode(repoDao, collectionId);
 
-			this.collection = unmarshalling(repoDao.getId(), collectionClient.get(nodeDao.getStoreIdentifier(),nodeDao.getStoreProtocol(),collectionId, nodeDao.fetchCounts));
+			this.collection = unmarshalling(repoDao.getId(), collectionClient.get(nodeDao.getNodeRef(), nodeDao.fetchCounts));
 			this.baseClient = repoDao.getBaseClient();
 
 		} catch (Exception e) {
@@ -216,7 +216,7 @@ public class CollectionDao {
 			this.repoDao = repoDao;
 			this.collectionId = collectionId;
 			this.nodeDao=nodeDao;
-			this.collection = unmarshalling(repoDao.getId(), collectionClient.get(nodeDao.getStoreIdentifier(),nodeDao.getStoreProtocol(),collectionId, nodeDao.fetchCounts));
+			this.collection = unmarshalling(repoDao.getId(), collectionClient.get(nodeDao.getNodeRef(), nodeDao.fetchCounts));
 			this.baseClient = repoDao.getBaseClient();
 			this.access = node.getAccess();//baseClient.hasAllPermissions(collectionId, PERMISSIONS);
 			this.preview= node.getPreview();

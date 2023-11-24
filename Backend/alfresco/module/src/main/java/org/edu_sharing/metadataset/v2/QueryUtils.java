@@ -1,14 +1,20 @@
 package org.edu_sharing.metadataset.v2;
 
+import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.ServiceRegistry;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.json.simple.JSONValue;
+import org.springframework.context.ApplicationContext;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Set;
 
 public class QueryUtils {
     private static Logger logger = Logger.getLogger(QueryUtils.class);
@@ -36,6 +42,13 @@ public class QueryUtils {
 
         query = replacer.replaceString(query,"${educontext}", NodeCustomizationPolicies.getEduSharingContext());
         query = replacer.replaceString(query, "${authority}", AuthenticationUtil.getFullyAuthenticatedUser());
+        if(query.contains("${authorities}")) {
+            ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
+            ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+            Set<String> authorities = serviceRegistry.getAuthorityService().getAuthorities();
+            authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);
+            query = replacer.replaceString(query, "${authorities}", StringUtils.join(authorities, "|"));
+        }
         return query;
     }
 

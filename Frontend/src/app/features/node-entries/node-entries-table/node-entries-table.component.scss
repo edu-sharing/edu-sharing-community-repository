@@ -22,10 +22,18 @@ $rowHeight: 58px;
             white-space: nowrap;
             text-overflow: ellipsis;
             overflow: hidden;
-            display: flex;
+            display: inline;
             width: 100%;
-            height: $rowHeight;
+            // height: $rowHeight;
+            margin: $rowHeight * 0.35 0;
             align-items: center;
+            // fix to support text ellipsis
+            > div {
+                display: inline;
+                > div {
+                    display: inline;
+                }
+            }
         }
     }
 }

@@ -95,13 +95,7 @@ import { NodeEntriesModule } from '../features/node-entries/node-entries.module'
         OverlayModule,
         ListItemsModule,
     ],
-    providers: [
-        Toast,
-        ErrorProcessingService,
-        NodeHelperService,
-        RenderHelperService,
-        OptionsHelperService,
-    ],
+    providers: [Toast, ErrorProcessingService, NodeHelperService, OptionsHelperService],
     exports: [
         SharedModule,
         ListTableComponent,
