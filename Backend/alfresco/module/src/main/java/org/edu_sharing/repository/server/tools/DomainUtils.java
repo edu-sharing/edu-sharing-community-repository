@@ -10,7 +10,7 @@ public final class DomainUtils {
 
     public static String getRootDomain(String urlString){
         if(StringUtils.isBlank(urlString)){
-            throw new IllegalArgumentException("Cannot be null or empty");
+           return null;
         }
 
         return  InternetDomainName

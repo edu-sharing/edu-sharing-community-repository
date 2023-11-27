@@ -17,7 +17,7 @@ class DomainUtilsTest {
         Assertions.assertEquals("example.co.uk", DomainUtils.getRootDomain(ukString));
 
         String nullString = null;
-        Assertions.assertThrows(IllegalArgumentException.class, () -> DomainUtils.getRootDomain(nullString));
+        Assertions.assertNull(DomainUtils.getRootDomain(nullString));
 
         String lolString = "lol, this is a malformed URL, amirite?!";
         Assertions.assertThrows(IllegalArgumentException.class, () -> DomainUtils.getRootDomain(lolString));
