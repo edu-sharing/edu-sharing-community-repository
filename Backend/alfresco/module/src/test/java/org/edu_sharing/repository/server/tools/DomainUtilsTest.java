@@ -7,19 +7,19 @@ class DomainUtilsTest {
 
     @Test
     void getRootDomain() {
-        String subdomainString = "https://my-sub.example.com/test";
+        String subdomainString = "my-sub.example.com";
         Assertions.assertEquals("example.com",  DomainUtils.getRootDomain(subdomainString));
 
-        String wwwString = "http://www.example.com/test";
+        String wwwString = "www.example.com";
         Assertions.assertEquals("example.com", DomainUtils.getRootDomain(wwwString));
 
-        String ukString = "http://www.example.co.uk/test";
+        String ukString = "www.example.co.uk";
         Assertions.assertEquals("example.co.uk", DomainUtils.getRootDomain(ukString));
 
         String nullString = null;
-        Assertions.assertNull(DomainUtils.getRootDomain(nullString));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> DomainUtils.getRootDomain(nullString));
 
         String lolString = "lol, this is a malformed URL, amirite?!";
-        Assertions.assertNull(DomainUtils.getRootDomain(lolString));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> DomainUtils.getRootDomain(lolString));
     }
 }
