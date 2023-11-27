@@ -603,9 +603,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	private String replaceDynamicVariables(String data) {
 		if(data == null) return data;
 
-		String contextDomain = (Context.getCurrentInstance() != null && Context.getCurrentInstance().getRequest() == null)
-				? null
-				: new RequestHelper(Context.getCurrentInstance().getRequest()).getServerName();
+		String contextDomain = (Context.getCurrentInstance() != null && Context.getCurrentInstance().getRequest() != null)
+				? new RequestHelper(Context.getCurrentInstance().getRequest()).getServerName()
+				: null;
 
 		String rootDomain = DomainUtils.getRootDomain(contextDomain);
 		Map<String, String> searchReplace = new HashMap<>();
