@@ -20,6 +20,6 @@ class DomainUtilsTest {
         Assertions.assertNull(DomainUtils.getRootDomain(nullString));
 
         String lolString = "lol, this is a malformed URL, amirite?!";
-        Assertions.assertThrows(IllegalArgumentException.class, () -> DomainUtils.getRootDomain(lolString));
+        Assertions.assertSame(lolString, DomainUtils.getRootDomain(lolString));
     }
 }
