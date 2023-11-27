@@ -12,6 +12,7 @@ export {
     MdsQueryCriteria,
     MdsSort,
     MdsSortColumn,
+    MdsSortDefault,
     MdsValue,
     MdsView,
     MdsWidget,

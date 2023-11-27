@@ -297,7 +297,6 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
                 }),
                 debounceTime(0),
                 distinctUntilChanged(),
-                // tap((progress) => console.log('progress', progress)),
             )
             .subscribe((progress) => this.loadingProgress.next(progress));
     }

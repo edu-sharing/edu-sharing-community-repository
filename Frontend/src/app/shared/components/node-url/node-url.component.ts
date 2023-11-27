@@ -85,8 +85,12 @@ export class NodeUrlComponent implements AfterViewInit {
 
     get(mode: 'routerLink' | 'queryParams'): any {
         const result: any = this.nodeHelper.getNodeLink(mode, this.node);
-        if (mode === 'queryParams' && this.queryParams) {
-            Object.keys(this.queryParams).forEach((k) => (result[k] = this.queryParams[k]));
+        if (mode === 'queryParams') {
+            // it is important that we remove the fromLogin info because otherwise the render component will redirect to the default page on back
+            result.fromLogin = null;
+            if (mode === 'queryParams') {
+                Object.keys(this.queryParams).forEach((k) => (result[k] = this.queryParams[k]));
+            }
         }
         return result;
     }
