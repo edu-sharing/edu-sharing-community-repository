@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.repository.server.RequestHelper;
 
 public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializable{
 
@@ -601,7 +602,11 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	private String replaceDynamicVariables(String data) {
 		if(data == null) return data;
-		String contextDomain = Context.getCurrentInstance() == null ? null : Context.getCurrentInstance().getRequest() == null ? null : Context.getCurrentInstance().getRequest().getServerName();
+
+		String contextDomain = (Context.getCurrentInstance() != null && Context.getCurrentInstance().getRequest() == null)
+				? null
+				: new RequestHelper(Context.getCurrentInstance().getRequest()).getServerName();
+
 		String rootDomain = DomainUtils.getRootDomain(contextDomain);
 		Map<String, String> searchReplace = new HashMap<>();
 		searchReplace.put("${context.id}", NodeCustomizationPolicies.getEduSharingContext());

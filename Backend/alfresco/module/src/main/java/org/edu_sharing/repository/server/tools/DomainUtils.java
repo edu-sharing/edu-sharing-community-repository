@@ -8,15 +8,18 @@ import java.net.URL;
 
 public final class DomainUtils {
 
-    public static String getRootDomain(String urlString){
-        if(StringUtils.isBlank(urlString)){
-           return null;
+    public static String getRootDomain(String urlString) {
+        if (StringUtils.isBlank(urlString)) {
+            return null;
         }
+        try {
+            return InternetDomainName
+                    .from(urlString)
+                    .topPrivateDomain()
+                    .name();
 
-        return  InternetDomainName
-                .from(urlString)
-                .topPrivateDomain()
-                .name();
-
+        }catch (Exception ignore){
+            return urlString;
+        }
     }
 }
