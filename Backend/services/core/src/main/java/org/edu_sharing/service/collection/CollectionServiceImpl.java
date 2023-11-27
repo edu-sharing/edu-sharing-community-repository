@@ -22,7 +22,7 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.thumbnail.ThumbnailService;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
-import org.edu_sharing.repackaged.elasticsearch.org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataReader;
@@ -532,13 +532,13 @@ public class CollectionServiceImpl implements CollectionService {
                  * handle level0
                  */
                 HashMap<String, Object> properties = client.getProperties(toMove);
-                if (new Boolean((String) properties.get(CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0))) {
+                if (Boolean.parseBoolean((String) properties.get(CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0))) {
                     if (Arrays.asList(client.getAspects(toCollection)).contains(CCConstants.CCM_ASPECT_COLLECTION)) {
-                        client.setProperty(toMove, CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0, new Boolean(false).toString());
+                        client.setProperty(toMove, CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0, "false");
                     }
                 } else {
                     if (!Arrays.asList(client.getAspects(toCollection)).contains(CCConstants.CCM_ASPECT_COLLECTION)) {
-                        client.setProperty(toMove, CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0, new Boolean(true).toString());
+                        client.setProperty(toMove, CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0, "true");
                     }
                 }
             }
@@ -678,7 +678,7 @@ public class CollectionServiceImpl implements CollectionService {
         }
         collection.setAuthorFreetext((String) props.get(CCConstants.CCM_PROP_MAP_COLLECTION_AUTHOR_FREETEXT));
         if (props.containsKey(CCConstants.CCM_PROP_COLLECTION_PINNED_STATUS))
-            collection.setPinned(new Boolean((String) props.get(CCConstants.CCM_PROP_COLLECTION_PINNED_STATUS)));
+            collection.setPinned( Boolean.parseBoolean((String) props.get(CCConstants.CCM_PROP_COLLECTION_PINNED_STATUS)));
 
         return collection;
     }

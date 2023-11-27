@@ -3,7 +3,9 @@ package org.edu_sharing.metadataset.v2.valuespace_reader;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataKey;
@@ -57,12 +59,7 @@ public class CurriculumReader extends ValuespaceReader{
     }
 
     private JSONArray getApi() throws IOException, JSONException {
-        CloseableHttpClient httpclient = HttpClients.createDefault();
-        HttpUriRequest request=new HttpGet(getApiUrl());
-        CloseableHttpResponse result = httpclient.execute(request);
-        String data=StreamUtils.copyToString(result.getEntity().getContent(), StandardCharsets.UTF_8);
-        result.close();
-        return new JSONArray(data);
+        return new JSONArray(ReaderUtils.query(getApiUrl()));
     }
     private String getApiUrl() {
         return url;

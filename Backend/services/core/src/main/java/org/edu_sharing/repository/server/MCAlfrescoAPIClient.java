@@ -105,6 +105,7 @@ import org.alfresco.util.ISO9075;
 import org.alfresco.util.Pair;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.HasPermissionsWork;
 import org.edu_sharing.alfresco.fixes.VirtualEduGroupFolderTool;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
@@ -3881,7 +3882,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				+ ContentModel.TYPE_AUTHORITY_CONTAINER
 				+ "\""
 				+ " +@"
-				+ org.edu_sharing.repackaged.elasticsearch.org.apache.lucene.queryparser.classic.QueryParser.escape("{" + ContentModel.PROP_AUTHORITY_NAME.getNamespaceURI() + "}"
+				+ QueryParser.escape("{" + ContentModel.PROP_AUTHORITY_NAME.getNamespaceURI() + "}"
 						+ ISO9075.encode(ContentModel.PROP_AUTHORITY_NAME.getLocalName())) + ":\"" + name + "\"");
 		ResultSet rs = null;
 		try {

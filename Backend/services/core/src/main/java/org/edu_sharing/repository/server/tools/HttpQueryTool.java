@@ -12,6 +12,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.*;
@@ -96,8 +97,8 @@ public class HttpQueryTool {
 		return this.query(url,null,null,true);
 	}
 
-	public String query(HttpUriRequest method){
-		return this.query(method.getURI().toString(),null,method,true);
+	public String query(RequestBuilder method){
+		return this.query(method.build().getURI().toString(),null,method.build(),true);
 	}
 
 	public String query(String url, Map<String,String> header, HttpUriRequest _method) {

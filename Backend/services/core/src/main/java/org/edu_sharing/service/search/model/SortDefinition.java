@@ -1,5 +1,7 @@
 package org.edu_sharing.service.search.model;
 
+import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.mapping.FieldType;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
@@ -9,9 +11,6 @@ import org.alfresco.util.Pair;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.elasticsearch.script.Script;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.*;
 import org.springframework.context.ApplicationContext;
 
 import java.io.Serializable;
@@ -70,8 +69,8 @@ public class SortDefinition implements Serializable {
 		if(sortProperties == null)
 			return;			
 		if(sortAscending==null) {
-			sortAscending=new ArrayList<Boolean>();
-			sortAscending.add(new Boolean(true));
+			sortAscending= new ArrayList<>();
+			sortAscending.add(true);
 		}
 		int i=0;
 		for(String sortProp : sortProperties){
@@ -126,20 +125,17 @@ public class SortDefinition implements Serializable {
 		}
 	}
 
-	public void applyToSearchSourceBuilder(SearchSourceBuilder searchSourceBuilder) {
+	public void applyToSearchSourceBuilder(co.elastic.clients.elasticsearch.core.SearchRequest.Builder builder) {
 		// Group by Folders & Files
-		searchSourceBuilder.sort("type", SortOrder.ASC);
+		builder.sort(sort -> sort.field(field -> field.field("type").order(SortOrder.Asc)));
 		for (SortDefinitionEntry sortDefintionEntry : getSortDefinitionEntries()) {
-			SortOrder sortOrder = sortDefintionEntry.ascending ? SortOrder.ASC : SortOrder.DESC;
+			SortOrder sortOrder = sortDefintionEntry.ascending ? SortOrder.Asc : SortOrder.Desc;
 			if(sortDefintionEntry.getProperty().equalsIgnoreCase("score")) {
-				searchSourceBuilder.sort(new ScoreSortBuilder().order(sortOrder));
+				builder.sort(sort->sort.score(score->score.order(sortOrder)));
 			} else if(sortDefintionEntry.getProperty().equalsIgnoreCase("tree")) {
-				searchSourceBuilder.sort(SortBuilders.scriptSort(
-						new Script("doc['fullpath'].value + '/' + doc['nodeRef.id'].value"),//(doc['properties.cm:name.keyword'].size() == 0 ? doc['properties.cm:name.keyword'].value : doc['properties.cm:name.keyword'].value)
-						ScriptSortBuilder.ScriptSortType.STRING
-				));
+				builder.sort(sort->sort.script(script -> script.script(s->s.inline(il->il.source("doc['fullpath'].value + '/' + doc['nodeRef.id'].value")))));
 			}else if(ALLOWED_SORT_MAIN_PROPERTIES.contains(sortDefintionEntry.getProperty())) {
-				searchSourceBuilder.sort(sortDefintionEntry.getProperty(), sortOrder);
+				builder.sort(sort->sort.field(field->field.field(sortDefintionEntry.getProperty()).order(sortOrder)));
 			}else {
 				String addSuffix = "";
 				String property = CCConstants.getValidGlobalName(sortDefintionEntry.getProperty());
@@ -157,9 +153,7 @@ public class SortDefinition implements Serializable {
 				}
 				String name = "properties." + sortDefintionEntry.getProperty() + ((!addSuffix.isEmpty()) ? ("." + addSuffix) :"" );
 				// currently, we use a dynamic model which might cause that fields not yet exists. We want to ignore this errors to let the request
-				searchSourceBuilder.sort(
-						SortBuilders.fieldSort(name).order(sortOrder).unmappedType("string")
-				);
+				builder.sort(sort->sort.field(field->field.field(name).order(sortOrder).unmappedType(FieldType.Keyword)));
 			}
 		}
 	}

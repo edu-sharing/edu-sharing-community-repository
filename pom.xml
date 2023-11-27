@@ -256,6 +256,25 @@
       </dependency>
 
       <dependency>
+        <groupId>co.elastic.clients</groupId>
+        <artifactId>elasticsearch-java</artifactId>
+        <version>8.11.1</version>
+      </dependency>
+
+      <!-- dependency of elastic client -->
+      <dependency>
+        <groupId>jakarta.json</groupId>
+        <artifactId>jakarta.json-api</artifactId>
+        <version>2.1.2</version>
+      </dependency>
+
+<!--      <dependency>-->
+<!--        <groupId>${project.groupId}</groupId>-->
+<!--        <artifactId>edu_sharing-community-repository-repackaged-elasticsearch</artifactId>-->
+<!--        <version>${bom.repository-repackaged.version}</version>-->
+<!--      </dependency>-->
+
+      <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
         <version>2.4</version>
@@ -516,12 +535,6 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-repackaged-elasticsearch</artifactId>
-        <version>${bom.repository-repackaged.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-repackaged-isoparser</artifactId>
         <version>${bom.repository-repackaged.version}</version>
       </dependency>
@@ -765,6 +778,12 @@
         <version>2.17.1</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.tika</groupId>
+        <artifactId>tika-core</artifactId>
+        <version>2.3.0</version>
       </dependency>
 
       <dependency>

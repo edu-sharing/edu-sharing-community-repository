@@ -1,18 +1,18 @@
 package org.edu_sharing.service.search;
 
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.elasticsearch.action.search.SearchResponse;
+import org.json.JSONObject;
 
 public class SearchResultNodeRefElastic extends SearchResultNodeRef {
 
 	@SuppressWarnings("NonSerializableFieldInSerializableClass")
-	private SearchResponse elasticResponse;
+	private JSONObject elasticResponse;
 
-	public SearchResponse getElasticResponse() {
+	public JSONObject getElasticResponse() {
 		return elasticResponse;
 	}
 
-	public void setElasticResponse(SearchResponse elasticResponse) {
+	public void setElasticResponse(JSONObject elasticResponse) {
 		this.elasticResponse = elasticResponse;
 	}
 }

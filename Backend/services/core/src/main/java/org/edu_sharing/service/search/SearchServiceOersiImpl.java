@@ -1,13 +1,10 @@
 package org.edu_sharing.service.search;
 
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.metadataset.v2.MetadataQuery;
-import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.metadataset.v2.MetadataSet;
-import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
-import org.edu_sharing.repackaged.elasticsearch.org.apache.http.HttpHost;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
@@ -15,33 +12,12 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.search.model.SearchToken;
-import org.elasticsearch.action.get.GetRequest;
-import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.Operator;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -273,9 +249,34 @@ public class SearchServiceOersiImpl extends SearchServiceAdapter {
     Map<String, Object> executeRetrieveById(String oersiId) throws OersiAccessException;
   }
 
+
+  // TODO elastic search migration to 8.11.1
   private class OersiElasticsearchQueryExecutor implements OersiQueryExecutor {
 
-    private RestHighLevelClient client = null;
+    @Override
+    public void endpoint(String host, int port, String scheme, String pathPrefix, String index) {
+      throw new NotImplementedException();
+    }
+
+    @Override
+    public OersiSearchResult executeSearch(MetadataSet mds, String query, Map<String, String[]> criteria, int from, int size) throws OersiAccessException {
+      throw new NotImplementedException();
+    }
+
+    @Override
+    public Map<String, Object> executeRetrieveById(String oersiId) throws OersiAccessException {
+      throw new NotImplementedException();
+    }
+
+    @Override
+    public void close() throws IOException {
+      throw new NotImplementedException();
+    }
+  }
+  /*
+  private class OersiElasticsearchQueryExecutor implements OersiQueryExecutor {
+
+    //private RestHighLevelClient client = null;
     private String index;
 
     @Override
@@ -413,4 +414,5 @@ public class SearchServiceOersiImpl extends SearchServiceAdapter {
       }
     }
   }
+  */
 }
