@@ -697,11 +697,11 @@
       <scope>runtime</scope>
     </dependency>
 
-    <dependency>
+    <!--dependency>
       <groupId>io.swagger.parser.v3</groupId>
       <artifactId>swagger-parser</artifactId>
       <scope>runtime</scope>
-    </dependency>
+    </dependency-->
 
     <dependency>
       <groupId>org.threeten</groupId>

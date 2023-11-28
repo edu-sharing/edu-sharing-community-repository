@@ -5,14 +5,6 @@ set -eu
 ########################################################################################################################
 whitelist=(
   # swagger gen vs swagger usage conflict -> new api
-  "swagger-annotations-1.6.6.jar:alf-lib"  # diff groupId
-  "swagger-annotations-2.1.11.jar:alf-lib" # diff groupId
-  "swagger-models-1.6.6.jar:alf-lib"
-  "swagger-models-2.1.11.jar:alf-lib"
-  "swagger-parser-1.0.56.jar:alf-lib" #diff classes
-  "swagger-parser-2.1.0.jar:alf-lib" #diff classes
-  "swagger-core-1.6.6.jar:alf-lib" # diff groupId
-  "swagger-core-2.1.11.jar:alf-lib" # diff groupId
   "xmlsec-1.5.8.jar:alf-lib" # axis-1.4
   "xmlsec-1.4.5.jar:edu-lib" # axis-1.4
 )
