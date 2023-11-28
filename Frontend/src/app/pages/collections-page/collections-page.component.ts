@@ -19,13 +19,12 @@ import {
     TranslationsService,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
-import { Subject } from 'rxjs';
+import { Subject, combineLatest } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import * as EduData from '../../core-module/core.module';
 import {
     ConfigurationService,
     DialogButton,
-    LoginResult,
     Mediacenter,
     Node,
     NodeRef,
@@ -35,14 +34,15 @@ import {
     RestHelper,
     RestIamService,
     RestMediacenterService,
+    RestNetworkService,
     RestNodeService,
     TemporaryStorageService,
     UIService,
 } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
+import { UIHelper } from '../../core-ui-module/ui-helper';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { Toast } from '../../services/toast';
-import { UIHelper } from '../../core-ui-module/ui-helper';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 import { CollectionContentComponent } from './collection-content/collection-content.component';
 import { CollectionInfoBarComponent } from './collection-info-bar/collection-info-bar.component';
@@ -158,13 +158,19 @@ export class CollectionsPageComponent implements OnDestroy {
         private router: Router,
         private tempStorage: TemporaryStorageService,
         private optionsService: OptionsHelperDataService,
+        private networkService: RestNetworkService,
+        private temporaryStorageService: TemporaryStorageService,
         private toast: Toast,
         private translations: TranslationsService,
         private uiService: UIService,
     ) {
         this.translations.waitForInit().subscribe(() => {
-            this.connector.isLoggedIn().subscribe(
-                (data: LoginResult) => {
+            combineLatest([
+                this.connector.isLoggedIn(),
+                // FIXME: The sub components should be obserable-aware!
+                this.networkService.getRepositories(),
+            ]).subscribe(
+                ([data]) => {
                     if (data.isValidLogin && data.currentScope == null) {
                         this.isGuest = data.isGuest;
                         this.mediacenterService.getMediacenters().subscribe((mediacenters) => {

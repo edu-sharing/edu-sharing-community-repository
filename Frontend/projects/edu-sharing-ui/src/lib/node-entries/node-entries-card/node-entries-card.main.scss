@@ -2,6 +2,7 @@
 @import '../mixins';
 
 $optionBarHeight: 50px;
+$cardLineHeight: 1.4;
 
 .grid-card {
     transition: all var(--transitionNormal);
@@ -138,7 +139,7 @@ $optionBarHeight: 50px;
             display: flex;
             flex-direction: row;
             align-items: center;
-            min-height: 2.5em;
+            min-height: $cardLineHeight * 2em;
             gap: 5px;
             &:not(:first-child) {
                 > label {
@@ -150,6 +151,9 @@ $optionBarHeight: 50px;
                     color: #000;
                     flex-grow: 1;
                     margin: 5px 0;
+                    // FIXME: This breaks `limitLineCount` via `-webkit-line-clamp`, which requires
+                    // `display: -webkit-box`. What is this even for? `text-align: end` seems to
+                    // work just fine, even for containers.
                     display: flex;
                     justify-content: flex-end;
                     text-align: end;
@@ -163,7 +167,7 @@ $optionBarHeight: 50px;
                     width: 100%;
                     color: var(--textMain);
                     font-size: 120%;
-                    height: 1.25 * 2em;
+                    height: $cardLineHeight * 2em;
                     text-align: left;
                     word-break: break-word;
                 }
@@ -197,7 +201,7 @@ $optionBarHeight: 50px;
             &:first-child {
                 es-list-base,
                 es-node-url a es-list-base {
-                    @include limitLineCount(2, 1.25);
+                    @include limitLineCount(2, $cardLineHeight);
                     > es-list-text {
                         word-break: break-word;
                     }

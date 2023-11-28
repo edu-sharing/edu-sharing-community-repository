@@ -1,25 +1,27 @@
 import { Component } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Metadata } from 'ngx-edu-sharing-graphql';
+import { RepoUrlService } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, forkJoin, forkJoin as observableForkJoin } from 'rxjs';
-import { map, take, takeWhile } from 'rxjs/operators';
+import { BehaviorSubject, forkJoin, forkJoin as observableForkJoin, of } from 'rxjs';
+import { catchError, map, take, takeWhile } from 'rxjs/operators';
 import { Node } from '../../../../../core-module/rest/data-object';
 import { RestNodeService } from '../../../../../core-module/rest/services/rest-node.service';
+import { Toast } from '../../../../../services/toast';
+import { Constraints, NativeWidgetComponent } from '../../../types/types';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RepoUrlService } from 'ngx-edu-sharing-ui';
-import { NativeWidgetComponent } from '../../../types/types';
 @Component({
     selector: 'es-mds-editor-widget-preview',
     templateUrl: './mds-editor-widget-preview.component.html',
     styleUrls: ['./mds-editor-widget-preview.component.scss'],
 })
 export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent {
-    static readonly constraints = {
+    static readonly constraints: Constraints = {
         requiresNode: true,
         supportsBulk: false,
+        onConstraintFailed: 'hide',
     };
     static readonly graphqlIds = [
         'info.preview.url',
@@ -39,6 +41,7 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent {
     constructor(
         private mdsEditorValues: MdsEditorInstanceService,
         private nodeService: RestNodeService,
+        private toast: Toast,
         private repoUrlService: RepoUrlService,
         private sanitizer: DomSanitizer,
     ) {
@@ -107,7 +110,13 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent {
         return observableForkJoin(
             nodes.map((n) => this.nodeService.uploadNodePreview(n.ref.id, this.file, false)),
         )
-            .pipe(map(() => nodes))
+            .pipe(
+                map(() => nodes),
+                catchError((e) => {
+                    this.toast.error(null, 'MDS.ERROR_PREVIEW');
+                    return of(nodes);
+                }),
+            )
             .toPromise();
     }
 

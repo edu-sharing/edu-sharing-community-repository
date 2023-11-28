@@ -63,7 +63,7 @@ public class ApiTool {
             for (Map.Entry<String, String> entry : params.entrySet()) {
                 sb.append("<input type=\"hidden\" id=\"" + entry.getKey() + "\" name=\"" + entry.getKey() + "\" value=\"" + entry.getValue() + "\" class=\"form-control\"/>");
             }
-            sb.append("<input type=\"submit\" value=\"Submit POST\" class=\"btn btn-primary\">")
+            sb.append("<input type=\"submit\" value=\"Submit POST\" style=\"display:none\">")
                     .append("</form>");
         }else {
             sb.append(message);

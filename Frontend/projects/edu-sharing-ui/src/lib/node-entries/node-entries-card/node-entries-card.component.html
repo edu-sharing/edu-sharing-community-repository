@@ -45,6 +45,7 @@
       <mat-checkbox
         [checked]="entriesService.selection.isSelected(node)"
         (change)="entriesService.onCheckboxChanged(node, $event.checked)"
+        color="primary"
         aria-label="{{ 'SELECT' | translate : { element: (node | nodeTitle) } }}"
       ></mat-checkbox>
     </div>

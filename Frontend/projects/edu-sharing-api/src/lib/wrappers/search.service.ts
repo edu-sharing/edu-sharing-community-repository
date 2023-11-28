@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
-import { LabeledValue, MdsIdentifier, SearchResults } from '../../public-api';
+import { LabeledValue, MdsIdentifier, NetworkService, SearchResults } from '../../public-api';
 import * as apiModels from '../api/models';
 import { SearchV1Service } from '../api/services';
 import { onSubscription } from '../utils/rxjs-operators/on-subscription';
@@ -77,7 +77,11 @@ export class SearchService {
     private readonly subscribedFacetsSubject = new BehaviorSubject<string[][]>([]);
     private didYouMeanSuggestionsSubscribers = 0;
 
-    constructor(private searchV1: SearchV1Service, private mdsLabel: MdsLabelService) {
+    constructor(
+        private mdsLabel: MdsLabelService,
+        private network: NetworkService,
+        private searchV1: SearchV1Service,
+    ) {
         this.registerFacetsSubject();
         this.registerDidYouMeanSuggestionSubject();
     }
@@ -263,7 +267,7 @@ export class SearchService {
         size: number,
     ): Observable<FacetsDict> {
         const searchParams = this.getSearchParams();
-        return this.searchV1
+        const asYouTypeFacetSuggestions = this.searchV1
             .searchFacets({
                 repository: searchParams.repository,
                 metadataset: searchParams.metadataset,
@@ -277,6 +281,16 @@ export class SearchService {
                 },
             })
             .pipe(switchMap((response) => this.mapFacets(response.facets)));
+        // As-you-type suggestions are only supported on edu-sharing repositories.
+        return this.network
+            .getRepository(searchParams.repository)
+            .pipe(
+                switchMap((repository) =>
+                    repository?.repositoryType === 'ALFRESCO'
+                        ? asYouTypeFacetSuggestions
+                        : rxjs.of({}),
+                ),
+            );
     }
 
     /**

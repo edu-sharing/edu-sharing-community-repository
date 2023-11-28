@@ -81,21 +81,25 @@ export class MdsViewerComponent implements OnChanges {
             setTimeout(() => this.inflate(), 1000 / 60);
             return;
         }
-        const editor = await this.mdsEditorInstanceService.initWithoutNodes(
-            this.groupId,
-            this.setId,
-            RestConstants.HOME_REPOSITORY,
-            'viewer',
-            this.data,
-        );
-        if (!editor) {
-            // Initialization was interrupted. Probably, this method was called again before it
-            // could finish.
-            return;
-        } else if (editor === 'legacy') {
-            console.error(
-                'mds viewer component is only supported for groups with angular rendering',
+        try {
+            const editor = await this.mdsEditorInstanceService.initWithoutNodes(
+                this.groupId,
+                this.setId,
+                RestConstants.HOME_REPOSITORY,
+                'viewer',
+                this.data,
             );
+            if (!editor) {
+                // Initialization was interrupted. Probably, this method was called again before it
+                // could finish.
+                return;
+            } else if (editor === 'legacy') {
+                console.error(
+                    'mds viewer component is only supported for groups with angular rendering',
+                );
+                return;
+            }
+        } catch (e) {
             return;
         }
         this.templates = [];

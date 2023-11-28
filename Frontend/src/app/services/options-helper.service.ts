@@ -208,7 +208,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         refreshListOptions: boolean,
     ) {
         if (data == null) {
-            console.info('options helper refresh called but no data previously bound');
+            // console.info('options helper refresh called but no data previously bound');
             return;
         }
         if (this.subscriptions?.length) {
@@ -1445,7 +1445,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         connectorType: Connector = null,
     ) {
         if (node.aspects?.includes('ccm:ltitool_node')) {
-            UIHelper.openLTIResourceLink(node);
+            UIHelper.openLTIResourceLink(win, node);
         } else {
             UIHelper.openConnector(
                 this.connectors,

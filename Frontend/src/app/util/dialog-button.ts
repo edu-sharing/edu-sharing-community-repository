@@ -6,7 +6,7 @@ export class ButtonConfig {
 }
 
 export class DialogButton {
-    readonly color: ButtonConfig['color'];
+    color: ButtonConfig['color'];
     readonly position: ButtonConfig['position'];
 
     disabled = false;

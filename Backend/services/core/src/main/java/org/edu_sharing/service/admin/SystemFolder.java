@@ -5,6 +5,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
@@ -60,6 +61,7 @@ public class SystemFolder {
 
     static NodeRef systemFolderBase = null;
     static NodeRef sitesFolder = null;
+    private static NodeRef personFolder;
 
     public static NodeRef getSystemFolderBase() {
         if (systemFolderBase == null) {
@@ -86,5 +88,25 @@ public class SystemFolder {
             });
         }
         return sitesFolder;
+    }
+
+    public static NodeRef getPersonFolder() {
+        if(personFolder == null) {
+            personFolder = AuthenticationUtil.runAsSystem(() -> {
+                try {
+                    org.alfresco.service.cmr.repository.NodeRef system = serviceRegistry.getNodeService().getChildAssocs(repositoryHelper.getRootHome()).stream().filter(
+                            (rel) -> rel.getQName().getLocalName().equals("system")
+                    ).map(ChildAssociationRef::getChildRef).findFirst().get();
+                    return serviceRegistry.getNodeService().getChildAssocs(system).stream().filter(
+                            (rel) -> rel.getQName().getLocalName().equals("people")
+                    ).map(ChildAssociationRef::getChildRef).findFirst().get();
+                }catch(Throwable t) {
+                    logger.warn("Could not resolve people folder", t);
+                    return null;
+                }
+            });
+        }
+        return personFolder;
+
     }
 }

@@ -425,7 +425,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 						// nodeService.setProperty(eduNodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR), vcardString);
 					}
 
-					String techLocValue = "ccrep://" + ApplicationInfoList.getHomeRepository().getAppId() + "/" + eduNodeRef.getId();
+					String techLocValue = CCConstants.CCREP_PROTOCOL + ApplicationInfoList.getHomeRepository().getAppId() + "/" + eduNodeRef.getId();
 					if(nodeService.getProperty(eduNodeRef,  QName.createQName(CCConstants.LOM_PROP_TECHNICAL_LOCATION)) == null){
 						nodeService.setProperty(eduNodeRef, QName.createQName(CCConstants.LOM_PROP_TECHNICAL_LOCATION), techLocValue);
 					}
@@ -508,7 +508,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			 * cause aspect ccm:collection would not be present onCreate
 			 */
 			String collectionType = (String)after.get(QName.createQName(CCConstants.CCM_PROP_MAP_COLLECTIONTYPE));
-			logger.info("collectionType:" +collectionType);
+			logger.debug("collectionType:" +collectionType);
 			if(collectionType == null){
 				if(nameAfter != null && !nameAfter.equals(nameBefore)){
 					try{

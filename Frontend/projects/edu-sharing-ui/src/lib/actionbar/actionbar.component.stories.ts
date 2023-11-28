@@ -1,14 +1,15 @@
-import { applicationConfig, type Meta, moduleMetadata, type StoryObj } from '@storybook/angular';
-import { ActionbarComponent } from './actionbar.component';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { OptionItem } from '../types/option-item';
-import { MatMenuModule } from '@angular/material/menu';
-import { translateProvider } from '../../../../../src/app/features/mds/mds-editor/storybook-utils';
+import { HttpClient, HttpHandler, HttpXhrBackend } from '@angular/common/http';
+import { importProvidersFrom } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { HttpClient } from '@angular/common/http';
-import { EduSharingUiCommonModule } from '../common/edu-sharing-ui-common.module';
-import { ApiRequestConfiguration, EduSharingApiModule } from 'ngx-edu-sharing-api';
+import { MatMenuModule } from '@angular/material/menu';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { applicationConfig, moduleMetadata, type Meta, type StoryObj } from '@storybook/angular';
+import { ApiRequestConfiguration, EduSharingApiModule } from 'ngx-edu-sharing-api';
+import { translateProvider } from '../../../../../src/app/features/mds/mds-editor/storybook-utils';
+import { EduSharingUiCommonModule } from '../common/edu-sharing-ui-common.module';
+import { OptionItem } from '../types/option-item';
+import { ActionbarComponent } from './actionbar.component';
 
 let defaultOptions = [
     new OptionItem('Option 1', 'home', () => {}),
@@ -35,10 +36,16 @@ const actionbar: Meta<ActionbarComponent> = {
         applicationConfig({
             providers: [
                 provideAnimations(),
+                HttpClient,
                 {
-                    provide: HttpClient,
-                    useValue: {},
+                    provide: HttpHandler,
+                    useValue: new HttpXhrBackend({ build: () => new XMLHttpRequest() }),
                 },
+                importProvidersFrom(
+                    EduSharingApiModule.forRoot({
+                        rootUrl: '/api',
+                    }),
+                ),
                 {
                     provide: TranslatePipe,
                     useValue: {},

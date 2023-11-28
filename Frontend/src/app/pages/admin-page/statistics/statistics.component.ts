@@ -11,11 +11,13 @@ import {
 import { TranslateService } from '@ngx-translate/core';
 import { DEFAULT, HOME_REPOSITORY, SearchService } from 'ngx-edu-sharing-api';
 import {
+    FormatDatePipe,
     InteractionType,
     ListCountsComponent,
     ListItem,
     NodeDataSource,
     NodeEntriesDisplayType,
+    Scope,
     UIAnimation,
 } from 'ngx-edu-sharing-ui';
 import { CsvHelper } from '../../../core-module/csv.helper';
@@ -29,8 +31,8 @@ import { RestConnectorService } from '../../../core-module/rest/services/rest-co
 import { RestStatisticsService } from '../../../core-module/rest/services/rest-statistics.service';
 import { SessionStorageService } from '../../../core-module/rest/services/session-storage.service';
 import { UIService } from '../../../core-module/rest/services/ui.service';
-import { Toast } from '../../../services/toast';
 import { NodeHelperService } from '../../../services/node-helper.service';
+import { Toast } from '../../../services/toast';
 import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
 
 // Charts.js
@@ -53,6 +55,7 @@ type GroupTemplate = {
     ],
 })
 export class AdminStatisticsComponent implements OnInit {
+    readonly Scope = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     @ViewChild('groupedChart') groupedChartRef: ElementRef;
@@ -742,10 +745,14 @@ export class AdminStatisticsComponent implements OnInit {
         let csvHeadersTranslated: string[];
         let csvHeadersMapping: string[];
         let csvData: any;
+        let from: Date;
+        let to: Date;
         // node export
         switch (this.currentTab) {
             // chart per day/month/year data
             case 0: {
+                from = this.groupedStart;
+                to = this.groupedEnd;
                 if (this.groupedChartData.node) {
                     // map the headings for the file
                     const data = (this.groupedChartData.node as any).concat(
@@ -782,6 +789,8 @@ export class AdminStatisticsComponent implements OnInit {
             }
             case 1: {
                 // grouped / folded data
+                from = this.customGroupStart;
+                to = this.customGroupEnd;
                 csvHeadersMapping = this.customGroupRows.map((h) => {
                     return this.customGroupLabels?.[h] || h;
                 });
@@ -804,6 +813,8 @@ export class AdminStatisticsComponent implements OnInit {
                 break;
             }
             case 2: {
+                from = this.nodesStart;
+                to = this.nodesEnd;
                 // counts by node including custom properties
                 const properties = this.exportProperties.split('\n').map((e) => e.trim());
                 this.storage.set('admin_statistics_properties', this.exportProperties);
@@ -831,7 +842,10 @@ export class AdminStatisticsComponent implements OnInit {
                 });
                 break;
             }
-            case 3: {
+            // was single, but is removed for now
+            case undefined: {
+                from = this.singleStart;
+                to = this.singleEnd;
                 csvHeadersMapping = this.singleDataRows;
                 csvHeadersTranslated = this.singleDataRows.map((s) =>
                     this.translate.instant('ADMIN.STATISTICS.HEADERS.' + s),
@@ -859,7 +873,20 @@ export class AdminStatisticsComponent implements OnInit {
             }
         }
         CsvHelper.download(
-            this.translate.instant('ADMIN.STATISTICS.CSV_FILENAME'),
+            this.translate.instant(
+                'ADMIN.STATISTICS.CSV_FILENAME' + (this.getMediacenter() ? '_MZ' : ''),
+                {
+                    mz: this._mediacenter?.profile?.displayName,
+                    from: new FormatDatePipe(this.translate).transform(from, {
+                        relative: false,
+                        time: false,
+                    }),
+                    to: new FormatDatePipe(this.translate).transform(to, {
+                        relative: false,
+                        time: false,
+                    }),
+                },
+            ),
             csvHeadersTranslated,
             csvData,
             csvHeadersMapping,

@@ -94,7 +94,7 @@ public class IamApi  {
 
 	    	List<UserSimple> result = new ArrayList<UserSimple>();
 	    	for (String user: search.getData()) {
-	    		result.add(new PersonDao(repoDao,user).asPersonSimple());
+	    		result.add(new PersonDao(repoDao,user).asPersonSimple(true));
 	    	}	
 	    	UserEntries response = new UserEntries();
 	    	response.setList(result);
@@ -1478,7 +1478,7 @@ public class IamApi  {
 		if(authority.startsWith(AuthorityType.GROUP.getPrefixString())){
 			return new GroupDao(repoDao,authority).asGroup();
 		}else{
-			return new PersonDao(repoDao,authority).asPersonSimple();
+			return new PersonDao(repoDao,authority).asPersonSimple(true);
 		}
 	}
 }

@@ -20,20 +20,7 @@ public class MediacenterServiceFactory {
 	}
 
 	public static MediacenterService getMediacenterService(String appId){
-
-		MediacenterService mediacenterService = null;
-		ApplicationInfo appInfo = (appId == null) ? ApplicationInfoList.getHomeRepository() : ApplicationInfoList.getRepositoryInfoById(appId);
-
-		if(!ProviderHelper.hasProvider(appInfo)){
-			return getLocalService();
-
-		}else{
-			if(appInfo.ishomeNode()){
-				return getLocalService();
-			}
-			//return ProviderHelper.getProviderByApp(appInfo).getMediacenterService();
-			throw new RuntimeException("not yet implemented");
-		}
+		return getLocalService();
 	}
 
 }

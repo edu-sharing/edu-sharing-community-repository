@@ -187,7 +187,7 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
                 allowed: true,
                 active: sortInfo.default.sortBy,
                 direction: sortInfo.default.sortAscending ? 'asc' : 'desc',
-                columns: sortInfo.columns.map(
+                columns: sortInfo.columns?.map(
                     ({ id, mode }) =>
                         new ListItemSort('NODE', id, mode as 'ascending' | 'descending'),
                 ),

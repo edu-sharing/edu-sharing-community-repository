@@ -560,15 +560,24 @@ export class UIHelper {
         );
     }
 
-    static openLTIResourceLink(node: Node) {
-        let w = window.open(
+    static openLTIResourceLink(w: any, node: Node) {
+        //let w = window.open('');
+        if (w == null) {
+            console.log('window is null');
+            w = window.open('');
+        }
+        w.location.href =
+            '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId=' +
+            node.ref.id;
+
+        /*let w = window.open(
             '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId=' +
                 node.ref.id,
             '_blank',
         );
         if (!w) {
             window.alert('popups are disabled');
-        }
+        }*/
     }
 
     static setFocusOnCard() {

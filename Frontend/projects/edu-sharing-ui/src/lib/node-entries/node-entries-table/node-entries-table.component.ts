@@ -44,6 +44,7 @@ import { Target } from '../../types/option-item';
 import { Toast } from '../../services/abstract/toast.service';
 import { DropdownComponent } from '../../dropdown/dropdown.component';
 import { NodeDataSourceRemote } from '../node-data-source-remote';
+import { TranslationsService } from '../../translations/translations.service';
 
 @Component({
     selector: 'es-node-entries-table',
@@ -88,6 +89,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         public entriesGlobalService: NodeEntriesGlobalService,
         private applicationRef: ApplicationRef,
         private toast: Toast,
+        private translations: TranslationsService,
         private changeDetectorRef: ChangeDetectorRef,
         public ui: UIService,
         private ngZone: NgZone,
@@ -116,6 +118,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
             this.entriesService.options$.pipe(startWith(void 0 as void)),
             this.entriesService.dataSource.isLoadingSubject.pipe(startWith(void 0 as void)),
             this.entriesService.selection.changed.pipe(startWith(void 0 as void)),
+            this.translations.waitForInit().pipe(startWith(void 0 as void)),
         ])
             .pipe(takeUntil(this.destroyed))
             .subscribe(() => {
@@ -244,7 +247,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     }
 
     isSortable(column: ListItem) {
-        return this.entriesService.sort?.columns.some((c) => c.name === column.name);
+        return this.entriesService.sort?.columns?.some((c) => c.name === column.name);
     }
 
     toggleAll(checked: boolean) {

@@ -10,47 +10,68 @@
 
 <div class="mobile-move-top2">
   <div class="menuButtonOuter" [ngSwitch]="mainMenuStyle">
-    <ng-container *ngSwitchCase="'dropdown'">
-      <es-main-menu-dropdown
-        #mainMenuDropdown
-        [currentScope]="currentScope"
-      ></es-main-menu-dropdown>
-      <button
-        *ngIf="showScope"
-        [matMenuTriggerFor]="mainMenuDropdown.dropdown.menu"
-        [disabled]="!canOpen"
-        matRipple
-        cdkMonitorElementFocus
-        class="menuButton"
-        [class.clickable]="canOpen"
-        title="{{ 'CHOOSEENVIRONMENT' | translate }}"
-      >
-        <img class="material-icons eduImage" [src]="getIconSource() | esAssetsPath" alt="" />
-        <span>{{ title | translate }}</span>
-        <i aria-hidden="true" class="material-icons barIcon">keyboard_arrow_down</i>
-      </button>
-    </ng-container>
-    <ng-container *ngSwitchCase="'sidebar'">
+    <ng-container
+      *ngIf="mainNavService.getCustomTemplateSlot(TemplateSlot.MainScopeButton) && showScope"
+    >
       <es-main-menu-sidebar
         #mainMenuSidebar
         [currentScope]="currentScope"
         (showLicenses)="showLicenses.emit()"
       ></es-main-menu-sidebar>
-      <button
-        *ngIf="showScope"
-        (click)="mainMenuSidebar.toggle()"
-        [disabled]="!canOpen"
-        matRipple
-        cdkMonitorElementFocus
-        class="menuButton"
-        [class.clickable]="canOpen"
-        title="{{ 'CHOOSEENVIRONMENT' | translate }}"
-        data-test="main-nav-scope-button"
-      >
-        <img class="material-icons eduImage" [src]="getIconSource() | esAssetsPath" alt="" />
-        <span>{{ title | translate }}</span>
-        <i aria-hidden="true" class="material-icons barIcon">keyboard_arrow_right</i>
-      </button>
+      <ng-container
+        *ngTemplateOutlet="
+          mainNavService.getCustomTemplateSlot(TemplateSlot.MainScopeButton);
+          context: {
+            currentScope: this.currentScope,
+            canOpen: this.canOpen,
+            onClick: toggleSidebar
+          }
+        "
+      ></ng-container>
+    </ng-container>
+    <ng-container *ngIf="!mainNavService.getCustomTemplateSlot(TemplateSlot.MainScopeButton)">
+      <ng-container *ngSwitchCase="'dropdown'">
+        <es-main-menu-dropdown
+          #mainMenuDropdown
+          [currentScope]="currentScope"
+        ></es-main-menu-dropdown>
+        <button
+          *ngIf="showScope"
+          [matMenuTriggerFor]="mainMenuDropdown.dropdown.menu"
+          [disabled]="!canOpen"
+          matRipple
+          cdkMonitorElementFocus
+          class="menuButton"
+          [class.clickable]="canOpen"
+          title="{{ 'CHOOSEENVIRONMENT' | translate }}"
+        >
+          <img class="material-icons eduImage" [src]="getIconSource() | esAssetsPath" alt="" />
+          <span>{{ title | translate }}</span>
+          <i aria-hidden="true" class="material-icons barIcon">keyboard_arrow_down</i>
+        </button>
+      </ng-container>
+      <ng-container *ngSwitchCase="'sidebar'">
+        <es-main-menu-sidebar
+          #mainMenuSidebar
+          [currentScope]="currentScope"
+          (showLicenses)="showLicenses.emit()"
+        ></es-main-menu-sidebar>
+        <button
+          *ngIf="showScope"
+          (click)="mainMenuSidebar.toggle()"
+          [disabled]="!canOpen"
+          matRipple
+          cdkMonitorElementFocus
+          class="menuButton"
+          [class.clickable]="canOpen"
+          title="{{ 'CHOOSEENVIRONMENT' | translate }}"
+          data-test="main-nav-scope-button"
+        >
+          <img class="material-icons eduImage" [src]="getIconSource() | esAssetsPath" alt="" />
+          <span>{{ title | translate }}</span>
+          <i aria-hidden="true" class="material-icons barIcon">keyboard_arrow_right</i>
+        </button>
+      </ng-container>
     </ng-container>
   </div>
   <ng-container *ngIf="isSafe && !mainMenuSidebar?.show">
@@ -102,6 +123,16 @@
     <ng-content select="[data-selector-search-field]"></ng-content>
   </div>
   <div class="topbar-search-right">
+    <ng-container *ngIf="mainNavService.getCustomTemplateSlot(TemplateSlot.BeforeUserMenu)">
+      <ng-container
+        *ngTemplateOutlet="
+          mainNavService.getCustomTemplateSlot(TemplateSlot.BeforeUserMenu);
+          context: {
+            currentScope: this.currentScope
+          }
+        "
+      ></ng-container>
+    </ng-container>
     <div class="imprint" *ngIf="config.imprintUrl || config.privacyInformationUrl">
       <a
         cdkMonitorElementFocus
@@ -153,3 +184,13 @@
     <es-dropdown #userDropdown class="userMenu" [options]="userMenuOptions"></es-dropdown>
   </div>
 </div>
+<ng-container *ngIf="mainNavService.getCustomTemplateSlot(TemplateSlot.BeforeUserMenu)">
+  <ng-container
+    *ngTemplateOutlet="
+      mainNavService.getCustomTemplateSlot(TemplateSlot.BelowTopBar);
+      context: {
+        currentScope: this.currentScope
+      }
+    "
+  ></ng-container>
+</ng-container>

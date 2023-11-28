@@ -22,8 +22,9 @@ import {
     GenericDialogData,
 } from '../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../features/dialogs/dialogs.service';
-import { GlobalProgressComponent } from '../shared/components/global-progress/global-progress.component';
 import { ToastMessageComponent } from '../main/toast-message/toast-message.component';
+import { GlobalProgressComponent } from '../shared/components/global-progress/global-progress.component';
+import { BridgeService } from './bridge.service';
 
 interface CustomAction {
     link: {
@@ -408,7 +409,7 @@ export class Toast extends ToastAbstract implements OnDestroy {
         let error = errorObject;
         let errorInfo = '';
         let json: any = null;
-        if (errorObject) {
+        if (errorObject && errorObject.status !== RestConstants.HTTP_UNAUTHORIZED) {
             json = errorObject.error;
         }
         try {
@@ -505,12 +506,17 @@ export class Toast extends ToastAbstract implements OnDestroy {
 
                 const login = this.injector.get(RestConnectorService).getCurrentLogin();
                 if (login && login.isGuest) {
-                    this.toast('TOAST.API_FORBIDDEN_LOGIN');
-                    this.goToLogin();
+                    if (!this.injector.get(BridgeService).isRunningCordova()) {
+                        this.toast('TOAST.API_FORBIDDEN_LOGIN');
+                        this.goToLogin();
+                    }
+
                     return false;
                 }
             } else if (errorObject.status === RestConstants.HTTP_UNAUTHORIZED) {
-                this.toast('TOAST.API_FORBIDDEN_LOGIN');
+                if (!this.injector.get(BridgeService).isRunningCordova()) {
+                    this.toast('TOAST.API_FORBIDDEN_LOGIN');
+                }
                 return false;
             } else {
                 if (!dialogMessage) {

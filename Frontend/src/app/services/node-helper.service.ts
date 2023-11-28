@@ -42,7 +42,14 @@ import { UniversalNode } from '../core-module/rest/definitions';
 import { SessionStorageService } from '../core-module/rest/services/session-storage.service';
 import { map } from 'rxjs/operators';
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
-import { ApiHelpersService, ConfigService, NetworkService, Node } from 'ngx-edu-sharing-api';
+import {
+    ApiHelpersService,
+    ConfigService,
+    HOME_REPOSITORY,
+    NetworkService,
+    Node,
+    TrackingV1Service,
+} from 'ngx-edu-sharing-api';
 
 export interface ConfigEntry {
     name: string;
@@ -90,6 +97,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
         private router: Router,
         private sessionStorage: SessionStorageService,
         private storage: TemporaryStorageService,
+        private trackingV1Service: TrackingV1Service,
         private location: Location,
     ) {
         super(
@@ -162,7 +170,20 @@ export class NodeHelperService extends NodeHelperServiceBase {
         return error.status;
     }
 
-    public downloadUrl(url: string, fileName = 'download') {
+    public downloadUrl(
+        url: string,
+        fileName = 'download',
+        details?: { triggerTrackingEvent: boolean; node: Node },
+    ) {
+        if (details?.triggerTrackingEvent) {
+            this.trackingV1Service
+                .trackEvent({
+                    repository: HOME_REPOSITORY,
+                    node: details.node.ref.id,
+                    event: 'DOWNLOAD_MATERIAL',
+                })
+                .subscribe(() => {});
+        }
         if (this.bridge.isRunningCordova()) {
             this.bridge.showTemporaryMessage(MessageType.info, 'TOAST.DOWNLOAD_STARTED', {
                 name: fileName,
@@ -205,6 +226,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
             window.open(url);
         }
     }
+
     /**
      * Download (a single) node
      */
@@ -281,6 +303,11 @@ export class NodeHelperService extends NodeHelperServiceBase {
                 } else if (c.changeStrategy === 'update') {
                     item = options.find((o) => o.name === c.name);
                     if (!item) {
+                        console.warn(
+                            'Updating item ' +
+                                c.name +
+                                ' failed: No such item is currently present',
+                        );
                         continue;
                     }
                 } else {
@@ -362,39 +389,40 @@ export class NodeHelperService extends NodeHelperServiceBase {
                 }
                 item.showAsAction = c.showAsAction;
                 item.isSeparate = c.isSeparate;
-                item.customEnabledCallback = (nodes) => {
-                    if (c.permission) {
-                        return this.getNodesRight(nodes, c.permission);
-                    }
-                    return true;
-                };
-                item.isEnabled = item.customEnabledCallback(null);
-                item.customShowCallback = (nodes) => {
-                    if (c.mode == 'nodes' && !nodes?.length) return false;
-                    if (c.mode == 'noNodes' && nodes && nodes.length) return false;
-                    if (
-                        c.mode == 'noNodesNotEmpty' &&
-                        ((nodes && nodes.length) || !allNodes || !allNodes.length)
-                    )
-                        return false;
-                    // @ts-ignore
-                    if (
-                        c.mode == 'nodes' &&
-                        c.isDirectory != 'any' &&
-                        nodes &&
-                        c.isDirectory != nodes[0].isDirectory
-                    )
-                        return false;
-                    if (
-                        c.toolpermission &&
-                        !this.connector.hasToolPermissionInstant(c.toolpermission)
-                    )
-                        return false;
-                    if (c.multiple != null && !c.multiple && nodes && nodes.length > 1)
-                        return false;
-                    return true;
-                };
                 if (c.changeStrategy !== 'update') {
+                    item.customEnabledCallback = (nodes) => {
+                        if (c.permission) {
+                            return this.getNodesRight(nodes, c.permission);
+                        }
+                        return true;
+                    };
+                    item.isEnabled = item.customEnabledCallback(null);
+                    item.customShowCallback = (nodes) => {
+                        if (c.mode == 'nodes' && !nodes?.length) return false;
+                        if (c.mode == 'noNodes' && nodes && nodes.length) return false;
+                        if (
+                            c.mode == 'noNodesNotEmpty' &&
+                            ((nodes && nodes.length) || !allNodes || !allNodes.length)
+                        )
+                            return false;
+                        // @ts-ignore
+                        if (
+                            c.mode == 'nodes' &&
+                            c.isDirectory != 'any' &&
+                            nodes &&
+                            c.isDirectory != nodes[0].isDirectory
+                        )
+                            return false;
+                        if (
+                            c.toolpermission &&
+                            !this.connector.hasToolPermissionInstant(c.toolpermission)
+                        )
+                            return false;
+                        if (c.multiple != null && !c.multiple && nodes && nodes.length > 1)
+                            return false;
+
+                        return true;
+                    };
                     options.splice(c.position ?? 0, 0, item);
                 }
             }

@@ -19,5 +19,6 @@ li {
         opacity: 0.5;
         cursor: move;
         padding: 20px;
+        box-sizing: content-box;
     }
 }

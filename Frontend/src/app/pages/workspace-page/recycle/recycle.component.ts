@@ -12,6 +12,7 @@ import { GenericAuthority } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     CustomOptions,
+    DefaultGroups,
     ElementType,
     FetchEvent,
     InteractionType,
@@ -106,16 +107,20 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
-        this.options.addOptions.push(
-            new OptionItem('RECYCLE.OPTION.RESTORE_SINGLE', 'undo', (node: Node) =>
-                this.restoreSingle(node),
-            ),
+        const restoreOption = new OptionItem(
+            'RECYCLE.OPTION.RESTORE_SINGLE',
+            'undo',
+            (node: Node) => this.restoreSingle(node),
         );
-        this.options.addOptions.push(
-            new OptionItem('RECYCLE.OPTION.DELETE_SINGLE', 'delete', (node: Node) =>
-                this.deleteSingle(node),
-            ),
+        restoreOption.group = DefaultGroups.Primary;
+        const deleteOption = new OptionItem(
+            'RECYCLE.OPTION.DELETE_SINGLE',
+            'delete',
+            (node: Node) => this.deleteSingle(node),
         );
+        deleteOption.group = DefaultGroups.Primary;
+        this.options.addOptions.push(restoreOption);
+        this.options.addOptions.push(deleteOption);
         this.options.addOptions.forEach((o) => {
             o.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         });
@@ -274,7 +279,6 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     updateSort(sort: ListSortConfig) {
-        console.log(sort);
         this.sort = sort;
         this.refresh();
     }

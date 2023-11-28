@@ -241,9 +241,20 @@ public class LTIPlatformApi {
 
 
             if(appInfo.hasLtiToolCustomContentOption() && loginInitiationSessionObject.getContentUrlNodeId() != null){
+                NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,loginInitiationSessionObject.getContentUrlNodeId());
                 AccessStatus accessStatus = serviceRegistry.getPermissionService()
-                        .hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,loginInitiationSessionObject.getContentUrlNodeId()),
+                        .hasPermission(nodeRef,
                                 PermissionService.WRITE_CONTENT);
+                if(serviceRegistry.getNodeService().hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
+                    NodeRef nodeRefOriginal = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,(String)serviceRegistry.getNodeService()
+                            .getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)));
+                    try {
+                        accessStatus = serviceRegistry.getPermissionService().hasPermission(nodeRefOriginal,
+                                PermissionService.WRITE_CONTENT);
+                    }catch (Exception e){
+                        accessStatus = AccessStatus.DENIED;
+                    }
+                }
                 Map<String,String> custom = new HashMap<>();
                 custom.put(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID,appInfo.getAppId());
                 custom.put(LTIPlatformConstants.CUSTOM_CLAIM_NODEID,loginInitiationSessionObject.getContentUrlNodeId());
@@ -756,17 +767,20 @@ public class LTIPlatformApi {
         loginInitiationSessionObject.setMessageType(messageType);
         loginInitiationSessionObject.setContentUrlNodeId(contentUrlNodeId);
         loginInitiationSessionObject.setLaunchPresentation(launchPresentation);
+        loginInitiationSessionObject.setUser(AuthenticationUtil.getFullyAuthenticatedUser());
         //remember session in userLTISessions map to reuse in later backend call
         if(contentUrlNodeId != null){
             Map<String,String> map = new HashMap<>();
             map.put(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID,appInfo.getAppId());
             map.put(LTIPlatformConstants.CUSTOM_CLAIM_USER,AuthenticationUtil.getFullyAuthenticatedUser());
             map.put(LTIPlatformConstants.CUSTOM_CLAIM_NODEID,contentUrlNodeId);
-            map.put("ts",System.currentTimeMillis()+"");
+            long timeStamp = System.currentTimeMillis();
+            map.put("ts",timeStamp + "");
             String json = new Gson().toJson(map);
             String encryptedToken = ApiTool.encrpt(json);
             loginInitiationSessionObject.setToken(encryptedToken);
-            AllSessions.userLTISessions.put(encryptedToken, req.getSession());
+            loginInitiationSessionObject.setLastAccessed(timeStamp);
+            AllSessions.userLTISessions.put(encryptedToken, loginInitiationSessionObject);
         }
 
         Map<String,LoginInitiationSessionObject> loginInitiationSessionObjectMap = (Map<String,LoginInitiationSessionObject>)req
@@ -1122,6 +1136,11 @@ public class LTIPlatformApi {
                         else
                             logger.error("unknown version");
                     }
+                }
+
+                if(serviceRegistry.getNodeService().hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
+                    nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,(String)serviceRegistry.getNodeService()
+                            .getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)));
                 }
 
                 String toolUrl = (String)serviceRegistry.getNodeService().getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_TOOLURL));

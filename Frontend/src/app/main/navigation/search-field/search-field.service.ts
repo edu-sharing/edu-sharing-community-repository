@@ -93,6 +93,20 @@ export class SearchFieldInstance {
     getInputElement(): ElementRef {
         return this._internal.searchFieldComponent.value.input;
     }
+
+    /**
+     * Whether the search field's suggestions overlay is currently being displayed.
+     */
+    overlayIsOpen(): boolean {
+        return this._internal.searchFieldComponent.value?.overlay.overlayRef != null;
+    }
+
+    /**
+     * If the overlay is currently visible, updates its position.
+     */
+    updateOverlayPosition(): void {
+        this._internal.searchFieldComponent.value?.overlay.overlayRef?.updatePosition();
+    }
 }
 
 /**
@@ -142,7 +156,7 @@ export class SearchFieldService {
      * Returns the current search-field instance or null if the search field is disabled.
      *
      * The returned instance's lifetime is determined by the `until` subject given when `enable` was
-     * called. Use this method if you want to use a search field instance, that has been enabled
+     * called. Use this method if you want to use a search field instance that has been enabled
      * someplace else and you are sure that it will stay enabled for the time you intend to use it.
      * A good example would be a sub-component of the component that called `enable`.
      */

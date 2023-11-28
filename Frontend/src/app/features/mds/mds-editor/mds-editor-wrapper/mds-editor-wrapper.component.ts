@@ -289,17 +289,21 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
             } else */ if (this.nodes) {
                 this.editorType = await this.mdsEditorInstance.initWithNodes(this.nodes, config);
             } else {
-                this.editorType = await this.mdsEditorInstance.initWithoutNodes(
-                    this.groupId,
-                    this.setId,
-                    this.repository,
-                    this.editorMode ?? 'search',
-                    this.currentValues,
-                );
+                try {
+                    this.editorType = await this.mdsEditorInstance.initWithoutNodes(
+                        this.groupId,
+                        this.setId,
+                        this.repository,
+                        this.editorMode ?? 'search',
+                        this.currentValues,
+                    );
+                } catch (e) {
+                    return;
+                }
             }
             if (!this.editorType) {
                 console.warn(
-                    `mds ${this.setId} at ${this.repository} did not specify any rendering type`,
+                    `mds ${this.setId} at ${this.repository} did not specify any rendering type (group ${this.groupId})`,
                 );
                 this.editorType = 'legacy';
             }

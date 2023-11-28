@@ -1,35 +1,43 @@
 import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition } from '@angular/cdk/overlay';
-import { Component, ElementRef, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    ElementRef,
+    HostListener,
+    NgZone,
+    OnDestroy,
+    OnInit,
+    ViewChild,
+} from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { MatChip } from '@angular/material/chips';
 import {
     FacetsDict,
     LabeledValue,
     LabeledValuesDict,
-    MdsService,
     MdsDefinition,
-    MdsWidget,
+    MdsService,
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap, takeUntil } from 'rxjs/operators';
+import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { SearchFieldFacetsComponent } from '../../../features/mds/mds-editor/search-field-facets/search-field-facets.component';
+import {
+    MdsWidgetTree,
+    Tree,
+} from '../../../features/mds/mds-editor/widgets/mds-editor-widget-tree/tree';
 import { MdsWidgetType, Values } from '../../../features/mds/types/types';
 import { LoadingScreenService } from '../../loading-screen/loading-screen.service';
 import { SearchFieldInternalService } from './search-field-internal.service';
 import { SearchFieldConfig } from './search-field.service';
-import { MdsHelper } from '../../../core-module/rest/mds-helper';
-import { Tree } from '../../../features/mds/mds-editor/widgets/mds-editor-widget-tree/tree';
 
-type MdsWidgetTree = MdsWidget & {
-    tree: Tree;
-};
 @Component({
     selector: 'es-search-field',
     templateUrl: './search-field.component.html',
     styleUrls: ['./search-field.component.scss'],
 })
-export class SearchFieldComponent implements OnInit, OnDestroy {
+export class SearchFieldComponent implements OnInit, OnDestroy, AfterViewInit {
     /** The number of filters visible on the facets overlay. */
     filtersCount: number;
     /** The total number of filters independently of categories of the facets overlay. */
@@ -45,7 +53,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     set input(value: ElementRef<HTMLInputElement>) {
         this.inputSubject.next(value);
     }
-    @ViewChild(CdkConnectedOverlay) private overlay: CdkConnectedOverlay;
+    @ViewChild(CdkConnectedOverlay) overlay: CdkConnectedOverlay;
     @ViewChild(SearchFieldFacetsComponent) private searchFieldFacets: SearchFieldFacetsComponent;
     @ViewChild(MatChip) private firstActiveChip: MatChip;
 
@@ -85,10 +93,11 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     private readonly destroyed$ = new Subject<void>();
 
     constructor(
+        private elementRef: ElementRef,
         private internal: SearchFieldInternalService,
         private loadingScreen: LoadingScreenService,
-        private ngZone: NgZone,
         private mdsService: MdsService,
+        private ngZone: NgZone,
     ) {
         this.mdsInfo$
             .pipe(switchMap((mds) => this.mdsService.getMetadataSet(mds)))
@@ -96,7 +105,6 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.internal.searchFieldComponent.next(this);
         this.internal.config
             .pipe(takeUntil(this.destroyed$))
             .subscribe((config) => (this.config = config));
@@ -154,11 +162,34 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
             .subscribe((isLoading) => (this.isLoading = isLoading));
     }
 
+    ngAfterViewInit(): void {
+        setTimeout(() => {
+            this.updateComponentInstance();
+        });
+    }
+
     ngOnDestroy(): void {
         this.destroyed$.next();
         this.destroyed$.complete();
         if (this.internal.searchFieldComponent.value === this) {
             this.internal.searchFieldComponent.next(null);
+        }
+    }
+
+    @HostListener('window:resize') onResize() {
+        // Keep the component instance pointed to the visible component when there are multiple
+        // search-field instances that are shown/hidden with CSS media queries.
+        this.updateComponentInstance();
+    }
+
+    /**
+     * Assigns the component reference of `SearchFieldInternalService` to this instance if this
+     * instance is currently visible in the DOM.
+     */
+    private updateComponentInstance(): void {
+        const isVisibleInDom = this.elementRef.nativeElement.offsetParent != null;
+        if (isVisibleInDom && this.internal.searchFieldComponent.value !== this) {
+            this.internal.searchFieldComponent.next(this);
         }
     }
 

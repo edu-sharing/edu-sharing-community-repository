@@ -17,6 +17,7 @@ import javax.xml.xpath.XPathFactory;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.importer.BinaryHandler;
+import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.importer.PersistentHandlerInterface;
 import org.edu_sharing.repository.server.importer.RecordHandlerInterfaceBase;
 import org.edu_sharing.repository.server.jobs.quartz.OAIConst;
@@ -53,8 +54,6 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 	String metadataPrefix = null;
 
 	String esMetadataSetId = null;
-
-	HttpQueryTool qt = new HttpQueryTool();
 
 	PersistentHandlerInterface persistentHandler = null;
 
@@ -95,7 +94,6 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 		this.recordHandler = recordHandler;
 		this.binaryHandler = binaryHandler;
 		this.addSetToGetRecordUrl = addSetToGetRecordUrl;
-
 		String url = this.oaiBaseUrl + "?verb=ListIdentifiers&metadataPrefix=" + metadataPrefix + "&set=" + set;
 		if(from != null && until != null){
 			url += "&from=" + OAIConst.DATE_FORMAT.format(from);
@@ -109,7 +107,7 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 
 		currentUrl = new String(url);
 
-		String result = qt.query(url);
+		String result = OAIPMHLOMImporter.getQueryTool().query(url);
 
 
 		try {
@@ -169,7 +167,7 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 		String lowerLocalName = localName.toLowerCase();
 
 		if (parentLocalName.equals("oai-pmh") && lowerLocalName.equals("error")) {
-			logger.error("oai service error:" + currentValue + " code:" + currentAtts.getValue("code") + " " +" cursor:"+cursor+ " set:"+set +" metadataPrefix:" + metadataPrefix + " currentUrl:"+currentUrl);
+			logger.warn("oai service error:" + currentValue + " code:" + currentAtts.getValue("code") + " " +" cursor:"+cursor+ " set:"+set +" metadataPrefix:" + metadataPrefix + " currentUrl:"+currentUrl);
 		}
 
 		// reset deleted status
@@ -236,7 +234,7 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 
 			String url = getRecordUrl(replId);
 			logger.info("url:" + url);
-			String result = qt.query(url);
+			String result = OAIPMHLOMImporter.getQueryTool().query(url);
 
 			try {
 

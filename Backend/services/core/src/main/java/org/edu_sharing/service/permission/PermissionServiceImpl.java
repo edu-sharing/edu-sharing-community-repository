@@ -29,6 +29,7 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repackaged.elasticsearch.org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
+import org.edu_sharing.alfresco.service.EduSharingCustomPermissionService;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -59,6 +60,7 @@ import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.springframework.beans.BeanInstantiationException;
 import org.springframework.context.ApplicationContext;
 
 import com.google.gson.Gson;
@@ -71,6 +73,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public static final String NODE_PUBLISHED = "NODE_PUBLISHED";
 	// the maximal number of "notify" entries in the PH_HISTORY field that are serialized
 	private static final int MAX_NOTIFY_HISTORY_LENGTH = 100;
+	private EduSharingCustomPermissionService customPermissionService;
 	private ShareService shareService = null;
 	private NodeService nodeService = null;
 	private PersonService personService;
@@ -98,7 +101,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		nodeService = serviceRegistry.getNodeService();
 		shareService = new ShareServiceImpl(this);
 		permissionService = serviceRegistry.getPermissionService();
-
+		if(applicationContext.containsBean("customPermissionService")) {
+			customPermissionService = (EduSharingCustomPermissionService) applicationContext.getBean("customPermissionService");
+		}
 		personService = serviceRegistry.getPersonService();
 	}
 	

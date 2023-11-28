@@ -150,6 +150,9 @@
     <h4 class="mat-heading-4 mat-heading-underline">
       <i esIcon="assessment"></i> {{ 'ADMIN.STATISTICS.NODES' | translate }}
     </h4>
+    <es-info-message *ngIf="_mediacenter">
+      {{ 'ADMIN.STATISTICS.NODES_MEDIACENTER_INFO' | translate }}
+    </es-info-message>
     <div class="modes">
       <div class="calendars">
         <div>
@@ -166,7 +169,7 @@
         </div>
       </div>
     </div>
-    <div class="export" *ngIf="!nodesNoData && !singleLoading">
+    <div class="export" *ngIf="!nodesNoData && !nodesDataSource.isLoading">
       <h4 class="mat-heading-4 mat-heading-underline clickable" (click)="showExport = !showExport">
         <i esIcon="cloud_download"></i>
         <span>{{ 'ADMIN.STATISTICS.EXPORT_LABEL' | translate }}</span>
@@ -195,6 +198,7 @@
     <h5 class="mat-heading-5" *ngIf="nodesNoData">{{ 'ADMIN.STATISTICS.NO_DATA' | translate }}</h5>
     <es-node-entries-wrapper
       *ngIf="!nodesNoData"
+      [scope]="Scope.Admin"
       [dataSource]="nodesDataSource"
       [elementInteractionType]="InteractionType.Emitter"
       [checkbox]="false"
@@ -206,6 +210,7 @@
       {{ 'ADMIN.STATISTICS.SLICE_INFO_DOWNLOAD' | translate }}
     </es-info-message>
   </mat-tab>
+  <!--
   <mat-tab label="{{ 'ADMIN.STATISTICS.SINGLE' | translate }}" class="stats-single">
     <h4 class="mat-heading-4 mat-heading-underline">
       <i esIcon="view_headline"></i> {{ 'ADMIN.STATISTICS.SINGLE' | translate }}
@@ -294,6 +299,7 @@
       </es-info-message>
     </div>
   </mat-tab>
+  -->
   <mat-tab label="{{ 'ADMIN.STATISTICS.ARCHIVED' | translate }}" *ngIf="_mediacenter">
     <h4 class="mat-heading-4 mat-heading-underline">
       <i esIcon="archive"></i> {{ 'ADMIN.STATISTICS.ARCHIVED' | translate }}
@@ -322,29 +328,15 @@
 <div
   class="export"
   *ngIf="
-    currentTab != 2 &&
-    currentTab != 4 &&
-    !groupedLoading &&
-    !customGroupLoading &&
-    !nodesDataSource.isLoading &&
-    !singleLoading
+    (currentTab === 0 && !groupedLoading) ||
+    (currentTab === 1 && !customGroupLoading) ||
+    (currentTab === 2 && !singleLoading)
   "
 >
   <h4 class="mat-heading-4 mat-heading-underline">
     <i esIcon="cloud_download"></i>{{ 'ADMIN.STATISTICS.EXPORT_LABEL' | translate }}
   </h4>
   <div>
-    <mat-form-field *ngIf="currentTab == 2">
-      <mat-label>{{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES' | translate }}</mat-label>
-      <textarea
-        matInput
-        cdkTextareaAutosize
-        cdkAutosizeMinRows="4"
-        cdkAutosizeMaxRows="6"
-        [(ngModel)]="exportProperties"
-      ></textarea>
-      <mat-hint>{{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES_HINT' | translate }}</mat-hint>
-    </mat-form-field>
     <div>
       <button mat-raised-button color="primary" (click)="export()">
         {{ 'ADMIN.STATISTICS.EXPORT' | translate }}

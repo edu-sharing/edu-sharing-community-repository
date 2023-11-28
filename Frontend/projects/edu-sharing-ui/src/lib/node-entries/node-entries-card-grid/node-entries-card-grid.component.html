@@ -1,4 +1,15 @@
 <ng-template #gridTop>
+  <button
+    *ngIf="entriesService.configureColumns"
+    mat-icon-button
+    (click)="columnChooserVisible$.next(!columnChooserVisible$.value)"
+    cdkOverlayOrigin
+    #columnChooserTrigger="cdkOverlayOrigin"
+    [matTooltip]="'LIST_TABLE.CONFIGURE_COLUMNS' | translate"
+    [attr.aria-label]="'LIST_TABLE.CONFIGURE_COLUMNS' | translate"
+  >
+    <i esIcon="settings"></i>
+  </button>
   <es-sort-select-panel
     *ngIf="entriesService.sort?.allowed"
     class="order-panel"
@@ -10,11 +21,19 @@
     (customSortingInProgressChange)="onCustomSortingInProgressChange()"
   ></es-sort-select-panel>
 </ng-template>
-
+<es-column-chooser
+  *ngIf="entriesService.configureColumns"
+  [(columns)]="entriesService.columns"
+  [columnChooserVisible]="columnChooserVisible$ | async"
+  [origin]="columnChooserTrigger"
+  (columnChooserVisibleChange)="columnChooserVisible$.next($event)"
+></es-column-chooser>
 <es-dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></es-dropdown>
 
 <!-- Do not render the list element (`role="list"` or `li`) when there are no list items. -->
-<ng-container *ngIf="(nodes$ | async)?.length > 0 || entriesService.globalOptions?.length > 0">
+<ng-container
+  *ngIf="(nodes$ | async)?.length > 0 || (entriesService.globalOptionsSubject | async)?.length > 0"
+>
   <!-- FIXME: Ideally, we would use native `ul` and `li` elements, but these have a strict model,
   that only allows `li` elements as direct children of `ul` elements. So we would need to use the
   native elements at all places without any elements between `ul` and `li`. -->
@@ -74,7 +93,7 @@
       (scrolled)="!visibleItemsLimited && loadData('scroll')"
     >
       <es-node-entries-global-options
-        *ngIf="entriesService.globalOptions?.length"
+        *ngIf="(entriesService.globalOptionsSubject | async)?.length"
         [displayType]="displayType"
       >
       </es-node-entries-global-options>
@@ -99,7 +118,7 @@
               [dropdown]="dropdown"
               role="listitem"
               cdkDrag
-              [cdkDragDisabled]="!getDragEnabled()"
+              [cdkDragDisabled]="!(getDragEnabled() | async)"
               [cdkDragData]="getDragData(node)"
               esNodesDrag
               (cdkDragStarted)="onDragStarted(node)"
@@ -127,7 +146,7 @@
               [node]="node"
               role="listitem"
               cdkDrag
-              [cdkDragDisabled]="!getDragEnabled()"
+              [cdkDragDisabled]="!(getDragEnabled() | async)"
               [cdkDragData]="[node]"
               esNodesDrag
             >

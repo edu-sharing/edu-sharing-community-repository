@@ -301,11 +301,13 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         RestConstants.COLLECTION_ORDER_MODE_CUSTOM
                             ? RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
                             : refMode) || RestConstants.CM_MODIFIED_DATE) as any;
-                        this.sortReferences.direction = RestConstants.COLLECTION_ORDER_MODE_CUSTOM
-                            ? 'asc'
-                            : refAscending
-                            ? 'asc'
-                            : 'desc';
+                        this.sortReferences.direction =
+                            this.sortReferences.active ===
+                            RestConstants.COLLECTION_ORDER_MODE_CUSTOM
+                                ? 'asc'
+                                : refAscending
+                                ? 'asc'
+                                : 'desc';
                         this.collection = collection;
                         this.mainNavUpdateTrigger.next();
                         this.dataSourceCollections.isLoading = false;
@@ -601,6 +603,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             currentScope: 'collections',
             onCreate: (nodes) => this.addNodesToCollection(nodes),
         });
+        this.mainNavService.onConnectorCreated
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((node) => this.addNodesToCollection([node]));
         this.mainNavUpdateTrigger.pipe(takeUntil(this.destroyed$)).subscribe(async () => {
             this.mainNavService.patchMainNavConfig({
                 create: {
@@ -632,6 +637,14 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         // when loading child collections, we load all of them
         if (!this.isRootLevel) {
             request.count = RestConstants.COUNT_UNLIMITED;
+        } else {
+            // on root level, obey pinned order if collections are pinned
+            request.sortBy = [
+                RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
+                RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
+                ...request.sortBy,
+            ];
+            request.sortAscending = [false, true, ...request.sortAscending];
         }
         this.collectionService
             .getCollectionSubcollections(
@@ -706,6 +719,11 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                     [sort.active, (sort.direction === 'asc') + ''],
                 )
                 .toPromise();
+            if (sort.active !== RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION) {
+                this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_TYPE', {
+                    type: this.translation.instant('NODE.' + sort.active),
+                });
+            }
         } catch (e) {
             this.toast.error(e);
         }

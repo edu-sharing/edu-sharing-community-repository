@@ -1,32 +1,34 @@
 /**
  *
- *  
- * 
- * 
- *	
  *
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  *
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -62,16 +64,14 @@ public class JobHandler {
 
 	public static final Object KEY_RESULT_DATA = "JOB_RESULT_DATA";
 	private static final int MAX_JOB_LOG_COUNT = 20; // maximal number of jobs to store for history and gui
-	public final static SimpleCache<String, List<JobInfo>> jobs = (SimpleCache)  AlfAppContextGate.getApplicationContext().getBean("eduSharingJobsListCache");
+	//public final static SimpleCache<String, List<JobInfo>> jobs = (SimpleCache)  AlfAppContextGate.getApplicationContext().getBean("eduSharingJobsListCache");
+	public final static Map<String, List<JobInfo>> jobs = new HashMap<>();
 	private static final String JOB_LIST_KEY = "jobs";
 
 	//private final ApplicationContext eduApplicationContext = null;
 
-	private final JobClusterLocker jobClusterLocker;
-
 	@Autowired
 	public JobHandler(JobClusterLocker jobClusterLocker, SchedulerFactoryBean schedulerFactoryBean) throws Exception {
-		this.jobClusterLocker = jobClusterLocker;
 		this.schedulerFactoryBean = schedulerFactoryBean;
 		init();
 	}
@@ -83,17 +83,68 @@ public class JobHandler {
 		jobs.put(JOB_LIST_KEY, jobs.get(JOB_LIST_KEY).stream().map(j -> j.equals(job) ? job : j).collect(Collectors.toList()));
 	}
 
-	public boolean cancelJob(String jobName) throws SchedulerException {
-
+	public Job getJobByName(String jobName) throws SchedulerException {
+		return (Job) quartzScheduler.getCurrentlyExecutingJobs().
+				stream()
+				.filter(j -> ((JobExecutionContext)j).getJobDetail().getKey().getName().equals(jobName))
+				.map(j -> ((JobExecutionContext)j).getJobInstance())
+				.findFirst().orElse(null);
+	}
+	public boolean cancelJob(String jobName, boolean force) throws SchedulerException {
+		checkPrimaryRepository();
+		JobDetail jobDetail = quartzScheduler.getJobDetail(JobKey.jobKey(jobName));
+		Job jobInstance = getJobByName(jobName);
+		if(force) {
+			if(jobInstance != null) {
+				if(jobInstance instanceof AbstractInterruptableJob) {
+					((AbstractInterruptableJob) jobInstance).setForceStop(force);
+				} else {
+					throw new RuntimeException("Force Stop of jobs is only supported for jobs of type " + AbstractInterruptableJob.class);
+				}
+			}
+			if(jobInstance == null) {
+				// throw new RuntimeException("Job " + jobName + " was not found as a running job. May it is running on an other cluster node?");
+				// we're on the primary instance - so if the job is not existing, we can still assume it's dead and cancel it
+			}
+		}
 		boolean result=quartzScheduler.interrupt(JobKey.jobKey(jobName));
 		if(!result){
+			if(jobInstance == null && !force) {
+				throw new RuntimeException("Job " + jobName + " was not found as a running job. Use force parameter if you want to remove the entry anyway.");
+			}
+		} else if(force) {
+			quartzScheduler.deleteJob(JobKey.jobKey(jobName));
+		}
+		if(force) {
 			try {
-				finishJob(quartzScheduler.getJobDetail(JobKey.jobKey(jobName)), JobInfo.Status.Aborted);
+				if(jobDetail != null) {
+					finishJob(jobDetail, JobInfo.Status.Aborted);
+				} else {
+					setJobStatusByName(jobName, JobInfo.Status.Aborted);
+				}
+
 			}catch(Throwable t){
 				t.printStackTrace();
 			}
 		}
 		return result;
+	}
+
+	private void checkPrimaryRepository() {
+		if(!isPrimaryRepository()) {
+			throw new RuntimeException("Jobs can only be controlled on the primary repository");
+		}
+	}
+
+	public void setJobStatusByName(String jobName, JobInfo.Status status) {
+		for(JobInfo job : getJobs()){
+			if(job.getJobName().equals(jobName) && job.getStatus().equals(JobInfo.Status.Running)){
+				job.setStatus(status);
+				job.setFinishTime(System.currentTimeMillis());
+				refreshJobsCache(job);
+				return;
+			}
+		}
 	}
 	public void finishJob(JobDetail jobDetail, JobInfo.Status status) {
 		for(JobInfo job : getJobs()){
@@ -109,11 +160,12 @@ public class JobHandler {
 		throw new IllegalArgumentException("Job "+jobDetail.getKey()+" was not found");
 	}
 
-	private static synchronized List<JobInfo> getJobs() {
-		if(jobs.get(JOB_LIST_KEY) == null) {
-			jobs.put(JOB_LIST_KEY, new ArrayList<>());
+	private static List<JobInfo> getJobs() {
+		List<JobInfo> jobList = jobs.get(JOB_LIST_KEY);
+		if(jobList == null) {
+			return new ArrayList<>();
 		}
-		return jobs.get(JOB_LIST_KEY);
+		return jobList;
 	}
 	private static synchronized void addJob(JobInfo jobInfo) {
 		List<JobInfo> jobList = getJobs();
@@ -128,13 +180,14 @@ public class JobHandler {
 			if(info.equalsDetail(jobDetail)){
 				((JobDetailImpl)jobDetail).setName(name);
 				info.setJobDetail(jobDetail);
+				refreshJobsCache(info);
 				return;
 			}
 		}
 	}
 
 	public class JobConfig {
-		
+
 		Class jobClass = null;
 		Trigger trigger = null;
 		HashMap<String, Object> params = null;
@@ -181,7 +234,7 @@ public class JobHandler {
 		public void setJobname(String jobname) {
 			this.jobname = jobname;
 		}
-		
+
 	}
 
 	Logger logger = Logger.getLogger(JobHandler.class);
@@ -198,11 +251,11 @@ public class JobHandler {
 
 	// trigger info Const job was vetoed
 	public static final String JOB_VETOED = "JOB_VETOED";
-	
+
 	public static final String IMMEDIATE_JOBNAME_SUFFIX = "_IMMEDIATE";
-	
+
 	public static final String VETO_BY_KEY = "VETO_BY";
-	
+
 	public static final String AUTH_INFO_KEY = "AUTH_INFO";
 
 	public static final String FILE_DATA = "FILE_DATA";
@@ -229,7 +282,6 @@ public class JobHandler {
 
 			@Override
 			public void triggerComplete(Trigger trigger, JobExecutionContext context, Trigger.CompletedExecutionInstruction triggerInstructionCode) {
-
 			}
 
 			@Override
@@ -268,20 +320,31 @@ public class JobHandler {
 								//&& Arrays.asList(((AbstractJob) jec.getJobInstance()).getJobClasses()).contains(jec.getJobInstance().getClass())
 								&& jobExecutionContext.getJobInstance().getClass().equals(jec.getJobInstance().getClass())
 						) {
-							veto = true;
-							jobExecutionContext.getJobDetail().getJobDataMap().put(VETO_BY_KEY, "another job is running");
-							logger.info("a job of class " + jec.getJobInstance().getClass().getName() + " is running. veto = true:");
+							if (jec.getJobInstance() instanceof AbstractInterruptableJob) {
+								if (
+										((AbstractInterruptableJob) jec.getJobInstance()).isForceStop() &&
+										((AbstractInterruptableJob) jec.getJobInstance()).isInterrupted()
+								) {
+									// no veto, the job is stuck or abandoned
+									logger.info("a job of class " + jec.getJobInstance().getClass().getName() + " is running. but is in stopped state. Skipping veto");
+								} else {
+									veto = true;
+									jobExecutionContext.getJobDetail().getJobDataMap().put(VETO_BY_KEY, "another job is running");
+									logger.info("a job of class " + jec.getJobInstance().getClass().getName() + " is running. veto = true:");
+								}
+							}
 						}
 					}
 
 					//check cluster singeltons
-					if(jobExecutionContext.getJobInstance() instanceof JobClusterLocker.ClusterSingelton){
+					// removed cause jobs only run on ONE primary node
+					/*if(jobExecutionContext.getJobInstance() instanceof JobClusterLocker.ClusterSingelton){
 						boolean aquiredLock = jobClusterLocker.tryLock(jobExecutionContext.getJobInstance().getClass().getName());
 						if(!aquiredLock){
 							veto = true;
 							jobExecutionContext.getJobDetail().getJobDataMap().put(VETO_BY_KEY, "same job is running on another cluster node");
 						}
-					}
+					}*/
 
 					logger.info("TriggerListener.vetoJobExecution returning:" + veto);
 					return veto;
@@ -319,14 +382,15 @@ public class JobHandler {
 				}
 				finishJob(context.getJobDetail(),status);
 
-				if(job instanceof JobClusterLocker.ClusterSingelton){
+				/*if(job instanceof JobClusterLocker.ClusterSingelton){
 					jobClusterLocker.releaseLock(job.getClass().getName());
-				}
+				}*/
 
 			}
 
 			@Override
 			public void jobToBeExecuted(JobExecutionContext context) {
+				checkPrimaryRepository();
 				Job job = context.getJobInstance();
 				logger.info("JobListener.jobToBeExecuted " + job.getClass());
 				if (job instanceof AbstractJob) {
@@ -363,6 +427,12 @@ public class JobHandler {
 
 	public synchronized void refresh(boolean triggerImmediateJobs) {
 		try {
+			if(!isPrimaryRepository()) {
+				logger.info("Not primary repository, will not register or handle quartz jobs");
+				return;
+			}
+			logger.info("primary repository, will register and handle quartz jobs");
+
 			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 			List<? extends Config> list = LightbendConfigLoader.get().getConfigList("jobs.entries");
 			jobConfigList.clear();
@@ -407,6 +477,24 @@ public class JobHandler {
 		}
 	}
 
+	private boolean isPrimaryRepository() {
+		if(LightbendConfigLoader.get().hasPath("jobs.primaryHostname")) {
+			try {
+				return Arrays.asList(
+						InetAddress.getLocalHost().getHostName(),
+						InetAddress.getLocalHost().getHostName().split("\\.")[0]
+				).contains(LightbendConfigLoader.get().getString("jobs.primaryHostname"));
+			} catch (UnknownHostException e) {
+				logger.warn("Could not resolve hostname", e);
+				return false;
+			}
+		} else {
+			logger.debug("No primaryHostname key, assuming no cluster, jobs are active on this repository");
+			return true;
+		}
+
+	}
+
 	private Trigger getTriggerFromString(String jobName, String triggerConfig) throws ParseException {
 		Trigger trigger = null;
 		if (triggerConfig.contains(TRIGGER_TYPE_DAILY)) {
@@ -418,8 +506,8 @@ public class JobHandler {
 				dailyConfig = dailyConfig.replaceAll("\\[", "").replaceAll("\\]", "");
 				String[] splittedConfig = dailyConfig.split(",");
 				if (splittedConfig.length == 2) {
-					hour = new Integer(splittedConfig[0]);
-					minute = new Integer(splittedConfig[1]);
+					hour = Integer.parseInt(splittedConfig[0]);
+					minute = Integer.parseInt(splittedConfig[1]);
 				}
 			}
 
@@ -469,6 +557,9 @@ public class JobHandler {
 	}
 
 	public List<JobInfo> getAllRunningJobs() throws SchedulerException {
+		if(!isPrimaryRepository()) {
+			return null;
+		}
 		List<JobInfo> result=getJobs();
 		/*
 		List running=getRunningJobs();
@@ -489,30 +580,31 @@ public class JobHandler {
 		return quartzScheduler.getCurrentlyExecutingJobs();
 	}
 	/**
-	 * 
+	 *
 	 * This is for immediate job excecution. when it's called a new job with an
 	 * immediate trigger will be created and registered with
 	 * scheduler.scheduleJob. For every immediate job there will be a
 	 * JobListener which is responsible to delete the Job from the scheduler:
 	 * - after the excecution finished
-	 * - an exception was drown 
+	 * - an exception was drown
 	 * - an veto occured.
-	 * 
+	 *
 	 * This listener also saves status information i.e if the job was vetoed or
 	 * the job finished. It is returned to the caller so that the caller can ask
 	 * for status Information
-	 * 
-	 * 
+	 *
+	 *
 	 * Another Idea was to put the status information in an JobDataMap of the
 	 * trigger but the Method Scheduler.triggerJob(jobName, null,jdm) creates an
 	 * own trigger
-	 * 
+	 *
 	 * @param jobClass
 	 * @param params
 	 * @return ImmediateJobListener
 	 * @throws SchedulerException
 	 */
 	public ImmediateJobListener startJob(Class jobClass, HashMap<String, Object> params) throws SchedulerException, Exception {
+		checkPrimaryRepository();
 
 		String jobName = jobClass.getSimpleName() + IMMEDIATE_JOBNAME_SUFFIX;
 
@@ -545,7 +637,7 @@ public class JobHandler {
 		 * user information if the job was vetoed(i.e. cause another job runs).
 		 * so we simulate synchr execution and wait 1 second and confirm that the
 		 * check is done.
-		 * 
+		 *
 		 * for the future maybe there will be a new UI where every job that is
 		 * registered at the scheduler is listed with status information. The
 		 * status information can be refreshed by polling
@@ -574,7 +666,7 @@ public class JobHandler {
 	 * schedules the job. used for cron triggers not for immediate triggers the
 	 * job detail name for the scheduler is jobClass.getSimpleName() +
 	 * "JobDetail";
-	 * 
+	 *
 	 * @param jobConfig
 	 */
 	private void scheduleJob(JobConfig jobConfig) throws SchedulerException {
@@ -626,5 +718,5 @@ public class JobHandler {
 	public List<JobConfig> getJobConfigList() {
 		return jobConfigList;
 	}
-	
+
 }

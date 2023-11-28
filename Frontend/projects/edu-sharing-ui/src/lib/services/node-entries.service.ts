@@ -55,8 +55,6 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
         this.columnsSubject.next(value);
     }
     configureColumns: boolean;
-    /** Emits when the columns configuration changes through user interaction. */
-    columnsChange: EventEmitter<ListItem[]>;
     displayType: NodeEntriesDisplayType;
     selection = new SelectionModel<T>(true, []);
     elementInteractionType: InteractionType;
@@ -68,7 +66,10 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
         this.options$.next(options);
     }
     checkbox: boolean;
-    globalOptions: OptionItem[];
+    globalOptionsSubject = new BehaviorSubject<OptionItem[]>([]);
+    set globalOptions(globalOptions: OptionItem[]) {
+        this.globalOptionsSubject.next(globalOptions);
+    }
     sortSubject = new BehaviorSubject<ListSortConfig>(void 0);
     get sort(): ListSortConfig {
         return this.sortSubject.value;

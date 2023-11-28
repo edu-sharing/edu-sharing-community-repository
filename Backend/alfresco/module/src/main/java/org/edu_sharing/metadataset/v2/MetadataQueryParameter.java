@@ -23,7 +23,7 @@ public class MetadataQueryParameter implements Serializable {
 	//only DSL
 	private boolean asFilter = true;
 
-	MetadataQueryParameter(String syntax, MetadataSet mds){
+	public MetadataQueryParameter(String syntax, MetadataSet mds){
 		this.syntax = syntax;
 		this.mds = mds;
 	}

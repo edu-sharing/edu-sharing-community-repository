@@ -281,8 +281,8 @@ public class AdminServiceImpl implements AdminService {
 		return JobHandler.getInstance().getAllRunningJobs();
 	}
 	@Override
-	public void cancelJob(String jobName) throws Throwable {
-		if(!JobHandler.getInstance().cancelJob(jobName)){
+	public void cancelJob(String jobName, boolean force) throws Throwable {
+		if(!JobHandler.getInstance().cancelJob(jobName, force)){
 			throw new Exception("Job could not be canceled. Scheduler returned false");
 		}
 	}
@@ -544,11 +544,22 @@ public class AdminServiceImpl implements AdminService {
         if (!appFile.exists()) {
             props.storeToXML(new FileOutputStream(appFile), "");
         } else {
-            throw new Exception("File " + appFile.getPath() + " already exsists");
+			throw new Exception("File "+appFile.getPath() + " already exists");
         }
 
 
-        String newProperty = getAppPropertiesApplications() + "," + filename;
+		String existingFileList = getAppPropertiesApplications();
+
+		if(existingFileList == null) {
+			try {
+				appFile.delete();
+			} catch(Throwable t){
+				logger.warn("Could not rollback app file " + appFile.getName(), t);
+			}
+			throw new Exception("AppList is currently empty. Please try again later");
+		}
+
+		String newProperty=existingFileList+","+filename;
         changeAppPropertiesApplications(newProperty, new Date() + " added file:" + filename);
 
 

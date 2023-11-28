@@ -1,4 +1,9 @@
-import { ComponentFactoryResolver, Injectable, ViewContainerRef } from '@angular/core';
+import {
+    ComponentFactoryResolver,
+    ComponentRef,
+    Injectable,
+    ViewContainerRef,
+} from '@angular/core';
 import {
     ListItem,
     NodeDataSource,
@@ -15,12 +20,12 @@ import { EventType, Node } from '../../core-module/rest/data-object';
 import { RestConstants } from '../../core-module/rest/rest-constants';
 import { RestTrackingService } from '../../core-module/rest/services/rest-tracking.service';
 import { RestUsageService } from '../../core-module/rest/services/rest-usage.service';
-import { VideoControlsComponent } from './video-controls/video-controls.component';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { replaceElementWithDiv } from '../../features/mds/mds-editor/util/replace-element-with-div';
 import { CommentsListComponent } from './comments-list/comments-list.component';
 import { MdsNodeRelationsWidgetComponent } from './node-relations/node-relations-widget.component';
+import { VideoControlsComponent } from './video-controls/video-controls.component';
 
 @Injectable()
 export class RenderHelperService {
@@ -28,6 +33,7 @@ export class RenderHelperService {
         return node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1;
     }
 
+    private videoControlsRef: ComponentRef<VideoControlsComponent>;
     private viewContainerRef: ViewContainerRef;
 
     constructor(
@@ -244,7 +250,7 @@ export class RenderHelperService {
             video: videoElement,
             node,
         };
-        UIHelper.injectAngularComponent(
+        this.videoControlsRef = UIHelper.injectAngularComponent(
             this.componentFactoryResolver,
             this.viewContainerRef,
             VideoControlsComponent,
@@ -262,6 +268,16 @@ export class RenderHelperService {
         htmlElement.innerHTML = detailsSnippet;
         Array.from(htmlElement.querySelectorAll('script')).forEach((script) => {
             const newScriptElement = document.createElement('script');
+            if (
+                !Array.from(script.attributes)
+                    .map((a) => a.name)
+                    .includes('src')
+            ) {
+                console.warn(
+                    'Rendering provided an inline script without a src! This script can not be executed!',
+                    script,
+                );
+            }
             Array.from(script.attributes).forEach((attr) => {
                 newScriptElement.setAttribute(attr.name, attr.value);
             });

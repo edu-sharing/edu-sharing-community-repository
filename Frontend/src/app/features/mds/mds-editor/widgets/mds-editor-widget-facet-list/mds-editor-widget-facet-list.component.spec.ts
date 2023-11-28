@@ -4,7 +4,7 @@ import { MdsEditorWidgetFacetListComponent } from './mds-editor-widget-facet-lis
 import { TranslateService } from '@ngx-translate/core';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ChangeDetectorRef } from '@angular/core';
-import { FacetValue } from 'ngx-edu-sharing-api';
+import { EduSharingApiModule, FacetValue } from 'ngx-edu-sharing-api';
 
 describe('MdsEditorWidgetFacetList', () => {
     let component: MdsEditorWidgetFacetListComponent;
@@ -18,7 +18,7 @@ describe('MdsEditorWidgetFacetList', () => {
 
     function setUp() {
         TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule],
+            imports: [HttpClientTestingModule, EduSharingApiModule.forRoot()],
             providers: [
                 MdsEditorWidgetFacetListComponent,
                 {

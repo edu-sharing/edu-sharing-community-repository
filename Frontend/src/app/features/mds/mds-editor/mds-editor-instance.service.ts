@@ -70,6 +70,7 @@ import {
 import { Helper } from '../../../core-module/rest/helper';
 import { MdsEditorWidgetCore } from './mds-editor-widget-core.directive';
 import { DisplayValue } from './widgets/DisplayValues';
+import { MdsWidgetTree } from './widgets/mds-editor-widget-tree/tree';
 
 export interface CompletionStatusField {
     widget: Widget;
@@ -102,6 +103,11 @@ export interface InitialValues {
      * Can be null but will never be set to an empty array.
      */
     readonly individualValues?: string[];
+}
+
+export class UnauthoritzedException implements Error {
+    message: string;
+    name: string;
 }
 
 /**
@@ -161,6 +167,8 @@ export class MdsEditorInstanceService implements OnDestroy {
             public readonly variables: { [key: string]: string } = null,
         ) {
             // deep copy to prevent persistence from inline overrides
+            // the tree element is recursive and might not be serializable, remove it (will be rebuild later)
+            delete (this._definition as MdsWidgetTree).tree;
             this._definition = Helper.deepCopy(this._definition);
             this.replaceVariables();
             combineLatest([this.value$, this.bulkMode, this.ready])
@@ -1138,7 +1146,11 @@ export class MdsEditorInstanceService implements OnDestroy {
                 );
                 mdsId = sets[0]?.id;
             } catch (e) {
-                console.warn('Error while resolving primary mds', e);
+                if (e?.status !== RestConstants.HTTP_UNAUTHORIZED) {
+                    console.warn('Error while resolving primary mds', e);
+                } else {
+                    throw new UnauthoritzedException();
+                }
             }
             if (!mdsId) {
                 mdsId = RestConstants.DEFAULT;
@@ -1146,7 +1158,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
         const hasInitialized = await this.initMds(groupId, mdsId, repository, null, initialValues);
         if (!hasInitialized) {
-            return null;
+            throw new Error('Could not initalize mds');
         }
         for (const widget of this.widgets.value) {
             widget.initWithValues(initialValues);
@@ -1525,7 +1537,9 @@ export class MdsEditorInstanceService implements OnDestroy {
                     this._new_initializingStateSubject.next('complete');
                 },
                 error: (error) => {
-                    console.warn('Failed to initialize MDS:', error);
+                    if (error.status != RestConstants.HTTP_UNAUTHORIZED) {
+                        console.warn('Failed to initialize MDS:', error);
+                    }
                     this._new_initializingStateSubject.next('failed');
                 },
             });

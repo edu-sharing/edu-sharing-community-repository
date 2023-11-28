@@ -1,10 +1,11 @@
 package org.edu_sharing.service.mediacenter;
 
-import org.edu_sharing.service.model.NodeRef;
+import org.edu_sharing.service.search.model.SortDefinition;
 
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public interface MediacenterService {
 	
@@ -47,5 +48,5 @@ public interface MediacenterService {
 
 	public void deleteMediacenter(String authorityName);
 
-    List<NodeRef> getAllLicensedNodes(String mediacenter) throws Throwable;
+	public List<org.edu_sharing.service.model.NodeRef> getAllLicensedNodes(String mediacenter, Map<String, String[]> criteria, SortDefinition sortDefinition) throws Throwable;
 }

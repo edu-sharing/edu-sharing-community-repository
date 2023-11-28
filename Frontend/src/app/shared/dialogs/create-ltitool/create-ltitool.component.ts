@@ -54,8 +54,8 @@ export class CreateLtitoolComponent implements OnInit {
         if (!this._tool) {
             return;
         }
-        console.log(
-            'this._tool.appId24:' +
+        console.debug(
+            'this._tool.appId:' +
                 this._tool.appId +
                 ' parentId:' +
                 this._parent.ref.id +
@@ -80,53 +80,7 @@ export class CreateLtitoolComponent implements OnInit {
     }
 
     public create() {
-        console.log(
-            'create() this._name:' +
-                this._name +
-                ' this._tool.customContentOption:' +
-                this._tool.customContentOption,
-        );
-        if (this._tool.customContentOption) {
-            this.createLtiContentOptionNode();
-            return;
-        } else {
-            if (!this.nodes) {
-                return;
-            }
-            this.onCreate.emit({ nodes: this.nodes, tool: this._tool });
-        }
-    }
-
-    public createLtiContentOptionNode() {
-        // @TODO cordova handling, popup problem
-        console.log('open() this._name:' + this._name);
-        if (this._name == undefined) {
-            return;
-        }
-        const properties = RestHelper.createNameProperty(this._name);
-        this.nodeService
-            .createNode(this._parent.ref.id, RestConstants.CCM_TYPE_IO, [], properties)
-            .subscribe(
-                (data: NodeWrapper) => {
-                    this.ltiPlatformService
-                        .convertToLtiResourceLink(data.node.ref.id, this._tool.appId)
-                        .subscribe(
-                            (result: any) => {
-                                this.nodes[0] = data.node;
-                                /**
-                                 * auto close when customContentOption and open resourcelink
-                                 */
-                                this.onCreate.emit({ nodes: this.nodes, tool: this._tool });
-                            },
-                            (error: any) => {
-                                this.nodeHelper.handleNodeError(this._name, error);
-                            },
-                        );
-                },
-                (error: any) => {
-                    this.nodeHelper.handleNodeError(this._name, error);
-                },
-            );
+        this.onCreate.emit({ nodes: this.nodes, name: this._name });
     }
 
     public openDeepLinkFlow() {
