@@ -29,7 +29,7 @@ public class ManualRegistrationData {
     @Schema(description = "The target link uri to use for DeepLing Message",required = false)
     String targetLinkUriDeepLink;
 
-    @Schema(name = "client_name", description = "Name of the Tool to be presented to the End-User. Localized representations may be included as described in Section 2.1 of the [OIDC-Reg] specification. ",required = true)
+    @Schema(description = "Name of the Tool to be presented to the End-User. Localized representations may be included as described in Section 2.1 of the [OIDC-Reg] specification. ",required = true)
     String clientName;
 
     public String getToolName() {

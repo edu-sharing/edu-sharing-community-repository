@@ -2351,7 +2351,7 @@
       },
       "ManualRegistrationData": {
         "properties": {
-          "client_name": {
+          "clientName": {
             "description": "Name of the Tool to be presented to the End-User. Localized representations may be included as described in Section 2.1 of the [OIDC-Reg] specification. ",
             "type": "string"
           },
@@ -2397,7 +2397,7 @@
           }
         },
         "required": [
-          "client_name",
+          "clientName",
           "targetLinkUri"
         ],
         "type": "object"
