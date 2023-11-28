@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
-import { MaterialCssVariables, MaterialCssVarsService } from 'angular-material-css-vars';
-import { ConfigService } from 'ngx-edu-sharing-api';
+import { Inject, Injectable } from '@angular/core';
+import { MaterialCssVarsService } from 'angular-material-css-vars';
 import { HueValue } from 'angular-material-css-vars/lib/model';
+import { ConfigService } from 'ngx-edu-sharing-api';
+import { EDU_SHARING_UI_CONFIG, EduSharingUiConfiguration } from 'ngx-edu-sharing-ui';
 
 export enum Variable {
     Primary = 'primary',
@@ -13,6 +14,7 @@ export class ThemeService {
     constructor(
         private materialCssVarsService: MaterialCssVarsService,
         private configService: ConfigService,
+        @Inject(EDU_SHARING_UI_CONFIG) private uiConfig: EduSharingUiConfiguration,
     ) {
         // set defaults
         this.setColor(Variable.Primary, '#48708e');
@@ -46,7 +48,11 @@ export class ThemeService {
                     MaterialCssVariables.ForegroundDivider,
                     this.fromPalette(color, '500'),
                 );*/
-                document.querySelector('meta[name="theme-color"]').setAttribute('content', color);
+                if (!this.uiConfig.isEmbedded) {
+                    document
+                        .querySelector('meta[name="theme-color"]')
+                        .setAttribute('content', color);
+                }
                 break;
             case Variable.Accent:
                 this.materialCssVarsService.setAccentColor(color);
