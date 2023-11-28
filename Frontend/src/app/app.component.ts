@@ -50,6 +50,8 @@ export class AppComponent implements OnInit, DoCheck, AfterViewInit {
     @ViewChild('management') management: WorkspaceManagementDialogsComponent;
     @ViewChild('cookie') cookie: CookieInfoComponent;
 
+    isLoading = this.loadingScreen.isLoading;
+
     private numberOfChecks = 0;
     private consecutiveTransgression = 0;
     private checksMonitorInterval: number;

@@ -1,10 +1,7 @@
-import { Overlay, OverlayRef } from '@angular/cdk/overlay';
-import { ComponentPortal } from '@angular/cdk/portal';
 import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { Observable, Subject } from 'rxjs';
-import { distinctUntilChanged, finalize, first } from 'rxjs/operators';
-import { LoadingScreenComponent } from './loading-screen.component';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { finalize, first } from 'rxjs/operators';
 
 class LoadingTask {
     get isDone() {
@@ -28,19 +25,9 @@ class LoadingTask {
     providedIn: 'root',
 })
 export class LoadingScreenService {
-    private overlayRef: OverlayRef;
-    private isLoadingSubject = new rxjs.BehaviorSubject(true);
+    private isLoadingSubject = new BehaviorSubject(true);
+    isLoading = this.isLoadingSubject.asObservable();
     private loadingTasks: LoadingTask[] = [];
-
-    constructor(private overlay: Overlay) {
-        this.isLoadingSubject.pipe(distinctUntilChanged()).subscribe((isLoading) => {
-            if (isLoading) {
-                this.show();
-            } else {
-                this.hide();
-            }
-        });
-    }
 
     getIsLoading(): boolean {
         return this.isLoadingSubject.value;
@@ -108,16 +95,5 @@ export class LoadingScreenService {
         if (this.loadingTasks.length === 0) {
             this.isLoadingSubject.next(false);
         }
-    }
-
-    private show(): void {
-        this.overlayRef = this.overlay.create();
-        const userProfilePortal = new ComponentPortal(LoadingScreenComponent);
-        this.overlayRef.attach(userProfilePortal);
-    }
-
-    private hide(): void {
-        this.overlayRef.detach();
-        this.overlayRef.dispose();
     }
 }

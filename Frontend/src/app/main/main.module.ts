@@ -48,6 +48,7 @@ import { ToastMessageComponent } from './toast-message/toast-message.component';
     exports: [
         CookieInfoComponent,
         CreateMenuComponent,
+        LoadingScreenComponent,
         MainNavComponent,
         RocketchatComponent,
         ScrollToTopButtonComponent,
