@@ -195,6 +195,15 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         queryParams: Params,
     ): void {
         this.visible = this.getIsVisible(mainNavConfig, queryParams);
+        if (this.visible) {
+            // Unset override.
+            document.documentElement.style.setProperty('--mainnavHeight', null);
+            document.documentElement.style.setProperty('--mainnavCurrentHeight', null);
+        } else {
+            // Override relevant css variables.
+            document.documentElement.style.setProperty('--mainnavHeight', '0');
+            document.documentElement.style.setProperty('--mainnavCurrentHeight', '0');
+        }
         this.canOpen = mainNavConfig.canOpen;
         if (!userInfo.loginInfo.isValidLogin) {
             this.canOpen = userInfo.loginInfo.isGuest;
