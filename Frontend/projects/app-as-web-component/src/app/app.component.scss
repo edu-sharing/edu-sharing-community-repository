@@ -1,4 +1,8 @@
 :host {
     min-height: 0;
+    contain: content;
+}
+
+.app-container {
     overflow: auto;
 }
