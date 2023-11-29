@@ -2,6 +2,7 @@ import {
     AfterViewInit,
     Component,
     DoCheck,
+    ElementRef,
     HostListener,
     Injector,
     NgZone,
@@ -21,6 +22,7 @@ import { CookieInfoComponent } from './main/cookie-info/cookie-info.component';
 import { LoadingScreenService } from './main/loading-screen/loading-screen.service';
 import { MainNavService } from './main/navigation/main-nav.service';
 import { printCurrentTaskInfo } from './main/track-change-detection';
+import { AppContainerService } from './services/app-container.service';
 import { BridgeService } from './services/bridge.service';
 import { LicenseAgreementService } from './services/license-agreement.service';
 import { ScrollPositionRestorationService } from './services/scroll-position-restoration.service';
@@ -86,6 +88,8 @@ export class AppComponent implements OnInit, DoCheck, AfterViewInit {
     }
 
     constructor(
+        private appContainer: AppContainerService,
+        private elementRef: ElementRef<HTMLElement>,
         private mainNavService: MainNavService,
         private dialogs: ManagementDialogsService,
         private ngZone: NgZone,
@@ -130,6 +134,7 @@ export class AppComponent implements OnInit, DoCheck, AfterViewInit {
         this.setUserScale();
         this.registerRedirectToLogin();
         this.registerContrastMode();
+        this.appContainer.init(this.elementRef.nativeElement);
         this.licenseAgreement.setup();
         this.scrollPositionRestoration.setup();
         this.legacyRestService.init();

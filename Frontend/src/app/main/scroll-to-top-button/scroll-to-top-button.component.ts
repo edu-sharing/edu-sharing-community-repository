@@ -1,7 +1,8 @@
 import { trigger } from '@angular/animations';
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { Subject } from 'rxjs';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
+import { Subject } from 'rxjs';
+import { AppContainerService } from '../../services/app-container.service';
 
 /**
  * Shows a small button on the bottom of the screen that scrolls to the page top.
@@ -19,14 +20,10 @@ export class ScrollToTopButtonComponent implements OnInit, OnDestroy {
 
     private readonly destroyed$ = new Subject<void>();
 
-    constructor(private ngZone: NgZone) {}
+    constructor(private appContainer: AppContainerService, private ngZone: NgZone) {}
 
     ngOnInit() {
-        this.ngZone.runOutsideAngular(() => {
-            const handleScroll = () => this.handleScroll();
-            window.addEventListener('scroll', handleScroll);
-            this.destroyed$.subscribe(() => window.removeEventListener('scroll', handleScroll));
-        });
+        this.appContainer.registerScrollEvents(() => this.handleScroll(), this.destroyed$);
     }
 
     ngOnDestroy() {
@@ -35,14 +32,14 @@ export class ScrollToTopButtonComponent implements OnInit, OnDestroy {
     }
 
     private handleScroll() {
-        const showScrollTop = (window.pageYOffset || document.documentElement.scrollTop) > 400;
+        const showScrollTop = this.appContainer.getScrollContainer().scrollTop > 400;
         if (showScrollTop !== this.showScrollToTop) {
             this.ngZone.run(() => (this.showScrollToTop = showScrollTop));
         }
     }
 
     scrollToTop() {
-        window.scroll({
+        this.appContainer.getScrollContainer().scroll({
             top: 0,
             behavior: 'smooth',
         });

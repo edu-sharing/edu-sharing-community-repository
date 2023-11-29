@@ -2,6 +2,7 @@ import { trigger } from '@angular/animations';
 import { Component, HostListener, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import { UserService } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     CanDrop,
@@ -47,9 +48,7 @@ import {
     UIService,
 } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
-import { CardService } from '../../services/card.service';
-import { NodeHelperService } from '../../services/node-helper.service';
-import { Toast } from '../../services/toast';
+import { mapVCard } from '../../core-module/rest/services/rest-iam.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config';
 import { OK } from '../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
@@ -60,13 +59,15 @@ import {
     SearchEvent,
     SearchFieldService,
 } from '../../main/navigation/search-field/search-field.service';
+import { AppContainerService } from '../../services/app-container.service';
+import { CardService } from '../../services/card.service';
+import { NodeHelperService } from '../../services/node-helper.service';
+import { Toast } from '../../services/toast';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 import { WorkspaceExplorerComponent } from './explorer/explorer.component';
 import { WorkspaceTreeComponent } from './tree/tree.component';
 import { canDragDrop, canDropOnNode } from './workspace-utils';
 import { WorkspaceService } from './workspace.service';
-import { UserService } from 'ngx-edu-sharing-api';
-import { mapVCard } from '../../core-module/rest/services/rest-iam.service';
 
 @Component({
     selector: 'es-workspace-page',
@@ -172,6 +173,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
 
     constructor(
+        private appContainer: AppContainerService,
         private breadcrumbsService: BreadcrumbsService,
         private card: CardService,
         private config: ConfigurationService,
@@ -231,7 +233,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
     }
 
     private handleScroll(event: Event) {
-        const scroll = window.pageYOffset || document.documentElement.scrollTop;
+        const scroll = this.appContainer.getScrollContainer().scrollTop;
         if (scroll > 0) {
             this.storage.set('workspace_scroll', scroll);
         }
@@ -297,11 +299,10 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
     }
 
     private registerScroll(): void {
-        this.ngZone.runOutsideAngular(() => {
-            const handleScroll = (event: Event) => this.handleScroll(event);
-            window.addEventListener('scroll', handleScroll);
-            this.destroyed$.subscribe(() => window.removeEventListener('scroll', handleScroll));
-        });
+        this.appContainer.registerScrollEvents(
+            (event) => this.handleScroll(event),
+            this.destroyed$,
+        );
     }
 
     private editConnector(

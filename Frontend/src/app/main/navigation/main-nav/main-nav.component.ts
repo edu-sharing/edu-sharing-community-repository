@@ -38,13 +38,14 @@ import {
     TemporaryStorageService,
     UIService,
 } from '../../../core-module/core.module';
-import { NodeHelperService } from '../../../services/node-helper.service';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { AppContainerService } from '../../../services/app-container.service';
 import { BridgeService } from '../../../services/bridge.service';
 import { LicenseAgreementService } from '../../../services/license-agreement.service';
+import { NodeHelperService } from '../../../services/node-helper.service';
 import { RocketChatService } from '../../rocketchat/rocket-chat.service';
 import { MainMenuEntriesService } from '../main-menu-entries.service';
 import { MainNavConfig, MainNavService } from '../main-nav.service';
@@ -104,6 +105,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     private queryParams: Params;
 
     constructor(
+        private appContainer: AppContainerService,
         public iam: RestIamService,
         public connector: RestConnectorService,
         private bridge: BridgeService,
@@ -271,18 +273,14 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private registerHandleScroll(): void {
-        const handleScroll = (event: any) => this.handleScroll(event);
-        this.ngZone.runOutsideAngular(() => {
-            window.addEventListener('scroll', handleScroll);
-            window.addEventListener('touchmove', handleScroll);
-            this.destroyed$.subscribe(() => {
-                window.removeEventListener('scroll', handleScroll);
-                window.removeEventListener('touchmove', handleScroll);
-            });
-        });
+        this.appContainer.registerScrollEvents(
+            (event) => this.handleScroll(event),
+            this.destroyed$,
+            { events: ['scroll', 'touchmove'] }, // Not needed?
+        );
     }
 
-    private async handleScroll(event: any) {
+    private async handleScroll(event: Event) {
         if (this.storage.get(TemporaryStorageService.OPTION_DISABLE_SCROLL_LAYOUT, false)) {
             return;
         }
@@ -572,10 +570,16 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.tabNav == null || this.tabNav.nativeElement == null) {
             return;
         }
-        // Take the scroll position inside a viewport that was zoomed in using pinch-to-zoom into
-        // account. This allows us to scroll bottom elements out of view, but is not really needed
-        // for top elements. Using for both as long as no problems come up.
-        const scrollY = (window as any).visualViewport?.pageTop ?? window.scrollY;
+        const scrollContainer = this.appContainer.getScrollContainer();
+        const scrollContainerOffset = this.appContainer.hasScrollContainer()
+            ? scrollContainer.getBoundingClientRect().top
+            : 0;
+        const scrollY = this.appContainer.hasScrollContainer()
+            ? scrollContainer.scrollTop
+            : // Take the scroll position inside a viewport that was zoomed in using pinch-to-zoom into
+              // account. This allows us to scroll bottom elements out of view, but is not really needed
+              // for top elements. Using for both as long as no problems come up.
+              (window as any).visualViewport?.pageTop ?? window.scrollY;
         if (this.lastScroll === -1) {
             this.lastScroll = scrollY;
             return;
@@ -586,14 +590,14 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         let bottom = -1;
         for (let i = 0; i < elementsTop.length; i++) {
             const rect = elementsTop.item(i).getBoundingClientRect();
-            if (bottom === -1 || bottom < rect.bottom) {
-                bottom = rect.bottom;
+            if (bottom === -1 || bottom < rect.bottom - scrollContainerOffset) {
+                bottom = rect.bottom - scrollContainerOffset;
             }
         }
         for (let i = 0; i < elementsBottom.length; i++) {
             const rect = elementsBottom.item(i).getBoundingClientRect();
-            if (top === -1 || top > rect.top) {
-                top = rect.top;
+            if (top === -1 || top > rect.top - scrollContainerOffset) {
+                top = rect.top - scrollContainerOffset;
             }
         }
         let diffTop = scrollY - this.lastScroll;
@@ -610,7 +614,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             diffTop = 0;
         }
         // Don't move bottom elements any further down when they already lie below the screen.
-        if (diffBottom > 0 && top > window.innerHeight) {
+        if (diffBottom > 0 && top > scrollContainer.clientHeight) {
             diffBottom = 0;
         }
         // Don't move bottom elements any further up when the page is zoomed in on mobile.
@@ -623,7 +627,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.elementsBottomY = Math.max(0, this.elementsBottomY);
         // For ios elastic scroll
         if (
-            window.scrollY < 0 ||
+            scrollContainer.scrollTop < 0 ||
             this.fixScrollElements ||
             !UIService.evaluateMediaQuery(
                 UIConstants.MEDIA_QUERY_MAX_WIDTH,
