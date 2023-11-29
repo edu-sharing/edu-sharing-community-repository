@@ -32,7 +32,7 @@ public class FixOwnerSafeScopeJob extends AbstractJob{
 
     Logger logger = Logger.getLogger(FixOwnerSafeScopeJob.class);
     ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-    ServiceRegistry serviceRegistry = applicationContext.getBean(ServiceRegistry.class);
+    ServiceRegistry serviceRegistry = applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY, ServiceRegistry.class);
     //using alfrescoDefaultDbNodeService to run through shared folders only once (not every userhome)
     NodeService nodeService = (NodeService)applicationContext.getBean("alfrescoDefaultDbNodeService");
 
