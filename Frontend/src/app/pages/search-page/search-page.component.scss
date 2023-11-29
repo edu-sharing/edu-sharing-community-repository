@@ -15,17 +15,6 @@ mat-progress-bar {
     z-index: 2;
 }
 
-// Unset materialize styles
-//
-// TODO: remove this and materialize style sheet
-nav {
-    height: unset;
-    width: unset;
-    line-height: unset;
-    background-color: unset;
-    box-shadow: unset;
-}
-
 .mat-tab-label-active {
     opacity: 1;
 }
