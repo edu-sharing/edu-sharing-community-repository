@@ -7,13 +7,11 @@
     "given by index.html (which belongs to the host page and we don't control)."
   ],
   "scripts": {
-    "build": "cd ../.. && npm run build -- app-as-web-component --output-hashing none --deploy-url edu-sharing/",
-    "build-watch": "cd ../.. && ng build app-as-web-component --output-hashing none --deploy-url edu-sharing/ --configuration development --watch",
-    "preview-example": "http-server --port 4200 example",
-    "//preview-example-proxy": "For a realistic example, we need to test without a proxy since an actual page embedding edu-sharing as a web component will also be served from another location than the backend. However, a proxied version might be helpful to test against a backend that doesn't allow-list localhost.",
-    "preview-example-proxy": "http-server --port 4200 --proxy http://repository.127.0.0.1.nip.io:8100 example",
-    "example": "npm run build && npm run preview-example",
-    "example-watch": "npm run build-watch & npm run preview-example"
+    "start": "npm run build-dev & npm run serve",
+    "preview": "npm run build && npm run serve",
+    "build": "cd ../.. && npm run build app-as-web-component",
+    "build-dev": "cd ../.. && ng build app-as-web-component --configuration development --watch",
+    "serve": "source ../../.env && http-server --port 4200 --proxy $BACKEND_URL example"
   },
   "devDependencies": {
     "@angular/elements": "^16.2.12"

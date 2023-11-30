@@ -387,6 +387,8 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "deployUrl": "edu-sharing/",
+            "outputHashing": "none",
             "outputPath": "dist/app-as-web-component",
             "index": "projects/app-as-web-component/src/index.html",
             "main": "projects/app-as-web-component/src/main.ts",
@@ -448,8 +450,7 @@
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.prod.ts"
                 }
-              ],
-              "outputHashing": "all"
+              ]
             },
             "development": {
               "buildOptimizer": false,

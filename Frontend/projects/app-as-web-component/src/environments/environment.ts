@@ -3,24 +3,18 @@
 // The list of file replacements can be found in `angular.json`.
 
 export interface Env {
-    EDU_SHARING_API_URL?: string;
+    EDU_SHARING_API_URL: string;
 }
 
 export interface ExtendedWindow extends Window {
-    __env?: Env;
+    __env: Env;
 }
 
 declare var window: ExtendedWindow;
 
 export const environment = {
     production: false,
-    eduSharingApiUrl: window.__env?.EDU_SHARING_API_URL ?? 'http://localhost:4200/edu-sharing/rest',
-    // eduSharingApiUrl: 'http://localhost:4200/edu-sharing/rest',
-    // eduSharingApiUrl: 'http://repository.127.0.0.1.nip.io:8100/edu-sharing/rest',
-};
-
-window.__env = {
-    EDU_SHARING_API_URL: environment.eduSharingApiUrl,
+    eduSharingApiUrl: window.__env.EDU_SHARING_API_URL,
 };
 
 /*

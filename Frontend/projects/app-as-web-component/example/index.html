@@ -7,9 +7,14 @@
     <title>Web Components Example</title>
     <base href="/" />
     <script>
+      // Provide the backend URL for edu-sharing.
+      //
+      // For testing with development builds use '/edu-sharing/rest' for a proxy to the URL
+      // configured the `.env` file.
+      //
       window.__env = {
-        // EDU_SHARING_API_URL: '/edu-sharing/rest',
-        EDU_SHARING_API_URL: 'http://repository.127.0.0.1.nip.io:8100/edu-sharing/rest',
+        EDU_SHARING_API_URL: '/edu-sharing/rest',
+        //  EDU_SHARING_API_URL: 'http://repository.127.0.0.1.nip.io:8100/edu-sharing/rest',
       };
     </script>
     <script src="edu-sharing/runtime.js" type="module"></script>
