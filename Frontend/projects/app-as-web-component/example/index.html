@@ -34,12 +34,13 @@
     <style>
       body {
         padding: 100px;
-        max-height: 100vh;
+        height: 100vh;
         display: flex;
         flex-direction: column;
       }
       .main-container {
         min-height: 0;
+        flex-grow: 1;
         display: flex;
         flex-direction: column;
         gap: 20px;
@@ -49,8 +50,6 @@
       }
       edu-sharing-app {
         flex-grow: 1;
-        display: flex;
-        flex-direction: column;
       }
       /* .controls {
         display: flex;
