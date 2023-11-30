@@ -52,7 +52,6 @@ import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.
 import { ElementRefDirective } from './directives/element-ref.directive';
 import { EscapeHtmlPipe } from './directives/escape-html.pipe';
 import { FileDropDirective } from './directives/file-drop';
-import { InfiniteScrollDirective } from './directives/infinite-scroll.directive';
 import { OnAttributeChangeDirective } from './directives/on-attribute-change.directive';
 import { RegisterCustomPropertyDirective } from './directives/register-custom-property.directive';
 import { SkipTargetDirective } from './directives/skip-target.directive';
@@ -82,7 +81,6 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
         EscapeHtmlPipe,
         FileDropDirective,
         GlobalProgressComponent,
-        InfiniteScrollDirective,
         InfoMessageComponent,
         InputPasswordComponent,
         LicenseSourceComponent,
@@ -144,7 +142,6 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
         FileDropDirective,
         FormsModule,
         GlobalProgressComponent,
-        InfiniteScrollDirective,
         InfoMessageComponent,
         InputPasswordComponent,
         LicenseSourceComponent,
