@@ -58,7 +58,6 @@ import { ElementRefDirective } from './directives/element-ref.directive';
 import { EscapeHtmlPipe } from './directives/escape-html.pipe';
 import { FileDropDirective } from './directives/file-drop';
 import { ImageConfigDirective } from './directives/image-config.directive';
-import { InfiniteScrollDirective } from './directives/infinite-scroll.directive';
 import { OnAttributeChangeDirective } from './directives/on-attribute-change.directive';
 import { RegisterCustomPropertyDirective } from './directives/register-custom-property.directive';
 import { SkipTargetDirective } from './directives/skip-target.directive';
@@ -94,7 +93,6 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
         FooterComponent,
         GlobalProgressComponent,
         ImageConfigDirective,
-        InfiniteScrollDirective,
         InfoMessageComponent,
         InputPasswordComponent,
         LicenseSourceComponent,
@@ -163,7 +161,6 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
         FormsModule,
         GlobalProgressComponent,
         ImageConfigDirective,
-        InfiniteScrollDirective,
         InfoMessageComponent,
         InputPasswordComponent,
         LicenseSourceComponent,

@@ -1,52 +1,54 @@
-import { NgModule } from '@angular/core';
-import { NodeIconPipe } from '../pipes/node-icon.pipe';
-import { VCardNamePipe } from '../pipes/vcard-name.pipe';
-import { NodeImagePipe } from '../pipes/node-image.pipe';
-import { IconDirective } from '../directives/icon.directive';
-import { FormatSizePipe } from '../pipes/file-size.pipe';
 import { CommonModule } from '@angular/common';
-import { TranslateModule } from '@ngx-translate/core';
-import { NodeImageSizePipe } from '../pipes/node-image-size.pipe';
-import { NodePersonNamePipe } from '../pipes/node-person-name.pipe';
-import { FormatDatePipe } from '../pipes/format-date.pipe';
-import { SortDropdownComponent } from '../sort-dropdown/sort-dropdown.component';
-import { CheckTextOverflowDirective } from '../directives/check-text-overflow.directive';
-import { MatMenuModule } from '@angular/material/menu';
-import { NodeTitlePipe } from '../pipes/node-title.pipe';
-import { SpinnerComponent } from '../spinner/spinner.component';
-import { NodeUrlComponent } from '../node-url/node-url.component';
-import { DropdownComponent } from '../dropdown/dropdown.component';
-import { RouterModule } from '@angular/router';
+import { NgModule } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatRippleModule } from '@angular/material/core';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { OptionTooltipPipe } from '../pipes/option-tooltip.pipe';
-import { ReplaceCharsPipe } from '../pipes/replace-chars.pipe';
+import { RouterModule } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { ActionbarComponent } from '../actionbar/actionbar.component';
 import { BorderBoxObserverDirective } from '../directives/border-box-observer.directive';
-import { MatButtonModule } from '@angular/material/button';
+import { CheckTextOverflowDirective } from '../directives/check-text-overflow.directive';
 import { FocusStateDirective } from '../directives/focus-state.directive';
+import { IconDirective } from '../directives/icon.directive';
+import { InfiniteScrollDirective } from '../directives/infinite-scroll.directive';
+import { DropdownComponent } from '../dropdown/dropdown.component';
+import { NodeUrlComponent } from '../node-url/node-url.component';
+import { FormatSizePipe } from '../pipes/file-size.pipe';
+import { FormatDatePipe } from '../pipes/format-date.pipe';
+import { NodeIconPipe } from '../pipes/node-icon.pipe';
+import { NodeImageSizePipe } from '../pipes/node-image-size.pipe';
+import { NodeImagePipe } from '../pipes/node-image.pipe';
+import { NodePersonNamePipe } from '../pipes/node-person-name.pipe';
+import { NodeTitlePipe } from '../pipes/node-title.pipe';
+import { OptionTooltipPipe } from '../pipes/option-tooltip.pipe';
+import { ReplaceCharsPipe } from '../pipes/replace-chars.pipe';
+import { VCardNamePipe } from '../pipes/vcard-name.pipe';
+import { SortDropdownComponent } from '../sort-dropdown/sort-dropdown.component';
+import { SpinnerComponent } from '../spinner/spinner.component';
 
 @NgModule({
     declarations: [
-        IconDirective,
+        ActionbarComponent,
+        BorderBoxObserverDirective,
         CheckTextOverflowDirective,
+        DropdownComponent,
+        FocusStateDirective,
+        FormatDatePipe,
+        FormatSizePipe,
+        IconDirective,
+        InfiniteScrollDirective,
         NodeIconPipe,
         NodeImagePipe,
-        VCardNamePipe,
-        FocusStateDirective,
-        FormatSizePipe,
         NodeImageSizePipe,
         NodePersonNamePipe,
         NodeTitlePipe,
-        FormatDatePipe,
+        NodeUrlComponent,
+        OptionTooltipPipe,
         ReplaceCharsPipe,
         SortDropdownComponent,
         SpinnerComponent,
-        NodeUrlComponent,
-        DropdownComponent,
-        OptionTooltipPipe,
-        ActionbarComponent,
-        BorderBoxObserverDirective,
+        VCardNamePipe,
     ],
     imports: [
         CommonModule,
@@ -58,23 +60,24 @@ import { FocusStateDirective } from '../directives/focus-state.directive';
         RouterModule,
     ],
     exports: [
-        IconDirective,
+        ActionbarComponent,
+        BorderBoxObserverDirective,
         CheckTextOverflowDirective,
+        DropdownComponent,
+        FocusStateDirective,
+        FormatDatePipe,
+        FormatSizePipe,
+        IconDirective,
+        InfiniteScrollDirective,
         NodeIconPipe,
         NodeImagePipe,
-        VCardNamePipe,
-        SortDropdownComponent,
-        FocusStateDirective,
-        FormatSizePipe,
         NodeImageSizePipe,
         NodePersonNamePipe,
         NodeTitlePipe,
-        FormatDatePipe,
-        SpinnerComponent,
         NodeUrlComponent,
-        DropdownComponent,
-        ActionbarComponent,
-        BorderBoxObserverDirective,
+        SortDropdownComponent,
+        SpinnerComponent,
+        VCardNamePipe,
     ],
 })
 export class EduSharingUiCommonModule {}

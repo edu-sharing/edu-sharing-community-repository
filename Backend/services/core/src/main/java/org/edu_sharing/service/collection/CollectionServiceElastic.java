@@ -32,8 +32,6 @@ import java.util.stream.Collectors;
 public class CollectionServiceElastic extends CollectionServiceImpl {
 
     private final SearchServiceElastic searchServiceElastic;
-    private final RestHighLevelClient esClient;
-
     public static CollectionServiceElastic build(String appId) {
         CollectionServiceConfig config = (CollectionServiceConfig) ApplicationContextFactory.getApplicationContext().getBean("collectionServiceConfig");
         return new CollectionServiceElastic(appId, config.getPattern(), config.getPath());
@@ -41,11 +39,6 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
     public CollectionServiceElastic(String appId, String pattern, String path) {
         super(appId,  pattern, path);
         this.searchServiceElastic = new SearchServiceElastic(appId);
-        try {
-            esClient = searchServiceElastic.getClient();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
@@ -112,7 +105,7 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
         searchSourceBuilder.trackTotalHits(true);
         sortDefinition.applyToSearchSourceBuilder(searchSourceBuilder);
         searchRequest.source(searchSourceBuilder);
-        SearchResponse result = esClient.search(searchRequest, RequestOptions.DEFAULT);
+        SearchResponse result = searchServiceElastic.searchNative(searchRequest);
         List<CollectionProposalInfo.CollectionProposalData> dataList = new ArrayList<>();
         Set<String> authorities = searchServiceElastic.getUserAuthorities();
         String user = serviceRegistry.getAuthenticationService().getCurrentUserName();

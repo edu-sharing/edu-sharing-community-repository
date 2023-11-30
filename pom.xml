@@ -268,6 +268,12 @@
       </dependency>
 
       <dependency>
+        <groupId>org.apache.tika</groupId>
+        <artifactId>tika-core</artifactId>
+        <version>2.3.0</version>
+      </dependency>
+
+      <dependency>
         <groupId>com.typesafe</groupId>
         <artifactId>config</artifactId>
         <version>1.4.0</version>
