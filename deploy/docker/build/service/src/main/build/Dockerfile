@@ -22,7 +22,8 @@ RUN set -eux \
         tomcat/webapps/alfresco/WEB-INF/lib/jsr305-* \
         tomcat/webapps/alfresco/WEB-INF/lib/woodstox-core-* \
         tomcat/webapps/alfresco/WEB-INF/lib/owasp-java-html-sanitizer-* \
-        tomcat/webapps/alfresco/WEB-INF/lib/reload4j-1.2.18.3*
+        tomcat/webapps/alfresco/WEB-INF/lib/reload4j-1.2.18.3* \
+        tomcat/webapps/alfresco/WEB-INF/lib/tika-core-2.2.1*
 
 COPY --chown=worker:worker artifacts/edu_sharing-community-repository-backend-tomcat-${org.edu_sharing:edu_sharing-community-repository-backend-tomcat:jar.version}.jar tomcat/lib/
 COPY --chown=worker:worker webapp/*.war tomcat/webapps/edu-sharing.war
