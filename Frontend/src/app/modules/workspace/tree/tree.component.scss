@@ -5,8 +5,9 @@
     align-items: center;
     @include clickable();
     padding-left: 10px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    margin: 4px 0;
 }
 .typeIcon {
     margin-right: 7px;
