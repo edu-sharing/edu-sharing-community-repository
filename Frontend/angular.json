@@ -387,7 +387,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "deployUrl": "edu-sharing/",
+            "deployUrl": "vendor/edu-sharing/",
             "outputHashing": "none",
             "outputPath": "dist/app-as-web-component",
             "index": "projects/app-as-web-component/src/index.html",

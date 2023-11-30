@@ -22,7 +22,7 @@ import { AppComponent } from './app.component';
             provide: LocationStrategy,
             useClass: MockLocationStrategy,
         },
-        { provide: ASSETS_BASE_PATH, useValue: 'edu-sharing/' },
+        { provide: ASSETS_BASE_PATH, useValue: 'vendor/edu-sharing/' },
     ],
 })
 // export class AppModule {}

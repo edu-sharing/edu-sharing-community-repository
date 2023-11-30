@@ -25,10 +25,10 @@ For testing, you can proxy requests to the URL given in the file `.env` by setti
 
 ## Installation
 
-In order to embed the web component in a web page, you have to include the copiled files from `dist/app-as-web-component` in the folder `edu-sharing` in your web root.
-Include all files as shown in `example/index.html`.
-Then you can include the web component:
-
-```html
-<edu-sharing-app></edu-sharing-app>
-```
+-   Build the application using `npm run build`
+-   Include the copiled files from `dist/app-as-web-component` in the folder `vendor/edu-sharing` in your web root
+-   Include `runtime.js`, `polyfills.js`, `scripts.js`, `main.js`, and `styles.css` in your page as shown in `example/index.html`
+-   Include the web component in your DOM:
+    ```html
+    <edu-sharing-app></edu-sharing-app>
+    ```
