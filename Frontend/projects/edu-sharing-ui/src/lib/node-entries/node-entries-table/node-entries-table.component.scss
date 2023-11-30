@@ -74,6 +74,8 @@ mat-cell {
 }
 
 .mat-row {
+    // Workaround for Firefox bug that makes _some_ bottom borders disappear.
+    background: unset;
     &.dynamic-single-click {
         cursor: pointer;
         &:hover {
