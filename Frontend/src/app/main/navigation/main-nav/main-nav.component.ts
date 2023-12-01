@@ -69,12 +69,22 @@ import { TopBarComponent } from '../top-bar/top-bar.component';
     // changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
+    // FIXME: This component contains a lot of business logic, that does not need to be exposed to
+    // the rest of the application, but should live in a service. Refactoring into an internal
+    // main-nav service would be a good solution.
+
     private static readonly ID_ATTRIBUTE_NAME = 'data-banner-id';
 
     @ViewChild(TopBarComponent) topBar: TopBarComponent;
     @ViewChild('tabNav') tabNav: ElementRef;
 
     private shouldAlwaysHide = this.storage.get(TemporaryStorageService.OPTION_HIDE_MAINNAV, false);
+    /**
+     * Whether the query param `mainnav=false` was set on the initial request.
+     *
+     * We save the value here, so we don't loose it on route changes.
+     */
+    private hiddenByQueryParam: boolean;
 
     @HostBinding('class.main-nav-visible') visible = !this.shouldAlwaysHide;
     autoLogoutTimeout$: Observable<string>;
@@ -260,10 +270,11 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private getIsVisible(mainNavConfig: MainNavConfig, queryParams: Params): boolean {
+        this.hiddenByQueryParam ??= queryParams.mainnav === 'false';
         if (this.shouldAlwaysHide || !this.mainNavConfig.show) {
             return false;
         } else if (
-            queryParams.mainnav === 'false' &&
+            this.hiddenByQueryParam &&
             ['login', 'search', 'collections'].includes(mainNavConfig.currentScope)
         ) {
             return false;

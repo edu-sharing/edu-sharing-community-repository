@@ -47,7 +47,9 @@ import { RouterHelper } from '../util/router.helper';
 import { Toast } from '../services/toast';
 
 export class UIHelper {
-    static COPY_URL_PARAMS = ['mainnav', 'reurl', 'reurlTypes', 'reurlCreate', 'applyDirectories'];
+    // TODO: check, whether these parameters are still used and remove or include them in
+    // `PRESERVED_QUERY_PARAMS` in `main/location-strategy.ts` accordingly.
+    static COPY_URL_PARAMS = ['reurlTypes', 'reurlCreate', 'applyDirectories'];
     public static getBlackWhiteContrast(color: string) {}
 
     static changeQueryParameter(router: Router, route: ActivatedRoute, name: string, value: any) {
@@ -707,9 +709,10 @@ export class UIHelper {
 
     /**
      * returns common active route parameters that should be keeped
-     * currently including: mainnav,
-     * @param route
+     *
+     * @deprecated Handled by `AppLocationStrategy` now.
      */
+    // TODO: remove this function and all usages.
     static getCommonParameters(route: ActivatedRoute) {
         return new Observable<any>((observer: Observer<any>) => {
             route.queryParams
