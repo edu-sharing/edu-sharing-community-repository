@@ -189,8 +189,16 @@ public class SearchServiceImpl implements SearchService {
 	public SearchResult<EduGroup> getAllOrganizations(boolean scoped) throws Exception {
 		return searchOrganizations("", 0, Integer.MAX_VALUE, null,scoped,true);
 	}
+
+	/**
+	 *
+	 * @param membershipsOnly (only for admin/system) when true, behave like regular users and show only groups
+	 *                        false will show all mz of the system
+	 * @return
+	 * @throws Exception
+	 */
 	@Override
-	public List<String> getAllMediacenters() throws Exception {
+	public List<String> getAllMediacenters(boolean membershipsOnly) throws Exception {
 
 
 		Set<String> memberships = serviceRegistry.getAuthorityService().getAuthorities();
@@ -199,7 +207,7 @@ public class SearchServiceImpl implements SearchService {
 				|| "admin".equals(AuthenticationUtil.getFullAuthentication().getName())
 				|| isSystemUser) ? true : false;
 
-		if(isAdmin) {
+		if(isAdmin && !membershipsOnly) {
 			SearchParameters parameters = new SearchParameters();
 			parameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
 			parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);

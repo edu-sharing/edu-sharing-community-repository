@@ -1,3 +1,4 @@
+
 package org.edu_sharing.service.search;
 
 import java.io.IOException;
@@ -41,7 +42,11 @@ public interface SearchService {
 
 	SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped,boolean onlyMemberShips) throws Throwable;
 
-    List<String> getAllMediacenters() throws Exception;
+	default List<String> getAllMediacenters() throws Exception {
+		return getAllMediacenters(false);
+	}
+
+	List<String> getAllMediacenters(boolean membershipsOnly) throws Exception;
 
 
 	SearchResultNodeRef getFilesSharedByMe(SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception;

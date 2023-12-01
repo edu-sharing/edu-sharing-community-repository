@@ -206,7 +206,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
                 logger.info("Failed to track organizations of user",e);
             }
             try {
-                    statement.setArray(7,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllMediacenters().toArray()));
+                    statement.setArray(7,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllMediacenters(true).toArray()));
             } catch (Exception e) {
                 logger.info("Failed to track mediacenter of user",e);
             }
