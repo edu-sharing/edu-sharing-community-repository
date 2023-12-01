@@ -59,13 +59,13 @@ import {
     UIService,
 } from '../../core-module/core.module';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
-import { CardService } from '../../services/card.service';
-import { NodeHelperService } from '../../services/node-helper.service';
-import { Toast } from '../../services/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
+import { CardService } from '../../services/card.service';
+import { NodeHelperService } from '../../services/node-helper.service';
 import { OptionsHelperService } from '../../services/options-helper.service';
+import { Toast } from '../../services/toast';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { RenderHelperService } from './render-helper.service';
@@ -74,7 +74,7 @@ import { RenderHelperService } from './render-helper.service';
     selector: 'es-render-page',
     templateUrl: 'render-page.component.html',
     styleUrls: ['render-page.component.scss'],
-    providers: [OptionsHelperService, , RenderHelperService],
+    providers: [OptionsHelperDataService, RenderHelperService],
     animations: [trigger('fadeFast', UIAnimation.fade(UIAnimation.ANIMATION_TIME_FAST))],
 })
 export class RenderPageComponent implements EventListener, OnInit, OnDestroy {
