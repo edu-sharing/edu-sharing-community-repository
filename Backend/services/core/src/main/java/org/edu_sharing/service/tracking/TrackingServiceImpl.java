@@ -68,11 +68,10 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             " GROUP BY node,authority,authority_organization,authority_mediacenter,time,type :grouping" +
             " ORDER BY date" +
             " LIMIT 100";
-    public static String TRACKING_STATISTICS_NODE_GROUPED = "SELECT node_uuid as node,type,COUNT(*) :fields from edu_tracking_node as tracking" +
+    public static String TRACKING_STATISTICS_NODE_GROUPED = "SELECT COALESCE(original_node_uuid, node_uuid) as node,type,COUNT(*) :fields from edu_tracking_node as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY node,type :grouping" +
-            " ORDER BY count DESC" +
-            " LIMIT 300";
+            " ORDER BY count DESC";
     public static String TRACKING_STATISTICS_NODE_SINGLE = "SELECT type,COUNT(*) from edu_tracking_node as tracking" +
             " WHERE node_uuid = ? AND time BETWEEN ? AND ?" +
             " GROUP BY type" +
