@@ -271,6 +271,8 @@ export class SearchPageService implements OnDestroy {
         this.searchFilters.observeUserValue().subscribe((searchFilters) => {
             // console.log('searchFilters.userValue', searchFilters);
             searchFieldInstance.setFilterValues(searchFilters);
+            // Reset the visible search string if the user made unapplied changes.
+            searchFieldInstance.setSearchString(this.searchString.getValue());
         });
         return searchFieldInstance;
     }
