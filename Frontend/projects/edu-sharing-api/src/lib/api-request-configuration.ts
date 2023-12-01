@@ -27,7 +27,14 @@ export class ApiRequestConfiguration {
         this.authForNextRequest = 'Bearer ' + accessToken;
     }
 
-    /** Apply the current headers to the given request */
+    /**
+     * Applies configuration to the given request.
+     *
+     * - Applies the current headers.
+     * - Sets `credentials: 'include'`.
+     *   This is needed for the application to send cookies to the backend when in an embedded
+     *   context, e.g., as a web component in a third-party page.
+     */
     apply(req: HttpRequest<any>): HttpRequest<any> {
         const headers: { [key: string]: string | string[] } = {};
         const isAPICall = req.url.startsWith(this.apiConfiguration.rootUrl);
@@ -45,6 +52,7 @@ export class ApiRequestConfiguration {
         }
         return req.clone({
             setHeaders: headers,
+            withCredentials: true,
         });
     }
 
