@@ -68,11 +68,10 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             " GROUP BY node,authority,authority_organization,authority_mediacenter,time,type :grouping" +
             " ORDER BY date" +
             " LIMIT 100";
-    public static String TRACKING_STATISTICS_NODE_GROUPED = "SELECT node_uuid as node,type,COUNT(*) :fields from edu_tracking_node as tracking" +
+    public static String TRACKING_STATISTICS_NODE_GROUPED = "SELECT COALESCE(original_node_uuid, node_uuid) as node,type,COUNT(*) :fields from edu_tracking_node as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY node,type :grouping" +
-            " ORDER BY count DESC" +
-            " LIMIT 300";
+            " ORDER BY count DESC";
     public static String TRACKING_STATISTICS_NODE_SINGLE = "SELECT type,COUNT(*) from edu_tracking_node as tracking" +
             " WHERE node_uuid = ? AND time BETWEEN ? AND ?" +
             " GROUP BY type" +
@@ -83,9 +82,9 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             " GROUP BY node_uuid, type" +
             " ORDER BY count DESC";
 
-    public static String TRACKING_STATISTICS_NODE_MEDIACENTER = "SELECT node_uuid, type,COUNT(*) :fields from edu_tracking_node as tracking" +
+    public static String TRACKING_STATISTICS_NODE_MEDIACENTER = "SELECT COALESCE(original_node_uuid, node_uuid) as node_uuid_final, type,COUNT(*) :fields from edu_tracking_node as tracking" +
             " WHERE (ARRAY[?] <@ authority_mediacenter) AND time BETWEEN ? AND ? AND ARRAY_LENGTH(authority_mediacenter, 1) = 1" +
-            " GROUP BY node_uuid, type" +
+            " GROUP BY node_uuid_final, type" +
             " ORDER BY count DESC";
     public static String TRACKING_STATISTICS_DAILY = "SELECT type,COUNT(*),TO_CHAR(time,'yyyy-mm-dd') as date :fields from :table as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
@@ -207,7 +206,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
                 logger.info("Failed to track organizations of user",e);
             }
             try {
-                    statement.setArray(7,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllMediacenters().toArray()));
+                    statement.setArray(7,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllMediacenters(true).toArray()));
             } catch (Exception e) {
                 logger.info("Failed to track mediacenter of user",e);
             }
@@ -516,7 +515,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
 
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, resultSet.getString("node_uuid"));
+                NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, resultSet.getString("node_uuid_final"));
                 EventType event = EventType.valueOf(resultSet.getString("type"));
                 data.put(nodeRef, new StatisticEntry());
                 data.get(nodeRef).getCounts().put(event, resultSet.getInt("count"));
