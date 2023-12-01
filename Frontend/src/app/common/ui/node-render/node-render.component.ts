@@ -1,4 +1,6 @@
-import { filter, skipWhile, takeUntil } from 'rxjs/operators';
+import { trigger } from '@angular/animations';
+import { Location, PlatformLocation } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import {
     ChangeDetectorRef,
     Component,
@@ -14,9 +16,9 @@ import {
     ViewChild,
     ViewContainerRef,
 } from '@angular/core';
-import { Toast } from '../../../core-ui-module/toast';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import { ConfigService, ProposalNode } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     DefaultGroups,
@@ -35,10 +37,9 @@ import {
     UIAnimation,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { trigger } from '@angular/animations';
-import { Location, PlatformLocation } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { Subject } from 'rxjs';
+import { filter, skipWhile, takeUntil } from 'rxjs/operators';
+import { OptionsHelperService } from 'src/app/core-ui-module/options-helper.service';
 import {
     ConfigurationHelper,
     ConfigurationService,
@@ -63,23 +64,22 @@ import {
 } from '../../../core-module/core.module';
 import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { RestTrackingService } from '../../../core-module/rest/services/rest-tracking.service';
-import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
-import { CardComponent } from '../../../shared/components/card/card.component';
 import { CardService } from '../../../core-ui-module/card.service';
-import { RouterComponent } from '../../../router/router.component';
+import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { RenderHelperService } from '../../../core-ui-module/render-helper.service';
-import { Subject } from 'rxjs';
+import { Toast } from '../../../core-ui-module/toast';
+import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
+import { RouterComponent } from '../../../router/router.component';
 import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
-import { ConfigService, ProposalNode } from 'ngx-edu-sharing-api';
-import { OptionsHelperService } from 'src/app/core-ui-module/options-helper.service';
+import { CardComponent } from '../../../shared/components/card/card.component';
 
 @Component({
     selector: 'es-node-render',
     templateUrl: 'node-render.component.html',
     styleUrls: ['node-render.component.scss'],
-    providers: [OptionsHelperService, RenderHelperService],
+    providers: [OptionsHelperDataService, RenderHelperService],
     animations: [trigger('fadeFast', UIAnimation.fade(UIAnimation.ANIMATION_TIME_FAST))],
 })
 export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
