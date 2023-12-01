@@ -366,7 +366,7 @@ public class LTIJWTUtil {
         /**
          * this is a backend call so we con not use this: req.getSession().getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
          */
-        LoginInitiationSessionObject sessionObject = AllSessions.userLTISessions.get(token);
+        LoginInitiationSessionObject sessionObject = AllSessions.getUserLTISessions().get(token);
         if(sessionObject == null){
             throw new ValidationException("no loginInitiationSessionObject found");
         }
@@ -397,7 +397,6 @@ public class LTIJWTUtil {
         }
         sessionObject.setLastAccessed(System.currentTimeMillis());
 
-        System.out.println(AllSessions.userLTISessions.getKeys().stream().map(k -> new Long(AllSessions.userLTISessions.get(k).getLastAccessed()).toString()).collect(Collectors.joining(",")));
 
         /**
          * extend session runtime: not longer necessary cause content can be written without session (token is used)
@@ -470,7 +469,7 @@ public class LTIJWTUtil {
             throw new ValidationException("missing "+LTIPlatformConstants.CUSTOM_CLAIM_TOKEN);
         }
 
-        LoginInitiationSessionObject sessionObject = AllSessions.userLTISessions.get(token);
+        LoginInitiationSessionObject sessionObject = AllSessions.getUserLTISessions().get(token);
         if(sessionObject == null){
             throw new ValidationException("no LoginInitiationSessionObject found");
         }
