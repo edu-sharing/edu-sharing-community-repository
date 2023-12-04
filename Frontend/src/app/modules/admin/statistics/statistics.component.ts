@@ -362,6 +362,7 @@ export class AdminStatisticsComponent implements OnInit {
                           stat.counts.VIEW_MATERIAL || 0,
                           stat.counts.VIEW_MATERIAL_EMBEDDED || 0,
                           stat.counts.DOWNLOAD_MATERIAL || 0,
+                          stat.counts.VIEW_COLLECTION || 0,
                           stat.counts.VIEW_MATERIAL_PLAY_MEDIA || 0,
                       ),
                   )
@@ -390,12 +391,20 @@ export class AdminStatisticsComponent implements OnInit {
                     },
                     {
                         label: this.translate.instant('ADMIN.STATISTICS.VIEWS_EMBEDDED'),
-                        yAxisID: 'y-axis-view-embedded',
+                        yAxisID: 'y-axis-view-collection',
                         backgroundColor: 'rgb(117,48,192)',
                         data: dataNode.map((stat) =>
                             stat.counts.VIEW_MATERIAL_EMBEDDED
                                 ? stat.counts.VIEW_MATERIAL_EMBEDDED
                                 : 0,
+                        ),
+                    },
+                    {
+                        label: this.translate.instant('ADMIN.STATISTICS.VIEWS_COLLECTION'),
+                        yAxisID: 'y-axis-view-embedded',
+                        backgroundColor: 'rgb(55,166,154)',
+                        data: dataNode.map((stat) =>
+                            stat.counts.VIEW_COLLECTION ? stat.counts.VIEW_COLLECTION : 0,
                         ),
                     },
                     {
@@ -440,6 +449,16 @@ export class AdminStatisticsComponent implements OnInit {
                 type: 'linear',
                 display: false,
                 id: 'y-axis-view-embedded',
+                ticks: {
+                    beginAtZero: true,
+                    max,
+                    min: 0,
+                },
+            },
+            {
+                type: 'linear',
+                display: false,
+                id: 'y-axis-view-collection',
                 ticks: {
                     beginAtZero: true,
                     max,

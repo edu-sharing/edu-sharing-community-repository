@@ -16,15 +16,12 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
-import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.tools.*;
-import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.restservices.collection.v1.model.CollectionRelationReference;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.collection.CollectionService;
@@ -78,6 +75,8 @@ import org.edu_sharing.service.search.model.SharedToMeType;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
+import org.edu_sharing.service.tracking.TrackingServiceFactory;
+import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -138,7 +137,25 @@ public class NodeDao {
         isCollectionHomePath = false; // TODO do we need to resolve this here?
     }
 
-	public org.edu_sharing.service.model.NodeRef getNodeRef() {
+    public static NodeStatsEntry.NodeStats getStats(NodeDao node) throws DAOException {
+        if(!node.isFromRemoteRepository()) {
+            if(!node.access.contains(PermissionService.CHANGE_PERMISSIONS)) {
+                throw new DAORestrictedAccessException(new SecurityException("Requires " + PermissionService.CHANGE_PERMISSIONS), node.getId());
+            }
+            try {
+                NodeStatsEntry.NodeStats stats = new NodeStatsEntry.NodeStats();
+                StatisticEntry total = TrackingServiceFactory.getTrackingService().getSingleNodeData(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node.getId()), null, null);
+                stats.setTotal(total.getCounts());
+                return stats;
+            } catch (Throwable e) {
+                logger.warn("Error while resolving stats for " + node.getRef().getId(), e);
+                return null;
+            }
+        }
+        return null;
+    }
+
+    public org.edu_sharing.service.model.NodeRef getNodeRef() {
 		if(this.nodeRef != null) {
 			return this.nodeRef;
 		}

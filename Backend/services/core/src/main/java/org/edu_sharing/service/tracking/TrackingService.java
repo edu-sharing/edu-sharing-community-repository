@@ -24,6 +24,7 @@ public interface TrackingService {
     enum EventType {
         DOWNLOAD_MATERIAL,
         VIEW_MATERIAL,
+        VIEW_COLLECTION,
         VIEW_MATERIAL_EMBEDDED,
         VIEW_MATERIAL_PLAY_MEDIA, // When a video or audio file is actually started playing
         LOGIN_USER_SESSION,
