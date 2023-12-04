@@ -253,7 +253,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        if (changes.collection) {
+        if (changes.collection.currentValue) {
             this.dataSourceCollections.reset();
             this.dataSourceReferences.reset();
 
@@ -275,74 +275,54 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 // load metadata of collection
                 this.dataSourceCollections.isLoading = true;
                 this.dataSourceReferences.isLoading = true;
+                // set the collection and load content data by refresh
+                const orderCollections =
+                    this.collection.properties[
+                        RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE
+                    ];
+                this.sortCollections.active =
+                    orderCollections?.[0] || RestConstants.CM_MODIFIED_DATE;
 
-                this.collectionService.getCollection(this.collection.ref.id).subscribe(
-                    ({ collection }) => {
-                        // set the collection and load content data by refresh
-                        const orderCollections =
-                            collection.properties[
-                                RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE
-                            ];
-                        this.sortCollections.active =
-                            orderCollections?.[0] || RestConstants.CM_MODIFIED_DATE;
+                this.sortCollections.direction =
+                    orderCollections?.[0] === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
+                        ? 'asc'
+                        : orderCollections?.[1] === 'true'
+                        ? 'asc'
+                        : 'desc';
 
-                        this.sortCollections.direction =
-                            orderCollections?.[0] ===
-                            RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
-                                ? 'asc'
-                                : orderCollections?.[1] === 'true'
-                                ? 'asc'
-                                : 'desc';
-
-                        const refMode = collection.collection.orderMode;
-                        const refAscending = collection.collection.orderAscending;
-                        // cast old order mode to new parameter
-                        this.sortReferences.active = ((refMode ===
-                        RestConstants.COLLECTION_ORDER_MODE_CUSTOM
-                            ? RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
-                            : refMode) || RestConstants.CM_MODIFIED_DATE) as any;
-                        this.sortReferences.direction =
-                            this.sortReferences.active ===
-                            RestConstants.COLLECTION_ORDER_MODE_CUSTOM
-                                ? 'asc'
-                                : refAscending
-                                ? 'asc'
-                                : 'desc';
-                        this.collection = collection;
-                        this.mainNavUpdateTrigger.next();
-                        this.dataSourceCollections.isLoading = false;
-                        this.setOptionsCollection();
-                        this.refreshContent();
-                        if (
-                            this.collection.access.indexOf(
-                                RestConstants.ACCESS_CHANGE_PERMISSIONS,
-                            ) !== -1
-                        ) {
-                            this.nodeService
-                                .getNodePermissions(this.collection.ref.id)
-                                .subscribe((permissions) => {
-                                    this.permissions =
-                                        permissions.permissions.localPermissions.permissions.concat(
-                                            permissions.permissions.inheritedPermissions,
-                                        );
-                                });
-                        }
-                    },
-                    (error) => {
-                        if (error.status === 404) {
-                            this.toast.error(null, 'COLLECTIONS.ERROR_NOT_FOUND');
-                        } else {
-                            this.toast.error(error);
-                        }
-                        this.dataSourceCollections.isLoading = false;
-                        if (!this.loadingTask.isDone) {
-                            this.loadingTask.done();
-                        }
-                    },
-                );
+                const refMode = this.collection.collection.orderMode;
+                const refAscending = this.collection.collection.orderAscending;
+                // cast old order mode to new parameter
+                this.sortReferences.active = ((refMode ===
+                RestConstants.COLLECTION_ORDER_MODE_CUSTOM
+                    ? RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
+                    : refMode) || RestConstants.CM_MODIFIED_DATE) as any;
+                this.sortReferences.direction =
+                    this.sortReferences.active === RestConstants.COLLECTION_ORDER_MODE_CUSTOM
+                        ? 'asc'
+                        : refAscending
+                        ? 'asc'
+                        : 'desc';
+                this.mainNavUpdateTrigger.next();
+                this.dataSourceCollections.isLoading = false;
+                this.setOptionsCollection();
+                this.refreshContent();
+                if (
+                    this.collection.access.indexOf(RestConstants.ACCESS_CHANGE_PERMISSIONS) !== -1
+                ) {
+                    this.nodeService
+                        .getNodePermissions(this.collection.ref.id)
+                        .subscribe((permissions) => {
+                            this.permissions =
+                                permissions.permissions.localPermissions.permissions.concat(
+                                    permissions.permissions.inheritedPermissions,
+                                );
+                        });
+                }
             }
         }
     }
+
     isUserAllowedToEdit(collection: Node) {
         return RestHelper.isUserAllowedToEdit(collection);
     }
