@@ -66,25 +66,11 @@
     </div>
   </section>
   <ng-container *ngIf="!isRootLevel">
-    <section *ngIf="!dataSourceCollectionProposals?.isEmpty()" class="collections-cards-div">
-      <div class="content-header heading-group">
-        <h2 class="mat-heading-3">
-          {{ 'COLLECTIONS.PROPOSALS.TITLE' | translate }}
-        </h2>
-      </div>
-
-      <es-node-entries-wrapper
-        [elementInteractionType]="interactionType"
-        #listProposals
-        [dataSource]="dataSourceCollectionProposals"
-        [scope]="Scope.CollectionsProposals"
-        [displayType]="NodeEntriesDisplayType.Grid"
-        [columns]="proposalColumns"
-        [globalOptions]=""
-        (clickItem)="onContentClick($event)"
-        class="no-padding"
-      ></es-node-entries-wrapper>
-    </section>
+    <es-collection-proposals
+      [collection]="collection"
+      [canEdit]="isAllowedToEditCollection()"
+      (onContentClick)="onContentClick($any($event))"
+    ></es-collection-proposals>
     <section class="collections-cards-div" *ngIf="!isRootLevel">
       <es-actionbar
         #actionbarReferences

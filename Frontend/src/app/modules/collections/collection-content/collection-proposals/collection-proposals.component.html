@@ -1,0 +1,20 @@
+<section *ngIf="!dataSourceCollectionProposals?.isEmpty()" class="collections-cards-div">
+  <div class="content-header heading-group">
+    <h2 class="mat-heading-3">
+      {{ 'COLLECTIONS.PROPOSALS.TITLE' | translate }}
+    </h2>
+    <es-actionbar></es-actionbar>
+  </div>
+
+  <es-node-entries-wrapper
+    [elementInteractionType]="InteractionType.DefaultActionLink"
+    #listProposals
+    [dataSource]="dataSourceCollectionProposals"
+    [scope]="Scope.CollectionsProposals"
+    [displayType]="NodeEntriesDisplayType.Grid"
+    [columns]="proposalColumns"
+    [globalOptions]=""
+    (clickItem)="onContentClick.emit($event.element)"
+    class="no-padding"
+  ></es-node-entries-wrapper>
+</section>
