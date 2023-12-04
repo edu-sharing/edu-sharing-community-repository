@@ -396,6 +396,9 @@
             <property name="cm:esLastLogin">
             	<type>d:datetime</type>
             </property>
+            <property name="cm:esFirstLogin">
+               <type>d:datetime</type>
+            </property>
 
             <!-- edu-sharing customization whether the user is interested in receiving mail updates / notifications -->
             <property name="cm:personallownotifications">
