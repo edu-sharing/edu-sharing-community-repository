@@ -108,7 +108,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
     @ViewChild('listCollections') listCollections: ListTableComponent;
     @ViewChild('listReferences') listReferences: ListEventInterface<CollectionReference>;
-    @ViewChild('listProposals') listProposals: ListEventInterface<ProposalNode>;
 
     private mainNavUpdateTrigger = new Subject<void>();
     sortCollectionColumns: ListItemSort[] = [
@@ -160,16 +159,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     });
     dataSourceCollections = new NodeDataSource<Node>();
     dataSourceReferences = new NodeDataSource<CollectionReference>();
-    dataSourceCollectionProposals = new NodeDataSource<ProposalNode>();
     collectionsColumns: ListItem[] = [];
     referencesColumns: ListItem[] = [];
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
 
-    proposalColumns = [
-        new ListItem('NODE', RestConstants.CM_PROP_TITLE),
-        new ListItem('NODE_PROPOSAL', RestConstants.CM_CREATOR, { showLabel: false }),
-        new ListItem('NODE_PROPOSAL', RestConstants.CM_PROP_C_CREATED, { showLabel: false }),
-    ];
     private contentNode: Node;
     permissions: Permission[];
     login: LoginResult;
@@ -206,7 +199,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 if (event.data.collection.ref.id === this.collection.ref.id) {
                     this.listReferences.addVirtualNodes(event.data.references);
                 }
-                this.refreshProposals();
             }
         });
         this.authenticationService
@@ -630,7 +622,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private refreshContent() {
         this.dataSourceCollections.reset();
         this.dataSourceReferences.reset();
-        this.dataSourceCollectionProposals.reset();
         this.listReferences?.getSelection().clear();
         this.dataSourceCollections.isLoading = true;
         this.dataSourceReferences.isLoading = true;
@@ -676,7 +667,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         this.finishCollectionLoading();
                         return;
                     }
-                    this.refreshProposals();
                     const requestRefs = this.getReferencesRequest();
                     requestRefs.count = null;
                     this.collectionService
@@ -963,29 +953,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                     this.toast.error(error);
                 },
             );
-    }
-
-    private refreshProposals() {
-        this.dataSourceCollectionProposals.reset();
-        this.dataSourceCollectionProposals.isLoading = true;
-        if (this.isAllowedToEditCollection()) {
-            this.collectionService
-                .getCollectionProposals(this.collection.ref.id)
-                .subscribe((proposals) => {
-                    proposals.nodes = proposals.nodes.map((p) => {
-                        p.proposalCollection = this.collection;
-                        return p;
-                    });
-                    this.dataSourceCollectionProposals.setData(
-                        proposals.nodes,
-                        proposals.pagination,
-                    );
-                    this.dataSourceCollectionProposals.isLoading = false;
-                    setTimeout(() => {
-                        this.listProposals?.initOptionsGenerator({});
-                    });
-                });
-        }
     }
 
     canDelete(node: EduData.CollectionReference) {

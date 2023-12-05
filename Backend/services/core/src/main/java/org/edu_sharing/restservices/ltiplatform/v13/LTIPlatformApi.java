@@ -780,7 +780,7 @@ public class LTIPlatformApi {
             String encryptedToken = ApiTool.encrpt(json);
             loginInitiationSessionObject.setToken(encryptedToken);
             loginInitiationSessionObject.setLastAccessed(timeStamp);
-            AllSessions.userLTISessions.put(encryptedToken, loginInitiationSessionObject);
+            AllSessions.getUserLTISessions().put(encryptedToken, loginInitiationSessionObject);
         }
 
         Map<String,LoginInitiationSessionObject> loginInitiationSessionObjectMap = (Map<String,LoginInitiationSessionObject>)req
