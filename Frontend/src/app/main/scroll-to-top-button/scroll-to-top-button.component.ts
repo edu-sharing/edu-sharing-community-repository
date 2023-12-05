@@ -1,8 +1,7 @@
 import { trigger } from '@angular/animations';
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { UIAnimation } from 'ngx-edu-sharing-ui';
+import { AppContainerService, UIAnimation } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
-import { AppContainerService } from '../../services/app-container.service';
 
 /**
  * Shows a small button on the bottom of the screen that scrolls to the page top.

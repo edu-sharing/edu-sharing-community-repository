@@ -11,7 +11,12 @@ import {
 } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { AuthenticationService } from 'ngx-edu-sharing-api';
-import { AccessibilityService, TranslationsService, UIConstants } from 'ngx-edu-sharing-ui';
+import {
+    AccessibilityService,
+    AppContainerService,
+    TranslationsService,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { environment } from '../environments/environment';
@@ -22,7 +27,6 @@ import { CookieInfoComponent } from './main/cookie-info/cookie-info.component';
 import { LoadingScreenService } from './main/loading-screen/loading-screen.service';
 import { MainNavService } from './main/navigation/main-nav.service';
 import { printCurrentTaskInfo } from './main/track-change-detection';
-import { AppContainerService } from './services/app-container.service';
 import { BridgeService } from './services/bridge.service';
 import { LicenseAgreementService } from './services/license-agreement.service';
 import { ScrollPositionRestorationService } from './services/scroll-position-restoration.service';

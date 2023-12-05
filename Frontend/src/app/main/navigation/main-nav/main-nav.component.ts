@@ -20,6 +20,7 @@ import {
     UserService,
 } from 'ngx-edu-sharing-api';
 import {
+    AppContainerService,
     OPEN_URL_MODE,
     OptionGroup,
     OptionItem,
@@ -42,7 +43,6 @@ import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import { AppContainerService } from '../../../services/app-container.service';
 import { BridgeService } from '../../../services/bridge.service';
 import { LicenseAgreementService } from '../../../services/license-agreement.service';
 import { NodeHelperService } from '../../../services/node-helper.service';

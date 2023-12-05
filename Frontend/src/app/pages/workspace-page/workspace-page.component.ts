@@ -5,6 +5,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { UserService } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
+    AppContainerService,
     CanDrop,
     ClipboardObject,
     CustomOptions,
@@ -59,7 +60,6 @@ import {
     SearchEvent,
     SearchFieldService,
 } from '../../main/navigation/search-field/search-field.service';
-import { AppContainerService } from '../../services/app-container.service';
 import { CardService } from '../../services/card.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { Toast } from '../../services/toast';

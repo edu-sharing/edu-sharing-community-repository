@@ -56,8 +56,10 @@ export class AppContainerService {
      *
      * If the app is served natively, returns the document element.
      */
-    getScrollContainer(): HTMLElement {
-        return this.scrollContainer ?? document.documentElement;
+    getScrollContainer(): HTMLElement;
+    getScrollContainer<T>({ fallback }: { fallback: T }): T;
+    getScrollContainer({ fallback = document.documentElement } = {}): HTMLElement {
+        return this.scrollContainer ?? fallback;
     }
 
     private registerScrollContainer(appElement: HTMLElement): void {
