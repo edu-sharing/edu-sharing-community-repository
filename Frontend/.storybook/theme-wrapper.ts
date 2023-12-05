@@ -1,8 +1,6 @@
-import { HttpClient, HttpHandler, HttpXhrBackend } from '@angular/common/http';
 import { Component, Input, importProvidersFrom } from '@angular/core';
 import { Decorator } from '@storybook/angular';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
-import { EduSharingApiModule } from 'ngx-edu-sharing-api';
 import { ThemeService, Variable } from '../src/app/common/services/theme.service';
 
 export interface Themes {
@@ -41,16 +39,6 @@ export function withTheme<TArgs = unknown>(themes: Themes): Decorator<TArgs> {
 
         story.applicationConfig ??= { providers: [] };
         story.applicationConfig.providers.push(
-            HttpClient,
-            {
-                provide: HttpHandler,
-                useValue: new HttpXhrBackend({ build: () => new XMLHttpRequest() }),
-            },
-            importProvidersFrom(
-                EduSharingApiModule.forRoot({
-                    rootUrl: '/api',
-                }),
-            ),
             importProvidersFrom(MaterialCssVarsModule.forRoot({ isAutoContrast: true })),
         );
 

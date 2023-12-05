@@ -1,4 +1,8 @@
-import type { Preview } from '@storybook/angular';
+import { HttpClient, HttpHandler, HttpXhrBackend } from '@angular/common/http';
+import { importProvidersFrom } from '@angular/core';
+import { applicationConfig, type Preview } from '@storybook/angular';
+import { EduSharingApiModule } from 'ngx-edu-sharing-api';
+import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
 import { Themes, withTheme } from './theme-wrapper';
 
 const themes: Themes = {
@@ -15,7 +19,29 @@ const themes: Themes = {
 };
 
 const preview: Preview = {
-    decorators: [withTheme(themes)],
+    decorators: [
+        applicationConfig({
+            providers: [
+                HttpClient,
+                {
+                    provide: HttpHandler,
+                    useValue: new HttpXhrBackend({ build: () => new XMLHttpRequest() }),
+                },
+                importProvidersFrom(
+                    EduSharingApiModule.forRoot({
+                        rootUrl: '/api',
+                    }),
+                ),
+                importProvidersFrom(
+                    EduSharingUiModule.forRoot({
+                        isEmbedded: true,
+                        production: false,
+                    }),
+                ),
+            ],
+        }),
+        withTheme(themes),
+    ],
     globalTypes: {
         theme: {
             description: 'Material color scheme',

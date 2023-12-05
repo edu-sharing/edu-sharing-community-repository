@@ -1,11 +1,8 @@
 import { applicationConfig, moduleMetadata, type Meta, type StoryObj } from '@storybook/angular';
-import { HttpClient, HttpHandler, HttpXhrBackend } from '@angular/common/http';
-import { importProvidersFrom } from '@angular/core';
-import { EduSharingApiModule } from 'ngx-edu-sharing-api';
-import { GenericDialogComponent } from './generic-dialog.component';
 import { SharedModule } from '../../../../shared/shared.module';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { GenericDialogComponent } from './generic-dialog.component';
 
 // TODO: Include dialog frame in the stories
 
@@ -20,16 +17,6 @@ const meta: Meta<GenericDialogComponent<string>> = {
         }),
         applicationConfig({
             providers: [
-                HttpClient,
-                {
-                    provide: HttpHandler,
-                    useValue: new HttpXhrBackend({ build: () => new XMLHttpRequest() }),
-                },
-                importProvidersFrom(
-                    EduSharingApiModule.forRoot({
-                        rootUrl: '/api',
-                    }),
-                ),
                 { provide: CARD_DIALOG_DATA, useValue: {} },
                 { provide: CardDialogRef, useValue: {} },
             ],

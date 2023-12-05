@@ -1,5 +1,3 @@
-import { HttpClient, HttpHandler, HttpXhrBackend } from '@angular/common/http';
-import { importProvidersFrom } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -36,16 +34,6 @@ const actionbar: Meta<ActionbarComponent> = {
         applicationConfig({
             providers: [
                 provideAnimations(),
-                HttpClient,
-                {
-                    provide: HttpHandler,
-                    useValue: new HttpXhrBackend({ build: () => new XMLHttpRequest() }),
-                },
-                importProvidersFrom(
-                    EduSharingApiModule.forRoot({
-                        rootUrl: '/api',
-                    }),
-                ),
                 {
                     provide: TranslatePipe,
                     useValue: {},
