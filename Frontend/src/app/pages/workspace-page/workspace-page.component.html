@@ -1,4 +1,17 @@
 <div class="frame" cdkDropList [cdkDropListSortingDisabled]="true">
+  <div class="topbarFrame">
+    <div class="mobile-move-top">
+      <es-breadcrumbs
+        *ngIf="isLoggedIn"
+        [searchQuery]="searchQuery?.query"
+        [home]="'WORKSPACE.' + root"
+        [canDropNodes]="canDropOnBreadcrumb"
+        (onDrop)="handleDropOnBreadcrumb($event)"
+        (onClick)="openBreadcrumb($event)"
+      ></es-breadcrumbs>
+      <es-actionbar #actionbar></es-actionbar>
+    </div>
+  </div>
   <div *ngIf="isBlocked" class="workspace-container isBlocked">
     {{ 'NO_PERMISSIONS_FOR_SCOPE' | translate }}
   </div>
@@ -56,24 +69,6 @@
         (onDeleteNodes)="onDeleteNodes($event)"
       ></es-workspace-tree>
       <es-user-quota *ngIf="user.person.quota.enabled" [quota]="user.person.quota"></es-user-quota>
-    </div>
-    <div class="topbarFrame">
-      <div class="mobile-move-top">
-        <!--[homeRouterLink]="path ? {
-            routerLink: '.',
-            queryParams: { id: null },
-            queryParamsHandling: 'merge'
-          } : null"-->
-        <es-breadcrumbs
-          *ngIf="isLoggedIn"
-          [searchQuery]="searchQuery?.query"
-          [home]="'WORKSPACE.' + root"
-          [canDropNodes]="canDropOnBreadcrumb"
-          (onDrop)="handleDropOnBreadcrumb($event)"
-          (onClick)="openBreadcrumb($event)"
-        ></es-breadcrumbs>
-        <es-actionbar #actionbar></es-actionbar>
-      </div>
     </div>
     <es-recycle *ngIf="root === 'RECYCLE'" class="explorer" [actionbar]="actionbar"></es-recycle>
     <h1 esTitle class="cdk-visually-hidden">{{ 'WORKSPACE.TITLE' | translate }}</h1>
