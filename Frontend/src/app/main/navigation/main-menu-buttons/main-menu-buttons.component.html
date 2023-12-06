@@ -10,6 +10,6 @@
   [class.disabled]="entry.isDisabled"
   title="{{ 'GOTO' | translate }} {{ entry.name | translate }}"
 >
-  <i *ngIf="entry.icon" class="material-icons align-icon">{{ entry.icon }}</i>
+  <i *ngIf="entry.icon" class="align-icon" [esIcon]="entry.icon"></i>
   <span>{{ entry.name | translate }}</span>
 </button>

@@ -74,6 +74,9 @@ export class IconDirective implements OnInit, OnDestroy {
     async ngOnInit() {
         this.isReady = true;
         this.element.nativeElement.setAttribute('aria-hidden', 'true');
+        // Material styles expect icons to have the class `mat-icon`, e.g.,
+        // https://github.com/angular/components/blob/ae0b9e1c1bae5e937d039ea53652fe1656bc4623/src/material/form-field/form-field.scss#L156
+        this.element.nativeElement.classList.add('mat-icon');
         this.updateAria();
     }
 
