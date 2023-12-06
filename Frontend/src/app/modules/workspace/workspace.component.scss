@@ -78,6 +78,10 @@ es-user-quota {
     bottom: 25px + $mobileTabNavHeight;
     display: none;
 }
+// Backdrop for dropdown .selectRootMenu
+.dialog {
+    z-index: 131;
+}
 .selectRootMenu {
     position: fixed;
     width: 250px;
