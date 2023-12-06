@@ -184,7 +184,7 @@
         <Logger name="org.apache.pdfbox.pdmodel.font.PDFont" level="FATAL"/>
         <Logger name="org.apache.pdfbox.pdmodel.font.PDSimpleFont" level="FATAL"/>
         <Logger name="org.apache.ws" level="INFO"/>
-        <Logger name="org.edu_sharing.repository.server.tools.HttpQueryTool" level="DEBUG"/>
+        <Logger name="org.edu_sharing.repository.server.tools.HttpQueryTool" level="info"/>
         <Logger name="org.hibernate" level="ERROR"/>
         <Logger name="org.hibernate.cfg.SettingsFactory" level="WARN"/>
         <Logger name="org.hibernate.event.def.AbstractFlushingEventListener" level="FATAL"/>
@@ -205,11 +205,11 @@
 
         <Logger name="org.edu_sharing" level="info"/>
         <Logger name="org.edu_sharing.alfresco.jobs" level="warn"/>
-        <Logger name="org.edu_sharing.repository.server.rendering.RenderingProxy" level="debug"/>
-        <Logger name="org.edu_sharing.repository.server.tools.cache" level="debug"/>
+        <Logger name="org.edu_sharing.repository.server.rendering.RenderingProxy" level="info"/>
+        <Logger name="org.edu_sharing.repository.server.tools.cache" level="info"/>
         <Logger name="org.edu_sharing.repository.server.MCAlfrescoAPIClient" level="info"/>
-        <Logger name="org.edu_sharing.repository.server.tools.ActionObserver" level="debug"/>
-        <Logger name="org.edu_sharing.repository.server.tools.HttpQueryTool" level="debug"/>
+        <Logger name="org.edu_sharing.repository.server.tools.ActionObserver" level="info"/>
+        <Logger name="org.edu_sharing.repository.server.tools.HttpQueryTool" level="info"/>
         <Logger name="org.edu_sharing.repository.server.importer.OAIPMHLOMValidator" level="info">
             <AppenderRef ref="edu-sharing-oai-validator"/>
         </Logger>
@@ -219,16 +219,16 @@
         <Logger name="org.edu_sharing.repository.server.jobs.quartz.RemoveDeletedImportsJob" level="info">
             <AppenderRef ref="edu-sharing-deletedobj"/>
         </Logger>
-        <Logger name="org.edu_sharing.repository.server.authentication.SessionListener" level="debug">
+        <Logger name="org.edu_sharing.repository.server.authentication.SessionListener" level="warn">
             <AppenderRef ref="edu-sharing-sessions"/>
         </Logger>
         <Logger name="org.edu_sharing.repository.server.jobs" level="info">
             <AppenderRef ref="edu-sharing-jobs"/>
         </Logger>
-        <Logger name="org.edu_sharing.repository.server.monitoring" level="debug">
+        <Logger name="org.edu_sharing.repository.server.monitoring" level="info">
             <AppenderRef ref="edu-sharing-monitoring"/>
         </Logger>
-        <Logger name="org.edu_sharing.repository.server.importer" level="debug">
+        <Logger name="org.edu_sharing.repository.server.importer" level="info">
             <AppenderRef ref="edu-sharing-jobs"/>
         </Logger>
         <Logger name="org.edu_sharing.repository.server.importer.ImportCleaner" level="info">
