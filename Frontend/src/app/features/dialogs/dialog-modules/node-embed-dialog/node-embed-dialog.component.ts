@@ -143,6 +143,9 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
     }
 
     private getEmbedLink(node: Node, version: 'fixed' | 'newest'): string {
+        // Note that this does not work when the application itself is used in an embedded context
+        // since this method relies on the current page's URL to match the origin and base HREF of
+        // the backend.
         const routerLink = 'eduservlet/render';
         const queryParams = {
             node_id: node.ref.id,
