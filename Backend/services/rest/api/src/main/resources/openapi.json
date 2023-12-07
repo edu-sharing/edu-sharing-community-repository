@@ -13099,6 +13099,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "description": "track this as a view of the collection (default: true)",
+            "in": "query",
+            "name": "track",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -28470,6 +28478,99 @@
         ]
       }
     },
+    "/node/v1/nodes/{repository}/{node}/stats": {
+      "get": {
+        "description": "Get statistics (views, downloads) of node. Requires ChangePermissions permission on node",
+        "operationId": "getStats",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of node",
+            "in": "path",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeEntry"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Get statistics of node.",
+        "tags": [
+          "NODE v1"
+        ]
+      }
+    },
     "/node/v1/nodes/{repository}/{node}/textContent": {
       "get": {
         "description": "May fails with 500 if the node can not be read.",
@@ -34972,6 +35073,7 @@
               "enum": [
                 "DOWNLOAD_MATERIAL",
                 "VIEW_MATERIAL",
+                "VIEW_COLLECTION",
                 "VIEW_MATERIAL_EMBEDDED",
                 "VIEW_MATERIAL_PLAY_MEDIA",
                 "LOGIN_USER_SESSION",
