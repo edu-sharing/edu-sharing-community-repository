@@ -406,6 +406,18 @@ body {
         color: $primary;
     }
 }
+// Undo default style of mat-icon.
+//
+// We assign icons the class .mat-icon so other Material components will treat them as icons, but we
+// don't use the actual mat-icon component. Some styles rely on setting the elements width and
+// height by changing its font-size.
+//
+// Note that the default style of mat-icon is only loaded when the mat-icon component is used, which
+// is rare but does happen.
+i.mat-icon {
+    height: unset;
+    width: unset;
+}
 button {
     &.mat-button,
     &.mat-flat-button,
