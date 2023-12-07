@@ -77,9 +77,10 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             " GROUP BY type" +
             " ORDER BY count DESC";
 
-    public static String TRACKING_STATISTICS_NODE_ARRAY = "SELECT node_uuid, type,COUNT(*) :fields from edu_tracking_node as tracking" +
-            " WHERE node_uuid = ANY(?) AND time BETWEEN ? AND ? AND (ARRAY[?] <@ authority_mediacenter)" +
-            " GROUP BY node_uuid, type" +
+    public static String TRACKING_STATISTICS_NODE_ARRAY = "SELECT COALESCE(original_node_uuid, node_uuid) as node_uuid_final, type,COUNT(*) :fields from edu_tracking_node as tracking" +
+            " WHERE time BETWEEN ? AND ? AND (ARRAY[?] <@ authority_mediacenter)" +
+            " GROUP BY node_uuid_final, type" +
+            " HAVING COALESCE(original_node_uuid, node_uuid) = ANY(?) " +
             " ORDER BY count DESC";
 
     public static String TRACKING_STATISTICS_NODE_MEDIACENTER = "SELECT COALESCE(original_node_uuid, node_uuid) as node_uuid_final, type,COUNT(*) :fields from edu_tracking_node as tracking" +
@@ -463,18 +464,18 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             query = query.replace(":fields", fields);
             statement=con.prepareStatement(query);
             int index=1;
-            statement.setArray(index++,con.createArrayOf("text", nodes.stream().map(NodeRef::getId).toArray()));
             if(dateFrom==null)
                 dateFrom = new java.util.Date(0);
             statement.setTimestamp(index++, Timestamp.valueOf(dateFrom.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
             if(dateTo==null)
                 dateTo = new java.util.Date();
             statement.setTimestamp(index++, Timestamp.valueOf(dateTo.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
-
             statement.setString(index++, mediacenter);
+            statement.setArray(index++,con.createArrayOf("text", nodes.stream().map(NodeRef::getId).toArray()));
+
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, resultSet.getString("node_uuid"));
+                NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, resultSet.getString("node_uuid_final"));
                 EventType event = EventType.valueOf(resultSet.getString("type"));
                 data.get(nodeRef).getCounts().put(event, resultSet.getInt("count"));
                 if(!additionalFields.isEmpty()) {
