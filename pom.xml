@@ -190,7 +190,7 @@
       <dependency>
         <groupId>org.alfresco</groupId>
         <artifactId>alfresco-search-services</artifactId>
-        <version>2.0.3</version>
+        <version>2.0.8.2</version>
         <type>zip</type>
       </dependency>
 
@@ -204,25 +204,25 @@
       <dependency>
         <groupId>org.alfresco</groupId>
         <artifactId>alfresco-transform-model</artifactId>
-        <version>2.6.0</version>
+        <version>3.1.1</version>
       </dependency>
 
       <dependency>
         <groupId>org.alfresco</groupId>
         <artifactId>alfresco-transformer-base</artifactId>
-        <version>2.6.0</version>
+        <version>3.1.1</version>
       </dependency>
 
       <dependency>
         <groupId>org.alfresco</groupId>
         <artifactId>alfresco-transform-tika</artifactId>
-        <version>2.6.0</version>
+        <version>3.1.1</version>
       </dependency>
 
       <dependency>
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm</artifactId>
-        <version>9.2</version>
+        <version>9.4</version>
       </dependency>
 
       <dependency>
@@ -595,13 +595,13 @@
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-annotations</artifactId>
-        <version>2.12.6</version>
+        <version>2.15.0-rc1</version>
       </dependency>
 
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-core</artifactId>
-        <version>2.12.6</version>
+        <version>2.15.0-rc1</version>
       </dependency>
 
       <dependency>
@@ -613,7 +613,7 @@
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
-        <version>2.12.6.1</version>
+        <version>2.15.0-rc1</version>
       </dependency>
 
       <dependency>
@@ -625,49 +625,49 @@
       <dependency>
         <groupId>com.fasterxml.jackson.dataformat</groupId>
         <artifactId>jackson-dataformat-cbor</artifactId>
-        <version>2.12.6</version>
+        <version>2.15.0-rc1</version>
       </dependency>
 
       <dependency>
         <groupId>com.fasterxml.jackson.dataformat</groupId>
         <artifactId>jackson-dataformat-smile</artifactId>
-        <version>2.12.6</version>
+        <version>2.15.0-rc1</version>
       </dependency>
 
       <dependency>
         <groupId>com.fasterxml.jackson.dataformat</groupId>
         <artifactId>jackson-dataformat-xml</artifactId>
-        <version>2.12.6</version>
+        <version>2.15.0-rc1</version>
       </dependency>
 
       <dependency>
         <groupId>com.fasterxml.jackson.dataformat</groupId>
         <artifactId>jackson-dataformat-yaml</artifactId>
-        <version>2.12.6</version>
+        <version>2.15.0-rc1</version>
       </dependency>
 
       <dependency>
         <groupId>com.fasterxml.jackson.datatype</groupId>
         <artifactId>jackson-datatype-joda</artifactId>
-        <version>2.12.6</version>
+        <version>2.15.0-rc1</version>
       </dependency>
 
       <dependency>
         <groupId>com.fasterxml.jackson.datatype</groupId>
         <artifactId>jackson-datatype-jsr310</artifactId>
-        <version>2.12.6</version>
+        <version>2.15.0-rc1</version>
       </dependency>
 
       <dependency>
         <groupId>com.fasterxml.jackson.jaxrs</groupId>
         <artifactId>jackson-jaxrs-base</artifactId>
-        <version>2.12.6</version>
+        <version>2.15.0-rc1</version>
       </dependency>
 
       <dependency>
         <groupId>com.fasterxml.jackson.jaxrs</groupId>
         <artifactId>jackson-jaxrs-json-provider</artifactId>
-        <version>2.12.6</version>
+        <version>2.15.0-rc1</version>
       </dependency>
 
       <dependency>
@@ -679,7 +679,7 @@
       <dependency>
         <groupId>com.fasterxml.jackson.module</groupId>
         <artifactId>jackson-module-jaxb-annotations</artifactId>
-        <version>2.12.6</version>
+        <version>2.15.0-rc1</version>
       </dependency>
 
       <dependency>
@@ -750,7 +750,7 @@
       <dependency>
         <groupId>com.nimbusds</groupId>
         <artifactId>nimbus-jose-jwt</artifactId>
-        <version>9.9</version>
+        <version>9.24.4</version>
       </dependency>
 
       <dependency>
@@ -768,7 +768,7 @@
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
         <artifactId>log4j-bom</artifactId>
-        <version>2.17.1</version>
+        <version>2.19.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -818,7 +818,7 @@
       <dependency>
         <groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
         <artifactId>owasp-java-html-sanitizer</artifactId>
-        <version>20180219.1</version>
+        <version>20220608.1</version>
       </dependency>
 
       <dependency>
@@ -836,7 +836,7 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>1.7.35</version>
+        <version>2.0.3</version>
       </dependency>
 
       <dependency>
@@ -866,20 +866,70 @@
       <dependency>
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-core</artifactId>
-        <version>5.6.1</version>
+        <version>5.8.3</version>
       </dependency>
 
       <dependency>
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-config</artifactId>
-        <version>5.6.1</version>
+        <version>5.8.3</version>
       </dependency>
 
       <dependency>
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-web</artifactId>
-        <version>5.6.1</version>
+        <version>5.8.3</version>
       </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-web</artifactId>
+        <version>5.3.27</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-webmvc</artifactId>
+        <version>5.3.27</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-tx</artifactId>
+        <version>5.3.27</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-aop</artifactId>
+        <version>5.3.27</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-beans</artifactId>
+        <version>5.3.27</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-core</artifactId>
+        <version>5.3.27</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-expression</artifactId>
+        <version>5.3.27</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-context</artifactId>
+        <version>5.3.27</version>
+      </dependency>
+
+
 
       <dependency>
         <groupId>org.springframework.security.extensions</groupId>
@@ -896,13 +946,13 @@
       <dependency>
         <groupId>io.swagger.core.v3</groupId>
         <artifactId>swagger-annotations</artifactId>
-        <version>2.1.11</version>
+        <version>2.2.15</version>
       </dependency>
 
       <dependency>
         <groupId>io.swagger.parser.v3</groupId>
         <artifactId>swagger-parser</artifactId>
-        <version>2.1.0</version>
+        <version>2.1.16</version>
         <exclusions>
           <exclusion>
             <groupId>org.slf4j</groupId>
@@ -921,7 +971,7 @@
       <dependency>
         <groupId>io.swagger.core.v3</groupId>
         <artifactId>swagger-jaxrs2</artifactId>
-        <version>2.1.11</version>
+        <version>2.2.15</version>
       </dependency>
 
       <dependency>
@@ -952,7 +1002,7 @@
       <dependency>
         <groupId>com.fasterxml.woodstox</groupId>
         <artifactId>woodstox-core</artifactId>
-        <version>6.2.8</version>
+        <version>6.4.0</version>
       </dependency>
 
       <dependency>
@@ -988,7 +1038,7 @@
       <dependency>
         <groupId>com.jayway.jsonpath</groupId>
         <artifactId>json-path</artifactId>
-        <version>2.6.0</version>
+        <version>2.8.0</version>
         <exclusions>
           <exclusion>
             <groupId>org.slf4j</groupId>
@@ -1148,7 +1198,7 @@
       <dependency>
         <groupId>org.apache.santuario</groupId>
         <artifactId>xmlsec</artifactId>
-        <version>2.3.0</version>
+        <version>3.0.0</version>
       </dependency>
 
 
@@ -1157,6 +1207,24 @@
         <artifactId>xz</artifactId>
         <version>1.9</version>
         <scope>compile</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>2.12.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.yaml</groupId>
+        <artifactId>snakeyaml</artifactId>
+        <version>2.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>jakarta.annotation</groupId>
+        <artifactId>jakarta.annotation-api</artifactId>
+        <version>2.1.1</version>
       </dependency>
 
     </dependencies>

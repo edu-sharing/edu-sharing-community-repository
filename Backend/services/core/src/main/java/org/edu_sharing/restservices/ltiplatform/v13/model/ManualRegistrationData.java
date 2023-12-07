@@ -1,8 +1,8 @@
 package org.edu_sharing.restservices.ltiplatform.v13.model;
 
-import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class ManualRegistrationData {
 
@@ -18,18 +18,18 @@ public class ManualRegistrationData {
 
     List<String> redirectionUrls;
 
-    @ApiModelProperty(notes = "JSON Object where each value is a string. Custom parameters to be included in each launch to this tool. If a custom parameter is also defined at the message level, the message level value takes precedence. The value of the custom parameters may be substitution parameters as described in the LTI Core [LTI-13] specification. ", required = false)
+    @Schema(description = "JSON Object where each value is a string. Custom parameters to be included in each launch to this tool. If a custom parameter is also defined at the message level, the message level value takes precedence. The value of the custom parameters may be substitution parameters as described in the LTI Core [LTI-13] specification. ", required = false)
     List<String> customParameters;
 
     String logoUrl;
 
-    @ApiModelProperty(notes = "The default target link uri to use unless defined otherwise in the message or link definition",required = true)
+    @Schema(description = "The default target link uri to use unless defined otherwise in the message or link definition",required = true)
     String targetLinkUri;
 
-    @ApiModelProperty(notes = "The target link uri to use for DeepLing Message",required = false)
+    @Schema(description = "The target link uri to use for DeepLing Message",required = false)
     String targetLinkUriDeepLink;
 
-    @ApiModelProperty(name = "client_name", notes = "Name of the Tool to be presented to the End-User. Localized representations may be included as described in Section 2.1 of the [OIDC-Reg] specification. ",required = true)
+    @Schema(description = "Name of the Tool to be presented to the End-User. Localized representations may be included as described in Section 2.1 of the [OIDC-Reg] specification. ",required = true)
     String clientName;
 
     public String getToolName() {

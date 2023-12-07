@@ -2141,6 +2141,9 @@
           "syslogEquivalent": {
             "format": "int32",
             "type": "integer"
+          },
+          "version2Level": {
+            "$ref": "#/components/schemas/Level"
           }
         },
         "type": "object"
@@ -2349,10 +2352,13 @@
       "ManualRegistrationData": {
         "properties": {
           "clientName": {
+            "description": "Name of the Tool to be presented to the End-User. Localized representations may be included as described in Section 2.1 of the [OIDC-Reg] specification. ",
             "type": "string"
           },
           "customParameters": {
+            "description": "JSON Object where each value is a string. Custom parameters to be included in each launch to this tool. If a custom parameter is also defined at the message level, the message level value takes precedence. The value of the custom parameters may be substitution parameters as described in the LTI Core [LTI-13] specification. ",
             "items": {
+              "description": "JSON Object where each value is a string. Custom parameters to be included in each launch to this tool. If a custom parameter is also defined at the message level, the message level value takes precedence. The value of the custom parameters may be substitution parameters as described in the LTI Core [LTI-13] specification. ",
               "type": "string"
             },
             "type": "array"
@@ -2373,9 +2379,11 @@
             "type": "array"
           },
           "targetLinkUri": {
+            "description": "The default target link uri to use unless defined otherwise in the message or link definition",
             "type": "string"
           },
           "targetLinkUriDeepLink": {
+            "description": "The target link uri to use for DeepLing Message",
             "type": "string"
           },
           "toolDescription": {
@@ -2388,6 +2396,10 @@
             "type": "string"
           }
         },
+        "required": [
+          "clientName",
+          "targetLinkUri"
+        ],
         "type": "object"
       },
       "McOrgConnectResult": {

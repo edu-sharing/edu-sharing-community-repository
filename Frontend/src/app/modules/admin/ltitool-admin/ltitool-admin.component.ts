@@ -16,7 +16,7 @@ export class LtitoolAdminComponent implements OnInit {
     ltiToolDynRegUrlSafe: SafeResourceUrl;
 
     //manual registration
-    manualRegistrationData: ManualRegistrationData = {};
+    manualRegistrationData: ManualRegistrationData = { clientName: '', targetLinkUri: '' };
 
     static staticRef: LtitoolAdminComponent;
 
