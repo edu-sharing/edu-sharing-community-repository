@@ -1201,7 +1201,7 @@ export class MdsEditorInstanceService implements OnDestroy {
     }
 
     getPrimaryWidget(propertyName: string): Widget {
-        return this.widgets.value.find(
+        return this.widgets.value?.find(
             (widget) => widget.definition.id === propertyName && widget.relation === null,
         );
     }

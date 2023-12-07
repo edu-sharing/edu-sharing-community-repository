@@ -8,6 +8,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ContentService;
+import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.commons.lang.StringUtils;
@@ -304,7 +305,15 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 
 	private Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> filterNonMediacenterMedia(Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> data) {
 		return data.entrySet().stream().filter(
-				e -> "restricted_mz".equals(NodeServiceHelper.getPropertyNative(e.getKey(), CCConstants.CCM_PROP_IO_EDITORIAL_STATE))
+				e -> {
+					try {
+						return "restricted_mz".equals(NodeServiceHelper.getPropertyNative(e.getKey(), CCConstants.CCM_PROP_IO_EDITORIAL_STATE));
+					}catch(InvalidNodeRefException exception) {
+						// node is deleted
+						logger.info("restricted_mz was not verifiable: " + e.getKey() + ": " + exception.getMessage());
+						return false;
+					}
+				}
 		).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 

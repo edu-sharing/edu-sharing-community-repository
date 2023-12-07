@@ -16,9 +16,6 @@ import javax.servlet.http.HttpSession;
 public class AllSessions {
 	static Map<String,HttpSession> allSessions = null;
 
-	public static SimpleCache<String, LoginInitiationSessionObject> userLTISessions =
-			(SimpleCache<String, LoginInitiationSessionObject>) AlfAppContextGate.getApplicationContext().getBean("eduSharingLtiSessionsCache");
-	
 	static Map<String,HttpSession>  getInstance(){
 		ReentrantReadWriteLock rw = new ReentrantReadWriteLock(); 
 		WriteLock writeLock = rw.writeLock();
@@ -52,5 +49,9 @@ public class AllSessions {
 	public static int size(){
 		return getInstance().size();
 	}
-	
+
+
+	public static SimpleCache<String, LoginInitiationSessionObject> getUserLTISessions(){
+		return (SimpleCache<String, LoginInitiationSessionObject>) AlfAppContextGate.getApplicationContext().getBean("eduSharingLtiSessionsCache");
+	}
 }

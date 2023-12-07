@@ -1,0 +1,10 @@
+@import '../../../../core-ui-module/styles/variables';
+
+.content-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    > h2 {
+        flex-grow: 1;
+    }
+}
