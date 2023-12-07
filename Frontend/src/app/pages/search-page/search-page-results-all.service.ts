@@ -6,6 +6,7 @@ import {
     MetadataSetInfo,
     Node,
     SearchService,
+    MdsSortDefault,
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';

@@ -195,11 +195,11 @@
       </div>
     </div>
 
-    <h5 class="mat-heading-5" *ngIf="nodesNoData && !nodesLoading">
+    <h5 class="mat-heading-5" *ngIf="nodesNoData && !nodesDataSource.isLoading">
       {{ 'ADMIN.STATISTICS.NO_DATA' | translate }}
     </h5>
     <es-node-entries-wrapper
-      *ngIf="!(nodesNoData && !nodesLoading)"
+      *ngIf="!(nodesNoData && !nodesDataSource.isLoading)"
       [scope]="Scope.Admin"
       [dataSource]="nodesDataSource"
       [elementInteractionType]="InteractionType.Emitter"

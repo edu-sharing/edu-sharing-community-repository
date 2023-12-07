@@ -9,17 +9,9 @@ import {
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
-import {
-    InteractionType,
-    ListEventInterface,
-    NodeEntriesDisplayType,
-} from '../../../../features/node-entries/entries-model';
-import { Scope } from '../../../../core-ui-module/option-item';
-import { NodeDataSource } from '../../../../features/node-entries/node-data-source';
-import { CollectionReference, ProposalNode } from '../../../../core-module/rest/data-object';
-import { Node } from 'ngx-edu-sharing-api';
+
+import { Node, ProposalNode } from 'ngx-edu-sharing-api';
 import { RestCollectionService } from '../../../../core-module/rest/services/rest-collection.service';
-import { ListItem } from '../../../../core-module/ui/list-item';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import {
     ManagementEvent,
@@ -27,7 +19,15 @@ import {
 } from '../../../management-dialogs/management-dialogs.component';
 import { MainNavService } from '../../../../main/navigation/main-nav.service';
 import { OptionsHelperService } from '../../../../core-ui-module/options-helper.service';
-import { ActionbarComponent } from '../../../../shared/components/actionbar/actionbar.component';
+import {
+    ActionbarComponent,
+    InteractionType,
+    ListEventInterface,
+    ListItem,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    Scope,
+} from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-collection-proposals',
