@@ -44,6 +44,10 @@
             min-height: 36px;
             height: auto;
         }
+        .updates-loading {
+            display: flex;
+            margin: auto;
+        }
     }
     // has own padding cause of tabs
     .main-content-statistics {

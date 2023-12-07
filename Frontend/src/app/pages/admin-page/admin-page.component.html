@@ -367,6 +367,7 @@
           </div>
         </div>
       </div>
+      <es-spinner class="updates-loading" *ngIf="updates.length === 0"></es-spinner>
     </div>
     <div *ngIf="modeIsActive('IMPORT')" class="content import">
       <div class="heading">
