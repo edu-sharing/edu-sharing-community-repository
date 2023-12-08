@@ -270,7 +270,7 @@ mat-tab-group {
     }
     --mdc-outlined-text-field-input-text-color: rgba(255, 255, 255);
 }
-mat-slide-toggle.mat-primary-bright {
+mat-slide-toggle.mat-mdc-slide-toggle.mat-primary-bright {
     --mdc-switch-unselected-handle-color: #fff;
     --mdc-switch-unselected-hover-handle-color: #{$primaryVeryLight};
     --mdc-switch-unselected-focus-handle-color: #{$primaryVeryLight};
