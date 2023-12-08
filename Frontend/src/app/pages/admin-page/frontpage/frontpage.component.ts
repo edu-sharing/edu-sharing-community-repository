@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Output, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -6,6 +6,7 @@ import {
     ListItem,
     NodeDataSource,
     NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
 } from 'ngx-edu-sharing-ui';
 import {
     RestCollectionService,
@@ -27,9 +28,12 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
     templateUrl: 'frontpage.component.html',
     styleUrls: ['frontpage.component.scss'],
 })
-export class AdminFrontpageComponent {
+export class AdminFrontpageComponent implements AfterViewInit {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
+
+    @ViewChild(NodeEntriesWrapperComponent) nodeEntries: NodeEntriesWrapperComponent<Node>;
+
     @Output() onOpenNode = new EventEmitter();
     previewLoading = true;
     config: any;
@@ -85,6 +89,10 @@ export class AdminFrontpageComponent {
             .getToolpermissions()
             .subscribe((toolpermissions) => (this.toolpermissions = Object.keys(toolpermissions)));
         this.update();
+    }
+
+    ngAfterViewInit(): void {
+        void this.nodeEntries.initOptionsGenerator({});
     }
 
     save() {

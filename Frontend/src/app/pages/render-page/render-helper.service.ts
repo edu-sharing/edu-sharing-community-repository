@@ -220,8 +220,15 @@ export class RenderHelperService {
         this.injectModuleComments(node);
         this.applyActionButtons(node);
         this.injectVideoControls(node);
+        this.injectEventHandler(node);
     }
 
+    injectEventHandler(node: Node) {
+        const videoElement = document.querySelector('#edusharing_rendering_content_href');
+        videoElement.addEventListener('click', () => {
+            this.tracking.trackEvent(EventType.OPEN_EXTERNAL_LINK, node.ref.id).subscribe(() => {});
+        });
+    }
     injectVideoControls(node: Node) {
         let videoElement: HTMLVideoElement;
         let target: Element;

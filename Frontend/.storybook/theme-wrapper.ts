@@ -43,10 +43,7 @@ export function withTheme<TArgs = unknown>(themes: Themes): Decorator<TArgs> {
         );
 
         story.props ??= {};
-        story.props = {
-            ...story.props,
-            theme: themes[storyContext.globals['theme']],
-        };
+        story.props.theme = themes[storyContext.globals['theme']];
 
         story.template =
             `<es-storybook-theme-wrapper [theme]="theme">` +

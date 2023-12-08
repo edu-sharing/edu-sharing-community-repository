@@ -301,6 +301,8 @@
       "OVERALL": "Summe",
       "VIEW_MATERIAL": "Seitenaufrufe",
       "VIEW_MATERIAL_EMBEDDED": "Einbettungen",
+      "VIEW_COLLECTION": "Sammlungs-Aufrufe",
+      "OPEN_EXTERNAL_LINK": "Externe Linkaufrufe",
       "DOWNLOAD_MATERIAL": "Downloads",
       "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben"
     }

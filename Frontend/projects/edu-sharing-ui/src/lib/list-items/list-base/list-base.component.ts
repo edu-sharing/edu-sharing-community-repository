@@ -25,19 +25,20 @@ export class ListBaseComponent extends ListWidget implements OnChanges {
                 this.item,
                 this.node as Node,
             );
+            this.widgetType = Object.entries(AVAILABLE_LIST_WIDGETS).find(
+                ([id, w]) =>
+                    w?.supportedItems?.filter(
+                        (i) =>
+                            i.type === this.item.type &&
+                            (i.name === this.item.name || i.name === '*'),
+                    ).length > 0,
+            )?.[0] as ListWidgetType;
             if (this.customTemplate) {
                 this.widgetType = ListWidgetType.Custom;
             } else if (this.forceText) {
-                this.widgetType = ListWidgetType.Text;
-            } else {
-                this.widgetType = Object.entries(AVAILABLE_LIST_WIDGETS).find(
-                    ([id, w]) =>
-                        w?.supportedItems?.filter(
-                            (i) =>
-                                i.type === this.item.type &&
-                                (i.name === this.item.name || i.name === '*'),
-                        ).length > 0,
-                )?.[0] as ListWidgetType;
+                if (![ListWidgetType.NodeCounts, ListWidgetType.Text].includes(this.widgetType)) {
+                    this.widgetType = ListWidgetType.Text;
+                }
             }
         }
     }

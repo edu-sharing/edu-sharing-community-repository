@@ -414,6 +414,14 @@ export class AdminStatisticsComponent implements OnInit {
                         ),
                     },
                     {
+                        label: this.translate.instant('ADMIN.STATISTICS.OPEN_EXTERNAL_LINK'),
+                        yAxisID: 'y-axis-view-embedded',
+                        backgroundColor: 'rgb(197,96,73)',
+                        data: dataNode.map((stat) =>
+                            stat.counts.OPEN_EXTERNAL_LINK ? stat.counts.OPEN_EXTERNAL_LINK : 0,
+                        ),
+                    },
+                    {
                         label: this.translate.instant('ADMIN.STATISTICS.DOWNLOADS'),
                         yAxisID: 'y-axis-download',
                         backgroundColor: 'rgb(40,146,192)',
@@ -841,6 +849,8 @@ export class AdminStatisticsComponent implements OnInit {
                 const countHeaders = [
                     'OVERALL',
                     'VIEW_MATERIAL',
+                    'VIEW_COLLECTION',
+                    'OPEN_EXTERNAL_LINK',
                     'VIEW_MATERIAL_EMBEDDED',
                     'DOWNLOAD_MATERIAL',
                 ];
@@ -927,7 +937,9 @@ export class AdminStatisticsComponent implements OnInit {
             new ListItem('NODE', 'counts.OVERALL'),
             new ListItem('NODE', 'counts.VIEW_MATERIAL'),
             new ListItem('NODE', 'counts.VIEW_MATERIAL_EMBEDDED'),
+            new ListItem('NODE', 'counts.VIEW_COLLECTION'),
             new ListItem('NODE', 'counts.DOWNLOAD_MATERIAL'),
+            new ListItem('NODE', 'counts.OPEN_EXTERNAL_LINK'),
             new ListItem('NODE', 'counts.VIEW_MATERIAL_PLAY_MEDIA'),
         ]);
     }

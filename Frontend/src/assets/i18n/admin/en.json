@@ -424,8 +424,9 @@
       "NODES_MEDIACENTER_INFO": "The given stats are only meant for access of current data. For accessing older data prefer the provided data under \"monthly/yearly\".",
       "CUSTOM_GROUPS": "By criterion",
       "VIEWS": "Object accesses",
-      "VIEWS_EMBEDDED": "Object Views (Remote)",
-      "VIEWS_COLLECTION": "Collection Views",
+      "VIEWS_EMBEDDED": "Object views (Remote)",
+      "VIEWS_COLLECTION": "Collection views",
+      "OPEN_EXTERNAL_LINK": "External page views",
       "DOWNLOADS": "Object downloads",
       "VIEWS_PLAY_MEDIA": "media playbacks",
       "USER_LOGINS": "User logins",
@@ -477,6 +478,8 @@
         "VIEW_MATERIAL": "Views",
         "VIEW_MATERIAL_PLAY_MEDIA": "Plays",
         "VIEW_MATERIAL_EMBEDDED": "Embeddings",
+        "VIEW_COLLECTION": "Collection views",
+        "OPEN_EXTERNAL_LINK": "External page views",
         "DOWNLOAD_MATERIAL": "Downloads"
       }
     },
