@@ -235,6 +235,8 @@
             <AppenderRef ref="edu-sharing-deletedobj"/>
         </Logger>
 
+        <Logger name="org.alfresco.repo.webdav.auth.LDAPAuthenticationFilter" level="INFO"/>
+
     </Loggers>
 
 </Configuration>
