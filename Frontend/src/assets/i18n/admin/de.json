@@ -439,6 +439,7 @@
       "VIEWS": "Seitenaufrufe",
       "VIEWS_EMBEDDED": "Einbettungen",
       "VIEWS_COLLECTION": "Sammlungs-Aufrufe",
+      "OPEN_EXTERNAL_LINK": "Externe Linkaufrufe",
       "DOWNLOADS": "Downloads",
       "VIEWS_PLAY_MEDIA": "Wiedergaben",
       "USER_LOGINS": "Logins",
@@ -490,6 +491,8 @@
         "VIEW_MATERIAL": "Seitenaufrufe",
         "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben",
         "VIEW_MATERIAL_EMBEDDED": "Einbettungen",
+        "VIEW_COLLECTION": "Sammlungs-Aufrufe",
+        "OPEN_EXTERNAL_LINK": "Externe Linkaufrufe",
         "DOWNLOAD_MATERIAL": "Downloads"
       }
     },

@@ -282,6 +282,8 @@
       "OVERALL": "Sum",
       "VIEW_MATERIAL": "Access",
       "VIEW_MATERIAL_EMBEDDED": "Embeddings",
+      "VIEW_COLLECTION": "Collection views",
+      "OPEN_EXTERNAL_LINK": "External page views",
       "DOWNLOAD_MATERIAL": "Downloads",
       "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben"
     }
