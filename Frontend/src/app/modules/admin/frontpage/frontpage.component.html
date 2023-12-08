@@ -208,6 +208,7 @@
       [elementInteractionType]="InteractionType.Emitter"
       (clickItem)="this.onOpenNode.emit($event.element)"
       (dblClickItem)="this.onOpenNode.emit($event.element)"
+      [scope]="$any('dummy')"
     ></es-node-entries-wrapper>
   </div>
   <h5
