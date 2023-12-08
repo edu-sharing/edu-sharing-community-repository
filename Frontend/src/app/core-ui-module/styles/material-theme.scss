@@ -415,8 +415,8 @@ body {
 // Note that the default style of mat-icon is only loaded when the mat-icon component is used, which
 // is rare but does happen.
 i.mat-icon {
-    height: unset;
-    width: unset;
+    height: 1em;
+    width: 1em;
 }
 button {
     &.mat-button,
