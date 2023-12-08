@@ -32,12 +32,6 @@ const preview: Preview = {
                         rootUrl: '/api',
                     }),
                 ),
-                importProvidersFrom(
-                    EduSharingUiModule.forRoot({
-                        isEmbedded: true,
-                        production: false,
-                    }),
-                ),
             ],
         }),
         withTheme(themes),
