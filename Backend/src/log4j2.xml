@@ -4,7 +4,7 @@
     <Appenders>
 
         <Console name="console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d [%X{EduVersion}] [${hostName}] [%X{RemoteAddr}] [%X{LogEventDate}] [%X{Url}] [%X{User}] %-5p [%c{3}] [%t] %m%n"/>
+            <PatternLayout pattern="%d [%X{EduVersion}] [${hostName}] [%X{RemoteAddr}] [%X{LogEventDate}] [%X{Url}] [%X{User}] %-5p [%c{3}.%M] [%t] %m%n"/>
         </Console>
 
         <RollingFile name="tomcat" fileName="${sys:catalina.home}/logs/tomcat.log" filePattern="${sys:catalina.home}/logs/tomcat.log.%i">
