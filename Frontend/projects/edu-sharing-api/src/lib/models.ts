@@ -26,6 +26,7 @@ export {
     Node,
     NodeEntries,
     NodeRef,
+    NodeStats,
     Organization,
     Group,
     Pagination,

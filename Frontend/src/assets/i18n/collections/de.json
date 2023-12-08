@@ -20,6 +20,9 @@
     "SHARING_STATE": "Freigabezustand",
     "NO_SUBCOLLECTIONS": "Keine Untersammlungen vorhanden",
     "NO_SUBCOLLECTIONS_HINT": "Sie können weitere Sammlungen über den \"Neu\"-Button anlegen",
+    "STATS": {
+      "TOTAL": "Gesamtzahl Aufrufe"
+    },
     "STEP": {
       "GENERAL": "Titel, Bild, Beschreibung und Farbe",
       "METADATA": "Weitere Informationen",

@@ -2232,7 +2232,7 @@ public class NodeApi  {
 	@Operation(summary = "Get statistics of node.", description = "Get statistics (views, downloads) of node. Requires " + PermissionService.CHANGE_PERMISSIONS + " permission on node")
 	@ApiResponses(
 			value = {
-					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeStatsEntry.NodeStats.class))),
 					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),

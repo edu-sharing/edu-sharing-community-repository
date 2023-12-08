@@ -2141,9 +2141,6 @@
           "syslogEquivalent": {
             "format": "int32",
             "type": "integer"
-          },
-          "version2Level": {
-            "$ref": "#/components/schemas/Level"
           }
         },
         "type": "object"
@@ -3547,6 +3544,18 @@
           },
           "url": {
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NodeStats": {
+        "properties": {
+          "total": {
+            "additionalProperties": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "type": "object"
           }
         },
         "type": "object"
@@ -28508,7 +28517,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NodeEntry"
+                  "$ref": "#/components/schemas/NodeStats"
                 }
               }
             },

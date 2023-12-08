@@ -4,6 +4,7 @@ import { map, tap } from 'rxjs/operators';
 import { NodeV1Service, SearchV1Service } from '../api/services';
 import { HOME_REPOSITORY } from '../constants';
 import { Node, NodeEntries, NodePermissions } from '../models';
+import { NodeStats } from '../api/models/node-stats';
 
 export class NodeConstants {
     public static SPACES_STORE_REF = 'workspace://SpacesStore/';
@@ -171,5 +172,11 @@ export class NodeService {
         { repository = HOME_REPOSITORY } = {},
     ): Observable<NodeEntries> {
         return this.searchV1.getMetdata({ repository, nodeIds, propertyFilter: ['-all-'] });
+    }
+    /**
+     * Like `getNodeFromSearchIndex`, but fetches multiple nodes.
+     */
+    getStats(nodeId: string, { repository = HOME_REPOSITORY } = {}): Observable<NodeStats> {
+        return this.nodeV1.getStats({ repository, node: nodeId });
     }
 }

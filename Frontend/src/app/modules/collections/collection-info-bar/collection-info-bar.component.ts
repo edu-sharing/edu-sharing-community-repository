@@ -1,5 +1,13 @@
-import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import { Node } from 'ngx-edu-sharing-api';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnChanges,
+    Output,
+    SimpleChanges,
+    ViewChild,
+} from '@angular/core';
+import { Node, NodeService, NodeStats } from 'ngx-edu-sharing-api';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { Permission } from '../../../core-module/rest/data-object';
@@ -12,14 +20,23 @@ import { MdsViewerComponent } from '../../../features/mds/mds-viewer/mds-viewer.
     templateUrl: 'collection-info-bar.component.html',
     styleUrls: ['collection-info-bar.component.scss'],
 })
-export class CollectionInfoBarComponent {
+export class CollectionInfoBarComponent implements OnChanges {
     @ViewChild('actionbar') actionbar: ActionbarComponent;
     @ViewChild('mds') mds: MdsViewerComponent;
     @Input() collection: Node;
     @Input() permissions: Permission[];
     @Output() edit = new EventEmitter<void>();
+    stats: NodeStats;
 
-    constructor(private nodeHelper: NodeHelperService) {}
+    constructor(private nodeHelper: NodeHelperService, private nodeService: NodeService) {}
+
+    async ngOnChanges(changes: SimpleChanges) {
+        if (changes.collection.currentValue) {
+            if (this.collection.access.includes(RestConstants.ACCESS_CHANGE_PERMISSIONS)) {
+                this.stats = await this.nodeService.getStats(this.collection.ref.id).toPromise();
+            }
+        }
+    }
 
     isBrightColor() {
         return (
