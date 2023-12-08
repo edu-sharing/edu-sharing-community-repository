@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repackaged.elasticsearch.org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -27,6 +28,8 @@ import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.edu_sharing.service.tracking.TrackingService;
+import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.edu_sharing.service.util.AlfrescoDaoHelper;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -65,6 +68,7 @@ public class CollectionApi {
 	public Response getCollection(
 			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
 			@Parameter(description = "ID of collection", required = true) @PathParam("collectionId") String collectionId,
+			@Parameter(description = "track this as a view of the collection (default: true)", required = false) @QueryParam("track") Boolean track,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -89,6 +93,10 @@ public class CollectionApi {
 			Node collection = nodeDao.asNode();
 
 			response.setCollection(collection);
+
+			if(track == null || track) {
+				TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId), null, TrackingService.EventType.VIEW_COLLECTION);
+			}
 
 			return Response.status(Response.Status.OK).entity(response).build();
 

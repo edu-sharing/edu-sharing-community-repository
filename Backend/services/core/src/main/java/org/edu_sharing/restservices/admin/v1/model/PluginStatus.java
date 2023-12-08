@@ -1,8 +1,4 @@
 package org.edu_sharing.restservices.admin.v1.model;
-
-import io.swagger.annotations.ApiModel;
-
-@ApiModel
 public class PluginStatus {
     private String version;
     private String name;

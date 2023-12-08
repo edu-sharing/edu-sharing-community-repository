@@ -32,7 +32,7 @@
     </docker.edu_sharing.community.common.alfresco.activemq>
 
     <docker.edu_sharing.community.common.alfresco.repository>
-      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-alfresco-repository:7.2
+      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-alfresco-repository:7.4.1
     </docker.edu_sharing.community.common.alfresco.repository>
 
     <docker.edu_sharing.community.common.alfresco.transform>
@@ -40,11 +40,11 @@
     </docker.edu_sharing.community.common.alfresco.transform>
 
     <docker.edu_sharing.community.common.alfresco.transform.core.aio>
-      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-alfresco-transform-core-aio:2.6.0
+      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-alfresco-transform-core-aio:3.1.1
     </docker.edu_sharing.community.common.alfresco.transform.core.aio>
 
     <docker.edu_sharing.community.common.alfresco.search.service>
-      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-alfresco-search-service:2.0.3
+      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-alfresco-search-service:2.0.8.2
     </docker.edu_sharing.community.common.alfresco.search.service>
 
     <docker.edu_sharing.community.common.postgresql>

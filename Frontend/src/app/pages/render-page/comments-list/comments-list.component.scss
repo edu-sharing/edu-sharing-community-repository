@@ -55,9 +55,14 @@ form {
 }
 mat-form-field {
     flex-grow: 1;
-    // Remove additional bottom padding
-    ::ng-deep .mat-mdc-form-field-subscript-wrapper::before {
-        content: unset;
+    ::ng-deep {
+        // Remove additional bottom padding
+        .mat-mdc-form-field-subscript-wrapper::before {
+            content: unset;
+        }
+        .mat-mdc-form-field-infix {
+            width: unset;
+        }
     }
 }
 

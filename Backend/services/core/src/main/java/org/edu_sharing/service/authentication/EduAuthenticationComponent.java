@@ -41,6 +41,7 @@ import org.alfresco.service.cmr.security.PersonService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.springframework.context.ApplicationContext;
 
 
@@ -119,7 +120,8 @@ public class EduAuthenticationComponent{
 			Object alfAuthService = AlfAppContextGate.getApplicationContext().getBean("authenticationService");
 			if(alfAuthService instanceof SubsystemChainingAuthenticationService) {
 				SubsystemChainingAuthenticationService scAuthService = (SubsystemChainingAuthenticationService)alfAuthService;
-				scAuthService.setEsLastLoginToNow(username);
+				scAuthService.setLoginTimestampToNow(username, CCConstants.PROP_USER_ESFIRSTLOGIN);
+				scAuthService.setLoginTimestampToNow(username, CCConstants.PROP_USER_ESLASTLOGIN);
 			}
 		}
 		return username;

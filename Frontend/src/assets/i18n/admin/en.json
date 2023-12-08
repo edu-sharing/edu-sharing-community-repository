@@ -425,6 +425,7 @@
       "CUSTOM_GROUPS": "By criterion",
       "VIEWS": "Object accesses",
       "VIEWS_EMBEDDED": "Object Views (Remote)",
+      "VIEWS_COLLECTION": "Collection Views",
       "DOWNLOADS": "Object downloads",
       "VIEWS_PLAY_MEDIA": "media playbacks",
       "USER_LOGINS": "User logins",

@@ -18,7 +18,7 @@ import java.util.*;
 public class SearchServiceAdapter implements SearchService {
 
     @Override
-    public List<String> getAllMediacenters() throws Exception {
+	public List<String> getAllMediacenters(boolean membershipsOnly) throws Exception {
         return null;
     }
 	@Override

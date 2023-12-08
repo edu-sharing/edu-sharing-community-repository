@@ -111,7 +111,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     @ContentChild('empty') emptyRef: TemplateRef<unknown>;
     @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
     @ViewChild('listReferences') listReferences: ListEventInterface<CollectionReference>;
-    @ViewChild('listProposals') listProposals: ListEventInterface<ProposalNode>;
 
     private mainNavUpdateTrigger = new Subject<void>();
     sortCollectionColumns: ListItemSort[] = [
@@ -163,16 +162,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     });
     dataSourceCollections = new NodeDataSource<Node>();
     dataSourceReferences = new NodeDataSource<CollectionReference>();
-    dataSourceCollectionProposals = new NodeDataSource<ProposalNode>();
     collectionsColumns: ListItem[] = [];
     referencesColumns: ListItem[] = [];
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
 
-    proposalColumns = [
-        new ListItem('NODE', RestConstants.CM_PROP_TITLE),
-        new ListItem('NODE_PROPOSAL', RestConstants.CM_CREATOR, { showLabel: false }),
-        new ListItem('NODE_PROPOSAL', RestConstants.CM_PROP_C_CREATED, { showLabel: false }),
-    ];
     private contentNode: Node;
     permissions: Permission[];
     login: LoginResult;
@@ -210,7 +203,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 if (event.data.collection.ref.id === this.collection.ref.id) {
                     this.listReferences.addVirtualNodes(event.data.references);
                 }
-                this.refreshProposals();
             }
         });
         this.authenticationService
@@ -253,7 +245,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        if (changes.collection) {
+        if (changes.collection.currentValue) {
             this.dataSourceCollections.reset();
             this.dataSourceReferences.reset();
 
@@ -275,74 +267,54 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 // load metadata of collection
                 this.dataSourceCollections.isLoading = true;
                 this.dataSourceReferences.isLoading = true;
+                // set the collection and load content data by refresh
+                const orderCollections =
+                    this.collection.properties[
+                        RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE
+                    ];
+                this.sortCollections.active =
+                    orderCollections?.[0] || RestConstants.CM_MODIFIED_DATE;
 
-                this.collectionService.getCollection(this.collection.ref.id).subscribe(
-                    ({ collection }) => {
-                        // set the collection and load content data by refresh
-                        const orderCollections =
-                            collection.properties[
-                                RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE
-                            ];
-                        this.sortCollections.active =
-                            orderCollections?.[0] || RestConstants.CM_MODIFIED_DATE;
+                this.sortCollections.direction =
+                    orderCollections?.[0] === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
+                        ? 'asc'
+                        : orderCollections?.[1] === 'true'
+                        ? 'asc'
+                        : 'desc';
 
-                        this.sortCollections.direction =
-                            orderCollections?.[0] ===
-                            RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
-                                ? 'asc'
-                                : orderCollections?.[1] === 'true'
-                                ? 'asc'
-                                : 'desc';
-
-                        const refMode = collection.collection.orderMode;
-                        const refAscending = collection.collection.orderAscending;
-                        // cast old order mode to new parameter
-                        this.sortReferences.active = ((refMode ===
-                        RestConstants.COLLECTION_ORDER_MODE_CUSTOM
-                            ? RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
-                            : refMode) || RestConstants.CM_MODIFIED_DATE) as any;
-                        this.sortReferences.direction =
-                            this.sortReferences.active ===
-                            RestConstants.COLLECTION_ORDER_MODE_CUSTOM
-                                ? 'asc'
-                                : refAscending
-                                ? 'asc'
-                                : 'desc';
-                        this.collection = collection;
-                        this.mainNavUpdateTrigger.next();
-                        this.dataSourceCollections.isLoading = false;
-                        this.setOptionsCollection();
-                        this.refreshContent();
-                        if (
-                            this.collection.access.indexOf(
-                                RestConstants.ACCESS_CHANGE_PERMISSIONS,
-                            ) !== -1
-                        ) {
-                            this.nodeService
-                                .getNodePermissions(this.collection.ref.id)
-                                .subscribe((permissions) => {
-                                    this.permissions =
-                                        permissions.permissions.localPermissions.permissions.concat(
-                                            permissions.permissions.inheritedPermissions,
-                                        );
-                                });
-                        }
-                    },
-                    (error) => {
-                        if (error.status === 404) {
-                            this.toast.error(null, 'COLLECTIONS.ERROR_NOT_FOUND');
-                        } else {
-                            this.toast.error(error);
-                        }
-                        this.dataSourceCollections.isLoading = false;
-                        if (!this.loadingTask.isDone) {
-                            this.loadingTask.done();
-                        }
-                    },
-                );
+                const refMode = this.collection.collection.orderMode;
+                const refAscending = this.collection.collection.orderAscending;
+                // cast old order mode to new parameter
+                this.sortReferences.active = ((refMode ===
+                RestConstants.COLLECTION_ORDER_MODE_CUSTOM
+                    ? RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
+                    : refMode) || RestConstants.CM_MODIFIED_DATE) as any;
+                this.sortReferences.direction =
+                    this.sortReferences.active === RestConstants.COLLECTION_ORDER_MODE_CUSTOM
+                        ? 'asc'
+                        : refAscending
+                        ? 'asc'
+                        : 'desc';
+                this.mainNavUpdateTrigger.next();
+                this.dataSourceCollections.isLoading = false;
+                this.setOptionsCollection();
+                this.refreshContent();
+                if (
+                    this.collection.access.indexOf(RestConstants.ACCESS_CHANGE_PERMISSIONS) !== -1
+                ) {
+                    this.nodeService
+                        .getNodePermissions(this.collection.ref.id)
+                        .subscribe((permissions) => {
+                            this.permissions =
+                                permissions.permissions.localPermissions.permissions.concat(
+                                    permissions.permissions.inheritedPermissions,
+                                );
+                        });
+                }
             }
         }
     }
+
     isUserAllowedToEdit(collection: Node) {
         return RestHelper.isUserAllowedToEdit(collection);
     }
@@ -620,7 +592,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private refreshContent() {
         this.dataSourceCollections.reset();
         this.dataSourceReferences.reset();
-        this.dataSourceCollectionProposals.reset();
         this.listReferences?.getSelection().clear();
         this.dataSourceCollections.isLoading = true;
         this.dataSourceReferences.isLoading = true;
@@ -666,7 +637,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         this.finishCollectionLoading();
                         return;
                     }
-                    this.refreshProposals();
                     const requestRefs = this.getReferencesRequest();
                     requestRefs.count = null;
                     this.collectionService
@@ -949,29 +919,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                     this.toast.error(error);
                 },
             );
-    }
-
-    private refreshProposals() {
-        this.dataSourceCollectionProposals.reset();
-        this.dataSourceCollectionProposals.isLoading = true;
-        if (this.isAllowedToEditCollection()) {
-            this.collectionService
-                .getCollectionProposals(this.collection.ref.id)
-                .subscribe((proposals) => {
-                    proposals.nodes = proposals.nodes.map((p) => {
-                        p.proposalCollection = this.collection;
-                        return p;
-                    });
-                    this.dataSourceCollectionProposals.setData(
-                        proposals.nodes,
-                        proposals.pagination,
-                    );
-                    this.dataSourceCollectionProposals.isLoading = false;
-                    setTimeout(() => {
-                        this.listProposals?.initOptionsGenerator({});
-                    });
-                });
-        }
     }
 
     canDelete(node: EduData.CollectionReference) {

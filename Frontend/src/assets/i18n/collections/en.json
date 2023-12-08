@@ -20,6 +20,9 @@
     "SHARING_STATE": "Sharing state",
     "NO_SUBCOLLECTIONS": "No subcollections available",
     "NO_SUBCOLLECTIONS_HINT": "You can create new subcollections using the \"New\"-Button",
+    "STATS": {
+      "TOTAL": "Total views"
+    },
     "STEP": {
       "GENERAL": "Title, Image, Description and Color",
       "METADATA": "Additional information",

@@ -164,6 +164,11 @@ public class CCConstants {
 	public final static String PROP_USER_SECONDARY_IDS = "{http://www.alfresco.org/model/content/1.0}essecondaryIds";
 	public static final String PROP_USER_ESREMOTEROLES = "{http://www.alfresco.org/model/content/1.0}esremoteroles";
 	public static final String PROP_USER_ESSSOTYPE = "{http://www.alfresco.org/model/content/1.0}esssotype";
+	/**
+	 * the first time this user authenticated
+	 * Note: This will only be set when the user authenticates itself, not if i.e. he is only getting provisioned via api
+	 */
+	public static final String PROP_USER_ESFIRSTLOGIN = "{http://www.alfresco.org/model/content/1.0}esFirstLogin";
 	public static final String PROP_USER_ESLASTLOGIN = "{http://www.alfresco.org/model/content/1.0}esLastLogin";
 	public static final String ASSOC_USER_AVATAR = "{http://www.alfresco.org/model/content/1.0}avatar";
 	public static final String ASSOC_USER_PREFERENCEIMAGE = "{http://www.alfresco.org/model/content/1.0}preferenceImage";

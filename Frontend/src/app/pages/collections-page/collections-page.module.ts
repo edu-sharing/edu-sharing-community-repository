@@ -7,12 +7,14 @@ import { CollectionNewComponent } from './collection-new/collection-new.componen
 import { CollectionsPageRoutingModule } from './collections-page-routing.module';
 import { CollectionsPageComponent } from './collections-page.component';
 import { InfobarComponent } from './infobar/infobar.component';
+import { CollectionProposalsComponent } from './collection-proposals/collection-proposals.component';
 
 @NgModule({
     declarations: [
         CollectionContentComponent,
         CollectionInfoBarComponent,
         CollectionNewComponent,
+        CollectionProposalsComponent,
         CollectionsPageComponent,
         InfobarComponent,
     ],

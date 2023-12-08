@@ -1,5 +1,6 @@
 package org.edu_sharing.alfresco.authentication.subsystems;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -51,7 +52,8 @@ public class SubsystemChainingAuthenticationService extends org.alfresco.repo.se
                     logger.debug("authenticate " + userName + " with " + getId(authService) + " SUCCEEDED");
                 }
                 successFullAuthenticationMethod.set(getId(authService));
-                setEsLastLoginToNow(userName);
+                setLoginTimestampToNow(userName, CCConstants.PROP_USER_ESFIRSTLOGIN);
+                setLoginTimestampToNow(userName, CCConstants.PROP_USER_ESLASTLOGIN);
 
                 return;
             } catch (AuthenticationException e) {
@@ -65,7 +67,7 @@ public class SubsystemChainingAuthenticationService extends org.alfresco.repo.se
 
     }
 
-    public void setEsLastLoginToNow(String userName) {
+    public void setLoginTimestampToNow(String userName, String property) {
         NodeRef nodeRefPerson = personService.getPerson(userName, false);
 
         // we won't do this for the guest
@@ -88,7 +90,20 @@ public class SubsystemChainingAuthenticationService extends org.alfresco.repo.se
 
             RetryingTransactionCallback<Void> txnWork = () -> {
                 try {
-                    nodeService.setProperty(nodeRefPerson, QName.createQName(CCConstants.PROP_USER_ESLASTLOGIN), new Date());
+                    if(property.equals(CCConstants.PROP_USER_ESFIRSTLOGIN)) {
+                        Serializable value = nodeService.getProperty(nodeRefPerson, QName.createQName(property));
+                        if(value != null) {
+                            return null;
+                        } else {
+                            // try to copy the last login and use this as the first known login
+                            value = nodeService.getProperty(nodeRefPerson, QName.createQName(CCConstants.PROP_USER_ESLASTLOGIN));
+                            if(value != null) {
+                                nodeService.setProperty(nodeRefPerson, QName.createQName(property), value);
+                                return null;
+                            }
+                        }
+                    }
+                    nodeService.setProperty(nodeRefPerson, QName.createQName(property), new Date());
                 } catch (ConcurrencyFailureException e) {
                     logger.info("failed to set cm:esLastLogin for user " + userName + " cause of " + e.getClass().getSimpleName());
                 }

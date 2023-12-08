@@ -1,5 +1,6 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
+import org.alfresco.repo.cache.SimpleCache;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.repository.server.tools.security.AllSessions;
@@ -26,8 +27,9 @@ public class LTISessionObjectCleanupJob extends AbstractJobMapAnnotationParams{
 
         List<String> cleanupKeys = new ArrayList<>();
 
-        for(String key : AllSessions.userLTISessions.getKeys()){
-            LoginInitiationSessionObject loginInitiationSessionObject = AllSessions.userLTISessions.get(key);
+        SimpleCache<String, LoginInitiationSessionObject> userLTISessions = AllSessions.getUserLTISessions();
+        for(String key : userLTISessions.getKeys()){
+            LoginInitiationSessionObject loginInitiationSessionObject = userLTISessions.get(key);
             logger.info("loginInitiationSessionObject.getLastAccessed():" + loginInitiationSessionObject.getLastAccessed() +" diff ms:" + (System.currentTimeMillis() - loginInitiationSessionObject.getLastAccessed()));
             int lastAccessDuration = (int)TimeUnit.MILLISECONDS.toMinutes((System.currentTimeMillis() - loginInitiationSessionObject.getLastAccessed()) );
             logger.info("lastAccessDuration:" + lastAccessDuration + " cleanupAfterInactivityMinutes:"+cleanupAfterInactivityMinutes);
@@ -38,6 +40,6 @@ public class LTISessionObjectCleanupJob extends AbstractJobMapAnnotationParams{
 
         logger.info("will cleanup " + cleanupKeys.size() +" LoginInitiationSessionObject's");
 
-        cleanupKeys.stream().forEach(k -> AllSessions.userLTISessions.remove(k));
+        cleanupKeys.stream().forEach(k -> userLTISessions.remove(k));
     }
 }

@@ -99,7 +99,11 @@ public class DownloadServlet extends HttpServlet{
 			}
 			String originalNodeId;
 			if(repositoryId == null) {
-				TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), null, TrackingService.EventType.DOWNLOAD_MATERIAL);
+				// do only track downloads if it was not accessed by the connector service
+				if(ContextManagementFilter.accessTool.get() == null ||
+						!ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getType())) {
+					TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), null, TrackingService.EventType.DOWNLOAD_MATERIAL);
+				}
 				originalNodeId = checkAndGetCollectionRef(nodeId);
 			} else {
 				originalNodeId = nodeId;
