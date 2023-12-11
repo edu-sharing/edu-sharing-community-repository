@@ -55,8 +55,7 @@ public class WpImporter implements Importer{
 	
 		String url = this.endpoint+"tags?post="+postId.toString();
 
-		HttpGet method = new HttpGet(url);
-		String result = new HttpQueryTool().query(method);
+		String result = new HttpQueryTool().query(url);
 		
 		List<String> generalKeywords = new ArrayList<String>();
 
@@ -123,8 +122,7 @@ public class WpImporter implements Importer{
 			
 			String url = this.endpoint + set;
 
-			HttpGet method = new HttpGet(url);
-			String result = new HttpQueryTool().query(method);
+			String result = new HttpQueryTool().query(url);
 
 				
 			try{

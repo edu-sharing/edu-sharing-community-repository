@@ -74,7 +74,7 @@ public class NodeSearch {
 	public static class Suggest{
 		String text;
 		String highlighted;
-		float score;
+		double score;
 
 		public void setHighlighted(String highlighted) {
 			this.highlighted = highlighted;
@@ -94,12 +94,12 @@ public class NodeSearch {
 			return highlighted;
 		}
 
-		public void setScore(float score) {
+		public void setScore(double score) {
 			this.score = score;
 		}
 
 		@Schema(required = true, description = "score of the suggestion")
-		public float getScore() {
+		public double getScore() {
 			return score;
 		}
 	}

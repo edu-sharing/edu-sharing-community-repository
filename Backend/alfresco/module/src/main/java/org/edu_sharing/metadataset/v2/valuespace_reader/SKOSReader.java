@@ -100,16 +100,7 @@ public class SKOSReader extends ValuespaceReader{
     }
 
     private JSONObject fetch() throws IOException, JSONException {
-        CloseableHttpClient httpclient = HttpClients.createDefault();
-        RequestConfig requestConfig = RequestConfig.custom().
-                setConnectTimeout(30000).
-                build();
-        HttpGet request=new HttpGet(url);
-        request.setConfig(requestConfig);
-        CloseableHttpResponse result = httpclient.execute(request);
-        String data=StreamUtils.copyToString(result.getEntity().getContent(), StandardCharsets.UTF_8);
-        result.close();
-        return new JSONObject(data);
+        return new JSONObject(ReaderUtils.query(url));
     }
 
     @Override

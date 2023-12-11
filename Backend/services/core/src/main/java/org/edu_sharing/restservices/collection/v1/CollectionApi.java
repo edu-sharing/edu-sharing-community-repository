@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
-import org.edu_sharing.repackaged.elasticsearch.org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.restservices.*;

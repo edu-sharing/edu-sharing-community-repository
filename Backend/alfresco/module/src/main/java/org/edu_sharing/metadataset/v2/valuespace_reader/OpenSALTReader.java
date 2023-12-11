@@ -81,12 +81,7 @@ public class OpenSALTReader extends ValuespaceReader{
     }
 
     private JSONObject getApi(String method, String uuid) throws IOException, JSONException {
-        CloseableHttpClient httpclient = HttpClients.createDefault();
-        HttpUriRequest request=new HttpGet(getApiUrl(method,uuid));
-        CloseableHttpResponse result = httpclient.execute(request);
-        String data=StreamUtils.copyToString(result.getEntity().getContent(), StandardCharsets.UTF_8);
-        result.close();
-        return new JSONObject(data);
+        return new JSONObject(ReaderUtils.query(getApiUrl(method, uuid)));
     }
     private String getApiUrl(String method, String uuid) {
         return baseUrl+"/ims/case/v1p0/"+ URLEncoder.encode(method)+"/"+ URLEncoder.encode(uuid);

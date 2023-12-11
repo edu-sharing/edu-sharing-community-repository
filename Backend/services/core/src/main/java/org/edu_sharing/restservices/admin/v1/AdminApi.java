@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.alfresco.repo.bulkimport.impl.FileUtils;
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
@@ -45,7 +44,6 @@ import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.service.admin.model.RepositoryConfig;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.admin.model.ToolPermission;
-import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.lifecycle.PersonDeleteOptions;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.lifecycle.PersonReport;
@@ -56,12 +54,7 @@ import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.edu_sharing.service.admin.model.ToolPermission;
 import org.edu_sharing.service.version.RepositoryVersionInfo;
-import org.elasticsearch.common.Strings;
-import org.elasticsearch.xcontent.ToXContent;
-import org.elasticsearch.xcontent.XContentBuilder;
-import org.elasticsearch.xcontent.XContentFactory;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import javax.servlet.http.HttpServletRequest;
@@ -72,7 +65,6 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.io.Writer;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -1235,9 +1227,7 @@ public class AdminApi {
 			response.setNodes(data);
 			response.setPagination(pagination);
 
-			XContentBuilder builder = XContentFactory.jsonBuilder().prettyPrint();
-			search.getElasticResponse().toXContent(builder, ToXContent.EMPTY_PARAMS);
-			response.setElasticResponse(Strings.toString(builder));
+			response.setElasticResponse(search.getElasticResponse().toString(2));
 			return Response.status(Response.Status.OK).entity(response).build();
 
 		} catch (Throwable t) {

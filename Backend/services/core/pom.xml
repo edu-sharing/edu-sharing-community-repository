@@ -35,6 +35,14 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>15</source>
+          <target>15</target>
+        </configuration>
+      </plugin>
 
     </plugins>
 
@@ -116,10 +124,23 @@
     </dependency>
 
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-repository-repackaged-elasticsearch</artifactId>
+      <groupId>co.elastic.clients</groupId>
+      <artifactId>elasticsearch-java</artifactId>
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>jakarta.json</groupId>
+      <artifactId>jakarta.json-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+<!--    <dependency>-->
+<!--      <groupId>${project.groupId}</groupId>-->
+<!--      <artifactId>edu_sharing-community-repository-repackaged-elasticsearch</artifactId>-->
+<!--      <scope>provided</scope>-->
+<!--    </dependency>-->
+
 
     <dependency>
       <groupId>com.google.apis</groupId>

@@ -10,6 +10,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
@@ -161,7 +162,7 @@ public class ClientUtilsService {
 					if(duplicate.hasPath("url")) {
 						String duplicateServiceUrl = duplicate.getString("url");
 						String text = Jsoup.parse(info.getRawContent()).text();
-						HttpPost method = new HttpPost(duplicateServiceUrl);
+						RequestBuilder method = RequestBuilder.post(duplicateServiceUrl);
 						method.setHeader("Content-Type", "application/json");
 						JSONObject json = new JSONObject();
 						json.put("text", text);
