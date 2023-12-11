@@ -26,7 +26,12 @@ my_home_appid="${REPOSITORY_SERVICE_HOME_APPID:-local}"
 my_home_auth="${REPOSITORY_SERVICE_HOME_AUTH:-}"
 my_home_auth_external="${REPOSITORY_SERVICE_HOME_AUTH_EXTERNAL:-false}"
 my_home_auth_external_login="${REPOSITORY_SERVICE_HOME_AUTH_EXTERNAL_LOGIN:-$my_path_external/shibboleth}"
-my_home_auth_external_logout="${REPOSITORY_SERVICE_HOME_AUTH_EXTERNAL_LOGOUT:-}"
+
+my_home_auth_external_logout="${REPOSITORY_SERVICE_HOME_AUTH_EXTERNAL_LOGOUT:-/Shibboleth.sso/Logout}"
+my_home_auth_external_logout_destroy_session="${REPOSITORY_SERVICE_HOME_AUTH_EXTERNAL_LOGOUT_DESTROY_SESSION:-"false"}"
+my_home_auth_external_logout_redirect="${REPOSITORY_SERVICE_HOME_AUTH_EXTERNAL_LOGOUT_REDIRECT:-"false"}"
+my_home_auth_external_logout_redirect_url="${REPOSITORY_SERVICE_HOME_AUTH_EXTERNAL_LOGOUT_REDIRECT_URL:-$my_base_external}"
+
 my_home_auth_external_login_providers_url="${REPOSITORY_SERVICE_HOME_AUTH_EXTERNAL_LOGIN_PROVIDERS_URL:-}"
 my_home_auth_external_login_provider_target_url="${REPOSITORY_SERVICE_HOME_AUTH_EXTERNAL_LOGIN_PROVIDER_TARGET_URL:-}"
 my_home_provider="${REPOSITORY_SERVICE_HOME_PROVIDER:-}"
@@ -74,6 +79,8 @@ my_http_server_session_timeout="${REPOSITORY_SERVICE_HTTP_SERVER_SESSION_TIMEOUT
 my_http_accesslog_enabled="${REPOSITORY_SERVICE_HTTP_ACCESSLOG_ENABLED:-}"
 my_http_jvmroute="${REPOSITORY_SERVICE_HTTP_JVMROUTE:-}"
 
+my_jobs_primary_hostname="${REPOSITORY_SERVICE_JOBS_PRIMARY_HOSTNAME:-}"
+
 cache_cluster="${CACHE_CLUSTER:-false}"
 cache_database="${CACHE_DATABASE:-0}"
 cache_host="${CACHE_HOST:-}"
@@ -94,6 +101,7 @@ repository_database_jdbc="jdbc:${repository_database_prot}://${repository_databa
 repository_search_solr_host="${REPOSITORY_SEARCH_SOLR_HOST:-repository-search-solr}"
 repository_search_solr_port="${REPOSITORY_SEARCH_SOLR_PORT:-8080}"
 
+repository_transform_enabled="${REPOSITORY_TRANSFORM_ENABLED:-"true"}"
 repository_transform_host="${REPOSITORY_TRANSFORM_HOST:-}"
 repository_transform_port="${REPOSITORY_TRANSFORM_PORT:-}"
 
@@ -346,8 +354,8 @@ grep -q '^[#]*\s*alfresco-pdf-renderer\.root=' "${alfProps}" || echo "alfresco-p
 sed -i -r 's|^[#]*\s*alfresco-pdf-renderer\.exe=.*|alfresco-pdf-renderer.exe=${alfresco-pdf-renderer.root}/alfresco-pdf-renderer|' "${alfProps}"
 grep -q '^[#]*\s*alfresco-pdf-renderer\.exe=' "${alfProps}" || echo 'alfresco-pdf-renderer.exe=${alfresco-pdf-renderer.root}/alfresco-pdf-renderer' >>"${alfProps}"
 
-sed -i -r 's|^[#]*\s*ooo\.enabled=.*|ooo.enabled=true|' "${alfProps}"
-grep -q '^[#]*\s*ooo\.enabled=' "${alfProps}" || echo "ooo.enabled=true" >>"${alfProps}"
+sed -i -r 's|^[#]*\s*ooo\.enabled=.*|ooo.enabled='"${repository_transform_enabled}"'|' "${alfProps}"
+grep -q '^[#]*\s*ooo\.enabled=' "${alfProps}" || echo "ooo.enabled=${repository_transform_enabled}" >>"${alfProps}"
 
 sed -i -r 's|^[#]*\s*ooo\.exe=.*|ooo.exe=|' "${alfProps}"
 grep -q '^[#]*\s*ooo\.exe=' "${alfProps}" || echo "ooo.exe=" >>"${alfProps}"
@@ -469,19 +477,25 @@ xmlstarlet ed -L \
           -s '/config/values' -t elem -n 'loginProviderTargetUrl' -v '' \
           -d '/config/values/loginProviderTargetUrl[position() != 1]' \
     			-u '/config/values/loginProviderTargetUrl' -v "${my_home_auth_external_login_provider_target_url}" \
+    			-s '/config/values' -t elem -n 'logout' -v '' \
+          -d '/config/values/logout[position() != 1]' \
+          -s '/config/values/logout' -t elem -n 'url' -v '' \
+          -d '/config/values/logout/url[position() != 1]' \
+          -u '/config/values/logout/url' -v "${my_home_auth_external_logout}" \
+          -s '/config/values/logout' -t elem -n 'destroySession' -v '' \
+          -d '/config/values/logout/destroySession[position() != 1]' \
+          -u '/config/values/logout/destroySession' -v "${my_home_auth_external_logout_destroy_session}" \
           ${eduCConf}
 
-          if [[ -n "${my_home_auth_external_logout}" ]] ; then
-             xmlstarlet ed -L \
-                  -s '/config/values' -t elem -n 'logout' -v '' \
-                  -d '/config/values/logout[position() != 1]' \
-                  -s '/config/values/logout' -t elem -n 'url' -v '' \
-                  -d '/config/values/logout/url[position() != 1]' \
-                  -u '/config/values/logout/url' -v "${my_home_auth_external_logout}" \
-                  -s '/config/values/logout' -t elem -n 'destroySession' -v '' \
-                  -d '/config/values/logout/destroySession[position() != 1]' \
-                  -u '/config/values/logout/destroySession' -v 'false' \
-                  ${eduCConf}
+          if [[ "${my_home_auth_external_logout_redirect}" == "true" ]] ; then
+            xmlstarlet ed -L \
+              -s '/config/values/logout' -t elem -n 'ajax' -v '' \
+              -d '/config/values/logout/ajax[position() != 1]' \
+              -u '/config/values/logout/ajax' -v 'true' \
+              -s '/config/values/logout' -t elem -n 'next' -v '' \
+              -d '/config/values/logout/next[position() != 1]' \
+              -u '/config/values/logout/next' -v "${my_home_auth_external_logout_redirect_url}" \
+              ${eduCConf}
           fi
   else
 		sed -i -r 's|<!--\s*SAML||g' tomcat/webapps/edu-sharing/WEB-INF/web.xml
@@ -714,6 +728,13 @@ xmlstarlet ed -L \
 	hocon -f ${eduSConf} set "angular.headers.Content-Security-Policy.style-src" '"'"${my_http_server_csp_style}"'"'
 }
 
+[[ $(hocon -f ${eduSConf} get "jobs.primaryHostname" 2>/dev/null) ]] && {
+  hocon -f ${eduSConf} unset "jobs.primaryHostname"
+}
+[[ -n "${my_jobs_primary_hostname}" ]] && {
+	hocon -f ${eduSConf} set "jobs.primaryHostname" '"'"${my_jobs_primary_hostname}"'"'
+}
+
 # clean up empty lines in config after hocon commands
 sed -i '/^[[:space:]]*$/d' ${eduSConf}
 
@@ -733,11 +754,4 @@ done
 
 ########################################################################################################################
 
-# Load libraries
-. /opt/bitnami/scripts/libtomcat.sh
-. /opt/bitnami/scripts/liblog.sh
-
-# Load Tomcat environment variables
-. /opt/bitnami/scripts/tomcat-env.sh
-
-exec "$@"
+exec /opt/bitnami/scripts/tomcat/entrypoint.sh "$@"
