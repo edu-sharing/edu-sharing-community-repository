@@ -2141,6 +2141,9 @@
           "syslogEquivalent": {
             "format": "int32",
             "type": "integer"
+          },
+          "version2Level": {
+            "$ref": "#/components/schemas/Level"
           }
         },
         "type": "object"
@@ -5536,7 +5539,7 @@
           },
           "score": {
             "description": "score of the suggestion",
-            "format": "float",
+            "format": "double",
             "type": "number"
           },
           "text": {
@@ -35082,6 +35085,7 @@
               "enum": [
                 "DOWNLOAD_MATERIAL",
                 "VIEW_MATERIAL",
+                "OPEN_EXTERNAL_LINK",
                 "VIEW_COLLECTION",
                 "VIEW_MATERIAL_EMBEDDED",
                 "VIEW_MATERIAL_PLAY_MEDIA",
