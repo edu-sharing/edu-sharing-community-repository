@@ -674,7 +674,7 @@ public class LDAPAuthenticationFilter implements Filter {
 				ApplicationContext context = AlfAppContextGate.getApplicationContext();
 				AuthenticationComponent authComp = (AuthenticationComponent)context.getBean("authenticationComponent");
 				authComp.setCurrentUser(username);
-				logger.info("webdav ldap authentication: sucessfull for loginName:" + hMac.calculateHmac(loginName) +" / userName:" + hMac.calculateHmac(username));
+				logger.info("webdav ldap authentication: sucessfull. loginName:" + hMac.calculateHmac(loginName) +" / userName:" + hMac.calculateHmac(username));
 				return;
 			}catch(javax.naming.AuthenticationException e){
 				logger.debug(e.getMessage(), e);
