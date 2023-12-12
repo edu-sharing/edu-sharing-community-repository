@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.security.HMac;
 import org.springframework.context.ApplicationContext;
 
 import javax.naming.CommunicationException;
@@ -98,6 +99,8 @@ public class LDAPAuthenticationFilter implements Filter {
 	private Properties env = null;
 	private String ldapUidProp = null;
 	private String ldapUrl = null;
+
+	HMac hMac = null;
 	
 	
 	/**
@@ -200,7 +203,8 @@ public class LDAPAuthenticationFilter implements Filter {
 		this.ldapTo = properties.getProperty(LDAPAuthenticationFilter.INIT_LDAP_TO);
 		this.ldapUidProp = properties.getProperty(LDAPAuthenticationFilter.INIT_LDAP_UID);
 		if(this.ldapUidProp == null || this.ldapUidProp.trim().equals("")) this.ldapUidProp = "uid";
-		
+
+		hMac = HMac.getInstance();
 	}
 
 	/**
@@ -342,6 +346,7 @@ public class LDAPAuthenticationFilter implements Filter {
 	    
 	                        // Authenticate the user    
 	                        try{
+								logger.info("webdav ldap authentication: starting. loginName:"+hMac.calculateHmac(username));
 	        					user = searchForUser(username,password);
 	        				}catch(CommunicationException e){
 	        					logger.error(e.getMessage() +" Will create new InitialDirContext and retry.");
@@ -529,12 +534,14 @@ public class LDAPAuthenticationFilter implements Filter {
 	 *https://issues.apache.org/jira/browse/HADOOP-9125
 	 *https://issues.apache.org/jira/secure/attachment/12560771/HADOOP-9125.patch
 	 */
-	WebDAVUser searchForUser(String username, String password) throws CommunicationException{
+	WebDAVUser searchForUser(String loginName, String password) throws CommunicationException{
 		
 		
 		String uid = null;
 
 		String dn = null;
+
+		String username = loginName;
 		
 		try
 		{
@@ -568,7 +575,7 @@ public class LDAPAuthenticationFilter implements Filter {
 				dn = r.getNameInNamespace();
 
 			}else{
-				throw new AuthenticationException("ldap authentication: user not found in directory for property:"+this.ldapFrom);
+				throw new AuthenticationException("webdav ldap authentication: user not found in directory. loginName:" + hMac.calculateHmac(loginName));
 			}
 			rs.close();
 
@@ -589,7 +596,7 @@ public class LDAPAuthenticationFilter implements Filter {
 					return true;
 				});
 				if(!allowed){
-					throw new AuthenticationException("ldap authentication: USER_BLOCKED");
+					throw new AuthenticationException("webdav ldap authentication: USER_BLOCKED. loginName:" + hMac.calculateHmac(loginName) + " / userName:" + hMac.calculateHmac(username) );
 				}
 			}
 
@@ -598,7 +605,7 @@ public class LDAPAuthenticationFilter implements Filter {
 			}else{
 				
 				logger.debug("using ldap auth dn:" + dn + " uid:" +uid +" username:" +username);
-				this.authenticate(dn, username, password);
+				this.authenticate(dn, username, password, loginName);
 			}
 
 			// Set the user name as stored by the back end
@@ -623,10 +630,13 @@ public class LDAPAuthenticationFilter implements Filter {
 		} catch (AuthenticationException ex) {
 			// Do nothing, user object will be null
 			if(ex.getMessage() != null && ex.getMessage().contains("Invalid Credentials")){
-				logger.warn("ldap authentication: failed with Invalid Credentials");
+				logger.warn("webdav ldap authentication: failed with Invalid Credentials. loginName:" + hMac.calculateHmac(loginName) + " / userName:" + hMac.calculateHmac(username));
+			}
+			if (ex.getMessage() != null && ex.getMessage().contains("DN with no password")) {
+				logger.warn("webdav ldap authentication: no password provided. loginName:" + hMac.calculateHmac(loginName) + " / userName:" + hMac.calculateHmac(username));
 			}else {
 				logger.warn(ex.getMsgId());
-				if(logger.isDebugEnabled()) {
+				if (logger.isDebugEnabled()) {
 					logger.error(ex.getMessage(), ex);
 				}
 			}
@@ -636,13 +646,14 @@ public class LDAPAuthenticationFilter implements Filter {
 	}
 	
 	/**
-	 * edu-sharing customization: try to authenticate at ldap directly 
+	 * edu-sharing customization: try to authenticate at ldap directly
 	 *
 	 * @param username
 	 * @param password
+	 * @param loginName
 	 * @throws AuthenticationException
 	 */
-	private void authenticate(String ldapUserDn, String username, String password) throws  AuthenticationException{
+	private void authenticate(String ldapUserDn, String username, String password, String loginName) throws  AuthenticationException{
 		
 		if(env != null){
 			Properties authEnv = new Properties();
@@ -663,13 +674,13 @@ public class LDAPAuthenticationFilter implements Filter {
 				ApplicationContext context = AlfAppContextGate.getApplicationContext();
 				AuthenticationComponent authComp = (AuthenticationComponent)context.getBean("authenticationComponent");
 				authComp.setCurrentUser(username);
-				logger.info("ldap authentication: sucessfull");
+				logger.info("webdav ldap authentication: sucessfull for loginName:" + hMac.calculateHmac(loginName) +" / userName:" + hMac.calculateHmac(username));
 				return;
 			}catch(javax.naming.AuthenticationException e){
 				logger.debug(e.getMessage(), e);
 				throw new AuthenticationException(e.getMessage());
 			} catch (NamingException e) {
-				logger.error(e.getMessage(), e);
+				logger.debug(e.getMessage(), e);
 				throw new AuthenticationException(e.getMessage());
 			}
 			

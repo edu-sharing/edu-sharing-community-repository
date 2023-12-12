@@ -70,15 +70,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 	@Override
 	public void init(FilterConfig config) throws ServletException {
 		this.context=config.getServletContext();
-		KeyStoreService keyStoreService = new KeyStoreService();
-
-		try {
-			String hmacPassword = keyStoreService.readPasswordFromKeyStore(CCConstants.EDU_PASSWORD_KEYSTORE_NAME,
-					ApplicationInfoList.getHomeRepository().getKeyStorePassword(),"",CCConstants.EDU_PASSWORD_USERNAMEHASH);
-			hMac = new HMac(hmacPassword,HMac.ALG_SHA256);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		hMac = HMac.getInstance();
 	}
 
 	@Override

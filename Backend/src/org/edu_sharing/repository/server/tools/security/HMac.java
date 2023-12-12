@@ -3,7 +3,8 @@ package org.edu_sharing.repository.server.tools.security;
 
 import org.apache.commons.codec.digest.HmacUtils;
 import org.apache.log4j.Logger;
-
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
 
 public class HMac {
@@ -33,19 +34,15 @@ public class HMac {
         return calculateHmac(data).equals(hmacHex);
     }
 
+    public static HMac getInstance() {
+        KeyStoreService keyStoreService = new KeyStoreService();
 
-    public static void main(String[] args) {
-        HMac hmac = new HMac("b65823166d642a6a1b4bd5f26f075bb8", ALG_SHA256);
-        long start = System.currentTimeMillis();
-        for(int i = 0; i < 1; i++) {
-            String rs = hmac.calculateHmac("thetest");
-           /* if(!"e20325d776dc1c884b2ec69e6de6c79222b9e3546fd0b668d04fa5b9ccb2ddb9".equals(rs)){
-                System.out.println("diff:" + rs);
-            }*/
+        try {
+            String hmacPassword = keyStoreService.readPasswordFromKeyStore(CCConstants.EDU_PASSWORD_KEYSTORE_NAME,
+                    ApplicationInfoList.getHomeRepository().getKeyStorePassword(),"",CCConstants.EDU_PASSWORD_USERNAMEHASH);
+            return new HMac(hmacPassword,HMac.ALG_SHA256);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
-
-
-        System.out.println("ready in "+(System.currentTimeMillis() -start)+"ms");
     }
 }
