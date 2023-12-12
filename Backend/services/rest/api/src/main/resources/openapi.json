@@ -12392,6 +12392,17 @@
       "post": {
         "description": "Get a given node based on the posted, multiple criteria. Make sure that they'll provide an unique result",
         "operationId": "find",
+        "parameters": [
+          {
+            "description": "Return the full node. If you don't need the data, set to false to only return the id (will improve performance)",
+            "in": "query",
+            "name": "resolveNode",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -12532,6 +12543,15 @@
                 "type": "string"
               },
               "type": "array"
+            }
+          },
+          {
+            "description": "Return the generated or updated node. If you don't need the data, set to false to only return the id (will improve performance)",
+            "in": "query",
+            "name": "resolveNode",
+            "schema": {
+              "default": true,
+              "type": "boolean"
             }
           },
           {

@@ -13,6 +13,7 @@ import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
+import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.bulk.BulkServiceFactory;
 
 import javax.servlet.http.HttpServletRequest;
@@ -47,16 +48,23 @@ public class BulkApi {
 		   @Parameter(description = "The properties on which the imported nodes should be grouped (for each value, a folder with the corresponding data is created)", required = false) @QueryParam("groupBy") List<String> groupBy,
 		   @Parameter(description = "type of node. If the node already exists, this will not change the type afterwards",required=true ) @QueryParam("type") String type,
 		   @Parameter(description = "aspects of node" ) @QueryParam("aspects") List<String> aspects,
+		   @Parameter(description = "Return the generated or updated node. If you don't need the data, set to false to only return the id (will improve performance)", required = false, schema = @Schema(defaultValue="true" )) @QueryParam("resolveNode") Boolean resolveNode,
 		   @Parameter(description = "properties, they'll not get filtered via mds, so be careful what you add here" , required=true) HashMap<String, String[]> properties,
 		   @Parameter(description = "reset all versions (like a complete reimport), all data inside edu-sharing will be lost" , required=false) @QueryParam("resetVersion") Boolean resetVersion
 
 	) {
 		try {
+			NodeRef result = BulkServiceFactory.getInstance().sync(group, match, groupBy, type, aspects, properties, resetVersion == null ? false : resetVersion);
+			NodeEntry entry = new NodeEntry();
+			if(resolveNode == null || resolveNode) {
 			NodeDao nodeDao = NodeDao.getNode(RepositoryDao.getHomeRepository(),
 					BulkServiceFactory.getInstance().sync(group, match, groupBy, type, aspects, properties, resetVersion==null ? false : resetVersion).getId(),
 					Filter.createShowAllFilter());
-			NodeEntry entry = new NodeEntry();
 			entry.setNode(nodeDao.asNode());
+			} else {
+				entry.setNode(new Node());
+				entry.getNode().setRef(new org.edu_sharing.restservices.shared.NodeRef(RepositoryDao.getHomeRepository(), result.getId()));
+			}
 			return Response.ok().entity(entry).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
@@ -76,16 +84,22 @@ public class BulkApi {
 			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response find(@Context HttpServletRequest req,
-						 @Parameter(description = "properties that must match (with \"AND\" concatenated)" , required=true ) HashMap<String, String[]> properties
-	) {
+						 @Parameter(description = "properties that must match (with \"AND\" concatenated)" , required=true ) HashMap<String, String[]> properties,
+						 @Parameter(description = "Return the full node. If you don't need the data, set to false to only return the id (will improve performance)", required = false, schema = @Schema(defaultValue="true" )) @QueryParam("resolveNode") Boolean resolveNode
+						 ) {
 		try {
 			NodeRef node = BulkServiceFactory.getInstance().find(properties);
 			if(node==null) {
 				throw new DAOMissingException(new Throwable("No node matched the criteria"));
 			}
-			NodeDao nodeDao = NodeDao.getNode(RepositoryDao.getHomeRepository(), node.getId(), Filter.createShowAllFilter());
 			NodeEntry entry = new NodeEntry();
-			entry.setNode(nodeDao.asNode());
+			if(resolveNode == null || resolveNode) {
+				NodeDao nodeDao = NodeDao.getNode(RepositoryDao.getHomeRepository(), node.getId(), Filter.createShowAllFilter());
+				entry.setNode(nodeDao.asNode());
+			} else {
+				entry.setNode(new Node());
+				entry.getNode().setRef(new org.edu_sharing.restservices.shared.NodeRef(RepositoryDao.getHomeRepository(), node.getId()));
+			}
 			return Response.ok().entity(entry).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t, ErrorResponse.ErrorResponseLogging.relaxed);
