@@ -53,6 +53,7 @@ import org.edu_sharing.service.lti13.uoc.Config;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -60,6 +61,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
@@ -171,7 +173,14 @@ public class LTIApi {
 
         // do the redirection
         String authRequest = tool.getOidcAuthUrl(loginRequest);
-
+        /**
+         *  fix param encoding of params that are not properly url encoded by lti library class
+         *  edu.uoc.elc.lti.tool.oidc.AuthRequestUrlBuilder
+         */
+        if(loginRequest.getLti_message_hint() != null) {
+            authRequest = UrlTool.replaceParam(authRequest, "lti_message_hint",
+                    URLEncoder.encode(loginRequest.getLti_message_hint(),"UTF-8"));
+        }
         /**
          * fix: when it's an LtiResourceLinkRequest moodle sends rendering url (/edu-sharing/components/render)
          * as targetUrl. edu.uoc.elc.lti.tool.Tool take this url for redirect_url which is wrong.
@@ -180,8 +189,7 @@ public class LTIApi {
          * we can not detect if it will be an ResourceLink or Deeplink call here.
          * This fix is only for ResourceLink calls. Deeplinks use the same redirect url so this is ok here.
          */
-        authRequest = UrlTool.removeParam(authRequest,"redirect_uri");
-        authRequest = UrlTool.setParam(authRequest,"redirect_uri",ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/rest/lti/v13/" + LTIConstants.LTI_TOOL_REDIRECTURL_PATH);
+        authRequest = UrlTool.replaceParam(authRequest,"redirect_uri",ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/rest/lti/v13/" + LTIConstants.LTI_TOOL_REDIRECTURL_PATH);
 
 
         //response.sendRedirect(authRequest);
@@ -289,7 +297,7 @@ public class LTIApi {
         String nonce = jws.getBody().get("nonce", String.class);
         String sessionNonce = new HttpSessionOIDCLaunchSession(req).getNonce();
         if(!nonce.equals(sessionNonce)){
-            logger.error("nonce:"+nonce+ " sessionNonce:"+sessionNonce);
+            logger.error("nonce:"+nonce+ " sessionNonce:"+sessionNonce +". maybe jsessionid is not the same for login_initiation and launch url. ");
             throw new IllegalStateException("nonce is invalid");
         }
 
