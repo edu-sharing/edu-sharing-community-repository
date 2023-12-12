@@ -21,7 +21,7 @@ public class SchemaFactory extends javax.xml.validation.SchemaFactory{
     public SchemaFactory(){
         logger.fine("using SchemaFactory "+SchemaFactory.class.getName());
         try {
-            wrapped.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA,"");
+            wrapped.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA,"jar:file,file");
             wrapped.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD,"");
 
         } catch (SAXNotRecognizedException e) {
