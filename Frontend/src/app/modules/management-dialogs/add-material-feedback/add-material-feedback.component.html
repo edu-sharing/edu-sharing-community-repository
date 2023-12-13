@@ -5,7 +5,7 @@
   editorMode="form"
   title="{{ 'FEEDBACK.TITLE' | translate }}"
   labelPositive="{{ 'FEEDBACK.SAVE' | translate }}"
-  toastOnSave="{{ 'FEEDBACK.TOAST' | translate }}"
+  [toastOnSave]="null"
   [currentValues]="{}"
   (onDone)="addFeedback($event)"
   (onCancel)="onClose.emit()"

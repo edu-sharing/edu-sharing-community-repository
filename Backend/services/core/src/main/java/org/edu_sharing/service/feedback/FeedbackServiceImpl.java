@@ -15,6 +15,7 @@ import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.feedback.model.FeedbackData;
 import org.edu_sharing.service.feedback.model.FeedbackResult;
@@ -110,7 +111,9 @@ public class FeedbackServiceImpl implements FeedbackService {
             Map<String, List<String>> feedbackData
     ) {
         String userId = AuthenticationUtil.getFullyAuthenticatedUser();
-
+        if(AuthorityServiceFactory.getLocalService().isGuest() && !userMode.equals(UserMode.session)) {
+            throw new IllegalArgumentException("Guest feedback is only supported when userMode == session");
+        }
         return AuthenticationUtil.runAsSystem(()-> {
             try {
                 // will reset after runAs automatically
