@@ -60,8 +60,7 @@ import javax.servlet.http.HttpSession;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.net.URI;
-import java.net.URLEncoder;
+import java.net.*;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
@@ -375,7 +374,14 @@ public class LTIApi {
                 }
             }
             if(ltijwtUtil.getApplicationInfo().isLtiScopeUsername()){
-                user = user+"@"+jws.getBody().getIssuer();
+                String scope = jws.getBody().getIssuer();
+                try {
+                    URL url = new URL(scope);
+                    url.toURI();
+                    scope = url.getHost();
+                } catch (MalformedURLException | URISyntaxException e) {}
+
+                user = user+"@"+scope;
             }else{
                 /**
                  * prevent an lti platform can becomes an alfresco admin
