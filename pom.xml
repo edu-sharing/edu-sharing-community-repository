@@ -700,7 +700,7 @@
       <dependency>
         <groupId>edu.uoc.elc.lti</groupId>
         <artifactId>lti-13</artifactId>
-        <version>0.0.3</version>
+        <version>0.0.3.edupatch.1</version>
       </dependency>
 
       <dependency>
