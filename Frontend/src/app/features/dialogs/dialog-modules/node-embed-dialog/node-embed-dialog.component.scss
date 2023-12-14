@@ -84,8 +84,10 @@
 .version-radio-group {
     display: flex;
     flex-direction: column;
-    gap: 10px;
     padding-bottom: 1.4375em; // Same as mat form field
+    > mat-radio-button {
+        height: 2.75em;
+    }
 }
 
 .embed-code-field {
