@@ -82,7 +82,12 @@ public class SKOSReader extends ValuespaceReader{
             key.setAlternativeKeys(altKeys);
         }
         if(entry.has("url")) {
-            key.setUrl(entry.getString("url"));
+            try {
+                // newer skos versions
+                key.setUrl(entry.getJSONArray("url").getJSONObject(0).getString("id"));
+            } catch(JSONException e) {
+                key.setUrl(entry.getString("url"));
+            }
         }
         for(MetadataKey.MetadataKeyRelated.Relation relation: MetadataKey.MetadataKeyRelated.Relation.values()) {
             if(entry.has(relation.name())) {
@@ -99,7 +104,7 @@ public class SKOSReader extends ValuespaceReader{
         return key;
     }
 
-    private JSONObject fetch() throws IOException, JSONException {
+    JSONObject fetch() throws IOException, JSONException {
         return new JSONObject(ReaderUtils.query(url));
     }
 

@@ -133,8 +133,13 @@ export class NodeHelperService {
      * @param licenseVersion
      */
     public getLicenseUrlByString(licenseProperty: string, licenseVersion: string) {
-        const url = (RestConstants.LICENSE_URLS as any)[licenseProperty];
+        let url = (RestConstants.LICENSE_URLS as any)[licenseProperty];
         if (!url) return null;
+        if (licenseVersion === '4.0') {
+            // the international 4.0 version does no longer follow the same path as the others
+            // so this part needs to be removed
+            url = url.replace('/de/', '/');
+        }
         return url.replace('#version', licenseVersion);
     }
 
