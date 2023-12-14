@@ -84,6 +84,7 @@
 			<id rel="graphql">lom.general.keyword</id>
 			<type>multivalueSuggestBadges</type>
 			<caption>lom_prop_general_keyword</caption>
+			<placeholder>lom_prop_general_keyword_placeholder_search</placeholder>
 			<template>search</template>
 		</widget>
 		<widget>
