@@ -10,7 +10,7 @@ services:
     ports:
       - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_MAILCATCHER_PORT_HTTP:-8025}:1080"
 
-  repository-search-solr4:
+  repository-search-solr:
     environment:
       CATALINA_OPTS: >-
         -Xms${REPOSITORY_SEARCH_SOLR4_JAVA_XMS:-512m}
