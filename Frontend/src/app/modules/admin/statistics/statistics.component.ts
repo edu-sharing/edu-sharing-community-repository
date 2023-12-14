@@ -545,7 +545,8 @@ export class AdminStatisticsComponent implements OnInit {
             return;
         }
         this.nodesDataSource = new NodeDataSource<Node>();
-        this.nodesDataSource.isLoading = false;
+        this.nodesDataSource.isLoading = true;
+        this.nodesNoData = true;
         const group = this.config.instant('admin.statistics.nodeGroup');
         this.statistics
             .getStatisticsNode(
@@ -569,6 +570,7 @@ export class AdminStatisticsComponent implements OnInit {
                 (error) => {
                     this.toast.error(error);
                     this.nodesDataSource.isLoading = false;
+                    this.nodesNoData = true;
                 },
             );
     }
