@@ -148,8 +148,7 @@ public class LTIPlatformApi {
             }
 
             /**
-             * we use the tool nonce for resolving the LoginInitiationSessionObject later when no lti_message_hint is available anymore
-             * TODO check find better solution
+             * remember nonce for replay (xss) protection. @TODO
              */
             loginInitiationSessionObject.setToolNonce(nonce);
             //we have to reset the session object cause of redisson cache management
@@ -822,15 +821,15 @@ public class LTIPlatformApi {
             if(loginInitiationSessionObjectMap == null){
                 throw new Exception(LTIPlatformConstants.ERROR_MISSING_SESSIONOBJECTS);
             }
-            /**
-             * we don't hat lti_message_hint here so we have to resolve the object by nonce
-             */
-            String nonce = LTIJWTUtil.getValue(jwt,"nonce");
-            if(nonce == null) throw new Exception("missing nonce");
+
+            //take the first session object that matches message type deeplink and clientid
+            //we don't get other information by the tool here to narrow down the context
+            String clientId = LTIJWTUtil.getValue(jwt,"iss");
             LoginInitiationSessionObject sessionObject = loginInitiationSessionObjectMap.entrySet().stream()
-                    .filter(e -> e.getValue().getToolNonce().equals(nonce))
+                    .filter(e -> (e.getValue().getClientId().equals(clientId) && e.getValue().getMessageType().equals(LoginInitiationSessionObject.MessageType.deeplink)))
                     .findFirst()
                     .orElseThrow(() -> new Exception(LTIPlatformConstants.ERROR_MISSING_SESSIONOBJECT)).getValue();
+
 
             LTIJWTUtil jwtUtil = new LTIJWTUtil();
             //find out clientid/deploymentid
