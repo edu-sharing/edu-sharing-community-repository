@@ -6,6 +6,10 @@ import { SearchPageResultsService } from './search-page-results.service';
 import { SearchPageService } from './search-page.service';
 import { GlobalSearchPageServiceInternal } from './global-search-page.service';
 import { TemporaryStorageService } from '../../core-module/rest/services/temporary-storage.service';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
+import { switchMap, takeUntil } from 'rxjs/operators';
+import { TranslateService } from '@ngx-translate/core';
+import { Subject } from 'rxjs';
 
 @Component({
     selector: 'es-search-page-results',
@@ -16,6 +20,7 @@ import { TemporaryStorageService } from '../../core-module/rest/services/tempora
 export class SearchPageResultsComponent implements OnInit, OnDestroy {
     readonly Scope = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    private destroyed = new Subject<void>();
 
     @ViewChild(ActionbarComponent)
     set _actionbar(value: ActionbarComponent) {
@@ -37,7 +42,21 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
         private results: SearchPageResultsService,
         private searchPage: SearchPageService,
         private temporaryStorageService: TemporaryStorageService,
-    ) {}
+        private announcer: LiveAnnouncer,
+        private translate: TranslateService,
+    ) {
+        // announce newly loaded elements to users using screen readers
+        results.diffCount
+            .pipe(
+                takeUntil(this.destroyed), // FIXME: replace with takeUntilDestroyed in Angular 16+
+                switchMap((newlyLoadedElements) =>
+                    this.translate.get('SEARCH.LOADED_RESULTS', { count: newlyLoadedElements }),
+                ),
+            )
+            .subscribe((elementsLoadedTranslation) => {
+                this.announcer.announce(elementsLoadedTranslation);
+            });
+    }
 
     ngOnInit(): void {
         setTimeout(() => {
@@ -52,6 +71,8 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
         this.temporaryStorageService.set(
             TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE,
             this.resultsDataSource,
