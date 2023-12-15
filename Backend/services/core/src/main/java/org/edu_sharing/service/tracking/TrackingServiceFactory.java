@@ -2,6 +2,8 @@ package org.edu_sharing.service.tracking;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.DownloadServlet;
+import org.edu_sharing.service.nodeservice.NodeService;
+import org.edu_sharing.spring.ApplicationContextFactory;
 
 public class TrackingServiceFactory {
     private static Logger logger = Logger.getLogger(TrackingServiceFactory.class);
@@ -12,7 +14,7 @@ public class TrackingServiceFactory {
 		}catch(Throwable t) {
 		    logger.debug("no class "+TrackingService.class.getName()+"Custom"+" found, will use default implementation for tracking");
 			//throw new RuntimeException(t);
-            return new TrackingServiceImpl();
+			return (TrackingService) ApplicationContextFactory.getApplicationContext().getBean("trackingService");
 
         }
 	}

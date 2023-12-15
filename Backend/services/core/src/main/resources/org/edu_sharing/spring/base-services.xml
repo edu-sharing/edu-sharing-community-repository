@@ -35,6 +35,29 @@
 	<bean id="nodeServiceInterceptor" class="org.edu_sharing.service.nodeservice.NodeServiceInterceptor"
 		  init-method="init"/>
 
+	<bean id="trackingService" class="org.springframework.aop.framework.ProxyFactoryBean" >
+		<property name="targetName">
+			<value>trackingServiceImpl</value>
+		</property>
+		<property name="proxyInterfaces">
+			<list>
+				<value>org.edu_sharing.service.tracking.TrackingService</value>
+			</list>
+		</property>
+		<property name="interceptorNames">
+			<list>
+				<value>trackingServiceInterceptor</value>
+			</list>
+		</property>
+	</bean>
+	<bean id="trackingServiceImpl" class="org.edu_sharing.service.tracking.TrackingServiceImpl">
+		<property name="nodeService">
+			<ref bean="nodeServiceImpl" />
+		</property>
+	</bean>
+	<bean id="trackingServiceInterceptor" class="org.edu_sharing.service.tracking.TrackingServiceInterceptor"
+		  init-method="init"/>
+
 	<bean id="authorityService" class=" org.edu_sharing.service.authority.AuthorityServiceImpl"/>
 	<bean id="permissionService" class="org.springframework.aop.framework.ProxyFactoryBean" >
 		<property name="targetName">
