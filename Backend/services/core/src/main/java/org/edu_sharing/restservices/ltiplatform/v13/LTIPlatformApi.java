@@ -227,9 +227,10 @@ public class LTIPlatformApi {
                 launchPresentation.put("return_url",homeApp.getClientBaseUrl()+"/components/workspace?id=" + loginInitiationSessionObject.getContextId() + "&mainnav=true&displayType=0");
 
 
-                String resourceLink = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK));
+                String targetLink = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK));
+                if(targetLink == null) targetLink = appInfo.getLtitoolTargetLinkUri();
                 jwtBuilder = jwtBuilder
-                        .claim(LTIConstants.LTI_TARGET_LINK_URI, resourceLink)
+                        .claim(LTIConstants.LTI_TARGET_LINK_URI, targetLink)
                         .claim(LTIConstants.LTI_CLAIM_RESOURCE_LINK,claimResourceLink)
                         .claim(LTIConstants.LTI_LAUNCH_PRESENTATION, launchPresentation)
                         .claim(LTIConstants.LTI_MESSAGE_TYPE, LTIConstants.LTI_MESSAGE_TYPE_RESOURCE_LINK);
@@ -690,11 +691,6 @@ public class LTIPlatformApi {
                 throw new Exception("not an lti resoucelink:"+nodeId);
             }
 
-            String resourceLink = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK));
-            if(resourceLink == null){
-                throw new Exception("lti resoucelink is null:"+nodeId);
-            }
-
             String toolUrl = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_TOOLURL));
             if(toolUrl == null){
                 throw new Exception("lti toolUrl is null:"+nodeId);
@@ -743,8 +739,11 @@ public class LTIPlatformApi {
         params.put("iss",ApplicationInfoList.getHomeRepository().getClientBaseUrl());
         String targetLinkUrl = appInfo.getLtitoolTargetLinkUri();
         if(messageType.equals(LoginInitiationSessionObject.MessageType.resourcelink)){
-            targetLinkUrl = (String)nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,resourceLinkNodeId),
+            String resourceLink = (String)nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,resourceLinkNodeId),
                     QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK));
+            if(resourceLink != null && !resourceLink.isEmpty()) {
+                targetLinkUrl = resourceLink;
+            }
         }
         params.put("target_link_uri", targetLinkUrl);
         params.put("login_hint", AuthenticationUtil.getFullyAuthenticatedUser());
@@ -865,12 +864,10 @@ public class LTIPlatformApi {
                 }
 
                 String url = (String)contentItem.get("url");
-                if(url == null){
-                    throw new Exception("missing resourcelink url");
-                }
+
 
                 String title = (String)contentItem.get("title");
-                title = title != null ? title : url;
+                title = title != null ? title : (url != null) ? url : "unknown title";
                 String name = EduSharingNodeHelper.cleanupCmName(title);
                 name = new DuplicateFinder().getUniqueValue(sessionObject.getContextId(),CCConstants.CM_NAME,name);
                 properties.put(CCConstants.CM_NAME,new String[]{name} );
@@ -933,7 +930,9 @@ public class LTIPlatformApi {
 
         if(!nodeService.hasAspect(nodeRef,aspectLti)){
             Map<QName, Serializable> ltiAspectProps = new HashMap<>();
-            ltiAspectProps.put(QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK), resourceLink);
+            if(resourceLink != null) {
+                ltiAspectProps.put(QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK), resourceLink);
+            }
             ltiAspectProps.put(QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_TOOLURL), appInfoTool.getLtitoolUrl());
             nodeService.addAspect(nodeRef,aspectLti,ltiAspectProps);
         }
