@@ -27,6 +27,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
+import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.authentication.ScopeAuthenticationServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.config.ConfigServiceFactory;
@@ -164,8 +165,12 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 				httpRes.sendError(result.getStatuscode(), result.getMessage());
 			} else {
 				String userId = SignatureVerifier.getHeaderOrParam("X-Edu-User-Id",httpReq);
-				accessTool.set(new TrackingApplicationInfo(result.getAppInfo(), userId));
-
+				if (userId != null) {
+					userId = SSOAuthorityMapper.mapAdminAuthority(userId, appId);
+					accessTool.set(new TrackingApplicationInfo(result.getAppInfo(), userId));
+				} else {
+					accessTool.set(new TrackingApplicationInfo(result.getAppInfo(), null));
+				}
 				String courseId = SignatureVerifier.getHeaderOrParam("X-Edu-Usage-Course-Id",httpReq);
 				String nodeId = SignatureVerifier.getHeaderOrParam("X-Edu-Usage-Node-Id",httpReq);
 				String resourceId = SignatureVerifier.getHeaderOrParam("X-Edu-Usage-Resource-Id",httpReq);
