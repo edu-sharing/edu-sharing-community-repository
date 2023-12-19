@@ -65,7 +65,7 @@ public class CallSourceHelper {
 
     private static boolean isToolConnector() {
         return ContextManagementFilter.accessTool.get() != null &&
-                ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getType());
+                ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getType());
     }
 
     private static boolean isSearch(String path){

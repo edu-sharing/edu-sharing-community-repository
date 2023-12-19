@@ -752,10 +752,9 @@ export class OptionsHelperService implements OnDestroy {
             /**
              * prevent lti editor as tool with custom content option, embedding nodes as platform created by the same tool
              */
-
-            let customContentNodeLtiToolUrl =
-                ltiSession.customContentNode.properties['ccm:ltitool_url'][0];
-            if (ltiSession.customContentNode) {
+            if (ltiSession.customContentNode && ltiSession.customContentNode.properties) {
+                let customContentNodeLtiToolUrl =
+                    ltiSession.customContentNode.properties['ccm:ltitool_url'][0];
                 return nodes.some((n) => {
                     let nLtiToolUrlArr = ltiSession.customContentNode.properties['ccm:ltitool_url'];
                     if (!isArray(nLtiToolUrlArr) || nLtiToolUrlArr.length == 0) {

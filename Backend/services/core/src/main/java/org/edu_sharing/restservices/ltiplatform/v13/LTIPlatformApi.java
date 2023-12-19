@@ -148,8 +148,7 @@ public class LTIPlatformApi {
             }
 
             /**
-             * we use the tool nonce for resolving the LoginInitiationSessionObject later when no lti_message_hint is available anymore
-             * TODO check find better solution
+             * remember nonce for replay (xss) protection. @TODO
              */
             loginInitiationSessionObject.setToolNonce(nonce);
             //we have to reset the session object cause of redisson cache management
@@ -228,9 +227,10 @@ public class LTIPlatformApi {
                 launchPresentation.put("return_url",homeApp.getClientBaseUrl()+"/components/workspace?id=" + loginInitiationSessionObject.getContextId() + "&mainnav=true&displayType=0");
 
 
-                String resourceLink = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK));
+                String targetLink = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK));
+                if(targetLink == null) targetLink = appInfo.getLtitoolTargetLinkUri();
                 jwtBuilder = jwtBuilder
-                        .claim(LTIConstants.LTI_TARGET_LINK_URI, resourceLink)
+                        .claim(LTIConstants.LTI_TARGET_LINK_URI, targetLink)
                         .claim(LTIConstants.LTI_CLAIM_RESOURCE_LINK,claimResourceLink)
                         .claim(LTIConstants.LTI_LAUNCH_PRESENTATION, launchPresentation)
                         .claim(LTIConstants.LTI_MESSAGE_TYPE, LTIConstants.LTI_MESSAGE_TYPE_RESOURCE_LINK);
@@ -691,11 +691,6 @@ public class LTIPlatformApi {
                 throw new Exception("not an lti resoucelink:"+nodeId);
             }
 
-            String resourceLink = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK));
-            if(resourceLink == null){
-                throw new Exception("lti resoucelink is null:"+nodeId);
-            }
-
             String toolUrl = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_TOOLURL));
             if(toolUrl == null){
                 throw new Exception("lti toolUrl is null:"+nodeId);
@@ -744,8 +739,11 @@ public class LTIPlatformApi {
         params.put("iss",ApplicationInfoList.getHomeRepository().getClientBaseUrl());
         String targetLinkUrl = appInfo.getLtitoolTargetLinkUri();
         if(messageType.equals(LoginInitiationSessionObject.MessageType.resourcelink)){
-            targetLinkUrl = (String)nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,resourceLinkNodeId),
+            String resourceLink = (String)nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,resourceLinkNodeId),
                     QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK));
+            if(resourceLink != null && !resourceLink.isEmpty()) {
+                targetLinkUrl = resourceLink;
+            }
         }
         params.put("target_link_uri", targetLinkUrl);
         params.put("login_hint", AuthenticationUtil.getFullyAuthenticatedUser());
@@ -822,15 +820,15 @@ public class LTIPlatformApi {
             if(loginInitiationSessionObjectMap == null){
                 throw new Exception(LTIPlatformConstants.ERROR_MISSING_SESSIONOBJECTS);
             }
-            /**
-             * we don't hat lti_message_hint here so we have to resolve the object by nonce
-             */
-            String nonce = LTIJWTUtil.getValue(jwt,"nonce");
-            if(nonce == null) throw new Exception("missing nonce");
+
+            //take the first session object that matches message type deeplink and clientid
+            //we don't get other information by the tool here to narrow down the context
+            String clientId = LTIJWTUtil.getValue(jwt,"iss");
             LoginInitiationSessionObject sessionObject = loginInitiationSessionObjectMap.entrySet().stream()
-                    .filter(e -> e.getValue().getToolNonce().equals(nonce))
+                    .filter(e -> (e.getValue().getClientId().equals(clientId) && e.getValue().getMessageType().equals(LoginInitiationSessionObject.MessageType.deeplink)))
                     .findFirst()
                     .orElseThrow(() -> new Exception(LTIPlatformConstants.ERROR_MISSING_SESSIONOBJECT)).getValue();
+
 
             LTIJWTUtil jwtUtil = new LTIJWTUtil();
             //find out clientid/deploymentid
@@ -866,12 +864,10 @@ public class LTIPlatformApi {
                 }
 
                 String url = (String)contentItem.get("url");
-                if(url == null){
-                    throw new Exception("missing resourcelink url");
-                }
+
 
                 String title = (String)contentItem.get("title");
-                title = title != null ? title : url;
+                title = title != null ? title : (url != null) ? url : "unknown title";
                 String name = EduSharingNodeHelper.cleanupCmName(title);
                 name = new DuplicateFinder().getUniqueValue(sessionObject.getContextId(),CCConstants.CM_NAME,name);
                 properties.put(CCConstants.CM_NAME,new String[]{name} );
@@ -934,7 +930,9 @@ public class LTIPlatformApi {
 
         if(!nodeService.hasAspect(nodeRef,aspectLti)){
             Map<QName, Serializable> ltiAspectProps = new HashMap<>();
-            ltiAspectProps.put(QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK), resourceLink);
+            if(resourceLink != null) {
+                ltiAspectProps.put(QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK), resourceLink);
+            }
             ltiAspectProps.put(QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_TOOLURL), appInfoTool.getLtitoolUrl());
             nodeService.addAspect(nodeRef,aspectLti,ltiAspectProps);
         }

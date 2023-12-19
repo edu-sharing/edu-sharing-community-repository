@@ -1,20 +1,17 @@
 package org.edu_sharing.service.tracking;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.binding.BindingException;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -28,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.postgresql.util.PGobject;
 import org.postgresql.util.PSQLException;
-import org.springframework.context.ApplicationContext;
 
 import java.sql.Date;
 import java.sql.*;
@@ -99,13 +95,8 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY type,date :grouping" +
             " ORDER BY date";
-    private final NodeService nodeService;
 
     public TrackingServiceImpl() {
-        ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
-
-        ServiceRegistry serviceRegistry = (ServiceRegistry) appContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-        nodeService=serviceRegistry.getNodeService();
         /*
         SqlSessionFactoryBuilder builder = new SqlSessionFactoryBuilder();
         PGPoolingDataSource source = new PGPoolingDataSource();
@@ -150,13 +141,13 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         return AuthenticationUtil.runAs(()-> execDatabaseQuery(TRACKING_INSERT_USER, statement -> {
             statement.setString(1, super.getTrackedUsername(authorityName));
             try {
-                statement.setArray(2,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray()));
+                statement.setArray(2,statement.getConnection().createArrayOf("VARCHAR", getAuthorityOrganizations()));
             } catch (Exception e) {
                 statement.setArray(2, null);
                 logger.info("Failed to track organizations of user",e);
             }
             try {
-                statement.setArray(3,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllMediacenters().toArray()));
+                statement.setArray(3,statement.getConnection().createArrayOf("VARCHAR",getAuthorityMediacenters()));
             } catch (Exception e) {
                 statement.setArray(3, null);
                 logger.info("Failed to track mediacenter of user",e);
@@ -196,18 +187,18 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             }catch(Throwable ignored) { }
         String finalOriginalNodeRef = originalNodeRef;
         return execDatabaseQuery(TRACKING_INSERT_NODE, statement -> {
-                statement.setLong(1, (Long) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.SYS_PROP_NODE_DBID)));
+                statement.setLong(1, (Long) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.SYS_PROP_NODE_DBID));
                 statement.setString(2, nodeRef.getId());
                 statement.setString(3, finalOriginalNodeRef);
                 statement.setString(4, version);
                 statement.setString(5, super.getTrackedUsername(authorityName));
             try {
-                    statement.setArray(6,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray()));
+                    statement.setArray(6,statement.getConnection().createArrayOf("VARCHAR", getAuthorityOrganizations()));
             } catch (Exception e) {
                 logger.info("Failed to track organizations of user",e);
             }
             try {
-                    statement.setArray(7,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllMediacenters(true).toArray()));
+                    statement.setArray(7,statement.getConnection().createArrayOf("VARCHAR", getAuthorityMediacenters()));
             } catch (Exception e) {
                 logger.info("Failed to track mediacenter of user",e);
             }
@@ -222,6 +213,30 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
 
             return true;
         });
+    }
+
+    @NotNull
+    private static Object[] getAuthorityMediacenters() throws Exception {
+        if(ContextManagementFilter.accessTool.get() == null || ContextManagementFilter.accessTool.get().getUserId() == null) {
+            return SearchServiceFactory.getLocalService().getAllMediacenters(true).toArray();
+        } else {
+            return AuthenticationUtil.runAs(
+                    () -> SearchServiceFactory.getLocalService().getAllMediacenters(true).toArray(),
+                    ContextManagementFilter.accessTool.get().getUserId()
+            );
+        }
+    }
+
+    @NotNull
+    private static Object[] getAuthorityOrganizations() throws Exception {
+        if(ContextManagementFilter.accessTool.get() == null || ContextManagementFilter.accessTool.get().getUserId() == null) {
+            return SearchServiceFactory.getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray();
+        } else {
+            return AuthenticationUtil.runAs(
+                    () -> SearchServiceFactory.getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray(),
+                    ContextManagementFilter.accessTool.get().getUserId()
+            );
+        }
     }
 
     /**

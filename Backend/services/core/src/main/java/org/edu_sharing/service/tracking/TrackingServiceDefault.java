@@ -13,6 +13,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.springframework.context.ApplicationContext;
 
@@ -24,7 +25,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public abstract class TrackingServiceDefault implements TrackingService{
-    private final org.edu_sharing.service.nodeservice.NodeService nodeService;
+    protected org.edu_sharing.service.nodeservice.NodeService nodeService;
     public static Map<EventType,String> EVENT_PROPERTY_MAPPING=new HashMap<>();
 
     BehaviourFilter policyBehaviourFilter = null;
@@ -41,7 +42,6 @@ public abstract class TrackingServiceDefault implements TrackingService{
 
         ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
         ServiceRegistry serviceRegistry = (ServiceRegistry) appContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-        nodeService=NodeServiceFactory.getLocalService();
         transactionService = serviceRegistry.getTransactionService();
         policyBehaviourFilter = (BehaviourFilter)appContext.getBean("policyBehaviourFilter");
     }
@@ -114,5 +114,9 @@ public abstract class TrackingServiceDefault implements TrackingService{
         if(mode==null)
             return UserTrackingMode.none;
         return UserTrackingMode.valueOf(mode);
+    }
+
+    public void setNodeService(NodeService nodeService) {
+        this.nodeService = nodeService;
     }
 }

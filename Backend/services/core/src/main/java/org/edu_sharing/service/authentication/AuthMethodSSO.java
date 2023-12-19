@@ -71,7 +71,7 @@ public class AuthMethodSSO implements AuthMethodInterface {
 		if(allowedAuthTypesConfig != null && allowedAuthTypesConfig.contains(paramAuthType) && Arrays.asList(allowedAuthTypes).contains(paramAuthType)){
 			return ssoAuthorityMapper.mapAuthority(params);
 		}else{
-			logger.error(AuthenticationExceptionMessages.INVALID_AUTHENTICATION_METHOD +" no SSO(shibboleth,cas) auth configured");
+			logger.error(AuthenticationExceptionMessages.INVALID_AUTHENTICATION_METHOD +" no SSO(shibboleth,cas) auth configured. authType:"+paramAuthType);
 			throw new AuthenticationException(AuthenticationExceptionMessages.INVALID_AUTHENTICATION_METHOD);
 		}
 		

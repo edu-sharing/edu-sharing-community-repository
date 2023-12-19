@@ -5,6 +5,12 @@
   [value]="progressBarIsVisible ? loadingProgress.value : 0"
   [@fadeOut]="progressBarIsVisible ? 'visible' : 'hidden'"
   (animationEnd)="onProgressBarAnimationEnd()"
+  [attr.aria-label]="
+    progressBarIsVisible
+      ? ('SEARCH.LOADING_RESULTS'
+        | translate: { progress: progressBarIsVisible ? loadingProgress.value : 0 })
+      : ''
+  "
 ></mat-progress-bar>
 
 <ng-container *ngIf="tabBarIsVisible">

@@ -861,7 +861,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	}
 	public boolean downloadAllowed(String nodeId,Serializable commonLicenseKey,String editorType){
 		// when there is a signed request from the connector, the download (binary content delivery) is allowed
-		if(ContextManagementFilter.accessTool.get() != null && ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getType())) {
+		if(ContextManagementFilter.accessTool.get() != null && ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getType())) {
 			return true;
 		}
 		boolean downloadAllowed;
