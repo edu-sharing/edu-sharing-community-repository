@@ -11,7 +11,7 @@ import { NodeEntriesService } from '../../../core-ui-module/node-entries.service
 import { Node } from '../../../core-module/rest/data-object';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { ColorHelper, PreferredColor } from '../../../core-module/ui/color-helper';
-import { OptionItem, Target } from '../../../core-ui-module/option-item';
+import { Target } from '../../../core-ui-module/option-item';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { Toast } from '../../../core-ui-module/toast';
@@ -107,6 +107,7 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
     async openMenu(node: T) {
         this.entriesService.selection.clear();
         this.entriesService.selection.select(node);
+        this.entriesService.selection.clickSource = ClickSource.Dropdown;
         await this.applicationRef.tick();
         this.dropdown.menu.focusFirstItem();
     }
