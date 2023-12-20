@@ -16,7 +16,6 @@ import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.TransportOptions;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
-import co.elastic.clients.util.ObjectBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import net.sourceforge.cardme.engine.VCardEngine;
@@ -163,12 +162,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         //enhance to collection permissions
         // @TODO: FIX after DESP-840
-        BoolQuery collectionPermissions = getPermissionsQuery(QueryBuilders.bool(), "collections.permissions.read.keyword")
-                .should(s -> s.match(m -> m.field("collections.owner.keyword").query(user)))
+        BoolQuery collectionPermissions = getPermissionsQuery(QueryBuilders.bool(), "collections.permissions.read")
+                .should(s -> s.match(m -> m.field("collections.owner").query(user)))
                 .build();
 
-        BoolQuery proposalPermissions = getPermissionsQuery(QueryBuilders.bool(),"collections.permissions.Coordinator.keyword", getUserAuthorities().stream().filter(a -> !a.equals(CCConstants.AUTHORITY_GROUP_EVERYONE)).collect(Collectors.toSet()))
-                .should(s -> s.match(m -> m.field("collections.owner.keyword").query(user)))
+        BoolQuery proposalPermissions = getPermissionsQuery(QueryBuilders.bool(),"collections.permissions.Coordinator", getUserAuthorities().stream().filter(a -> !a.equals(CCConstants.AUTHORITY_GROUP_EVERYONE)).collect(Collectors.toSet()))
+                .should(s -> s.match(m -> m.field("collections.owner").query(user)))
                 .must(must -> must.match(match -> match.field("collections.relation.type").query("ccm:collection_proposal")))
                 .build();
 
@@ -180,8 +179,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                 .mustNot(m -> m.term(t -> t.field("properties.ccm:restricted_access.keyword").value(true)))
                                 .must(m -> m.bool(subPermission -> subPermission
                                         .minimumShouldMatch("1")
-                                        .should(q -> q.bool(collectionPermissions))
-                                        .should(q -> q.bool(proposalPermissions))
+                                        .should(q -> q.nested(nested->nested.path("collections").query(nq->nq.bool(collectionPermissions))))
+                                        .should(q -> q.nested(nested->nested.path("collections").query(nq->nq.bool(proposalPermissions))))
                                 ))));
     }
 
@@ -395,13 +394,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
                             queryBuilderGlobalConditions._toQuery(),
                             searchToken);
 
-                    SearchRequest.Builder searchSourceBuilderAggs = new SearchRequest.Builder();
-                    searchSourceBuilderAggs.index("workspace");
-                    searchSourceBuilderAggs.from(0);
-                    searchSourceBuilderAggs.size(0);
-                    searchSourceBuilderAggs.aggregations(aggregations);
-                    logger.info("query aggs: " + searchSourceBuilderAggs.toString());
-                    searchResponseAggregations = LogTime.log("Searching elastic for facets", () -> client.search(searchSourceBuilderAggs.build(), Map.class));
+                    SearchRequest searchSourceAggs = SearchRequest.of(req->req
+                            .index("workspace")
+                            .from(0)
+                            .size(0)
+                            .aggregations(aggregations));
+
+                    logger.info("query aggs: " + JsonpUtils.toJsonString(searchSourceAggs, new JacksonJsonpMapper()));
+                    searchResponseAggregations = LogTime.log("Searching elastic for facets", () -> client.search(searchSourceAggs, Map.class));
                 } else {
                     for (String facet : searchToken.getFacets()) {
                         // we use a higher facet limit since the facets will be filtered for the containing string!
@@ -449,8 +449,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
 
             // logger.info("query: "+searchSourceBuilder.toString());
+            SearchRequest searchRequest = searchRequestBuilder.build();
             try {
-                SearchRequest searchRequest = searchRequestBuilder.build();
                 logger.info("query: "+ JsonpUtils.toJsonString(searchRequest, new JacksonJsonpMapper()));
                 SearchResponse<Map> searchResponse = LogTime.log("Searching elastic", () -> client.search(searchRequest, Map.class));
 
@@ -567,7 +567,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             } catch (ElasticsearchException e) {
                 logger.error("Error running query. The query is logged below for debugging reasons");
                 logger.error(e.getMessage(), e);
-                logger.error(searchRequestBuilder.toString());
+                logger.error(JsonpUtils.toJsonString(searchRequest, new JacksonJsonpMapper()));
                 throw e;
             }
 
@@ -1076,14 +1076,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 }
             }
         }
-        BoolQuery.Builder qb = QueryBuilders.bool();
+        final BoolQuery.Builder contributorQuery = QueryBuilders.bool();
         for (String searchField : searchFields) {
             final String search = suggest.contains("*") ? suggest : String.format("*%s*", suggest);
-            qb.should(should->should.wildcard(wc->wc.field(searchField).value(search)));
+            contributorQuery.should(should->should.wildcard(wc->wc.field(searchField).value(search)));
         }
 
         if (!contributorProperties.isEmpty()) {
-            qb.must(must->must.bool(bool->bool
+            contributorQuery.must(must->must.bool(bool->bool
                     .minimumShouldMatch("1")
                     .should(should->{
                         contributorProperties.forEach(prop-> should.term(term->term.field("contributor.property").value(prop)));
@@ -1092,31 +1092,44 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
 
         if (contributorKind == ContributorKind.ORGANIZATION) {
-            qb.must(must->must.bool(bool->bool
+            contributorQuery.must(must->must.bool(bool->bool
                     .should(should->should.exists(exists->exists.field("contributor.X-ROR")))
                     .should(should->should.exists(exists->exists.field("contributor.X-Wikidata")))
                     .minimumShouldMatch("1")));
         } else {
-            qb.must(must->must.bool(bool->bool
+            contributorQuery.must(must->must.bool(bool->bool
                     .should(should->should.exists(exists->exists.field("contributor.X-ORCID")))
                     .should(should->should.exists(exists->exists.field("contributor.X-GND-URI")))
                     .minimumShouldMatch("1")));
         }
 
+        SearchRequest searchRequest = SearchRequest.of(req->req
+                .index("workspace")
+                .from(0)
+                .size(0)
+                .trackTotalHits(track->track.enabled(true))
+                .sort(sort->sort.score(score->score.order(SortOrder.Desc)))
+                .aggregations("contributor", aggr->aggr
+                        .nested(nes->nes.path("contributor"))
+                        .aggregations("vcard", vcardAggr->vcardAggr
+                                .terms(term->term
+                                        .field("contributor.vcard")
+                                        .size(100))))
+                .query(query->query
+                        .nested(nested->nested
+                                .path("contributor")
+                                .query(nq->nq
+                                        .bool(contributorQuery.build())))));
 
         SearchResponse<Map> searchResponse = client
                 .withTransportOptions(this::getRequestOptions)
-                .search(req->req
-                                .index("workspace")
-                                .from(0)
-                                .size(0)
-                                .trackTotalHits(track->track.enabled(true))
-                                .sort(sort->sort.score(score->score.order(SortOrder.Desc)))
-                                .aggregations("vcard", aggr->aggr.terms(term->term.field("contributor.vcard").size(10000)))
-                                .query(query->query.bool(qb.build()))
-                        , Map.class);
+                .search(searchRequest, Map.class);
 
-        Aggregate aggregation = searchResponse.aggregations().get("vcard");
+        Aggregate aggregation = searchResponse.aggregations()
+                .get("contributor")
+                .nested()
+                .aggregations()
+                .get("vcard");
 
         VCardEngine engine = new VCardEngine();
         return aggregation.sterms().buckets().array().stream().
@@ -1125,7 +1138,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 .filter(k -> Arrays.stream(suggest.toLowerCase().split(" ")).allMatch(t -> k.stringValue().toLowerCase().contains(t)))
                 .filter(k -> {
                     try {
-                        VCard vcard = engine.parse(k.toString());
+                        VCard vcard = engine.parse(k.stringValue());
                         if (contributorKind == ContributorKind.ORGANIZATION) {
                             return vcard.getExtendedTypes().stream().map(ExtendedType::getExtendedName).anyMatch(
                                     (e) -> e.equals("X-ROR") || e.equals("X-Wikidata")
@@ -1139,7 +1152,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         return false;
                     }
                 })
-                .map((k) -> new SearchVCard(k.toString())).
+                .map((k) -> new SearchVCard(k.stringValue())).
                 collect(Collectors.toCollection(HashSet::new));
     }
 
@@ -1199,7 +1212,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         List<NodeRef> data = new ArrayList<>();
         sr.setData(data);
 
-        SearchResponse<Map> searchResponse = client.search(req -> req
+        SearchRequest searchRequest = SearchRequest.of(req -> req
                         .index("workspace")
                         .from(0)
                         .size(nodeIds.size())
@@ -1212,10 +1225,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                                             nodeIds.forEach(x -> should.term(t -> t.field("nodeRef.id").value(x)));
                                                             return should;
                                                         })))
-                                        .build()))
-                , Map.class);
+                                        .build())));
+        SearchResponse<Map> searchResponse = client.search(searchRequest, Map.class);
 
-//        logger.info("query: " + searchSourceBuilder.toString());
+        logger.info("query: " + JsonpUtils.toJsonString(searchRequest, new JacksonJsonpMapper()));
         HitsMetadata<Map> hits = searchResponse.hits();
         logger.info("result count: " + hits.total().value());
 
