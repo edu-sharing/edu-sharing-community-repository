@@ -1122,7 +1122,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return aggregation.sterms().buckets().array().stream().
                 map(StringTermsBucket::key)
                 // this would be nicer via elastic "include" feature, however, it seems to be a pain with the java library
-                .filter(k -> Arrays.stream(suggest.toLowerCase().split(" ")).allMatch(t -> k.toString().toLowerCase().contains(t)))
+                .filter(k -> Arrays.stream(suggest.toLowerCase().split(" ")).allMatch(t -> k.stringValue().toLowerCase().contains(t)))
                 .filter(k -> {
                     try {
                         VCard vcard = engine.parse(k.toString());
