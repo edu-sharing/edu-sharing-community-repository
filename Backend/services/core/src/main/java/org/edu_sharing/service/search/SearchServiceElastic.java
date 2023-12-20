@@ -1112,8 +1112,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                 .size(0)
                                 .trackTotalHits(track->track.enabled(true))
                                 .sort(sort->sort.score(score->score.order(SortOrder.Desc)))
-                                .aggregations("vcard", aggr->aggr.terms(term->term.field("contributor.vcard.keyword").size(10000)))
-                                .query(query->query)
+                                .aggregations("vcard", aggr->aggr.terms(term->term.field("contributor.vcard").size(10000)))
+                                .query(query->query.bool(qb.build()))
                         , Map.class);
 
         Aggregate aggregation = searchResponse.aggregations().get("vcard");
