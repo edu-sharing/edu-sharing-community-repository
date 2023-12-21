@@ -244,7 +244,7 @@ export class NodeHelperService {
     ) {
         const downloadUrl =
             this.connector.getAbsoluteEndpointUrl() +
-            '../eduservlet/download?appId=' +
+            '../eduservlet/download?repositoryId=' +
             encodeURIComponent(node.ref.repo) +
             '&nodeId=' +
             encodeURIComponent(node.ref.id) +
