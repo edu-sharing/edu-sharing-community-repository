@@ -46,6 +46,12 @@ export class MdsEditorWidgetCheckboxesComponent extends MdsEditorWidgetBase impl
                     }
                 });
             });
+        this.widget.setValueExternal.subscribe((values) => {
+            this.formArray.setValue(
+                this.values.values.map((value, index) => !!values?.includes(value.key)),
+            );
+            this.setValue(values, true);
+        });
     }
 
     onIndeterminateChange(isIndeterminate: boolean, index: number): void {

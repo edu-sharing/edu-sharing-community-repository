@@ -141,6 +141,7 @@ export class MdsEditorWidgetChipsComponent
         this.widget.addValue.subscribe((value: MdsWidgetValue) =>
             this.add(this.toDisplayValues(value)),
         );
+        this.registerValueChanges(this.chipsControl);
     }
 
     ngAfterViewInit(): void {
