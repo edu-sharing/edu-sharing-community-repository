@@ -11,7 +11,6 @@ import { FrameEventsService } from '../../core-module/rest/services/frame-events
 import { DateHelper } from '../../core-ui-module/DateHelper';
 import { OAuthResult } from '../../core-module/rest/data-object';
 import { RestConstants } from '../../core-module/rest/rest-constants';
-import { RestConnectorService } from '../../core-module/rest/services/rest-connector.service';
 import { AuthenticationService, LoginInfo } from 'ngx-edu-sharing-api';
 import { RestLocatorService } from '../../core-module/rest/services/rest-locator.service';
 import { first, map, share } from 'rxjs/operators';
@@ -1295,11 +1294,9 @@ export class CordovaService {
                 async (oauth) => {
                     console.info('cordova: oauth OK');
                     this.reiniting = false;
-                    this.injector.get(AuthenticationService).loginToken(oauth.access_token);
-                    await this.injector
-                        .get(AuthenticationService)
-                        .forceLoginInfoRefresh()
-                        .toPromise();
+                    const auth = this.injector.get(AuthenticationService);
+                    auth.loginToken(oauth.access_token);
+                    auth.forceLoginInfoRefresh();
                     observer.next(null);
                     observer.complete();
                 },

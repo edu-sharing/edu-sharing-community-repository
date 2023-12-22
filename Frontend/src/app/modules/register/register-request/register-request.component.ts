@@ -1,19 +1,11 @@
 import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { Router, Route, Params, ActivatedRoute, UrlSerializer } from '@angular/router';
+import { Router } from '@angular/router';
 import { RestConnectorService } from '../../../core-module/core.module';
 import { Toast } from '../../../core-ui-module/toast';
-import { PlatformLocation } from '@angular/common';
-import { TranslateService } from '@ngx-translate/core';
-import { ConfigurationService } from '../../../core-module/core.module';
-import { Title } from '@angular/platform-browser';
-import { SessionStorageService } from '../../../core-module/core.module';
-import { CordovaService } from '../../../common/services/cordova.service';
-import { UIConstants } from '../../../core-module/ui/ui-constants';
-import { RestRegisterService } from '../../../core-module/core.module';
 import { FormControl, Validators } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { RegisterService } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-register-request',
@@ -28,12 +20,7 @@ export class RegisterRequestComponent implements OnDestroy {
         Validators.required,
         // Validators.email, // also local accounts are allowed for restore
     ]);
-    constructor(
-        private connector: RestConnectorService,
-        private toast: Toast,
-        private router: Router,
-        private register: RestRegisterService,
-    ) {
+    constructor(private toast: Toast, private register: RegisterService) {
         this.emailFormControl.statusChanges
             .pipe(takeUntil(this.destroyed$))
             .subscribe(() => this.onStateChanged.emit());

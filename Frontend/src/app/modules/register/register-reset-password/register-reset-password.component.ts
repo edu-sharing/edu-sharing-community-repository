@@ -1,30 +1,9 @@
-import {
-    Component,
-    Input,
-    EventEmitter,
-    Output,
-    ElementRef,
-    ViewChild,
-    OnInit,
-} from '@angular/core';
+import { Component, Input, EventEmitter, Output } from '@angular/core';
 import { Toast } from '../../../core-ui-module/toast';
-import { Router, Route, Params, ActivatedRoute, UrlSerializer } from '@angular/router';
-import { OAuthResult, LoginResult, AccessScope } from '../../../core-module/core.module';
-import { TranslateService } from '@ngx-translate/core';
-import { RestConnectorService } from '../../../core-module/core.module';
-import { RestConstants } from '../../../core-module/core.module';
-import { ConfigurationService } from '../../../core-module/core.module';
-import { FrameEventsService } from '../../../core-module/core.module';
-import { Title } from '@angular/platform-browser';
+import { Router, Params } from '@angular/router';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { SessionStorageService } from '../../../core-module/core.module';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
-import { Helper } from '../../../core-module/rest/helper';
-import { RestHelper } from '../../../core-module/core.module';
-import { PlatformLocation } from '@angular/common';
-
-import { CordovaService } from '../../../common/services/cordova.service';
-import { RestRegisterService } from '../../../core-module/core.module';
+import { RegisterService } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-register-reset-password',
@@ -65,10 +44,5 @@ export class RegisterResetPasswordComponent {
             },
         );
     }
-    constructor(
-        private connector: RestConnectorService,
-        private toast: Toast,
-        private register: RestRegisterService,
-        private router: Router,
-    ) {}
+    constructor(private toast: Toast, private register: RegisterService, private router: Router) {}
 }
