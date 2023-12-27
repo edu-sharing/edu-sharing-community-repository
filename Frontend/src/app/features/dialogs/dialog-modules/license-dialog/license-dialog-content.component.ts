@@ -159,6 +159,20 @@ export class LicenseDialogContentComponent implements OnInit {
     @Output() canSave = new EventEmitter<boolean>();
 
     set primaryType(primaryType: string) {
+        if (!primaryType.startsWith('CC_BY')) {
+            // make sure to unset cc-values if they're inapplicable
+            this.ccCountry = '';
+            this.ccVersion = '';
+            this.ccShare = '';
+            this.ccCommercial = '';
+            if (primaryType == 'CC_0') {
+                // CC0 is only available in version 1.0
+                this.ccVersion = '1.0';
+            }
+        } else {
+            // if no version is selected select 4.0 by default
+            if (!this.ccVersion) this.ccVersion = '4.0';
+        }
         this._primaryType = primaryType;
         this.updateCanSave();
     }

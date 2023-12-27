@@ -243,7 +243,7 @@
 <div class="currentLicense">
   <h4 *ngIf="type !== 'MULTI'">{{ 'WORKSPACE.LICENSE.CURRENT' | translate }}</h4>
   <img *ngIf="type !== 'MULTI'" class="currentLicenseIcon" src="{{ getLicenseIcon() }}" />
-  <div class="license-additional-data" *ngIf="type === 'CC_BY' || type === 'CC_BY_SA'">
+  <div class="license-additional-data" *ngIf="type.startsWith('CC_BY')">
     <div *ngIf="ccVersion != '4.0'" class="licenseLocale">
       <mat-form-field>
         <mat-label>{{ 'WORKSPACE.LICENSE.LOCALE' | translate }}</mat-label>
