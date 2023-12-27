@@ -387,6 +387,12 @@ export class LicenseDialogContentComponent implements OnInit {
             return;
         }
         if (this._properties) {
+            // this._properties is set through getProperties, which is currently only used here and
+            // in EmbedComponent, which controls saving the changes on its own, so just return here
+            // fixme: if possible and worth it: unify (probably by letting license-dialog handle the
+            //  saving, so all we do here is emit;
+            //  on the other hand: having the dialog emit "done" only when everything went through
+            //  without error, as it currently is, is also nice)
             this.done.emit(await this.getProperties(this._properties));
             return;
         }
@@ -640,11 +646,11 @@ export class LicenseDialogContentComponent implements OnInit {
         if (!this.contactIndeterminate)
             prop[RestConstants.CCM_PROP_QUESTIONSALLOWED] = [this.contact];
         if (this.isCCAttributableLicense()) {
-            prop[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = null;
-            prop[RestConstants.CCM_PROP_LICENSE_SOURCE_URL] = null;
-            prop[RestConstants.CCM_PROP_LICENSE_PROFILE_URL] = null;
-            prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION] = null;
-            prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = null;
+            prop[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = [];
+            prop[RestConstants.CCM_PROP_LICENSE_SOURCE_URL] = [];
+            prop[RestConstants.CCM_PROP_LICENSE_PROFILE_URL] = [];
+            prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION] = [];
+            prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = [];
             if (this.ccTitleOfWork) {
                 prop[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = [this.ccTitleOfWork];
             }
@@ -656,6 +662,10 @@ export class LicenseDialogContentComponent implements OnInit {
             }
             if (this.ccVersion) {
                 prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION] = [this.ccVersion];
+                // make sure v4.0 has no locale
+                if (this.ccVersion === '4.0') {
+                    this.ccCountry = '';
+                }
             }
             if (this.ccCountry) {
                 prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = [this.ccCountry];
