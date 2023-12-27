@@ -363,16 +363,32 @@ export class NodeHelperService {
      * return the License URL (e.g. for CC_BY licenses) for a license string and version
      * @param licenseProperty
      * @param licenseVersion
+     * @param licenseLocale
      */
-    public getLicenseUrlByString(licenseProperty: string, licenseVersion: string) {
-        let url = (RestConstants.LICENSE_URLS as any)[licenseProperty];
-        if (!url) return null;
-        if (licenseVersion === '4.0') {
-            // the international 4.0 version does no longer follow the same path as the others
-            // so this part needs to be removed
-            url = url.replace('/de/', '/');
-        }
-        return url.replace('#version', licenseVersion);
+    public getLicenseUrlByString(
+        licenseProperty: string,
+        licenseVersion: string,
+        licenseLocale: string,
+    ) {
+        const isV4 = licenseVersion === '4.0';
+        const locale = isV4 || !licenseLocale ? '' : licenseLocale.toLowerCase() + '/';
+        return this.translate
+            .get(`LICENSE.URLS.${licenseProperty}`, {
+                version: licenseVersion,
+                locale: locale,
+            })
+            .pipe(
+                map((url: string) => {
+                    // when the translation fails it might return something like 'LICENSE.URLS.undefined'
+                    if (!url || url.startsWith('LICENSE.URLS')) return null;
+                    if (!isV4) {
+                        // only the international 4.0 version supports different languages
+                        // so this part needs to be removed for all other versions
+                        url = url.replace('.de', '');
+                    }
+                    return url;
+                }),
+            );
     }
 
     /**

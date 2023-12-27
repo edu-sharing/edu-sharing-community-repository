@@ -40,7 +40,9 @@
       </div>
     </div>
     <div *ngIf="type === 'CC_BY' || type === 'CC_0'" class="licenseUrl">
-      <a [href]="getLicenseUrl()" target="_blank">{{ 'WORKSPACE.LICENSE.MORE' | translate }}</a>
+      <a [href]="getLicenseUrl() | async" target="_blank">{{
+        'WORKSPACE.LICENSE.MORE' | translate
+      }}</a>
     </div>
   </div>
 </div>

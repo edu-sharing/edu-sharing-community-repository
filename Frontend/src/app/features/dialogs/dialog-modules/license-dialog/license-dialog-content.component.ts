@@ -532,11 +532,15 @@ export class LicenseDialogContentComponent implements OnInit {
     }
 
     getLicenseUrl() {
-        return this.nodeHelper.getLicenseUrlByString(this.getLicenseProperty(), this.ccVersion);
+        return this.nodeHelper.getLicenseUrlByString(
+            this.getLicenseProperty(),
+            this.ccVersion,
+            this.ccCountry,
+        );
     }
 
     getLicenseUrlVersion(type: string) {
-        return this.nodeHelper.getLicenseUrlByString(type, this.ccVersion);
+        return this.nodeHelper.getLicenseUrlByString(type, this.ccVersion, this.ccCountry);
     }
 
     getLicenseIcon() {
@@ -693,6 +697,10 @@ export class LicenseDialogContentComponent implements OnInit {
      * @param {string[]} countries array with all Countries Key
      */
     private translateLicenseCountries(countries: string[]) {
+        // fixme: many possible combinations of countries and versions do not actually exist
+        //        we could use a dict here to collect the versions available per country and then
+        //        only show the available versions and vice versa only the available countries
+        //        per version
         this._ccCountries = [];
         countries.forEach((country) => {
             this._ccCountries.push({
