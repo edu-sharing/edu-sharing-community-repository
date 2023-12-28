@@ -165,7 +165,11 @@ export class LicenseDialogContentComponent implements OnInit {
             this.ccVersion = '';
             this.ccShare = '';
             this.ccCommercial = '';
-            if (primaryType == 'CC_0') {
+            if (!primaryType.startsWith('CC')) {
+                this.ccProfileUrl = '';
+                this.ccSourceUrl = '';
+                this.ccTitleOfWork = '';
+            } else if (primaryType == 'CC_0') {
                 // CC0 is only available in version 1.0
                 this.ccVersion = '1.0';
             }
