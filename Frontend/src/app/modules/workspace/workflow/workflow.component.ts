@@ -4,6 +4,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { forkJoin, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
+    Authority,
     ConfigurationService,
     DialogButton,
     Group,
@@ -24,7 +25,7 @@ import { Toast } from '../../../core-ui-module/toast';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { ModalMessageType } from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 
-type WorkflowReceiver = UserSimple | Group;
+type WorkflowReceiver = Authority;
 
 @Component({
     selector: 'es-workspace-workflow',
@@ -107,7 +108,7 @@ export class WorkspaceWorkflowComponent implements OnChanges {
         this.updateButtons();
     }
 
-    addSuggestion(data: UserSimple) {
+    addSuggestion(data: Authority) {
         this.receivers = [data];
         this.updateButtons();
     }
@@ -185,7 +186,7 @@ export class WorkspaceWorkflowComponent implements OnChanges {
         } else {
             this.history = histories[0];
             if (this.history.length) {
-                this.receivers = this.history[0].receiver;
+                this.receivers = this.history[0].receiver as Authority[];
             }
             if (!this.receivers || (this.receivers.length === 1 && !this.receivers[0])) {
                 this.receivers = [];
@@ -332,27 +333,15 @@ export class WorkspaceWorkflowComponent implements OnChanges {
     ): Promise<void> {
         this.loading = true;
         try {
-            await Promise.all(
-                nodes.map((node) => this.addWritePermission(receiver.authorityName, node)),
-            );
+            await Promise.all(nodes.map((node) => this.addWritePermission(receiver, node)));
         } catch (error) {
             this.toast.error(error);
         }
     }
 
-    private async addWritePermission(authority: string, node: Node): Promise<void> {
+    private async addWritePermission(authority: WorkflowReceiver, node: Node): Promise<void> {
         const nodePermissions = await this.nodeService.getNodePermissions(node.ref.id).toPromise();
-        const permission = new Permission();
-        permission.authority = {
-            authorityName: authority,
-            authorityType: RestConstants.AUTHORITY_TYPE_USER,
-        };
-        permission.permissions = [RestConstants.PERMISSION_COORDINATOR];
-        nodePermissions.permissions.localPermissions.permissions.push(permission);
-        const permissions = RestHelper.copyAndCleanPermissions(
-            nodePermissions.permissions.localPermissions.permissions,
-            nodePermissions.permissions.localPermissions.inherited,
-        );
+        const permissions = RestHelper.addCoordinatorPermission(nodePermissions, authority);
         await this.nodeService.setNodePermissions(node.ref.id, permissions, false).toPromise();
     }
 }
