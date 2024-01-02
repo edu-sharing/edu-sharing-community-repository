@@ -108,7 +108,6 @@
             flex-shrink: 0;
             background-color: $actionDialogBackground;
             display: flex;
-            align-items: top;
             height: $titleHeight;
             position: relative;
             .mat-mdc-card-header-text {
@@ -157,14 +156,18 @@
                     color: $primary;
                 }
             }
-            .mat-card-title,
-            .mat-card-subtitle {
+            mat-card-title,
+            mat-card-subtitle {
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
-            .mat-card-title {
-                color: $textMain;
+            mat-card-title {
+                color: $textMain !important;
+            }
+            mat-card-subtitle {
+                font-weight: normal;
+                font-size: 100%;
             }
         }
         background-color: $backgroundColor;
