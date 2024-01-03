@@ -569,7 +569,7 @@ export class NodeHelperService {
             nodes = await forkJoin(
                 nodes.map((n) => this.nodeService.prepareUsage(n.ref.id, n.ref.repo)),
             )
-                .pipe(map((nodes) => nodes.map((n) => n.remote)))
+                .pipe(map((nodes) => nodes.map((n) => n.remote || n.node)))
                 .toPromise();
             let url = this.connector.createUrl('lti/v13/generateDeepLinkingResponse', null, []);
             nodes.forEach((n) => {
