@@ -35,7 +35,16 @@ export class CardDialogConfig<D = unknown> {
     jumpMarks?: JumpMark[];
     data?: D;
 }
-
+export enum CARD_DEFAULT_WIDTH {
+    xsmall = 400,
+    small = 500,
+    normal = 600,
+    mlarge = 650,
+    large = 700,
+    xlarge = 800,
+    xxlarge = 900,
+    xxxlarge = 1200,
+}
 /**
  * Standard ways for the user to close the dialog, ordered by increasing resistance.
  */

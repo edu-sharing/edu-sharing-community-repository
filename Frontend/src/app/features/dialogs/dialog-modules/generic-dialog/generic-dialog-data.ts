@@ -1,6 +1,9 @@
 import { TemplateRef } from '@angular/core';
 import { ButtonConfig } from '../../../../core-module/ui/dialog-button';
 import { CardDialogConfig } from '../../card-dialog/card-dialog-config';
+import { CardAvatar } from '../../card-dialog/card-dialog-container/card-header/card-avatar';
+import { DialogRef } from '../../../../modules/management-dialogs/dialogs.service';
+import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 
 export class GenericDialogData<R extends string> {
     /** Message text to show in the dialog body. Will be translated. */
@@ -23,12 +26,18 @@ export class GenericDialogConfig<R extends string> extends GenericDialogData<R> 
     closable?: CardDialogConfig['closable'] = new CardDialogConfig().closable;
     minWidth?: CardDialogConfig['minWidth'];
     maxWidth?: CardDialogConfig['maxWidth'] = 750;
+    avatar?: CardAvatar;
     customHeaderBarContent?: TemplateRef<HTMLElement>;
 }
 
-interface GenericDialogButton<R extends string> {
+export interface GenericDialogButton<R extends string> {
     label: R;
     config: ButtonConfig;
+    /*
+     custom callback
+     Promise should return if the dialog shall be closed or not
+     */
+    callback?: (ref: CardDialogRef<GenericDialogData<string>, string>) => Promise<boolean>;
 }
 
 export const DELETE_OR_CANCEL: GenericDialogButton<'YES_DELETE' | 'CANCEL'>[] = [
