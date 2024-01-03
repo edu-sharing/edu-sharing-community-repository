@@ -49,6 +49,7 @@ export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implemen
         this.formControl.valueChanges.subscribe((value) => {
             this.setValue(value ? [value.id] : [null]);
         });
+        this.registerValueChanges(this.formControl);
     }
 
     onActiveDescendantChanges(elementId: string) {

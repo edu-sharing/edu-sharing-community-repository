@@ -19,6 +19,7 @@ import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
+import { Observable } from 'rxjs';
 
 @Component({
     selector: 'es-node-variant',
@@ -197,18 +198,16 @@ export class NodeVariantComponent {
             this.breadcrumbsService.setNodePath(parents.nodes.reverse());
         });
     }
-    openLicense() {
-        UIHelper.openUrl(
-            this.getLicenseUrl(),
-            this.connector.getBridgeService(),
-            OPEN_URL_MODE.BlankSystemBrowser,
-        );
+
+    openLicense(url: string) {
+        UIHelper.openUrl(url, this.connector.getBridgeService(), OPEN_URL_MODE.BlankSystemBrowser);
     }
 
-    getLicenseUrl(): string {
+    getLicenseUrl(): Observable<string | null> {
         return this.nodeHelper.getLicenseUrlByString(
             this._node.properties[RestConstants.CCM_PROP_LICENSE],
             this._node.properties[RestConstants.CCM_PROP_LICENSE_CC_VERSION],
+            this._node.properties[RestConstants.CCM_PROP_LICENSE_CC_LOCALE],
         );
     }
     updateButtons(): any {

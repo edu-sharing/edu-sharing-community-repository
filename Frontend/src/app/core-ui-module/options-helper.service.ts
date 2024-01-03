@@ -430,7 +430,10 @@ export class OptionsHelperService implements OnDestroy {
                 return ElementType.NodeChild;
             } else if (object.mediatype === 'folder-link') {
                 return ElementType.MapRef;
-            } else if (object.proposal) {
+            } else if (
+                object.proposal ||
+                object.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL
+            ) {
                 return ElementType.NodeProposal;
             } else {
                 if (this.nodeHelper.isNodePublishedCopy(object)) {

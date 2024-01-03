@@ -329,6 +329,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     async openMenu(node: T) {
         this.entriesService.selection.clear();
         this.entriesService.selection.select(node);
+        this.entriesService.selection.clickSource = ClickSource.Dropdown;
         await this.applicationRef.tick();
         this.dropdown.menu.focusFirstItem();
     }

@@ -109,6 +109,10 @@ export class LicenseDetailsComponent implements OnChanges {
         return this.nodeHelper.getLicenseNameByString(this.getLicenseProperty());
     }
     getLicenseUrl() {
-        return this.nodeHelper.getLicenseUrlByString(this.getLicenseProperty(), this.ccVersion);
+        return this.nodeHelper.getLicenseUrlByString(
+            this.getLicenseProperty(),
+            this.ccVersion,
+            this.ccCountry,
+        );
     }
 }

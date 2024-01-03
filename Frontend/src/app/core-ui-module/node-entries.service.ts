@@ -1,9 +1,10 @@
 import { SelectionModel } from '@angular/cdk/collections';
 import { EventEmitter, Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { UIService } from '../core-module/rest/services/ui.service';
 import { ListItem } from '../core-module/ui/list-item';
 import {
+    ClickSource,
     FetchEvent,
     GridConfig,
     InteractionType,
@@ -23,6 +24,43 @@ import {
 import { NodeEntriesDataType } from '../features/node-entries/node-entries.component';
 
 import { OptionItem, Scope } from './option-item';
+import { delay, map } from 'rxjs/operators';
+
+/**
+ Custom selection model which adds the click source of the selection
+ */
+class CustomSelectionModel<T> extends SelectionModel<T> {
+    private _clickSource: ClickSource;
+    readonly changedClickSource = this.changed.pipe(
+        delay(0),
+        map((c) => {
+            return { ...c, clickSource: this._clickSource };
+        }),
+    );
+    deselect(...values: T[]) {
+        this._clickSource = null;
+        super.deselect(...values);
+    }
+
+    toggle(value: T) {
+        this._clickSource = null;
+        super.toggle(value);
+    }
+
+    clear() {
+        this._clickSource = null;
+        super.clear();
+    }
+
+    select(...values: T[]) {
+        this._clickSource = null;
+        super.select(...values);
+    }
+
+    set clickSource(value: ClickSource) {
+        this._clickSource = value;
+    }
+}
 
 @Injectable()
 export class NodeEntriesService<T extends NodeEntriesDataType> {
@@ -56,7 +94,7 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     configureColumns: boolean;
     columnsChange: EventEmitter<ListItem[]>;
     displayType: NodeEntriesDisplayType;
-    selection = new SelectionModel<T>(true, []);
+    selection = new CustomSelectionModel<T>(true, []);
     elementInteractionType: InteractionType;
     options$ = new BehaviorSubject<ListOptions>(null);
     get options() {

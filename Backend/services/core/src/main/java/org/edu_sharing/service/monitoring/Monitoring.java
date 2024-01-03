@@ -25,7 +25,7 @@ public class Monitoring {
 	ServiceRegistry serviceRegistry;
 	Repository repositoryHelper;
 
-	public static ExecutorService executorService = Executors.newFixedThreadPool(2);
+	public static ExecutorService executorService = Executors.newFixedThreadPool(10);
 	
 	public static enum Modes{
 		SEARCH,

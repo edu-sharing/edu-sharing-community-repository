@@ -2,16 +2,13 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angu
 import { RestConnectorService } from '../../../core-module/core.module';
 import { Toast } from '../../../core-ui-module/toast';
 import { PlatformLocation } from '@angular/common';
-import { ActivatedRoute, Router, UrlSerializer } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
+import { Router } from '@angular/router';
 import { ConfigurationService } from '../../../core-module/core.module';
-import { Title } from '@angular/platform-browser';
-import { SessionStorageService } from '../../../core-module/core.module';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
-import { RestRegisterService } from '../../../core-module/core.module';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { CordovaService } from '../../../common/services/cordova.service';
 import { RestLocatorService } from '../../../core-module/core.module';
+import { RegisterService } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-register-done',
@@ -69,9 +66,8 @@ export class RegisterDoneComponent {
         }
     }
     constructor(
-        private connector: RestConnectorService,
         private toast: Toast,
-        private register: RestRegisterService,
+        private register: RegisterService,
         private platformLocation: PlatformLocation,
         private config: ConfigurationService,
         private cordova: CordovaService,
@@ -82,7 +78,7 @@ export class RegisterDoneComponent {
         setTimeout(() => this.checkStatus(), RegisterDoneComponent.STATUS_INTERVAL);
     }
 
-    // loop and check if the user has already registered in an other tab
+    // loop and check if the user has already registered in another tab
     private checkStatus() {
         if (this.activated) {
             return;
@@ -91,7 +87,7 @@ export class RegisterDoneComponent {
             setTimeout(() => this.checkStatus(), RegisterDoneComponent.STATUS_INTERVAL);
             return;
         }
-        this.register.exists(this.email).subscribe(
+        this.register.mailExists(this.email).subscribe(
             (status) => {
                 if (status.exists) {
                     this.router.navigate([UIConstants.ROUTER_PREFIX, 'login'], {

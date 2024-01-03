@@ -30,6 +30,7 @@ export class MdsEditorWidgetRadioButtonComponent extends MdsEditorWidgetBase imp
             .subscribe((value: DisplayValue) => {
                 this.setValue([value.key]);
             });
+        this.registerValueChanges(this.formControl);
     }
 
     private getMode(): 'horizontal' | 'vertical' {

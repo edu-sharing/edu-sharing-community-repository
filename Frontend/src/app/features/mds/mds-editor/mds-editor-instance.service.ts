@@ -130,6 +130,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         readonly status = new BehaviorSubject<InputStatus>(null);
         readonly meetsDynamicCondition = new BehaviorSubject<boolean>(true);
         readonly focusTrigger = new Subject<void>();
+        readonly setValueExternal = new Subject<string[]>();
         private hasUnsavedDefault: boolean; // fixed after `ready`
         private initialValues: InitialValues;
         private initialDisplayValues: MdsValueList;
@@ -1112,6 +1113,22 @@ export class MdsEditorInstanceService implements OnDestroy {
                 }
                 return acc;
             }, {} as { [key: string]: string[] });
+    }
+
+    /**
+     * set the value for a given widget id. This might be useful if the value was changed externally
+     * and the widget should represent a new state
+     * The value change of the MdsEditorInstanceService will also reflect this change and will trigger
+     * Please note that currently not all widget types support this behaviour
+     */
+    setValueForWidget(widgetId: string, value: string[]) {
+        const widget = this.widgets.value.filter((w) => w.definition.id === widgetId)?.[0];
+        if (widget.setValueExternal.observers.length === 0) {
+            throw new Error(
+                `The widget type ${widget.definition.type} has not implemented external value changes`,
+            );
+        }
+        widget.setValueExternal.next(value);
     }
     getRegisteredWidgets(): Observable<GeneralWidget[]> {
         return zip(this.widgets, this.nativeWidgets).pipe(

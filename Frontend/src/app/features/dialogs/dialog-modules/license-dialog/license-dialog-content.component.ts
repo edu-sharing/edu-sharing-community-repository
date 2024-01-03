@@ -159,6 +159,24 @@ export class LicenseDialogContentComponent implements OnInit {
     @Output() canSave = new EventEmitter<boolean>();
 
     set primaryType(primaryType: string) {
+        if (!primaryType.startsWith('CC_BY')) {
+            // make sure to unset cc-values if they're inapplicable
+            this.ccCountry = '';
+            this.ccVersion = '';
+            this.ccShare = '';
+            this.ccCommercial = '';
+            if (!primaryType.startsWith('CC')) {
+                this.ccProfileUrl = '';
+                this.ccSourceUrl = '';
+                this.ccTitleOfWork = '';
+            } else if (primaryType == 'CC_0') {
+                // CC0 is only available in version 1.0
+                this.ccVersion = '1.0';
+            }
+        } else {
+            // if no version is selected select 4.0 by default
+            if (!this.ccVersion) this.ccVersion = '4.0';
+        }
         this._primaryType = primaryType;
         this.updateCanSave();
     }
@@ -387,6 +405,12 @@ export class LicenseDialogContentComponent implements OnInit {
             return;
         }
         if (this._properties) {
+            // this._properties is set through getProperties, which is currently only used here and
+            // in EmbedComponent, which controls saving the changes on its own, so just return here
+            // fixme: if possible and worth it: unify (probably by letting license-dialog handle the
+            //  saving, so all we do here is emit;
+            //  on the other hand: having the dialog emit "done" only when everything went through
+            //  without error, as it currently is, is also nice)
             this.done.emit(await this.getProperties(this._properties));
             return;
         }
@@ -526,11 +550,15 @@ export class LicenseDialogContentComponent implements OnInit {
     }
 
     getLicenseUrl() {
-        return this.nodeHelper.getLicenseUrlByString(this.getLicenseProperty(), this.ccVersion);
+        return this.nodeHelper.getLicenseUrlByString(
+            this.getLicenseProperty(),
+            this.ccVersion,
+            this.ccCountry,
+        );
     }
 
     getLicenseUrlVersion(type: string) {
-        return this.nodeHelper.getLicenseUrlByString(type, this.ccVersion);
+        return this.nodeHelper.getLicenseUrlByString(type, this.ccVersion, this.ccCountry);
     }
 
     getLicenseIcon() {
@@ -640,11 +668,11 @@ export class LicenseDialogContentComponent implements OnInit {
         if (!this.contactIndeterminate)
             prop[RestConstants.CCM_PROP_QUESTIONSALLOWED] = [this.contact];
         if (this.isCCAttributableLicense()) {
-            prop[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = null;
-            prop[RestConstants.CCM_PROP_LICENSE_SOURCE_URL] = null;
-            prop[RestConstants.CCM_PROP_LICENSE_PROFILE_URL] = null;
-            prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION] = null;
-            prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = null;
+            prop[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = [];
+            prop[RestConstants.CCM_PROP_LICENSE_SOURCE_URL] = [];
+            prop[RestConstants.CCM_PROP_LICENSE_PROFILE_URL] = [];
+            prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION] = [];
+            prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = [];
             if (this.ccTitleOfWork) {
                 prop[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = [this.ccTitleOfWork];
             }
@@ -656,6 +684,10 @@ export class LicenseDialogContentComponent implements OnInit {
             }
             if (this.ccVersion) {
                 prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION] = [this.ccVersion];
+                // make sure v4.0 has no locale
+                if (this.ccVersion === '4.0') {
+                    this.ccCountry = '';
+                }
             }
             if (this.ccCountry) {
                 prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = [this.ccCountry];
@@ -683,6 +715,10 @@ export class LicenseDialogContentComponent implements OnInit {
      * @param {string[]} countries array with all Countries Key
      */
     private translateLicenseCountries(countries: string[]) {
+        // fixme: many possible combinations of countries and versions do not actually exist
+        //        we could use a dict here to collect the versions available per country and then
+        //        only show the available versions and vice versa only the available countries
+        //        per version
         this._ccCountries = [];
         countries.forEach((country) => {
             this._ccCountries.push({

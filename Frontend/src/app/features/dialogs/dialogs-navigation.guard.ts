@@ -26,7 +26,7 @@ export class DialogsNavigationGuard implements CanDeactivate<unknown> {
     /**
      * Handles dialogs when navigating to other pages or changing query parameters.
      *
-     * @returns `false` when navigation should be canceled so we stay on the old page.
+     * @returns `false` when navigation should be canceled, so we stay on the old page.
      */
     canDeactivate(
         component: unknown,

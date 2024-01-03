@@ -15,7 +15,12 @@
       message="{{ 'NODE_VARIANT.WARNING.' + licenseWarning | translate }}"
     >
       <div>
-        <button mat-button color="primary" *ngIf="getLicenseUrl()" (click)="openLicense()">
+        <button
+          mat-button
+          color="primary"
+          *ngIf="getLicenseUrl() | async as url"
+          (click)="openLicense(url)"
+        >
           {{ 'NODE_VARIANT.WARNING.LINK' | translate }}
         </button>
       </div>

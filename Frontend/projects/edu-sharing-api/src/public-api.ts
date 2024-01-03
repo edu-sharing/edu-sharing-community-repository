@@ -22,6 +22,7 @@ export * from './lib/wrappers/mds.service';
 export * from './lib/wrappers/network.service';
 export * from './lib/wrappers/node.service';
 export * from './lib/wrappers/nodeList.service';
+export * from './lib/wrappers/register.service';
 export * from './lib/wrappers/relation.service';
 export * from './lib/wrappers/saved-searches.service';
 export * from './lib/wrappers/search.service';
@@ -37,7 +38,6 @@ export {
     StreamV1Service,
     ClientutilsV1Service,
     TrackingV1Service,
-    RegisterV1Service,
     FeedbackV1Service,
     LtiPlatformV13Service,
 } from './lib/api/services';

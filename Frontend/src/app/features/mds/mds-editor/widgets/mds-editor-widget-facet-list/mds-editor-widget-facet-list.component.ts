@@ -73,6 +73,13 @@ export class MdsEditorWidgetFacetListComponent
         this.values = this.widget.getInitialValues().jointValues;
         this.registerFacetValuesSubject();
         this.registerFormControls();
+        this.widget.setValueExternal.subscribe((values) => {
+            const valuesMapped = this.facetValuesFiltered.map(
+                ({ value }) => !!values?.includes(value),
+            );
+            this.formArray.setValue(valuesMapped);
+            this.widget.setValue(values, true);
+        });
     }
 
     ngOnDestroy(): void {
