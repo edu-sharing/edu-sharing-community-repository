@@ -670,8 +670,11 @@
       </property>
    </bean>
     <bean id="transformer.worker.SerloIndexTransformerWorker" class="org.edu_sharing.alfresco.transformer.SerloIndexTransformerWorker">
+        <property name="nodeService">
+            <ref bean="NodeService" />
+        </property>
     </bean>
-    <bean id="transformer.SerloIndexTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
+    <bean id="transformer.worker.SerloIndexTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
         <property name="worker">
             <ref bean="transformer.worker.SerloIndexTransformerWorker" />
         </property>
