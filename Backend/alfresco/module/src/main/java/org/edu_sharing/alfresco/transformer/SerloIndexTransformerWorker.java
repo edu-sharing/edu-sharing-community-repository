@@ -2,10 +2,14 @@ package org.edu_sharing.alfresco.transformer;
 
 import org.alfresco.repo.content.transform.ContentTransformerHelper;
 import org.alfresco.repo.content.transform.ContentTransformerWorker;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentWriter;
+import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.TransformationOptions;
+import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.action.RessourceInfoExecuter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -17,6 +21,8 @@ public class SerloIndexTransformerWorker extends ContentTransformerHelper implem
 
     Logger logger = Logger.getLogger(SerloIndexTransformerWorker.class);
 
+    NodeService nodeService = null;
+
     @Override
     public boolean isAvailable() {
         return true;
@@ -24,17 +30,15 @@ public class SerloIndexTransformerWorker extends ContentTransformerHelper implem
 
     @Override
     public String getVersionString() {
-        return "1.0";
+        return "1.1";
     }
 
     @Override
     public boolean isTransformable(String sourceMimetype, String targetMimetype, TransformationOptions options) {
         logger.debug("called:" +sourceMimetype +" "+targetMimetype + " use:" + options.getUse());
-
-        if(sourceMimetype.equals("application/json") && targetMimetype.equals("text/plain")){
-            return true;
-        }
-        return false;
+        return AuthenticationUtil.runAsSystem(
+                () -> RessourceInfoExecuter.CCM_RESSOURCETYPE_SERLO.equals(nodeService.getProperty(options.getSourceNodeRef(), QName.createQName(RessourceInfoExecuter.CCM_PROP_IO_RESSOURCETYPE))) && targetMimetype.equals("text/plain")
+        );
     }
 
     @Override
@@ -43,14 +47,8 @@ public class SerloIndexTransformerWorker extends ContentTransformerHelper implem
 
 
         JSONObject jsonObject = (JSONObject) new JSONParser().parse(reader.getContentString());
-        String type = (String) jsonObject.get("type");
-        if(type == null || !"https://github.com/serlo/ece-as-a-service".equals(type)){
-            throw new Exception("Unsupported json document with type:"+type);
-        }
-
         StringBuffer resultString = new StringBuffer();
         traverse(resultString,null, jsonObject);
-
         writer.putContent(resultString.toString());
     }
 
@@ -71,7 +69,7 @@ public class SerloIndexTransformerWorker extends ContentTransformerHelper implem
                 if(resultString.length() == 0){
                     resultString.append((String)o);
                 }else{
-                    resultString.append(" " +(String)o);
+                    resultString.append(" " + o);
                 }
             }
         }else if(o instanceof Long){
@@ -79,6 +77,9 @@ public class SerloIndexTransformerWorker extends ContentTransformerHelper implem
         }else {
             logger.warn("unknown class "+o.getClass() +" key:"+key);
         }
+    }
 
+    public void setNodeService(NodeService nodeService) {
+        this.nodeService = nodeService;
     }
 }
