@@ -333,6 +333,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 		}
 	}
 	void processGeogebra(InputStream is, NodeRef actionedUponNodeRef) {
+		// thumbnail is handled @org.edu_sharing.alfresco.transformer.GeogebraTransformerWorker
 		try {
 			Document doc = new RessourceInfoTool().loadFromStream(is);
 			XPathFactory pfactory = XPathFactory.newInstance();

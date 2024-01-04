@@ -628,6 +628,15 @@
             <ref bean="TransactionService" />
         </property>
     </bean>
+    <bean id="transformer.worker.ESGeogebraTransformerWorker" class="org.edu_sharing.alfresco.transformer.GeogebraTransformerWorker">
+        <property name="mimetypeService" ref="mimetypeService"/>
+        <property name="transformerConfig">
+            <ref bean="transformerConfig" />
+        </property>
+        <property name="nodeService">
+            <ref bean="NodeService" />
+        </property>
+    </bean>
     <bean id="transformer.ESVideoTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
       <property name="worker">
          <ref bean="transformer.worker.ESVideoTransformerWorker" />
@@ -636,6 +645,11 @@
     <bean id="transformer.ESH5PTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
         <property name="worker">
             <ref bean="transformer.worker.ESH5PTransformerWorker" />
+        </property>
+    </bean>
+    <bean id="transformer.ESGeogebraTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
+        <property name="worker">
+            <ref bean="transformer.worker.ESGeogebraTransformerWorker" />
         </property>
     </bean>
      <bean id="transformer.worker.ESCollectionRefTransformerWorker" class="org.edu_sharing.alfresco.transformer.CollectionRefTransformerWorker">
