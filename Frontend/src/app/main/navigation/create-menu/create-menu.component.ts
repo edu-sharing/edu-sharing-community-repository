@@ -103,7 +103,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     tools: Tools;
     createToolType: Tool;
 
-    private showPicker: boolean;
+    showPicker: boolean; // keep public - used by extensions
     private params: Params;
     private destroyed = new Subject<void>();
 
