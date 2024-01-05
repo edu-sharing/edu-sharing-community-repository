@@ -32,6 +32,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
     private static readonly inlineEditing: MdsWidgetType[] = [
         MdsWidgetType.Text,
         MdsWidgetType.Number,
+        MdsWidgetType.Date,
         MdsWidgetType.Email,
         MdsWidgetType.Textarea,
         MdsWidgetType.Singleoption,
