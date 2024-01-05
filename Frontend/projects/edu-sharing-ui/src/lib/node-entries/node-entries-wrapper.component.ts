@@ -36,7 +36,7 @@ import {
 } from './entries-model';
 import { NodeDataSource } from './node-data-source';
 import { Helper } from '../util/helper';
-import { NodeEntriesService } from '../services/node-entries.service';
+import { CustomSelectionModel, NodeEntriesService } from '../services/node-entries.service';
 import { OptionItem, Scope } from '../types/option-item';
 import { NodeHelperService } from '../services/node-helper.service';
 import { ListItem } from '../types/list-item';
@@ -318,7 +318,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.ngOnChanges();
     }
 
-    getSelection() {
+    getSelection(): CustomSelectionModel<T> {
         return this.entriesService.selection;
     }
 

@@ -30,7 +30,7 @@ import { delay, map } from 'rxjs/operators';
  Custom selection model which adds the click source of the selection.
  USED IN EXTENSIONS!
  */
-class CustomSelectionModel<T> extends SelectionModel<T> {
+export class CustomSelectionModel<T> extends SelectionModel<T> {
     private _clickSource: ClickSource;
     /**
      * used in extensions
