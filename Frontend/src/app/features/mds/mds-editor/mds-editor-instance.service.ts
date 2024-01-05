@@ -883,6 +883,10 @@ export class MdsEditorInstanceService implements OnDestroy {
                 }
             }
         }
+        // keep this for debugging purposes
+        /*console.table(this.widgets.value.map( ({definition}) => [
+            definition.id, definition.type, definition.interactionType, definition.caption
+        ]));*/
         setTimeout(() => this.widgets.next(this.widgets.value.slice()), 5000);
         // to lower case because of remote repos wrong mapping
         return this.getGroup(
