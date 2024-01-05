@@ -13,7 +13,7 @@ const button: Meta<ButtonComponent> = {
     argTypes: {
         color: {
             control: 'radio',
-            options: ['primary', 'accent', 'warn'],
+            options: ['primary', 'accent', 'warn', undefined],
         },
     },
     tags: ['autodocs'],
@@ -76,5 +76,31 @@ export const WarnButtonFlatDisabled: Story = {
         color: 'warn',
         type: ButtonType.flat,
         disabled: true,
+    },
+};
+
+export const NoColorButtonDefault: Story = {
+    args: {
+        color: undefined,
+    },
+};
+
+export const NoColorButtonFlat: Story = {
+    args: {
+        color: undefined,
+        type: ButtonType.flat,
+    },
+};
+export const NoColorButtonFlatDisabled: Story = {
+    args: {
+        color: undefined,
+        type: ButtonType.flat,
+        disabled: true,
+    },
+};
+export const NoColorButtonRaised: Story = {
+    args: {
+        color: undefined,
+        type: ButtonType.raised,
     },
 };
