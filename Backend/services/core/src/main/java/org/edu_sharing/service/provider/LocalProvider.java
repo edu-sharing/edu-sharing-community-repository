@@ -8,6 +8,10 @@ import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.rating.RatingService;
+import org.edu_sharing.service.rating.RatingServiceFactory;
+import org.edu_sharing.service.relations.RelationService;
+import org.edu_sharing.service.relations.RelationServiceFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 
@@ -36,4 +40,15 @@ public class LocalProvider extends Provider{
     public FeedbackService getFeedbackService() {
         return FeedbackServiceFactory.getLocalService();
     }
+
+    @Override
+    public RatingService getRatingService() {
+        return RatingServiceFactory.getLocalService();
+    }
+
+    @Override
+    public RelationService getRelationService() {
+        return RelationServiceFactory.getLocalService();
+    }
+
 }
