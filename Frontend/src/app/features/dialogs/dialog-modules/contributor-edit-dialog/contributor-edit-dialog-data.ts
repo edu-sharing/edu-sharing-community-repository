@@ -5,6 +5,7 @@ export type EditMode = 'lifecycle' | 'metadata';
 export interface ContributorEditDialogData {
     vCard?: VCard;
     role?: string;
+    position?: number;
     editMode: EditMode;
 }
 

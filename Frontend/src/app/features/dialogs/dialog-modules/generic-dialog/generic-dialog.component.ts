@@ -23,9 +23,15 @@ export class GenericDialogComponent<R extends string> implements OnInit {
         if (this.data.buttons) {
             const buttons = this.data.buttons.map(
                 (button) =>
-                    new DialogButton(button.label, button.config, () =>
-                        this.dialogRef.close(button.label),
-                    ),
+                    new DialogButton(button.label, button.config, async () => {
+                        let close = true;
+                        if (button.callback) {
+                            close = await button.callback(this.dialogRef);
+                        }
+                        if (close) {
+                            this.dialogRef.close(button.label);
+                        }
+                    }),
             );
             this.dialogRef.patchConfig({ buttons });
         }

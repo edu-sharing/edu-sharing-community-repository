@@ -283,7 +283,7 @@ public class RegistrationService {
         properties.put(ApplicationInfo.KEY_LTI_KEYSET_URL,keysetUrl);
         if(keyId != null) properties.put(ApplicationInfo.KEY_LTI_KID,keyId);
 
-        JWKSet publicKeys = JWKSet.load(new URL(keysetUrl));
+        /*JWKSet publicKeys = JWKSet.load(new URL(keysetUrl));
         if(publicKeys == null){
             throw new Exception("no public key found");
         }
@@ -295,7 +295,7 @@ public class RegistrationService {
 
         String pubKeyString = "-----BEGIN PUBLIC KEY-----\n"
                 + new String(new Base64().encode(((AsymmetricJWK) jwk).toPublicKey().getEncoded())) + "-----END PUBLIC KEY-----";
-        properties.put(ApplicationInfo.KEY_PUBLIC_KEY, pubKeyString);
+        properties.put(ApplicationInfo.KEY_PUBLIC_KEY, pubKeyString);*/
         AdminServiceFactory.getInstance().addApplication(properties);
 
         if(token != null){
@@ -451,7 +451,7 @@ public class RegistrationService {
 
 
 
-        JWKSet publicKeys = JWKSet.load(new URL(jwksuri));
+        /*JWKSet publicKeys = JWKSet.load(new URL(jwksuri));
         if(publicKeys == null || publicKeys.getKeys() == null || publicKeys.getKeys().size() == 0){
             throw new Exception("no public key found");
         }
@@ -463,7 +463,7 @@ public class RegistrationService {
 
         String pubKeyString = "-----BEGIN PUBLIC KEY-----\n"
                 + new String(new Base64().encode(((AsymmetricJWK) jwk).toPublicKey().getEncoded())) + "-----END PUBLIC KEY-----";
-        properties.put(ApplicationInfo.KEY_PUBLIC_KEY, pubKeyString);
+        properties.put(ApplicationInfo.KEY_PUBLIC_KEY, pubKeyString);*/
         AdminServiceFactory.getInstance().addApplication(properties);
         return ApplicationInfoList.getRepositoryInfoById(appId);
     }

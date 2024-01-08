@@ -379,6 +379,15 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
     isAuthorMissing() {
         return this.isAuthorEmpty && !this.node.isDirectory;
     }
+
+    canBePublished() {
+        // it either has all required metadata or is already published anyway
+        return (
+            this.mdsCompletion?.completed === this.mdsCompletion?.total ||
+            this.initialState.copy ||
+            this.initialState.direct
+        );
+    }
 }
 export enum ShareMode {
     Direct = 'direct',

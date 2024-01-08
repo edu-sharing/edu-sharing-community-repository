@@ -1,5 +1,11 @@
 import { PlatformLocation } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    Component,
+    OnInit,
+    ViewChild,
+} from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Params, Router, UrlSerializer } from '@angular/router';
 import { TranslationsService, UIConstants } from 'ngx-edu-sharing-ui';
@@ -23,7 +29,7 @@ import { RegisterResetPasswordComponent } from './register-reset-password/regist
     styleUrls: ['register.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
     @ViewChild('registerForm') registerForm: RegisterFormComponent;
     @ViewChild('registerDone') registerDone: RegisterDoneComponent;
     @ViewChild('request') request: RegisterRequestComponent;
@@ -51,15 +57,15 @@ export class RegisterComponent {
         private connector: RestConnectorService,
         private toast: Toast,
         private platformLocation: PlatformLocation,
-        private urlSerializer: UrlSerializer,
         private router: Router,
         private translations: TranslationsService,
         private uiService: UIService,
         private configService: ConfigurationService,
         private changes: ChangeDetectorRef,
-        private title: Title,
         private route: ActivatedRoute,
-    ) {
+    ) {}
+
+    ngOnInit() {
         this.updateButtons();
         this.route.params.subscribe((params) => {
             this.params = params;
@@ -108,7 +114,7 @@ export class RegisterComponent {
         this.state = 'done';
         this.changes.detectChanges();
         this.updateButtons();
-        // will loose state when going back to register form
+        // will lose state when going back to register form
         // this.router.navigate([UIConstants.ROUTER_PREFIX,"register","done","-",email]);
         this.uiService.waitForComponent(this, 'registerDone').subscribe(() => {
             this.registerDone.email = email;

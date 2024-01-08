@@ -1,5 +1,5 @@
 import { TranslateService } from '@ngx-translate/core';
-import { Observable, Observer } from 'rxjs';
+import { forkJoin, Observable, Observer } from 'rxjs';
 import { Params, Router } from '@angular/router';
 import { Location } from '@angular/common';
 import {
@@ -427,21 +427,34 @@ export class NodeHelperService extends NodeHelperServiceBase {
         );
     }
 
-    addNodesToLTIPlatform(nodes: Node[]) {
-        let url = this.connector.createUrl('lti/v13/generateDeepLinkingResponse', null, []);
-        nodes.forEach((n) => {
-            if (!url.includes('?')) {
-                url += '?nodeIds=' + n.ref.id;
-            } else {
-                url += '&nodeIds=' + n.ref.id;
-            }
-        });
-
-        this.connector
-            .get<DeepLinkResponse>(url, this.connector.getRequestOptions())
-            .subscribe((data: DeepLinkResponse) => {
-                this.postLtiDeepLinkResponse(data.jwtDeepLinkResponse, data.ltiDeepLinkReturnUrl);
+    async addNodesToLTIPlatform(nodes: Node[]) {
+        this.toast.showProgressSpinner();
+        try {
+            // prepare usages in case of remote refs
+            nodes = await forkJoin(
+                nodes.map((n) => this.nodeService.prepareUsage(n.ref.id, n.ref.repo)),
+            )
+                .pipe(map((nodes) => nodes.map((n) => n.remote || n.node)))
+                .toPromise();
+            let url = this.connector.createUrl('lti/v13/generateDeepLinkingResponse', null, []);
+            nodes.forEach((n) => {
+                if (!url.includes('?')) {
+                    url += '?nodeIds=' + n.ref.id;
+                } else {
+                    url += '&nodeIds=' + n.ref.id;
+                }
             });
+            const response = await this.connector
+                .get<DeepLinkResponse>(url, this.connector.getRequestOptions())
+                .toPromise();
+            this.postLtiDeepLinkResponse(
+                response.jwtDeepLinkResponse,
+                response.ltiDeepLinkReturnUrl,
+            );
+        } catch (e) {
+            this.toast.error(e);
+        }
+        this.toast.closeProgressSpinner();
     }
 
     private postLtiDeepLinkResponse(jwt: string, url: string) {

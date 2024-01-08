@@ -96,6 +96,13 @@ export class MdsEditorWidgetChipsComponent
             ].map((value) => this.toDisplayValues(value)),
             this.getStandardValidators(),
         );
+        this.widget
+            .getInitialDisplayValues()
+            .pipe(filter((v) => !!v))
+            .subscribe(async (value) => {
+                this.chipsControl.setValue(await this.getInitialValues());
+            });
+
         this.chipsSuggestions =
             this.widget
                 .getSuggestions()
@@ -157,6 +164,14 @@ export class MdsEditorWidgetChipsComponent
         this.widget.addValue.subscribe((value: MdsWidgetValue) =>
             this.add(this.toDisplayValues(value)),
         );
+        this.registerValueChanges(this.chipsControl);
+    }
+
+    private async getInitialValues() {
+        return [
+            ...((await this.widget.getInitalValuesAsync()).jointValues ?? []),
+            ...((await this.widget.getInitalValuesAsync()).individualValues ?? []),
+        ].map((value) => this.toDisplayValues(value));
     }
 
     ngAfterViewInit(): void {
@@ -387,10 +402,10 @@ export class MdsEditorWidgetChipsComponent
     private toDisplayValues(value: MdsWidgetValue | string): DisplayValue {
         if (typeof value === 'string') {
             const knownValue = this.widget.definition.values?.find((v) => v.id === value);
-            if (!knownValue && this.widget.getInitialDisplayValues()) {
+            if (!knownValue && this.widget.getInitialDisplayValues().value) {
                 const ds = this.widget
                     .getInitialDisplayValues()
-                    .values?.find((v) => v.key === value)?.displayString;
+                    .value.values?.find((v) => v.key === value)?.displayString;
                 return {
                     key: value,
                     label: ds || value,

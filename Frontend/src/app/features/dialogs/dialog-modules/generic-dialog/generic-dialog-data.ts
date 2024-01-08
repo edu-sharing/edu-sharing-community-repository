@@ -2,6 +2,7 @@ import { TemplateRef } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { ButtonConfig } from '../../../../core-module/ui/dialog-button';
 import { CardDialogConfig } from '../../card-dialog/card-dialog-config';
+import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 
 export class GenericDialogData<R extends string, P extends string = string> {
     /** Message to show in the dialog body. Will be translated. */
@@ -49,6 +50,11 @@ export class GenericDialogConfig<R extends string> extends GenericDialogData<R> 
 export interface GenericDialogButton<R extends string> {
     label: R;
     config: ButtonConfig;
+    /*
+     custom callback
+     Promise should return if the dialog shall be closed or not
+     */
+    callback?: (ref: CardDialogRef<GenericDialogData<string>, string>) => Promise<boolean>;
 }
 
 export const CLOSE: GenericDialogButton<'CLOSE'>[] = [

@@ -27,7 +27,7 @@
           </es-multi-line-label>
         </mat-radio-button>
         <div class="more-information-link">
-          <a [href]="getLicenseUrlVersion('CC_0')" target="_blank">{{
+          <a [href]="getLicenseUrlVersion('CC_0') | async" target="_blank">{{
             'WORKSPACE.LICENSE.MORE' | translate
           }}</a>
         </div>
@@ -44,7 +44,7 @@
           </es-multi-line-label>
         </mat-radio-button>
         <div class="more-information-link">
-          <a [href]="getLicenseUrlVersion('PDM')" target="_blank">{{
+          <a class="focus-underline" [href]="getLicenseUrlVersion('PDM') | async" target="_blank">{{
             'WORKSPACE.LICENSE.MORE' | translate
           }}</a>
         </div>
@@ -66,9 +66,12 @@
           </es-multi-line-label>
         </mat-radio-button>
         <div class="more-information-link">
-          <a [href]="getLicenseUrlVersion('CC_BY')" target="_blank">{{
-            'WORKSPACE.LICENSE.MORE' | translate
-          }}</a>
+          <a
+            class="focus-underline"
+            [href]="getLicenseUrlVersion('CC_BY') | async"
+            target="_blank"
+            >{{ 'WORKSPACE.LICENSE.MORE' | translate }}</a
+          >
         </div>
       </div>
       <div *ngIf="isAllowedLicense('CC_BY_SA')">
@@ -83,9 +86,12 @@
           </es-multi-line-label>
         </mat-radio-button>
         <div class="more-information-link">
-          <a [href]="getLicenseUrlVersion('CC_BY_SA')" target="_blank">{{
-            'WORKSPACE.LICENSE.MORE' | translate
-          }}</a>
+          <a
+            class="focus-underline"
+            [href]="getLicenseUrlVersion('CC_BY_SA') | async"
+            target="_blank"
+            >{{ 'WORKSPACE.LICENSE.MORE' | translate }}</a
+          >
         </div>
       </div>
     </div>
@@ -102,9 +108,12 @@
   </mat-form-field>
   <div *ngIf="primaryType === 'CC_BY'" class="cc">
     <h5 class="ccAbout">
-      <a [href]="getLicenseUrlVersion('CC_BY_ABOUT')" target="_blank">{{
-        'WORKSPACE.LICENSE.CC.ABOUT' | translate
-      }}</a>
+      <a
+        class="focus-underline"
+        [href]="getLicenseUrlVersion('CC_BY_ABOUT') | async"
+        target="_blank"
+        >{{ 'WORKSPACE.LICENSE.CC.ABOUT' | translate }}</a
+      >
     </h5>
     <div *ngIf="isAllowedLicense('CC_BY_SA') || isAllowedLicense('CC_BY_ND')">
       <h4>{{ 'WORKSPACE.LICENSE.CC.SHARE' | translate }}</h4>
@@ -171,7 +180,7 @@
         </es-multi-line-label>
       </mat-radio-button>
       <div class="more-information-link">
-        <a [href]="getLicenseUrlVersion('CC_0')" target="_blank">{{
+        <a class="focus-underline" [href]="getLicenseUrlVersion('CC_0') | async" target="_blank">{{
           'WORKSPACE.LICENSE.MORE' | translate
         }}</a>
       </div>
@@ -188,7 +197,7 @@
         </es-multi-line-label>
       </mat-radio-button>
       <div class="more-information-link">
-        <a [href]="getLicenseUrlVersion('PDM')" target="_blank">{{
+        <a class="focus-underline" [href]="getLicenseUrlVersion('PDM') | async" target="_blank">{{
           'WORKSPACE.LICENSE.MORE' | translate
         }}</a>
       </div>
@@ -240,7 +249,7 @@
 <div class="currentLicense">
   <h4 *ngIf="type !== 'MULTI'">{{ 'WORKSPACE.LICENSE.CURRENT' | translate }}</h4>
   <img *ngIf="type !== 'MULTI'" class="currentLicenseIcon" src="{{ getLicenseIcon() }}" />
-  <div class="license-additional-data" *ngIf="type === 'CC_BY' || type === 'CC_BY_SA'">
+  <div class="license-additional-data" *ngIf="type.startsWith('CC_BY')">
     <div *ngIf="ccVersion != '4.0'" class="licenseLocale">
       <mat-form-field>
         <mat-label>{{ 'WORKSPACE.LICENSE.LOCALE' | translate }}</mat-label>
@@ -296,7 +305,9 @@
       </div>
     </div>
     <div *ngIf="primaryType === 'CC_BY' || primaryType === 'CC_0'" class="licenseUrl">
-      <a [href]="getLicenseUrl()" target="_blank">{{ 'WORKSPACE.LICENSE.MORE' | translate }}</a>
+      <a [href]="getLicenseUrl() | async" target="_blank">{{
+        'WORKSPACE.LICENSE.MORE' | translate
+      }}</a>
     </div>
   </div>
 </div>

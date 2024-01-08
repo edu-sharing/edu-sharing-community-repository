@@ -1,13 +1,14 @@
 package org.edu_sharing.alfresco.action;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
 import org.alfresco.service.cmr.action.Action;
@@ -28,14 +29,14 @@ import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.tika.Tika;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.springframework.util.StreamUtils;
+import org.apache.tika.mime.MimeType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 
+	private static final long MAX_JSON_PARSE_SIZE = 1024 * 1024 * 1;
 	/** The logger */
 	private static Log logger = LogFactory.getLog(RessourceInfoExecuter.class);
 
@@ -59,6 +60,8 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 	public static final String CCM_PROP_IO_RESOURCESUBTYPE = "{http://www.campuscontent.de/model/1.0}ccresourcesubtype";
 	public static final String CCM_RESSOURCETYPE_MOODLE = "moodle";
 	public static final String CCM_RESSOURCETYPE_H5P = "h5p";
+	public static final String CCM_RESSOURCETYPE_GEOGEBRA = "geogebra";
+	public static final String CCM_RESSOURCETYPE_SERLO = "serlo";
 	public static final String CCM_RESSOURCETYPE_EDUHTML = "eduhtml";
 
 	public static ArchiveInputStream getZipInputStream(ContentReader contentreader) throws IOException {
@@ -122,6 +125,12 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 							zip.close();
 							return;
 						}
+						// geogebra
+						if (current.getName().endsWith("geogebra.xml")) {
+							processGeogebra(zip, actionedUponNodeRef);
+							zip.close();
+							return;
+						}
 
 						if (current.getName().equals("moodle_backup.xml")) {
 							processMoodle2_0(zip, contentreader, actionedUponNodeRef);
@@ -136,12 +145,45 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 					}
 
 					zip.close();
+				} else {
+					if(Arrays.asList("application/json", "text/plain", "application/octet-stream").contains(contentreader.getMimetype()) &&
+							contentreader.getSize() < MAX_JSON_PARSE_SIZE) {
+						// stream was already consumed
+						contentreader = this.contentService.getReader(actionedUponNodeRef, ContentModel.PROP_CONTENT);
+						try (InputStream is = contentreader.getContentInputStream()) {
+							if(processSerlo(is, actionedUponNodeRef)) {
+								return;
+							}
+						} catch(Throwable e) {
+							logger.debug(e);
+						}
+					}
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.info(e);
 			}
 		}
 
+	}
+
+	boolean processSerlo(InputStream is, NodeRef nodeRef) {
+		try {
+			SerloStructure result = new Gson().fromJson(new InputStreamReader(is), SerloStructure.class);
+			if("https://serlo.org/editor".equals(result.type)) {
+				nodeService.addAspect(nodeRef, QName.createQName(CCM_ASPECT_RESSOURCEINFO),
+						null);
+				nodeService.setProperty(nodeRef, QName.createQName(CCM_PROP_IO_RESSOURCETYPE),
+						CCM_RESSOURCETYPE_SERLO);
+				nodeService.setProperty(nodeRef, QName.createQName(CCM_PROP_IO_RESOURCESUBTYPE), result.variant);
+				nodeService.setProperty(nodeRef, QName.createQName(CCM_PROP_IO_RESSOURCEVERSION), result.version);
+				return true;
+			}
+		}
+		catch(JsonSyntaxException ignored) {}
+		catch(Throwable e) {
+			logger.debug("Serlo parsing error " + nodeRef, e);
+		}
+		return false;
 	}
 
 	private void proccessGenericHTML(NodeRef nodeRef) {
@@ -290,6 +332,29 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 			}
 		}
 	}
+	void processGeogebra(InputStream is, NodeRef actionedUponNodeRef) {
+		// thumbnail is handled @org.edu_sharing.alfresco.transformer.GeogebraTransformerWorker
+		try {
+			Document doc = new RessourceInfoTool().loadFromStream(is);
+			XPathFactory pfactory = XPathFactory.newInstance();
+			XPath xpath = pfactory.newXPath();
+			String schemaVersPath = "/geogebra/@version";
+			String schemaVers = (String) xpath.evaluate(schemaVersPath, doc, XPathConstants.STRING);
+			if (schemaVers != null && !schemaVers.equals("")) {
+				if (!this.nodeService.hasAspect(actionedUponNodeRef,
+                        QName.createQName(CCM_ASPECT_RESSOURCEINFO))) {
+					this.nodeService.addAspect(actionedUponNodeRef, QName.createQName(CCM_ASPECT_RESSOURCEINFO),
+							null);
+				}
+				nodeService.setProperty(actionedUponNodeRef, QName.createQName(CCM_PROP_IO_RESSOURCETYPE),
+						CCM_RESSOURCETYPE_GEOGEBRA);
+				nodeService.setProperty(actionedUponNodeRef, QName.createQName(CCM_PROP_IO_RESSOURCEVERSION),
+						schemaVers);
+			}
+		} catch(Throwable e) {
+			logger.info("Could not identify if file is a geogebra element: " + e.getMessage());
+		}
+	}
 
 	private void processMoodle(InputStream is, ContentReader contentreader, NodeRef actionedUponNodeRef) {
 		RessourceInfoTool ressourceInfoTool = new RessourceInfoTool();
@@ -430,4 +495,9 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 		this.actionService = actionService;
 	}
 
+	static class SerloStructure {
+		public String type;
+		public String version;
+		public String variant;
+	}
 }

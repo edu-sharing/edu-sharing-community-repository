@@ -479,15 +479,17 @@ public class PersonDao {
 	}
 	public UserSimple asPersonSimple(boolean resolveOrganizations) {
 		UserSimple data = new UserSimple();
-    	data.setAuthorityName(getAuthorityName());
-    	data.setAuthorityType(Authority.Type.USER);
-    	data.setUserName(getUserName());
-    	data.setProfile(getProfile());
+		data.setAuthorityName(getAuthorityName());
+		data.setAuthorityType(Authority.Type.USER);
+		data.setUserName(getUserName());
+		data.setProfile(getProfile());
 		data.setStatus(getStatus());
-		if(isCurrentUserOrAdmin()){
+		if (isCurrentUserOrAdmin()) {
 			data.setProperties(getProperties());
 		}
-		//data.setOrganizations(OrganizationDao.mapOrganizations(getParentOrganizations()));
+		if (resolveOrganizations) {
+			data.setOrganizations(OrganizationDao.mapOrganizations(getParentOrganizations()));
+		}
 		if(isCurrentUserOrAdmin()) {
 	    	NodeRef homeDir = new NodeRef();
 	    	homeDir.setRepo(repoDao.getId());

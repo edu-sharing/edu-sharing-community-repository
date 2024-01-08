@@ -78,7 +78,7 @@ public class DownloadServlet extends HttpServlet{
 					!NodeServiceHelper.downloadAllowed(nodeId) &&
 					!(
 							ContextManagementFilter.accessTool.get() != null &&
-							ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getType())
+							ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getType())
 					)
 					) {
 				logger.info("Download forbidden for node " + nodeId);
@@ -101,7 +101,7 @@ public class DownloadServlet extends HttpServlet{
 			if(repositoryId == null) {
 				// do only track downloads if it was not accessed by the connector service
 				if(ContextManagementFilter.accessTool.get() == null ||
-						!ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getType())) {
+						!ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getType())) {
 					TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), null, TrackingService.EventType.DOWNLOAD_MATERIAL);
 				}
 				originalNodeId = checkAndGetCollectionRef(nodeId);

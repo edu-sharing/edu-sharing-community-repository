@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { first, map, startWith } from 'rxjs/operators';
+import { first, map, startWith, switchMap } from 'rxjs/operators';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
@@ -73,8 +73,10 @@ export class LoginComponent implements OnInit, OnDestroy {
         const loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
         this.isLoading = true;
         this.updateButtons();
-        this.translations.waitForInit().subscribe(() => {
-            this.configService.getAll().subscribe((data: any) => {
+        this.translations
+            .waitForInit()
+            .pipe(switchMap(() => this.configService.getAll()))
+            .subscribe((data: any) => {
                 this.config = data;
                 if (!this.config.register) {
                     // default register mode: allow local registration if not disabled
@@ -124,7 +126,7 @@ export class LoginComponent implements OnInit, OnDestroy {
                                 this.goToNext(data);
                             }
                         }
-                        // when there is a request to go into safe mode, first, the user needs to login regular
+                        // when there is a request to go into safe mode, first, the user needs to log in regularly
                         else if (data.statusCode !== RestConstants.STATUS_CODE_OK && this.scope) {
                             // RestHelper.goToLogin()
                         }
@@ -185,7 +187,6 @@ export class LoginComponent implements OnInit, OnDestroy {
                     }
                 });
             });
-        });
     }
 
     ngOnDestroy(): void {

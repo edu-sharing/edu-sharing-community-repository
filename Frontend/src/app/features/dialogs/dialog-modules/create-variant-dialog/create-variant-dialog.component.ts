@@ -17,11 +17,12 @@ import {
 import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
 import { Toast } from '../../../../core-ui-module/toast';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
-import { DialogsService } from '../../../../features/dialogs/dialogs.service';
+import { DialogsService } from '../../dialogs.service';
 import { BreadcrumbsService } from '../../../../shared/components/breadcrumbs/breadcrumbs.service';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { CreateVariantDialogData, CreateVariantDialogResult } from './create-variant-dialog-data';
+import { Observable } from 'rxjs';
 
 @Component({
     selector: 'es-create-variant-dialog',
@@ -199,18 +200,15 @@ export class CreateVariantDialogComponent {
         });
     }
 
-    openLicense() {
-        UIHelper.openUrl(
-            this.getLicenseUrl(),
-            this.connector.getBridgeService(),
-            OPEN_URL_MODE.BlankSystemBrowser,
-        );
+    openLicense(url: string) {
+        UIHelper.openUrl(url, this.connector.getBridgeService(), OPEN_URL_MODE.BlankSystemBrowser);
     }
 
-    getLicenseUrl(): string {
+    getLicenseUrl(): Observable<string | null> {
         return this.nodeHelper.getLicenseUrlByString(
             this.data.node.properties[RestConstants.CCM_PROP_LICENSE]?.[0],
             this.data.node.properties[RestConstants.CCM_PROP_LICENSE_CC_VERSION]?.[0],
+            this.data.node.properties[RestConstants.CCM_PROP_LICENSE_CC_LOCALE]?.[0],
         );
     }
 

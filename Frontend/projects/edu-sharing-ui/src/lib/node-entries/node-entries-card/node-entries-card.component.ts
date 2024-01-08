@@ -108,6 +108,7 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
     async openMenu(node: T) {
         this.entriesService.selection.clear();
         this.entriesService.selection.select(node);
+        this.entriesService.selection.clickSource = ClickSource.Dropdown;
         await this.applicationRef.tick();
         this.dropdown.menu.focusFirstItem();
     }

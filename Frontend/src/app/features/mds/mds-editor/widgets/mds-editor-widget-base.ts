@@ -1,4 +1,4 @@
-import { ValidatorFn, Validators } from '@angular/forms';
+import { FormControl, ValidatorFn, Validators } from '@angular/forms';
 import { InputStatus, MdsWidget, RequiredMode } from '../../types/types';
 import { Directive, EventEmitter } from '@angular/core';
 import { MdsEditorWidgetCore } from '../mds-editor-widget-core.directive';
@@ -31,6 +31,16 @@ export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
 
     protected setStatus(value: InputStatus): void {
         this.widget.setStatus(value);
+    }
+
+    /**
+     * register the form control that should be updated when external value changes received
+     */
+    protected registerValueChanges(formControl: FormControl) {
+        this.widget.setValueExternal.subscribe((value) => {
+            formControl.setValue(value);
+            this.setValue(value, true);
+        });
     }
 
     protected getStandardValidators(
