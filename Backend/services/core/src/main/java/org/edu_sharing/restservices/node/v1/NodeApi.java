@@ -1661,7 +1661,7 @@ public class NodeApi  {
     @Hidden
 
 	public Response options06() {
-		
+
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
 	}
 
@@ -1686,19 +1686,18 @@ public class NodeApi  {
 		@Context HttpServletRequest req) {
     
     	try {
-    		
+
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, Filter.createShowAllFilter());
-	    	
-	    	NodeVersionEntries response=new NodeVersionEntries();
-	    	response.setVersions(nodeDao.getHistory());
+
+			NodeVersionRefEntries response=new NodeVersionRefEntries();
+	    	response.setVersions(nodeDao.getNodeRefHistory());
 	    	return Response.status(Response.Status.OK).entity(response).build();
 	
     	} catch (Throwable t) {
     		return ErrorResponse.createResponse(t);
     	}
-
-   }
+	  }
     
     
 	@OPTIONS    
@@ -1708,6 +1707,43 @@ public class NodeApi  {
 	public Response options07() {
 		
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
+	}
+
+
+	@GET
+	@Path("/nodes/{repository}/{node}/versions/metadata")
+
+	@Operation(summary = "Get all versions of node, including it's metadata.", description = "Get all versions of node, including it's metadata.")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeVersionEntries.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+			})
+
+	public Response getVersions(
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			Filter filter = new Filter(propertyFilter);
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
+
+			NodeVersionEntries response=new NodeVersionEntries();
+			response.setVersions(nodeDao.getHistory());
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
 	}
 
     @GET
