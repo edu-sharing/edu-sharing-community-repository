@@ -76,6 +76,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SearchServiceElastic extends SearchServiceImpl {
+    public static final String WORKSPACE_INDEX = "workspace_9.0";
     static RestClient restClient;
     static ElasticsearchClient client;
 
@@ -228,7 +229,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     private SearchResultNodeRef parseAggregations(SearchToken searchToken, Map<String, Aggregation> aggregations) throws Exception {
 //        logger.info("query aggs: "+searchSourceBuilderAggs.toString());
         SearchResponse<Map> resp = LogTime.log("Searching elastic for facets", () -> client.search(req -> req
-                        .index("workspace")
+                        .index(WORKSPACE_INDEX)
                         .from(0)
                         .size(0)
                         .aggregations(aggregations)
@@ -290,7 +291,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         BoolQuery.Builder queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData);
 
         SearchRequest.Builder searchRequest = new SearchRequest.Builder()
-                .index("workspace")
+                .index(WORKSPACE_INDEX)
                 .scroll(Time.of(time -> time.time("60s")))
                 .source(src -> src
                         .filter(filter -> filter.excludes(searchToken.getExcludes()))
@@ -378,7 +379,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
 
             SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()
-                    .index("workspace")
+                    .index(WORKSPACE_INDEX)
                     .source(src->src.filter(filter->filter.excludes(searchToken.getExcludes())));
 
             SearchResponse<Map> searchResponseAggregations = null;
@@ -395,7 +396,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                             searchToken);
 
                     SearchRequest searchSourceAggs = SearchRequest.of(req->req
-                            .index("workspace")
+                            .index(WORKSPACE_INDEX)
                             .from(0)
                             .size(0)
                             .aggregations(aggregations));
@@ -692,7 +693,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchResponse<Map> searchResult = client
                     .withTransportOptions(this::getRequestOptions)
                     .search(req->req
-                            .index("workspace")
+                            .index(WORKSPACE_INDEX)
                             .trackTotalHits(t->t.enabled(true))
                             .query(query->query
                                     .bool(checkIsChildObjectQuery->checkIsChildObjectQuery
@@ -719,10 +720,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     private boolean hasReadPermissionOnNode(String nodeId) {
         try {
+            checkClient();
             SearchResponse<Map> searchResult = client
                     .withTransportOptions(this::getRequestOptions)
                     .search(request->request
-                                    .index("workspace")
+                                    .index(WORKSPACE_INDEX)
                                     .size(0)
                                     .trackTotalHits(t->t.enabled(true))
                                     .query(query->query
@@ -1104,7 +1106,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
 
         SearchRequest searchRequest = SearchRequest.of(req->req
-                .index("workspace")
+                .index(WORKSPACE_INDEX)
                 .from(0)
                 .size(0)
                 .trackTotalHits(track->track.enabled(true))
@@ -1213,7 +1215,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         sr.setData(data);
 
         SearchRequest searchRequest = SearchRequest.of(req -> req
-                        .index("workspace")
+                        .index(WORKSPACE_INDEX)
                         .from(0)
                         .size(nodeIds.size())
                         .trackTotalHits(track -> track.enabled(true))

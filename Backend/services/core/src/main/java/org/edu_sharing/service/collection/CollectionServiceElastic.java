@@ -1,7 +1,7 @@
 package org.edu_sharing.service.collection;
 
-import co.elastic.clients.elasticsearch._types.aggregations.*;
-import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.aggregations.StringTermsAggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
@@ -13,7 +13,10 @@ import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.spring.ApplicationContextFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class CollectionServiceElastic extends CollectionServiceImpl {
 
@@ -33,7 +36,7 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
     protected void addCollectionCountProperties(NodeRef nodeRef, Collection collection) {
         try {
             SearchRequest searchRequest = SearchRequest.of(req -> req
-                    .index("workspace")
+                    .index(SearchServiceElastic.WORKSPACE_INDEX)
                     .size(0)
                     .aggregations("type", agg -> agg.terms(t -> t.field("type")))
                     .query(q -> q
@@ -61,7 +64,7 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
     public CollectionProposalInfo getCollectionsContainingProposals(CCConstants.PROPOSAL_STATUS status, Integer skipCount, Integer maxItems, SortDefinition sortDefinition) throws Throwable {
 
         SearchRequest searchRequest = SearchRequest.of(req->req
-                .index("workspace")
+                .index(SearchServiceElastic.WORKSPACE_INDEX)
                 .size(maxItems)
                 .from(skipCount)
                 .source(src->src.fetch(true))
