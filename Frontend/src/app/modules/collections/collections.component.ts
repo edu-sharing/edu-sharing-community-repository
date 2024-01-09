@@ -370,9 +370,20 @@ export class CollectionsMainComponent implements OnDestroy {
 
     async displayCollectionById(id: string) {
         if (!!id) {
-            this.collection = (
-                await this.collectionService.getCollection(id).toPromise()
-            ).collection;
+            try {
+                this.collection = (
+                    await this.collectionService.getCollection(id).toPromise()
+                ).collection;
+            } catch (e) {
+                if (e.status === RestConstants.HTTP_FORBIDDEN) {
+                    const login = await this.connector.isLoggedIn().toPromise();
+                    if (login.statusCode === RestConstants.STATUS_CODE_OK) {
+                        this.toast.error(e);
+                    } else {
+                        RestHelper.goToLogin(this.router, this.config, null);
+                    }
+                }
+            }
         } else {
             this.setCollectionId(RestConstants.ROOT);
         }

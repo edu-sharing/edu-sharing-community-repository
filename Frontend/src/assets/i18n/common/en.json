@@ -409,6 +409,8 @@
     "file-video": "video",
     "file-qti": "ONYX file",
     "file-h5p": "H5P file",
+    "file-geogebra": "geogebra file",
+    "file-serlo": "serlo file",
     "file-pdf": "pdf file",
     "link": "Website",
     "folder": "Folder",

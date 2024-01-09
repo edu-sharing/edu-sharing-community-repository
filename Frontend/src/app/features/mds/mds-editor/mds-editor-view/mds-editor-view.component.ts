@@ -491,6 +491,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         );
         const injected = this.injectWidget(widget, targetElement, 'nodes', 'replace');
         widget.initWithNodes(this.mdsEditorInstance.nodes$.value);
+        this.mdsEditorInstance.fetchDisplayValues(widget);
         // timeout to wait for view inflation and set the focus
         await this.applicationRef.tick();
         setTimeout(() => {

@@ -1394,6 +1394,16 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				enable);
 
 	}
+
+	@Override
+	public Long getContentLength(String storeProtocol, String storeId, String nodeId, String version, String contentProp) throws Throwable {
+		ContentReader reader = getContentReader(storeProtocol, storeId, nodeId, version, contentProp);
+		if(reader != null && reader.getContentData() != null) {
+			return reader.getContentData().getSize();
+		}
+		return null;
+	}
+
 	@Override
 	public ContentReader getContentReader(String storeProtocol, String storeId, String nodeId, String version, String contentProp){
 		NodeRef nodeRef=new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);

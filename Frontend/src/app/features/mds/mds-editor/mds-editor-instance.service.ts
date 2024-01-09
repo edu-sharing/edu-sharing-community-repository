@@ -133,7 +133,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         readonly setValueExternal = new Subject<string[]>();
         private hasUnsavedDefault: boolean; // fixed after `ready`
         private initialValues: InitialValues;
-        private initialDisplayValues: MdsValueList;
+        private initialDisplayValues = new BehaviorSubject<MdsValueList>(null);
         private readonly value$ = new BehaviorSubject<string[]>(null);
         private isDirty = false;
         /**
@@ -400,10 +400,10 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
 
         setInitialDisplayValues(value: MdsValueList) {
-            this.initialDisplayValues = value;
+            this.initialDisplayValues.next(value);
         }
 
-        getInitialDisplayValues() {
+        getInitialDisplayValues(): BehaviorSubject<MdsValueList> {
             return this.initialDisplayValues;
         }
 
@@ -870,19 +870,12 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
         for (const widget of this.widgets.value) {
             widget.initWithNodes(this.nodes$.value);
-            if (
-                widget.definition.type === MdsWidgetType.MultiValueFixedBadges &&
-                !widget.definition.values &&
-                widget.getInitialValues().jointValues
-            ) {
-                const mdsValueList = await widget.getValuesForKeys(
-                    widget.getInitialValues().jointValues,
-                );
-                if (mdsValueList) {
-                    widget.setInitialDisplayValues(mdsValueList);
-                }
-            }
+            await this.fetchDisplayValues(widget);
         }
+        // keep this for debugging purposes
+        /*console.table(this.widgets.value.map( ({definition}) => [
+            definition.id, definition.type, definition.interactionType, definition.caption
+        ]));*/
         setTimeout(() => this.widgets.next(this.widgets.value.slice()), 5000);
         // to lower case because of remote repos wrong mapping
         return this.getGroup(
@@ -890,7 +883,6 @@ export class MdsEditorInstanceService implements OnDestroy {
             groupId,
         ).rendering?.toLowerCase() as EditorType;
     }
-
     async initWithoutNodes(
         groupId: string,
         mdsId: string = null,
@@ -924,8 +916,10 @@ export class MdsEditorInstanceService implements OnDestroy {
         if (!hasInitialized) {
             throw new Error('Could not initalize mds');
         }
+
         for (const widget of this.widgets.value) {
             widget.initWithValues(initialValues);
+            await this.fetchDisplayValues(widget);
         }
         for (const widget of this.nativeWidgets.value) {
             if (widget instanceof MdsEditorWidgetCore) {
@@ -939,7 +933,20 @@ export class MdsEditorInstanceService implements OnDestroy {
             groupId,
         ).rendering?.toLowerCase() as EditorType;
     }
-
+    async fetchDisplayValues(widget: Widget) {
+        if (
+            widget.definition.type === MdsWidgetType.MultiValueFixedBadges &&
+            !widget.definition.values &&
+            widget.getInitialValues().jointValues
+        ) {
+            const mdsValueList = await widget.getValuesForKeys(
+                widget.getInitialValues().jointValues,
+            );
+            if (mdsValueList) {
+                widget.setInitialDisplayValues(mdsValueList);
+            }
+        }
+    }
     async clearValues(): Promise<void> {
         // At the moment, widget components don't support changing or resetting the value from
         // outside the component. Therefore, we have to reload and redraw everything here.

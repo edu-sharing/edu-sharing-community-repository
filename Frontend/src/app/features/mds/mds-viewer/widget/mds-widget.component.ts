@@ -22,6 +22,7 @@ import { MdsWidgetType } from '../../types/types';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { UIService } from '../../../../core-module/rest/services/ui.service';
 import { MatRipple } from '@angular/material/core';
+import { filter } from 'rxjs/operators';
 
 @Component({
     selector: 'es-mds-widget',
@@ -32,6 +33,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
     private static readonly inlineEditing: MdsWidgetType[] = [
         MdsWidgetType.Text,
         MdsWidgetType.Number,
+        MdsWidgetType.Date,
         MdsWidgetType.Email,
         MdsWidgetType.Textarea,
         MdsWidgetType.Singleoption,
@@ -73,6 +75,12 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
 
     ngOnInit() {
         this.value = this.getNodeValue();
+        this.widget
+            .getInitialDisplayValues()
+            .pipe(filter((v) => !!v))
+            .subscribe(async (value) => {
+                this.value = value.values.map((v) => v.displayString);
+            });
     }
 
     getBasicType() {
@@ -208,6 +216,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
         this.temporaryValue = instance.widget.getValue();
         this.value = this.getNodeValue();
         this.editWrapper.nativeElement.children[0].innerHTML = null;
+        await this.mdsEditorInstance.fetchDisplayValues(this.widget);
     }
 
     isEditable() {

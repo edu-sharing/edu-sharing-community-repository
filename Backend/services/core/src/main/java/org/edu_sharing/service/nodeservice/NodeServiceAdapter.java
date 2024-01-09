@@ -6,11 +6,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.alfresco.service.cmr.repository.*;
-import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.NotImplementedException;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -178,7 +176,12 @@ public class NodeServiceAdapter implements NodeService {
 	public InputStream getContent(String nodeId) throws Throwable{
 		throw new Exception("getContent not implemented for this repository");
 	}
-	
+
+	public Integer getContentLength(String nodeId) throws Throwable{
+		throw new Exception("getContent not implemented for this repository");
+	}
+
+
 	/**
 	 * Import the node from a foreign repository to the local one
 	 * @param localParent
@@ -238,6 +241,11 @@ public class NodeServiceAdapter implements NodeService {
 	@Override
 	public InputStream getContent(String storeProtocol, String storeId, String nodeId, String version, String contentProp) throws Throwable {
 		return getContent(nodeId);
+	}
+
+	@Override
+	public Long getContentLength(String storeProtocol, String storeId, String nodeId, String version, String contentProp) throws Throwable {
+		return null;
 	}
 
 	@Override

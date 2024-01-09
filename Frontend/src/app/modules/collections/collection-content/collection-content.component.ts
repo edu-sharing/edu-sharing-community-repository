@@ -42,7 +42,7 @@ import { OptionItem, Scope } from '../../../core-ui-module/option-item';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
-import { forkJoin as observableForkJoin, Subject } from 'rxjs';
+import { forkJoin, forkJoin as observableForkJoin, Subject } from 'rxjs';
 import { RestNodeService } from '../../../core-module/rest/services/rest-node.service';
 import { Toast } from '../../../core-ui-module/toast';
 import { DialogButton } from '../../../core-module/ui/dialog-button';
@@ -399,7 +399,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 !this.nodeHelper.getNodesRight(
                     nodes,
                     RestConstants.ACCESS_WRITE,
-                    NodesRightMode.Original,
+                    NodesRightMode.Local,
                 ))
         ) {
             return {
@@ -457,46 +457,41 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                     },
                 );
         } else {
-            UIHelper.addToCollection(
-                this.nodeHelper,
-                this.collectionService,
-                this.router,
-                this.bridge,
-                target as Node,
-                source.element,
-                false,
-                (nodes) => {
-                    if (source.mode === 'copy') {
+            if (source.mode === 'copy') {
+                UIHelper.addToCollection(
+                    this.nodeHelper,
+                    this.collectionService,
+                    this.router,
+                    this.bridge,
+                    target as Node,
+                    source.element,
+                    false,
+                    (nodes) => {
                         this.toast.closeModalDialog();
                         this.refreshContent();
-                        return;
-                    }
-                    if (nodes.length > 0) {
-                        const movedNodes = source.element.filter(
-                            (sourceElement: CollectionReference) =>
-                                nodes.some((node) => node.originalId === sourceElement.originalId),
-                        );
-                        const observables = movedNodes.map((n) =>
-                            this.collectionService.removeFromCollection(
-                                n.ref.id,
-                                this.collection.ref.id,
-                            ),
-                        );
-                        observableForkJoin(observables).subscribe(
-                            () => {
-                                this.toast.closeModalDialog();
-                                this.refreshContent();
-                            },
-                            (error) => {
-                                this.handleError(error);
-                                this.toast.closeModalDialog();
-                            },
-                        );
-                    } else {
+                    },
+                );
+            } else if (source.mode === 'move') {
+                forkJoin(
+                    source.element.map((toMove) =>
+                        this.nodeService.moveNode(
+                            (target as Node)?.ref?.id || RestConstants.COLLECTIONHOME,
+                            toMove.ref.id,
+                        ),
+                    ),
+                ).subscribe(
+                    () => {
                         this.toast.closeModalDialog();
-                    }
-                },
-            );
+                        this.refreshContent();
+                    },
+                    (error) => {
+                        this.handleError(error);
+                        this.toast.closeModalDialog();
+                    },
+                );
+            } else {
+                this.toast.error(null, 'INVALID_OPERATION');
+            }
         }
     };
     private handleError(error: any) {

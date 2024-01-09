@@ -74,7 +74,7 @@
   <es-info-message mode="info" *ngIf="isCopy">
     {{ 'WORKSPACE.SHARE.PUBLISH.COPY_ACTIVE' | translate }}
   </es-info-message>
-  <div *ngIf="!inherited && mdsCompletion?.completed === mdsCompletion?.total" class="share-type">
+  <div *ngIf="!inherited && canBePublished()" class="share-type">
     <mat-checkbox
       #shareModeDirectRef
       [(ngModel)]="shareModeDirect"

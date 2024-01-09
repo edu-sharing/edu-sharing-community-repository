@@ -141,7 +141,8 @@ public class ContentServlet extends HttpServlet{
 							String mimetype = reader.getMimetype();
 
 							resp.setContentType((mimetype != null) ? mimetype : "application/octet-stream");
-							resp.setContentLength((int) reader.getContentData().getSize());
+							// important: use the addHeader method here since the length method only accepts int which overflows for long values (> 4 GB)
+							resp.addHeader("Content-Length", Long.toString(reader.getContentData().getSize()));
 
 							int length = 0;
 							//

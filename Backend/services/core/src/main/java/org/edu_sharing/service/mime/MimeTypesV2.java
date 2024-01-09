@@ -202,6 +202,14 @@ public class MimeTypesV2 {
 			}
 			return "folder";
 		}
+		if(properties != null) {
+			if(RessourceInfoExecuter.CCM_RESSOURCETYPE_GEOGEBRA.equals(properties.get(RessourceInfoExecuter.CCM_PROP_IO_RESSOURCETYPE))) {
+				return "file-geogebra";
+			}
+			if(RessourceInfoExecuter.CCM_RESSOURCETYPE_SERLO.equals(properties.get(RessourceInfoExecuter.CCM_PROP_IO_RESSOURCETYPE))) {
+				return "file-serlo";
+			}
+		}
 		if(isLtiDefinition(aspects))
 			return "tool_definition";
 		if(isSavedSearch(nodeType))
