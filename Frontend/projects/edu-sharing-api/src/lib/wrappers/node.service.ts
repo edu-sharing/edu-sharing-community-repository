@@ -3,7 +3,15 @@ import { Observable, Subject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { NodeV1Service, SearchV1Service } from '../api/services';
 import { HOME_REPOSITORY } from '../constants';
-import { Node, NodeEntries, NodePermissions } from '../models';
+import {
+    Node,
+    NodeEntries,
+    NodePermissions,
+    NodeVersion,
+    NodeVersionRefEntries,
+    NodeVersionEntries,
+} from '../models';
+import { NodeEntry } from '../api/models/node-entry';
 
 export class NodeConstants {
     public static SPACES_STORE_REF = 'workspace://SpacesStore/';
@@ -88,6 +96,93 @@ export class NodeService {
             repository,
             node: id,
         });
+    }
+
+    /**
+     * Get all versions of a node.
+     * @param repository ID of the repository (or &quot;-home-&quot; for home repository)
+     * @param node ID of the node
+     */
+    getVersions(repository: string, node: string): Observable<NodeVersionRefEntries> {
+        return this.nodeV1.getVersions({
+            repository,
+            node,
+        });
+    }
+
+    /**
+     * Get all versions of a node, including their metadata.
+     *
+     * Specify a filter to receive the chosen properties.
+     * @param repository ID of the repository (or &quot;-home-&quot; for home repository)
+     * @param node ID of the node
+     * @param propertyFilter property filter for result nodes (or &quot;-all-&quot; for all properties)
+     */
+    getVersionsMetadata(
+        repository: string,
+        node: string,
+        propertyFilter?: Array<string>,
+    ): Observable<NodeVersionEntries> {
+        return this.nodeV1.getVersions1({
+            repository,
+            node,
+            propertyFilter,
+        });
+    }
+
+    /**
+     * Get metadata of a node version.
+     *
+     * @param repository ID of repository (or &quot;-home-&quot; for home repository)
+     * @param node ID of node
+     * @param major major version
+     * @param minor minor version
+     * @param propertyFilter property filter for result nodes (or &quot;-all-&quot; for all properties)
+     */
+    getVersionMetadata(
+        repository: string,
+        node: string,
+        major: number,
+        minor: number,
+        propertyFilter?: Array<string>,
+    ): Observable<NodeVersion> {
+        return this.nodeV1
+            .getVersionMetadata({
+                repository,
+                node,
+                major,
+                minor,
+                propertyFilter,
+            })
+            .pipe(map((nodeVersionEntry) => nodeVersionEntry.version));
+    }
+
+    /**
+     * Revert a node to a given version.
+     *
+     * @param repository ID of repository (or &quot;-home-&quot; for home repository)
+     * @param node ID of node
+     * @param major major version
+     * @param minor minor version
+     * @returns the node, reverted to the given version
+     */
+    revertToVersion(
+        repository: string,
+        node: string,
+        major: number,
+        minor: number,
+    ): Observable<Node> {
+        return this.nodeV1
+            .revertVersion({
+                repository,
+                node,
+                major,
+                minor,
+            })
+            .pipe(
+                tap(() => this._nodesChanged.next()),
+                map((nodeEntry: NodeEntry) => nodeEntry.node),
+            );
     }
 
     /**
