@@ -100,6 +100,8 @@ public interface NodeService {
 
     InputStream getContent(String storeProtocol, String storeId, String nodeId, String version, String contentProp) throws Throwable;
 
+	Long getContentLength(String storeProtocol, String storeId, String nodeId, String version, String contentProp) throws Throwable;
+
 	String getContentHash(String storeProtocol, String storeId, String nodeId, String version, String contentProp);
 
 	public void addAspect(String nodeId, String aspect);
