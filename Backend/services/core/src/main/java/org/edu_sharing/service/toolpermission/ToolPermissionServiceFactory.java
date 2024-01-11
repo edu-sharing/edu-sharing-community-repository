@@ -1,10 +1,18 @@
 package org.edu_sharing.service.toolpermission;
 
 import org.edu_sharing.spring.ApplicationContextFactory;
+import org.springframework.context.ApplicationContext;
 
 public class ToolPermissionServiceFactory {
 	public static ToolPermissionService getInstance(){
-		return (ToolPermissionService) ApplicationContextFactory.getApplicationContext().getBean("toolPermissionService");
+
+		ApplicationContext applicationContext = ApplicationContextFactory.getApplicationContext();
+		// the context isn't set on startup, so we need to return null
+		if( applicationContext == null){
+			return null;
+		}
+
+		return applicationContext.getBean("toolPermissionService", ToolPermissionService.class);
 		/*
 		if( tps == null){
 			 tps = (ToolPermissionService) ApplicationContextFactory.getApplicationContext().getBean("toolPermissionService");
