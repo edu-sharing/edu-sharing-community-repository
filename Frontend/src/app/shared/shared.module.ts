@@ -64,6 +64,7 @@ import { PermissionNamePipe } from './pipes/permission-name.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { SplitNewLinesPipe } from './pipes/split-new-lines.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
+import { SmallCollectionComponent } from './components/small-collection/small-collection.component';
 
 @NgModule({
     declarations: [
@@ -91,6 +92,7 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
         RegisterCustomPropertyDirective,
         SafeHtmlPipe,
         SkipTargetDirective,
+        SmallCollectionComponent,
         SpinnerSmallComponent,
         SplitNewLinesPipe,
         TitleDirective,
@@ -181,6 +183,7 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
         RouterModule,
         SafeHtmlPipe,
         SkipTargetDirective,
+        SmallCollectionComponent,
         SpinnerSmallComponent,
         SplitNewLinesPipe,
         TitleDirective,

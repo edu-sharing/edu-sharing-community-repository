@@ -1,3 +1,4 @@
+/** This component is also used in extensions and therefore shared! */
 import { Component, Input } from '@angular/core';
 import { ListItem } from 'ngx-edu-sharing-ui';
 import { Node } from '../../../core-module/core.module';
