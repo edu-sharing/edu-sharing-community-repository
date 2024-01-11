@@ -33,7 +33,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
 @JobDescription(description = "This job triggers a cache reload of the application caches and metadatasets")
-public class InvalidateApplicationCacheJob extends AbstractJobMapAnnotationParams implements JobClusterLocker.ClusterSingelton {
+public class InvalidateApplicationCacheJob extends AbstractJobMapAnnotationParams {
     public InvalidateApplicationCacheJob(){
     }
     @Override

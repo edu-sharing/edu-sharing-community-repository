@@ -43,7 +43,7 @@ import org.quartz.JobExecutionException;
  * @author thomschke
  *
  */
-public class TrackingJob extends AbstractJob implements JobClusterLocker.ClusterSingelton{
+public class TrackingJob extends AbstractJob {
 
 	/**
 	 * job parameter: class name for <code>TrackingEventHandler</code> 
