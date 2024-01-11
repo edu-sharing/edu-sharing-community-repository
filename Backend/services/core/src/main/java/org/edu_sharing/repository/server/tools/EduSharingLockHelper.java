@@ -32,23 +32,21 @@ public class EduSharingLockHelper {
     }
 
     /**
-     * @see  runSingletonTest
+     * @see runSingletonTest
      */
     public static <T> T runSingleton(Class clazz, String keyName, Callable<T> callable, EduSharingLockManager manager) {
-        synchronized (manager) {
-            Lock lock = manager.getLock(clazz, keyName);
+        Lock lock = manager.getLock(clazz, keyName);
+        try {
+            EduSharingLockHelper.acquire(lock);
             try {
-                EduSharingLockHelper.acquire(lock);
-                try {
-                    return callable.call();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                } finally {
-                    lock.unlock();
-                }
+                return callable.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             } finally {
-                manager.cleanupLock(lock);
+                lock.unlock();
             }
+        } finally {
+            manager.cleanupLock(lock);
         }
     }
 }
