@@ -603,13 +603,14 @@
     	<jsp-file>/cas_proxycallback.jsp</jsp-file>
     </servlet>-->
     
-    <!-- Axis servlet stuff -->
+    <!-- Axis servlet stuff
     <servlet>
 		<display-name>Apache-Axis Servlet</display-name>
 		<servlet-name>AxisServlet</servlet-name>
 		<servlet-class>
 		org.apache.axis.transport.http.AxisServlet</servlet-class>
 	</servlet>
+	 -->
 
     <servlet>
         <servlet-name>REST API</servlet-name>
@@ -792,7 +793,7 @@
         <url-pattern>/rendering-error</url-pattern>
     </servlet-mapping>
 
-    <!-- Axis mapping stuff -->
+    <!-- Axis mapping stuff
     <servlet-mapping>
 		<servlet-name>AxisServlet</servlet-name>
 		<url-pattern>/servlet/AxisServlet</url-pattern>
@@ -805,6 +806,7 @@
 		<servlet-name>AxisServlet</servlet-name>
 		<url-pattern>/services/*</url-pattern>
 	</servlet-mapping>
+	-->
 
 	<servlet-mapping>
 		<servlet-name>OAuth2Token</servlet-name>
