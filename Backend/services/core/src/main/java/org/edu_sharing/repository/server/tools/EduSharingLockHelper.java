@@ -1,6 +1,8 @@
 package org.edu_sharing.repository.server.tools;
 
-import org.edu_sharing.repository.server.jobs.quartz.JobClusterLocker;
+import org.alfresco.repo.cache.SimpleCache;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.restservices.ltiplatform.v13.model.LoginInitiationSessionObject;
 import org.edu_sharing.spring.ApplicationContextFactory;
 
 import java.util.concurrent.Callable;
@@ -26,18 +28,27 @@ public class EduSharingLockHelper {
      */
     public static <T> T runSingleton(Class clazz, String keyName, Callable<T> callable) {
         EduSharingLockManager manager = (EduSharingLockManager) ApplicationContextFactory.getApplicationContext().getBean("esLockManager");
-        Lock lock = manager.getLock(clazz, keyName);
-        try {
-            EduSharingLockHelper.acquire(lock);
+        return runSingleton(clazz, keyName, callable, manager);
+    }
+
+    /**
+     * @see  runSingletonTest
+     */
+    public static <T> T runSingleton(Class clazz, String keyName, Callable<T> callable, EduSharingLockManager manager) {
+        synchronized (manager) {
+            Lock lock = manager.getLock(clazz, keyName);
             try {
-                return callable.call();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+                EduSharingLockHelper.acquire(lock);
+                try {
+                    return callable.call();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    lock.unlock();
+                }
             } finally {
-                lock.unlock();
+                manager.cleanupLock(lock);
             }
-        } finally {
-            manager.cleanupLock(lock);
         }
     }
 }
