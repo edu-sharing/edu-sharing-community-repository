@@ -62,10 +62,9 @@
     <tomcat.version.major>9</tomcat.version.major>
     <tomcat.version.minor>0</tomcat.version.minor>
     <tomcat.version.patch>70</tomcat.version.patch>
-    <tomcat.version>${tomcat.version.major}.${tomcat.version.minor}.${tomcat.version.patch}
-    </tomcat.version>
+    <tomcat.version>${tomcat.version.major}.${tomcat.version.minor}.${tomcat.version.patch}</tomcat.version>
 
-    <mongodb.version>4.9.1</mongodb.version>
+    <mongodb.version>4.11.1</mongodb.version>
   </properties>
 
   <profiles>
