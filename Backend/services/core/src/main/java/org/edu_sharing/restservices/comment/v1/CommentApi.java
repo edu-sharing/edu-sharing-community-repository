@@ -15,7 +15,7 @@ import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.comment.v1.model.Comments;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;

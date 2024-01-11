@@ -1,7 +1,7 @@
 package org.edu_sharing.webservices.axis;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.soap.SOAPException;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.xml.soap.SOAPException;
 
 import org.apache.axis.AxisFault;
 import org.apache.axis.MessageContext;

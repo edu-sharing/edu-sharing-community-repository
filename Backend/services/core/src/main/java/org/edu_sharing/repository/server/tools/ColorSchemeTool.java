@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Properties;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Tool class for supporting color schemes.

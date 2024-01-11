@@ -19,7 +19,7 @@ import org.edu_sharing.restservices.shared.Repo;
 import org.edu_sharing.service.network.model.Service;
 import org.edu_sharing.service.network.model.StoredService;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;

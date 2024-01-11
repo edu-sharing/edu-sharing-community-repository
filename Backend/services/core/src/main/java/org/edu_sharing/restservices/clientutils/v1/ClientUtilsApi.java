@@ -15,7 +15,7 @@ import org.edu_sharing.restservices.clientutils.v1.model.WebsiteInformation;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.service.clientutils.ClientUtilsService;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;

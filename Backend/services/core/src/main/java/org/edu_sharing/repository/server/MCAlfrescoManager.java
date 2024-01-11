@@ -29,8 +29,8 @@ package org.edu_sharing.repository.server;
 
 import java.io.File;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -140,7 +140,7 @@ public class MCAlfrescoManager implements ServletContextListener {
 				int size = appInfo.getTrackingBufferSize();
 				logger.info("startup TrackingBuffer (max=" + size + ")");
 				
-				File directory = (File) servletContextEvent.getServletContext().getAttribute("javax.servlet.context.tempdir");
+				File directory = (File) servletContextEvent.getServletContext().getAttribute("jakarta.servlet.context.tempdir");
 				
 				final TrackingBuffer trackingBuffer = 
 						( directory != null 

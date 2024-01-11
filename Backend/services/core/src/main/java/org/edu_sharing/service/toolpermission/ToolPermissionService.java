@@ -2,7 +2,7 @@ package org.edu_sharing.service.toolpermission;
 
 import java.util.*;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;

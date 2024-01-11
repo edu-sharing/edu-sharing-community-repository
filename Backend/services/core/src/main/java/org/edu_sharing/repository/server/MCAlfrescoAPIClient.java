@@ -45,7 +45,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.transaction.UserTransaction;
+import jakarta.transaction.UserTransaction;
 
 import com.google.common.base.CharMatcher;
 import org.alfresco.error.AlfrescoRuntimeException;

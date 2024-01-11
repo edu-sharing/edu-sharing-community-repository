@@ -11,7 +11,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.tomcat.util.modeler.Registry;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.springframework.context.ApplicationContext;
@@ -23,7 +23,7 @@ public class MonitoringDao {
 	BasicDataSource dataSource = (BasicDataSource) applicationContext.getBean("defaultDataSource");
 	
 	
-	public static final String MAX_ACTIVE = "maxActive";
+	public static final String MAX_TOTAL = "maxTotal";
 	public static final String MAX_IDLE = "maxIdle";
 	public static final String NUM_ACTIVE = "numActive";
 	public static final String NUM_IDLE = "numIdle";
@@ -36,7 +36,7 @@ public class MonitoringDao {
 	
 	public HashMap<String,String> getDataBasePoolInfo(){
 		 HashMap<String,String> map = new HashMap<String,String>();
-		 map.put(MAX_ACTIVE, "" + dataSource.getMaxActive());
+		 map.put(MAX_TOTAL, "" + dataSource.getMaxTotal());
 		 map.put(MAX_IDLE, "" + dataSource.getMaxIdle());
 		 map.put(NUM_ACTIVE, "" + dataSource.getNumActive());
 		 map.put(NUM_IDLE, "" + dataSource.getNumIdle());

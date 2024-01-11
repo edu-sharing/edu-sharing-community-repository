@@ -31,10 +31,10 @@
 
   <properties>
 
-    <alfresco.pdf-renderer.version>1.1</alfresco.pdf-renderer.version>
-    <alfresco.platform.version>7.2.0.1</alfresco.platform.version>
-    <alfresco.share.version>7.0.0</alfresco.share.version>
-    <alfresco.sdk.version>4.4.0</alfresco.sdk.version>
+    <alfresco.pdf-renderer.version>1.2</alfresco.pdf-renderer.version>
+    <alfresco.platform.version>23.2.0-A9</alfresco.platform.version>
+    <alfresco.share.version>23.2.0-A10</alfresco.share.version>
+    <alfresco.sdk.version>4.7.0</alfresco.sdk.version>
 
     <!-- release-1 -->
     <bom.repository-repackaged.version>${project.version}</bom.repository-repackaged.version>
@@ -59,9 +59,9 @@
     <postgresql.jdbc.version.patch>0</postgresql.jdbc.version.patch>
     <postgresql.jdbc.version>${postgresql.jdbc.version.major}.${postgresql.jdbc.version.minor}.${postgresql.jdbc.version.patch}</postgresql.jdbc.version>
 
-    <tomcat.version.major>9</tomcat.version.major>
-    <tomcat.version.minor>0</tomcat.version.minor>
-    <tomcat.version.patch>70</tomcat.version.patch>
+    <tomcat.version.major>10</tomcat.version.major>
+    <tomcat.version.minor>1</tomcat.version.minor>
+    <tomcat.version.patch>17</tomcat.version.patch>
     <tomcat.version>${tomcat.version.major}.${tomcat.version.minor}.${tomcat.version.patch}
     </tomcat.version>
 
@@ -277,7 +277,7 @@
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.4</version>
+        <version>2.15.1</version>
       </dependency>
 
       <dependency>
@@ -720,10 +720,17 @@
       </dependency>
 
       <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>javax.servlet-api</artifactId>
-        <version>3.0.1</version>
+        <groupId>jakarta.servlet</groupId>
+        <artifactId>jakarta.servlet-api</artifactId>
+        <version>5.0.0</version>
       </dependency>
+
+      <dependency>
+        <groupId>jakarta.websocket</groupId>
+        <artifactId>jakarta.websocket-api</artifactId>
+        <version>2.1.1</version>
+      </dependency>
+
 
       <dependency>
         <groupId>jaxen</groupId>
@@ -861,7 +868,7 @@
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-aspects</artifactId>
-        <version>5.3.21</version>
+        <version>6.0.14</version>
       </dependency>
 
       <dependency>
@@ -873,7 +880,7 @@
       <dependency>
         <groupId>org.springframework.data</groupId>
         <artifactId>spring-data-commons</artifactId>
-        <version>2.7.15</version>
+        <version>3.2.1</version>
       </dependency>
 
       <dependency>
@@ -882,70 +889,70 @@
         <version>3.4.15</version>
       </dependency>
 
-      <dependency>
+      <!--dependency>
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-core</artifactId>
-        <version>5.8.3</version>
-      </dependency>
+        <version>6.1.14</version>
+      </dependency-->
 
       <dependency>
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-config</artifactId>
-        <version>5.8.3</version>
+        <version>6.1.6</version>
       </dependency>
 
       <dependency>
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-web</artifactId>
-        <version>5.8.3</version>
+        <version>6.1.6</version>
       </dependency>
 
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-web</artifactId>
-        <version>5.3.27</version>
+        <version>6.0.14</version>
       </dependency>
 
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-webmvc</artifactId>
-        <version>5.3.27</version>
+        <version>6.0.14</version>
       </dependency>
 
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-tx</artifactId>
-        <version>5.3.27</version>
+        <version>6.0.14</version>
       </dependency>
 
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-aop</artifactId>
-        <version>5.3.27</version>
+        <version>6.0.14</version>
       </dependency>
 
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-beans</artifactId>
-        <version>5.3.27</version>
+        <version>6.0.14</version>
       </dependency>
 
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-core</artifactId>
-        <version>5.3.27</version>
+        <version>6.0.14</version>
       </dependency>
 
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-expression</artifactId>
-        <version>5.3.27</version>
+        <version>6.0.14</version>
       </dependency>
 
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-context</artifactId>
-        <version>5.3.27</version>
+        <version>6.0.14</version>
       </dependency>
 
 
@@ -1132,8 +1139,8 @@
 
       <dependency>
         <groupId>com.graphql-java-kickstart</groupId>
-        <artifactId>graphql-java-servlet</artifactId>
-        <version>14.0.0</version>
+        <artifactId>graphql-java-servlet-jakarta5</artifactId>
+        <version>15.1.0</version>
         <exclusions>
           <exclusion>
             <groupId>org.slf4j</groupId>
@@ -1149,6 +1156,7 @@
           </exclusion>
         </exclusions>
       </dependency>
+
 
       <dependency>
         <groupId>com.graphql-java-kickstart</groupId>
@@ -1246,6 +1254,17 @@
         <version>2.1.1</version>
       </dependency>
 
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-fileupload2-jakarta</artifactId>
+        <version>2.0.0-M1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-fileupload2-core</artifactId>
+        <version>2.0.0-M1</version>
+      </dependency>
     </dependencies>
 
   </dependencyManagement>

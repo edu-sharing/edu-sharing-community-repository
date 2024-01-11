@@ -404,8 +404,8 @@
     </dependency>
 
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -760,7 +760,7 @@
 
     <dependency>
       <groupId>com.graphql-java-kickstart</groupId>
-      <artifactId>graphql-java-servlet</artifactId>
+      <artifactId>graphql-java-servlet-jakarta5</artifactId>
       <scope>runtime</scope>
     </dependency>
 
@@ -808,6 +808,12 @@
       <artifactId>spring-test</artifactId>
       <version>3.2.17.RELEASE</version>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sun.mail</groupId>
+      <artifactId>javax.mail</artifactId>
+      <version>1.6.2</version>
     </dependency>
 
 

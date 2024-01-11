@@ -4,37 +4,38 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.SingleThreadModel;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload2.core.FileItem;
+import org.apache.commons.fileupload2.core.FileItemFactory;
+import org.apache.commons.fileupload2.core.FileUploadException;
+import org.apache.commons.fileupload2.core.DiskFileItem;
+import org.apache.commons.fileupload2.core.DiskFileItemFactory;
+import org.apache.commons.fileupload2.jakarta.JakartaServletFileUpload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.repository.server.importer.ExcelLOMImporter;
 
-public class ExcelImportServlet extends HttpServlet implements SingleThreadModel{
+public class ExcelImportServlet extends HttpServlet{
 
 	private static Log logger = LogFactory.getLog(ExcelImportServlet.class);
 	
 	protected void doPost(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
 		
 		ServletOutputStream out = resp.getOutputStream();
-		if (!ServletFileUpload.isMultipartContent(request)){
+		if (!JakartaServletFileUpload.isMultipartContent(request)){
 			out.print("No MultipartContent");
 			return;
 		}
-		
-		FileItemFactory factory = new DiskFileItemFactory();
-		ServletFileUpload upload = new ServletFileUpload(factory);
+
+
+
+		DiskFileItemFactory factory = DiskFileItemFactory.builder().get();
+		JakartaServletFileUpload upload = new JakartaServletFileUpload(factory);
 		
 		
 		HashMap<String, String> authInfo = new AuthenticationToolAPI().validateAuthentication(request.getSession());

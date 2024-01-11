@@ -29,7 +29,7 @@ package org.edu_sharing.repository.server;
 
 import java.util.HashMap;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 import net.sf.acegisecurity.Authentication;
 import org.alfresco.model.ContentModel;

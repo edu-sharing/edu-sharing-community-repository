@@ -22,7 +22,7 @@ import org.edu_sharing.restservices.usage.v1.model.CreateUsage;
 import org.edu_sharing.restservices.usage.v1.model.Usages;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;

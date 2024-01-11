@@ -45,7 +45,7 @@ import org.edu_sharing.restservices.iam.v1.model.ProfileSettings;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;

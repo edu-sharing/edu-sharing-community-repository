@@ -25,7 +25,7 @@ import org.edu_sharing.restservices.register.v1.model.RegisterInformation;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.springframework.context.ApplicationContext;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 import java.io.Serializable;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;

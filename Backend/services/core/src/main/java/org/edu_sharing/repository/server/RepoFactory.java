@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 import org.alfresco.repo.node.MLPropertyInterceptor;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;

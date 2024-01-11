@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Remote API
  * %%
- * Copyright (C) 2005 - 2016 Alfresco Software Limited
+ * Copyright (C) 2005 - 2023 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software. 
  * If the software was purchased under a paid Alfresco license, the terms of 
@@ -25,6 +25,7 @@
  */
 package org.alfresco.repo.webdav;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.repo.activities.ActivityType;
 import org.alfresco.service.cmr.activities.ActivityPoster;
@@ -34,8 +35,6 @@ import org.alfresco.sync.repo.Client;
 import org.alfresco.sync.repo.Client.ClientType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * WebDAV methods may use an instance of this class to post activity data.

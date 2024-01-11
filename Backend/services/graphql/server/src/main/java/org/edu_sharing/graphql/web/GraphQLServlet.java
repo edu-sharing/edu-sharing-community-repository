@@ -1,6 +1,6 @@
 package org.edu_sharing.graphql.web;
 
-import graphql.kickstart.execution.GraphQLInvoker;
+
 import graphql.kickstart.servlet.GraphQLConfiguration;
 import graphql.kickstart.servlet.GraphQLHttpServlet;
 import graphql.schema.GraphQLSchema;
@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
 
 public class GraphQLServlet extends GraphQLHttpServlet {
     @Autowired private GraphQLConfiguration graphQLConfiguration;

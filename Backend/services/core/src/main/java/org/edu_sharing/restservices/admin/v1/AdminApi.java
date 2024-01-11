@@ -57,7 +57,7 @@ import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.version.RepositoryVersionInfo;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;

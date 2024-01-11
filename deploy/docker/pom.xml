@@ -32,7 +32,7 @@
     </docker.edu_sharing.community.common.alfresco.activemq>
 
     <docker.edu_sharing.community.common.alfresco.repository>
-      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-alfresco-repository:7.4.1
+      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-alfresco-repository:23.2.0-A9
     </docker.edu_sharing.community.common.alfresco.repository>
 
     <docker.edu_sharing.community.common.alfresco.transform>

@@ -3,13 +3,13 @@ package org.edu_sharing.repository.server.authentication;
 import java.io.IOException;
 import java.util.HashMap;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -20,7 +20,7 @@ import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.alfresco.service.config.model.Config;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 
-public class GuestFilter implements javax.servlet.Filter {
+public class GuestFilter implements jakarta.servlet.Filter {
 
 	Logger logger = Logger.getLogger(GuestFilter.class);
 	
@@ -78,7 +78,7 @@ public class GuestFilter implements javax.servlet.Filter {
 
 	}
 
-	public void init(javax.servlet.FilterConfig arg0) throws ServletException {
+	public void init(jakarta.servlet.FilterConfig arg0) throws ServletException {
 
 	};
 }

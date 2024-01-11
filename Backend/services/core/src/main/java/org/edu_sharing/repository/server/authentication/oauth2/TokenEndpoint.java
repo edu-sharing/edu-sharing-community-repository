@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.apache.log4j.Logger;
@@ -64,8 +64,13 @@ public class TokenEndpoint extends HttpServlet {
 			OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
 	
 			try {
-				
-				oauthRequest = new OAuthTokenRequest(request);
+
+				/**
+				 * @TODO
+				 *  jakarta/javax lib problem
+				 *  justed fixed compile problems
+				 */
+				oauthRequest = null;//new OAuthTokenRequest(request);
 	
 				String clientId = oauthRequest.getClientId();
 	

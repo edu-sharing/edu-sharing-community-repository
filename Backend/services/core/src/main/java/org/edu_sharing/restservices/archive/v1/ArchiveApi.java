@@ -16,7 +16,7 @@ import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.archive.v1.model.RestoreResults;
 import org.edu_sharing.restservices.shared.*;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;

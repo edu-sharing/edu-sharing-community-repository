@@ -29,7 +29,7 @@ package org.edu_sharing.repository.server;
 
 import java.util.HashMap;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 public interface AuthenticationTool {
 	public HashMap<String, String> createNewSession(String userName, String password) throws Exception;

@@ -18,7 +18,7 @@ import org.edu_sharing.service.feedback.FeedbackServiceFactory;
 import org.edu_sharing.service.feedback.model.FeedbackData;
 import org.edu_sharing.service.feedback.model.FeedbackResult;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Remote API
  * %%
- * Copyright (C) 2005 - 2016 Alfresco Software Limited
+ * Copyright (C) 2005 - 2023 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software. 
  * If the software was purchased under a paid Alfresco license, the terms of 
@@ -25,6 +25,12 @@
  */
 package org.alfresco.repo.webdav;
 
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.UserTransaction;
 import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.repo.security.authentication.AuthenticationContext;
 import org.alfresco.repo.tenant.TenantService;
@@ -44,12 +50,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.List;
@@ -96,10 +96,10 @@ public class WebDAVServlet extends HttpServlet
     private static NodeRef defaultRootNode; // for default domain
     
     // WebDAV helper class
-    private transient WebDAVHelper m_davHelper;
+    private WebDAVHelper m_davHelper;
     private WebDAVActivityPoster activityPoster;
 
-    private transient WebDAVInitParameters initParams;
+    private WebDAVInitParameters initParams;
 
     /**
      * @see HttpServlet#service(HttpServletRequest,
@@ -118,6 +118,13 @@ public class WebDAVServlet extends HttpServlet
         if (logger.isTraceEnabled())
         {
             startTime = System.currentTimeMillis();
+        }
+
+        if (request.getMethod().equals(WebDAV.METHOD_POST) && !initParams.allowInsecurePOSTMethod())
+        {
+            logger.error("POST method is not allowed!");
+            response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+            return;
         }
 
         FileFilterMode.setClient(Client.webdav);
@@ -406,6 +413,7 @@ public class WebDAVServlet extends HttpServlet
         private String storeName;
         private String rootPath;
         private String urlPathPrefix;
+        private boolean allowInsecurePOSTMethod = false;
         
         public boolean getEnabled()
         {
@@ -480,6 +488,16 @@ public class WebDAVServlet extends HttpServlet
         public void setUrlPathPrefix(String urlPathPrefix)
         {
             this.urlPathPrefix = urlPathPrefix;
+        }
+
+        public boolean allowInsecurePOSTMethod()
+        {
+            return allowInsecurePOSTMethod;
+        }
+
+        public void setAllowInsecurePOSTMethod(boolean allowInsecurePOSTMethod)
+        {
+            this.allowInsecurePOSTMethod = allowInsecurePOSTMethod;
         }
     }
 }

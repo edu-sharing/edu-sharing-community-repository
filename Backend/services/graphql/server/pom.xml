@@ -63,7 +63,7 @@
 
         <dependency>
             <groupId>com.graphql-java-kickstart</groupId>
-            <artifactId>graphql-java-servlet</artifactId>
+            <artifactId>graphql-java-servlet-jakarta5</artifactId>
             <scope>provided</scope>
         </dependency>
 
@@ -142,5 +142,20 @@
             <artifactId>edu_sharing-community-repository-backend-alfresco-module</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/jakarta.websocket/jakarta.websocket-api -->
+        <dependency>
+            <groupId>jakarta.websocket</groupId>
+            <artifactId>jakarta.websocket-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+
     </dependencies>
 </project>

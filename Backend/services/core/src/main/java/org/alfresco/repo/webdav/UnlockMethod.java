@@ -2,7 +2,7 @@
  * #%L
  * Alfresco Remote API
  * %%
- * Copyright (C) 2005 - 2016 Alfresco Software Limited
+ * Copyright (C) 2005 - 2023 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software. 
  * If the software was purchased under a paid Alfresco license, the terms of 
@@ -25,6 +25,7 @@
  */
 package org.alfresco.repo.webdav;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.lock.UnableToReleaseLockException;
 import org.alfresco.service.cmr.model.FileInfo;
@@ -33,7 +34,6 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.rule.RuleService;
 import org.alfresco.service.cmr.rule.RuleType;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.Set;
 
 /**

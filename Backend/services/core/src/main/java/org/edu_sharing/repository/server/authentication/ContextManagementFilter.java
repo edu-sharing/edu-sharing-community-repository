@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Map;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -41,7 +41,7 @@ import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 import org.springframework.context.ApplicationContext;
 
 
-public class ContextManagementFilter implements javax.servlet.Filter {
+public class ContextManagementFilter implements jakarta.servlet.Filter {
 	// stores the currently accessing tool type, e.g. CONNECTOR
 	public static ThreadLocal<TrackingApplicationInfo> accessTool = new ThreadLocal<>();
 

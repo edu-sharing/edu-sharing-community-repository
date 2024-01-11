@@ -12,10 +12,10 @@ import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.json.JSONObject;
 import org.springframework.validation.Errors;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -30,15 +30,15 @@ public class NgErrorServlet extends HttpServlet {
 
 	private static void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		try {
-			Object errorMessage= req.getAttribute("javax.servlet.error.message");
-			Object errorCode= req.getAttribute("javax.servlet.error.status_code");
+			Object errorMessage= req.getAttribute("jakarta.servlet.error.message");
+			Object errorCode= req.getAttribute("jakarta.servlet.error.status_code");
 			ErrorFilter.handleError(req, resp, new Throwable(
 					errorMessage.toString()),
 					Integer.parseInt(errorCode.toString())
 			);
 		}catch(NullPointerException e) {
 			try {
-				Throwable t = (Throwable) req.getAttribute("javax.servlet.error.exception");
+				Throwable t = (Throwable) req.getAttribute("jakarta.servlet.error.exception");
 				logger.error(t);
 			} catch(Throwable t){
 				resp.sendError(500, "Fatal error preparing error.html: "+t.getMessage());

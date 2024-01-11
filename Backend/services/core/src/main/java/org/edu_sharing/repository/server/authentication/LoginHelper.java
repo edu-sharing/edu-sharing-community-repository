@@ -6,7 +6,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.remote.Rocketchat;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 
