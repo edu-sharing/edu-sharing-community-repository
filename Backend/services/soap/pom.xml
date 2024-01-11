@@ -25,12 +25,4 @@
     <module>webapp</module>
   </modules>
 
-  <dependencies>
-    <dependency>
-      <groupId>jakarta.xml.soap</groupId>
-      <artifactId>jakarta.xml.soap-api</artifactId>
-      <version>3.0.1</version>
-    </dependency>
-  </dependencies>
-
 </project>
