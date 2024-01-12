@@ -185,6 +185,11 @@ export CATALINA_OPTS="-Duser.language=de $CATALINA_OPTS"
 export CATALINA_OPTS="-Dorg.xml.sax.parser=com.sun.org.apache.xerces.internal.parsers.SAXParser $CATALINA_OPTS"
 export CATALINA_OPTS="-Djavax.xml.parsers.DocumentBuilderFactory=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl $CATALINA_OPTS"
 export CATALINA_OPTS="-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl $CATALINA_OPTS"
+# hazelcast 5.3
+#TODO Enabling XXE protection failed. The attribute http://javax.xml.XMLConstants/property/accessExternalDTD is not supported by the TransformerFactory. This usually mean an outdated XML processor is present on the classpath (e.g. Xerces, Xalan). If you are not able to resolve the issue by fixing the classpath, the hazelcast.ignoreXxeProtectionFailures system property can be used to disable XML External Entity protections. We don't recommend disabling the XXE as such the XML processor configuration is unsecure!
+export CATALINA_OPTS="-Dhazelcast.ignoreXxeProtectionFailures=true $CATALINA_OPTS"
+export CATALINA_OPTS="--add-modules java.se --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.management/sun.management=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED $CATALINA_OPTS"
+
 
 xmlstarlet ed -L \
 	-d '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/@hostConfigClass' \
