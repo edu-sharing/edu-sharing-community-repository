@@ -86,7 +86,7 @@
               <regex>true</regex>
               <replacements>
                 <replacement>
-                  <token>@javax.annotation.Generated(.)*</token>
+                  <token>@jakarta.annotation.Generated(.)*</token>
                   <value/>
                 </replacement>
               </replacements>
@@ -153,7 +153,7 @@
 
     <dependency>
       <groupId>io.swagger.core.v3</groupId>
-      <artifactId>swagger-annotations</artifactId>
+      <artifactId>swagger-annotations-jakarta</artifactId>
     </dependency>
 
     <dependency>

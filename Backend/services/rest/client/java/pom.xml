@@ -56,6 +56,10 @@
               <apiPackage>${java.package}.api</apiPackage>
               <modelPackage>${java.package}.model</modelPackage>
               <skipValidateSpec>false</skipValidateSpec>
+              <!--configHelp>true</configHelp-->
+              <configOptions>
+                <useJakartaEe>true</useJakartaEe>
+              </configOptions>
             </configuration>
           </execution>
         </executions>
@@ -79,7 +83,7 @@
               <regex>true</regex>
               <replacements>
                 <replacement>
-                  <token>@javax.annotation.Generated(.)*</token>
+                  <token>@jakarta.annotation(.)*</token>
                   <value/>
                 </replacement>
               </replacements>
@@ -421,8 +425,8 @@
     </dependency>
 
     <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>javax.ws.rs-api</artifactId>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
       <scope>provided</scope>
     </dependency>
 

@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.apache.commons.logging.impl.Log4JLogger;

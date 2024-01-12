@@ -7,6 +7,10 @@ whitelist=(
   # swagger gen vs swagger usage conflict -> new api
   "xmlsec-1.5.8.jar:alf-lib" # axis-1.4
   "xmlsec-1.4.5.jar:edu-lib" # axis-1.4
+  "jakarta.activation-2.0.1.jar:alf-lib" #todo remove when soap is removed
+  "jakarta.activation-2.0.1.jar:edu-lib"
+  "jakarta.xml.soap-api-2.0.1.jar:alf-lib" #todo remove when soap is removed
+  "jakarta.xml.soap-api-2.0.1.jar:edu-lib"
 )
 
 files=()

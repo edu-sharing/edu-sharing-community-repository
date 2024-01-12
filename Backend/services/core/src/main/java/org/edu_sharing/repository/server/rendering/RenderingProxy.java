@@ -11,7 +11,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import org.edu_sharing.generated.repository.backend.services.rest.client.model.RenderingDetailsEntry;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;

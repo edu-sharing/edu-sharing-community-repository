@@ -17,9 +17,9 @@ import org.edu_sharing.restservices.archive.v1.model.RestoreResults;
 import org.edu_sharing.restservices.shared.*;
 
 import jakarta.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 
