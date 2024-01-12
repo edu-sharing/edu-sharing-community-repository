@@ -5,18 +5,18 @@ import {
     AuthenticationService,
     RestConstants,
     NetworkService,
+    RatingV1Service,
 } from 'ngx-edu-sharing-api';
 import { Toast } from '../../services/abstract/toast.service';
 import { take, takeUntil } from 'rxjs/operators';
 import { RestHelper } from '../../util/rest-helper';
+
 @Component({
     selector: 'es-node-rating',
     templateUrl: 'node-rating.component.html',
     styleUrls: ['node-rating.component.scss'],
 })
 export class NodeRatingComponent<T extends Node> implements OnInit {
-    // @TODO
-    ratingService: any = {};
     @Input() node: T;
     mode: RatingMode;
     hasPermission: boolean;
@@ -26,7 +26,8 @@ export class NodeRatingComponent<T extends Node> implements OnInit {
         public configService: ConfigService,
         private networkApi: NetworkService,
         public authenticationService: AuthenticationService,
-        public changeDetectorRef: ChangeDetectorRef, // @TODO // public ratingService: RestRatingService,
+        public changeDetectorRef: ChangeDetectorRef,
+        public ratingService: RatingV1Service,
     ) {}
 
     async ngOnInit() {
@@ -41,7 +42,12 @@ export class NodeRatingComponent<T extends Node> implements OnInit {
         const name = RestHelper.getTitle(this.node);
         if (this.node.rating?.user) {
             try {
-                await this.ratingService.deleteNodeRating(this.node.ref.id).toPromise();
+                await this.ratingService
+                    .deleteRating({
+                        repository: this.node.ref.repo,
+                        node: this.node.ref.id,
+                    })
+                    .toPromise();
                 this.toast.toast('RATING.TOAST.LIKE_REMOVED', { name });
                 this.node.rating.user = 0;
                 this.node.rating.overall.count--;
@@ -50,7 +56,14 @@ export class NodeRatingComponent<T extends Node> implements OnInit {
             }
         } else {
             try {
-                await this.ratingService.updateNodeRating(this.node.ref.id, 5).toPromise();
+                await this.ratingService
+                    .addOrUpdateRating({
+                        repository: this.node.ref.repo,
+                        node: this.node.ref.id,
+                        rating: 5,
+                        body: null,
+                    })
+                    .toPromise();
                 this.toast.toast('RATING.TOAST.LIKED', { name });
                 this.node.rating.user = 5;
                 this.node.rating.overall.count++;
@@ -74,7 +87,14 @@ export class NodeRatingComponent<T extends Node> implements OnInit {
     async setRating(rating: number) {
         const name = RestHelper.getTitle(this.node);
         try {
-            await this.ratingService.updateNodeRating(this.node.ref.id, rating).toPromise();
+            await this.ratingService
+                .addOrUpdateRating({
+                    repository: this.node.ref.repo,
+                    node: this.node.ref.id,
+                    rating,
+                    body: null,
+                })
+                .toPromise();
             this.toast.toast('RATING.TOAST.RATED', { name, rating });
             this.node.rating.overall.count += this.node.rating.user ? 0 : 1;
             this.node.rating.user = rating;
@@ -87,7 +107,12 @@ export class NodeRatingComponent<T extends Node> implements OnInit {
     async deleteRating() {
         const name = RestHelper.getTitle(this.node);
         try {
-            await this.ratingService.deleteNodeRating(this.node.ref.id).toPromise();
+            await this.ratingService
+                .deleteRating({
+                    repository: this.node.ref.repo,
+                    node: this.node.ref.id,
+                })
+                .toPromise();
             this.toast.toast('RATING.TOAST.RATING_REMOVED', { name });
             this.node.rating.overall.count--;
             this.node.rating.overall.sum -= this.node.rating.user;

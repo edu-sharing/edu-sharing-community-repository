@@ -45,4 +45,5 @@ export {
     NotificationV1Service,
     FeedbackV1Service,
     LtiPlatformV13Service,
+    RatingV1Service,
 } from './lib/api/services';
