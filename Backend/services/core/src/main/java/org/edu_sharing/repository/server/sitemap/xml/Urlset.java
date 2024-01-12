@@ -1,7 +1,7 @@
 package org.edu_sharing.repository.server.sitemap.xml;
 import org.edu_sharing.repository.server.sitemap.SitemapServlet;
 
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Collection;
 

@@ -1,6 +1,6 @@
 package org.edu_sharing.repository.server.oembed;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class oEmbedBase {

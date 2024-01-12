@@ -3,7 +3,7 @@ package org.edu_sharing.alfresco.service.config.model;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElement;
 
 public class Context implements Serializable {
 	@XmlElement	public String id;
