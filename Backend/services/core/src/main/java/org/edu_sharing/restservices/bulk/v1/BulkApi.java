@@ -13,6 +13,7 @@ import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
+import org.edu_sharing.service.bulk.BulkRun;
 import org.edu_sharing.service.bulk.BulkServiceFactory;
 
 import javax.servlet.http.HttpServletRequest;
@@ -87,6 +88,33 @@ public class BulkApi {
 			NodeEntry entry = new NodeEntry();
 			entry.setNode(nodeDao.asNode());
 			return Response.ok().entity(entry).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t, ErrorResponse.ErrorResponseLogging.relaxed);
+		}
+	}
+
+
+	@GET
+	@Path("/runs")
+
+	@Operation(summary = "get imports from new runs", description = "Gets a list of runs from this crawler (by day) and info about the state of this run")
+
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = BulkRun[].class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	public Response find(@Context HttpServletRequest req,
+						 @Parameter(description = "replicationsource as previously provided when syncing data" , required=true) @QueryParam("replicationsource") String replicationsource,
+						 @Parameter(description = "filter by state (optional)" , required=false) @QueryParam("filterBySate") BulkRun.RunState filterBySate
+	) {
+		try {
+			List<BulkRun> runs = BulkServiceFactory.getInstance().runs(replicationsource, filterBySate);
+			if(runs==null) {
+				throw new DAOMissingException(new Throwable("No data found for replicationsource"));
+			}
+			return Response.ok().entity(runs).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t, ErrorResponse.ErrorResponseLogging.relaxed);
 		}

@@ -2002,7 +2002,17 @@
 				</property>
 			</properties>
 		</aspect>
-		
+
+		<aspect name="ccm:replicationfolder">
+			<title>aspect for marking a folder that contains replication data ("crawler") and extending it with behaviour configs</title>
+			<properties>
+				<!-- information about how to handle new files. See @BulkUpdateBehaviour -->
+				<property name="ccm:replicationfolderupdate">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</aspect>
+
 		<aspect name="ccm:positionable">
 			<title>aspect to give an object position information</title>
 			<properties>

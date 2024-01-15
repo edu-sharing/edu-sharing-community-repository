@@ -6,6 +6,10 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
+import org.alfresco.service.cmr.security.AccessPermission;
+import org.alfresco.service.cmr.security.AccessStatus;
+import org.alfresco.service.cmr.security.AuthorityType;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
@@ -17,19 +21,24 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.EduSharingLockHelper;
+import org.edu_sharing.restservices.DAOException;
+import org.edu_sharing.restservices.NodeDao;
+import org.edu_sharing.restservices.RepositoryDao;
+import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BulkServiceImpl implements BulkService {
 	public static final String PRIMARY_FOLDER_NAME = "SYNC_OBJ";
+	public static final String NEW_DATA_FOLDER_NAME = "NEW";
 
 	/**
 	 * these internal properties will be ignored from the mds and never touched by the bulk service sync method
@@ -62,22 +71,56 @@ public class BulkServiceImpl implements BulkService {
 
 	public NodeRef getOrCreate(NodeRef parent, String name, HashMap<String, Object> propertiesNative){
 		name = NodeServiceHelper.cleanupCmName(name);
+		NodeRef replicationFolder = getOrCreateFolderInternal(parent, name, propertiesNative);
+		BulkUpdateBehaviour behaviour = getBehaviourConfig(replicationFolder);
+		if(behaviour.equals(BulkUpdateBehaviour.None)) {
+			return replicationFolder;
+		} else if(behaviour.equals(BulkUpdateBehaviour.SeparateViaFolder)) {
+			NodeRef newFolder = getOrCreateFolderInternal(replicationFolder, NEW_DATA_FOLDER_NAME, propertiesNative);
+			copyPermissions(replicationFolder, newFolder);
+			String dateName = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+			return getOrCreateFolderInternal(newFolder, dateName, propertiesNative);
+		}
+		throw new IllegalArgumentException("unkown behaviour: " + behaviour);
+	}
+
+	private void copyPermissions(NodeRef fromFolder, NodeRef toFolder) {
+		PermissionService permissionService = serviceRegistry.getPermissionService();
+		Set<AccessPermission> permissions = permissionService.getAllSetPermissions(fromFolder).stream().filter(p -> !p.getAuthorityType().equals(AuthorityType.EVERYONE) && !p.isInherited()).collect(Collectors.toSet());
+		permissionService.deletePermissions(toFolder);
+		permissionService.setInheritParentPermissions(toFolder, false);
+		permissions.forEach(p -> permissionService.setPermission(toFolder, p.getAuthority(), p.getPermission(), p.getAccessStatus().equals(AccessStatus.ALLOWED)));
+	}
+
+	private static NodeRef getOrCreateFolderInternal(NodeRef parent, String name, HashMap<String, Object> propertiesNative) {
 		NodeRef node = nodeServiceAlfresco.getChildByName(parent, ContentModel.ASSOC_CONTAINS, name);
-		if(node == null){
-			Map<QName, Serializable> props=new HashMap<>();
-			props.put(ContentModel.PROP_NAME, name);
-			if(propertiesNative!=null){
-				props.put(QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET),
-						(Serializable)propertiesNative.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
-				props.put(QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET),
-						(Serializable)propertiesNative.get(CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET));
-			}
-			return serviceRegistry.getNodeService().createNode(parent, ContentModel.ASSOC_CONTAINS,
-					QName.createQName(name),
-					QName.createQName(CCConstants.CCM_TYPE_MAP),
-					props).getChildRef();
+		if (node == null) {
+			return createFolder(parent, name, propertiesNative);
 		}
 		return node;
+	}
+
+	private static NodeRef createFolder(NodeRef parent, String name, HashMap<String, Object> propertiesNative) {
+		Map<QName, Serializable> props = new HashMap<>();
+		props.put(ContentModel.PROP_NAME, name);
+		if (propertiesNative != null) {
+			props.put(QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET),
+					(Serializable) propertiesNative.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
+			props.put(QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET),
+					(Serializable) propertiesNative.get(CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET));
+		}
+		return serviceRegistry.getNodeService().createNode(parent, ContentModel.ASSOC_CONTAINS,
+				QName.createQName(name),
+				QName.createQName(CCConstants.CCM_TYPE_MAP),
+				props).getChildRef();
+	}
+
+	private BulkUpdateBehaviour getBehaviourConfig(NodeRef primaryFolder) {
+		String value = (String) serviceRegistry.getNodeService().getProperty(primaryFolder, QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONFOLDERUPDATE));
+		if(value == null) {
+			return BulkUpdateBehaviour.None;
+		}
+		return BulkUpdateBehaviour.valueOf(value);
 	}
 
 	@Override
@@ -86,7 +129,7 @@ public class BulkServiceImpl implements BulkService {
 	}
 
 	public BulkServiceImpl(){
-		primaryFolder = getOrCreate(repositoryHelper.getCompanyHome(), PRIMARY_FOLDER_NAME, null);
+		primaryFolder = getOrCreateFolderInternal(repositoryHelper.getCompanyHome(), PRIMARY_FOLDER_NAME, null);
 
 
 		// all props which might be overriden through the user, reset them and clean them
@@ -114,7 +157,7 @@ public class BulkServiceImpl implements BulkService {
 			} catch (InstantiationException | IllegalAccessException | InvocationTargetException |
 					 NoSuchMethodException | ClassNotFoundException e) {
 				throw new RuntimeException(e);
-	}
+			}
 		}).collect(Collectors.toList());
 	}
 
@@ -216,10 +259,10 @@ public class BulkServiceImpl implements BulkService {
 		propsToClean.forEach((k) -> cleanProps.put(k, null));
 		return cleanProps;*/
 		return Stream.concat(MetadataHelper.getWidgetsByNode(nodeRef, false).stream().map((w) -> CCConstants.getValidGlobalName(w.getId())).
-				filter(Objects::nonNull).
-				filter(id -> !IGNORE_PROPERTIES.contains(id)).
-				filter(id -> !id.startsWith("{virtualproperty}")),
-				propsToClean.stream())
+								filter(Objects::nonNull).
+								filter(id -> !IGNORE_PROPERTIES.contains(id)).
+								filter(id -> !id.startsWith("{virtualproperty}")),
+						propsToClean.stream())
 				.collect(Collectors.toList());
 	}
 	/**
@@ -328,6 +371,38 @@ public class BulkServiceImpl implements BulkService {
 			throw new Exception("The given properties ("+props+") matched more than 1 node (" + result.size() + "). Please check your criterias and make sure they match unique data");
 		}
 		return null;
+	}
+
+	@Override
+	public List<BulkRun> runs(String replicationsource, BulkRun.RunState filterByState) throws DAOException {
+		String name = NodeServiceHelper.cleanupCmName(replicationsource);
+		NodeRef replicationFolder = getOrCreateFolderInternal(getPrimaryFolder(), name, null);
+		if(replicationFolder == null) {
+			return null;
+		}
+		NodeRef newFolder = serviceRegistry.getNodeService().getChildByName(replicationFolder, ContentModel.ASSOC_CONTAINS, NEW_DATA_FOLDER_NAME);
+		if(newFolder == null) {
+			return Collections.emptyList();
+		}
+		return serviceRegistry.getNodeService().getChildAssocs(newFolder, Collections.singleton(QName.createQName(CCConstants.CCM_TYPE_MAP))).stream().map(
+				child -> {
+					try {
+						BulkRun.RunState state = serviceRegistry.getPermissionService().getAllSetPermissions(child.getChildRef()).stream()
+								.anyMatch((p) -> p.getAuthorityType().equals(AuthorityType.EVERYONE) && p.getAccessStatus().equals(AccessStatus.ALLOWED)) ?
+								BulkRun.RunState.Published : BulkRun.RunState.New;
+						if(filterByState == null || state.equals(filterByState)) {
+							return new BulkRun(
+									NodeDao.getNode(RepositoryDao.getHomeRepository(), child.getChildRef().getId(), Filter.createShowAllFilter()).asNode(),
+									state
+							);
+						} else {
+							return null;
+						}
+					} catch (DAOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+		).filter(Objects::nonNull).collect(Collectors.toList());
 	}
 
 	public static List<NodeRef> filterCMISResult(List<NodeRef> result, NodeRef primaryFolder){

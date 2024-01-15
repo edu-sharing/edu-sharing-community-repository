@@ -1156,6 +1156,8 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_REPLICATIONSOURCEID = "{http://www.campuscontent.de/model/1.0}replicationsourceid";
 	public final static String CCM_PROP_IO_REPLICATIONSOURCEUUID = "{http://www.campuscontent.de/model/1.0}replicationsourceuuid";
 	public final static String CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP = "{http://www.campuscontent.de/model/1.0}replicationsourcetimestamp";
+
+	public final static String CCM_PROP_IO_REPLICATIONFOLDERUPDATE = "{http://www.campuscontent.de/model/1.0}replicationfolderupdate";
 	public final static String CCM_PROP_IO_REPLICATION_MODIFIED = "{http://www.campuscontent.de/model/1.0}replicationmodified";
 	public final static String CCM_PROP_IO_IMPORT_MODIFIED = "{http://www.campuscontent.de/model/1.0}importmodified";
 	public final static String CCM_PROP_IO_IMPORT_BLOCKED = "{http://www.campuscontent.de/model/1.0}importblocked";
