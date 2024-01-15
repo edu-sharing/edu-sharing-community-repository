@@ -1,5 +1,5 @@
 {
-  "COLLECTIONS": {
+   "COLLECTIONS": {
     "TUTORIAL_HEADING": "Einsammeln was dir gefällt",
     "NO_SUBCOLLECTIONS_HINT": "Du kannst weitere Sammlungen über den \"Neu\"-Button anlegen",
     "CREATE": {
@@ -23,5 +23,7 @@
       "EDU_GROUPS_LONG": "Sammlungen, die für Dich freigegeben wurden"
     },
     "PERMISSIONS_STATUS_MY": "Aktuell ist die Sammlung nur für Dich sichtbar."
-  }
+  },
+  "collections_howToAddContent": "Du kannst in der Suchumgebung nach geeigneten Materialien für Deine Sammlung suchen. Klicke einfach auf ein geeignetes Material und wähle dann die Option 'zu Sammlung hinzufügen' aus.",
+  "collections_noOrgaCollections": "Du wurdest bisher zu keiner Sammlung eingeladen."
 }
