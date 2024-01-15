@@ -5,10 +5,10 @@ import { BehaviorSubject, observable, Observable, of as observableOf } from 'rxj
 import { first, map, switchMap, tap } from 'rxjs/operators';
 import { BridgeService } from '../core-bridge-module/bridge.service';
 import { ConfigurationService, SessionStorageService } from '../core-module/core.module';
-import { LANGUAGES } from './languages';
+import { LANGUAGES } from 'ngx-edu-sharing-api';
 
 // 'none' means that only labels should be shown (for dev)
-const DEFAULT_SUPPORTED_LANGUAGES = ['de', 'de-informal', 'en', 'none'];
+const DEFAULT_SUPPORTED_LANGUAGES = ['de', 'de-informal', 'en', 'fr', 'none'];
 
 @Injectable({ providedIn: 'root' })
 export class TranslationsService {
@@ -56,6 +56,7 @@ export class TranslationsService {
                         first(),
                         map((params) => {
                             let selectedLanguage: string = null;
+                            console.log(supportedLanguages, params.locale);
                             if (supportedLanguages.indexOf(params.locale) !== -1) {
                                 selectedLanguage = params.locale;
                             } else if (params.locale) {
