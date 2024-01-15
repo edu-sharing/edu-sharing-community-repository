@@ -1,13 +1,13 @@
 package org.edu_sharing.alfresco.transformer.executors;
 
-import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transformer.executors.AbstractCommandExecutor;
-import org.alfresco.transformer.executors.RuntimeExec;
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.executors.AbstractCommandExecutor;
+import org.alfresco.transform.base.executors.RuntimeExec;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 
 import java.io.*;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 
 @Component
-public class H5pThumbnailExecutor extends AbstractCommandExecutor {
+public class H5pThumbnailExecutor extends AbstractCommandExecutor implements CustomTransformerFileAdaptor {
 
     private static final Logger logger = LoggerFactory.getLogger(H5pThumbnailExecutor.class);
 
@@ -52,51 +52,7 @@ public class H5pThumbnailExecutor extends AbstractCommandExecutor {
         return createTransformCommand();
     }
 
-    @Override
-    public String getTransformerId() {
-        return ID;
-    }
 
-    @Override
-    public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions, File sourceFile, File targetFile) throws TransformException {
-        this.transform(null, targetMimetype, transformOptions, sourceFile, targetFile);
-    }
-
-    @Override
-    public void transform(String transformName, String sourceMimetype, String targetMimetype, Map<String, String> transformOptions, File sourceFile, File targetFile) throws Exception {
-
-        logger.info("sourceMimetype:"+sourceMimetype+" targetMimetype:"+targetMimetype+" sourceFile:"+sourceFile +" targetFile:"+targetFile);
-        if(transformOptions != null)
-            transformOptions.entrySet().stream().forEach(e -> System.out.println("o:"+ e.getKey() + " "+e.getValue()));
-
-        Files.copy(sourceFile.toPath(), Path.of("/tmp/source.h5p"), StandardCopyOption.REPLACE_EXISTING);
-
-        try {
-            ArchiveInputStream zip = getZipInputStream(sourceFile);
-            while (true) {
-                ArchiveEntry entry = zip.getNextEntry();
-                if(entry==null) {
-                    logger.info("entry is null");
-                    break;
-                }
-                String name=entry.getName().toLowerCase();
-                if(name.startsWith("content/images") && (name.endsWith(".jpg") || name.endsWith(".png"))){
-
-                    logger.info("found preview in zip");
-
-                    OutputStream os = new FileOutputStream(targetFile);
-                    InputStream is = ImageTool.autoRotateImage(zip, ImageTool.MAX_THUMB_SIZE);
-                    StreamUtils.copy(is,os);
-                    os.close();
-                    return;
-                }
-            }
-        }
-        catch(Throwable t){
-            logger.error(t.getMessage(),t);
-        }
-
-    }
 
     public static ArchiveInputStream getZipInputStream(File sourceFile) throws IOException {
 
@@ -143,5 +99,45 @@ public class H5pThumbnailExecutor extends AbstractCommandExecutor {
         }
         is.close();
         return null;
+    }
+
+
+    @Override
+    public String getTransformerName() {
+        return ID;
+    }
+
+    @Override
+    public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions, File sourceFile, File targetFile, TransformManager transformManager) throws Exception {
+        logger.info("sourceMimetype:"+sourceMimetype+" targetMimetype:"+targetMimetype+" sourceFile:"+sourceFile +" targetFile:"+targetFile);
+        if(transformOptions != null)
+            transformOptions.entrySet().stream().forEach(e -> System.out.println("o:"+ e.getKey() + " "+e.getValue()));
+
+        Files.copy(sourceFile.toPath(), Path.of("/tmp/source.h5p"), StandardCopyOption.REPLACE_EXISTING);
+
+        try {
+            ArchiveInputStream zip = getZipInputStream(sourceFile);
+            while (true) {
+                ArchiveEntry entry = zip.getNextEntry();
+                if(entry==null) {
+                    logger.info("entry is null");
+                    break;
+                }
+                String name=entry.getName().toLowerCase();
+                if(name.startsWith("content/images") && (name.endsWith(".jpg") || name.endsWith(".png"))){
+
+                    logger.info("found preview in zip");
+
+                    OutputStream os = new FileOutputStream(targetFile);
+                    InputStream is = ImageTool.autoRotateImage(zip, ImageTool.MAX_THUMB_SIZE);
+                    StreamUtils.copy(is,os);
+                    os.close();
+                    return;
+                }
+            }
+        }
+        catch(Throwable t){
+            logger.error(t.getMessage(),t);
+        }
     }
 }

@@ -1,8 +1,9 @@
 package org.edu_sharing.alfresco.transformer.executors;
 
-import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transformer.executors.AbstractCommandExecutor;
-import org.alfresco.transformer.executors.RuntimeExec;
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.executors.AbstractCommandExecutor;
+import org.alfresco.transform.base.executors.RuntimeExec;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
@@ -21,7 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 
 @Component
-public class SerloIndexExecutor extends AbstractCommandExecutor {
+public class SerloIndexExecutor extends AbstractCommandExecutor implements CustomTransformerFileAdaptor {
 
     private static final Logger logger = LoggerFactory.getLogger(SerloIndexExecutor.class);
 
@@ -45,40 +46,7 @@ public class SerloIndexExecutor extends AbstractCommandExecutor {
         return createTransformCommand();
     }
 
-    @Override
-    public String getTransformerId() {
-        return ID;
-    }
 
-    @Override
-    public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions, File sourceFile, File targetFile) throws TransformException {
-        this.transform(null, targetMimetype, transformOptions, sourceFile, targetFile);
-    }
-
-    @Override
-    public void transform(String transformName, String sourceMimetype, String targetMimetype, Map<String, String> transformOptions, File sourceFile, File targetFile) throws Exception {
-
-        logger.info("sourceMimetype:" + sourceMimetype + " targetMimetype:" + targetMimetype + " sourceFile:" + sourceFile + " targetFile:" + targetFile);
-        if (transformOptions != null)
-            transformOptions.entrySet().stream().forEach(e -> System.out.println("o:" + e.getKey() + " " + e.getValue()));
-
-        try {
-            JSONObject jsonObject = (JSONObject) new JSONParser().parse(new FileReader(sourceFile));
-            String type = (String) jsonObject.get("type");
-            if (type == null || !"https://github.com/serlo/ece-as-a-service".equals(type)) {
-                throw new Exception("Unsupported json document with type:" + type);
-            }
-
-            StringBuffer resultString = new StringBuffer();
-            traverse(resultString, null, jsonObject);
-
-            OutputStream os = new FileOutputStream(targetFile);
-            StreamUtils.copy(IOUtils.toInputStream(resultString), os);
-            os.close();
-        } catch (Throwable e) {
-            logger.error(e.getMessage(), e);
-        }
-    }
 
 
     private void traverse(StringBuffer resultString, String key, Object o) {
@@ -107,5 +75,34 @@ public class SerloIndexExecutor extends AbstractCommandExecutor {
             logger.warn("unknown class " + o.getClass() + " key:" + key);
         }
 
+    }
+
+    @Override
+    public String getTransformerName() {
+        return ID;
+    }
+
+    @Override
+    public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions, File sourceFile, File targetFile, TransformManager transformManager) throws Exception {
+        logger.info("sourceMimetype:" + sourceMimetype + " targetMimetype:" + targetMimetype + " sourceFile:" + sourceFile + " targetFile:" + targetFile);
+        if (transformOptions != null)
+            transformOptions.entrySet().stream().forEach(e -> System.out.println("o:" + e.getKey() + " " + e.getValue()));
+
+        try {
+            JSONObject jsonObject = (JSONObject) new JSONParser().parse(new FileReader(sourceFile));
+            String type = (String) jsonObject.get("type");
+            if (type == null || !"https://github.com/serlo/ece-as-a-service".equals(type)) {
+                throw new Exception("Unsupported json document with type:" + type);
+            }
+
+            StringBuffer resultString = new StringBuffer();
+            traverse(resultString, null, jsonObject);
+
+            OutputStream os = new FileOutputStream(targetFile);
+            StreamUtils.copy(IOUtils.toInputStream(resultString), os);
+            os.close();
+        } catch (Throwable e) {
+            logger.error(e.getMessage(), e);
+        }
     }
 }

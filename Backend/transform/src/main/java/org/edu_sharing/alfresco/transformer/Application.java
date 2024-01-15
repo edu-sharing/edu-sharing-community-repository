@@ -10,9 +10,8 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
-@SpringBootApplication
-@EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
-@ComponentScan({"org.edu_sharing.alfresco.transformer","org.alfresco.transformer"})
+@SpringBootApplication(scanBasePackages = {"org.edu_sharing.alfresco.transformer","org.alfresco.transform"})
+//@EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
 public class Application
 {
     @Value("${container.name}")
