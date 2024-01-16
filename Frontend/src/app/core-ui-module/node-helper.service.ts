@@ -215,9 +215,13 @@ export class NodeHelperService extends NodeHelperServiceBase {
     /**
      * Download (a single) node
      */
-    public downloadNode(node: any, version = RestConstants.NODE_VERSION_CURRENT, metadata = false) {
+    public async downloadNode(
+        node: any,
+        version = RestConstants.NODE_VERSION_CURRENT,
+        metadata = false,
+    ) {
         this.downloadUrl(
-            this.repoUrlService.getRepoUrl(node.downloadUrl, node) +
+            (await this.repoUrlService.getRepoUrl(node.downloadUrl, node)) +
                 (version && version != RestConstants.NODE_VERSION_CURRENT
                     ? '&version=' + version
                     : '') +
@@ -478,8 +482,8 @@ export class NodeHelperService extends NodeHelperServiceBase {
      * Download one or multiple nodes
      * @param node
      */
-    downloadNodes(nodes: Node[], fileName = 'download.zip') {
-        if (nodes.length === 1) return this.downloadNode(nodes[0]);
+    async downloadNodes(nodes: Node[], fileName = 'download.zip') {
+        if (nodes.length === 1) return await this.downloadNode(nodes[0]);
 
         const nodesString = RestHelper.getNodeIds(nodes).join(',');
         const url =
