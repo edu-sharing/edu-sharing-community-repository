@@ -90,6 +90,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 			TrackingService.EventType.VIEW_MATERIAL,
 			TrackingService.EventType.VIEW_MATERIAL_EMBEDDED,
 			TrackingService.EventType.VIEW_MATERIAL_PLAY_MEDIA,
+			TrackingService.EventType.OPEN_EXTERNAL_LINK,
 			TrackingService.EventType.DOWNLOAD_MATERIAL
 	);
 	@JobFieldDescription(description = "Optional, set a list of mediacenters to apply, otherwise it will run for all", sampleValue = "GROUP_MEDIA_CENTER_1")
