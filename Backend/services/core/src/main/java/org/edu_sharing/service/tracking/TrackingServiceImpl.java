@@ -218,7 +218,11 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     @NotNull
     private static Object[] getAuthorityMediacenters() throws Exception {
         if(ContextManagementFilter.accessTool.get() == null || ContextManagementFilter.accessTool.get().getUserId() == null) {
-            return SearchServiceFactory.getLocalService().getAllMediacenters(true).toArray();
+            // use the fully authenticated user since the current runAs user might be system
+            return AuthenticationUtil.runAs(
+                    () ->SearchServiceFactory.getLocalService().getAllMediacenters(true).toArray(),
+                    AuthenticationUtil.getFullyAuthenticatedUser()
+            );
         } else {
             return AuthenticationUtil.runAs(
                     () -> SearchServiceFactory.getLocalService().getAllMediacenters(true).toArray(),
@@ -230,7 +234,11 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     @NotNull
     private static Object[] getAuthorityOrganizations() throws Exception {
         if(ContextManagementFilter.accessTool.get() == null || ContextManagementFilter.accessTool.get().getUserId() == null) {
-            return SearchServiceFactory.getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray();
+            // use the fully authenticated user since the current runAs user might be system
+            return AuthenticationUtil.runAs(
+                    () -> SearchServiceFactory.getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray(),
+                    AuthenticationUtil.getFullyAuthenticatedUser()
+            );
         } else {
             return AuthenticationUtil.runAs(
                     () -> SearchServiceFactory.getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray(),
