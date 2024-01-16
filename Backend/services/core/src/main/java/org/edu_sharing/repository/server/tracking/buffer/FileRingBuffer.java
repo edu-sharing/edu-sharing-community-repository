@@ -35,7 +35,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
-import javax.xml.bind.JAXB;
+import jakarta.xml.bind.JAXB;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
