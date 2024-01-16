@@ -18,6 +18,7 @@ import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.extensions.surf.util.URLEncoder;
 
 public class NodeServiceAdapter implements NodeService {
@@ -151,7 +152,13 @@ public class NodeServiceAdapter implements NodeService {
 	public HashMap<String, HashMap<String, Object>> getVersionHistory(String nodeId) throws Throwable {
 		return null;
 	}
-	
+
+	@NotNull
+	@Override
+	public List<String> getVersionLabelsHistory(String nodeId) {
+		return new ArrayList<>();
+	}
+
 	private List<String> getPropertyValues(ValueTool vt,Object value) {
 		List<String> values = new ArrayList<String>();
 		if (value != null ){

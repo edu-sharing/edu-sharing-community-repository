@@ -188,6 +188,11 @@ public class AdminServiceImpl implements AdminService  {
 	private List<Group> getEffectiveSource(String nodeId, String authority, String permissionName) throws Exception {
 		PermissionService permissionService = PermissionServiceFactory.getLocalService();
 		List<Group> result = new ArrayList<>();
+		// getMemberships can not be called for group everyone
+		if(authority.equals(CCConstants.AUTHORITY_GROUP_EVERYONE)) {
+			result.add(Group.getEveryone());
+			return result;
+		}
 		for(String group : AuthorityServiceFactory.getLocalService().getMemberships(authority)){
 			List<String> permissionsExplicit = permissionService.getExplicitPermissionsForAuthority(nodeId,group);
 			if(permissionsExplicit.contains(permissionName)){

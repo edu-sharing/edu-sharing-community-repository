@@ -21,7 +21,7 @@ public interface TrackingService {
         Yearly,
         Node,
     }
-    enum EventType {
+    public enum EventType {
         DOWNLOAD_MATERIAL,
         VIEW_MATERIAL,
         VIEW_MATERIAL_EMBEDDED,
