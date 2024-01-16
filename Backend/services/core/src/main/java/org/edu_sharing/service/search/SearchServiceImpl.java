@@ -201,7 +201,7 @@ public class SearchServiceImpl implements SearchService {
 	public List<String> getAllMediacenters(boolean membershipsOnly) throws Exception {
 
 
-		Set<String> memberships = serviceRegistry.getAuthorityService().getAuthoritiesForUser(AuthenticationUtil.getFullyAuthenticatedUser());
+		Set<String> memberships = serviceRegistry.getAuthorityService().getAuthorities();
 		boolean isSystemUser = AuthenticationUtil.isRunAsUserTheSystemUser();
 		boolean isAdmin = ((memberships != null && memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
 				|| "admin".equals(AuthenticationUtil.getFullAuthentication().getName())
@@ -247,7 +247,7 @@ public class SearchServiceImpl implements SearchService {
 		try {
 			
 			
-			Set<String> memberships = serviceRegistry.getAuthorityService().getAuthoritiesForUser(AuthenticationUtil.getFullyAuthenticatedUser());
+			Set<String> memberships = serviceRegistry.getAuthorityService().getAuthorities();
 			boolean isAdmin = ((memberships != null && memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) 
 					|| "admin".equals(AuthenticationUtil.getFullAuthentication().getName())) ? true : false;
 
