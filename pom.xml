@@ -201,23 +201,6 @@
         <type>war</type>
       </dependency>
 
-      <dependency>
-        <groupId>org.alfresco</groupId>
-        <artifactId>alfresco-transform-model</artifactId>
-        <version>3.1.1</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.alfresco</groupId>
-        <artifactId>alfresco-transformer-base</artifactId>
-        <version>3.1.1</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.alfresco</groupId>
-        <artifactId>alfresco-transform-tika</artifactId>
-        <version>3.1.1</version>
-      </dependency>
 
       <dependency>
         <groupId>org.ow2.asm</groupId>
