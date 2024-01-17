@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { AfterViewInit, Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -13,14 +13,13 @@ import {
 import { forkJoin } from 'rxjs';
 import { UIConstants } from '../../../../core-module/ui/ui-constants';
 import { Toast } from '../../../../core-ui-module/toast';
-import {
-    CARD_DIALOG_DATA,
-    configForNode,
-    configForNodes,
-} from '../../card-dialog/card-dialog-config';
+import { CARD_DIALOG_DATA, configForNodes } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { BreadcrumbsService } from '../../../../shared/components/breadcrumbs/breadcrumbs.service';
+import { OptionsHelperService } from '../../../../core-ui-module/options-helper.service';
+import { ActionbarComponent } from '../../../../shared/components/actionbar/actionbar.component';
+import { Scope } from '../../../../core-ui-module/option-item';
 
 export interface NodeInfoDialogData {
     nodes: Node[];
@@ -35,7 +34,8 @@ export interface NodeInfoDialogData {
 /**
  * A node info dialog (useful primary for admin stuff)
  */
-export class NodeInfoDialogComponent implements OnInit {
+export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
+    @ViewChild(ActionbarComponent) actionbarComponent: ActionbarComponent;
     _nodes: Node[];
     _children: Node[];
     _permissions: Permissions;
@@ -54,8 +54,15 @@ export class NodeInfoDialogComponent implements OnInit {
         private config: ConfigurationService,
         private router: Router,
         private breadcrumbsService: BreadcrumbsService,
+        private optionsHelperService: OptionsHelperService,
         private translate: TranslateService,
     ) {}
+
+    async ngAfterViewInit() {
+        console.log(this.actionbarComponent);
+        await this.optionsHelperService.initComponents(this.actionbarComponent);
+        this.optionsHelperService.refreshComponents();
+    }
 
     ngOnInit(): void {
         this.setNodes(this.data.nodes);
@@ -110,6 +117,12 @@ export class NodeInfoDialogComponent implements OnInit {
                 this._permissions = data.permissions;
             });
         }
+        console.log(this.actionbarComponent);
+        this.optionsHelperService.setData({
+            scope: Scope.Admin,
+            activeObjects: this._nodes,
+            selectedObjects: this._nodes,
+        });
     }
 
     openNodes(nodes: Node[]) {
