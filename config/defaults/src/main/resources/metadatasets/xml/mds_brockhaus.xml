@@ -7,7 +7,7 @@
 			<id>src</id>
 			<caption>src</caption>
 			<type>radioVertical</type>
-			<defaultvalue>ecs.kilex</defaultvalue>
+			<defaultvalue>ecs</defaultvalue>
 			<valuespace_i18n_prefix>src_</valuespace_i18n_prefix>
 			<values>
 				<value>ecs</value>
