@@ -530,7 +530,7 @@ export class AdminStatisticsComponent implements OnInit {
         this.statistics
             .getStatisticsNode(
                 this._nodesStart,
-                new Date(this._nodesEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET),
+                new Date(this._nodesEnd.getTime()),
                 'Node',
                 this.getMediacenter(),
                 group ? [group] : null,
