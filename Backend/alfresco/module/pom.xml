@@ -302,7 +302,7 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
 
-    <dependency>
+    <!--dependency>
       <groupId>org.springframework.security.extensions</groupId>
       <artifactId>spring-security-saml2-core</artifactId>
       <exclusions>
@@ -311,7 +311,23 @@
           <artifactId>bcprov-jdk15</artifactId>
         </exclusion>
       </exclusions>
+    </dependency-->
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-web</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-config</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-saml2-service-provider</artifactId>
+    </dependency>
+
 
     <dependency>
       <groupId>org.aspectj</groupId>

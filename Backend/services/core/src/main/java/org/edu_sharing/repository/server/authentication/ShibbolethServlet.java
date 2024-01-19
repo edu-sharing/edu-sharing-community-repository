@@ -57,7 +57,8 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.saml.SamlAuthentication;
+
+import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal;
 
 public class ShibbolethServlet extends HttpServlet {
 
@@ -284,9 +285,9 @@ public class ShibbolethServlet extends HttpServlet {
 	 private String getShibValue(String attName, HttpServletRequest req){
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication != null && authentication.isAuthenticated() && authentication instanceof SamlAuthentication) {
-                SamlAuthentication samlAuthentication = (SamlAuthentication) authentication;
-				return samlAuthentication.getAssertion().getFirstAttribute(attName).getValues().stream().findFirst().map(Object::toString).orElse(null);
+            if (authentication != null && authentication.isAuthenticated() && authentication instanceof Saml2AuthenticatedPrincipal) {
+				Saml2AuthenticatedPrincipal samlAuthentication = (Saml2AuthenticatedPrincipal) authentication;
+				return samlAuthentication.getAttribute(attName).stream().findFirst().map(Object::toString).orElse(null);
             }
 
 	    	String attValue = null;
