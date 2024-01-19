@@ -13,7 +13,7 @@ import java.text.ParseException;
 import java.util.Date;
 
 @JobDescription(description = "Sync permissions for imported objects based on a custom implementation of a MediacenterLicenseProvider")
-public class MediacenterNodePermissionsJob extends AbstractInterruptableJob implements JobClusterLocker.ClusterSingelton{
+public class MediacenterNodePermissionsJob extends AbstractInterruptableJob {
 
 	@JobFieldDescription(description = "Period in days to look back for license changes, empty value for full refresh")
 	Integer period_in_days;

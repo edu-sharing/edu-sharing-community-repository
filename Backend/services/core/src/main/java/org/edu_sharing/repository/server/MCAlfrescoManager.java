@@ -51,18 +51,22 @@ import org.edu_sharing.repository.server.tracking.TrackingService.TrackingBuffer
 import org.edu_sharing.repository.server.tracking.buffer.FileRingBuffer;
 import org.edu_sharing.repository.server.tracking.buffer.MemoryRingBuffer;
 import org.edu_sharing.repository.server.tracking.buffer.TrackingBuffer;
-import org.edu_sharing.repository.update.*;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.web.context.ContextLoaderListener;
 
-public class MCAlfrescoManager implements ServletContextListener {
+import javax.servlet.ServletContextEvent;
+import java.io.File;
+
+public class MCAlfrescoManager extends ContextLoaderListener {
 
 	Log logger = LogFactory.getLog(MCAlfrescoManager.class);
 	private ApplicationContext applicationContext;
 	private ServiceRegistry serviceRegistry;
 
 	// -- startup ---
-	
+
+	@Override
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
 		try{
 			applicationContext = AlfAppContextGate.getApplicationContext();
@@ -75,11 +79,15 @@ public class MCAlfrescoManager implements ServletContextListener {
 
 			logger.info("load Metadatasets");
 			MetadataReader.refresh();
-			
+
+
+
 			//do update this class checks if it is already done
 			AuthenticationToolAPI authTool = new AuthenticationToolAPI();
 			authTool.createNewSession(appInfo.getUsername(), appInfo.getPassword());
-			
+
+			super.contextInitialized(servletContextEvent);
+
 			logger.info("load edu groups");
 			
 			/**
@@ -93,31 +101,6 @@ public class MCAlfrescoManager implements ServletContextListener {
 			}
 
 
-
-			// run this BEFORE any other update because it depends on checking if edu-sharing is already installed!
-//			new Release_8_1_SetCompanyHomePermissions(null).execute();
-
-			//remove lom subobjects
-//			new Release_1_7_SubObjectsToFlatObjects(null).execute();
-			
-			//unmount groupfolderes cause they are virtual mounted
-//			new Release_1_7_UnmountGroupFolders(null).execute();
-			
-			//make admin and other users get edu folders in userhome
-//			new Edu_SharingAuthoritiesUpdate(null).execute();
-			
-//			new Release_3_2_DefaultScope(null).execute();
-			
-			//fill original property of all IO's
-//			new Release_3_2_FillOriginalId(null).execute();
-			
-//			new Release_3_2_PermissionInheritFalse(null).execute();
-
-//			new Release_8_0_Migrate_Database_Scripts(null).execute();
-
-//			new SQLUpdater().execute();
-			
-//			new Release_4_2_PersonStatusUpdater(null).execute();
 
 			//init the system folders so that are created with a admin
 			UserEnvironmentTool uet = new UserEnvironmentTool(appInfo.getUsername());
@@ -147,12 +130,7 @@ public class MCAlfrescoManager implements ServletContextListener {
 						? new FileRingBuffer(directory, size)
 						: new MemoryRingBuffer(size));
 						
-				TrackingService.registerBuffer(new TrackingBufferFactory() {
-										
-					public TrackingBuffer getTrackingBuffer() {
-						return trackingBuffer;
-					}
-				});
+				TrackingService.registerBuffer(() -> trackingBuffer);
 			} else {
 				logger.warn("no tracking!");				
 			}
@@ -163,7 +141,6 @@ public class MCAlfrescoManager implements ServletContextListener {
 			//test setting cmis factory to use cmis in edu-sharing
 			//ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 			Object factory = applicationContext.getBean("CMISServiceFactory");
-
 			servletContextEvent.getServletContext().setAttribute(CmisRepositoryContextListener.SERVICES_FACTORY, factory);
 			
 		} catch(Throwable e) {
@@ -186,10 +163,10 @@ public class MCAlfrescoManager implements ServletContextListener {
 	@Override
 	public void contextDestroyed(ServletContextEvent arg0) {
 		try {
-			
 			logger.info("shutdown JobHandler");
 			JobHandler.getInstance().shutDown();
-			
+			super.contextDestroyed(arg0);
+
 			TrackingBufferFactory trackingBufferFactory = TrackingService.unregisterBuffer();			
 			if (trackingBufferFactory != null) {
 				

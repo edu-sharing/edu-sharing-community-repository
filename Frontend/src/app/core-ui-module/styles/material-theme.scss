@@ -598,7 +598,7 @@ mat-select.mat-select-icon {
         }
     }
 }
-.mat-menu-panel {
+.mat-mdc-menu-panel {
     min-height: initial !important;
     overflow-x: hidden !important; // prevent scrollbars on FF
 }
@@ -643,7 +643,7 @@ mat-form-field {
     }
     .cdk-overlay-pane .suggestion-card,
     .cdk-overlay-pane .mat-autocomplete-panel,
-    .cdk-overlay-pane .mat-menu-panel,
+    .cdk-overlay-pane .mat-mdc-menu-panel,
     .cdk-overlay-pane .mat-tooltip {
         outline: 1px solid rgba(black, 0.42);
     }

@@ -31,7 +31,7 @@ import java.util.HashMap;
 
 import jakarta.servlet.http.HttpSession;
 
-import net.sf.acegisecurity.Authentication;
+import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.AuthenticationException;
@@ -44,7 +44,6 @@ import org.alfresco.service.cmr.security.PersonService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
@@ -87,8 +86,10 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 		addClientUserInfo(returnval);
 		
 		ToolPermissionService toolPermissionService = ToolPermissionServiceFactory.getInstance();
-		toolPermissionService.invalidateSessionCache();
-	
+		// the context isn't set on startup, so we need to return null
+		if(toolPermissionService != null) {
+			toolPermissionService.invalidateSessionCache();
+		}
 		return returnval;
 	};
 	

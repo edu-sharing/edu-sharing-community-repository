@@ -27,8 +27,6 @@
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
-import java.util.HashMap;
-
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.apache.commons.logging.LogFactory;
@@ -38,9 +36,11 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
+import java.util.HashMap;
+
 
 @JobDescription(description = "Re-Build/warmup cache for the IMP-OBJ or a custom folder")
-public class RefreshCacheJob extends AbstractInterruptableJob implements JobClusterLocker.ClusterSingelton {
+public class RefreshCacheJob extends AbstractInterruptableJob {
 
 
 	@JobFieldDescription(description = "the node id to start from (defaults to IMP-OBJ)")

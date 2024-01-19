@@ -13,6 +13,10 @@
          <param-name>rootPath</param-name>
          <param-value>/app:company_home</param-value>
    </context-param>
+    <context-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>classpath*:/org/edu_sharing/spring/application-context.xml</param-value>
+    </context-param>
     <!-- SAML
     <context-param>
         <param-name>contextConfigLocation</param-name>

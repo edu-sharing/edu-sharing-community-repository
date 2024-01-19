@@ -8,12 +8,10 @@ import { SearchPageResultsComponent } from './search-page-results.component';
 import { SearchPageRoutingModule } from './search-page-routing.module';
 import { SearchPageToolbarComponent } from './search-page-toolbar.component';
 import { SearchPageComponent } from './search-page.component';
-import { SmallCollectionComponent } from './small-collection/small-collection.component';
 import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
 
 @NgModule({
     declarations: [
-        SmallCollectionComponent,
         SearchPageComponent,
         SearchPageToolbarComponent,
         SearchPageFilterBarComponent,

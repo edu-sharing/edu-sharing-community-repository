@@ -37,13 +37,13 @@ for file in "${whitelist[@]}" ; do
 done
 
 groupedFiles=()
-while IFS='' read -r line; do groupedFiles+=("$line"); done < <(printf "%s\n" "${files[@]}" | sed 's|-[0-9.][0-9.]*[a-zA-Z0-9_\-]*\.jar:.*$||' | sort | uniq -c | sed 's| *||') #| sed 's| |:|g')
+while IFS='' read -r line; do groupedFiles+=("$line"); done < <(printf "%s\n" "${files[@]}" | sed 's|-[0-9.][0-9.]*[a-zA-Z0-9_]*\.jar:.*$||' | sort | uniq -c | sed 's| *||') #| sed 's| |:|g')
 
 duplicates=()
 for group in "${groupedFiles[@]}" ; do
   if [[ -n ${group##* } ]] && [[ ${group%% *} != 1 ]] ; then
     while IFS='' read -r line; do duplicates+=("$line"); done < <(echo "Multiple library versions of ${group##* } (${group%% *}) found:")
-    while IFS='' read -r line; do duplicates+=("$line"); done < <(printf "%s\n" "${files[@]}" | grep "^${group##* }-[0-9.][0-9.]*[a-zA-Z0-9_]*\.jar:.*$")
+    while IFS='' read -r line; do duplicates+=("$line"); done < <(printf "%s\n" "${files[@]}" | grep "^${group##* }-[0-9.][0-9.]*[a-zA-Z0-9_-]*\.jar:.*$")
     while IFS='' read -r line; do duplicates+=("$line"); done < <(echo "")
   fi
 done
