@@ -24,6 +24,8 @@ public class Monitoring {
 	
 	ServiceRegistry serviceRegistry;
 	Repository repositoryHelper;
+
+	public static ExecutorService executorService = Executors.newFixedThreadPool(2);
 	
 	public static enum Modes{
 		SEARCH,
@@ -93,7 +95,7 @@ public class Monitoring {
 	}
 	
 	private String executeTask(int timeoutInSeconds, Callable<String> task) throws Throwable{
-		ExecutorService executorService = Executors.newSingleThreadExecutor();
+
 		Future<String> future = executorService.submit(task);
 		String result = future.get(timeoutInSeconds, TimeUnit.SECONDS);
 		return result;

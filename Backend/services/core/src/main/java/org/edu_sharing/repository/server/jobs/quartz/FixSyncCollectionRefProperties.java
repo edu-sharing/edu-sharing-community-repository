@@ -26,7 +26,7 @@ public class FixSyncCollectionRefProperties extends AbstractJob{
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
 
         ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-        ServiceRegistry serviceRegistry = applicationContext.getBean(ServiceRegistry.class);
+        ServiceRegistry serviceRegistry = applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY, ServiceRegistry.class);
         NodeService nodeService = serviceRegistry.getNodeService();
 
         NodeRunner nr = new NodeRunner();
