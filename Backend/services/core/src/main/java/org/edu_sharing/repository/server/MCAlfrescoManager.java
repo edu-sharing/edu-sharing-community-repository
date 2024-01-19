@@ -55,7 +55,6 @@ import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.ContextLoaderListener;
 
-import javax.servlet.ServletContextEvent;
 import java.io.File;
 
 public class MCAlfrescoManager extends ContextLoaderListener {

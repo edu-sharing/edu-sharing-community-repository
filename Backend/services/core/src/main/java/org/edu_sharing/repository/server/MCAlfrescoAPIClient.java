@@ -27,27 +27,8 @@
  */
 package org.edu_sharing.repository.server;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.rmi.RemoteException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
-import jakarta.transaction.UserTransaction;
-
 import com.google.common.base.CharMatcher;
+import jakarta.transaction.UserTransaction;
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
@@ -135,7 +116,6 @@ import org.edu_sharing.service.util.AlfrescoDaoHelper;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.I18NUtil;
 
-import javax.transaction.UserTransaction;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
