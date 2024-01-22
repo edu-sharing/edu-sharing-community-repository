@@ -105,6 +105,10 @@ export class RestConstants {
     public static CM_PROP_TITLE = 'cm:title';
     public static CCM_PROP_WIDTH = 'ccm:width';
     public static CCM_PROP_HEIGHT = 'ccm:height';
+    public static CCM_PROP_EDITOR_TYPE = 'ccm:editorType';
+    public static CCM_PROP_CCRESSOURCETYPE = 'ccm:ccressourcetype';
+    public static CCM_PROP_CCRESSOURCESUBTYPE = 'ccm:ccresourcesubtype';
+    public static CCM_PROP_CCRESSOURCEVERSION = 'ccm:ccressourceversion';
     public static AUTHORITY_NAME = 'authorityName';
     public static AUTHORITY_DISPLAYNAME = 'displayName';
     public static AUTHORITY_FIRSTNAME = 'firstName';
