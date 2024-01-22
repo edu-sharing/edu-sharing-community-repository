@@ -19,10 +19,8 @@
     </context-param>
     <!-- SAML
     <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>
-            /WEB-INF/securityContext.xml
-        </param-value>
+      <param-name>spring.profiles.active</param-name>
+      <param-value>samlEnabled</param-value>
     </context-param>
     SAML -->
 
@@ -154,12 +152,20 @@
 
     <!-- SAML
     <filter-mapping>
-        <filter-name>springSecurityFilterChain</filter-name>
-        <url-pattern>/saml/*</url-pattern>
+      <filter-name>springSecurityFilterChain</filter-name>
+      <url-pattern>/shibboleth</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>springSecurityFilterChain</filter-name>
-        <url-pattern>/shibboleth</url-pattern>
+      <filter-name>springSecurityFilterChain</filter-name>
+      <url-pattern>/saml2/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+      <filter-name>springSecurityFilterChain</filter-name>
+      <url-pattern>/login/saml2/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+      <filter-name>springSecurityFilterChain</filter-name>
+      <url-pattern>/samllogout</url-pattern>
     </filter-mapping>
      SAML -->
 
@@ -834,12 +840,6 @@
 	<listener>
 	 	<listener-class>org.edu_sharing.repository.server.authentication.SessionListener</listener-class>
 	 </listener>
-
-    <!-- SAML
-    <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-    </listener>
-    SAML -->
 
       <!-- Angular Dynamic routing, added by Torsten 2016-11-02 -->
 	<servlet>
