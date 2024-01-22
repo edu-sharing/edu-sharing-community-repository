@@ -101,7 +101,7 @@ export class OptionsHelperDataService implements OnDestroy {
         this.data = this.optionsHelperService.wrapOptionCallbacks(data);
     }
 
-    refreshComponents(refreshListOptions = true) {
+    async refreshComponents(refreshListOptions = true) {
         if (this.data == null) {
             console.warn('options helper refresh called but no data previously bound');
             return;
@@ -110,8 +110,8 @@ export class OptionsHelperDataService implements OnDestroy {
             console.warn('optionsHelperService not provided. No default actions will be generated');
             return;
         }
-        this.globalOptions = this.getAvailableOptions(Target.Actionbar);
-        this.optionsHelperService?.refreshComponents(
+        this.globalOptions = await this.getAvailableOptions(Target.Actionbar);
+        await this.optionsHelperService?.refreshComponents(
             this.components,
             this.data,
             refreshListOptions,

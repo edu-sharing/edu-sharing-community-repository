@@ -193,7 +193,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         }
     }
 
-    updateOptions() {
+    async updateOptions() {
         this.options = [];
         if (this.allowBinary && this.folder) {
             const pasteNodes = new OptionItem('OPTIONS.PASTE', 'content_paste', (node) =>
@@ -307,7 +307,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             scope: Scope.CreateMenu,
             parent: this._parent,
         });
-        this.options = this.optionsService.filterOptions(this.options, Target.CreateMenu);
+        this.options = await this.optionsService.filterOptions(this.options, Target.CreateMenu);
 
         // If the menu was open, we just removed all its items, leaving focus on <body>.
         setTimeout(() => {

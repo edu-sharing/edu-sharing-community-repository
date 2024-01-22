@@ -474,7 +474,7 @@ export class StreamPageComponent implements OnInit, AfterViewInit, OnDestroy {
         return node.preview.url + '&crop=true&maxWidth=500&maxHeight=500';
     }
 
-    updateOptions(strm: StreamEntry) {
+    async updateOptions(strm: StreamEntry) {
         this.optionsHelper.setData({
             scope: Scope.Stream,
             customOptions: this.customOptions,
@@ -483,7 +483,7 @@ export class StreamPageComponent implements OnInit, AfterViewInit, OnDestroy {
         });
         this.optionsHelper.refreshComponents();
         this.currentStreamObject = strm;
-        this.options = this.optionsHelper.getAvailableOptions(
+        this.options = await this.optionsHelper.getAvailableOptions(
             Target.ListDropdown,
             strm?.nodes as unknown as Node[],
         );

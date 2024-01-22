@@ -13,9 +13,9 @@ import { OptionItem } from '../../types/option-item';
             mat-icon-button
             color="primary"
             matTooltip="{{ option.name | translate }}"
-            [class.display-none]="!optionIsShown(option, node)"
+            [class.display-none]="!(optionIsShown(option, node) | async)"
             [disabled]="!optionIsValid(option, node)"
-            (click)="optionIsShown(option, node) ? option.callback(node) : null"
+            (click)="click(option, node)"
             attr.data-test="option-button-{{ option.name }}"
         >
             <i esIcon="{{ option.icon }}" [aria]="false"></i>
@@ -33,10 +33,16 @@ export class OptionButtonComponent {
         return optionItem.isEnabled;
     }
 
-    optionIsShown(optionItem: OptionItem, node: Node): boolean {
+    async optionIsShown(optionItem: OptionItem, node: Node): Promise<boolean> {
         if (optionItem.showCallback) {
-            return optionItem.showCallback(node);
+            return await optionItem.showCallback(node);
         }
         return true;
+    }
+
+    async click(option: OptionItem, node: Node) {
+        if (await this.optionIsShown(option, node)) {
+            option.callback(node);
+        }
     }
 }

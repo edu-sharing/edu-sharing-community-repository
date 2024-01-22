@@ -771,11 +771,11 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy {
      * check if the current url requested to directly open an action (from the actionbar),
      * and if so, call it
      */
-    private handleQueryAction() {
+    private async handleQueryAction() {
         if (this.queryParams.action) {
-            const option = this.optionsHelper
-                .getAvailableOptions(Target.Actionbar)
-                .filter((o) => o.name === this.queryParams.action)?.[0];
+            const option = (await this.optionsHelper.getAvailableOptions(Target.Actionbar)).filter(
+                (o) => o.name === this.queryParams.action,
+            )?.[0];
             if (option) {
                 if (option.isEnabled) {
                     option.callback();

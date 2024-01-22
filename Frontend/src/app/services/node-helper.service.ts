@@ -397,7 +397,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
                         return true;
                     };
                     item.isEnabled = item.customEnabledCallback(null);
-                    item.customShowCallback = (nodes) => {
+                    item.customShowCallback = async (nodes) => {
                         if (c.mode == 'nodes' && !nodes?.length) return false;
                         if (c.mode == 'noNodes' && nodes && nodes.length) return false;
                         if (

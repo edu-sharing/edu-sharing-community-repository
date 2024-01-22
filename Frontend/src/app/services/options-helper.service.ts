@@ -1,7 +1,7 @@
 import { EventEmitter, Injectable, NgZone, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { NodeListErrorResponses, NodeListService } from 'ngx-edu-sharing-api';
+import { LtiPlatformService, NodeListErrorResponses, NodeListService } from 'ngx-edu-sharing-api';
 import {
     ClipboardObject,
     Constrain,
@@ -29,7 +29,7 @@ import {
     forkJoin as observableForkJoin,
     of,
 } from 'rxjs';
-import { catchError, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { catchError, filter, first, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import {
     ConfigurationService,
     FrameEventsService,
@@ -106,6 +106,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         private router: Router,
         private storage: TemporaryStorageService,
         private toast: Toast,
+        private ltiPlatformService: LtiPlatformService,
         private translate: TranslateService,
         private uiService: UIService,
         private workspace: WorkspaceService,
@@ -202,7 +203,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     /**
      * refresh all bound components with available menu options
      */
-    refreshComponents(
+    async refreshComponents(
         components: OptionsHelperComponents,
         data: OptionData,
         refreshListOptions: boolean,
@@ -216,11 +217,11 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             this.subscriptions = [];
         }
 
-        this.globalOptions = this.getAvailableOptions(Target.Actionbar, [], components, data);
+        this.globalOptions = await this.getAvailableOptions(Target.Actionbar, [], components, data);
         if (components.list) {
             components.list.setOptions({
-                [Target.List]: this.getAvailableOptions(Target.List, [], components, data),
-                [Target.ListDropdown]: this.getAvailableOptions(
+                [Target.List]: await this.getAvailableOptions(Target.List, [], components, data),
+                [Target.ListDropdown]: await this.getAvailableOptions(
                     Target.ListDropdown,
                     [],
                     components,
@@ -229,7 +230,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             });
         }
         if (components.dropdown) {
-            components.dropdown.options = this.getAvailableOptions(
+            components.dropdown.options = await this.getAvailableOptions(
                 Target.ListDropdown,
                 [],
                 components,
@@ -260,7 +261,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         return true;
     }
 
-    getAvailableOptions(
+    async getAvailableOptions(
         target: Target,
         objects: Node[],
         components: OptionsHelperComponents,
@@ -312,7 +313,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         const custom = this.configService.instant<ConfigOptionItem[]>('customOptions');
         this.nodeHelper.applyCustomNodeOptions(custom, data.allObjects, objects, options);
         // do pre-handle callback options for dropdown + actionbar
-        options = this.filterOptions(options, target, data, objects);
+        options = await this.filterOptions(options, target, data, objects);
         if (target !== Target.Actionbar) {
             options = options.filter((o) => !o.isToggle);
             // do not show any actions in the dropdown for no selection, these are reserved for actionbar
@@ -323,16 +324,19 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         return this.uiService.filterValidOptions(options) as OptionItem[];
     }
 
-    private handleCallbackStates(
+    private async handleCallbackStates(
         options: OptionItem[],
         target: Target,
         data: OptionData,
         objects: Node[] | any[] = null,
     ) {
         this.handleCallbacks(options, objects, data);
-        options = options.filter((o) =>
-            o.showCallback(target === Target.List && objects && objects[0] ? objects[0] : null),
+        const showState = await Promise.all(
+            options.map((o) =>
+                o.showCallback(target === Target.List && objects && objects[0] ? objects[0] : null),
+            ),
         );
+        options = options.filter((o, i) => showState[i]);
         options.forEach(
             (o) =>
                 (o.isEnabled = o.enabledCallback(
@@ -342,7 +346,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         return options;
     }
 
-    private isOptionAvailable(option: OptionItem, objects: Node[] | any[], data: OptionData) {
+    private async isOptionAvailable(option: OptionItem, objects: Node[] | any[], data: OptionData) {
         if (option.elementType.indexOf(this.getType(objects)) === -1) {
             // console.log('types not matching', objects, this.getType(objects), option);
             return false;
@@ -358,7 +362,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             }
         }
         if (option.customShowCallback) {
-            if (option.customShowCallback(objects) === false) {
+            if ((await option.customShowCallback(objects)) === false) {
                 // console.log('customShowCallback  was false', option, objects);
                 return false;
             }
@@ -476,7 +480,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         applyNode.showAlways = true;
         applyNode.group = DefaultGroups.Primary;
         applyNode.priority = 10;
-        applyNode.customShowCallback = (nodes) => {
+        applyNode.customShowCallback = async (nodes) => {
             return this.queryParams.applyDirectories === 'true' || (nodes && !nodes[0].isDirectory);
         };
 
@@ -648,7 +652,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         const editConnectorNode = new OptionItem('OPTIONS.OPEN', 'launch', (node) => {
             this.editConnector(this.getObjects(node, data)[0]);
         });
-        editConnectorNode.customShowCallback = (nodes) => {
+        editConnectorNode.customShowCallback = async (nodes) => {
             let n = nodes ? nodes[0] : null;
             if (n?.aspects?.includes('ccm:ltitool_node')) {
                 return true;
@@ -698,7 +702,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         addNodeToCollection.elementType = OptionsHelperService.ElementTypesAddToCollection;
         addNodeToCollection.showAsAction = true;
         addNodeToCollection.constrains = [Constrain.Files, Constrain.User, Constrain.NoScope];
-        addNodeToCollection.customShowCallback = (nodes) => {
+        addNodeToCollection.customShowCallback = async (nodes) => {
             addNodeToCollection.name =
                 data.scope === Scope.CollectionsReferences
                     ? 'OPTIONS.COLLECTION_OTHER'
@@ -770,7 +774,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         bookmarkNode.constrains = [Constrain.Files, Constrain.HomeRepository, Constrain.NoScope];
         bookmarkNode.group = DefaultGroups.Reuse;
         bookmarkNode.priority = 20;
-        bookmarkNode.customShowCallback = (nodes) => {
+        bookmarkNode.customShowCallback = async (nodes) => {
             if (nodes) {
                 return nodes.every((n) => this.nodeHelper.referenceOriginalExists(n));
             }
@@ -802,7 +806,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             }
             return true;
         };
-        createNodeVariant.customShowCallback = (nodes) => {
+        createNodeVariant.customShowCallback = async (nodes) => {
             if (nodes) {
                 createNodeVariant.name =
                     'OPTIONS.VARIANT' +
@@ -828,7 +832,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         inviteNode.group = DefaultGroups.Edit;
         inviteNode.priority = 10;
         // invite is not allowed for collections of type editorial
-        inviteNode.customShowCallback = (objects) =>
+        inviteNode.customShowCallback = async (objects) =>
             objects[0].collection
                 ? objects[0].collection.type !== RestConstants.COLLECTIONTYPE_EDITORIAL
                 : objects[0].type !== RestConstants.SYS_TYPE_CONTAINER;
@@ -851,7 +855,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         streamNode.group = DefaultGroups.Edit;
         streamNode.priority = 15;
         streamNode.customShowCallback = (objects) =>
-            this.configService.instant('stream.enabled', false);
+            this.configService.get('stream.enabled', false).pipe(first()).toPromise();
 
         const licenseNode = new OptionItem('OPTIONS.LICENSE', 'copyright', (object) => {
             const nodes = this.getObjects(object, data);
@@ -967,7 +971,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         downloadMetadataNode.scopes = [Scope.Render];
         downloadMetadataNode.group = DefaultGroups.View;
         downloadMetadataNode.priority = 50;
-        downloadMetadataNode.customShowCallback = (nodes) => {
+        downloadMetadataNode.customShowCallback = async (nodes) => {
             if (!nodes) {
                 return false;
             }
@@ -1181,7 +1185,8 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         reportNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         reportNode.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository];
         reportNode.scopes = [Scope.Search, Scope.CollectionsReferences, Scope.Render];
-        reportNode.customShowCallback = () => this.configService.instant('nodeReport', false);
+        reportNode.customShowCallback = (objects) =>
+            this.configService.get('nodeReport', false).pipe(first()).toPromise();
         reportNode.group = DefaultGroups.View;
         reportNode.priority = 60;
 
@@ -1268,7 +1273,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         feedbackMaterial.group = DefaultGroups.View;
         feedbackMaterial.priority = 15;
         // feedback is only shown for non-managers
-        feedbackMaterial.customShowCallback = (objects) =>
+        feedbackMaterial.customShowCallback = async (objects) =>
             !this.nodeHelper.getNodesRight(
                 objects,
                 RestConstants.ACCESS_WRITE,
@@ -1438,7 +1443,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         return options;
     }
 
-    private editConnector(
+    private async editConnector(
         node: Node | any,
         type: Filetype = null,
         win: any = null,
@@ -1525,9 +1530,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
      */
     private handleCallbacks(options: OptionItem[], objects: Node[] | any, data: OptionData) {
         options.forEach((o) => {
-            o.showCallback = (object) => {
+            o.showCallback = async (object) => {
                 const list = NodeHelperService.getActionbarNodes(objects, object);
-                return this.isOptionAvailable(o, list, data);
+                return await this.isOptionAvailable(o, list, data);
             };
             o.enabledCallback = (object) => {
                 const list = NodeHelperService.getActionbarNodes(objects, object);
@@ -1835,7 +1840,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
      * @param target
      * @param objects
      */
-    filterOptions(
+    async filterOptions(
         options: OptionItem[],
         target: Target,
         data: OptionData,
@@ -1849,7 +1854,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             // attach the show callbacks
             this.handleCallbacks(options, target, data);
         } else {
-            options = this.handleCallbackStates(options, target, data, objects);
+            options = await this.handleCallbackStates(options, target, data, objects);
         }
         options = this.sortOptionsByGroup(options);
         return options;

@@ -93,8 +93,8 @@ export class SharingPageComponent {
         });
         open.group = DefaultGroups.Primary;
         open.showAsAction = true;
-        download.customShowCallback = (nodes: Node[]) => nodes?.[0]?.mediatype !== 'link';
-        open.customShowCallback = (nodes: Node[]) => nodes?.[0]?.mediatype === 'link';
+        download.customShowCallback = async (nodes: Node[]) => nodes?.[0]?.mediatype !== 'link';
+        open.customShowCallback = async (nodes: Node[]) => nodes?.[0]?.mediatype === 'link';
         this.options.addOptions.push(download);
         this.options.addOptions.push(open);
         this.translations.waitForInit().subscribe(() => {

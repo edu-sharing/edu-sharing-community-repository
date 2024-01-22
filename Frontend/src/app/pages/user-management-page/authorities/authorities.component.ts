@@ -461,7 +461,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             );
             orgSignupList.elementType = [ElementType.Group];
             orgSignupList.group = DefaultGroups.Edit;
-            orgSignupList.customShowCallback = (nodes) => {
+            orgSignupList.customShowCallback = async (nodes) => {
                 return nodes[0].signupMethod === 'list';
             };
             orgSignupList.priority = 20;

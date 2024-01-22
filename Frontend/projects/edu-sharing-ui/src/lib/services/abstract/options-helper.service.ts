@@ -9,14 +9,14 @@ export abstract class OptionsHelperService {
         components: OptionsHelperComponents,
         data: OptionData,
         refreshListOptions: boolean,
-    ): void;
+    ): Promise<void>;
 
     abstract getAvailableOptions(
         target: Target,
         objects: Node[],
         components: OptionsHelperComponents,
         data: OptionData,
-    ): OptionItem[];
+    ): Promise<OptionItem[]>;
 
     abstract pasteNode(components: OptionsHelperComponents, data: OptionData, nodes: Node[]): void;
 
@@ -25,5 +25,5 @@ export abstract class OptionsHelperService {
         target: Target,
         data: OptionData,
         objects: Node[] | any,
-    ): OptionItem[];
+    ): Promise<OptionItem[]>;
 }

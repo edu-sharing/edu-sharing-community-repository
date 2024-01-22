@@ -80,12 +80,12 @@ export class OptionItem {
      * Is handled by optionsHelper and may not be used otherwise
      * Please use @customShowCallback instead
      */
-    public showCallback: (node?: Node | any) => boolean;
+    public showCallback: (node?: Node | any) => Promise<boolean>;
     /**
      * A function called with the node as parm which should return true or false if the option should be shown for this node
      * Will be called by the optionsHelper
      */
-    public customShowCallback: (nodes?: Node[] | any[]) => boolean;
+    public customShowCallback: (nodes?: Node[] | any[]) => Promise<boolean>;
     /**
      * A function called with the node as param which should return true or false if the option should be enabled or not
      * Is handled by optionsHelper and may not be used otherwise

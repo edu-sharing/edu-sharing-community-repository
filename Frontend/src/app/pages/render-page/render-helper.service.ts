@@ -195,15 +195,15 @@ export class RenderHelperService {
             let action: HTMLElement;
             while ((action = result.iterateNext() as HTMLElement)) {
                 const actionName = action.getAttribute('data-es-action');
-                action.onclick = (event) => {
+                action.onclick = async (event) => {
                     event.preventDefault();
                     this.optionsHelperService.setData({
                         scope: Scope.Render,
                         activeObjects: [node],
                     });
-                    const option = this.optionsHelperService
-                        .getAvailableOptions(Target.List, [node])
-                        .filter((o) => o.name === actionName);
+                    const option = (
+                        await this.optionsHelperService.getAvailableOptions(Target.List, [node])
+                    ).filter((o) => o.name === actionName);
                     if (option.length === 1 && option[0].isEnabled) {
                         option[0].callback(node);
                     } else {
