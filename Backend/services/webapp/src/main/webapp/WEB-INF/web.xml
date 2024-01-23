@@ -161,12 +161,16 @@
     </filter-mapping>
     <filter-mapping>
       <filter-name>springSecurityFilterChain</filter-name>
-      <url-pattern>/login/saml2/*</url-pattern>
+      <url-pattern>/login/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
       <filter-name>springSecurityFilterChain</filter-name>
       <url-pattern>/samllogout</url-pattern>
     </filter-mapping>
+    <filter-mapping>
+      <filter-name>springSecurityFilterChain</filter-name>
+      <url-pattern>/oauth2/*</url-pattern>
+     </filter-mapping>
      SAML -->
 
     <filter-mapping>
