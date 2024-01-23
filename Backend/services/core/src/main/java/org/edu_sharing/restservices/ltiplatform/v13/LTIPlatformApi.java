@@ -65,6 +65,7 @@ import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Path("/ltiplatform/v13")
 @Consumes({ "text/html" })
@@ -267,7 +268,7 @@ public class LTIPlatformApi {
                 }
                 if(loginInitiationSessionObject.getContentUrlNodeId() != null) {
                     custom.put(LTIPlatformConstants.CUSTOM_CLAIM_FILENAME, (String)nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-                            loginInitiationSessionObject.getContentUrlNodeId()),
+                                    loginInitiationSessionObject.getContentUrlNodeId()),
                             ContentModel.PROP_NAME));
                 }
                 custom.put(LTIPlatformConstants.CUSTOM_CLAIM_GET_CONTENTAPIURL,homeApp.getClientBaseUrl()+"/rest/ltiplatform/v13/content");
@@ -365,8 +366,8 @@ public class LTIPlatformApi {
                     @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class)))
             })
     public Response startDynamicRegistration(@Parameter(description = "url",required=true) @FormParam("url") String url,
-                                           @Context HttpServletRequest req){
-            return startDynamicRegistrationBase(url);
+                                             @Context HttpServletRequest req){
+        return startDynamicRegistrationBase(url);
     }
 
     @GET
@@ -384,7 +385,7 @@ public class LTIPlatformApi {
                     @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class)))
             })
     public Response startDynamicRegistrationGet(@Parameter(description = "url",required=true) @QueryParam("url") String url,
-                                             @Context HttpServletRequest req){
+                                                @Context HttpServletRequest req){
         return startDynamicRegistrationBase(url);
     }
 
@@ -478,7 +479,7 @@ public class LTIPlatformApi {
             JSONParser jsonParser = new JSONParser();
             JSONObject registrationPayload =  (JSONObject)jsonParser.parse(registrationpayload);
             ApplicationInfo appInfo = AuthenticationUtil.runAsSystem(() -> {
-               return new RegistrationService().ltiDynamicToolRegistration(registrationPayload, jwt);
+                return new RegistrationService().ltiDynamicToolRegistration(registrationPayload, jwt);
             });
 
 
@@ -598,6 +599,7 @@ public class LTIPlatformApi {
                     Tool tool = new Tool();
                     tool.setAppId(appInfo.getAppId());
                     tool.setDescription(appInfo.getLtitoolDescription());
+                    tool.setResourceType(appInfo.getLtiResourceType());
                     try {
                         URI uri = new URI(appInfo.getLtitoolLoginInitiationsUrl());
                         tool.setDomain(uri.getHost());
@@ -657,7 +659,7 @@ public class LTIPlatformApi {
             }
             throw new Exception("no lti tool found for "+ appId);
         }catch (Exception e){
-             return ApiTool.processError(req,e,"LTI_ERROR");
+            return ApiTool.processError(req,e,"LTI_ERROR");
         }
     }
 
@@ -676,10 +678,10 @@ public class LTIPlatformApi {
                     @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = String.class)))
             })
     public Response generateLoginInitiationFormResourceLink(@Parameter(description = "the nodeid of a node that contains a lti resourcelink. is required for lti resourcelink",required=true) @QueryParam("nodeId") String nodeId,
-                                                @Parameter(description = "for tools with content option, this param sends changeContentUrl (true) else contentUrl will be excluded",required = false,schema = @Schema(defaultValue = "true")) @QueryParam("editMode") Boolean editMode,
-                                                @Parameter(description = "the version. for tools with contentoption.", required = false) @QueryParam("version") String version,
-                                                @Parameter(description = "launchPresentation. how the resourcelink will be embedded. valid values: window,iframe", required = false) @QueryParam("launchPresentation") String launchPresentation,
-                                                @Context HttpServletRequest req){
+                                                            @Parameter(description = "for tools with content option, this param sends changeContentUrl (true) else contentUrl will be excluded",required = false,schema = @Schema(defaultValue = "true")) @QueryParam("editMode") Boolean editMode,
+                                                            @Parameter(description = "the version. for tools with contentoption.", required = false) @QueryParam("version") String version,
+                                                            @Parameter(description = "launchPresentation. how the resourcelink will be embedded. valid values: window,iframe", required = false) @QueryParam("launchPresentation") String launchPresentation,
+                                                            @Context HttpServletRequest req){
         try{
             //@TODO find out why defaultvalue of swagger definition does not work
             if(editMode == null){
@@ -687,35 +689,58 @@ public class LTIPlatformApi {
             }
             NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 
-            if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_LTITOOL_NODE))){
-                throw new Exception("not an lti resoucelink:"+nodeId);
-            }
-
+            String resourceType = (String) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_CCRESSOURCETYPE));
             String toolUrl = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_TOOLURL));
-            if(toolUrl == null){
+            if(resourceType == null && toolUrl == null){
                 throw new Exception("lti toolUrl is null:"+nodeId);
             }
-
-            for(ApplicationInfo appInfo : ApplicationInfoList.getApplicationInfos().values()){
-                if(appInfo.isLtiTool() && toolUrl.equals(appInfo.getLtitoolUrl())){
-                    String form = prepareLoginInitiation(nodeService.getPrimaryParent(nodeRef).getParentRef().getId(),
-                            nodeId,
-                            editMode,
-                            nodeId,
-                            version,
-                            appInfo,
-                            LoginInitiationSessionObject.MessageType.resourcelink,
-                            launchPresentation,
-                            req);
-                    return Response.status(Response.Status.OK).entity(form).build();
+            List<ApplicationInfo> appInfos = Collections.emptyList();
+            if(nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_LTITOOL_NODE))) {
+                appInfos = ApplicationInfoList.getApplicationInfos().values().stream().filter(
+                        appInfo -> appInfo.isLtiTool() && toolUrl.equals(appInfo.getLtitoolUrl())
+                ).collect(Collectors.toList());
+            }
+            if(appInfos.isEmpty() && resourceType != null) {
+                appInfos = getAppByResoureType(resourceType);
+                if(!appInfos.isEmpty()) {
+                    // set the tool as lti on this node so the tool is allowed to fetch content later
+                    nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_TOOLURL), appInfos.get(0).getLtitoolUrl());
                 }
             }
-            throw new Exception("no lti tool found for toolUrl:"+ toolUrl);
-
-
+            if(!appInfos.isEmpty()) {
+                if(appInfos.size() > 1) {
+                    logger.warn("Found more than one possible lti application for node: " + nodeId + " / Valid applications: " + StringUtils.join(appInfos.stream().map(ApplicationInfo::getAppId).collect(Collectors.toList()), ", "));
+                }
+                String form = prepareLoginInitiation(nodeService.getPrimaryParent(nodeRef).getParentRef().getId(),
+                        nodeId,
+                        editMode,
+                        nodeId,
+                        version,
+                        appInfos.get(0),
+                        LoginInitiationSessionObject.MessageType.resourcelink,
+                        launchPresentation,
+                        req);
+                return Response.status(Response.Status.OK).entity(form).build();
+            }
+            throw new Exception("no lti tool found for toolUrl:"+ toolUrl + " / resoureType:" + resourceType);
         }catch (Exception e){
             return ApiTool.processError(req,e,"LTI_ERROR");
         }
+    }
+
+    @NotNull
+    private static List<ApplicationInfo> getAppByResoureType(String resourceType) throws Exception {
+        List<ApplicationInfo> appInfos = ApplicationInfoList.getApplicationInfos().values().stream()
+                .filter(ApplicationInfo::isLtiTool)
+                .filter(app -> resourceType.equals(app.getLtiResourceType()))
+                .collect(Collectors.toList());
+        if (appInfos.isEmpty()) {
+            throw new Exception("no lti tool can handle the resoure type: " + resourceType);
+        }
+        if (appInfos.size() > 1) {
+            throw new Exception("multiple lti tools can handle the resoure type: " + resourceType);
+        }
+        return appInfos;
     }
 
     /**
@@ -871,7 +896,7 @@ public class LTIPlatformApi {
                 String name = EduSharingNodeHelper.cleanupCmName(title);
                 name = new DuplicateFinder().getUniqueValue(sessionObject.getContextId(),CCConstants.CM_NAME,name);
                 properties.put(CCConstants.CM_NAME,new String[]{name} );
-               // properties.put(CCConstants.LOM_PROP_GENERAL_TITLE,new String[]{title});
+                // properties.put(CCConstants.LOM_PROP_GENERAL_TITLE,new String[]{title});
 
                 if(contentItem.containsKey("icon")){
                     Map<String,Object> icon = (Map<String,Object>)contentItem.get("icon");
@@ -906,13 +931,13 @@ public class LTIPlatformApi {
             String closeAndInformAngular =
                     "function callAngularFunction(nodeIds, titles) {" +
                             "window.opener.angularComponentReference.zone.run(() => { window.opener.angularComponentReference.loadAngularFunction(nodeIds,titles); });" +
-                    "}"
-                    + "window.onload = function() {\n" +
+                            "}"
+                            + "window.onload = function() {\n" +
                             " nodeIdArr="+nodeIdsJS+";"+
                             " titlesArr="+titlesJS+";"+
-                        " callAngularFunction(nodeIdArr,titlesArr);\n" +
+                            " callAngularFunction(nodeIdArr,titlesArr);\n" +
                             "window.close();\n" +
-                    "};";
+                            "};";
 
             //cleanup session object to prevent wrong context message
 
