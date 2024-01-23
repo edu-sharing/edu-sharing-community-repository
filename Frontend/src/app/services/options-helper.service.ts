@@ -416,7 +416,10 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 return ElementType.NodeChild;
             } else if (object.mediatype === 'folder-link') {
                 return ElementType.MapRef;
-            } else if (object.proposal) {
+            } else if (
+                object.proposal ||
+                object.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL
+            ) {
                 return ElementType.NodeProposal;
             } else {
                 if (this.nodeHelper.isNodePublishedCopy(object)) {
@@ -740,10 +743,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             /**
              * prevent lti editor as tool with custom content option, embedding nodes as platform created by the same tool
              */
-
-            let customContentNodeLtiToolUrl =
-                ltiSession.customContentNode.properties['ccm:ltitool_url'][0];
-            if (ltiSession.customContentNode) {
+            if (ltiSession.customContentNode && ltiSession.customContentNode.properties) {
+                let customContentNodeLtiToolUrl =
+                    ltiSession.customContentNode.properties['ccm:ltitool_url'][0];
                 return nodes.some((n) => {
                     let nLtiToolUrlArr = ltiSession.customContentNode.properties['ccm:ltitool_url'];
                     if (!Array.isArray(nLtiToolUrlArr) || nLtiToolUrlArr.length == 0) {

@@ -1,41 +1,16 @@
 package org.edu_sharing.service.nodeservice;
 
 
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.service.cmr.repository.StoreRef;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.metadataset.v2.MetadataReader;
-import org.edu_sharing.metadataset.v2.QueryUtils;
-import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.service.admin.RepositoryConfigFactory;
 import org.edu_sharing.service.admin.model.RepositoryConfig;
-import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.model.NodeRef;
-import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.SearchServiceFactory;
-import org.edu_sharing.service.search.model.SortDefinition;
-import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.script.Script;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.ScriptSortBuilder;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.elasticsearch.search.sort.SortMode;
-import org.elasticsearch.search.sort.SortOrder;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -59,6 +34,9 @@ public class NodeFrontpage {
 
 
     public Collection<NodeRef> getNodesForCurrentUserAndConfig() throws Throwable {
+
+        // @TODO
+        /*
         RepositoryConfig.Frontpage config = RepositoryConfigFactory.getConfig().frontpage;
         if(config.mode.equals(RepositoryConfig.Frontpage.Mode.collection)){
             if(config.collection==null){
@@ -132,7 +110,7 @@ public class NodeFrontpage {
         Set<String> authorities = searchServiceElastic.getUserAuthorities();
         for(SearchHit hit : searchResult.getHits().getHits()){
             logger.debug("score:"+hit.getScore() +" id:"+hit.getId() + " "+ ((Map)hit.getSourceAsMap().get("properties")).get("cm:name"));
-            result.add(searchServiceElastic.transformSearchHit(authorities, AuthenticationUtil.getFullyAuthenticatedUser(),hit,false));
+            result.add(searchServiceElastic.transformSearchHit(authorities, AuthenticationUtil.getFullyAuthenticatedUser(),hit.getSourceAsMap(),false));
         }
         result = result.subList(0, result.size() > config.totalCount ? config.totalCount : result.size());
         if(config.displayCount<config.totalCount) {
@@ -145,6 +123,8 @@ public class NodeFrontpage {
         }
         return result;
 
+         */
+        return null;
     }
 
     private List<String> getFieldNames(RepositoryConfig.Frontpage config){

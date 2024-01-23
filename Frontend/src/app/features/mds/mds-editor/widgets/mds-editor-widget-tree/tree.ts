@@ -5,6 +5,7 @@ let nextUniqueId = 0;
 
 export class TreeNode {
     id: string;
+    alternativeIds: string[];
     uid: string;
     caption: string;
     children?: TreeNode[];
@@ -22,6 +23,7 @@ export type MdsWidgetTree = MdsWidget & {
 export class Tree {
     rootNodes: TreeNode[];
     nodesMap: { [key: string]: TreeNode };
+    nodesMapAlternativeIds: { [key: string]: TreeNode };
 
     static generateTree(
         definedValues: readonly MdsWidgetValue[],
@@ -39,6 +41,7 @@ export class Tree {
                 }
                 const node: TreeNode = {
                     id: value.id,
+                    alternativeIds: value.alternativeIds,
                     uid: `app-tree-node-${nextUniqueId++}`,
                     caption: value.caption,
                     isChecked: checkedValues.includes(value.id),
@@ -69,6 +72,7 @@ export class Tree {
     private constructor() {
         this.rootNodes = [];
         this.nodesMap = {};
+        this.nodesMapAlternativeIds = {};
     }
 
     findById(id: string): TreeNode {
@@ -112,7 +116,7 @@ export class Tree {
     }
 
     idToDisplayValue(id: string): DisplayValue {
-        const node = this.nodesMap[id];
+        const node = this.nodesMap[id] || this.nodesMapAlternativeIds[id];
         if (node == null) {
             return {
                 key: id,
@@ -132,6 +136,10 @@ export class Tree {
 
     private pushNode(node: TreeNode, parent?: TreeNode): void {
         this.nodesMap[node.id] = node;
+        if (node.alternativeIds?.length > 0) {
+            // FIXME: we're currently only supporting one alternative id but not multiple
+            this.nodesMapAlternativeIds[node.alternativeIds[0]] = node;
+        }
         if (parent) {
             node.parent = parent;
             if (parent.children) {

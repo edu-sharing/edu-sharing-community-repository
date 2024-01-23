@@ -16,6 +16,11 @@ const themes: Themes = {
         accent: '#ff0000',
         warn: '#cd2457',
     },
+    lightBlue: {
+        primary: '#76a1c0',
+        accent: '#76a1c0',
+        warn: '#cd2457',
+    },
 };
 
 const preview: Preview = {

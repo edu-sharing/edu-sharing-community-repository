@@ -54,6 +54,7 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
                 this.translate,
             );
         }
+        this.registerValueChanges(this.formControl);
     }
 
     focus(): void {

@@ -411,6 +411,8 @@
     "file-video": "video",
     "file-qti": "ONYX file",
     "file-h5p": "H5P file",
+    "file-geogebra": "geogebra file",
+    "file-serlo": "serlo file",
     "file-pdf": "pdf file",
     "link": "Website",
     "folder": "Folder",
@@ -570,6 +572,17 @@
       "SCHULFUNK": "German educational radio/television license (§47 UrhG)",
       "EDU": "edu-sharing Licenses",
       "CUSTOM": "define custom license"
+    },
+    "URLS": {
+      "CC_BY_ABOUT": "https://creativecommons.org/licenses/",
+      "CC_BY": "https://creativecommons.org/licenses/by/{{version}}/{{locale}}legalcode",
+      "CC_BY_ND": "https://creativecommons.org/licenses/by-nd/{{version}}/{{locale}}legalcode",
+      "CC_BY_SA": "https://creativecommons.org/licenses/by-sa/{{version}}/{{locale}}legalcode",
+      "CC_BY_NC": "https://creativecommons.org/licenses/by-nc/{{version}}/{{locale}}legalcode",
+      "CC_BY_NC_ND": "https://creativecommons.org/licenses/by-nc-nd/{{version}}/{{locale}}legalcode",
+      "CC_BY_NC_SA": "https://creativecommons.org/licenses/by-nc-sa/{{version}}/{{locale}}legalcode",
+      "CC_0": "https://creativecommons.org/publicdomain/zero/1.0/legalcode",
+      "PDM": "https://creativecommons.org/public-domain/pdm/"
     }
   },
   "LIST": {

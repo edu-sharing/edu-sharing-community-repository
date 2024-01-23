@@ -63,6 +63,7 @@ export enum ClickSource {
     Metadata,
     Comments,
     Overlay,
+    Dropdown, // keep: used in extensions
 }
 
 export type NodeClickEvent<T extends NodeEntriesDataType> = {

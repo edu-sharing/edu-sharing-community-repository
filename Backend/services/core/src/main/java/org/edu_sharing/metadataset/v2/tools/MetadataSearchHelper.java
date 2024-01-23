@@ -6,9 +6,9 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.log4j.Logger;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.metadataset.v2.*;
-import org.edu_sharing.repackaged.elasticsearch.org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -67,7 +67,7 @@ public class MetadataSearchHelper {
 						if(!queryString.isEmpty())
 							queryString+=" "+query.getJoin()+" ";
 						// handle ignorable parameters
-						queryString+="ISNULL:@"+QueryParser.escape(parameter.getName());
+						queryString+="ISNULL:@"+ QueryParser.escape(parameter.getName());
 							continue;
 					}
 					if(!queryString.isEmpty())

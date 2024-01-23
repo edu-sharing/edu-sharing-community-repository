@@ -1,9 +1,9 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Toast } from '../../../services/toast';
 import { Params, Router } from '@angular/router';
-import { RestConnectorService, RestRegisterService } from '../../../core-module/core.module';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { UIConstants } from 'ngx-edu-sharing-ui';
+import { RegisterService } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-register-reset-password',
@@ -44,10 +44,5 @@ export class RegisterResetPasswordComponent {
             },
         );
     }
-    constructor(
-        private connector: RestConnectorService,
-        private toast: Toast,
-        private register: RestRegisterService,
-        private router: Router,
-    ) {}
+    constructor(private toast: Toast, private register: RegisterService, private router: Router) {}
 }

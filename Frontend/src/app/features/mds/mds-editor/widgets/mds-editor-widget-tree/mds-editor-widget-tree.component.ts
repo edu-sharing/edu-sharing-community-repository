@@ -114,6 +114,7 @@ export class MdsEditorWidgetTreeComponent
         this.indeterminateValues$.subscribe((indeterminateValues) =>
             this.widget.setIndeterminateValues(indeterminateValues),
         );
+        this.registerValueChanges(this.chipsControl);
     }
 
     ngAfterViewInit(): void {

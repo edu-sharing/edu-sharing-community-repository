@@ -435,6 +435,7 @@
       "SINGLE": "Einzelauswertung",
       "NODES": "Nach Objekt",
       "NODES_MEDIACENTER_INFO": "Die gezeigten Statistiken sind nur für den Abruf aktueller Daten vorgesehen. Für den Zugriff auf historische Daten nutzen Sie bitte die bereitgestellten Dateien unter \"Monatlich/Jährlich\".",
+      "NODES_APPLY": "Auswertung starten",
       "CUSTOM_GROUPS": "Nach Kriterium",
       "VIEWS": "Seitenaufrufe",
       "VIEWS_EMBEDDED": "Einbettungen",

@@ -96,23 +96,23 @@
       </div>
 
       <div *ngIf="data.sendMessages && getNewInvitedAuthorities().length" class="groupMessage">
-        <mat-form-field>
+        <mat-checkbox id="notify" [(ngModel)]="notifyUsers">
+          <div>{{ 'WORKSPACE.NOTIFY_TITLE' | translate }}</div>
+          <div class="notify-info">{{ 'WORKSPACE.NOTIFY_INFO' | translate }}</div>
+        </mat-checkbox>
+        <mat-form-field *ngIf="notifyUsers" [@overlay]="notifyUsers" floatLabel="always">
           <mat-label>{{ 'WORKSPACE.SHARE.MESSAGE' | translate }}</mat-label>
           <textarea
             matInput
             cdkTextareaAutosize
-            cdkAutosizeMinRows="2"
-            cdkAutosizeMaxRows="4"
+            cdkAutosizeMinRows="3"
+            cdkAutosizeMaxRows="5"
             id="message"
             name="message"
             [(ngModel)]="notifyMessage"
             placeholder="{{ 'WORKSPACE.SHARE.MESSAGE_PLACEHOLDER' | translate }}"
           ></textarea>
         </mat-form-field>
-        <mat-checkbox id="notify" [(ngModel)]="notifyUsers">
-          <div>{{ 'WORKSPACE.NOTIFY_TITLE' | translate }}</div>
-          <div class="notify-info">{{ 'WORKSPACE.NOTIFY_INFO' | translate }}</div>
-        </mat-checkbox>
       </div>
       <!--
         <div [ngClass]="{'publish-grey': getNewInvitedAuthorities().length}" class="publish" *ngIf="!isSafe && _nodes[0].isDirectory">

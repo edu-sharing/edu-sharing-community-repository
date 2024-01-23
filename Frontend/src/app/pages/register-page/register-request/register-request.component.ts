@@ -5,6 +5,7 @@ import { Toast } from '../../../services/toast';
 import { UntypedFormControl, Validators } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { RegisterService } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-register-request',
@@ -19,12 +20,7 @@ export class RegisterRequestComponent implements OnDestroy {
         Validators.required,
         // Validators.email, // also local accounts are allowed for restore
     ]);
-    constructor(
-        private connector: RestConnectorService,
-        private toast: Toast,
-        private router: Router,
-        private register: RestRegisterService,
-    ) {
+    constructor(private toast: Toast, private register: RegisterService) {
         this.emailFormControl.statusChanges
             .pipe(takeUntil(this.destroyed$))
             .subscribe(() => this.onStateChanged.emit());

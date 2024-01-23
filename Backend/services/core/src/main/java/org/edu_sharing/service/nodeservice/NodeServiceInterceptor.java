@@ -137,7 +137,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
      */
     private static Object checkIgnoreQuota(MethodInvocation invocation) throws Throwable {
         if(ContextManagementFilter.accessTool.get() != null &&
-                ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getType())
+                ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getType())
         ){
             return ignoreQuota(() -> {
                 try {

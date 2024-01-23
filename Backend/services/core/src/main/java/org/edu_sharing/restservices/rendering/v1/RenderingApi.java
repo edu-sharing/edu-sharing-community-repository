@@ -18,6 +18,7 @@ import org.edu_sharing.restservices.rendering.v1.model.RenderingDetailsEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Node;
+import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.repoproxy.RepoProxy;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.tracking.NodeTrackingDetails;
@@ -27,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.util.Arrays;
 import java.util.Map;
 
 
@@ -139,7 +141,11 @@ public class RenderingApi {
 					org.edu_sharing.alfresco.repository.server.authentication.
 							Context.getCurrentInstance().getRequest().getSession().removeAttribute(CCConstants.SESSION_RENDERING_DETAILS);
 				}
-				TrackingTool.trackActivityOnNode(node, details, TrackingService.EventType.VIEW_MATERIAL);
+				if(Arrays.asList(RenderingTool.DISPLAY_DYNAMIC,RenderingTool.DISPLAY_CONTENT).contains(displayMode) || displayMode == null) {
+					TrackingTool.trackActivityOnNode(node, details, TrackingService.EventType.VIEW_MATERIAL);
+				} else if(RenderingTool.DISPLAY_INLINE.equals(displayMode)) {
+					TrackingTool.trackActivityOnNode(node, details, TrackingService.EventType.VIEW_MATERIAL_EMBEDDED);
+				}
 			}
 
 			RenderingDetailsEntry response = new RenderingDetailsEntry();

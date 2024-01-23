@@ -145,7 +145,7 @@ public class UsageDao {
 					CCConstants.PERMISSION_CHANGEPERMISSIONS);
 			if(ContextManagementFilter.accessTool != null
 					&& ContextManagementFilter.accessTool.get() != null){
-				if(ContextManagementFilter.accessTool.get().getAppId().equals(usage.getLmsId())) {
+				if(ContextManagementFilter.accessTool.get().getApplicationInfo().getAppId().equals(usage.getLmsId())) {
 					permission = true;
 					logger.info("Delete usage allowed for app id " + usage.getLmsId());
 				} else {

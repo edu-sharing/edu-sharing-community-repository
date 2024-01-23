@@ -34,6 +34,7 @@ import { UIService } from '../../../core-module/rest/services/ui.service';
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { Toast } from '../../../services/toast';
 import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
+import { animate, state, style, transition, trigger } from '@angular/animations';
 
 // Charts.js
 declare var Chart: any;
@@ -50,7 +51,25 @@ type GroupTemplate = {
     templateUrl: 'statistics.component.html',
     styleUrls: ['statistics.component.scss'],
     animations: [
-        trigger('overlay', UIAnimation.openOverlay()),
+        trigger('overlay', [
+            state(
+                'false',
+                style({
+                    opacity: 0,
+                    'transform-origin': '50% 0%',
+                    transform: 'scaleY(0)',
+                    height: 0,
+                }),
+            ),
+            state(
+                'true',
+                style({ opacity: 1, 'transform-origin': '50% 0%', transform: 'scaleY(1)' }),
+            ),
+            transition(
+                'false <=> true',
+                animate(UIAnimation.ANIMATION_TIME_NORMAL + 'ms ease-in-out'),
+            ),
+        ]),
         trigger('dialog', UIAnimation.switchDialog()),
     ],
 })
@@ -100,7 +119,7 @@ export class AdminStatisticsComponent implements OnInit {
     singleData: any[];
     singleDataRows: string[];
     groupedChart: any;
-    nodesDataSource = new NodeDataSource<any>();
+    nodesDataSource: NodeDataSource<Node | any> = null;
     columns: ListItem[];
     currentTab = 0;
     exportProperties: string;
@@ -198,7 +217,7 @@ export class AdminStatisticsComponent implements OnInit {
     set nodesStart(nodesStart: Date) {
         this._nodesStart = nodesStart;
         this._nodesStart.setHours(0, 0, 0);
-        this.refreshNodes();
+        this.nodesDataSource = null;
     }
     get nodesStart() {
         return this._nodesStart;
@@ -206,7 +225,7 @@ export class AdminStatisticsComponent implements OnInit {
     set nodesEnd(nodesEnd: Date) {
         this._nodesEnd = nodesEnd;
         this._nodesEnd.setHours(23, 59, 59);
-        this.refreshNodes();
+        this.nodesDataSource = null;
     }
     get nodesEnd() {
         return this._nodesEnd;
@@ -279,7 +298,6 @@ export class AdminStatisticsComponent implements OnInit {
     refresh() {
         this.refreshArchived();
         this.refreshGroups();
-        this.refreshNodes();
         this.refreshSingle();
         this.refreshCustomGroups();
     }
@@ -529,12 +547,13 @@ export class AdminStatisticsComponent implements OnInit {
         });
     }
 
-    private refreshNodes() {
+    refreshNodes() {
         if (!this.finishedPreload) {
             return;
         }
-        this.nodesDataSource.reset();
-        this.nodesDataSource.isLoading = false;
+        this.nodesDataSource = new NodeDataSource<Node>();
+        this.nodesDataSource.isLoading = true;
+        this.nodesNoData = true;
         const group = this.config.instant('admin.statistics.nodeGroup');
         this.statistics
             .getStatisticsNode(
@@ -544,16 +563,23 @@ export class AdminStatisticsComponent implements OnInit {
                 this.getMediacenter(),
                 group ? [group] : null,
             )
-            .subscribe((data) => {
-                this.nodesDataSource.isLoading = false;
-                this.nodesNoData = data.length === 0;
-                this.nodesDataSource.setData(
-                    data.map((stat) => {
-                        (stat.node as any).counts = stat;
-                        return stat.node;
-                    }),
-                );
-            });
+            .subscribe(
+                (data) => {
+                    this.nodesDataSource.isLoading = false;
+                    this.nodesNoData = data.length === 0;
+                    this.nodesDataSource.setData(
+                        data.map((stat) => {
+                            (stat.node as any).counts = stat;
+                            return stat.node;
+                        }),
+                    );
+                },
+                (error) => {
+                    this.toast.error(error);
+                    this.nodesDataSource.isLoading = false;
+                    this.nodesNoData = true;
+                },
+            );
     }
     getValidMode(mode: 'NODES' | 'USERS') {
         if (!this._mediacenter) {

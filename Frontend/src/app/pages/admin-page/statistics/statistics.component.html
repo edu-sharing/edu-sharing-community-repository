@@ -153,7 +153,8 @@
     <es-info-message *ngIf="_mediacenter">
       {{ 'ADMIN.STATISTICS.NODES_MEDIACENTER_INFO' | translate }}
     </es-info-message>
-    <div class="modes">
+    <!-- only hide to prevent mat-calendar to reset view -->
+    <div class="modes" [@overlay]="!nodesDataSource?.isLoading">
       <div class="calendars">
         <div>
           <mat-label>{{ 'ADMIN.STATISTICS.FROM' | translate }}</mat-label>
@@ -168,49 +169,62 @@
           ></mat-calendar>
         </div>
       </div>
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="refreshNodes()"
+        [disabled]="nodesDataSource?.isLoading"
+      >
+        {{ 'ADMIN.STATISTICS.NODES_APPLY' | translate }}
+      </button>
     </div>
-    <div class="export" *ngIf="!nodesNoData && !nodesDataSource.isLoading">
-      <h4 class="mat-heading-4 mat-heading-underline clickable" (click)="showExport = !showExport">
-        <i esIcon="cloud_download"></i>
-        <span>{{ 'ADMIN.STATISTICS.EXPORT_LABEL' | translate }}</span>
-        <i [esIcon]="'keyboard_arrow_' + (showExport ? 'up' : 'down')"></i>
-      </h4>
-      <div *ngIf="showExport" [@overlay]="showExport">
-        <mat-form-field>
-          <mat-label>{{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES' | translate }}</mat-label>
-          <textarea
-            matInput
-            cdkTextareaAutosize
-            cdkAutosizeMinRows="4"
-            cdkAutosizeMaxRows="6"
-            [(ngModel)]="exportProperties"
-          ></textarea>
-          <mat-hint>{{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES_HINT' | translate }}</mat-hint>
-        </mat-form-field>
-        <div>
-          <button mat-raised-button color="primary" (click)="export()">
-            {{ 'ADMIN.STATISTICS.EXPORT' | translate }}
-          </button>
+    <ng-container *ngIf="nodesDataSource !== null">
+      <div class="export" *ngIf="!nodesNoData && !nodesDataSource?.isLoading">
+        <h4
+          class="mat-heading-4 mat-heading-underline clickable"
+          (click)="showExport = !showExport"
+        >
+          <i esIcon="cloud_download"></i>
+          <span>{{ 'ADMIN.STATISTICS.EXPORT_LABEL' | translate }}</span>
+          <i [esIcon]="'keyboard_arrow_' + (showExport ? 'up' : 'down')"></i>
+        </h4>
+        <div *ngIf="showExport" [@overlay]="showExport">
+          <mat-form-field>
+            <mat-label>{{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES' | translate }}</mat-label>
+            <textarea
+              matInput
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="4"
+              cdkAutosizeMaxRows="6"
+              [(ngModel)]="exportProperties"
+            ></textarea>
+            <mat-hint>{{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES_HINT' | translate }}</mat-hint>
+          </mat-form-field>
+          <div>
+            <button mat-raised-button color="primary" (click)="export()">
+              {{ 'ADMIN.STATISTICS.EXPORT' | translate }}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <h5 class="mat-heading-5" *ngIf="nodesNoData && !nodesDataSource.isLoading">
-      {{ 'ADMIN.STATISTICS.NO_DATA' | translate }}
-    </h5>
-    <es-node-entries-wrapper
-      *ngIf="!(nodesNoData && !nodesDataSource.isLoading)"
-      [scope]="Scope.Admin"
-      [dataSource]="nodesDataSource"
-      [elementInteractionType]="InteractionType.Emitter"
-      [checkbox]="false"
-      [displayType]="NodeEntriesDisplayType.Table"
-      [columns]="columns"
-      (clickItem)="onOpenNode.emit($event.element)"
-    ></es-node-entries-wrapper>
-    <es-info-message *ngIf="!nodesNoData">
-      {{ 'ADMIN.STATISTICS.SLICE_INFO_DOWNLOAD' | translate }}
-    </es-info-message>
+      <h5 class="mat-heading-5" *ngIf="nodesNoData && !nodesDataSource.isLoading">
+        {{ 'ADMIN.STATISTICS.NO_DATA' | translate }}
+      </h5>
+      <es-node-entries-wrapper
+        *ngIf="!(nodesNoData && !nodesDataSource.isLoading)"
+        [scope]="Scope.Admin"
+        [dataSource]="nodesDataSource"
+        [elementInteractionType]="InteractionType.Emitter"
+        [checkbox]="false"
+        [displayType]="NodeEntriesDisplayType.Table"
+        [columns]="columns"
+        (clickItem)="onOpenNode.emit($event.element)"
+      ></es-node-entries-wrapper>
+      <es-info-message *ngIf="!nodesNoData">
+        {{ 'ADMIN.STATISTICS.SLICE_INFO_DOWNLOAD' | translate }}
+      </es-info-message>
+    </ng-container>
   </mat-tab>
   <!--
   <mat-tab label="{{ 'ADMIN.STATISTICS.SINGLE' | translate }}" class="stats-single">
@@ -329,11 +343,7 @@
 </mat-tab-group>
 <div
   class="export"
-  *ngIf="
-    (currentTab === 0 && !groupedLoading) ||
-    (currentTab === 1 && !customGroupLoading) ||
-    (currentTab === 2 && !singleLoading)
-  "
+  *ngIf="(currentTab === 0 && !groupedLoading) || (currentTab === 1 && !customGroupLoading)"
 >
   <h4 class="mat-heading-4 mat-heading-underline">
     <i esIcon="cloud_download"></i>{{ 'ADMIN.STATISTICS.EXPORT_LABEL' | translate }}

@@ -5,6 +5,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.RequestBuilder;
 import org.apache.log4j.MDC;
 import org.edu_sharing.repository.client.tools.CCConstants;
 
@@ -173,7 +175,7 @@ public class Context {
             return false;
         }
 
-        default void addToRequest(HttpRequestBase request) {
+        default void addToRequest(RequestBuilder request) {
             for (Map.Entry<String, String> header : getX3Headers().entrySet()) {
                 request.setHeader(header.getKey(), header.getValue());
             }

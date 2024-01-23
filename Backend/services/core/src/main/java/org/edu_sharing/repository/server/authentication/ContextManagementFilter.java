@@ -20,13 +20,14 @@ import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.QueryUtils;
+import org.edu_sharing.repository.TrackingApplicationInfo;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
+import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.authentication.ScopeAuthenticationServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.config.ConfigServiceFactory;
@@ -42,7 +43,7 @@ import org.springframework.context.ApplicationContext;
 
 public class ContextManagementFilter implements javax.servlet.Filter {
 	// stores the currently accessing tool type, e.g. CONNECTOR
-	public static ThreadLocal<ApplicationInfo> accessTool = new ThreadLocal<>();
+	public static ThreadLocal<TrackingApplicationInfo> accessTool = new ThreadLocal<>();
 
 	Logger logger = Logger.getLogger(ContextManagementFilter.class);
 
@@ -163,9 +164,13 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 				logger.warn(msg);
 				httpRes.sendError(result.getStatuscode(), result.getMessage());
 			} else {
-				ApplicationInfo appInfo = result.getAppInfo();
-				accessTool.set(appInfo);
-
+				String userId = SignatureVerifier.getHeaderOrParam("X-Edu-User-Id",httpReq);
+				if (userId != null) {
+					userId = SSOAuthorityMapper.mapAdminAuthority(userId, appId);
+					accessTool.set(new TrackingApplicationInfo(result.getAppInfo(), userId));
+				} else {
+					accessTool.set(new TrackingApplicationInfo(result.getAppInfo(), null));
+				}
 				String courseId = SignatureVerifier.getHeaderOrParam("X-Edu-Usage-Course-Id",httpReq);
 				String nodeId = SignatureVerifier.getHeaderOrParam("X-Edu-Usage-Node-Id",httpReq);
 				String resourceId = SignatureVerifier.getHeaderOrParam("X-Edu-Usage-Resource-Id",httpReq);

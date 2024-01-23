@@ -14,6 +14,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
@@ -143,7 +144,7 @@ public class RenderingServiceImpl implements RenderingService{
 
 	@Override
 	public String getDetails(String renderingServiceUrl, RenderingServiceData data) throws JsonProcessingException, UnsupportedEncodingException {
-		HttpPost post = new HttpPost(renderingServiceUrl);
+		RequestBuilder post = RequestBuilder.post(renderingServiceUrl);
 		if (Context.getCurrentInstance() != null) {
 			Context.getCurrentInstance().getB3().addToRequest(post);
 		}

@@ -5,8 +5,11 @@
   <div *ngIf="contributorLifecycle[role] && contributorLifecycle[role].length" class="group">
     <div class="role">{{ 'WORKSPACE.CONTRIBUTOR.TYPE.' + role.toUpperCase() | translate }}</div>
     <mat-chip-grid>
-      <mat-chip *ngFor="let vCard of contributorLifecycle[role]; let i = index" class="clickable">
-        <span (click)="editVCard('lifecycle', vCard, role)">{{ vCard.getDisplayName() }}</span>
+      <mat-chip
+        *ngFor="let vCard of contributorLifecycle[role]; let i = index"
+        class="badge clickable"
+      >
+        <span (click)="editVCard('lifecycle', vCard, role, i)">{{ vCard.getDisplayName() }}</span>
         <mat-icon matChipRemove (click)="remove(contributorLifecycle[role], i)">cancel</mat-icon>
       </mat-chip>
     </mat-chip-grid>
@@ -22,8 +25,11 @@
   <div *ngIf="contributorMetadata[role] && contributorMetadata[role].length" class="group">
     <div class="role">{{ 'WORKSPACE.CONTRIBUTOR.TYPE.' + role.toUpperCase() | translate }}</div>
     <mat-chip-grid>
-      <mat-chip *ngFor="let vCard of contributorMetadata[role]; let i = index" class="clickable">
-        <span (click)="editVCard('metadata', vCard, role)">{{ vCard.getDisplayName() }}</span>
+      <mat-chip
+        *ngFor="let vCard of contributorMetadata[role]; let i = index"
+        class="badge clickable"
+      >
+        <span (click)="editVCard('metadata', vCard, role, i)">{{ vCard.getDisplayName() }}</span>
         <mat-icon matChipRemove (click)="remove(contributorMetadata[role], i)">cancel</mat-icon>
       </mat-chip>
     </mat-chip-grid>

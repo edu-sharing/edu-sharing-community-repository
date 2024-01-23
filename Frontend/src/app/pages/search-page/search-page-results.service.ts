@@ -15,7 +15,9 @@ import {
     filter,
     first,
     map,
+    pairwise,
     share,
+    startWith,
     switchMap,
     takeUntil,
     tap,
@@ -35,6 +37,7 @@ import { MdsWidgetType } from 'src/app/features/mds/types/types';
 import { RestSearchService } from 'src/app/core-module/core.module';
 
 export interface SearchPageResults {
+    diffCount?: Observable<number>;
     totalResults?: Observable<number>;
     loadingProgress: Observable<number>;
     addNodes: (nodes: Node[]) => void;
@@ -52,6 +55,7 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
     readonly loadingContent = new BehaviorSubject<boolean>(true);
     readonly loadingCollections = new BehaviorSubject<boolean>(true);
     readonly loadingProgress = new BehaviorSubject<number>(0);
+    readonly diffCount = new BehaviorSubject<number>(0);
 
     private readonly _destroyed = new Subject<void>();
 
@@ -67,6 +71,7 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
         this._registerSearchObservables();
         this._registerColumnsAndSortConfig();
         this._registerLoadingProgress();
+        this._registerResultDiffCount();
     }
 
     ngOnDestroy(): void {
@@ -298,6 +303,21 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
                 distinctUntilChanged(),
             )
             .subscribe((progress) => this.loadingProgress.next(progress));
+    }
+
+    private _registerResultDiffCount(): void {
+        this.resultsDataSource
+            .connect()
+            .pipe(
+                takeUntil(this._destroyed),
+                filter(notNull),
+                map((nodes) => nodes.length),
+                startWith(0),
+                pairwise(),
+            )
+            .subscribe(([previousCount, currentCount]) => {
+                this.diffCount.next(currentCount - previousCount);
+            });
     }
 
     // TODO: Port `unfoldTrees` methods from 8.0. See

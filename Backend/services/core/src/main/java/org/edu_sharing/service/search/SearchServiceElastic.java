@@ -1,5 +1,22 @@
 package org.edu_sharing.service.search;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.ElasticsearchException;
+import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.SuggestMode;
+import co.elastic.clients.elasticsearch._types.Time;
+import co.elastic.clients.elasticsearch._types.aggregations.*;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
+import co.elastic.clients.elasticsearch.core.*;
+import co.elastic.clients.elasticsearch.core.search.*;
+import co.elastic.clients.json.JsonpUtils;
+import co.elastic.clients.json.jackson.JacksonJsonpMapper;
+import co.elastic.clients.transport.ElasticsearchTransport;
+import co.elastic.clients.transport.TransportOptions;
+import co.elastic.clients.transport.rest_client.RestClientTransport;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.vcard.VCard;
@@ -9,9 +26,11 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.PermissionReference;
 import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpHost;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
@@ -21,7 +40,6 @@ import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
-import org.edu_sharing.repackaged.elasticsearch.org.apache.http.HttpHost;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -43,50 +61,25 @@ import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SearchVCard;
-import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.action.delete.DeleteRequest;
-import org.elasticsearch.action.delete.DeleteResponse;
-import org.elasticsearch.action.search.*;
-import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.action.update.UpdateResponse;
-import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.Request;
 import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.core.TimeValue;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.SearchModule;
-import org.elasticsearch.search.aggregations.Aggregation;
-import org.elasticsearch.search.aggregations.AggregationBuilder;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.filter.ParsedFilter;
-import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.elasticsearch.search.aggregations.metrics.ParsedCardinality;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.ScoreSortBuilder;
-import org.elasticsearch.search.sort.SortOrder;
-import org.elasticsearch.search.suggest.SuggestBuilder;
-import org.elasticsearch.search.suggest.SuggestBuilders;
-import org.elasticsearch.search.suggest.phrase.DirectCandidateGeneratorBuilder;
-import org.elasticsearch.search.suggest.phrase.PhraseSuggestion;
-import org.elasticsearch.xcontent.*;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SearchServiceElastic extends SearchServiceImpl {
-    static RestHighLevelClient client;
+    public static final String WORKSPACE_INDEX = "workspace_9.0";
+    static RestClient restClient;
+    static ElasticsearchClient client;
+
     public SearchServiceElastic(String applicationId) {
         super(applicationId);
     }
@@ -98,113 +91,109 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
-    PermissionModel permissionModel = (PermissionModel)alfApplicationContext.getBean("permissionsModelDAO");
+    PermissionModel permissionModel = (PermissionModel) alfApplicationContext.getBean("permissionsModelDAO");
 
     public static HttpHost[] getConfiguredHosts() {
-        List<HttpHost> hosts=null;
         try {
-            List<String> servers= LightbendConfigLoader.get().getStringList("elasticsearch.servers");
-            hosts=new ArrayList<>();
-            for(String server : servers) {
-                hosts.add(new HttpHost(server.split(":")[0],Integer.parseInt(server.split(":")[1])));
+            List<String> servers = LightbendConfigLoader.get().getStringList("elasticsearch.servers");
+            List<HttpHost> hosts = new ArrayList<>();
+            for (String server : servers) {
+                hosts.add(new HttpHost(server.split(":")[0], Integer.parseInt(server.split(":")[1])));
             }
-        }catch(Throwable t) {
+            return hosts.toArray(new HttpHost[0]);
+        } catch (Throwable ignored) {
+            return null;
         }
-        return hosts.toArray(new HttpHost[0]);
     }
 
     public SearchResultNodeRefElastic searchDSL(String dsl) throws Throwable {
         checkClient();
-        SearchRequest searchRequest = new SearchRequest("workspace");
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        SearchModule searchModule = new SearchModule(Settings.EMPTY, false, Collections.emptyList());
-        try (XContentParser parser = XContentFactory.xContent(XContentType.JSON).createParser(new NamedXContentRegistry(searchModule
-                .getNamedXContents()), DeprecationHandler.IGNORE_DEPRECATIONS, dsl)) {
-            searchSourceBuilder.parseXContent(parser);
-        }
-        searchRequest.source(searchSourceBuilder);
-        SearchResponse searchResponse = client.search(searchRequest, getRequestOptions());
-
+        Request request = new Request("GET", "workspace/_search");
+        request.setJsonEntity(dsl);
+        JSONObject response = new JSONObject(EntityUtils.toString(restClient.performRequest(request).getEntity()));
         SearchResultNodeRefElastic sr = new SearchResultNodeRefElastic();
         List<NodeRef> data = new ArrayList<>();
         sr.setData(data);
-        sr.setElasticResponse(searchResponse);
-        SearchHits hits = searchResponse.getHits();
-        logger.info("result count: "+hits.getTotalHits());
-        sr.setNodeCount((int) hits.getTotalHits().value);
+        sr.setElasticResponse(response);
+        JSONObject hits = response.getJSONObject("hits");
+        int total = hits.getJSONObject("total").getInt("value");
+        logger.info("result count: " + total);
+        sr.setNodeCount(total);
+        JSONArray hitsList = hits.getJSONArray("hits");
         Set<String> authorities = getUserAuthorities();
         String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
-        for (SearchHit hit : hits) {
+        for (int i = 0; i < hitsList.length(); i++) {
+            Map hit = new ObjectMapper().readValue(hitsList.getJSONObject(i).getJSONObject("_source").toString(), Map.class);
             data.add(transformSearchHit(authorities, user, hit, false));
         }
         return sr;
     }
 
-    private RequestOptions getRequestOptions() {
-        RequestOptions.Builder b = RequestOptions.DEFAULT.toBuilder();
+    private TransportOptions.Builder getRequestOptions(TransportOptions.Builder bld) {
 
         // add trace headers to elastic request
         Context context = Context.getCurrentInstance();
-        if(context != null) {
-            for(Map.Entry<String, String> header: context.getB3().getX3Headers().entrySet()) {
-                b.addHeader(header.getKey(), header.getValue());
+        if (context != null) {
+            for (Map.Entry<String, String> header : context.getB3().getX3Headers().entrySet()) {
+                bld.addHeader(header.getKey(), header.getValue());
             }
         }
-        return b.build();
+        return bld;
     }
 
-    public BoolQueryBuilder getPermissionsQuery(String field){
+    public BoolQuery.Builder getPermissionsQuery(BoolQuery.Builder builder, String field) {
         Set<String> authorities = getUserAuthorities();
-        return getPermissionsQuery(field,authorities);
+        return getPermissionsQuery(builder, field, authorities);
     }
-    public BoolQueryBuilder getPermissionsQuery(String field, Set<String> authorities){
-        BoolQueryBuilder audienceQueryBuilder = QueryBuilders.boolQuery();
-        audienceQueryBuilder.minimumShouldMatch(1);
+
+    public BoolQuery.Builder getPermissionsQuery(BoolQuery.Builder audienceQueryBuilder, String field, Set<String> authorities) {
+        audienceQueryBuilder.minimumShouldMatch("1");
         for (String a : authorities) {
-            audienceQueryBuilder.should(QueryBuilders.matchQuery(field, a));
+            audienceQueryBuilder.should(should->should.match(match->match.field(field).query(a)));
         }
         return audienceQueryBuilder;
     }
-    public BoolQueryBuilder getReadPermissionsQuery(){
 
-        if(AuthorityServiceHelper.isAdmin() || AuthenticationUtil.isRunAsUserTheSystemUser()){
-            return new BoolQueryBuilder().must(QueryBuilders.matchAllQuery());
+    public BoolQuery.Builder getReadPermissionsQuery(BoolQuery.Builder builder) {
+        if (AuthorityServiceHelper.isAdmin() || AuthenticationUtil.isRunAsUserTheSystemUser()) {
+            return new BoolQuery.Builder().must(q -> q.matchAll(all -> all));
         }
 
         String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
-        BoolQueryBuilder audienceQueryBuilder = getPermissionsQuery("permissions.read");
-        audienceQueryBuilder.should(QueryBuilders.matchQuery("owner", user));
 
         //enhance to collection permissions
-        MatchQueryBuilder collectionTypeProposal = QueryBuilders.matchQuery("collections.relation.type", "ccm:collection_proposal");
         // @TODO: FIX after DESP-840
-        BoolQueryBuilder collectionPermissions = getPermissionsQuery("collections.permissions.read.keyword");
-        collectionPermissions.should(QueryBuilders.matchQuery("collections.owner.keyword", user));
-        collectionPermissions.mustNot(collectionTypeProposal);
+        BoolQuery collectionPermissions = getPermissionsQuery(QueryBuilders.bool(), "collections.permissions.read")
+                .should(s -> s.match(m -> m.field("collections.owner").query(user)))
+                .build();
 
-        BoolQueryBuilder proposalPermissions = getPermissionsQuery("collections.permissions.Coordinator.keyword",getUserAuthorities().stream().filter(a -> !a.equals(CCConstants.AUTHORITY_GROUP_EVERYONE)).collect(Collectors.toSet()));
-        proposalPermissions.should(QueryBuilders.matchQuery("collections.owner.keyword", user));
-        proposalPermissions.must(collectionTypeProposal);
-
-        BoolQueryBuilder subPermissions = QueryBuilders.boolQuery().minimumShouldMatch(1)
-                .should(collectionPermissions)
-                .should(proposalPermissions);
+        BoolQuery proposalPermissions = getPermissionsQuery(QueryBuilders.bool(),"collections.permissions.Coordinator", getUserAuthorities().stream().filter(a -> !a.equals(CCConstants.AUTHORITY_GROUP_EVERYONE)).collect(Collectors.toSet()))
+                .should(s -> s.match(m -> m.field("collections.owner").query(user)))
+                .must(must -> must.match(match -> match.field("collections.relation.type").query("ccm:collection_proposal")))
+                .build();
 
 
-        BoolQueryBuilder audienceQueryBuilderCollections = QueryBuilders.boolQuery()
-                .mustNot(QueryBuilders.termQuery("properties.ccm:restricted_access.keyword",true))
-                .must(subPermissions);
-        audienceQueryBuilder.should(audienceQueryBuilderCollections);
-
-        return audienceQueryBuilder;
+        return getPermissionsQuery(builder, "permissions.read")
+                .should(q -> q.match(m -> m.field("owner").query(user)))
+                .should(audienceQueryBuilderCollections -> audienceQueryBuilderCollections
+                        .bool(b -> b
+                                .mustNot(m -> m.term(t -> t.field("properties.ccm:restricted_access.keyword").value(true)))
+                                .must(m -> m.bool(subPermission -> subPermission
+                                        .minimumShouldMatch("1")
+                                        .should(q -> q.nested(nested->nested.path("collections").query(nq->nq.bool(collectionPermissions))))
+                                        .should(q -> q.nested(nested->nested.path("collections").query(nq->nq.bool(proposalPermissions))))
+                                ))));
     }
 
-    public SearchResultNodeRef searchFacets(MetadataSet mds, String query, Map<String,String[]> criterias, SearchToken searchToken) throws Throwable {
+    public SearchResultNodeRef searchFacets(MetadataSet mds, String query, Map<String, String[]> criterias, SearchToken searchToken) throws Throwable {
+
         MetadataQuery queryData = mds.findQuery(query, MetadataReader.QUERY_SYNTAX_DSL);
-        BoolQueryBuilder globalConditions = getGlobalConditions(searchToken.getAuthorityScope(),searchToken.getPermissions(), queryData);
+        Query globalConditions = new Query.Builder()
+                .bool(getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData).build())
+                .build();
 
         Set<MetadataQueryParameter> excludeOwnFacets = MetadataElasticSearchHelper.getExcludeOwnFacets(queryData, new HashMap<>(), searchToken.getFacets());
-        List<AggregationBuilder> aggregations = MetadataElasticSearchHelper.getAggregations(
+        Map<String, Aggregation> aggregations = MetadataElasticSearchHelper.getAggregations(
                 mds,
                 queryData,
                 criterias,
@@ -237,32 +226,28 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     @NotNull
-    private SearchResultNodeRef parseAggregations(SearchToken searchToken, List<AggregationBuilder> aggregations) throws Exception {
-        SearchRequest searchRequestAggs = new SearchRequest("workspace");
-        SearchSourceBuilder searchSourceBuilderAggs = new SearchSourceBuilder();
-        searchSourceBuilderAggs.from(0);
-        searchSourceBuilderAggs.size(0);
-        //searchSourceBuilderAggs.collapse(collapseBuilder);
-        for(AggregationBuilder ab : aggregations){
-            searchSourceBuilderAggs.aggregation(ab);
-        }
-        searchRequestAggs.source(searchSourceBuilderAggs);
-        logger.info("query aggs: "+searchSourceBuilderAggs.toString());
-        SearchResponse resp = LogTime.log("Searching elastic for facets", () -> client.search(searchRequestAggs, RequestOptions.DEFAULT));
+    private SearchResultNodeRef parseAggregations(SearchToken searchToken, Map<String, Aggregation> aggregations) throws Exception {
+//        logger.info("query aggs: "+searchSourceBuilderAggs.toString());
+        SearchResponse<Map> resp = LogTime.log("Searching elastic for facets", () -> client.search(req -> req
+                        .index(WORKSPACE_INDEX)
+                        .from(0)
+                        .size(0)
+                        .aggregations(aggregations)
+                , Map.class));
 
         List<NodeSearch.Facet> facetsResult = new ArrayList<>();
-        for(Aggregation a : resp.getAggregations()) {
-            if(a instanceof ParsedFilter){
-                ParsedFilter pf = (ParsedFilter)a;
-                for(Aggregation aggregation : pf.getAggregations().asList()){
-                    if(aggregation instanceof ParsedStringTerms){
-                        AggregationBuilder definition = aggregations.stream().filter(agg -> agg.getName().equalsIgnoreCase(a.getName())).findAny().get();
-                        ParsedStringTerms pst = (ParsedStringTerms) aggregation;
-                        facetsResult.add(getFacet(pst ,definition));
+        for(Map.Entry<String, Aggregate> a : resp.aggregations().entrySet()) {
+            if(a.getValue().isFilter()){
+                FilterAggregate pf = a.getValue().filter();
+                for(Map.Entry<String, Aggregate> aggregation : pf.aggregations().entrySet()){
+                    if(aggregation.getValue().isSterms()){
+                        Aggregation definition = aggregations.get(a.getKey());
+                        StringTermsAggregate sterms = aggregation.getValue().sterms();
+                        facetsResult.add(getFacet(aggregation.getKey(), sterms ,definition));
                     }
                 }
             }else{
-                logger.error("non supported aggregation " + a.getName());
+                logger.error("non supported aggregation " + a.getKey());
             }
         }
 
@@ -287,7 +272,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
      * @return
      * @throws Throwable
      */
-    public List<NodeRef> searchAll(MetadataSet mds, String query, Map<String,String[]> criterias,
+    public List<NodeRef> searchAll(MetadataSet mds, String query, Map<String, String[]> criterias,
                                    SearchToken searchToken) throws Throwable {
         checkClient();
         MetadataQuery queryData = mds.findQuery(query, MetadataReader.QUERY_SYNTAX_DSL);
@@ -300,67 +285,75 @@ public class SearchServiceElastic extends SearchServiceImpl {
         List<NodeRef> data = new ArrayList<>();
         sr.setData(data);
 
-        SearchRequest searchRequest = new SearchRequest("workspace");
-        searchRequest.scroll(TimeValue.timeValueSeconds(60));
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.fetchSource(null, searchToken.getExcludes().toArray(new String[]{}));
-        searchSourceBuilder.size(100);
+
+        BoolQuery.Builder metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criterias, true);
+        BoolQuery.Builder metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criterias, false);
+        BoolQuery.Builder queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData);
+
+        SearchRequest.Builder searchRequest = new SearchRequest.Builder()
+                .index(WORKSPACE_INDEX)
+                .scroll(Time.of(time -> time.time("60s")))
+                .source(src -> src
+                        .filter(filter -> filter.excludes(searchToken.getExcludes()))
+                )
+                .size(100)
+                .query(q->q
+                        .bool(b->b
+                            .filter(filter->filter
+                                    .bool(fb->fb
+                                            .must(fq->fq.bool(metadataQueryBuilderFilter.build()))
+                                            .must(fq->fq.bool(queryBuilderGlobalConditions.build()))))
+                                .must(must->must.bool(metadataQueryBuilderAsQuery.build()))));
+
         if(searchToken.getSortDefinition() != null) {
-            searchToken.getSortDefinition().applyToSearchSourceBuilder(searchSourceBuilder);
+            searchToken.getSortDefinition().applyToSearchSourceBuilder(searchRequest);
         }
-
-        QueryBuilder metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criterias, true);
-        QueryBuilder metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criterias, false);
-        BoolQueryBuilder queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData);
-
-        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-        BoolQueryBuilder filterBuilder = QueryBuilders.boolQuery().must(metadataQueryBuilderFilter).must(queryBuilderGlobalConditions);
-
-        queryBuilder = queryBuilder.filter(filterBuilder);
-        queryBuilder = queryBuilder.must(metadataQueryBuilderAsQuery);
-        searchSourceBuilder.query(queryBuilder);
-        searchRequest.source(searchSourceBuilder);
 
         try {
             String scrollId = null;
             while(true) {
-                SearchResponse searchResponse;
+                ResponseBody<Map> searchResponse;
                 if(scrollId == null) {
-                    searchResponse = client.search(searchRequest, getRequestOptions());
+                    searchResponse = client
+                            .withTransportOptions(this::getRequestOptions)
+                            .search(searchRequest.build(), Map.class);
                 } else {
-                    SearchScrollRequest searchRequestScroll = new SearchScrollRequest(scrollId);
-                    searchRequestScroll.scroll(TimeValue.timeValueSeconds(60));
-                    searchResponse = client.scroll(searchRequestScroll, getRequestOptions());
+                    final String usedScrollId = scrollId;
+                    searchResponse = client
+                            .withTransportOptions(this::getRequestOptions)
+                            .scroll(scroll -> scroll.scrollId(usedScrollId).scroll(t->t.time("60s")), Map.class);
                 }
-                scrollId = searchResponse.getScrollId();
+                scrollId = searchResponse.scrollId();
 
-                SearchHits hits = searchResponse.getHits();
-                for (SearchHit hit : hits) {
-                    data.add(transformSearchHit(authorities, user, hit, searchToken.isResolveCollections()));
+                HitsMetadata<Map> hits = searchResponse.hits();
+                for (Hit<Map> hit : hits.hits()) {
+                    data.add(transformSearchHit(authorities, user, hit.source(), searchToken.isResolveCollections()));
                 }
-                if(hits.getHits().length == 0) {
+                if(hits.hits().isEmpty()) {
                     break;
                 }
             }
         } catch(ElasticsearchException e) {
             logger.error("Error running query. The query is logged below for debugging reasons");
             logger.error(e.getMessage(), e);
-            logger.error(queryBuilder.toString());
+            logger.error(searchRequest.toString());
             throw e;
         }
         logger.info("result count: " + data.size());
         return data;
     }
+
     @Override
-    public SearchResultNodeRef search(MetadataSet mds, String query, Map<String,String[]> criterias,
+    public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criterias,
                                       SearchToken searchToken) throws Throwable {
+
         checkClient();
         MetadataQuery queryData;
-        try{
+        try {
             queryData = mds.findQuery(query, MetadataReader.QUERY_SYNTAX_DSL);
-        } catch(IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             logger.info("Query " + query + " is not defined within dsl language, switching to lucene...");
-            return super.search(mds,query,criterias,searchToken);
+            return super.search(mds, query, criterias, searchToken);
         }
 
         Set<String> authorities = getUserAuthorities();
@@ -372,162 +365,143 @@ public class SearchServiceElastic extends SearchServiceImpl {
         sr.setData(data);
         try {
 
-            SearchRequest searchRequest = new SearchRequest("workspace");
-            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-            searchSourceBuilder.fetchSource(null,searchToken.getExcludes().toArray(new String[]{}));
+            BoolQuery metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criterias, true).build();
+            BoolQuery metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criterias, false).build();
+            BoolQuery queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData).build();
+
+            // add collapse builder
+            // CollapseBuilder collapseBuilder = new CollapseBuilder("properties.ccm:original");
+            // searchSourceBuilder.collapse(collapseBuilder);
+            // cardinality aggregation to get correct total count
+            // https://github.com/elastic/elasticsearch/issues/24130
+            // CardinalityAggregationBuilder original_count = AggregationBuilders.cardinality("original_count").field("properties.ccm:original");
+            // searchSourceBuilder.aggregation(original_count);
 
 
-            QueryBuilder metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL),queryData,criterias,true);
-            QueryBuilder metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL),queryData,criterias,false);
-            BoolQueryBuilder queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(),searchToken.getPermissions(), queryData);
+            SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()
+                    .index(WORKSPACE_INDEX)
+                    .source(src->src.filter(filter->filter.excludes(searchToken.getExcludes())));
 
-            BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-            BoolQueryBuilder filterBuilder = QueryBuilders.boolQuery().must(metadataQueryBuilderFilter).must(queryBuilderGlobalConditions);
-
-            queryBuilder = queryBuilder.filter(filterBuilder);
-            queryBuilder = queryBuilder.must(metadataQueryBuilderAsQuery);
-
-
-            /**
-             * add collapse builder
-             */
-            //CollapseBuilder collapseBuilder = new CollapseBuilder("properties.ccm:original");
-            //searchSourceBuilder.collapse(collapseBuilder);
-            /**
-             * cardinality aggregation to get correct total count
-             *
-             * https://github.com/elastic/elasticsearch/issues/24130
-             */
-            /*CardinalityAggregationBuilder original_count = AggregationBuilders.cardinality("original_count").field("properties.ccm:original");
-            searchSourceBuilder.aggregation(original_count);*/
-
-            SearchResponse searchResponseAggregations = null;
-            if(searchToken.getFacets() != null) {
+            SearchResponse<Map> searchResponseAggregations = null;
+            if (searchToken.getFacets() != null) {
                 Set<MetadataQueryParameter> excludeOwnFacets = MetadataElasticSearchHelper.getExcludeOwnFacets(queryData, criterias, searchToken.getFacets());
-                if(excludeOwnFacets.size() > 0){
-                    List<AggregationBuilder> aggregations = MetadataElasticSearchHelper.getAggregations(
+                if (!excludeOwnFacets.isEmpty()) {
+                    Map<String, Aggregation> aggregations = MetadataElasticSearchHelper.getAggregations(
                             mds,
                             queryData,
                             criterias,
                             searchToken.getFacets(),
                             excludeOwnFacets,
-                            queryBuilderGlobalConditions,
+                            queryBuilderGlobalConditions._toQuery(),
                             searchToken);
-                    SearchRequest searchRequestAggs = new SearchRequest("workspace");
-                    SearchSourceBuilder searchSourceBuilderAggs = new SearchSourceBuilder();
-                    searchSourceBuilderAggs.from(0);
-                    searchSourceBuilderAggs.size(0);
-                    //searchSourceBuilderAggs.collapse(collapseBuilder);
-                    for(AggregationBuilder ab : aggregations){
-                        searchSourceBuilderAggs.aggregation(ab);
-                    }
-                    searchRequestAggs.source(searchSourceBuilderAggs);
-                    logger.info("query aggs: "+searchSourceBuilderAggs.toString());
-                    searchResponseAggregations = LogTime.log("Searching elastic for facets", () -> client.search(searchRequestAggs, RequestOptions.DEFAULT));
-                }else{
+
+                    SearchRequest searchSourceAggs = SearchRequest.of(req->req
+                            .index(WORKSPACE_INDEX)
+                            .from(0)
+                            .size(0)
+                            .aggregations(aggregations));
+
+                    logger.info("query aggs: " + JsonpUtils.toJsonString(searchSourceAggs, new JacksonJsonpMapper()));
+                    searchResponseAggregations = LogTime.log("Searching elastic for facets", () -> client.search(searchSourceAggs, Map.class));
+                } else {
                     for (String facet : searchToken.getFacets()) {
                         // we use a higher facet limit since the facets will be filtered for the containing string!
-                        searchSourceBuilder.aggregation(AggregationBuilders.terms(facet).size(searchToken.getFacetLimit()*MetadataElasticSearchHelper.FACET_LIMIT_MULTIPLIER).minDocCount(searchToken.getFacetsMinCount()).field("properties." + facet+".keyword"));
+                        searchRequestBuilder.aggregations(facet, b->b.terms(t->t
+                                .field("properties."+facet+".keyword")
+                                .size(searchToken.getFacetLimit() * MetadataElasticSearchHelper.FACET_LIMIT_MULTIPLIER)
+                                .minDocCount(searchToken.getFacetsMinCount())));
                     }
                 }
             }
 
-            if(searchToken.isReturnSuggestion()){
-
-
-
+            if (searchToken.isReturnSuggestion()) {
                 String[] ngsearches = criterias.get("ngsearchword");
-                if(ngsearches != null){
-                    SuggestBuilder suggest = new SuggestBuilder()
-                            .setGlobalText(ngsearches[0])
-                            .addSuggestion("ngsearchword",
-                                    SuggestBuilders.phraseSuggestion("properties.cclom:title.trigram")
-                                            //.size(10)
+                if (ngsearches != null) {
+                    searchRequestBuilder.suggest(suggest->suggest
+                            .text(ngsearches[0])
+                            .suggesters("ngsearchword", s->s
+                                    .phrase(p->p
+                                            .text("properties.cclom:title.trigram")
                                             .gramSize(3)
-                                            .confidence((float)0.9)
-                                            .highlight("<em>","</em>")
-                                            .addCandidateGenerator(new DirectCandidateGeneratorBuilder("properties.cclom:title.trigram")
-                                                    .suggestMode("popular"))
-                                            .smoothingModel( new org.elasticsearch.search.suggest.phrase.Laplace(0.5))
-                            );
-                    searchSourceBuilder.suggest(suggest);
+                                            .confidence(0.9)
+                                            .highlight(high->high.preTag("<em>").postTag("</em>"))
+                                            .directGenerator(x->x
+                                                    .field("properties.cclom:title.trigram")
+                                                    .suggestMode(SuggestMode.Popular))
+                                            .smoothing(smooth->smooth.laplace(l->l.alpha(0.5))))));
                 }
             }
 
 
+            searchRequestBuilder.query(q -> q
+                    .bool(b->b
+                            .filter(filter -> filter
+                                    .bool(bool->bool
+                                            .must(must->must.bool(metadataQueryBuilderFilter))
+                                            .must(must->must.bool(queryBuilderGlobalConditions))))
+                            .must(must->must.bool(metadataQueryBuilderAsQuery))));
 
-            searchSourceBuilder.query(queryBuilder);
-
-            searchSourceBuilder.from(searchToken.getFrom());
-            searchSourceBuilder.size(searchToken.getMaxResult());
-            searchSourceBuilder.trackTotalHits(true);
-            if(searchToken.getSortDefinition() != null) {
-                searchToken.getSortDefinition().applyToSearchSourceBuilder(searchSourceBuilder);
+            searchRequestBuilder.from(searchToken.getFrom());
+            searchRequestBuilder.size(searchToken.getMaxResult());
+            searchRequestBuilder.trackTotalHits(new TrackHits.Builder().enabled(true).build());
+            if (searchToken.getSortDefinition() != null) {
+                searchToken.getSortDefinition().applyToSearchSourceBuilder(searchRequestBuilder);
             }
-
-
-
-
-            searchRequest.source(searchSourceBuilder);
-
 
 
             // logger.info("query: "+searchSourceBuilder.toString());
+            SearchRequest searchRequest = searchRequestBuilder.build();
             try {
-                SearchResponse searchResponse = LogTime.log("Searching elastic", () -> client.search(searchRequest, getRequestOptions()));
+                logger.info("query: "+ JsonpUtils.toJsonString(searchRequest, new JacksonJsonpMapper()));
+                SearchResponse<Map> searchResponse = LogTime.log("Searching elastic", () -> client.search(searchRequest, Map.class));
 
-                SearchHits hits = searchResponse.getHits();
-                logger.info("result count: "+hits.getTotalHits());
+                HitsMetadata<Map> hits = searchResponse.hits();
+                logger.info("result count: " + hits.total());
 
                 long millisPerm = System.currentTimeMillis();
-                for (SearchHit hit : hits) {
-                    data.add(transformSearchHit(authorities, user, hit, searchToken.isResolveCollections()));
+                for (Hit<Map> hit : hits.hits()) {
+                    data.add(transformSearchHit(authorities, user, hit.source(), searchToken.isResolveCollections()));
                 }
-                logger.info("permission stuff took:"+(System.currentTimeMillis() - millisPerm));
+                logger.info("permission stuff took:" + (System.currentTimeMillis() - millisPerm));
 
                 List<NodeSearch.Facet> facetsResult = new ArrayList<>();
                 List<NodeSearch.Facet> facetsResultSelected = new ArrayList<>();
 
                 Long total = null;
 
-                List<Aggregation> aggregations = new ArrayList<>();
-                if(searchResponseAggregations != null){
-                    aggregations.addAll(searchResponseAggregations.getAggregations().asList());
+                Map<String, Aggregate> aggregations = new HashMap<>();
+                if (searchResponseAggregations != null) {
+                    aggregations.putAll(searchResponseAggregations.aggregations());
                 }
-                if(searchResponse.getAggregations() != null) aggregations.addAll(searchResponse.getAggregations().asList());
+                if (searchResponse.aggregations() != null) aggregations.putAll(searchResponse.aggregations());
 
-                for(Aggregation a : aggregations){
-                    if(a instanceof  ParsedStringTerms) {
-                        ParsedStringTerms pst = (ParsedStringTerms) a;
-                        facetsResult.add(getFacet(pst, null));
-                    }else if (a instanceof ParsedCardinality){
-                        ParsedCardinality pc = (ParsedCardinality)a;
-                        if (a.getName().equals("original_count")) {
-                            total = pc.getValue();
-                        }else{
+                for (Map.Entry<String, Aggregate> a : aggregations.entrySet()) {
+                    if (a.getValue().isSterms()) {
+                        facetsResult.add(getFacet(a.getKey(), a.getValue().sterms(), null));
+                    } else if (a.getValue()._kind().equals(Aggregate.Kind.Cardinality)) {
+                        if (a.getKey().equals("original_count")) {
+                            total = a.getValue().cardinality().value();
+                        } else {
                             logger.error("unknown cardinality aggregation");
                         }
 
-                    }else if(a instanceof ParsedFilter){
-                        ParsedFilter pf = (ParsedFilter)a;
-                        for(Aggregation aggregation : pf.getAggregations().asList()){
-                            if(aggregation instanceof ParsedStringTerms){
-                                ParsedStringTerms pst = (ParsedStringTerms) aggregation;
-                                if(a.getName().endsWith("_selected")){
-                                    facetsResultSelected.add(getFacet(pst, null));
-                                }else{
-                                    facetsResult.add(getFacet(pst, null));
+                    } else if (a.getValue().isFilter()) {
+                        FilterAggregate filter = a.getValue().filter();
+                        for (Map.Entry<String, Aggregate> aggregationEntry : filter.aggregations().entrySet()) {
+                            if (aggregationEntry.getValue().isSterms()) {
+                                if (a.getKey().endsWith("_selected")) {
+                                    facetsResultSelected.add(getFacet(a.getKey(), a.getValue().sterms(), null));
+                                } else {
+                                    facetsResult.add(getFacet(a.getKey(), a.getValue().sterms(), null));
                                 }
                             }
                         }
-                    }else{
-                        logger.error("non supported aggreagtion "+a.getName());
+                    } else {
+                        logger.error("non supported aggreagtion " + a.getKey());
                     }
                 }
-                /**
-                 * add selected when missing
-                 */
-                if(searchToken != null && searchToken.getFacets() != null && searchToken.getFacets().size() > 0) {
+                // add selected when missing
+                if (searchToken.getFacets() != null && !searchToken.getFacets().isEmpty()) {
                     for (String facet : searchToken.getFacets()) {
                         if (!criterias.containsKey(facet)) {
                             continue;
@@ -542,7 +516,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                     .findFirst();
                             if (selected.isPresent()) {
                                 if (facetResult.isPresent()) {
-                                    if (!facetResult.get().getValues().stream().anyMatch(v -> v.getValue().equals(value))) {
+                                    if (facetResult.get().getValues().stream().noneMatch(v -> v.getValue().equals(value))) {
                                         if (selected.get().getValues().stream().anyMatch(v -> value.equals(v.getValue()))) {
                                             facetResult.get().getValues().add(selected.get().getValues().stream()
                                                     .filter(v -> value.equals(v.getValue()))
@@ -561,47 +535,45 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     }
                 }
 
-                if(searchResponse.getSuggest() != null) {
-                    PhraseSuggestion phraseSuggestion = searchResponse.getSuggest().getSuggestion("ngsearchword");
-                    if (phraseSuggestion.getEntries() != null && phraseSuggestion.getEntries().size() > 0) {
-                        List<PhraseSuggestion.Entry> entries = phraseSuggestion.getEntries();
-
-                        List<NodeSearch.Suggest> suggests = new ArrayList<>();
-                        for (PhraseSuggestion.Entry entry : entries) {
-                            if(entry.getOptions() == null || entry.getOptions().size() == 0) continue;
-                            logger.info("phrase:" +entry.getCutoffScore());
-                            for(PhraseSuggestion.Entry.Option option: entry.getOptions()){
-                                NodeSearch.Suggest suggest = new NodeSearch.Suggest();
-                                suggest.setText(option.getText().string());
-                                suggest.setHighlighted((option.getHighlighted().hasString())
-                                        ? option.getHighlighted().string() : null);
-                                suggest.setScore(option.getScore());
-                                suggests.add(suggest);
-                                logger.info("SUGGEST:" + option.getText() +" " + option.getScore() +" "+ option.getHighlighted());
-                            }
-
-                        }
+                if (!searchResponse.suggest().isEmpty()) {
+                    List<co.elastic.clients.elasticsearch.core.search.Suggestion<Map>> phraseSuggestion = searchResponse.suggest().get("ngsearchword");
+                    if (!phraseSuggestion.isEmpty()) {
+                        List<NodeSearch.Suggest> suggests = phraseSuggestion.stream()
+                                .filter(co.elastic.clients.elasticsearch.core.search.Suggestion::isPhrase)
+                                .map(co.elastic.clients.elasticsearch.core.search.Suggestion::phrase)
+                                .map(PhraseSuggest::options)
+                                .filter(Objects::nonNull)
+                                .flatMap(Collection::stream)
+                                .map(x -> {
+                                    NodeSearch.Suggest suggest = new NodeSearch.Suggest();
+                                    suggest.setText(x.text());
+                                    suggest.setHighlighted(x.highlighted());
+                                    suggest.setScore(x.score());
+                                    return suggest;
+                                })
+                                .collect(Collectors.toList());
+                        suggests.forEach(x -> logger.info("SUGGEST:" + x.getText() + " " + x.getScore() + " " + x.getHighlighted()));
                         sr.setSuggests(suggests);
-
                     }
                 }
 
-                if(total == null){
-                    total = hits.getTotalHits().value;
+                if (total == null) {
+                    total = Optional.of(hits).map(HitsMetadata::total).map(TotalHits::value).orElse(0L);
                 }
+
                 sr.setFacets(facetsResult);
                 sr.setStartIDX(searchToken.getFrom());
-                sr.setNodeCount((int)total.longValue());
+                sr.setNodeCount((int) total.longValue());
                 //client.close();
-            } catch(ElasticsearchException e) {
+            } catch (ElasticsearchException e) {
                 logger.error("Error running query. The query is logged below for debugging reasons");
                 logger.error(e.getMessage(), e);
-                logger.error(queryBuilder.toString());
+                logger.error(JsonpUtils.toJsonString(searchRequest, new JacksonJsonpMapper()));
                 throw e;
             }
 
         } catch (IOException e) {
-            logger.error(e.getMessage(),e);
+            logger.error(e.getMessage(), e);
         }
 
 
@@ -609,25 +581,26 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return sr;
     }
 
-    private NodeSearch.Facet getFacet(ParsedStringTerms pst, AggregationBuilder builder){
+    private NodeSearch.Facet getFacet(String name, StringTermsAggregate pst, Aggregation builder) {
+
         NodeSearch.Facet facet = new NodeSearch.Facet();
-        facet.setProperty(pst.getName());
+        facet.setProperty(name);
         List<NodeSearch.Facet.Value> values = new ArrayList<>();
         facet.setValues(values);
 
-        for (Terms.Bucket b : pst.getBuckets()) {
-            if(builder != null && "multi_terms".equals(builder.getMetadata().get("type"))) {
-                String[] key = b.getKeyAsString().split("\\|");
+        for (StringTermsBucket b : pst.buckets().array()) {
+            if(builder != null && Aggregation.Kind.MultiTerms == builder._kind()) {
+                String[] key = b.key().stringValue().split("\\|");
                 for (String k : key) {
-                    long count = b.getDocCount();
+                    long count = b.docCount();
                     NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
                     value.setValue(k);
                     value.setCount((int) count);
                     values.add(value);
                 }
             } else {
-                String key = b.getKeyAsString();
-                long count = b.getDocCount();
+                String key = b.key().stringValue();
+                long count = b.docCount();
                 NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
                 value.setValue(key);
                 value.setCount((int) count);
@@ -635,7 +608,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             }
         }
 
-        facet.setSumOtherDocCount(pst.getSumOfOtherDocCounts());
+        facet.setSumOtherDocCount(pst.sumOtherDocCount());
         return facet;
     }
 
@@ -647,39 +620,47 @@ public class SearchServiceElastic extends SearchServiceImpl {
      * @param query
      * @return
      */
-    private BoolQueryBuilder getGlobalConditions(List<String> authorityScope, List<String> permissions, MetadataQuery query) {
-        BoolQueryBuilder queryBuilderGlobalConditions = (authorityScope != null && authorityScope.size() > 0)
-                ? getPermissionsQuery("permissions.read",new HashSet<>(authorityScope))
-                : getReadPermissionsQuery();
-        queryBuilderGlobalConditions = queryBuilderGlobalConditions.must(QueryBuilders.matchQuery("nodeRef.storeRef.protocol", "workspace"));
-        if(permissions != null){
-            BoolQueryBuilder permissionsFilter = QueryBuilders.boolQuery().must(queryBuilderGlobalConditions);
+    BoolQuery.Builder getGlobalConditions(List<String> authorityScope, List<String> permissions, MetadataQuery query) {
+
+        Function<BoolQuery.Builder, BoolQuery.Builder> queryGlobalConditionsFactory = (builder) ->
+                ((authorityScope != null && !authorityScope.isEmpty())
+                    ? getPermissionsQuery(builder, "permissions.read", new HashSet<>(authorityScope))
+                    : getReadPermissionsQuery(builder))
+                        .must(must -> must
+                                .match(match -> match
+                                        .field("nodeRef.storeRef.protocol")
+                                        .query("workspace")));
+
+
+
+        BoolQuery.Builder queryBuilderGlobalConditions = queryGlobalConditionsFactory.apply(QueryBuilders.bool());
+        if (permissions != null) {
+            BoolQuery.Builder permissionsFilter = QueryBuilders.bool().must(must->must.bool(queryGlobalConditionsFactory::apply));
             String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
-            permissionsFilter.should(QueryBuilders.matchQuery("owner", user));
-            for(String permission : permissions){
-                permissionsFilter.should(getPermissionsQuery("permissions." + permission));
-                // queryBuilderGlobalConditions = QueryBuilders.boolQuery().must(queryBuilderGlobalConditions).must(getPermissionsQuery("permissions." + permission));
+            permissionsFilter.should(should -> should.match(match->match.field("owner").query(user)));
+            for (String permission : permissions) {
+                permissionsFilter.should(s->s.bool(bool->getPermissionsQuery(bool, "permissions." + permission)));
             }
             queryBuilderGlobalConditions = permissionsFilter;
         }
 
-        if(NodeServiceInterceptor.getEduSharingScope() == null){
-            queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.existsQuery("properties.ccm:eduscopename"));
-        }else{
-            queryBuilderGlobalConditions = queryBuilderGlobalConditions.must(QueryBuilders.termQuery("properties.ccm:eduscopename.keyword",NodeServiceInterceptor.getEduSharingScope()));
+        if (NodeServiceInterceptor.getEduSharingScope() == null) {
+            queryBuilderGlobalConditions.mustNot(mustNot->mustNot.exists(exist->exist.field("properties.ccm:eduscopename")));
+        } else {
+            queryBuilderGlobalConditions.must(must->must.term(term->term.field("properties.ccm:eduscopename.keyword").value(NodeServiceInterceptor.getEduSharingScope())));
         }
         // mds specialFilter processing on per-query basis
-        if(query != null) {
+        if (query != null) {
             for (MetadataQuery.SpecialFilter filter : query.getSpecialFilter()) {
-                if(MetadataQuery.SpecialFilter.exclude_system_folder.equals(filter)) {
-                    queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + SystemFolder.getSystemFolderBase().getId() + "*"));
-                } else if(MetadataQuery.SpecialFilter.exclude_sites_folder.equals(filter)) {
-                    queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + SystemFolder.getSitesFolder().getId() + "*"));
-                } else if(MetadataQuery.SpecialFilter.exclude_people_folder.equals(filter)) {
+                if (MetadataQuery.SpecialFilter.exclude_system_folder.equals(filter)) {
+                    queryBuilderGlobalConditions.mustNot(mustNot->mustNot.wildcard(wild->wild.field("fullpath").value("*/" + SystemFolder.getSystemFolderBase().getId() + "*")));
+                } else if (MetadataQuery.SpecialFilter.exclude_sites_folder.equals(filter)) {
+                    queryBuilderGlobalConditions.mustNot(mustNot->mustNot.wildcard(wild->wild.field("fullpath").value("*/" + SystemFolder.getSitesFolder().getId() + "*")));
+                } else if (MetadataQuery.SpecialFilter.exclude_people_folder.equals(filter)) {
                     org.alfresco.service.cmr.repository.NodeRef personFolder = SystemFolder.getPersonFolder();
-                    if(personFolder != null) {
-                        queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + SystemFolder.getPersonFolder().getId() + "*"));
-                    }  else {
+                    if (personFolder != null) {
+                        queryBuilderGlobalConditions.mustNot(mustNot->mustNot.wildcard(wild->wild.field("fullpath").value("*/" + SystemFolder.getPersonFolder().getId() + "*")));
+                    } else {
                         logger.warn("People folder unknown, elastic query is skipping special filter");
                     }
                 }
@@ -690,68 +671,84 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     public Set<String> getUserAuthorities() {
         Set<String> authorities = serviceRegistry.getAuthorityService().getAuthorities();
-        if(!authorities.contains(CCConstants.AUTHORITY_GROUP_EVERYONE))
-            authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);
-        if(!AuthenticationUtil.isRunAsUserTheSystemUser()) {
+        authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);
+        if (!AuthenticationUtil.isRunAsUserTheSystemUser()) {
             authorities.add(AuthenticationUtil.getFullyAuthenticatedUser());
         }
         return authorities;
     }
 
-    public boolean isAllowedToRead(String nodeId){
+    public boolean isAllowedToRead(String nodeId) {
         boolean result = hasReadPermissionOnNode(nodeId);
-        if(result) return true;
+        if (result) return true;
 
-        BoolQueryBuilder checkIsChildObjectQuery = QueryBuilders.boolQuery()
-                .must(QueryBuilders.termQuery("properties.sys:node-uuid", nodeId))
-                .must(QueryBuilders.termQuery("aspects","ccm:io_childobject"));
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.query(checkIsChildObjectQuery);
-        SearchRequest request = new SearchRequest("workspace");
-        request.source(searchSourceBuilder);
+//        BoolQueryBuilder checkIsChildObjectQuery = QueryBuilders.boolQuery()
+//                .must(QueryBuilders.termQuery("properties.sys:node-uuid", nodeId))
+//                .must(QueryBuilders.termQuery("aspects", "ccm:io_childobject"));
+//        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+//        searchSourceBuilder.query(checkIsChildObjectQuery);
+//        SearchRequest request = new SearchRequest("workspace");
+//        request.source(searchSourceBuilder);
         try {
-            SearchResponse searchResult = client.search(request, getRequestOptions());
-            boolean isChildObject = searchResult.getHits().getTotalHits().value > 0;
-            if(!isChildObject) return false;
+            SearchResponse<Map> searchResult = client
+                    .withTransportOptions(this::getRequestOptions)
+                    .search(req->req
+                            .index(WORKSPACE_INDEX)
+                            .trackTotalHits(t->t.enabled(true))
+                            .query(query->query
+                                    .bool(checkIsChildObjectQuery->checkIsChildObjectQuery
+                                            .must(must->must.term(term -> term.field("properties.sys:node-uuid").value(nodeId)))
+                                            .must(must->must.term(term -> term.field("aspects").value("ccm:io_childobject"))))), Map.class);
 
-            Map parentRef = (Map) searchResult.getHits().getAt(0).getSourceAsMap().get("parentRef");
+            if (searchResult.hits().total().value() == 0) {
+                return false;
+            }
+
+            Map source = searchResult.hits().hits().get(0).source();
+            if(source == null){
+                return false;
+            }
+
+            Map parentRef = (Map) source.get("parentRef");
             String parentId = (String) parentRef.get("id");
             return hasReadPermissionOnNode(parentId);
         } catch (IOException e) {
-            logger.error(e.getMessage(),e);
+            logger.error(e.getMessage(), e);
             return false;
         }
     }
-    private boolean hasReadPermissionOnNode(String nodeId){
+
+    private boolean hasReadPermissionOnNode(String nodeId) {
         try {
-
-            BoolQueryBuilder query = QueryBuilders.boolQuery()
-                    .must(getReadPermissionsQuery())
-                    .must(QueryBuilders.termQuery("properties.sys:node-uuid", nodeId));
-            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-            searchSourceBuilder.query(query);
-            searchSourceBuilder.size(0);
-            SearchRequest request = new SearchRequest("workspace");
-            request.source(searchSourceBuilder);
-            SearchResponse searchResult = client.search(request, getRequestOptions());
-            return searchResult.getHits().getTotalHits().value > 0;
-
-        } catch (IOException e) {
-            logger.error(e.getMessage(),e);
+            checkClient();
+            SearchResponse<Map> searchResult = client
+                    .withTransportOptions(this::getRequestOptions)
+                    .search(request->request
+                                    .index(WORKSPACE_INDEX)
+                                    .size(0)
+                                    .trackTotalHits(t->t.enabled(true))
+                                    .query(query->query
+                                            .bool(bool->bool
+                                                    .must(must -> must.bool(this::getReadPermissionsQuery))
+                                                    .must(must -> must.term(term->term.field("properties.sys:node-uuid").value(nodeId))))), Map.class);
+            return searchResult.hits().total().value() != 0;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
         }
 
         return false;
     }
 
-    public NodeRef transformSearchHit(Set<String> authorities, String user, SearchHit hit, boolean resolveCollections) {
+    public NodeRef transformSearchHit(Set<String> authorities, String user, Map hit, boolean resolveCollections) {
         try {
-            return this.transform(NodeRefImpl.class, authorities,user,hit.getSourceAsMap(), resolveCollections);
+            return this.transform(NodeRefImpl.class, authorities, user, hit, resolveCollections);
         } catch (IllegalAccessException | InstantiationException e) {
             throw new RuntimeException(e);
         }
     }
+
     private <T extends NodeRefImpl> T transform(Class<T> clazz, Set<String> authorities, String user, Map<String, Object> sourceAsMap, boolean resolveCollections) throws IllegalAccessException, InstantiationException {
-        HashMap<String,MetadataSet> mdsCache = new HashMap<>();
+        HashMap<String, MetadataSet> mdsCache = new HashMap<>();
 
         Map<String, Serializable> properties = (Map) sourceAsMap.get("properties");
 
@@ -759,14 +756,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
         String nodeId = (String) nodeRef.get("id");
 
         Map parentRef = (Map) sourceAsMap.get("parentRef");
-        String parentId = (parentRef != null) ? (String)parentRef.get("id") :null;
+        String parentId = (parentRef != null) ? (String) parentRef.get("id") : null;
 
 
         Map storeRef = (Map) nodeRef.get("storeRef");
         String protocol = (String) storeRef.get("protocol");
         String identifier = (String) storeRef.get("identifier");
-
-        String metadataSet = (String)properties.get(CCConstants.getValidLocalName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
 
         HashMap<String, Object> props = new HashMap<>();
 
@@ -776,28 +771,28 @@ public class SearchServiceElastic extends SearchServiceImpl {
             /**
              * @TODO: transform to ValueTool.toMultivalue
              */
-            if(entry.getValue() instanceof ArrayList){
+            if (entry.getValue() instanceof ArrayList) {
                 ArrayList<?> list = (ArrayList<?>) entry.getValue();
-                if(list.size() > 1 && list.get(0) instanceof String) {
+                if (list.size() > 1 && list.get(0) instanceof String) {
                     value = ValueTool.toMultivalue(list.toArray(new String[0]));
-                } else if(list.size() == 1) {
+                } else if (list.size() == 1) {
                     value = (Serializable) ((ArrayList<?>) entry.getValue()).get(0);
                 }
             } else {
                 value = entry.getValue();
             }
-            if(entry.getKey().equals("ccm:mediacenter")){
-                List<Map<String,Object>> mediacenterStatus = (List<Map<String,Object>>)entry.getValue();
+            if (entry.getKey().equals("ccm:mediacenter")) {
+                List<Map<String, Object>> mediacenterStatus = (List<Map<String, Object>>) entry.getValue();
                 ArrayList<String> result = new ArrayList<>();
-                for(Map<String,Object> mcSt: mediacenterStatus){
+                for (Map<String, Object> mcSt : mediacenterStatus) {
                     Gson gson = new Gson();
                     String json = gson.toJson(mcSt);
                     result.add(json);
                 }
                 value = ValueTool.toMultivalue(result.toArray(new String[result.size()]));
             }
-            if(entry.getKey().equals("cm:created") || entry.getKey().equals("cm:modified") && value != null){
-                props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.LONG_DATE_SUFFIX , ((Long)value).toString());
+            if (entry.getKey().equals("cm:created") || entry.getKey().equals("cm:modified") && value != null) {
+                props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.LONG_DATE_SUFFIX, ((Long) value).toString());
             }
             props.put(CCConstants.getValidGlobalName(entry.getKey()), value);
 
@@ -805,27 +800,27 @@ public class SearchServiceElastic extends SearchServiceImpl {
              * metadataset translation
              */
             String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
-            Map<String,Serializable> i18n = (Map<String,Serializable>)sourceAsMap.get("i18n");
-            if(i18n != null){
-                Map<String,Serializable> i18nProps = (Map<String,Serializable>)i18n.get(currentLocale);
-                if(i18nProps != null){
-                    List<String> displayNames = (List<String> )i18nProps.get(entry.getKey());
-                    if(displayNames != null){
+            Map<String, Serializable> i18n = (Map<String, Serializable>) sourceAsMap.get("i18n");
+            if (i18n != null) {
+                Map<String, Serializable> i18nProps = (Map<String, Serializable>) i18n.get(currentLocale);
+                if (i18nProps != null) {
+                    List<String> displayNames = (List<String>) i18nProps.get(entry.getKey());
+                    if (displayNames != null) {
                         props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(displayNames, CCConstants.MULTIVALUE_SEPARATOR));
                     }
                 }
             } else {
                 try {
-                    String mdsId= (String) properties.getOrDefault(
+                    String mdsId = (String) properties.getOrDefault(
                             CCConstants.getValidLocalName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET),
                             CCConstants.metadatasetdefault_id);
                     MetadataSet mds = mdsCache.get(mdsId);
-                    if(mds == null){
+                    if (mds == null) {
                         mds = MetadataHelper.getMetadataset(
                                 ApplicationInfoList.getHomeRepository(),
                                 mdsId
                         );
-                        mdsCache.put(mdsId,mds);
+                        mdsCache.put(mdsId, mds);
                     }
 
                     MetadataHelper.addVirtualDisplaynameProperties(mds, props);
@@ -840,54 +835,54 @@ public class SearchServiceElastic extends SearchServiceImpl {
         int childIOCount = 0;
         int usageCount = 0;
         int commentCount = 0;
-        if(children != null) {
+        if (children != null) {
             for (Map<String, Serializable> child : children) {
-                String type = (String)child.get("type");
-                List<String> aspects = (List<String>)child.get("aspects");
-                if(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO).equals(type)
-                        && aspects.contains(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT))){
+                String type = (String) child.get("type");
+                List<String> aspects = (List<String>) child.get("aspects");
+                if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO).equals(type)
+                        && aspects.contains(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT))) {
                     childIOCount++;
                 }
-                if(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_USAGE).equals(type)){
+                if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_USAGE).equals(type)) {
                     usageCount++;
                 }
-                if(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_COMMENT).equals(type)){
+                if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_COMMENT).equals(type)) {
                     commentCount++;
                 }
             }
         }
-        if(childIOCount > 0){
-            props.put(CCConstants.VIRT_PROP_CHILDOBJECTCOUNT,childIOCount);
+        if (childIOCount > 0) {
+            props.put(CCConstants.VIRT_PROP_CHILDOBJECTCOUNT, childIOCount);
         }
-        if(usageCount > 0){
-            props.put(CCConstants.VIRT_PROP_USAGECOUNT,usageCount);
+        if (usageCount > 0) {
+            props.put(CCConstants.VIRT_PROP_USAGECOUNT, usageCount);
         }
-        if(commentCount > 0){
-            props.put(CCConstants.VIRT_PROP_COMMENTCOUNT,commentCount);
+        if (commentCount > 0) {
+            props.put(CCConstants.VIRT_PROP_COMMENTCOUNT, commentCount);
         }
 
 
-
-        org.alfresco.service.cmr.repository.NodeRef alfNodeRef = new  org.alfresco.service.cmr.repository.NodeRef(new StoreRef(protocol,identifier),nodeId);
-        String contentUrl = URLTool.getNgRenderNodeUrl(nodeId,null);
+        org.alfresco.service.cmr.repository.NodeRef alfNodeRef = new org.alfresco.service.cmr.repository.NodeRef(new StoreRef(protocol, identifier), nodeId);
+        String contentUrl = URLTool.getNgRenderNodeUrl(nodeId, null);
         contentUrl = URLTool.addOAuthAccessToken(contentUrl);
         props.put(CCConstants.CONTENTURL, contentUrl);
 
-        if(sourceAsMap.get("content") != null) {
+        if (sourceAsMap.get("content") != null) {
             props.put(CCConstants.DOWNLOADURL, URLTool.getDownloadServletUrl(alfNodeRef.getId(), null, true));
         }
 
-        if(parentId != null){
-            props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID,parentId);
+        if (parentId != null) {
+            props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID, parentId);
         }
 
         T eduNodeRef = clazz.newInstance();
-        eduNodeRef.setRepositoryId(ApplicationInfoList.getHomeRepository().getAppId());;
+        eduNodeRef.setRepositoryId(ApplicationInfoList.getHomeRepository().getAppId());
+        ;
         eduNodeRef.setStoreProtocol(protocol);
         eduNodeRef.setStoreId(identifier);
         eduNodeRef.setNodeId(nodeId);
 
-        eduNodeRef.setAspects(((List<String>)sourceAsMap.get("aspects")).
+        eduNodeRef.setAspects(((List<String>) sourceAsMap.get("aspects")).
                 stream().map(CCConstants::getValidGlobalName).filter(Objects::nonNull).collect(Collectors.toList()));
 
         HashMap<String, Boolean> permissions = new HashMap<>();
@@ -895,25 +890,25 @@ public class SearchServiceElastic extends SearchServiceImpl {
         String guestUser = ApplicationInfoList.getHomeRepository().getGuest_username();
         long millis = System.currentTimeMillis();
         eduNodeRef.setPublic(false);
-        Map<String,List<String>> permissionsElastic = (Map) sourceAsMap.get("permissions");
-        String owner = (String)sourceAsMap.get("owner");
-        for(Map.Entry<String,List<String>> entry : permissionsElastic.entrySet()){
-            if("read".equals(entry.getKey())){
+        Map<String, List<String>> permissionsElastic = (Map) sourceAsMap.get("permissions");
+        String owner = (String) sourceAsMap.get("owner");
+        for (Map.Entry<String, List<String>> entry : permissionsElastic.entrySet()) {
+            if ("read".equals(entry.getKey())) {
                 continue;
             }
-            if(!eduNodeRef.getPublic() && guestUser != null && entry.getValue().contains(CCConstants.AUTHORITY_GROUP_EVERYONE)) {
-                PermissionReference pr = permissionModel.getPermissionReference(null,entry.getKey());
+            if (!eduNodeRef.getPublic() && guestUser != null && entry.getValue().contains(CCConstants.AUTHORITY_GROUP_EVERYONE)) {
+                PermissionReference pr = permissionModel.getPermissionReference(null, entry.getKey());
                 Set<PermissionReference> granteePermissions = permissionModel.getGranteePermissions(pr);
                 eduNodeRef.setPublic(granteePermissions.stream().anyMatch(p -> p.getName().equals(CCConstants.PERMISSION_READ_ALL)));
             }
-            if(authorities.stream().anyMatch(s -> entry.getValue().contains(s))
-                    || entry.getValue().contains(user) ){
+            if (authorities.stream().anyMatch(s -> entry.getValue().contains(s))
+                    || entry.getValue().contains(user)) {
                 //get fine grained permissions
-                PermissionReference pr = permissionModel.getPermissionReference(null,entry.getKey());
+                PermissionReference pr = permissionModel.getPermissionReference(null, entry.getKey());
                 Set<PermissionReference> granteePermissions = permissionModel.getGranteePermissions(pr);
-                for(String perm : PermissionServiceHelper.PERMISSIONS){
-                    for(PermissionReference pRef : granteePermissions){
-                        if(pRef.getName().equals(perm)){
+                for (String perm : PermissionServiceHelper.PERMISSIONS) {
+                    for (PermissionReference pRef : granteePermissions) {
+                        if (pRef.getName().equals(perm)) {
                             permissions.put(perm, true);
                         }
                     }
@@ -924,11 +919,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
         // @TODO: remove all of this from/to multivalue
         ValueTool.getMultivalue(props);
         PropertiesGetInterceptor.PropertiesContext propertiesContext = PropertiesInterceptorFactory.getPropertiesContext(
-                alfNodeRef,props,eduNodeRef.getAspects(),
+                alfNodeRef, props, eduNodeRef.getAspects(),
                 permissions,
                 sourceAsMap
-        )
-                ;
+        );
         for (PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
             props = new HashMap<>(i.beforeDeliverProperties(propertiesContext));
         }
@@ -936,10 +930,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
         ValueTool.toMultivalue(props);
         eduNodeRef.setProperties(props);
 
-        eduNodeRef.setOwner((String)sourceAsMap.get("owner"));
+        eduNodeRef.setOwner((String) sourceAsMap.get("owner"));
 
         Map preview = (Map) sourceAsMap.get("preview");
-        if(preview != null && preview.get("small") != null) {
+        if (preview != null && preview.get("small") != null) {
             eduNodeRef.setPreview(
                     new NodeRefImpl.PreviewImpl(
                             (String) preview.get("mimetype"),
@@ -951,8 +945,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
 
         List<Contributor> contributorsResult = new ArrayList<>();
-        List contributors = (List)sourceAsMap.get("contributor");
-        if(contributors != null) {
+        List contributors = (List) sourceAsMap.get("contributor");
+        if (contributors != null) {
             for (Object contributor : contributors) {
                 Map c = (Map) contributor;
                 Contributor contributorResult = new Contributor();
@@ -968,13 +962,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
         eduNodeRef.setContributors(contributorsResult);
 
 
-        if(AuthorityServiceHelper.isAdmin() || user.equals(owner)){
-            permissions.put(CCConstants.PERMISSION_CC_PUBLISH,true);
-            PermissionReference pr = permissionModel.getPermissionReference(null,"FullControl");
+        if (AuthorityServiceHelper.isAdmin() || user.equals(owner)) {
+            permissions.put(CCConstants.PERMISSION_CC_PUBLISH, true);
+            PermissionReference pr = permissionModel.getPermissionReference(null, "FullControl");
             Set<PermissionReference> granteePermissions = permissionModel.getGranteePermissions(pr);
-            for(String perm : PermissionServiceHelper.PERMISSIONS){
-                for(PermissionReference pRef : granteePermissions){
-                    if(pRef.getName().equals(perm)){
+            for (String perm : PermissionServiceHelper.PERMISSIONS) {
+                for (PermissionReference pRef : granteePermissions) {
+                    if (pRef.getName().equals(perm)) {
                         permissions.put(perm, true);
                     }
                 }
@@ -989,7 +983,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         eduNodeRef.setPermissions(permissions);
         boolean isProposal = sourceAsMap.get("type").equals(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_COLLECTION_PROPOSAL));
-        if(resolveCollections) {
+        if (resolveCollections) {
             List<Map<String, Object>> collections = (List) sourceAsMap.get("collections");
             if (collections != null) {
                 for (Map<String, Object> collection : collections) {
@@ -1006,7 +1000,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     }
                     if (hasPermission) {
                         CollectionRefImpl transform = transform(CollectionRefImpl.class, authorities, user, collection, false);
-                        if(isProposal) {
+                        if (isProposal) {
                             transform.setRelationType(CollectionRef.RelationType.Proposal);
                         }
                         eduNodeRef.getUsedInCollections().add(transform);
@@ -1014,19 +1008,19 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 }
             }
         }
-        if(isProposal && sourceAsMap.containsKey("original")) {
+        if (isProposal && sourceAsMap.containsKey("original")) {
             eduNodeRef.getRelations().put(
                     NodeRefImpl.Relation.Original,
                     transform(NodeRefImpl.class, authorities, user, (Map) sourceAsMap.get("original"), false)
             );
         }
-        if(eduNodeRef instanceof CollectionRefImpl) {
+        if (eduNodeRef instanceof CollectionRefImpl) {
             CollectionRefImpl collectionRef = (CollectionRefImpl) eduNodeRef;
             Map<String, Object> relation = (Map) sourceAsMap.get("relation");
-            if(relation != null) {
+            if (relation != null) {
                 // @TODO: transform relation type
                 Map<String, Object> relationProps = (Map) relation.get("properties");
-                if(relationProps.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS))) {
+                if (relationProps.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS))) {
                     collectionRef.setRelationType(CollectionRef.RelationType.Proposal);
                 } else {
                     collectionRef.setRelationType(CollectionRef.RelationType.Usage);
@@ -1042,13 +1036,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
      * check if the user has permissions on this element via a collection and give him all permissions as it is an usage access
      */
     private static void processCollectionUsagePermissions(Set<String> authorities, String user, Map<String, Object> sourceAsMap, HashMap<String, Boolean> permissions) {
-        if(permissions.size() == 1) {
+        if (permissions.size() == 1) {
             List<Map<String, Object>> collections = (List<Map<String, Object>>) sourceAsMap.get("collections");
             for (Map<String, Object> collection : Optional.ofNullable(collections).orElse(Collections.emptyList())) {
                 Map<String, List<String>> collectionPermissions = (Map<String, List<String>>) collection.get("permissions");
-                if(Optional.ofNullable(collectionPermissions).orElse(Collections.emptyMap()).entrySet().stream().filter(p ->
+                if (Optional.ofNullable(collectionPermissions).orElse(Collections.emptyMap()).entrySet().stream().filter(p ->
                         // check the consumer, collaborator or coordinator lists
-                        Arrays.asList(CCConstants.PERMISSION_CONSUMER,CCConstants.PERMISSION_COLLABORATOR, CCConstants.PERMISSION_COORDINATOR).contains(p.getKey())
+                        Arrays.asList(CCConstants.PERMISSION_CONSUMER, CCConstants.PERMISSION_COLLABORATOR, CCConstants.PERMISSION_COORDINATOR).contains(p.getKey())
                 ).anyMatch(
                         // and if the user has one of this rights
                         (entry) ->
@@ -1056,136 +1050,98 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                         || entry.getValue().contains(user))) {
                     permissions.putAll(
                             CCConstants.getUsagePermissions().stream().collect(
-                            Collectors.toMap(o -> o, (o) -> true)
-                    ));
+                                    Collectors.toMap(o -> o, (o) -> true)
+                            ));
                     break;
                 }
             }
         }
     }
 
-    enum CONTRIBUTOR_PROP {firstname,lastname,email,url,uid};
+    enum CONTRIBUTOR_PROP {firstname, lastname, email, url, uid}
+
+    ;
 
     @Override
-    public Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) throws IOException{
+    public Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) throws IOException {
         checkClient();
-        SearchRequest searchRequest = new SearchRequest("workspace");
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
         List<String> searchFields = new ArrayList<>();
-        if(fields == null || fields.size() == 0){
-            for(CONTRIBUTOR_PROP att : CONTRIBUTOR_PROP.values()){
+        if (fields == null || fields.size() == 0) {
+            for (CONTRIBUTOR_PROP att : CONTRIBUTOR_PROP.values()) {
                 searchFields.add("contributor." + att.name());
             }
-        }else{
-            for(String f : fields){
-                if(Stream.of(CONTRIBUTOR_PROP.values()).anyMatch(v -> v.name().equals(f))){
+        } else {
+            for (String f : fields) {
+                if (Stream.of(CONTRIBUTOR_PROP.values()).anyMatch(v -> v.name().equals(f))) {
                     searchFields.add("contributor." + f);
                 }
             }
         }
-        BoolQueryBuilder qb = QueryBuilders.boolQuery();
-        for(String searchField : searchFields){
-            String search = new String(suggest);
-            if(!search.contains("*")) search = "*"+search+"*";
-            qb.should(QueryBuilders.wildcardQuery(searchField,search));
+        final BoolQuery.Builder contributorQuery = QueryBuilders.bool();
+        for (String searchField : searchFields) {
+            final String search = suggest.contains("*") ? suggest : String.format("*%s*", suggest);
+            contributorQuery.should(should->should.wildcard(wc->wc.field(searchField).value(search)));
         }
 
-        if(contributorProperties.size() > 0) {
-            BoolQueryBuilder bqb = QueryBuilders.boolQuery().minimumShouldMatch(1);
-            for (String contributorProp : contributorProperties) {
-                bqb.should(QueryBuilders.termQuery("contributor.property", contributorProp));
-            }
-            qb.must(bqb);
+        if (!contributorProperties.isEmpty()) {
+            contributorQuery.must(must->must.bool(bool->bool
+                    .minimumShouldMatch("1")
+                    .should(should->{
+                        contributorProperties.forEach(prop-> should.term(term->term.field("contributor.property").value(prop)));
+                        return should;
+                    })));
         }
 
-        if(contributorKind == ContributorKind.ORGANIZATION){
-            qb.must(QueryBuilders.boolQuery().should(
-                            QueryBuilders.existsQuery("contributor.X-ROR")
-                    ).should(
-                            QueryBuilders.existsQuery("contributor.X-Wikidata")
-                    ).minimumShouldMatch(1)
-            );
-        }else{
-            qb.must(QueryBuilders.boolQuery().should(
-                            QueryBuilders.existsQuery("contributor.X-ORCID")
-                    ).should(
-                            QueryBuilders.existsQuery("contributor.X-GND-URI")
-                    ).minimumShouldMatch(1)
-            );
+        if (contributorKind == ContributorKind.ORGANIZATION) {
+            contributorQuery.must(must->must.bool(bool->bool
+                    .should(should->should.exists(exists->exists.field("contributor.X-ROR")))
+                    .should(should->should.exists(exists->exists.field("contributor.X-Wikidata")))
+                    .minimumShouldMatch("1")));
+        } else {
+            contributorQuery.must(must->must.bool(bool->bool
+                    .should(should->should.exists(exists->exists.field("contributor.X-ORCID")))
+                    .should(should->should.exists(exists->exists.field("contributor.X-GND-URI")))
+                    .minimumShouldMatch("1")));
         }
 
+        SearchRequest searchRequest = SearchRequest.of(req->req
+                .index(WORKSPACE_INDEX)
+                .from(0)
+                .size(0)
+                .trackTotalHits(track->track.enabled(true))
+                .sort(sort->sort.score(score->score.order(SortOrder.Desc)))
+                .aggregations("contributor", aggr->aggr
+                        .nested(nes->nes.path("contributor"))
+                        .aggregations("vcard", vcardAggr->vcardAggr
+                                .terms(term->term
+                                        .field("contributor.vcard")
+                                        .size(100))))
+                .query(query->query
+                        .nested(nested->nested
+                                .path("contributor")
+                                .query(nq->nq
+                                        .bool(contributorQuery.build())))));
 
-        searchSourceBuilder.query(qb);
-        searchSourceBuilder.from(0);
-        searchSourceBuilder.size(0);
-        searchSourceBuilder.trackTotalHits(true);
-        searchSourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
-        searchSourceBuilder.aggregation(AggregationBuilders.terms("vcard").field("contributor.vcard.keyword").size(10000));
-        searchRequest.source(searchSourceBuilder);
-        SearchResponse searchResponse = client.search(searchRequest, getRequestOptions());
-        ParsedStringTerms aggregation = searchResponse.getAggregations().get("vcard");
-        /*
-        for (Terms.Bucket bucket : aggregation.getBuckets()) {
-            ArrayList<Map<String,Serializable>> contributor = (ArrayList<Map<String,Serializable>>) sourceAsMap.get("contributor");
+        SearchResponse<Map> searchResponse = client
+                .withTransportOptions(this::getRequestOptions)
+                .search(searchRequest, Map.class);
 
-            List<Map<String,Serializable>> remove = new ArrayList<>();
-            for(Map<String,Serializable> map:contributor){
-                boolean inResult = false;
-                boolean propertyIsInFilter = true;
+        Aggregate aggregation = searchResponse.aggregations()
+                .get("contributor")
+                .nested()
+                .aggregations()
+                .get("vcard");
 
-                if(contributorKind == ContributorKind.ORGANIZATION){
-                    if(!map.containsKey("X-ROR") && !map.containsKey("X-Wikidata")){
-                        remove.add(map);
-                        continue;
-                    }
-                }else{
-                    if(!map.containsKey("X-ORCID") && !map.containsKey("X-GND-URI")){
-                        remove.add(map);
-                        continue;
-                    }
-                }
-
-                for(Map.Entry<String,Serializable> entry : map.entrySet()){
-                    if(entry.getKey().equals("property")){
-                        if(contributorProperties.size() > 0){
-                            if(!contributorProperties.contains(entry.getValue())){
-                                propertyIsInFilter = false;
-                            }
-                        }
-                        continue;
-                    }
-                    if(fields.size() > 0 && !fields.contains(entry.getKey())){
-                        continue;
-                    }
-                    if(entry.getValue() == null){
-                        continue;
-                    }
-                    if(((String)entry.getValue()).toLowerCase().contains(suggest.toLowerCase())){
-                       inResult = true;
-                    }
-                }
-                if(!inResult || !propertyIsInFilter)remove.add(map);
-            }
-            for(Map<String,Serializable> map : remove) contributor.remove(map);
-            if(contributor.size() > 0) result.addAll(contributor);
-
-
-        }*/
         VCardEngine engine = new VCardEngine();
-        return aggregation.getBuckets().stream().
-                map(Terms.Bucket::getKey).
+        return aggregation.sterms().buckets().array().stream().
+                map(StringTermsBucket::key)
                 // this would be nicer via elastic "include" feature, however, it seems to be a pain with the java library
-                        filter(
-                        (k) -> Arrays.stream(
-                                suggest.toLowerCase().split(" ")).allMatch(
-                                (t) -> k.toString().toLowerCase().contains(t)
-                        )
-                ).
-                filter((k) -> {
+                .filter(k -> Arrays.stream(suggest.toLowerCase().split(" ")).allMatch(t -> k.stringValue().toLowerCase().contains(t)))
+                .filter(k -> {
                     try {
-                        VCard vcard = engine.parse(k.toString());
-                        if(contributorKind == ContributorKind.ORGANIZATION){
+                        VCard vcard = engine.parse(k.stringValue());
+                        if (contributorKind == ContributorKind.ORGANIZATION) {
                             return vcard.getExtendedTypes().stream().map(ExtendedType::getExtendedName).anyMatch(
                                     (e) -> e.equals("X-ROR") || e.equals("X-Wikidata")
                             );
@@ -1197,83 +1153,98 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     } catch (Exception ignored) {
                         return false;
                     }
-                }).
-                map((k) -> new SearchVCard(k.toString())).
+                })
+                .map((k) -> new SearchVCard(k.stringValue())).
                 collect(Collectors.toCollection(HashSet::new));
     }
-    public RestHighLevelClient getClient() throws IOException {
-        checkClient();
-        return client;
-    }
+
+    //
+//    public RestHighLevelClient getClient() throws IOException {
+//        checkClient();
+//        return client;
+//    }
+
     public DeleteResponse deleteNative(DeleteRequest deleteRequest) throws IOException {
-        return getClient().delete(deleteRequest, getRequestOptions());
+        return client.withTransportOptions(this::getRequestOptions).delete(deleteRequest);
     }
-    public SearchResponse searchNative(SearchRequest searchRequest) throws IOException {
-        return getClient().search(searchRequest, getRequestOptions());
+
+    public SearchResponse<Map> searchNative(SearchRequest searchRequest) throws IOException {
+        return client.withTransportOptions(this::getRequestOptions).search(searchRequest, Map.class);
     }
-    public UpdateResponse updateNative(UpdateRequest updateRequest) throws IOException {
-        return getClient().update(updateRequest, getRequestOptions());
+
+    public UpdateResponse<Map> updateNative(UpdateRequest updateRequest) throws IOException {
+        return client.withTransportOptions(this::getRequestOptions).update(updateRequest, Map.class);
     }
-    public SearchResponse scrollNative(SearchScrollRequest searchScrollRequest) throws IOException {
-        return getClient().scroll(searchScrollRequest, getRequestOptions());
+
+    public ScrollResponse<Map> scrollNative(ScrollRequest searchScrollRequest) throws IOException {
+        return client.withTransportOptions(this::getRequestOptions).scroll(searchScrollRequest, Map.class);
     }
+
     public ClearScrollResponse clearScrollNative(ClearScrollRequest clearScrollRequest) throws IOException {
-        return getClient().clearScroll(clearScrollRequest, getRequestOptions());
+        return client.withTransportOptions(this::getRequestOptions).clearScroll(clearScrollRequest);
     }
+
     public void checkClient() throws IOException {
-        if(client == null || !client.ping(getRequestOptions())){
-            if(client != null){
+        if (client == null || !client.ping().value()) {
+            if (client != null) {
                 try {
-                    client.close();
-                }catch (Exception e){
-                    logger.error("ping failed, close failed:" + e.getMessage()+" creating new");
+                    restClient.close();
+                } catch (Exception e) {
+                    logger.error("ping failed, close failed:" + e.getMessage() + " creating new");
                 }
             }
-            client = new ESRestHighLevelClient(RestClient.builder(getConfiguredHosts()));
+            // Create the low-level client
+            restClient = RestClient
+                    .builder(getConfiguredHosts())
+                    .setDefaultHeaders(new Header[]{
+                            // new BasicHeader("Authorization", "ApiKey " + apiKey)
+                    })
+                    .build();
+            ElasticsearchTransport transport = new RestClientTransport(
+                    restClient, new JacksonJsonpMapper());
+
+            client = new ElasticsearchClient(transport);
         }
     }
 
 
-    public SearchResultNodeRef getMetadata(List<String> nodeIds) throws IOException{
+    public SearchResultNodeRef getMetadata(List<String> nodeIds) throws IOException {
 
         SearchResultNodeRef sr = new SearchResultNodeRef();
         List<NodeRef> data = new ArrayList<>();
         sr.setData(data);
 
-        SearchRequest searchRequest = new SearchRequest("workspace");
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        BoolQueryBuilder queryBuilder = getGlobalConditions(null,null, null);
-        BoolQueryBuilder qbNodeIds = QueryBuilders.boolQuery().minimumShouldMatch(1);
-        queryBuilder.must(qbNodeIds);
+        SearchRequest searchRequest = SearchRequest.of(req -> req
+                        .index(WORKSPACE_INDEX)
+                        .from(0)
+                        .size(nodeIds.size())
+                        .trackTotalHits(track -> track.enabled(true))
+                        .query(root -> root
+                                .bool(getGlobalConditions(null, null, null)
+                                        .must(must -> must
+                                                .bool(queryNodeIds -> queryNodeIds.minimumShouldMatch("1")
+                                                        .should(should -> {
+                                                            nodeIds.forEach(x -> should.term(t -> t.field("nodeRef.id").value(x)));
+                                                            return should;
+                                                        })))
+                                        .build())));
+        SearchResponse<Map> searchResponse = client.search(searchRequest, Map.class);
 
-        for(String nodeId : nodeIds) {
-            qbNodeIds.should(QueryBuilders.termQuery("nodeRef.id",nodeId));
-        }
+        logger.info("query: " + JsonpUtils.toJsonString(searchRequest, new JacksonJsonpMapper()));
+        HitsMetadata<Map> hits = searchResponse.hits();
+        logger.info("result count: " + hits.total().value());
 
-        searchSourceBuilder.query(queryBuilder);
-
-        searchSourceBuilder.from(0);
-        searchSourceBuilder.size(nodeIds.size());
-        searchSourceBuilder.trackTotalHits(true);
-        searchRequest.source(searchSourceBuilder);
-
-        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-
-        logger.info("query: "+searchSourceBuilder.toString());
-        SearchHits hits = searchResponse.getHits();
-        logger.info("result count: "+hits.getTotalHits());
-
-        for (SearchHit hit : hits) {
-            data.add(transformSearchHit(getUserAuthorities(), AuthenticationUtil.getFullyAuthenticatedUser(), hit,true));
+        for (Hit<Map> hit : hits.hits()) {
+            data.add(transformSearchHit(getUserAuthorities(), AuthenticationUtil.getFullyAuthenticatedUser(), hit.source(), true));
         }
         sr.setStartIDX(0);
-        sr.setNodeCount( (int)hits.getTotalHits().value);
+        sr.setNodeCount((int) hits.total().value());
         return sr;
     }
 
     @Override
     public List<? extends Suggestion> getSuggestions(MetadataSet mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
-        Map<String,String[]> criteriasMap = MetadataSearchHelper.convertCriterias(criterias);
+        Map<String, String[]> criteriasMap = MetadataSearchHelper.convertCriterias(criterias);
         SearchToken token = new SearchToken();
         token.setFacets(Collections.singletonList(parameterId));
         token.setFrom(0);
@@ -1286,7 +1257,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchResultNodeRef search = searchFacets(
                     mds, queryId, criteriasMap, token
             );
-            if(search.getFacets().size() != 1) {
+            if (search.getFacets().size() != 1) {
                 return Collections.emptyList();
             }
             return search.getFacets().get(0).getValues().stream().filter(s ->

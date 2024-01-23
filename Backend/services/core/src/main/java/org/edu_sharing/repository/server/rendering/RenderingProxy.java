@@ -188,7 +188,7 @@ public class RenderingProxy extends HttpServlet {
 					&& ContextManagementFilter.accessTool.get() != null
 					&& AuthenticationUtil.getFullyAuthenticatedUser() != null
 					&& AuthenticationUtil.getFullyAuthenticatedUser().equals(CCConstants.PROXY_USER)){
-				logger.info("trusted application, validated usage access for app: " + ContextManagementFilter.accessTool.get().getAppId());
+				logger.info("trusted application, validated usage access for app: " + ContextManagementFilter.accessTool.get().getApplicationInfo().getAppId());
 				return CCConstants.PROXY_USER;
 			}else{
 				throw new Exception("Parameter \"u\" (username) is missing");

@@ -2141,6 +2141,9 @@
           "syslogEquivalent": {
             "format": "int32",
             "type": "integer"
+          },
+          "version2Level": {
+            "$ref": "#/components/schemas/Level"
           }
         },
         "type": "object"
@@ -5536,7 +5539,7 @@
           },
           "score": {
             "description": "score of the suggestion",
-            "format": "float",
+            "format": "double",
             "type": "number"
           },
           "text": {
@@ -12389,6 +12392,17 @@
       "post": {
         "description": "Get a given node based on the posted, multiple criteria. Make sure that they'll provide an unique result",
         "operationId": "find",
+        "parameters": [
+          {
+            "description": "Return the full node. If you don't need the data, set to false to only return the id (will improve performance)",
+            "in": "query",
+            "name": "resolveNode",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -12529,6 +12543,15 @@
                 "type": "string"
               },
               "type": "array"
+            }
+          },
+          {
+            "description": "Return the generated or updated node. If you don't need the data, set to false to only return the id (will improve performance)",
+            "in": "query",
+            "name": "resolveNode",
+            "schema": {
+              "default": true,
+              "type": "boolean"
             }
           },
           {
@@ -35082,6 +35105,7 @@
               "enum": [
                 "DOWNLOAD_MATERIAL",
                 "VIEW_MATERIAL",
+                "OPEN_EXTERNAL_LINK",
                 "VIEW_COLLECTION",
                 "VIEW_MATERIAL_EMBEDDED",
                 "VIEW_MATERIAL_PLAY_MEDIA",

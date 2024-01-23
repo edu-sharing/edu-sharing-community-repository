@@ -364,10 +364,11 @@ public class MetadataTemplateRenderer {
 								VCard vcard = vCardEngine.parse(rawValue);
 								String persistentIdUrl = null;
 								for (ExtendedType type : vcard.getExtendedTypes()) {
-									if (type.getExtendedName().equals(CCConstants.VCARD_T_X_ORCID) ||
+									if ((type.getExtendedName().equals(CCConstants.VCARD_T_X_ORCID) ||
 											type.getExtendedName().equals(CCConstants.VCARD_T_X_GND_URI) ||
 											type.getExtendedName().equals(CCConstants.VCARD_T_X_ROR) ||
-											type.getExtendedName().equals(CCConstants.VCARD_T_X_WIKIDATA)) {
+											type.getExtendedName().equals(CCConstants.VCARD_T_X_WIKIDATA)
+									) && (type.getExtendedValue() != null && !type.getExtendedValue().isEmpty())) {
 										persistentIdUrl = type.getExtendedValue();
 										break;
 									}

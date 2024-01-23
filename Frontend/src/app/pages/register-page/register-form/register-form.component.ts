@@ -1,12 +1,7 @@
 import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
 import { Toast } from '../../../services/toast';
 import { Router } from '@angular/router';
-import {
-    ConfigurationService,
-    RegisterInformation,
-    RestConnectorService,
-    RestRegisterService,
-} from '../../../core-module/core.module';
+import { ConfigurationService, RegisterInformation } from '../../../core-module/core.module';
 import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { PlatformLocation } from '@angular/common';
@@ -19,7 +14,7 @@ import {
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { VCard } from 'ngx-edu-sharing-ui';
-import { RegisterV1Service } from 'ngx-edu-sharing-api';
+import { RegisterService } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-register-form',
@@ -50,7 +45,7 @@ export class RegisterFormComponent implements OnDestroy {
 
         delete (this.info as any).agree;
         this.info.password = this.password;
-        this.registerService.register({ body: this.info }).subscribe(
+        this.registerService.register(this.info).subscribe(
             () => {
                 this.toast.closeProgressSpinner();
                 this.onRegisterDone.emit();
@@ -85,7 +80,7 @@ export class RegisterFormComponent implements OnDestroy {
         private platformLocation: PlatformLocation,
         private formBuilder: UntypedFormBuilder,
         private router: Router,
-        private registerService: RegisterV1Service,
+        private registerService: RegisterService,
         private translations: TranslationsService,
         private configService: ConfigurationService,
     ) {

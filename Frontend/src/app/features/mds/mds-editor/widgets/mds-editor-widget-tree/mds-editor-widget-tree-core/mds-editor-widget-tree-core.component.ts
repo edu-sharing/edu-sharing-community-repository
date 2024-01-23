@@ -392,6 +392,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
         return data.concat([
             {
                 id: null,
+                alternativeIds: null,
                 uid: null,
                 caption: null,
                 parent,

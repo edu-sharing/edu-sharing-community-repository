@@ -188,7 +188,7 @@
             <phase>generate-sources</phase>
             <configuration>
               <includeArtifactIds>
-                edu_sharing-community-repository-repackaged-elasticsearch,
+<!--                edu_sharing-community-repository-repackaged-elasticsearch,-->
                 edu_sharing-community-repository-repackaged-isoparser
               </includeArtifactIds>
               <type>tar.gz</type>
@@ -398,6 +398,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
       <scope>provided</scope>
@@ -466,10 +472,23 @@
     </dependency>
 
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-repository-repackaged-elasticsearch</artifactId>
+      <groupId>co.elastic.clients</groupId>
+      <artifactId>elasticsearch-java</artifactId>
       <scope>runtime</scope>
     </dependency>
+
+    <dependency>
+      <groupId>jakarta.json</groupId>
+      <artifactId>jakarta.json-api</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+<!--    <dependency>-->
+<!--      <groupId>${project.groupId}</groupId>-->
+<!--      <artifactId>edu_sharing-community-repository-repackaged-elasticsearch</artifactId>-->
+<!--      <scope>runtime</scope>-->
+<!--    </dependency>-->
+
 
     <dependency>
       <groupId>com.google.apis</groupId>
@@ -553,6 +572,12 @@
           <artifactId>javax.inject</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.glassfish.jersey.ext</groupId>
+      <artifactId>jersey-spring5</artifactId>
+      <scope>runtime</scope>
     </dependency>
 
     <dependency>

@@ -164,8 +164,8 @@ span {
     }
 }
 
-.user {
-    color: $workspaceTopBarFontColor !important;
+button.user {
+    color: $workspaceTopBarFontColor;
 }
 .user span {
     font-size: 100%;

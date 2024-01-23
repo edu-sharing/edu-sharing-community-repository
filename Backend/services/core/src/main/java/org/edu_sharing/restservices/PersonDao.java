@@ -9,7 +9,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
-import org.edu_sharing.repackaged.elasticsearch.org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.EduGroup;
@@ -410,7 +410,7 @@ public class PersonDao {
 
 			@Override
 			public UserStats doWork() throws Exception {
-				String luceneUser = "@cm\\:creator:\""+QueryParser.escape(getAuthorityName())+"\"";
+				String luceneUser = "@cm\\:creator:\""+ QueryParser.escape(getAuthorityName())+"\"";
 				luceneUser += " AND NOT ASPECT:"+QueryParser.escape(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE));
 				luceneUser += " AND NOT ASPECT:"+QueryParser.escape(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT));
 				SearchToken token=new SearchToken();
@@ -479,15 +479,17 @@ public class PersonDao {
 	}
 	public UserSimple asPersonSimple(boolean resolveOrganizations) {
 		UserSimple data = new UserSimple();
-    	data.setAuthorityName(getAuthorityName());
-    	data.setAuthorityType(Authority.Type.USER);
-    	data.setUserName(getUserName());
-    	data.setProfile(getProfile());
+		data.setAuthorityName(getAuthorityName());
+		data.setAuthorityType(Authority.Type.USER);
+		data.setUserName(getUserName());
+		data.setProfile(getProfile());
 		data.setStatus(getStatus());
-		if(isCurrentUserOrAdmin()){
+		if (isCurrentUserOrAdmin()) {
 			data.setProperties(getProperties());
 		}
-		//data.setOrganizations(OrganizationDao.mapOrganizations(getParentOrganizations()));
+		if (resolveOrganizations) {
+			data.setOrganizations(OrganizationDao.mapOrganizations(getParentOrganizations()));
+		}
 		if(isCurrentUserOrAdmin()) {
 	    	NodeRef homeDir = new NodeRef();
 	    	homeDir.setRepo(repoDao.getId());

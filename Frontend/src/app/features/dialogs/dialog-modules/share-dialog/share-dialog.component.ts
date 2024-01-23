@@ -41,11 +41,14 @@ import { CardDialogUtilsService } from '../../card-dialog/card-dialog-utils.serv
 import { DialogsService } from '../../dialogs.service';
 import { ShareDialogPublishComponent } from './publish/publish.component';
 import { ShareDialogData, ShareDialogResult } from './share-dialog-data';
+import { trigger } from '@angular/animations';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-share-dialog',
     templateUrl: './share-dialog.component.html',
     styleUrls: ['./share-dialog.component.scss'],
+    animations: [trigger('overlay', UIAnimation.openOverlay())],
 })
 export class ShareDialogComponent implements OnInit, AfterViewInit {
     @ViewChild('publish') publishComponent: ShareDialogPublishComponent;
@@ -269,7 +272,8 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         const isDirectory = new Set(this._nodes.map((n) => n.isDirectory));
         if (isDirectory.size !== 1) {
             this.toast.error(null, 'WORKSPACE.SHARE.ERROR_INVALID_TYPE_COMBINATION');
-            this.cancel();
+            // async to make sure the dialogRef is available
+            setTimeout(() => this.cancel());
             return;
         }
         if (isDirectory.values().next()) {

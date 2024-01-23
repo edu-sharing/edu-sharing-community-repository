@@ -62,10 +62,9 @@
     <tomcat.version.major>9</tomcat.version.major>
     <tomcat.version.minor>0</tomcat.version.minor>
     <tomcat.version.patch>70</tomcat.version.patch>
-    <tomcat.version>${tomcat.version.major}.${tomcat.version.minor}.${tomcat.version.patch}
-    </tomcat.version>
+    <tomcat.version>${tomcat.version.major}.${tomcat.version.minor}.${tomcat.version.patch}</tomcat.version>
 
-    <mongodb.version>4.9.1</mongodb.version>
+    <mongodb.version>4.11.1</mongodb.version>
   </properties>
 
   <profiles>
@@ -254,6 +253,25 @@
         <artifactId>cardme</artifactId>
         <version>0.4.0</version>
       </dependency>
+
+      <dependency>
+        <groupId>co.elastic.clients</groupId>
+        <artifactId>elasticsearch-java</artifactId>
+        <version>8.11.1</version>
+      </dependency>
+
+      <!-- dependency of elastic client -->
+      <dependency>
+        <groupId>jakarta.json</groupId>
+        <artifactId>jakarta.json-api</artifactId>
+        <version>2.1.2</version>
+      </dependency>
+
+<!--      <dependency>-->
+<!--        <groupId>${project.groupId}</groupId>-->
+<!--        <artifactId>edu_sharing-community-repository-repackaged-elasticsearch</artifactId>-->
+<!--        <version>${bom.repository-repackaged.version}</version>-->
+<!--      </dependency>-->
 
       <dependency>
         <groupId>commons-io</groupId>
@@ -522,12 +540,6 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-repackaged-elasticsearch</artifactId>
-        <version>${bom.repository-repackaged.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-repackaged-isoparser</artifactId>
         <version>${bom.repository-repackaged.version}</version>
       </dependency>
@@ -565,25 +577,19 @@
       <dependency>
         <groupId>com.hazelcast</groupId>
         <artifactId>hazelcast</artifactId>
-        <version>3.12</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.hazelcast</groupId>
-        <artifactId>hazelcast-client</artifactId>
-        <version>3.12</version>
+        <version>5.3.6</version>
       </dependency>
 
       <dependency>
         <groupId>com.hazelcast</groupId>
         <artifactId>hazelcast-kubernetes</artifactId>
-        <version>1.5.6</version>
+        <version>2.2.3</version>
       </dependency>
 
       <dependency>
         <groupId>com.hazelcast</groupId>
         <artifactId>hazelcast-spring</artifactId>
-        <version>3.12</version>
+        <version>5.3.6</version>
       </dependency>
 
       <dependency>
@@ -774,6 +780,12 @@
       </dependency>
 
       <dependency>
+        <groupId>org.apache.tika</groupId>
+        <artifactId>tika-core</artifactId>
+        <version>2.3.0</version>
+      </dependency>
+
+      <dependency>
         <groupId>com.squareup.okhttp3</groupId>
         <artifactId>logging-interceptor</artifactId>
         <version>4.9.2</version>
@@ -788,7 +800,7 @@
       <dependency>
         <groupId>edu.uoc.elc.lti</groupId>
         <artifactId>lti-13</artifactId>
-        <version>0.0.3</version>
+        <version>0.0.3.edupatch.1</version>
       </dependency>
 
       <dependency>
@@ -1242,7 +1254,7 @@
       </releases>
       <snapshots>
         <enabled>true</enabled>
-        <updatePolicy>always</updatePolicy>
+        <updatePolicy>never</updatePolicy>
       </snapshots>
     </repository>
 
@@ -1255,7 +1267,7 @@
       </releases>
       <snapshots>
         <enabled>true</enabled>
-        <updatePolicy>always</updatePolicy>
+        <updatePolicy>never</updatePolicy>
       </snapshots>
     </repository>
 

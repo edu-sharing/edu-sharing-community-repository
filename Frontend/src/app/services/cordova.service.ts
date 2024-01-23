@@ -1294,11 +1294,9 @@ export class CordovaService extends AppServiceAbstract {
                 async (oauth) => {
                     console.info('cordova: oauth OK');
                     this.reiniting = false;
-                    this.injector.get(AuthenticationService).loginToken(oauth.access_token);
-                    await this.injector
-                        .get(AuthenticationService)
-                        .forceLoginInfoRefresh()
-                        .toPromise();
+                    const auth = this.injector.get(AuthenticationService);
+                    auth.loginToken(oauth.access_token);
+                    auth.forceLoginInfoRefresh();
                     observer.next(null);
                     observer.complete();
                 },

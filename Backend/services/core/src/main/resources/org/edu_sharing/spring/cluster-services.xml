@@ -8,6 +8,5 @@
 <!--                                                                        -->
 
 <beans>
-    <bean id="jobClusterLocker" class="org.edu_sharing.repository.server.jobs.quartz.JobClusterLocker"/>
     <bean id="esLockManager" class="org.edu_sharing.repository.server.tools.EduSharingLockManager"/>
 </beans>

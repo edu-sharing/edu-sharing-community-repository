@@ -1,11 +1,5 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -30,7 +24,9 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
-public class AssignedLicenseManagerJob  extends AbstractJob implements JobClusterLocker.ClusterSingelton {
+import java.util.*;
+
+public class AssignedLicenseManagerJob  extends AbstractJob {
 	
 	Logger logger = Logger.getLogger(AssignedLicenseManagerJob.class);
 	

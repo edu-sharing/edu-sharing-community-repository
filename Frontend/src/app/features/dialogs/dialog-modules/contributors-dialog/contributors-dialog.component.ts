@@ -118,10 +118,11 @@ export class ContributorsDialogComponent implements OnInit {
         void this.openEditDialog({ editMode: mode });
     }
 
-    async editVCard(mode: EditMode, vcard: VCard, role: string) {
+    async editVCard(mode: EditMode, vcard: VCard, role: string, position: number) {
         void this.openEditDialog({
             vCard: vcard.copy(),
             editMode: mode,
+            position,
             role,
         });
     }
@@ -145,10 +146,9 @@ export class ContributorsDialogComponent implements OnInit {
                 ? this.contributorLifecycle
                 : this.contributorMetadata;
         if (originalData.role) {
-            let pos = array[originalData.role].indexOf(originalData.vCard);
-            array[originalData.role].splice(pos, 1);
+            array[originalData.role].splice(originalData.position, 1);
             if (originalData.role === result.role) {
-                array[originalData.role].splice(pos, 0, result.vCard);
+                array[originalData.role].splice(originalData.position, 0, result.vCard);
             } else {
                 array[result.role].push(result.vCard);
             }

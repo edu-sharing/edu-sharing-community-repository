@@ -203,12 +203,12 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         private workspace: WorkspaceService,
     ) {
         this.event.addListener(this, this.destroyed$);
-        this.translations.waitForInit().subscribe(() => {
-            void this.initialize();
-        });
         this.connector.setRoute(this.route, this.router);
         this.globalProgress = true;
-        this.cardHasOpenModals$ = this.card.hasOpenModals.pipe(delay(0));
+        this.translations.waitForInit().subscribe(() => {
+            void this.initialize();
+            this.cardHasOpenModals$ = this.card.hasOpenModals.pipe(delay(0));
+        });
     }
 
     ngOnInit(): void {

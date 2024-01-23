@@ -1,9 +1,5 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
-
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.apache.log4j.Logger;
@@ -11,7 +7,11 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-public class TrashcanCleanerSolrJob extends AbstractJob implements JobClusterLocker.ClusterSingelton {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
+
+public class TrashcanCleanerSolrJob extends AbstractJob {
 
 	public static final String PARAM_DAYS_TO_KEEP = "DAYS_TO_KEEP";
 	

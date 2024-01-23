@@ -128,7 +128,7 @@ mat-radio-button {
     margin-top: 0;
     margin-bottom: 20px;
     > a {
-        text-decoration: none;
+        text-decoration: underline;
     }
 }
 
@@ -178,7 +178,7 @@ fieldset {
 .licenseUrl {
     margin: 10px !important;
     a {
-        text-decoration: none;
+        text-decoration: underline;
     }
 }
 .authors {

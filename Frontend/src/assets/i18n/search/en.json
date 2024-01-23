@@ -41,6 +41,8 @@
     "REPOSITORY_ALL": "All",
     "REPOSITORY_MORE": "More",
     "REPOSITORY_FILTER": "Content Sources:",
+    "LOADING_RESULTS": "loading results, progress is {{ progress }}%",
+    "LOADED_RESULTS": "loaded {{ count }} new results",
     "RENDER": {
       "BACK_TO_SEARCH": "Back to search"
     },

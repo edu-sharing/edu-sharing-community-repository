@@ -32,14 +32,14 @@
     </mat-button-toggle-group>
   </div>
   <ng-container *ngIf="modeGroup.value === 'foreign'">
-    <label for="authorFreetext">{{ 'MDS.AUTHOR_FREETEXT_PLACEHOLDER' | translate }}</label>
     <mat-form-field class="authorFreetext">
+      <mat-label>{{ 'MDS.AUTHOR_FREETEXT_PLACEHOLDER' | translate }}</mat-label>
       <textarea
         matInput
         cdkTextareaAutosize
         id="authorFreetext"
         [(ngModel)]="authorFreetext"
-        cdkAutosizeMinRows="2"
+        cdkAutosizeMinRows="3"
         cdkAutosizeMaxRows="5"
       ></textarea>
     </mat-form-field>

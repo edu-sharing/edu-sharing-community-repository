@@ -102,6 +102,13 @@ public class UrlTool {
 		
 		return newUrl;
 	}
+
+
+	public static String replaceParam(String url, String param, String value){
+		url = removeParam(url, param);
+		url = setParam(url, param, value);
+		return url;
+	}
 	
 	/**
 	 * if sourceUrl contains jsessionid it will be added to target url

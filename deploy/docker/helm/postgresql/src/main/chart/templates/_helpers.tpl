@@ -33,3 +33,7 @@ app.kubernetes.io/name: {{ include "edusharing_postgresql.name" . }}
 {{- $repository := default .Values.global.image.repository .Values.image.repository -}}
 {{ $registry }}{{ if $registry }}/{{ end }}{{ $repository }}{{ if $repository }}/{{ end }}
 {{- end -}}
+
+{{- define "edusharing_postgresql.pvc.share.data" -}}
+share-data-{{ include "edusharing_postgresql.name" . }}
+{{- end -}}

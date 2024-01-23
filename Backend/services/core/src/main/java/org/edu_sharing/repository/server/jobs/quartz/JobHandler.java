@@ -71,7 +71,7 @@ public class JobHandler {
 	//private final ApplicationContext eduApplicationContext = null;
 
 	@Autowired
-	public JobHandler(JobClusterLocker jobClusterLocker, SchedulerFactoryBean schedulerFactoryBean) throws Exception {
+	public JobHandler(SchedulerFactoryBean schedulerFactoryBean) throws Exception {
 		this.schedulerFactoryBean = schedulerFactoryBean;
 		init();
 	}

@@ -422,6 +422,7 @@
       "SINGLE": "Individual evaluation",
       "NODES": "By object",
       "NODES_MEDIACENTER_INFO": "The given stats are only meant for access of current data. For accessing older data prefer the provided data under \"monthly/yearly\".",
+      "NODES_APPLY": "Fetch list",
       "CUSTOM_GROUPS": "By criterion",
       "VIEWS": "Object accesses",
       "VIEWS_EMBEDDED": "Object views (Remote)",

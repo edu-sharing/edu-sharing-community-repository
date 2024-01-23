@@ -197,9 +197,8 @@ export class AuthenticationService {
      * This is usually not needed since `login` and `logout` will update login information
      * automatically. Use only if the login state was affected by some outside actor.
      */
-    forceLoginInfoRefresh(): Observable<LoginInfo> {
+    forceLoginInfoRefresh(): void {
         this.loginActionTrigger.next({ kind: 'forceRefresh' });
-        return this.loginInfo$.pipe(first());
     }
 
     /**

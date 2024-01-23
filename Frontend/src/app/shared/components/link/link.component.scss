@@ -9,6 +9,7 @@ button {
     padding: unset;
     text-transform: unset;
     cursor: pointer;
+    font-size: 100%;
     border-bottom: 1px solid transparent; // Take up the same space as when focused
     &:hover,
     :host.highlight & {
