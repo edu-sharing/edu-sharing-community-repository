@@ -530,7 +530,7 @@ export class AdminStatisticsComponent implements OnInit {
         this.statistics
             .getStatisticsNode(
                 this._nodesStart,
-                new Date(this._nodesEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET),
+                new Date(this._nodesEnd.getTime()),
                 'Node',
                 this.getMediacenter(),
                 group ? [group] : null,
@@ -842,7 +842,7 @@ export class AdminStatisticsComponent implements OnInit {
                 this.storage.set('admin_statistics_properties', this.exportProperties);
                 //csvHeaders = properties.concat(Helper.uniqueArray(this.nodes.map((n) => Object.keys(n.counts)).reduce((a: any, b: any) => a.concat(b))));
                 const countHeaders = [
-                    'OVERALL',
+                    // 'OVERALL',
                     'VIEW_MATERIAL',
                     'VIEW_MATERIAL_EMBEDDED',
                     'DOWNLOAD_MATERIAL',
@@ -927,7 +927,7 @@ export class AdminStatisticsComponent implements OnInit {
             .subscribe((p) => (this.exportProperties = p));
 
         this.columns = this.columns.concat([
-            new ListItem('NODE', 'counts.OVERALL'),
+            //new ListItem('NODE', 'counts.OVERALL'),
             new ListItem('NODE', 'counts.VIEW_MATERIAL'),
             new ListItem('NODE', 'counts.VIEW_MATERIAL_EMBEDDED'),
             new ListItem('NODE', 'counts.DOWNLOAD_MATERIAL'),

@@ -537,7 +537,9 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             while (resultSet.next()) {
                 NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, resultSet.getString("node_uuid_final"));
                 EventType event = EventType.valueOf(resultSet.getString("type"));
-                data.put(nodeRef, new StatisticEntry());
+                if(!data.containsKey(nodeRef)) {
+                    data.put(nodeRef, new StatisticEntry());
+                }
                 data.get(nodeRef).getCounts().put(event, resultSet.getInt("count"));
                 if(!additionalFields.isEmpty()) {
                     mapAdditionalFields(event, additionalFields, resultSet, data.get(nodeRef), mediacenter);

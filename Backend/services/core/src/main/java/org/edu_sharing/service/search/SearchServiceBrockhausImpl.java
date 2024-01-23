@@ -87,7 +87,11 @@ public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 		return searchResultNodeRef;
 	}
 	public static String buildUrl(String apiKey,String id){
-		return "https://www.brockhaus.de/portal/user/"+URLEncoder.encodeUriComponent(apiKey)+"?url="+URLEncoder.encodeUriComponent("/ecs/" + id.replace("%2f", "/"));
+		String prefix = "";
+		if(id.startsWith("%2fkilex")) {
+			prefix = "/junior";
+		}
+		return "https://www.brockhaus.de/portal/user/"+URLEncoder.encodeUriComponent(apiKey)+"?url="+URLEncoder.encodeUriComponent(prefix + "/ecs/" + id.replace("%2f", "/"));
 	}
 	@Override
 	public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criterias,
