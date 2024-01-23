@@ -1,4 +1,4 @@
-package org.edu_sharing.saml2;
+package org.edu_sharing.spring.security.saml2;
 
 import com.typesafe.config.Config;
 import org.apache.commons.io.IOUtils;
