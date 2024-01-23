@@ -442,6 +442,11 @@ public class RegistrationService {
             if(jo.get(LTIPlatformConstants.CUSTOM_CLAIM_GET_CONTENTAPIURL)  != null){
                 properties.put(ApplicationInfo.KEY_LTITOOL_CUSTOMCONTENT_OPTION,"true");
             }
+            // if the remote lti tool supports content fetching, check if it can handle a custom resource type
+            // this way, the app can open for manually uploaded files
+            if(jo.get(LTIPlatformConstants.CUSTOM_CLAIM_RESOURCE_TYPE)  != null){
+                properties.put(ApplicationInfo.KEY_LTI_RESOURCE_TYPE, (String) jo.get(LTIPlatformConstants.CUSTOM_CLAIM_RESOURCE_TYPE));
+            }
         }
         properties.put(ApplicationInfo.KEY_LOGO,logoUri);
         properties.put(ApplicationInfo.KEY_LTI_KEYSET_URL,jwksuri);

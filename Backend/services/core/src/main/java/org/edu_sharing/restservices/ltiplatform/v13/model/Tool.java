@@ -1,8 +1,15 @@
 package org.edu_sharing.restservices.ltiplatform.v13.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class Tool {
     String domain,description,appId,name,logo;
     boolean customContentOption = false;
+
+    @Getter
+    @Setter
+    String resourceType;
 
     public String getDescription() {
         return description;

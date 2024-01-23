@@ -34,6 +34,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import lombok.Getter;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.RequestHelper;
@@ -145,6 +146,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	public static final String KEY_LTI_SYNCREADERS = "lti_sync_readers";
 
+	public static final String KEY_LTI_RESOURCE_TYPE = "lti_resource_type";
+
 	public static final String KEY_LTITOOL_LOGININITIATIONS_URL = "ltitool_initiate_login_uri";
 
 	public static final String KEY_LTITOOL_REDIRECT_URLS = "ltitool_redirect_urls";
@@ -232,6 +235,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	private final Properties properties;
 	private final String appFileName;
+	@Getter
+	private final String ltiResourceType;
 
 	private String host = null;
 	
@@ -573,6 +578,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		ltiKid = properties.getProperty(KEY_LTI_KID);
 		ltiUsagesEnabled = properties.getProperty(KEY_LTI_USAGES_ENABLED);
 		ltiSyncReaders = properties.getProperty(KEY_LTI_SYNCREADERS);
+		ltiResourceType = properties.getProperty(KEY_LTI_RESOURCE_TYPE);
 
 		ltitoolRedirectUrls = properties.getProperty(KEY_LTITOOL_REDIRECT_URLS);
 		ltitoolLoginInitiationsUrl = properties.getProperty(KEY_LTITOOL_LOGININITIATIONS_URL);
