@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { first, map, startWith } from 'rxjs/operators';
+import { first, map, startWith, switchMap } from 'rxjs/operators';
 import { BridgeService } from '../../services/bridge.service';
 import {
     ConfigurationService,

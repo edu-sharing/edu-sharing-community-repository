@@ -1,4 +1,4 @@
-import { trigger } from '@angular/animations';
+import { animate, state, style, transition, trigger } from '@angular/animations';
 import {
     Component,
     ElementRef,
@@ -34,7 +34,6 @@ import { UIService } from '../../../core-module/rest/services/ui.service';
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { Toast } from '../../../services/toast';
 import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
-import { animate, state, style, transition, trigger } from '@angular/animations';
 
 // Charts.js
 declare var Chart: any;
