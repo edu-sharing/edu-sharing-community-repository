@@ -5,7 +5,7 @@ public class LTIPlatformConstants {
 
     public static final String CUSTOM_CLAIM_APP_ID = "appId";
 
-    public static final String CUSTOM_CLAIM_RESOURCE_TYPE = "resoureType";
+    public static final String CUSTOM_CLAIM_RESOURCE_TYPE = "resourceType";
 
     public static final String CUSTOM_CLAIM_USER = "user";
 
