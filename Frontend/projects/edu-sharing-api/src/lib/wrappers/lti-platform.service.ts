@@ -47,7 +47,7 @@ export class LtiPlatformService {
             return null;
         }
         const tools = await this.getTools().pipe(first()).toPromise();
-        return tools?.tools?.filter((t) => t.resourceType)?.[0];
+        return tools?.tools?.filter((t) => t.resourceType === ltiValue)?.[0];
     }
 
     convertToLtiResourceLink(nodeId: string, appId: string): Observable<null> {
