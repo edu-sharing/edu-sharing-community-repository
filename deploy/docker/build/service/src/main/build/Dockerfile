@@ -15,6 +15,7 @@ RUN set -eux \
 RUN set -eux \
     && rm \
         tomcat/webapps/alfresco/WEB-INF/lib/jsr305-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/spring-security-* \
         tomcat/webapps/alfresco/WEB-INF/classes/log4j2.properties
 
 COPY --chown=worker:worker artifacts/edu_sharing-community-repository-backend-tomcat-${org.edu_sharing:edu_sharing-community-repository-backend-tomcat:jar.version}.jar tomcat/lib/

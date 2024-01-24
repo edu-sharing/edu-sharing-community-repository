@@ -16,6 +16,8 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 @Profile("openidEnabled")
 @EnableWebSecurity(debug = true)
@@ -28,13 +30,27 @@ public class SecurityConfigurationOpenIdConnect {
     SecurityFilterChain app(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((authorize) -> authorize
-                        //.anyRequest().authenticated()
-                        .requestMatchers("/shibboleth").authenticated()
-                        .requestMatchers("/**").permitAll()
+                     //   .requestMatchers("/shibboleth").authenticated()
+                     //   .requestMatchers("/**").permitAll()
+                        /**
+                         * we have to use ant matchers here cause the new spring-security version 6.2
+                         * tries to use mvc matchers cause it is in classpath. but we don't use mvc matcher,
+                         * which causes NoSuchBeanDefinitionException mvcHandlerMappingIntrospector
+                         *
+                         * org.springframework.security.config.annotation.web.AbstractRequestMatcherRegistry diff 6.1 vs 6.2
+                         */
+                    .requestMatchers(new AntPathRequestMatcher("/shibboleth")).authenticated()
+                    .requestMatchers(new AntPathRequestMatcher("/**")).permitAll()
                 )
 
                 .oauth2Login(Customizer.withDefaults())
-                .logout((logout) -> logout.logoutSuccessHandler(oidcLogoutSuccessHandler()))
+                //frontchannel logout triggerd by edu-sharing gui
+                .logout((logout) ->
+                        logout.logoutSuccessHandler(oidcLogoutSuccessHandler()))
+                //backchannel logout
+                .oidcLogout((logout) -> logout
+                        .backChannel(Customizer.withDefaults())
+                )
                 .csrf(AbstractHttpConfigurer::disable);
 
         // @formatter:on
