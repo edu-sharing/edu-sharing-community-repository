@@ -1,9 +1,12 @@
-:host ::ng-deep .mat-checkbox {
-    .mat-checkbox-layout {
-        width: 100%;
-        .mat-checkbox-label {
-            flex-grow: 1;
-            min-width: 0;
+:host ::ng-deep {
+    .mat-checkbox {
+        .mat-checkbox-layout {
+            width: 100%;
+
+            .mat-checkbox-label {
+                flex-grow: 1;
+                min-width: 0;
+            }
         }
     }
     .mdc-form-field,
