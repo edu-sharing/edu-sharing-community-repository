@@ -1,5 +1,7 @@
 package org.edu_sharing.spring.security.openid;
 
+import com.typesafe.config.Config;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.spring.security.saml2.SecurityConfigurationSaml;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +20,8 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity(debug = true)
 @Configuration
 public class SecurityConfigurationOpenIdConnect {
+
+    Config config = LightbendConfigLoader.get();
 
     @Bean
     SecurityFilterChain app(HttpSecurity http) throws Exception {
@@ -38,15 +42,12 @@ public class SecurityConfigurationOpenIdConnect {
     @Bean
     ClientRegistrationRepository clientRegistrationRepository() {
         ClientRegistration clientRegistration = ClientRegistrations
-                //find out keycloak issuer: http://172.17.0.1:8080/realms/testrealm/.well-known/openid-configuration
-                .fromIssuerLocation("http://172.17.0.1:8080/realms/testrealm")
-                .clientId("eduoidconnect")
-                .clientSecret("GfCronHpYHdDhpU7I7ichvKvdBh3nNjW")
+                .fromIssuerLocation(config.getString("security.sso.openIdConnect.issuer"))
+                .clientId(config.getString("security.sso.openIdConnect.clientId"))
+                .clientSecret(config.getString("security.sso.openIdConnect.secret"))
                 .scope("openid")
                 .build();
         return new InMemoryClientRegistrationRepository(clientRegistration);
     }
-
-
 
 }
