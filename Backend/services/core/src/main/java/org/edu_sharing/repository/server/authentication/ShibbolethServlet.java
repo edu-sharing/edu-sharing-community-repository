@@ -58,6 +58,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal;
 
 public class ShibbolethServlet extends HttpServlet {
@@ -285,10 +286,19 @@ public class ShibbolethServlet extends HttpServlet {
 	 private String getShibValue(String attName, HttpServletRequest req){
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication != null && authentication.isAuthenticated() && authentication instanceof Saml2AuthenticatedPrincipal) {
-				Saml2AuthenticatedPrincipal samlAuthentication = (Saml2AuthenticatedPrincipal) authentication;
-				return samlAuthentication.getAttribute(attName).stream().findFirst().map(Object::toString).orElse(null);
-            }
+
+
+			if(authentication != null && authentication.isAuthenticated()){
+				if (authentication instanceof Saml2AuthenticatedPrincipal) {
+					Saml2AuthenticatedPrincipal samlAuthentication = (Saml2AuthenticatedPrincipal) authentication;
+					return samlAuthentication.getAttribute(attName).stream().findFirst().map(Object::toString).orElse(null);
+				}
+				if(authentication instanceof OAuth2AuthenticationToken){
+					OAuth2AuthenticationToken token = (OAuth2AuthenticationToken)authentication;
+					Object att = token.getPrincipal().getAttribute(attName);
+					return (att != null) ? att.toString() : null;
+				}
+			}
 
 	    	String attValue = null;
 
