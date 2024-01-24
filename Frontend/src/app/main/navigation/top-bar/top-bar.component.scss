@@ -88,14 +88,14 @@
     margin: 0 20px;
     min-width: 0;
 }
-.addDesktop {
+.add-material .addDesktop {
     margin-left: 50px;
     padding-left: 16px;
     padding-right: 25px;
     height: 39px;
     display: flex;
     align-items: center;
-    color: $workspaceTopBarFontColor !important;
+    color: $workspaceTopBarFontColor;
     background-color: rgba(
         red($workspaceTopBarFontColor),
         green($workspaceTopBarFontColor),

@@ -4,6 +4,7 @@
 <mat-expansion-panel
   *ngIf="(expandedState$ | async) !== 'disabled'"
   [expanded]="(expandedState$ | async) === 'expanded'"
+  class="mat-elevation-z0"
 >
   <mat-expansion-panel-header>
     <mat-panel-title>

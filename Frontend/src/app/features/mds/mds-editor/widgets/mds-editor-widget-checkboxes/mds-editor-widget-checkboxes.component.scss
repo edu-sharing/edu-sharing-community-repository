@@ -6,6 +6,11 @@
             min-width: 0;
         }
     }
+    .mdc-form-field,
+    .mdc-label {
+        // necessary for ellipsis to function
+        width: 100%;
+    }
 }
 ul {
     margin: 0;
