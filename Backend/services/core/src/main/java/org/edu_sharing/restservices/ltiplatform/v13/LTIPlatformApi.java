@@ -562,7 +562,7 @@ public class LTIPlatformApi {
                     RegistrationService.generateNewClientId(),
                     registrationData.getLoginInitiationUrl(),
                     registrationData.getKeysetUrl(),
-                    null,
+                    registrationData.getTargetLinkUri(),
                     StringUtils.join(registrationData.getRedirectionUrls(), ","),
                     registrationData.getLogoUrl(),
                     (registrationData.getCustomParameters() != null) ? StringUtils.join(registrationData.getCustomParameters(),",") : null,
