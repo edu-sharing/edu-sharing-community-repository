@@ -483,29 +483,36 @@ public class LTIPlatformApi {
             });
 
 
-            OpenIdRegistrationResult ors = new OpenIdRegistrationResult();
-            ors.setClient_id(appInfo.getLtiClientId());
-            ors.setApplication_type("web");
-            ors.setClient_name(appInfo.getAppCaption());
-            ors.setInitiate_login_uri(appInfo.getLtitoolLoginInitiationsUrl());
-            ors.setRedirect_uris(Arrays.asList(appInfo.getLtitoolRedirectUrls().split(",")));
-            ors.setToken_endpoint_auth_method((String)registrationPayload.get("token_endpoint_auth_method"));
-            ors.setLogo_uri(appInfo.getLogo());
-            ors.setScope((String)registrationPayload.get("scope"));
-
-            OpenIdRegistrationResult.LTIToolConfiguration ltiToolConfiguration = new OpenIdRegistrationResult.LTIToolConfiguration();
-            //ltiToolConfiguration.setVersion();
-            ltiToolConfiguration.setDeployment_id(appInfo.getLtiDeploymentId());
-            ltiToolConfiguration.setTarget_link_uri(appInfo.getLtitoolTargetLinkUri());
-            ltiToolConfiguration.setDomain(appInfo.getDomain());
-            //ltiToolConfiguration.setDescription();
-            //ltiToolConfiguration.setClaims();
-            ors.setLtiToolConfiguration(ltiToolConfiguration);
+            OpenIdRegistrationResult ors = generateOpenIdRegistrationResult(appInfo, registrationPayload);
             return Response.ok().entity(ors).build();
         } catch (Exception e) {
             logger.error(e.getMessage(),e);
             return ErrorResponse.createResponse(e);
         }
+    }
+
+    private static OpenIdRegistrationResult generateOpenIdRegistrationResult(ApplicationInfo appInfo, JSONObject registrationPayload) {
+        OpenIdRegistrationResult ors = new OpenIdRegistrationResult();
+        ors.setClient_id(appInfo.getLtiClientId());
+        ors.setApplication_type("web");
+        ors.setClient_name(appInfo.getAppCaption());
+        ors.setInitiate_login_uri(appInfo.getLtitoolLoginInitiationsUrl());
+        ors.setRedirect_uris(Arrays.asList(appInfo.getLtitoolRedirectUrls().split(",")));
+        if(registrationPayload != null) {
+            ors.setToken_endpoint_auth_method((String) registrationPayload.get("token_endpoint_auth_method"));
+            ors.setScope((String) registrationPayload.get("scope"));
+        }
+        ors.setLogo_uri(appInfo.getLogo());
+
+        OpenIdRegistrationResult.LTIToolConfiguration ltiToolConfiguration = new OpenIdRegistrationResult.LTIToolConfiguration();
+        //ltiToolConfiguration.setVersion();
+        ltiToolConfiguration.setDeployment_id(appInfo.getLtiDeploymentId());
+        ltiToolConfiguration.setTarget_link_uri(appInfo.getLtitoolTargetLinkUri());
+        ltiToolConfiguration.setDomain(appInfo.getDomain());
+        //ltiToolConfiguration.setDescription();
+        //ltiToolConfiguration.setClaims();
+        ors.setLtiToolConfiguration(ltiToolConfiguration);
+        return ors;
     }
 
 
@@ -545,7 +552,7 @@ public class LTIPlatformApi {
     @Produces({"application/json"})
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+                    @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = OpenIdRegistrationResult.class))),
                     @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -558,19 +565,19 @@ public class LTIPlatformApi {
             @Parameter(description = "registrationData" ,required=true ) ManualRegistrationData registrationData,
             @Context HttpServletRequest req) {
         try {
-            new RegistrationService().registerTool(
+            ApplicationInfo info = new RegistrationService().registerTool(
                     RegistrationService.generateNewClientId(),
                     registrationData.getLoginInitiationUrl(),
                     registrationData.getKeysetUrl(),
                     registrationData.getTargetLinkUri(),
                     StringUtils.join(registrationData.getRedirectionUrls(), ","),
                     registrationData.getLogoUrl(),
-                    (registrationData.getCustomParameters() != null) ? StringUtils.join(registrationData.getCustomParameters(),",") : null,
+                    (registrationData.getCustomParameters() != null) ? StringUtils.join(registrationData.getCustomParameters(), ",") : null,
                     registrationData.getToolDescription(),
                     registrationData.getClientName(),
                     registrationData.getTargetLinkUriDeepLink(),
                     registrationData.getToolUrl());
-            return Response.ok().build();
+            return Response.ok().entity(generateOpenIdRegistrationResult(info, null)).build();
         }catch (Exception e){
             return ErrorResponse.createResponse(e);
         }

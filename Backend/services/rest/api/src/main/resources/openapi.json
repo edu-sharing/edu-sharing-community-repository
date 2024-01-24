@@ -12409,7 +12409,7 @@
     "/bulk/v1/find": {
       "post": {
         "description": "Get a given node based on the posted, multiple criteria. Make sure that they'll provide an unique result",
-        "operationId": "find",
+        "operationId": "find_1",
         "parameters": [
           {
             "description": "Return the full node. If you don't need the data, set to false to only return the id (will improve performance)",
@@ -12509,7 +12509,7 @@
     "/bulk/v1/runs": {
       "get": {
         "description": "Gets a list of runs from this crawler (by day) and info about the state of this run",
-        "operationId": "find_1",
+        "operationId": "find",
         "parameters": [
           {
             "description": "replicationsource as previously provided when syncing data",
@@ -21493,7 +21493,11 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenIdRegistrationResult"
+                }
+              }
             },
             "description": "OK."
           },
