@@ -1,9 +1,13 @@
 package org.edu_sharing.spring.security.openid;
 
 import com.typesafe.config.Config;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.Filter;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,7 +21,9 @@ import org.springframework.security.oauth2.client.registration.InMemoryClientReg
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
+import org.springframework.stereotype.Component;
+
+import java.lang.reflect.Field;
 
 @Profile("openidEnabled")
 @EnableWebSecurity(debug = true)
@@ -58,6 +64,40 @@ public class SecurityConfigurationOpenIdConnect {
         return http.build();
     }
 
+    @Component
+    class Patcher{
+
+        @Autowired
+        SecurityFilterChain securityFilterChain;
+        @PostConstruct
+        public void init(){
+            for(Filter f : securityFilterChain.getFilters()){
+                if(f.getClass().getName().equals("org.springframework.security.config.annotation.web.configurers.oauth2.client.OidcBackChannelLogoutFilter")){
+                    try {
+                        Class c = Class.forName("org.springframework.security.config.annotation.web.configurers.oauth2.client.OidcBackChannelLogoutFilter");
+                        Field fLogoutHandler = c.getDeclaredField("logoutHandler");
+                        fLogoutHandler.setAccessible(true);
+                        Object oidcBackChannelLogoutHandler = fLogoutHandler.get(f);
+
+                            Class c2 = Class.forName("org.springframework.security.config.annotation.web.configurers.oauth2.client.⁰,");
+                        Field logoutEndpointName = c2.getDeclaredField("logoutEndpointName");
+                        logoutEndpointName.setAccessible(true);
+                        logoutEndpointName.set(oidcBackChannelLogoutHandler,"/edu-sharing/logout");
+
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    } catch (NoSuchFieldException e) {
+                        throw new RuntimeException(e);
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    } ;
+
+                }
+            }
+        }
+    }
+
+
     private LogoutSuccessHandler oidcLogoutSuccessHandler() {
         OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler =
                 new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository());
@@ -79,5 +119,4 @@ public class SecurityConfigurationOpenIdConnect {
                 .build();
         return new InMemoryClientRegistrationRepository(clientRegistration);
     }
-
 }
