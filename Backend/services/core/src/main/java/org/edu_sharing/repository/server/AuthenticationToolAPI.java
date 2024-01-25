@@ -227,7 +227,9 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 		authenticationService.validate(ticket);
 
 		// prewarm tp session cache
-		ToolPermissionServiceFactory.getInstance().getAllAvailableToolPermissions();
+		// not required since validateSession will do it anyway
+		// otherwise, every status probe call will build unnecessary a tp cache
+		//ToolPermissionServiceFactory.getInstance().getAllAvailableToolPermissions();
 
 		try {
 			HashMap<String, String> userInfo = getUserInfo(authenticationService.getCurrentUserName(), ticket);
