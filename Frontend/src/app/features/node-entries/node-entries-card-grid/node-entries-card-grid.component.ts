@@ -266,7 +266,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
                     new ListItemSort('NODE', RestConstants.CCM_PROP_REPLICATIONMODIFIED),
                     new ListItemSort('NODE', RestConstants.CCM_PROP_REPLICATIONSOURCETIMESTAMP),
                 )
-                .some((c2) => c2.name === c.name);
+                .some((c2) => c.type === c2.type && c2.name === c.name);
             if (!result && !this.entriesService.configureColumns) {
                 console.warn(
                     'Sort field ' +
