@@ -21,6 +21,7 @@ import org.springframework.security.saml2.provider.service.registration.RelyingP
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrations;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,9 +43,9 @@ public class SecurityConfigurationSaml {
         http
                 .authorizeHttpRequests((authorize) -> authorize
                         //.anyRequest().authenticated()
-                        .requestMatchers("/shibboleth").authenticated()
-                        .requestMatchers("/samllogout").authenticated()
-                        .requestMatchers("/**").permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/shibboleth")).authenticated()
+                        .requestMatchers(new AntPathRequestMatcher("/samllogout")).authenticated()
+                        .requestMatchers(new AntPathRequestMatcher("/**")).permitAll()
                 )
 
                 .saml2Login((login) -> login
