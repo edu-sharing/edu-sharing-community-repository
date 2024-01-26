@@ -33,7 +33,7 @@ public class GuestFilter implements javax.servlet.Filter {
 		
 		logger.debug("starting");
 		HttpServletRequest httpRequest = (HttpServletRequest) req;
-		if(httpRequest.getPathInfo().startsWith("/_about/")) {
+		if(httpRequest != null && httpRequest.getPathInfo() != null && httpRequest.getPathInfo().startsWith("/_about/")) {
 			return;
 		}
 		//prevent caching cause this leads that the index.html would be delivered without going over the search path which goes over the guest filter
