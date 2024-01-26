@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -78,8 +79,15 @@ public class SecurityConfigurationSaml {
         @Override
         public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 
+            String successTarget = "/shibboleth";
+            try {
+                successTarget = ConfigServiceFactory.getCurrentConfig().getValue("logout.next", successTarget);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
             //override at runtime
-            this.setDefaultTargetUrl("/shibboleth");
+            this.setDefaultTargetUrl(successTarget);
             super.onLogoutSuccess(request, response, authentication);
         }
     }
