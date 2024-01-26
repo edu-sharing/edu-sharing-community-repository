@@ -165,10 +165,6 @@
     </filter-mapping>
     <filter-mapping>
       <filter-name>springSecurityFilterChain</filter-name>
-      <url-pattern>/samllogout</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-      <filter-name>springSecurityFilterChain</filter-name>
       <url-pattern>/logout</url-pattern>
     </filter-mapping>
     <filter-mapping>
