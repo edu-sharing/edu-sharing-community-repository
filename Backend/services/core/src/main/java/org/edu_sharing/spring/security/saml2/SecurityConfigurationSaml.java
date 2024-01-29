@@ -13,11 +13,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.saml2.Saml2LogoutConfigurer;
 import org.springframework.security.converter.RsaKeyConverters;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml2.core.Saml2X509Credential;
 import org.springframework.security.saml2.provider.service.registration.InMemoryRelyingPartyRegistrationRepository;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
@@ -26,10 +29,15 @@ import org.springframework.security.saml2.provider.service.registration.RelyingP
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
+import org.springframework.security.web.util.matcher.AndRequestMatcher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
@@ -60,8 +68,42 @@ public class SecurityConfigurationSaml {
                         //don't use this cause it uses SavedRequestAwareAuthenticationSuccessHandler
                         //.defaultSuccessUrl("/shibboleth")
                 )
-                 //change that cause of logout servlet
-                .saml2Logout(withDefaults())
+                /**
+                 * change LogoutFilter Method from POST to GET
+                 *  org.springframework.security.config.annotation.web.configurers.saml2.Saml2LogoutConfigurer z.273
+                 *  creates a POST Mapping for the Logout Filter. in edu-sharing we use GET to trigger logout.
+                 *
+                 *  we have to do the same things they do in private Method  Saml2LogoutConfigurer.createLogoutMatcher()
+                 */
+                .saml2Logout(logout -> logout.withObjectPostProcessor(
+                        new ObjectPostProcessor<LogoutFilter>() {
+                            @Override
+                            public <O extends LogoutFilter> O postProcess(O logoutFilter) {
+
+                                //switch to get
+                                RequestMatcher logoutRequestMatcher = new AntPathRequestMatcher("/logout", "GET");
+                                Class<?>[] declaredClasses = Saml2LogoutConfigurer.class.getDeclaredClasses();
+                                for(Class<?> innerClass : declaredClasses){
+                                    if(innerClass.getName().contains("Saml2RequestMatcher")){
+                                        Constructor<?> constructor = innerClass.getDeclaredConstructors()[0];
+                                        constructor.setAccessible(true);
+                                        try {
+                                            Object o = constructor.newInstance(SecurityContextHolder.getContextHolderStrategy());
+                                            logoutFilter.setLogoutRequestMatcher(new AndRequestMatcher(logoutRequestMatcher, (RequestMatcher)o));
+                                        } catch (InstantiationException e) {
+                                            throw new RuntimeException(e);
+                                        } catch (IllegalAccessException e) {
+                                            throw new RuntimeException(e);
+                                        } catch (InvocationTargetException e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                    }
+                                }
+
+                                return logoutFilter;
+                            }
+                        }
+                ))
                 /**
                  * saml2 logout is using logoutSuccessHandler from default logout config
                  * @see org.springframework.security.config.annotation.web.configurers.saml2Saml2LogoutConfigurer
