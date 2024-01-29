@@ -8,6 +8,7 @@ import org.apache.commons.io.IOUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -60,49 +61,14 @@ public class SecurityConfigurationSaml {
                 )
 
                 .saml2Login((login) -> login
-                        /**
-                         * SavedRequestAwareAuthenticationSuccessHandler is default which always redircts to /samllogout url with GET which is not vailable
-                         * after logout/login again
-                         */
+
                         .successHandler(new EduAuthSuccsessHandler())
                         //don't use this cause it uses SavedRequestAwareAuthenticationSuccessHandler
                         //.defaultSuccessUrl("/shibboleth")
                 )
-                /**
-                 * change LogoutFilter Method from POST to GET
-                 *  org.springframework.security.config.annotation.web.configurers.saml2.Saml2LogoutConfigurer z.273
-                 *  creates a POST Mapping for the Logout Filter. in edu-sharing we use GET to trigger logout.
-                 *
-                 *  we have to do the same things they do in private Method  Saml2LogoutConfigurer.createLogoutMatcher()
-                 */
+
                 .saml2Logout(logout -> logout.withObjectPostProcessor(
-                        new ObjectPostProcessor<LogoutFilter>() {
-                            @Override
-                            public <O extends LogoutFilter> O postProcess(O logoutFilter) {
-
-                                //switch to get
-                                RequestMatcher logoutRequestMatcher = new AntPathRequestMatcher("/logout", "GET");
-                                Class<?>[] declaredClasses = Saml2LogoutConfigurer.class.getDeclaredClasses();
-                                for(Class<?> innerClass : declaredClasses){
-                                    if(innerClass.getName().contains("Saml2RequestMatcher")){
-                                        Constructor<?> constructor = innerClass.getDeclaredConstructors()[0];
-                                        constructor.setAccessible(true);
-                                        try {
-                                            Object o = constructor.newInstance(SecurityContextHolder.getContextHolderStrategy());
-                                            logoutFilter.setLogoutRequestMatcher(new AndRequestMatcher(logoutRequestMatcher, (RequestMatcher)o));
-                                        } catch (InstantiationException e) {
-                                            throw new RuntimeException(e);
-                                        } catch (IllegalAccessException e) {
-                                            throw new RuntimeException(e);
-                                        } catch (InvocationTargetException e) {
-                                            throw new RuntimeException(e);
-                                        }
-                                    }
-                                }
-
-                                return logoutFilter;
-                            }
-                        }
+                        switchPost2GetProcessor()
                 ))
                 /**
                  * saml2 logout is using logoutSuccessHandler from default logout config
@@ -115,6 +81,44 @@ public class SecurityConfigurationSaml {
         // @formatter:on
 
         return http.build();
+    }
+
+    /**
+     * change LogoutFilter Method from POST to GET
+     *  org.springframework.security.config.annotation.web.configurers.saml2.Saml2LogoutConfigurer z.273
+     *  creates a POST Mapping for the Logout Filter. in edu-sharing we use GET to trigger logout.
+     *
+     *  we have to do the same things they do in private Method  Saml2LogoutConfigurer.createLogoutMatcher()
+     */
+    @NotNull
+    private ObjectPostProcessor<LogoutFilter> switchPost2GetProcessor() {
+        return new ObjectPostProcessor<LogoutFilter>() {
+            @Override
+            public <O extends LogoutFilter> O postProcess(O logoutFilter) {
+
+                //switch to get
+                RequestMatcher logoutRequestMatcher = new AntPathRequestMatcher("/logout", "GET");
+                Class<?>[] declaredClasses = Saml2LogoutConfigurer.class.getDeclaredClasses();
+                for (Class<?> innerClass : declaredClasses) {
+                    if (innerClass.getName().contains("Saml2RequestMatcher")) {
+                        Constructor<?> constructor = innerClass.getDeclaredConstructors()[0];
+                        constructor.setAccessible(true);
+                        try {
+                            Object o = constructor.newInstance(SecurityContextHolder.getContextHolderStrategy());
+                            logoutFilter.setLogoutRequestMatcher(new AndRequestMatcher(logoutRequestMatcher, (RequestMatcher) o));
+                        } catch (InstantiationException e) {
+                            throw new RuntimeException(e);
+                        } catch (IllegalAccessException e) {
+                            throw new RuntimeException(e);
+                        } catch (InvocationTargetException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+
+                return logoutFilter;
+            }
+        };
     }
 
     public class EduSimpleUrlLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler{
@@ -135,7 +139,11 @@ public class SecurityConfigurationSaml {
     }
 
     /**
-     * @TODO make redirect dynamic depending on repository configuration
+     *  redirects to /shibboleth after successfull auth
+     *
+     *  notice:
+     *  SavedRequestAwareAuthenticationSuccessHandler is default which always redircts to /samllogout url with GET which is not vailable
+     *      * after logout/login again
      */
     public class EduAuthSuccsessHandler extends SimpleUrlAuthenticationSuccessHandler{
         EduAuthSuccsessHandler(){
