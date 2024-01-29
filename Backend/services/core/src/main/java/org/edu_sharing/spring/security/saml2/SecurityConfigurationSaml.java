@@ -75,8 +75,12 @@ public class SecurityConfigurationSaml {
                  * @see org.springframework.security.config.annotation.web.configurers.saml2Saml2LogoutConfigurer
                  */
                 .logout(logout -> logout.logoutSuccessHandler(new EduSimpleUrlLogoutSuccessHandler()))
-                .saml2Metadata(withDefaults())
-                .csrf(AbstractHttpConfigurer::disable);
+                .saml2Metadata(withDefaults());
+
+        if(config.hasPath("security.sso.disableCsrf") && config.getBoolean("security.sso.disableCsrf")){
+            http.csrf(AbstractHttpConfigurer::disable);
+        }
+
 
         // @formatter:on
 

@@ -62,8 +62,11 @@ public class SecurityConfigurationOpenIdConnect {
                 //backchannel logout
                 .oidcLogout((logout) -> logout
                         .backChannel(Customizer.withDefaults())
-                )
-                .csrf(AbstractHttpConfigurer::disable);
+                );
+
+        if(config.hasPath("security.sso.disableCsrf") && config.getBoolean("security.sso.disableCsrf")){
+            http.csrf(AbstractHttpConfigurer::disable);
+        }
 
         // @formatter:on
 
