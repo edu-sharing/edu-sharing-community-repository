@@ -3,7 +3,11 @@ package org.edu_sharing.spring.security.openid;
 import com.typesafe.config.Config;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.Filter;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +17,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -23,6 +28,7 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 
 @Profile("openidEnabled")
@@ -100,12 +106,24 @@ public class SecurityConfigurationOpenIdConnect {
 
     private LogoutSuccessHandler oidcLogoutSuccessHandler() {
         OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler =
-                new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository());
+                new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository()){
+                    @Override
+                    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 
-        // Sets the location that the End-User's User Agent will be redirected to
-        // after the logout has been performed at the Provider
-        oidcLogoutSuccessHandler.setPostLogoutRedirectUri("{baseUrl}/shibboleth");
+                        // Sets the location that the End-User's User Agent will be redirected to
+                        // after the logout has been performed at the Provider
 
+                        String successTarget = "/shibboleth";
+                        try {
+                            successTarget = ConfigServiceFactory.getCurrentConfig().getValue("logout.next", successTarget);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+
+                        setPostLogoutRedirectUri(successTarget);
+                        super.onLogoutSuccess(request, response, authentication);
+                    }
+                };
         return oidcLogoutSuccessHandler;
     }
 
