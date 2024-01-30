@@ -59,6 +59,16 @@
       "QUOTA": "Upload quota reached",
       "VIRUS": "Virus detected. File was deleted."
     },
+    "UPLOAD_EXISTS": {
+      "TITLE": "Existing elements",
+      "SINGLE": "\"{{fileName}}\" is already present at this location. Do you want to overwrite the existing element or keep both elements?",
+      "MULTIPLE": "At least one element is already present under the same name at this position. Do you want to overwrite the existing elements or keep all elements?",
+      "SINGLE_OVERWRITE": "Replace element",
+      "SINGLE_KEEP": "Keep both elements",
+      "MULTIPLE_OVERWRITE": "Replace existing elements",
+      "MULTIPLE_KEEP": "Keep all elements",
+      "UPLOAD": "Upload"
+    },
     "ADD_FOLDER_TITLE": "Add new folder",
     "ADD_FOLDER_METADATASET": "Metadataset of folder",
     "FOLDER_PLACEHOLDER": "Foldername",

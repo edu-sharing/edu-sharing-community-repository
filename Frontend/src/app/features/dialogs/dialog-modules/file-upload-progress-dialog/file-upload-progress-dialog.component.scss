@@ -78,3 +78,14 @@
 .groupColumn {
     flex-direction: column;
 }
+
+.existing-radio-group {
+    display: flex;
+    flex-direction: column;
+    margin: 10px 0;
+    align-items: flex-start;
+}
+
+.existing-radio-button {
+    margin: 3px;
+}

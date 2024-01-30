@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Node } from 'ngx-edu-sharing-api';
+import { Node, NodeService } from 'ngx-edu-sharing-api';
 import { LocalEventsService } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { ConfigurationService, RestConstants, RestNodeService } from '../core-module/core.module';
@@ -11,6 +11,8 @@ import {
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { DialogType } from '../features/management-dialogs/management-dialogs.component';
 import { BulkBehavior } from '../features/mds/types/types';
+import { merge } from 'rxjs';
+import { filter, map, toArray } from 'rxjs/operators';
 
 /**
  * Provides high-level methods to allow uploading and saving new material.
@@ -24,6 +26,7 @@ export class UploadDialogService {
         private dialogs: DialogsService,
         private localEvents: LocalEventsService,
         private nodeService: RestNodeService,
+        private nodeApi: NodeService,
         private toast: Toast,
     ) {}
 
@@ -147,8 +150,24 @@ export class UploadDialogService {
 
     private async _afterMetadataEditDone(originalNodes: Node[], updatedNodes: Node[] | null) {
         if (!updatedNodes) {
-            await this._deleteNodes(originalNodes);
-            this.localEvents.nodesDeleted.emit(originalNodes);
+            // only delete these original nodes which are actually new
+            // to check whether a node is new check that it only has one version:
+            const nodesWithOneVersion = await merge(
+                ...originalNodes.map((node) =>
+                    this.nodeApi.getVersions(node.ref.repo, node.ref.id),
+                ),
+            )
+                .pipe(
+                    filter((versions) => versions.versions.length === 1),
+                    map((versions) => versions.versions[0].node.id),
+                    toArray(),
+                )
+                .toPromise();
+            const nodesToDelete = originalNodes.filter((node) => {
+                return nodesWithOneVersion.includes(node.ref.id);
+            });
+            await this._deleteNodes(nodesToDelete);
+            this.localEvents.nodesDeleted.emit(nodesToDelete);
         }
         if (updatedNodes) {
             this.localEvents.nodesChanged.emit(updatedNodes);

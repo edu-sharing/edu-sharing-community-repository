@@ -59,6 +59,16 @@
       "QUOTA": "Speicherplatz-Quota wurde überschritten",
       "VIRUS": "Virus erkannt. Datei wurde gelöscht."
     },
+    "UPLOAD_EXISTS": {
+      "TITLE": "Vorhandene Elemente",
+      "SINGLE": "\"{{fileName}}\" ist an diesem Speicherort bereits vorhanden. Möchten Sie das bestehende Element ersetzen oder beide Elemente behalten?",
+      "MULTIPLE": "Mindestens ein Element ist unter gleichem Namen bereits vorhanden. Möchten Sie die vorhandenen Elemente ersetzen oder alle Elemente behalten?",
+      "SINGLE_OVERWRITE": "Vorhandenes Element ersetzen",
+      "SINGLE_KEEP": "Beide Elemente behalten",
+      "MULTIPLE_OVERWRITE": "Vorhandene Elemente ersetzen",
+      "MULTIPLE_KEEP": "Alle Elemente behalten",
+      "UPLOAD": "Hochladen"
+    },
     "ADD_FOLDER_TITLE": "Neuen Ordner erstellen",
     "ADD_FOLDER_METADATASET": "Metadatenset für Ordner",
     "FOLDER_PLACEHOLDER": "Ordnername",

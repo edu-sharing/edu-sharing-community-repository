@@ -38,3 +38,16 @@
     </div>
   </div>
 </div>
+
+<ng-template #existingFiles let-multiple>
+  <mat-radio-group class="existing-radio-group" [(ngModel)]="keep">
+    <mat-radio-button class="existing-radio-button" [value]="false">
+      {{
+        'WORKSPACE.UPLOAD_EXISTS.' + (multiple ? 'MULTIPLE' : 'SINGLE') + '_OVERWRITE' | translate
+      }}
+    </mat-radio-button>
+    <mat-radio-button class="existing-radio-button" [value]="true">
+      {{ 'WORKSPACE.UPLOAD_EXISTS.' + (multiple ? 'MULTIPLE' : 'SINGLE') + '_KEEP' | translate }}
+    </mat-radio-button>
+  </mat-radio-group>
+</ng-template>
