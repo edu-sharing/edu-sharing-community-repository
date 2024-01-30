@@ -367,7 +367,7 @@ export class OptionsHelperService implements OnDestroy {
         }
         if (option.scopes) {
             if (this.data.scope == null) {
-                console.warn('Scope for options was not set, some may missing');
+                console.warn('Scope for options was not set, some may missing', option.name);
                 return false;
             }
             if (option.scopes.indexOf(this.data.scope) === -1) {

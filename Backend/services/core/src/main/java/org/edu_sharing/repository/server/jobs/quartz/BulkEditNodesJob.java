@@ -27,6 +27,7 @@
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.version.Version2Model;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -38,6 +39,9 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.edu_sharing.service.util.CSVTool;
@@ -341,6 +345,11 @@ public class BulkEditNodesJob extends AbstractJob{
 		}
 		if(new Boolean(versionStore)){
 			runner.setStartFolderStore(new StoreRef("workspace","version2Store"));
+			if(StringUtils.isBlank(startFolder)) {
+				runner.setStartFolder(AuthenticationUtil.runAsSystem(
+						() -> nodeService.getRootNode(new StoreRef("workspace","version2Store")).getId())
+				);
+			}
 			if(lucene != null && !lucene.trim().isEmpty()) throw new IllegalArgumentException("lucene can not be used with version store");
 		}
 		int count=runner.run();

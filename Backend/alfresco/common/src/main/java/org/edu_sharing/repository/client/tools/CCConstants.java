@@ -2,6 +2,8 @@ package org.edu_sharing.repository.client.tools;
 
 import java.util.*;
 
+import static java.util.Collections.unmodifiableList;
+
 public class CCConstants {
 
 	public final static String DIV = "CC_SEARCH";
@@ -1963,7 +1965,7 @@ public class CCConstants {
 	 * Permissions allowed if the node was opened via usage (lms) or signature
 	 * @return
 	 */
-	public static synchronized ArrayList<String> getUsagePermissions(){
+	public static synchronized List<String> getUsagePermissions(){
 		if(usagePermissions == null){
 				usagePermissions = new ArrayList<>();
 				usagePermissions.add(PERMISSION_READ);
@@ -1974,7 +1976,7 @@ public class CCConstants {
 				usagePermissions.add(PERMISSION_RATE);
 				usagePermissions.add(PERMISSION_RATE_READ);
 		}
-		return usagePermissions;
+		return unmodifiableList(usagePermissions);
 	}
 
 	//AuthorityTypeKey
