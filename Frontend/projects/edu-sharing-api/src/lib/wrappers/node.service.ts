@@ -125,6 +125,48 @@ export class NodeService {
         }
     }
 
+    /**
+     * Change content of node.
+     */
+    changeContent(
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string,
+
+        /**
+         * ID of node
+         */
+        node: string,
+
+        /**
+         * MIME-Type
+         */
+        mimetype: string,
+
+        /**
+         * comment, leave empty &#x3D; no new version, otherwise new version is generated
+         */
+        versionComment?: string,
+
+        body?: {
+            /**
+             * file upload
+             */
+            file?: Blob;
+        },
+    ): Observable<Node> {
+        return this.nodeV1
+            .changeContent1({
+                repository,
+                node,
+                versionComment,
+                mimetype,
+                body,
+            })
+            .pipe(map((nEntry) => nEntry.node));
+    }
+
     copyMetadata(targetId: string, sourceId: string, { repository = HOME_REPOSITORY }) {
         return this.nodeV1.copyMetadata({
             node: targetId,
