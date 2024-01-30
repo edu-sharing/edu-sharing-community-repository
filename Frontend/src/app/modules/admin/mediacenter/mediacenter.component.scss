@@ -9,6 +9,16 @@
         }
     }
 }
+:host ::ng-deep {
+    es-admin-statistics {
+        .mat-tab-labels {
+            // hide "by criteria" tab in stats for mz
+            > div:nth-child(2) {
+                display: none;
+            }
+        }
+    }
+}
 .select-mediacenter {
     display: flex;
     flex-direction: column;

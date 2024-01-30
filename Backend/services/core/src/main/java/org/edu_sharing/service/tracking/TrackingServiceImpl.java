@@ -95,6 +95,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY type,date :grouping" +
             " ORDER BY date";
+    private final TrackingServiceCustomInterface customTrackingService;
 
     public TrackingServiceImpl() {
         /*
@@ -111,6 +112,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         Environment environment = new Environment("tracking", transactionFactory, source);
         Configuration configuration = new Configuration(environment);
         */
+        customTrackingService = TrackingServiceFactory.getTrackingServiceCustom();
         try {
             new ConnectionDBAlfresco().getSqlSessionFactoryBean().getConfiguration().addMapper(EduTrackingMapper.class);
         }catch(BindingException ignored) {}
@@ -251,24 +253,18 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
      * overwrite this in a custom method to track additional data
      */
     protected JSONObject buildJson(NodeRef nodeRef, NodeTrackingDetails details, EventType type) {
-        /*
-        try {
-            // sample object for testing purposes
-            return new JSONObject().put("ref",nodeRef.getId()).put("boolean",true).put("int",1).put("string","text").put("double",1.0);
-        } catch (JSONException e) {}
-        */
+        if(customTrackingService != null) {
+            return customTrackingService.buildJson(nodeRef, details, type);
+        }
         return null;
     }
     /**
      * overwrite this in a custom method to track additional data
      */
     protected JSONObject buildJson(String authorityName, EventType type) {
-        /*
-        try {
-            // sample object for testing purposes
-            return new JSONObject().put("school",authorityName.substring(0,1)).put("role",authorityName.substring(0,1));
-        } catch (JSONException e) {}
-        */
+        if(customTrackingService != null) {
+            return customTrackingService.buildJson(authorityName, type);
+        }
         return null;
     }
     @Override
@@ -541,7 +537,9 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             while (resultSet.next()) {
                 NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, resultSet.getString("node_uuid_final"));
                 EventType event = EventType.valueOf(resultSet.getString("type"));
-                data.put(nodeRef, new StatisticEntry());
+                if(!data.containsKey(nodeRef)) {
+                    data.put(nodeRef, new StatisticEntry());
+                }
                 data.get(nodeRef).getCounts().put(event, resultSet.getInt("count"));
                 if(!additionalFields.isEmpty()) {
                     mapAdditionalFields(event, additionalFields, resultSet, data.get(nodeRef), mediacenter);
