@@ -483,7 +483,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         applyNode.showAlways = true;
         applyNode.group = DefaultGroups.Primary;
         applyNode.priority = 10;
-        applyNode.customEnabledCallback = async (nodes) => {
+        applyNode.customEnabledCallback = (nodes) => {
             console.log(this.queryParams, nodes?.[0].downloadUrl);
             // either apply directories is true or it is an file
             return (
