@@ -8,6 +8,7 @@ import org.apache.commons.io.IOUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.edu_sharing.spring.security.basic.CSRFConfig;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -77,12 +78,7 @@ public class SecurityConfigurationSaml {
                 .logout(logout -> logout.logoutSuccessHandler(new EduSimpleUrlLogoutSuccessHandler()))
                 .saml2Metadata(withDefaults());
 
-        if(config.hasPath("security.sso.disableCsrf") && config.getBoolean("security.sso.disableCsrf")){
-            http.csrf(AbstractHttpConfigurer::disable);
-        }
-
-
-        // @formatter:on
+        CSRFConfig.config(http);
 
         return http.build();
     }

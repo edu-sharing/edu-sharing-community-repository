@@ -11,12 +11,10 @@ import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -27,6 +25,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
+import org.edu_sharing.spring.security.basic.CSRFConfig;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -64,11 +63,7 @@ public class SecurityConfigurationOpenIdConnect {
                         .backChannel(Customizer.withDefaults())
                 );
 
-        if(config.hasPath("security.sso.disableCsrf") && config.getBoolean("security.sso.disableCsrf")){
-            http.csrf(AbstractHttpConfigurer::disable);
-        }
-
-        // @formatter:on
+        CSRFConfig.config(http);
 
         return http.build();
     }
