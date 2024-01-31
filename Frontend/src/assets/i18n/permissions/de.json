@@ -236,7 +236,7 @@
       "disabled_DETAILS": "Nutzer{{GENDER_SEPARATOR}}innen können sich nicht selbstständig in die Organisation/Gruppe einschreiben, sondern müssen manuell von einem Administrierenden hinzugefügt werden.",
       "simple_DETAILS": "Nutzer{{GENDER_SEPARATOR}}innen können sich selbstständig in die Organisation/Gruppe einschreiben und werden sofort Mitglied.",
       "password_DETAILS": "Nutzer{{GENDER_SEPARATOR}}innen können sich selbstständig in die Organisation/Gruppe einschreiben und werden sofort Mitglied, sofern sie das korrekte Passwort kennen.",
-      "list_DETAILS": "Nutzer{{GENDER_SEPARATOR}}innen können sich selbstständig in die Organisation/Gruppe einschreiben und werden auf eine Warteliste gesetzt. Ein Person mit Admin-Rechten muss die Einschreibung anschließend bestätigen."
+      "list_DETAILS": "Nutzer{{GENDER_SEPARATOR}}innen können sich selbstständig in die Organisation/Gruppe einschreiben und werden auf eine Warteliste gesetzt. Eine Person mit Admin-Rechten muss die Einschreibung anschließend bestätigen."
     }
   }
 }

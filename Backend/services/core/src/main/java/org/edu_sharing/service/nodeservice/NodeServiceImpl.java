@@ -58,6 +58,7 @@ import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.service.search.Suggestion;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 
 public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.NodeService {
@@ -1389,6 +1390,16 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				enable);
 
 	}
+
+	@Override
+	public Long getContentLength(String storeProtocol, String storeId, String nodeId, String version, String contentProp) throws Throwable {
+		ContentReader reader = getContentReader(storeProtocol, storeId, nodeId, version, contentProp);
+		if(reader != null && reader.getContentData() != null) {
+			return reader.getContentData().getSize();
+		}
+		return null;
+	}
+
 	@Override
 	public ContentReader getContentReader(String storeProtocol, String storeId, String nodeId, String version, String contentProp){
 		NodeRef nodeRef=new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);
@@ -1469,6 +1480,18 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	@Override
 	public HashMap<String, HashMap<String, Object>> getVersionHistory(String nodeId) throws Throwable {
 		return apiClient.getVersionHistory(nodeId);
+	}
+
+	@NotNull
+	@Override
+	public List<String> getVersionLabelsHistory(String nodeId){
+		return Optional.of(versionService)
+				.map(x->x.getVersionHistory(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId)))
+				.map(VersionHistory::getAllVersions)
+				.map(x->x.stream()
+						.map(Version::getVersionLabel)
+						.collect(Collectors.toList()))
+				.orElse(new ArrayList<>());
 	}
 
 	@Override

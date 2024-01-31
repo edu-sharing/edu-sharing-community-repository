@@ -93,9 +93,9 @@ public class ConvertCollectionTypeJob extends AbstractJobMapAnnotationParams{
 			return;
 		}
 		if(mode.equals(Mode.DefaultToEditorial)) {
-			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_MAP_COLLECTIONTYPE, CCConstants.COLLECTIONTYPE_EDITORIAL, false);
+			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_MAP_COLLECTIONTYPE, CCConstants.COLLECTIONTYPE_EDITORIAL, true);
 		} else if(mode.equals(Mode.EditorialToDefault)) {
-			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_MAP_COLLECTIONTYPE, CCConstants.COLLECTIONTYPE_DEFAULT, false);
+			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_MAP_COLLECTIONTYPE, CCConstants.COLLECTIONTYPE_DEFAULT, true);
 		}
 		if(makePublic != null && makePublic) {
 			serviceRegistry.getPermissionService().setPermission(nodeRef, CCConstants.AUTHORITY_GROUP_EVERYONE, CCConstants.PERMISSION_CONSUMER, true);

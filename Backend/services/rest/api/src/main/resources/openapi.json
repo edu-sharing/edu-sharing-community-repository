@@ -3627,6 +3627,20 @@
         ],
         "type": "object"
       },
+      "NodeVersionEntries": {
+        "properties": {
+          "versions": {
+            "items": {
+              "$ref": "#/components/schemas/NodeVersion"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "versions"
+        ],
+        "type": "object"
+      },
       "NodeVersionEntry": {
         "properties": {
           "version": {
@@ -29020,6 +29034,111 @@
           }
         },
         "summary": "Get all versions of node.",
+        "tags": [
+          "NODE v1"
+        ]
+      }
+    },
+    "/node/v1/nodes/{repository}/{node}/versions/metadata": {
+      "get": {
+        "description": "Get all versions of node, including it's metadata.",
+        "operationId": "getVersions_1",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of node",
+            "in": "path",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "property filter for result nodes (or \"-all-\" for all properties)",
+            "in": "query",
+            "name": "propertyFilter",
+            "schema": {
+              "items": {
+                "default": "-all-",
+                "type": "string"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeVersionEntries"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Get all versions of node, including it's metadata.",
         "tags": [
           "NODE v1"
         ]

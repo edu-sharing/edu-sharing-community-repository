@@ -9,10 +9,7 @@ RUN set -eux \
     && mkdir -p tomcat/shared/classes/config/cluster/applications \
     && mkdir -p tomcat/shared/classes/config/node \
     && chown -RL worker:worker . \
-    && chown -RL worker:worker /tmp
-
-#USER worker
-RUN set -eux \
+    && chown -RL worker:worker /tmp \
     && rm \
         tomcat/webapps/alfresco/WEB-INF/lib/jsr305-* \
         tomcat/webapps/alfresco/WEB-INF/classes/log4j2.properties
@@ -56,10 +53,10 @@ VOLUME [ "/opt/alfresco/alf_data", "/opt/bitnami/tomcat/shared/classes/config/cl
 
 ########################################################################################################################
 
-LABEL git.branch=${git.branch}
-LABEL git.closest.tag.name=${git.closest.tag.fixed}
-LABEL git.commit.id=${git.commit.id}
-LABEL git.dirty=${git.dirty}
-LABEL mvn.project.artifactId=${project.artifactId}
-LABEL mvn.project.groupId=${project.groupId}
-LABEL mvn.project.version=${project.version}
+LABEL git.branch=${git.branch} \
+git.closest.tag.name=${git.closest.tag.fixed} \
+git.commit.id=${git.commit.id} \
+git.dirty=${git.dirty} \
+mvn.project.artifactId=${project.artifactId} \
+mvn.project.groupId=${project.groupId} \
+mvn.project.version=${project.version}

@@ -14,7 +14,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 public class LightbendConfigLoader {
-    private static SimpleCache<String, String> configCache = (SimpleCache) AlfAppContextGate.getApplicationContext().getBean("eduSharingLightBendConfigCache");
+    // we use a non-serializable Config as value because this is a local cache and not distributed
+    private static SimpleCache<String, Config> configCache = (SimpleCache) AlfAppContextGate.getApplicationContext().getBean("eduSharingLightBendConfigCache");
     private static Logger logger = Logger.getLogger(LightbendConfigLoader.class);
     public static String BASE_FILE = "edu-sharing.reference.conf";
     public static String DEPLOYMENT_FILE = "edu-sharing.deployment.conf";
@@ -28,7 +29,8 @@ public class LightbendConfigLoader {
      */
     public static Config get() {
         if(configCache.get("config") != null) {
-            return ConfigFactory.parseString(configCache.get("config"), ConfigParseOptions.defaults());
+            //return ConfigFactory.parseString(configCache.get("config"), ConfigParseOptions.defaults());
+            return configCache.get("config");
         }
         String base = getConfigFileLocation(BASE_FILE, PropertiesHelper.Config.PathPrefix.DEFAULTS);
         String custom = getConfigFileLocation(CUSTOM_FILE, PropertiesHelper.Config.PathPrefix.DEFAULTS);
@@ -43,7 +45,7 @@ public class LightbendConfigLoader {
                 .withFallback(ConfigFactory.parseResourcesAnySyntax(custom))
                 .withFallback(ConfigFactory.parseResourcesAnySyntax(base))
                 .resolve();
-        configCache.put("config", config.root().render(ConfigRenderOptions.concise()));
+        configCache.put("config", config);
         return config;
     }
 

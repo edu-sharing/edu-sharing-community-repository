@@ -1,16 +1,36 @@
 package org.edu_sharing.alfresco.service.config.model;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import org.apache.log4j.Logger;
 
-import java.io.Serializable;
-import java.util.List;
-
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
+import java.util.List;
 
 @XmlRootElement
 public class Config implements Serializable {
 
 	static Logger logger=Logger.getLogger(Config.class);
+	private static final ObjectReader jacksonReader;
+
+	static{
+		Unmarshaller jaxbUnmarshaller1;
+		try {
+			JAXBContext jaxbContext = JAXBContext.newInstance(Config.class);
+			jaxbUnmarshaller1 = jaxbContext.createUnmarshaller();
+		} catch (JAXBException e) {
+			jaxbUnmarshaller1 = null;
+			logger.error(e.getMessage(),e);
+		}
+		Unmarshaller jaxbUnmarshaller = jaxbUnmarshaller1;
+		jacksonReader = new ObjectMapper().reader(Config.class);
+	}
 
 	@XmlElement public Values values;
 	@XmlElement public Contexts contexts;
@@ -41,4 +61,11 @@ public class Config implements Serializable {
 			return defaultValue;
 		}
     }
+	public Config deepCopy() {
+		try {
+			return jacksonReader.readValue(new ObjectMapper().writer().writeValueAsString(this));
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+	}
 }

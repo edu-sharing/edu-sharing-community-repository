@@ -314,6 +314,7 @@
   },
   "NODE_PROPOSAL": {
     "cm:created": "Zeitpunkt des Vorschlags",
+    "ccm:collection_proposal_status": "Status des Vorschlags",
     "cm:creator": "Vorgeschlagen von"
   },
   "LICENSE": {

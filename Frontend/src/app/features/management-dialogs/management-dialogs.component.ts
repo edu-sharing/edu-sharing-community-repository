@@ -226,7 +226,10 @@ export class WorkspaceManagementDialogsComponent {
                 observableForkJoin(
                     nodes.map((n) =>
                         this.nodeService.editNodeProperty(
-                            n.proposal.ref.id,
+                            n.proposal?.ref.id ||
+                                (n.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL
+                                    ? n.ref.id
+                                    : null),
                             RestConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS,
                             ['DECLINED' as CollectionProposalStatus],
                         ),
@@ -245,7 +248,10 @@ export class WorkspaceManagementDialogsComponent {
                 observableForkJoin(
                     nodes.map((n) =>
                         this.nodeService.editNodeProperty(
-                            n.proposal.ref.id,
+                            n.proposal?.ref.id ||
+                                (n.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL
+                                    ? n.ref.id
+                                    : null),
                             RestConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS,
                             ['ACCEPTED' as CollectionProposalStatus],
                         ),

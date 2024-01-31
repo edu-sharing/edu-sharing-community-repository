@@ -49,7 +49,7 @@ import { Toast } from '../services/toast';
 export class UIHelper {
     // TODO: check, whether these parameters are still used and remove or include them in
     // `PRESERVED_QUERY_PARAMS` in `main/location-strategy.ts` accordingly.
-    static COPY_URL_PARAMS = ['reurlTypes', 'reurlCreate', 'applyDirectories'];
+    static COPY_URL_PARAMS = ['reurlTypes', 'reurlCreate', 'applyDirectories', 'onlyDownloadable'];
     public static getBlackWhiteContrast(color: string) {}
 
     static changeQueryParameter(router: Router, route: ActivatedRoute, name: string, value: any) {

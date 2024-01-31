@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ConfigService, NodeService } from 'ngx-edu-sharing-api';
+import { ConfigService } from 'ngx-edu-sharing-api';
 import {
     DurationHelper,
     FormatDatePipe,
@@ -28,7 +28,6 @@ import {
     IamUser,
     Node,
     NodePermissions,
-    NodeVersions,
     Permission,
     RestConstants,
     RestHelper,
@@ -42,6 +41,7 @@ import {
 } from '../../../core-module/core.module';
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
+import { NodeService, NodeVersionEntries, NodeVersion } from 'ngx-edu-sharing-api';
 
 // Charts.js
 declare var Chart: any;
@@ -91,7 +91,7 @@ export class WorkspaceMetadataComponent implements OnInit {
     usagesCollection = new NodeDataSource();
     usagesCollectionData = this.usagesCollection.connect();
     nodeObject: Node;
-    versions: Version[];
+    versions: NodeVersion[];
     versionsLoading = false;
     columns: ListItem[] = [];
     columnsCollections: ListItem[] = [];
@@ -154,43 +154,47 @@ export class WorkspaceMetadataComponent implements OnInit {
         this.loading = false;
         this.data = this.format(this.nodeObject);
         const currentNode = this.nodeObject;
-        this.nodeApi.getNodeVersions(this.nodeObject.ref.id).subscribe((data: NodeVersions) => {
-            if (currentNode !== this.nodeObject) return;
-            this.versions = data.versions.reverse();
-            for (const version of this.versions) {
-                if (version.comment) {
-                    if (
-                        version.comment === RestConstants.COMMENT_MAIN_FILE_UPLOAD ||
-                        version.comment === RestConstants.COMMENT_METADATA_UPDATE ||
-                        version.comment === RestConstants.COMMENT_CONTRIBUTOR_UPDATE ||
-                        version.comment === RestConstants.COMMENT_CONTENT_UPDATE ||
-                        version.comment === RestConstants.COMMENT_LICENSE_UPDATE ||
-                        version.comment === RestConstants.COMMENT_NODE_PUBLISHED ||
-                        version.comment === RestConstants.COMMENT_PREVIEW_CHANGED ||
-                        version.comment.startsWith(RestConstants.COMMENT_EDITOR_UPLOAD)
-                    ) {
-                        const parameters = version.comment.split(',');
-                        let editor = '';
-                        if (parameters.length > 1)
-                            editor = this.translate.instant('CONNECTOR.' + parameters[1] + '.NAME');
-                        version.comment = this.translate.instant(
-                            'WORKSPACE.METADATA.COMMENT.' + parameters[0],
-                            { editor },
-                        );
+        this.nodeService
+            .getVersionsMetadata(this.nodeObject.ref.repo, this.nodeObject.ref.id)
+            .subscribe((data: NodeVersionEntries) => {
+                if (currentNode !== this.nodeObject) return;
+                this.versions = data.versions.reverse();
+                for (const version of this.versions) {
+                    if (version.comment) {
+                        if (
+                            version.comment === RestConstants.COMMENT_MAIN_FILE_UPLOAD ||
+                            version.comment === RestConstants.COMMENT_METADATA_UPDATE ||
+                            version.comment === RestConstants.COMMENT_CONTRIBUTOR_UPDATE ||
+                            version.comment === RestConstants.COMMENT_CONTENT_UPDATE ||
+                            version.comment === RestConstants.COMMENT_LICENSE_UPDATE ||
+                            version.comment === RestConstants.COMMENT_NODE_PUBLISHED ||
+                            version.comment === RestConstants.COMMENT_PREVIEW_CHANGED ||
+                            version.comment.startsWith(RestConstants.COMMENT_EDITOR_UPLOAD)
+                        ) {
+                            const parameters = version.comment.split(',');
+                            let editor = '';
+                            if (parameters.length > 1)
+                                editor = this.translate.instant(
+                                    'CONNECTOR.' + parameters[1] + '.NAME',
+                                );
+                            version.comment = this.translate.instant(
+                                'WORKSPACE.METADATA.COMMENT.' + parameters[0],
+                                { editor },
+                            );
+                        }
                     }
                 }
-            }
-            let i = 0;
-            for (const version of this.versions) {
-                if (this.isCurrentVersion(version)) {
-                    this.versions.splice(i, 1);
-                    this.versions.splice(0, 0, version);
-                    break;
+                let i = 0;
+                for (const version of this.versions) {
+                    if (this.isCurrentVersion(version)) {
+                        this.versions.splice(i, 1);
+                        this.versions.splice(0, 0, version);
+                        break;
+                    }
+                    i++;
                 }
-                i++;
-            }
-            this.versionsLoading = false;
-        });
+                this.versionsLoading = false;
+            });
         this.iamApi.getUser().subscribe((login: IamUser) => {
             this.nodeApi
                 .getNodePermissions(this.nodeObject.ref.id)
@@ -237,7 +241,7 @@ export class WorkspaceMetadataComponent implements OnInit {
         });
     }
 
-    isCurrentVersion(version: Version): boolean {
+    isCurrentVersion(version: NodeVersion): boolean {
         if (!this.nodeObject) return false;
         const prop = this.nodeObject.properties[RestConstants.LOM_PROP_LIFECYCLE_VERSION];
         if (!prop) return false;
@@ -262,7 +266,7 @@ export class WorkspaceMetadataComponent implements OnInit {
         this.displayNode(this.nodeObject);
     }
 
-    displayVersion(version: Version) {
+    displayVersion(version: NodeVersion) {
         if (this.isCurrentVersion(version)) this.display();
         else this.display(version.version.major + '.' + version.version.minor);
     }
@@ -323,7 +327,7 @@ export class WorkspaceMetadataComponent implements OnInit {
         this.onEditMetadata.emit(this.nodeObject);
     }
 
-    restoreVersion(restore: Version) {
+    restoreVersion(restore: NodeVersion) {
         this.onRestore.emit({ version: restore, node: this.nodeObject });
     }
 

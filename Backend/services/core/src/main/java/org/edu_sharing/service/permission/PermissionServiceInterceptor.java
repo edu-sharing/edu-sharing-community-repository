@@ -6,6 +6,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.nodeservice.NodeServiceInterceptor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +57,7 @@ public class PermissionServiceInterceptor implements MethodInterceptor {
                 }
                 if (NodeServiceInterceptor.hasReadAccess(nodeId)) {
                     // return all valid usage permissions because indirect access is available
-                    return CCConstants.getUsagePermissions();
+                    return new ArrayList<>(CCConstants.getUsagePermissions());
                 }
                 return result.stream().filter(e -> CCConstants.getUsagePermissions().contains(e)).collect(Collectors.toList());
             }

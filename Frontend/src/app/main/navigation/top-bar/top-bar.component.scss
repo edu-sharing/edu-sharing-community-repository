@@ -88,22 +88,6 @@
     margin: 0 20px;
     min-width: 0;
 }
-.addDesktop {
-    margin-left: 50px;
-    padding-left: 16px;
-    padding-right: 25px;
-    height: 39px;
-    display: flex;
-    align-items: center;
-    color: $workspaceTopBarFontColor !important;
-    background-color: rgba(
-        red($workspaceTopBarFontColor),
-        green($workspaceTopBarFontColor),
-        blue($workspaceTopBarFontColor),
-        0.1
-    );
-    border-radius: 0;
-}
 
 .mat-mdc-button {
     --mat-mdc-button-ripple-color: #{color.change($workspaceTopBarFontColor, $alpha: 0.1)};
@@ -186,6 +170,22 @@ button.user {
 .add-material {
     display: flex;
     align-items: center;
+    .addDesktop {
+        margin-left: 50px;
+        padding-left: 16px;
+        padding-right: 25px;
+        height: 39px;
+        display: flex;
+        align-items: center;
+        color: $workspaceTopBarFontColor;
+        background-color: rgba(
+            red($workspaceTopBarFontColor),
+            green($workspaceTopBarFontColor),
+            blue($workspaceTopBarFontColor),
+            0.1
+        );
+        border-radius: 0;
+    }
 }
 .create-dummy {
     width: 0;
@@ -257,7 +257,7 @@ button.user {
     span {
         display: none;
     }
-    .addDesktop {
+    .add-material .addDesktop {
         padding-right: 15px;
     }
 }

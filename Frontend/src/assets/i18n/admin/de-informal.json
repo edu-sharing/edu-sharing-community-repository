@@ -1,15 +1,4 @@
 {
-  "EXTENSION_NOT_MATCH_INFO": "Bist Du sicher, dass Du die Dateiendung von '{{extensionOld}}' auf '{{extensionNew}}' ändern möchtest?\n\n{{warning}}",
-  "EXTENSION_NOT_MATCH_INFO_OLD": "Bist Du sicher, dass Du die Dateiendung '{{extensionOld}}' entfernen möchtest?\n\n{{warning}}",
-  "COMMON_API_ERROR": "Ein Fehler ist aufgetreten. Bitte versuche es erneut.",
-  "RENDERSERVICE_API_ERROR": "Fehler beim Verbinden mit dem Renderingservice. Bitte melde diesen Fehler den Administrierenden",
-  "CONNECTOR_QUOTA_REACHED_MESSAGE": "Diese Funktion ist nicht mehr verfügbar, da Du das Speicherplatz-Quota vollständig überschritten hast.\n\nLösche einige Dateien, um Speicherplatz zu schaffen und versuche es anschließend erneut.",
-  "RESTRICTED_ACCESS_ERROR_MESSAGE": "Beim aktuellen Material handelt es sich um ein lizenziertes Material. Du besitzt jedoch keine Lizenz, um auf das Material zuzugreifen",
-  "TOOLPERMISSION_ERROR": "Dir fehlt für diesen Vorgang die notwendige Berechtigung",
-  "TOOLPERMISSION_ERROR_INLINE": "Du darfst diese Aktion nicht durchführen, da die Berechtigung \"{{permission}}\" fehlt.",
-  "TOOLPERMISSION_ERROR_HEADER": "Folgende Berechtigung ist für Dein Konto nicht freigegeben:",
-  "TOOLPERMISSION_ERROR_FOOTER": "Falls Du dies für einen Fehler hältst, kontaktiere die Administrierenden und fragen nach Freigabe der Berechtigung {{permission}}",
-  "USER_TUTORIAL_DESCRIPTION": "Hier kannst du ein eigenes Profilbild angeben und zeigen, wer du bist und was du tust. Du entscheidest, was Andere sehen können.",
   "ADMIN": {
     "WARNING_INFO": "Dieser Bereich ist nur zur Administration des Repositorys gedacht. Falsche Änderungen können zu Fehlern bis hin zu Datenverlust führen.\nFühre keine Aktionen durch, bei denen Du unsicher bist!",
     "GLOBAL_CONFIG": {
@@ -92,9 +81,5 @@
       "COLLECTION_HINT": "Wähle die Sammlung aus, deren Materialien auf der Startseite angezeigt werden sollen.",
       "CONFIG_BROKEN_INFO": "Die aktuelle Konfiguration scheint fehlerhaft. Möchtest Du die bestehende Konfiguration löschen und auf den Originalzustand zurücksetzen?"
     }
-  },
-  "collections_howToAddContent": "Du kannst in der Suchumgebung nach geeigneten Materialien für Deine Sammlung suchen. Klicke einfach auf ein geeignetes Material und wähle dann die Option 'zu Sammlung hinzufügen' aus.",
-  "EXTENSION_NOT_MATCH_INFO_NEW": "Bist Du sicher, dass Du die Dateiendung '{{extensionNew}}' hinzufügen möchtest?",
-  "BREADCRUMB_LOCATION_PREFIX": "Du bist hier:",
-  "collections_noOrgaCollections": "Du wurdest bisher zu keiner Sammlung eingeladen."
+  }
 }
