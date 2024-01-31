@@ -7,6 +7,8 @@ whitelist=(
   # swagger gen vs swagger usage conflict -> new api
   "xmlsec-1.5.8.jar:alf-lib" # axis-1.4
   "xmlsec-1.4.5.jar:edu-lib" # axis-1.4
+  "stax-api-1.0-2.jar:alf-lib"
+  "stax-api-1.0.1.jar:alf-lib"
 )
 
 files=()
