@@ -88,7 +88,7 @@ public class SecurityConfigurationOpenIdConnect {
                         fLogoutHandler.setAccessible(true);
                         Object oidcBackChannelLogoutHandler = fLogoutHandler.get(f);
 
-                            Class c2 = Class.forName("org.springframework.security.config.annotation.web.configurers.oauth2.client.⁰,");
+                        Class c2 = Class.forName("org.springframework.security.config.annotation.web.configurers.oauth2.client.OidcBackChannelLogoutHandler");
                         Field logoutEndpointName = c2.getDeclaredField("logoutEndpointName");
                         logoutEndpointName.setAccessible(true);
                         logoutEndpointName.set(oidcBackChannelLogoutHandler,"/edu-sharing/logout");
