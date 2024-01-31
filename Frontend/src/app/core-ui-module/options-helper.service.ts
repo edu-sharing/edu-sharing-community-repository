@@ -1274,12 +1274,7 @@ export class OptionsHelperService implements OnDestroy {
             'chat_bubble',
             (object) => (management.materialWriteFeedback = this.getObjects(object)[0]),
         );
-        feedbackMaterial.constrains = [
-            Constrain.HomeRepository,
-            Constrain.Files,
-            Constrain.NoBulk,
-            Constrain.User,
-        ];
+        feedbackMaterial.constrains = [Constrain.HomeRepository, Constrain.Files, Constrain.NoBulk];
         feedbackMaterial.permissions = [RestConstants.PERMISSION_FEEDBACK];
         feedbackMaterial.permissionsRightMode = NodesRightMode.Original;
         feedbackMaterial.scopes = [Scope.Render];
