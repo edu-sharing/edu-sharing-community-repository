@@ -3,10 +3,10 @@ package org.edu_sharing.spring.security.openid;
 import com.typesafe.config.Config;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.Filter;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -23,11 +24,13 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.util.UrlUtils;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.edu_sharing.spring.security.basic.CSRFConfig;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 
 @Profile("openidEnabled")
@@ -41,8 +44,8 @@ public class SecurityConfigurationOpenIdConnect {
     SecurityFilterChain app(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((authorize) -> authorize
-                     //   .requestMatchers("/shibboleth").authenticated()
-                     //   .requestMatchers("/**").permitAll()
+                        //   .requestMatchers("/shibboleth").authenticated()
+                        //   .requestMatchers("/**").permitAll()
                         /**
                          * we have to use ant matchers here cause the new spring-security version 6.2
                          * tries to use mvc matchers cause it is in classpath. but we don't use mvc matcher,
@@ -50,8 +53,8 @@ public class SecurityConfigurationOpenIdConnect {
                          *
                          * org.springframework.security.config.annotation.web.AbstractRequestMatcherRegistry diff 6.1 vs 6.2
                          */
-                    .requestMatchers(new AntPathRequestMatcher("/shibboleth")).authenticated()
-                    .requestMatchers(new AntPathRequestMatcher("/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/shibboleth")).authenticated()
+                        .requestMatchers(new AntPathRequestMatcher("/**")).permitAll()
                 )
 
                 .oauth2Login(Customizer.withDefaults())
@@ -106,11 +109,12 @@ public class SecurityConfigurationOpenIdConnect {
         OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler =
                 new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository()){
                     @Override
-                    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+                    protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
 
-                        // Sets the location that the End-User's User Agent will be redirected to
-                        // after the logout has been performed at the Provider
+                        String targetUrl = super.determineTargetUrl(request,response,authentication);
 
+
+                        String idpRedirectUrl = "";
                         String successTarget = "/shibboleth";
                         try {
                             successTarget = ConfigServiceFactory.getCurrentConfig().getValue("logout.next", successTarget);
@@ -118,8 +122,23 @@ public class SecurityConfigurationOpenIdConnect {
                             throw new RuntimeException(e);
                         }
 
-                        setPostLogoutRedirectUri(successTarget);
-                        super.onLogoutSuccess(request, response, authentication);
+                        if(!successTarget.startsWith("http")){
+                            UriComponents successUrlComp = UriComponentsBuilder
+                                    .fromHttpUrl(UrlUtils.buildFullRequestUrl(request)).build();
+
+                            idpRedirectUrl = successUrlComp.getScheme()+"://"+successUrlComp.getHost();
+
+                            int port = successUrlComp.getPort();
+                            if(port != 80 && port != 443){
+                                idpRedirectUrl += ":"+port;
+                            }
+
+                            idpRedirectUrl += request.getContextPath() + successTarget;
+                        }else{
+                            idpRedirectUrl = successTarget;
+                        }
+
+                        return UrlTool.replaceParam(targetUrl,"post_logout_redirect_uri",idpRedirectUrl);
                     }
                 };
         return oidcLogoutSuccessHandler;
