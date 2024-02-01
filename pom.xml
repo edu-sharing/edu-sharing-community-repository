@@ -453,13 +453,6 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-services-soap-webapp</artifactId>
-        <version>${project.version}</version>
-        <type>war</type>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-backend-services-webapp</artifactId>
         <version>${project.version}</version>
         <type>war</type>
