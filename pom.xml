@@ -109,6 +109,9 @@
               --add-opens=java.base/java.lang=ALL-UNNAMED
               --add-opens=java.base/java.util=ALL-UNNAMED
             </argLine>
+            <classpathDependencyExcludes>
+              <classpathDependencyExclude>org.apache.logging.log4j:log4j-slf4j2-impl</classpathDependencyExclude>
+            </classpathDependencyExcludes>
           </configuration>
         </plugin>
 
