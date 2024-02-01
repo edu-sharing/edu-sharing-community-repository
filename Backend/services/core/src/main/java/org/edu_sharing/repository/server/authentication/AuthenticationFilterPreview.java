@@ -37,8 +37,7 @@ import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
-import org.edu_sharing.service.usage.UsageException;
-import org.edu_sharing.webservices.usage2.Usage2Exception;
+import org.edu_sharing.service.usage.Usage2Exception;
 import org.springframework.context.ApplicationContext;
 
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;

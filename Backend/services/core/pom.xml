@@ -59,7 +59,7 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-repository-backend-services-soap-client-java</artifactId>
+      <artifactId>edu_sharing-community-repository-backend-services-common</artifactId>
     </dependency>
 
     <dependency>

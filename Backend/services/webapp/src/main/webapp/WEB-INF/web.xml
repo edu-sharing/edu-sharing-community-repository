@@ -464,16 +464,7 @@
             org.edu_sharing.repository.server.FolderTemplateServlet
         </servlet-class> 
     </servlet>
-    
-    <servlet>  
-      <servlet-name>RestService</servlet-name>  
-      <servlet-class>org.restlet.ext.servlet.ServerServlet</servlet-class>
-      <init-param>
-            <!-- Application class name -->
-            <param-name>org.restlet.application</param-name>
-            <param-value>org.edu_sharing.rest.RestService</param-value>
-      </init-param>
-   </servlet>  
+
    
    <servlet>
       <servlet-name>EduWebDAV</servlet-name>
@@ -667,12 +658,7 @@
     <servlet-mapping>
         <servlet-name>REST API</servlet-name>
         <url-pattern>/rest/*</url-pattern>
-    </servlet-mapping>  
-        
-	 <servlet-mapping>  
-      <servlet-name>RestService</servlet-name>  
-      <url-pattern>/restservice/*</url-pattern>  
-   </servlet-mapping>  
+    </servlet-mapping>
 	
 	<!-- webdav stuff-->
 	<servlet-mapping>

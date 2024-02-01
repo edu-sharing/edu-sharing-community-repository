@@ -7,6 +7,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 @Configuration
 public class ApplicationContextFactory implements ApplicationContextAware {
 
@@ -19,5 +22,7 @@ public class ApplicationContextFactory implements ApplicationContextAware {
 	@Override
 	public void setApplicationContext(@NotNull ApplicationContext applicationContext) throws BeansException {
 		ApplicationContextFactory.applicationContext = applicationContext;
+		System.out.println("PROP:" + applicationContext.getEnvironment().getProperty("spring.profiles.active"));
+		System.out.println("active profiles: "+ Arrays.asList(applicationContext.getEnvironment().getActiveProfiles()).stream().collect(Collectors.joining(",")));
 	}
 }

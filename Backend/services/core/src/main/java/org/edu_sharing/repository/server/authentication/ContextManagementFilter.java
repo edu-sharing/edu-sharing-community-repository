@@ -34,7 +34,7 @@ import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.alfresco.service.config.model.AvailableMds;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
-import org.edu_sharing.webservices.usage2.Usage2Exception;
+import org.edu_sharing.service.usage.Usage2Exception;
 import org.edu_sharing.webservices.util.AuthenticationUtils;
 
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;

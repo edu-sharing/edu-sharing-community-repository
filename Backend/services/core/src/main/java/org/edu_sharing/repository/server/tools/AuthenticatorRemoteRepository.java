@@ -54,13 +54,6 @@ import org.edu_sharing.restservices.login.v1.model.AuthenticationToken;
 import org.edu_sharing.restservices.shared.UserProfileAppAuth;
 import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.webservices.authbyapp.AuthByApp;
-import org.edu_sharing.webservices.authbyapp.AuthByAppServiceLocator;
-import org.edu_sharing.webservices.authentication.AuthenticationException;
-import org.edu_sharing.webservices.authentication.AuthenticationResult;
-import org.edu_sharing.webservices.types.KeyValue;
-import org.edu_sharing.webservices.util.AuthenticationDetails;
-import org.edu_sharing.webservices.util.AuthenticationUtils;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.logging.LoggingFeature;
 import org.springframework.context.ApplicationContext;
@@ -123,10 +116,7 @@ public class AuthenticatorRemoteRepository {
 
 	private AuthenticationToken remoteAuth(String appId, String username) throws Exception{
 		ApplicationInfo appInfoRemoteApp = ApplicationInfoList.getRepositoryInfoById(appId);
-		if(appInfoRemoteApp.getCache().size() > 0 && (Float)appInfoRemoteApp.getCache().get(ApplicationInfo.CacheKey.RemoteAlfrescoVersion) <= 5.1){
-			logger.info("Detected repository " + appId + " has version <= 5.1, using legacy SOAP authentication");
-			return remoteAuthSoap(appId, username);
-		}
+
 		String localAppId = ApplicationInfoList.getHomeRepository().getAppId();
 		logger.info("startSession remoteApplicationId:"+appId +" localAppId:"+localAppId);
 
@@ -139,7 +129,6 @@ public class AuthenticatorRemoteRepository {
 			personMapping.put(remoteUserid,CCConstants.CM_PROP_PERSON_USERNAME);
 		}
 
-		List<KeyValue> ssoData = new ArrayList<KeyValue>();
 		String esuid;
 		Map<String, Serializable> personData;
 		if(username.equals(ApplicationInfoList.getRepositoryInfoById(appId).getString(ApplicationInfo.FORCED_USER,null))){
@@ -225,130 +214,6 @@ public class AuthenticatorRemoteRepository {
 			RemoteAuthenticationException e = new RemoteAuthenticationException(response.getStatus(),message);
 			throw e;
 		}
-	}
-
-	/**
-	 * legacy auth for repositories <= version 5.1
-	 */
-	private AuthenticationToken remoteAuthSoap(String appId, String username) throws Exception{
-		MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
-		String localAppId = ApplicationInfoList.getHomeRepository().getAppId();
-		logger.info("startSession remoteApplicationId:"+appId +" localAppId:"+localAppId);
-
-		ApplicationInfo appInfoRemoteApp = ApplicationInfoList.getRepositoryInfoById(appId);
-
-		HashMap<String,String> personMapping = new HashMap<>(ssoAuthorityMapper.getMappingConfig().getPersonMapping());
-		String remoteUserid = ApplicationInfoList.getRepositoryInfoById(appId).getString(ApplicationInfo.REMOTE_USERID, null);
-		if(remoteUserid!=null && !remoteUserid.isEmpty()){
-			logger.info("remote_userid configured "+remoteUserid+", will change auth");
-			personMapping.values().remove(CCConstants.CM_PROP_PERSON_USERNAME);
-			personMapping.put(remoteUserid,CCConstants.CM_PROP_PERSON_USERNAME);
-		}
-
-		List<KeyValue> ssoData = new ArrayList<KeyValue>();
-		String esuid;
-		HashMap<String, String> personData;
-		if(username.equals(ApplicationInfoList.getRepositoryInfoById(appId).getString(ApplicationInfo.FORCED_USER,null))){
-			// do not escape the guest, send them as a "plain" user
-			personData = new HashMap<>();
-			personData.put(CCConstants.CM_PROP_PERSON_FIRSTNAME,ApplicationInfoList.getHomeRepository().getAppCaption());
-			esuid = username;
-		}
-		else {
-			personData = apiClient.getUserInfo(username);
-			esuid = personData.get(CCConstants.PROP_USER_ESUID);
-			if(esuid == null || esuid.trim().equals("")){
-				throw new Exception("missing esuid for user!!! (Note: Admin doesn't have a esuid!)");
-			}
-		}
-
-
-		for(Map.Entry<String, String> entry : personMapping.entrySet()){
-
-			String val = personData.get(entry.getValue());
-
-			/**
-			 * add an domain with appid to esuid to prevent interference with an existing user in remote repo
-			 */
-			if(entry.getValue().equals(CCConstants.CM_PROP_PERSON_USERNAME)){
-				val = esuid + "@" + localAppId;
-			}
-			ssoData.add(new KeyValue(entry.getKey(), val));
-		}
-
-		//add global groups
-
-		String globalGroups = null;
-
-		AuthorityService authorityService = serviceRegistry.getAuthorityService();
-		logger.info(serviceRegistry.getAuthenticationService().getCurrentUserName());
-		Set<String> authoritiesForUser = authorityService.getAuthorities();
-		for(String authority : authoritiesForUser){
-			NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(authority);
-			//i.i. noderef for GROUP_EVERYONE is null
-			if(authorityNodeRef == null) continue;
-			String scopeType = (String)serviceRegistry.getNodeService().getProperty(authorityNodeRef, QName.createQName(CCConstants.CCM_PROP_SCOPE_TYPE));
-
-			if(CCConstants.CCM_VALUE_SCOPETYPE_GLOBAL.equals(scopeType)){
-				if(globalGroups == null){
-					globalGroups = authority;
-				}else{
-					globalGroups += ";"+authority;
-				}
-			}
-		}
-
-		if(globalGroups != null){
-			ssoData.add(new KeyValue(CCConstants.EDU_SHARING_GLOBAL_GROUPS, globalGroups));
-			logger.info("global groups for user added");
-		}
-
-		try{
-
-			AuthByAppServiceLocator locator = new AuthByAppServiceLocator();
-
-			locator.setauthbyappEndpointAddress(appInfoRemoteApp.getWebServiceHotUrl()+"/authbyapp");
-
-			AuthByApp stub = locator.getauthbyapp();
-
-			String timestamp = ""+System.currentTimeMillis();
-
-			//sign essuid so that man in the middle can not change webservice data, essuid must be tested on serverside
-			String signData = esuid+"localAppId"+timestamp;
-
-			Signing signing = new Signing();
-
-			byte[] signature = signing.sign(signing.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM), signData, CCConstants.SECURITY_SIGN_ALGORITHM);
-			signature = new Base64().encode(signature);
-
-			((Stub)stub).setHeader(new SOAPHeaderElement("http://webservices.edu_sharing.org","timestamp",timestamp));
-			((Stub)stub).setHeader(new SOAPHeaderElement("http://webservices.edu_sharing.org","appId",localAppId));
-			((Stub)stub).setHeader(new SOAPHeaderElement("http://webservices.edu_sharing.org","signature",new String(signature)));
-			((Stub)stub).setHeader(new SOAPHeaderElement("http://webservices.edu_sharing.org","signed",signData));
-
-			AuthenticationResult authResult = stub.authenticateByTrustedApp(localAppId, ssoData.toArray(new KeyValue[ssoData.size()]));
-			AuthenticationUtils.setAuthenticationDetails(new AuthenticationDetails(authResult.getUsername(), authResult.getTicket(),null));
-			AuthenticationToken token = new AuthenticationToken();
-			token.setUserId(authResult.getUsername());
-			token.setTicket(authResult.getTicket());
-			return token;
-		}catch(AuthenticationException e){
-
-			System.out.println("EXCEPTION CLASS:"+e.getClass());
-			AuthenticationFault authFault = new AuthenticationFault();
-			authFault.addFaultDetail(javax.xml.namespace.QName.valueOf(CCConstants.CC_EXCEPTIONPARAM_REPOSITORY_CAPTION), appInfoRemoteApp.getAppCaption());
-			authFault.setMessage1(((AuthenticationException)e).getMessage1());
-			throw authFault;
-
-		} catch(Exception e){
-
-			System.out.println("EXCEPTION CLASS:"+e.getClass());
-			e.printStackTrace();
-			AuthenticationFault authFault = new AuthenticationFault();
-			authFault.setMessage1(e.getMessage());
-			throw authFault;
-		}
-
 	}
 
 	public class RemoteAuthenticationException extends Exception{
