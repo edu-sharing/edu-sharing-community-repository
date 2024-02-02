@@ -398,9 +398,6 @@ grep -q '^[#]*\s*localTransform\.edu-sharing\.url=' "${alfProps}" || echo "local
 sed -i -r 's|^[#]*\s*localTransform\.core-aio\.url=.*|localTransform.core-aio.url=http://repository-alfresco-transform-core-aio:8090/|' "${alfProps}"
 grep -q '^[#]*\s*localTransform\.core-aio\.url=' "${alfProps}" || echo "localTransform.core-aio.url=http://repository-alfresco-transform-core-aio:8090/" >>"${alfProps}"
 
-tomcatlog="/opt/alfresco/tomcat/conf/logging.properties"
-grep -q 'org.apache.tomcat.util.IntrospectionUtils.level=ALL' ${tomcatlog} || echo "org.apache.tomcat.util.IntrospectionUtils.level=ALL" >> ${tomcatlog}
-
 xmlstarlet ed -L \
 	-s '_:web-app/_:filter[_:filter-name="X509AuthFilter"]' -t elem -n "init-param" -v '' \
 	--var param '$prev' \
