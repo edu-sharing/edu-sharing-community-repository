@@ -107,5 +107,26 @@
         [columns]="similarNodeColumns"
       ></es-listTable>
     </div>
+    <div *ngIf="config.imprintUrl || config.privacyInformationUrl" class="imprint-and-privacy-info">
+      <a
+        cdkMonitorElementFocus
+        tabindex="0"
+        class="clickable"
+        *ngIf="config.imprintUrl"
+        (click)="openImprint()"
+        (keyup.enter)="openImprint()"
+        >{{ 'IMPRINT' | translate }}</a
+      >
+      {{ config.imprintUrl && config.privacyInformationUrl ? '/' : '' }}
+      <a
+        cdkMonitorElementFocus
+        tabindex="0"
+        class="clickable"
+        *ngIf="config.privacyInformationUrl"
+        (click)="openPrivacy()"
+        (keyup.enter)="openPrivacy()"
+        >{{ 'PRIVACY_INFORMATION' | translate }}</a
+      >
+    </div>
   </div>
 </div>

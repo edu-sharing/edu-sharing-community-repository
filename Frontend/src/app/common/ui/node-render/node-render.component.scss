@@ -281,6 +281,18 @@ div.download {
     }
 }
 
+.imprint-and-privacy-info {
+    text-align: center;
+    background-color: white;
+    color: $textLight;
+    position: relative;
+    margin-top: -21px;
+    font-size: 89%;
+    a {
+        color: $textLight;
+    }
+}
+
 @media (pointer: coarse) {
     #sequence {
         overflow-x: auto;
