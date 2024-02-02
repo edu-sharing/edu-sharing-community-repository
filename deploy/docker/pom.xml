@@ -88,7 +88,7 @@
 
     <phpredis.version>5.3.7</phpredis.version>
     <prometheus.jmx.version>0.17.2</prometheus.jmx.version>
-    <redisson.version>3.18.0</redisson.version>
+    <redisson.version>3.26.0</redisson.version>
 
   </properties>
   <build>

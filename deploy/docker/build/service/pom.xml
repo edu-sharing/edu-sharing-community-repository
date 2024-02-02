@@ -39,7 +39,7 @@
                 jmx_prometheus_javaagent,
                 postgresql,
                 redisson-all,
-                redisson-tomcat-9
+                redisson-tomcat-10
               </includeArtifactIds>
               <outputDirectory>${project.build.directory}/build/artifacts</outputDirectory>
             </configuration>
