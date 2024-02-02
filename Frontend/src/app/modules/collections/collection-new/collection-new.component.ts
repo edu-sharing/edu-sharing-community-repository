@@ -356,15 +356,22 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
                             RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE,
                         )
                     ) {
+                        this.editorialGroups.isLoading = true;
                         this.iamService
                             .searchGroups('*', true, RestConstants.GROUP_TYPE_EDITORIAL, '', {
                                 count: RestConstants.COUNT_UNLIMITED,
                                 sortBy: [RestConstants.CM_PROP_AUTHORITY_DISPLAYNAME],
                                 sortAscending: [true],
                             })
-                            .subscribe((data: IamGroups) => {
-                                this.editorialGroups.setData(data.groups, data.pagination);
-                            });
+                            .subscribe(
+                                (data: IamGroups) => {
+                                    this.editorialGroups.setData(data.groups, data.pagination);
+                                    this.editorialGroups.isLoading = false;
+                                },
+                                (error) => {
+                                    this.toast.error(error);
+                                },
+                            );
                     }
                 });
             });
