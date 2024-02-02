@@ -76,6 +76,12 @@
       <type>war</type>
     </dependency>
 
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-services-core</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
     <!-- provided -->
 
     <dependency>
