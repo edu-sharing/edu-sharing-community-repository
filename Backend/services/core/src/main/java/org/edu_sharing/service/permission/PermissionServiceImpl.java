@@ -1529,7 +1529,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	@Override
-	public List<String> getPermissionsForAuthority(String nodeId, String authorityId) throws InsufficientPermissionException {
+	public List<String> getPermissionsForAuthority(String nodeId, String authorityId, Collection<String> permissions) throws InsufficientPermissionException {
 		if(!authorityId.equals(AuthenticationUtil.getFullyAuthenticatedUser())){
 			if(!isAdminOrSystem()) {
 				if(!hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,PermissionService.READ_PERMISSIONS)) {
@@ -1545,7 +1545,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			List<String> result = new ArrayList<>();
 			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 
-			for (String permission : CCConstants.getPermissionList()) {
+			for (String permission : permissions) {
 				if (permissionService.hasPermission(nodeRef, permission).equals(AccessStatus.ALLOWED)) {
 					result.add(permission);
 				}

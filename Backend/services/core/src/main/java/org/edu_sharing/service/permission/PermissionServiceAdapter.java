@@ -1,9 +1,6 @@
 package org.edu_sharing.service.permission;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.rpc.ACE;
@@ -141,10 +138,10 @@ public class PermissionServiceAdapter implements PermissionService {
 	}
 
 	@Override
-	public List<String> getPermissionsForAuthority(String nodeId, String authorityId) throws InsufficientPermissionException {
+	public List<String> getPermissionsForAuthority(String nodeId, String authorityId, Collection<String> permissions) throws InsufficientPermissionException {
 		return null;
 	}
-	
+
 	@Override
 	public void setPermission(String nodeId, String authority, String permission) {
 		// TODO Auto-generated method stub

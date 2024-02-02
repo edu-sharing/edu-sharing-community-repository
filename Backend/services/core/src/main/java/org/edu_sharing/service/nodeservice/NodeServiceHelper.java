@@ -237,11 +237,11 @@ public class NodeServiceHelper {
 		return NodeServiceFactory.getLocalService().getContent(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),null, ContentModel.PROP_CONTENT.toString());
 	}
 
-	public static void validatePermissionRestrictedAccess(NodeRef nodeRef, String permission) throws RestrictedAccessException {
+	public static void validatePermissionRestrictedAccess(NodeRef nodeRef, String... permissions) throws RestrictedAccessException {
 		if(NodeServiceHelper.hasAspect(nodeRef,CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
 			String refNodeId = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_ORIGINAL);
 			Boolean restricted = (Boolean) AuthenticationUtil.runAsSystem(() -> NodeServiceHelper.getPropertyNative(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, refNodeId), CCConstants.CCM_PROP_RESTRICTED_ACCESS));
-			if (restricted != null && restricted && !PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, refNodeId), permission)) {
+			if (restricted != null && restricted && !Arrays.stream(permissions).allMatch((permission) -> PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, refNodeId), permission))) {
 				throw new RestrictedAccessException(refNodeId);
 			}
 		}

@@ -15,6 +15,7 @@ import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -22,6 +23,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 
 import java.util.*;
+
+import static org.mockito.ArgumentMatchers.eq;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -46,8 +49,8 @@ class PermissionCheckingTest {
 
         Mockito.when(authorityService.isGuest()).thenReturn(false);
         Mockito.when(toolPermissionService.hasToolPermission(toolPermission)).thenReturn(true);
-        Mockito.when(permissionService.getPermissionsForAuthority(nodeA, authority)).thenReturn(nodePermissions);
-        Mockito.when(permissionService.getPermissionsForAuthority(nodeB.getId(), authority)).thenReturn(nodePermissions);
+        Mockito.when(permissionService.getPermissionsForAuthority(eq(nodeA), eq(authority), ArgumentMatchers.anyCollection())).thenReturn(nodePermissions);
+        Mockito.when(permissionService.getPermissionsForAuthority(eq(nodeB.getId()), eq(authority), ArgumentMatchers.anyCollection())).thenReturn(nodePermissions);
 
 
         TestClass target = new TestClass();
@@ -81,9 +84,9 @@ class PermissionCheckingTest {
         Mockito.when(toolPermissionService.hasToolPermission(toolPermission)).thenReturn(true);
         for (Object node : nodes) {
             if(node instanceof String) {
-                Mockito.when(permissionService.getPermissionsForAuthority((String) node, authority)).thenReturn(nodePermissions);
+                Mockito.when(permissionService.getPermissionsForAuthority(eq((String) node), eq(authority), ArgumentMatchers.anyCollection())).thenReturn(nodePermissions);
             }else {
-                Mockito.when(permissionService.getPermissionsForAuthority(((NodeRef)node).getId(), authority)).thenReturn(nodePermissions);
+                Mockito.when(permissionService.getPermissionsForAuthority(eq(((NodeRef)node).getId()), eq(authority), ArgumentMatchers.anyCollection())).thenReturn(nodePermissions);
             }
         }
 
@@ -115,9 +118,9 @@ class PermissionCheckingTest {
         Mockito.when(toolPermissionService.hasToolPermission(toolPermission)).thenReturn(true);
         for (Object node : nodes) {
             if(node instanceof String) {
-                Mockito.when(permissionService.getPermissionsForAuthority((String)node, authority)).thenReturn(nodePermissions);
+                Mockito.when(permissionService.getPermissionsForAuthority(eq((String)node), eq(authority), ArgumentMatchers.anyCollection())).thenReturn(nodePermissions);
             }else {
-                Mockito.when(permissionService.getPermissionsForAuthority(((NodeRef)node).getId(), authority)).thenReturn(nodePermissions);
+                Mockito.when(permissionService.getPermissionsForAuthority(eq(((NodeRef)node).getId()), eq(authority), ArgumentMatchers.anyCollection())).thenReturn(nodePermissions);
             }
         }
 
@@ -284,7 +287,7 @@ class PermissionCheckingTest {
 
         Mockito.when(authorityService.isGuest()).thenReturn(false);
         Mockito.when(toolPermissionService.hasToolPermission(toolPermission)).thenReturn(true);
-        Mockito.when(permissionService.getPermissionsForAuthority(nodeA, authority)).thenReturn(nodePermissionsNodeA);
+        Mockito.when(permissionService.getPermissionsForAuthority(eq(nodeA), eq(authority), ArgumentMatchers.anyCollection())).thenReturn(nodePermissionsNodeA);
 
 
         TestClass target = new TestClass();
@@ -316,8 +319,8 @@ class PermissionCheckingTest {
 
         Mockito.when(authorityService.isGuest()).thenReturn(false);
         Mockito.when(toolPermissionService.hasToolPermission(toolPermission)).thenReturn(true);
-        Mockito.when(permissionService.getPermissionsForAuthority(nodeA, authority)).thenReturn(nodePermissionsNodeA);
-        Mockito.when(permissionService.getPermissionsForAuthority(nodeB.getId(), authority)).thenReturn(nodePermissionsNodeB);
+        Mockito.when(permissionService.getPermissionsForAuthority(eq(nodeA), eq(authority), ArgumentMatchers.anyCollection())).thenReturn(nodePermissionsNodeA);
+        Mockito.when(permissionService.getPermissionsForAuthority(eq(nodeB.getId()), eq(authority), ArgumentMatchers.anyCollection())).thenReturn(nodePermissionsNodeB);
 
 
         TestClass target = new TestClass();
@@ -348,7 +351,7 @@ class PermissionCheckingTest {
 
         Mockito.when(authorityService.isGuest()).thenReturn(false);
         Mockito.when(toolPermissionService.hasToolPermission(toolPermission)).thenReturn(true);
-        Mockito.when(permissionService.getPermissionsForAuthority(((String) nodes.get(0)), authority)).thenReturn(new ArrayList<>());
+        Mockito.when(permissionService.getPermissionsForAuthority(eq(((String) nodes.get(0))), eq(authority), ArgumentMatchers.anyCollection())).thenReturn(new ArrayList<>());
 
         TestClass target = new TestClass();
         AspectJProxyFactory factory = new AspectJProxyFactory(target);
@@ -379,8 +382,8 @@ class PermissionCheckingTest {
 
         Mockito.when(authorityService.isGuest()).thenReturn(false);
         Mockito.when(toolPermissionService.hasToolPermission(toolPermission)).thenReturn(true);
-        Mockito.when(permissionService.getPermissionsForAuthority((String) nodes.get(0), authority)).thenReturn(nodePermissions);
-        Mockito.when(permissionService.getPermissionsForAuthority(((NodeRef) nodes.get(1)).getId(), authority)).thenReturn(new ArrayList<>());
+        Mockito.when(permissionService.getPermissionsForAuthority(eq((String) nodes.get(0)), eq(authority), ArgumentMatchers.anyCollection())).thenReturn(nodePermissions);
+        Mockito.when(permissionService.getPermissionsForAuthority(eq(((NodeRef) nodes.get(1)).getId()), eq(authority), ArgumentMatchers.anyCollection())).thenReturn(new ArrayList<>());
 
         TestClass target = new TestClass();
         AspectJProxyFactory factory = new AspectJProxyFactory(target);
@@ -413,7 +416,7 @@ class PermissionCheckingTest {
 
         Mockito.when(authorityService.isGuest()).thenReturn(false);
         Mockito.when(toolPermissionService.hasToolPermission(toolPermission)).thenReturn(true);
-        Mockito.when(permissionService.getPermissionsForAuthority(((String) nodes[0]), authority)).thenReturn(new ArrayList<>());
+        Mockito.when(permissionService.getPermissionsForAuthority(eq(((String) nodes[0])), eq(authority), ArgumentMatchers.anyCollection())).thenReturn(new ArrayList<>());
 
         TestClass target = new TestClass();
         AspectJProxyFactory factory = new AspectJProxyFactory(target);
@@ -446,8 +449,8 @@ class PermissionCheckingTest {
 
         Mockito.when(authorityService.isGuest()).thenReturn(false);
         Mockito.when(toolPermissionService.hasToolPermission(toolPermission)).thenReturn(true);
-        Mockito.when(permissionService.getPermissionsForAuthority((String) nodes[0], authority)).thenReturn(nodePermissions);
-        Mockito.when(permissionService.getPermissionsForAuthority(((NodeRef) nodes[1]).getId(), authority)).thenReturn(new ArrayList<>());
+        Mockito.when(permissionService.getPermissionsForAuthority(eq((String) nodes[0]), eq(authority), ArgumentMatchers.anyCollection())).thenReturn(nodePermissions);
+        Mockito.when(permissionService.getPermissionsForAuthority(eq(((NodeRef) nodes[1]).getId()), eq(authority), ArgumentMatchers.anyCollection())).thenReturn(new ArrayList<>());
 
         TestClass target = new TestClass();
         AspectJProxyFactory factory = new AspectJProxyFactory(target);

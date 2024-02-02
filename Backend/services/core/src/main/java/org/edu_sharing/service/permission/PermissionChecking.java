@@ -12,7 +12,8 @@ import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.service.AspectConstants;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityService;
-import org.edu_sharing.service.permission.annotation.NodePermission;
+import org.edu_sharing.service.permission.annotation.
+        NodePermission;
 import org.edu_sharing.service.permission.annotation.Permission;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +76,14 @@ public class PermissionChecking {
         checkNodePermissions(joinPoint, user, method);
     }
 
+    /**
+     * checks if the user has all permissions provided on the node
+     * will throw an InsufficientPermissionException otherwise
+     */
+    public void checkNodePermissions(Object node, String[] permissions) throws InsufficientPermissionException {
+        checkNodePermissions(node, AuthenticationUtil.getFullyAuthenticatedUser(), permissions, "checkNodePermissions");
+    }
+
     private void checkNodePermissions(JoinPoint joinPoint, String user, Method method) throws InsufficientPermissionException {
         Object[] args = joinPoint.getArgs();
         Parameter[] parameters = method.getParameters();
@@ -122,9 +131,9 @@ public class PermissionChecking {
             throw new InvalidArgumentException(String.format("%s must be of type %s or %s", parameterName, String.class, NodeRef.class));
         }
         if(nodePermissions == null) {
-            nodePermissions = permissionService.getPermissionsForAuthority(nodeId, user);
+            nodePermissions = permissionService.getPermissionsForAuthority(nodeId, user, List.of(permissions));
         }
-        if (!nodePermissions.containsAll(Arrays.asList(permissions))) {
+        if (!nodePermissions.containsAll(List.of(permissions))) {
             throw new InsufficientPermissionException(String.format("%s with id %s requires permission(s): %s",
                     parameterName, nodeId, String.join(", ", permissions)));
         }

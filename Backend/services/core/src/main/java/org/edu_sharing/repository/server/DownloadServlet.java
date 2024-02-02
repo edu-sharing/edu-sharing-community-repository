@@ -1,16 +1,5 @@
 package org.edu_sharing.repository.server;
 
-import java.io.*;
-import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -32,27 +21,48 @@ import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tracking.TrackingTool;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
+import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
-import org.edu_sharing.service.permission.*;
+import org.edu_sharing.service.permission.PermissionChecking;
+import org.edu_sharing.service.permission.PermissionService;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
 import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
+import org.springframework.web.servlet.support.RequestContextUtils;
+
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 
+@Component
 public class DownloadServlet extends HttpServlet{
-
-
+	private static PermissionChecking permissionChecking;
 	static Logger logger = Logger.getLogger(DownloadServlet.class);
 	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-
+		if(permissionChecking == null) {
+			// @TODO: Is there a more streamlined way?
+			permissionChecking = RequestContextUtils.findWebApplicationContext(req).getBean("permissionChecking", PermissionChecking.class);
+		}
 		String nodeId = req.getParameter("nodeId");
 		String repositoryId = req.getParameter("repositoryId");
 		if(repositoryId != null && ApplicationInfoList.isLocalRepository(repositoryId)){
@@ -65,11 +75,19 @@ public class DownloadServlet extends HttpServlet{
 			downloadZip(resp, nodeIds.split(","), null, null, null, fileName);
 			return;
 		}
-		downloadNode(nodeId, repositoryId,req,resp,fileName,mode);
+		try {
+			downloadNodeInternal(nodeId, repositoryId, req,resp, fileName,mode);
+		} catch (InsufficientPermissionException e) {
+			resp.sendRedirect(URLTool.getBaseUrl(true) + "/" + NgServlet.COMPONENTS_ERROR + "/" + HttpServletResponse.SC_FORBIDDEN);
+		}
 
 	}
 
-	private void downloadNode(String nodeId, String repositoryId, HttpServletRequest req, HttpServletResponse resp, String fileName, Mode mode) throws ServletException {
+	private void downloadNodeInternal(
+			String nodeId,
+			String repositoryId,
+			HttpServletRequest req, HttpServletResponse resp,
+			String fileName, Mode mode) throws ServletException, InsufficientPermissionException {
 		try {
 			// allow signature based auth from connector to bypass the download/content access
 			NodeService nodeService = repositoryId == null ? NodeServiceFactory.getLocalService() : NodeServiceFactory.getNodeService(repositoryId);
@@ -84,11 +102,11 @@ public class DownloadServlet extends HttpServlet{
 				logger.info("Download forbidden for node " + nodeId);
 				throw new ErrorFilter.ErrorFilterException(HttpServletResponse.SC_FORBIDDEN);
 			}
-			String version=req.getParameter("version");
-			if(version!=null && version.isEmpty())
-			    version=null;
-			OutputStream bufferOut = resp.getOutputStream();
 			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+			String version=req.getParameter("version");
+			if(version!=null && version.isEmpty()) {
+				version=null;
+			}
 			String name = fileName!=null ? fileName : nodeService.getProperty(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(), CCConstants.CM_NAME);
 			if("true".equalsIgnoreCase(req.getParameter("metadata"))){
 				String metadata = getMetadataRenderer(nodeRef).render("io_text");
@@ -102,93 +120,101 @@ public class DownloadServlet extends HttpServlet{
 				// do only track downloads if it was not accessed by the connector service
 				if(ContextManagementFilter.accessTool.get() == null ||
 						!ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getType())) {
-					TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), null, TrackingService.EventType.DOWNLOAD_MATERIAL);
+					TrackingServiceFactory.getTrackingService().trackActivityOnNode(nodeRef, null, TrackingService.EventType.DOWNLOAD_MATERIAL);
 				}
-				originalNodeId = checkAndGetCollectionRef(nodeId);
+				originalNodeId = checkAndGetCollectionRef(nodeRef.getId());
 			} else {
-				originalNodeId = nodeId;
+				originalNodeId = nodeRef.getId();
 			}
-			InputStream is=null;
-			Long length=null;
-			try {
-				if(originalNodeId != null){
-					String finalVersion = version;
-					is = AuthenticationUtil.runAsSystem(() -> {
-						try {
-							return nodeService.getContent(
-									StoreRef.PROTOCOL_WORKSPACE,
-									StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
-									originalNodeId,
-									finalVersion,
-									ContentModel.PROP_CONTENT.toString());
-						} catch (Throwable ignored) {
-						}
-						return null;
-					});
-
-					length = AuthenticationUtil.runAsSystem(() -> {
-						try {
-							return nodeService.getContentLength(
-									StoreRef.PROTOCOL_WORKSPACE,
-									StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
-									originalNodeId,
-									finalVersion,
-									ContentModel.PROP_CONTENT.toString());
-						} catch (Throwable ignored) {
-						}
-						return null;
-					});
-				} else {
-					is = nodeService.getContent(
-							StoreRef.PROTOCOL_WORKSPACE,
-							StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
-							nodeId,
-							version,
-							ContentModel.PROP_CONTENT.toString());
-					length = nodeService.getContentLength(
-							StoreRef.PROTOCOL_WORKSPACE,
-							StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
-							nodeId,
-							version,
-							ContentModel.PROP_CONTENT.toString());
-				}
-			} catch(Throwable ignored){
-
-			}
-			if(is==null || is.available()==0){
-				if(mode.equals(Mode.passthrough)) {
-					Throwable throwable = handleStreamFromLocation(nodeId, new HttpQueryTool.Callback<Throwable>() {
-						@Override
-						public void handle(InputStream is) {
-							try {
-								setHeaders(resp, name);
-								//resp.setHeader("Content-Length",""+is.available());
-								StreamUtils.copy(is, bufferOut);
-							} catch (Throwable e) {
-								this.setResult(e);
-							}
-						}
-					});
-					if(throwable != null){
-						throw throwable;
-					}
-					return;
-				}
-				else if(mode.equals(Mode.redirect)){
-					resp.sendRedirect(nodeService.getProperty(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(),CCConstants.LOM_PROP_TECHNICAL_LOCATION));
-					return;
-				}
-			}
-			setHeaders(resp, name);
-			if(length != null) {
-				resp.setHeader("Content-Length", Long.toString(length));
-			}
-			StreamUtils.copy(is, bufferOut);
+			downloadNodeInternal(nodeId, resp, mode, originalNodeId, version, nodeService, nodeRef, name);
 
 		}catch(Throwable t){
 			logger.error(t);
 			throw new ErrorFilter.ErrorFilterException(t);
 		}
+	}
+
+	private void downloadNodeInternal(String nodeId, HttpServletResponse resp, Mode mode,
+									 String originalNodeId,
+									  String version, NodeService nodeService,
+									  NodeRef nodeRef, String name) throws Throwable {
+		OutputStream bufferOut = resp.getOutputStream();
+		InputStream is=null;
+		Long length=null;
+		try {
+			if(originalNodeId != null){
+				String finalVersion = version;
+				is = AuthenticationUtil.runAsSystem(() -> {
+					try {
+						return nodeService.getContent(
+								StoreRef.PROTOCOL_WORKSPACE,
+								StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+								originalNodeId,
+								finalVersion,
+								ContentModel.PROP_CONTENT.toString());
+					} catch (Throwable ignored) {
+					}
+					return null;
+				});
+
+				length = AuthenticationUtil.runAsSystem(() -> {
+					try {
+						return nodeService.getContentLength(
+								StoreRef.PROTOCOL_WORKSPACE,
+								StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+								originalNodeId,
+								finalVersion,
+								ContentModel.PROP_CONTENT.toString());
+					} catch (Throwable ignored) {
+					}
+					return null;
+				});
+			} else {
+				is = nodeService.getContent(
+						StoreRef.PROTOCOL_WORKSPACE,
+						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+						nodeRef.getId(),
+						version,
+						ContentModel.PROP_CONTENT.toString());
+				length = nodeService.getContentLength(
+						StoreRef.PROTOCOL_WORKSPACE,
+						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+						nodeRef.getId(),
+						version,
+						ContentModel.PROP_CONTENT.toString());
+			}
+		} catch(Throwable ignored){
+
+		}
+		if(is==null || is.available()==0){
+			if(mode.equals(Mode.passthrough)) {
+				Throwable throwable = handleStreamFromLocation(nodeId, new HttpQueryTool.Callback<Throwable>() {
+					@Override
+					public void handle(InputStream is) {
+						try {
+							setHeaders(resp, name);
+							//resp.setHeader("Content-Length",""+is.available());
+							StreamUtils.copy(is, bufferOut);
+						} catch (Throwable e) {
+							this.setResult(e);
+						}
+					}
+				});
+				if(throwable != null){
+					throw throwable;
+				}
+				return;
+			}
+			else if(mode.equals(Mode.redirect)){
+				resp.sendRedirect(nodeService.getProperty(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(),CCConstants.LOM_PROP_TECHNICAL_LOCATION));
+				return;
+			}
+		}
+		setHeaders(resp, name);
+		if(length != null) {
+			resp.setHeader("Content-Length", Long.toString(length));
+		}
+		StreamUtils.copy(is, bufferOut);
 	}
 
 	/**
@@ -203,14 +229,17 @@ public class DownloadServlet extends HttpServlet{
 		new HttpQueryTool().queryStream(location,callback);
 		return callback.getResult();
 	}
-	private static String checkAndGetCollectionRef(String nodeId){
+	private static String checkAndGetCollectionRef(String nodeId) throws InsufficientPermissionException {
 		NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 		if(NodeServiceHelper.hasAspect(ref,CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
-			NodeServiceHelper.validatePermissionRestrictedAccess(ref, CCConstants.PERMISSION_READ_ALL);
+			NodeServiceHelper.validatePermissionRestrictedAccess(ref, CCConstants.PERMISSION_READ_ALL, CCConstants.PERMISSION_DOWNLOAD_CONTENT);
 			return NodeServiceHelper.getProperty(ref, CCConstants.CCM_PROP_IO_ORIGINAL);
+		} else {
+			permissionChecking.checkNodePermissions(nodeId, new String[]{CCConstants.PERMISSION_READ_ALL, CCConstants.PERMISSION_DOWNLOAD_CONTENT});
 		}
 		return null;
 	}
+
 	public static void downloadZip(HttpServletResponse resp, String[] nodeIds, String parentNodeId, String token, String password, String zipName) throws IOException {
 		if(zipName==null || zipName.isEmpty())
 			zipName="Download.zip";
@@ -298,55 +327,17 @@ public class DownloadServlet extends HttpServlet{
 						String finalNodeId = nodeId;
 
                         AuthenticationUtil.RunAsWork work= () ->{
-							try {
-								addMetadataFile(finalNodeId, zos);
-							} catch (Throwable t) {
-								logger.warn("Could not export metadata for node "+finalNodeId, t);
-							}
-							String filename = nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),finalNodeId,CCConstants.CM_NAME);
-                            String wwwurl = nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),finalNodeId,CCConstants.CCM_PROP_IO_WWWURL);
-                            if(wwwurl!=null){
-                                errors.add( filename+": Is a link and can not be downloaded: " + wwwurl);
-                                return null;
-                            }
-							InputStream reader = null;
-							try {
-								reader = nodeService.getContent(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),finalNodeId,null, ContentModel.PROP_CONTENT.toString());
-							} catch (Throwable t) {
-							}
-							if(reader==null){
-                                errors.add( filename+": Has no content" );
-                                return null;
-                            }
-							if(!NodeServiceHelper.downloadAllowed(finalNodeId)){
-								errors.add(filename+": Download not allowed");
-								return null;
-							}
-                            resp.setContentType("application/zip");
-
-                            DataInputStream in = new DataInputStream(reader);
-							if(filenames.contains(filename)) {
-								String[] splitted = filename.split("\\.");
-								splitted[Math.max(0, splitted.length - 2)] += " - " + finalNodeId;
-								filename = StringUtils.join(splitted, ".");
-							}
-							filenames.add(filename);
-                            ZipEntry entry = new ZipEntry(filename);
-                            zos.putNextEntry(entry);
-                            byte[] buffer=new byte[1024];
-                            while(true){
-                                int l=in.read(buffer);
-                                if(l<=0)
-                                    break;
-                                zos.write(buffer,0,l);
-                            }
-                            in.close();
-                            return null;
-                        };
+							addNodeToZip(resp, finalNodeId, zos, nodeService, errors, filenames);
+							return null;
+						};
                         if(isCollectionRef)
                             AuthenticationUtil.runAsSystem(work);
                         else
                             work.doWork();
+					}catch(InsufficientPermissionException e){
+						logger.debug(e);
+						String filename = nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,CCConstants.CM_NAME);
+						errors.add(filename+": Download not allowed");
 					}catch(Throwable t){
                         logger.warn(t.getMessage(),t);
                         throw t;
@@ -374,6 +365,54 @@ public class DownloadServlet extends HttpServlet{
 		catch(Throwable t){
 			t.printStackTrace();
 		}
+	}
+
+	private static void addNodeToZip(HttpServletResponse resp,
+									 String finalNodeId,
+									 ZipOutputStream zos, NodeService nodeService, List<String> errors, List<String> filenames) throws IOException, InsufficientPermissionException {
+		try {
+			addMetadataFile(finalNodeId, zos);
+		} catch (Throwable t) {
+			logger.warn("Could not export metadata for node "+ finalNodeId, t);
+		}
+		String filename = nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), finalNodeId,CCConstants.CM_NAME);
+		String wwwurl = nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), finalNodeId,CCConstants.CCM_PROP_IO_WWWURL);
+		if(wwwurl!=null){
+			errors.add( filename+": Is a link and can not be downloaded: " + wwwurl);
+			return;
+		}
+		InputStream reader = null;
+		try {
+			reader = nodeService.getContent(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), finalNodeId,null, ContentModel.PROP_CONTENT.toString());
+		} catch (Throwable t) {
+		}
+		if(reader==null){
+errors.add( filename+": Has no content" );
+			return;
+}
+		if(!NodeServiceHelper.downloadAllowed(finalNodeId)){
+			errors.add(filename+": Download not allowed");
+			return;
+		}
+		resp.setContentType("application/zip");
+
+		DataInputStream in = new DataInputStream(reader);
+		if(filenames.contains(filename)) {
+			String[] splitted = filename.split("\\.");
+			splitted[Math.max(0, splitted.length - 2)] += " - " + finalNodeId;
+			filename = StringUtils.join(splitted, ".");
+		}
+		filenames.add(filename);
+		ZipEntry entry = new ZipEntry(filename);
+		zos.putNextEntry(entry);
+		byte[] buffer=new byte[1024];
+		while(true){
+			int l=in.read(buffer);
+			if(l<=0)
+				break;
+			zos.write(buffer,0,l);
+		}
+		in.close();
 	}
 
 	private static void addMetadataFile(String nodeId,ZipOutputStream zos) throws Throwable {

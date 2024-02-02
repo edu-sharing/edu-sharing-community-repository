@@ -847,6 +847,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		if(editorType != null && editorType.toLowerCase().equals(ConnectorService.ID_TINYMCE.toLowerCase())){
 			downloadAllowed = false;
 		}
+
+		if(downloadAllowed) {
+			downloadAllowed = hasPermissions(nodeId, new String[]{CCConstants.PERMISSION_READ_ALL, CCConstants.PERMISSION_DOWNLOAD_CONTENT});
+		}
 		return downloadAllowed;
 	}
 	/**

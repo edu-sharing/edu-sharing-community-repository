@@ -1,9 +1,6 @@
 package org.edu_sharing.service.permission;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.rpc.ACE;
@@ -99,7 +96,12 @@ public interface PermissionService {
 	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId, String[] permissions);
 	
 	public ACL getPermissions(String nodeId) throws Exception;
-	public List<String> getPermissionsForAuthority(String nodeId,String authorityId) throws InsufficientPermissionException;
+	public List<String> getPermissionsForAuthority(String nodeId,String authorityId, Collection<String> permissions) throws InsufficientPermissionException;
+
+	default List<String> getPermissionsForAuthority(String nodeId,String authorityId) throws InsufficientPermissionException {
+		return getPermissionsForAuthority(nodeId, authorityId, CCConstants.getPermissionList());
+	}
+
 
 	void setPermission(String nodeId, String authority, String permission);
 

@@ -258,10 +258,10 @@ public class PermissionServiceWSImpl implements PermissionService {
 	}
 
 	@Override
-	public List<String> getPermissionsForAuthority(String nodeId, String authorityId) throws InsufficientPermissionException {
+	public List<String> getPermissionsForAuthority(String nodeId, String authorityId, Collection<String> permissions) throws InsufficientPermissionException {
 		return null;
 	}
-	
+
 	@Override
 	public void setPermission(String nodeId, String authority, String permission) {
 		// TODO Auto-generated method stub

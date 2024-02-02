@@ -1725,6 +1725,8 @@ public class CCConstants {
 	 */
 	public final static String PERMISSION_CC_PUBLISH = "CCPublish";
 	public final static String PERMISSION_READ_ALL = "ReadAll";
+
+	public final static String PERMISSION_DOWNLOAD_CONTENT = "DownloadContent";
 	public final static String PERMISSION_READ_PREVIEW = "ReadPreview";
 
 	public final static String PERMISSION_COMMENT = "Comment";
@@ -1936,15 +1938,16 @@ public class CCConstants {
 
 
 
-	private static ArrayList<String> permission = null;
+	private static Set<String> permission = null;
 
-	public static ArrayList<String> getPermissionList(){
+	public static Set<String> getPermissionList(){
 		if(permission == null){
-			permission = new ArrayList<>();
+			permission = new HashSet<>();
 			permission.add(PERMISSION_ALL);
 			permission.add(PERMISSION_READ);
 			permission.add(PERMISSION_READ_PREVIEW);
 			permission.add(PERMISSION_READ_ALL);
+			permission.add(PERMISSION_DOWNLOAD_CONTENT);
 			permission.add(PERMISSION_COMMENT);
 			permission.add(PERMISSION_FEEDBACK);
 			permission.add(PERMISSION_RATE);

@@ -99,7 +99,8 @@
       <permissionGroup name="ReadChildren" expose="true" allowFullControl="false" />  
       <permissionGroup name="WriteProperties" expose="true" allowFullControl="false" />  
       <permissionGroup name="ReadContent" expose="false" allowFullControl="false" />  
-      <permissionGroup name="WriteContent" expose="false" allowFullControl="false" />  
+      <permissionGroup name="DownloadContent" expose="true" allowFullControl="false" />
+      <permissionGroup name="WriteContent" expose="false" allowFullControl="false" />
       <permissionGroup name="ExecuteContent" expose="false" allowFullControl="false" />  
       <permissionGroup name="DeleteNode" expose="true" allowFullControl="false" />  
       <permissionGroup name="DeleteChildren" expose="true" allowFullControl="false" />  
@@ -216,6 +217,12 @@
          <requiredPermission on="parent" name="_ReadChildren" implies="false"/>
          -->
       </permission>
+
+       <!-- The permission to download content.                                               -->
+
+       <permission name="_DownloadContent" expose="false">
+           <grantedToGroup permissionGroup="DownloadContent"/>
+       </permission>
 
       <!-- The permission to write content.                                              -->
       
@@ -372,7 +379,8 @@
       
       <!-- edu-sharing The Consumer permission allows read to everything by default.   -->
       <permissionGroup name="Consumer" allowFullControl="false" expose="true" >
-          <includePermissionGroup permissionGroup="ReadAll" type="sys:base" />
+          <includePermissionGroup type="sys:base" permissionGroup="ReadAll" />
+          <includePermissionGroup type="sys:base" permissionGroup="DownloadContent"/>
           <includePermissionGroup type="sys:base" permissionGroup="Comment"/>
           <includePermissionGroup type="sys:base" permissionGroup="Feedback"/>
           <includePermissionGroup type="sys:base" permissionGroup="RateRead"/>
@@ -391,6 +399,7 @@
           <includePermissionGroup type="sys:base" permissionGroup="ReadChildren"/>
           <includePermissionGroup type="sys:base" permissionGroup="WriteProperties"/>
           <includePermissionGroup type="sys:base" permissionGroup="ReadContent"/>
+          <includePermissionGroup type="sys:base" permissionGroup="DownloadContent"/>
           <includePermissionGroup type="sys:base" permissionGroup="DeleteChildren"/>
           <includePermissionGroup type="sys:base" permissionGroup="CreateChildren"/>
           <includePermissionGroup type="sys:base" permissionGroup="LinkChildren"/>
