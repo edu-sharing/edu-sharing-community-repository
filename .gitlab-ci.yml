@@ -138,7 +138,7 @@ test docker:
     - mkdir -p "$MAVEN_HOME"
     - mvn $MAVEN_CLI -s .mvn/settings.xml install
     - pushd deploy/docker/compose/target/compose
-    - docker compose -f 1_repository-common.yml up
+    - docker compose -f 1_repository-common.yml up -d
     - "until wait-for-it docker:8100 -t 3; do sleep 1; done"
     - "until [[ $(curl -sSf -w '%{http_code}\n' -o /dev/null -H 'Accept: application/json' http://docker:8100/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3) -eq 200 ]]; do sleep 1; done"
     - "curl -m 300 -H 'Accept: application/json' --user 'admin:admin' http://docker:8100/edu-sharing/rest/openapi.json | jq -S . > openapi.json"
