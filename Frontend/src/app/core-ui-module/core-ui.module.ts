@@ -47,6 +47,7 @@ import { ListItemsModule } from '../features/list-items/list-items.module';
 import { MdsNodeRelationsWidgetComponent } from '../common/ui/node-render/node-relations/node-relations-widget.component';
 import { AppModule } from '../app.module';
 import { NodeEntriesModule } from '../features/node-entries/node-entries.module';
+import { ImprintPrivacyFooterComponent } from '../common/ui/imprint-privacy-footer/imprint-privacy-footer.component';
 
 @NgModule({
     declarations: [
@@ -56,6 +57,7 @@ import { NodeEntriesModule } from '../features/node-entries/node-entries.module'
         UserTileComponent,
         VideoControlsComponent,
         MdsNodeRelationsWidgetComponent,
+        ImprintPrivacyFooterComponent,
         ToastMessageComponent,
         UrlPipe,
         NodesDragSourceDirective,
@@ -102,6 +104,7 @@ import { NodeEntriesModule } from '../features/node-entries/node-entries.module'
         ListOptionItemComponent,
         VideoControlsComponent,
         ImageConfigDirective,
+        ImprintPrivacyFooterComponent,
         UserTileComponent,
         CollectionChooserComponent,
         UrlPipe,

@@ -281,16 +281,10 @@ div.download {
     }
 }
 
-.imprint-and-privacy-info {
-    text-align: center;
-    background-color: white;
-    color: $textLight;
-    position: relative;
+es-imprint-privacy-footer {
+    position: absolute;
+    width: 100%;
     margin-top: -21px;
-    font-size: 89%;
-    a {
-        color: $textLight;
-    }
 }
 
 @media (pointer: coarse) {

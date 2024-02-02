@@ -1,0 +1,21 @@
+<ng-container *ngIf="imprintUrl || privacyInformationUrl">
+  <a
+    cdkMonitorElementFocus
+    tabindex="0"
+    class="clickable"
+    *ngIf="imprintUrl"
+    (click)="openImprint()"
+    (keyup.enter)="openImprint()"
+    >{{ 'IMPRINT' | translate }}</a
+  >
+  {{ imprintUrl && privacyInformationUrl ? '/' : '' }}
+  <a
+    cdkMonitorElementFocus
+    tabindex="0"
+    class="clickable"
+    *ngIf="privacyInformationUrl"
+    (click)="openPrivacy()"
+    (keyup.enter)="openPrivacy()"
+    >{{ 'PRIVACY_INFORMATION' | translate }}</a
+  >
+</ng-container>

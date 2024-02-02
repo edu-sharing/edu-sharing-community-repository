@@ -29,7 +29,7 @@ import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { trigger } from '@angular/animations';
 import { Location, PlatformLocation } from '@angular/common';
-import { OPEN_URL_MODE, UIConstants } from '../../../core-module/ui/ui-constants';
+import { UIConstants } from '../../../core-module/ui/ui-constants';
 import { HttpClient } from '@angular/common/http';
 import {
     ConfigurationHelper,
@@ -178,22 +178,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             });
         });
         this.frame.broadcastEvent(FrameEventsService.EVENT_VIEW_OPENED, 'node-render');
-        // get the imprint and privacy infos for the custom footer
-        this.configurationService.getAll().subscribe((configData: any) => {
-            this.config = configData;
-        });
-    }
-
-    openImprint() {
-        UIHelper.openUrl(this.config.imprintUrl, this.bridge, OPEN_URL_MODE.BlankSystemBrowser);
-    }
-
-    openPrivacy() {
-        UIHelper.openUrl(
-            this.config.privacyInformationUrl,
-            this.bridge,
-            OPEN_URL_MODE.BlankSystemBrowser,
-        );
     }
 
     ngOnInit(): void {
