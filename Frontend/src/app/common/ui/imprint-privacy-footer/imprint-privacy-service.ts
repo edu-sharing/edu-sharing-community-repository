@@ -1,15 +1,13 @@
-import { Component } from '@angular/core';
-import { ConfigService } from 'ngx-edu-sharing-api';
+import { Injectable } from '@angular/core';
+import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { OPEN_URL_MODE } from '../../../core-module/ui/ui-constants';
-import { BridgeService } from '../../../core-bridge-module/bridge.service';
+import { ConfigService } from 'ngx-edu-sharing-api';
 
-@Component({
-    selector: 'es-imprint-privacy-footer',
-    templateUrl: './imprint-privacy-footer.component.html',
-    styleUrls: ['./imprint-privacy-footer.component.scss'],
+@Injectable({
+    providedIn: 'root',
 })
-export class ImprintPrivacyFooterComponent {
+export class ImprintPrivacyService {
     imprintUrl: string;
     privacyInformationUrl: string;
     constructor(private configService: ConfigService, private bridge: BridgeService) {
