@@ -12,6 +12,7 @@ whitelist=(
   "jakarta.xml.soap-api-2.0.1.jar:alf-lib" #todo remove when soap is removed
   "jakarta.xml.soap-api-2.0.1.jar:edu-lib"
   "stax-api-1.0.1.jar:alf-lib"
+  "stax-api-1.0-2.jar:alf-lib"
 )
 
 files=()

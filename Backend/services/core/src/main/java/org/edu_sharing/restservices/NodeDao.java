@@ -1,13 +1,5 @@
 package org.edu_sharing.restservices;
 
-import java.io.InputStream;
-import java.io.Serializable;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.core.util.Json;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -20,22 +12,13 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
-import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
-import org.edu_sharing.repository.server.tools.*;
-import org.edu_sharing.restservices.collection.v1.model.CollectionRelationReference;
-import org.edu_sharing.service.authority.AuthorityService;
-import org.edu_sharing.service.collection.CollectionService;
-import org.edu_sharing.service.collection.CollectionServiceFactory;
-import org.edu_sharing.service.model.CollectionRef;
-import org.edu_sharing.service.model.NodeRefImpl;
-import org.edu_sharing.service.notification.NotificationService;
-import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
+import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
-import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.metadataset.v2.MetadataReader;
+import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.rpc.User;
@@ -44,24 +27,33 @@ import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.collection.v1.model.CollectionReference;
+import org.edu_sharing.restservices.collection.v1.model.CollectionRelationReference;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeShare;
 import org.edu_sharing.restservices.node.v1.model.NotifyEntry;
 import org.edu_sharing.restservices.node.v1.model.WorkflowHistory;
-import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.shared.NodeRef;
+import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.shared.NodeSearch.Facet;
 import org.edu_sharing.restservices.shared.NodeSearch.Facet.Value;
+import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.collection.CollectionService;
+import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.comment.CommentService;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
+import org.edu_sharing.service.model.CollectionRef;
+import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.nodeservice.*;
 import org.edu_sharing.service.nodeservice.NodeService;
+import org.edu_sharing.service.notification.NotificationService;
 import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
+import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.rating.RatingDetails;
@@ -79,9 +71,18 @@ import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import org.springframework.context.ApplicationContext;
 
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class NodeDao {
     private static Logger logger = Logger.getLogger(NodeDao.class);
@@ -185,6 +186,7 @@ public class NodeDao {
         props.remove(CCConstants.getValidLocalName(CCConstants.CM_NAME));
         return changeProperties(props);
     }
+
 
     enum ExistingMode {
         // Fallback if the original node does not exist
@@ -661,7 +663,7 @@ public class NodeDao {
                 isCollectionHomePath = false;
             }
 
-			this.nodeRef = nodeRef;
+            this.nodeRef = nodeRef;
 
             this.repoDao = repoDao;
             this.nodeId = nodeRef.getNodeId();
@@ -1214,7 +1216,6 @@ public class NodeDao {
     }
 
     public List<NodeVersion> getHistory() throws DAOException {
-
         List<NodeVersion> history = new ArrayList<NodeVersion>();
         for (Entry<String, HashMap<String, Object>> version : getNodeHistory().entrySet()) {
             NodeVersion nodeVersion = convertVersionProps(version.getKey(), version.getValue());
@@ -1226,8 +1227,24 @@ public class NodeDao {
                 return o1.getVersion().getMinor() > o2.getVersion().getMinor() ? 1 : -1;
             return o1.getVersion().getMajor() > o2.getVersion().getMajor() ? 1 : -1;
         });
-
         return history;
+    }
+
+    public List<NodeVersionRef> getNodeRefHistory() throws DAOException {
+        try {
+            return nodeService.getVersionLabelsHistory(nodeId)
+                    .stream()
+                    .map(this::transformVersion)
+                    .sorted((lhs, rhs) -> {
+                        if (lhs.getMajor() == rhs.getMajor()) {
+                            return Integer.compare(lhs.getMinor(), rhs.getMinor());
+                        }
+                        return Integer.compare(lhs.getMajor(), rhs.getMajor());
+                    })
+                    .collect(Collectors.toList());
+        } catch (Throwable t) {
+            throw DAOException.mapping(t);
+        }
     }
 
     public NodeDao revertHistory(int major, int minor) throws DAOException {
@@ -2190,7 +2207,7 @@ public class NodeDao {
     public HashMap<String, HashMap<String, Object>> getNodeHistory() throws DAOException {
         try {
             if (nodeHistory == null) {
-                this.nodeHistory = new HashMap<String, HashMap<String, Object>>();
+                this.nodeHistory = new HashMap<>();
 
                 HashMap<String, HashMap<String, Object>> versionHistory = nodeService
                         .getVersionHistory(nodeId);
@@ -2502,16 +2519,16 @@ public class NodeDao {
         nodeService.setOwner(this.getId(), username);
     }
 
-	public void setProperty(String property, Serializable value, boolean keepModifiedDate) {
-		if(keepModifiedDate) {
-			nodeService.keepModifiedDate(
-					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), this.getId(),
-					() -> setPropertyInternal(property, value)
-			);
-		} else {
-			setPropertyInternal(property, value);
-		}
-	}
+    public void setProperty(String property, Serializable value, boolean keepModifiedDate) {
+        if (keepModifiedDate) {
+            nodeService.keepModifiedDate(
+                    StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), this.getId(),
+                    () -> setPropertyInternal(property, value)
+            );
+        } else {
+            setPropertyInternal(property, value);
+        }
+    }
 
 	private void setPropertyInternal(String property, Serializable value) {
         if (value == null) {

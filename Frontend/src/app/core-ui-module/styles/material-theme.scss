@@ -183,10 +183,10 @@ mat-tab-group {
     // white background, primary as content color
     color: $primary;
 }
-.mat-flat-button,
-.mat-raised-button,
-.mat-fab,
-.mat-mini-fab {
+.mat-mdc-unelevated-button:not(:disabled),
+.mat-mdc-raised-button:not(:disabled),
+.mat-mdc-fab:not(:disabled),
+.mat-mdc-mini-fab:not(:disabled) {
     // `color="warn"`
     &.mat-warn {
         // Red background, same as negative
@@ -414,23 +414,14 @@ i.mat-icon {
     width: 1em;
 }
 button {
-    &.mat-button,
-    &.mat-flat-button,
-    &.mat-raised-button,
-    &.mat-icon-button,
-    &.mat-fab {
+    &.mat-mdc-button,
+    &.mat-mdc-unelevated-button,
+    &.mat-mdc-raised-button,
+    &.mat-mdc-icon-button,
+    &.mat-mdc-fab {
         &.cdk-keyboard-focused {
             @include setGlobalKeyboardFocus();
         }
-    }
-}
-.mat-button-wrapper {
-    position: relative;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    > i {
-        width: 35px;
     }
 }
 .mat-button-no-uppercase .mat-button-wrapper {

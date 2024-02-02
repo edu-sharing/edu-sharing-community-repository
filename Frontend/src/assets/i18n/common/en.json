@@ -295,6 +295,7 @@
   },
   "NODE_PROPOSAL": {
     "cm:created": "proposed at",
+    "ccm:collection_proposal_status": "proposal status",
     "cm:creator": "proposed by"
   },
   "COOKIE_INFO": {

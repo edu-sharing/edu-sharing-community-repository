@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
+import lombok.NonNull;
 import org.alfresco.service.cmr.repository.*;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.rpc.User;
@@ -100,6 +101,8 @@ public interface NodeService {
 
     InputStream getContent(String storeProtocol, String storeId, String nodeId, String version, String contentProp) throws Throwable;
 
+	Long getContentLength(String storeProtocol, String storeId, String nodeId, String version, String contentProp) throws Throwable;
+
 	String getContentHash(String storeProtocol, String storeId, String nodeId, String version, String contentProp);
 
 	public void addAspect(String nodeId, String aspect);
@@ -109,6 +112,10 @@ public interface NodeService {
 	public void revertVersion(String nodeId, String verLbl) throws Exception;
 	
 	public HashMap<String, HashMap<String,Object>> getVersionHistory(String nodeId) throws Throwable;
+
+	@NonNull
+	List<String> getVersionLabelsHistory(String nodeId);
+
 	/**
 	 * Import the node from a foreign repository to the local one, and return the local node Ref
 	 * @param nodeId

@@ -32,6 +32,21 @@ export class NodeCache<T> {
                 );
             }
         }
+        // for the first request
+        console.warn(
+            'Requested range was not found in the slices cache, falling back to a smaller slice (the backend resolved too less data)',
+            range,
+            this._slices,
+        );
+        for (const slice of this._slices) {
+            if (slice.startIndex <= range.startIndex && slice.endIndex >= range.startIndex) {
+                return slice.data.slice(
+                    range.startIndex - slice.startIndex,
+                    range.endIndex - slice.startIndex,
+                );
+            }
+        }
+        console.error('Could not find any slice for the range', range, this._slices);
         return null;
     }
 

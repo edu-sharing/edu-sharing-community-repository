@@ -109,6 +109,7 @@ public class DownloadServlet extends HttpServlet{
 				originalNodeId = nodeId;
 			}
 			InputStream is=null;
+			Long length=null;
 			try {
 				if(originalNodeId != null){
 					String finalVersion = version;
@@ -124,8 +125,27 @@ public class DownloadServlet extends HttpServlet{
 						}
 						return null;
 					});
+
+					length = AuthenticationUtil.runAsSystem(() -> {
+						try {
+							return nodeService.getContentLength(
+									StoreRef.PROTOCOL_WORKSPACE,
+									StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+									originalNodeId,
+									finalVersion,
+									ContentModel.PROP_CONTENT.toString());
+						} catch (Throwable ignored) {
+						}
+						return null;
+					});
 				} else {
 					is = nodeService.getContent(
+							StoreRef.PROTOCOL_WORKSPACE,
+							StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+							nodeId,
+							version,
+							ContentModel.PROP_CONTENT.toString());
+					length = nodeService.getContentLength(
 							StoreRef.PROTOCOL_WORKSPACE,
 							StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
 							nodeId,
@@ -160,7 +180,9 @@ public class DownloadServlet extends HttpServlet{
 				}
 			}
 			setHeaders(resp, name);
-			//resp.setHeader("Content-Length",""+is.available());
+			if(length != null) {
+				resp.setHeader("Content-Length", Long.toString(length));
+			}
 			StreamUtils.copy(is, bufferOut);
 
 		}catch(Throwable t){

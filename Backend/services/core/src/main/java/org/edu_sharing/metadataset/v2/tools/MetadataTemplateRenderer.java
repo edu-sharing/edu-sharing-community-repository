@@ -550,7 +550,11 @@ public class MetadataTemplateRenderer {
 		if(widget.getType()!=null){
 			if(widget.getType().equals("date")){
 				try{
-					Date dateValue = new DateTool().getDate(properties.get(widget.getId() + CCConstants.LONG_DATE_SUFFIX)[index]);
+					String[] data = properties.get(widget.getId() + CCConstants.LONG_DATE_SUFFIX);
+					if(data == null) {
+						data = properties.get(widget.getId());
+					}
+					Date dateValue = new DateTool().getDate(data[0]);
 					if(widget.getFormat()!=null && !widget.getFormat().isEmpty()){
 						value=new SimpleDateFormat(widget.getFormat()).format(dateValue);
 					}

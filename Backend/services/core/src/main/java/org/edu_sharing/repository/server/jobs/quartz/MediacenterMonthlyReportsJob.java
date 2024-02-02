@@ -333,7 +333,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 						c.size() == 1 ? "NODE." + c.get(0) : "VCARD." + c.get(1))
 				)
 		).collect(Collectors.toList());
-		header.add(I18nAngular.getTranslationAngular("admin", "ADMIN.STATISTICS.HEADERS.count"));
+		//header.add(I18nAngular.getTranslationAngular("admin", "ADMIN.STATISTICS.HEADERS.count"));
 		header.addAll(STAT_FIELDS.stream().map(e ->  I18nAngular.getTranslationAngular("admin", "ADMIN.STATISTICS.ACTIONS." + e)).collect(Collectors.toList()));
 		Map<String, Set<String>> additionalFieldValues = new HashMap<>();
 		additionalFields.forEach(f -> {
@@ -396,7 +396,8 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 					STAT_FIELDS.stream().map(
 							event -> entry.getValue().getCounts().getOrDefault(event, 0)
 					).reduce(Integer::sum).orElse(0);
-			csvEntry.add(String.valueOf(totalSum));
+			// csvEntry.add(String.valueOf(totalSum));
+
 			// add counts per stat field
 			csvEntry.addAll(STAT_FIELDS.stream().map(
 					event -> entry.getValue().getCounts().getOrDefault(event, 0)

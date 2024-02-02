@@ -47,7 +47,15 @@ import { RouterHelper } from './router.helper';
 import { Toast } from './toast';
 
 export class UIHelper {
-    static COPY_URL_PARAMS = ['mainnav', 'reurl', 'reurlTypes', 'reurlCreate', 'applyDirectories'];
+    static COPY_URL_PARAMS = [
+        'mainnav',
+        'reurl',
+        'reurlTypes',
+        'reurlCreate',
+        'applyDirectories',
+        'onlyDownloadable',
+    ];
+
     public static getBlackWhiteContrast(color: string) {}
 
     static changeQueryParameter(router: Router, route: ActivatedRoute, name: string, value: any) {

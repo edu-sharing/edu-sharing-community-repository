@@ -21,14 +21,10 @@ WORKDIR $ALF_HOME
 COPY assets/entrypoint.sh bin/
 
 RUN set -eux \
-	&& find bin -type f -name '*.sh' -exec chmod +x {} \;
-
-RUN set -eux \
+	&& find bin -type f -name '*.sh' -exec chmod +x {} \; \
     && adduser --uid=1000 --home=$ALF_HOME --disabled-password --gecos "" --shell=/bin/bash worker \
     && chown -RL worker:worker . \
-    && chown -RL worker:worker /tmp
-
-RUN set -eux \
+    && chown -RL worker:worker /tmp \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
         ffmpeg \
@@ -49,10 +45,10 @@ ENTRYPOINT ["entrypoint.sh"]
 
 ########################################################################################################################
 
-LABEL git.branch=${git.branch}
-LABEL git.closest.tag.name=${git.closest.tag.fixed}
-LABEL git.commit.id=${git.commit.id}
-LABEL git.dirty=${git.dirty}
-LABEL mvn.project.artifactId=${project.artifactId}
-LABEL mvn.project.groupId=${project.groupId}
-LABEL mvn.project.version=${project.version}
+LABEL git.branch=${git.branch} \
+git.closest.tag.name=${git.closest.tag.fixed} \
+git.commit.id=${git.commit.id} \
+git.dirty=${git.dirty} \
+mvn.project.artifactId=${project.artifactId} \
+mvn.project.groupId=${project.groupId} \
+mvn.project.version=${project.version}

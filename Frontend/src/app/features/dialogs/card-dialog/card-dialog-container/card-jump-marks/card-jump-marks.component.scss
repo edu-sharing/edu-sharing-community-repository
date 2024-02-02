@@ -8,19 +8,22 @@
     padding: 10px 0;
 }
 
-button {
+button.mat-mdc-button {
     border-radius: 0;
     margin: 0;
     padding: 10px 5px;
     width: 100%;
+    height: unset;
     transition: all $transitionNormal;
     white-space: normal;
-    ::ng-deep .mat-button-wrapper {
+    ::ng-deep .mdc-button__label {
         justify-content: flex-start;
         text-align: start;
         line-height: 1.5;
         text-transform: unset;
+        width: 100%;
         > i {
+            width: 35px;
             text-align: center;
             flex-shrink: 0;
         }
