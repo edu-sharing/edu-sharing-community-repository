@@ -27,13 +27,18 @@ export class AddMaterialFeedbackComponent {
 
     async addFeedback(values: Node[] | Values) {
         this.toast.showProgressDialog();
-        const result = await this.feedbackService
-            .addFeedback({
-                repository: RestConstants.HOME_REPOSITORY,
-                node: this._node.ref.id,
-                body: values as Values,
-            })
-            .toPromise();
+        try {
+            const result = await this.feedbackService
+                .addFeedback({
+                    repository: RestConstants.HOME_REPOSITORY,
+                    node: this._node.ref.id,
+                    body: values as Values,
+                })
+                .toPromise();
+            this.toast.toast('FEEDBACK.TOAST');
+        } catch (e) {
+            this.toast.error(e);
+        }
         this.toast.closeModalDialog();
         this.onClose.emit();
         if (this.queryParams.feedbackClose) {

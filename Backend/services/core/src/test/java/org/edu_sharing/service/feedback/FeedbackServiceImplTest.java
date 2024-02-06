@@ -11,7 +11,9 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
+import org.edu_sharing.service.authority.AuthorityServiceImpl;
 import org.edu_sharing.service.feedback.model.FeedbackData;
 import org.edu_sharing.service.feedback.model.FeedbackResult;
 import org.edu_sharing.service.nodeservice.NodeService;
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class FeedbackServiceImplTest {
@@ -49,6 +52,7 @@ class FeedbackServiceImplTest {
     private MockedStatic<AuthorityServiceHelper> authorityServiceHelperMockedStatic;
     private MockedStatic<Context> contextMockedStatic;
     private String sessionId;
+    private MockedStatic<AuthorityServiceFactory> authorityServiceFactoryMockedStatic;
 
     @BeforeEach
     void setUp() {
@@ -60,11 +64,16 @@ class FeedbackServiceImplTest {
         NodeRef userNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, UUID.randomUUID().toString());
         nodeServiceHelperMockedStatic = Mockito.mockStatic(NodeServiceHelper.class);
         authorityServiceHelperMockedStatic = Mockito.mockStatic(AuthorityServiceHelper.class);
+        authorityServiceFactoryMockedStatic = Mockito.mockStatic(AuthorityServiceFactory.class);
+        AuthorityServiceImpl authorityServiceMock = Mockito.mock(AuthorityServiceImpl.class);
+        authorityServiceFactoryMockedStatic.when(() -> AuthorityServiceFactory.getLocalService()).thenReturn(authorityServiceMock);
+        Mockito.lenient().when(authorityServiceMock.isGuest()).thenReturn(false);
         authenticationUtilMockedStatic = Mockito.mockStatic(AuthenticationUtil.class);
         contextMockedStatic = Mockito.mockStatic(Context.class);
         Context context = Mockito.mock(Context.class);
         contextMockedStatic.when(Context::getCurrentInstance).thenReturn(context);
         Mockito.lenient().when(Context.getCurrentInstance().getSessionId()).thenReturn(sessionId);
+        authorityServiceHelperMockedStatic.when(() -> AuthorityServiceHelper.getAuthorityNodeRef(userId)).thenReturn(userNodeRef);
         authorityServiceHelperMockedStatic.when(() -> AuthorityServiceHelper.getAuthorityNodeRef(userId)).thenReturn(userNodeRef);
         authenticationUtilMockedStatic.when(AuthenticationUtil::getFullyAuthenticatedUser).thenReturn(userId);
         authenticationUtilMockedStatic.when(AuthenticationUtil.runAsSystem(any())).thenAnswer(invocation ->
@@ -79,6 +88,7 @@ class FeedbackServiceImplTest {
     @AfterEach
     void teardown() {
         authenticationUtilMockedStatic.close();
+        authorityServiceFactoryMockedStatic.close();
         authorityServiceHelperMockedStatic.close();
         nodeServiceHelperMockedStatic.close();
         contextMockedStatic.close();
