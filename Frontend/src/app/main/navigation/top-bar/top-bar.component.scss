@@ -14,7 +14,7 @@
     max-width: 160px;
 }
 
-.imprint {
+es-imprint-privacy ::ng-deep {
     position: absolute;
     right: 10px;
     top: 5px;
@@ -196,7 +196,7 @@ es-user-avatar {
     .rocketchat {
         display: flex;
     }
-    .imprint {
+    es-imprint-privacy {
         display: none;
     }
 }

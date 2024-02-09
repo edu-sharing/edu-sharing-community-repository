@@ -20,8 +20,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.HashMap;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 @Disabled
@@ -36,6 +35,7 @@ class SearchServiceDDBImplTest {
 
     @BeforeEach
     void setUp() {
+        assertNotEquals("", apiKey);
         alfAppContextGateMockedStatic = Mockito.mockStatic(AlfAppContextGate.class);
         ApplicationContext applicationContextMock = Mockito.mock(ApplicationContext.class);
         Mockito.when(applicationContextMock.getBean(ArgumentMatchers.anyString())).thenReturn(null);
@@ -89,6 +89,9 @@ class SearchServiceDDBImplTest {
             // assertEquals(1, ((List)result2.get(CCConstants.LOM_PROP_GENERAL_KEYWORD)).size());
             assertEquals("Wed Mar 01 14:00:16 CET 2023", result2.get(CCConstants.CM_PROP_C_MODIFIED).toString());
             assertEquals(CCConstants.COMMON_LICENSE_CC_ZERO, result2.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY));
+
+            HashMap<String, Object> result3 = underTestNode.getProperties(null, null, "7TB7U4SGT5F5ONT6HI4JDUD6HWMWGP7H");
+            assertEquals("100 DDR-Aktfotos :die schönsten Frauen", result3.get(CCConstants.LOM_PROP_GENERAL_TITLE));
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }

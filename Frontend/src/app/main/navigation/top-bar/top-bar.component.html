@@ -130,26 +130,7 @@
         "
       ></ng-container>
     </ng-container>
-    <div class="imprint" *ngIf="config.imprintUrl || config.privacyInformationUrl">
-      <a
-        cdkMonitorElementFocus
-        tabindex="0"
-        class="clickable"
-        *ngIf="config.imprintUrl"
-        (click)="openImprint.emit()"
-        (keyup.enter)="openImprint.emit()"
-        >{{ 'IMPRINT' | translate }}</a
-      >
-      <a
-        cdkMonitorElementFocus
-        tabindex="0"
-        class="clickable"
-        *ngIf="config.privacyInformationUrl"
-        (click)="openPrivacy.emit()"
-        (keyup.enter)="openPrivacy.emit()"
-        >{{ 'PRIVACY_INFORMATION' | translate }}</a
-      >
-    </div>
+    <es-imprint-privacy></es-imprint-privacy>
     <button
       mat-icon-button
       *ngIf="currentUser && showChat"

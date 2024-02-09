@@ -367,7 +367,7 @@ export class OptionsHelperService implements OnDestroy {
         }
         if (option.scopes) {
             if (this.data.scope == null) {
-                console.warn('Scope for options was not set, some may missing');
+                console.warn('Scope for options was not set, some may missing', option.name);
                 return false;
             }
             if (option.scopes.indexOf(this.data.scope) === -1) {
@@ -495,8 +495,15 @@ export class OptionsHelperService implements OnDestroy {
         applyNode.showAlways = true;
         applyNode.group = DefaultGroups.Primary;
         applyNode.priority = 10;
-        applyNode.customShowCallback = (nodes) => {
-            return this.queryParams.applyDirectories === 'true' || (nodes && !nodes[0].isDirectory);
+        applyNode.customEnabledCallback = (nodes) => {
+            // either apply directories is true or it is an file
+            return (
+                (nodes?.[0].isDirectory ? this.queryParams.applyDirectories === 'true' : true) &&
+                // and either onlyDownloadable is explicitly required or the node has a download url
+                ((this.queryParams.onlyDownloadable ?? 'false') === 'false' ||
+                    !!nodes?.[0].downloadUrl ||
+                    nodes?.[0].isDirectory)
+            );
         };
 
         /*
@@ -690,23 +697,23 @@ export class OptionsHelperService implements OnDestroy {
 
         /**
          if (this.connector.getCurrentLogin() && !this.connector.getCurrentLogin().isGuest) {
-        option = new OptionItem("OPTIONS.COLLECTION", "layers", callback);
-        option.isEnabled = this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
-        option.showAsAction = true;
-        option.customShowCallback = (node: Node) => {
-            let n=ActionbarHelperService.getNodes(nodes,node);
-            if(n==null)
-                return false;
-            return this.nodeHelper.referenceOriginalExists(node) && this.nodeHelper.allFiles(nodes) && n.length>0;
-        }
-        option.enabledCallback = (node: Node) => {
-          let list = ActionbarHelperService.getNodes(nodes, node);
-          return this.nodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
-        }
-        option.disabledCallback = () =>{
-          this.connectors.getRestConnector().getBridgeService().showTemporaryMessage(MessageType.error, null,'WORKSPACE.TOAST.ADD_TO_COLLECTION_DISABLED');
-        };
-      }
+         option = new OptionItem("OPTIONS.COLLECTION", "layers", callback);
+         option.isEnabled = this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
+         option.showAsAction = true;
+         option.customShowCallback = (node: Node) => {
+         let n=ActionbarHelperService.getNodes(nodes,node);
+         if(n==null)
+         return false;
+         return this.nodeHelper.referenceOriginalExists(node) && this.nodeHelper.allFiles(nodes) && n.length>0;
+         }
+         option.enabledCallback = (node: Node) => {
+         let list = ActionbarHelperService.getNodes(nodes, node);
+         return this.nodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
+         }
+         option.disabledCallback = () =>{
+         this.connectors.getRestConnector().getBridgeService().showTemporaryMessage(MessageType.error, null,'WORKSPACE.TOAST.ADD_TO_COLLECTION_DISABLED');
+         };
+         }
          */
 
         const addNodeToCollection = new OptionItem(
@@ -1235,12 +1242,12 @@ export class OptionsHelperService implements OnDestroy {
 
         /**
          * if (this.isAllowedToEditCollection()) {
-            this.optionsCollection.push(
-                new OptionItem('COLLECTIONS.ACTIONBAR.EDIT', 'edit', () =>
-                    this.collectionEdit(),
-                ),
-            );
-        }*/
+         this.optionsCollection.push(
+         new OptionItem('COLLECTIONS.ACTIONBAR.EDIT', 'edit', () =>
+         this.collectionEdit(),
+         ),
+         );
+         }*/
         const editCollection = new OptionItem('OPTIONS.COLLECTION_EDIT', 'edit', (object) =>
             this.editCollection(this.getObjects(object)[0]),
         );

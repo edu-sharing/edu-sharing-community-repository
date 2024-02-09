@@ -45,9 +45,9 @@ import org.json.JSONObject;
 
 public class ConfigServiceImpl implements ConfigService{
 	private static Logger logger=Logger.getLogger(ConfigServiceImpl.class);
-	// Cached config
 	private static String CACHE_KEY = "CLIENT_CONFIG";
-	private static SimpleCache<String, String> configCache = (SimpleCache<String, String>) AlfAppContextGate.getApplicationContext().getBean("eduSharingConfigCache");
+	// we use a non-serializable Config as value because this is a local cache and not distributed
+	private static SimpleCache<String, Config> configCache = (SimpleCache) AlfAppContextGate.getApplicationContext().getBean("eduSharingConfigCache");
 
 	private static final Unmarshaller jaxbUnmarshaller;
 
@@ -117,8 +117,7 @@ public class ConfigServiceImpl implements ConfigService{
 	@Override
 	public Config getConfig() throws Exception {
 	    if(!"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()) && configCache.getKeys().contains(CACHE_KEY)) {
-	    	// Deep copy to prevent override cache data from contexts
-			return jacksonReader.readValue(configCache.get(CACHE_KEY));
+			return configCache.get(CACHE_KEY);
 			//return new Gson().fromJson(configCache.get(CACHE_KEY), Config.class);
 			//return SerializationUtils.clone((Config) configCache.get(CACHE_KEY));
 		}
@@ -128,8 +127,8 @@ public class ConfigServiceImpl implements ConfigService{
             config = (Config) jaxbUnmarshaller.unmarshal(is);
         }
         is.close();
-		configCache.put(CACHE_KEY, new ObjectMapper().writer().writeValueAsString(config));
-		return jacksonReader.readValue(configCache.get(CACHE_KEY));
+		configCache.put(CACHE_KEY,config);
+		return config;
 	}
 
 	private InputStream getConfigInputStream() throws IOException {
@@ -164,17 +163,22 @@ public class ConfigServiceImpl implements ConfigService{
 	}
 	@Override
 	public Config getConfigByDomain(String domain) throws Exception {
-		Config config=getConfig();
 		Context context=getContext(domain);
-		if(context!=null){
-			overrideValues(config.values,context.values);
-			if(context.language!=null)
-				config.language=overrideLanguage(config.language,context.language);
-			if(context.variables!=null)
-				config.variables=overrideVariables(config.variables,context.variables);
-			return config;
+		if(context == null) {
+			throw new IllegalArgumentException("Context with domain "+domain+" does not exists");
 		}
-		throw new IllegalArgumentException("Context with domain "+domain+" does not exists");
+		if(!"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()) && configCache.getKeys().contains(CACHE_KEY + "_" + context)) {
+			return configCache.get(CACHE_KEY + "_" + context);
+		}
+		Config config=getConfig().deepCopy();
+		overrideValues(config.values,context.values);
+		if(context.language!=null)
+			config.language = overrideLanguage(config.language,context.language);
+		if(context.variables!=null)
+			config.variables = overrideVariables(config.variables,context.variables);
+		configCache.put(CACHE_KEY + "_" + context, config);
+		return config;
+
 	}
 
 	@Override

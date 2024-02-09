@@ -47,7 +47,14 @@ import { DialogButton } from '../core-module/ui/dialog-button';
 import { LoginInfo } from 'ngx-edu-sharing-api';
 
 export class UIHelper {
-    static COPY_URL_PARAMS = ['mainnav', 'reurl', 'reurlTypes', 'reurlCreate', 'applyDirectories'];
+    static COPY_URL_PARAMS = [
+        'mainnav',
+        'reurl',
+        'reurlTypes',
+        'reurlCreate',
+        'applyDirectories',
+        'onlyDownloadable',
+    ];
 
     public static evaluateMediaQuery(type: string, value: number) {
         if (type == UIConstants.MEDIA_QUERY_MAX_WIDTH) return value > window.innerWidth;

@@ -71,6 +71,7 @@ import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { NodeDataSource } from '../../../features/node-entries/node-data-source';
 import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
 import { LocalEventsService } from '../../../services/local-events.service';
+import { BridgeService } from '../../../core-bridge-module/bridge.service';
 
 @Component({
     selector: 'es-node-render',
@@ -80,6 +81,8 @@ import { LocalEventsService } from '../../../services/local-events.service';
     animations: [trigger('fadeFast', UIAnimation.fade(UIAnimation.ANIMATION_TIME_FAST))],
 })
 export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
+    config: any;
+
     @Input() set node(node: Node | string) {
         const id = (node as Node).ref ? (node as Node).ref.id : (node as string);
         jQuery('#nodeRenderContent').html('');
@@ -109,10 +112,11 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         private frame: FrameEventsService,
         private toast: Toast,
         private cd: ChangeDetectorRef,
-        private config: ConfigurationService,
+        private configurationService: ConfigurationService,
         private route: ActivatedRoute,
         private networkService: RestNetworkService,
         private breadcrumbsService: BreadcrumbsService,
+        private bridge: BridgeService,
         private _ngZone: NgZone,
         private router: Router,
         private platformLocation: PlatformLocation,
@@ -132,7 +136,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         this.renderHelper.setViewContainerRef(viewContainerRef);
 
         this.translations.waitForInit().subscribe(() => {
-            this.banner = ConfigurationHelper.getBanner(this.config);
+            this.banner = ConfigurationHelper.getBanner(this.configurationService);
             this.connector.setRoute(this.route, this.router);
             this.networkService.prepareCache();
             this.route.queryParams.subscribe((params: Params) => {
@@ -279,7 +283,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                     UIHelper.goToDefaultLocation(
                         this.router,
                         this.platformLocation,
-                        this.config,
+                        this.configurationService,
                         false,
                     );
                 } else {
@@ -426,7 +430,10 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             return;
         }
         const parameters = {
-            showDownloadButton: this.config.instant('rendering.showDownloadButton', false),
+            showDownloadButton: this.configurationService.instant(
+                'rendering.showDownloadButton',
+                false,
+            ),
             showDownloadAdvice: !this.isOpenable,
         };
         this._node = null;
@@ -503,7 +510,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             .subscribe((nodes) => this.breadcrumbsService.setNodePath(nodes.nodes.reverse()));
     }
     private postprocessHtml() {
-        if (!this.config.instant('rendering.showPreview', true)) {
+        if (!this.configurationService.instant('rendering.showPreview', true)) {
             jQuery('.edusharing_rendering_content_wrapper').hide();
             jQuery('.showDetails').hide();
         }
