@@ -28,11 +28,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 
 @Component
-public class H5pThumbnailExecutor extends AbstractCommandExecutor implements CustomTransformerFileAdaptor {
+public class EduSharingZipThumbnailExecutor extends AbstractCommandExecutor implements CustomTransformerFileAdaptor {
 
-    private static final Logger logger = LoggerFactory.getLogger(H5pThumbnailExecutor.class);
+    private static final Logger logger = LoggerFactory.getLogger(EduSharingZipThumbnailExecutor.class);
 
-    public static String ID = "EduSharingH5pThumbnailExecutor";
+    public static String ID = "EduSharingZipThumbnailExecutor";
 
     @Override
     protected RuntimeExec createTransformCommand() {

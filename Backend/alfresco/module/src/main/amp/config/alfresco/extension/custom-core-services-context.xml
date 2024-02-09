@@ -643,28 +643,89 @@
          </list>
       </property>
    </bean>
-   
-   
-   <bean id="searchServiceInterceptor" class="org.edu_sharing.alfresco.workspace_administration.SearchServiceInterceptor">
-   </bean>
-    
-    <bean id="scopedSearchService" class="org.springframework.aop.framework.ProxyFactoryBean">
-    	<property name="targetName">
-        	 <value>searchService</value>
-      	</property>
-      	<property name="proxyInterfaces">
-        	<list>
-            	<value>org.alfresco.service.cmr.search.SearchService</value>
-         	</list>
-      	</property>
-      	<property name="interceptorNames">
-        	 <list>
-	            <value>searchServiceInterceptor</value>
-         	</list>
-      </property>
+
+    <!--
+        override transform client for getting nodeproperties in transformer app
+        currently used implementation is
+
+            org.alfresco.repo.rendition2.LocalSynchronousTransformClient
+
+        cause of properties
+            repo.event2.enabled=false
+            messaging.subsystem.autoStart=false
+
+        when removing these properties or setting to true the interceptor must be written for
+
+            org.alfresco.repo.rendition2.LocalTransformClient
+    -->
+
+
+    <bean id="localSynchronousTransformClient" class="org.edu_sharing.alfresco.transformer.EduLocalSynchronousTransformClient">
+        <property name="localTransformServiceRegistry" ref="localTransformServiceRegistry" />
+        <property name="contentService" ref="contentService" />
+        <property name="directAccessUrlEnabled" value="${local.transform.directAccessUrl.enabled}"/>
+        <property name="nodeService">
+            <ref bean="nodeService" />
+        </property>
     </bean>
-    
-    <!-- Preview Job -->
+
+    <bean id="localTransformClient" class="org.edu_sharing.alfresco.transformer.EduLocalTransformClient">
+        <property name="localTransformServiceRegistry" ref="localTransformServiceRegistry" />
+        <property name="transactionService" ref="transactionService" />
+        <property name="contentService" ref="contentService" />
+        <property name="renditionService2" ref="renditionService2" />
+        <property name="directAccessUrlEnabled" value="${local.transform.directAccessUrl.enabled}"/>
+        <property name="nodeService">
+            <ref bean="nodeService" />
+        </property>
+    </bean>
+
+    <bean id="thumbnailRegistry" parent="baseThumbnailRegistry" class="org.edu_sharing.alfresco.transformer.EduThumbnailRegistry" >
+        <property name="nodeService">
+            <ref bean="nodeService" />
+        </property>
+    </bean>
+
+
+    <bean id="localTransformServiceRegistry" class="org.edu_sharing.alfresco.transformer.EduLocalTransformServiceRegistry" >
+        <property name="jsonObjectMapper" ref="localTransformServiceRegistryJsonObjectMapper" />
+        <property name="pipelineConfigDir" value="${local.transform.pipeline.config.dir}" />
+        <property name="enabled" value="${local.transform.service.enabled}" />
+        <property name="cronExpression" value="${local.transform.service.cronExpression}"></property>
+        <property name="initialAndOnErrorCronExpression" value="${local.transform.service.initialAndOnError.cronExpression}"></property>
+        <property name="properties" ref="global-properties" />
+        <property name="transformerDebug" ref="transformerDebug" />
+        <property name="mimetypeService" ref="MimetypeService" />
+        <property name="strictMimeTypeCheck" value="${transformer.strict.mimetype.check}"/>
+        <property name="retryTransformOnDifferentMimeType" value="${content.transformer.retryOn.different.mimetype}"/>
+        <property name="shutdownIndicator" ref="shutdownIndicator" />
+        <property name="httpClientConfig" ref="httpClientConfigTransform" />
+    </bean>
+
+    <!--
+        END override transform client for getting nodeproperties in transformer app
+    -->
+
+<bean id="searchServiceInterceptor" class="org.edu_sharing.alfresco.workspace_administration.SearchServiceInterceptor">
+</bean>
+
+<bean id="scopedSearchService" class="org.springframework.aop.framework.ProxyFactoryBean">
+    <property name="targetName">
+         <value>searchService</value>
+      </property>
+      <property name="proxyInterfaces">
+        <list>
+            <value>org.alfresco.service.cmr.search.SearchService</value>
+         </list>
+      </property>
+      <property name="interceptorNames">
+         <list>
+            <value>searchServiceInterceptor</value>
+         </list>
+  </property>
+</bean>
+
+<!-- Preview Job -->
      <bean id="eduPreviewJob" class="org.springframework.scheduling.quartz.SchedulerAccessorBean">
         <property name="scheduler">
             <ref bean="schedulerFactory" />

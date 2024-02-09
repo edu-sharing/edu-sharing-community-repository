@@ -71,6 +71,14 @@
         }
       }
     ],
+    "eduResourceType": [
+      {
+        "value": {
+          "required": true,
+          "name": "eduResourceType"
+        }
+      }
+    ],
     "metadataOptions": [
       {"value": {"name": "extractMapping"}}
     ]
@@ -92,7 +100,7 @@
       ]
     },
     {
-      "transformerName": "EduSharingH5pThumbnailExecutor",
+      "transformerName": "EduSharingZipThumbnailExecutor",
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "application/zip", "targetMediaType": "image/png"},
         {"sourceMediaType": "application/gzip", "targetMediaType": "image/png"},
@@ -102,7 +110,8 @@
       ],
       "transformOptions": [
         "eduVideoThumbnail",
-        "directAccessUrl"
+        "directAccessUrl",
+        "eduResourceType"
       ]
     },
     {
@@ -112,7 +121,8 @@
       ],
       "transformOptions": [
         "eduVideoThumbnail",
-        "directAccessUrl"
+        "directAccessUrl",
+        "eduResourceType"
       ]
     },
     {
