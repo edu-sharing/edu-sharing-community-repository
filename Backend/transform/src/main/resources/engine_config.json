@@ -106,6 +106,7 @@
         {"sourceMediaType": "application/gzip", "targetMediaType": "image/png"},
 
         {"sourceMediaType": "application/zip", "priority": 49, "targetMediaType": "image/jpeg"},
+        {"sourceMediaType": "application/octet-stream", "priority": 49, "targetMediaType": "image/jpeg"},
         {"sourceMediaType": "application/gzip", "targetMediaType": "image/jpeg"}
       ],
       "transformOptions": [
@@ -135,7 +136,17 @@
       "transformOptions": [
         "metadataOptions"
       ]
+    },
+    {
+      "transformerName": "EduSharingZipTextExecuter",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/octet-stream", "priority": 49, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/zip", "priority": 49, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/gzip", "targetMediaType": "text/plain"}
+      ],
+      "transformOptions": [
+        "eduResourceType"
+      ]
     }
-
   ]
 }

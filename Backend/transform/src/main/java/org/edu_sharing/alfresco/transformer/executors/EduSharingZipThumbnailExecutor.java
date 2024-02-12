@@ -20,6 +20,8 @@ import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.tika.Tika;
+import org.edu_sharing.alfresco.transformer.executors.tools.Commands;
+import org.edu_sharing.alfresco.transformer.executors.tools.ZipTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,65 +42,12 @@ public class EduSharingZipThumbnailExecutor extends AbstractCommandExecutor impl
         /**
          * @TODO dummy command
          */
-        RuntimeExec runtimeExec = new RuntimeExec();
-        Map<String, String[]> commandsAndArguments = new HashMap<>();
-        commandsAndArguments.put(".*", new String[] { "ffmpeg", "-version" });
-        runtimeExec.setCommandsAndArguments(commandsAndArguments);
-        return runtimeExec;
+        return Commands.getFFMPegRuntimeExec();
     }
 
     @Override
     protected RuntimeExec createCheckCommand() {
         return createTransformCommand();
-    }
-
-
-
-    public static ArchiveInputStream getZipInputStream(File sourceFile) throws IOException {
-
-        InputStream is = new FileInputStream(sourceFile);
-
-        /*
-        Attention this kills the inputstream and leads to
-
-        java.util.zip.ZipException: Unexpected record signature: 0X302D3831
-
-        when calling
-
-
-        Tika tika = new Tika();
-        String type = tika.detect(is);
-        logger.info("type:" + type);*/
-
-        Tika tika = new Tika();
-        String type = tika.detect(sourceFile);
-        logger.info("type:" + type);
-
-        if(type == null) {
-
-        }else if(type.equals("application/gzip")) {
-
-            try {
-                final InputStream bis = new BufferedInputStream(is);
-                CompressorInputStream cis = null;
-                cis = new CompressorStreamFactory().createCompressorInputStream(CompressorStreamFactory.GZIP,
-                        bis);
-                return new TarArchiveInputStream(cis);
-
-            }catch(CompressorException e) {
-                logger.error(e.getMessage());
-            }
-        }else if(type.equals("application/zip")) {
-
-            String encoding = System.getProperty("file.encoding");
-            logger.info("encoding:"+encoding);
-            // allowStoredEntriesWithDataDescriptor = true because some h5p might have this
-            return new ZipArchiveInputStream(is, encoding, true, true);
-        }else {
-            logger.info("unknown format:" +  type);
-        }
-        is.close();
-        return null;
     }
 
 
@@ -113,10 +62,10 @@ public class EduSharingZipThumbnailExecutor extends AbstractCommandExecutor impl
         if(transformOptions != null)
             transformOptions.entrySet().stream().forEach(e -> System.out.println("o:"+ e.getKey() + " "+e.getValue()));
 
-        Files.copy(sourceFile.toPath(), Path.of("/tmp/source.h5p"), StandardCopyOption.REPLACE_EXISTING);
+        //Files.copy(sourceFile.toPath(), Path.of("/tmp/source.h5p"), StandardCopyOption.REPLACE_EXISTING);
 
         try {
-            ArchiveInputStream zip = getZipInputStream(sourceFile);
+            ArchiveInputStream zip = ZipTool.getZipInputStream(sourceFile);
             while (true) {
                 ArchiveEntry entry = zip.getNextEntry();
                 if(entry==null) {
@@ -124,6 +73,7 @@ public class EduSharingZipThumbnailExecutor extends AbstractCommandExecutor impl
                     break;
                 }
                 String name=entry.getName().toLowerCase();
+                //h5p
                 if(name.startsWith("content/images") && (name.endsWith(".jpg") || name.endsWith(".png"))){
 
                     logger.info("found preview in zip");
@@ -134,7 +84,16 @@ public class EduSharingZipThumbnailExecutor extends AbstractCommandExecutor impl
                     os.close();
                     return;
                 }
+                //geogebra
+                if(name.endsWith("geogebra_thumbnail.png")){
+                    OutputStream os = new FileOutputStream(targetFile);
+                    InputStream is = ImageTool.autoRotateImage(zip, ImageTool.MAX_THUMB_SIZE);
+                    StreamUtils.copy(is,os);
+                    os.close();
+                    return;
+                }
             }
+            logger.info("no thumbnail found in zip file");
         }
         catch(Throwable t){
             logger.error(t.getMessage(),t);
