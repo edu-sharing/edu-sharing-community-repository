@@ -102,6 +102,11 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 					ThreadContext.put("RemoteAddr", remoteAdress);
 				}
 
+				String ua = ((HttpServletRequest) req).getHeader("user-agent");
+				if(ua != null){
+					ThreadContext.put("UserAgent",ua);
+				}
+
 				if(user != null){
 					String hmac = hMac.calculateHmac(user.trim());
 					ThreadContext.put("UserPlain",user);
