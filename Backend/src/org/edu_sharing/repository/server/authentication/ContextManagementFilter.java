@@ -94,8 +94,12 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 				);
 				QueryUtils.setUserInfo(info);
 
-				if(req.getRemoteAddr() != null) {
-					ThreadContext.put("RemoteAddr", req.getRemoteAddr());
+				String remoteAdress = ((HttpServletRequest) req).getHeader("x-forwarded-for");
+				if(remoteAdress == null){
+					remoteAdress = req.getRemoteAddr();
+				}
+				if(remoteAdress != null) {
+					ThreadContext.put("RemoteAddr", remoteAdress);
 				}
 
 				if(user != null){
