@@ -5,6 +5,7 @@ import org.alfresco.transform.base.executors.AbstractCommandExecutor;
 import org.alfresco.transform.base.executors.RuntimeExec;
 import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
 import org.apache.commons.io.IOUtils;
+import org.edu_sharing.alfresco.transformer.executors.tools.Commands;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
@@ -34,11 +35,7 @@ public class SerloIndexExecutor extends AbstractCommandExecutor implements Custo
         /**
          * @TODO dummy command
          */
-        RuntimeExec runtimeExec = new RuntimeExec();
-        Map<String, String[]> commandsAndArguments = new HashMap<>();
-        commandsAndArguments.put(".*", new String[]{"ffmpeg", "-version"});
-        runtimeExec.setCommandsAndArguments(commandsAndArguments);
-        return runtimeExec;
+        return Commands.getFFMPegRuntimeExec();
     }
 
     @Override
@@ -91,7 +88,7 @@ public class SerloIndexExecutor extends AbstractCommandExecutor implements Custo
         try {
             JSONObject jsonObject = (JSONObject) new JSONParser().parse(new FileReader(sourceFile));
             String type = (String) jsonObject.get("type");
-            if (type == null || !"https://github.com/serlo/ece-as-a-service".equals(type)) {
+            if (type == null || !"https://serlo.org/editor".equals(type)) {
                 throw new Exception("Unsupported json document with type:" + type);
             }
 
