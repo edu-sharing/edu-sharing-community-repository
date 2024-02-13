@@ -49,6 +49,7 @@ import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.search.*;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
+import org.elasticsearch.client.HttpAsyncResponseConsumerFactory;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -100,6 +101,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     PermissionModel permissionModel = (PermissionModel)alfApplicationContext.getBean("permissionsModelDAO");
 
+    public static int MAX_RESPONSE_ENTITY_SIZE = -1;
+
     public static HttpHost[] getConfiguredHosts() {
         List<HttpHost> hosts=null;
         try {
@@ -141,7 +144,20 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     private RequestOptions getRequestOptions() {
+
+        if(MAX_RESPONSE_ENTITY_SIZE == -1){
+            if(LightbendConfigLoader.get().hasPath("elasticsearch.max_response_entity_size")){
+                MAX_RESPONSE_ENTITY_SIZE = LightbendConfigLoader.get().getInt("elasticsearch.max_response_entity_size");
+            }
+            else{
+                //100 MB
+                MAX_RESPONSE_ENTITY_SIZE = 100 * 1048576;
+            }
+        }
+
         RequestOptions.Builder b = RequestOptions.DEFAULT.toBuilder();
+        b.setHttpAsyncResponseConsumerFactory(
+                new HttpAsyncResponseConsumerFactory.HeapBufferedResponseConsumerFactory(MAX_RESPONSE_ENTITY_SIZE));
 
         // add trace headers to elastic request
         Context context = Context.getCurrentInstance();
