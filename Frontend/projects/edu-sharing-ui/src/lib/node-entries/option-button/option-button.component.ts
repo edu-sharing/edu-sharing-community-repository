@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { OptionItem } from '../../types/option-item';
 // TODO: Decide if providing focus highlights and ripples with this component is a good idea. When
@@ -13,7 +13,7 @@ import { OptionItem } from '../../types/option-item';
             mat-icon-button
             color="primary"
             matTooltip="{{ option.name | translate }}"
-            [class.display-none]="!(optionIsShown(option, node) | async)"
+            [class.display-none]="!isShown"
             [disabled]="!optionIsValid(option, node)"
             (click)="click(option, node)"
             attr.data-test="option-button-{{ option.name }}"
@@ -22,9 +22,14 @@ import { OptionItem } from '../../types/option-item';
         </button>
     `,
 })
-export class OptionButtonComponent {
+export class OptionButtonComponent implements OnChanges {
     @Input() option: OptionItem;
     @Input() node: Node;
+
+    isShown = false;
+    async ngOnChanges(changes: SimpleChanges) {
+        this.isShown = await this.optionIsShown(this.option, this.node);
+    }
 
     optionIsValid(optionItem: OptionItem, node: Node): boolean {
         if (optionItem.enabledCallback) {
@@ -33,9 +38,9 @@ export class OptionButtonComponent {
         return optionItem.isEnabled;
     }
 
-    async optionIsShown(optionItem: OptionItem, node: Node): Promise<boolean> {
+    private async optionIsShown(optionItem: OptionItem, node: Node): Promise<boolean> {
         if (optionItem.showCallback) {
-            return await optionItem.showCallback(node);
+            return optionItem.showCallback(node);
         }
         return true;
     }
