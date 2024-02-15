@@ -1,7 +1,11 @@
 <div
-  class="grid-card"
-  [class.grid-card-collection]="isCollection"
-  [class.grid-card-virtual]="node.virtual"
+  [class]="
+    'grid-card' +
+    (isCollection
+      ? ' grid-card-collection grid-card-collection-scope-' + node.collection.scope
+      : '') +
+    (node.virtual ? ' grid-card-virtual' : '')
+  "
   [style.background-color]="isCollection ? node.collection.color : null"
   [class.dynamic-single-click]="entriesService.singleClickHint === 'dynamic'"
   [class.selected]="entriesService.selection.isSelected(node)"
