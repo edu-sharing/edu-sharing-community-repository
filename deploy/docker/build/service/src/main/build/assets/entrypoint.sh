@@ -104,6 +104,10 @@ repository_search_solr_port="${REPOSITORY_SEARCH_SOLR_PORT:-8080}"
 repository_transform_enabled="${REPOSITORY_TRANSFORM_ENABLED:-"true"}"
 repository_transform_host="${REPOSITORY_TRANSFORM_HOST:-}"
 repository_transform_port="${REPOSITORY_TRANSFORM_PORT:-}"
+repository_transform_aio_host="${REPOSITORY_TRANSFORM_AIO_HOST:-}"
+repository_transform_aio_port="${REPOSITORY_TRANSFORM_AIO_PORT:-}"
+repository_transform_es_host="${REPOSITORY_TRANSFORM_ES_HOST:-}"
+repository_transform_es_port="${REPOSITORY_TRANSFORM_ES_PORT:-}"
 
 catSConf="tomcat/conf/server.xml"
 catCConf="tomcat/conf/Catalina/localhost/edu-sharing.xml"
@@ -142,8 +146,19 @@ until PGPASSWORD="${repository_database_pass}" \
 	sleep 3
 done
 
+# jodconverter
 [[ -n "${repository_transform_host}" && -n "${repository_transform_port}" ]] && {
 	until wait-for-it "${repository_transform_host}:${repository_transform_port}" -t 3; do sleep 1; done
+}
+
+# core aio transformer
+[[ -n "${repository_transform_aio_host}" && -n "${repository_transform_aio_port}" ]] && {
+	until wait-for-it "${repository_transform_aio_host}:${repository_transform_aio_port}" -t 3; do sleep 1; done
+}
+
+# edu-sharing custom transformer
+[[ -n "${repository_transform_es_host}" && -n "${repository_transform_es_port}" ]] && {
+	until wait-for-it "${repository_transform_es_host}:${repository_transform_es_port}" -t 3; do sleep 1; done
 }
 
 ### config #############################################################################################################
@@ -365,9 +380,6 @@ grep -q '^[#]*\s*ooo\.enabled=' "${alfProps}" || echo "ooo.enabled=${repository_
 sed -i -r 's|^[#]*\s*ooo\.exe=.*|ooo.exe=|' "${alfProps}"
 grep -q '^[#]*\s*ooo\.exe=' "${alfProps}" || echo "ooo.exe=" >>"${alfProps}"
 
-sed -i -r 's|^[#]*\s*ooo\.host=.*|ooo.host='"${repository_transform_host}"'|' "${alfProps}"
-grep -q '^[#]*\s*ooo\.host=' "${alfProps}" || echo "ooo.host=${repository_transform_host}" >>"${alfProps}"
-
 sed -i -r 's|^[#]*\s*ooo\.port=.*|ooo.port='"${repository_transform_port}"'|' "${alfProps}"
 grep -q '^[#]*\s*ooo\.port=' "${alfProps}" || echo "ooo.port=${repository_transform_port}" >>"${alfProps}"
 
@@ -398,11 +410,11 @@ grep -q '^[#]*\s*repo\.event2\.enabled=' "${alfProps}" || echo "repo.event2.enab
 sed -i -r 's|^[#]*\s*messaging\.subsystem\.autoStart=.*|messaging.subsystem.autoStart=false|' "${alfProps}"
 grep -q '^[#]*\s*messaging\.subsystem\.autoStart=' "${alfProps}" || echo "messaging.subsystem.autoStart=false" >>"${alfProps}"
 
-sed -i -r 's|^[#]*\s*localTransform\.edu-sharing\.url=.*|localTransform.edu-sharing.url=http://repository-transform-edu-sharing:8091/|' "${alfProps}"
-grep -q '^[#]*\s*localTransform\.edu-sharing\.url=' "${alfProps}" || echo "localTransform.edu-sharing.url=http://repository-transform-edu-sharing:8091/" >>"${alfProps}"
+sed -i -r 's|^[#]*\s*localTransform\.edu-sharing\.url=.*|localTransform.edu-sharing.url=http://${repository_transform_es_host}:${repository_transform_es_port}/|' "${alfProps}"
+grep -q '^[#]*\s*localTransform\.edu-sharing\.url=' "${alfProps}" || echo "localTransform.edu-sharing.url=http://${repository_transform_es_host}:${repository_transform_es_port}/" >>"${alfProps}"
 
-sed -i -r 's|^[#]*\s*localTransform\.core-aio\.url=.*|localTransform.core-aio.url=http://repository-alfresco-transform-core-aio:8090/|' "${alfProps}"
-grep -q '^[#]*\s*localTransform\.core-aio\.url=' "${alfProps}" || echo "localTransform.core-aio.url=http://repository-alfresco-transform-core-aio:8090/" >>"${alfProps}"
+sed -i -r 's|^[#]*\s*localTransform\.core-aio\.url=.*|localTransform.core-aio.url=http://${repository_transform_aio_host}:${repository_transform_aio_port}/|' "${alfProps}"
+grep -q '^[#]*\s*localTransform\.core-aio\.url=' "${alfProps}" || echo "localTransform.core-aio.url=http://${repository_transform_aio_host}:${repository_transform_aio_port}/" >>"${alfProps}"
 
 xmlstarlet ed -L \
 	-s '_:web-app/_:filter[_:filter-name="X509AuthFilter"]' -t elem -n "init-param" -v '' \
