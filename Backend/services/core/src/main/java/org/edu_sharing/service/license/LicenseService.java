@@ -64,7 +64,7 @@ public class LicenseService {
 				result = result.replace("${version}", version);
 			}
 			
-			String country = (locale == null) ? "en" : locale.split("_")[0];
+			String country = (locale == null) ? "de" : locale.split("_")[0];
 			if(result.contains("${locale}")){
 				result = result.replace("${locale}", country);
 			}
