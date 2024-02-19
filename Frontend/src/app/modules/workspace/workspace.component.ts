@@ -1033,6 +1033,9 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     }
 
     setDisplayType(displayType: NodeEntriesDisplayType, refreshRoute = true) {
+        if (this.displayType === displayType) {
+            return;
+        }
         this.displayType = displayType;
         if (refreshRoute) {
             void this.router.navigate(['./'], {
