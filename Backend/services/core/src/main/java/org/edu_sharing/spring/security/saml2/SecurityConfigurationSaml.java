@@ -18,7 +18,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.saml2.Saml2LogoutConfigurer;
 import org.springframework.security.converter.RsaKeyConverters;
 import org.springframework.security.core.Authentication;
@@ -30,10 +29,10 @@ import org.springframework.security.saml2.provider.service.registration.RelyingP
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrations;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.util.matcher.AndRequestMatcher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import java.io.IOException;
@@ -154,8 +153,9 @@ public class SecurityConfigurationSaml {
     @Bean
     RelyingPartyRegistrationRepository relyingPartyRegistrationRepository() {
         try(InputStream inputStream = config.getBoolean("security.sso.saml.useHomeApplicationKeys")
-                ? IOUtils.toInputStream(ApplicationInfoList.getHomeRepository().getPrivateKey(),"UTF-8")
+                ? IOUtils.toInputStream(getHomeAppPrivateKey(),"UTF-8")
                 : new ClassPathResource(config.getString("security.sso.saml.privateKey.location")).getInputStream()){
+
             Converter<InputStream, RSAPrivateKey> converter = RsaKeyConverters.pkcs8();
             RSAPrivateKey privateKey = converter.convert(inputStream);
 
@@ -174,6 +174,20 @@ public class SecurityConfigurationSaml {
         }catch (IOException e){
             throw new RuntimeException(e);
         }
+    }
+
+    private String getHomeAppPrivateKey(){
+        String privKey = ApplicationInfoList.getHomeRepository().getPrivateKey();
+
+        privKey = privKey.replaceAll("(.{64})", "$1"+System.lineSeparator());
+
+        if(!privKey.trim().startsWith("-----BEGIN PRIVATE KEY-----")){
+            privKey = System.lineSeparator() + "-----BEGIN PRIVATE KEY-----" +privKey.trim();
+        }
+        if(!privKey.trim().endsWith("-----END PRIVATE KEY-----")){
+            privKey= privKey.trim() + System.lineSeparator() + "-----END PRIVATE KEY-----";
+        }
+        return privKey;
     }
 
     X509Certificate relyingPartyCertificate() {
