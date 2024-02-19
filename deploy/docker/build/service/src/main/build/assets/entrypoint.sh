@@ -410,10 +410,10 @@ grep -q '^[#]*\s*repo\.event2\.enabled=' "${alfProps}" || echo "repo.event2.enab
 sed -i -r 's|^[#]*\s*messaging\.subsystem\.autoStart=.*|messaging.subsystem.autoStart=false|' "${alfProps}"
 grep -q '^[#]*\s*messaging\.subsystem\.autoStart=' "${alfProps}" || echo "messaging.subsystem.autoStart=false" >>"${alfProps}"
 
-sed -i -r 's|^[#]*\s*localTransform\.edu-sharing\.url=.*|localTransform.edu-sharing.url=http://${repository_transform_es_host}:${repository_transform_es_port}/|' "${alfProps}"
+sed -i -r 's|^[#]*\s*localTransform\.edu-sharing\.url=.*|localTransform.edu-sharing.url=http://'"${repository_transform_es_host}"':'"${repository_transform_es_port}"'/|' "${alfProps}"
 grep -q '^[#]*\s*localTransform\.edu-sharing\.url=' "${alfProps}" || echo "localTransform.edu-sharing.url=http://${repository_transform_es_host}:${repository_transform_es_port}/" >>"${alfProps}"
 
-sed -i -r 's|^[#]*\s*localTransform\.core-aio\.url=.*|localTransform.core-aio.url=http://${repository_transform_aio_host}:${repository_transform_aio_port}/|' "${alfProps}"
+sed -i -r 's|^[#]*\s*localTransform\.core-aio\.url=.*|localTransform.core-aio.url=http://'"${repository_transform_aio_host}"':'"${repository_transform_aio_port}"'/|' "${alfProps}"
 grep -q '^[#]*\s*localTransform\.core-aio\.url=' "${alfProps}" || echo "localTransform.core-aio.url=http://${repository_transform_aio_host}:${repository_transform_aio_port}/" >>"${alfProps}"
 
 xmlstarlet ed -L \
