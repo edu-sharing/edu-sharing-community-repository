@@ -98,8 +98,8 @@ data:
   REPOSITORY_TRANSFORM_PORT: {{ if .Values.config.transform.server.enabled }}""{{ else }}"8100"{{ end }}
   REPOSITORY_TRANSFORM_SERVER_HOST: {{ .Values.config.transform.server.host | quote }}
   REPOSITORY_TRANSFORM_SERVER_PORT: {{ .Values.config.transform.server.port | quote }}
-  REPOSITORY_TRANSFORM_SERVER_AIO_HOST: {{ .Values.config.transform_aio.server.host | quote }}
-  REPOSITORY_TRANSFORM_SERVER_AIO_PORT: {{ .Values.config.transform_aio.server.port | quote }}
-  REPOSITORY_TRANSFORM_SERVER_ES_HOST: {{ .Values.config.transform_es.server.host | quote }}
-  REPOSITORY_TRANSFORM_SERVER_ES_PORT: {{ .Values.config.transform_es.server.port | quote }}
+  REPOSITORY_TRANSFORM_AIO_HOST: {{ .Values.config.transform_aio.server.host | quote }}
+  REPOSITORY_TRANSFORM_AIO_PORT: {{ .Values.config.transform_aio.server.port | quote }}
+  REPOSITORY_TRANSFORM_ES_HOST: {{ .Values.config.transform_es.server.host | quote }}
+  REPOSITORY_TRANSFORM_ES_PORT: {{ .Values.config.transform_es.server.port | quote }}
   TOMCAT_INSTALL_DEFAULT_WEBAPPS: "no"
