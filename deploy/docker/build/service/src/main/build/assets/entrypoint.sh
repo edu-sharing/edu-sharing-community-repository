@@ -389,8 +389,14 @@ grep -q '^[#]*\s*solr\.port=' "${alfProps}" || echo "solr.port=${repository_sear
 sed -i -r 's|^[#]*\s*solr\.secureComms=.*|solr.secureComms=none|' "${alfProps}"
 grep -q '^[#]*\s*solr\.secureComms=' "${alfProps}" || echo "solr.secureComms=none" >>"${alfProps}"
 
-sed -i -r 's|^[#]*\s*messaging\.broker\.url=.*|messaging.broker.url=failover:(nio://repository-activemq:61616)?timeout=3000\&jms.useCompression=true|' "${alfProps}"
-grep -q '^[#]*\s*messaging\.broker\.url=' "${alfProps}" || echo "messaging.broker.url=failover:(nio://repository-activemq:61616)?timeout=3000\&jms.useCompression=true" >>"${alfProps}"
+#sed -i -r 's|^[#]*\s*messaging\.broker\.url=.*|messaging.broker.url=failover:(nio://repository-activemq:61616)?timeout=3000\&jms.useCompression=true|' "${alfProps}"
+#grep -q '^[#]*\s*messaging\.broker\.url=' "${alfProps}" || echo "messaging.broker.url=failover:(nio://repository-activemq:61616)?timeout=3000\&jms.useCompression=true" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*repo\.event2\.enabled=.*|repo.event2.enabled=false|' "${alfProps}"
+grep -q '^[#]*\s*repo\.event2\.enabled=' "${alfProps}" || echo "repo.event2.enabled=false" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*messaging\.subsystem\.autoStart=.*|messaging.subsystem.autoStart=false|' "${alfProps}"
+grep -q '^[#]*\s*messaging\.subsystem\.autoStart=' "${alfProps}" || echo "messaging.subsystem.autoStart=false" >>"${alfProps}"
 
 sed -i -r 's|^[#]*\s*localTransform\.edu-sharing\.url=.*|localTransform.edu-sharing.url=http://repository-transform-edu-sharing:8091/|' "${alfProps}"
 grep -q '^[#]*\s*localTransform\.edu-sharing\.url=' "${alfProps}" || echo "localTransform.edu-sharing.url=http://repository-transform-edu-sharing:8091/" >>"${alfProps}"
