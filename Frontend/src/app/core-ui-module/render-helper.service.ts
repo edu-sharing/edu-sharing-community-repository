@@ -76,7 +76,7 @@ export class RenderHelperService {
 
         function removeCollectionsContainer() {
             // if its the only widget inside the group
-            if (parentInner.children.length === 2) {
+            if (parentInner.children.length <= 2) {
                 parent.remove();
                 return;
             } else {
