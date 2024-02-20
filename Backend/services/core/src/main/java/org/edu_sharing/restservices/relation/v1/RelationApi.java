@@ -16,8 +16,8 @@ import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.NodeRelation;
 import org.edu_sharing.service.relations.InputRelationType;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 
 @Path("/relation/v1")
 @Tag(name="RELATION v1")

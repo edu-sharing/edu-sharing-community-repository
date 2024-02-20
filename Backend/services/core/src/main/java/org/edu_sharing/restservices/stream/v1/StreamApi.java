@@ -17,10 +17,10 @@ import org.edu_sharing.restservices.stream.v1.model.StreamEntryInput;
 import org.edu_sharing.restservices.stream.v1.model.StreamList;
 import org.edu_sharing.service.search.model.SortDefinition;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.Map;
 

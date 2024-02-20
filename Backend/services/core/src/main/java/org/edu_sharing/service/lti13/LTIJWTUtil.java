@@ -30,7 +30,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;

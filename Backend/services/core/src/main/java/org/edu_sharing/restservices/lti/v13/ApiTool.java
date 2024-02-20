@@ -9,12 +9,12 @@ import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.service.lti13.model.LTISessionObject;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
-import org.edu_sharing.webservices.usage2.Usage2Exception;
+import org.edu_sharing.service.usage.Usage2Exception;
 import org.springframework.extensions.surf.util.URLEncoder;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.ws.rs.core.Response;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;

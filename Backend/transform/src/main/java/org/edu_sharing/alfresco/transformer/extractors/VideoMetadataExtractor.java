@@ -1,15 +1,21 @@
 package org.edu_sharing.alfresco.transformer.extractors;
 
-import org.alfresco.transformer.metadataExtractors.AbstractMetadataExtractor;
-import org.apache.tika.io.TikaInputStream;
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder;
+import org.edu_sharing.alfresco.transformer.executors.VideoThumbnailExecutor;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
 
 
 /**
@@ -43,20 +49,22 @@ import java.util.regex.Pattern;
  * HEIGHT=ccm:width
  * WIDTH=ccm:height
  */
-public class VideoMetadataExtractor extends AbstractMetadataExtractor {
+@Component
+public class VideoMetadataExtractor extends AbstractMetadataExtractorEmbedder {
+
+    public static String ID = "EduSharingVideoMetadataExecutor";
 
     static String KEY_WIDTH = "WIDTH";
     static String KEY_HEIGHT = "HEIGHT";
     static String KEY_LENGTH = "LENGTH";
 
-    public VideoMetadataExtractor(Logger logger) {
-        super(logger);
+    private static final Logger logger = LoggerFactory.getLogger(VideoMetadataExtractor.class);
+
+    public VideoMetadataExtractor() {
+        super(EXTRACTOR, logger);
     }
 
-    @Override
-    public Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions, File sourceFile) throws Exception {
-        return extractRaw(sourceFile);
-    }
+
 
     protected Map<String, Serializable> extractRaw(File sourceFile) throws IOException,InterruptedException {
 
@@ -179,5 +187,21 @@ public class VideoMetadataExtractor extends AbstractMetadataExtractor {
             sb.append((char)k);
         }
         return sb.toString();
+    }
+
+    @Override
+    public Map<String, Serializable> extractMetadata(String sourceMimetype, InputStream inputStream, String targetMimetype, OutputStream outputStream, Map<String, String> transformOptions, TransformManager transformManager) throws Exception {
+        File sourceFile = transformManager.createSourceFile();
+        return extractRaw(sourceFile);
+    }
+
+    @Override
+    public void embedMetadata(String sourceMimetype, InputStream inputStream, String targetMimetype, OutputStream outputStream, Map<String, String> transformOptions, TransformManager transformManager) throws Exception {
+
+    }
+
+    @Override
+    public String getTransformerName() {
+        return ID;
     }
 }

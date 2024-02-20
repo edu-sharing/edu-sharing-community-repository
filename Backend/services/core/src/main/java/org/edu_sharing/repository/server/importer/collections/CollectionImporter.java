@@ -1,26 +1,5 @@
 package org.edu_sharing.repository.server.importer.collections;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-import javax.activation.MimetypesFileTypeMap;
-import javax.servlet.http.HttpUtils;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
-import org.apache.commons.compress.archivers.zip.ZipUtil;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.util.IOUtils;
 import org.apache.tika.Tika;
@@ -28,15 +7,24 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.importer.collections.xmlclasses.Collections;
 import org.edu_sharing.repository.server.importer.collections.xmlclasses.Collections.Collection.Property;
 import org.edu_sharing.restservices.CollectionDao;
-import org.edu_sharing.restservices.RestConstants;
-import org.edu_sharing.restservices.admin.v1.AdminApi;
-import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.collection.Collection;
 import org.edu_sharing.service.collection.CollectionService;
-import org.edu_sharing.service.collection.CollectionServiceImpl;
+import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Unmarshaller;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.HashMap;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class CollectionImporter {	
 	private static Logger logger = Logger.getLogger(CollectionImporter.class);

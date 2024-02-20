@@ -28,6 +28,7 @@
 package org.edu_sharing.repository.server;
 
 import com.google.common.base.CharMatcher;
+import jakarta.transaction.UserTransaction;
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
@@ -115,7 +116,6 @@ import org.edu_sharing.service.util.AlfrescoDaoHelper;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.I18NUtil;
 
-import javax.transaction.UserTransaction;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -840,11 +840,13 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
             downloadAllowed = (CCConstants.COMMON_LICENSE_EDU_P_NR_ND.equals(commonLicenseKey)) ? false : true;
 
         //allow download for owner, performance only check owner if download not allowed
+
 		if(!downloadAllowed && isOwner(nodeId, authenticationInfo.get(CCConstants.AUTH_USERNAME))){
 			downloadAllowed = true;
 		}
 
-		if(editorType != null && editorType.toLowerCase().equals(ConnectorService.ID_TINYMCE.toLowerCase())){
+		// allow tinymce in safe but not in normal storage
+		if(editorType != null && editorType.toLowerCase().equals(ConnectorService.ID_TINYMCE.toLowerCase()) && (Context.getCurrentInstance() != null && !CCConstants.CCM_VALUE_SCOPE_SAFE.equals(Context.getCurrentInstance().getSessionAttribute(CCConstants.AUTH_SCOPE)))) {
 			downloadAllowed = false;
 		}
 

@@ -29,7 +29,7 @@ import org.edu_sharing.service.search.model.SearchResult;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;

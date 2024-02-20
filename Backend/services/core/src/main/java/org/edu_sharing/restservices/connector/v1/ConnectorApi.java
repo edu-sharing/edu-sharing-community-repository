@@ -15,10 +15,10 @@ import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.connector.v1.model.ConnectorList;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 
 @Path("/connector/v1")
 @Tag(name= "CONNECTOR v1" )

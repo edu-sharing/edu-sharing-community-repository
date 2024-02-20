@@ -4,8 +4,8 @@ import com.typesafe.config.Config;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.springframework.http.HttpRequest;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * provide information about the current request context and proxy related changes

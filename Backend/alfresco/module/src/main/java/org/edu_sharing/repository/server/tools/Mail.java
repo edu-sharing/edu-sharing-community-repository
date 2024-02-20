@@ -27,15 +27,6 @@
  */
 package org.edu_sharing.repository.server.tools;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.mail.internet.InternetAddress;
-import javax.servlet.ServletContext;
-
 import com.typesafe.config.Config;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.mail.EmailException;
@@ -43,6 +34,14 @@ import org.apache.commons.mail.HtmlEmail;
 import org.apache.commons.mail.SimpleEmail;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+
+import javax.mail.internet.InternetAddress;
+import jakarta.servlet.ServletContext;
+import java.io.File;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class Mail {

@@ -54,7 +54,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
-import javax.transaction.UserTransaction;
+import jakarta.transaction.UserTransaction;
 import java.util.List;
 
 @JobDescription(description = "refresh the mimetype and preview for a given solr search filter")

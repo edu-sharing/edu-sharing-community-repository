@@ -27,14 +27,10 @@
  */
 package org.edu_sharing.repository.server;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-import javax.servlet.SingleThreadModel;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,7 +40,9 @@ import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.rendering.RenderingServiceFactory;
 
-public class RedirectServlet extends HttpServlet implements SingleThreadModel {
+import java.io.IOException;
+
+public class RedirectServlet extends HttpServlet {
 
 	private static Log logger = LogFactory.getLog(RedirectServlet.class);
 

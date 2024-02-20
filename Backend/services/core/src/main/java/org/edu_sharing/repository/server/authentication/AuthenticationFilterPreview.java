@@ -7,14 +7,14 @@ import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.service.ServiceRegistry;
@@ -37,13 +37,12 @@ import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
-import org.edu_sharing.service.usage.UsageException;
-import org.edu_sharing.webservices.usage2.Usage2Exception;
+import org.edu_sharing.service.usage.Usage2Exception;
 import org.springframework.context.ApplicationContext;
 
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 
-public class AuthenticationFilterPreview implements javax.servlet.Filter {
+public class AuthenticationFilterPreview implements jakarta.servlet.Filter {
 
 	Logger logger = Logger.getLogger(AuthenticationFilterPreview.class);
 	private TokenService tokenService;

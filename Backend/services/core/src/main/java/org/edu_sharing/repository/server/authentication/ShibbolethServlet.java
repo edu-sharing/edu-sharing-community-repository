@@ -35,10 +35,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.http.HttpHeaders;
 import org.apache.log4j.Logger;
@@ -57,7 +57,9 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.saml.SamlAuthentication;
+
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal;
 
 public class ShibbolethServlet extends HttpServlet {
 
@@ -284,10 +286,19 @@ public class ShibbolethServlet extends HttpServlet {
 	 private String getShibValue(String attName, HttpServletRequest req){
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication != null && authentication.isAuthenticated() && authentication instanceof SamlAuthentication) {
-                SamlAuthentication samlAuthentication = (SamlAuthentication) authentication;
-				return samlAuthentication.getAssertion().getFirstAttribute(attName).getValues().stream().findFirst().map(Object::toString).orElse(null);
-            }
+
+
+			if(authentication != null && authentication.isAuthenticated()){
+				if (authentication instanceof Saml2AuthenticatedPrincipal) {
+					Saml2AuthenticatedPrincipal samlAuthentication = (Saml2AuthenticatedPrincipal) authentication;
+					return samlAuthentication.getAttribute(attName).stream().findFirst().map(Object::toString).orElse(null);
+				}
+				if(authentication instanceof OAuth2AuthenticationToken){
+					OAuth2AuthenticationToken token = (OAuth2AuthenticationToken)authentication;
+					Object att = token.getPrincipal().getAttribute(attName);
+					return (att != null) ? att.toString() : null;
+				}
+			}
 
 	    	String attValue = null;
 

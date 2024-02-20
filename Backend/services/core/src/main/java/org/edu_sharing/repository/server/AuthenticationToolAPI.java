@@ -27,6 +27,10 @@
  */
 package org.edu_sharing.repository.server;
 
+import java.util.HashMap;
+
+import jakarta.servlet.http.HttpSession;
+
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
@@ -47,8 +51,7 @@ import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
-import javax.servlet.http.HttpSession;
-import java.util.HashMap;
+import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 
 public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 	

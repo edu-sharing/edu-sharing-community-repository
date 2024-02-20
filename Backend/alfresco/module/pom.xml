@@ -104,6 +104,17 @@
               <destinationFile>${project.build.directory}/fixes/org/alfresco/repo/web/scripts/solr/NodesMetaDataGet.class</destinationFile>
             </configuration>
           </execution>
+          <execution>
+            <id>fix8</id>
+            <goals>
+              <goal>rename</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <sourceFile>${project.build.directory}/classes/org/alfresco/transform/registry/TransformRegistryHelper.class</sourceFile>
+              <destinationFile>${project.build.directory}/fixes/org/alfresco/transform/registry/TransformRegistryHelper.class</destinationFile>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 
@@ -279,7 +290,7 @@
 
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
-      <artifactId>jackson-module-jaxb-annotations</artifactId>
+      <artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
     </dependency>
 
     <dependency>
@@ -302,7 +313,7 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
 
-    <dependency>
+    <!--dependency>
       <groupId>org.springframework.security.extensions</groupId>
       <artifactId>spring-security-saml2-core</artifactId>
       <exclusions>
@@ -311,7 +322,58 @@
           <artifactId>bcprov-jdk15</artifactId>
         </exclusion>
       </exclusions>
+    </dependency-->
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-core</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-crypto</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-oauth2-client</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-oauth2-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-oauth2-jose</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-oauth2-jose</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-oauth2-resource-server</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-web</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-config</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-saml2-service-provider</artifactId>
+    </dependency>
+
 
     <dependency>
       <groupId>org.aspectj</groupId>
@@ -404,8 +466,8 @@
     </dependency>
 
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -557,8 +619,8 @@
     </dependency>
 
     <dependency>
-      <groupId>com.fasterxml.jackson.jaxrs</groupId>
-      <artifactId>jackson-jaxrs-json-provider</artifactId>
+      <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
+      <artifactId>jackson-jakarta-rs-json-provider</artifactId>
       <scope>runtime</scope>
     </dependency>
 
@@ -574,11 +636,11 @@
       </exclusions>
     </dependency>
 
-    <dependency>
+    <!--dependency>
       <groupId>org.glassfish.jersey.ext</groupId>
       <artifactId>jersey-spring5</artifactId>
       <scope>runtime</scope>
-    </dependency>
+    </dependency-->
 
     <dependency>
       <groupId>org.glassfish.jersey.inject</groupId>
@@ -638,15 +700,10 @@
       <scope>runtime</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-jcl</artifactId>
-      <scope>runtime</scope>
-    </dependency>
 
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-slf4j-impl</artifactId>
+      <artifactId>log4j-slf4j2-impl</artifactId>
       <scope>runtime</scope>
     </dependency>
 
@@ -705,6 +762,10 @@
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-starter-web</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>org.springframework.security.oauth</groupId>
+          <artifactId>spring-security-oauth2</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
 
@@ -716,13 +777,13 @@
 
     <dependency>
       <groupId>io.swagger.core.v3</groupId>
-      <artifactId>swagger-annotations</artifactId>
+      <artifactId>swagger-annotations-jakarta</artifactId>
       <scope>runtime</scope>
     </dependency>
 
     <dependency>
       <groupId>io.swagger.core.v3</groupId>
-      <artifactId>swagger-jaxrs2</artifactId>
+      <artifactId>swagger-jaxrs2-jakarta</artifactId>
       <scope>runtime</scope>
     </dependency>
 
@@ -766,7 +827,7 @@
 
     <dependency>
       <groupId>com.graphql-java-kickstart</groupId>
-      <artifactId>graphql-java-servlet</artifactId>
+      <artifactId>graphql-java-servlet-jakarta5</artifactId>
       <scope>runtime</scope>
     </dependency>
 
@@ -814,6 +875,12 @@
       <artifactId>spring-test</artifactId>
       <version>3.2.17.RELEASE</version>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sun.mail</groupId>
+      <artifactId>javax.mail</artifactId>
+      <version>1.6.2</version>
     </dependency>
 
 

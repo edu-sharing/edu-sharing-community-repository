@@ -136,6 +136,10 @@ services:
       REPOSITORY_TRANSFORM_ENABLED: "${REPOSITORY_SERVICE_TRANSFORM_ENABLED:-true}"
       REPOSITORY_TRANSFORM_HOST: repository-transform
       REPOSITORY_TRANSFORM_PORT: "8100"
+      REPOSITORY_TRANSFORM_AIO_HOST: repository-alfresco-transform-core-aio
+      REPOSITORY_TRANSFORM_AIO_PORT: "8090"
+      REPOSITORY_TRANSFORM_ES_HOST: repository-transform-edu-sharing
+      REPOSITORY_TRANSFORM_ES_PORT: "8091"
       TOMCAT_INSTALL_DEFAULT_WEBAPPS: "no"
     expose:
       - "7199"

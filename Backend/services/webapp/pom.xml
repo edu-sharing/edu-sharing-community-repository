@@ -78,8 +78,8 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-repository-backend-services-soap-webapp</artifactId>
-      <type>war</type>
+      <artifactId>edu_sharing-community-repository-backend-services-core</artifactId>
+      <scope>runtime</scope>
     </dependency>
 
     <!-- provided -->

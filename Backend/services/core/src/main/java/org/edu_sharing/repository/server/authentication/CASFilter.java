@@ -3,12 +3,12 @@ package org.edu_sharing.repository.server.authentication;
 import java.io.IOException;
 import java.util.HashMap;
 
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -17,7 +17,7 @@ import org.edu_sharing.service.authentication.EduAuthentication;
 import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.springframework.context.ApplicationContext;
 
-public class CASFilter  implements javax.servlet.Filter {
+public class CASFilter  implements jakarta.servlet.Filter {
 
 	Logger logger = Logger.getLogger(CASFilter.class);
 	

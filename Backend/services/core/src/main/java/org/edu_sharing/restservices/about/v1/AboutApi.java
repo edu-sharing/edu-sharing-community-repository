@@ -19,10 +19,10 @@ import org.edu_sharing.service.monitoring.Monitoring;
 import org.edu_sharing.service.version.VersionService;
 import org.edu_sharing.spring.ApplicationContextFactory;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.Map;
 

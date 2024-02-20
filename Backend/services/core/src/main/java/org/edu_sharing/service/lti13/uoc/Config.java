@@ -15,7 +15,7 @@ import edu.uoc.lti.jwt.deeplink.JWSTokenBuilder;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class Config {
     private static BasicToolDefinition getBasicToolDefinition(ApplicationInfo platform){
@@ -60,6 +60,12 @@ public class Config {
     }
 
     public static Tool getTool(ApplicationInfo platform, HttpServletRequest request, boolean clearSession){
-        return new ToolFactory().from(getToolDefinitionBean(platform), request, clearSession);
+        /**
+         * @TODO
+         *  jakarta/javax lib problem
+         *  justed fixed compile problems
+         */
+        return null;
+        //return new ToolFactory().from(getToolDefinitionBean(platform), request, clearSession);
     }
 }

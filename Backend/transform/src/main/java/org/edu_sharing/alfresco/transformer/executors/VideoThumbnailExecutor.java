@@ -1,8 +1,12 @@
 package org.edu_sharing.alfresco.transformer.executors;
 
+import org.alfresco.transform.base.TransformManager;
+import org.alfresco.transform.base.executors.AbstractCommandExecutor;
+import org.alfresco.transform.base.executors.RuntimeExec;
+import org.alfresco.transform.base.util.CustomTransformerFileAdaptor;
+import org.alfresco.transform.common.RequestParamMap;
 import org.alfresco.transform.exceptions.TransformException;
-import org.alfresco.transformer.executors.AbstractCommandExecutor;
-import org.alfresco.transformer.executors.RuntimeExec;
+
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.alfresco.transformer.extractors.VideoMetadataExtractor;
 import org.slf4j.Logger;
@@ -16,17 +20,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import static org.alfresco.transformer.util.RequestParamMap.TIMEOUT;
-import static org.alfresco.transformer.util.Util.stringToLong;
+
+import static org.alfresco.transform.base.util.Util.stringToLong;
 
 @Component
-public class VideoThumbnailExecutor extends AbstractCommandExecutor {
+public class VideoThumbnailExecutor extends AbstractCommandExecutor implements CustomTransformerFileAdaptor {
 
     private static final Logger logger = LoggerFactory.getLogger(VideoThumbnailExecutor.class);
 
     public static String ID = "EduSharingVideoThumbnailExecutor";
-
-    VideoMetadataExtractor videoMetadataExtractor = new VideoMetadataExtractor(LoggerFactory.getLogger(VideoMetadataExtractor.class));
 
     @Override
     protected RuntimeExec createTransformCommand() {
@@ -64,13 +66,7 @@ public class VideoThumbnailExecutor extends AbstractCommandExecutor {
     }
 
     @Override
-    public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions, File sourceFile, File targetFile) throws TransformException {
-        this.transform(null, targetMimetype, transformOptions, sourceFile, targetFile);
-    }
-
-    @Override
-    public void transform(String transformName, String sourceMimetype, String targetMimetype, Map<String, String> transformOptions, File sourceFile, File targetFile) throws TransformException {
-
+    public void transform(String sourceMimetype, String targetMimetype, Map<String, String> transformOptions, File sourceFile, File targetFile, TransformManager transformManager) throws Exception {
         logger.info("sourceMimetype:"+sourceMimetype+" targetMimetype:"+targetMimetype+" sourceFile:"+sourceFile +" targetFile:"+targetFile);
         if(transformOptions != null)
             transformOptions.entrySet().stream().forEach(e -> System.out.println("o:"+ e.getKey() + " "+e.getValue()));
@@ -91,7 +87,7 @@ public class VideoThumbnailExecutor extends AbstractCommandExecutor {
                         .collect(Collectors.toList());
             }
 
-            Long timeout = stringToLong(transformOptions.get(TIMEOUT));
+            Long timeout = stringToLong(transformOptions.get(RequestParamMap.TIMEOUT));
             //this.run(StringUtils.join(comandAndArgs," "),sourceFile,targetFile,timeout);
             HashMap<String,String> options = new HashMap<>();
             options.put("options",StringUtils.join(comandAndArgs," "));
@@ -101,14 +97,12 @@ public class VideoThumbnailExecutor extends AbstractCommandExecutor {
         }
     }
 
-    @Override
-    public void extractMetadata(String transformName, String sourceMimetype, String targetMimetype, Map<String, String> transformOptions, File sourceFile, File targetFile) throws Exception {
-        logger.info("sourceMimetype:"+sourceMimetype+" targetMimetype:"+targetMimetype+" sourceFile:"+sourceFile +" targetFile:"+targetFile);
-        if(transformOptions != null)
-            transformOptions.entrySet().stream().forEach(e -> logger.info("o:"+ e.getKey() + " "+e.getValue()));
 
-        videoMetadataExtractor.extractMetadata(sourceMimetype,transformOptions,sourceFile,targetFile);
+    @Override
+    public String getTransformerName() {
+        return ID;
     }
+
 
     @Override
     protected RuntimeExec createCheckCommand() {
@@ -119,8 +113,4 @@ public class VideoThumbnailExecutor extends AbstractCommandExecutor {
         return runtimeExec;
     }
 
-    @Override
-    public String getTransformerId() {
-        return ID;
-    }
 }

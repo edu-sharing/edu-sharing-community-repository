@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { RestConnectorService } from '../../core-module/core.module';
+import { RestConnectorService, UIConstants } from '../../core-module/core.module';
 import { Closable } from './card-dialog/card-dialog-config';
 import { CardDialogRef } from './card-dialog/card-dialog-ref';
 import { CardDialogUtilsService } from './card-dialog/card-dialog-utils.service';
@@ -127,6 +127,7 @@ import {
     XmlAppPropertiesDialogResult,
 } from './dialog-modules/xml-app-properties-dialog/xml-app-properties-dialog-data';
 import { NotificationDialogComponent } from '../../main/navigation/top-bar/notification-dialog/notification-dialog.component';
+import { CardComponent } from '../../shared/components/card/card.component';
 
 @Injectable({
     providedIn: 'root',
@@ -654,7 +655,7 @@ export class DialogsService {
         return this.cardDialog.open(FileUploadProgressDialogComponent, {
             title: 'WORKSPACE.UPLOAD_TITLE',
             avatar: { kind: 'icon', icon: 'cloud_upload' },
-            width: 500,
+            width: 700,
             data,
             closable: Closable.Disabled,
         });

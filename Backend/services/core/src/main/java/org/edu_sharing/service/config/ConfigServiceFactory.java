@@ -8,8 +8,8 @@ import org.edu_sharing.alfresco.service.config.model.KeyValuePair;
 import org.edu_sharing.alfresco.service.config.model.Language;
 import org.edu_sharing.repository.server.RequestHelper;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public class ConfigServiceFactory {

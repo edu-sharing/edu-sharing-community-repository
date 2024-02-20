@@ -32,7 +32,7 @@
     </docker.edu_sharing.community.common.alfresco.activemq>
 
     <docker.edu_sharing.community.common.alfresco.repository>
-      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-alfresco-repository:7.4.1
+      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-alfresco-repository:23.2.0-A9_2
     </docker.edu_sharing.community.common.alfresco.repository>
 
     <docker.edu_sharing.community.common.alfresco.transform>
@@ -40,7 +40,7 @@
     </docker.edu_sharing.community.common.alfresco.transform>
 
     <docker.edu_sharing.community.common.alfresco.transform.core.aio>
-      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-alfresco-transform-core-aio:3.1.1
+      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-alfresco-transform-core-aio:5.0.0
     </docker.edu_sharing.community.common.alfresco.transform.core.aio>
 
     <docker.edu_sharing.community.common.alfresco.search.service>
@@ -88,7 +88,7 @@
 
     <phpredis.version>5.3.7</phpredis.version>
     <prometheus.jmx.version>0.17.2</prometheus.jmx.version>
-    <redisson.version>3.18.0</redisson.version>
+    <redisson.version>3.26.0</redisson.version>
 
   </properties>
   <build>

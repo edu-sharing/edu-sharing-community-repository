@@ -51,12 +51,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.UserTransaction;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.List;
@@ -119,8 +119,8 @@ public class Edu_SharingWebDAVServlet extends HttpServlet
 	public static final String KEY_ROOT_PATH = "rootPath";
 
     /**
-     * @see javax.servlet.http.HttpServlet#service(javax.servlet.http.HttpServletRequest,
-     *      javax.servlet.http.HttpServletResponse)
+     * @see jakarta.servlet.http.HttpServlet#service(jakarta.servlet.http.HttpServletRequest,
+     *      jakarta.servlet.http.HttpServletResponse)
      */
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException,
             IOException
@@ -477,7 +477,8 @@ public class Edu_SharingWebDAVServlet extends HttpServlet
         private String storeName;
         private String rootPath;
         private String urlPathPrefix;
-        
+        private boolean allowInsecurePOSTMethod = false;
+
         public boolean getEnabled()
         {
             return enabled;
@@ -551,6 +552,16 @@ public class Edu_SharingWebDAVServlet extends HttpServlet
         public void setUrlPathPrefix(String urlPathPrefix)
         {
             this.urlPathPrefix = urlPathPrefix;
+        }
+
+        public boolean allowInsecurePOSTMethod()
+        {
+            return allowInsecurePOSTMethod;
+        }
+
+        public void setAllowInsecurePOSTMethod(boolean allowInsecurePOSTMethod)
+        {
+            this.allowInsecurePOSTMethod = allowInsecurePOSTMethod;
         }
     }
 }

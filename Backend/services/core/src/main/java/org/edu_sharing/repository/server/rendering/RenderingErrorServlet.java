@@ -7,10 +7,10 @@ import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.HttpException;
 import org.edu_sharing.repository.server.tools.I18nServer;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 
@@ -20,7 +20,7 @@ public class RenderingErrorServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         RenderingException exception = (RenderingException) req
-                .getAttribute("javax.servlet.error.exception");
+                .getAttribute("jakarta.servlet.error.exception");
         if(exception!=null) {
             logger.warn(exception.getMessage(), exception);
             if (exception.getNested() != null){

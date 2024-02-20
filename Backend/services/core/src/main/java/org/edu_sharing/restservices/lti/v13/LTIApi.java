@@ -55,11 +55,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import java.net.*;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
@@ -148,8 +148,13 @@ public class LTIApi {
         RepoTools repoTools = new RepoTools();
         ApplicationInfo platform = repoTools.getApplicationInfo(iss, clientId, ltiDeploymentId);
         Tool tool = Config.getTool(platform, req,true);
+        /**
+         * @TODO
+         *  jakarta/javax lib problem
+         *  justed fixed compile problems
+         */
         // get data from request
-        final LoginRequest loginRequest = LoginRequestFactory.from(req);
+        final LoginRequest loginRequest = null;//LoginRequestFactory.from(req);
         if (this.logger.isInfoEnabled()) {
             this.logger.info("OIDC launch received with " + loginRequest.toString());
         }
@@ -294,7 +299,12 @@ public class LTIApi {
          * validate nonce
          */
         String nonce = jws.getBody().get("nonce", String.class);
-        String sessionNonce = new HttpSessionOIDCLaunchSession(req).getNonce();
+        /**
+         * @TODO
+         *  jakarta/javax lib problem
+         *  justed fixed compile problems
+         */
+        String sessionNonce = null;//new HttpSessionOIDCLaunchSession(req).getNonce();
         if(!nonce.equals(sessionNonce)){
             logger.error("nonce:"+nonce+ " sessionNonce:"+sessionNonce +". maybe jsessionid is not the same for login_initiation and launch url. ");
             throw new IllegalStateException("nonce is invalid");

@@ -3,7 +3,7 @@ package org.edu_sharing.service.rendering;
 import java.util.Map;
 import java.util.function.Function;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class RenderingServiceOptions {
     public String displayMode;

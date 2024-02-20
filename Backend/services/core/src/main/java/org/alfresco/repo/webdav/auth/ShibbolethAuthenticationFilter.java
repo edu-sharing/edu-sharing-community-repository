@@ -2,15 +2,15 @@ package org.alfresco.repo.webdav.auth;
 
 import java.io.IOException;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.UserTransaction;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
@@ -191,7 +191,7 @@ public class ShibbolethAuthenticationFilter implements Filter {
 					String proxyHost = System.getProperty("https.proxyHost");
 					String proxyPort = System.getProperty("https.proxyPort");
 					
-					final WebClient webClient = 
+					final WebClient webClient =
 							  (proxyHost != null & proxyPort != null)
 							? new WebClient(BrowserVersion.getDefault(), proxyHost, Integer.parseInt(proxyPort))
 							: new WebClient();
@@ -479,7 +479,7 @@ public class ShibbolethAuthenticationFilter implements Filter {
 			form2.getInputByName("j_username").setValueAttribute(localname);
 			form2.getInputByName("j_password").setValueAttribute(password);
 
-			HtmlButton button2 = 
+			HtmlButton button2 =
 					(HtmlButton) form2.getByXPath("//button[@type='submit']").get(0);
 			
 			result = button2.click();

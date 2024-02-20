@@ -4,23 +4,22 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.Schema;;
 
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.StringWriter;
+import java.util.Map;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import org.alfresco.error.AlfrescoRuntimeException;
-import org.apache.commons.logging.impl.Log4JLogger;
 import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.restservices.*;
-import org.edu_sharing.restservices.node.v1.NodeApi;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.edu_sharing.service.foldertemplates.LoggingErrorHandler;
+import org.springframework.http.HttpStatus;
 
 @Schema(description = "")
 public class ErrorResponse {
@@ -32,6 +31,8 @@ public class ErrorResponse {
 	private String message = null;
 	private String stacktrace = null;
 	private String logLevel;
+
+	private Map<String, Serializable> details;
 
 	public ErrorResponse() {	
 		
@@ -69,6 +70,12 @@ public class ErrorResponse {
         if(t instanceof DAOMissingException) {
     		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
     	}
+		if(t instanceof DAOMimetypeVerificationException || t instanceof DAOFileExtensionVerificationException) {
+			return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity(new ErrorResponse(t)).build();
+		}
+		if(t instanceof DAOVirusDetectedException || t instanceof DAOVirusScanFailedException) {
+			return Response.status(HttpStatus.UNPROCESSABLE_ENTITY.value()).entity(new ErrorResponse(t)).build();
+		}
     	if(t instanceof DAOQuotaException){
 
 			logger.info(t.getMessage(), t);
@@ -102,7 +109,9 @@ public class ErrorResponse {
 
 	public ErrorResponse(Throwable t) {
 		Level level=logger.getEffectiveLevel();
-		
+		if(t instanceof DAOException) {
+			setDetails(((DAOException) t).getDetails());
+		}
 		if(level!=null){
 			setError(t.getClass().getName());
 			if(level.toInt()<=Level.INFO_INT)
@@ -163,5 +172,12 @@ public class ErrorResponse {
 	public void setStacktrace(String stacktrace) {
 		this.stacktrace = stacktrace;
 	}
-	
+
+	public Map<String, Serializable> getDetails() {
+		return details;
+	}
+
+	public void setDetails(Map<String, Serializable> details) {
+		this.details = details;
+	}
 }

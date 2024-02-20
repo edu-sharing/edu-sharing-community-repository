@@ -15,7 +15,7 @@ import org.edu_sharing.repository.server.update.UpdateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import javax.transaction.UserTransaction;
+import jakarta.transaction.UserTransaction;
 import java.util.ArrayList;
 import java.util.List;
 

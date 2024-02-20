@@ -8,7 +8,7 @@ import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.json.JSONObject;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 import java.io.File;
 
 /**

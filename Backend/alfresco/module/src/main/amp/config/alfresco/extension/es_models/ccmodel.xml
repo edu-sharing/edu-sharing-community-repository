@@ -618,7 +618,7 @@
 				<!-- edu-sharing show or hide email in profile: true=show , false=hide   -->
 				<property name="ccm:showEmail">
 					<type>d:boolean</type>
-					<default>false</default>
+					<default>true</default>
 				</property>
 				<!-- edu-sharing customization: list of recently invited persons / groups -->
 				<property name="ccm:userRecentlyInvited">

@@ -17,10 +17,10 @@ import org.edu_sharing.service.bulk.BulkRun;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.bulk.BulkServiceFactory;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.List;
 

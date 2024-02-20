@@ -33,10 +33,13 @@ import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
-import org.edu_sharing.webservices.usage2.Usage2Exception;
 import org.springframework.context.ApplicationContext;
 
 public class Usage2Service {
+
+
+	public static final String MISSING_PARAM = "MISSING_PARAM";
+	public static final String NO_CCPUBLISH_PERMISSION = "NO_CCPUBLISH_PERMISSION";
 	
 Logger logger = Logger.getLogger(Usage2Service.class);
 	
@@ -137,7 +140,7 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 	public Usage setUsage(String repoId, String userIn, String lmsId, String courseId, String parentNodeId, String userMail, Calendar fromUsed, Calendar toUsed, int distinctPersons, String _version, String resourceId, String xmlParams) throws UsageException{
 		if (userIn == null || userIn.trim().equals("") || lmsId == null || lmsId.trim().equals("") || courseId == null || courseId.trim().equals("") || parentNodeId == null
 				|| parentNodeId.trim().equals("")) {
-			throw new UsageException(UsageService.MISSING_PARAM, null);
+			throw new UsageException(MISSING_PARAM, null);
 		}
 		// if the user is admin, map it for the requesting repo
 		final String user=SSOAuthorityMapper.mapAdminAuthority(userIn,lmsId);
@@ -164,7 +167,7 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 							if(!parentNodeId.equals(usageNodeId)){
 								logger.info("The element "+parentNodeId+" is a collection ref for object "+usageNodeId+", but the user is missing "+CCConstants.PERMISSION_CC_PUBLISH+" on the primary object");
 							}
-							throw new UsageException(UsageService.NO_CCPUBLISH_PERMISSION, null);
+							throw new UsageException(NO_CCPUBLISH_PERMISSION, null);
 						}
 					}
 

@@ -46,7 +46,7 @@ import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class RenderingServiceImpl implements RenderingService{

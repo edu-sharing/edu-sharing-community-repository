@@ -14,10 +14,10 @@ import org.edu_sharing.restservices.register.v1.model.RegisterExists;
 import org.edu_sharing.restservices.register.v1.model.RegisterInformation;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 
 @Path("/register/v1")
 @Tag(name="REGISTER v1")

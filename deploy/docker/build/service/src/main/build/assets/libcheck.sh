@@ -7,8 +7,12 @@ whitelist=(
   # swagger gen vs swagger usage conflict -> new api
   "xmlsec-1.5.8.jar:alf-lib" # axis-1.4
   "xmlsec-1.4.5.jar:edu-lib" # axis-1.4
-  "stax-api-1.0-2.jar:alf-lib"
+  "jakarta.activation-2.0.1.jar:alf-lib" #todo remove when soap is removed
+  "jakarta.activation-2.0.1.jar:edu-lib"
+  "jakarta.xml.soap-api-2.0.1.jar:alf-lib" #todo remove when soap is removed
+  "jakarta.xml.soap-api-2.0.1.jar:edu-lib"
   "stax-api-1.0.1.jar:alf-lib"
+  "stax-api-1.0-2.jar:alf-lib"
 )
 
 files=()
@@ -34,7 +38,7 @@ for file in "${whitelist[@]}" ; do
 done
 
 groupedFiles=()
-while IFS='' read -r line; do groupedFiles+=("$line"); done < <(printf "%s\n" "${files[@]}" | sed 's|-[0-9.][0-9.]*[a-zA-Z0-9_-]*\.jar:.*$||' | sort | uniq -c | sed 's| *||') #| sed 's| |:|g')
+while IFS='' read -r line; do groupedFiles+=("$line"); done < <(printf "%s\n" "${files[@]}" | sed 's|-[0-9.][0-9.]*[a-zA-Z0-9_]*\.jar:.*$||' | sort | uniq -c | sed 's| *||') #| sed 's| |:|g')
 
 duplicates=()
 for group in "${groupedFiles[@]}" ; do

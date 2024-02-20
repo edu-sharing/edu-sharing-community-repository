@@ -71,6 +71,14 @@
         }
       }
     ],
+    "eduResourceType": [
+      {
+        "value": {
+          "required": true,
+          "name": "eduResourceType"
+        }
+      }
+    ],
     "metadataOptions": [
       {"value": {"name": "extractMapping"}}
     ]
@@ -92,17 +100,19 @@
       ]
     },
     {
-      "transformerName": "EduSharingH5pThumbnailExecutor",
+      "transformerName": "EduSharingZipThumbnailExecutor",
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "application/zip", "targetMediaType": "image/png"},
         {"sourceMediaType": "application/gzip", "targetMediaType": "image/png"},
 
         {"sourceMediaType": "application/zip", "priority": 49, "targetMediaType": "image/jpeg"},
+        {"sourceMediaType": "application/octet-stream", "priority": 49, "targetMediaType": "image/jpeg"},
         {"sourceMediaType": "application/gzip", "targetMediaType": "image/jpeg"}
       ],
       "transformOptions": [
         "eduVideoThumbnail",
-        "directAccessUrl"
+        "directAccessUrl",
+        "eduResourceType"
       ]
     },
     {
@@ -112,7 +122,8 @@
       ],
       "transformOptions": [
         "eduVideoThumbnail",
-        "directAccessUrl"
+        "directAccessUrl",
+        "eduResourceType"
       ]
     },
     {
@@ -125,7 +136,17 @@
       "transformOptions": [
         "metadataOptions"
       ]
+    },
+    {
+      "transformerName": "EduSharingZipTextExecuter",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/octet-stream", "priority": 49, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/zip", "priority": 49, "targetMediaType": "text/plain"},
+        {"sourceMediaType": "application/gzip", "targetMediaType": "text/plain"}
+      ],
+      "transformOptions": [
+        "eduResourceType"
+      ]
     }
-
   ]
 }

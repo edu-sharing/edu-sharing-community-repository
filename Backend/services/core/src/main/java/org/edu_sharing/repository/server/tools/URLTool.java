@@ -30,7 +30,7 @@ package org.edu_sharing.repository.server.tools;
 import java.text.MessageFormat;
 import java.util.HashMap;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;

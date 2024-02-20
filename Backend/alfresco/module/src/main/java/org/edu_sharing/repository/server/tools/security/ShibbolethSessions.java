@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -46,11 +46,11 @@ public class ShibbolethSessions {
 			this.alfrescoTicket = alfrescoTicket;
 		}
 
-		public javax.servlet.http.HttpSession getTomcatSession() {
+		public jakarta.servlet.http.HttpSession getTomcatSession() {
 			return tomcatSession;
 		}
 
-		public void setTomcatSession(javax.servlet.http.HttpSession tomcatSession) {
+		public void setTomcatSession(jakarta.servlet.http.HttpSession tomcatSession) {
 			this.tomcatSession = tomcatSession;
 		}
 		

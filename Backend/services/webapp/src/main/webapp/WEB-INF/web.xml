@@ -17,14 +17,6 @@
       <param-name>contextConfigLocation</param-name>
       <param-value>classpath*:/org/edu_sharing/spring/application-context.xml</param-value>
     </context-param>
-    <!-- SAML
-    <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>
-            /WEB-INF/securityContext.xml
-        </param-value>
-    </context-param>
-    SAML -->
 
    
    <filter>
@@ -154,13 +146,29 @@
 
     <!-- SAML
     <filter-mapping>
-        <filter-name>springSecurityFilterChain</filter-name>
-        <url-pattern>/saml/*</url-pattern>
+      <filter-name>springSecurityFilterChain</filter-name>
+      <url-pattern>/shibboleth</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>springSecurityFilterChain</filter-name>
-        <url-pattern>/shibboleth</url-pattern>
+      <filter-name>springSecurityFilterChain</filter-name>
+      <url-pattern>/saml2/*</url-pattern>
     </filter-mapping>
+    <filter-mapping>
+      <filter-name>springSecurityFilterChain</filter-name>
+      <url-pattern>/login/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+      <filter-name>springSecurityFilterChain</filter-name>
+      <url-pattern>/logout</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+      <filter-name>springSecurityFilterChain</filter-name>
+      <url-pattern>/oauth2/*</url-pattern>
+     </filter-mapping>
+     <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/rest/*</url-pattern>
+     </filter-mapping>
      SAML -->
 
     <filter-mapping>
@@ -456,16 +464,7 @@
             org.edu_sharing.repository.server.FolderTemplateServlet
         </servlet-class> 
     </servlet>
-    
-    <servlet>  
-      <servlet-name>RestService</servlet-name>  
-      <servlet-class>org.restlet.ext.servlet.ServerServlet</servlet-class>
-      <init-param>
-            <!-- Application class name -->
-            <param-name>org.restlet.application</param-name>
-            <param-value>org.edu_sharing.rest.RestService</param-value>
-      </init-param>
-   </servlet>  
+
    
    <servlet>
       <servlet-name>EduWebDAV</servlet-name>
@@ -607,19 +606,20 @@
     	<jsp-file>/cas_proxycallback.jsp</jsp-file>
     </servlet>-->
     
-    <!-- Axis servlet stuff -->
+    <!-- Axis servlet stuff
     <servlet>
 		<display-name>Apache-Axis Servlet</display-name>
 		<servlet-name>AxisServlet</servlet-name>
 		<servlet-class>
 		org.apache.axis.transport.http.AxisServlet</servlet-class>
 	</servlet>
+	 -->
 
     <servlet>
         <servlet-name>REST API</servlet-name>
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
         <init-param>
-            <param-name>javax.ws.rs.Application</param-name>
+            <param-name>jakarta.ws.rs.Application</param-name>
             <param-value>org.edu_sharing.restservices.ApiApplication</param-value>
         </init-param>
     </servlet>
@@ -658,12 +658,7 @@
     <servlet-mapping>
         <servlet-name>REST API</servlet-name>
         <url-pattern>/rest/*</url-pattern>
-    </servlet-mapping>  
-        
-	 <servlet-mapping>  
-      <servlet-name>RestService</servlet-name>  
-      <url-pattern>/restservice/*</url-pattern>  
-   </servlet-mapping>  
+    </servlet-mapping>
 	
 	<!-- webdav stuff-->
 	<servlet-mapping>
@@ -796,7 +791,7 @@
         <url-pattern>/rendering-error</url-pattern>
     </servlet-mapping>
 
-    <!-- Axis mapping stuff -->
+    <!-- Axis mapping stuff
     <servlet-mapping>
 		<servlet-name>AxisServlet</servlet-name>
 		<url-pattern>/servlet/AxisServlet</url-pattern>
@@ -809,6 +804,7 @@
 		<servlet-name>AxisServlet</servlet-name>
 		<url-pattern>/services/*</url-pattern>
 	</servlet-mapping>
+	-->
 
 	<servlet-mapping>
 		<servlet-name>OAuth2Token</servlet-name>
@@ -832,12 +828,6 @@
 	<listener>
 	 	<listener-class>org.edu_sharing.repository.server.authentication.SessionListener</listener-class>
 	 </listener>
-
-    <!-- SAML
-    <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-    </listener>
-    SAML -->
 
       <!-- Angular Dynamic routing, added by Torsten 2016-11-02 -->
 	<servlet>

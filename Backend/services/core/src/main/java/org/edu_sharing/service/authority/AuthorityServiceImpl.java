@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.transaction.UserTransaction;
+import jakarta.transaction.UserTransaction;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;

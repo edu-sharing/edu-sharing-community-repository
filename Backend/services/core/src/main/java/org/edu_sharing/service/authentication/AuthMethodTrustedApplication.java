@@ -9,8 +9,6 @@ import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.webservices.authentication.Authentication;
-import org.edu_sharing.webservices.authentication.AuthenticationServiceLocator;
 
 public class AuthMethodTrustedApplication implements AuthMethodInterface {
 
@@ -57,30 +55,6 @@ public class AuthMethodTrustedApplication implements AuthMethodInterface {
 		
 		params.put(SSOAuthorityMapper.PARAM_SSO_TYPE, SSOAuthorityMapper.SSO_TYPE_AuthByApp);
 		return ssoAuthorityMapper.mapAuthority(params);
-	}
-	
-	
-	
-	/**
-	 * 
-	 * we can not use EduWebServiceFactory cause here its deployed in edu-sharing webapp context, 
-	 * and this class is deployed in alfreco context
-	 * 
-	 * so this is a copy from EduWebServiceFactory.  
-	 * @param endpointAddress
-	 * @return
-	 */
-	public Authentication getAuthenticationServiceByEndpointAddress(String endpointAddress){
-		try{
-			AuthenticationServiceLocator locator = new AuthenticationServiceLocator();
-			locator.setauthenticationEndpointAddress(endpointAddress);
-			return locator.getauthentication();
-		}catch(ServiceException e){
-			//e.printStackTrace();
-			logger.error(e.getMessage(), e);
-			
-		}
-		return null;
 	}
 	
 	public void setSsoAuthorityMapper(SSOAuthorityMapper ssoAuthorityMapper) {

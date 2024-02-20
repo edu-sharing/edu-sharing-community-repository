@@ -228,7 +228,9 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
     @HostListener('window:beforeunload', ['$event'])
     beforeunloadHandler(event: any) {
         if (this.isSafe) {
-            void this.connector.logout().toPromise();
+            // not necessary anymore, stay in session on reload
+            // low session times for safe in backend to provide session hijacking
+            // this.connector.logout().toPromise();
         }
     }
 
@@ -1028,6 +1030,9 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
     }
 
     setDisplayType(displayType: NodeEntriesDisplayType, refreshRoute = true) {
+        if (this.displayType === displayType) {
+            return;
+        }
         this.displayType = displayType;
         if (refreshRoute) {
             void this.router.navigate(['./'], {

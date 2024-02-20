@@ -1,9 +1,5 @@
 package org.edu_sharing.webservices.axis;
 
-import java.util.Iterator;
-
-import javax.xml.soap.SOAPBody;
-
 import org.apache.axis.AxisFault;
 import org.apache.axis.MessageContext;
 import org.apache.axis.handlers.BasicHandler;

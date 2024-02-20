@@ -3,8 +3,8 @@ package org.edu_sharing.service.repoproxy;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.Response;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.Response;
 
 import org.edu_sharing.restservices.mds.v1.model.SuggestionParam;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
