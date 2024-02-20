@@ -2,7 +2,10 @@
   [class]="
     'grid-card' +
     (nodeHelper.isNodeCollection(node)
-      ? ' grid-card-collection grid-card-collection-scope-' + node.collection.scope
+      ? ' grid-card-collection grid-card-collection-scope-' +
+        node.collection.scope +
+        ' grid-card-collection-type-' +
+        node.collection.type
       : '') +
     (entriesService.singleClickHint === 'dynamic' ? ' dynamic-single-click' : '')
   "

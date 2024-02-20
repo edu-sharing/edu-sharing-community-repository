@@ -2,7 +2,10 @@
   [class]="
     'grid-card' +
     (isCollection
-      ? ' grid-card-collection grid-card-collection-scope-' + node.collection.scope
+      ? ' grid-card-collection grid-card-collection-scope-' +
+        node.collection.scope +
+        ' grid-card-collection-type-' +
+        node.collection.type
       : '') +
     (node.virtual ? ' grid-card-virtual' : '')
   "
