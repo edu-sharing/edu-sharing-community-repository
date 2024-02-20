@@ -260,7 +260,17 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
             this.toast.toast(this.toastOnSave);
             this.onDone.emit(updatedNodes);
         } catch (error) {
-            this.handleError(error);
+            if (
+                error?.error?.error?.endsWith(
+                    RestConstants.CONTENT_FILE_EXTENSION_VERIFICATION_EXCEPTION,
+                )
+            ) {
+                this.handleError(
+                    new UserPresentableError('MDS.ERROR_FILE_EXTENSION_VERIFICATION_EXCEPTION'),
+                );
+            } else {
+                this.handleError(error);
+            }
         } finally {
             this.isLoading = false;
         }

@@ -191,7 +191,7 @@ public class ShibbolethAuthenticationFilter implements Filter {
 					String proxyHost = System.getProperty("https.proxyHost");
 					String proxyPort = System.getProperty("https.proxyPort");
 					
-					final WebClient webClient = 
+					final WebClient webClient =
 							  (proxyHost != null & proxyPort != null)
 							? new WebClient(BrowserVersion.getDefault(), proxyHost, Integer.parseInt(proxyPort))
 							: new WebClient();
@@ -479,7 +479,7 @@ public class ShibbolethAuthenticationFilter implements Filter {
 			form2.getInputByName("j_username").setValueAttribute(localname);
 			form2.getInputByName("j_password").setValueAttribute(password);
 
-			HtmlButton button2 = 
+			HtmlButton button2 =
 					(HtmlButton) form2.getByXPath("//button[@type='submit']").get(0);
 			
 			result = button2.click();

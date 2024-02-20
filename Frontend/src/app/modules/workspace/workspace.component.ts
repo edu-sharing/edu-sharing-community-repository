@@ -224,7 +224,9 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     @HostListener('window:beforeunload', ['$event'])
     beforeunloadHandler(event: any) {
         if (this.isSafe) {
-            void this.connector.logout().toPromise();
+            // not necessary anymore, stay in session on reload
+            // low session times for safe in backend to provide session hijacking
+            // this.connector.logout().toPromise();
         }
     }
 

@@ -15,7 +15,7 @@ import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
-import org.apache.cxf.common.util.CollectionUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.AuthorityService;
 import org.edu_sharing.alfresco.service.OrganisationService;
@@ -854,7 +854,7 @@ public class MediacenterServiceImpl implements MediacenterService {
             mcStatusListNew.add(jo.toJSONString());
         }
 
-        if(mcStatusList == null || CollectionUtils.diff(mcStatusListNew,mcStatusList).size() > 0){
+            if(mcStatusList == null || (CollectionUtils.disjunction(mcStatusListNew, mcStatusList)).size() > 0){
             serviceregistry.getRetryingTransactionHelper().doInTransaction(() -> {
                 policyBehaviourFilter.disableBehaviour(nodeRef);
                 logger.info("updateing mediacenter status for " + nodeRef+" mediacenter:"+mediacenterGroupName+" activated:"+activated);

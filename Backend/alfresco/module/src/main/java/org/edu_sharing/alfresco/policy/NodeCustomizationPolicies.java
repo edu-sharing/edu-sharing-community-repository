@@ -1,14 +1,5 @@
 package org.edu_sharing.alfresco.policy;
 
-import java.io.ByteArrayInputStream;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import com.google.common.collect.Lists;
 import com.typesafe.config.Config;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.ContentServicePolicies.OnContentUpdatePolicy;
@@ -38,7 +29,14 @@ import org.alfresco.service.transaction.TransactionService;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.tika.config.TikaConfig;
+import org.apache.tika.detect.Detector;
+import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.metadataset.v2.MetadataReader;
@@ -48,10 +46,18 @@ import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
-import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.json.JSONObject;
 import org.quartz.Scheduler;
 import org.springframework.security.crypto.codec.Base64;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *
@@ -288,6 +294,17 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 
 				new ThumbnailHandling().thumbnailHandling(nodeRef);
 			}
+			if(verifyMimetypeEnabled()) {
+				if(newContent &&
+						!nodeService.getProperty(nodeRef,ContentModel.PROP_NODE_UUID)
+								.equals(nodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL))))
+				{
+					logger.info("will not verifyMimetypeEnabled for copy");
+				}else {
+					String filename = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+					verifyMimetype(reader, filename, getMimetypeAllowList(), LightbendConfigLoader.get().getBoolean("security.fileManagement.mimetypeVerification.allowUnknownMimetypes"));
+				}
+			}
 
 			Action extractMetadataAction = actionService.createAction("extract-metadata");
 			//dont do async cause it conflicts with preview creation when webdav is used
@@ -331,6 +348,46 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			});
 		}
 		new RepositoryCache().remove(nodeRef.getId());
+	}
+
+	private static HashMap<String, List<String>> getMimetypeAllowList() {
+		HashMap<String, List<String>> allowList = LightbendConfigLoader.get().
+				getConfig("security.fileManagement.mimetypeVerification.list").entrySet().stream().collect(
+						Collectors.toMap(e -> StringUtils.strip(e.getKey(), "\""), e -> (List<String>) e.getValue().unwrapped(),
+								(a, b) -> b, HashMap::new)
+				);
+		return allowList;
+	}
+
+	private static boolean verifyMimetypeEnabled() {
+		return LightbendConfigLoader.get().getBoolean("security.fileManagement.mimetypeVerification.enabled");
+	}
+
+	static void verifyMimetype(ContentReader reader, String filename, Map<String, List<String>> allowList, boolean allowUnknownMimetypes) throws NodeMimetypeUnknownValidationException {
+		// String reportedMimeType = reader.getMimetype();
+		try {
+			TikaConfig config = TikaConfig.getDefaultConfig();
+			Detector detector = config.getDetector();
+			TikaInputStream stream = TikaInputStream.get(reader.getContentInputStream());
+			Metadata metadata = new Metadata();
+			MediaType mediaType = detector.detect(stream, metadata);
+			if(mediaType.equals(MediaType.OCTET_STREAM) && !allowUnknownMimetypes) {
+				throw new NodeMimetypeUnknownValidationException();
+			}
+			String detectedMimeType = mediaType.getType() + "/" + mediaType.getSubtype();
+			if(!allowList.containsKey(detectedMimeType)) {
+				logger.warn("Mimetype not allowed: " + detectedMimeType);
+				throw new NodeMimetypeValidationException(detectedMimeType);
+			}
+			List<String> fileExtensions = allowList.get(detectedMimeType);
+			String extension = FilenameUtils.getExtension(filename);
+			if(!(fileExtensions == null || fileExtensions.contains("*") || fileExtensions.stream().anyMatch(e -> e.equalsIgnoreCase(extension)))) {
+				logger.warn("Found no allowed file extension for given mimetype: " + detectedMimeType);
+				throw new NodeFileExtensionValidationException(fileExtensions, extension);
+			}
+		} catch (IOException e) {
+			logger.warn("Tika mime type detection failed", e);
+		}
 	}
 
 	@Override
@@ -488,6 +545,23 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			if(nameAfter != null && !nameAfter.equals(nameBefore)){
 				// removed on 2017-04-20
 				//nodeService.setProperty(nodeRef, QName.createQName(CCConstants.LOM_PROP_GENERAL_TITLE), nameAfter);
+
+				if(verifyMimetypeEnabled() && nodeService.exists(nodeRef)) {
+					if(nameBefore == null && !nodeService.getProperty(nodeRef,ContentModel.PROP_NODE_UUID)
+							.equals(nodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)))){
+						logger.info("will not verifyMimetypeEnabled for copy");
+					}else{
+						ContentReader reader = contentService.getReader(nodeRef, ContentModel.PROP_CONTENT);
+						if(reader != null && reader.exists()) {
+							try {
+								verifyMimetype(reader, nameAfter, getMimetypeAllowList(), LightbendConfigLoader.get().getBoolean("security.fileManagement.mimetypeVerification.allowUnknownMimetypes"));
+							}catch(NodeMimetypeValidationException ignored) {
+								// we ignore this since the node is now already uploaded. we only want to throw the
+								// @NodeFileExtensionValidationException
+							}
+						}
+					}
+				}
 			}
 			// refresh all collection io's metadata
 			// run as admin to refresh all, see ESPUB-633
