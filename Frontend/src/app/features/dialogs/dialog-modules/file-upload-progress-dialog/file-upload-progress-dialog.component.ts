@@ -1,5 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
+import { FormatSizePipe } from 'ngx-edu-sharing-ui';
 import {
     DialogButton,
     Node,
@@ -26,7 +27,11 @@ import {
     styleUrls: ['./file-upload-progress-dialog.component.scss'],
 })
 export class FileUploadProgressDialogComponent implements OnInit {
-    progress: { name: string; progress: UploadProgress; error?: string }[] = [];
+    progress: {
+        name: string;
+        progress: UploadProgress;
+        error?: { key: string; variables?: any };
+    }[] = [];
     private resultList: Node[] = [];
     private error = false;
     processed = 0;
@@ -73,7 +78,7 @@ export class FileUploadProgressDialogComponent implements OnInit {
         if (!this.data.files.item(number).type && !this.data.files.item(number).size) {
             setTimeout(() => {
                 this.progress[number].progress.progress = -1;
-                this.progress[number].error = 'FORMAT';
+                this.progress[number].error = { key: 'FORMAT' };
                 this.error = true;
                 this._upload(number + 1);
             }, 50);
@@ -139,28 +144,48 @@ export class FileUploadProgressDialogComponent implements OnInit {
         if (node) {
             this.nodeService.deleteNode(node.ref.id, false).subscribe(() => {});
         }
+        let i18nName: string;
+        let variables: any;
         if (RestHelper.errorMatchesAny(error, RestConstants.CONTENT_VIRUS_SCAN_FAILED_EXCEPTION)) {
-            return 'VIRUS_SCAN_FAILED';
-        }
-        if (RestHelper.errorMatchesAny(error, RestConstants.CONTENT_VIRUS_EXCEPTION)) {
-            return 'VIRUS';
-        }
-        if (
+            i18nName = 'VIRUS_SCAN_FAILED';
+        } else if (RestHelper.errorMatchesAny(error, RestConstants.CONTENT_VIRUS_EXCEPTION)) {
+            i18nName = 'VIRUS';
+        } else if (
             RestHelper.errorMatchesAny(error, RestConstants.CONTENT_MIMETYPE_VERIFICATION_EXCEPTION)
         ) {
-            return 'MIMETYPE_VERIFICATION';
-        }
-        if (
+            i18nName = 'MIMETYPE_VERIFICATION';
+        } else if (
+            RestHelper.errorMatchesAny(
+                error,
+                RestConstants.CONTENT_NODE_FILE_SIZE_EXCEEDED_EXCEPTION,
+            )
+        ) {
+            i18nName = 'FILE_SIZE_EXCEEDED';
+            try {
+                const errorData = JSON.parse(error.response);
+                variables = {
+                    actualSize: new FormatSizePipe(this.translate).transform(
+                        errorData.details.actualSize,
+                    ),
+                    maxSize: new FormatSizePipe(this.translate).transform(
+                        errorData.details.maxSize,
+                    ),
+                };
+            } catch (e) {
+                console.warn(e);
+            }
+        } else if (
             RestHelper.errorMatchesAny(
                 error,
                 RestConstants.CONTENT_FILE_EXTENSION_VERIFICATION_EXCEPTION,
             )
         ) {
-            return 'FILETYPE_VERIFICATION';
+            i18nName = 'FILETYPE_VERIFICATION';
+        } else if (RestHelper.errorMatchesAny(error, RestConstants.CONTENT_QUOTA_EXCEPTION)) {
+            i18nName = 'QUOTA';
+        } else {
+            i18nName = 'UNKNOWN';
         }
-        if (RestHelper.errorMatchesAny(error, RestConstants.CONTENT_QUOTA_EXCEPTION)) {
-            return 'QUOTA';
-        }
-        return 'UNKNOWN';
+        return { key: i18nName, variables };
     }
 }

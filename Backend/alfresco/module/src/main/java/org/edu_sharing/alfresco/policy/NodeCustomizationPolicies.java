@@ -305,7 +305,14 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 					verifyMimetype(reader, filename, getMimetypeAllowList(), LightbendConfigLoader.get().getBoolean("security.fileManagement.mimetypeVerification.allowUnknownMimetypes"));
 				}
 			}
-
+			Long sizeLimit = LightbendConfigLoader.get().hasPath("security.fileManagement.limits.fileSize") ? LightbendConfigLoader.get().getLong("security.fileManagement.limits.fileSize") : null;
+			if(sizeLimit != null) {
+				if (!(newContent &&
+						!nodeService.getProperty(nodeRef, ContentModel.PROP_NODE_UUID)
+								.equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL))))) {
+					verifyFileLimit(reader, sizeLimit);
+				}
+			}
 			Action extractMetadataAction = actionService.createAction("extract-metadata");
 			//dont do async cause it conflicts with preview creation when webdav is used
 			actionService.executeAction(extractMetadataAction, nodeRef, true, false);
@@ -348,6 +355,12 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			});
 		}
 		new RepositoryCache().remove(nodeRef.getId());
+	}
+
+	private void verifyFileLimit(ContentReader reader, Long sizeLimit) throws NodeFileSizeExceededException {
+		if(reader.getSize() > sizeLimit) {
+			throw new NodeFileSizeExceededException(sizeLimit, reader.getSize());
+		}
 	}
 
 	private static HashMap<String, List<String>> getMimetypeAllowList() {

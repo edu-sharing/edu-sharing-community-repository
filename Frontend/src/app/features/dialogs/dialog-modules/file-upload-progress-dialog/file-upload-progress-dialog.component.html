@@ -14,7 +14,7 @@
     </div>
     <div class="info" [style.visibility]="item.progress.loaded || item.error ? '' : 'hidden'">
       <span class="info-error" *ngIf="item.error">{{
-        'WORKSPACE.UPLOAD_ERROR.' + item.error | translate
+        'WORKSPACE.UPLOAD_ERROR.' + item.error.key | translate : item.error.variables
       }}</span>
       <div *ngIf="item.progress.loaded">
         <span *ngIf="item.progress.remaining > 1">{{

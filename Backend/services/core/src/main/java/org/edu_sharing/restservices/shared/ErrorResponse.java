@@ -4,7 +4,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.Schema;;
 
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.StringWriter;
+import java.util.Map;
 
 import jakarta.ws.rs.core.Response;
 
@@ -29,6 +31,8 @@ public class ErrorResponse {
 	private String message = null;
 	private String stacktrace = null;
 	private String logLevel;
+
+	private Map<String, Serializable> details;
 
 	public ErrorResponse() {	
 		
@@ -105,7 +109,9 @@ public class ErrorResponse {
 
 	public ErrorResponse(Throwable t) {
 		Level level=logger.getEffectiveLevel();
-		
+		if(t instanceof DAOException) {
+			setDetails(((DAOException) t).getDetails());
+		}
 		if(level!=null){
 			setError(t.getClass().getName());
 			if(level.toInt()<=Level.INFO_INT)
@@ -166,5 +172,12 @@ public class ErrorResponse {
 	public void setStacktrace(String stacktrace) {
 		this.stacktrace = stacktrace;
 	}
-	
+
+	public Map<String, Serializable> getDetails() {
+		return details;
+	}
+
+	public void setDetails(Map<String, Serializable> details) {
+		this.details = details;
+	}
 }
