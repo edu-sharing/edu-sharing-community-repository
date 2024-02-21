@@ -304,6 +304,7 @@ xmlstarlet ed -L \
 				echo "  database: ${cache_database}"
 			} >> tomcat/conf/redisson.yaml
 		fi
+		echo "codec: !<org.edu_sharing.redisson.Kryo5Codec> {}" >> tomcat/conf/redisson.yaml
 }
 
 ### Alfresco platform ##################################################################################################

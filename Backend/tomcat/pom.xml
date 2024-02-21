@@ -68,6 +68,14 @@
       <version>${tomcat.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.redisson</groupId>
+      <artifactId>redisson-all</artifactId>
+      <version>3.26.0</version>
+      <scope>provided</scope>
+    </dependency>
+
+
   </dependencies>
 
 </project>
