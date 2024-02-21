@@ -1294,6 +1294,12 @@
       },
       "ErrorResponse": {
         "properties": {
+          "details": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
           "error": {
             "type": "string"
           },
