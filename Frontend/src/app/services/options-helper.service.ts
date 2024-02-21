@@ -476,7 +476,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
 
         applyNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         applyNode.permissions = [RestConstants.ACCESS_CC_PUBLISH];
-        applyNode.permissionsRightMode = NodesRightMode.Original;
+        applyNode.permissionsRightMode = NodesRightMode.Effective;
         applyNode.permissionsMode = HideMode.Disable;
         applyNode.constrains = [Constrain.NoBulk, Constrain.ReurlMode, Constrain.User];
         applyNode.showAsAction = true;
@@ -723,7 +723,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             return this.nodeHelper.referenceOriginalExists(nodes ? nodes[0] : null);
         };
         addNodeToCollection.permissions = [RestConstants.ACCESS_CC_PUBLISH];
-        addNodeToCollection.permissionsRightMode = NodesRightMode.Original;
+        addNodeToCollection.permissionsRightMode = NodesRightMode.Effective;
         addNodeToCollection.permissionsMode = HideMode.Disable;
         // addNodeToCollection.key = 'C';
         addNodeToCollection.group = DefaultGroups.Reuse;
@@ -812,7 +812,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                     this.nodeHelper.getNodesRight(
                         nodes,
                         RestConstants.ACCESS_CHANGE_PERMISSIONS,
-                        NodesRightMode.Original,
+                        NodesRightMode.Effective,
                     )
                 );
             }
@@ -837,7 +837,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         inviteNode.showAsAction = true;
         inviteNode.permissions = [RestConstants.ACCESS_CHANGE_PERMISSIONS];
         inviteNode.permissionsMode = HideMode.Hide;
-        inviteNode.permissionsRightMode = NodesRightMode.Original;
+        inviteNode.permissionsRightMode = NodesRightMode.Effective;
         // inviteNode.key = 'S';
         inviteNode.constrains = [Constrain.HomeRepository, Constrain.User];
         inviteNode.toolpermissions = [RestConstants.TOOLPERMISSION_INVITE];
@@ -1011,7 +1011,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         );
         simpleEditNode.constrains = [Constrain.Files, Constrain.HomeRepository, Constrain.User];
         simpleEditNode.permissions = [RestConstants.ACCESS_WRITE];
-        simpleEditNode.permissionsRightMode = NodesRightMode.Original;
+        simpleEditNode.permissionsRightMode = NodesRightMode.Effective;
         simpleEditNode.permissionsMode = HideMode.Disable;
         simpleEditNode.group = DefaultGroups.Edit;
         simpleEditNode.priority = 15;
@@ -1028,7 +1028,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         ];
         editNode.permissions = [RestConstants.ACCESS_WRITE];
         editNode.permissionsMode = HideMode.Disable;
-        editNode.permissionsRightMode = NodesRightMode.Original;
+        editNode.permissionsRightMode = NodesRightMode.Effective;
         editNode.group = DefaultGroups.Edit;
         editNode.priority = 20;
 
@@ -1241,7 +1241,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         relationNode.scopes = [Scope.Render];
         relationNode.toolpermissions = [RestConstants.TOOLPERMISSION_MANAGE_RELATIONS];
         relationNode.permissions = [RestConstants.PERMISSION_WRITE];
-        relationNode.permissionsRightMode = NodesRightMode.Original;
+        relationNode.permissionsRightMode = NodesRightMode.Effective;
         relationNode.group = DefaultGroups.Edit;
         relationNode.priority = 70;
 
@@ -1290,7 +1290,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             Constrain.User,
         ];
         feedbackMaterial.permissions = [RestConstants.PERMISSION_FEEDBACK];
-        feedbackMaterial.permissionsRightMode = NodesRightMode.Original;
+        feedbackMaterial.permissionsRightMode = NodesRightMode.Effective;
         feedbackMaterial.scopes = [Scope.Render];
         feedbackMaterial.permissionsMode = HideMode.Hide;
         feedbackMaterial.toolpermissions = [RestConstants.TOOLPERMISSION_MATERIAL_FEEDBACK];
@@ -1301,7 +1301,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             !this.nodeHelper.getNodesRight(
                 objects,
                 RestConstants.ACCESS_WRITE,
-                NodesRightMode.Original,
+                NodesRightMode.Effective,
             );
 
         const feedbackMaterialView = new OptionItem(
@@ -1317,7 +1317,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         ];
         feedbackMaterialView.scopes = [Scope.Render];
         feedbackMaterialView.permissions = [RestConstants.ACCESS_DELETE];
-        feedbackMaterialView.permissionsRightMode = NodesRightMode.Original;
+        feedbackMaterialView.permissionsRightMode = NodesRightMode.Effective;
         feedbackMaterialView.permissionsMode = HideMode.Hide;
         feedbackMaterialView.toolpermissions = [RestConstants.TOOLPERMISSION_MATERIAL_FEEDBACK];
         feedbackMaterialView.group = DefaultGroups.View;

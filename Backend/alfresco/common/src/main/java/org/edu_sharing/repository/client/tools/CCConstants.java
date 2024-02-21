@@ -1232,6 +1232,14 @@ public class CCConstants {
 	 * This means that access to content is denied even if there should be access via a collection ref, only the original node permissions are working
 	 */
 	public final static String CCM_PROP_RESTRICTED_ACCESS ="{http://www.campuscontent.de/model/1.0}restricted_access";
+	/**
+	 * permissions that are still be granted via a ref, even if restricted access is enabled (default: none)
+	 * currently allowed values in this field:
+	 * CCConstants.PERMISSION_READ_ALL
+	 * CCConstants.PERMISSION_DOWNLOAD_CONTENT
+	 * CCConstants.PERMISSION_PRINT
+	 */
+	public final static String CCM_PROP_RESTRICTED_ACCESS_PERMISSIONS ="{http://www.campuscontent.de/model/1.0}restricted_access_permissions";
 
 
 	/**

@@ -93,6 +93,7 @@
     "UNBLOCK_MESSAGE": "Möchten Sie die gewählten Elemente wieder für den Import freischalten?\n\nGgf. dauert es bis zum nächsten Import, bis die Sichtbarkeit in der Suche der Elemente wiederhergestellt ist",
     "TAB_INVITE": "Einladen",
     "TAB_INVITED": "Schon Eingeladen",
+    "TAB_RESTRICTED_ACCESS": "Lizenzierung",
     "TAB_PUBLISH": "Veröffentlichen",
     "TAB_ADVANCED": "Erweitert",
     "BTN_INVITE": "Einladen",
@@ -156,6 +157,17 @@
       "PUBLISHING_WARNING_TITLE": "Element wirklich veröffentlichen?",
       "PUBLISHING_WARNING_MESSAGE": "Wenn Sie fortfahren, wird das aktuelle Element für alle Nutzende des Systems freigegeben und kann von jedem aufgerufen werden.\n\nSind Sie sicher, dass Sie das Element öffentlich freigeben möchten?",
       "ERROR_INVALID_TYPE_COMBINATION": "Elemente verschiedener Typen können nicht im Bulk freigegeben werden",
+      "RESTRICTED_ACCESS": {
+        "PRIMARY": "Eingeschränkter Zugriff (Lizenziertes Material)",
+        "SECONDARY": "Aktivieren Sie diese Option, um nur Personen mit explizit zugeteilter Freigabe den Zugriff auf dieses Material zu gewähren. Etwaige indirekte Freigaben, z.B. über Sammlungs-Zuordnungen, wirken auf dieses Material nicht.",
+        "ADDITIONAL_PERMISSIONS": "Zugelassene Berechtigungen",
+        "ADDITIONAL_PERMISSIONS_INFO": "Legen Sie fest, ob und falls ja, welche Berechtigungen für dieses Material indirekt über Sammlungen weitergegeben werden dürfen",
+        "PERMISSION": {
+          "ReadAll": "Betrachten (Vorschaubild, Metadaten & Inhaltsanzeige)",
+          "Print": "Drucken (nur für PDF-Dateien)",
+          "DownloadContent": "Herunterladen"
+        }
+      },
       "PUBLISH": {
         "OPEN_VERSION": "Version anzeigen",
         "NO_LICENSE": "Das aktuelle Material hat keine zugewiesene Lizenz. Freigegebene Materialien sollten eine eindeutige Lizenz besitzen, damit festgelegt ist, ob und wie das Material weiterverwendet werden darf",

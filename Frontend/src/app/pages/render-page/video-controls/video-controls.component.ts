@@ -143,7 +143,7 @@ export class VideoControlsComponent implements OnInit, OnDestroy {
                     return this.nodeHelper.getNodesRight(
                         [node],
                         RestConstants.ACCESS_CC_PUBLISH,
-                        NodesRightMode.Original,
+                        NodesRightMode.Effective,
                     );
                 }
             } else {

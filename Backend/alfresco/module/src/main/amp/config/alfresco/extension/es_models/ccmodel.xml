@@ -1595,6 +1595,11 @@
 					<type>d:boolean</type>
 					<multiple>false</multiple>
 				</property>
+				<!-- permissions that will still be granted, even if restricted access is enabled -->
+				<property name="ccm:restricted_access_permissions">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
 				<!-- Lerneinheit-ID -->
 				<property name="ccm:learnunit_id">
 					<type>d:text</type>

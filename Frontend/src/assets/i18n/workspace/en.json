@@ -93,6 +93,7 @@
     "UNBLOCK_MESSAGE": "Do you want to reactivate the selected elements for importing?\n\nIt may will take up to the next import run until the elements are visible in search again",
     "TAB_INVITE": "Add",
     "TAB_INVITED": "Invited",
+    "TAB_RESTRICTED_ACCESS": "Licensing",
     "TAB_PUBLISH": "Publish",
     "TAB_ADVANCED": "Advanced",
     "BTN_INVITE": "Invite",
@@ -156,6 +157,17 @@
       "PUBLISHING_WARNING_TITLE": "Publish element?",
       "PUBLISHING_WARNING_MESSAGE": "If you continue, the current element will be shared with all users of the system and can be accessed by everyone.\n\nAre you sure you want to publish this element?",
       "ERROR_INVALID_TYPE_COMBINATION": "elements of different types can't be shared in bulk",
+      "RESTRICTED_ACCESS": {
+        "PRIMARY": "Restricted access (Licensed material)",
+        "SECONDARY": "If this option is enabled the material might not being re-distributed indirectly, e.g. via Collections. Only users having access rights on the original object can use it.",
+        "ADDITIONAL_PERMISSIONS": "Allowed permissions",
+        "ADDITIONAL_PERMISSIONS_INFO": "Define the permissions that will still be granted indirectly, if any.",
+        "PERMISSION": {
+          "ReadAll": "View (Preview image, metadata & content viewing)",
+          "Print": "Print (only for pdf files)",
+          "DownloadContent": "Download"
+        }
+      },
       "PUBLISH": {
         "OPEN_VERSION": "Show version",
         "NO_LICENSE": "The current material does not have an assigned license. Shared materials should have a proper license to specify whether and how the material may be reused.",

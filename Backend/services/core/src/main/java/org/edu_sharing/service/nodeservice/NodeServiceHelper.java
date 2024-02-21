@@ -3,6 +3,8 @@ package org.edu_sharing.service.nodeservice;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.permissions.PermissionReference;
+import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -42,6 +44,9 @@ public class NodeServiceHelper {
 	private static final Lock lock = new ReentrantLock();
 	private static final Map<String, String> cache = new HashMap<>();
 	private static Logger logger=Logger.getLogger(NodeServiceHelper.class);
+
+	private static ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
+	private static PermissionModel permissionModel = (PermissionModel) alfApplicationContext.getBean("permissionsModelDAO");
 
 	/**
 	 * Clean the CM_NAME property so it does not cause an org.alfresco.repo.node.integrity.IntegrityException
@@ -239,10 +244,30 @@ public class NodeServiceHelper {
 
 	public static void validatePermissionRestrictedAccess(NodeRef nodeRef, String... permissions) throws RestrictedAccessException {
 		if(NodeServiceHelper.hasAspect(nodeRef,CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
-			String refNodeId = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_ORIGINAL);
-			Boolean restricted = (Boolean) AuthenticationUtil.runAsSystem(() -> NodeServiceHelper.getPropertyNative(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, refNodeId), CCConstants.CCM_PROP_RESTRICTED_ACCESS));
-			if (restricted != null && restricted && !Arrays.stream(permissions).allMatch((permission) -> PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, refNodeId), permission))) {
-				throw new RestrictedAccessException(refNodeId);
+			String originalNodeId = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_ORIGINAL);
+			Boolean restricted = (Boolean) AuthenticationUtil.runAsSystem(() -> NodeServiceHelper.getPropertyNative(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalNodeId), CCConstants.CCM_PROP_RESTRICTED_ACCESS));
+			if (restricted != null && restricted && !Arrays.stream(permissions).allMatch((permission) -> PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalNodeId), permission))) {
+				List restrictedPermissions = (List) AuthenticationUtil.runAsSystem(() -> NodeServiceHelper.getPropertyNative(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalNodeId), CCConstants.CCM_PROP_RESTRICTED_ACCESS_PERMISSIONS));
+				if(restrictedPermissions != null) {
+					/*for (String permission : permissions) {
+						PermissionReference pr = permissionModel.getPermissionReference(null, permissions);
+						Set<PermissionReference> granteePermissions = permissionModel.getGranteePermissions(pr);
+					}*/
+					/*
+					 * map the permissions to simplified values as stored in the CCM_PROP_RESTRICTED_ACCESS_PERMISSIONS
+					 */
+					HashMap<String, String> permissionsMapped = new HashMap<String, String>() {{
+						put(CCConstants.PERMISSION_READ_PREVIEW, CCConstants.PERMISSION_READ_ALL);
+					}};
+					if(Arrays.stream(permissions)
+							.filter((permission) -> !PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalNodeId), permission))
+							.map(permission -> permissionsMapped.getOrDefault(permission, permission))
+							.allMatch(restrictedPermissions::contains)) {
+						return;
+					}
+
+				}
+				throw new RestrictedAccessException(originalNodeId);
 			}
 		}
 	}
