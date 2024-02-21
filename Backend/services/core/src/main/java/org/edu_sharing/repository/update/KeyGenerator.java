@@ -2,6 +2,7 @@ package org.edu_sharing.repository.update;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -10,24 +11,24 @@ import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.repository.server.update.UpdateRoutine;
 import org.edu_sharing.repository.server.update.UpdateService;
 
+import javax.security.auth.x500.X500Principal;
 import java.io.FileOutputStream;
+import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
+import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPrivateKey;
+import java.util.Date;
+import java.util.Random;
 import java.util.UUID;
 
 @Slf4j
-@UpdateService
 public class KeyGenerator {
 
-	@UpdateRoutine(
-			id = "KeyGenerator",
-			description = "generates public and private key in homeApplication if they don't exsist",
-			order = 1800,
-			auto = true
-	)
+
 	public void execute(boolean test) {
 		ApplicationInfo homeRepo = ApplicationInfoList.getHomeRepository();
 
@@ -62,6 +63,18 @@ public class KeyGenerator {
 
 			}
 
+			if(homeRepo.getCertificate() == null){
+				log.info("will set certificate");
+				PrivateKey pemPrivateKey = s.getPemPrivateKey(homeRepo.getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
+				PublicKey pemPublicKey = s.getPemPublicKey(homeRepo.getPublicKey(), CCConstants.SECURITY_KEY_ALGORITHM);
+				String cert = encodeCertificate(generateCertificate(homeRepo,pemPrivateKey,pemPublicKey));
+				if (!test) {
+					PropertiesHelper.setProperty(ApplicationInfo.KEY_CERTIFICATE,
+							cert,
+							file, PropertiesHelper.XML);
+				}
+			}
+
 			if(homeRepo.getLtiKid() == null){
 				log.info("will set lti kid");
 
@@ -79,6 +92,31 @@ public class KeyGenerator {
 			log.error(e.getMessage(), e);
 		}
 
+	}
+
+
+	public X509Certificate generateCertificate(ApplicationInfo homeApp, PrivateKey privateKey, PublicKey publicKey) throws Exception {
+		X509V3CertificateGenerator certGenerator = new X509V3CertificateGenerator();
+
+		String cn = "CN={domain}, OU=Unknown, O={domain}, L=UnkownCity, ST=UnkownState, C=UnkownCountry";
+		cn = cn.replaceAll("\\{domain}",homeApp.getDomain());
+		X500Principal issuer = new X500Principal("CN="+cn);
+		X500Principal subject = new X500Principal("CN="+cn);
+
+		certGenerator.setSerialNumber(BigInteger.valueOf(new Random().nextInt(Integer.MAX_VALUE)));
+		certGenerator.setIssuerDN(issuer);
+		certGenerator.setSubjectDN(subject);
+		certGenerator.setPublicKey(publicKey);
+		certGenerator.setNotBefore(new Date(System.currentTimeMillis()));
+		certGenerator.setNotAfter(new Date(System.currentTimeMillis() + 10 * 365 * 24 * 60 * 60 * 1000)); // Valid for 10 year
+		certGenerator.setSignatureAlgorithm("SHA256WithRSAEncryption");
+
+		return certGenerator.generate(privateKey, "BC");
+	}
+
+	public static String encodeCertificate(X509Certificate cert) throws Exception {
+		byte[] certBytes = cert.getEncoded();
+		return java.util.Base64.getEncoder().encodeToString(certBytes);
 	}
 
 	public static void main(String[] args) {
