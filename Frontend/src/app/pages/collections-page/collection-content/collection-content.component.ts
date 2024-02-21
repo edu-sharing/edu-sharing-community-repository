@@ -377,7 +377,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 !this.nodeHelper.getNodesRight(
                     nodes,
                     RestConstants.ACCESS_CC_PUBLISH,
-                    NodesRightMode.Original,
+                    NodesRightMode.Effective,
                 )) ||
             (dropData.action === 'move' &&
                 !this.nodeHelper.getNodesRight(

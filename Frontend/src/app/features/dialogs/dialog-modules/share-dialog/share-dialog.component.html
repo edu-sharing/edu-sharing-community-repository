@@ -362,6 +362,15 @@
       ></es-share-dialog-publish>
     </div>
   </mat-tab>
+  <mat-tab *ngIf="_nodes && restrictedAccessPermission && !isBulk() && !isSafe" class="tabContent">
+    <ng-template mat-tab-label>
+      <i esIcon="lock" class="tab-icon"></i>
+      <span class="tab-label">{{ 'WORKSPACE.TAB_RESTRICTED_ACCESS' | translate }}</span>
+    </ng-template>
+    <div class="restricted-access-tab">
+      <es-share-dialog-restricted-access [node]="_nodes[0]"></es-share-dialog-restricted-access>
+    </div>
+  </mat-tab>
   <mat-tab *ngIf="isAdmin && permissionsUser && permissionsGroup" class="tabContent">
     <ng-template mat-tab-label>
       <i esIcon="settings" class="tab-icon"></i>

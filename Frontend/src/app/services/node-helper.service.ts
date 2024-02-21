@@ -131,14 +131,11 @@ export class NodeHelperService extends NodeHelperServiceBase {
             ) {
                 currentMode = NodesRightMode.Local;
             }
-            if (currentMode === NodesRightMode.Original || currentMode === NodesRightMode.Both) {
+            if (currentMode === NodesRightMode.Effective) {
                 if (node.accessOriginal && node.accessOriginal.indexOf(right) !== -1) {
                     continue;
                 }
-                // return false because either on original not found, or both (because both is then also false)
-                if (currentMode === NodesRightMode.Both) {
-                    return false;
-                } else if (RestConstants.IMPLICIT_COLLECTION_PERMISSIONS.indexOf(right) === -1) {
+                if (RestConstants.IMPLICIT_COLLECTION_PERMISSIONS.indexOf(right) === -1) {
                     // permission not matched on original -> implicit permissions from collection may apply
                     return false;
                 }

@@ -3,14 +3,23 @@ package org.edu_sharing.service.permission;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.permissions.PermissionReference;
+import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.springframework.context.ApplicationContext;
 
 public class PermissionServiceHelper {
+	private static ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
+	private static PermissionModel permissionModel = (PermissionModel) alfApplicationContext.getBean("permissionsModelDAO");
+
 	/**
 	 * permission list resolved by elastic
 	 */
@@ -45,6 +54,17 @@ public class PermissionServiceHelper {
 
 	public static Boolean isNodePublic(NodeRef nodeRef) {
 		return AuthenticationUtil.runAs(() -> hasPermission(nodeRef, CCConstants.PERMISSION_READ), org.alfresco.service.cmr.security.PermissionService.GUEST_AUTHORITY);
+	}
+
+	/**
+	 * resolves all indirect permissions a permission is granting
+	 * i.e. ReadAll -> Read, ReadPreview, ReadContent...
+	 * @param perm
+	 * @return
+	 */
+    public static Set<String> getAllIncludingPermissions(String perm) {
+		PermissionReference pr = permissionModel.getPermissionReference(null, perm);
+		return permissionModel.getGranteePermissions(pr).stream().map(PermissionReference::getName).collect(Collectors.toUnmodifiableSet());
 	}
 
     public void validatePermissionOrThrow(String nodeId, String permissionName) {

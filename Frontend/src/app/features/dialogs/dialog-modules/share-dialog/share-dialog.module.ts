@@ -7,6 +7,7 @@ import { NodeAuthorNamePipe } from './publish/node-author-name.pipe';
 import { ShareDialogPublishComponent } from './publish/publish.component';
 import { ShareDialogComponent } from './share-dialog.component';
 import { ShareDialogUsageComponent } from './usage/usage.component';
+import { ShareDialogRestrictedAccessComponent } from './restricted-access/restricted-access.component';
 
 export { ShareDialogComponent };
 
@@ -19,6 +20,7 @@ export { ShareDialogComponent };
         ShareDialogPermissionComponent,
         ShareDialogPublishComponent,
         ShareDialogUsageComponent,
+        ShareDialogRestrictedAccessComponent,
     ],
     imports: [SharedModule],
 })

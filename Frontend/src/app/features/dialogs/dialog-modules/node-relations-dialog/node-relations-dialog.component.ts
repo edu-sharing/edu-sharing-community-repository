@@ -236,7 +236,7 @@ export class NodeRelationsDialogComponent implements OnInit {
         return this.nodeHelper.getNodesRight(
             [relation.node],
             RestConstants.PERMISSION_WRITE,
-            NodesRightMode.Original,
+            NodesRightMode.Effective,
         );
     }
 

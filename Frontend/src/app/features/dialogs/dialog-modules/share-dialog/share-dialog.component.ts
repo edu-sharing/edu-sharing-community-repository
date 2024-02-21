@@ -8,9 +8,9 @@ import {
     ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { UIConstants } from 'ngx-edu-sharing-ui';
+import { LocalEventsService, UIAnimation, UIConstants } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { Observable, Observer, forkJoin as observableForkJoin } from 'rxjs';
+import { forkJoin as observableForkJoin } from 'rxjs';
 import {
     CollectionUsage,
     ConfigurationService,
@@ -42,7 +42,8 @@ import { DialogsService } from '../../dialogs.service';
 import { ShareDialogPublishComponent } from './publish/publish.component';
 import { ShareDialogData, ShareDialogResult } from './share-dialog-data';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from 'ngx-edu-sharing-ui';
+import { AuthenticationService } from 'ngx-edu-sharing-api';
+import { ShareDialogRestrictedAccessComponent } from './restricted-access/restricted-access.component';
 
 @Component({
     selector: 'es-share-dialog',
@@ -52,10 +53,12 @@ import { UIAnimation } from 'ngx-edu-sharing-ui';
 })
 export class ShareDialogComponent implements OnInit, AfterViewInit {
     @ViewChild('publish') publishComponent: ShareDialogPublishComponent;
+    @ViewChild(ShareDialogRestrictedAccessComponent)
+    restrictedAccessComponent: ShareDialogRestrictedAccessComponent;
     @ViewChild('inheritRef') inheritRef: any;
     @ViewChild('state') stateRef: TemplateRef<HTMLElement>;
     @ViewChild('shareLink') shareLinkRef: TemplateRef<HTMLElement>;
-
+    readonly RestConstants = RestConstants;
     readonly ALL_PERMISSIONS = [
         'All',
         'Read',
@@ -135,6 +138,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     showLink: boolean;
     isAdmin: boolean;
     publishPermission: boolean;
+    restrictedAccessPermission: boolean;
     isSafe = false;
     collectionColumns = UIHelper.getDefaultCollectionColumns();
     collections: CollectionUsage[];
@@ -157,10 +161,12 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         @Inject(CARD_DIALOG_DATA) public data: ShareDialogData,
         private dialogRef: CardDialogRef<ShareDialogData, ShareDialogResult>,
         private applicationRef: ApplicationRef,
+        private authenticationService: AuthenticationService,
         private cardDialogUtils: CardDialogUtilsService,
         private collectionService: RestCollectionService,
         private config: ConfigurationService,
         private connector: RestConnectorService,
+        private localEvents: LocalEventsService,
         private dialogs: DialogsService,
         private iam: RestIamService,
         private nodeApi: RestNodeService,
@@ -596,8 +602,8 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         if (this.permissions != null) {
             this.dialogRef.patchState({ isLoading: true });
             let inherit = this.inherited && this.inheritAllowed && !this.isCollection();
-            const actions: Observable<void>[] = this._nodes.map((n, i) => {
-                return new Observable((observer: Observer<void>) => {
+            const actions = this._nodes.map((n, i) => {
+                return async () => {
                     let permissions: Permission[] = Helper.deepCopy(this.permissions);
                     if (this.isBulk()) {
                         if (this.bulkInvite) {
@@ -623,21 +629,29 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                     // handle the invitation of group everyone
                     if (this.publishComponent) {
                         permissions = this.publishComponent.updatePermissions(permissions);
-                        this.publishComponent.save().subscribe(
-                            (nodeCopy) => {
-                                this.handlePermissionsPerNode(observer, n, permissions, inherit);
-                            },
-                            (error) => {
-                                this.toast.error(error);
-                                this.dialogRef.patchState({ isLoading: false });
-                            },
-                        );
-                    } else {
-                        this.handlePermissionsPerNode(observer, n, permissions, inherit);
+                        try {
+                            await this.publishComponent.save().toPromise();
+                        } catch (error) {
+                            this.toast.error(error);
+                            this.dialogRef.patchState({ isLoading: false });
+                            return;
+                        }
                     }
-                });
+                    if (this.restrictedAccessComponent) {
+                        try {
+                            if (this.data.sendToApi) {
+                                await this.restrictedAccessComponent.save();
+                            }
+                        } catch (error) {
+                            this.toast.error(error);
+                            this.dialogRef.patchState({ isLoading: false });
+                            return;
+                        }
+                    }
+                    await this.handlePermissionsPerNode(n, permissions, inherit);
+                };
             });
-            observableForkJoin(actions).subscribe(
+            observableForkJoin(actions.map((a) => a())).subscribe(
                 () => {
                     if (!this.data.sendToApi) {
                         return;
@@ -665,8 +679,8 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                     : RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH,
             )
             .subscribe((has: boolean) => (this.globalAllowed = has));
-        this.connector
-            .hasToolPermission(
+        this.authenticationService
+            .hasToolpermission(
                 this.isSafe
                     ? this.isSharedScope
                         ? RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE
@@ -675,13 +689,16 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                     ? RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE
                     : RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH,
             )
-            .subscribe((has: boolean) => (this.globalAllowed = has));
-        this.connector
-            .hasToolPermission(RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY)
-            .subscribe((has: boolean) => (this.fuzzyAllowed = has));
-        this.connector
-            .hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES)
-            .subscribe((has: boolean) => (this.publishPermission = has));
+            .then((has: boolean) => (this.globalAllowed = has));
+        this.authenticationService
+            .hasToolpermission(RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY)
+            .then((has: boolean) => (this.fuzzyAllowed = has));
+        this.authenticationService
+            .hasToolpermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES)
+            .then((has: boolean) => (this.publishPermission = has));
+        this.authenticationService
+            .hasToolpermission(RestConstants.TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS)
+            .then((has: boolean) => (this.restrictedAccessPermission = has));
     }
     updatePermissionInfo() {
         let type: string[];
@@ -750,6 +767,9 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     private updateUsages(permissions: LocalPermissions, pos = 0, error = false) {
         // skip for bulk mode
         if (pos === this.deletedUsages.length || this.isBulk()) {
+            if (this.data.sendToApi) {
+                this.localEvents.nodesChanged.emit(this.data.nodes as Node[]);
+            }
             this.dialogRef.close(this.getEmitObject(permissions));
             if (!error) {
                 this.toast.toast('WORKSPACE.PERMISSIONS_UPDATED');
@@ -791,12 +811,11 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         };
     }
 
-    private handlePermissionsPerNode(
-        observer: Observer<void>,
+    private async handlePermissionsPerNode(
         n: Node,
         permissions: Permission[],
         inherit: boolean,
-    ): void {
+    ): Promise<void> {
         const permissionsCopy = RestHelper.copyAndCleanPermissions(permissions, inherit);
         if (!this.data.sendToApi) {
             this.dialogRef.close(
@@ -804,7 +823,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
             );
             return null;
         }
-        this.nodeApi
+        await this.nodeApi
             .setNodePermissions(
                 n.ref.id,
                 permissionsCopy,
@@ -812,16 +831,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                 this.notifyMessage,
                 false,
             )
-            .subscribe(
-                () => {
-                    observer.next();
-                    observer.complete();
-                },
-                (error) => {
-                    observer.error(error);
-                    observer.complete();
-                },
-            );
+            .toPromise();
     }
 
     setInitialState() {

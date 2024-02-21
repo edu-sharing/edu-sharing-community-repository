@@ -8,9 +8,10 @@
 import { KeyboardShortcutCondition } from '../types/keyboard-shortcuts';
 
 export enum NodesRightMode {
+    // rights on the current node, no matter if its a reference or origianl
     Local,
-    Original,
-    Both,
+    // effective rights on the current node, only relevant for collection references (for non-refs, this equals to local)
+    Effective,
 }
 export class OptionItem {
     /**

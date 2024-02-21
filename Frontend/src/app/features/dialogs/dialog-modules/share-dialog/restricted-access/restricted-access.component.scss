@@ -1,0 +1,13 @@
+@import '../../../../../core-ui-module/styles/variables';
+
+.group-padding {
+    padding: 30px $cardPadding;
+    .additional-permissions {
+        display: flex;
+        flex-direction: column;
+        padding: 10px;
+        > es-info-message {
+            padding-bottom: 10px;
+        }
+    }
+}

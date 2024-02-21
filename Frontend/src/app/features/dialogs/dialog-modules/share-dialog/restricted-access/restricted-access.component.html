@@ -1,0 +1,27 @@
+<div class="group-padding">
+  <mat-checkbox [(ngModel)]="restrictedAccess">
+    <es-multi-line-label>
+      <ng-container slot="label">
+        {{ 'WORKSPACE.SHARE.RESTRICTED_ACCESS.PRIMARY' | translate }}
+      </ng-container>
+      <span class="description" slot="description">
+        {{ 'WORKSPACE.SHARE.RESTRICTED_ACCESS.SECONDARY' | translate }}
+      </span>
+    </es-multi-line-label>
+  </mat-checkbox>
+  <div class="additional-permissions" *ngIf="restrictedAccess">
+    <h5 class="mat-heading-5">
+      {{ 'WORKSPACE.SHARE.RESTRICTED_ACCESS.ADDITIONAL_PERMISSIONS' | translate }}
+    </h5>
+    <es-info-message
+      mode="info"
+      message="{{ 'WORKSPACE.SHARE.RESTRICTED_ACCESS.ADDITIONAL_PERMISSIONS_INFO' | translate }}"
+    ></es-info-message>
+    <mat-checkbox
+      *ngFor="let permission of restrictedAccessPermissions | keyvalue"
+      [(ngModel)]="restrictedAccessPermissions[permission.key]"
+    >
+      {{ 'WORKSPACE.SHARE.RESTRICTED_ACCESS.PERMISSION.' + permission.key | translate }}
+    </mat-checkbox>
+  </div>
+</div>

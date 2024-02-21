@@ -177,12 +177,26 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 .should(q -> q.match(m -> m.field("owner").query(user)))
                 .should(audienceQueryBuilderCollections -> audienceQueryBuilderCollections
                         .bool(b -> b
-                                .mustNot(m -> m.term(t -> t.field("properties.ccm:restricted_access.keyword").value(true)))
-                                .must(m -> m.bool(subPermission -> subPermission
-                                        .minimumShouldMatch("1")
-                                        .should(q -> q.nested(nested->nested.path("collections").query(nq->nq.bool(collectionPermissions))))
-                                        .should(q -> q.nested(nested->nested.path("collections").query(nq->nq.bool(proposalPermissions))))
-                                ))));
+                                .minimumShouldMatch("1")
+                                .should(bs -> bs.bool(bb -> bb
+                                        // restricted access is true -> do not inherit rights
+                                        .mustNot(m -> m.term(t -> t.field("properties.ccm:restricted_access.keyword").value(true)))
+                                        .must(m -> m.bool(subPermission -> subPermission
+                                                .minimumShouldMatch("1")
+                                                .should(q -> q.nested(nested->nested.path("collections").query(nq->nq.bool(collectionPermissions))))
+                                                .should(q -> q.nested(nested->nested.path("collections").query(nq->nq.bool(proposalPermissions))))
+                                        )))
+                                ).should(bs -> bs.bool(bb -> bb
+                                        // restricted access is "true" BUT "ReadAll" is given -> so behave like it would be false
+                                        .must(m -> m.term(t -> t.field("properties.ccm:restricted_access.keyword").value(true)))
+                                        .must(m -> m.term(t -> t.field("properties.ccm:restricted_access_permissions.keyword").value(CCConstants.PERMISSION_READ_ALL)))
+                                        .must(m -> m.bool(subPermission -> subPermission
+                                                .minimumShouldMatch("1")
+                                                .should(q -> q.nested(nested->nested.path("collections").query(nq->nq.bool(collectionPermissions))))
+                                                .should(q -> q.nested(nested->nested.path("collections").query(nq->nq.bool(proposalPermissions))))
+                                        )))
+                                )
+                        ));
     }
 
     public SearchResultNodeRef searchFacets(MetadataSet mds, String query, Map<String, String[]> criterias, SearchToken searchToken) throws Throwable {
@@ -299,10 +313,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 .size(100)
                 .query(q->q
                         .bool(b->b
-                            .filter(filter->filter
-                                    .bool(fb->fb
-                                            .must(fq->fq.bool(metadataQueryBuilderFilter.build()))
-                                            .must(fq->fq.bool(queryBuilderGlobalConditions.build()))))
+                                .filter(filter->filter
+                                        .bool(fb->fb
+                                                .must(fq->fq.bool(metadataQueryBuilderFilter.build()))
+                                                .must(fq->fq.bool(queryBuilderGlobalConditions.build()))))
                                 .must(must->must.bool(metadataQueryBuilderAsQuery.build()))));
 
         if(searchToken.getSortDefinition() != null) {
@@ -624,8 +638,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         Function<BoolQuery.Builder, BoolQuery.Builder> queryGlobalConditionsFactory = (builder) ->
                 ((authorityScope != null && !authorityScope.isEmpty())
-                    ? getPermissionsQuery(builder, "permissions.read", new HashSet<>(authorityScope))
-                    : getReadPermissionsQuery(builder))
+                        ? getPermissionsQuery(builder, "permissions.read", new HashSet<>(authorityScope))
+                        : getReadPermissionsQuery(builder))
                         .must(must -> must
                                 .match(match -> match
                                         .field("nodeRef.storeRef.protocol")
@@ -724,13 +738,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchResponse<Map> searchResult = client
                     .withTransportOptions(this::getRequestOptions)
                     .search(request->request
-                                    .index(WORKSPACE_INDEX)
-                                    .size(0)
-                                    .trackTotalHits(t->t.enabled(true))
-                                    .query(query->query
-                                            .bool(bool->bool
-                                                    .must(must -> must.bool(this::getReadPermissionsQuery))
-                                                    .must(must -> must.term(term->term.field("properties.sys:node-uuid").value(nodeId))))), Map.class);
+                            .index(WORKSPACE_INDEX)
+                            .size(0)
+                            .trackTotalHits(t->t.enabled(true))
+                            .query(query->query
+                                    .bool(bool->bool
+                                            .must(must -> must.bool(this::getReadPermissionsQuery))
+                                            .must(must -> must.term(term->term.field("properties.sys:node-uuid").value(nodeId))))), Map.class);
             return searchResult.hits().total().value() != 0;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -1215,19 +1229,19 @@ public class SearchServiceElastic extends SearchServiceImpl {
         sr.setData(data);
 
         SearchRequest searchRequest = SearchRequest.of(req -> req
-                        .index(WORKSPACE_INDEX)
-                        .from(0)
-                        .size(nodeIds.size())
-                        .trackTotalHits(track -> track.enabled(true))
-                        .query(root -> root
-                                .bool(getGlobalConditions(null, null, null)
-                                        .must(must -> must
-                                                .bool(queryNodeIds -> queryNodeIds.minimumShouldMatch("1")
-                                                        .should(should -> {
-                                                            nodeIds.forEach(x -> should.term(t -> t.field("nodeRef.id").value(x)));
-                                                            return should;
-                                                        })))
-                                        .build())));
+                .index(WORKSPACE_INDEX)
+                .from(0)
+                .size(nodeIds.size())
+                .trackTotalHits(track -> track.enabled(true))
+                .query(root -> root
+                        .bool(getGlobalConditions(null, null, null)
+                                .must(must -> must
+                                        .bool(queryNodeIds -> queryNodeIds.minimumShouldMatch("1")
+                                                .should(should -> {
+                                                    nodeIds.forEach(x -> should.term(t -> t.field("nodeRef.id").value(x)));
+                                                    return should;
+                                                })))
+                                .build())));
         SearchResponse<Map> searchResponse = client.search(searchRequest, Map.class);
 
         logger.info("query: " + JsonpUtils.toJsonString(searchRequest, new JacksonJsonpMapper()));

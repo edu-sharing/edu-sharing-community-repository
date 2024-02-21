@@ -168,7 +168,7 @@ export class NodeSearchSelectorComponent implements AfterViewInit {
 
     hasPermissions(suggestion: Node) {
         return this.permissions.every((p) =>
-            this.nodeHelper.getNodesRight([suggestion], p, NodesRightMode.Original),
+            this.nodeHelper.getNodesRight([suggestion], p, NodesRightMode.Effective),
         );
     }
 
