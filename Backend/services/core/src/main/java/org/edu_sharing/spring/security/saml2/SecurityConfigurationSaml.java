@@ -184,16 +184,17 @@ public class SecurityConfigurationSaml {
     }
 
     private String getHomeAppPrivateKey(){
+        String begin = "-----BEGIN PRIVATE KEY-----";
+        String end = "-----END PRIVATE KEY-----";
         String privKey = ApplicationInfoList.getHomeRepository().getPrivateKey();
-        System.out.println("TEST SAML");
         privKey = privKey.trim();
         privKey = privKey.replaceAll("(.{64})", "$1"+System.lineSeparator());
 
-        if(!privKey.startsWith("-----BEGIN PRIVATE KEY-----")){
-            privKey = "-----BEGIN PRIVATE KEY-----" + System.lineSeparator() +privKey;
+        if(!privKey.startsWith(begin)){
+            privKey = begin + System.lineSeparator() +privKey;
         }
-        if(!privKey.endsWith("-----END PRIVATE KEY-----")){
-            privKey= privKey + System.lineSeparator() + "-----END PRIVATE KEY-----";
+        if(!privKey.endsWith(end)){
+            privKey= privKey + System.lineSeparator() + end;
         }
         System.out.println(privKey);
         return privKey;
