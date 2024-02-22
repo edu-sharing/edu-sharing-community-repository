@@ -532,7 +532,7 @@ xmlstarlet ed -L \
 			-d '/config/values/logout[position() != 1]' \
 			-s '/config/values/logout' -t elem -n 'url' -v '' \
 			-d '/config/values/logout/url[position() != 1]' \
-			-u '/config/values/logout/url' -v "${my_path_external}/saml/logout" \
+			-u '/config/values/logout/url' -v "${my_path_external}/logout" \
 			-s '/config/values/logout' -t elem -n 'destroySession' -v '' \
 			-d '/config/values/logout/destroySession[position() != 1]' \
 			-u '/config/values/logout/destroySession' -v 'false' \
