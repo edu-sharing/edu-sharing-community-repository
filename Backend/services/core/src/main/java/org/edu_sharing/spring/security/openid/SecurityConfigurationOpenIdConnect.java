@@ -129,7 +129,7 @@ public class SecurityConfigurationOpenIdConnect {
                             idpRedirectUrl = successUrlComp.getScheme()+"://"+successUrlComp.getHost();
 
                             int port = successUrlComp.getPort();
-                            if(port != 80 && port != 443){
+                            if(port != 80 && port != 443 && port > 0){
                                 idpRedirectUrl += ":"+port;
                             }
 
