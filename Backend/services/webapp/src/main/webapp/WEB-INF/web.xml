@@ -169,6 +169,10 @@
         <filter-name>springSecurityFilterChain</filter-name>
         <url-pattern>/rest/*</url-pattern>
      </filter-mapping>
+     <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/graphql/*</url-pattern>
+     </filter-mapping>
      SAML -->
 
     <filter-mapping>
