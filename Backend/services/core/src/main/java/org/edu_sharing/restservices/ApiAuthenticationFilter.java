@@ -200,7 +200,8 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
 
 		// ignore the auth for the login
 		if(validatedAuth == null && (!noAuthenticationNeeded && !trustedAuth)){
-			if(httpReq.getPathInfo().equals("/openapi.json"))
+			String pathInfo = httpReq.getPathInfo();
+			if(pathInfo != null && pathInfo.equals("/openapi.json"))
 				httpResp.setHeader("WWW-Authenticate", "BASIC realm=\""+ "Edu-Sharing Rest API" +"\"");
 			httpResp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			httpResp.flushBuffer();
