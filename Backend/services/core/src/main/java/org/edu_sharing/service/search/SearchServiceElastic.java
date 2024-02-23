@@ -490,9 +490,19 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         for (Map.Entry<String, Aggregate> aggregationEntry : filter.aggregations().entrySet()) {
                             if (aggregationEntry.getValue().isSterms()) {
                                 if (a.getKey().endsWith("_selected")) {
-                                    facetsResultSelected.add(getFacet(a.getKey(), a.getValue().sterms(), null));
+                                    if(a.getValue().isFilter()) {
+                                        Map<String, Aggregate> agg = a.getValue().filter().aggregations();
+                                        facetsResultSelected.add(getFacet(a.getKey(), agg.entrySet().iterator().next().getValue().sterms(), null));
+                                    } else {
+                                        facetsResultSelected.add(getFacet(a.getKey(), a.getValue().sterms(), null));
+                                    }
                                 } else {
-                                    facetsResult.add(getFacet(a.getKey(), a.getValue().sterms(), null));
+                                    if(a.getValue().isFilter()) {
+                                        Map<String, Aggregate> agg = a.getValue().filter().aggregations();
+                                        facetsResult.add(getFacet(a.getKey(), agg.entrySet().iterator().next().getValue().sterms(), null));
+                                    } else {
+                                        facetsResult.add(getFacet(a.getKey(), a.getValue().sterms(), null));
+                                    }
                                 }
                             }
                         }
