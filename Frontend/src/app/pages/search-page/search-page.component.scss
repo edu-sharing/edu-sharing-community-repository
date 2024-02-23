@@ -73,11 +73,11 @@ mat-tab-nav-panel {
     align-items: center;
     padding: 0 20px;
     height: 60px;
-    border-bottom: 1px solid
-        rgba(var(--palette-foreground-divider), var(--palette-foreground-divider-alpha));
+    border-bottom: 1px solid var(--mat-divider-color);
     .filter-bar-title {
         flex-grow: 1;
         font-size: 180%;
+        font-weight: normal;
         margin: 0;
     }
     .filter-bar-close-button {
