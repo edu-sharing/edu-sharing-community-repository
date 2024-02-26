@@ -259,7 +259,7 @@ public class MetadataReader {
                     if (parameterNode.getNodeName().equals("condition")) {
                         handleQueryCondition(parameterNode, query);
                     }
-                    MetadataQueryParameter parameter = new MetadataQueryParameter(syntaxName, mds);
+                    MetadataQueryParameter parameter = new MetadataQueryParameter(syntaxName);
                     NodeList list3 = parameterNode.getChildNodes();
                     NamedNodeMap attributes = parameterNode.getAttributes();
                     if (attributes == null || attributes.getNamedItem("name") == null)
