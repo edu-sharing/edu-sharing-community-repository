@@ -29,13 +29,13 @@ package org.edu_sharing.repository.server.tools;
 
 import com.typesafe.config.Config;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.HtmlEmail;
-import org.apache.commons.mail.SimpleEmail;
+import org.apache.commons.mail2.jakarta.HtmlEmail;
+import org.apache.commons.mail2.jakarta.SimpleEmail;
+import org.apache.commons.mail2.core.EmailException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 
-import javax.mail.internet.InternetAddress;
+import jakarta.mail.internet.InternetAddress;
 import jakarta.servlet.ServletContext;
 import java.io.File;
 import java.util.Arrays;
@@ -84,7 +84,8 @@ public class Mail {
 		
 		if(authType != null && !authType.trim().equals("")){
 			if(authType.trim().equals(AUTH_TYPE_TLS)){
-				email.setTLS(true);
+				email.setStartTLSEnabled(true);
+				//email.setTLS(true);
 			}else{
 				logger.info("auth type "+authType +" not supported at the moment");
 			}
@@ -114,7 +115,7 @@ public class Mail {
 			email.setMsg(message);
 			email.send();
 		}catch(EmailException e){
-			if(e.getCause() != null && e.getCause().getClass().equals(javax.mail.SendFailedException.class)){
+			if(e.getCause() != null && e.getCause().getClass().equals(jakarta.mail.SendFailedException.class)){
 				logger.error("EmailException caused by javax.mail.SendFailedException: maybe wrong receiver");
 				logger.error("sender:" + sender);
 				logger.error("receiver:" + receiver);
@@ -147,7 +148,7 @@ public class Mail {
 		
 		if(authType != null && !authType.trim().equals("")){
 			if(authType.toLowerCase().trim().equals(AUTH_TYPE_TLS)){
-				email.setTLS(true);
+				email.setStartTLSEnabled(true);
 			}else{
 				logger.info("auth type "+authType +" not supported at the moment");
 			}
@@ -186,7 +187,7 @@ public class Mail {
 			email.setHtmlMsg(message);
 			email.send();
 		}catch(EmailException e){
-			if(e.getCause() != null && e.getCause().getClass().equals(javax.mail.SendFailedException.class)){
+			if(e.getCause() != null && e.getCause().getClass().equals(jakarta.mail.SendFailedException.class)){
 				logger.error("EmailException caused by javax.mail.SendFailedException: maybe wrong receiver");
 				logger.error("sender:" + sender);
 				logger.error("receiver:" + receiver);
