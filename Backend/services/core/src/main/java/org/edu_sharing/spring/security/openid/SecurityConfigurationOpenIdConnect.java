@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.edu_sharing.spring.security.basic.CSRFConfig;
+import org.edu_sharing.spring.security.basic.EduAuthSuccsessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +17,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -29,7 +31,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.edu_sharing.spring.security.basic.CSRFConfig;
 
 import java.lang.reflect.Field;
 
@@ -57,7 +58,7 @@ public class SecurityConfigurationOpenIdConnect {
                         .requestMatchers(new AntPathRequestMatcher("/**")).permitAll()
                 )
 
-                .oauth2Login(Customizer.withDefaults())
+                .oauth2Login(login -> login.successHandler(new EduAuthSuccsessHandler()))
                 //frontchannel logout triggerd by edu-sharing gui
                 .logout((logout) ->
                         logout.logoutSuccessHandler(oidcLogoutSuccessHandler()))

@@ -10,6 +10,7 @@ import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.spring.security.basic.CSRFConfig;
+import org.edu_sharing.spring.security.basic.EduAuthSuccsessHandler;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -144,18 +145,7 @@ public class SecurityConfigurationSaml {
         }
     }
 
-    /**
-     *  redirects to /shibboleth after successfull auth
-     *
-     *  notice:
-     *  SavedRequestAwareAuthenticationSuccessHandler is default which always redircts to /samllogout url with GET which is not vailable
-     *      * after logout/login again
-     */
-    public class EduAuthSuccsessHandler extends SimpleUrlAuthenticationSuccessHandler{
-        EduAuthSuccsessHandler(){
-            super("/shibboleth");
-        }
-    }
+
 
     @Bean
     RelyingPartyRegistrationRepository relyingPartyRegistrationRepository() {
