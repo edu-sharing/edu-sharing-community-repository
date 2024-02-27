@@ -74,6 +74,7 @@ public class SecurityConfigurationSaml {
                         //don't use this cause it uses SavedRequestAwareAuthenticationSuccessHandler
                         //.defaultSuccessUrl("/shibboleth")
                 )
+                .sessionManagement(s -> s.sessionFixation().none())
 
                 .saml2Logout(logout -> logout.withObjectPostProcessor(
                         switchPost2GetProcessor()

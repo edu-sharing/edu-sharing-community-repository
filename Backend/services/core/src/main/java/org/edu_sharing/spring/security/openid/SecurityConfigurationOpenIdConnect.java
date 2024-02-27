@@ -59,6 +59,7 @@ public class SecurityConfigurationOpenIdConnect {
                 )
 
                 .oauth2Login(login -> login.successHandler(new EduAuthSuccsessHandler()))
+                .sessionManagement(s -> s.sessionFixation().none())
                 //frontchannel logout triggerd by edu-sharing gui
                 .logout((logout) ->
                         logout.logoutSuccessHandler(oidcLogoutSuccessHandler()))
