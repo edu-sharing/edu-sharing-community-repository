@@ -58,7 +58,7 @@ public class NgServlet extends HttpServlet {
 			if(head!=null) {
 				html = addToHead(head, html);
 			}
-            addResponseHeaders(resp);
+
 			if(url.getPath().contains(COMPONENTS_RENDER)){
 				html = addLicenseMetadata(html,url);
 				html = addLRMI(html,url);
@@ -76,18 +76,6 @@ public class NgServlet extends HttpServlet {
 			t.printStackTrace();
 			resp.sendError(500, "Fatal error preparing index.html: "+t.getMessage());
 		}
-	}
-
-	private void addResponseHeaders(HttpServletResponse resp) {
-		Config headers = LightbendConfigLoader.get().getConfig("angular.headers");
-		resp.setHeader("X-XSS-Protection", headers.getString("X-XSS-Protection"));
-		resp.setHeader("X-Frame-Options", headers.getString("X-Frame-Options"));
-		Config securityConfigs = headers.getConfig("Content-Security-Policy");
-		StringBuilder joined = new StringBuilder();
-		securityConfigs.entrySet().forEach((e) ->
-				joined.append(e.getKey()).append(" ").append(e.getValue().unwrapped().toString()).append("; ")
-		);
-		resp.setHeader("Content-Security-Policy", joined.toString());
 	}
 
 	private static String addSEO(String html, URL url) {
