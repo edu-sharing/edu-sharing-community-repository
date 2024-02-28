@@ -234,29 +234,21 @@ export class NodeHelperService extends NodeHelperServiceBase {
     /**
      * fetches the preview of the node and appends it at preview.data
      */
-    public appendImageData(node: Node, quality = 70): Observable<Node> {
-        return new Observable<Node>((observer: Observer<Node>) => {
-            const options: any = this.rest.getRequestOptions();
-            options.responseType = 'blob';
-            const url = this.repoUrlService.getRepoUrl(node.preview.url, node);
-            this.rest
-                .get(url + '&allowRedirect=false&quality=' + quality, options, false)
-                .subscribe(
-                    async (data: Blob) => {
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                            const dataUrl = reader.result;
-                            node.preview.data = dataUrl.toString();
-                            observer.next(node);
-                            observer.complete();
-                        };
-                        reader.readAsDataURL(data);
-                    },
-                    (error) => {
-                        observer.error(error);
-                        observer.complete();
-                    },
-                );
+    public async appendImageData(node: Node, quality = 70) {
+        const options: any = this.rest.getRequestOptions();
+        options.responseType = 'blob';
+        const url = await this.repoUrlService.getRepoUrl(node.preview.url, node);
+        const data = await this.rest
+            .get<Blob>(url + '&allowRedirect=false&quality=' + quality, options, false)
+            .toPromise();
+        const reader = new FileReader();
+        return new Promise((resolve) => {
+            reader.onload = () => {
+                const dataUrl = reader.result;
+                node.preview.data = dataUrl.toString();
+                resolve(node);
+            };
+            reader.readAsDataURL(data);
         });
     }
 

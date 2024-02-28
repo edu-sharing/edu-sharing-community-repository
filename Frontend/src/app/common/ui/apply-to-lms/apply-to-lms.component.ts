@@ -104,7 +104,7 @@ export class ApplyToLmsComponent {
         if (reurl == 'IFRAME' || reurl == 'WINDOW') {
             node.objectUrl = ccrepUrl;
             node.nodeId = wrapper.remote.ref.id;
-            this.nodeHelper.appendImageData(node).subscribe(
+            this.nodeHelper.appendImageData(node).then(
                 (data) => {
                     this.events.broadcastEvent(FrameEventsService.EVENT_APPLY_NODE, data);
                     window.history.back();
