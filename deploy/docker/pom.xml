@@ -18,70 +18,93 @@
 
   <properties>
 
-    <docker.from.openjdk.11>
-      dockerio.mirror.docker.edu-sharing.com/openjdk:11-jdk
-    </docker.from.openjdk.11>
+    <docker.edu_sharing.community.common.alfresco.repository.name>
+      edu_sharing-community-common-docker-alfresco-repository
+    </docker.edu_sharing.community.common.alfresco.repository.name>
 
+    <docker.edu_sharing.community.common.alfresco.repository.tag>
+      23.2.0-A9_2
+    </docker.edu_sharing.community.common.alfresco.repository.tag>
 
-    <docker.edu_sharing.communty.common.repository>
-      ${docker.registry}/community/common
-    </docker.edu_sharing.communty.common.repository>
+    <docker.edu_sharing.community.common.alfresco.transform.name>
+      edu_sharing-community-common-docker-alfresco-transform
+    </docker.edu_sharing.community.common.alfresco.transform.name>
 
-    <docker.edu_sharing.community.common.alfresco.activemq>
-      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-alfresco-activemq:5.16.5
-    </docker.edu_sharing.community.common.alfresco.activemq>
+    <docker.edu_sharing.community.common.alfresco.transform.tag>
+      1.0.0
+    </docker.edu_sharing.community.common.alfresco.transform.tag>
 
-    <docker.edu_sharing.community.common.alfresco.repository>
-      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-alfresco-repository:23.2.0-A9_2
-    </docker.edu_sharing.community.common.alfresco.repository>
+    <docker.edu_sharing.community.common.alfresco.transform.core.aio.name>
+      edu_sharing-community-common-docker-alfresco-transform-core-aio
+    </docker.edu_sharing.community.common.alfresco.transform.core.aio.name>
 
-    <docker.edu_sharing.community.common.alfresco.transform>
-      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-alfresco-transform:1.0.0
-    </docker.edu_sharing.community.common.alfresco.transform>
+    <docker.edu_sharing.community.common.alfresco.transform.core.aio.tag>
+      5.0.0
+    </docker.edu_sharing.community.common.alfresco.transform.core.aio.tag>
 
-    <docker.edu_sharing.community.common.alfresco.transform.core.aio>
-      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-alfresco-transform-core-aio:5.0.0
-    </docker.edu_sharing.community.common.alfresco.transform.core.aio>
+    <docker.edu_sharing.community.common.alfresco.search.service.name>
+      edu_sharing-community-common-docker-alfresco-search-service
+    </docker.edu_sharing.community.common.alfresco.search.service.name>
 
-    <docker.edu_sharing.community.common.alfresco.search.service>
-      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-alfresco-search-service:2.0.8.2
-    </docker.edu_sharing.community.common.alfresco.search.service>
+    <docker.edu_sharing.community.common.alfresco.search.service.tag>
+      2.0.8.2-3
+    </docker.edu_sharing.community.common.alfresco.search.service.tag>
 
-    <docker.edu_sharing.community.common.postgresql>
-      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-postgresql:${postgresql.version}
-    </docker.edu_sharing.community.common.postgresql>
+    <docker.edu_sharing.community.common.postgresql.name>
+      edu_sharing-community-common-docker-postgresql
+    </docker.edu_sharing.community.common.postgresql.name>
 
-    <docker.edu_sharing.community.common.postgresql.exporter>
-      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-postgresql-exporter:0.11.1
-    </docker.edu_sharing.community.common.postgresql.exporter>
+    <docker.edu_sharing.community.common.postgresql.tag>
+      ${postgresql.version}
+    </docker.edu_sharing.community.common.postgresql.tag>
 
-    <docker.edu_sharing.community.common.mailcatcher>
-      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-mailcatcher:1.0.0
-    </docker.edu_sharing.community.common.mailcatcher>
+    <docker.edu_sharing.community.common.postgresql.exporter.name>
+      edu_sharing-community-common-docker-postgresql-exporter
+    </docker.edu_sharing.community.common.postgresql.exporter.name>
 
-    <docker.edu_sharing.community.common.minideb>
-      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-minideb:11
-    </docker.edu_sharing.community.common.minideb>
+    <docker.edu_sharing.community.common.postgresql.exporter.tag>
+      0.11.1
+    </docker.edu_sharing.community.common.postgresql.exporter.tag>
 
-    <docker.edu_sharing.community.common.redis>
-      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-redis:6.2.7
-    </docker.edu_sharing.community.common.redis>
+    <docker.edu_sharing.community.common.mailcatcher.name>
+      edu_sharing-community-common-docker-mailcatcher
+    </docker.edu_sharing.community.common.mailcatcher.name>
 
-    <docker.edu_sharing.community.common.redis.cluster>
-      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-redis-cluster:6.2.7
-    </docker.edu_sharing.community.common.redis.cluster>
+    <docker.edu_sharing.community.common.mailcatcher.tag>
+      1.0.0
+    </docker.edu_sharing.community.common.mailcatcher.tag>
 
-    <docker.edu_sharing.community.common.redis.exporter>
-      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-redis-exporter:1.45.0
-    </docker.edu_sharing.community.common.redis.exporter>
+    <docker.edu_sharing.community.common.minideb.name>
+      edu_sharing-community-common-docker-minideb
+    </docker.edu_sharing.community.common.minideb.name>
 
-    <docker.edu_sharing.community.common.varnish>
-      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-varnish:0.35.0
-    </docker.edu_sharing.community.common.varnish>
+    <docker.edu_sharing.community.common.minideb.tag>
+      11
+    </docker.edu_sharing.community.common.minideb.tag>
 
-    <docker.edu_sharing.community.common.varnish.exporter>
-      ${docker.edu_sharing.communty.common.repository}/edu_sharing-community-common-docker-varnish-exporter:0.35.0
-    </docker.edu_sharing.community.common.varnish.exporter>
+    <docker.edu_sharing.community.common.redis.name>
+      edu_sharing-community-common-docker-redis
+    </docker.edu_sharing.community.common.redis.name>
+
+    <docker.edu_sharing.community.common.redis.tag>
+      6.2.7
+    </docker.edu_sharing.community.common.redis.tag>
+
+    <docker.edu_sharing.community.common.varnish.name>
+      edu_sharing-community-common-docker-varnish
+    </docker.edu_sharing.community.common.varnish.name>
+
+    <docker.edu_sharing.community.common.varnish.tag>
+      0.35.0
+    </docker.edu_sharing.community.common.varnish.tag>
+
+    <docker.edu_sharing.community.common.varnish.exporter.name>
+      edu_sharing-community-common-docker-varnish-exporter
+    </docker.edu_sharing.community.common.varnish.exporter.name>
+
+    <docker.edu_sharing.community.common.varnish.exporter.tag>
+      0.35.0
+    </docker.edu_sharing.community.common.varnish.exporter.tag>
 
     <helm.kube.version>&gt;= 1.20.0</helm.kube.version>
     <helm.version>3.10.0</helm.version>

@@ -1332,11 +1332,6 @@
       </snapshots>
     </repository>
 
-    <repository>
-      <id>alfresco-maven-repo</id>
-      <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
-    </repository>
-
   </repositories>
 
   <modules>
