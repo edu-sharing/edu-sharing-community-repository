@@ -1175,22 +1175,27 @@ public class SearchServiceElastic extends SearchServiceImpl {
 //    }
 
     public DeleteResponse deleteNative(DeleteRequest deleteRequest) throws IOException {
+        checkClient();
         return client.withTransportOptions(this::getRequestOptions).delete(deleteRequest);
     }
 
     public SearchResponse<Map> searchNative(SearchRequest searchRequest) throws IOException {
+        checkClient();
         return client.withTransportOptions(this::getRequestOptions).search(searchRequest, Map.class);
     }
 
     public UpdateResponse<Map> updateNative(UpdateRequest updateRequest) throws IOException {
+        checkClient();
         return client.withTransportOptions(this::getRequestOptions).update(updateRequest, Map.class);
     }
 
     public ScrollResponse<Map> scrollNative(ScrollRequest searchScrollRequest) throws IOException {
+        checkClient();
         return client.withTransportOptions(this::getRequestOptions).scroll(searchScrollRequest, Map.class);
     }
 
     public ClearScrollResponse clearScrollNative(ClearScrollRequest clearScrollRequest) throws IOException {
+        checkClient();
         return client.withTransportOptions(this::getRequestOptions).clearScroll(clearScrollRequest);
     }
 
