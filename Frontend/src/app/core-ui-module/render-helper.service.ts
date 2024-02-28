@@ -225,7 +225,7 @@ export class RenderHelperService {
 
     injectEventHandler(node: Node) {
         const videoElement = document.querySelector('#edusharing_rendering_content_href');
-        videoElement.addEventListener('click', () => {
+        videoElement?.addEventListener('click', () => {
             this.tracking.trackEvent(EventType.OPEN_EXTERNAL_LINK, node.ref.id).subscribe(() => {});
         });
     }
