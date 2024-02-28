@@ -19,9 +19,10 @@ export class ApiHelpersService {
         }
         let baseURL =
             location.protocol + '//' + location.hostname + (location.port && ':' + location.port);
-        if (document.getElementsByTagName('base').length > 0) {
-            baseURL = document.getElementsByTagName('base')[0].href;
-        }
+
+        // is already inside rootUrl!
+        // baseURL = ((document.querySelector('head > base') as HTMLBaseElement)?.href) || baseURL;
+
         // proxy target (i.e. in dev mode and proxy set in .env file)
         if (ApiInterceptor.proxyTarget) {
             baseURL = ApiInterceptor.proxyTarget;
