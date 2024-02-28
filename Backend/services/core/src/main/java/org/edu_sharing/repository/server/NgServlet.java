@@ -58,17 +58,11 @@ public class NgServlet extends HttpServlet {
 			File index=new File(req.getSession().getServletContext().getRealPath("index.html"));
 			String html=FileUtils.readFileToString(index);
 
-			SecureRandom instance = SecureRandom.getInstance("SHA1PRNG");
-			byte[] nonce = new byte[16];
-			instance.nextBytes(nonce);
-			String ngCspNonce = String.valueOf(Base64.getEncoder().encodeToString(nonce));
-
 			if(head!=null) {
 				html = addToHead(head, html);
 			}
-			html = addToHead("<app ngCspNonce=\"" + ngCspNonce + "\"></app>", html);
-			html = html.replace("{{ngCspNonce}}", ngCspNonce);
-			addResponseHeaders(resp, ngCspNonce);
+			html = addToHead("<app ngCspNonce=\"" + SecurityHeadersFilter.ngCspNonce.get() + "\"></app>", html);
+			html = html.replace("{{ngCspNonce}}", SecurityHeadersFilter.ngCspNonce.get());
 			if(url.getPath().contains(COMPONENTS_RENDER)){
 				html = addLicenseMetadata(html,url);
 				html = addLRMI(html,url);
@@ -86,20 +80,6 @@ public class NgServlet extends HttpServlet {
 			t.printStackTrace();
 			resp.sendError(500, "Fatal error preparing index.html: "+t.getMessage());
 		}
-	}
-
-	private void addResponseHeaders(HttpServletResponse resp, String ngCspNonce) {
-		Config headers = LightbendConfigLoader.get().getConfig("angular.headers");
-		resp.setHeader("X-XSS-Protection", headers.getString("X-XSS-Protection"));
-		resp.setHeader("X-Frame-Options", headers.getString("X-Frame-Options"));
-		Config securityConfigs = headers.getConfig("Content-Security-Policy");
-		StringBuilder joined = new StringBuilder();
-		securityConfigs.entrySet().forEach((e) ->
-				joined.append(e.getKey()).append(" ").append(
-						e.getValue().unwrapped().toString().replace("{{ngCspNonce}}", ngCspNonce)
-				).append("; ")
-		);
-		resp.setHeader("Content-Security-Policy", joined.toString());
 	}
 
 	private static String addSEO(String html, URL url) {
