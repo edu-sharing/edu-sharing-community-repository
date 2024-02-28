@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ApplicationRef, Component, OnInit, ViewChild } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { User } from 'ngx-edu-sharing-api';
 import {
@@ -23,13 +23,14 @@ import { Toast } from '../../../core-ui-module/toast';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { AuthoritySearchMode } from '../../../shared/components/authority-search-input/authority-search-input.component';
 import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
     selector: 'es-permissions-delete',
     templateUrl: 'delete.component.html',
     styleUrls: ['delete.component.scss'],
 })
-export class PermissionsDeleteComponent implements OnInit {
+export class PermissionsDeleteComponent implements OnInit, AfterViewInit {
     readonly DisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     readonly AuthoritySearchMode = AuthoritySearchMode;
@@ -37,6 +38,7 @@ export class PermissionsDeleteComponent implements OnInit {
     nodeEntriesWrapperComponent: NodeEntriesWrapperComponent<User>;
     deleteModes = [DeleteMode.none, DeleteMode.assign, DeleteMode.delete];
     deleteModesFolder = [DeleteMode.none, DeleteMode.assign];
+    canSubmit$ = new BehaviorSubject<boolean>(false);
     options: any;
     receiver: User;
     receiverGroup: Group;
@@ -53,6 +55,7 @@ export class PermissionsDeleteComponent implements OnInit {
         private iam: RestIamService,
         private storage: SessionStorageService,
         private toast: Toast,
+        private applicationRef: ApplicationRef,
         private translate: TranslateService,
     ) {
         // send list of target users + options for these specific users
@@ -148,6 +151,10 @@ export class PermissionsDeleteComponent implements OnInit {
         this.iam.searchUsers('*', true, 'todelete', request).subscribe(
             (users) => {
                 this.usersDataSource.setData(users.users as unknown as User[], users.pagination);
+                this.applicationRef.tick();
+                this.nodeEntriesWrapperComponent
+                    .getSelection()
+                    .changed.subscribe(() => this.canSubmit$.next(this.canSubmit()));
                 this.usersDataSource.isLoading = false;
             },
             (error) => {
@@ -247,9 +254,9 @@ export class PermissionsDeleteComponent implements OnInit {
         return this.hasAssigning() && (this.receiver == null || this.receiverGroup == null);
     }
 
-    canSubmit() {
+    private canSubmit() {
         return (
-            !this.nodeEntriesWrapperComponent?.getSelection().isEmpty && !this.missingAssigning()
+            !this.nodeEntriesWrapperComponent?.getSelection().isEmpty() && !this.missingAssigning()
         );
     }
 
@@ -266,4 +273,6 @@ export class PermissionsDeleteComponent implements OnInit {
             this.options.homeFolder.keepFolderStructure = false;
         }
     }
+
+    ngAfterViewInit() {}
 }
