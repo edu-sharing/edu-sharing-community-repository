@@ -64,6 +64,12 @@ public class KeyGenerator {
 			}
 
 			if(homeRepo.getCertificate() == null){
+				//on first startup the private key / pub key would be null
+				if(homeRepo.getPrivateKey() == null || homeRepo.getPublicKey() == null){
+					ApplicationInfoList.refresh();
+					homeRepo = ApplicationInfoList.getHomeRepository();
+				}
+
 				log.info("will set certificate");
 				PrivateKey pemPrivateKey = s.getPemPrivateKey(homeRepo.getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
 				PublicKey pemPublicKey = s.getPemPublicKey(homeRepo.getPublicKey(), CCConstants.SECURITY_KEY_ALGORITHM);
