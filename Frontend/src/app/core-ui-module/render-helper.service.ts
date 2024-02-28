@@ -272,6 +272,12 @@ export class RenderHelperService {
      * This function should be used to align with CSP security policies
      */
     applyRenderData(htmlElement: HTMLElement, detailsSnippet: string) {
+        detailsSnippet = detailsSnippet.replaceAll(
+            '<style',
+            '<style nonce="' +
+                document.querySelector('app[ngCspNonce]')?.getAttribute('ngCspNonce') +
+                '"',
+        );
         htmlElement.innerHTML = detailsSnippet;
         Array.from(htmlElement.querySelectorAll('script')).forEach((script) => {
             const newScriptElement = document.createElement('script');
