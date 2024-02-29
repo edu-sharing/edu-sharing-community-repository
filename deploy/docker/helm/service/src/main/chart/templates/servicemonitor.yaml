@@ -4,8 +4,8 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "edusharing_repository_service.name" . }}-api
-  labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
+  name: {{ include "edusharing_common_lib.names.name" . }}-api
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
     app.kubernetes.io/component: "metrics-api"
 spec:
   endpoints:
@@ -17,7 +17,7 @@ spec:
     metricRelabelings: {{ toYaml . | nindent 6 }}
     {{- end }}
   selector:
-    matchLabels: {{ include "edusharing_repository_service.labels.app" . | nindent 6 }}
+    matchLabels: {{ include "edusharing_common_lib.labels.app" . | nindent 6 }}
       app.kubernetes.io/component: "metrics-api"
   namespaceSelector:
     matchNames:
@@ -27,8 +27,8 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "edusharing_repository_service.name" . }}-proxy
-  labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
+  name: {{ include "edusharing_common_lib.names.name" . }}-proxy
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
     app.kubernetes.io/component: "metrics-proxy"
 spec:
   endpoints:
@@ -40,7 +40,7 @@ spec:
     metricRelabelings: {{ toYaml . | nindent 6 }}
     {{- end }}
   selector:
-    matchLabels: {{ include "edusharing_repository_service.labels.app" . | nindent 6 }}
+    matchLabels: {{ include "edusharing_common_lib.labels.app" . | nindent 6 }}
       app.kubernetes.io/component: "metrics-proxy"
   namespaceSelector:
     matchNames:

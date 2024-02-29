@@ -32,14 +32,7 @@
             <phase>package</phase>
             <configuration>
               <includeArtifactIds>
-                alfresco-content-services-share-distribution,
-                alfresco-pdf-renderer,
-                alfresco-content-services-community-distribution,
-                edu_sharing-community-repository-backend-tomcat,
-                jmx_prometheus_javaagent,
-                postgresql,
-                redisson-all,
-                redisson-tomcat-10
+                edu_sharing-community-repository-backend-tomcat
               </includeArtifactIds>
               <outputDirectory>${project.build.directory}/build/artifacts</outputDirectory>
             </configuration>

@@ -21,16 +21,6 @@
     <docker.prefix>edu_sharing-community-repository</docker.prefix>
     <helm.prefix>edu_sharing-community-repository</helm.prefix>
 
-    <prometheus.jmx.version>0.17.2</prometheus.jmx.version>
-    <redisson.version>3.18.0</redisson.version>
-    <redisson.version>3.18.0</redisson.version>
-
-    <postgresql.version.major>13</postgresql.version.major>
-    <postgresql.version.minor>9</postgresql.version.minor>
-    <postgresql.version.patch>0</postgresql.version.patch>
-    <postgresql.version>${postgresql.version.major}.${postgresql.version.minor}.${postgresql.version.patch}
-    </postgresql.version>
-
   </properties>
 
   <modules>

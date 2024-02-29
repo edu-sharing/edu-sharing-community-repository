@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "edusharing_common_lib.names.name" . }}
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels: {{ include "edusharing_common_lib.labels.app" . | nindent 6 }}
+  serviceName: {{ include "edusharing_common_lib.names.name" . }}-headless
+  template:
+    metadata:
+      labels: {{ include "edusharing_common_lib.labels.app" . | nindent 8 }}
+      annotations:
+        checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
+        {{- if not .Values.global.metrics.servicemonitor.enabled }}
+        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/port: "8092"
+        prometheus.io/scrape: {{ .Values.config.metrics.enabled | quote }}
+        {{- end }}
+        sidecar.istio.io/inject: {{ .Values.global.cluster.istio.enabled | quote }}
+        {{- with merge .Values.podAnnotations .Values.global.annotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      containers:
+      - name: {{ include "edusharing_common_lib.names.name" . }}
+        image: {{ include "edusharing_common_lib.images.image" . }}{{ .Values.image.name }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+        envFrom:
+        - configMapRef:
+            name: {{ include "edusharing_common_lib.names.name" . }}-env
+        ports:
+        - name: api
+          containerPort: 8091
+        - name: management
+          containerPort: 8092
+        {{- if default .Values.global.debug .Values.debug }}
+        - name: jpda
+          containerPort: 5005
+        {{- end }}
+        {{- with .Values.startupProbe }}
+        startupProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: management
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.livenessProbe }}
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: management
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.readinessProbe }}
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: management
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.resources }}
+        resources: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.securityContext }}
+        securityContext: {{ toYaml . | nindent 10 }}
+        {{- end }}
+      {{- with .Values.global.image.pullSecrets }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with merge .Values.podSecurityContext .Values.global.security }}
+      securityContext: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{ with .Values.terminationGracePeriod }}
+      terminationGracePeriodSeconds: {{ . }}
+      {{- end }}
+      {{- with .Values.nodeAffinity }}
+      affinity:
+        nodeAffinity: {{ toYaml . | nindent 10 }}
+      {{- end }}

@@ -42,11 +42,12 @@ global:
     pullSecrets: []
     registry: ${docker.registry}
     repository: ${docker.repository}
+    common: ${docker.common}
 
   metrics:
     scrape:
-      interval: 10s
-      timeout: 10s
+      interval: 60s
+      timeout: 60s
     servicemonitor:
       enabled: false
 
@@ -67,14 +68,8 @@ global:
 nameOverride: edusharing-repository-service
 
 image:
-  prefix: ${docker.prefix}
+  name: ${docker.prefix}-deploy-docker-build-service
   tag: ${docker.tag}
-
-images:
-  minideb: ${docker.edu_sharing.community.common.minideb}
-  varnish:
-    cache: ${docker.edu_sharing.community.common.varnish}
-    exporter: ${docker.edu_sharing.community.common.varnish}
 
 ########################################################################################################################
 
@@ -194,6 +189,26 @@ config:
     username: ""
     password: ""
 
+  hazelcast:
+    heartbeat:
+      failuredetector:
+        type: deadline
+      interval:
+        seconds: 5
+    max:
+      "no":
+        heartbeat:
+          seconds: 15
+    phiaccrual:
+      failuredetector:
+        min:
+          std:
+            dev:
+              millis: 100
+        threshold: 10
+        sample:
+          size: 200
+
   home:
     appid: local
     cookieAttributes: ""
@@ -265,11 +280,6 @@ config:
       application: ""
       server: ""
 
-  saml:
-    enabled: false
-#    config: ""
-#    files: {}
-
   search:
 
     elastic:
@@ -282,6 +292,14 @@ config:
       port: 8080
 
   transform:
+
+    aio:
+      host: edusharing-repository-transform-aio
+      port: 8090
+
+    es:
+      host: edusharing-repository-transform-es
+      port: 8091
 
     server:
       enabled: ${helm.config.transform.enabled}
@@ -390,6 +408,10 @@ init:
 
   permission:
 
+    image:
+      name: ${docker.edu_sharing.community.common.minideb.name}
+      tag: "${docker.edu_sharing.community.common.minideb.tag}"
+
     resources:
 
       limits:
@@ -408,6 +430,10 @@ init:
 sidecar:
 
   proxyCache:
+
+    image:
+      name: ${docker.edu_sharing.community.common.varnish.name}
+      tag: "${docker.edu_sharing.community.common.varnish.tag}"
 
     startupProbe:
 
@@ -451,6 +477,10 @@ sidecar:
 
   proxyMetrics:
 
+    image:
+      name: ${docker.edu_sharing.community.common.varnish.exporter.name}
+      tag: "${docker.edu_sharing.community.common.varnish.exporter.tag}"
+
     relabelings: []
 
     resources:
@@ -471,6 +501,10 @@ sidecar:
       runAsUser: 101
 
   transform:
+
+    image:
+      name: ${docker.edu_sharing.community.common.alfresco.transform.name}
+      tag: "${docker.edu_sharing.community.common.alfresco.transform.tag}"
 
     startupProbe:
 

@@ -1,4 +1,4 @@
-FROM ${docker.registry}/${docker.common}/${docker.edu_sharing.community.common.alfresco.repository.name}:${docker.edu_sharing.community.common.alfresco.repository.tag}
+FROM ${docker.from.edu_sharing.community.common.alfresco.repository}
 
 ########################################################################################################################
 

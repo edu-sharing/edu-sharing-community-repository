@@ -88,11 +88,6 @@
       <artifactId>edu_sharing-community-repository-backend-transform</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>io.prometheus.jmx</groupId>
-      <artifactId>jmx_prometheus_javaagent</artifactId>
-    </dependency>
-
   </dependencies>
 
 </project>
