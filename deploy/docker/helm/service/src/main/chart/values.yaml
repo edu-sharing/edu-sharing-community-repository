@@ -143,7 +143,7 @@ config:
     password: ""
 
   antivirus:
-    enabled: ${helm.config.antivirus.enabled}
+    enabled: false
     host: edusharing-repository-antivirus
     port: 1344
     service: squidclamav
@@ -155,7 +155,7 @@ config:
     port: 6379
 
   cluster:
-    enabled: ${helm.config.cluster.enabled}
+    enabled: false
     backup:
       count: 1
       read: false
@@ -302,7 +302,7 @@ config:
       port: 8091
 
     server:
-      enabled: ${helm.config.transform.enabled}
+      enabled: false
       host: edusharing-repository-transform
       port: 8080
 
