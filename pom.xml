@@ -241,12 +241,6 @@
         <version>2.1.2</version>
       </dependency>
 
-<!--      <dependency>-->
-<!--        <groupId>${project.groupId}</groupId>-->
-<!--        <artifactId>edu_sharing-community-repository-repackaged-elasticsearch</artifactId>-->
-<!--        <version>${bom.repository-repackaged.version}</version>-->
-<!--      </dependency>-->
-
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>

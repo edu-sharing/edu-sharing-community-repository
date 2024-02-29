@@ -135,13 +135,6 @@
       <scope>provided</scope>
     </dependency>
 
-<!--    <dependency>-->
-<!--      <groupId>${project.groupId}</groupId>-->
-<!--      <artifactId>edu_sharing-community-repository-repackaged-elasticsearch</artifactId>-->
-<!--      <scope>provided</scope>-->
-<!--    </dependency>-->
-
-
     <dependency>
       <groupId>com.google.apis</groupId>
       <artifactId>google-api-services-youtube</artifactId>

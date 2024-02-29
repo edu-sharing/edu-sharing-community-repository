@@ -199,7 +199,6 @@
             <phase>generate-sources</phase>
             <configuration>
               <includeArtifactIds>
-<!--                edu_sharing-community-repository-repackaged-elasticsearch,-->
                 edu_sharing-community-repository-repackaged-isoparser
               </includeArtifactIds>
               <type>tar.gz</type>
@@ -539,13 +538,6 @@
       <artifactId>jakarta.json-api</artifactId>
       <scope>runtime</scope>
     </dependency>
-
-<!--    <dependency>-->
-<!--      <groupId>${project.groupId}</groupId>-->
-<!--      <artifactId>edu_sharing-community-repository-repackaged-elasticsearch</artifactId>-->
-<!--      <scope>runtime</scope>-->
-<!--    </dependency>-->
-
 
     <dependency>
       <groupId>com.google.apis</groupId>
