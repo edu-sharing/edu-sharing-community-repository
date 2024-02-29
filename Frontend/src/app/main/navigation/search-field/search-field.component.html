@@ -94,6 +94,7 @@
             keyboard interaction to work. -->
             <ng-container *ngIf="(categories$ | async)?.includes(filters.key)">
               <mat-chip-option
+                [selectable]="false"
                 *ngFor="let filterValue of filters.value"
                 class="filter-chip-{{ filters.key | propertySlug }}"
                 [removable]="true"
