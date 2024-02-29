@@ -91,6 +91,10 @@ form {
             }
         }
 
+        .remove-chip {
+            color: var(--textLight) !important;
+        }
+
         .mdc-evolution-chip__text-label {
             padding: 5px 0;
             white-space: normal;
