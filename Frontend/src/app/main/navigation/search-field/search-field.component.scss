@@ -74,22 +74,31 @@ form {
         @include suggestionCardHeading;
         margin-bottom: 5px;
     }
+}
+.suggestion-card {
     .chips-wrapper {
         display: flex;
         width: 100%;
         flex-wrap: wrap;
-        .mat-chip.mat-standard-chip {
-            word-break: break-word;
+    }
 
-            @each $property, $color in $chip-colors {
-                &.filter-chip-#{$property} {
-                    background-color: $color;
-                }
+    ::ng-deep .mat-mdc-standard-chip {
+        word-break: break-word;
+        height: unset;
+        @each $property, $color in $chip-colors {
+            &.filter-chip-#{$property} {
+                background-color: $color !important;
             }
-            .mat-chip-remove {
-                color: inherit;
-                opacity: 0.4;
-            }
+        }
+
+        .mdc-evolution-chip__text-label {
+            padding: 5px 0;
+            white-space: normal;
+        }
+
+        .mat-mdc-chip-remove {
+            color: inherit;
+            opacity: 0.4;
         }
     }
 }
@@ -125,11 +134,10 @@ form {
 }
 
 .clear-button {
-    --mdc-icon-button-state-layer-size: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 4px;
+    margin-right: 0;
     color: #{rgba($workspaceTopBarInputText, 0.8)};
     &.cdk-keyboard-focused {
         @include setGlobalKeyboardFocus('border');
