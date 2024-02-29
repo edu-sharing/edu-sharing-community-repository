@@ -15,14 +15,6 @@
 
   <name>edu_sharing-community-repository-deploy-docker-helm-service</name>
 
-  <properties>
-
-    <helm.config.antivirus.enabled>false</helm.config.antivirus.enabled>
-    <helm.config.cluster.enabled>false</helm.config.cluster.enabled>
-    <helm.config.transform.enabled>false</helm.config.transform.enabled>
-
-  </properties>
-
   <build>
 
     <plugins>
@@ -99,69 +91,5 @@
     </plugins>
 
   </build>
-
-  <profiles>
-
-    <profile>
-
-      <id>repository.antivirus</id>
-
-      <activation>
-        <activeByDefault>false</activeByDefault>
-        <property>
-          <name>env.REPOSITORY_ANTIVIRUS_ENABLED</name>
-          <value>true</value>
-        </property>
-      </activation>
-
-      <properties>
-
-        <helm.config.antivirus.enabled>true</helm.config.antivirus.enabled>
-
-      </properties>
-
-    </profile>
-
-    <profile>
-
-      <id>repository.cluster</id>
-
-      <activation>
-        <activeByDefault>false</activeByDefault>
-        <property>
-          <name>env.REPOSITORY_CLUSTER_ENABLED</name>
-          <value>true</value>
-        </property>
-      </activation>
-
-      <properties>
-
-        <helm.config.cluster.enabled>true</helm.config.cluster.enabled>
-
-      </properties>
-
-    </profile>
-
-    <profile>
-
-      <id>repository.transform</id>
-
-      <activation>
-        <activeByDefault>false</activeByDefault>
-        <property>
-          <name>env.REPOSITORY_TRANSFORM_ENABLED</name>
-          <value>true</value>
-        </property>
-      </activation>
-
-      <properties>
-
-        <helm.config.transform.enabled>true</helm.config.transform.enabled>
-
-      </properties>
-
-    </profile>
-
-  </profiles>
 
 </project>
