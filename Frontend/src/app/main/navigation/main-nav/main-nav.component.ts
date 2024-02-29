@@ -548,7 +548,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private getConfigMenuHelpOptions() {
         if (!this.config.helpMenuOptions) {
-            console.warn('config does not contain helpMenuOptions, will not display any options');
+            // console.warn('config does not contain helpMenuOptions, will not display any options');
             return [];
         }
         const versionParts = this.about.version.repository.split('.');
