@@ -275,7 +275,7 @@ export class RenderHelperService {
         detailsSnippet = detailsSnippet.replaceAll(
             '<style',
             '<style nonce="' +
-                document.querySelector('app[ngCspNonce]')?.getAttribute('ngCspNonce') +
+                document.querySelector('es-router[ngCspNonce]')?.getAttribute('ngCspNonce') +
                 '"',
         );
 
