@@ -17,6 +17,8 @@
     "publish:edu-sharing-api": "npm run build:edu-sharing-api && cd dist/edu-sharing-api && npm publish",
     "prebuild": "npm run build:edu-sharing-api && npm run build:edu-sharing-graphql && npm run build:edu-sharing-ui",
     "build": "node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build --configuration production --delete-output-path false --base-href /edu-sharing/",
+    "copy-build-to-docker": "docker container cp ./dist/. $(docker ps --filter name=^repository-service --quiet):/opt/bitnami/tomcat/temp/0-edu-sharing/",
+    "build-and-copy-to-docker": "npm run build && npm run copy-build-to-docker",
     "prebuild-dev": "npm run build:edu-sharing-api:dev && npm run build:edu-sharing-graphql && npm run build:edu-sharing-ui",
     "build-dev": "node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build --delete-output-path false --base-href /edu-sharing/",
     "build:app-as-web-component": "ng build app-as-web-component --output-hashing none",

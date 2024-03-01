@@ -278,6 +278,19 @@ export class RenderHelperService {
                 document.querySelector('app[ngCspNonce]')?.getAttribute('ngCspNonce') +
                 '"',
         );
+
+        let styleIndex = -1;
+        do {
+            styleIndex = detailsSnippet.indexOf('style=', styleIndex + 1);
+            if (styleIndex === -1) {
+                break;
+            }
+            console.warn(
+                'Rendering provided an inline style attribute! This style will be ignored if unsafe-inline is disabled!',
+                detailsSnippet.substring(styleIndex - 50, styleIndex + 50),
+            );
+        } while (true);
+
         htmlElement.innerHTML = detailsSnippet;
         Array.from(htmlElement.querySelectorAll('script')).forEach((script) => {
             const newScriptElement = document.createElement('script');

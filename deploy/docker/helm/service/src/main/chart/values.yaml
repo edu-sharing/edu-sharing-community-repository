@@ -271,6 +271,9 @@ config:
     username: repository
     password: ""
 
+  oidc:
+    enabled: false
+
   override:
     config:
       application:
@@ -279,6 +282,9 @@ config:
     logging:
       application: ""
       server: ""
+
+  saml:
+    enabled: false
 
   search:
 
