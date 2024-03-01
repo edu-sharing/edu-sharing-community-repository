@@ -177,7 +177,7 @@
     </filter-mapping>
     <filter-mapping>
       <filter-name>springSecurityFilterChain</filter-name>
-      <url-pattern>/logout</url-pattern>
+      <url-pattern>/logout/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
       <filter-name>springSecurityFilterChain</filter-name>
