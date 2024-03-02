@@ -73,7 +73,7 @@
       <i esIcon="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
     </button>
     <div *ngIf="showPersistentIds" [@overlay]="more" class="persistent-id">
-      <div class="table">
+      <div class="table orcid">
         <mat-form-field floatLabel="always">
           <mat-label>{{ 'VCARD.X-ORCID' | translate }}</mat-label>
           <input
@@ -87,7 +87,7 @@
           <mat-hint innerHTML="{{ 'VCARD_HINT.X-ORCID' | translate }}"></mat-hint>
         </mat-form-field>
       </div>
-      <div class="table">
+      <div class="table gnduri">
         <mat-form-field floatLabel="always">
           <mat-label>{{ 'VCARD.X-GND-URI' | translate }}</mat-label>
           <input
@@ -134,7 +134,7 @@
       <i esIcon="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
     </button>
     <div *ngIf="showPersistentIds" [@overlay]="more" class="persistent-id">
-      <div class="table">
+      <div class="table ror">
         <mat-form-field floatLabel="always">
           <mat-label>{{ 'VCARD.X-ROR' | translate }}</mat-label>
           <input
@@ -148,7 +148,7 @@
           <mat-hint innerHTML="{{ 'VCARD_HINT.X-ROR' | translate }}"></mat-hint>
         </mat-form-field>
       </div>
-      <div class="table">
+      <div class="table wikidata">
         <mat-form-field floatLabel="always">
           <mat-label>{{ 'VCARD.X-Wikidata' | translate }}</mat-label>
           <input
