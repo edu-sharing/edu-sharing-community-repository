@@ -427,12 +427,7 @@ xmlstarlet ed -L \
 
 [[ -f ${catAlfLog} ]] && {
 
-  xmlstarlet ed -L \
-    -s '_:web-app' -t elem -n "context-param" -v '' \
-    --var param '$prev' \
-    -s '$param' -t elem -n "param-name" -v "log4jConfiguration" \
-    -s '$param' -t elem -n "param-value" -v "file://${ALF_HOME}/${catAlfLog}" \
-    ${catAlfWConf}
+  cp ${catAlfLog} tomcat/webapps/alfresco/WEB-INF/classes/log4j2.properties
 
 }
 

@@ -18,9 +18,11 @@ import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.organization.v1.model.OrganizationEntries;
 import org.edu_sharing.restservices.shared.ErrorResponse;
+import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.Organization;
 import org.edu_sharing.restservices.shared.Pagination;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -81,7 +83,16 @@ public class OrganizationApi  {
 	    			false,
 	    			onlyMemberships);
 	    	for (EduGroup eduGroup : result.getData()) {
-	    		data.add(new OrganizationDao(repoDao,eduGroup).asOrganization());
+				try {
+					data.add(new OrganizationDao(repoDao,eduGroup).asOrganization());
+				} catch(NullPointerException e) {
+					logger.warn("Group " + eduGroup.getGroupname() + " as provided by search was causing NullPointerException", e);
+					Organization org = new Organization();
+					org.setAuthorityName(eduGroup.getGroupname());
+					org.setRef(new NodeRef(RepositoryDao.getHomeRepository(), eduGroup.getGroupId()));
+					org.setAdministrationAccess(AuthorityServiceHelper.isAdmin());
+					data.add(org);
+				}
 	    	}
 	    	response.setList(data);
 	    	response.setPagination(new Pagination(result));
