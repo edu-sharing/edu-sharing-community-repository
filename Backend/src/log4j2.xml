@@ -236,6 +236,8 @@
         </Logger>
 
         <Logger name="org.alfresco.repo.webdav.auth.LDAPAuthenticationFilter" level="INFO"/>
+        <Logger name="org.edu_sharing.service.authentication" level="INFO"/>
+        <Logger name="org.edu_sharing.service.authentication.ConfidentalScopeAuthenticationService" level="INFO"/>
 
     </Loggers>
 
