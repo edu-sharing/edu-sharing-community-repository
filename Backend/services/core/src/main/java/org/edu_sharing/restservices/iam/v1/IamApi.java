@@ -780,7 +780,14 @@ public class IamApi  {
 
     	    	List<Group> result = new ArrayList<Group>();
     	    	for (String group: search.getData()) {
-    	    		result.add(new GroupDao(repoDao,group).asGroup());
+					try {
+						result.add(new GroupDao(repoDao, group).asGroup());
+					} catch(DAOMissingException e) {
+						logger.warn("Group " + group + " as provided by search was not found", e);
+						Group groupObj = new Group();
+						groupObj.setAuthorityName(group);
+						result.add(groupObj);
+					}
     	    	}	
     	    	GroupEntries response = new GroupEntries();
     	    	response.setList(result);
