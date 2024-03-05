@@ -113,6 +113,7 @@ catSConf="tomcat/conf/server.xml"
 catCConf="tomcat/conf/Catalina/localhost/edu-sharing.xml"
 catEduWConf="tomcat/webapps/edu-sharing/WEB-INF/web.xml"
 catAlfWConf="tomcat/webapps/alfresco/WEB-INF/web.xml"
+catAlfLog="tomcat/webapps/alfresco/WEB-INF/log4j2-alfresco.properties"
 
 eduCConf="tomcat/shared/classes/config/defaults/client.config.xml"
 eduCConfX="tomcat/shared/classes/config/defaults/client.config.override.xml"
@@ -423,6 +424,17 @@ xmlstarlet ed -L \
 	-s '$param' -t elem -n "param-name" -v "allow-unauthenticated-solr-endpoint" \
 	-s '$param' -t elem -n "param-value" -v "true" \
 	${catAlfWConf}
+
+[[ -f ${catAlfLog} ]] && {
+
+  xmlstarlet ed -L \
+    -s '_:web-app' -t elem -n "context-param" -v '' \
+    --var param '$prev' \
+    -s '$param' -t elem -n "param-name" -v "log4jConfiguration" \
+    -s '$param' -t elem -n "param-value" -v "file://${ALF_HOME}/${catAlfLog}" \
+    ${catAlfWConf}
+
+}
 
 ### edu-sharing ########################################################################################################
 
