@@ -427,7 +427,7 @@ xmlstarlet ed -L \
 
 [[ -f ${catAlfLog} ]] && {
 
-  mv ${catAlfLog} tomcat/webapps/alfresco/WEB-INF/classes/log4j2.properties
+  cp ${catAlfLog} tomcat/webapps/alfresco/WEB-INF/classes/log4j2.properties
 
 }
 
