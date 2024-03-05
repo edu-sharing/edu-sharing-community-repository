@@ -279,6 +279,7 @@ config:
       application:
         client: ""
         mds: ""
+        settings: ""
     logging:
       application: ""
       server: ""

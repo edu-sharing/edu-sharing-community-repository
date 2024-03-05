@@ -30,10 +30,9 @@ package org.edu_sharing.repository.server.authentication;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import org.springframework.extensions.surf.util.URLDecoder;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -296,6 +295,9 @@ public class ShibbolethServlet extends HttpServlet {
 				if(authentication instanceof OAuth2AuthenticationToken){
 					OAuth2AuthenticationToken token = (OAuth2AuthenticationToken)authentication;
 					Object att = token.getPrincipal().getAttribute(attName);
+					if(att != null && att instanceof ArrayList){
+						return ((ArrayList<String>)att).stream().collect(Collectors.joining(";"));
+					}
 					return (att != null) ? att.toString() : null;
 				}
 			}

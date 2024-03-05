@@ -61,7 +61,6 @@ public class NgServlet extends HttpServlet {
 			if(head!=null) {
 				html = addToHead(head, html);
 			}
-			html = addToHead("<app ngCspNonce=\"" + SecurityHeadersFilter.ngCspNonce.get() + "\"></app>", html);
 			html = html.replace("{{ngCspNonce}}", SecurityHeadersFilter.ngCspNonce.get());
 			if(url.getPath().contains(COMPONENTS_RENDER)){
 				html = addLicenseMetadata(html,url);
