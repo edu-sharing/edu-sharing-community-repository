@@ -111,7 +111,7 @@ spec:
           subPath: config-application-mds
         {{- end }}
         {{- with .Values.config.override.config.application.settings }}
-        - name: file
+        - name: file-sec
           mountPath: /opt/bitnami/tomcat/shared/classes/config/default/edu-sharing.override.conf
           subPath: config-application-settings
         {{- end }}
@@ -353,6 +353,9 @@ spec:
       - name: file
         configMap:
           name: {{ include "edusharing_common_lib.names.name" . }}-file
+      - name: file-sec
+        secret:
+          secretName: {{ include "edusharing_common_lib.names.name" . }}-file
       {{- if .Values.proxy.enabled }}
       - name: temp-proxy
         emptyDir: { }

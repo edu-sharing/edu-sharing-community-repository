@@ -10,9 +10,6 @@ data:
 {{- with .Values.config.override.config.application.mds }}
   config-application-mds: | {{ . | nindent 4 }}
 {{- end }}
-{{- with .Values.config.override.config.application.settings }}
-  config-application-settings: | {{ . | nindent 4 }}
-{{- end }}
 {{- with .Values.config.override.logging.application }}
   logging-application: | {{ . | nindent 4 }}
 {{- end }}
