@@ -89,6 +89,7 @@ public class OaiServlet extends HttpServlet{
             Map<String, List<String>> request = mapRequest(req);
             OAIPMH response = oai.handleRequest(request);
             String responseXML = EduOai.responseToXML(response);
+            responseXML = OAIExporterFactory.getOAILOMExporter().postProcessResponse(request, responseXML);
             resp.setHeader("Content-Type","application/xml");
             resp.getOutputStream().write(responseXML.getBytes());
         }

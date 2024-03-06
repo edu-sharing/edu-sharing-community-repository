@@ -4,10 +4,10 @@
 <ng-container *ngIf="item.type === 'ORG' || item.type === 'GROUP'">
   <ng-container [ngSwitch]="item.name">
     <span *ngSwitchCase="'displayName'" [class.type-danger]="isDangerousGroup()">
-      {{ $any(getNode()).profile.displayName }}
+      {{ $any(getNode()).profile?.displayName || $any(getNode()).authorityName }}
     </span>
     <span *ngSwitchCase="'groupType'">
-      {{ 'PERMISSIONS.GROUP_TYPE.' + $any(getNode()).profile.groupType | translate }}
+      {{ 'PERMISSIONS.GROUP_TYPE.' + $any(getNode()).profile?.groupType | translate }}
     </span>
     <span *ngSwitchDefault>
       {{ $any(getNode())[item.name] }}
@@ -16,7 +16,7 @@
 </ng-container>
 <ng-container *ngIf="item.type === 'USER'">
   <span *ngIf="isUserProfileAttribute(item.name)">
-    {{ $any(getNode()).profile[item.name] }}
+    {{ $any(getNode()).profile?.[item.name] }}
   </span>
   <span *ngIf="item.name === 'status'">
     {{ 'PERMISSIONS.USER_STATUS.' + $any(getNode()).status.status | translate }}

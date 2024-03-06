@@ -426,7 +426,7 @@ export class OptionsHelperService implements OnDestroy {
         } else if (object.ref) {
             if (object.type === RestConstants.CCM_TYPE_SAVED_SEARCH) {
                 return ElementType.SavedSearch;
-            } else if (object.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) !== -1) {
+            } else if (object.aspects?.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) !== -1) {
                 return ElementType.NodeChild;
             } else if (object.mediatype === 'folder-link') {
                 return ElementType.MapRef;

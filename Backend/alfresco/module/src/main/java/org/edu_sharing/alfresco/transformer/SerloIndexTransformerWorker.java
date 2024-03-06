@@ -36,7 +36,7 @@ public class SerloIndexTransformerWorker extends ContentTransformerHelper implem
     @Override
     public boolean isTransformable(String sourceMimetype, String targetMimetype, TransformationOptions options) {
         logger.debug("called:" +sourceMimetype +" "+targetMimetype + " use:" + options.getUse());
-        return AuthenticationUtil.runAsSystem(
+        return options.getSourceNodeRef() != null && AuthenticationUtil.runAsSystem(
                 () -> RessourceInfoExecuter.CCM_RESSOURCETYPE_SERLO.equals(nodeService.getProperty(options.getSourceNodeRef(), QName.createQName(RessourceInfoExecuter.CCM_PROP_IO_RESSOURCETYPE))) && targetMimetype.equals("text/plain")
         );
     }

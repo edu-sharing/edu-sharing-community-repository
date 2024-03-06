@@ -19,7 +19,7 @@
       </mat-tab>
       <mat-tab
         label="{{ 'PERMISSIONS.TAB.GROUP' | translate }}{{
-          selected ? ' (' + selected.profile.displayName + ')' : ''
+          selected ? ' (' + selected.profile?.displayName + ')' : ''
         }}"
         *ngIf="selected || isAdmin"
       >
@@ -35,7 +35,7 @@
       </mat-tab>
       <mat-tab
         label="{{ 'PERMISSIONS.TAB.USER' | translate }}{{
-          selected ? ' (' + selected.profile.displayName + ')' : ''
+          selected ? ' (' + selected.profile?.displayName + ')' : ''
         }}"
         *ngIf="selected || isAdmin"
       >

@@ -136,7 +136,7 @@ public class LTIJWTUtil {
                     return null;
                 }
                 // If the platform has a JWK Set endpoint... we try that.
-                if (StringUtils.isNoneEmpty(platform.getPublicKey())) {
+                if (StringUtils.isNoneEmpty(platform.getLtiKeysetUrl())) {
                     try {
                         JWKSet publicKeys = JWKSet.load(new URL(platform.getLtiKeysetUrl()));
                         JWK jwk = publicKeys.getKeyByKeyId(header.getKeyId());
@@ -149,7 +149,7 @@ public class LTIJWTUtil {
                         return null;
                     }
                 } else { // If not, we get the key stored in our configuration
-                    logger.error("The platform configuration must contain a valid Public Key");
+                    logger.error("The platform configuration must contain a keyset url");
                     return null;
                 }
 
