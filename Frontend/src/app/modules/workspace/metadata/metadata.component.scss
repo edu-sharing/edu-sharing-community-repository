@@ -61,9 +61,9 @@ mat-tab-group ::ng-deep mat-tab-header {
 .versionDate {
     color: $textLight;
 }
-
-.btnVersion {
-    margin-right: 5px;
+.button-actions {
+    display: flex;
+    gap: 10px;
 }
 .content {
     padding: 0 12px;
