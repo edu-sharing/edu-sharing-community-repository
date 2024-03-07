@@ -108,7 +108,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     public SearchResultNodeRefElastic searchDSL(String dsl) throws Throwable {
         checkClient();
-        Request request = new Request("GET", "workspace/_search");
+        Request request = new Request("GET", WORKSPACE_INDEX + "/_search");
         request.setJsonEntity(dsl);
         JSONObject response = new JSONObject(EntityUtils.toString(restClient.performRequest(request).getEntity()));
         SearchResultNodeRefElastic sr = new SearchResultNodeRefElastic();
