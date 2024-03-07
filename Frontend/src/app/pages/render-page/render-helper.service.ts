@@ -33,7 +33,7 @@ export class RenderHelperService {
         return node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1;
     }
 
-    private videoControlsRef: ComponentRef<VideoControlsComponent>;
+    public videoControlsRef: ComponentRef<VideoControlsComponent>;
     private viewContainerRef: ViewContainerRef;
 
     constructor(
