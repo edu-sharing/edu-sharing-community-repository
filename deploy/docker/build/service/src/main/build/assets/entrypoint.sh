@@ -113,6 +113,7 @@ catSConf="tomcat/conf/server.xml"
 catCConf="tomcat/conf/Catalina/localhost/edu-sharing.xml"
 catEduWConf="tomcat/webapps/edu-sharing/WEB-INF/web.xml"
 catAlfWConf="tomcat/webapps/alfresco/WEB-INF/web.xml"
+catAlfLog="tomcat/webapps/alfresco/WEB-INF/log4j2-alfresco.properties"
 
 eduCConf="tomcat/shared/classes/config/defaults/client.config.xml"
 eduCConfX="tomcat/shared/classes/config/defaults/client.config.override.xml"
@@ -304,6 +305,7 @@ xmlstarlet ed -L \
 				echo "  database: ${cache_database}"
 			} >> tomcat/conf/redisson.yaml
 		fi
+		echo "codec: !<org.edu_sharing.redisson.Kryo5Codec> {}" >> tomcat/conf/redisson.yaml
 }
 
 ### Alfresco platform ##################################################################################################
@@ -423,6 +425,12 @@ xmlstarlet ed -L \
 	-s '$param' -t elem -n "param-value" -v "true" \
 	${catAlfWConf}
 
+[[ -f ${catAlfLog} ]] && {
+
+  cp ${catAlfLog} tomcat/webapps/alfresco/WEB-INF/classes/log4j2.properties
+
+}
+
 ### edu-sharing ########################################################################################################
 
 my_origin="${my_prot_external}://${my_host_external}"
@@ -531,7 +539,7 @@ xmlstarlet ed -L \
 			-d '/config/values/logout[position() != 1]' \
 			-s '/config/values/logout' -t elem -n 'url' -v '' \
 			-d '/config/values/logout/url[position() != 1]' \
-			-u '/config/values/logout/url' -v "${my_path_external}/saml/logout" \
+			-u '/config/values/logout/url' -v "${my_path_external}/logout" \
 			-s '/config/values/logout' -t elem -n 'destroySession' -v '' \
 			-d '/config/values/logout/destroySession[position() != 1]' \
 			-u '/config/values/logout/destroySession' -v 'false' \

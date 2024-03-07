@@ -3,10 +3,10 @@
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
-  name: {{ include "edusharing_repository_service.name" . }}
-  labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
+  name: {{ include "edusharing_common_lib.names.name" . }}
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
 spec:
-  host: {{ include "edusharing_repository_service.name" . }}
+  host: {{ include "edusharing_common_lib.names.name" . }}
   trafficPolicy:
     loadBalancer:
       consistentHash:

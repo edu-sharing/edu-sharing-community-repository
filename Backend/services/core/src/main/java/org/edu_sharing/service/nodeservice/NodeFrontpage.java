@@ -1,18 +1,39 @@
 package org.edu_sharing.service.nodeservice;
 
 
+import co.elastic.clients.elasticsearch._types.*;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
+import co.elastic.clients.elasticsearch.core.search.HitsMetadata;
+import co.elastic.clients.json.JsonData;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.metadataset.v2.MetadataReader;
+import org.edu_sharing.metadataset.v2.QueryUtils;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.admin.RepositoryConfigFactory;
 import org.edu_sharing.service.admin.model.RepositoryConfig;
+import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.model.NodeRef;
+import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SortDefinition;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static org.edu_sharing.service.search.SearchServiceElastic.WORKSPACE_INDEX;
 
 public class NodeFrontpage {
     private Logger logger= Logger.getLogger(NodeFrontpage.class);
@@ -35,8 +56,6 @@ public class NodeFrontpage {
 
     public Collection<NodeRef> getNodesForCurrentUserAndConfig() throws Throwable {
 
-        // @TODO
-        /*
         RepositoryConfig.Frontpage config = RepositoryConfigFactory.getConfig().frontpage;
         if(config.mode.equals(RepositoryConfig.Frontpage.Mode.collection)){
             if(config.collection==null){
@@ -59,13 +78,19 @@ public class NodeFrontpage {
 
             return result;
         }
-        //initElastic rasuschmeißen (frontpage_cache nicht mehr benötigt)
 
-        BoolQueryBuilder query = QueryBuilders.boolQuery();
-        query.must(searchServiceElastic.getReadPermissionsQuery());
-        query.must(QueryBuilders.termQuery("type","ccm:io"));
-        query.must(QueryBuilders.termQuery("nodeRef.storeRef.protocol","workspace"));
-        query.mustNot(QueryBuilders.termQuery("aspects","ccm:collection_io_reference"));
+        BoolQuery.Builder query = new BoolQuery.Builder()
+                .must(
+                        m -> m.bool(b -> searchServiceElastic.getReadPermissionsQuery(b)))
+                .must(
+                        m -> m.term(t -> t.field("type").value("ccm:io"))
+                )
+                .must(
+                        m -> m.term(t -> t.field("nodeRef.storeRef.protocol").value("workspace"))
+                )
+                .mustNot(
+                        m -> m.term(t -> t.field("aspects").value("ccm:collection_io_reference"))
+                );
 
         if(config.queries!=null && !config.queries.isEmpty()) {
             // filter all queries with matching toolpermissions, than concat them via "must"
@@ -78,7 +103,7 @@ public class NodeFrontpage {
                 return false;
             }).forEach((q)-> {
                 //@TODO check config queries in extensions and fit for new index
-                query.must(QueryBuilders.wrapperQuery(QueryUtils.replaceCommonQueryParams(q.query,QueryUtils.replacerFromSyntax(MetadataReader.QUERY_SYNTAX_DSL))));
+                query.must(m -> m.wrapper(w -> w.query(QueryUtils.replaceCommonQueryParams(q.query,QueryUtils.replacerFromSyntax(MetadataReader.QUERY_SYNTAX_DSL)))));
             });
         }
 
@@ -87,30 +112,30 @@ public class NodeFrontpage {
         InputStream is = NodeFrontpage.class.getClassLoader().getResource("frontpage-ratings.properties").openStream();
         String sortingScript = IOUtils.toString(is, StandardCharsets.UTF_8.name());
 
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.query(query);
+        Script sortingScriptInline = new Script.Builder().inline(
+                i -> i.lang("painless").source(sortingScript).params("fields", getFieldNames(config))
+        ).build();
 
-        Map<String,Object> params = new HashMap<>();
+        SearchRequest searchRequest = SearchRequest.of(req->req
+                .index(WORKSPACE_INDEX)
+                .from(0)
+                // fetch more because we might need buffer for invalid permissions
+                .size(config.totalCount)
+                .trackTotalHits(track->track.enabled(true))
+                .query(q -> q.bool(query.build()))
+                .sort(
+                        SortOptions.of(so -> so.script(
+                                s -> s.mode(SortMode.Max).type(ScriptSortType.Number).order(SortOrder.Desc).script(sortingScriptInline))
+                        )
+                )
+        );
 
-        params.put("fields",getFieldNames(config));
-
-        Script script = new Script(Script.DEFAULT_SCRIPT_TYPE, "painless", sortingScript,Collections.emptyMap(),params);
-        ScriptSortBuilder sb = SortBuilders.scriptSort(script, ScriptSortBuilder.ScriptSortType.NUMBER).order(SortOrder.DESC);
-        sb.sortMode(SortMode.MAX);
-        searchSourceBuilder.sort(sb);
-
-
-        // fetch more because we might need buffer for invalid permissions
-        searchSourceBuilder.size(config.totalCount);
-        searchSourceBuilder.from(0);
-        SearchRequest searchRequest = new SearchRequest().source(searchSourceBuilder);
-        searchRequest.indices("workspace");
-        SearchResponse searchResult = searchServiceElastic.searchNative(searchRequest);
+        SearchResponse<Map> searchResult = searchServiceElastic.searchNative(searchRequest);
         List<NodeRef> result=new ArrayList<>();
         Set<String> authorities = searchServiceElastic.getUserAuthorities();
-        for(SearchHit hit : searchResult.getHits().getHits()){
-            logger.debug("score:"+hit.getScore() +" id:"+hit.getId() + " "+ ((Map)hit.getSourceAsMap().get("properties")).get("cm:name"));
-            result.add(searchServiceElastic.transformSearchHit(authorities, AuthenticationUtil.getFullyAuthenticatedUser(),hit.getSourceAsMap(),false));
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        for(Hit<Map> hit : searchResult.hits().hits()){
+            result.add(searchServiceElastic.transformSearchHit(authorities, user,hit.source(),false));
         }
         result = result.subList(0, result.size() > config.totalCount ? config.totalCount : result.size());
         if(config.displayCount<config.totalCount) {
@@ -122,18 +147,15 @@ public class NodeFrontpage {
             return randoms;
         }
         return result;
-
-         */
-        return null;
     }
 
-    private List<String> getFieldNames(RepositoryConfig.Frontpage config){
+    private JsonData getFieldNames(RepositoryConfig.Frontpage config){
         List<String> result = new ArrayList<>();
         Calendar cal = Calendar.getInstance();
 
         String prefix = "";
         if(RepositoryConfig.Frontpage.Mode.rating.equals(config.mode) ){
-           prefix = "statistic_RATING_";
+            prefix = "statistic_RATING_";
         }else if(RepositoryConfig.Frontpage.Mode.views.equals(config.mode)){
             prefix = "statistic_VIEW_MATERIAL_";
         }else if(RepositoryConfig.Frontpage.Mode.downloads.equals(config.mode)){
@@ -153,6 +175,6 @@ public class NodeFrontpage {
                 result.add(fieldName);
             }
         }
-        return result;
+        return JsonData.of(result);
     }
 }

@@ -26,6 +26,7 @@
       <es-node-entries-wrapper
         [displayType]="DisplayType.Table"
         [columns]="columns"
+        [dataSource]="usersDataSource"
         [checkbox]="true"
         [elementInteractionType]="InteractionType.Emitter"
       ></es-node-entries-wrapper>
@@ -292,6 +293,7 @@
           'PERMISSIONS.DELETE.USER_INTERACTIONS.STATISTICS_HINT' | translate
         }}</mat-hint>
         <es-info-message
+          class="info-delete-assigning"
           mode="info"
           message="{{ 'PERMISSIONS.DELETE.STATE.ASSIGNING_DELETED_USER' | translate }}"
         ></es-info-message>
@@ -299,7 +301,12 @@
     </ng-container>
   </div>
   <div class="group group-buttons" *ngIf="!usersDataSource.isLoading">
-    <button mat-raised-button color="primary" [disabled]="!canSubmit()" (click)="prepareStart()">
+    <button
+      mat-raised-button
+      color="primary"
+      [disabled]="!(canSubmit$ | async)"
+      (click)="prepareStart()"
+    >
       {{ 'PERMISSIONS.DELETE.START' | translate }}
     </button>
   </div>

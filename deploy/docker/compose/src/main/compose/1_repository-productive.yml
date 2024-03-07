@@ -20,11 +20,8 @@ services:
   repository-transform:
     restart: unless-stopped
 
-  repository-alfresco-transform-core-aio:
+  repository-transform-core-aio:
     restart: unless-stopped
 
   repository-transform-edu-sharing:
-    restart: unless-stopped
-
-  repository-activemq:
     restart: unless-stopped

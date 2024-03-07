@@ -113,6 +113,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	public static final String KEY_PUBLIC_KEY = "public_key";
 	public static final String KEY_PRIVATE_KEY = "private_key";
+
+	public static final String KEY_CERTIFICATE = "certificate";
 	
 	public static final String KEY_MESSAGE_OFFSET_MILLISECONDS = "message_offset_ms";
 	public static final String KEY_MESSAGE_SEND_OFFSET_MILLISECONDS = "message_send_offset_ms";
@@ -342,6 +344,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	private String publicKey = null;
 	
 	private String privateKey = null;
+
+	private String certificate;
 	
 	private String messageOffsetMs = null;
 	
@@ -547,6 +551,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		publicKey = properties.getProperty(KEY_PUBLIC_KEY);
 		
 		privateKey = properties.getProperty(KEY_PRIVATE_KEY);
+
+		certificate = properties.getProperty(KEY_CERTIFICATE);
 		
 		messageOffsetMs = properties.getProperty(KEY_MESSAGE_OFFSET_MILLISECONDS);
 		
@@ -1151,5 +1157,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	public boolean isLtiScopeUsername() {
 		return ltiScopeUsername;
+	}
+
+	public String getCertificate() {
+		return certificate;
 	}
 }

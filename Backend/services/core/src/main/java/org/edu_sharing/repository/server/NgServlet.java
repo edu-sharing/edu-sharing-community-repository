@@ -1,6 +1,10 @@
 package org.edu_sharing.repository.server;
 
 import com.typesafe.config.Config;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.io.FileUtils;
@@ -18,15 +22,13 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.HashMap;
 
 public class NgServlet extends HttpServlet {
@@ -55,10 +57,11 @@ public class NgServlet extends HttpServlet {
 			}
 			File index=new File(req.getSession().getServletContext().getRealPath("index.html"));
 			String html=FileUtils.readFileToString(index);
+
 			if(head!=null) {
 				html = addToHead(head, html);
 			}
-            addResponseHeaders(resp);
+			html = html.replace("{{ngCspNonce}}", SecurityHeadersFilter.ngCspNonce.get());
 			if(url.getPath().contains(COMPONENTS_RENDER)){
 				html = addLicenseMetadata(html,url);
 				html = addLRMI(html,url);
@@ -76,18 +79,6 @@ public class NgServlet extends HttpServlet {
 			t.printStackTrace();
 			resp.sendError(500, "Fatal error preparing index.html: "+t.getMessage());
 		}
-	}
-
-	private void addResponseHeaders(HttpServletResponse resp) {
-		Config headers = LightbendConfigLoader.get().getConfig("angular.headers");
-		resp.setHeader("X-XSS-Protection", headers.getString("X-XSS-Protection"));
-		resp.setHeader("X-Frame-Options", headers.getString("X-Frame-Options"));
-		Config securityConfigs = headers.getConfig("Content-Security-Policy");
-		StringBuilder joined = new StringBuilder();
-		securityConfigs.entrySet().forEach((e) ->
-				joined.append(e.getKey()).append(" ").append(e.getValue().unwrapped().toString()).append("; ")
-		);
-		resp.setHeader("Content-Security-Policy", joined.toString());
 	}
 
 	private static String addSEO(String html, URL url) {

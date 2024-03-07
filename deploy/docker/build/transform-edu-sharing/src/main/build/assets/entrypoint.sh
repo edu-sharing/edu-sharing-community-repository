@@ -4,8 +4,8 @@ set -eux
 ########################################################################################################################
 
 my_bind="${REPOSITORY_TRANSFORM_EDU_SHARING_BIND:-"0.0.0.0"}"
-my_port="${REPOSITORY_EDU_SHARINGTRANSFORM_PORT_HTTP:-8091}"
-my_ms_port="${REPOSITORY_EDU_SHARINGTRANSFORM_MS_PORT_HTTP:-8092}"
+my_port="${REPOSITORY_TRANSFORM_EDU_SHARING_PORT_HTTP:-8091}"
+my_ms_port="${REPOSITORY_TRANSFORM_EDU_SHARING_MS_PORT_HTTP:-8092}"
 
 ########################################################################################################################
 

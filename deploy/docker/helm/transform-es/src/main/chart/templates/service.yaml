@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "edusharing_common_lib.names.name" . }}
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+  ports:
+    - name: http-api
+      port: {{ .Values.service.port.api }}
+      targetPort: api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "edusharing_common_lib.names.name" . }}-headless
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+  ports:
+  - name: http-api
+    port: {{ .Values.service.port.api }}
+  - name: http-management
+    port: {{ .Values.service.port.management }}
+{{- if .Values.global.metrics.servicemonitor.enabled }}
+{{- if .Values.config.metrics.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "edusharing_common_lib.names.name" . }}-metrics
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+    app.kubernetes.io/component: "metrics"
+spec:
+  type: ClusterIP
+  selector: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+  ports:
+    - name: http-management
+      port: {{ .Values.service.port.management }}
+      targetPort: management
+{{- end }}
+{{- end }}

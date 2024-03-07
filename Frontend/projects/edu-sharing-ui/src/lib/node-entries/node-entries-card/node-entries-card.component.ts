@@ -62,9 +62,9 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
             : '#fff';
     }
     optionsOnCard() {
-        const options = this.entriesService.options[Target.List];
-        const always = options.filter((o) => o.showAlways);
-        if (always.some((o) => o.showCallback(this.node))) {
+        const options = this.entriesService.options?.[Target.List];
+        const always = options?.filter((o) => o.showAlways);
+        if (always?.some((o) => o.showCallback(this.node))) {
             return always;
         }
         // we do NOT show any additional actions

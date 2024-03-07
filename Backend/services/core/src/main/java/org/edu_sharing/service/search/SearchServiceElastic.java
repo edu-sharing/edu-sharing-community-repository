@@ -108,7 +108,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     public SearchResultNodeRefElastic searchDSL(String dsl) throws Throwable {
         checkClient();
-        Request request = new Request("GET", "workspace/_search");
+        Request request = new Request("GET", WORKSPACE_INDEX + "/_search");
         request.setJsonEntity(dsl);
         JSONObject response = new JSONObject(EntityUtils.toString(restClient.performRequest(request).getEntity()));
         SearchResultNodeRefElastic sr = new SearchResultNodeRefElastic();
@@ -504,9 +504,19 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         for (Map.Entry<String, Aggregate> aggregationEntry : filter.aggregations().entrySet()) {
                             if (aggregationEntry.getValue().isSterms()) {
                                 if (a.getKey().endsWith("_selected")) {
-                                    facetsResultSelected.add(getFacet(a.getKey(), a.getValue().sterms(), null));
+                                    if(a.getValue().isFilter()) {
+                                        Map<String, Aggregate> agg = a.getValue().filter().aggregations();
+                                        facetsResultSelected.add(getFacet(a.getKey(), agg.entrySet().iterator().next().getValue().sterms(), null));
+                                    } else {
+                                        facetsResultSelected.add(getFacet(a.getKey(), a.getValue().sterms(), null));
+                                    }
                                 } else {
-                                    facetsResult.add(getFacet(a.getKey(), a.getValue().sterms(), null));
+                                    if(a.getValue().isFilter()) {
+                                        Map<String, Aggregate> agg = a.getValue().filter().aggregations();
+                                        facetsResult.add(getFacet(a.getKey(), agg.entrySet().iterator().next().getValue().sterms(), null));
+                                    } else {
+                                        facetsResult.add(getFacet(a.getKey(), a.getValue().sterms(), null));
+                                    }
                                 }
                             }
                         }
@@ -1179,22 +1189,27 @@ public class SearchServiceElastic extends SearchServiceImpl {
 //    }
 
     public DeleteResponse deleteNative(DeleteRequest deleteRequest) throws IOException {
+        checkClient();
         return client.withTransportOptions(this::getRequestOptions).delete(deleteRequest);
     }
 
     public SearchResponse<Map> searchNative(SearchRequest searchRequest) throws IOException {
+        checkClient();
         return client.withTransportOptions(this::getRequestOptions).search(searchRequest, Map.class);
     }
 
     public UpdateResponse<Map> updateNative(UpdateRequest updateRequest) throws IOException {
+        checkClient();
         return client.withTransportOptions(this::getRequestOptions).update(updateRequest, Map.class);
     }
 
     public ScrollResponse<Map> scrollNative(ScrollRequest searchScrollRequest) throws IOException {
+        checkClient();
         return client.withTransportOptions(this::getRequestOptions).scroll(searchScrollRequest, Map.class);
     }
 
     public ClearScrollResponse clearScrollNative(ClearScrollRequest clearScrollRequest) throws IOException {
+        checkClient();
         return client.withTransportOptions(this::getRequestOptions).clearScroll(clearScrollRequest);
     }
 

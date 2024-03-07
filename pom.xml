@@ -41,34 +41,18 @@
 
     <java.version.range>[11,)</java.version.range>
 
-    <node.version.major>20</node.version.major>
-    <node.version.minor>9</node.version.minor>
-    <node.version.patch>0</node.version.patch>
-    <node.version>${node.version.major}.${node.version.minor}.${node.version.patch}</node.version>
+    <node.version>20.9.0</node.version>
+    <npm.version>7.24.2</npm.version>
 
     <npm.args.install>install</npm.args.install>
     <npm.args.build>run build</npm.args.build>
 
-    <npm.version.major>7</npm.version.major>
-    <npm.version.minor>24</npm.version.minor>
-    <npm.version.patch>2</npm.version.patch>
-    <npm.version>${npm.version.major}.${npm.version.minor}.${npm.version.patch}</npm.version>
-
-    <postgresql.jdbc.version.major>42</postgresql.jdbc.version.major>
-    <postgresql.jdbc.version.minor>5</postgresql.jdbc.version.minor>
-    <postgresql.jdbc.version.patch>0</postgresql.jdbc.version.patch>
-    <postgresql.jdbc.version>${postgresql.jdbc.version.major}.${postgresql.jdbc.version.minor}.${postgresql.jdbc.version.patch}</postgresql.jdbc.version>
-
-    <tomcat.version.major>10</tomcat.version.major>
-    <tomcat.version.minor>1</tomcat.version.minor>
-    <tomcat.version.patch>17</tomcat.version.patch>
-    <tomcat.version>${tomcat.version.major}.${tomcat.version.minor}.${tomcat.version.patch}
-    </tomcat.version>
-
+    <postgresql.jdbc.version>42.5.0</postgresql.jdbc.version>
+    <tomcat.version>10.1.17</tomcat.version>
     <jackson.version>2.15.2</jackson.version>
-
     <mongodb.version>4.11.1</mongodb.version>
     <spring-security.version>6.2.1</spring-security.version>
+
   </properties>
 
   <profiles>
@@ -247,7 +231,7 @@
       <dependency>
         <groupId>co.elastic.clients</groupId>
         <artifactId>elasticsearch-java</artifactId>
-        <version>8.11.1</version>
+        <version>8.12.2</version>
       </dependency>
 
       <!-- dependency of elastic client -->
@@ -256,12 +240,6 @@
         <artifactId>jakarta.json-api</artifactId>
         <version>2.1.2</version>
       </dependency>
-
-<!--      <dependency>-->
-<!--        <groupId>${project.groupId}</groupId>-->
-<!--        <artifactId>edu_sharing-community-repository-repackaged-elasticsearch</artifactId>-->
-<!--        <version>${bom.repository-repackaged.version}</version>-->
-<!--      </dependency>-->
 
       <dependency>
         <groupId>commons-io</groupId>
@@ -310,61 +288,6 @@
         <artifactId>edu_sharing-community-repository-backend-alfresco-module</artifactId>
         <version>${project.version}</version>
         <type>amp</type>
-      </dependency>
-
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-deploy-docker-helm-postgresql</artifactId>
-        <version>${project.version}</version>
-        <type>tar.gz</type>
-        <classifier>bin</classifier>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-deploy-docker-helm-solr</artifactId>
-        <version>${project.version}</version>
-        <type>tar.gz</type>
-        <classifier>bin</classifier>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-deploy-docker-helm-rediscluster</artifactId>
-        <version>${project.version}</version>
-        <type>tar.gz</type>
-        <classifier>bin</classifier>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-deploy-docker-helm-service</artifactId>
-        <version>${project.version}</version>
-        <type>tar.gz</type>
-        <classifier>bin</classifier>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-deploy-docker-build-service</artifactId>
-        <version>${project.version}</version>
-        <classifier>sources</classifier>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-deploy-docker-compose</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-deploy-docker-helm-bundle</artifactId>
-        <version>${project.version}</version>
-        <type>tar.gz</type>
-        <classifier>bin</classifier>
       </dependency>
 
       <dependency>
@@ -473,6 +396,51 @@
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-config-node</artifactId>
         <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-deploy-docker-build-service</artifactId>
+        <version>${project.version}</version>
+        <classifier>sources</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-deploy-docker-compose</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-deploy-docker-helm-search-solr</artifactId>
+        <version>${project.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-deploy-docker-helm-service</artifactId>
+        <version>${project.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-deploy-docker-helm-transform-aio</artifactId>
+        <version>${project.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-deploy-docker-helm-transform-es</artifactId>
+        <version>${project.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
       </dependency>
 
       <dependency>
@@ -1281,10 +1249,25 @@
       </dependency>
 
       <dependency>
+        <groupId>com.sun.mail</groupId>
+        <artifactId>jakarta.mail</artifactId>
+        <version>2.0.1</version>
+      </dependency>
+
+
+      <dependency>
         <groupId>org.apache.commons</groupId>
-        <artifactId>commons-fileupload2-core</artifactId>
+        <artifactId>commons-email2-core</artifactId>
         <version>2.0.0-M1</version>
       </dependency>
+
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-email2-jakarta</artifactId>
+        <version>2.0.0-M1</version>
+      </dependency>
+
+
     </dependencies>
 
   </dependencyManagement>
@@ -1315,11 +1298,6 @@
         <enabled>true</enabled>
         <updatePolicy>never</updatePolicy>
       </snapshots>
-    </repository>
-
-    <repository>
-      <id>alfresco-maven-repo</id>
-      <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
     </repository>
 
   </repositories>

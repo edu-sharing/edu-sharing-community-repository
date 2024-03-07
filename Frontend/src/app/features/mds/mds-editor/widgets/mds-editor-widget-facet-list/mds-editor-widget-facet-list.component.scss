@@ -3,30 +3,29 @@
 $countBackgroundColor: scale-color($backgroundColor, $lightness: -15%);
 
 :host ::ng-deep {
-    mat-form-field {
+    .mdc-form-field {
         width: 100%;
-        > div {
-            padding-bottom: 1em;
+        .mdc-label {
+            min-width: 0;
+            flex-grow: 1;
         }
     }
-    mat-checkbox {
-        .mat-checkbox-layout {
+    .mdc-checkbox {
+        .mdc-checkbox-layout {
             width: 100%;
-        }
-
-        .mat-checkbox-label {
-            flex-grow: 1;
-            min-width: 0;
         }
     }
 }
 
 ul {
     margin: 0;
+    list-style-type: none;
+    padding-inline-start: 0;
 }
 
 li {
-    padding: 3px 4px;
+    padding: 0 4px;
+    margin: -10px 0;
 }
 
 mat-checkbox {
@@ -38,10 +37,10 @@ mat-checkbox {
     width: 100%;
     align-items: center;
     .caption {
+        @include limitLineCount(1);
         flex-grow: 1;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        margin-right: 1em;
+        padding-right: 10px;
+        word-break: break-all;
     }
     .count {
         border-radius: 20px;

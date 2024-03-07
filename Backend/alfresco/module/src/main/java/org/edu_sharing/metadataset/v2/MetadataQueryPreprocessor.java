@@ -26,17 +26,7 @@ public class MetadataQueryPreprocessor {
         return (String) method.invoke(null, parameter, valueIn);
     }
 
-    /**
-     * map the input value to the 1st alternative id of the widgets valuespace
-     */
-    private static String alternative_id(MetadataQueryParameter parameter,String value){
-        try {
-            return parameter.getMds().findWidget(parameter.getName()).getValuesAsMap().get(value).getAlternativeKeys().get(0);
-        }catch (Throwable t){
-            logger.info("Could not resolve alternative_id at " + parameter.getName() + ": " + t.getMessage());
-            return value;
-        }
-    }
+
     private static String node_path(MetadataQueryParameter parameter,String value){
         return AuthenticationUtil.runAsSystem(()-> {
             ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();

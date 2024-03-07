@@ -15,11 +15,6 @@
 
   <name>edu_sharing-community-repository-deploy-docker-build-transform-edu-sharing</name>
 
-  <properties>
-    <docker.from.openjdk.17.liberica.debian>
-      dockerio.mirror.docker.edu-sharing.com/bellsoft/liberica-openjdk-debian:17.0.9-11
-    </docker.from.openjdk.17.liberica.debian>
-  </properties>
   <build>
 
     <plugins>
@@ -91,11 +86,6 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>edu_sharing-community-repository-backend-transform</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>io.prometheus.jmx</groupId>
-      <artifactId>jmx_prometheus_javaagent</artifactId>
     </dependency>
 
   </dependencies>

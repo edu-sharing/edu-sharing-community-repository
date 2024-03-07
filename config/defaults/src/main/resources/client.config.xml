@@ -13,12 +13,12 @@
 		<helpMenuOptions>
 			<key>ONLINE_HELP</key>
 			<icon>help_outline</icon>
-			<url>https://docs.edu-sharing.com/confluence/edusharing:version/de</url>
+			<url>https://edu-sharing-documentation.scrollhelp.site/de/edu-sharing-documentation/:version/?l=de</url>
 		</helpMenuOptions>
 		<helpMenuOptions>
 			<key>WHATS_NEW</key>
 			<icon>lightbulb_outline</icon>
-			<url>http://docs.edu-sharing.com/confluence/edp/de/was-ist-neu-in-edu-sharing</url>
+			<url>https://edu-sharing-documentation.scrollhelp.site/de/edu-sharing-documentation/:version/was-ist-neu-in-edu-sharing</url>
 		</helpMenuOptions>
 	</values>
 	<contexts>

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "edusharing_common_lib.names.name" . }}-env
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+data:
+  {{- with .Values.config.override.application.common }}
+  REPOSITORY_SEARCH_SOLR_CONFIG: | {{ . | nindent 4 }}
+  {{- end }}
+  REPOSITORY_SEARCH_SOLR_ENVS: |
+    ENABLE_REMOTE_JMX_OPTS="true"
+    RMI_PORT="7199"
+    GC_TUNE="{{ with .Values.config.jvm.opts }}{{ . }}{{ end }}"
+    SOLR_JAVA_MEM="{{ with .Values.config.jvm.ram.minPercentage }}-XX:InitialRAMPercentage={{ . }}{{ end }} {{ with .Values.config.jvm.ram.maxPercentage }}-XX:MaxRAMPercentage={{ . }}{{ end }}"
+  REPOSITORY_SEARCH_SOLR_HOST: {{ include "edusharing_common_lib.names.name" . | quote }}
+  REPOSITORY_SEARCH_SOLR_PORT: {{ .Values.service.port.api | quote }}
+  REPOSITORY_SERVICE_HOST: {{ .Values.config.repository.host | quote }}
+  REPOSITORY_SERVICE_PORT: {{ .Values.config.repository.port | quote }}

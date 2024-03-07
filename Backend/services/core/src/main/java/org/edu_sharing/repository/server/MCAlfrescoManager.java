@@ -51,6 +51,7 @@ import org.edu_sharing.repository.server.tracking.TrackingService.TrackingBuffer
 import org.edu_sharing.repository.server.tracking.buffer.FileRingBuffer;
 import org.edu_sharing.repository.server.tracking.buffer.MemoryRingBuffer;
 import org.edu_sharing.repository.server.tracking.buffer.TrackingBuffer;
+import org.edu_sharing.repository.update.KeyGenerator;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.ContextLoaderListener;
@@ -71,6 +72,7 @@ public class MCAlfrescoManager extends ContextLoaderListener {
 			applicationContext = AlfAppContextGate.getApplicationContext();
 			serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 			//generate security keys if not there
+			new KeyGenerator().execute(false);
 			ApplicationInfoList.refresh();
 			
 			logger.info("load ApplicationInfos");			

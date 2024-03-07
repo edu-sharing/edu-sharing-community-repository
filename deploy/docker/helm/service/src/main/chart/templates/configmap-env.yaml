@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "edusharing_repository_service.name" . }}-env
-  labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
+  name: {{ include "edusharing_common_lib.names.name" . }}-env
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
 data:
   ALLOW_EMPTY_PASSWORD: "yes"
   CACHE_CLUSTER: {{ .Values.config.cache.cluster | quote }}
@@ -24,14 +24,16 @@ data:
     -Dcaches.backupCount={{ .Values.config.cluster.backup.count }}
     -Dcaches.readBackupData={{ .Values.config.cluster.backup.read }}
     -Dhazelcast.network=kubernetes
-    -Dhazelcast.network.kubernetes.dns={{ printf "%s-headless.%s.svc.%s" (include "edusharing_repository_service.name" .) .Release.Namespace .Values.global.cluster.domain }}
+    -Dhazelcast.network.kubernetes.dns={{ printf "%s-headless.%s.svc.%s" (include "edusharing_common_lib.names.name" .) .Release.Namespace .Values.global.cluster.domain }}
     -Dhazelcast.shutdownhook.policy=GRACEFUL
     -Dhazelcast.graceful.shutdown.max.wait={{ .Values.terminationGracePeriod }}
     {{- end }}
     {{- if .Values.config.metrics.enabled }}
     -javaagent:/opt/alfresco/tomcat/agent/jmx_prometheus_javaagent.jar=9090:/opt/alfresco/tomcat/agent/jmx-exporter-config.yaml
     {{- end }}
-  JPDA_ADDRESS: "0.0.0.0:5005"
+    {{- if default .Values.global.debug .Values.debug }}
+    -agentlib:jdwp=transport=dt_socket,address=0.0.0.0:5005,server=y,suspend=n
+    {{- end }}
   {{- if .Values.config.antivirus.enabled }}
   REPOSITORY_ANTIVIRUS_SERVER_HOST: {{ .Values.config.antivirus.host | quote }}
   REPOSITORY_ANTIVIRUS_SERVER_PORT: {{ .Values.config.antivirus.port | quote }}
@@ -54,13 +56,18 @@ data:
   {{- end }}
   REPOSITORY_SEARCH_SOLR_HOST: {{ .Values.config.search.solr.host | quote }}
   REPOSITORY_SEARCH_SOLR_PORT: {{ .Values.config.search.solr.port | quote }}
-  REPOSITORY_SERVICE_BIND: {{ if .Values.global.cluster.istio.enabled }}"127.0.0.1"{{ else }}"0.0.0.0"{{ end }}
+  REPOSITORY_SERVICE_HAZELCAST_HEARTBEAT_FAILUREDETECTOR_TYPE: {{ .Values.config.hazelcast.heartbeat.failuredetector.type | quote }}
+  REPOSITORY_SERVICE_HAZELCAST_HEARTBEAT_INTERVAL_SECONDS: {{ .Values.config.hazelcast.heartbeat.interval.seconds | quote }}
+  REPOSITORY_SERVICE_HAZELCAST_MAX_NO_HEARTBEAT_SECONDS: {{ .Values.config.hazelcast.max.no.heartbeat.seconds | quote }}
+  REPOSITORY_SERVICE_HAZELCAST_PHIACCRUAL_FAILUREDETECTOR_THRESHOLD: {{ .Values.config.hazelcast.phiaccrual.failuredetector.threshold | quote }}
+  REPOSITORY_SERVICE_HAZELCAST_PHIACCRUAL_FAILUREDETECTOR_SAMPLE_SIZE: {{ .Values.config.hazelcast.phiaccrual.failuredetector.sample.size | quote }}
+  REPOSITORY_SERVICE_HAZELCAST_PHIACCRUAL_FAILUREDETECTOR_MIN_STD_DEV_MILLIS: {{ .Values.config.hazelcast.phiaccrual.failuredetector.min.std.dev.millis | quote }}
   REPOSITORY_SERVICE_HOME_APPID: {{ .Values.config.home.appid | quote }}
-  REPOSITORY_SERVICE_HOME_AUTH: {{ if .Values.config.saml.enabled }}"shibboleth"{{ else }}""{{ end }}
+  REPOSITORY_SERVICE_HOME_AUTH: {{ if or .Values.config.oidc.enabled .Values.config.saml.enabled }}"shibboleth"{{ else }}""{{ end }}
   REPOSITORY_SERVICE_HOME_COOKIE_ATTRIBUTES: {{ .Values.config.home.cookieAttributes | quote }}
   REPOSITORY_SERVICE_ALLOW_ORIGIN: "{{- join "," .Values.config.http.server.allowOrigin}}"
   REPOSITORY_SERVICE_HOST_EXTERNAL: {{ .Values.ingress.hosts | first | quote }}
-  REPOSITORY_SERVICE_HOST_INTERNAL: {{ printf "%s.%s.svc.%s" (include "edusharing_repository_service.name" .) .Release.Namespace .Values.global.cluster.domain | quote }}
+  REPOSITORY_SERVICE_HOST_INTERNAL: {{ printf "%s.%s.svc.%s" (include "edusharing_common_lib.names.name" .) .Release.Namespace .Values.global.cluster.domain | quote }}
   REPOSITORY_SERVICE_HTTP_CLIENT_DISABLE_SNI4HOSTS: {{ .Values.config.http.client.disablesni4host | quote }}
   REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_HOST: {{ .Values.config.http.client.proxy.host | quote }}
   REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_NONPROXYHOSTS: "'{{- join "|" .Values.config.http.client.proxy.nonproxyhosts }}'"
@@ -93,13 +100,13 @@ data:
   REPOSITORY_SERVICE_PROT_EXTERNAL: {{ if .Values.ingress.tls }}"https"{{ else }}"http"{{ end }}
   REPOSITORY_SERVICE_WAIT_EXTERNAL: {{ .Values.config.connector.external.timeout | quote }}
   REPOSITORY_SERVICE_WAIT_INTERNAL: {{ .Values.config.connector.internal.timeout | quote }}
-  REPOSITORY_TRANSFORM_BIND: {{ if .Values.config.transform.server.enabled }}""{{ else }}"127.0.0.1"{{ end }}
+  REPOSITORY_TRANSFORM_ENABLED: "true"
+  REPOSITORY_TRANSFORM_AIO_HOST: {{ .Values.config.transform.aio.host | quote }}
+  REPOSITORY_TRANSFORM_AIO_PORT: {{ .Values.config.transform.aio.port | quote }}
+  REPOSITORY_TRANSFORM_ES_HOST: {{ .Values.config.transform.es.host | quote }}
+  REPOSITORY_TRANSFORM_ES_PORT: {{ .Values.config.transform.es.port | quote }}
   REPOSITORY_TRANSFORM_HOST: {{ if .Values.config.transform.server.enabled }}""{{ else }}"127.0.0.1"{{ end }}
   REPOSITORY_TRANSFORM_PORT: {{ if .Values.config.transform.server.enabled }}""{{ else }}"8100"{{ end }}
   REPOSITORY_TRANSFORM_SERVER_HOST: {{ .Values.config.transform.server.host | quote }}
   REPOSITORY_TRANSFORM_SERVER_PORT: {{ .Values.config.transform.server.port | quote }}
-  REPOSITORY_TRANSFORM_AIO_HOST: {{ .Values.config.transform_aio.server.host | quote }}
-  REPOSITORY_TRANSFORM_AIO_PORT: {{ .Values.config.transform_aio.server.port | quote }}
-  REPOSITORY_TRANSFORM_ES_HOST: {{ .Values.config.transform_es.server.host | quote }}
-  REPOSITORY_TRANSFORM_ES_PORT: {{ .Values.config.transform_es.server.port | quote }}
   TOMCAT_INSTALL_DEFAULT_WEBAPPS: "no"

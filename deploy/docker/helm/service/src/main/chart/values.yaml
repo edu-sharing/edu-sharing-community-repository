@@ -42,11 +42,12 @@ global:
     pullSecrets: []
     registry: ${docker.registry}
     repository: ${docker.repository}
+    common: ${docker.common}
 
   metrics:
     scrape:
-      interval: 10s
-      timeout: 10s
+      interval: 60s
+      timeout: 60s
     servicemonitor:
       enabled: false
 
@@ -67,14 +68,8 @@ global:
 nameOverride: edusharing-repository-service
 
 image:
-  prefix: ${docker.prefix}
+  name: ${docker.prefix}-deploy-docker-build-service
   tag: ${docker.tag}
-
-images:
-  minideb: ${docker.edu_sharing.community.common.minideb}
-  varnish:
-    cache: ${docker.edu_sharing.community.common.varnish}
-    exporter: ${docker.edu_sharing.community.common.varnish}
 
 ########################################################################################################################
 
@@ -148,7 +143,7 @@ config:
     password: ""
 
   antivirus:
-    enabled: ${helm.config.antivirus.enabled}
+    enabled: false
     host: edusharing-repository-antivirus
     port: 1344
     service: squidclamav
@@ -160,7 +155,7 @@ config:
     port: 6379
 
   cluster:
-    enabled: ${helm.config.cluster.enabled}
+    enabled: false
     backup:
       count: 1
       read: false
@@ -193,6 +188,26 @@ config:
   guest:
     username: ""
     password: ""
+
+  hazelcast:
+    heartbeat:
+      failuredetector:
+        type: deadline
+      interval:
+        seconds: 5
+    max:
+      "no":
+        heartbeat:
+          seconds: 15
+    phiaccrual:
+      failuredetector:
+        min:
+          std:
+            dev:
+              millis: 100
+        threshold: 10
+        sample:
+          size: 200
 
   home:
     appid: local
@@ -256,19 +271,21 @@ config:
     username: repository
     password: ""
 
+  oidc:
+    enabled: false
+
   override:
     config:
       application:
         client: ""
         mds: ""
+        settings: ""
     logging:
       application: ""
       server: ""
 
   saml:
     enabled: false
-#    config: ""
-#    files: {}
 
   search:
 
@@ -283,8 +300,16 @@ config:
 
   transform:
 
+    aio:
+      host: edusharing-repository-transform-aio
+      port: 8090
+
+    es:
+      host: edusharing-repository-transform-es
+      port: 8091
+
     server:
-      enabled: ${helm.config.transform.enabled}
+      enabled: false
       host: edusharing-repository-transform
       port: 8080
 
@@ -390,6 +415,10 @@ init:
 
   permission:
 
+    image:
+      name: ${docker.edu_sharing.community.common.minideb.name}
+      tag: "${docker.edu_sharing.community.common.minideb.tag}"
+
     resources:
 
       limits:
@@ -408,6 +437,10 @@ init:
 sidecar:
 
   proxyCache:
+
+    image:
+      name: ${docker.edu_sharing.community.common.varnish.name}
+      tag: "${docker.edu_sharing.community.common.varnish.tag}"
 
     startupProbe:
 
@@ -451,6 +484,10 @@ sidecar:
 
   proxyMetrics:
 
+    image:
+      name: ${docker.edu_sharing.community.common.varnish.exporter.name}
+      tag: "${docker.edu_sharing.community.common.varnish.exporter.tag}"
+
     relabelings: []
 
     resources:
@@ -471,6 +508,10 @@ sidecar:
       runAsUser: 101
 
   transform:
+
+    image:
+      name: ${docker.edu_sharing.community.common.alfresco.transform.name}
+      tag: "${docker.edu_sharing.community.common.alfresco.transform.tag}"
 
     startupProbe:
 

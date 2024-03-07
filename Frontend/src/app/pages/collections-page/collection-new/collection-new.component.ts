@@ -198,15 +198,16 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
 
     onEvent(event: string, data: Node): void {
         if (event === FrameEventsService.EVENT_APPLY_NODE) {
-            const imageData = data.preview?.data?.[0];
+            const imageData = data.preview?.data;
             if (imageData) {
-                this.imageData = imageData;
+                this.imageData = this.sanitizer.bypassSecurityTrustUrl(imageData);
                 this.updateImageOptions();
                 fetch(imageData)
                     .then((res) => res.blob())
                     .then((blob) => {
                         this.imageFile = blob as File;
                     });
+                this.ref.tick();
             } else {
                 console.info(data);
                 this.toast.error(null, 'COLLECTIONS.TOAST.ERROR_IMAGE_APPLY');

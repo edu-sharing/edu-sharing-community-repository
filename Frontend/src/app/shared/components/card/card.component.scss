@@ -105,6 +105,7 @@
         padding: 0;
         @include materialShadowLarge();
         mat-card-header {
+            padding: 8px 16px 0;
             flex-shrink: 0;
             background-color: $actionDialogBackground;
             display: flex;
@@ -113,6 +114,7 @@
             .mat-mdc-card-header-text {
                 width: calc(100% - 32px);
                 mat-card-title {
+                    font-size: 130%;
                     &.no-subtitle {
                         margin-bottom: 5px;
                     }

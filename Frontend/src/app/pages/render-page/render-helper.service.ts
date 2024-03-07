@@ -225,7 +225,7 @@ export class RenderHelperService {
 
     injectEventHandler(node: Node) {
         const videoElement = document.querySelector('#edusharing_rendering_content_href');
-        videoElement.addEventListener('click', () => {
+        videoElement?.addEventListener('click', () => {
             this.tracking.trackEvent(EventType.OPEN_EXTERNAL_LINK, node.ref.id).subscribe(() => {});
         });
     }
@@ -272,6 +272,25 @@ export class RenderHelperService {
      * This function should be used to align with CSP security policies
      */
     applyRenderData(htmlElement: HTMLElement, detailsSnippet: string) {
+        detailsSnippet = detailsSnippet.replaceAll(
+            '<style',
+            '<style nonce="' +
+                document.querySelector('es-router[ngCspNonce]')?.getAttribute('ngCspNonce') +
+                '"',
+        );
+
+        let styleIndex = -1;
+        do {
+            styleIndex = detailsSnippet.indexOf('style=', styleIndex + 1);
+            if (styleIndex === -1) {
+                break;
+            }
+            console.warn(
+                'Rendering provided an inline style attribute! This style will be ignored if unsafe-inline is disabled!',
+                detailsSnippet.substring(styleIndex - 50, styleIndex + 50),
+            );
+        } while (true);
+
         htmlElement.innerHTML = detailsSnippet;
         Array.from(htmlElement.querySelectorAll('script')).forEach((script) => {
             const newScriptElement = document.createElement('script');

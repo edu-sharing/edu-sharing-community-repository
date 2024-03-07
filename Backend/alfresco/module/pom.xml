@@ -199,7 +199,6 @@
             <phase>generate-sources</phase>
             <configuration>
               <includeArtifactIds>
-<!--                edu_sharing-community-repository-repackaged-elasticsearch,-->
                 edu_sharing-community-repository-repackaged-isoparser
               </includeArtifactIds>
               <type>tar.gz</type>
@@ -296,11 +295,6 @@
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-1.2-api</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-web</artifactId>
     </dependency>
 
     <dependency>
@@ -544,13 +538,6 @@
       <artifactId>jakarta.json-api</artifactId>
       <scope>runtime</scope>
     </dependency>
-
-<!--    <dependency>-->
-<!--      <groupId>${project.groupId}</groupId>-->
-<!--      <artifactId>edu_sharing-community-repository-repackaged-elasticsearch</artifactId>-->
-<!--      <scope>runtime</scope>-->
-<!--    </dependency>-->
-
 
     <dependency>
       <groupId>com.google.apis</groupId>
@@ -877,10 +864,25 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
+    <!--dependency>
       <groupId>com.sun.mail</groupId>
       <artifactId>javax.mail</artifactId>
       <version>1.6.2</version>
+    </dependency-->
+
+    <dependency>
+      <groupId>com.sun.mail</groupId>
+      <artifactId>jakarta.mail</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-email2-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-email2-jakarta</artifactId>
     </dependency>
 
 

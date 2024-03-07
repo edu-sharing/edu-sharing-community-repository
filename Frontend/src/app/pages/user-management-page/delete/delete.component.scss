@@ -26,9 +26,15 @@
     .group-metadata {
         display: flex;
         flex-direction: column;
+        mat-checkbox {
+            margin-bottom: -8px;
+        }
+        .info-delete-assigning {
+            padding-top: 15px;
+        }
         > mat-hint {
-            padding-left: 40px;
-            padding-bottom: 10px;
+            padding-left: 46px;
+            padding-bottom: 2px;
             font-size: 90%;
         }
     }
@@ -56,7 +62,7 @@
         display: flex;
         flex-direction: column;
         mat-radio-button {
-            padding: 5px 0;
+            margin: -5px 0;
         }
     }
 }

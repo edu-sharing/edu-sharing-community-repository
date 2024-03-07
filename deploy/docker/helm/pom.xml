@@ -67,10 +67,11 @@
 
   </build>
 
-<modules>  <module>bundle</module>
-    <module>postgresql</module>
-    <module>rediscluster</module>
+  <modules>
+    <module>search-solr</module>
     <module>service</module>
-    <module>solr</module>
+    <module>transform-aio</module>
+    <module>transform-es</module>
   </modules>
+
 </project>

@@ -1,4 +1,4 @@
-FROM ${docker.edu_sharing.community.common.alfresco.repository}
+FROM ${docker.from.edu_sharing.community.common.alfresco.repository}
 
 ########################################################################################################################
 

@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "edusharing_repository_service.name" . }}-file
-  labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
+  name: {{ include "edusharing_common_lib.names.name" . }}-file
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
 data:
 {{- with .Values.config.override.config.application.client }}
   config-application-client: | {{ . | nindent 4 }}
@@ -50,11 +50,15 @@ data:
         return (synth(200, "OK"));
       }
 
+      if (req.method == "POST" || req.method == "PUT" || req.method == "DELETE" || req.url ~ "/rest/") {
+        return (pass);
+      }
+
       if (req.restarts > 0) {
         set req.hash_always_miss = true;
       }
 
-      if (req.url ~ "(\.css|\.eot|\.gif|\.ico|\.jpg|\.js|\.json|\.map|\.md|\.mjs|\.otf|\.png|\.scss|\.svg|\.svg|\.ts|\.ttf|\.txt|\.woff|\.woff2)") {
+      if (req.url ~ "(\.css|\.eot|\.gif|\.ico|\.jpg|\.js|\.map|\.md|\.mjs|\.otf|\.png|\.scss|\.svg|\.svg|\.ts|\.ttf|\.txt|\.woff|\.woff2)") {
         return (hash);
       }
     }
@@ -75,7 +79,7 @@ data:
         set beresp.do_gzip = false;
       }
       {{- end }}
-      if (bereq.url ~ "(\.css|\.eot|\.gif|\.ico|\.jpg|\.js|\.json|\.map|\.md|\.mjs|\.otf|\.png|\.scss|\.svg|\.svg|\.ts|\.ttf|\.txt|\.woff|\.woff2)") {
+      if (bereq.url ~ "(\.css|\.eot|\.gif|\.ico|\.jpg|\.js|\.map|\.md|\.mjs|\.otf|\.png|\.scss|\.svg|\.svg|\.ts|\.ttf|\.txt|\.woff|\.woff2)") {
         unset beresp.http.set-cookie;
         set beresp.ttl = {{ .Values.proxy.config.cache.ttl }}s;
         {{- if .Values.proxy.config.cache.control }}

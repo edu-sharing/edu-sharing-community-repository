@@ -2,14 +2,10 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ include "edusharing_repository_service.name" . }}
-  labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
+  name: {{ include "edusharing_common_lib.names.name" . }}
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
 spec:
-  {{- if .Values.config.cluster.enabled }}
-  maxUnavailable: {{ .Values.config.cluster.backup.count }}
-  {{- else }}
-  minAvailable: 1
-  {{- end }}
+  maxUnavailable: {{ if .Values.config.cluster.enabled }}{{ .Values.config.cluster.backup.count }}{{ else }}0{{ end }}
   selector:
-    matchLabels: {{ include "edusharing_repository_service.labels.app" . | nindent 6 }}
+    matchLabels: {{ include "edusharing_common_lib.labels.app" . | nindent 6 }}
 {{- end }}

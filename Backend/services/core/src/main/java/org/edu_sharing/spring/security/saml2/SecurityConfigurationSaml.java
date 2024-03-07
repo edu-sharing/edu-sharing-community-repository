@@ -5,10 +5,12 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.spring.security.basic.CSRFConfig;
+import org.edu_sharing.spring.security.basic.EduAuthSuccsessHandler;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,13 +37,19 @@ import org.springframework.security.web.util.matcher.AndRequestMatcher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
+import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigInteger;
+import java.security.PublicKey;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
+import java.util.Base64;
+import java.util.Date;
+import java.util.Random;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -66,6 +74,7 @@ public class SecurityConfigurationSaml {
                         //don't use this cause it uses SavedRequestAwareAuthenticationSuccessHandler
                         //.defaultSuccessUrl("/shibboleth")
                 )
+                .sessionManagement(s -> s.sessionFixation().none())
 
                 .saml2Logout(logout -> logout.withObjectPostProcessor(
                         switchPost2GetProcessor()
@@ -137,18 +146,7 @@ public class SecurityConfigurationSaml {
         }
     }
 
-    /**
-     *  redirects to /shibboleth after successfull auth
-     *
-     *  notice:
-     *  SavedRequestAwareAuthenticationSuccessHandler is default which always redircts to /samllogout url with GET which is not vailable
-     *      * after logout/login again
-     */
-    public class EduAuthSuccsessHandler extends SimpleUrlAuthenticationSuccessHandler{
-        EduAuthSuccsessHandler(){
-            super("/shibboleth");
-        }
-    }
+
 
     @Bean
     RelyingPartyRegistrationRepository relyingPartyRegistrationRepository() {
@@ -177,22 +175,39 @@ public class SecurityConfigurationSaml {
     }
 
     private String getHomeAppPrivateKey(){
+        String begin = "-----BEGIN PRIVATE KEY-----";
+        String end = "-----END PRIVATE KEY-----";
         String privKey = ApplicationInfoList.getHomeRepository().getPrivateKey();
-
+        privKey = privKey.trim();
         privKey = privKey.replaceAll("(.{64})", "$1"+System.lineSeparator());
 
-        if(!privKey.trim().startsWith("-----BEGIN PRIVATE KEY-----")){
-            privKey = System.lineSeparator() + "-----BEGIN PRIVATE KEY-----" +privKey.trim();
+        if(!privKey.startsWith(begin)){
+            privKey = begin + System.lineSeparator() +privKey;
         }
-        if(!privKey.trim().endsWith("-----END PRIVATE KEY-----")){
-            privKey= privKey.trim() + System.lineSeparator() + "-----END PRIVATE KEY-----";
+        if(!privKey.endsWith(end)){
+            privKey= privKey + System.lineSeparator() + end;
         }
+        System.out.println(privKey);
         return privKey;
+    }
+
+    private String getHomeAppCert(){
+        String begin = "-----BEGIN CERTIFICATE-----";
+        String end = "-----END CERTIFICATE-----";
+        String cert = ApplicationInfoList.getHomeRepository().getCertificate();
+        cert = cert.replace(begin,"");
+        cert = cert.replace(end,"");
+        cert = cert.trim();
+        cert = cert.replaceAll("(.{64})", "$1"+System.lineSeparator());
+        cert = begin + System.lineSeparator() + cert;
+        cert = cert + System.lineSeparator() +end;
+        System.out.println(cert);
+        return cert;
     }
 
     X509Certificate relyingPartyCertificate() {
         try(InputStream inputStream = config.getBoolean("security.sso.saml.useHomeApplicationKeys")
-                ? IOUtils.toInputStream(ApplicationInfoList.getHomeRepository().getPublicKey(),"UTF-8")
+                ? IOUtils.toInputStream(getHomeAppCert(),"UTF-8")
                 : new ClassPathResource(config.getString("security.sso.saml.publicKey.location")).getInputStream()) {
             return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(inputStream);
         }catch (Exception e){

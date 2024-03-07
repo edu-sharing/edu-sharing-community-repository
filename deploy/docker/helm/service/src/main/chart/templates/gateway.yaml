@@ -3,8 +3,8 @@
 apiVersion: networking.istio.io/v1beta1
 kind: Gateway
 metadata:
-  name: {{ include "edusharing_repository_service.name" . }}
-  labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
+  name: {{ include "edusharing_common_lib.names.name" . }}
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
 spec:
   selector: {{ toYaml .Values.global.cluster.istio.gateway.selector | nindent 4 }}
   servers:
