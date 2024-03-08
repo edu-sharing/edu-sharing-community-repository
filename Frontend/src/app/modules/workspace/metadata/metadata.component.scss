@@ -93,8 +93,8 @@ canvas {
 .statistic-value {
     display: grid;
     width: 100%;
+    padding: 0 3px 0 25px;
     grid-template-columns: 1fr 1fr 1fr 1fr;
-    padding: 0;
 
     .point {
         display: flex;

@@ -63,7 +63,7 @@
     "angular-material-css-vars": "^5.0.2",
     "angular-resizable-element": "^7.0.2",
     "angularx-qrcode": "^16.0.2",
-    "chart.js": "^2.7.2",
+    "chart.js": "^4.4.2",
     "core-js": "^3.6.4",
     "edu-sharing-extension-dependencies": "file:src/app/extension",
     "graphql": "^16.5.0",
