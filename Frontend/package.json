@@ -27,7 +27,7 @@
     "check:format": "prettier --check src projects/*/src",
     "fix:format": "prettier --write src projects/*/src",
     "test": "ng test --no-watch",
-    "test-ci": "ng test --no-watch --no-progress --browsers=ChromeHeadlessCI",
+    "test-ci": "ng test --no-watch --no-progress --browsers=ChromeHeadlessCI --reporters=verbose",
     "pree2e": "rm -rf playwright/out && tsc --incremental -p tests/tsconfig.json",
     "e2e": "playwright test",
     "e2e-watch-compile": "rm -rf playwright/out && tsc --watch -p tests/tsconfig.json",
