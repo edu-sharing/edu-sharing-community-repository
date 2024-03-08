@@ -194,6 +194,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
      * @deprecated compatibility to legacy `mds` component
      *
      * Use `reInit()` and make sure inputs are prepared before calling.
+     * Does not work properly for the angular based variant!
      */
     loadMds(onlyLegacy = false): void {
         // In case of `SearchComponent`, `currentValues` is not ready when `loadMds` is called. So
