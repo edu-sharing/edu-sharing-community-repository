@@ -74,6 +74,7 @@ import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { RouterComponent } from '../../../router/router.component';
 import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
+import * as jQuery from 'jquery';
 
 @Component({
     selector: 'es-node-render',
