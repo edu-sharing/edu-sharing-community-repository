@@ -1876,7 +1876,7 @@ public class NodeDao {
                 return RatingServiceFactory.getRatingService(repoDao.getId()).getAccumulatedRatings(getNodeRef(), null);
             }
         } catch (Throwable t) {
-            logger.warn("Can not fetch ratings for node " + nodeId + ": " + t.getMessage());
+            logger.info("Can not fetch ratings for node " + nodeId + ": " + t.getMessage());
             logger.debug(t);
             return null;
         }
