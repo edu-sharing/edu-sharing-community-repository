@@ -119,7 +119,7 @@ public class SecurityConfigurationOpenIdConnect {
                         String idpRedirectUrl = "";
                         String successTarget = "/shibboleth";
                         try {
-                            successTarget = ConfigServiceFactory.getCurrentConfig().getValue("logout.next", successTarget);
+                            successTarget = ConfigServiceFactory.getCurrentConfig(request).getValue("logout.next", successTarget);
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
