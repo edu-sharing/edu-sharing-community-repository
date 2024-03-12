@@ -93,7 +93,7 @@ public class KeyGenerator extends UpdateAbstract {
 					String keyStorePw = keyTool.getRandomPassword();
 					PropertiesHelper.setProperty(ApplicationInfo.KEY_KEYSTORE_PW,
 							keyStorePw,
-							CCConstants.REPOSITORY_FILE_HOME, PropertiesHelper.XML);
+							file, PropertiesHelper.XML);
 				}
 			}
 
