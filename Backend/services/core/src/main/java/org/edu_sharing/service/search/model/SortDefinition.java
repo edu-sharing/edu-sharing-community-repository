@@ -139,7 +139,9 @@ public class SortDefinition implements Serializable {
 			}else {
 				String addSuffix = "";
 				String property = CCConstants.getValidGlobalName(sortDefintionEntry.getProperty());
-				if(property != null){
+				if(sortDefintionEntry.getProperty().equalsIgnoreCase("sys:node-uuid")) {
+					// do nothing, this field is already a keyword!
+				} else if(property != null){
 					PropertyDefinition propDef = serviceRegistry.getDictionaryService().getProperty(QName.createQName(property));
 					if(propDef != null) {
 						if (Stream.of(DataTypeDefinition.TEXT, DataTypeDefinition.MLTEXT, DataTypeDefinition.DATE, DataTypeDefinition.DATETIME, DataTypeDefinition.BOOLEAN).anyMatch(qName -> qName.equals(propDef.getDataType().getName()))) {
