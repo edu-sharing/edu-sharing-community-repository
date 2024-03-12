@@ -376,6 +376,10 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	}
 
 	static void verifyMimetype(ContentReader reader, String filename, Map<String, List<String>> allowList) throws NodeMimetypeUnknownValidationException {
+		verifyMimetype(reader,filename,allowList,LightbendConfigLoader.get().getBoolean("security.fileManagement.mimetypeVerification.allowUnknownMimetypes"));
+	}
+
+	static void verifyMimetype(ContentReader reader, String filename, Map<String, List<String>> allowList, boolean allowUnknownMimetypes) throws NodeMimetypeUnknownValidationException {
 		// String reportedMimeType = reader.getMimetype();
 		try {
 			TikaConfig config = TikaConfig.getDefaultConfig();
@@ -383,7 +387,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			TikaInputStream stream = TikaInputStream.get(reader.getContentInputStream());
 			Metadata metadata = new Metadata();
 			MediaType mediaType = detector.detect(stream, metadata);
-			if(mediaType.equals(MediaType.OCTET_STREAM) && !LightbendConfigLoader.get().getBoolean("security.fileManagement.mimetypeVerification.allowUnknownMimetypes")) {
+			if(mediaType.equals(MediaType.OCTET_STREAM) && !allowUnknownMimetypes) {
 				throw new NodeMimetypeUnknownValidationException();
 			}
 			String detectedMimeType = mediaType.getType() + "/" + mediaType.getSubtype();

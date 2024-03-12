@@ -72,6 +72,6 @@ class NodeCustomizationPoliciesTest {
         assertThrows(NodeMimetypeUnknownValidationException.class,() -> NodeCustomizationPolicies.verifyMimetype(
                 contentReader,
                 "test.dummy",
-                new HashMap<>()));
+                new HashMap<>(),false));
     }
 }
