@@ -49,8 +49,8 @@ import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.model.CollectionRef;
 import org.edu_sharing.service.model.NodeRefImpl;
-import org.edu_sharing.service.nodeservice.*;
 import org.edu_sharing.service.nodeservice.NodeService;
+import org.edu_sharing.service.nodeservice.*;
 import org.edu_sharing.service.notification.NotificationService;
 import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
 import org.edu_sharing.service.permission.HandleMode;
@@ -1673,7 +1673,7 @@ public class NodeDao {
     }
 
     public boolean isDirectory() {
-        return MimeTypesV2.isDirectory(nodeProps);
+        return MimeTypesV2.isDirectory(nodeProps, type);
     }
 
     public boolean isCollection() {
@@ -2160,7 +2160,7 @@ public class NodeDao {
     }
 
     private String getMimetype() {
-        return MimeTypesV2.getMimeType(nodeProps);
+        return MimeTypesV2.getMimeType(nodeProps, type);
     }
 
     public String getMediatype() {
