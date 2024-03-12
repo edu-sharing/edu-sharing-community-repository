@@ -4,7 +4,7 @@
     <Appenders>
 
         <Console name="STDOUT" target="SYSTEM_OUT">
-            <PatternLayout pattern=" %d %-5p [%X] [%c{3}] [%t] %m%n"/>
+            <PatternLayout pattern="%d [%X{EduVersion}] [${hostName}] [%X{RemoteAddr}] [%X{LogEventDate}] [%X{Url}] [%X{UserAgent}] [%X{User}] %-5p [%c{3}.%M] [%t] %m%n"/>
         </Console>
 
         <Async name="ASYNC">
@@ -21,6 +21,10 @@
 
         <Logger name="org.hibernate" level="warn"/>
         <Logger name="org.springframework" level="warn"/>
+
+        <Logger name="org.alfresco.repo.webdav.auth.LDAPAuthenticationFilter" level="INFO"/>
+        <Logger name="org.edu_sharing.service.authentication" level="INFO"/>
+        <Logger name="org.edu_sharing.service.authentication.ConfidentalScopeAuthenticationService" level="INFO"/>
 
     </Loggers>
 
