@@ -57,10 +57,10 @@
       "UNKNOWN": "Fehler bei der Datenübertragung",
       "FORMAT": "Nicht identifizierbares Dateiformat",
       "QUOTA": "Speicherplatz-Quota wurde überschritten",
-      "VIRUS":"Virus erkannt. Datei wurde gelöscht.",
-      "VIRUS_SCAN_FAILED":"Fehler bei der Dateiprüfung. Bitte versuchen Sie es erneut.",
-      "MIMETYPE_VERIFICATION":"Dateiinhalt ist nicht zulässig oder konnte nicht verifiziert werden. Die Datei wurde gelöscht. Wenden Sie sich bei Fragen bitte an den Support.",
-      "FILETYPE_VERIFICATION":"Dateiendung konnte nicht verifiziert werden. Die Datei wurde gelöscht. Wenden Sie sich bei Fragen bitte an den Support."
+      "VIRUS": "Virus erkannt. Datei wurde gelöscht.",
+      "VIRUS_SCAN_FAILED": "Fehler bei der Dateiprüfung. Bitte versuchen Sie es erneut.",
+      "MIMETYPE_VERIFICATION": "Dateiinhalt ist nicht zulässig oder konnte nicht verifiziert werden. Die Datei wurde gelöscht. Wenden Sie sich bei Fragen bitte an den Support.",
+      "FILETYPE_VERIFICATION": "Dateiendung konnte nicht verifiziert werden. Die Datei wurde gelöscht. Wenden Sie sich bei Fragen bitte an den Support."
     },
     "ADD_FOLDER_TITLE": "Neuen Ordner erstellen",
     "ADD_FOLDER_METADATASET": "Metadatenset für Ordner",
@@ -477,7 +477,7 @@
       "CUT_COPY": "{{count}} Element(e) wurden in die Zwischenablage übernommen",
       "PASTE": "{{count}} Element(e) wurden von {{from}} nach {{to}} {{mode}}",
       "PASTE_DRAG": "{{count}} Element(e) wurde(n) nach {{to}} {{mode}}",
-            "DUPLICATE_NAME": "Der Name {{name}} existiert bereits.\nBitte verwenden Sie einen anderen, eindeutigen Namen",
+      "DUPLICATE_NAME": "Der Name {{name}} existiert bereits.\nBitte verwenden Sie einen anderen, eindeutigen Namen",
       "CYCLIC_NODE": "Ein Ordner kann nicht in sich selbst eingefügt werden",
       "NOT_POSSIBLE_IN_SEARCH": "Dieser Vorgang ist während einer Suche leider nicht möglich",
       "NOT_POSSIBLE_GENERAL": "In diesem Bereich ist ein Upload nicht möglich",
