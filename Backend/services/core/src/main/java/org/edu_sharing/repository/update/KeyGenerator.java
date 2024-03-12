@@ -94,6 +94,8 @@ public class KeyGenerator extends UpdateAbstract {
 					PropertiesHelper.setProperty(ApplicationInfo.KEY_KEYSTORE_PW,
 							keyStorePw,
 							file, PropertiesHelper.XML);
+					ApplicationInfoList.refresh();
+					homeRepo = ApplicationInfoList.getHomeRepository();
 				}
 			}
 
