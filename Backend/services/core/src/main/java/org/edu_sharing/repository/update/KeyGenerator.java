@@ -13,7 +13,9 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.KeyTool;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
+import org.edu_sharing.repository.server.tools.security.KeyStoreService;
 import org.edu_sharing.repository.server.tools.security.Signing;
 
 public class KeyGenerator extends UpdateAbstract {
@@ -91,6 +93,42 @@ public class KeyGenerator extends UpdateAbstract {
 				}
 
 			}
+
+			/**
+			 * Keystore for username hashing in logs
+			 */
+			KeyTool keyTool = new KeyTool();
+			//check if keystore password is set
+			if(homeRepo.getKeyStorePassword() == null){
+				logInfo("will generate keystore password and default passwords");
+				if(!test){
+					String keyStorePw = keyTool.getRandomPassword();
+					PropertiesHelper.setProperty(ApplicationInfo.KEY_KEYSTORE_PW,
+							keyStorePw,
+							file, PropertiesHelper.XML);
+					ApplicationInfoList.refresh();
+					homeRepo = ApplicationInfoList.getHomeRepository();
+				}
+			}
+
+			//create keystore if not exists
+			KeyStoreService keyStoreService = new KeyStoreService();
+			keyStoreService.getKeyStore(CCConstants.EDU_PASSWORD_KEYSTORE_NAME,homeRepo.getKeyStorePassword());
+
+			//check for keystore entry
+			String pwUserNameHash = keyStoreService.readPasswordFromKeyStore(CCConstants.EDU_PASSWORD_KEYSTORE_NAME, homeRepo.getKeyStorePassword(), "", CCConstants.EDU_PASSWORD_USERNAMEHASH);
+			if(pwUserNameHash == null){
+				logger.info("pwUserNameHash does not exist. adding...");
+				keyStoreService.writePasswordToKeyStore(CCConstants.EDU_PASSWORD_KEYSTORE_NAME,
+						homeRepo.getKeyStorePassword(),
+						"",
+						CCConstants.EDU_PASSWORD_USERNAMEHASH,
+						keyTool.getRandomPassword());
+			}
+
+
+
+
 
 		} catch (Exception e) {
 			logError(e.getMessage(), e);

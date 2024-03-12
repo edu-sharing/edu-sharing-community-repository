@@ -230,13 +230,19 @@
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.4</version>
+        <version>2.11.0</version>
       </dependency>
 
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
         <version>3.12.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>1.15</version>
       </dependency>
 
       <dependency>
@@ -420,6 +426,12 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-backend-xml-security</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-config-cluster</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -456,6 +468,18 @@
       </dependency>
 
       <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-repackaged-spring-web</artifactId>
+        <version>${bom.repository-repackaged.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-repackaged-spring-security-web</artifactId>
+        <version>${bom.repository-repackaged.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>com.google.apis</groupId>
         <artifactId>google-api-services-youtube</artifactId>
         <version>v3-rev157-1.19.1</version>
@@ -476,7 +500,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>11.0.2</version>
+        <version>27.0.1-android</version>
       </dependency>
 
       <dependency>
@@ -488,13 +512,13 @@
       <dependency>
         <groupId>com.hazelcast</groupId>
         <artifactId>hazelcast</artifactId>
-        <version>3.12</version>
+        <version>3.12.13</version>
       </dependency>
 
       <dependency>
         <groupId>com.hazelcast</groupId>
         <artifactId>hazelcast-client</artifactId>
-        <version>3.12</version>
+        <version>3.12.13</version>
       </dependency>
 
       <dependency>
@@ -506,13 +530,13 @@
       <dependency>
         <groupId>com.hazelcast</groupId>
         <artifactId>hazelcast-spring</artifactId>
-        <version>3.12</version>
+        <version>3.12.13</version>
       </dependency>
 
       <dependency>
-        <groupId>net.sourceforge.htmlunit</groupId>
+        <groupId>org.htmlunit</groupId>
         <artifactId>htmlunit</artifactId>
-        <version>2.13</version>
+        <version>3.1.0</version>
       </dependency>
 
       <dependency>
@@ -730,7 +754,7 @@
       <dependency>
         <groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
         <artifactId>owasp-java-html-sanitizer</artifactId>
-        <version>20180219.1</version>
+        <version>20220608.1</version>
       </dependency>
 
       <dependency>
@@ -766,12 +790,6 @@
       <dependency>
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-core</artifactId>
-        <version>3.1.7.RELEASE</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-web</artifactId>
         <version>3.1.7.RELEASE</version>
       </dependency>
 
@@ -1003,6 +1021,60 @@
         <artifactId>spring-aspects</artifactId>
         <version>3.2.17.RELEASE</version>
       </dependency>
+
+      <!-- security fixes alfresco-5.2 -->
+      <dependency>
+        <groupId>com.thoughtworks.xstream</groupId>
+        <artifactId>xstream</artifactId>
+        <version>1.4.20</version>
+      </dependency>
+      <dependency>
+        <groupId>org.edu_sharing</groupId>
+        <artifactId>edu_sharing-community-repository-security-fixes-jodconverter-alfresco-patched</artifactId>
+        <version>2.1.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.xmlbeans</groupId>
+        <artifactId>xmlbeans</artifactId>
+        <version>3.1.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.edu_sharing</groupId>
+        <artifactId>edu_sharing-community-repository-security-fixes-quartz-alfresco-patched</artifactId>
+        <version>1.8.7</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-core</artifactId>
+        <version>3.2.18.RELEASE</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-webmvc</artifactId>
+        <version>3.2.18.RELEASE</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-tx</artifactId>
+        <version>3.2.17.RELEASE</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-fileupload</groupId>
+        <artifactId>commons-fileupload</artifactId>
+        <version>1.5</version>
+      </dependency>
+      <dependency>
+        <groupId>org.dom4j</groupId>
+        <artifactId>dom4j</artifactId>
+        <version>2.0.3</version>
+      </dependency>
+      <dependency>
+        <groupId>org.codehaus.groovy</groupId>
+        <artifactId>groovy-all</artifactId>
+        <version>2.4.21</version>
+      </dependency>
+
+      <!-- END security fixes alfresco-5.2 -->
 
       <dependency>
         <groupId>javax.validation</groupId>

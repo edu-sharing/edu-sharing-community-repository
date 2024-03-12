@@ -33,11 +33,14 @@ export class FileUploadComponent {
     set showUploadSelect(showUploadSelect: boolean) {
         this._showUploadSelect = showUploadSelect;
     }
+
     get showUploadSelect() {
         return this._showUploadSelect;
     }
+
     parent: Node;
     private reurl: string;
+
     constructor(
         private translations: TranslationsService,
         private nodeHelper: NodeHelperService,
@@ -68,6 +71,7 @@ export class FileUploadComponent {
         this._showUploadSelect = false;
         this.filesToUpload = event;
     }
+
     onDone(node: Node[]) {
         if (node == null) {
             // canceled;

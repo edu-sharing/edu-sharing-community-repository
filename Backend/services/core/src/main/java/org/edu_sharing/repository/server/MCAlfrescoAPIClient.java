@@ -873,11 +873,13 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
             downloadAllowed = (CCConstants.COMMON_LICENSE_EDU_P_NR_ND.equals(commonLicenseKey)) ? false : true;
 
         //allow download for owner, performance only check owner if download not allowed
+
 		if(!downloadAllowed && isOwner(nodeId, authenticationInfo.get(CCConstants.AUTH_USERNAME))){
 			downloadAllowed = true;
 		}
 
-		if(editorType != null && editorType.toLowerCase().equals(ConnectorService.ID_TINYMCE.toLowerCase())){
+		// allow tinymce in safe but not in normal storage
+		if(editorType != null && editorType.toLowerCase().equals(ConnectorService.ID_TINYMCE.toLowerCase()) && (Context.getCurrentInstance() != null && !CCConstants.CCM_VALUE_SCOPE_SAFE.equals(Context.getCurrentInstance().getSessionAttribute(CCConstants.AUTH_SCOPE)))) {
 			downloadAllowed = false;
 		}
 		return downloadAllowed;
@@ -1892,7 +1894,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	public String createNode(StoreRef store, String parentID, String nodeTypeString, String childAssociation, HashMap<String, Object> _props) {
 
 		String name = (String)_props.get(CCConstants.CM_NAME);
-		_props.put(CCConstants.CM_NAME,CharMatcher.JAVA_ISO_CONTROL.removeFrom(name));
+		_props.put(CCConstants.CM_NAME,CharMatcher.javaIsoControl().removeFrom(name));
 		Map<QName, Serializable> properties = transformPropMap(_props);
 
 		NodeRef parentNodeRef = new NodeRef(store, parentID);
@@ -1926,7 +1928,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 		try {
 			String name = (String)_props.get(CCConstants.CM_NAME);
-			_props.put(CCConstants.CM_NAME,CharMatcher.JAVA_ISO_CONTROL.removeFrom(name));
+			_props.put(CCConstants.CM_NAME,CharMatcher.javaIsoControl().removeFrom(name));
 			Map<QName, Serializable> props = transformPropMap(_props);
 			NodeRef nodeRef = new NodeRef(store, nodeId);
 

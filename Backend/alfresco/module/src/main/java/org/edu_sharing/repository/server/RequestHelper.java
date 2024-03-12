@@ -2,7 +2,6 @@ package org.edu_sharing.repository.server;
 
 import com.typesafe.config.Config;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
-import org.springframework.http.HttpRequest;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;

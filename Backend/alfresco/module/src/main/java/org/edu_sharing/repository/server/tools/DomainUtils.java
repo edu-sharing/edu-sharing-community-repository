@@ -15,8 +15,7 @@ public final class DomainUtils {
         try {
             return InternetDomainName
                     .from(urlString)
-                    .topPrivateDomain()
-                    .name();
+                    .topPrivateDomain().toString();
 
         }catch (Exception ignore){
             return urlString;

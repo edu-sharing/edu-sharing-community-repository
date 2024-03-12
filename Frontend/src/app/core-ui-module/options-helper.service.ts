@@ -967,6 +967,18 @@ export class OptionsHelperService implements OnDestroy {
             if (!nodes) {
                 return false;
             }
+
+            if (
+                nodes.some((n) =>
+                    n.properties?.[RestConstants.CCM_PROP_EDUSCOPENAME]?.includes(
+                        RestConstants.SAFE_SCOPE,
+                    ),
+                )
+            ) {
+                downloadNode.name = 'OPTIONS.DOWNLOAD_SAFE';
+            } else {
+                downloadNode.name = 'OPTIONS.DOWNLOAD';
+            }
             for (const item of nodes) {
                 // if at least one is allowed -> allow download (download servlet will later filter invalid files)
                 if (
