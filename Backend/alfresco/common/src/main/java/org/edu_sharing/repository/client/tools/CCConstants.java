@@ -2143,6 +2143,10 @@ public class CCConstants {
 	public static final String VERSION_COMMENT_BULK_MIGRATION = "BULK_MIGRATION";
 	public static final String VERSION_COMMENT_BULK_UPDATE_RESYNC = "BULK_UPDATE_RESYNC";
 
+	public static final String EDU_PASSWORD_KEYSTORE_NAME = "edupasswords";
+	public static final String EDU_PASSWORD_USERNAMEHASH = "usernamehash";
+
+
 	/**
 	 * Methos that set all the Properties for ProfileSettings
 	 * @return (List) list of all properties we want to be in ProfileSettings

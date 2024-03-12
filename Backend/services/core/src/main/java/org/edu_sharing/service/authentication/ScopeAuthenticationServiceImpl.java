@@ -30,6 +30,6 @@ public class ScopeAuthenticationServiceImpl extends ScopeAuthenticationServiceAb
 
 	@Override
 	public int getSessionTimeout() {
-		return 10*60;
+		return 5*60;
 	}
 }

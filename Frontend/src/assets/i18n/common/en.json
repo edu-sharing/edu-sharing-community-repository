@@ -552,6 +552,7 @@
         "COLLECTION_FEEDBACK_VIEW": "View feedback",
         "OPEN": "Open",
         "DOWNLOAD": "Download",
+        "DOWNLOAD_SAFE": "Archive",
         "DOWNLOAD_ALL": "download zip",
         "DOWNLOAD_METADATA": "download metadata",
         "NODE_REPORT": "Report problem",

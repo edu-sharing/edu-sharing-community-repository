@@ -99,6 +99,9 @@ export class WorkspaceFileUploadComponent  {
       if(RestHelper.errorMatchesAny(error,RestConstants.CONTENT_QUOTA_EXCEPTION)) {
           return 'QUOTA';
       }
+      if(RestHelper.errorMatchesAny(error,RestConstants.CONTENT_VIRUS_SCAN_FAILED_EXCEPTION)){
+          return 'VIRUS_SCAN_FAILED';
+      }
       if(RestHelper.errorMatchesAny(error,RestConstants.CONTENT_VIRUS_EXCEPTION)){
           return 'VIRUS';
       }

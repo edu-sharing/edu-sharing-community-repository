@@ -16,6 +16,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.*;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.http.HttpStatus;
 
 @Schema(description = "")
 public class ErrorResponse {
@@ -64,8 +65,11 @@ public class ErrorResponse {
         if(t instanceof DAOMissingException) {
     		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
     	}
-		if(t instanceof DAOMimetypeVerificationException) {
+		if(t instanceof DAOMimetypeVerificationException || t instanceof DAOFileExtensionVerificationException) {
 			return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity(new ErrorResponse(t)).build();
+		}
+		if(t instanceof DAOVirusDetectedException || t instanceof DAOVirusScanFailedException) {
+			return Response.status(HttpStatus.UNPROCESSABLE_ENTITY.value()).entity(new ErrorResponse(t)).build();
 		}
     	if(t instanceof DAOQuotaException){
 

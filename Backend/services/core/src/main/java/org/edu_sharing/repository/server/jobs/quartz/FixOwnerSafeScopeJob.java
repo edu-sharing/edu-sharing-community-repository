@@ -2,6 +2,7 @@ package org.edu_sharing.repository.server.jobs.quartz;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.query.PagingRequest;
+import org.alfresco.query.PagingResults;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -24,6 +25,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,7 +34,7 @@ public class FixOwnerSafeScopeJob extends AbstractJob{
 
     Logger logger = Logger.getLogger(FixOwnerSafeScopeJob.class);
     ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-    ServiceRegistry serviceRegistry = applicationContext.getBean(ServiceRegistry.class);
+    ServiceRegistry serviceRegistry = (ServiceRegistry)applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
     //using alfrescoDefaultDbNodeService to run through shared folders only once (not every userhome)
     NodeService nodeService = (NodeService)applicationContext.getBean("alfrescoDefaultDbNodeService");
 
@@ -51,7 +53,9 @@ public class FixOwnerSafeScopeJob extends AbstractJob{
         persist = new Boolean(persistParam);
 
 
+        logger.info("starting getAllPeople");
         List<PersonService.PersonInfo> allPeople = getAllPeople();
+        logger.info("finished getAllPeople");
         for(PersonService.PersonInfo personInfo : allPeople){
             NodeRef personNodeRef = personInfo.getNodeRef();
             List<ChildAssociationRef> personScopes = nodeService.getChildAssocs(personNodeRef, ScopeUserHomeServiceImpl.CHILD_ASSOC_PERSON_SCOPES, RegexQNamePattern.MATCH_ALL);
@@ -91,7 +95,20 @@ public class FixOwnerSafeScopeJob extends AbstractJob{
     private List<PersonService.PersonInfo> getAllPeople() {
         return AuthenticationUtil.runAsSystem(() -> {
             PersonService personService = serviceRegistry.getPersonService();
-            return personService.getPeople(null, null, null, new PagingRequest(Integer.MAX_VALUE, null)).getPage();
+            //return personService.getPeople(null, null, null, new PagingRequest(Integer.MAX_VALUE, null)).getPage();
+
+            List<PersonService.PersonInfo> result = new ArrayList<>();
+            int maxItems = 100;
+            int skipCount = 0;
+            PagingResults<PersonService.PersonInfo> pageResult = null;
+            do {
+                PagingRequest pr = new PagingRequest(skipCount, maxItems);
+                pageResult = personService.getPeople(null, null, null, pr);
+                result.addAll(pageResult.getPage());
+                logger.info("finished page: " + skipCount +" from: "+ pageResult.getTotalResultCount());
+                skipCount += maxItems;
+            }while (pageResult.hasMoreItems());
+            return result;
         });
     }
 

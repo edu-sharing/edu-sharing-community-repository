@@ -586,6 +586,7 @@
         "COLLECTION_FEEDBACK_VIEW": "Feedback ansehen",
         "OPEN": "Öffnen",
         "DOWNLOAD": "Herunterladen",
+        "DOWNLOAD_SAFE": "Archivieren",
         "DOWNLOAD_ALL": "Zip herunterladen",
         "DOWNLOAD_METADATA": "Metadaten herunterladen",
         "NODE_REPORT": "Problem melden",

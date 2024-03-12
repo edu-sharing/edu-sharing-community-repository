@@ -299,8 +299,15 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	     	    new ThumbnailHandling().thumbnailHandling(nodeRef);
     		}
 			if(verifyMimetypeEnabled()) {
-				String filename = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
-				verifyMimetype(reader, filename,  getMimetypeAllowList());
+				if(newContent &&
+						!nodeService.getProperty(nodeRef,ContentModel.PROP_NODE_UUID)
+								.equals(nodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL))))
+				{
+					logger.info("will not verifyMimetypeEnabled for copy");
+				}else {
+					String filename = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+					verifyMimetype(reader, filename, getMimetypeAllowList());
+				}
 			}
 
 			Action extractMetadataAction = actionService.createAction("extract-metadata");
@@ -368,7 +375,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			TikaInputStream stream = TikaInputStream.get(reader.getContentInputStream());
 			Metadata metadata = new Metadata();
 			MediaType mediaType = detector.detect(stream, metadata);
-			if(mediaType.equals(MediaType.OCTET_STREAM)) {
+			if(mediaType.equals(MediaType.OCTET_STREAM) && !LightbendConfigLoader.get().getBoolean("security.fileManagement.mimetypeVerification.allowUnknownMimetypes")) {
 				throw new NodeMimetypeUnknownValidationException();
 			}
 			String detectedMimeType = mediaType.getType() + "/" + mediaType.getSubtype();
@@ -544,13 +551,18 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 				//nodeService.setProperty(nodeRef, QName.createQName(CCConstants.LOM_PROP_GENERAL_TITLE), nameAfter);
 
 				if(verifyMimetypeEnabled() && nodeService.exists(nodeRef)) {
-					ContentReader reader = contentService.getReader(nodeRef, ContentModel.PROP_CONTENT);
-					if(reader != null && reader.exists()) {
-						try {
-							verifyMimetype(reader, nameAfter, getMimetypeAllowList());
-						}catch(NodeMimetypeValidationException ignored) {
-							// we ignore this since the node is now already uploaded. we only want to throw the
-							// @NodeFileExtensionValidationException
+					if(nameBefore == null && !nodeService.getProperty(nodeRef,ContentModel.PROP_NODE_UUID)
+							.equals(nodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)))){
+						logger.info("will not verifyMimetypeEnabled for copy");
+					}else{
+						ContentReader reader = contentService.getReader(nodeRef, ContentModel.PROP_CONTENT);
+						if(reader != null && reader.exists()) {
+							try {
+								verifyMimetype(reader, nameAfter, getMimetypeAllowList());
+							}catch(NodeMimetypeValidationException ignored) {
+								// we ignore this since the node is now already uploaded. we only want to throw the
+								// @NodeFileExtensionValidationException
+							}
 						}
 					}
 				}
