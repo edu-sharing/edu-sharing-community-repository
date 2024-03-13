@@ -38,7 +38,7 @@ class NodeCustomizationPoliciesTest {
             NodeCustomizationPolicies.verifyMimetype(
                     contentReader,
                     filename,
-                    allowList);
+                    allowList,false);
             HashMap<String, List<String>> allowListWrongMimetype = new HashMap<String, List<String>>() {{
                 put("test/sample", Collections.singletonList(mimetype.split("/")[1]));
             }};
@@ -48,7 +48,7 @@ class NodeCustomizationPoliciesTest {
             assertThrowsExactly(NodeMimetypeValidationException.class, () -> NodeCustomizationPolicies.verifyMimetype(
                     contentReader,
                     filename,
-                    allowListWrongMimetype));
+                    allowListWrongMimetype,false));
             HashMap<String, List<String>> allowListWrongFileExtension = new HashMap<String, List<String>>() {{
                 put(mimetype, Collections.singletonList("wrong"));
             }};
@@ -58,7 +58,7 @@ class NodeCustomizationPoliciesTest {
             assertThrows(NodeFileExtensionValidationException.class, () -> NodeCustomizationPolicies.verifyMimetype(
                     contentReader,
                     filename,
-                    allowListWrongFileExtension));
+                    allowListWrongFileExtension,false));
         });
     }
     @Test
