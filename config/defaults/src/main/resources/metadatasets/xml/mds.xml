@@ -1294,6 +1294,9 @@
         }}
       </basequery>
     </query>
+    <query join="AND" id="workflowReceive">
+      <basequery/>
+    </query>
     <query join="AND" id="workspace">
       <property name="ngsearchword">
         <statement>

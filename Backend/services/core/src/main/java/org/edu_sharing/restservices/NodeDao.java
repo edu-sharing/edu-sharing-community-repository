@@ -2285,15 +2285,22 @@ public class NodeDao {
      * All files the current user is a receiver of the workflow
      *
      * @param repoDao
+     * @param skipCount
+     * @param maxItems
      * @return
      * @throws DAOException
      */
-    public static List<NodeRef> getWorkflowReceive(RepositoryDao repoDao, List<String> filter, SortDefinition sortDefinition) throws DAOException {
+    public static SearchResult<NodeDao> getWorkflowReceive(RepositoryDao repoDao, List<String> filter, SortDefinition sortDefinition, Integer skipCount, Integer maxItems) throws DAOException {
         SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
         try {
-            List<org.alfresco.service.cmr.repository.NodeRef> refs = searchService.getWorkflowReceive(AuthenticationUtil.getFullyAuthenticatedUser());
-            refs = NodeDao.sortAlfrescoRefs(refs, filter, sortDefinition);
-            return convertAlfrescoNodeRef(repoDao, refs);
+            SearchResultNodeRef result = searchService.getWorkflowReceive(
+                    AuthenticationUtil.getFullyAuthenticatedUser(),
+                    sortDefinition, mapFilterToContentType(filter),
+                    skipCount.intValue(),
+                    maxItems == null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems.intValue()
+            );
+            return NodeDao.convertResultSet(repoDao, Filter.createShowAllFilter(), result);
+
         } catch (Exception e) {
             throw DAOException.mapping(e);
         }

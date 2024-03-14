@@ -109,22 +109,20 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     public static BoolQuery getFilesSharedToMeQuery(MetadataQueries queries, SharedToMeType type) {
-        ServiceRegistry serviceRegistry = (ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
         String username = AuthenticationUtil.getFullyAuthenticatedUser();
-        Set<String> memberships = new HashSet<>();
-        memberships.add(username);
-        memberships.addAll(serviceRegistry.getAuthorityService().getAuthorities());
-        memberships.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
-        ReadableWrapperQueryBuilder basequery = new ReadableWrapperQueryBuilder(queries.findQuery("sharedToMe").getBasequery().get(null));
+        Set<String> memberships = getAllMemberships(username);
+        String basequery = queries.findQuery("sharedToMe").getBasequery().get(null);
 
         BoolQuery.Builder builder = QueryBuilders.bool()
-                .must(b -> b.wrapper(basequery.build()))
                 .must(b -> b.bool(b2 -> b2.mustNot(
                                 b3 -> b3.match(m -> m.field("properties.ccm:ph_users.keyword").query(username))
                         ).mustNot(
                                 b3 -> b3.match(m -> m.field("properties.cm:creator.keyword").query(username))
                         )
                 ));
+        if(StringUtils.isNotBlank(basequery)) {
+            builder.must(b -> b.wrapper(new ReadableWrapperQueryBuilder(basequery).build()));
+        }
 
         builder.minimumShouldMatch("1");
         if (type.equals(SharedToMeType.All)) {
@@ -137,14 +135,27 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return builder.build();
     }
 
+    @NotNull
+    private static Set<String> getAllMemberships(String username) {
+        ServiceRegistry serviceRegistry = (ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
+        Set<String> memberships = new HashSet<>();
+        memberships.add(username);
+        memberships.addAll(serviceRegistry.getAuthorityService().getAuthorities());
+        memberships.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
+        return memberships;
+    }
+
     public static BoolQuery getFilesSharedByMeQuery(MetadataQueries queries) {
         String username = AuthenticationUtil.getFullyAuthenticatedUser();
-        ReadableWrapperQueryBuilder basequery = new ReadableWrapperQueryBuilder(queries.findQuery("sharedByMe").getBasequery().get(null));
-        return QueryBuilders.bool()
-                .must(b -> b.wrapper(basequery.build()))
+        String basequery = queries.findQuery("sharedByMe").getBasequery().get(null);
+        BoolQuery.Builder builder = QueryBuilders.bool()
                 .must(b -> b.bool(b2 -> b2.must(
                         b3 -> b3.match(m -> m.field("properties.ccm:ph_users.keyword").query(username))
-                ))).build();
+                )));
+        if(StringUtils.isNotBlank(basequery)) {
+            builder.must(b -> b.wrapper(new ReadableWrapperQueryBuilder(basequery).build()));
+        }
+        return builder.build();
     }
 
     public SearchResultNodeRefElastic searchDSL(String dsl) throws Throwable {
@@ -1353,6 +1364,25 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 );
         return searchByQuery(query.build(), skipCount, maxItems, sortDefinition);
     }
+
+    @Override
+    public SearchResultNodeRef getWorkflowReceive(String user, SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception{
+        BoolQuery.Builder builder = QueryBuilders.bool();
+        builder.minimumShouldMatch("1");
+        getAllMemberships(user).forEach(authority -> builder.should(b -> b.match(m -> m.field(
+                "properties.ccm:wf_receiver.keyword").query(authority)))
+        );
+        builder.mustNot(b -> b.exists(e -> e.field(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL))));
+        builder.mustNot(b -> b.match(m -> m.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))));
+        builder.must(getContentTypeQuery(contentType));
+        MetadataQueries queries = MetadataHelper.getLocalDefaultMetadataset().getQueries(MetadataReader.QUERY_SYNTAX_DSL);
+        String basequery = queries.findQuery("workflowReceive").getBasequery().get(null);
+        if(StringUtils.isNotBlank(basequery)) {
+            builder.must(b -> b.wrapper(new ReadableWrapperQueryBuilder(basequery).build()));
+        }
+        return searchByQuery(builder.build(), skipCount, maxItems, sortDefinition);
+    }
+
     private Query getContentTypeQuery(ContentType contentType) {
         if(contentType == null || contentType.equals(ContentType.ALL)) {
             return QueryBuilders.matchAll().build()._toQuery();
