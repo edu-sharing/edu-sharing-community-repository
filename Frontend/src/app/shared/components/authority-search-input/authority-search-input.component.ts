@@ -70,6 +70,11 @@ export class AuthoritySearchInputComponent {
     @Input() label: string;
     @Input() placeholder = 'WORKSPACE.INVITE_FIELD';
     @Input() hint = '';
+    /**
+     * The minimum length of input required to trigger suggestions.
+     * Default value is 2.
+     */
+    @Input() minSuggestionLength: number = 2;
 
     @Output() onChooseAuthority = new EventEmitter<Authority | any>();
 
@@ -89,7 +94,7 @@ export class AuthoritySearchInputComponent {
             startWith(''),
             debounceTime(500),
             filter(() => {
-                if (this.input.value?.length < 2) {
+                if (this.input.value?.length < this.minSuggestionLength) {
                     this.suggestionLoading.next(false);
                     return false;
                 }
@@ -124,7 +129,7 @@ export class AuthoritySearchInputComponent {
     }
 
     getSuggestions(inputValue: string): Observable<SuggestionGroup[]> {
-        if (inputValue.length < 2) {
+        if (inputValue.length < this.minSuggestionLength)  {
             if (this.showRecent && this.restConnector.getCurrentLogin()?.currentScope == null) {
                 return this.getRecentSuggestions();
             } else {

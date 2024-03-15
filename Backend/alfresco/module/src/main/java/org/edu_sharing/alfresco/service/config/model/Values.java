@@ -67,4 +67,5 @@ public class Values implements Serializable {
 	@XmlElement	public String customCSS;
 	@XmlElement	public ConfigThemeColors themeColors;
 	@XmlElement	public ConfigPrivacy privacy;
+	@XmlElement public Integer minSuggestionLength;
 }

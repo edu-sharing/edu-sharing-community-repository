@@ -156,7 +156,10 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     private originalPermissions: LocalPermissions[];
     showChooseType = false;
     private showChooseTypeList: Permission;
-
+    /**
+     * The minimum input length required for suggestions.
+     */
+    minSuggestionLength= 2;
     constructor(
         @Inject(CARD_DIALOG_DATA) public data: ShareDialogData,
         private dialogRef: CardDialogRef<ShareDialogData, ShareDialogResult>,
@@ -202,6 +205,8 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
             this.isSafe = data.currentScope != null;
             this.updateToolpermissions();
         });
+
+        this.minSuggestionLength=this.config.instant("minSuggestionLength", 2);
         // Call in constructor to avoid changed-after-checked error when setting `isLoading` state.
         this.initNodes();
     }

@@ -46,6 +46,10 @@ export class WorkflowDialogComponent {
     receivers: WorkflowReceiver[] = [];
     status = WORKFLOW_STATUS_UNCHECKED;
     validStatus: WorkflowDefinition[];
+    /**
+     * The minimum input length required for suggestions.
+     */
+    minSuggestionLength= 2;
 
     private initialStatus = WORKFLOW_STATUS_UNCHECKED;
     private nodes: Node[] = this.data.nodes;
@@ -79,6 +83,7 @@ export class WorkflowDialogComponent {
             }
         });
         void this.initNodes(this.data.nodes);
+        this.minSuggestionLength=this.config.instant("minSuggestionLength", 2);
     }
 
     isAllowedAsNext(status: WorkflowDefinition) {
