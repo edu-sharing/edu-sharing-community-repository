@@ -4835,6 +4835,9 @@
           "resolveCollections": {
             "type": "boolean"
           },
+          "resolveUsernames": {
+            "type": "boolean"
+          },
           "returnSuggestions": {
             "type": "boolean"
           }
