@@ -4,6 +4,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.web.filter.beans.DependencyInjectedFilter;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -41,7 +42,7 @@ import java.util.*;
 /**
  * Servlet Filter implementation class CockpitAuthenticationFilter
  */
-public class LDAPAuthenticationFilter implements Filter {
+public class LDAPAuthenticationFilter implements Filter, DependencyInjectedFilter {
 
 	private static final String CONTEXT = LDAPAuthenticationFilter.class.getCanonicalName();
 	private static final String RELEASE = "$Revision: 1422 $";
@@ -220,6 +221,10 @@ public class LDAPAuthenticationFilter implements Filter {
 		}
 	}
 
+	@Override
+	public void doFilter(ServletContext servletContext, ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+		doFilter(servletRequest, servletResponse, filterChain);
+	}
 	/**
 	 * Run the authentication filter
 	 * 
@@ -668,4 +673,5 @@ public class LDAPAuthenticationFilter implements Filter {
 		}
 		throw new AuthenticationException("LDAPAuthenticationFilter env seems to be null");
 	}
+
 }

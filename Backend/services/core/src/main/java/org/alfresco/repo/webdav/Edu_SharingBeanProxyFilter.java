@@ -12,6 +12,7 @@ import javax.servlet.ServletResponse;
 
 import org.alfresco.repo.web.filter.beans.DependencyInjectedFilter;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.spring.ApplicationContextFactory;
 
 public class Edu_SharingBeanProxyFilter implements Filter
 {
@@ -34,8 +35,11 @@ public class Edu_SharingBeanProxyFilter implements Filter
      */
     public void init(FilterConfig args) throws ServletException
     {
-    	this.filter = (DependencyInjectedFilter)AlfAppContextGate.getApplicationContext().getBean(args.getInitParameter(INIT_PARAM_BEAN_NAME));
         this.context = args.getServletContext();
+    	this.filter = (DependencyInjectedFilter) ApplicationContextFactory.getApplicationContext().getBean(args.getInitParameter(INIT_PARAM_BEAN_NAME));
+        if(this.filter instanceof Filter){
+            ((Filter)this.filter).init(args);
+        }
     }
 
     /* (non-Javadoc)
