@@ -303,6 +303,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         /**
          *  @deprecated
          *  prefer to subscribe the initialValuesSubject instead, because the initial values might
+         *  or use await getInitalValuesAsync
          *  not be ready when the widget gets loaded
          * */
         getInitialValues(): InitialValues {

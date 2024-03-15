@@ -7,7 +7,7 @@ import { JumpMark } from '../../../../services/jump-marks.service';
 import { LocalEventsService } from '../../../../services/local-events.service';
 import { MdsEditorCoreComponent } from '../../../mds/mds-editor/mds-editor-core/mds-editor-core.component';
 import { MdsEditorInstanceService } from '../../../mds/mds-editor/mds-editor-instance.service';
-import { EditorType } from '../../../mds/types/types';
+import { EditorType, UserPresentableError } from '../../../mds/types/types';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
 import { JUMP_MARK_POSTFIX } from '../../card-dialog/card-dialog-container/jump-marks-handler.directive';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
@@ -146,11 +146,16 @@ export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
     private async save(): Promise<void> {
         if (this.mdsEditorInstance.getCanSave()) {
             this.dialogRef.patchState({ isLoading: true });
-            const updatedNodesOrValues = await this.mdsEditorInstance.save();
-            this.toast.toast('WORKSPACE.EDITOR.UPDATED');
-            this.dialogRef.close(updatedNodesOrValues);
-            if (hasNodes(this.data)) {
-                this.localEvents.nodesChanged.emit(updatedNodesOrValues as Node[]);
+            try {
+                const updatedNodesOrValues = await this.mdsEditorInstance.save();
+                this.toast.toast('WORKSPACE.EDITOR.UPDATED');
+                this.dialogRef.close(updatedNodesOrValues);
+                if (hasNodes(this.data)) {
+                    this.localEvents.nodesChanged.emit(updatedNodesOrValues as Node[]);
+                }
+            } catch (e) {
+                this.handleError(e);
+                this.dialogRef.patchState({ isLoading: false });
             }
         } else {
             // No changes, behave like close.
@@ -159,6 +164,14 @@ export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
             } else {
                 this.mdsEditorInstance.showMissingRequiredWidgets();
             }
+        }
+    }
+    private handleError(error: any): void {
+        console.error(error);
+        if (error instanceof UserPresentableError) {
+            this.toast.error(null, error.message);
+        } else {
+            this.toast.error(error);
         }
     }
 }

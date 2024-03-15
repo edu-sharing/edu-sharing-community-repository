@@ -361,7 +361,7 @@ export class OptionsHelperService implements OnDestroy {
     }
 
     private isOptionAvailable(option: OptionItem, objects: Node[] | any[]) {
-        if (option.elementType.indexOf(this.getType(objects)) === -1) {
+        if (!this.getType(objects).every((t) => option.elementType.includes(t))) {
             // console.log('types not matching', objects, this.getType(objects), option);
             return false;
         }
@@ -408,14 +408,14 @@ export class OptionsHelperService implements OnDestroy {
         return this.data.selectedObjects && this.data.selectedObjects.length;
     }
 
-    private getType(objects: Node[]): ElementType {
+    private getType(objects: Node[]): ElementType[] {
         if (objects) {
             const types = Array.from(new Set(objects.map((o) => this.getTypeSingle(o))));
-            if (types.length === 1) {
-                return types[0];
+            if (types.length > 0) {
+                return types;
             }
         }
-        return ElementType.Unknown;
+        return [ElementType.Unknown];
     }
 
     private getTypeSingle(object: Node | any) {

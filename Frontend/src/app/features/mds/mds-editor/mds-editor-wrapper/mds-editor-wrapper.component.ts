@@ -359,7 +359,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
 
     private handleError(error: any): void {
         console.error(error);
-        if (error instanceof UserPresentableError || error.message) {
+        if (error instanceof UserPresentableError) {
             this.toast.error(null, error.message);
         } else {
             this.toast.error(error);
