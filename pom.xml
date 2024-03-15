@@ -51,6 +51,10 @@
     <tomcat.version>10.1.17</tomcat.version>
     <jackson.version>2.15.2</jackson.version>
     <mongodb.version>4.11.1</mongodb.version>
+    <!--
+      do not update to 6.2.2 cause it breaks openidconnect backchannel logout
+      https://github.com/spring-projects/spring-security/issues/14553
+    -->
     <spring-security.version>6.2.1</spring-security.version>
 
   </properties>
