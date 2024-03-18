@@ -9,6 +9,7 @@ import java.util.List;
 
 import lombok.NonNull;
 import org.alfresco.service.cmr.repository.*;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
@@ -193,6 +194,9 @@ public interface NodeService {
 	 */
 	String publishCopy(String nodeId, HandleMode handleMode) throws Throwable;
 
+	default void createHandle(NodeRef nodeRef, List<String> publishedCopies, HandleMode handleMode) throws Exception {
+		throw new NotImplementedException();
+	}
 	/**
 	 * Get all published copies of this node
 	 * @return

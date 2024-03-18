@@ -1231,6 +1231,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 
+	@Override
 	public void createHandle(NodeRef nodeRef, List<String> publishedCopies, HandleMode handleMode) throws Exception {
 		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE);
 		HandleService handleService = null;
