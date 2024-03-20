@@ -811,6 +811,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     private <T extends NodeRefImpl> T transform(Class<T> clazz, Set<String> authorities, String user, Map<String, Object> sourceAsMap, boolean resolveCollections) throws IllegalAccessException, InstantiationException {
         HashMap<String, MetadataSet> mdsCache = new HashMap<>();
+        String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
 
         Map<String, Serializable> properties = (Map) sourceAsMap.get("properties");
 
@@ -861,7 +862,6 @@ public class SearchServiceElastic extends SearchServiceImpl {
             /**
              * metadataset translation
              */
-            String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
             Map<String, Serializable> i18n = (Map<String, Serializable>) sourceAsMap.get("i18n");
             if (i18n != null) {
                 Map<String, Serializable> i18nProps = (Map<String, Serializable>) i18n.get(currentLocale);
