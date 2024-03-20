@@ -72,6 +72,7 @@ import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
+import org.edu_sharing.service.nodeservice.CallSourceHelper;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -1461,8 +1462,12 @@ public class NodeDao {
 
     private Content getContent(Node data) throws DAOException {
         Content content = new Content();
-        content.setVersion(getContentVersion(data));
         content.setUrl(getContentUrl());
+        // skip hash + version for search cause of performance penalties
+        if(Arrays.asList(CallSourceHelper.CallSource.Search, CallSourceHelper.CallSource.Sitemap).contains(CallSourceHelper.getCallSource())) {
+            return content;
+        }
+        content.setVersion(getContentVersion(data));
 
         if (isFromRemoteRepository()) {
             // @TODO: not available here
