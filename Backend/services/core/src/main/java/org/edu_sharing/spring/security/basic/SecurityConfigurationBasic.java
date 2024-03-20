@@ -15,7 +15,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfigurationBasic {
 
-    Config config = LightbendConfigLoader.get();
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
