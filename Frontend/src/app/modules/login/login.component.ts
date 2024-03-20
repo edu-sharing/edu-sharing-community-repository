@@ -224,7 +224,11 @@ export class LoginComponent implements OnInit, OnDestroy {
             this.connector.getAbsoluteServerUrl() + this.configService.instant('loginUrl');
         url = url
             .replace(':target', encodeURIComponent(target))
-            .replace(':entity', encodeURIComponent(this.currentProvider.url));
+            // remove invalid parameters for multiple universities using the same idp
+            .replace(
+                ':entity',
+                encodeURIComponent(this.currentProvider.url.replace(/@_.*?_@/, '')),
+            );
         // @TODO: Redirect to shibboleth provider
         UIHelper.openUrl(url, this.bridge, OPEN_URL_MODE.Current);
     }
