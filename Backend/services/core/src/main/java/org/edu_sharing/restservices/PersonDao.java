@@ -132,7 +132,7 @@ public class PersonDao {
 
 	private final Map<String, Serializable> userInfo;
 	private String homeFolderId;
-	private final List<String> sharedFolderIds = new ArrayList<String>();
+	private List<String> sharedFolderIds = null;
 
 	private NodeService nodeService;
 	private SearchService searchService;
@@ -162,39 +162,40 @@ public class PersonDao {
 					authorityService.getEduGroups(userName, NodeServiceInterceptor.getEduSharingScope())
 			);*/
 
-
-			try{
-
-				boolean getGroupFolder = true;
-				//don't run into access denied wrapped by Transaction commit failed
-				if(!AuthenticationUtil.isRunAsUserTheSystemUser()
-						&& !AuthenticationUtil.getRunAsUser().equals(ApplicationInfoList.getHomeRepository().getUsername())
-						&& !AuthenticationUtil.getRunAsUser().equals(userName)) {
-					getGroupFolder = false;
-				}
-				if(getGroupFolder && userName!=null) {
-					String groupFolderId = ((MCAlfrescoAPIClient)baseClient).getGroupFolderId(userName);
-					if (groupFolderId != null) {
-
-						HashMap<String, HashMap<String, Object>> children = baseClient.getChildren(groupFolderId);
-
-						for (Object key : children.keySet()) {
-
-							sharedFolderIds.add(key.toString());
-						}
-					}
-				}
-			}catch(InvalidNodeRefException e){
-
-			}
-			catch(AccessDeniedException e){
-
-			}
-
 		} catch (Throwable t) {
 			throw DAOException.mapping(t);
 		}
 	}
+
+	private void initGroupFolders() {
+		if(sharedFolderIds != null) {
+			return;
+		}
+		try{
+			sharedFolderIds = new ArrayList<>();
+			boolean getGroupFolder = true;
+			//don't run into access denied wrapped by Transaction commit failed
+			if(!AuthenticationUtil.isRunAsUserTheSystemUser()
+					&& !AuthenticationUtil.getRunAsUser().equals(ApplicationInfoList.getHomeRepository().getUsername())
+					&& !AuthenticationUtil.getRunAsUser().equals(getUserName())) {
+				getGroupFolder = false;
+			}
+			if(getGroupFolder && getUserName() !=null) {
+				String groupFolderId = ((MCAlfrescoAPIClient)baseClient).getGroupFolderId(getUserName());
+				if (groupFolderId != null) {
+
+					HashMap<String, HashMap<String, Object>> children = baseClient.getChildren(groupFolderId);
+
+					for (Object key : children.keySet()) {
+
+						sharedFolderIds.add(key.toString());
+					}
+				}
+			}
+		}catch(Throwable e) {
+
+        }
+    }
 
 	public void changeProfile(UserProfileEdit profile) throws DAOException {
 
@@ -317,7 +318,9 @@ public class PersonDao {
 	    	data.setHomeFolder(homeDir);
             data.setQuota(getQuota());
 
-	    	List<NodeRef> sharedFolderRefs = new ArrayList<NodeRef>();
+			initGroupFolders();
+
+			List<NodeRef> sharedFolderRefs = new ArrayList<NodeRef>();
 	    	for (String sharedFolderId : sharedFolderIds) {
 
 	        	NodeRef sharedFolderRef = new NodeRef();
