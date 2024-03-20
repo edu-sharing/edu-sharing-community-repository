@@ -103,6 +103,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 				ArchiveInputStream zip = getZipInputStream(contentreader);
 				ArchiveEntry current = null;
 				if(zip!=null) {
+					boolean genericHtmlFallback = false;
 					while ((current = zip.getNextEntry()) != null) {
 						if (current.getName().equals("imsmanifest.xml")) {
 
@@ -112,9 +113,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 
 						}
 						if (current.getName().equalsIgnoreCase("index.html") || current.getName().equalsIgnoreCase("index.htm")) {
-							zip.close();
-							proccessGenericHTML(actionedUponNodeRef);
-							return;
+							genericHtmlFallback = true;
 						}
 
 						if (current.getName().equals("moodle.xml")) {
@@ -136,6 +135,9 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 					}
 
 					zip.close();
+					if(genericHtmlFallback){
+						proccessGenericHTML(actionedUponNodeRef);
+					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
