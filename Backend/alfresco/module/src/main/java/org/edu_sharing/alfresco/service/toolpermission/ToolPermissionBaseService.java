@@ -41,10 +41,8 @@ public class ToolPermissionBaseService {
     protected boolean isAdmin(){
         try {
             Set<String> testUsetAuthorities = serviceRegistry.getAuthorityService().getAuthorities();
-            for (String testAuth : testUsetAuthorities) {
-                if (testAuth.equals("GROUP_ALFRESCO_ADMINISTRATORS")) {
-                    return true;
-                }
+            if(testUsetAuthorities.contains("GROUP_ALFRESCO_ADMINISTRATORS")) {
+                return true;
             }
             return AuthenticationUtil.isRunAsUserTheSystemUser();
         }catch(AuthenticationCredentialsNotFoundException ignored){
