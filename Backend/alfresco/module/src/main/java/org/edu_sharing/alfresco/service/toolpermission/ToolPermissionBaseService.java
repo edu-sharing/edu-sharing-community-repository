@@ -1,7 +1,7 @@
 package org.edu_sharing.alfresco.service.toolpermission;
 
 import com.typesafe.config.Config;
-import com.typesafe.config.ConfigValue;
+import jakarta.servlet.http.HttpSession;
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
@@ -15,14 +15,13 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.I18nServer;
 import org.springframework.context.ApplicationContext;
 
-import jakarta.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.util.*;
 
@@ -94,14 +93,6 @@ public class ToolPermissionBaseService {
      * @return
      */
     public boolean hasToolPermission(String toolPermission, boolean renew) {
-        try{
-            if(isAdmin()){
-                return true;
-            }
-        }catch(Exception e){
-            logger.error(e.getMessage(),e);
-        }
-
         /**
          * try to use session cache
          */
