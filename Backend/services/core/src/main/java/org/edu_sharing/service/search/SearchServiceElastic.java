@@ -810,6 +810,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     private <T extends NodeRefImpl> T transform(Class<T> clazz, Set<String> authorities, String user, Map<String, Object> sourceAsMap, boolean resolveCollections) throws IllegalAccessException, InstantiationException {
+        boolean isAdmin = AuthorityServiceHelper.isAdmin();
         HashMap<String, MetadataSet> mdsCache = new HashMap<>();
         String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
 
@@ -1024,7 +1025,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         eduNodeRef.setContributors(contributorsResult);
 
 
-        if (AuthorityServiceHelper.isAdmin() || user.equals(owner)) {
+        if (isAdmin || user.equals(owner)) {
             permissions.put(CCConstants.PERMISSION_CC_PUBLISH, true);
             PermissionReference pr = permissionModel.getPermissionReference(null, "FullControl");
             Set<PermissionReference> granteePermissions = permissionModel.getGranteePermissions(pr);
@@ -1050,7 +1051,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             if (collections != null) {
                 for (Map<String, Object> collection : collections) {
                     String colOwner = (String) collection.get("owner");
-                    boolean hasPermission = user.equals(colOwner) || AuthorityServiceHelper.isAdmin();
+                    boolean hasPermission = user.equals(colOwner) || isAdmin;
                     if (!hasPermission) {
                         Map<String, List<String>> colPermissionsElastic = (Map) collection.get("permissions");
                         for (Map.Entry<String, List<String>> entry : colPermissionsElastic.entrySet()) {
