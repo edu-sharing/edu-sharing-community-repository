@@ -1092,11 +1092,12 @@ export class OptionsHelperService implements OnDestroy {
         );
         // do not allow copy of map links if tp is missing
         copyNodes.customEnabledCallback = (node) =>
-            node?.some((n) => this.getTypeSingle(n) === ElementType.MapRef)
+            node.every((n) => !n.aspects?.includes(RestConstants.CCM_ASPECT_COLLECTION)) &&
+            (node?.some((n) => this.getTypeSingle(n) === ElementType.MapRef)
                 ? this.connector.hasToolPermissionInstant(
                       RestConstants.TOOLPERMISSION_CREATE_MAP_LINK,
                   )
-                : true;
+                : true);
 
         copyNodes.elementType = [ElementType.Node, ElementType.SavedSearch, ElementType.MapRef];
         copyNodes.constrains = [Constrain.HomeRepository, Constrain.User];
