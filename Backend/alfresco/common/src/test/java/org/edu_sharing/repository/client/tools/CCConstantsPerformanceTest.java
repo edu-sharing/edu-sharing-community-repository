@@ -1,18 +1,22 @@
 package org.edu_sharing.repository.client.tools;
 
 import org.openjdk.jmh.annotations.*;
-import org.openjdk.jmh.infra.Blackhole;
-import org.openjdk.jmh.runner.Runner;
-import org.openjdk.jmh.runner.RunnerException;
-import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-@BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.MILLISECONDS)
+@BenchmarkMode(Mode.Throughput)
+@Warmup(iterations =  1)
+@Measurement(iterations = 1)
+@Fork(value = 1)
 @State(Scope.Benchmark)
-class CCConstantsPerformanceTest {
-
-    void getValidGlobalName() {
-
+public class CCConstantsPerformanceTest {
+    public static void main(String[] args) throws Exception {
+        org.openjdk.jmh.Main.main(args);
+    }
+    @Benchmark
+    public void getValidGlobalName() {
+        CCConstants.getValidGlobalName("cm:name");
+    }
+    @Benchmark
+    public void getValidLocalName() {
+        CCConstants.getValidLocalName(CCConstants.CM_NAME);
     }
 }
