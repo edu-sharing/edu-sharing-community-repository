@@ -10,7 +10,10 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import com.typesafe.config.Config;
 import org.alfresco.repo.web.filter.beans.DependencyInjectedFilter;
+import org.alfresco.repo.webdav.auth.LDAPAuthenticationFilter;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.spring.ApplicationContextFactory;
 
@@ -22,7 +25,13 @@ public class Edu_SharingBeanProxyFilter implements Filter
     private static final String INIT_PARAM_BEAN_NAME = "beanName";
     
     private DependencyInjectedFilter filter;
-    private ServletContext context;    
+    private ServletContext context;
+
+    Config eduConfig = LightbendConfigLoader.get();
+
+    static String CONFIG_ENABLED = "repository.webdav.enabled";
+
+    boolean enabled = true;
     
     /**
      * Initialize the filter.
@@ -35,6 +44,9 @@ public class Edu_SharingBeanProxyFilter implements Filter
      */
     public void init(FilterConfig args) throws ServletException
     {
+        if(eduConfig.hasPath(CONFIG_ENABLED)){
+            enabled = eduConfig.getBoolean(CONFIG_ENABLED);
+        }
         this.context = args.getServletContext();
     	this.filter = (DependencyInjectedFilter) ApplicationContextFactory.getApplicationContext().getBean(args.getInitParameter(INIT_PARAM_BEAN_NAME));
         if(this.filter instanceof Filter){
@@ -56,7 +68,7 @@ public class Edu_SharingBeanProxyFilter implements Filter
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
             ServletException
     {
-        this.filter.doFilter(this.context, request, response, chain);
+        if(enabled) this.filter.doFilter(this.context, request, response, chain);
     }
 
 }

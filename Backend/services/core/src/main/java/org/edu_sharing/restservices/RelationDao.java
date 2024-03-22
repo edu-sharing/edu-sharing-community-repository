@@ -47,7 +47,9 @@ public class RelationDao {
         try {
             org.edu_sharing.service.relations.NodeRelation nodeRelation = this.relationService.getRelations(sourceNodeId);
             NodeRelation.NodeRelationBuilder nodeRelationBuilder = NodeRelation.builder();
-            nodeRelationBuilder.node(NodeDao.getAnyExistingNode(repoDao, Arrays.asList(NodeDao.ExistingMode.IfNotExists, NodeDao.ExistingMode.IfNoReadPermissions), nodeRelation.getNode()).asNode());
+
+            // TODO we can delete this cause it's unused by the frontend
+            //nodeRelationBuilder.node(NodeDao.getAnyExistingNode(repoDao, Arrays.asList(NodeDao.ExistingMode.IfNotExists, NodeDao.ExistingMode.IfNoReadPermissions), nodeRelation.getNode()).asNode());
             for (org.edu_sharing.service.relations.RelationData relationData : nodeRelation.getRelations()) {
                 try {
                     nodeRelationBuilder.relation(
