@@ -5,7 +5,7 @@
     <img *ngIf="error != '500' && error != '404'" src="assets/images/message/invalid.svg" alt="" />
     <div>
       <h1 esTitle>{{ message | translate }}</h1>
-      <h2>{{ messageDetail | translate : { text: messageText } }}</h2>
+      <h2>{{ messageDetail | translate: { text: messageText } }}</h2>
       <div class="link">
         <a tabindex="0" (click)="openSearch()" (keyup.enter)="openSearch()" class="clickable">{{
           'MESSAGES.GO_TO_SEARCH' | translate

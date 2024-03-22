@@ -1,5 +1,5 @@
 <form #formElement (ngSubmit)="report()" [formGroup]="form">
-  <h2>{{ 'NODE_REPORT.REPORT_INFO' | translate : { name: (data.node | nodeTitle) } }}</h2>
+  <h2>{{ 'NODE_REPORT.REPORT_INFO' | translate: { name: (data.node | nodeTitle) } }}</h2>
   <div class="report">
     <mat-radio-group
       formControlName="reason"

@@ -1,7 +1,7 @@
 <es-card
   *ngIf="!loading"
   title="{{ 'COLLECTIONS.PINNING.TITLE' | translate }}"
-  subtitle="{{ 'CARD_SUBTITLE_MULTIPLE' | translate : { count: pinnedCollections.length } }}"
+  subtitle="{{ 'CARD_SUBTITLE_MULTIPLE' | translate: { count: pinnedCollections.length } }}"
   [buttons]="buttons"
   (onCancel)="cancel()"
   width="small"

@@ -2,7 +2,7 @@
   #container
   *ngIf="filteredSuggestions$ | async as suggestions"
   [widget]="widget"
-  [label]="'SEARCH.FILTER_BY' | translate : { property: this.widget.definition.caption }"
+  [label]="'SEARCH.FILTER_BY' | translate: { property: this.widget.definition.caption }"
   [wrapInGroup]="false"
   [injectedView]="this"
 >

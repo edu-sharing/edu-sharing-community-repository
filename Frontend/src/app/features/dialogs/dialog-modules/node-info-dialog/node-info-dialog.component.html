@@ -27,11 +27,11 @@
 <ng-container *ngIf="_nodes.length === 1">
   <div *ngIf="_nodes[0].properties && _nodes[0].properties['cm:created_LONG']">
     <span>{{ 'NODE.cm:created' | translate }}</span
-    ><span>{{ _nodes[0].properties['cm:created_LONG'][0] | formatDate : { time: true } }}</span>
+    ><span>{{ _nodes[0].properties['cm:created_LONG'][0] | formatDate: { time: true } }}</span>
   </div>
   <div *ngIf="_nodes[0].properties && _nodes[0].properties['cm:modified_LONG']">
     <span>{{ 'NODE.cm:modified' | translate }}</span
-    ><span>{{ _nodes[0].properties['cm:modified_LONG'][0] | formatDate : { time: true } }}</span>
+    ><span>{{ _nodes[0].properties['cm:modified_LONG'][0] | formatDate: { time: true } }}</span>
   </div>
   <div>
     <span>{{ 'NODE.cm:creator' | translate }}</span

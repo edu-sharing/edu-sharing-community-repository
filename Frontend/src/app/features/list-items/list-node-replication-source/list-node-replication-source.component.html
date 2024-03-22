@@ -1,6 +1,6 @@
 <span *ngIf="indicatorIcons$ | async; else textRepresentation" [matTooltip]="tooltip$ | async">
   <img
-    [src]="replicationSource$ | async | appNodeSource : { mode: 'url' }"
+    [src]="replicationSource$ | async | appNodeSource: { mode: 'url' }"
     (error)="$any($event.target).style.display = 'none'"
     [alt]="tooltip$ | async"
   />

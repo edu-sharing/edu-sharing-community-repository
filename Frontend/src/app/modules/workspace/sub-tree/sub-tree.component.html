@@ -58,7 +58,7 @@
       *ngIf="moreItems > 0 && !loadingMore"
       [style.marginLeft.px]="50 + depth * 20"
     >
-      {{ 'WORKSPACE.TREE_MORE_ITEMS' | translate : { count: moreItems } }}
+      {{ 'WORKSPACE.TREE_MORE_ITEMS' | translate: { count: moreItems } }}
     </button>
     <es-spinner
       class="more-items-loading"
