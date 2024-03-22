@@ -1,7 +1,7 @@
 <div class="infobar infobar-{{ position }}" *ngIf="title" [@infobarBottom]="title">
   <div class="infobar-message">
     <div class="title">{{ title | translate }}</div>
-    <div class="message">{{ message | translate : messageParameters }}</div>
+    <div class="message">{{ message | translate: messageParameters }}</div>
   </div>
   <div class="infobar-buttons" *ngIf="_buttons">
     <div *ngFor="let button of _buttons; let i = index" #buttonElements>

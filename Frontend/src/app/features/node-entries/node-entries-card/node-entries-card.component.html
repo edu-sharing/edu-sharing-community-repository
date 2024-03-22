@@ -53,7 +53,7 @@
         [checked]="entriesService.selection.isSelected(node)"
         (change)="entriesService.onCheckboxChanged(node, $event.checked)"
         color="primary"
-        aria-label="{{ 'SELECT' | translate : { element: (node | nodeTitle) } }}"
+        aria-label="{{ 'SELECT' | translate: { element: (node | nodeTitle) } }}"
       ></mat-checkbox>
     </div>
   </div>
@@ -117,7 +117,7 @@
         color="primary"
         (click)="openMenu(node)"
         [matMenuTriggerFor]="dropdown.menu"
-        [attr.aria-label]="'OPTIONS_FOR' | translate : { element: (node | nodeTitle) }"
+        [attr.aria-label]="'OPTIONS_FOR' | translate: { element: (node | nodeTitle) }"
         data-test="card-options-button"
       >
         <i esIcon="more_vert"></i>

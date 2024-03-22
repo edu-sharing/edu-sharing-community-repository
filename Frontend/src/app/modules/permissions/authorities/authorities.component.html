@@ -7,7 +7,7 @@
       </div>
       <div *ngIf="org">
         <span>{{
-          'PERMISSIONS.INFO_ORG_' + _mode | translate : { org: org.profile.displayName }
+          'PERMISSIONS.INFO_ORG_' + _mode | translate: { org: org.profile.displayName }
         }}</span>
         <span *ngIf="isAdmin">
           <a class="clickable" (click)="deselectOrg()">{{ 'PERMISSIONS.NO_ORG' | translate }}</a>
@@ -50,7 +50,7 @@
     }}</mat-checkbox>
     <div class="status-change" *ngIf="editStatus.status.date">
       {{ 'PERMISSIONS.STATUS_LAST_CHANGE' | translate }}:
-      {{ editStatus.status.date | formatDate : { relative: false, time: true } }}
+      {{ editStatus.status.date | formatDate: { relative: false, time: true } }}
     </div>
   </div>
 </es-card>

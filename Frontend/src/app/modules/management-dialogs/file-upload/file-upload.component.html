@@ -1,7 +1,7 @@
 <es-card
   title="{{ 'WORKSPACE.UPLOAD_TITLE' | translate }}"
   subtitle="{{
-    'WORKSPACE.UPLOAD_SUBTITLE' | translate : { progress: processed, total: progress.length }
+    'WORKSPACE.UPLOAD_SUBTITLE' | translate: { progress: processed, total: progress.length }
   }}"
   width="small"
   height="normal"
@@ -33,7 +33,7 @@
           <div *ngIf="item.progress.loaded">
             <span *ngIf="item.progress.remaining > 1">{{
               'WORKSPACE.UPLOAD_REMAINING'
-                | translate : { time: formatTime(item.progress.remaining) }
+                | translate: { time: formatTime(item.progress.remaining) }
             }}</span>
             <span *ngIf="item.progress.remaining <= 1">{{
               'WORKSPACE.UPLOAD_FINISHING' | translate

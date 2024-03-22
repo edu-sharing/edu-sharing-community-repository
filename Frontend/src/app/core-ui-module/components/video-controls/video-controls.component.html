@@ -30,7 +30,7 @@
                 name="startTime"
                 id="startTime"
                 pattern="\d\d:\d\d(:\d\d)?"
-                [ngModel]="values.startTime | duration : video.duration"
+                [ngModel]="values.startTime | duration: video.duration"
                 (ngModelChange)="
                   values.startTime =
                     ($event.length === 8 || $event.length === 5) &&
@@ -50,7 +50,7 @@
                 name="endTime"
                 id="endTime"
                 pattern="\d\d:\d\d(:\d\d)?"
-                [ngModel]="values.endTime | duration : video.duration"
+                [ngModel]="values.endTime | duration: video.duration"
                 (ngModelChange)="
                   values.endTime =
                     ($event.length === 8 || $event.length === 5) &&

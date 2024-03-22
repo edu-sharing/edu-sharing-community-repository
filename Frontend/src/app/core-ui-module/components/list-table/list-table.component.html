@@ -58,7 +58,7 @@
         *ngIf="totalCount && hasCheckbox && !isLoading"
         [title]="
           'LIST.TOTAL_COUNT_TOOLTIP'
-            | translate : { selected: selectedNodes?.length || 0, total: totalCount }
+            | translate: { selected: selectedNodes?.length || 0, total: totalCount }
         "
       >
         ({{ (selectedNodes?.length || 0) + '/' + totalCount }})
@@ -440,7 +440,7 @@
             [ngModel]="getSelectedPos(node) != -1"
             (change)="onCheckboxClick(node)"
             (click)="$event.stopPropagation()"
-            aria-label="{{ 'SELECT' | translate : { element: getPrimaryTitle(node) } }}"
+            aria-label="{{ 'SELECT' | translate: { element: getPrimaryTitle(node) } }}"
           >
             &nbsp;
           </mat-checkbox>

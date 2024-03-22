@@ -177,14 +177,14 @@
               class="blurred-image"
               [src]="
                 currentCollection
-                  | esNodeImage : { maxWidth: 300, maxHeight: 300, crop: true }
+                  | esNodeImage: { maxWidth: 300, maxHeight: 300, crop: true }
                   | async
               "
             />
             <img
               [src]="
                 currentCollection
-                  | esNodeImage : { maxWidth: 300, maxHeight: 300, crop: true }
+                  | esNodeImage: { maxWidth: 300, maxHeight: 300, crop: true }
                   | async
               "
               class="card-image-preview"
@@ -243,7 +243,7 @@
                 *ngIf="authorFreetextAllowed"
                 mat-icon-button
                 [attr.aria-label]="
-                  'EDIT' | translate : { thing: ('COLLECTIONS.NEW.AUTHOR_FREETEXT' | translate) }
+                  'EDIT' | translate: { thing: ('COLLECTIONS.NEW.AUTHOR_FREETEXT' | translate) }
                 "
                 (click)="switchToAuthorFreetext()"
               >
@@ -310,7 +310,7 @@
                 (click)="setColor(color)"
               >
                 <span class="cdk-visually-hidden">
-                  {{ 'collectionNew_colorIndex' | translate : { index: index + 1 } }}
+                  {{ 'collectionNew_colorIndex' | translate: { index: index + 1 } }}
                 </span>
               </li>
             </ul>
