@@ -3,6 +3,7 @@ package org.edu_sharing.repository.client.tools;
 import java.util.*;
 
 import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.unmodifiableSet;
 
 public class CCConstants {
 
@@ -1960,14 +1961,14 @@ public class CCConstants {
 		return permission;
 	}
 
-	private static ArrayList<String> usagePermissions = null;
+	private static HashSet<String> usagePermissions = null;
 	/**
 	 * Permissions allowed if the node was opened via usage (lms) or signature
 	 * @return
 	 */
-	public static synchronized List<String> getUsagePermissions(){
+	public static synchronized Set<String> getUsagePermissions(){
 		if(usagePermissions == null){
-				usagePermissions = new ArrayList<>();
+			usagePermissions = new HashSet<>();
 				usagePermissions.add(PERMISSION_READ);
 				usagePermissions.add(PERMISSION_READ_PREVIEW);
 				usagePermissions.add(PERMISSION_READ_ALL);
@@ -1976,7 +1977,7 @@ public class CCConstants {
 				usagePermissions.add(PERMISSION_RATE);
 				usagePermissions.add(PERMISSION_RATE_READ);
 		}
-		return unmodifiableList(usagePermissions);
+		return unmodifiableSet(usagePermissions);
 	}
 
 	//AuthorityTypeKey
