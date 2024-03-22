@@ -11,7 +11,7 @@
 </es-infobar>
 <es-card
   *ngIf="visible && !progressType && dialogType === DialogType.ModalCard"
-  title="{{ title | translate: messageParameters }}"
+  title="{{ title | translate : messageParameters }}"
   (onCancel)="cancel()"
   [isCancelable]="isCancelable"
   [buttons]="buttons"
@@ -23,12 +23,12 @@
 >
   <div class="modal-dialog-toast">
     <span class="modal-dialog-toast-message" *ngIf="messageType === 'text'">{{
-      message | translate: messageParameters
+      message | translate : messageParameters
     }}</span>
     <span
       class="modal-dialog-toast-message"
       *ngIf="messageType === 'html'"
-      innerHTML="{{ message | translate: messageParameters }}"
+      innerHTML="{{ message | translate : messageParameters }}"
     ></span>
     <mat-form-field *ngIf="input">
       <mat-label>{{ input | translate }}</mat-label>

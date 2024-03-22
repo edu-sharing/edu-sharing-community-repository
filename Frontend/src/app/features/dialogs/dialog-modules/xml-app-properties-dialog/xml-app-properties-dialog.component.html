@@ -22,7 +22,7 @@
     <!-- Api does currently not support deleting -->
     <i class="material-icons clickable" (click)="removeAppProperty(i)" *ngIf="false">delete</i>
     <mat-hint *ngIf="data.appName">{{
-      'ADMIN.APPLICATIONS.' + data.appName + '.' + value | translate: { fallback: '' }
+      'ADMIN.APPLICATIONS.' + data.appName + '.' + value | translate : { fallback: '' }
     }}</mat-hint>
   </mat-form-field>
 </div>
@@ -41,7 +41,7 @@
     />
     <mat-hint *ngIf="data.appName">{{
       'ADMIN.APPLICATIONS.' + data.appName + '.' + xmlAppAdditionalPropertyName
-        | translate: { fallback: '' }
+        | translate : { fallback: '' }
     }}</mat-hint>
   </mat-form-field>
   <mat-form-field>

@@ -5,7 +5,7 @@
   </h4>
   <ng-container *ngIf="!node?.isDirectory">
     <es-info-message mode="info" *ngIf="getLicense()">
-      {{ 'WORKSPACE.SHARE.PUBLISH.LICENSE_INFO' | translate: { license: getLicenseText() } }}
+      {{ 'WORKSPACE.SHARE.PUBLISH.LICENSE_INFO' | translate : { license: getLicenseText() } }}
       {{ 'WORKSPACE.SHARE.PUBLISH.LICENSE_AUTHOR' | translate }}: {{ node | nodeAuthorName }}
       <ng-container *ngIf="shareModeCopy">
         <br /><br />
@@ -24,7 +24,7 @@
       </div>
     </es-info-message>
     <es-info-message mode="warning" *ngIf="mdsCompletion?.completed !== mdsCompletion?.total">
-      {{ 'WORKSPACE.SHARE.PUBLISH.MISSING_METADATA' | translate: mdsCompletion }}
+      {{ 'WORKSPACE.SHARE.PUBLISH.MISSING_METADATA' | translate : mdsCompletion }}
       <div>
         <button mat-button color="primary" (click)="openMetadata()">
           <i esIcon="arrow_forward"></i> {{ 'WORKSPACE.SHARE.PUBLISH.OPEN_METADATA' | translate }}

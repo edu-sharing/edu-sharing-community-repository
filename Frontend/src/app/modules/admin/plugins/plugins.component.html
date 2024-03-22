@@ -8,7 +8,7 @@
         <div class="name-wrapper">
           <div class="name">
             {{
-              'ADMIN.PLUGINS.PLUGIN_DETAILS.' + p.name + '.TITLE' | translate: { fallback: p.name }
+              'ADMIN.PLUGINS.PLUGIN_DETAILS.' + p.name + '.TITLE' | translate : { fallback: p.name }
             }}
           </div>
           <div class="version">{{ p.version }}</div>
@@ -19,7 +19,7 @@
         <div class="description">
           {{
             'ADMIN.PLUGINS.PLUGIN_DETAILS.' + p.name + '.DESCRIPTION'
-              | translate: { fallback: ('ADMIN.PLUGINS.NO_DESCRIPTION' | translate) }
+              | translate : { fallback: ('ADMIN.PLUGINS.NO_DESCRIPTION' | translate) }
           }}
         </div>
       </div>

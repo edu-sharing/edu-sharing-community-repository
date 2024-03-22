@@ -23,10 +23,10 @@
                 [user]="{ authorityName: feedback.authority }"
                 size="xsmall"
               ></es-user-avatar>
-              {{ 'FEEDBACK.CREATOR' | translate: { creator: feedback.authority } }}
+              {{ 'FEEDBACK.CREATOR' | translate : { creator: feedback.authority } }}
             </div>
             <div class="date">
-              {{ feedback.modifiedAt | formatDate: { relative: true, time: true } }}
+              {{ feedback.modifiedAt | formatDate : { relative: true, time: true } }}
             </div>
           </div>
           <div class="meta-data">

@@ -5,7 +5,7 @@
     [style.background-color]="collection.collection.color"
   >
     <img
-      [src]="collection | esNodeImage: { maxWidth: 100, maxHeight: 100, crop: true } | async"
+      [src]="collection | esNodeImage : { maxWidth: 100, maxHeight: 100, crop: true } | async"
       *ngIf="!collection.preview.isIcon"
     />
     <div *ngIf="collection.preview.isIcon" class="icon">
@@ -14,10 +14,10 @@
   </div>
   <div class="right">
     <div class="title" *ngIf="titleLabel">
-      {{ titleLabel | translate: { title: collection.title } }}
+      {{ titleLabel | translate : { title: collection.title } }}
     </div>
     <div class="title titleMobile" *ngIf="titleLabelShort">
-      {{ titleLabelShort | translate: { title: collection.title } }}
+      {{ titleLabelShort | translate : { title: collection.title } }}
     </div>
     <div class="title titleMobile" *ngIf="!(titleLabel && titleLabelShort)">
       {{ collection.title }}

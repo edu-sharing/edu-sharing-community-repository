@@ -55,7 +55,7 @@
             <ng-template #customMetadata>
               <div class="info-group">
                 <label>{{ 'NODE_RELATIONS.RELATION_CREATED' | translate }}</label>
-                <span>{{ relation.timestamp | formatDate: { relative: true } }}</span>
+                <span>{{ relation.timestamp | formatDate : { relative: true } }}</span>
               </div>
               <div class="info-group">
                 <label>{{ 'NODE_RELATIONS.RELATION_CREATOR' | translate }}</label>
@@ -81,7 +81,7 @@
             <ng-template #customMetadata>
               <div class="info-group">
                 <label>{{ 'NODE_RELATIONS.VARIANT_CREATED' | translate }}</label>
-                <span>{{ forkedOrigin.createdAt | formatDate: { relative: true } }}</span>
+                <span>{{ forkedOrigin.createdAt | formatDate : { relative: true } }}</span>
               </div>
               <div class="info-group">
                 <label>{{ 'NODE_RELATIONS.VARIANT_CREATOR' | translate }}</label>
@@ -108,7 +108,7 @@
             <ng-template #customMetadata>
               <div class="info-group">
                 <label>{{ 'NODE_RELATIONS.VARIANT_CREATED' | translate }}</label>
-                <span>{{ child.createdAt | formatDate: { relative: true } }}</span>
+                <span>{{ child.createdAt | formatDate : { relative: true } }}</span>
               </div>
               <div class="info-group">
                 <label>{{ 'NODE_RELATIONS.VARIANT_CREATOR' | translate }}</label>

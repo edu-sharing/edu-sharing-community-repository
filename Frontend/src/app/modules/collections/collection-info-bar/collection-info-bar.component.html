@@ -29,11 +29,11 @@
       <img
         role="presentation"
         class="blurred-image"
-        [src]="collection | esNodeImage: { maxWidth: 300, maxHeight: 300, crop: true } | async"
+        [src]="collection | esNodeImage : { maxWidth: 300, maxHeight: 300, crop: true } | async"
       />
       <img
         *ngIf="collection?.preview?.url"
-        [src]="collection | esNodeImage: { maxWidth: 300, maxHeight: 300, crop: true } | async"
+        [src]="collection | esNodeImage : { maxWidth: 300, maxHeight: 300, crop: true } | async"
         class="collection-header-image"
         role="presentation"
       />
