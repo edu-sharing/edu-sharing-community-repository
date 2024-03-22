@@ -11,7 +11,7 @@
     </div>
     <div class="permissionName">
       <span class="primary">{{ _permission | permissionName }}</span>
-      <span class="secondary">{{ _permission | permissionName: { field: 'secondary' } }}</span>
+      <span class="secondary">{{ _permission | permissionName : { field: 'secondary' } }}</span>
     </div>
     <div class="permission" [class.readOnly]="readOnly">
       <div class="publish">
@@ -29,7 +29,7 @@
         *ngIf="invalidPermission"
         title="{{
           'WORKSPACE.SHARE.TYPE_UNKNOWN_DESCRIPTION'
-            | translate: { permissions: _permission.permissions.join(', ') }
+            | translate : { permissions: _permission.permissions.join(', ') }
         }}"
       >
         <div>
@@ -45,7 +45,7 @@
           (click)="chooseType()"
           role="combobox"
           [attr.aria-label]="
-            'WORKSPACE.SHARE.TYPE_MENU_LABEL' | translate: { user: _permission | permissionName }
+            'WORKSPACE.SHARE.TYPE_MENU_LABEL' | translate : { user: _permission | permissionName }
           "
           aria-haspopup="true"
           [attr.aria-expanded]="showChooseType || null"
@@ -89,7 +89,7 @@
           *ngIf="showChooseType"
           class="typeAdd"
           [aria-label]="
-            'WORKSPACE.SHARE.TYPE_MENU_LABEL' | translate: { user: _permission | permissionName }
+            'WORKSPACE.SHARE.TYPE_MENU_LABEL' | translate : { user: _permission | permissionName }
           "
           [selected]="_permission.permissions"
           [isDirectory]="isDirectory"

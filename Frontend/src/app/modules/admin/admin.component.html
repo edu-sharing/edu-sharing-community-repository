@@ -75,18 +75,18 @@
         >
           <div class="data">
             <div class="title">
-              {{ 'ADMIN.INFO.CHECK.' + check.name + '.TITLE' | translate: check.translate }}
+              {{ 'ADMIN.INFO.CHECK.' + check.name + '.TITLE' | translate : check.translate }}
             </div>
             <div class="description">
               {{
                 'ADMIN.INFO.CHECK.' + check.name + '.STATUS_' + check.status
-                  | translate: check.translate
+                  | translate : check.translate
               }}
             </div>
             <div *ngIf="check.status !== 'OK' && check.status !== 'INFO'" class="solution">
               <i class="material-icons">forward</i>
               <div>
-                {{ 'ADMIN.INFO.CHECK.' + check.name + '.SOLUTION' | translate: check.translate }}
+                {{ 'ADMIN.INFO.CHECK.' + check.name + '.SOLUTION' | translate : check.translate }}
                 <div>
                   <button
                     mat-button
@@ -97,7 +97,7 @@
                   >
                     {{
                       'ADMIN.INFO.CHECK.' + check.name + '.SOLUTION_LINK'
-                        | translate: check.translate
+                        | translate : check.translate
                     }}
                   </button>
                 </div>
@@ -151,7 +151,7 @@
       <div class="group xml">
         <div *ngFor="let xml of editableXmls">
           <button mat-raised-button color="primary" (click)="editApp(xml)">
-            {{ 'ADMIN.APPLICATIONS.EDIT_APP' | translate: { xml: xml.file } }}
+            {{ 'ADMIN.APPLICATIONS.EDIT_APP' | translate : { xml: xml.file } }}
           </button>
         </div>
       </div>
@@ -700,9 +700,9 @@
               </div>
               <div class="job-col col-time">
                 <div class="date">
-                  {{ job.startTime | formatDate: { time: true, relative: false } }}
+                  {{ job.startTime | formatDate : { time: true, relative: false } }}
                   <span *ngIf="job.finishTime">
-                    - {{ job.finishTime | formatDate: { time: true, relative: false } }}
+                    - {{ job.finishTime | formatDate : { time: true, relative: false } }}
                   </span>
                 </div>
                 <div class="job-status {{ job.status.toLowerCase() }}">
@@ -777,7 +777,7 @@
                       {{ 'ADMIN.JOBS.LOG_LEVEL_' + entry.level.syslogEquivalent | translate }}
                     </div>
                     <div class="log-date">
-                      {{ entry.date | formatDate: { time: true, date: false, relative: false } }}
+                      {{ entry.date | formatDate : { time: true, date: false, relative: false } }}
                     </div>
                     <div class="log-class">
                       {{ entry.className.split('.')[entry.className.split('.').length - 1] }}

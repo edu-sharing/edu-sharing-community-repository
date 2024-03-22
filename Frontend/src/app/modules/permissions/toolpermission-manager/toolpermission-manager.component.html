@@ -44,13 +44,13 @@
               <div *ngIf="group.name === 'CONNECTORS'">
                 {{
                   'TOOLPERMISSION.TOOLPERMISSION_CONNECTOR' + (getTpSafe(key) ? '_SAFE' : '')
-                    | translate: { connector: getTpConnector(key) }
+                    | translate : { connector: getTpConnector(key) }
                 }}
               </div>
               <div *ngIf="group.name === 'REPOSITORIES'">
                 {{
                   'TOOLPERMISSION.TOOLPERMISSION_REPOSITORY'
-                    | translate: { repository: getTpRepository(key) }
+                    | translate : { repository: getTpRepository(key) }
                 }}
               </div>
               <div class="technicalName">{{ key }}</div>
