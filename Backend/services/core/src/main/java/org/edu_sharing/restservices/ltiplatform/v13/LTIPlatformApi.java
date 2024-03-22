@@ -216,8 +216,13 @@ public class LTIPlatformApi {
 
             }else if(LoginInitiationSessionObject.MessageType.resourcelink.equals(loginInitiationSessionObject.getMessageType())){
                 NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,loginInitiationSessionObject.getResourceLinkNodeId());
+
+
+
                 Map<String,String> claimResourceLink = new HashMap<>();
-                claimResourceLink.put("title",(String)nodeService.getProperty(nodeRef,ContentModel.PROP_NAME));
+                AuthenticationUtil.runAsSystem(()->{
+                    claimResourceLink.put("title",(String)nodeService.getProperty(nodeRef,ContentModel.PROP_NAME));
+                return null;});
                 claimResourceLink.put("id",loginInitiationSessionObject.getResourceLinkNodeId());
 
                 String presentation = (loginInitiationSessionObject.getLaunchPresentation() != null)
@@ -227,7 +232,7 @@ public class LTIPlatformApi {
                 launchPresentation.put("return_url",homeApp.getClientBaseUrl()+"/components/workspace?id=" + loginInitiationSessionObject.getContextId() + "&mainnav=true&displayType=0");
 
 
-                String targetLink = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK));
+                String targetLink = AuthenticationUtil.runAsSystem(()-> (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK)));
                 if(targetLink == null) targetLink = appInfo.getLtitoolTargetLinkUri();
                 jwtBuilder = jwtBuilder
                         .claim(LTIConstants.LTI_TARGET_LINK_URI, targetLink)
