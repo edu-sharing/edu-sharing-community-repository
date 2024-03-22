@@ -164,6 +164,26 @@ public class LTIJWTUtil {
         return getDeepLinkingResponseJwt(ltiSessionObject,new Node[]{n});
     }
 
+    /**
+     * generates an jwt signed by homeApp with a claim nodeId that expires after "expireInSeconds"
+     * @param nodeId
+     * @return
+     * @throws GeneralSecurityException
+     */
+    public static String getShortAccessJwt(String nodeId, int expireInSeconds) throws GeneralSecurityException{
+        ApplicationInfo homeApp = ApplicationInfoList.getHomeRepository();
+        Key toolPrivateKey = new Signing().getPemPrivateKey(homeApp.getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
+        Date date = new Date();
+        String jwt = Jwts.builder()
+                .setHeaderParam(LTIConstants.TYP, LTIConstants.JWT)
+                .setHeaderParam(LTIConstants.KID, homeApp.getLtiKid())
+                .setHeaderParam(LTIConstants.ALG, LTIConstants.RS256)
+                .setExpiration(DateUtils.addSeconds(date, expireInSeconds))
+                .setIssuedAt(date)
+                .claim(CCConstants.NODEID, nodeId).signWith(SignatureAlgorithm.RS256, toolPrivateKey)  //We sign it
+                .compact();
+        return jwt;
+    }
 
 
     public String getDeepLinkingResponseJwt(LTISessionObject ltiSessionObject, Node[] nodes) throws GeneralSecurityException{

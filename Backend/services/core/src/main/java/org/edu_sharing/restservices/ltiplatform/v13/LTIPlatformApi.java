@@ -679,43 +679,59 @@ public class LTIPlatformApi {
                                                 @Parameter(description = "for tools with content option, this param sends changeContentUrl (true) else contentUrl will be excluded",required = false,schema = @Schema(defaultValue = "true")) @QueryParam("editMode") Boolean editMode,
                                                 @Parameter(description = "the version. for tools with contentoption.", required = false) @QueryParam("version") String version,
                                                 @Parameter(description = "launchPresentation. how the resourcelink will be embedded. valid values: window,iframe", required = false) @QueryParam("launchPresentation") String launchPresentation,
+                                                @Parameter(description = "jwt for checking access in lms context",required = false) @QueryParam("jwt") String jwt,
                                                 @Context HttpServletRequest req){
         try{
-            //@TODO find out why defaultvalue of swagger definition does not work
-            if(editMode == null){
-                editMode = true;
-            }
-            NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 
-            if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_LTITOOL_NODE))){
-                throw new Exception("not an lti resoucelink:"+nodeId);
-            }
-
-            String toolUrl = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_TOOLURL));
-            if(toolUrl == null){
-                throw new Exception("lti toolUrl is null:"+nodeId);
-            }
-
-            for(ApplicationInfo appInfo : ApplicationInfoList.getApplicationInfos().values()){
-                if(appInfo.isLtiTool() && toolUrl.equals(appInfo.getLtitoolUrl())){
-                    String form = prepareLoginInitiation(nodeService.getPrimaryParent(nodeRef).getParentRef().getId(),
-                            nodeId,
-                            editMode,
-                            nodeId,
-                            version,
-                            appInfo,
-                            LoginInitiationSessionObject.MessageType.resourcelink,
-                            launchPresentation,
-                            req);
-                    return Response.status(Response.Status.OK).entity(form).build();
+            if(jwt != null){
+                Jws<Claims> claimsJws = LTIJWTUtil.validateJWT(jwt, ApplicationInfoList.getHomeRepository());
+                String jwtNodeId = (String)claimsJws.getBody().get(CCConstants.NODEID);
+                if(jwtNodeId == null){
+                    throw new Exception("nodeId not found in validated jwt");
                 }
+                if(!jwtNodeId.equals(nodeId)){
+                    throw new Exception("wrong nodeId found in validated jwt");
+                }
+                return AuthenticationUtil.runAsSystem(() -> generateLoginInitationResouceLinkRaw(nodeId, editMode, version, launchPresentation, req));
+            }else{
+                return generateLoginInitationResouceLinkRaw(nodeId, editMode, version, launchPresentation, req);
             }
-            throw new Exception("no lti tool found for toolUrl:"+ toolUrl);
-
-
         }catch (Exception e){
             return ApiTool.processError(req,e,"LTI_ERROR");
         }
+    }
+
+    private Response generateLoginInitationResouceLinkRaw(String nodeId, Boolean editMode, String version, String launchPresentation, HttpServletRequest req) throws Exception {
+        //@TODO find out why defaultvalue of swagger definition does not work
+        if(editMode == null){
+            editMode = true;
+        }
+        NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+
+        if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_LTITOOL_NODE))){
+            throw new Exception("not an lti resoucelink:"+ nodeId);
+        }
+
+        String toolUrl = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_TOOLURL));
+        if(toolUrl == null){
+            throw new Exception("lti toolUrl is null:"+ nodeId);
+        }
+
+        for(ApplicationInfo appInfo : ApplicationInfoList.getApplicationInfos().values()){
+            if(appInfo.isLtiTool() && toolUrl.equals(appInfo.getLtitoolUrl())){
+                String form = prepareLoginInitiation(nodeService.getPrimaryParent(nodeRef).getParentRef().getId(),
+                        nodeId,
+                        editMode,
+                        nodeId,
+                        version,
+                        appInfo,
+                        LoginInitiationSessionObject.MessageType.resourcelink,
+                        launchPresentation,
+                        req);
+                return Response.status(Response.Status.OK).entity(form).build();
+            }
+        }
+        throw new Exception("no lti tool found for toolUrl:"+ toolUrl);
     }
 
     /**
