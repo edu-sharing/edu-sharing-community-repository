@@ -250,7 +250,7 @@ public class LTIPlatformApi {
                 AccessStatus accessStatus = serviceRegistry.getPermissionService()
                         .hasPermission(nodeRef,
                                 PermissionService.WRITE_CONTENT);
-                if(serviceRegistry.getNodeService().hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
+                if(AuthenticationUtil.runAsSystem(() -> serviceRegistry.getNodeService().hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)))){
                     NodeRef nodeRefOriginal = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,(String)serviceRegistry.getNodeService()
                             .getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)));
                     try {
