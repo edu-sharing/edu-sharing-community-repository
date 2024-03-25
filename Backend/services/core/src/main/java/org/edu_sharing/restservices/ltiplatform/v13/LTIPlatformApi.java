@@ -271,9 +271,9 @@ public class LTIPlatformApi {
                     custom.put(LTIPlatformConstants.CUSTOM_CLAIM_TOKEN, loginInitiationSessionObject.getToken());
                 }
                 if(loginInitiationSessionObject.getContentUrlNodeId() != null) {
-                    custom.put(LTIPlatformConstants.CUSTOM_CLAIM_FILENAME, (String)nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-                            loginInitiationSessionObject.getContentUrlNodeId()),
-                            ContentModel.PROP_NAME));
+                    custom.put(LTIPlatformConstants.CUSTOM_CLAIM_FILENAME, AuthenticationUtil.runAsSystem(() -> (String)nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+                                    loginInitiationSessionObject.getContentUrlNodeId()),
+                            ContentModel.PROP_NAME)) );
                 }
                 custom.put(LTIPlatformConstants.CUSTOM_CLAIM_GET_CONTENTAPIURL,homeApp.getClientBaseUrl()+"/rest/ltiplatform/v13/content");
                 custom.put(LTIPlatformConstants.CUSTOM_CLAIM_DETAILSSNIPPETURL,homeApp.getClientBaseUrl()+"/rest/lti/v13/details");
