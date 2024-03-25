@@ -292,7 +292,18 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                     setTimeout(() => {
                         console.log(this.mainNavService.getMainNav());
                         if (!this.isDestroyed) {
-                            this.mainNavService.getMainNav().topBar.toggleMenuSidebar();
+                            this.mainNavService.patchMainNavConfig({ showNavigation: true });
+                            setTimeout(() => {
+                                this.mainNavService.getMainNav().topBar.toggleMenuSidebar();
+                                this.mainNavService
+                                    .getMainNav()
+                                    .topBar.onCloseScopeSelector.pipe(takeUntil(this.destroyed$))
+                                    .subscribe(() => {
+                                        this.mainNavService.patchMainNavConfig({
+                                            showNavigation: false,
+                                        });
+                                    });
+                            });
                         }
                     }, 250);
                 }
