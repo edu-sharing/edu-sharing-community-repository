@@ -83,9 +83,9 @@ public class Mail {
 		email.setSmtpPort(smtpPort);
 
 		if(StringUtils.isNotBlank(authType)){
-			if(authType.trim().equals(AUTH_TYPE_TLS)){
+			if(authType.trim().toLowerCase().equals(AUTH_TYPE_TLS)){
 				email.setStartTLSEnabled(true);
-			}else if(authType.trim().equals(AUTH_TYPE_SSL)) {
+			}else if(authType.trim().toLowerCase().equals(AUTH_TYPE_SSL)) {
 				email.setSSLOnConnect(true);
 				email.setSslSmtpPort(Integer.toString(smtpPort));
 			}else{
