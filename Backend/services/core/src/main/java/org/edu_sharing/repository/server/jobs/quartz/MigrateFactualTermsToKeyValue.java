@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MigrateFactualTermsToKeyValue extends AbstractJob{
 
@@ -38,6 +39,9 @@ public class MigrateFactualTermsToKeyValue extends AbstractJob{
 
     @JobFieldDescription(description = " weather to use the versionstore store, default is false. overwrites archive param")
     boolean versionStore = false;
+
+    @JobFieldDescription(description = " types, default is ccm:io,ccm:map")
+    List<String> types;
 
     static String PROP = CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD;
     static String PROP_DISPLAY = CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD_DISPLAY;
@@ -60,6 +64,17 @@ public class MigrateFactualTermsToKeyValue extends AbstractJob{
             logger.error("no start folder provided");
             return;
         }
+        try {
+            types = Arrays.stream(((String) jobExecutionContext.getJobDetail().getJobDataMap().get("types")).
+                            split(",")).map(String::trim).map(CCConstants::getValidGlobalName).
+                    collect(Collectors.toList());
+        } catch (Throwable t) {
+        }
+
+        if (types == null || types.isEmpty()) {
+            types = Arrays.asList(CCConstants.CCM_TYPE_IO, CCConstants.CCM_TYPE_MAP);
+        }
+
         AuthenticationUtil.runAsSystem(() ->{
 
             StoreRef storeRef = (archive) ? StoreRef.STORE_REF_ARCHIVE_SPACESSTORE : StoreRef.STORE_REF_WORKSPACE_SPACESSTORE;
@@ -76,7 +91,7 @@ public class MigrateFactualTermsToKeyValue extends AbstractJob{
         NodeRunner nr = new NodeRunner();
         nr.setStartFolder(startFolder.getId());
         nr.setStartFolderStore(startFolder.getStoreRef());
-        nr.setTypes(Arrays.asList(CCConstants.CCM_TYPE_IO));
+        nr.setTypes(types);
         nr.setRecurseMode(RecurseMode.Folders);
         if(startFolder.getStoreRef().equals(version2Store)){
             nr.setRecurseMode(RecurseMode.All);
