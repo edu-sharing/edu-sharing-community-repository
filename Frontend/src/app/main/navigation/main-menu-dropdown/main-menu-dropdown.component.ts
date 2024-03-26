@@ -4,12 +4,13 @@ import {
     EventEmitter,
     Input,
     OnChanges,
+    OnDestroy,
     Output,
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 import { OptionItem } from '../../../core-ui-module/option-item';
 import { ConfigEntry } from '../../../core-ui-module/node-helper.service';
@@ -21,18 +22,26 @@ import { MenuCloseReason } from '@angular/material/menu/menu';
     templateUrl: './main-menu-dropdown.component.html',
     styleUrls: ['./main-menu-dropdown.component.scss'],
 })
-export class MainMenuDropdownComponent implements OnChanges, AfterViewInit {
+export class MainMenuDropdownComponent implements OnChanges, AfterViewInit, OnDestroy {
     @ViewChild('dropdown', { static: true }) dropdown: DropdownComponent;
 
     @Input() currentScope: string;
 
+    private readonly destroyed$ = new Subject();
     optionItems$: Observable<OptionItem[]>;
-    @Output() onClose: EventEmitter<MenuCloseReason>;
+    @Output() onClose = new EventEmitter<void>();
 
     constructor(private mainMenuEntries: MainMenuEntriesService) {}
 
+    ngOnDestroy(): void {
+        this.destroyed$.next();
+        this.destroyed$.complete();
+    }
+
     ngAfterViewInit(): void {
-        this.onClose = this.dropdown.menu.closed;
+        this.dropdown.menu.closed
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe(() => this.onClose.emit());
     }
 
     ngOnChanges(changes: SimpleChanges): void {
