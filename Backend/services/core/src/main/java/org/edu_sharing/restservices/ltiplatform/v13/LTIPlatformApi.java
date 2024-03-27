@@ -32,6 +32,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.EduSharingLockHelper;
 import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 import org.edu_sharing.repository.server.tools.security.AllSessions;
 import org.edu_sharing.repository.server.tools.security.Signing;
@@ -54,6 +55,7 @@ import org.springframework.extensions.surf.util.I18NUtil;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -132,28 +134,22 @@ public class LTIPlatformApi {
             }
 
 
-            Map<String,LoginInitiationSessionObject> loginInitiationSessionObjectMap = (Map<String,LoginInitiationSessionObject>)req.
-                    getSession().
-                    getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
+            Map<String, LoginInitiationSessionObject> loginInitiationSessionObjectMap = new LoginInitationSessionObjectEditor() {
+                @Override
+                protected String edit(Map<String, LoginInitiationSessionObject> loginInitiationSessionObjectMap) {
+                    LoginInitiationSessionObject loginInitiationSessionObject = loginInitiationSessionObjectMap.get(ltiMessageHint);
 
-            if(loginInitiationSessionObjectMap == null){
-                throw new Exception(LTIPlatformConstants.ERROR_MISSING_SESSIONOBJECTS);
-            }
-
-
+                    if (loginInitiationSessionObject == null) {
+                        return LTIPlatformConstants.ERROR_MISSING_SESSIONOBJECT + " " + ltiMessageHint;
+                    }
+                    /**
+                     * remember nonce for replay (xss) protection. @TODO
+                     */
+                    loginInitiationSessionObject.setToolNonce(nonce);
+                    return null;
+                }
+            }.updateLoginInitationObject(req.getSession(), true);
             LoginInitiationSessionObject loginInitiationSessionObject = loginInitiationSessionObjectMap.get(ltiMessageHint);
-
-            if(loginInitiationSessionObject == null){
-                throw new Exception(LTIPlatformConstants.ERROR_MISSING_SESSIONOBJECT+" "+ltiMessageHint);
-            }
-
-            /**
-             * remember nonce for replay (xss) protection. @TODO
-             */
-            loginInitiationSessionObject.setToolNonce(nonce);
-            //we have to reset the session object cause of redisson cache management
-            req.getSession().setAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT, loginInitiationSessionObjectMap);
-
 
             ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(loginInitiationSessionObject.getAppId());
             if(appInfo == null){
@@ -802,18 +798,62 @@ public class LTIPlatformApi {
             AllSessions.getUserLTISessions().put(encryptedToken, loginInitiationSessionObject);
         }
 
-        Map<String,LoginInitiationSessionObject> loginInitiationSessionObjectMap = (Map<String,LoginInitiationSessionObject>)req
-                .getSession()
-                .getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
-        if(loginInitiationSessionObjectMap == null){
-            logger.info("");
-            loginInitiationSessionObjectMap = new HashMap<>();
+
+        try {
+            new LoginInitationSessionObjectEditor(){
+                @Override
+                protected String edit(Map<String, LoginInitiationSessionObject> loginInitiationSessionObjectMap) {
+                    loginInitiationSessionObjectMap.put(ltiSessionScope,loginInitiationSessionObject);
+                    return null;
+                }
+            }.updateLoginInitationObject(req.getSession(),false);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        loginInitiationSessionObjectMap.put(ltiSessionScope,loginInitiationSessionObject);
-        req.getSession().setAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT, loginInitiationSessionObjectMap);
 
         return form;
     }
+
+    /**
+     * Thread Safe edit LoginInitiationSessionObject
+     */
+    public abstract class LoginInitationSessionObjectEditor{
+
+        /**
+         *
+         * @param loginInitiationSessionObjectMap
+         * @return errorcode as string and null if no error occours
+         */
+        protected abstract String edit( Map<String,LoginInitiationSessionObject> loginInitiationSessionObjectMap);
+
+        /**
+         *
+         * @param session
+         * @param sessionObjectMustExist
+         * @throws Exception if sessionObjectMustExist and does not exist or edit(...) result is not null
+         */
+        public Map<String, LoginInitiationSessionObject> updateLoginInitationObject(HttpSession session, boolean sessionObjectMustExist) throws Exception {
+            return EduSharingLockHelper.runSingleton(LoginInitationSessionObjectEditor.class,session.getId(),() -> {
+                Map<String, LoginInitiationSessionObject> loginInitiationSessionObjectMap = (Map<String, LoginInitiationSessionObject>) session
+                        .getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
+                if (loginInitiationSessionObjectMap == null) {
+                    if (sessionObjectMustExist) {
+                        throw new Exception(LTIPlatformConstants.ERROR_MISSING_SESSIONOBJECTS);
+                    }
+                    loginInitiationSessionObjectMap = new HashMap<>();
+                }
+                String error = edit(loginInitiationSessionObjectMap);
+                if(error != null){
+                    throw new Exception(error);
+                }
+                //we have to reset the session object cause of redisson cache management
+                session.setAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT, loginInitiationSessionObjectMap);
+                return loginInitiationSessionObjectMap;
+            });
+        }
+    }
+
+
 
 
     @POST
