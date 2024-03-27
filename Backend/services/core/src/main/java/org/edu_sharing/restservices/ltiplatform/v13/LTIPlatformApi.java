@@ -51,6 +51,8 @@ import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.extensions.surf.util.I18NUtil;
+import org.springframework.extensions.surf.util.URLDecoder;
+import org.springframework.extensions.surf.util.URLEncoder;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -134,22 +136,7 @@ public class LTIPlatformApi {
             }
 
 
-            Map<String, LoginInitiationSessionObject> loginInitiationSessionObjectMap = new LoginInitationSessionObjectEditor() {
-                @Override
-                protected String edit(Map<String, LoginInitiationSessionObject> loginInitiationSessionObjectMap) {
-                    LoginInitiationSessionObject loginInitiationSessionObject = loginInitiationSessionObjectMap.get(ltiMessageHint);
-
-                    if (loginInitiationSessionObject == null) {
-                        return LTIPlatformConstants.ERROR_MISSING_SESSIONOBJECT + " " + ltiMessageHint;
-                    }
-                    /**
-                     * remember nonce for replay (xss) protection. @TODO
-                     */
-                    loginInitiationSessionObject.setToolNonce(nonce);
-                    return null;
-                }
-            }.updateLoginInitationObject(req.getSession(), true);
-            LoginInitiationSessionObject loginInitiationSessionObject = loginInitiationSessionObjectMap.get(ltiMessageHint);
+            LoginInitiationSessionObject loginInitiationSessionObject = AllSessions.getUserLTISessions().get(URLDecoder.decode(ltiMessageHint));
 
             ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(loginInitiationSessionObject.getAppId());
             if(appInfo == null){
@@ -752,6 +739,37 @@ public class LTIPlatformApi {
                                           LoginInitiationSessionObject.MessageType messageType,
                                           String launchPresentation,
                                           HttpServletRequest req) {
+
+
+        LoginInitiationSessionObject loginInitiationSessionObject = new LoginInitiationSessionObject();
+        loginInitiationSessionObject.setAppId(appInfo.getAppId());
+        loginInitiationSessionObject.setClientId(appInfo.getLtiClientId());
+        loginInitiationSessionObject.setContextId(contextId);
+        loginInitiationSessionObject.setResourceLinkNodeId(resourceLinkNodeId);
+        if(resourceLinkEditMode != null) loginInitiationSessionObject.setResourceLinkEditMode(resourceLinkEditMode);
+        loginInitiationSessionObject.setVersion(version);
+        loginInitiationSessionObject.setMessageType(messageType);
+        loginInitiationSessionObject.setContentUrlNodeId(contentUrlNodeId);
+        loginInitiationSessionObject.setLaunchPresentation(launchPresentation);
+        loginInitiationSessionObject.setUser(AuthenticationUtil.getFullyAuthenticatedUser());
+
+        if(contentUrlNodeId == null) {
+            throw new RuntimeException("missing contentUrlNodeId");
+        }
+        Map<String,String> map = new HashMap<>();
+        map.put(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID,appInfo.getAppId());
+        map.put(LTIPlatformConstants.CUSTOM_CLAIM_USER,AuthenticationUtil.getFullyAuthenticatedUser());
+        map.put(LTIPlatformConstants.CUSTOM_CLAIM_NODEID,contentUrlNodeId);
+        long timeStamp = System.currentTimeMillis();
+        map.put("ts",timeStamp + "");
+        String json = new Gson().toJson(map);
+        String encryptedToken = ApiTool.encrpt(json);
+        loginInitiationSessionObject.setToken(encryptedToken);
+        loginInitiationSessionObject.setLastAccessed(timeStamp);
+        //remember session in userLTISessions map to reuse in later backend call
+        AllSessions.getUserLTISessions().put(encryptedToken, loginInitiationSessionObject);
+
+
         Map<String,String> params = new HashMap<>();
         params.put("iss",ApplicationInfoList.getHomeRepository().getClientBaseUrl());
         String targetLinkUrl = appInfo.getLtitoolTargetLinkUri();
@@ -766,94 +784,14 @@ public class LTIPlatformApi {
         params.put("login_hint", AuthenticationUtil.getFullyAuthenticatedUser());
 
         //allow multiple lti windows
-        String ltiSessionScope = UUID.randomUUID().toString();
-        params.put("lti_message_hint", ltiSessionScope);
+        params.put("lti_message_hint", URLEncoder.encode(encryptedToken));
         params.put("client_id", appInfo.getLtiClientId());
         params.put("lti_deployment_id", appInfo.getLtiDeploymentId());
         String form = ApiTool.getHTML(appInfo.getLtitoolLoginInitiationsUrl(),params);
 
-        LoginInitiationSessionObject loginInitiationSessionObject = new LoginInitiationSessionObject();
-        loginInitiationSessionObject.setAppId(appInfo.getAppId());
-        loginInitiationSessionObject.setClientId(appInfo.getLtiClientId());
-        loginInitiationSessionObject.setContextId(contextId);
-        loginInitiationSessionObject.setResourceLinkNodeId(resourceLinkNodeId);
-        if(resourceLinkEditMode != null) loginInitiationSessionObject.setResourceLinkEditMode(resourceLinkEditMode);
-        loginInitiationSessionObject.setVersion(version);
-        loginInitiationSessionObject.setMessageType(messageType);
-        loginInitiationSessionObject.setContentUrlNodeId(contentUrlNodeId);
-        loginInitiationSessionObject.setLaunchPresentation(launchPresentation);
-        loginInitiationSessionObject.setUser(AuthenticationUtil.getFullyAuthenticatedUser());
-        //remember session in userLTISessions map to reuse in later backend call
-        if(contentUrlNodeId != null){
-            Map<String,String> map = new HashMap<>();
-            map.put(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID,appInfo.getAppId());
-            map.put(LTIPlatformConstants.CUSTOM_CLAIM_USER,AuthenticationUtil.getFullyAuthenticatedUser());
-            map.put(LTIPlatformConstants.CUSTOM_CLAIM_NODEID,contentUrlNodeId);
-            long timeStamp = System.currentTimeMillis();
-            map.put("ts",timeStamp + "");
-            String json = new Gson().toJson(map);
-            String encryptedToken = ApiTool.encrpt(json);
-            loginInitiationSessionObject.setToken(encryptedToken);
-            loginInitiationSessionObject.setLastAccessed(timeStamp);
-            AllSessions.getUserLTISessions().put(encryptedToken, loginInitiationSessionObject);
-        }
-
-
-        try {
-            new LoginInitationSessionObjectEditor(){
-                @Override
-                protected String edit(Map<String, LoginInitiationSessionObject> loginInitiationSessionObjectMap) {
-                    loginInitiationSessionObjectMap.put(ltiSessionScope,loginInitiationSessionObject);
-                    return null;
-                }
-            }.updateLoginInitationObject(req.getSession(),false);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
 
         return form;
     }
-
-    /**
-     * Thread Safe edit LoginInitiationSessionObject
-     */
-    public abstract class LoginInitationSessionObjectEditor{
-
-        /**
-         *
-         * @param loginInitiationSessionObjectMap
-         * @return errorcode as string and null if no error occours
-         */
-        protected abstract String edit( Map<String,LoginInitiationSessionObject> loginInitiationSessionObjectMap);
-
-        /**
-         *
-         * @param session
-         * @param sessionObjectMustExist
-         * @throws Exception if sessionObjectMustExist and does not exist or edit(...) result is not null
-         */
-        public Map<String, LoginInitiationSessionObject> updateLoginInitationObject(HttpSession session, boolean sessionObjectMustExist) throws Exception {
-            return EduSharingLockHelper.runSingleton(LoginInitationSessionObjectEditor.class,session.getId(),() -> {
-                Map<String, LoginInitiationSessionObject> loginInitiationSessionObjectMap = (Map<String, LoginInitiationSessionObject>) session
-                        .getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
-                if (loginInitiationSessionObjectMap == null) {
-                    if (sessionObjectMustExist) {
-                        throw new Exception(LTIPlatformConstants.ERROR_MISSING_SESSIONOBJECTS);
-                    }
-                    loginInitiationSessionObjectMap = new HashMap<>();
-                }
-                String error = edit(loginInitiationSessionObjectMap);
-                if(error != null){
-                    throw new Exception(error);
-                }
-                //we have to reset the session object cause of redisson cache management
-                session.setAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT, loginInitiationSessionObjectMap);
-                return loginInitiationSessionObjectMap;
-            });
-        }
-    }
-
-
 
 
     @POST
