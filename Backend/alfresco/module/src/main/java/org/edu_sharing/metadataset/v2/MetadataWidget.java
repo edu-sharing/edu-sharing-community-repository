@@ -1,5 +1,8 @@
 package org.edu_sharing.metadataset.v2;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -71,6 +74,10 @@ public class MetadataWidget extends MetadataTranslatable{
 	placeholder,defaultvalue,template,
 	suggestionSource,suggestionQuery,suggestDisplayProperty,unit,format,
 	valuespaceSort="default";
+
+	@Getter
+	@Setter
+	private Boolean countDefaultvalueAsFilter = false;
 	private Integer min,max,defaultMin,defaultMax,step;
 	private boolean extended,allowempty,valuespaceClient=true,hideIfEmpty,inherit=true;
 	private Required required = Required.optional;

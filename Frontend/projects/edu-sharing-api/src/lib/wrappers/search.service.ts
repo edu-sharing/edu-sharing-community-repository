@@ -524,6 +524,7 @@ export class SearchService {
             'facetSuggest',
             'facets',
             'resolveCollections',
+            'resolveUsernames',
             'returnSuggestions',
         ];
         if (!changedBodyProperties.every((param) => [...nonCriticalBodyParams].includes(param))) {

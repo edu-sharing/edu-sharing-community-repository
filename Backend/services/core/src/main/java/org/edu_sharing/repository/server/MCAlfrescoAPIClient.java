@@ -133,6 +133,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	private static Logger logger = Logger.getLogger(MCAlfrescoAPIClient.class);
 
 	private static ApplicationContext applicationContext = null;
+	private final UserCache userCache;
 
 	private ServiceRegistry serviceRegistry = null;
 
@@ -213,6 +214,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		repId = appInfo.getAppId();
 
 		applicationContext = AlfAppContextGate.getApplicationContext();
+		userCache = AlfAppContextGate.getApplicationContext().getBean(UserCache.class);
 
 		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
@@ -2636,7 +2638,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					return null;
 				},
         false);
-		UserCache.refresh(userName);
+		userCache.refresh(userName);
 	}
 	
 	private void addUserExtensionAspect(String userName) {
@@ -3088,40 +3090,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		if(owner == null){
 			return null;
 		}
-		return getUser(owner);
-	}
-
-	public User getUser(String username){
-		User user = UserCache.get(username);
-		if(user != null){
-			return user;
-		}
-
-		user = new User();
-		user.setUsername(username);
-		NodeRef persNoderef = null;
-		try {
-			persNoderef = personService.getPerson(username,false);
-		} catch(NoSuchPersonException e) {
-			//ie the system user
-		}
-		if(persNoderef != null){
-			Map<QName,Serializable> props = nodeService.getProperties(persNoderef);
-			user.setEmail((String)props.get(QName.createQName(CCConstants.CM_PROP_PERSON_EMAIL)));
-			user.setGivenName((String)props.get(QName.createQName(CCConstants.CM_PROP_PERSON_FIRSTNAME)));
-			user.setSurname(((String)props.get(QName.createQName(CCConstants.CM_PROP_PERSON_LASTNAME))));
-			user.setNodeId(persNoderef.getId());
-			HashMap<String,Serializable> userProperties = new HashMap<>();
-			for (Map.Entry<QName, Serializable> entry : props.entrySet()) {
-				Serializable value = entry.getValue();
-				userProperties.put(
-						entry.getKey().toString(),
-						value);
-			}
-			user.setProperties(userProperties);
-		}
-		UserCache.put(username,user);
-		return user;
+		return userCache.getUser(owner);
 	}
 
 	/**
@@ -3883,19 +3852,11 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		// Creators
 		String creator = (String) properties.get(CCConstants.CM_PROP_C_CREATOR);
 		if (creator != null) {
-			NodeRef ref = null;
-
-			try {
-				ref = personService.getPerson(creator, false);
-			} catch (org.alfresco.service.cmr.security.NoSuchPersonException e) {
-				logger.debug("person " + creator + " does not longer exsists");
-			}
-
-			if (ref != null) {
-
-				properties.put(CCConstants.NODECREATOR_FIRSTNAME, nodeService.getProperty(ref, ContentModel.PROP_FIRSTNAME));
-				properties.put(CCConstants.NODECREATOR_LASTNAME, nodeService.getProperty(ref, ContentModel.PROP_LASTNAME));
-				properties.put(CCConstants.NODECREATOR_EMAIL, nodeService.getProperty(ref, ContentModel.PROP_EMAIL));
+			User creatorUser = userCache.getUser(creator);
+			if (creatorUser != null) {
+				properties.put(CCConstants.NODECREATOR_FIRSTNAME, creatorUser.getGivenName());
+				properties.put(CCConstants.NODECREATOR_LASTNAME, creatorUser.getSurname());
+				properties.put(CCConstants.NODECREATOR_EMAIL, creatorUser.getEmail());
 			} else {
 				properties.put(CCConstants.NODECREATOR_FIRSTNAME, "unknown");
 				properties.put(CCConstants.NODECREATOR_LASTNAME, "unknown");
@@ -3906,19 +3867,12 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		// Modfifier
 		String modifier = (String) properties.get(CCConstants.CM_PROP_C_MODIFIER);
 		if (modifier != null) {
-			NodeRef ref = null;
+			User modifierUser = userCache.getUser(modifier);
 
-			try {
-				ref = personService.getPerson(modifier, false);
-			} catch (org.alfresco.service.cmr.security.NoSuchPersonException e) {
-				logger.debug("person " + modifier + " does not longer exsists");
-			}
-
-			if (ref != null) {
-
-				properties.put(CCConstants.NODEMODIFIER_FIRSTNAME, nodeService.getProperty(ref, ContentModel.PROP_FIRSTNAME));
-				properties.put(CCConstants.NODEMODIFIER_LASTNAME, nodeService.getProperty(ref, ContentModel.PROP_LASTNAME));
-				properties.put(CCConstants.NODEMODIFIER_EMAIL, nodeService.getProperty(ref, ContentModel.PROP_EMAIL));
+			if (modifierUser != null) {
+				properties.put(CCConstants.NODEMODIFIER_FIRSTNAME, modifierUser.getGivenName());
+				properties.put(CCConstants.NODEMODIFIER_LASTNAME, modifierUser.getSurname());
+				properties.put(CCConstants.NODEMODIFIER_EMAIL, modifierUser.getEmail());
 			} else {
 				properties.put(CCConstants.NODEMODIFIER_FIRSTNAME, "unknown");
 				properties.put(CCConstants.NODEMODIFIER_LASTNAME, "unknown");
