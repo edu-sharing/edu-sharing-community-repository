@@ -72,6 +72,7 @@ import { NodeDataSource } from '../../../features/node-entries/node-data-source'
 import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
 import { LocalEventsService } from '../../../services/local-events.service';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
+import { CardDialogService } from '../../../features/dialogs/card-dialog/card-dialog.service';
 
 @Component({
     selector: 'es-node-render',
@@ -108,6 +109,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         private toolService: RestToolService,
         private componentFactoryResolver: ComponentFactoryResolver,
         private cardServcie: CardService,
+        private cardDialogService: CardDialogService,
         private viewContainerRef: ViewContainerRef,
         private frame: FrameEventsService,
         private toast: Toast,
@@ -258,7 +260,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
 
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
-        if (CardComponent.getNumberOfOpenCards() > 0) {
+        if (CardComponent.getNumberOfOpenCards() > 0 || this.cardDialogService.openDialogs.length > 0) {
             return;
         }
         if (event.code == 'ArrowLeft' && this.canSwitchBack()) {
