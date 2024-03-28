@@ -1,5 +1,5 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import { EventEmitter, Injectable } from '@angular/core';
+import { EventEmitter, Injectable, signal, WritableSignal } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import {
     ClickSource,
@@ -138,6 +138,7 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     primaryInstance: boolean;
     singleClickHint: 'dynamic' | 'static';
     disableInfiniteScroll: boolean;
+    scrollGradientColor: WritableSignal<string> = signal('fff');
 
     constructor(private uiService: UIService, private entriesGlobal: NodeEntriesGlobalService) {}
 
