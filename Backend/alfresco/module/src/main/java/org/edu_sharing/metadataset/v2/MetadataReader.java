@@ -453,6 +453,8 @@ public class MetadataReader {
                 }
                 if (name.equals("defaultvalue"))
                     widget.setDefaultvalue(value);
+                if (name.equals("countDefaultvalueAsFilter"))
+                    widget.setCountDefaultvalueAsFilter(new Boolean(value));
                 if (name.equals("format"))
                     widget.setFormat(value);
                 if (name.equals("link"))
