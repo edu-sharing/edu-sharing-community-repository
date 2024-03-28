@@ -260,7 +260,10 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
 
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
-        if (CardComponent.getNumberOfOpenCards() > 0 || this.cardDialogService.openDialogs.length > 0) {
+        if (
+            CardComponent.getNumberOfOpenCards() > 0 ||
+            this.cardDialogService.openDialogs.length > 0
+        ) {
             return;
         }
         if (event.code == 'ArrowLeft' && this.canSwitchBack()) {
