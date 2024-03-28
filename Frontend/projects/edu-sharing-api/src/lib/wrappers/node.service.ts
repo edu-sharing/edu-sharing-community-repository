@@ -47,6 +47,55 @@ export class NodeService {
             .pipe(map((nodeEntry) => nodeEntry.node));
     }
 
+    /**
+     * Create a new child.
+     */
+    createChild(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of parent node use -userhome- for userhome or -inbox- for inbox node
+         */
+        node: string;
+
+        /**
+         * type of node
+         */
+        type: string;
+
+        /**
+         * aspects of node
+         */
+        aspects?: Array<string>;
+
+        /**
+         * rename if the same node name exists
+         */
+        renameIfExists?: boolean;
+
+        /**
+         * comment, leave empty &#x3D; no inital version
+         */
+        versionComment?: string;
+
+        /**
+         * Association type, can be empty
+         */
+        assocType?: string;
+
+        /**
+         * properties, example: {"{http://www.alfresco.org/model/content/1.0}name": ["test"]}
+         */
+        body: {
+            [key: string]: Array<string>;
+        };
+    }): Observable<Node> {
+        return this.nodeV1.createChild(params).pipe(map((nodeEntry) => nodeEntry.node));
+    }
+
     deleteNode(
         id: string,
         { recycle = true, repository = HOME_REPOSITORY } = {},
@@ -218,6 +267,46 @@ export class NodeService {
                 map(({ node }) => node),
             );
         }
+    }
+
+    /**
+     * Set single property of node.
+     *
+     * When the property is unset (null), it will be removed
+     */
+    setProperty(
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string,
+
+        /**
+         * ID of node
+         */
+        node: string,
+
+        /**
+         * property
+         */
+        property: string,
+
+        /**
+         * value
+         */
+        value?: Array<string>,
+
+        /**
+         * keepModifiedDate
+         */
+        keepModifiedDate?: boolean,
+    ): Observable<any> {
+        return this.nodeV1.setProperty({
+            repository,
+            node,
+            property,
+            keepModifiedDate,
+            value,
+        });
     }
 
     /**
