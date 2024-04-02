@@ -1,20 +1,14 @@
 package org.edu_sharing.repository.server.authentication.oauth2;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.HashMap;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.apache.log4j.Logger;
 import org.apache.oltu.oauth2.as.issuer.MD5Generator;
 import org.apache.oltu.oauth2.as.issuer.OAuthIssuer;
 import org.apache.oltu.oauth2.as.issuer.OAuthIssuerImpl;
-import org.apache.oltu.oauth2.as.request.OAuthTokenRequest;
 import org.apache.oltu.oauth2.as.response.OAuthASResponse;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
@@ -30,6 +24,10 @@ import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
 import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.springframework.context.ApplicationContext;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
 
 public class TokenEndpoint extends HttpServlet {
 
@@ -60,18 +58,11 @@ public class TokenEndpoint extends HttpServlet {
 
 		try {
 
-			OAuthTokenRequest oauthRequest = null;
-			OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
-	
 			try {
 
-				/**
-				 * @TODO
-				 *  jakarta/javax lib problem
-				 *  justed fixed compile problems
-				 */
-				oauthRequest = null;//new OAuthTokenRequest(request);
-	
+				EduOAuthTokenRequest oauthRequest = new EduOAuthTokenRequest(request);
+				OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
+
 				String clientId = oauthRequest.getClientId();
 	
 				tokenService.validateClient(clientId, oauthRequest.getClientSecret());
