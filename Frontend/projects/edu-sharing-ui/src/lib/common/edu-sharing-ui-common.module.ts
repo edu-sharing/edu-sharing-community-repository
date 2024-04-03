@@ -47,12 +47,12 @@ import { SpinnerComponent } from '../spinner/spinner.component';
         OptionTooltipPipe,
         ReplaceCharsPipe,
         SortDropdownComponent,
-        SpinnerComponent,
         VCardNamePipe,
     ],
     imports: [
         CommonModule,
         MatMenuModule,
+        SpinnerComponent,
         MatButtonModule,
         MatTooltipModule,
         MatRippleModule,

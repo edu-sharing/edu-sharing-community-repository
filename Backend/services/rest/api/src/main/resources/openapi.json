@@ -2697,6 +2697,10 @@
           "configuration": {
             "type": "string"
           },
+          "countDefaultvalueAsFilter": {
+            "description": "When true, a set defaultvalue will still trigger the search to show an active filter. When false (default), the defaultvalue will be shown as if no filter is active",
+            "type": "boolean"
+          },
           "defaultMax": {
             "format": "int32",
             "type": "integer"
@@ -4848,6 +4852,9 @@
             "type": "array"
           },
           "resolveCollections": {
+            "type": "boolean"
+          },
+          "resolveUsernames": {
             "type": "boolean"
           },
           "returnSuggestions": {

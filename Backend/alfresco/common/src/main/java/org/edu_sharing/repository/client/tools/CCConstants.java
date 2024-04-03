@@ -2144,7 +2144,7 @@ public class CCConstants {
 
 		for(Map.Entry<String,String> entry: getNameSpaceMap().entrySet()){
 			if(value.contains(entry.getKey())){
-				String valMinusNamespace =  value.replaceAll("\\{"+entry.getKey()+"\\}","");
+				String valMinusNamespace =  value.replace("{"+entry.getKey()+"}","");
 				return entry.getValue()+":"+valMinusNamespace;
 			}
 		}
@@ -2157,11 +2157,9 @@ public class CCConstants {
 	 * @return
 	 */
 	public static String getValidGlobalName(String value){
-
 		for(Map.Entry<String,String> entry: getNameSpaceMap().entrySet()){
 			if(value.startsWith(entry.getValue())){
-				String valMinusNamespace =  value.replaceAll("^.+:", "");
-				return "{" + entry.getKey() + "}" + valMinusNamespace;
+				return "{" + entry.getKey() + "}" + value.substring(entry.getValue().length() + 1);
 			}
 		}
 		return null;

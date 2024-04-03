@@ -22,6 +22,7 @@ import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.search.ReadableWrapperQueryBuilder;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.SearchServiceFactory;
@@ -103,7 +104,8 @@ public class NodeFrontpage {
                 return false;
             }).forEach((q)-> {
                 //@TODO check config queries in extensions and fit for new index
-                query.must(m -> m.wrapper(w -> w.query(QueryUtils.replaceCommonQueryParams(q.query,QueryUtils.replacerFromSyntax(MetadataReader.QUERY_SYNTAX_DSL)))));
+                String queryString = QueryUtils.replaceCommonQueryParams(q.query,QueryUtils.replacerFromSyntax(MetadataReader.QUERY_SYNTAX_DSL));
+                query.must(must->must.wrapper(new ReadableWrapperQueryBuilder(queryString).build()));
             });
         }
 

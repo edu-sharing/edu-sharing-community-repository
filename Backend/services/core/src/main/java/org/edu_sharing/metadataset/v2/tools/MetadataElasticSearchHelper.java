@@ -3,19 +3,21 @@ package org.edu_sharing.metadataset.v2.tools;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.AggregationBuilders;
 import co.elastic.clients.elasticsearch._types.aggregations.MultiTermLookup;
-import co.elastic.clients.elasticsearch._types.aggregations.TermsInclude;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.json.JsonData;
 import co.elastic.clients.json.JsonpUtils;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.restservices.mds.v1.model.MdsWidget;
 import org.edu_sharing.service.search.ReadableWrapperQueryBuilder;
+import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SharedToMeType;
 
 import java.security.InvalidParameterException;
 import java.util.*;
@@ -27,6 +29,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
      */
     public static final int FACET_LIMIT_MULTIPLIER = 5;
     static Logger logger = Logger.getLogger(MetadataElasticSearchHelper.class);
+    private static MetadataQueryPreprocessor preprocessor = new MetadataQueryPreprocessor(MetadataReader.QUERY_SYNTAX_DSL);
 
     public static BoolQuery.Builder getElasticSearchQuery(SearchToken searchToken, MetadataQueries queries,MetadataQuery query, Map<String,String[]> parameters) throws IllegalArgumentException {
         return getElasticSearchQuery(searchToken, queries,query,parameters,true);
@@ -40,8 +43,10 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
             String baseQuery = replaceCommonQueryVariables(query.getBasequery().get(null));
             String baseQueryConditional = replaceCommonQueryVariables(query.findBasequery(parameters == null ? null : parameters.keySet()));
 
-            if(baseQuery.equals(baseQueryConditional)) {
-                result.must(must->must.wrapper(new ReadableWrapperQueryBuilder(baseQuery).build()));
+            if(Objects.equals(baseQuery,baseQueryConditional)) {
+                if(baseQuery != null) {
+                    result.must(must -> must.wrapper(new ReadableWrapperQueryBuilder(baseQuery).build()));
+                }
             } else {
                 result.must(must->must.wrapper(new ReadableWrapperQueryBuilder(baseQuery).build()))
                         .must(must->must.wrapper(new ReadableWrapperQueryBuilder(baseQueryConditional).build()));
@@ -50,9 +55,9 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
         if(parameters != null && parameters.isEmpty()) {
             if(query.isApplyBasequery()){
-                if(queries.findBasequery(parameters.keySet())!=null &&
-                        !queries.findBasequery(parameters.keySet()).isEmpty()) {
-                    result.must(must->must.wrapper(new ReadableWrapperQueryBuilder(queries.findBasequery(parameters.keySet())).build()));
+                String baseQueryParam = queries.findBasequery(parameters.keySet());
+                if(!StringUtils.isEmpty(baseQueryParam)) {
+                    result.must(must->must.wrapper(new ReadableWrapperQueryBuilder(baseQueryParam).build()));
                 }
                 applyCondition(queries, result);
             }
@@ -79,15 +84,23 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
             Query queryBuilderParam = null;
             if(query.isApplyBasequery()){
-                if(queries.findBasequery(parameters.keySet())!=null &&
-                        !queries.findBasequery(parameters.keySet()).isEmpty()) {
-                    result.must(must->must.wrapper(new ReadableWrapperQueryBuilder(queries.findBasequery(parameters.keySet())).build()));
+                String baseQueryParam = queries.findBasequery(parameters.keySet());
+                if(!StringUtils.isEmpty(baseQueryParam)) {
+                    result.must(must->must.wrapper(new ReadableWrapperQueryBuilder(baseQueryParam).build()));
                 }
                 applyCondition(queries, result);
             }
 
             applyCondition(query, result);
-            if (parameter.isMultiple()) {
+            BoolQuery sharedFilesSearch;
+            if(query.getId().equals("workspace") && parameter.getName().equals("parent") && parameter.getPreprocessor().equals("node_path")) {
+                sharedFilesSearch = handleSharedFilesSearch(queries, values);
+            } else {
+                sharedFilesSearch = null;
+            }
+            if(sharedFilesSearch != null) {
+                queryBuilderParam = Query.of(q-> q.bool(sharedFilesSearch));
+            } else if (parameter.isMultiple()) {
 
                 String multipleJoin = parameter.getMultiplejoin();
                 BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
@@ -137,6 +150,29 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         return result;
     }
 
+    private static BoolQuery handleSharedFilesSearch(MetadataQueries queries, String[] values) {
+        if(values[0].startsWith("-to_me_shared_files")){
+            try {
+                if("-to_me_shared_files_personal-".equals(values[0]) ){
+                    return SearchServiceElastic.getFilesSharedToMeQuery(queries, SharedToMeType.Private);
+                }else if("-to_me_shared_files-".equals(values[0])){
+                    return SearchServiceElastic.getFilesSharedToMeQuery(queries, SharedToMeType.All);
+                }else{
+                    logger.error("unknown SharedToMeType:"+values[0]);
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage(),e);
+            }
+        } else if(values[0].startsWith("-my_shared_files")) {
+            try {
+                return SearchServiceElastic.getFilesSharedByMeQuery(queries);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+        return null;
+    }
+
     private static BoolQuery.Builder applyCondition(MetadataQueryBase query, BoolQuery.Builder result) {
         for(MetadataQueryCondition condition : query.getConditions()){
             boolean conditionState = MetadataHelper.checkConditionTrue(condition.getCondition());
@@ -162,9 +198,9 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         if (value == null)
             return "";
 
-        // invoke any preprocessors for this value0
+        // invoke any preprocessors for this value
         try {
-            value = MetadataQueryPreprocessor.run(parameter, value);
+            value = preprocessor.run(parameter, value);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

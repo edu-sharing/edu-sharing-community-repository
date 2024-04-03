@@ -2,6 +2,8 @@ package org.edu_sharing.restservices.mds.v1.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
 import org.edu_sharing.metadataset.v2.MetadataCondition;
 import org.edu_sharing.metadataset.v2.MetadataKey;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
@@ -98,6 +100,11 @@ public class MdsWidget {
 	private MetadataWidget.Required isRequired;
 	private boolean allowempty;
 	private String defaultvalue;
+
+	@Schema(description = "When true, a set defaultvalue will still trigger the search to show an active filter. When false (default), the defaultvalue will be shown as if no filter is active")
+	@Getter
+	@Setter
+	private boolean countDefaultvalueAsFilter;
 	private boolean isSearchable;
 	private MdsWidgetCondition condition;
 	private int maxlength;
@@ -116,6 +123,7 @@ public class MdsWidget {
 		this.type=widget.getType();
 		this.link=widget.getLink();
 		this.defaultvalue=widget.getDefaultvalue();
+		this.countDefaultvalueAsFilter=widget.getCountDefaultvalueAsFilter();
 		this.placeholder=widget.getPlaceholder();
 		this.maxlength=widget.getMaxlength();
 		this.interactionType=widget.getInteractionType();

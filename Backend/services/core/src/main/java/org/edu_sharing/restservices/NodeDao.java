@@ -49,8 +49,8 @@ import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.model.CollectionRef;
 import org.edu_sharing.service.model.NodeRefImpl;
-import org.edu_sharing.service.nodeservice.*;
 import org.edu_sharing.service.nodeservice.NodeService;
+import org.edu_sharing.service.nodeservice.*;
 import org.edu_sharing.service.notification.NotificationService;
 import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
 import org.edu_sharing.service.permission.HandleMode;
@@ -72,6 +72,7 @@ import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
+import org.edu_sharing.service.nodeservice.CallSourceHelper;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -116,6 +117,11 @@ public class NodeDao {
     whether this node dao is supposed to fetch collection counts (more expensive when true)
      */
     boolean fetchCounts = true;
+    /**
+     * whether to resolve owner, creator and modifier full username
+     * Disabling is recommended when not needed to improve performance
+     */
+    public boolean resolveUsernames = true;
     // id of the object by the remote repository (null if not a remote object)
     private String remoteId;
     private RepositoryDao remoteRepository;
@@ -314,11 +320,11 @@ public class NodeDao {
     }
 
     public static NodeSearch search(RepositoryDao repoDao, MdsDao mdsDao,
-                                    String query, List<MdsQueryCriteria> criterias, SearchToken token, Filter filter) throws DAOException {
+                                    String query, List<MdsQueryCriteria> criterias, SearchToken token, Filter filter, Function<NodeDao, NodeDao> transform) throws DAOException {
         SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getId());
         Map<String, String[]> criteriasMap = MetadataSearchHelper.convertCriterias(criterias);
         try {
-            NodeSearch result = transform(repoDao, searchService.search(mdsDao.getMds(), query, criteriasMap, token), filter);
+            NodeSearch result = transform(repoDao, searchService.search(mdsDao.getMds(), query, criteriasMap, token), filter, transform);
             if (result.getCount() == 0) {
                 // try to search for ignorable properties to be null
                 List<String> removed;
@@ -332,7 +338,7 @@ public class NodeDao {
                 } else {
                     removed = slackCriteriasMap(criteriasMap, mdsDao.getMds().findQuery(query, MetadataReader.QUERY_SYNTAX_LUCENE));
                 }
-                result = transform(repoDao, searchService.search(mdsDao.getMds(), query, criteriasMap, token), filter);
+                result = transform(repoDao, searchService.search(mdsDao.getMds(), query, criteriasMap, token), filter, transform);
                 result.setIgnored(removed);
                 return result;
             }
@@ -374,7 +380,7 @@ public class NodeDao {
     public static NodeSearch searchFingerprint(RepositoryDao repoDao, String nodeId, Filter filter) throws DAOException {
         SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getId());
         try {
-            return transform(repoDao, searchService.searchFingerPrint(nodeId), filter);
+            return transform(repoDao, searchService.searchFingerPrint(nodeId), filter, null);
         } catch (Throwable e) {
             throw DAOException.mapping(e);
         }
@@ -382,7 +388,7 @@ public class NodeDao {
 
     public static NodeSearch search(RepositoryDao repoDao, String query,
                                     int startIdx, int nrOfresults, List<String> facets,
-                                    int facetsMinCount, int facetsLimit) throws DAOException {
+                                    int facetsMinCount, int facetsLimit, Function<NodeDao, NodeDao> transform) throws DAOException {
 
         try {
 
@@ -401,17 +407,17 @@ public class NodeDao {
     public static NodeSearch getMetadata(RepositoryDao repoDao, List<String> nodeIds, Filter filter) throws DAOException {
         SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getId());
         try {
-            return transform(repoDao, searchService.getMetadata(nodeIds), filter);
+            return transform(repoDao, searchService.getMetadata(nodeIds), filter, null);
         } catch (Throwable e) {
             throw DAOException.mapping(e);
         }
     }
 
     public static NodeSearch transform(RepositoryDao repoDao, SearchResultNodeRef search) {
-        return transform(repoDao, search, null);
+        return transform(repoDao, search, null, null);
     }
 
-    public static NodeSearch transform(RepositoryDao repoDao, SearchResultNodeRef search, Filter filter) {
+    public static NodeSearch transform(RepositoryDao repoDao, SearchResultNodeRef search, Filter filter, Function<NodeDao, NodeDao> transform) {
 
         NodeSearch result = new NodeSearch();
 
@@ -437,7 +443,11 @@ public class NodeDao {
             if (nodeRef.getProperties() != null) {
 
                 try {
-                    nodes.add(new NodeDao(repoDao, nodeRef, filter).asNode());
+                    NodeDao nodeDao = new NodeDao(repoDao, nodeRef, filter);
+                    if (transform != null) {
+                        nodeDao = transform.apply(nodeDao);
+                    }
+                    nodes.add(nodeDao.asNode());
                 } catch (DAOException e) {
 
                 }
@@ -608,7 +618,7 @@ public class NodeDao {
             List<MdsQueryCriteria> parameters = Arrays.asList(mapper.readValue(
                     (String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS), MdsQueryCriteria[].class));
             NodeSearch search = NodeDao.search(repoDao, mdsDao,
-                    (String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_QUERY), parameters, token, filter);
+                    (String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_QUERY), parameters, token, filter, null);
 
             List<Node> data;
             if (search.getNodes().size() < search.getResult().size()) {
@@ -1485,8 +1495,12 @@ public class NodeDao {
 
     private Content getContent(Node data) throws DAOException {
         Content content = new Content();
-        content.setVersion(getContentVersion(data));
         content.setUrl(getContentUrl());
+        // skip hash + version for search cause of performance penalties
+        if(Arrays.asList(CallSourceHelper.CallSource.Search, CallSourceHelper.CallSource.Sitemap).contains(CallSourceHelper.getCallSource())) {
+            return content;
+        }
+        content.setVersion(getContentVersion(data));
 
         if (isFromRemoteRepository()) {
             // @TODO: not available here
@@ -1697,7 +1711,7 @@ public class NodeDao {
     }
 
     public boolean isDirectory() {
-        return MimeTypesV2.isDirectory(nodeProps);
+        return MimeTypesV2.isDirectory(nodeProps, type);
     }
 
     public boolean isCollection() {
@@ -1771,33 +1785,45 @@ public class NodeDao {
     public Person getCreatedBy() {
 
         Person ref = new Person();
-        ref.setFirstName((String) nodeProps
-                .get(CCConstants.NODECREATOR_FIRSTNAME));
-        ref.setLastName((String) nodeProps
-                .get(CCConstants.NODECREATOR_LASTNAME));
-        if (this.checkUserHasPermissionToSeeMail((String) nodeProps.get(CCConstants.CM_PROP_C_CREATOR)))
-            ref.setMailbox((String) nodeProps.get(CCConstants.NODECREATOR_EMAIL));
-
+        if(nodeProps.get(CCConstants.NODECREATOR_FIRSTNAME) != null && nodeProps.get(CCConstants.NODECREATOR_LASTNAME) != null) {
+            ref.setFirstName((String) nodeProps
+                    .get(CCConstants.NODECREATOR_FIRSTNAME));
+            ref.setLastName((String) nodeProps
+                    .get(CCConstants.NODECREATOR_LASTNAME));
+            if (resolveUsernames && this.checkUserHasPermissionToSeeMail((String) nodeProps.get(CCConstants.CM_PROP_C_CREATOR)))
+                ref.setMailbox((String) nodeProps.get(CCConstants.NODECREATOR_EMAIL));
+        } else if(resolveUsernames && authorityService != null) {
+            User user = authorityService.getUser((String) nodeProps.get(CCConstants.CM_PROP_C_CREATOR));
+            if(user != null) {
+                ref.setFirstName(user.getGivenName());
+                ref.setLastName(user.getSurname());
+                if (this.checkUserHasPermissionToSeeMail((String) nodeProps.get(CCConstants.CM_PROP_C_CREATOR)))
+                    ref.setMailbox(ref.getMailbox());
+            }
+        }
         return ref;
     }
 
     private Person getOwner() {
-        User owner = null;
-        if (ownerUsername != null && !ownerUsername.trim().equals("")) {
-            if (authorityService != null) {
-                owner = authorityService.getUser(ownerUsername);
+        if(resolveUsernames) {
+            User owner = null;
+            if (ownerUsername != null && !ownerUsername.trim().equals("")) {
+                if (authorityService != null) {
+                    owner = authorityService.getUser(ownerUsername);
+                }
             }
-        }
-        owner = (owner == null) ? nodeService.getOwner(storeId, storeProtocol, nodeId) : owner;
-        if (owner == null)
-            return null;
-        Person ref = new Person();
-        ref.setFirstName(owner.getGivenName());
-        ref.setLastName(owner.getSurname());
-        if (this.checkUserHasPermissionToSeeMail(owner.getUsername()))//only admin can see even if users have hide email
-            ref.setMailbox(owner.getEmail());
+            owner = (owner == null) ? nodeService.getOwner(storeId, storeProtocol, nodeId) : owner;
+            if (owner == null)
+                return null;
+            Person ref = new Person();
+            ref.setFirstName(owner.getGivenName());
+            ref.setLastName(owner.getSurname());
+            if (this.checkUserHasPermissionToSeeMail(owner.getUsername()))//only admin can see even if users have hide email
+                ref.setMailbox(owner.getEmail());
 
-        return ref;
+            return ref;
+        }
+        return null;
     }
 
 
@@ -1877,14 +1903,22 @@ public class NodeDao {
     private Person getModifiedBy() {
 
         Person ref = new Person();
-
-        ref.setFirstName((String) nodeProps
-                .get(CCConstants.NODEMODIFIER_FIRSTNAME));
-        ref.setLastName((String) nodeProps
-                .get(CCConstants.NODEMODIFIER_LASTNAME));
-        if (this.checkUserHasPermissionToSeeMail((String) nodeProps.get(CCConstants.CM_PROP_C_MODIFIER)))
-            ref.setMailbox((String) nodeProps.get(CCConstants.NODEMODIFIER_EMAIL));
-
+        if(nodeProps.get(CCConstants.NODEMODIFIER_FIRSTNAME) != null && nodeProps.get(CCConstants.NODEMODIFIER_LASTNAME) != null) {
+            ref.setFirstName((String) nodeProps
+                    .get(CCConstants.NODEMODIFIER_FIRSTNAME));
+            ref.setLastName((String) nodeProps
+                    .get(CCConstants.NODEMODIFIER_LASTNAME));
+            if (resolveUsernames && this.checkUserHasPermissionToSeeMail((String) nodeProps.get(CCConstants.CM_PROP_C_MODIFIER)))
+                ref.setMailbox((String) nodeProps.get(CCConstants.NODEMODIFIER_EMAIL));
+        } else if(resolveUsernames && authorityService != null) {
+            User user = authorityService.getUser((String) nodeProps.get(CCConstants.CM_PROP_C_MODIFIER));
+            if(user != null) {
+                ref.setFirstName(user.getGivenName());
+                ref.setLastName(user.getSurname());
+                if (this.checkUserHasPermissionToSeeMail((String) nodeProps.get(CCConstants.CM_PROP_C_MODIFIER)))
+                    ref.setMailbox(ref.getMailbox());
+            }
+        }
         return ref;
     }
 
@@ -2184,7 +2218,7 @@ public class NodeDao {
     }
 
     private String getMimetype() {
-        return MimeTypesV2.getMimeType(nodeProps);
+        return MimeTypesV2.getMimeType(nodeProps, type);
     }
 
     public String getMediatype() {
@@ -2309,15 +2343,22 @@ public class NodeDao {
      * All files the current user is a receiver of the workflow
      *
      * @param repoDao
+     * @param skipCount
+     * @param maxItems
      * @return
      * @throws DAOException
      */
-    public static List<NodeRef> getWorkflowReceive(RepositoryDao repoDao, List<String> filter, SortDefinition sortDefinition) throws DAOException {
+    public static SearchResult<NodeDao> getWorkflowReceive(RepositoryDao repoDao, List<String> filter, SortDefinition sortDefinition, Integer skipCount, Integer maxItems) throws DAOException {
         SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
         try {
-            List<org.alfresco.service.cmr.repository.NodeRef> refs = searchService.getWorkflowReceive(AuthenticationUtil.getFullyAuthenticatedUser());
-            refs = NodeDao.sortAlfrescoRefs(refs, filter, sortDefinition);
-            return convertAlfrescoNodeRef(repoDao, refs);
+            SearchResultNodeRef result = searchService.getWorkflowReceive(
+                    AuthenticationUtil.getFullyAuthenticatedUser(),
+                    sortDefinition, mapFilterToContentType(filter),
+                    skipCount.intValue(),
+                    maxItems == null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems.intValue()
+            );
+            return NodeDao.convertResultSet(repoDao, Filter.createShowAllFilter(), result);
+
         } catch (Exception e) {
             throw DAOException.mapping(e);
         }
@@ -2617,7 +2658,10 @@ public class NodeDao {
             sr.setNodes(NodeServiceFactory.getNodeService(repoDao.getId()).
                     getFrontpageNodes().stream().map((ref) -> {
                         try {
-                            return NodeDao.getNode(repoDao, ref);
+                            NodeDao dao = NodeDao.getNode(repoDao, ref);
+                            // not required for the frontpage
+                            dao.resolveUsernames = false;
+                            return dao;
                         } catch (DAOException e) {
                             throw new RuntimeException(e);
                         }

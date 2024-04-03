@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.edu_sharing.utils.TreeNode;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -105,6 +108,7 @@ public class MetadataWidget extends MetadataTranslatable {
     private boolean valuespaceClient = true;
     private boolean hideIfEmpty;
     private boolean inherit = true;
+    private Boolean countDefaultvalueAsFilter = false;
     private Required required = Required.optional;
     private Map<String, MetadataKey> values;
     private List<Subwidget> subwidgets;
