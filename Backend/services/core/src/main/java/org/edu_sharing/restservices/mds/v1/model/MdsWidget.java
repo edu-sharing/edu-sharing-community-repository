@@ -133,7 +133,7 @@ public class MdsWidget {
 		this.allowValuespaceSuggestions =widget.getSuggestionReceiver() != null;
 		this.isExtended=widget.isExtended();
 		this.isHideIfEmpty=widget.isHideIfEmpty();
-		this.isRequired=widget.isRequired();
+		this.isRequired=widget.getRequired();
 		this.allowempty=widget.isAllowempty();
 		this.isSearchable=widget.isSearchable();
 		if(widget.getCondition()!=null) {
