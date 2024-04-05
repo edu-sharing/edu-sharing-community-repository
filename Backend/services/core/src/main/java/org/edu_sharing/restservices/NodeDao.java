@@ -72,7 +72,6 @@ import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
-import org.edu_sharing.service.nodeservice.CallSourceHelper;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -1957,7 +1956,8 @@ public class NodeDao {
                 return RatingServiceFactory.getRatingService(repoDao.getId()).getAccumulatedRatings(getNodeRef(), null);
             }
         } catch (Throwable t) {
-            logger.warn("Can not fetch ratings for node " + nodeId + ": " + t.getMessage(), t);
+            logger.info("Can not fetch ratings for node " + nodeId + ": " + t.getMessage());
+            logger.debug(t);
             return null;
         }
     }

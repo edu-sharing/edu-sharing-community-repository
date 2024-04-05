@@ -283,6 +283,13 @@ div.download {
     }
 }
 
+es-imprint-privacy {
+    position: absolute;
+    width: 100%;
+    // leave space for scroll to top
+    padding: 10px 0 45px 0;
+}
+
 @media (pointer: coarse) {
     #sequence {
         overflow-x: auto;

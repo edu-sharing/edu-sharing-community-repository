@@ -1,10 +1,10 @@
 import { trigger } from '@angular/animations';
 import { PlatformLocation } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { first, map, startWith, switchMap } from 'rxjs/operators';
+import { delay, first, map, startWith, switchMap } from 'rxjs/operators';
 import { BridgeService } from '../../services/bridge.service';
 import {
     ConfigurationService,
@@ -31,7 +31,7 @@ import { Subject } from 'rxjs';
     styleUrls: ['login-page.component.scss'],
     animations: [trigger('dialog', UIAnimation.switchDialog(UIAnimation.ANIMATION_TIME_FAST))],
 })
-export class LoginPageComponent implements OnInit, OnDestroy {
+export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     @ViewChild('loginForm') loginForm: ElementRef;
     @ViewChild('passwordInput') passwordInput: InputPasswordComponent;
@@ -130,15 +130,6 @@ export class LoginPageComponent implements OnInit, OnDestroy {
                         else if (data.statusCode !== RestConstants.STATUS_CODE_OK && this.scope) {
                             // RestHelper.goToLogin()
                         }
-                        if (configService.instant('loginProvidersUrl')) {
-                            this.showProviders = true;
-                            this.updateButtons();
-                            this.http
-                                .get(configService.instant('loginProvidersUrl'))
-                                .subscribe((providers) => {
-                                    this.processProviders(providers);
-                                });
-                        }
                         this.loginUrl = configService.instant('loginUrl');
                         const allowLocal = configService.instant('loginAllowLocal', false);
                         if (
@@ -152,6 +143,17 @@ export class LoginPageComponent implements OnInit, OnDestroy {
                         }
                         this.isLoading = false;
                         loadingTask.done();
+                        if (configService.instant('loginProvidersUrl')) {
+                            this.showProviders = true;
+                            this.updateButtons();
+                            // delay to make sure animation of card has finished
+                            // otherwise, overlay gets aligned wrongly
+                            const providers = await this.http
+                                .get(configService.instant('loginProvidersUrl'))
+                                .pipe(delay(UIAnimation.ANIMATION_TIME_NORMAL))
+                                .toPromise();
+                            this.processProviders(providers);
+                        }
                     });
                     this.isSafeLogin = this.scope == RestConstants.SAFE_SCOPE;
                     if (this.scope === RestConstants.SAFE_SCOPE) {
@@ -189,6 +191,10 @@ export class LoginPageComponent implements OnInit, OnDestroy {
             });
     }
 
+    ngAfterViewInit(): void {
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 100);
+    }
+
     ngOnDestroy(): void {
         this.destroyed.next();
         this.destroyed.complete();
@@ -222,7 +228,11 @@ export class LoginPageComponent implements OnInit, OnDestroy {
             this.connector.getAbsoluteServerUrl() + this.configService.instant('loginUrl');
         url = url
             .replace(':target', encodeURIComponent(target))
-            .replace(':entity', encodeURIComponent(this.currentProvider.url));
+            // remove invalid parameters for multiple universities using the same idp
+            .replace(
+                ':entity',
+                encodeURIComponent(this.currentProvider.url.replace(/@_.*?_@/, '')),
+            );
         // @TODO: Redirect to shibboleth provider
         UIHelper.openUrl(url, this.bridge, OPEN_URL_MODE.Current);
     }

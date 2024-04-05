@@ -1,19 +1,20 @@
 package org.edu_sharing.service.nodeservice;
 
+import lombok.NonNull;
+import org.alfresco.service.cmr.repository.*;
+import org.apache.commons.lang3.NotImplementedException;
+import org.apache.log4j.Logger;
+import org.edu_sharing.repository.client.rpc.User;
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+import org.edu_sharing.service.permission.HandleMode;
+import org.edu_sharing.service.search.model.SortDefinition;
+
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-
-import lombok.NonNull;
-import org.alfresco.service.cmr.repository.*;
-import org.apache.log4j.Logger;
-import org.edu_sharing.repository.client.rpc.User;
-import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
-import org.edu_sharing.service.permission.HandleMode;
-import org.edu_sharing.service.search.model.SortDefinition;
 
 public interface NodeService {
 
@@ -193,6 +194,9 @@ public interface NodeService {
 	 */
 	String publishCopy(String nodeId, HandleMode handleMode) throws Throwable;
 
+	default void createHandle(NodeRef nodeRef, List<String> publishedCopies, HandleMode handleMode) throws Exception {
+		throw new NotImplementedException();
+	}
 	/**
 	 * Get all published copies of this node
 	 * @return

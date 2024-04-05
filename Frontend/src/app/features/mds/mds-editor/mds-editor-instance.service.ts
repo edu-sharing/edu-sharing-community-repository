@@ -260,9 +260,8 @@ export class MdsEditorInstanceService implements OnDestroy {
         initWithNodes(nodes: Node[] | Metadata[]): void {
             const nodeValues = nodes.map((node) => this.readNodeValue(node, this.definition));
             if (nodeValues.every((nodeValue) => nodeValue === undefined)) {
-                const defaultValue = this.definition.defaultvalue
-                    ? [this.definition.defaultvalue]
-                    : [];
+                const defaultValue =
+                    this.getDefaultValue() !== null ? [this.getDefaultValue()] : [];
                 this.initialValues = { jointValues: defaultValue };
                 this.hasUnsavedDefault = defaultValue.length > 0;
             } else {
@@ -307,7 +306,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                 this.initialValues = {
                     jointValues:
                         values?.[this.definition.id] ||
-                        (this.definition.defaultvalue ? [this.definition.defaultvalue] : []),
+                        (this.getDefaultValue() !== null ? [this.getDefaultValue()] : []),
                 };
             }
             // Set initial values, so the initial completion status is calculated correctly.
@@ -320,6 +319,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         /**
          *  @deprecated
          *  prefer to subscribe the initialValuesSubject instead, because the initial values might
+         *  or use await getInitalValuesAsync
          *  not be ready when the widget gets loaded
          * */
         getInitialValues(): InitialValues {
@@ -620,6 +620,13 @@ export class MdsEditorInstanceService implements OnDestroy {
                 }
             });
             return Array.from(result);
+        }
+
+        private getDefaultValue(): string | null {
+            if (this.definition.type === 'checkbox') {
+                return this.definition.defaultvalue ?? 'false';
+            }
+            return this.definition.defaultvalue ?? null;
         }
 
         private setInternalError(internalError: string) {

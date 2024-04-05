@@ -21432,6 +21432,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "description": "jwt for checking access in lms context",
+            "in": "query",
+            "name": "jwt",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {

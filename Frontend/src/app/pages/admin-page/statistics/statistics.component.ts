@@ -37,7 +37,6 @@ import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
 import {
     BarController,
     BarElement,
-    CartesianScaleTypeRegistry,
     CategoryScale,
     Chart,
     Legend,
@@ -792,7 +791,7 @@ export class AdminStatisticsComponent implements OnInit {
     export() {
         let csvHeadersTranslated: string[];
         let csvHeadersMapping: string[];
-        let csvData: any;
+        let csvData: any[];
         let from: Date;
         let to: Date;
         // node export
@@ -845,7 +844,8 @@ export class AdminStatisticsComponent implements OnInit {
                 csvHeadersTranslated = csvHeadersMapping.map((s) =>
                     this.translate.instant('ADMIN.STATISTICS.HEADERS.' + s),
                 );
-                csvData = this.customGroupData.map((c: any) => {
+
+                csvData = Helper.deepCopy(this.customGroupData).map((c: any) => {
                     c[this.customGroup] = c.displayValue;
                     console.log(c);
                     for (const key of this.customGroupRows) {
@@ -857,7 +857,54 @@ export class AdminStatisticsComponent implements OnInit {
                     }
                     return c;
                 });
-                console.log(csvHeadersTranslated, csvData);
+                const eventTypes = [
+                    // 'OVERALL',
+                    'VIEW_MATERIAL',
+                    'VIEW_COLLECTION',
+                    'OPEN_EXTERNAL_LINK',
+                    'VIEW_MATERIAL_EMBEDDED',
+                    'VIEW_MATERIAL_PLAY_MEDIA',
+                    'DOWNLOAD_MATERIAL',
+                ];
+                // fill up all non existing events per field group
+                [
+                    ...new Set(
+                        csvData.map((csvData: any) => csvData.entry.fields[this.customGroup]),
+                    ),
+                ].forEach((grouping) => {
+                    const data = csvData.filter(
+                        (csvData: any) => csvData.entry.fields[this.customGroup] === grouping,
+                    );
+                    eventTypes
+                        .filter((event) => !data.some((d: any) => d.action === event))
+                        .forEach((event) => {
+                            csvData.push({
+                                ...data[0],
+                                action: event,
+                                count: 0,
+                                entry: {
+                                    ...data[0].entry,
+                                    counts: null,
+                                },
+                            });
+                        });
+                });
+                // sort the result
+                csvData.sort((a, b) => {
+                    const a1 = a.entry.fields[this.customGroup];
+                    const b1 = b.entry.fields[this.customGroup];
+                    if (a1 !== b1) {
+                        return a1 > b1 ? -1 : 1;
+                    }
+                    return eventTypes.indexOf(a.action) > eventTypes.indexOf(b.action) ? 1 : -1;
+                });
+
+                // translate labels
+                csvData = csvData.map((data) => {
+                    data.action = this.translate.instant('ADMIN.STATISTICS.ACTIONS.' + data.action);
+                    return data;
+                });
+                console.info(csvHeadersTranslated, csvHeadersMapping, csvData);
                 break;
             }
             case 2: {

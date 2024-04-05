@@ -15,6 +15,7 @@ import co.elastic.clients.json.JsonpUtils;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.TransportOptions;
+import co.elastic.clients.transport.rest_client.RestClientOptions;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -63,7 +64,9 @@ import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SearchVCard;
 import org.edu_sharing.service.search.model.SharedToMeType;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.elasticsearch.client.HttpAsyncResponseConsumerFactory;
 import org.elasticsearch.client.Request;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
@@ -94,6 +97,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
     ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
     PermissionModel permissionModel = (PermissionModel) alfApplicationContext.getBean("permissionsModelDAO");
+
+    public static int MAX_RESPONSE_ENTITY_SIZE = -1;
 
     public static HttpHost[] getConfiguredHosts() {
         try {
@@ -182,7 +187,6 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     private TransportOptions.Builder getRequestOptions(TransportOptions.Builder bld) {
-
         // add trace headers to elastic request
         Context context = Context.getCurrentInstance();
         if (context != null) {
@@ -671,6 +675,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 for (String k : key) {
                     long count = b.docCount();
                     NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
+                    // skip duplicate entries
+                    if(values.stream().anyMatch(v -> v.getValue().equals(k))) {
+                        continue;
+                    }
                     value.setValue(k);
                     value.setCount((int) count);
                     values.add(value);
@@ -1275,6 +1283,16 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     logger.error("ping failed, close failed:" + e.getMessage() + " creating new");
                 }
             }
+            if(MAX_RESPONSE_ENTITY_SIZE == -1){
+                if(LightbendConfigLoader.get().hasPath("elasticsearch.max_response_entity_size")){
+                    MAX_RESPONSE_ENTITY_SIZE = LightbendConfigLoader.get().getInt("elasticsearch.max_response_entity_size");
+                }
+                else{
+                    //100 MB
+                    MAX_RESPONSE_ENTITY_SIZE = 100 * 1048576;
+                }
+            }
+
             // Create the low-level client
             restClient = RestClient
                     .builder(getConfiguredHosts())
@@ -1282,9 +1300,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
                             // new BasicHeader("Authorization", "ApiKey " + apiKey)
                     })
                     .build();
-            ElasticsearchTransport transport = new RestClientTransport(
-                    restClient, new JacksonJsonpMapper());
 
+            RequestOptions.Builder options = RequestOptions.DEFAULT.toBuilder();
+            options.setHttpAsyncResponseConsumerFactory(
+                    new HttpAsyncResponseConsumerFactory.HeapBufferedResponseConsumerFactory(MAX_RESPONSE_ENTITY_SIZE)
+            );
+            ElasticsearchTransport transport = new RestClientTransport(
+                    restClient, new JacksonJsonpMapper(), new RestClientOptions.Builder(options).build());
             client = new ElasticsearchClient(transport);
         }
     }
