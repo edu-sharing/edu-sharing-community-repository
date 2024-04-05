@@ -132,6 +132,9 @@ public class MetadataWidget extends MetadataTranslatable {
     }
 
     public Collection<MetadataKey> getValues() {
+        if(values == null) {
+            return null;
+        }
         return values.values();
     }
 
