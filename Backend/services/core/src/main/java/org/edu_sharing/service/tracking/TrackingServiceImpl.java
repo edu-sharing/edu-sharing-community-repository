@@ -634,7 +634,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         try{
             Array mediacenters = resultSet.getArray("authority_mediacenter");
             if (mediacenters != null) {
-                if(mediacenter != null) {
+                if(!StringUtils.isEmpty(mediacenter)) {
                     // filter only for the current mediacenter
                     entry.getAuthorityInfo().setMediacenters(Arrays.stream((String[]) mediacenters.getArray()).filter(mediacenter::equals).toArray(String[]::new));
                 } else {

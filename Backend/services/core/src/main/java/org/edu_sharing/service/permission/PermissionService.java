@@ -1,23 +1,17 @@
 package org.edu_sharing.service.permission;
 
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.edu_sharing.repository.client.rpc.*;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.service.InsufficientPermissionException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.edu_sharing.repository.client.rpc.ACE;
-import org.edu_sharing.repository.client.rpc.ACL;
-import org.edu_sharing.repository.client.rpc.Authority;
-import org.edu_sharing.repository.client.rpc.Group;
-import org.edu_sharing.repository.client.rpc.Notify;
-import org.edu_sharing.repository.client.rpc.Result;
-import org.edu_sharing.repository.client.rpc.User;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.service.InsufficientPermissionException;
-
 public interface PermissionService {
-	public static final String[] GUEST_PERMISSIONS = new String[]{ org.alfresco.service.cmr.security.PermissionService.READ,CCConstants.PERMISSION_READ_PREVIEW,CCConstants.PERMISSION_READ_ALL};
+	public static final String[] GUEST_PERMISSIONS = new String[]{ org.alfresco.service.cmr.security.PermissionService.READ,CCConstants.PERMISSION_READ_PREVIEW,CCConstants.PERMISSION_READ_ALL, CCConstants.PERMISSION_FEEDBACK};
 	/**
 	 * adds permissions to the current ACL
 	 * @param _nodeId

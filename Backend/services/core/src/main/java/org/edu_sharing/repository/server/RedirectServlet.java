@@ -61,7 +61,7 @@ public class RedirectServlet extends HttpServlet {
 			}
 			throw new ServletException("Repository "+appId+" does not support rendering and didn't provide a "+CCConstants.LOM_PROP_TECHNICAL_LOCATION+" property! Please make sure that a property is provided");
 		}
-		String url=URLTool.getNgRenderNodeUrl(nodeId,req.getParameter("version"));
+		String url=URLTool.getNgRenderNodeUrl(nodeId,req.getParameter("version"), false, appId);
 		String params = req.getParameter("params");
 		if (params != null && !params.trim().equals("")) {
 			url=UrlTool.setParamEncode(url,"params",params);

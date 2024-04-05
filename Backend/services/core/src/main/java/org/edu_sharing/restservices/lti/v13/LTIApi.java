@@ -5,8 +5,6 @@ import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
 import edu.uoc.elc.lti.tool.Tool;
 import edu.uoc.elc.lti.tool.oidc.LoginRequest;
-import edu.uoc.elc.spring.lti.security.openid.HttpSessionOIDCLaunchSession;
-import edu.uoc.elc.spring.lti.security.openid.LoginRequestFactory;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -17,6 +15,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.log4j.Logger;
@@ -25,7 +28,6 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.security.AllSessions;
 import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
@@ -53,13 +55,7 @@ import org.edu_sharing.service.lti13.uoc.Config;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
 import java.net.*;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
@@ -515,7 +511,7 @@ public class LTIApi {
                                 null);
                     }
                 }
-
+                req.getSession().removeAttribute(LTISessionObject.class.getName());
                 return Response.ok(dl).build();
             }else{
                 throw new Exception("no active lti session");
