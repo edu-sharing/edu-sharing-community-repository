@@ -34,6 +34,7 @@ export * from './lib/node-entries/node-entries-global.service';
 export * from './lib/node-entries/node-entries-wrapper.component';
 export * from './lib/node-entries/node-entries.module';
 export * from './lib/node-url/node-url.component';
+export * from './lib/pipes/property-slug.pipe';
 export * from './lib/pipes/file-size.pipe';
 export * from './lib/pipes/format-date.pipe';
 export * from './lib/pipes/node-icon.pipe';
