@@ -7,7 +7,9 @@
         ' grid-card-collection-type-' +
         node.collection.type
       : '') +
-    ($any(node).virtual ? ' grid-card-virtual' : '')
+    ($any(node).virtual ? ' grid-card-virtual' : '') +
+    ' ' +
+    nodeEntriesGlobalService.getCustomCssClass(node)
   "
   [style.background-color]="isCollection ? node.collection.color : null"
   [class.dynamic-single-click]="entriesService.singleClickHint === 'dynamic'"
