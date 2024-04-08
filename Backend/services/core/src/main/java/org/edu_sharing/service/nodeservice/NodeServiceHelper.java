@@ -45,9 +45,6 @@ public class NodeServiceHelper {
 	private static final Map<String, String> cache = new HashMap<>();
 	private static Logger logger=Logger.getLogger(NodeServiceHelper.class);
 
-	private static ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
-	private static PermissionModel permissionModel = (PermissionModel) alfApplicationContext.getBean("permissionsModelDAO");
-
 	/**
 	 * Clean the CM_NAME property so it does not cause an org.alfresco.repo.node.integrity.IntegrityException
 	 * @param cmNameReadableName
