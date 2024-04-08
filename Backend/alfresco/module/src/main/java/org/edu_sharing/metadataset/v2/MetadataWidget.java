@@ -168,7 +168,7 @@ public class MetadataWidget extends MetadataTranslatable {
     }
 
     public Map<String, MetadataKey> getValuesAsMap() {
-        return values;
+        return values == null ? Collections.emptyMap() : values;
     }
 
     public Map<String, Collection<MetadataKey.MetadataKeyRelated>> getValuespaceMappingByRelation(MetadataKey.MetadataKeyRelated.Relation relation) {
