@@ -1016,14 +1016,10 @@ public class CollectionServiceImpl implements CollectionService {
 
     @Override
     public void writePreviewImage(String collectionId, InputStream is, String mimeType) throws Exception {
-        //new ImageMagickContentTransformerWorker()
-		is = ImageTool.verifyImage(is);
-        is = ImageTool.autoRotateImage(is, ImageTool.MAX_THUMB_SIZE);
-        client.writeContent(MCAlfrescoAPIClient.storeRef, collectionId, is, mimeType, null, CCConstants.CCM_PROP_MAP_ICON);
+        ImageTool.VerifyResult result = ImageTool.verifyAndPreprocessImage(is, ImageTool.MAX_THUMB_SIZE);
+        client.writeContent(MCAlfrescoAPIClient.storeRef, collectionId, result.getInputStream(), result.getMediaType().toString(), null, CCConstants.CCM_PROP_MAP_ICON);
         ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
         ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-        ThumbnailService thumbnailService = serviceRegistry.getThumbnailService();
-        org.alfresco.service.cmr.repository.NodeRef ref = new org.alfresco.service.cmr.repository.NodeRef(MCAlfrescoAPIClient.storeRef, collectionId);
         PreviewCache.purgeCache(collectionId);
     }
 

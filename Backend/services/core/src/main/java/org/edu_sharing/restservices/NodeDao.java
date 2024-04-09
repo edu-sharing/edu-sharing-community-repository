@@ -1148,8 +1148,7 @@ public class NodeDao {
     public NodeDao changePreview(InputStream is, String mimetype, boolean version) throws DAOException {
 
         try {
-			is = ImageTool.verifyImage(is);
-            is = ImageTool.autoRotateImage(is, ImageTool.MAX_THUMB_SIZE);
+            ImageTool.VerifyResult result = ImageTool.verifyAndPreprocessImage(is, ImageTool.MAX_THUMB_SIZE);
 
             HashMap<String, String[]> props = new HashMap<>();
             if (version) {
@@ -1158,7 +1157,7 @@ public class NodeDao {
             }
             props.put(CCConstants.CCM_PROP_IO_CREATE_VERSION, new String[]{new Boolean(version).toString()});
             nodeService.updateNode(nodeId, props);
-            nodeService.writeContent(storeRef, nodeId, is, mimetype, null,
+            nodeService.writeContent(storeRef, nodeId, result.getInputStream(), result.getMediaType().toString(),null,
                     isDirectory() ? CCConstants.CCM_PROP_MAP_ICON : CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
             PreviewCache.purgeCache(nodeId);
             return new NodeDao(repoDao, nodeId);
