@@ -167,7 +167,6 @@ public class ImageTool {
 		Metadata metadata = new Metadata();
 		MediaType mediaType = detector.detect(stream, metadata);
 		if(!mediaType.getType().equals("image") && !mediaType.getType().equals("text")) {
-			// TODO: convert to NodeMimetypeValidationException after merge of file filter completed
 			throw new NodeMimetypeValidationException("Invalid mime type for image: " + mediaType.getType() + "/" + mediaType.getSubtype());
 		}
 		if(mediaType.getType().equals("text") || mediaType.equals(MediaType.image("svg"))) {
