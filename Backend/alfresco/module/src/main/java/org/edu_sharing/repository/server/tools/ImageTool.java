@@ -13,6 +13,8 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.apache.activemq.util.ByteArrayInputStream;
 import org.apache.catalina.util.IOTools;
 
@@ -23,6 +25,12 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.sun.star.uno.Exception;
+import org.apache.commons.io.IOUtils;
+import org.apache.tika.config.TikaConfig;
+import org.apache.tika.detect.Detector;
+import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.mime.MediaType;
+import org.apache.tika.mime.MimeTypeException;
 
 /** 
  * 
@@ -145,5 +153,34 @@ public class ImageTool {
 		BufferedImage buffered = new BufferedImage(width,height, image.getType());
 		buffered.getGraphics().drawImage(scaled, 0, 0 , null);
 		return buffered;
+	}
+
+	/**
+	 * checks if given input stream is an image mimetype and throws an exception otherwise
+	 * Will also auto convert svg to remove malicious data and auto rotate jpgs based on exif data
+	 */
+	public static VerifyResult verifyAndPreprocessImage(InputStream is, int maxSize) throws MimeTypeException, IOException {
+		byte[] data= IOUtils.toByteArray(is);
+		TikaConfig config = TikaConfig.getDefaultConfig();
+		Detector detector = config.getDetector();
+		TikaInputStream stream = TikaInputStream.get(data);
+		org.apache.tika.metadata.Metadata metadata = new org.apache.tika.metadata.Metadata();
+		MediaType mediaType = detector.detect(stream, metadata);
+		if(!mediaType.getType().equals("image") && !mediaType.getType().equals("text")) {
+			// TODO: convert to NodeMimetypeValidationException after merge of file filter completed
+			throw new MimeTypeException("Invalid mime type for image: " + mediaType.getType() + "/" + mediaType.getSubtype());
+		}
+		if(mediaType.getType().equals("text") || mediaType.equals(MediaType.image("svg"))) {
+			throw new MimeTypeException("svg is currently not supported");
+		}
+		InputStream result = autoRotateImage(new java.io.ByteArrayInputStream(data), ImageTool.MAX_THUMB_SIZE);
+		return new VerifyResult(result, mediaType);
+	}
+
+	@Data
+	@AllArgsConstructor
+	public static class VerifyResult {
+		InputStream inputStream;
+		MediaType mediaType;
 	}
 }
