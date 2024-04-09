@@ -180,7 +180,7 @@ public class ImageTool {
 			}
 		}
 		InputStream result = autoRotateImage(new ByteArrayInputStream(data), ImageTool.MAX_THUMB_SIZE);
-		return new VerifyResult(new ByteArrayInputStream(data), mediaType);
+		return new VerifyResult(result, mediaType);
 	}
 
 
