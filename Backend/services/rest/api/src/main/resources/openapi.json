@@ -134,6 +134,13 @@
       },
       "Admin": {
         "properties": {
+          "editorType": {
+            "enum": [
+              "Textarea",
+              "Monaco"
+            ],
+            "type": "string"
+          },
           "statistics": {
             "$ref": "#/components/schemas/Statistics"
           }

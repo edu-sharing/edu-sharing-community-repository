@@ -160,11 +160,7 @@
         </div>
         <div class="monaco-editor">
           <mat-label>{{ 'ADMIN.FRONTPAGE.CUSTOM_QUERY_LABEL' | translate }}</mat-label>
-          <ngx-monaco-editor
-            [options]="codeOptions"
-            [(ngModel)]="query.query"
-            [ngModelOptions]="{ standalone: true }"
-          ></ngx-monaco-editor>
+          <es-code-editor [options]="codeOptions" [(ngModel)]="query.query"></es-code-editor>
           <mat-hint
             ><div>{{ 'ADMIN.FRONTPAGE.CUSTOM_QUERY_HINT' | translate }}</div>
             <button mat-button (click)="queryHelp()">
