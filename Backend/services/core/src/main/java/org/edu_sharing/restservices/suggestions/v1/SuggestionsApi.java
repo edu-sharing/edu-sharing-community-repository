@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang.NotImplementedException;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.DAOException;
 import org.edu_sharing.restservices.RestConstants;
@@ -18,6 +17,7 @@ import org.edu_sharing.restservices.suggestions.v1.dto.CreateSuggestionRequestDT
 import org.edu_sharing.restservices.suggestions.v1.dto.NodeSuggestionResponseDTO;
 import org.edu_sharing.restservices.suggestions.v1.dto.SuggestionResponseDTO;
 import org.edu_sharing.service.suggestion.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Map;
@@ -28,10 +28,10 @@ import java.util.stream.Collectors;
 @ApiService(value = "SUGGESTIONS", major = 1, minor = 0)
 @Consumes({"application/json"})
 @Produces({"application/json"})
-@RequiredArgsConstructor
 public class SuggestionsApi {
 
-    private final SuggestionServiceFactory suggestionServiceFactory;
+    @Autowired
+    private SuggestionServiceFactory suggestionServiceFactory;
 
     @POST
     @Path("/{repository}/{node}")
