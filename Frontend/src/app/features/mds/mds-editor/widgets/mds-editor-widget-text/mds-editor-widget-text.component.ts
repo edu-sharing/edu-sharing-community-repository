@@ -2,6 +2,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { UntypedFormControl, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_FORM_FIELD } from '@angular/material/form-field';
 import { TranslateService } from '@ngx-translate/core';
+import { SuggestionResponseDto, SuggestionStatus } from 'ngx-edu-sharing-api';
 import { DateHelper } from 'ngx-edu-sharing-ui';
 import { filter } from 'rxjs/operators';
 import { Toast } from '../../../../../services/toast';
@@ -23,6 +24,7 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
     readonly valueType: ValueType = ValueType.String;
     formControl: UntypedFormControl;
     fileNameChecker: FileNameChecker;
+    suggestions: SuggestionResponseDto[];
 
     constructor(
         mdsEditorInstance: MdsEditorInstanceService,
@@ -55,6 +57,9 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
             );
         }
         this.registerValueChanges(this.formControl);
+
+        this.suggestions =
+            this.widget.getSuggestions()?.filter((s) => s.status === 'PENDING') ?? [];
     }
 
     focus(): void {
@@ -99,6 +104,17 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
         if (this.mdsEditorInstance.editorMode === 'search') {
             this.setValue([this.formControl.value]);
         }
+    }
+
+    setSuggestionState(suggestion: SuggestionResponseDto, status: SuggestionStatus) {
+        suggestion.status = status;
+        this.mdsEditorInstance.updateSuggestionState(this.widget.definition.id, suggestion);
+        this.widget.markSuggestionChanged();
+    }
+
+    applySuggestion(suggestion: SuggestionResponseDto) {
+        this.setValue([suggestion.value as string]);
+        this.setSuggestionState(suggestion, 'ACCEPTED');
     }
 }
 

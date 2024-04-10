@@ -66,7 +66,29 @@
     <ng-container *ngTemplateOutlet="error"></ng-container>
   </mat-error>
 </mat-form-field>
-
+<div class="suggestions" *ngIf="suggestions?.length">
+  <h5 class="mat-heading-5">{{ 'MDS.SUGGESTIONS.LIST_TITLE' | translate }}</h5>
+  <div class="suggestion" *ngFor="let suggestion of suggestions">
+    <div>
+      <div class="info">{{ suggestion.createdBy }}</div>
+      <div class="content">{{ suggestion.value }}</div>
+    </div>
+    <div class="actions">
+      <button
+        mat-icon-button
+        color="primary"
+        class="apply"
+        (click)="applySuggestion(suggestion)"
+        matTooltip="{{ 'MDS.SUGGESTIONS.APPLY' | translate }}"
+      >
+        <i esIcon="file_upload"></i>
+      </button>
+      <button mat-icon-button color="warn" (click)="setSuggestionState(suggestion, 'DECLINED')">
+        <i esIcon="close" matTooltip="{{ 'MDS.SUGGESTIONS.DECLINE' | translate }}"></i>
+      </button>
+    </div>
+  </div>
+</div>
 <ng-template #error>
   <ng-container *ngIf="widget.definition.isRequired === 'mandatory'">
     {{ 'MDS.REQUIRED_MESSAGE' | translate }}

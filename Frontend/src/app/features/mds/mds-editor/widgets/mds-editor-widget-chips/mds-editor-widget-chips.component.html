@@ -44,7 +44,7 @@
       <mat-icon matChipRemove>cancel</mat-icon>
     </mat-chip>
     <ng-container *ngIf="getSuggestions()?.length">
-      <mat-chip-row
+      <mat-chip
         class="mat-chip-suggestion"
         *ngFor="let suggestion of chipsSuggestions"
         [value]="suggestion"
@@ -54,7 +54,7 @@
         [class.mat-chip-selected]="false"
         [matTooltip]="getSuggestionTooltip(suggestion)"
       >
-        <span class="mat-chip-label">{{ suggestion.displayValue.label }}</span>
+        <span class="mat-chip-label">{{ toDisplayValues($any(suggestion.value)).label }}</span>
         <button
           mat-icon-button
           matChipTrailingIcon
@@ -64,7 +64,7 @@
           <mat-icon matChipTrailingIcon>check_circle</mat-icon>
         </button>
         <mat-icon matChipRemove class="decline">cancel</mat-icon>
-      </mat-chip-row>
+      </mat-chip>
     </ng-container>
     <div class="input-wrapper">
       <input

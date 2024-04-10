@@ -35,9 +35,13 @@ mat-form-field {
     color: $textLight;
     background: repeating-linear-gradient(-45deg, #f2f2f2, #f2f2f2 5px, #fff 5px, #fff 10px);
     .accept {
-        color: $colorStatusPositive;
+        @include clickable();
+        width: 25px;
+        mat-icon {
+            color: $colorStatusPositive;
+        }
     }
     .decline {
-        color: $colorStatusNegative;
+        color: $colorStatusNegative !important;
     }
 }
