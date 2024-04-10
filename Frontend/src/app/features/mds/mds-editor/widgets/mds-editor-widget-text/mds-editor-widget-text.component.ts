@@ -3,11 +3,12 @@ import { UntypedFormControl, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_FORM_FIELD } from '@angular/material/form-field';
 import { TranslateService } from '@ngx-translate/core';
 import { SuggestionResponseDto, SuggestionStatus } from 'ngx-edu-sharing-api';
-import { DateHelper } from 'ngx-edu-sharing-ui';
+import { DateHelper, UIAnimation } from 'ngx-edu-sharing-ui';
 import { filter } from 'rxjs/operators';
 import { Toast } from '../../../../../services/toast';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import { trigger } from '@angular/animations';
 
 @Component({
     selector: 'es-mds-editor-widget-text',
@@ -17,6 +18,7 @@ import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
         // Tell the input that it is inside a form field so it will apply relevant classes.
         { provide: MAT_FORM_FIELD, useValue: true },
     ],
+    animations: [],
 })
 export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements OnInit {
     @ViewChild('inputElement') inputElement: ElementRef;
@@ -57,9 +59,10 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
             );
         }
         this.registerValueChanges(this.formControl);
+    }
 
-        this.suggestions =
-            this.widget.getSuggestions()?.filter((s) => s.status === 'PENDING') ?? [];
+    getSuggestions() {
+        return this.widget.getSuggestions()?.filter((s) => s.status === 'PENDING') ?? [];
     }
 
     focus(): void {
@@ -113,6 +116,7 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
     }
 
     applySuggestion(suggestion: SuggestionResponseDto) {
+        this.formControl.setValue(suggestion.value as string);
         this.setValue([suggestion.value as string]);
         this.setSuggestionState(suggestion, 'ACCEPTED');
     }

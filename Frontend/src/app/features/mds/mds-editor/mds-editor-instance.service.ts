@@ -266,7 +266,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             this.initialValuesSubject.next(this.initialValues);
             if (nodes?.length === 1) {
                 this.suggestionValues =
-                    this.mdsEditorInstanceService.suggestionMetadata$.value[0].suggestions[
+                    this.mdsEditorInstanceService.suggestionMetadata$.value?.[0].suggestions[
                         this.definition.id
                     ];
             }

@@ -152,7 +152,7 @@ export class MdsEditorCommonService {
 
     async fetchNodesSuggestions(nodes: Node[]): Promise<NodeSuggestionResponseDto[]> {
         console.log('Read suggestions!');
-        return await forkJoin(
+        /*return await forkJoin(
             nodes.map((n) =>
                 this.suggestionsV1Service.getSuggestionsByNodeId({
                     repository: HOME_REPOSITORY,
@@ -162,34 +162,59 @@ export class MdsEditorCommonService {
         )
             .pipe()
             .toPromise();
-        /*return [
+        */
+        return [
             {
                 nodeId: nodes[0].ref.id,
-                values: {
+                suggestions: {
                     'cclom:general_keyword': [
                         {
-                            data: 'hello world',
-                            creator: 'test',
-                            status: 'todo',
-                        }
+                            value: 'hello world',
+                            createdBy: 'Superschlauer Duper KI',
+                            status: 'PENDING',
+                        },
+                        {
+                            value: 'AB\nDEF',
+                            createdBy: 'Noch schlauerer Redakteur',
+                            status: 'PENDING',
+                        },
                     ],
                     'ccm:educationallearningresourcetype': [
                         {
-                            data: 'exercise',
-                            creator: 'test',
-                            status: 'todo',
-                        }
+                            value: 'exercise',
+                            createdBy: 'test',
+                            status: 'PENDING',
+                        },
+                    ],
+                    'cclom:general_description': [
+                        {
+                            value: 'lorem ipsum\ndolor sit amet',
+                            createdBy: 'Superschlaue Duper KI',
+                            status: 'PENDING',
+                            type: 'AI',
+                        },
+                        {
+                            value: 'AB\nDEF',
+                            createdBy: 'Noch schlauerer Redakteur',
+                            status: 'PENDING',
+                        },
                     ],
                     'cclom:title': [
                         {
-                            data: 'ABC DEF',
-                            creator: 'test',
-                            status: 'todo',
-                        }
-                    ]
-                }
-            }
-        ];*/
+                            value: 'KI Titel super fancy',
+                            createdBy: 'Superschlaue Duper KI',
+                            status: 'PENDING',
+                            type: 'AI',
+                        },
+                        {
+                            value: 'Titel des Redakteurs',
+                            createdBy: 'Noch schlauerer Redakteur',
+                            status: 'PENDING',
+                        },
+                    ],
+                },
+            },
+        ];
     }
 }
 
