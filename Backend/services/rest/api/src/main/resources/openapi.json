@@ -3626,7 +3626,10 @@
           },
           "suggestions": {
             "additionalProperties": {
-              "$ref": "#/components/schemas/SuggestionResponseDTO"
+              "items": {
+                "$ref": "#/components/schemas/SuggestionResponseDTO"
+              },
+              "type": "array"
             },
             "type": "object"
           }
