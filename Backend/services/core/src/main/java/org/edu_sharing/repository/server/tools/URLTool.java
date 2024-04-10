@@ -202,18 +202,7 @@ public class URLTool{
     public static String getNgAssetsUrl(){
         return getBaseUrl(false)+"/assets/";
     }
-	public static String getUploadFormLink(String repositoryId, String nodeId){
-		String result = getBaseUrl(repositoryId);
-		
-		result = addSSOPathWhenConfigured(repositoryId,result);
-		
-		result += "?mode=2";
-		
-		if(nodeId != null){
-			result+="&nodeId="+nodeId;
-		}
-		return result;
-	}
+
 	public static String getPreviewServletUrl(String node, String storeProtocol,String storeId,String baseUrl) {
 		ServiceRegistry serviceRegistry = (ServiceRegistry)AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
 		NodeService alfNodeService = serviceRegistry.getNodeService();
@@ -293,39 +282,7 @@ public class URLTool{
 			return null;
 		}
 	}
-	
-	public static String getSearchUrl(String nodeId){
-		String result = getBaseUrl();
-		
-		result = addSSOPathWhenConfigured(result);
-		
-		result +="?mode="+CCConstants.MODE_SEARCH+"&p_searchtext="+nodeId+"&p_startsearch=1";
-		return result;
-	}
-	
-	
-	public static String addSSOPathWhenConfigured(String baseUrl){
-		return addSSOPathWhenConfigured(ApplicationInfoList.getHomeRepository().getAppId(), baseUrl);
-	}
-	
-	public static String addSSOPathWhenConfigured(String repositoryId, String baseUrl){
-		String allowedAuthTypes = ApplicationInfoList.getRepositoryInfoById(repositoryId).getAllowedAuthenticationTypes();
-		String authTypePath="";
-		
-		if(allowedAuthTypes == null){
-			return baseUrl;
-		}
-		
-		if(allowedAuthTypes.contains("shibboleth")){
-			authTypePath = "/shibboleth";
-		}else if(allowedAuthTypes.contains("cas")){
-			authTypePath = "/cas";
-		}
-		
-		if(baseUrl.endsWith("/")) baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
-		return baseUrl + authTypePath;
-	}
-	
+
 	/**
 	 * code from alfresco DownloadContentServlet (no longer available in 5.0.d)
 	 * @return
