@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-import lombok.RequiredArgsConstructor;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.DAOException;
 import org.edu_sharing.restservices.RestConstants;
@@ -56,7 +55,7 @@ public class SuggestionsApi {
 
     @DELETE
     @Path("/{repository}/{node}")
-    @Operation(summary = "Create suggestions")
+    @Operation(summary = "Delete suggestions")
     @ApiResponse(responseCode = "200", description = "Delete all suggestions of a given providerId and node.")
     public Response deleteSuggestions(
             @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
@@ -72,18 +71,19 @@ public class SuggestionsApi {
     }
 
     @PATCH
-    @Path("/{repository}")
+    @Path("/{repository}/{node}")
     @Operation(summary = "Update suggestion status")
     @ApiResponse(responseCode = "200",
             description = "Updates the status of all suggestions by the given suggestion ids",
             content = @Content(array = @ArraySchema(schema = @Schema(implementation = SuggestionResponseDTO.class))))
     public Response updateStatus(
             @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
             @QueryParam("id") List<String> ids,
             @QueryParam("status") SuggestionStatus status) throws DAOException {
         try {
             SuggestionService suggestionService = suggestionServiceFactory.getServiceByAppId(repository);
-            List<Suggestion> suggestions = suggestionService.updateStatus(ids, status);
+            List<Suggestion> suggestions = suggestionService.updateStatus(node, ids, status);
             return Response.ok(suggestions.stream().map(this::map).toArray(SuggestionResponseDTO[]::new)).build();
         } catch (Throwable t) {
             throw DAOException.mapping(t);

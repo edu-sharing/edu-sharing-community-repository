@@ -10,7 +10,7 @@ public interface SuggestionService {
 
     void deleteSuggestions(String nodeId, String providerId);
 
-    List<Suggestion> updateStatus(List<String> ids, SuggestionStatus status);
+    List<Suggestion> updateStatus(String nodeId, List<String> ids, SuggestionStatus status);
 
     Map<String, List<Suggestion>> getSuggestionsByNodeId(String nodeId);
 }

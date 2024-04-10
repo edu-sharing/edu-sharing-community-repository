@@ -1,7 +1,6 @@
 package org.edu_sharing.service.suggestion;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.suggestions.v1.dto.CreateSuggestionRequestDTO;
 
 import java.util.Date;
@@ -21,7 +20,7 @@ public class DefaultSuggestionService implements SuggestionService {
     }
 
     @Override
-    public List<Suggestion> updateStatus(List<String> ids, SuggestionStatus status) {
+    public List<Suggestion> updateStatus(String nodeId, List<String> ids, SuggestionStatus status) {
         throw new NotImplementedException();
     }
 
