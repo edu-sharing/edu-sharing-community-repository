@@ -27,6 +27,7 @@
  */
 package org.edu_sharing.service.authentication;
 
+import com.typesafe.config.Config;
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
@@ -54,38 +55,37 @@ public class AuthMethodSSO implements AuthMethodInterface {
 	public Boolean createUser = false;
 
 
-	public static final String[] allowedAuthTypes = {SSOAuthorityMapper.SSO_TYPE_Shibboleth,
-			SSOAuthorityMapper.SSO_TYPE_CAS, SSOAuthorityMapper.SSO_TYPE_LTI};
-
 	@Override
 	public String authenticate(HashMap<String, String> params) throws AuthenticationException {
-		//for security reasons: shibboleth auth should be explicit activated in homeApplication.properties.xml
+		//for security reasons: sso auth should be explicit activated in config
 		//so that we don't get an open gate when someone forgets to remove the shibboleth servlet from web.xml and don't protects this url
+		//(shibboleth header usage)
 
-		final ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
+		String paramAuthType = params.get(SSOAuthorityMapper.PARAM_SSO_TYPE);
 
-		String allowedAuthTypesConfig = homeRepository.getAllowedAuthenticationTypes();
+		if(paramAuthType == null){
+			logger.error("missing paramAuthType");
+			throw new AuthenticationException(AuthenticationExceptionMessages.MISSING_PARAM);
+		}
 
-		String paramAuthType = (String)params.get(SSOAuthorityMapper.PARAM_SSO_TYPE);
-
-		//wurde authtype konfiguriert und ist es ein erlaubter authtype
-		if(
-				(
-						allowedAuthTypesConfig != null &&
-								allowedAuthTypesConfig.contains(paramAuthType) &&
-								Arrays.asList(allowedAuthTypes).contains(paramAuthType))
-						|| (
-						SSOAuthorityMapper.SSO_TYPE_LTI.equals(paramAuthType) &&
-								LightbendConfigLoader.get().getBoolean("security.sso.lti.enabled")
-				)
-		){
+		Config config = LightbendConfigLoader.get();
+		String springProfiles = config.hasPath("spring.profiles.active")
+				? config.getString("spring.profiles.active")
+				: null;
+		if(SSOAuthorityMapper.SSO_TYPE_Shibboleth.equals(paramAuthType)
+			&& springProfiles != null
+			&& (springProfiles.contains("openidEnabled") || springProfiles.contains("samlEnabled"))) {
 			return ssoAuthorityMapper.mapAuthority(params);
-		}else{
+		}else if(SSOAuthorityMapper.SSO_TYPE_LTI.equals(paramAuthType) &&
+				config.getBoolean("security.sso.lti.enabled")){
+			return ssoAuthorityMapper.mapAuthority(params);
+		}else if(SSOAuthorityMapper.SSO_TYPE_CAS.equals(paramAuthType) &&
+				config.getBoolean("security.sso.cas.enabled")){
+			return ssoAuthorityMapper.mapAuthority(params);
+		}else {
 			logger.error(AuthenticationExceptionMessages.INVALID_AUTHENTICATION_METHOD +" no SSO(shibboleth,cas) auth configured. authType:"+paramAuthType);
 			throw new AuthenticationException(AuthenticationExceptionMessages.INVALID_AUTHENTICATION_METHOD);
 		}
-
-
 	}
 
 
