@@ -45,10 +45,13 @@ public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationPara
 		nodeService = NodeServiceFactory.getLocalService();
 		policyBehaviourFilter = (BehaviourFilter)applicationContext.getBean("policyBehaviourFilter");
 		if(!StringUtils.isBlank(nodeId)) {
-			AuthenticationUtil.runAsSystem(() -> {
-				migrate(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
-				return null;
-			});
+			AuthenticationUtil.runAsSystem(() -> serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
+                NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+                policyBehaviourFilter.disableBehaviour(ref);
+                migrate(ref);
+                policyBehaviourFilter.enableBehaviour(ref);
+                return null;
+            }));
 			return;
 		}
 		NodeRunner runner = new NodeRunner();
@@ -76,20 +79,33 @@ public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationPara
 			logger.warn("Can not migrate node " + ref + " since it is a published copy");
 			return;
 		}
+		// copy the old publish date
+		Serializable date = NodeServiceHelper.getPropertyNative(ref, CCConstants.CCM_PROP_IO_PUBLISHED_DATE);
+		if (date != null) {
+			logger.info("Keeping old published date " + date);
+		} else {
+			logger.warn("Old node had no published date! Will use cm:modified as fallback");
+			date = NodeServiceHelper.getPropertyNative(ref, CCConstants.CM_PROP_C_MODIFIED);
+		}
 		try {
 			// do not do anything with the handle for now!
+			logger.info("Creating published copy of " + ref);
 			NodeRef copy = new NodeRef(
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
 					nodeService.publishCopy(ref.getId(), null));
+			logger.info("Created copy: " + copy);
+			Serializable finalDate = date;
 			serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
 				policyBehaviourFilter.disableBehaviour(copy);
+				NodeServiceHelper.setProperty(copy, CCConstants.CM_PROP_C_CREATED, NodeServiceHelper.getPropertyNative(ref, CCConstants.CM_PROP_C_CREATED), true);
+				NodeServiceHelper.setProperty(copy, CCConstants.CM_PROP_C_MODIFIED, NodeServiceHelper.getPropertyNative(ref, CCConstants.CM_PROP_C_MODIFIED), true);
 				// now, fake the current history of copies to the directly published element so its handle id gets the update
+				logger.info("Update old handle " + handleId + " from " + ref + " to " + copy);
 				nodeService.createHandle(copy, Collections.singletonList(ref.getId()), HandleMode.update);
 
 				// copy the old publish date
-				Serializable date = NodeServiceHelper.getPropertyNative(ref, CCConstants.CCM_PROP_IO_PUBLISHED_DATE);
-				if (date != null) {
-					NodeServiceHelper.setProperty(copy, CCConstants.CCM_PROP_IO_PUBLISHED_DATE, date, true);
+				if (finalDate != null) {
+					NodeServiceHelper.setProperty(copy, CCConstants.CCM_PROP_IO_PUBLISHED_DATE, finalDate, true);
 				}
 				serviceRegistry.getPermissionService().deletePermission(ref, CCConstants.AUTHORITY_GROUP_EVERYONE, CCConstants.PERMISSION_CONSUMER);
 				serviceRegistry.getPermissionService().deletePermission(ref, CCConstants.AUTHORITY_GROUP_EVERYONE, CCConstants.PERMISSION_CC_PUBLISH);
