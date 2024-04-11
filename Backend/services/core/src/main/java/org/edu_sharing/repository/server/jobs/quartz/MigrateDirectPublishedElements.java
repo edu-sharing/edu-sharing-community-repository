@@ -5,6 +5,8 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.security.AccessPermission;
+import org.alfresco.service.cmr.security.AccessStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -25,6 +27,8 @@ import org.springframework.context.ApplicationContext;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @JobDescription(description = "Migrate previously directly published element to published copies")
 public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationParams{
@@ -45,13 +49,10 @@ public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationPara
 		nodeService = NodeServiceFactory.getLocalService();
 		policyBehaviourFilter = (BehaviourFilter)applicationContext.getBean("policyBehaviourFilter");
 		if(!StringUtils.isBlank(nodeId)) {
-			AuthenticationUtil.runAsSystem(() -> serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
-                NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
-                policyBehaviourFilter.disableBehaviour(ref);
-                migrate(ref);
-                policyBehaviourFilter.enableBehaviour(ref);
-                return null;
-            }));
+			AuthenticationUtil.runAsSystem(() -> {
+                migrate(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
+				return null;
+            });
 			return;
 		}
 		NodeRunner runner = new NodeRunner();
@@ -59,8 +60,8 @@ public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationPara
 		runner.setRunAsSystem(true);
 		runner.setThreaded(false);
 		runner.setLucene("ISNOTNULL:\"ccm:published_handle_id\" AND ISNULL:\"ccm:published_original\" AND NOT ASPECT:\"ccm:collection_io_reference\"");
-		runner.setKeepModifiedDate(true);
-		runner.setTransaction(NodeRunner.TransactionMode.LocalRetrying);
+		runner.setKeepModifiedDate(false);
+		runner.setTransaction(NodeRunner.TransactionMode.None);
 		int count=runner.run();
 		logger.info("Processed "+count+" nodes");
 	}
@@ -90,9 +91,19 @@ public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationPara
 		try {
 			// do not do anything with the handle for now!
 			logger.info("Creating published copy of " + ref);
-			NodeRef copy = new NodeRef(
-					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-					nodeService.publishCopy(ref.getId(), null));
+			NodeRef copy = serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
+				policyBehaviourFilter.disableBehaviour(ref);
+				NodeRef copyInternal = new NodeRef(
+						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+						nodeService.publishCopy(ref.getId(), null));
+				policyBehaviourFilter.enableBehaviour(ref);
+				return copyInternal;
+			});
+
+			if(!NodeServiceHelper.exists(copy)) {
+				logger.error("Copy failed for node: " + ref);
+				return;
+			}
 			logger.info("Created copy: " + copy);
 			Serializable finalDate = date;
 			serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
@@ -107,11 +118,25 @@ public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationPara
 				if (finalDate != null) {
 					NodeServiceHelper.setProperty(copy, CCConstants.CCM_PROP_IO_PUBLISHED_DATE, finalDate, true);
 				}
-				serviceRegistry.getPermissionService().deletePermission(ref, CCConstants.AUTHORITY_GROUP_EVERYONE, CCConstants.PERMISSION_CONSUMER);
-				serviceRegistry.getPermissionService().deletePermission(ref, CCConstants.AUTHORITY_GROUP_EVERYONE, CCConstants.PERMISSION_CC_PUBLISH);
 				policyBehaviourFilter.enableBehaviour(copy);
 				return null;
 			});
+			serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
+						policyBehaviourFilter.disableBehaviour(ref);
+						Set<AccessPermission> perm = serviceRegistry.getPermissionService().getPermissions(ref).
+								stream().filter(p -> p.getAccessStatus().equals(AccessStatus.ALLOWED) && p.getAuthority().equals(CCConstants.AUTHORITY_GROUP_EVERYONE)).collect(Collectors.toSet());
+						logger.info("cleaning up permissions");
+						if (perm.stream().anyMatch(p -> p.getPermission().equals(CCConstants.PERMISSION_CONSUMER))) {
+							serviceRegistry.getPermissionService().deletePermission(ref, CCConstants.AUTHORITY_GROUP_EVERYONE, CCConstants.PERMISSION_CONSUMER);
+						}
+						if (perm.stream().anyMatch(p -> p.getPermission().equals(CCConstants.PERMISSION_CC_PUBLISH))) {
+							serviceRegistry.getPermissionService().deletePermission(ref, CCConstants.AUTHORITY_GROUP_EVERYONE, CCConstants.PERMISSION_CC_PUBLISH);
+						}
+						policyBehaviourFilter.enableBehaviour(ref);
+						return null;
+					});
+			logger.info("done for node: " + ref + ", new copy: " + copy);
+
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}
