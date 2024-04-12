@@ -368,6 +368,8 @@ public class ToolPermissionBaseService {
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_RATE);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_RATE_WRITE);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_RATE_READ);
+        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_SUGGESTION_WRITE);
+        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_SUGGESTION_READ);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_MANAGE_RELATIONS);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_VIDEO_AUDIO_CUT);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_MEDIACENTER_MANAGE);

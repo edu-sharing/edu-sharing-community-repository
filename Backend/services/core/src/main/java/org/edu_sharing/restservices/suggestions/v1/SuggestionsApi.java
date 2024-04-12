@@ -43,14 +43,11 @@ public class SuggestionsApi {
             @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
             @QueryParam("providerId") String providerId,
             @QueryParam("type") SuggestionType type,
-            CreateSuggestionRequestDTO[] suggestions) throws DAOException {
-        try {
-            SuggestionService suggestionService = suggestionServiceFactory.getServiceByAppId(repository);
-            Suggestion suggestion = suggestionService.createSuggestion(node, providerId, type, suggestions);
-            return Response.ok(map(suggestion)).build();
-        } catch (Throwable t) {
-            throw DAOException.mapping(t);
-        }
+            List<CreateSuggestionRequestDTO> suggestionsDto) {
+
+        SuggestionService suggestionService = suggestionServiceFactory.getServiceByAppId(repository);
+        List<Suggestion> suggestions = suggestionService.createSuggestion(node, providerId, type, suggestionsDto);
+        return Response.ok(suggestions.stream().map(this::map).toArray(SuggestionResponseDTO[]::new)).build();
     }
 
     @DELETE
@@ -60,14 +57,11 @@ public class SuggestionsApi {
     public Response deleteSuggestions(
             @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
             @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
-            @QueryParam("providerId") String providerId) throws DAOException {
-        try {
-            SuggestionService suggestionService = suggestionServiceFactory.getServiceByAppId(repository);
-            suggestionService.deleteSuggestions(node, providerId);
-            return Response.ok().build();
-        } catch (Throwable t) {
-            throw DAOException.mapping(t);
-        }
+            @QueryParam("providerId") String providerId) {
+
+        SuggestionService suggestionService = suggestionServiceFactory.getServiceByAppId(repository);
+        suggestionService.deleteSuggestions(node, providerId);
+        return Response.ok().build();
     }
 
     @PATCH
@@ -80,14 +74,12 @@ public class SuggestionsApi {
             @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
             @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
             @QueryParam("id") List<String> ids,
-            @QueryParam("status") SuggestionStatus status) throws DAOException {
-        try {
-            SuggestionService suggestionService = suggestionServiceFactory.getServiceByAppId(repository);
-            List<Suggestion> suggestions = suggestionService.updateStatus(node, ids, status);
-            return Response.ok(suggestions.stream().map(this::map).toArray(SuggestionResponseDTO[]::new)).build();
-        } catch (Throwable t) {
-            throw DAOException.mapping(t);
-        }
+            @QueryParam("status") SuggestionStatus status) {
+
+        SuggestionService suggestionService = suggestionServiceFactory.getServiceByAppId(repository);
+        List<Suggestion> suggestions = suggestionService.updateStatus(node, ids, status);
+        return Response.ok(suggestions.stream().map(this::map).toArray(SuggestionResponseDTO[]::new)).build();
+
     }
 
     @GET
@@ -99,14 +91,12 @@ public class SuggestionsApi {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = NodeSuggestionResponseDTO.class)))
     public Response getSuggestionsByNodeId(
             @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
-            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node) throws DAOException {
-        try {
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "Filter option") @QueryParam("status") List<SuggestionStatus> status) {
+
             SuggestionService suggestionService = suggestionServiceFactory.getServiceByAppId(repository);
-            Map<String, List<Suggestion>> nodeSuggestions = suggestionService.getSuggestionsByNodeId(node);
+            Map<String, List<Suggestion>> nodeSuggestions = suggestionService.getSuggestionsByNodeId(node, status);
             return Response.ok(map(node, nodeSuggestions)).build();
-        } catch (Throwable t) {
-            throw DAOException.mapping(t);
-        }
     }
 
     private NodeSuggestionResponseDTO map(String node, Map<String, List<Suggestion>> nodeSuggestions) {
@@ -120,7 +110,7 @@ public class SuggestionsApi {
         return nodeSuggestions
                 .entrySet()
                 .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, y->y.getValue().stream().map(this::map).collect(Collectors.toList())));
+                .collect(Collectors.toMap(Map.Entry::getKey, y -> y.getValue().stream().map(this::map).collect(Collectors.toList())));
     }
 
     private SuggestionResponseDTO map(Suggestion suggestion) {
@@ -131,6 +121,7 @@ public class SuggestionsApi {
                 suggestion.getType(),
                 suggestion.getStatus(),
                 suggestion.getDescription(),
+                suggestion.getConfidence(),
                 suggestion.getCreated(),
                 suggestion.getCreatedBy(),
                 suggestion.getModified(),

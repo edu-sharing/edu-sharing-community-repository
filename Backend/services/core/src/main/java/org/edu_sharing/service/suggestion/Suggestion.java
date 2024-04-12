@@ -12,9 +12,10 @@ import java.util.Date;
 @AllArgsConstructor
 public class Suggestion {
     String id;
+    String nodeId;
 
     String propertyId;
-    Serializable value;
+    Object value;
 
     SuggestionType type;
     SuggestionStatus status;

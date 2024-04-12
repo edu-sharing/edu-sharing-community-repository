@@ -1,5 +1,8 @@
 package org.edu_sharing.restservices.suggestions.v1.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.Value;
 import org.edu_sharing.service.suggestion.SuggestionStatus;
 import org.edu_sharing.service.suggestion.SuggestionType;
@@ -7,20 +10,22 @@ import org.edu_sharing.service.suggestion.SuggestionType;
 import java.io.Serializable;
 import java.util.Date;
 
-@Value
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class SuggestionResponseDTO {
-   String id;
+   private String id;
 
-   String propertyId;
-   Serializable value;
+   private String propertyId;
+   private Object value;
 
-   SuggestionType type;
-   SuggestionStatus status;
-   String description;
-   double confidence = 0;
+   private SuggestionType type;
+   private SuggestionStatus status;
+   private String description;
+   private double confidence = 0;
 
-   Date created;
-   String createdBy;
-   Date modified;
-   String modifiedBy;
+   private Date created;
+   private String createdBy;
+   private Date modified;
+   private String modifiedBy;
 }
