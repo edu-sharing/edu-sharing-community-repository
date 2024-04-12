@@ -14,6 +14,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
+import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -123,7 +124,7 @@ public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationPara
 			});
 			serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
 						policyBehaviourFilter.disableBehaviour(ref);
-						Set<AccessPermission> perm = serviceRegistry.getPermissionService().getPermissions(ref).
+						Set<AccessPermission> perm = serviceRegistry.getPermissionService().getAllSetPermissions(ref).
 								stream().filter(p -> p.getAccessStatus().equals(AccessStatus.ALLOWED) && p.getAuthority().equals(CCConstants.AUTHORITY_GROUP_EVERYONE)).collect(Collectors.toSet());
 						logger.info("cleaning up permissions");
 						if (perm.stream().anyMatch(p -> p.getPermission().equals(CCConstants.PERMISSION_CONSUMER))) {
@@ -133,11 +134,11 @@ public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationPara
 							serviceRegistry.getPermissionService().deletePermission(ref, CCConstants.AUTHORITY_GROUP_EVERYONE, CCConstants.PERMISSION_CC_PUBLISH);
 						}
 						NodeServiceHelper.removeProperty(ref, CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID);
-						NodeServiceHelper.removeAspect(ref, CCConstants.CCM_ASPECT_PUBLISHED);
 						policyBehaviourFilter.enableBehaviour(ref);
 						return null;
 					});
 			logger.info("done for node: " + ref + ", new copy: " + copy);
+			new RepositoryCache().remove(ref.getId());
 
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
