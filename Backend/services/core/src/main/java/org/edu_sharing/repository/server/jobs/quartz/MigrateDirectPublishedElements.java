@@ -101,7 +101,7 @@ public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationPara
 			});
 
 			if(!NodeServiceHelper.exists(copy)) {
-				logger.error("Copy failed for node: " + ref);
+				logger.error("Copy failed for node: " + ref + ", missing node id: " + copy);
 				return;
 			}
 			logger.info("Created copy: " + copy);
@@ -132,6 +132,8 @@ public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationPara
 						if (perm.stream().anyMatch(p -> p.getPermission().equals(CCConstants.PERMISSION_CC_PUBLISH))) {
 							serviceRegistry.getPermissionService().deletePermission(ref, CCConstants.AUTHORITY_GROUP_EVERYONE, CCConstants.PERMISSION_CC_PUBLISH);
 						}
+						NodeServiceHelper.removeProperty(ref, CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID);
+						NodeServiceHelper.removeAspect(ref, CCConstants.CCM_ASPECT_PUBLISHED);
 						policyBehaviourFilter.enableBehaviour(ref);
 						return null;
 					});
@@ -140,7 +142,6 @@ public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationPara
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}
-		NodeServiceHelper.removeProperty(ref, CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID);
-		NodeServiceHelper.removeAspect(ref, CCConstants.CCM_ASPECT_PUBLISHED);
+
 	}
 }
