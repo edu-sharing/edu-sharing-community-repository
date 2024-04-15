@@ -1,11 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { TranslateLoader } from '@ngx-translate/core';
-import { ConfigService } from 'ngx-edu-sharing-api';
+import { ConfigService, LANGUAGES } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { concat, Observable, of } from 'rxjs';
 import { catchError, first, map, reduce } from 'rxjs/operators';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
-import { LANGUAGES } from './languages';
 import { TranslationSource } from './translation-source';
 
 export const TRANSLATION_LIST = [
@@ -55,6 +54,9 @@ export class TranslationLoader implements TranslateLoader {
     getTranslation(lang: string): Observable<Dictionary> {
         if (lang === 'none') {
             return of({});
+        }
+        if (!LANGUAGES[lang]) {
+            console.error('unknown locale for language ' + lang);
         }
         this.configService.setLocale(LANGUAGES[lang]);
         return rxjs
@@ -107,7 +109,20 @@ export class TranslationLoader implements TranslateLoader {
     private fetchTranslations(lang: string): Observable<Dictionary>[] {
         return TRANSLATION_LIST.map(
             (translation) => `${this.prefix}/${translation}/${lang}${this.suffix}`,
-        ).map((url) => this.http.get(url) as Observable<Dictionary>);
+        )
+            .map((url) => this.http.get(url) as Observable<Dictionary>)
+            .map((obs) =>
+                obs.pipe(
+                    catchError((e) => {
+                        console.warn(
+                            'missing translation file for language ' +
+                                lang +
+                                ', translations will be missing / falling back to the default language',
+                        );
+                        return of({});
+                    }),
+                ),
+            );
     }
 
     /**
