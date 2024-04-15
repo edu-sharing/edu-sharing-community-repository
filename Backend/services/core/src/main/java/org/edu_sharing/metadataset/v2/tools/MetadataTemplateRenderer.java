@@ -230,7 +230,10 @@ public class MetadataTemplateRenderer {
 									properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION))[0] : null;
 
 							LicenseService license = new LicenseService();
-							String link = license.getLicenseUrl(licenseName, Context.getCurrentInstance().getLocale(), licenseVersion);
+							String link = license.getLicenseUrl(licenseName, Context.getCurrentInstance() != null
+									? Context.getCurrentInstance().getLocale()
+									: null,
+									licenseVersion);
 							value = "";
 							if (renderingMode.equals(RenderingMode.HTML)) {
 								if (link != null)
