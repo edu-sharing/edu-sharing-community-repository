@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 public interface SuggestionService {
-    List<Suggestion> createSuggestion(String nodeId, String providerId, SuggestionType type, List<CreateSuggestionRequestDTO> suggestions);
+    List<Suggestion> createSuggestion(String nodeId, SuggestionType type, String version, List<CreateSuggestionRequestDTO> suggestions);
 
-    void deleteSuggestions(String nodeId, String providerId);
+    void deleteSuggestions(String suggestionId, List<String> versions);
 
     List<Suggestion> updateStatus(String nodeId, List<String> ids, SuggestionStatus status);
 

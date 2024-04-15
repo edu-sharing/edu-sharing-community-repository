@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Value;
+import org.edu_sharing.restservices.PersonDao;
+import org.edu_sharing.restservices.shared.User;
+import org.edu_sharing.restservices.shared.UserSimple;
 import org.edu_sharing.service.suggestion.SuggestionStatus;
 import org.edu_sharing.service.suggestion.SuggestionType;
 
@@ -15,6 +18,8 @@ import java.util.Date;
 @AllArgsConstructor
 public class SuggestionResponseDTO {
    private String id;
+   private String nodeId;
+   private String version;
 
    private String propertyId;
    private Object value;
@@ -25,7 +30,7 @@ public class SuggestionResponseDTO {
    private double confidence = 0;
 
    private Date created;
-   private String createdBy;
+   private UserSimple createdBy;
    private Date modified;
-   private String modifiedBy;
+   private UserSimple modifiedBy;
 }

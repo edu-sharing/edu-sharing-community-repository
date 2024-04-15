@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.NotImplementedException;
 import org.edu_sharing.restservices.suggestions.v1.dto.CreateSuggestionRequestDTO;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -12,12 +11,12 @@ import java.util.Map;
 public class DefaultSuggestionService implements SuggestionService {
 
     @Override
-    public List<Suggestion> createSuggestion(String nodeId, String providerId, SuggestionType type, List<CreateSuggestionRequestDTO> suggestions) {
+    public List<Suggestion> createSuggestion(String nodeId, SuggestionType type, String version, List<CreateSuggestionRequestDTO> suggestions) {
         throw new NotImplementedException();
     }
 
     @Override
-    public void deleteSuggestions(String nodeId, String providerId) {
+    public void deleteSuggestions(String suggestionId, List<String> versions) {
         throw new NotImplementedException();
     }
 

@@ -3,6 +3,7 @@ package org.edu_sharing.service.suggestion;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.stringtemplate.v4.ST;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -13,6 +14,7 @@ import java.util.Date;
 public class Suggestion {
     String id;
     String nodeId;
+    String version;
 
     String propertyId;
     Object value;
