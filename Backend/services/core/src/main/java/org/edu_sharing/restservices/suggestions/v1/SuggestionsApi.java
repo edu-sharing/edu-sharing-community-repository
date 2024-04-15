@@ -12,7 +12,6 @@ import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.shared.ErrorResponse;
-import org.edu_sharing.restservices.shared.User;
 import org.edu_sharing.restservices.shared.UserSimple;
 import org.edu_sharing.restservices.suggestions.v1.dto.CreateSuggestionRequestDTO;
 import org.edu_sharing.restservices.suggestions.v1.dto.NodeSuggestionResponseDTO;
@@ -64,7 +63,7 @@ public class SuggestionsApi {
     public Response deleteSuggestions(
             @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
             @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
-            @Parameter(description = "delete only specified versions. If not set, it deletes all versions")  @QueryParam("version") List<String> versions) {
+            @Parameter(description = "delete only specified versions. If not set, it deletes all versions") @QueryParam("version") List<String> versions) {
 
         SuggestionService suggestionService = suggestionServiceFactory.getServiceByAppId(repository);
         suggestionService.deleteSuggestions(node, versions);
@@ -104,8 +103,8 @@ public class SuggestionsApi {
 
         Mapper mapper = new Mapper(RepositoryDao.getRepository(repository));
         SuggestionService suggestionService = suggestionServiceFactory.getServiceByAppId(repository);
-            Map<String, List<Suggestion>> nodeSuggestions = suggestionService.getSuggestionsByNodeId(node, status);
-            return Response.ok(mapper.map(node, nodeSuggestions)).build();
+        Map<String, List<Suggestion>> nodeSuggestions = suggestionService.getSuggestionsByNodeId(node, status);
+        return Response.ok(mapper.map(node, nodeSuggestions)).build();
     }
 
     @RequiredArgsConstructor
@@ -113,44 +112,44 @@ public class SuggestionsApi {
         private final RepositoryDao repositoryDao;
 
         public NodeSuggestionResponseDTO map(String node, Map<String, List<Suggestion>> nodeSuggestions) {
-        return new NodeSuggestionResponseDTO(
-                node,
-                map(nodeSuggestions)
-        );
-    }
+            return new NodeSuggestionResponseDTO(
+                    node,
+                    map(nodeSuggestions)
+            );
+        }
 
         public Map<String, List<SuggestionResponseDTO>> map(Map<String, List<Suggestion>> nodeSuggestions) {
-        return nodeSuggestions
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, y -> y.getValue().stream().map(this::map).collect(Collectors.toList())));
-    }
+            return nodeSuggestions
+                    .entrySet()
+                    .stream()
+                    .collect(Collectors.toMap(Map.Entry::getKey, y -> y.getValue().stream().map(this::map).collect(Collectors.toList())));
+        }
 
-    public SuggestionResponseDTO map(Suggestion suggestion) {
+        public SuggestionResponseDTO map(Suggestion suggestion) {
 
-        UserSimple createBy = getPerson(suggestion.getCreatedBy());
-        UserSimple modifiedBy = getPerson(suggestion.getModifiedBy());
+            UserSimple createBy = getPerson(suggestion.getCreatedBy());
+            UserSimple modifiedBy = getPerson(suggestion.getModifiedBy());
 
-        return new SuggestionResponseDTO(
-                suggestion.getId(),
-                suggestion.getNodeId(),
-                suggestion.getVersion(),
-                suggestion.getPropertyId(),
-                suggestion.getValue(),
-                suggestion.getType(),
-                suggestion.getStatus(),
-                suggestion.getDescription(),
-                suggestion.getConfidence(),
-                suggestion.getCreated(),
-                createBy,
-                suggestion.getModified(),
-                modifiedBy);
-    }
+            return new SuggestionResponseDTO(
+                    suggestion.getId(),
+                    suggestion.getNodeId(),
+                    suggestion.getVersion(),
+                    suggestion.getPropertyId(),
+                    suggestion.getValue(),
+                    suggestion.getType(),
+                    suggestion.getStatus(),
+                    suggestion.getDescription(),
+                    suggestion.getConfidence(),
+                    suggestion.getCreated(),
+                    createBy,
+                    suggestion.getModified(),
+                    modifiedBy);
+        }
 
         private UserSimple getPerson(String user) {
             try {
                 return PersonDao.getPerson(repositoryDao, user).asPersonSimple(false);
-            }catch (DAOException daoException){
+            } catch (DAOException daoException) {
                 log.error(daoException.getMessage());
                 return null;
             }
