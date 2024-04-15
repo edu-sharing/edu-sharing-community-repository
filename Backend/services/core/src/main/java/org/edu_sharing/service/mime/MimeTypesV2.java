@@ -406,8 +406,10 @@ public static HashMap<String, String> getExtensionMimeMap() {
 			
 			extensionMimeMap.put("xls", "application/vnd.ms-excel");
 										 
-			extensionMimeMap.put("txt", "text/plain");	
-			
+			extensionMimeMap.put("txt", "text/plain");
+
+			extensionMimeMap.put("csv", "text/csv");
+
 			extensionMimeMap.put("properties", "text/plain");
 			
 			extensionMimeMap.put("pdf","application/pdf");
