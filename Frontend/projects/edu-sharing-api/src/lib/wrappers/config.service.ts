@@ -19,11 +19,12 @@ export type ClientConfig = apiModels.Values;
 export type Variables = apiModels.Variables['current'];
 export type TranslationsDict = { [key: string]: string | TranslationsDict };
 
-export type Locale = 'de_DE' | 'en_US' | 'fr_FR';
+export type Locale = 'de_DE' | 'en_US' | 'fr_FR' | 'it_IT';
 export const LANGUAGES: { [key: string]: Locale } = {
     de: 'de_DE',
     en: 'en_US',
     fr: 'fr_FR',
+    it: 'it_IT',
 };
 
 /**

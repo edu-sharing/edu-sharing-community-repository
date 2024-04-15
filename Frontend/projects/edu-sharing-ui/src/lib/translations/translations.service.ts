@@ -7,7 +7,7 @@ import { ConfigService, LANGUAGES, SessionStorageService } from 'ngx-edu-sharing
 import { AppService } from '../services/abstract/app.service';
 
 // 'none' means that only labels should be shown (for dev)
-const DEFAULT_SUPPORTED_LANGUAGES = ['de', 'de-informal', 'en', 'fr', 'none'];
+const DEFAULT_SUPPORTED_LANGUAGES = ['de', 'de-informal', 'en', 'fr', 'it', 'none'];
 
 @Injectable({ providedIn: 'root' })
 export class TranslationsService {
