@@ -50,10 +50,24 @@ public class ErrorResponse {
 
 	private static Logger logger = Logger.getLogger(ErrorResponse.class);
 	public static Response createResponse(Throwable t) {
-		return createResponse(t,ErrorResponseLogging.strict);
+		return createResponse(t, null, ErrorResponseLogging.strict);
 	}
-	public static Response createResponse(Throwable t,ErrorResponseLogging logging){
+
+	public static Response createResponse(Throwable t, Response.Status errorCode) {
+		return createResponse(t, errorCode, ErrorResponseLogging.strict);
+	}
+
+	public static Response createResponse(Throwable t, ErrorResponseLogging logging) {
+		return createResponse(t, null, logging);
+	}
+
+	public static Response createResponse(Throwable t, Response.Status errorCode, ErrorResponseLogging logging){
 		handleLog(t,logging);
+
+		if(errorCode != null){
+			return Response.status(errorCode).entity(new ErrorResponse(t)).build();
+		}
+
 		// in case alfresco transaction exception, map to causing exception which is the DAO exception
 		if(t instanceof AlfrescoRuntimeException && t.getCause() != null) {
 			t = t.getCause();
