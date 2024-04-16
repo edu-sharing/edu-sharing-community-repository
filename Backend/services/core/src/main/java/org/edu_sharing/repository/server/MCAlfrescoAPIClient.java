@@ -908,7 +908,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			if(commonLicensekey != null){
 				if(Context.getCurrentInstance() != null){
 					String ccversion = (String)propsCopy.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION);
-					String licenseUrl =  new LicenseService().getLicenseUrl(commonLicensekey, Context.getCurrentInstance().getLocale(),ccversion);
+					String ccLocale = (String)propsCopy.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE);
+					String licenseUrl =  new LicenseService().getLicenseUrl(commonLicensekey, Context.getCurrentInstance().getLocale(),ccversion,ccLocale);
 					if(licenseUrl != null){
 						propsCopy.put(CCConstants.VIRT_PROP_LICENSE_URL, licenseUrl);
 					}

@@ -1922,12 +1922,12 @@ public class CCConstants {
 
 	public final static String COMMON_LICENSE_CC_ZERO_LINK = "https://creativecommons.org/publicdomain/zero/1.0/deed.${locale}";
 	public final static String COMMON_LICENSE_CC_PDM_LINK = "http://creativecommons.org/publicdomain/mark/1.0/deed.${locale}";
-	public final static String COMMON_LICENSE_CC_BY_LINK = "https://creativecommons.org/licenses/by/${version}/deed.${locale}";
-	public final static String COMMON_LICENSE_CC_BY_SA_LINK = "https://creativecommons.org/licenses/by-sa/${version}/deed.${locale}";
-	public final static String COMMON_LICENSE_CC_BY_ND_LINK = "https://creativecommons.org/licenses/by-nd/${version}/deed.${locale}";
-	public final static String COMMON_LICENSE_CC_BY_NC_LINK = "https://creativecommons.org/licenses/by-nc/${version}/deed.${locale}";
-	public final static String COMMON_LICENSE_CC_BY_NC_SA_LINK = "https://creativecommons.org/licenses/by-nc-sa/${version}/deed.${locale}";
-	public final static String COMMON_LICENSE_CC_BY_NC_ND_LINK = "https://creativecommons.org/licenses/by-nc-nd/${version}/deed.${locale}";
+	public final static String COMMON_LICENSE_CC_BY_LINK = "https://creativecommons.org/licenses/by/${version}/${jurisdiction}/deed.${locale}";
+	public final static String COMMON_LICENSE_CC_BY_SA_LINK = "https://creativecommons.org/licenses/by-sa/${version}/${jurisdiction}/deed.${locale}";
+	public final static String COMMON_LICENSE_CC_BY_ND_LINK = "https://creativecommons.org/licenses/by-nd/${version}/${jurisdiction}/deed.${locale}";
+	public final static String COMMON_LICENSE_CC_BY_NC_LINK = "https://creativecommons.org/licenses/by-nc/${version}/${jurisdiction}/deed.${locale}";
+	public final static String COMMON_LICENSE_CC_BY_NC_SA_LINK = "https://creativecommons.org/licenses/by-nc-sa/${version}/${jurisdiction}/deed.${locale}";
+	public final static String COMMON_LICENSE_CC_BY_NC_ND_LINK = "https://creativecommons.org/licenses/by-nc-nd/${version}/${jurisdiction}/deed.${locale}";
 	public final static String COMMON_LICENSE_EDU_LINK = "http://edu-sharing.net/licenses/edu-nc-nd/1.0/de";
 	public final static String COMMON_LICENSE_CUSTOM_LINK = "http://edu-sharing.net/licenses/custom-licence/1.0/de";
 
