@@ -170,45 +170,45 @@ export class MdsEditorCommonService {
                     'cclom:general_keyword': [
                         {
                             value: 'hello world',
-                            createdBy: 'Superschlauer Duper KI',
+                            createdBy: 'Superschlauer Duper KI' as any,
                             status: 'PENDING',
                         },
                         {
                             value: 'AB\nDEF',
-                            createdBy: 'Noch schlauerer Redakteur',
+                            createdBy: 'Noch schlauerer Redakteur' as any,
                             status: 'PENDING',
                         },
                     ],
                     'ccm:educationallearningresourcetype': [
                         {
                             value: 'exercise',
-                            createdBy: 'test',
+                            createdBy: 'test' as any,
                             status: 'PENDING',
                         },
                     ],
                     'cclom:general_description': [
                         {
                             value: 'lorem ipsum\ndolor sit amet',
-                            createdBy: 'Superschlaue Duper KI',
+                            createdBy: 'Superschlaue Duper KI' as any,
                             status: 'PENDING',
                             type: 'AI',
                         },
                         {
                             value: 'AB\nDEF',
-                            createdBy: 'Noch schlauerer Redakteur',
+                            createdBy: 'Noch schlauerer Redakteur' as any,
                             status: 'PENDING',
                         },
                     ],
                     'cclom:title': [
                         {
                             value: 'KI Titel super fancy',
-                            createdBy: 'Superschlaue Duper KI',
+                            createdBy: 'Superschlaue Duper KI' as any,
                             status: 'PENDING',
                             type: 'AI',
                         },
                         {
                             value: 'Titel des Redakteurs',
-                            createdBy: 'Noch schlauerer Redakteur',
+                            createdBy: 'Noch schlauerer Redakteur' as any,
                             status: 'PENDING',
                         },
                     ],
