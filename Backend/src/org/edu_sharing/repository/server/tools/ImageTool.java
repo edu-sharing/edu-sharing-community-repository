@@ -172,7 +172,7 @@ public class ImageTool {
 			// TODO: convert to NodeMimetypeValidationException after merge of file filter completed
 			throw new MimeTypeException("Invalid mime type for image: " + mediaType.getType() + "/" + mediaType.getSubtype());
 		}
-		if(mediaType.getType().equals("text") || mediaType.equals(MediaType.image("svg"))) {
+		if(mediaType.getType().equals("text") || mediaType.equals(MediaType.image("svg+xml"))) {
 			throw new MimeTypeException("svg is currently not supported");
 		}
 		InputStream result = autoRotateImage(new java.io.ByteArrayInputStream(data), ImageTool.MAX_THUMB_SIZE);
