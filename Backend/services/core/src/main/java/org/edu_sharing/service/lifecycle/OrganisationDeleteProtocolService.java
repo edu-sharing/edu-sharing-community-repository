@@ -250,9 +250,13 @@ public abstract class OrganisationDeleteProtocolService {
         public String[] getArray(){
             return new String[]{error,organisation,authority,
                     new Integer(docs).toString(),
+                    new Integer(docsShared).toString(),
                     new Integer(docsSafe).toString(),
+                    new Integer(docsSharedSafe).toString(),
                     new Integer(folders).toString(),
+                    new Integer(foldersShared).toString(),
                     new Integer(foldersSafe).toString(),
+                    new Integer(foldersSharedSafe).toString(),
                     new Integer(collections).toString(),
                     new Integer(collectionRefs).toString()
             };
