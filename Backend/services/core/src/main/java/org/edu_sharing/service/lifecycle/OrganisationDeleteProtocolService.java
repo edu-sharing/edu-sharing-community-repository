@@ -156,6 +156,13 @@ public abstract class OrganisationDeleteProtocolService {
         {
             Pair<Integer, Integer> subCount = countFilesFolders(rs.sharedFolders.get(CCConstants.CCM_VALUE_SCOPE_SAFE));
             protEntry.docsSharedSafe = subCount.getFirst();
+            /**
+             * foldersSharedSafe @see PersonLifecycleService.handleForeignFiles
+             * can be 1 to 3 folders more than expected cause folders like this are also counted (createdBy)
+             * /app:company_home/ccm:SCOPES/ccm:safe
+             * /app:company_home/ccm:SCOPES/ccm:safe/ccm:Bv (user:BvlZac)
+             * /app:company_home/ccm:EDU_SHARED/ccm:Test_x0020_School_safe
+             */
             protEntry.foldersSharedSafe = subCount.getSecond();
         }
 
