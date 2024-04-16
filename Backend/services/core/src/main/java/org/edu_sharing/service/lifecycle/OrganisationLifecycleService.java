@@ -1,7 +1,6 @@
 package org.edu_sharing.service.lifecycle;
 
 import org.alfresco.model.ContentModel;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -13,7 +12,6 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 
@@ -64,6 +62,7 @@ public class OrganisationLifecycleService {
 
         if(!authorityService.authorityExists(authorityName)){
             logger.error("authority does not exists " + authorityName);
+            return;
         }
 
         logger.info("starting for organisation:" + authorityName);
@@ -78,24 +77,10 @@ public class OrganisationLifecycleService {
     private void deleteOrganisationWithContext(String orga, String authorityName) {
         Set<String> users = authorityService.getContainedAuthorities(AuthorityType.USER, authorityName, true);
 
-        List<PersonDeleteResult> personDeleteResults = new ArrayList<>();
         for (String user : users) {
             try {
-
-                NodeRef safeHomeFolder = ScopeUserHomeServiceFactory.getScopeUserHomeService().getUserHome(user, CCConstants.CCM_VALUE_SCOPE_SAFE, false);
-                NodeRef homeFolder = (NodeRef)nodeService.getProperty(personService.getPerson(user),ContentModel.PROP_HOMEFOLDER);
-                personDeleteResults.add(deleteUser(authorityName, user));
-
-                if(safeHomeFolder != null && nodeService.exists(safeHomeFolder)){
-                    nodeService.deleteNode(safeHomeFolder);
-                }
-
-                if(homeFolder != null && nodeService.exists(homeFolder)){
-                    nodeService.deleteNode(homeFolder);
-                }
-
-
-
+                PersonDeleteResult personDeleteResult = deleteUser(authorityName, user);
+                protocolService.protocolPersons(orga, personDeleteResult);
             } catch (RuntimeException e) {
                 logger.error(e.getMessage(),e);
                 protocolService.protocolError(orga, user, e.getMessage());
@@ -105,10 +90,6 @@ public class OrganisationLifecycleService {
                 logger.error(e.getMessage(),e);
                 return;
             }
-        }
-
-        for (PersonDeleteResult rs : personDeleteResults) {
-            protocolService.protocolPersons(orga, rs);
         }
 
         //delete safe org and subgroups
