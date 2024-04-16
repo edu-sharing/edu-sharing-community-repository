@@ -101,6 +101,9 @@ public class OrganisationLifecycleService {
                 protocolService.protocolError(orga, user, e.getMessage());
                 //skip for fixing problem by hand
                 return;
+            }catch(Throwable e){
+                logger.error(e.getMessage(),e);
+                return;
             }
         }
 
