@@ -95,7 +95,12 @@ public class OrganisationLifecycleServiceTestSetup {
 
             //safe
             NodeServiceInterceptor.setEduSharingScope(CCConstants.CCM_VALUE_SCOPE_SAFE);
-            NodeRef ref  = AuthenticationUtil.runAsSystem(() -> ScopeUserHomeServiceFactory.getScopeUserHomeService().getUserHome(user, CCConstants.CCM_VALUE_SCOPE_SAFE, true));
+            NodeRef ref  = AuthenticationUtil.runAsSystem(() -> {
+                        AuthenticationUtil.setFullyAuthenticatedUser(user);
+                        AuthenticationUtil.setRunAsUserSystem();
+                        return  ScopeUserHomeServiceFactory.getScopeUserHomeService().getUserHome(user, CCConstants.CCM_VALUE_SCOPE_SAFE, true);
+                    }
+            );
             createFoldersFiles(user, numberOfHomeFolders, numberOfHomeDocs, ref);
             NodeServiceInterceptor.setEduSharingScope(null);
         }
