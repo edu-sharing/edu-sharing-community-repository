@@ -36,6 +36,8 @@ public class OrganisationLifecycleServiceTestSetup {
     int numberOfPersons = 10;
 
     int numberOfHomeDocs = 12;
+
+    //+ 3 (dokuments,images,shared)
     int numberOfHomeFolders = 9;
 
     int numberOfSharedDocs = 10;
