@@ -5686,7 +5686,7 @@
             "type": "string"
           },
           "createdBy": {
-            "type": "string"
+            "$ref": "#/components/schemas/UserSimple"
           },
           "description": {
             "type": "string"
@@ -5699,6 +5699,9 @@
             "type": "string"
           },
           "modifiedBy": {
+            "$ref": "#/components/schemas/UserSimple"
+          },
+          "nodeId": {
             "type": "string"
           },
           "propertyId": {
@@ -5721,6 +5724,9 @@
           },
           "value": {
             "type": "object"
+          },
+          "version": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -34768,7 +34774,107 @@
         ]
       }
     },
-    "/suggestions/v1/{repository}": {
+    "/suggestions/v1/{repository}/{node}": {
+      "delete": {
+        "operationId": "deleteSuggestions",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of node",
+            "in": "path",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "delete only specified versions. If not set, it deletes all versions",
+            "in": "query",
+            "name": "version",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete all suggestions of a given node."
+          }
+        },
+        "summary": "Delete suggestions",
+        "tags": [
+          "SUGGESTIONS v1"
+        ]
+      },
+      "get": {
+        "operationId": "getSuggestionsByNodeId",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of node",
+            "in": "path",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter option",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "items": {
+                "enum": [
+                  "ACCEPTED",
+                  "PENDING",
+                  "DECLINED"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeSuggestionResponseDTO"
+                }
+              }
+            },
+            "description": "get all suggestions notifications"
+          }
+        },
+        "summary": "Retrieve stored suggestion for the given nodeId",
+        "tags": [
+          "SUGGESTIONS v1"
+        ]
+      },
       "patch": {
         "operationId": "updateStatus",
         "parameters": [
@@ -34779,6 +34885,15 @@
             "required": true,
             "schema": {
               "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of node",
+            "in": "path",
+            "name": "node",
+            "required": true,
+            "schema": {
               "type": "string"
             }
           },
@@ -34824,88 +34939,6 @@
         "tags": [
           "SUGGESTIONS v1"
         ]
-      }
-    },
-    "/suggestions/v1/{repository}/{node}": {
-      "delete": {
-        "operationId": "deleteSuggestions",
-        "parameters": [
-          {
-            "description": "ID of repository (or \"-home-\" for home repository)",
-            "in": "path",
-            "name": "repository",
-            "required": true,
-            "schema": {
-              "default": "-home-",
-              "type": "string"
-            }
-          },
-          {
-            "description": "ID of node",
-            "in": "path",
-            "name": "node",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "providerId",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Delete all suggestions of a given providerId and node."
-          }
-        },
-        "summary": "Create suggestions",
-        "tags": [
-          "SUGGESTIONS v1"
-        ]
-      },
-      "get": {
-        "operationId": "getSuggestionsByNodeId",
-        "parameters": [
-          {
-            "description": "ID of repository (or \"-home-\" for home repository)",
-            "in": "path",
-            "name": "repository",
-            "required": true,
-            "schema": {
-              "default": "-home-",
-              "type": "string"
-            }
-          },
-          {
-            "description": "ID of node",
-            "in": "path",
-            "name": "node",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NodeSuggestionResponseDTO"
-                }
-              }
-            },
-            "description": "get all suggestions notifications"
-          }
-        },
-        "summary": "Retrieve stored suggestion for the given nodeId",
-        "tags": [
-          "SUGGESTIONS v1"
-        ]
       },
       "post": {
         "operationId": "createSuggestions",
@@ -34930,20 +34963,24 @@
             }
           },
           {
-            "in": "query",
-            "name": "providerId",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
+            "description": "Type of the suggestion",
             "in": "query",
             "name": "type",
+            "required": true,
             "schema": {
               "enum": [
                 "AI",
                 "USER_PROPOSAL"
               ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Version of the suggestion",
+            "in": "query",
+            "name": "version",
+            "required": true,
+            "schema": {
               "type": "string"
             }
           }
@@ -34973,6 +35010,26 @@
               }
             },
             "description": "Store suggestions for the given node."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
           }
         },
         "summary": "Create suggestions",
