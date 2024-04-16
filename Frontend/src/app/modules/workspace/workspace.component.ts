@@ -66,6 +66,7 @@ import { canDragDrop, canDropOnNode } from './workspace-utils';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { UserService } from 'ngx-edu-sharing-api';
 import { mapVCard } from '../../core-module/rest/services/rest-iam.service';
+import { RecycleMainComponent } from '../node-list/recycle/recycle.component';
 
 @Component({
     selector: 'es-workspace-main',
@@ -100,6 +101,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     @ViewChild('explorer') explorer: WorkspaceExplorerComponent;
 
     @ViewChild(WorkspaceTreeComponent) treeComponent: WorkspaceTreeComponent;
+    @ViewChild(RecycleMainComponent) recycleMainComponent: RecycleMainComponent;
     @ViewChild('actionbar') actionbarRef: ActionbarComponent;
 
     cardHasOpenModals$: Observable<boolean>;
@@ -672,15 +674,15 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     }
 
     setSelection(nodes: Node[]) {
-        this.explorer.nodeEntries.getSelection().clear();
-        this.explorer.nodeEntries.getSelection().select(...nodes);
+        this.explorer?.nodeEntries.getSelection().clear();
+        this.explorer?.nodeEntries.getSelection().select(...nodes);
         this.setFixMobileNav();
     }
 
     private setFixMobileNav() {
         this.mainNavService
             .getMainNav()
-            .setFixMobileElements(this.explorer.nodeEntries.getSelection().selected?.length > 0);
+            .setFixMobileElements(this.explorer?.nodeEntries.getSelection().selected?.length > 0);
     }
 
     private updateLicense() {
