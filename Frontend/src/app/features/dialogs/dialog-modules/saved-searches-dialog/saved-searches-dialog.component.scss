@@ -1,0 +1,34 @@
+@import '../../../../core-ui-module/styles/variables';
+
+:host ::ng-deep .mat-mdc-tab-body-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.mat-tab-group {
+    height: 100%;
+    & ::ng-deep .mat-tab-body-wrapper {
+        flex-grow: 1;
+    }
+}
+
+.search-input-form {
+    display: flex;
+    padding: 25px 25px 0;
+    .search-input-field {
+        flex-grow: 1;
+        & ::ng-deep .mat-form-field-wrapper {
+            padding: 0;
+        }
+    }
+}
+
+.actionbar {
+    padding: 25px 25px 0;
+    align-self: flex-end;
+}
+
+.no-results-notice {
+    padding: 25px;
+    color: $textLight;
+}

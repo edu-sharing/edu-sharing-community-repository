@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
-import { LabeledValue, MdsIdentifier, SearchResults } from '../../public-api';
+import { LabeledValue, MdsIdentifier, NetworkService, SearchResults } from '../../public-api';
 import * as apiModels from '../api/models';
 import { SearchV1Service } from '../api/services';
-import { onSubscription } from '../utils/on-subscription';
+import { onSubscription } from '../utils/rxjs-operators/on-subscription';
 import { LabeledValuesDict, MdsLabelService, RawValuesDict } from './mds-label.service';
 
 /** Configuration for `SearchService`. */
@@ -77,7 +77,11 @@ export class SearchService {
     private readonly subscribedFacetsSubject = new BehaviorSubject<string[][]>([]);
     private didYouMeanSuggestionsSubscribers = 0;
 
-    constructor(private searchV1: SearchV1Service, private mdsLabel: MdsLabelService) {
+    constructor(
+        private mdsLabel: MdsLabelService,
+        private network: NetworkService,
+        private searchV1: SearchV1Service,
+    ) {
         this.registerFacetsSubject();
         this.registerDidYouMeanSuggestionSubject();
     }
@@ -263,7 +267,7 @@ export class SearchService {
         size: number,
     ): Observable<FacetsDict> {
         const searchParams = this.getSearchParams();
-        return this.searchV1
+        const asYouTypeFacetSuggestions = this.searchV1
             .searchFacets({
                 repository: searchParams.repository,
                 metadataset: searchParams.metadataset,
@@ -277,6 +281,16 @@ export class SearchService {
                 },
             })
             .pipe(switchMap((response) => this.mapFacets(response.facets)));
+        // As-you-type suggestions are only supported on edu-sharing repositories.
+        return this.network
+            .getRepository(searchParams.repository)
+            .pipe(
+                switchMap((repository) =>
+                    repository?.repositoryType === 'ALFRESCO'
+                        ? asYouTypeFacetSuggestions
+                        : rxjs.of({}),
+                ),
+            );
     }
 
     /**
@@ -510,6 +524,7 @@ export class SearchService {
             'facetSuggest',
             'facets',
             'resolveCollections',
+            'resolveUsernames',
             'returnSuggestions',
         ];
         if (!changedBodyProperties.every((param) => [...nonCriticalBodyParams].includes(param))) {
@@ -520,16 +535,22 @@ export class SearchService {
             previousSearchParams.body.criteria,
             searchParams.body.criteria,
         );
-        // If the only criterion that has changed is the facet in question, we can keep the facet.
-        return (
-            changedCriteria.length === 0 ||
-            (changedCriteria.length === 1 && changedCriteria[0] === facetProperty)
-        );
+        // ~~If the only criterion that has changed is the facet in question, we can keep the facet.~~
+        // return (
+        //     changedCriteria.length === 0 ||
+        //     (changedCriteria.length === 1 && changedCriteria[0] === facetProperty)
+        // );
+
+        // The above works only when multiple values of the criterion are OR-combined. Otherwise,
+        // additional filter values for the criterion will reduce the available facets.
+        //
+        // TODO: Clarify if either OR or AND combination is preferred / always used.
+        return changedCriteria.length === 0;
     }
 
     /** Compares two objects and return the keys of properties that are not deep-equal in a string
      * array. */
-    private getChangedProperties<T>(lhs: T, rhs: T): (keyof T)[] {
+    private getChangedProperties<T extends {}>(lhs: T, rhs: T): (keyof T)[] {
         const keys = [...new Set([...Object.keys(lhs), ...Object.keys([rhs])])] as (keyof T)[];
         return keys.filter(
             (key) => JSON.stringify((lhs as any)[key]) !== JSON.stringify((rhs as any)[key]),
@@ -623,9 +644,15 @@ function omitProperty<T, K extends keyof T>(obj: T | null, property: K): Omit<T,
     }
 }
 
-function pickProperties<T, K extends keyof T>(obj: T, properties: K[]): Pick<T, K>;
-function pickProperties<T, K extends keyof T>(obj: T | null, properties: K[]): Pick<T, K> | null;
-function pickProperties<T, K extends keyof T>(obj: T | null, properties: K[]): Pick<T, K> | null {
+function pickProperties<T extends {}, K extends keyof T>(obj: T, properties: K[]): Pick<T, K>;
+function pickProperties<T extends {}, K extends keyof T>(
+    obj: T | null,
+    properties: K[],
+): Pick<T, K> | null;
+function pickProperties<T extends {}, K extends keyof T>(
+    obj: T | null,
+    properties: K[],
+): Pick<T, K> | null {
     if (obj === null) {
         return null;
     } else {

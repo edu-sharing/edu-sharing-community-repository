@@ -1,0 +1,47 @@
+@import '../../../assets/scss/mixins';
+::ng-deep .sort-dropdown-menu {
+    width: 240px;
+}
+
+.collection-item-title {
+    color: var(--textLight);
+    font-size: 80%;
+    font-weight: bold;
+    padding: 5px 16px;
+}
+
+.collection-item {
+    display: flex;
+    color: var(--primary);
+    text-align: left;
+    border: none;
+    width: 100%;
+    & ::ng-deep .mat-mdc-menu-item-text {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+    }
+    &.cdk-keyboard-focused {
+        @include setGlobalKeyboardFocus('border');
+    }
+    &.active {
+        --mat-menu-item-label-text-weight: bold;
+    }
+    &.active::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            to right,
+            var(--primary) 0,
+            var(--primary) 5px,
+            transparent 5px,
+            transparent 5%
+        );
+    }
+    .title {
+        flex-grow: 1;
+    }
+}

@@ -1,0 +1,29 @@
+.lti-wrapper {
+    padding: 20px 20px;
+    es-info-message {
+        display: flex;
+        margin-bottom: 20px;
+        .info-message {
+            white-space: pre-line;
+        }
+    }
+}
+.mat-table {
+    margin-bottom: 20px;
+}
+.mat-button-base {
+    float: right;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.base-fields {
+    display: flex;
+    flex-wrap: wrap;
+    padding-top: 10px;
+
+    mat-form-field {
+        width: calc(50% - 20px);
+        margin: 0 10px;
+    }
+}

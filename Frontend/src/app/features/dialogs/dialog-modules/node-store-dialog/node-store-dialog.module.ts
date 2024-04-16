@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { SharedModule } from '../../../../shared/shared.module';
-import { NodeEntriesModule } from '../../../node-entries/node-entries.module';
-import { SearchNodeStoreComponent } from './node-store.component';
+import { SearchNodeStoreDialogComponent } from './node-store-dialog.component';
+import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
 
-export { SearchNodeStoreComponent };
+export { SearchNodeStoreDialogComponent as SearchNodeStoreComponent };
 
 @NgModule({
-    declarations: [SearchNodeStoreComponent],
-    imports: [SharedModule, NodeEntriesModule],
+    declarations: [SearchNodeStoreDialogComponent],
+    imports: [SharedModule, EduSharingUiModule],
 })
 export class NodeStoreDialogModule {}

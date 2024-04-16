@@ -1,0 +1,218 @@
+@import '../../core-ui-module/styles/variables';
+
+.frame {
+    display: flex;
+    flex-direction: column;
+}
+
+.topbarFrame {
+    position: sticky;
+    top: var(--mainnavHeight);
+    z-index: 60;
+    > div {
+        width: 100%;
+        height: $workspaceBreadcrumbsHeight;
+        background-color: #fff;
+        @include materialShadow();
+        display: flex;
+        > es-breadcrumbs {
+            padding-left: 30px;
+            flex-grow: 1;
+            height: 100%;
+        }
+        > es-actionbar {
+            position: absolute;
+            right: 0;
+            height: 100%;
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            z-index: 62;
+            background: linear-gradient(
+                to right,
+                rgba(255, 255, 255, 0.001) 0,
+                #fff 10px,
+                #fff 100%
+            ); /* safari fix */
+        }
+    }
+    ::ng-deep {
+        .breadcrumb {
+            div {
+                word-break: break-all;
+            }
+        }
+    }
+}
+
+.workspace-container {
+    display: flex;
+}
+
+.isBlocked {
+    position: absolute;
+    color: $noResultsColor;
+    font-size: 150%;
+    text-align: center;
+    width: 100%;
+    padding-top: 25px;
+}
+
+.tree {
+    display: table-cell;
+}
+
+.globalProgress {
+    z-index: 122;
+}
+
+$quotaHeight: 60px;
+.tree {
+    min-width: $workspaceTreeWidth;
+    max-width: $workspaceTreeWidth;
+    top: calc(#{$workspaceBreadcrumbsHeight} + var(--mainnavHeight));
+    position: fixed;
+    height: calc(100% - #{$workspaceBreadcrumbsHeight} - var(--mainnavHeight));
+    z-index: 2;
+    background: $workspaceTreeBackground;
+    es-workspace-tree {
+        min-width: $workspaceTreeWidth;
+        max-width: $workspaceTreeWidth;
+        top: calc(#{$workspaceBreadcrumbsHeight} + var(--mainnavHeight));
+        position: fixed;
+        height: calc(100% - #{$workspaceBreadcrumbsHeight} - var(--mainnavHeight));
+        overflow-y: auto;
+    }
+    .tree-quota {
+        height: calc(
+            100% - #{$workspaceBreadcrumbsHeight} - var(--mainnavHeight) - #{$quotaHeight}
+        );
+    }
+}
+
+es-user-quota {
+    position: absolute;
+    width: $workspaceTreeWidth;
+    height: $quotaHeight;
+    background: $workspaceTreeBackground;
+    bottom: 0;
+    z-index: 3;
+    padding: 10px 20px;
+}
+.nodeRender {
+    padding: 20px;
+}
+.addDesktop,
+.addMobile {
+    z-index: 65;
+}
+.addMobile {
+    z-index: 66;
+    position: fixed;
+    right: 25px;
+    bottom: 25px + $mobileTabNavHeight;
+    display: none;
+}
+// Backdrop for dropdown .selectRootMenu
+.dialog {
+    z-index: 131;
+}
+.selectRootMenu {
+    position: fixed;
+    width: 250px;
+    left: 311px;
+    top: calc(14px + var(--mainnavHeight));
+    box-shadow: 0 0 5px #0000004d;
+    z-index: 132;
+    cursor: pointer;
+    background-color: $backgroundColor;
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+}
+.selectRootMenu .collection-item {
+    display: flex;
+    align-items: center;
+    color: $textLight;
+    padding: 8px 15px;
+    gap: 8px;
+}
+.rootSelected {
+    color: $primary !important;
+    font-weight: bold;
+    background: $workspaceTreeSelectedBackgroundEffect;
+    background-color: #fff;
+}
+.explorer {
+    position: relative;
+    display: block;
+    left: 300px;
+    width: calc(100% - 300px);
+    transition: all $transitionNormal;
+}
+
+.explorerMetadata {
+    width: calc(100% - 600px);
+}
+
+.viewType {
+    position: fixed;
+    color: $textLight;
+    padding-top: 20px;
+    padding-right: 25px;
+    right: 0;
+    z-index: 97;
+}
+.viewType div {
+    /* border-left:1px solid #ccc; */
+}
+
+.tree {
+    @include materialShadow();
+}
+
+@media screen and (max-width: ($mobileWidth+$mobileStage*6)) {
+    .explorerMetadata {
+        width: calc(100% - 300px);
+    }
+}
+@media screen and (max-width: ($mobileWidth+$mobileStage*4)) {
+    /*
+  .breadcrumbFrame{
+    padding-right:170px;
+  }
+  */
+}
+
+@media screen and (max-width: ($mobileTabSwitchWidth)) {
+    .tree {
+        display: none;
+    }
+    .selectRootMenu {
+        left: 10px;
+    }
+    .addMobile {
+        display: inherit;
+    }
+    .topbarFrame > div > es-breadcrumbs {
+        padding-left: 20px;
+    }
+    .explorer {
+        left: 0;
+        width: 100%;
+        height: calc(100% - (var(--mainnavHeight) + #{$secondaryBarHeight+$mobileTabNavHeight}));
+    }
+    :host ::ng-deep {
+        es-workspace-explorer .list {
+            margin-bottom: 62px;
+        }
+    }
+}
+
+@media screen and (max-width: $mobileWidth) {
+    /*
+  .metadata{
+    max-width:none;
+    width:100%;
+  }
+  */
+}

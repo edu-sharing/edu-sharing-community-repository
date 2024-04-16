@@ -1,0 +1,51 @@
+@import '../../../../core-ui-module/styles/variables';
+
+.row {
+    margin-bottom: 20px;
+}
+
+.inputs {
+    display: flex;
+    width: 100%;
+    gap: 20px;
+    es-authority-search-input {
+        flex-grow: 1;
+    }
+}
+
+.status-select ::ng-deep .mat-mdc-form-field-infix {
+    height: 50px; // Same as the form field of authority-search-input
+    display: flex;
+    align-items: center;
+    padding: 0;
+}
+
+.status-select ::ng-deep .mat-mdc-select-value,
+::ng-deep .workflow-dialog-status-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    &::before {
+        content: '';
+        border-radius: 50%;
+        width: 12px;
+        height: 12px;
+        background-color: var(--status-color);
+    }
+}
+
+.comment {
+    width: 100%;
+}
+
+.historyLabel {
+    font-weight: bold;
+    padding-top: 30px;
+    padding-bottom: 12px;
+}
+
+@media screen and (max-width: ($mobileWidth - $mobileStage * 1)) {
+    .inputs {
+        flex-direction: column;
+    }
+}

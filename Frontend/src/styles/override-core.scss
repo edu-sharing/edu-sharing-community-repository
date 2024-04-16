@@ -2,7 +2,7 @@
   anything that do not match up with the core-ui-module globals
 */
 
-.dialog-right{
-  top:$mainnavHeight;
-  height: calc( 100% - #{$mainnavHeight});
+.dialog-right {
+    top: var(--mainnavHeight);
+    height: calc(100% - var(--mainnavHeight));
 }

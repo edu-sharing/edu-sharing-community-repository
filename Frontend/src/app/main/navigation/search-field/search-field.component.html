@@ -1,6 +1,6 @@
 <form role="search" autocomplete="off" (ngSubmit)="onSubmit()">
-  <!-- #trigger="cdkOverlayOrigin" -->
   <div
+    #trigger="cdkOverlayOrigin"
     class="search-field-wrapper"
     cdkOverlayOrigin
     cdkMonitorSubtreeFocus
@@ -8,15 +8,27 @@
     esBorderBoxObserver
     #triggerBorderBox="borderBoxObserver"
   >
-    <mat-form-field class="search-field" appearance="legacy" floatLabel="always">
-      <mat-label></mat-label>
+    <div class="search-field">
       <div class="search-field-input-wrapper">
-        <div matPrefix
-             class="filter-prefix"
-             matTooltip="{{'SEARCH.ACTIVE_FILTER_TOOLTIP' | translate:{count: filtersCount} }}"
-             *ngIf="filtersCount">
-          {{filtersCount}}
-        </div>
+        <button
+          *ngIf="config.showFiltersButton"
+          matPrefix
+          class="filters-button"
+          mat-icon-button
+          type="button"
+          [attr.aria-label]="'SEARCH.FILTERS' | translate"
+          matTooltip="{{ 'TOGGLE_SEARCH_FILTERS' | translate }} {{
+            totalFiltersCount > 0
+              ? '(' +
+                ('SEARCH.ACTIVE_FILTER_TOOLTIP' | translate : { count: totalFiltersCount }) +
+                ')'
+              : ''
+          }}"
+          [matBadge]="totalFiltersCount || null"
+          (click)="onFiltersButtonClicked()"
+        >
+          <i esIcon="filter_list" [aria]="false"></i>
+        </button>
         <input
           class="search-input"
           #input
@@ -25,11 +37,13 @@
           matInput
           [formControl]="inputControl"
           autocomplete="off"
-          placeholder="{{ placeholder | translate }}"
-          [attr.aria-label]="placeholder | translate"
+          placeholder="{{ config.placeholder | translate }}"
+          [attr.aria-label]="config.placeholder | translate"
           (focus)="onInputFocus()"
           (blur)="onInputBlur($event)"
           (keydown.tab)="focusOverlayIfOpen($event)"
+          data-test="top-bar-search-field"
+          (click)="onInputFocus()"
         />
         <button
           class="clear-button"
@@ -37,7 +51,7 @@
           mat-icon-button
           type="button"
           (click)="onClear()"
-          attr.aria-label="{{'SEARCH_CLEAR' | translate}}"
+          attr.aria-label="{{ 'SEARCH_CLEAR' | translate }}"
         >
           <i esIcon="clear" [aria]="false"></i>
         </button>
@@ -45,53 +59,56 @@
           class="submit-button"
           mat-icon-button
           attr.aria-label="{{ 'WORKSPACE.SEARCH_ACTION' | translate }}"
+          data-test="top-bar-search-button"
         >
           <i esIcon="search" [aria]="false"></i>
         </button>
       </div>
-    </mat-form-field>
+    </div>
   </div>
 </form>
 
-
-
-<!-- <ng-template
+<ng-template
   cdkConnectedOverlay
   [cdkConnectedOverlayOrigin]="trigger"
-  [cdkConnectedOverlayOpen]="showOverlay && (!!filtersCount || hasSuggestions)"
+  [cdkConnectedOverlayOpen]="showOverlay.value && (!!filtersCount || hasSuggestions) && !isLoading"
   [cdkConnectedOverlayPositions]="overlayPositions"
   [cdkConnectedOverlayWidth]="triggerBorderBox.width$ | async"
   (overlayOutsideClick)="onOutsideClick($event)"
   (detach)="onDetach()"
 >
   <!-- FIXME: The focus trap doesn't seem to work, when there are suggestions for only one facet
-  category. ->
+  category. -->
   <div class="suggestion-card mat-elevation-z2" cdkTrapFocus>
-    <div *ngIf="filtersCount"
-         class="suggestion-active-filter"
-         [class.suggestion-active-filter-separator]="!facets.isEmpty()"
+    <div
+      *ngIf="filtersCount"
+      class="suggestion-active-filter"
+      [class.suggestion-active-filter-separator]="!facets.isEmpty()"
     >
-      <label #label>{{'SEARCH.ACTIVE_FILTER' | translate:{count:filtersCount} }}</label>
-      <mat-chip-list [attr.aria-labelledby]="label" #chipList>
+      <label #label>{{ 'SEARCH.ACTIVE_FILTER' | translate }}</label>
+      <mat-chip-listbox [attr.aria-labelledby]="label" #chipList>
         <div class="chips-wrapper" *ngIf="filters$ | async as filtersDict">
           <ng-container *ngFor="let filters of filtersDict | keyvalue">
             <!-- We considered injecting the chip list from the mds editor like the suggestions
             panel, but `mat-chip-list` needs direct access to `mat-chip`s as child components for
-            keyboard interaction to work. ->
+            keyboard interaction to work. -->
             <ng-container *ngIf="(categories$ | async)?.includes(filters.key)">
-              <mat-chip
+              <mat-chip-option
+                [selectable]="false"
                 *ngFor="let filterValue of filters.value"
                 class="filter-chip-{{ filters.key | propertySlug }}"
                 [removable]="true"
                 (removed)="onRemoveFilter(filters.key, filterValue)"
+                [matTooltip]="getTooltip(filters.key, filterValue)"
+                matTooltipPosition="above"
               >
                 {{ filterValue.label }}
-                <mat-icon matChipRemove>cancel</mat-icon>
-              </mat-chip>
+                <mat-icon matChipRemove class="remove-chip">cancel</mat-icon>
+              </mat-chip-option>
             </ng-container>
           </ng-container>
         </div>
-      </mat-chip-list>
+      </mat-chip-listbox>
     </div>
     <ng-container *ngTemplateOutlet="facets.suggestionsPanel"></ng-container>
   </div>
@@ -99,7 +116,7 @@
 
 <!-- We need to have `SearchFieldFacets` permanently injected, so we can get the `categories`
 parameter that tells us which facets to request for suggestions. When there are any suggestions, we
-show the suggestion panel via template outlet. ->
+show the suggestion panel via template outlet. -->
 <es-search-field-facets
   #facets
   [repository]="(mdsInfo$ | async)?.repository"
@@ -109,4 +126,4 @@ show the suggestion panel via template outlet. ->
   (valuesChange)="onValuesChange($event)"
   [suggestions]="suggestions$ | async"
   (categories)="onCategories($event)"
-></es-search-field-facets> -->
+></es-search-field-facets>

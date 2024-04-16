@@ -1,23 +1,13 @@
-import {first, filter} from 'rxjs/operators';
-import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { Node } from '../../../../../core-module/rest/data-object';
-import { RestConstants } from '../../../../../core-module/rest/rest-constants';
-import { RestIamService } from '../../../../../core-module/rest/services/rest-iam.service';
-import { UIService } from '../../../../../core-module/rest/services/ui.service';
-import { VCard } from '../../../../../core-module/ui/VCard';
+import { filter } from 'rxjs/operators';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { VCard } from 'ngx-edu-sharing-ui';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
-import { Values } from '../../../types/types';
-import {MdsEditorWidgetBase, ValueType} from '../mds-editor-widget-base';
-import {FormControl, FormGroup} from '@angular/forms';
-import {TranslateService} from '@ngx-translate/core';
-import {Toast} from '../../../../../core-ui-module/toast';
-import {DateHelper} from '../../../../../core-ui-module/DateHelper';
-import {
-    WorkspaceContributorComponent
-} from '../../../../../modules/management-dialogs/contributor/contributor.component';
-import {MatTabGroup} from '@angular/material/tabs';
+import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { TranslateService } from '@ngx-translate/core';
+import { Toast } from '../../../../../services/toast';
+import { MatTabGroup } from '@angular/material/tabs';
+import { MdsWidget } from '../../../types/types';
 
 export interface AuthorData {
     freetext: string;
@@ -37,7 +27,7 @@ export class MdsEditorWidgetVCardComponent extends MdsEditorWidgetBase implement
     @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
     readonly valueType: ValueType = ValueType.String;
 
-    formControl: FormGroup;
+    formControl: UntypedFormGroup;
     editType: number;
 
     constructor(
@@ -55,33 +45,38 @@ export class MdsEditorWidgetVCardComponent extends MdsEditorWidgetBase implement
         }
         const vcard = new VCard(initialValue[0]);
         this.editType = vcard.getType();
-        this.formControl = new FormGroup({
-            givenname: new FormControl(vcard.givenname),
-            surname: new FormControl(vcard.surname),
-            org: new FormControl(vcard.org),
-        }, this.getStandardValidators());
-        this.formControl.valueChanges.pipe(
-            filter((value) => value !== null))
-            .subscribe((value) => {
-                vcard.givenname = value.givenname;
-                vcard.surname = value.surname;
-                vcard.org = value.org;
-                let result = initialValue.slice();
-                if (vcard.isValid()) {
-                    result[0] = vcard.toVCardString();
-                } else {
-                    result = initialValue.slice(1);
-                }
-                this.setValue(result);
-            });
+        this.formControl = new UntypedFormGroup(
+            {
+                title: new UntypedFormControl(vcard.title),
+                givenname: new UntypedFormControl(vcard.givenname),
+                surname: new UntypedFormControl(vcard.surname),
+                org: new UntypedFormControl(vcard.org),
+            },
+            this.getStandardValidators(),
+        );
+        this.formControl.valueChanges.pipe(filter((value) => value !== null)).subscribe((value) => {
+            vcard.title = value.title;
+            vcard.givenname = value.givenname;
+            vcard.surname = value.surname;
+            vcard.org = value.org;
+            let result = initialValue.slice();
+            if (vcard.isValid()) {
+                result[0] = vcard.toVCardString();
+            } else {
+                result = initialValue.slice(1);
+            }
+            this.setValue(result);
+        });
         setTimeout(() => this.tabGroup.realignInkBar());
     }
 
-    focus(): void {
-    }
+    focus(): void {}
 
     blur(): void {
         this.onBlur.emit();
     }
-
+    public static mapGraphqlId(definition: MdsWidget) {
+        // attach the "Contributor" graphql Attributes
+        return MdsEditorWidgetBase.attachGraphqlSelection(definition, ['role', 'content']);
+    }
 }

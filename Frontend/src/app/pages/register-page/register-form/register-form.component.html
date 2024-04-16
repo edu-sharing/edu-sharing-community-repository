@@ -1,0 +1,45 @@
+<form (ngSubmit)="register()" #loginForm *ngIf="registerForm" [formGroup]="registerForm">
+  <div class="name-input">
+    <mat-form-field class="title">
+      <mat-label>{{ 'VCARD.Title' | translate }}</mat-label>
+      <input matInput type="text" formControlName="title" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>{{ 'USER.firstName' | translate }}</mat-label>
+      <input matInput type="text" formControlName="firstName" />
+    </mat-form-field>
+    <mat-form-field class="last-name">
+      <mat-label>{{ 'USER.lastName' | translate }}</mat-label>
+      <input matInput type="text" formControlName="lastName" />
+    </mat-form-field>
+  </div>
+
+  <mat-form-field>
+    <mat-label>{{ 'USER.email' | translate }}</mat-label>
+    <input matInput type="email" formControlName="email" />
+  </mat-form-field>
+  <es-input-password
+    label="{{ 'USER.password' | translate }}"
+    hint="{{ 'REGISTER.HINT' | translate }}"
+    [displayStrength]="true"
+    autocomplete="new-password"
+    inputId="password"
+    [required]="true"
+    (keydown.enter)="register()"
+    [(value)]="password"
+    (valueChange)="onStateChanged.emit()"
+  ></es-input-password>
+  <mat-form-field class="organization">
+    <mat-label>{{ 'REGISTER.ORGANIZATION' | translate }}</mat-label>
+    <input matInput type="text" formControlName="organization" />
+  </mat-form-field>
+  <div class="accept">
+    <mat-checkbox formControlName="agree">{{ 'REGISTER.ACCEPT' | translate }}</mat-checkbox>
+    <a class="clickable imprint" *ngIf="privacyUrl" (click)="openPrivacy()">{{
+      'REGISTER.PRIVACY-LINK' | translate
+    }}</a>
+  </div>
+  <mat-checkbox formControlName="allowNotifications">{{
+    'REGISTER.NEWSLETTER' | translate
+  }}</mat-checkbox>
+</form>

@@ -1,10 +1,9 @@
 import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
-import { Node, RestNodeService, RestConstants } from '../../../core-module/core.module';
-import {DragData, DragNodeTarget, DropData} from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 import { Params, QueryParamsHandling } from '@angular/router';
-import {CdkDragDrop, CdkDragEnter, CdkDragExit} from '@angular/cdk/drag-drop';
-import {DragCursorDirective} from '../../../core-ui-module/directives/drag-cursor.directive';
-import { DropSource } from 'src/app/features/node-entries/entries-model';
+import { CanDrop, DragData, DropSource, NodesDragDropService } from 'ngx-edu-sharing-ui';
+import { Node, RestNodeService } from '../../../core-module/core.module';
+
+import { BreadcrumbsService } from './breadcrumbs.service';
 
 /**
  * Breadcrumbs for nodes or collections.
@@ -26,6 +25,10 @@ export class BreadcrumbsComponent {
     @Input() homeIcon: string;
 
     /**
+     * should an information be shown that you're in the root path in case of an empty nodes path?
+     */
+    @Input() showHomeNotice = true;
+    /**
      * shall an invisbile description (for screen readers) be generated, similar to
      * 'You're here'
      */
@@ -38,7 +41,7 @@ export class BreadcrumbsComponent {
     @Input() homeRouterLink: {
         routerLink: any[] | string;
         queryParams?: Params | null;
-        queryParamsHandling?: QueryParamsHandling | null
+        queryParamsHandling?: QueryParamsHandling | null;
     };
     /**
      * Attach a clickable class so the user cursor will be a hand.
@@ -50,7 +53,8 @@ export class BreadcrumbsComponent {
      * `auto` (default) decides via media query.
      */
     @HostBinding('attr.short')
-    @Input() short: 'never' | 'always' | 'auto' = 'auto';
+    @Input()
+    short: 'never' | 'always' | 'auto' = 'auto';
     /**
      * Should automatically be linked via angular routing.
      *
@@ -64,26 +68,8 @@ export class BreadcrumbsComponent {
         this._searchQuery = searchQuery;
         this.addSearch();
     }
-    /**
-     * Set the breadcrumb list as a @Node array.
-     */
-    @Input() set breadcrumbsAsNode(nodes: Node[]) {
-        if (nodes == null) return;
-        this.nodes = nodes;
-        this.addSearch();
-    }
-    /**
-     * Set the breadcrumb main id.
-     *
-     * The breadcrumb nodes will get async resolved via API.
-     */
-    @Input() set breadcrumbsForId(id: string) {
-        if (id == null) return;
-        this.node.getNodeParents(id, false, [RestConstants.ALL]).subscribe(nodes => {
-            this.nodes = nodes.nodes.reverse();
-            this.addSearch();
-        });
-    }
+
+    @Input() canDropNodes: (dragData: DragData<'HOME' | Node>) => CanDrop;
 
     /**
      * A breadcrumb is clicked.
@@ -94,13 +80,26 @@ export class BreadcrumbsComponent {
     /**
      * Called when an item is dropped on the breadcrumbs.
      */
-    @Output() onDrop = new EventEmitter<{target: Node, source: DropSource<Node>}>();
+    @Output() onDrop = new EventEmitter<{ target: Node | 'HOME'; source: DropSource<Node> }>();
 
+    readonly HOME = 'HOME' as 'HOME';
     nodes: Node[] = [];
 
     private _searchQuery: string;
 
-    constructor(private node: RestNodeService) {}
+    constructor(
+        private node: RestNodeService,
+        private breadcrumbsService: BreadcrumbsService,
+        private nodesDragDrop: NodesDragDropService,
+    ) {
+        this.breadcrumbsService.breadcrumbs$.subscribe((nodes) => {
+            if (nodes == null) {
+                return;
+            }
+            this.nodes = nodes;
+            this.addSearch();
+        });
+    }
 
     openBreadcrumb(position: number) {
         this.onClick.emit(position);
@@ -119,34 +118,44 @@ export class BreadcrumbsComponent {
             if (add) {
                 this.nodes.splice(this.nodes.length, 0, search);
             } else {
-                this.nodes[this.nodes.length - 1] = search;
+                this.nodes = this.nodes.filter((n) => n.type !== 'SEARCH');
             }
         } else if (!add) {
-            this.nodes.splice(this.nodes.length, 1);
+            this.nodes = this.nodes.filter((n) => n.type !== 'SEARCH');
         }
     }
 
-    drop(event: CdkDragDrop<Node|any>) {
+    onDropped(dragData: DragData<'HOME' | Node>) {
         this.onDrop.emit({
-            target: event.container.data,
+            target: dragData.target,
             source: {
-                element: [event.item.data],
-                sourceList: null,
-                mode: DragCursorDirective.dragState.mode
-            }
+                element: dragData.draggedNodes,
+                mode: dragData.action,
+            },
         });
-        DragCursorDirective.dragState.element = null;
-    }
-    getDragState() {
-        return DragCursorDirective.dragState;
     }
 
-    dragExit(event: CdkDragExit<any>) {
-        DragCursorDirective.dragState.element = null;
-    }
+    // drop(event: CdkDragDrop<Node | any>) {
+    //     // this.onDrop.emit({
+    //     //     target: event.container.data,
+    //     //     source: {
+    //     //         element: [event.item.data],
+    //     //         sourceList: null,
+    //     //         mode: DragCursorDirective.dragState.mode,
+    //     //     },
+    //     // });
+    //     // DragCursorDirective.dragState.element = null;
+    // }
+    // getDragState() {
+    //     return {} as any;
+    // }
 
-    dragEnter(event: CdkDragEnter<any>) {
-        DragCursorDirective.dragState.element = event.container.data;
-        DragCursorDirective.dragState.dropAllowed = true;
-    }
+    // dragExit(event: CdkDragExit<any>) {
+    //     // DragCursorDirective.dragState.element = null;
+    // }
+
+    // dragEnter(event: CdkDragEnter<any>) {
+    //     // DragCursorDirective.dragState.element = event.container.data;
+    //     // DragCursorDirective.dragState.dropAllowed = true;
+    // }
 }

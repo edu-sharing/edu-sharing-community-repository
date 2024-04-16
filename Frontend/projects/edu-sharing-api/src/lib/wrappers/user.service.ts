@@ -1,17 +1,18 @@
 import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, using } from 'rxjs';
 import { first, map, startWith, switchMap, take, tap } from 'rxjs/operators';
 import { User, UserEntry, UserProfileEdit } from '../api/models';
 import { IamV1Service } from '../api/services';
 import { HOME_REPOSITORY, ME } from '../constants';
-import { switchReplay } from '../utils/switch-replay';
+import { switchReplay } from '../utils/rxjs-operators/switch-replay';
 import { AuthenticationService, LoginInfo } from './authentication.service';
+import * as Constants from '../constants';
 
 export { UserEntry, User };
 
 export interface CurrentUserInfo {
-    user: UserEntry;
+    user: UserEntry | null;
     loginInfo: LoginInfo;
 }
 
@@ -26,21 +27,45 @@ export class UserService {
      */
     private readonly currentUserProfileChangesSubject = new Subject<void>();
     /** The currently logged in user. */
-    private readonly currentUser$ = this.createCurrentUser();
+    private readonly currentUser$;
 
-    constructor(private authentication: AuthenticationService, private iamApi: IamV1Service) {}
+    constructor(private authentication: AuthenticationService, private iamApi: IamV1Service) {
+        this.currentUser$ = this.createCurrentUser();
+    }
 
     /**
      * Returns the user with the given `userId`.
      *
      * When requesting a user other then `ME`, this method triggers an API request.
+     *
+     * Might return `null` when not logged in.
      */
-    getUser(userId: string, repository: string = HOME_REPOSITORY): Observable<UserEntry> {
+    getUser(userId: string, repository: string = HOME_REPOSITORY): Observable<UserEntry | null> {
         if (userId === ME && repository === HOME_REPOSITORY) {
             return this.currentUser$.pipe(take(1));
         } else {
             return this.getUserInner(userId, repository);
         }
+    }
+
+    getUserPreferences(userId: string = Constants.ME, repository: string = HOME_REPOSITORY) {
+        return this.iamApi
+            .getPreferences({
+                repository,
+                person: userId,
+            })
+            .pipe(map((p) => JSON.parse(p.preferences as string)));
+    }
+    setUserPreferences(
+        preferences: any,
+        userId: string = Constants.ME,
+        repository: string = HOME_REPOSITORY,
+    ) {
+        return this.iamApi.setPreferences({
+            repository,
+            person: userId,
+            body: JSON.stringify(preferences),
+        });
     }
 
     /**
@@ -50,8 +75,10 @@ export class UserService {
      *
      * Subscribing to the observable does not necessarily trigger an API request, when we already
      * have fetched the data.
+     *
+     * Might return `null` when not logged in.
      */
-    observeCurrentUser(): Observable<UserEntry> {
+    observeCurrentUser(): Observable<UserEntry | null> {
         return this.currentUser$;
     }
 
@@ -84,7 +111,7 @@ export class UserService {
         return this.observeCurrentUser().pipe(
             first(),
             switchMap((userEntry) => {
-                if (userId === ME || userId === userEntry.person.authorityName) {
+                if (userId === ME || userId === userEntry?.person.authorityName) {
                     return inner.pipe(tap(() => this.currentUserProfileChangesSubject.next()));
                 } else {
                     return inner;
@@ -93,12 +120,19 @@ export class UserService {
         );
     }
 
-    private createCurrentUser(): Observable<UserEntry> {
+    private createCurrentUser(): Observable<UserEntry | null> {
         return rxjs
             .merge(this.authentication.observeUserChanges(), this.currentUserProfileChangesSubject)
             .pipe(
                 startWith(void 0 as void),
-                switchReplay(() => this.getUserInner(ME, HOME_REPOSITORY)),
+                switchMap(() => this.authentication.observeLoginInfo().pipe(take(1))),
+                switchReplay((loginInfo) => {
+                    if (loginInfo.isValidLogin) {
+                        return this.getUserInner(ME, HOME_REPOSITORY);
+                    } else {
+                        return rxjs.of(null);
+                    }
+                }),
             );
     }
 

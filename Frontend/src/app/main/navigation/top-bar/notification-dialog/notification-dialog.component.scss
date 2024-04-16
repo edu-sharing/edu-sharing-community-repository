@@ -1,0 +1,19 @@
+@import '../../../../core-ui-module/styles/variables';
+form {
+    mat-radio-group {
+        display: grid;
+        grid-template-rows: auto auto;
+        grid-gap: 10px;
+    }
+    .extended-group {
+        padding: 30px 20px;
+        h6 {
+            padding-bottom: 10px;
+        }
+        &.notification-individual {
+            display: grid;
+            grid-gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        }
+    }
+}

@@ -2,25 +2,26 @@
   #container
   *ngIf="filteredSuggestions$ | async as suggestions"
   [widget]="widget"
-  [label]="true"
+  [label]="'SEARCH.FILTER_BY' | translate : { property: this.widget.definition.caption }"
   [wrapInGroup]="false"
   [injectedView]="this"
 >
-  <mat-chip-list
+  <mat-chip-listbox
     #chipList
     [attr.aria-labelledby]="container.labelId"
     [attr.aria-describedby]="container.descriptionId"
   >
-    <mat-chip
+    <mat-chip-option
       *ngFor="let suggestion of suggestions"
-      class="filter-chip-{{ widget.definition.id| propertySlug }}"
+      class="filter-chip-{{ widget.definition.id | propertySlug }}"
       [selectable]="false"
       (click)="add(suggestion)"
       (keydown.enter)="add(suggestion)"
-      [matTooltip]="'MDS.FILTER_FOR' | translate: { value: suggestion.label, count: suggestion.count }"
+      [matTooltip]="getTooltip(suggestion)"
+      matTooltipPosition="above"
     >
       <span class="caption">{{ suggestion.label }}</span>
       <!-- <span class="count">({{ value.count }})</span> -->
-    </mat-chip>
-  </mat-chip-list>
+    </mat-chip-option>
+  </mat-chip-listbox>
 </es-mds-editor-widget-container>

@@ -1,0 +1,216 @@
+########################################################################################################################
+# GLOBAL
+########################################################################################################################
+
+global:
+
+  annotations: {}
+
+  cluster:
+
+    istio:
+      enabled: false
+
+    pdb:
+      enabled: false
+
+    storage:
+
+      data:
+        permission: false
+        spec: {}
+
+  debug: false
+
+  image:
+    pullPolicy: Always
+    pullSecrets: []
+    registry: ${docker.registry}
+    repository: ${docker.repository}
+    common: ${docker.common}
+
+  metrics:
+    scrape:
+      interval: 60s
+      timeout: 60s
+    servicemonitor:
+      enabled: false
+
+  security: {}
+
+########################################################################################################################
+# LOCAL
+########################################################################################################################
+
+nameOverride: edusharing-repository-search-solr
+
+image:
+  name: ${docker.edu_sharing.community.common.alfresco.search.service.name}
+  tag: "${docker.edu_sharing.community.common.alfresco.search.service.tag}"
+
+########################################################################################################################
+
+replicaCount: 1
+
+########################################################################################################################
+
+service:
+
+  port:
+    api: 8080
+    metrics: 9090
+
+########################################################################################################################
+
+config:
+
+  jvm:
+    opts: >-
+      -XX:+UseG1GC 
+      -XX:+PerfDisableSharedMem 
+      -XX:+ParallelRefProcEnabled 
+      -XX:MaxGCPauseMillis=250 
+      -XX:+AlwaysPreTouch 
+      -XX:+ExplicitGCInvokesConcurrent
+    ram:
+      minPercentage: "75.0"
+      maxPercentage: "75.0"
+
+  metrics:
+    enabled: true
+    relabelings: []
+
+  override:
+    application:
+      common: ""
+    logging:
+      application: ""
+
+  repository:
+    host: edusharing-repository-service
+    port: 8080
+
+########################################################################################################################
+
+multistage:
+
+  enabled: false
+
+  current: ""
+
+  stages: []
+#    - name: blue
+#      spec:
+#        config:
+#          override:
+#            application:
+#              common: ""
+#    - name: green
+#      spec:
+#        config:
+#          override:
+#            application:
+#              common: ""
+
+########################################################################################################################
+
+debug: false
+
+########################################################################################################################
+
+nodeAffinity: {}
+podAntiAffinity: "soft"
+
+tolerations: []
+
+########################################################################################################################
+
+persistence:
+
+  data:
+
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi
+
+########################################################################################################################
+
+podAnnotations: {}
+
+podSecurityContext:
+
+  fsGroup: 1000
+  fsGroupChangePolicy: OnRootMismatch
+
+securityContext:
+
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  runAsUser: 1000
+
+########################################################################################################################
+
+terminationGracePeriod: 120
+
+startupProbe:
+
+  failureThreshold: 30
+  initialDelaySeconds: 0
+  periodSeconds: 20
+  successThreshold: 1
+  timeoutSeconds: 10
+
+livenessProbe:
+
+  failureThreshold: 3
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 10
+
+readinessProbe:
+
+  failureThreshold: 1
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 10
+
+########################################################################################################################
+
+resources:
+
+  limits:
+    cpu: 1000m
+    memory: 4Gi
+  requests:
+    cpu: 1000m
+    memory: 4Gi
+
+########################################################################################################################
+
+init:
+
+  permission:
+
+    image:
+      name: ${docker.edu_sharing.community.common.minideb.name}
+      tag: "${docker.edu_sharing.community.common.minideb.tag}"
+
+    resources:
+
+      limits:
+        cpu: 125m
+        memory: 512Mi
+      requests:
+        cpu: 125m
+        memory: 512Mi
+
+    securityContext:
+
+      runAsUser: 0
+
+########################################################################################################################

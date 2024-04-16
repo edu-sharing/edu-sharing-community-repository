@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING/DTD BEAN//EN"
+    "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+    <!--<bean id="fileSecurityConfig" class="org.alfresco.filesys.config.SecurityConfigBean">
+
+
+       <property name="shareMapper">
+
+         <bean class="org.alfresco.jlan.sample.HomeShareMapper" init-method="init">
+             <property name="serverConfiguration">
+                 <ref bean="fileServerConfiguration" />
+             </property>
+             <property name="repoDiskInterface">
+                 <ref bean="contentDiskDriver"/>
+             </property>
+             <property name="quotaManager">
+                 <ref bean="filesystemQuotaManager"/>
+             </property>
+             <property name="tenantShareName">
+                 <value>${filesystem.name}</value>
+             </property>
+             <property name="storeName">
+                 <value>${protocols.storeName}</value>
+             </property>
+             <property name="rootPath">
+                 <value>${filesystem.rootPath}</value>
+             </property>
+         </bean>
+       </property>
+
+       <property name="globalAccessControl">
+          <bean class="org.alfresco.filesys.config.acl.AccessControlListBean">
+             <property name="defaultAccessLevel">
+                <value>${filesystem.acl.global.defaultAccessLevel}</value>
+             </property>
+             <property name="domainAccessControls">
+                <ref bean="filesystem.acl.global.domainAccessControls" />
+             </property>
+             <property name="protocolAccessControls">
+                <ref bean="filesystem.acl.global.protocolAccessControls" />
+             </property>
+             <property name="userAccessControls">
+                <ref bean="filesystem.acl.global.userAccessControls" />
+             </property>
+          </bean>
+       </property>
+    </bean>
+ -->
+</beans>

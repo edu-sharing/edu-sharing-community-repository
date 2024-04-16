@@ -1,0 +1,115 @@
+<div
+  class="topBar fixed"
+  *ngIf="showTopBar && !mainNavService.getMainNav()?.topBar?.isSidenavOpen()"
+>
+  <div class="displayBar">
+    <div class="left">
+      <button mat-button title="{{ 'BACK' | translate }}" (click)="close()">
+        <i esIcon="keyboard_arrow_left"></i>
+        <span class="render-back">{{ 'BACK' | translate }}</span>
+      </button>
+    </div>
+    <div class="center">
+      <button
+        mat-button
+        *ngIf="_node"
+        (click)="showDetails()"
+        title="{{ 'GOTO' | translate }} {{ 'INFO' | translate }}"
+      >
+        <i esIcon="info_outline"></i> <span class="hidemobile">{{ 'INFO' | translate }}</span>
+      </button>
+    </div>
+    <div class="right">
+      <es-actionbar
+        #actionbar
+        [backgroundType]="'dark'"
+        [numberOfAlwaysVisibleOptions]="1"
+        [numberOfAlwaysVisibleOptionsMobile]="0"
+      ></es-actionbar>
+    </div>
+  </div>
+</div>
+<div *ngIf="getPosition() != -1">
+  <button
+    class="previous"
+    *ngIf="canSwitchBack()"
+    cdkMonitorElementFocus
+    (click)="switchPosition(getPosition() - 1)"
+  >
+    <i esIcon="keyboard_arrow_left" [aria]="true"></i>
+  </button>
+  <button
+    class="next"
+    *ngIf="canSwitchForward()"
+    cdkMonitorElementFocus
+    (click)="switchPosition(getPosition() + 1)"
+  >
+    <i esIcon="keyboard_arrow_right" [aria]="true"></i>
+  </button>
+</div>
+<div>
+  <div id="nodeRenderContentWrapper">
+    <div *ngIf="sequence" id="sequence" #sequencediv>
+      <div
+        class="wrapperouter clickable"
+        tabindex="0"
+        (click)="viewParent()"
+        (keyup.enter)="viewParent()"
+      >
+        <span class="itemTitle">{{ getNodeTitle(sequenceParent) }}</span>
+        <div class="wrapper" [class.selected]="_nodeId == sequenceParent.ref.id">
+          <img src="{{ sequenceParent.preview.url }}&crop=true&width=100&height=75" />
+        </div>
+      </div>
+      <div
+        *ngFor="let item of sequence.nodes; let i = index"
+        tabindex="0"
+        class="wrapperouter clickable"
+        (click)="viewChildobject(item, i)"
+        (keyup.enter)="viewChildobject(item, i)"
+      >
+        <span class="itemTitle">{{ getNodeTitle(item) }}</span>
+        <div class="wrapper" [class.selected]="_nodeId == item.ref.id">
+          <img src="{{ item.preview.url }}&crop=true&width=100&height=75" />
+        </div>
+      </div>
+    </div>
+    <div class="scroller left clickable" *ngIf="canScrollLeft" (click)="scroll('left')" id="left">
+      <i esIcon="keyboard_arrow_left" [aria]="true"></i>
+    </div>
+    <div
+      class="scroller right clickable"
+      *ngIf="canScrollRight"
+      (click)="scroll('right')"
+      id="right"
+    >
+      <i esIcon="keyboard_arrow_right" [aria]="true"></i>
+    </div>
+    <!-- Ideally, we would be be using the actual h1 headings for [esTitle], but since these are
+    injected by the rendering service, we use a completely hidden element here. -->
+    <h1 esTitle hidden class="display-none">{{ getNodeTitle(_node) }}</h1>
+    <div
+      id="nodeRenderContent"
+      [class.hide]="isLoading"
+      esTouchEvent
+      (ngSwipeRight)="canSwitchBack() ? switchPosition(getPosition() - 1) : null"
+      (ngSwipeLeft)="canSwitchForward() ? switchPosition(getPosition() + 1) : null"
+    ></div>
+    <div class="nodeRenderLoading" *ngIf="isLoading">
+      <es-spinner></es-spinner>
+    </div>
+
+    <div class="similarNodes" *ngIf="!similarNodes.isEmpty()">
+      <div class="caption">Ähnliche Objekte</div>
+      <es-node-entries-wrapper
+        [dataSource]="similarNodes"
+        [displayType]="DisplayType.Grid"
+        [columns]="similarNodeColumns"
+        [checkbox]="false"
+        [elementInteractionType]="InteractionType.DefaultActionLink"
+      >
+      </es-node-entries-wrapper>
+    </div>
+    <es-imprint-privacy [separator]="'/'"></es-imprint-privacy>
+  </div>
+</div>

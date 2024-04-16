@@ -1,0 +1,168 @@
+<es-actionbar [numberOfAlwaysVisibleOptions]="4"></es-actionbar>
+<div>
+  <span>{{ 'NODE.cm:name' | translate }}</span
+  ><span *ngFor="let node of _nodes">{{ node.name }}</span>
+</div>
+<div>
+  <span>{{ 'NODE.sys:node-uuid' | translate }}</span>
+  <span class="node-id" *ngFor="let node of _nodes">
+    <a class="clickable" (click)="openNodeWorkspace(node)">{{ node.ref?.id }}</a>
+    <button mat-icon-button color="primary" (click)="copyNodeIdToClipboard(node)">
+      <i esIcon="content_copy" color="primary"></i>
+    </button>
+  </span>
+</div>
+<div>
+  <span>{{ 'NODE_INFO.NODE_TYPE' | translate }}</span
+  ><span *ngFor="let node of _nodes">{{ node.type }}</span>
+</div>
+<div *ngIf="_nodes.length === 1">
+  <span>{{ 'NODE_INFO.NODE_ASPECTS' | translate }}</span
+  ><span class="aspects">{{ _nodes[0].aspects.join('\n') }}</span>
+</div>
+<div>
+  <span>{{ 'NODE.mimetype' | translate }}</span
+  ><span *ngFor="let node of _nodes">{{ node.mimetype }} / {{ node.mediatype }}</span>
+</div>
+<ng-container *ngIf="_nodes.length === 1">
+  <div *ngIf="_nodes[0].properties && _nodes[0].properties['cm:created_LONG']">
+    <span>{{ 'NODE.cm:created' | translate }}</span
+    ><span>{{ _nodes[0].properties['cm:created_LONG'][0] | formatDate : { time: true } }}</span>
+  </div>
+  <div *ngIf="_nodes[0].properties && _nodes[0].properties['cm:modified_LONG']">
+    <span>{{ 'NODE.cm:modified' | translate }}</span
+    ><span>{{ _nodes[0].properties['cm:modified_LONG'][0] | formatDate : { time: true } }}</span>
+  </div>
+  <div>
+    <span>{{ 'NODE.cm:creator' | translate }}</span
+    ><span>{{ _creator }}</span>
+  </div>
+  <div>
+    <span>{{ 'DOWNLOAD' | translate }}</span
+    ><span
+      ><a *ngIf="_nodes[0].downloadUrl" [href]="_nodes[0].downloadUrl" target="_blank">{{
+        _nodes[0].downloadUrl
+      }}</a>
+      <div *ngIf="!_nodes[0].downloadUrl">-</div></span
+    >
+  </div>
+  <div *ngIf="_nodes[0].preview">
+    <span>{{ 'WORKSPACE.EDITOR.PREVIEW' | translate }}</span
+    ><span
+      ><a [href]="_nodes[0].preview.url" target="_blank">{{ _nodes[0].preview.url }}</a></span
+    ><span>isIcon: {{ _nodes[0].preview.isIcon }}</span> <img [src]="_nodes[0].preview.url" />
+  </div>
+  <div>
+    <span>{{ 'NODE_INFO.PERMISSIONS' | translate }}</span>
+    <es-spinner-small *ngIf="!_permissions"></es-spinner-small>
+    <div *ngIf="_permissions">
+      <div class="inherited">
+        <span>{{ 'NODE_INFO.PERMISSIONS_INHERITED' | translate }}</span>
+        <div *ngIf="!_permissions.localPermissions.inherited">
+          {{ 'NODE_INFO.PERMISSIONS_INHERIT_DISABLED' | translate }}
+        </div>
+        <div *ngIf="_permissions.localPermissions.inherited">
+          <div *ngIf="!_permissions.inheritedPermissions.length">
+            {{ 'NODE_INFO.PERMISSIONS_INHERIT_EMPTY' | translate }}
+          </div>
+          <div *ngFor="let permission of _permissions.inheritedPermissions">
+            <div class="authority">
+              {{ permission.authority.authorityName }} ({{ permission.authority.authorityType }})
+            </div>
+            <div class="permissions">{{ permission.permissions.join(', ') }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="local">
+        <span>{{ 'NODE_INFO.PERMISSIONS_LOCAL' | translate }}</span>
+        <div *ngIf="!_permissions.localPermissions.permissions.length">
+          {{ 'NODE_INFO.PERMISSIONS_LOCAL_EMPTY' | translate }}
+        </div>
+        <div *ngFor="let permission of _permissions.localPermissions.permissions">
+          <div class="authority">
+            {{ permission.authority.authorityName }} ({{ permission.authority.authorityType }})
+          </div>
+          <div class="permissions">{{ permission.permissions.join(', ') }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+<div>
+  <ng-container *ngIf="_nodes.length === 1">
+    <span>{{ 'NODE_INFO.CHILDREN' | translate }} ({{ _children ? _children.length : 0 }})</span>
+    <span class="children">
+      <div *ngFor="let child of _children">
+        {{ child.type }} (<a class="clickable" (click)="openNodes([child])">{{ child.ref.id }}</a
+        >)
+      </div>
+      <es-spinner-small *ngIf="!_children"></es-spinner-small>
+      <div *ngIf="_children && !_children.length">
+        {{ 'NODE_INFO.CHILDREN_NONE' | translate }}
+      </div>
+    </span>
+    <div>
+      <span>{{ 'NODE_INFO.LOCATION' | translate }}</span
+      ><span>
+        <es-breadcrumbs
+          [home]="'WORKSPACE.MY_FILES'"
+          [clickable]="true"
+          (onClick)="openBreadcrumb($event)"
+        ></es-breadcrumbs>
+      </span>
+    </div>
+  </ng-container>
+  <div *ngIf="canEdit()" class="edit"><i esIcon="edit" (click)="editMode = true"></i></div>
+  <div>
+    <span>{{ 'NODE_INFO.NODE_PROPERTIES' | translate }}</span>
+    <div class="property" *ngFor="let property of _properties">
+      <span *ngIf="!editMode">{{ property[0] }}</span>
+      <span *ngIf="!editMode">{{ property[1] }}</span>
+      <div *ngIf="editMode">
+        <mat-form-field class="mat-form-field-no-padding">
+          <mat-label>{{ property[0] }}</mat-label>
+          <input matInput type="text" *ngIf="editMode" [(ngModel)]="property[1]" />
+        </mat-form-field>
+        <div *ngIf="!saving">
+          <button
+            mat-raised-button
+            color="primary"
+            [disabled]="saving"
+            (click)="saveProperty(property)"
+          >
+            <i esIcon="save"></i>
+          </button>
+        </div>
+        <div *ngIf="saving"><es-spinner-small></es-spinner-small></div>
+      </div>
+    </div>
+    <div class="property property-add" *ngIf="editMode">
+      <mat-form-field class="mat-form-field-no-padding mat-form-field-max-width">
+        <mat-label>{{ 'NODE_INFO.CUSTOM_PROPERTY_NAME' | translate }}</mat-label>
+        <input matInput type="text" placeholder="cm:name" [(ngModel)]="customProperty[0]" />
+      </mat-form-field>
+      <mat-form-field class="mat-form-field-no-padding mat-form-field-max-width">
+        <mat-label>{{ 'NODE_INFO.CUSTOM_PROPERTY_VALUE' | translate }}</mat-label>
+        <input matInput type="text" [(ngModel)]="customProperty[1]" />
+      </mat-form-field>
+      <div *ngIf="editMode" class="edit-save">
+        <es-spinner-small *ngIf="saving"></es-spinner-small>
+        <div>
+          <button
+            mat-raised-button
+            color="primary"
+            [disabled]="saving || !customProperty[0]"
+            (click)="addProperty()"
+          >
+            <i esIcon="save"></i> {{ 'ADD' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <span>{{ 'NODE_INFO.JSON' | translate }}</span
+    ><span class="json">{{ _json }}</span>
+  </div>
+</div>

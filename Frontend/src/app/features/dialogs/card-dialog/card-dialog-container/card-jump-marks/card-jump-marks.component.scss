@@ -1,0 +1,36 @@
+@import '../../../../../core-ui-module/styles/variables';
+
+:host {
+    display: flex;
+    flex-direction: column;
+    background-color: $workspaceTreeBackground;
+    border-radius: 3pt;
+    padding: 10px 0;
+}
+
+button.mat-mdc-button {
+    border-radius: 0;
+    margin: 0;
+    padding: 10px 5px;
+    width: 100%;
+    height: unset;
+    transition: all $transitionNormal;
+    white-space: normal;
+    ::ng-deep .mdc-button__label {
+        justify-content: flex-start;
+        text-align: start;
+        line-height: 1.5;
+        text-transform: unset;
+        width: 100%;
+        > i {
+            width: 35px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+    }
+}
+
+button.active {
+    background: $workspaceTreeSelectedBackgroundEffect;
+    background-color: $workspaceTreeSelectedBackground;
+}

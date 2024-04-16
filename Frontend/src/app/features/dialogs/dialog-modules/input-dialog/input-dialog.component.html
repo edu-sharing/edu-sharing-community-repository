@@ -1,0 +1,8 @@
+<p *ngFor="let line of data.message | translate : data.messageParameters | splitNewLines">
+  {{ line }}
+</p>
+
+<mat-form-field>
+  <mat-label>{{ data.label | translate }}</mat-label>
+  <input matInput autofocus [formControl]="control" />
+</mat-form-field>

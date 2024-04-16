@@ -1,0 +1,15 @@
+apiVersion: v2
+
+name: ${helm.prefix}-service
+description: ${helm.prefix}-service
+
+icon: ${helm.chart.icon}
+
+version: ${helm.chart.version}
+appVersion: ${docker.tag}
+kubeVersion: "${helm.kube.version}"
+
+dependencies:
+  - name: edu_sharing-community-common-lib
+    repository: ${helm.deploy.url}
+    version: 1.x.x

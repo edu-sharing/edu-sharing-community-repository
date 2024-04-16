@@ -1,0 +1,9 @@
+# queue seems to be used for jms activemq. problem is it disables transform-core-aio transformations
+# so uncomment
+#queue:
+#  engineRequestQueue: edu-engine-queue
+
+
+#transform:
+#  core:
+#    version: 2.6.0

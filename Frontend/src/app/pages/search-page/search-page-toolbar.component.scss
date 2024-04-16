@@ -1,0 +1,19 @@
+@import '../../core-ui-module/styles/variables';
+
+:host {
+    display: flex;
+    position: sticky;
+    z-index: 2;
+    top: var(--top-matter-height);
+    padding: 10px 0;
+    background-color: $backgroundColor;
+}
+
+.toggle-filter-bar-button {
+    i {
+        transition: rotate $transitionNormal;
+    }
+    &.toggle-filter-bar-button-active i {
+        rotate: 180deg;
+    }
+}

@@ -1,0 +1,91 @@
+@import '../../core-ui-module/styles/variables';
+
+$barHeight: 30px;
+$barHeightMobile: 60px;
+$chatWidth: 400px;
+$chatHeight: 550px;
+
+@mixin fullscreen($bar) {
+    width: 100%;
+    max-height: 100%;
+    iframe {
+        height: calc(100vh - #{$bar});
+    }
+}
+.chat {
+    transition: all $transitionNormal;
+    position: fixed;
+    max-height: $chatHeight;
+    bottom: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    width: 115px;
+    @include materialShadow();
+    &.opened {
+        width: $chatWidth;
+    }
+    .bar {
+        transition: all $transitionNormal;
+        display: flex;
+        padding: 0 10px;
+        align-items: center;
+        color: $workspaceTopBarFontColor;
+        background-color: $workspaceTopBarBackground;
+        height: $barHeight;
+        .title {
+            flex-grow: 1;
+        }
+        .options {
+            display: flex;
+            > button {
+                display: flex;
+                align-items: center;
+                padding: 0;
+                min-width: unset;
+            }
+            .toggle-close {
+                display: none;
+            }
+        }
+        &.unread {
+            background-color: #ad4638;
+        }
+    }
+    iframe {
+        transition: all ease $transitionNormal;
+        background-color: #fff;
+        border: none;
+        height: 0;
+        &.opened {
+            height: $chatHeight - $barHeight;
+        }
+    }
+    &.fullscreen {
+        @include fullscreen($barHeight);
+    }
+}
+@media screen and (max-width: $mobileTabSwitchWidth) {
+    .chat:not(.opened) {
+        display: none;
+    }
+    .chat.opened {
+        @include fullscreen($barHeightMobile);
+        .bar {
+            height: $barHeightMobile;
+            .options {
+                > div {
+                    padding: 6px;
+                }
+                .toggle-close {
+                    display: flex;
+                }
+                .toggle-fullscreen,
+                .toggle-open {
+                    display: none;
+                }
+            }
+        }
+    }
+}

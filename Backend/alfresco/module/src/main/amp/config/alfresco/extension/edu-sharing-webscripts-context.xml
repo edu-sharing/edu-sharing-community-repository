@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN 2.0//EN'
+        'http://www.springframework.org/dtd/spring-beans-2.0.dtd'>
+<beans>
+    <bean id="webscript.org.edu_sharing.alfresco.webscripts.tracker.permissions.post"
+          class="org.edu_sharing.alfresco.webscripts.tracker.PermissionsGet" parent="webscript">
+        <property name="aclDAO" ref="aclDAO" />
+        <property name="permissionModel" ref="permissionsModelDAO"/>
+    </bean>
+    <bean id="webscript.org.edu_sharing.alfresco.webscripts.tracker.metadata-uuid.get"
+          class="org.edu_sharing.alfresco.webscripts.tracker.MetadataUUIDGet" parent="webscript">
+        <property name="nodeService" ref="dbNodeService"/>
+        <property name="solrTrackingComponent" ref="searchTrackingComponent"/>
+        <property name="solrSerializer" ref="solrSerializer"/>
+    </bean>
+</beans>

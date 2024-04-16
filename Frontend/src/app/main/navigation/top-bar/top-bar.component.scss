@@ -1,8 +1,9 @@
+@use 'sass:color';
 @import '../../../core-ui-module/styles/variables';
 
 :host > div {
     width: 100%;
-    height: $mainnavHeight;
+    height: var(--mainnavHeight);
     background: $workspaceTopBarBackground;
     color: $workspaceTopBarFontColor;
     display: flex;
@@ -14,7 +15,7 @@
     max-width: 160px;
 }
 
-.imprint {
+es-imprint-privacy ::ng-deep {
     position: absolute;
     right: 10px;
     top: 5px;
@@ -36,9 +37,20 @@
 }
 
 .menuButton {
+    position: relative;
     width: 250px;
+    height: 100%;
+    padding: 0 16px;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
+    border: none;
+    outline: none;
+    background-color: unset;
+    color: $workspaceTopBarFontColor !important;
+    & ::ng-deep .mat-ripple-element {
+        background-color: #{color.change($workspaceTopBarFontColor, $alpha: 0.1)};
+    }
     .barIcon {
         margin-top: 2px;
     }
@@ -49,12 +61,23 @@
         @include setGlobalKeyboardFocus();
         outline-offset: -5px;
     }
+    &:not([disabled]):hover::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: $workspaceTopBarFontColor;
+        opacity: 0.04;
+    }
 }
 .menuButtonOuter {
     height: 100%;
     display: flex;
+    align-items: center;
     // fix button move to background if sidemenu is open
-    z-index: 1;
+    z-index: 2;
     > button {
         border-radius: 0px;
     }
@@ -63,18 +86,12 @@
 .topBarSearch {
     flex: auto;
     margin: 0 20px;
+    min-width: 0;
 }
-.addDesktop {
-    margin-left: 50px;
-    padding-right: 25px;
-    height: 39px;
-    background-color: rgba(
-        red($workspaceTopBarFontColor),
-        green($workspaceTopBarFontColor),
-        blue($workspaceTopBarFontColor),
-        0.1
-    );
-    border-radius: 0;
+
+.mat-mdc-button {
+    --mat-mdc-button-ripple-color: #{color.change($workspaceTopBarFontColor, $alpha: 0.1)};
+    --mat-mdc-button-persistent-ripple-color: #{$workspaceTopBarFontColor};
 }
 
 .menuButton img {
@@ -85,7 +102,6 @@
 span {
     font-size: 130%;
     position: relative;
-    margin-left: 6px;
 }
 .rocketchat {
     display: none;
@@ -121,34 +137,30 @@ span {
 .user {
     position: relative;
     display: flex;
-    padding: 0;
     margin: 0px 10px;
     height: 40px;
     align-items: center;
     span {
         overflow: hidden;
-        margin-top: 1px;
         word-break: break-all;
         display: inline-block;
         text-transform: none;
     }
 }
 
+button.user {
+    color: $workspaceTopBarFontColor;
+}
 .user span {
     font-size: 100%;
 }
 
 .user i {
-    margin-right: 5px;
-    margin-left: 5px;
-    margin-top: 3px;
+    margin-top: 2px;
 }
 
 .iconPerson {
     display: none;
-}
-es-user-avatar {
-    margin: 0 7px;
 }
 
 .scopeNameMobile {
@@ -158,6 +170,22 @@ es-user-avatar {
 .add-material {
     display: flex;
     align-items: center;
+    .addDesktop {
+        margin-left: 50px;
+        padding-left: 16px;
+        padding-right: 25px;
+        height: 39px;
+        display: flex;
+        align-items: center;
+        color: $workspaceTopBarFontColor;
+        background-color: rgba(
+            red($workspaceTopBarFontColor),
+            green($workspaceTopBarFontColor),
+            blue($workspaceTopBarFontColor),
+            0.1
+        );
+        border-radius: 0;
+    }
 }
 .create-dummy {
     width: 0;
@@ -196,7 +224,7 @@ es-user-avatar {
     .rocketchat {
         display: flex;
     }
-    .imprint {
+    es-imprint-privacy {
         display: none;
     }
 }
@@ -229,7 +257,7 @@ es-user-avatar {
     span {
         display: none;
     }
-    .addDesktop {
+    .add-material .addDesktop {
         padding-right: 15px;
     }
 }

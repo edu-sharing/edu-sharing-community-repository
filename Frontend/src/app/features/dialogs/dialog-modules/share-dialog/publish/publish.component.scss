@@ -1,0 +1,127 @@
+@import '../../../../../core-ui-module/styles/variables';
+
+es-info-message {
+    display: flex;
+    padding: 10px 20px;
+    button {
+        margin-top: 10px;
+    }
+}
+.share-type {
+    mat-checkbox {
+        display: flex;
+        padding: 10px 0;
+    }
+}
+.group-padding {
+    padding: 5px $cardPadding;
+    .description {
+        white-space: pre-line;
+    }
+}
+.published-versions-container {
+    padding: 5px 28px;
+    h6.published-versions {
+        padding-top: 10px;
+    }
+    .no-versions {
+        display: flex;
+        justify-content: center;
+        font-size: 90%;
+        color: $textLight;
+        font-style: italic;
+        text-align: center;
+        padding-top: 10px;
+    }
+    .published-versions {
+        display: flex;
+        flex-direction: column;
+        mat-radio-group {
+            display: flex;
+            margin: 5px 10px;
+            width: 100%;
+            justify-content: space-between;
+            > mat-radio-button {
+                padding: 0 10px;
+            }
+            @media screen and (max-width: ($mobileWidth)) {
+                flex-direction: column;
+            }
+        }
+        es-info-message {
+            display: block;
+        }
+        .version {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            background-color: $cardLightBackground;
+            padding: 5px 20px;
+            margin: 5px 0;
+            border-radius: 50px;
+
+            .version-group {
+                display: flex;
+                flex-direction: column;
+                flex-grow: 1;
+
+                > div {
+                    display: flex;
+                    justify-content: space-between;
+                    > div {
+                        display: flex;
+                        flex-direction: column;
+                        padding: 4px 6px;
+                        &.version-number {
+                            align-items: flex-end;
+                        }
+                        > label {
+                            color: $textLight;
+                            text-transform: uppercase;
+                            font-size: $fontSizeXSmall;
+                        }
+                    }
+                }
+            }
+            .version-handle {
+                color: $textLight;
+                width: 40px;
+                display: flex;
+                justify-content: flex-end;
+            }
+            .version-date {
+                font-size: $fontSizeSmall;
+            }
+            &.version-virtual {
+                background: lighten($workspaceInheritColor, 40%);
+                border: 2px dashed $workspaceInheritColor;
+            }
+            &.version-update {
+                background: lighten($warningMedium, 40%);
+                border: 2px dashed $warningMedium;
+            }
+            .version-actions {
+                align-self: center;
+                > button {
+                    height: 40px;
+                    margin: 5px;
+                }
+            }
+        }
+    }
+}
+.doi {
+    background-color: $cardLightBackground;
+    margin: 0 0 20px 0;
+    padding: 10px $cardPadding + 33px;
+    .handle-mode {
+        padding-top: 8px;
+    }
+    .label {
+        display: flex;
+        align-items: center;
+        > i {
+            margin: 0 5px;
+        }
+    }
+}

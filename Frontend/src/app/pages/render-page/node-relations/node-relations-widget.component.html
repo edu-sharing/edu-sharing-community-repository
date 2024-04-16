@@ -1,0 +1,124 @@
+<div class="node-relations-widget">
+  <es-spinner *ngIf="loading"></es-spinner>
+  <ng-container *ngIf="!loading">
+    <div class="relations-group versions" *ngIf="versions?.length">
+      <h5 class="relations-heading">{{ 'NODE_RELATIONS.RELATION_TYPE.VERSIONS' | translate }}</h5>
+      <div class="relation-nodes version">
+        <es-node-url
+          class="relation-node"
+          *ngFor="let version of versions"
+          [class.current-version]="isCurrentVersion(version)"
+          [node]="version"
+          [queryParams]="{ closeOnBack: true }"
+          target="_BLANK"
+        >
+          <es-node-row [node]="version" [columns]="columns">
+            <ng-template #customMetadata>
+              <div class="info-group">
+                <label>{{ 'WORKSPACE.SHARE.PUBLISH.VERSION_DATE_ABSOLUTE' | translate }}</label>
+                <span
+                  >{{ version.properties['ccm:published_date_LONG']?.[0] | formatDate:{relative: false} }}</span
+                >
+              </div>
+              <div class="info-group">
+                <label>{{ 'WORKSPACE.SHARE.PUBLISH.VERSION_NUMBER' | translate }}</label>
+                <span
+                  >{{ version.properties['cclom:version']?.[0] }}
+                  <span *ngIf="isCurrentVersion(version)" class="current-version-text">
+                    ({{ 'NODE_RELATIONS.CURRENT_VERSION' | translate }})
+                  </span></span
+                >
+              </div>
+            </ng-template>
+          </es-node-row>
+        </es-node-url>
+      </div>
+    </div>
+
+    <div
+      class="empty"
+      *ngIf="!versions?.length && !relations?.length && !forkedChilds?.length && !forkedOrigin"
+    >
+      {{ 'NODE_RELATIONS.NO_RELATIONS' | translate }}
+    </div>
+    <div class="relations-group" *ngFor="let key of getRelationKeys()">
+      <h5 class="relations-heading">{{ 'NODE_RELATIONS.RELATION_TYPE.' + key | translate }}</h5>
+      <div class="relation-nodes">
+        <es-node-url
+          class="relation-node"
+          [node]="relation.node"
+          [queryParams]="{ closeOnBack: true }"
+          target="_BLANK"
+          *ngFor="let relation of getRelations(key)"
+        >
+          <es-node-row [node]="relation.node" [columns]="columns">
+            <ng-template #customMetadata>
+              <div class="info-group">
+                <label>{{ 'NODE_RELATIONS.RELATION_CREATED' | translate }}</label>
+                <span>{{ relation.timestamp | formatDate : { relative: true } }}</span>
+              </div>
+              <div class="info-group">
+                <label>{{ 'NODE_RELATIONS.RELATION_CREATOR' | translate }}</label>
+                <span>{{ relation.creator | authorityName }}</span>
+              </div>
+            </ng-template>
+          </es-node-row>
+        </es-node-url>
+      </div>
+    </div>
+    <ng-container *ngIf="forkedOrigin">
+      <h5 class="relations-heading">
+        {{ 'NODE_RELATIONS.RELATION_TYPE.FORKED_ORIGIN' | translate }}
+      </h5>
+      <div class="relation-nodes version">
+        <es-node-url
+          class="relation-node"
+          [node]="forkedOrigin"
+          [queryParams]="{ closeOnBack: true }"
+          target="_BLANK"
+        >
+          <es-node-row [node]="forkedOrigin" [columns]="columns">
+            <ng-template #customMetadata>
+              <div class="info-group">
+                <label>{{ 'NODE_RELATIONS.VARIANT_CREATED' | translate }}</label>
+                <span>{{ forkedOrigin.createdAt | formatDate : { relative: true } }}</span>
+              </div>
+              <div class="info-group">
+                <label>{{ 'NODE_RELATIONS.VARIANT_CREATOR' | translate }}</label>
+                <span>{{ forkedOrigin.createdBy | authorityName }}</span>
+              </div>
+            </ng-template>
+          </es-node-row>
+        </es-node-url>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="forkedChilds?.length">
+      <h5 class="relations-heading">
+        {{ 'NODE_RELATIONS.RELATION_TYPE.FORKED_CHILDS' | translate }}
+      </h5>
+      <div class="relation-nodes version">
+        <es-node-url
+          class="relation-node"
+          *ngFor="let child of forkedChilds"
+          [node]="child"
+          [queryParams]="{ closeOnBack: true }"
+          target="_BLANK"
+        >
+          <es-node-row [node]="child" [columns]="columns">
+            <ng-template #customMetadata>
+              <div class="info-group">
+                <label>{{ 'NODE_RELATIONS.VARIANT_CREATED' | translate }}</label>
+                <span>{{ child.createdAt | formatDate : { relative: true } }}</span>
+              </div>
+              <div class="info-group">
+                <label>{{ 'NODE_RELATIONS.VARIANT_CREATOR' | translate }}</label>
+                <span>{{ child.createdBy | authorityName }}</span>
+              </div>
+            </ng-template>
+          </es-node-row>
+        </es-node-url>
+      </div>
+    </ng-container>
+  </ng-container>
+</div>
+<ng-template let-key="key" let-nodes="nodes"> </ng-template>

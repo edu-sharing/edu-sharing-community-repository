@@ -1,5 +1,6 @@
-import { EventEmitter, Injectable } from '@angular/core';
 import { HttpRequest } from '@angular/common/http';
+import { EventEmitter, Injectable } from '@angular/core';
+import { v4 as uuidv4 } from 'uuid';
 import { ApiConfiguration } from './api/api-configuration';
 
 /**
@@ -22,15 +23,26 @@ export class ApiRequestConfiguration {
     setBasicAuthForNextRequest(auth: { username: string; password: string }): void {
         this.authForNextRequest = 'Basic ' + btoa(auth.username + ':' + auth.password);
     }
+    setBearerAuthForNextRequest(accessToken?: string): void {
+        this.authForNextRequest = 'Bearer ' + accessToken;
+    }
 
-    /** Apply the current headers to the given request */
+    /**
+     * Applies configuration to the given request.
+     *
+     * - Applies the current headers.
+     * - Sets `credentials: 'include'`.
+     *   This is needed for the application to send cookies to the backend when in an embedded
+     *   context, e.g., as a web component in a third-party page.
+     */
     apply(req: HttpRequest<any>): HttpRequest<any> {
-        const headers: { [name: string]: string | string[] } = {};
+        const headers: { [key: string]: string | string[] } = {};
         const isAPICall = req.url.startsWith(this.apiConfiguration.rootUrl);
         if (!isAPICall) {
             return req;
         }
         this.apiRequest.emit();
+        headers['X-Client-Trace-Id'] = this.generateTraceId();
         if (this.locale) {
             headers.locale = this.locale;
         }
@@ -40,6 +52,11 @@ export class ApiRequestConfiguration {
         }
         return req.clone({
             setHeaders: headers,
+            withCredentials: true,
         });
+    }
+
+    private generateTraceId(): string {
+        return uuidv4();
     }
 }

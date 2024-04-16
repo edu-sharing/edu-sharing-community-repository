@@ -1,0 +1,74 @@
+<mat-menu #menu="matMenu" class="mat-menu-template">
+  <button
+    mat-menu-item
+    *ngFor="let template of templates | keyvalue"
+    (click)="loadTemplate(template.key)"
+  >
+    {{ template.key }}
+  </button>
+</mat-menu>
+
+<es-card
+  *ngIf="isNewTemplateDialogVisible"
+  title="{{ 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.NEW_BUTTON' | translate }}"
+  (onCancel)="closeNewTemplateDialog()"
+  [buttons]="newTemplateDialogButtons"
+  height="auto"
+>
+  <div class="modal-card-content">
+    <p>{{ 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CHOOSE_NAME_TEXT' | translate }}</p>
+    <mat-form-field>
+      <mat-label>{{
+        'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CHOOSE_NAME_INPUT_LABEL' | translate
+      }}</mat-label>
+      <input
+        matInput
+        [(ngModel)]="newTemplateName"
+        (keydown.enter)="createNewTemplate(); $event.preventDefault()"
+      />
+    </mat-form-field>
+  </div>
+</es-card>
+
+<fieldset>
+  <legend>{{ 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.GROUP_LABEL' | translate }}</legend>
+  <mat-hint>{{ 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.HINT' | translate }}</mat-hint>
+  <div class="buttons">
+    <button mat-raised-button (click)="isNewTemplateDialogVisible = true">
+      {{ 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.NEW_BUTTON' | translate }}
+    </button>
+    <button
+      mat-raised-button
+      [matMenuTriggerFor]="menu"
+      [disabled]="!templates || (templates | json) === '{}'"
+    >
+      {{ 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.LOAD_BUTTON' | translate }}
+      <i esIcon="arrow_drop_down" class="drop-down-arrow"></i>
+    </button>
+    <button
+      mat-raised-button
+      *ngIf="selectedTemplate && !templates[selectedTemplate].isDefault"
+      (click)="confirmUpdateTemplate(selectedTemplate)"
+      [disabled]="
+        query === templates[selectedTemplate].query &&
+        properties === templates[selectedTemplate].properties
+      "
+    >
+      {{
+        'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.UPDATE_BUTTON'
+          | translate : { template: selectedTemplate }
+      }}
+    </button>
+    <button
+      mat-raised-button
+      color="warn"
+      *ngIf="selectedTemplate && !templates[selectedTemplate].isDefault"
+      (click)="confirmDeleteTemplate(selectedTemplate)"
+    >
+      {{
+        'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.DELETE_BUTTON'
+          | translate : { template: selectedTemplate }
+      }}
+    </button>
+  </div>
+</fieldset>

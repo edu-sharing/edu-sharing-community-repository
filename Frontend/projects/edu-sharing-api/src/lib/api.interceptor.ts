@@ -1,12 +1,23 @@
-import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
+import {
+    HttpEvent,
+    HttpHandler,
+    HttpInterceptor,
+    HttpRequest,
+    HttpResponseBase,
+} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiRequestConfiguration } from './api-request-configuration';
 import { EduSharingApiConfiguration } from './edu-sharing-api-configuration';
-import { handleError } from './utils/handle-error';
+import { handleError } from './utils/rxjs-operators/handle-error';
+import { tap } from 'rxjs/operators';
 
 @Injectable()
 export class ApiInterceptor implements HttpInterceptor {
+    /**
+     * proxy target, only non-null in dev mode, will be set via interceptor
+     */
+    static proxyTarget: string | null;
     constructor(
         private apiRequestConfiguration: ApiRequestConfiguration,
         private configuration: EduSharingApiConfiguration,
@@ -21,8 +32,15 @@ export class ApiInterceptor implements HttpInterceptor {
         if (isApiRequest) {
             // Apply the headers
             req = this.apiRequestConfiguration.apply(req);
-    
+
             return next.handle(req).pipe(
+                tap((event) => {
+                    if (event instanceof HttpResponseBase) {
+                        ApiInterceptor.proxyTarget = (event as HttpResponseBase).headers.get(
+                            'X-Edu-Sharing-Proxy-Target',
+                        );
+                    }
+                }),
                 // Handle errors globally
                 handleError((err) => this.configuration.onError?.(err, req)),
             );

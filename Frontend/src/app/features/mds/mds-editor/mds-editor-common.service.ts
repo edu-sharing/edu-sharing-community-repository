@@ -7,7 +7,12 @@ import {
     RestMdsService,
     RestNodeService,
 } from '../../../core-module/core.module';
-import { MdsDefinition, MdsType, Values } from '../types/types';
+import { MdsType, Values } from '../types/types';
+import {
+    HOME_REPOSITORY,
+    NodeSuggestionResponseDto,
+    SuggestionsV1Service,
+} from 'ngx-edu-sharing-api';
 
 /** Error with a translatable message that is suitable to be shown to the user. */
 export class UserPresentableError extends Error {
@@ -29,7 +34,11 @@ export class UserPresentableError extends Error {
     providedIn: 'root',
 })
 export class MdsEditorCommonService {
-    constructor(private restNode: RestNodeService, private mdsService: RestMdsService) {}
+    constructor(
+        private restNode: RestNodeService,
+        private mdsService: RestMdsService,
+        private suggestionsV1Service: SuggestionsV1Service,
+    ) {}
 
     /**
      * Fetches the up-to-date and complete metadata from the server.
@@ -46,18 +55,18 @@ export class MdsEditorCommonService {
     }
 
     async saveNodesMetadata(
-        pairs: Array<{ node: Node; values: Values }>,
+        pairs: Array<{ id?: string; node?: Node; values: Values }>,
         versionComment?: string,
     ): Promise<Node[]> {
         return forkJoin(
-            pairs.map(({ node, values }) => {
+            pairs.map(({ id, node, values }) => {
                 if (versionComment) {
                     return this.restNode
-                        .editNodeMetadataNewVersion(node.ref.id, versionComment, values)
+                        .editNodeMetadataNewVersion(node?.ref?.id || id, versionComment, values)
                         .pipe(map((nodeWrapper) => nodeWrapper.node));
                 } else {
                     return this.restNode
-                        .editNodeMetadata(node.ref.id, values)
+                        .editNodeMetadata(node?.ref?.id || id, values)
                         .pipe(map((nodeWrapper) => nodeWrapper.node));
                 }
             }),
@@ -78,11 +87,10 @@ export class MdsEditorCommonService {
     async saveNodeProperty(
         node: Node,
         property: string,
-        values: string[]
+        values: string[],
         //versionComment?: string,
     ): Promise<void> {
         this.restNode.editNodeProperty(node.ref.id, property, values).toPromise();
-
     }
 
     /**
@@ -91,23 +99,27 @@ export class MdsEditorCommonService {
      * Throws with a translatable error message if the given nodes cannot be handled by an MDS.
      */
     getMdsId(nodes: Node[]): string {
-        const types = nodes.map((node) => node.type);
+        const types = nodes.map((node) => (node as Node).type);
         if (!areAllEqual(types)) {
             throw new UserPresentableError('MDS.ERROR_INVALID_TYPE_COMBINATION');
         }
-        const requestedMdsIds = nodes.map((node) => node.metadataset || RestConstants.DEFAULT);
+        const requestedMdsIds = nodes.map(
+            (node) => (node as Node).metadataset,
+            RestConstants.DEFAULT,
+        );
         if (!areAllEqual(requestedMdsIds)) {
             throw new UserPresentableError('MDS.ERROR_INVALID_MDS_COMBINATION');
         }
         if (
-            nodes.filter((n) => !!n.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]).length >
-            0
+            nodes[0] instanceof Node &&
+            (nodes as Node[]).filter(
+                (n) => !!n.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL],
+            ).length > 0
         ) {
             throw new UserPresentableError('MDS.ERROR_ELEMENT_TYPE_UNSUPPORTED');
         }
         return requestedMdsIds[0];
     }
-
     getGroupId(nodes: Node[]): MdsType {
         const node = nodes[0];
         let nodeGroup: MdsType = node.isDirectory ? MdsType.Map : MdsType.Io;
@@ -136,6 +148,73 @@ export class MdsEditorCommonService {
             nodeGroup = MdsType.IoBulk;
         }
         return nodeGroup;
+    }
+
+    async fetchNodesSuggestions(nodes: Node[]): Promise<NodeSuggestionResponseDto[]> {
+        console.log('Read suggestions!');
+        /*return await forkJoin(
+            nodes.map((n) =>
+                this.suggestionsV1Service.getSuggestionsByNodeId({
+                    repository: HOME_REPOSITORY,
+                    node: n.ref.id,
+                }),
+            ),
+        )
+            .pipe()
+            .toPromise();
+        */
+        return [
+            {
+                nodeId: nodes[0].ref.id,
+                suggestions: {
+                    'cclom:general_keyword': [
+                        {
+                            value: 'hello world',
+                            createdBy: 'Superschlauer Duper KI',
+                            status: 'PENDING',
+                        },
+                        {
+                            value: 'AB\nDEF',
+                            createdBy: 'Noch schlauerer Redakteur',
+                            status: 'PENDING',
+                        },
+                    ],
+                    'ccm:educationallearningresourcetype': [
+                        {
+                            value: 'exercise',
+                            createdBy: 'test',
+                            status: 'PENDING',
+                        },
+                    ],
+                    'cclom:general_description': [
+                        {
+                            value: 'lorem ipsum\ndolor sit amet',
+                            createdBy: 'Superschlaue Duper KI',
+                            status: 'PENDING',
+                            type: 'AI',
+                        },
+                        {
+                            value: 'AB\nDEF',
+                            createdBy: 'Noch schlauerer Redakteur',
+                            status: 'PENDING',
+                        },
+                    ],
+                    'cclom:title': [
+                        {
+                            value: 'KI Titel super fancy',
+                            createdBy: 'Superschlaue Duper KI',
+                            status: 'PENDING',
+                            type: 'AI',
+                        },
+                        {
+                            value: 'Titel des Redakteurs',
+                            createdBy: 'Noch schlauerer Redakteur',
+                            status: 'PENDING',
+                        },
+                    ],
+                },
+            },
+        ];
     }
 }
 

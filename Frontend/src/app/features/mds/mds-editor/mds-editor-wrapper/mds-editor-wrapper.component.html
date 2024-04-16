@@ -28,15 +28,6 @@
   (openTemplate)="openTemplate.emit($event)"
 ></es-mds>
 
-<es-mds-editor-card
-  *ngIf="editorType === 'angular' && !embedded"
-  [title]="(customTitle ? customTitle : 'MDS.TITLE') | translate"
-  [priority]="priority"
-  (cancel)="onCancel.emit()"
-  (save)="onSave()"
->
-</es-mds-editor-card>
-
 <es-mds-editor-embedded *ngIf="editorType === 'angular' && embedded"></es-mds-editor-embedded>
 <es-spinner *ngIf="isLoading && embedded"></es-spinner>
 <es-global-progress *ngIf="isLoading && !embedded"></es-global-progress>

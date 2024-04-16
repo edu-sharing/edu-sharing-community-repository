@@ -1,0 +1,514 @@
+<metadataset id="oeh" label="OEH" hidden="false">
+	<i18n>mds</i18n>
+	<inherit>mds</inherit>
+	<name>Open Edu Hub</name>
+	<widgets>
+		<widget>
+			<caption>Fachgebiet</caption>
+			<id>ccm:taxonid</id>
+			<id rel="graphql">lom.classification.taxon</id>
+			<type>multivalueFixedBadges</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/discipline/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Zielgruppe</caption>
+			<id>ccm:educationalintendedenduserrole</id>
+			<id rel="graphql">lom.educational.0.intendedEndUserRole</id>
+			<type>multivalueFixedBadges</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/intendedEndUserRole/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Nicht erfüllte, rechtliche Kriterien</caption>
+			<id>ccm:unmetLegalCriteria</id>
+			<id rel="graphql">oeh.unmetLegalCriteria</id>
+			<type>checkboxVertical</type>
+			<values>
+				<value cap="Strafrecht">criminal_law</value>
+				<value cap="Jugendschutz">protection_of_minors</value>
+				<value cap="Perönlichkeitsrechte">personality_right</value>
+				<value cap="Urheberrechte">copyright_law</value>
+				<value cap="Datenschutzangaben">data_privacy</value>
+			</values>
+		</widget>
+		<widget>
+			<caption>Bildungsumfeld</caption>
+			<id>ccm:educationalcontext</id>
+			<id rel="graphql">lom.educational.0.context</id>
+			<type>multivalueFixedBadges</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/educationalContext/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Materialart (LOM)</caption>
+			<id>ccm:educationallearningresourcetype</id>
+			<id rel="graphql">lom.educational.0.learningResourceType</id>
+			<type>multivalueTree</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/learningResourceType/index.json</valuespace>
+			<required>mandatoryForPublish</required>
+		</widget>
+		<widget>
+			<caption>Art der Seite</caption>
+			<bottomCaption>Für Quellen</bottomCaption>
+			<id>ccm:sourceContentType</id>
+			<type>multivalueFixedBadges</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/sourceContentType/index.json</valuespace>
+			<condition type="PROPERTY" pattern="SOURCE" dynamic="true">ccm:objecttype</condition>
+			<required>mandatoryForPublish</required>
+		</widget>
+		<widget>
+			<caption>Art des Tools</caption>
+			<bottomCaption>Für Tools/Werkzeuge</bottomCaption>
+			<id>ccm:toolCategory</id>
+			<type>multivalueFixedBadges</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/toolCategory/index.json</valuespace>
+			<condition type="PROPERTY" pattern="TOOL" dynamic="true">ccm:objecttype</condition>
+			<required>mandatoryForPublish</required>
+		</widget>
+		<widget>
+			<caption>Zugangsbedingungen (Login)</caption>
+			<id>ccm:conditionsOfAccess</id>
+			<id rel="graphql">oeh.conditionsOfAccess</id>
+			<type>singleoption</type>
+			<allowempty>true</allowempty>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/conditionsOfAccess/index.json</valuespace>
+			<condition type="PROPERTY" pattern="SOURCE" dynamic="true">ccm:objecttype</condition>
+		</widget>
+		<widget>
+			<caption>Enthält Werbung</caption>
+			<id>ccm:containsAdvertisement</id>
+			<id rel="graphql">oeh.containsAdvertisement</id>
+			<type>singleoption</type>
+			<allowempty>true</allowempty>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/containsAdvertisement/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Kosten</caption>
+			<id>ccm:price</id>
+			<id rel="graphql">oeh.price</id>
+			<type>singleoption</type>
+			<allowempty>true</allowempty>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/price/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Barrierefreiheit</caption>
+			<id>ccm:accessibilitySummary</id>
+			<id rel="graphql">oeh.accessibilitySummary</id>
+			<type>multivalueFixedBadges</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/accessibilitySummary/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>DSGVO</caption>
+			<id>ccm:dataProtectionConformity</id>
+			<id rel="graphql">oeh.dataProtectionConformity</id>
+			<type>multivalueFixedBadges</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/dataProtectionConformity/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>FSK</caption>
+			<id>ccm:fskRating</id>
+			<id rel="graphql">oeh.fskRating</id>
+			<type>singleoption</type>
+			<allowempty>true</allowempty>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/fskRating/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Nutzungsrechte</caption>
+			<id>ccm:license_oer</id>
+			<id rel="graphql">oeh.licenseOer</id>
+			<type>singleoption</type>
+			<allowempty>true</allowempty>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/oer/index.json</valuespace>
+			<condition type="PROPERTY" pattern="SOURCE" dynamic="true">ccm:objecttype</condition>
+		</widget>
+		<widget>
+			<caption>Interner Quellenname</caption>
+			<id>ccm:general_identifier</id>
+			<id rel="graphql">oeh.generalIdentifier</id>
+			<type>text</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<condition type="PROPERTY" pattern="SOURCE" dynamic="true">ccm:objecttype</condition>
+		</widget>
+		<widget>
+			<caption>Notizen / Bermerkungen (intern)</caption>
+			<id>ccm:notes</id>
+			<type>textarea</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<toolpermission>TOOLPERMISSION_COLLECTION_EDITORIAL</toolpermission>
+		</widget>
+		<widget>
+			<caption>Typ des Objekts</caption>
+			<id>ccm:objecttype</id>
+			<id rel="graphql">info.objectType</id>
+			<type>singleoption</type>
+			<values>
+				<value cap="Material">MATERIAL</value>
+				<value cap="Tool">TOOL</value>
+				<value cap="Quelle">SOURCE</value>
+				<value cap="Unterrichtsplanung">LESSONPLANNING</value>
+			</values>
+		</widget>
+		<widget>
+			<id>ccm:replicationsource</id>
+			<id rel="graphql">remote.repository.id</id>
+			<type>multivalueFixedBadges</type>
+			<caption>Quelle</caption>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/sources/index.json</valuespace>
+		</widget>
+		<widget>
+			<id>cclom:location</id>
+			<id rel="graphql">lom.technical.location</id>
+			<caption>Link zur Themenseite</caption>
+			<bottomCaption>Nur bei Bedarf verändern, wird automatisch beim Erstellen generiert!</bottomCaption>
+			<type>text</type>
+			<link>_BLANK</link>
+		</widget>
+		<widget>
+			<id>cclom:general_keyword</id>
+			<id rel="graphql">lom.general.keyword</id>
+			<type>multivalueSuggestBadges</type>
+			<caption>Freie Schlagworte / Stichworte</caption>
+			<placeholder>Stichwort ergänzen...</placeholder>
+			<hideIfEmpty>true</hideIfEmpty>
+			<searchable>true</searchable>
+		</widget>
+		<widget>
+			<id>ccm:editorial_state</id>
+			<id rel="graphql">lom.editorial.state</id>
+			<caption>Redaktionsstatus / Sichtbarkeit</caption>
+			<bottomCaption>für Wordpress</bottomCaption>
+			<type>singleoption</type>
+			<values>
+				<value cap="Aktiviert / Sichtbar">activated</value>
+				<value cap="Deaktiviert / Ausgeblendet">deactivated</value>
+			</values>
+		</widget>
+		<widget>
+			<id>ccm:collection_ordered_position</id>
+			<id rel="graphql">collection.position</id>
+			<caption>Reihenfolge</caption>
+			<bottomCaption>für Wordpress</bottomCaption>
+			<type>slider</type>
+			<min>1</min>
+			<max>100</max>
+		</widget>
+	</widgets>
+	<groups>
+		<group>
+			<id>io</id>
+			<rendering>angular</rendering>
+			<views>
+				<view>node_general</view>
+				<view>node_editorial</view>
+			</views>
+		</group>
+		<group>
+			<id>io_wordpress</id>
+			<rendering>angular</rendering>
+			<views>
+				<view>node_wordpress</view>
+			</views>
+		</group>
+		<group>
+			<id>io_render</id>
+			<views>
+				<view>node_general_render</view>
+				<view>node_editorial</view>
+			</views>
+		</group>
+	</groups>
+	<templates>
+		<template>
+			<id>node_general</id>
+			<caption>dialog_upload_tab_basic</caption>
+			<icon>description</icon>
+			<html><![CDATA[
+              <ccm:wwwurl>
+              <cm:name>
+              <cclom:title>
+              <cclom:general_keyword>
+              <cclom:general_description type="textarea">
+              <ccm:objecttype>
+			  <ccm:taxonid>
+			  <ccm:educationalintendedenduserrole>
+			  <ccm:educationalcontext>
+			  <ccm:educationallearningresourcetype>
+			  <ccm:sourceContentType>
+			  <ccm:toolCategory>
+              <license>
+				]]></html>
+		</template>
+		<template>
+			<id>node_editorial</id>
+			<caption>Quellen-Informationen</caption>
+			<icon>archive</icon>
+			<html><![CDATA[
+				<ccm:conditionsOfAccess>
+				<ccm:containsAdvertisement>
+				<ccm:price>
+				<ccm:accessibilitySummary>
+				<ccm:dataProtectionConformity>
+				<ccm:fskRating>
+				<ccm:license_oer>
+				<ccm:general_identifier>
+				<ccm:notes>
+				]]></html>
+		</template>
+		<template>
+			<id>node_general_render</id>
+			<caption>dialog_upload_tab_basic</caption>
+			<icon>description</icon>
+			<html><![CDATA[
+              <ccm:wwwurl>
+              <cm:name>
+              <cclom:title>
+              <cclom:general_keyword>
+              <cclom:general_description type="textarea">
+              <ccm:objecttype>
+			  <ccm:taxonid>
+			  <ccm:educationalintendedenduserrole>
+			  <ccm:educationalcontext>
+			  <ccm:educationallearningresourcetype>
+			  <ccm:sourceContentType>
+			  <ccm:toolCategory>
+              <license>
+				]]></html>
+		</template>
+		<template>
+			<id>node_general_bulk</id>
+			<caption>dialog_upload_tab_basic</caption>
+			<icon>description</icon>
+			<html><![CDATA[
+              <cclom:title>
+              <cclom:general_keyword>
+              <cclom:general_description type="textarea">
+              <ccm:objecttype>
+			  <ccm:taxonid>
+			  <ccm:educationalintendedenduserrole>
+			  <ccm:educationalcontext>
+			  <ccm:educationallearningresourcetype>
+			  <ccm:sourceContentType>
+			  <ccm:toolCategory>
+				]]></html>
+		</template>
+		<template>
+			<id>collection_editorial</id>
+			<caption>collection_editorial</caption>
+			<html><![CDATA[
+						<style>
+						.cclom_location input{
+							opacity:0.5;
+						}
+						</style>
+				      <ccm:taxonid>
+					  <ccm:educationalintendedenduserrole>
+					  <ccm:educationalcontext>
+
+					  <cclom:location>
+					  <ccm:collection_ordered_position>
+					  <ccm:editorial_state>
+					  <cclom:general_description>
+					  <cclom:general_keyword>
+
+				]]></html>
+		</template>
+		<template>
+			<id>node_wordpress</id>
+			<caption>dialog_upload_tab_basic</caption>
+			<icon>description</icon>
+			<html><![CDATA[
+              <cclom:title>
+              <cclom:general_keyword>
+              <cclom:general_description type="textarea">
+			  <ccm:taxonid>
+			  <ccm:educationalintendedenduserrole>
+			  <ccm:educationalcontext>
+			  <ccm:educationallearningresourcetype>
+				]]></html>
+		</template>
+		<template>
+			<id>node_general_simple</id>
+			<caption>dialog_upload_tab_basic</caption>
+			<icon>description</icon>
+			<html><![CDATA[
+              <ccm:taxonid>
+			  <ccm:educationalintendedenduserrole>
+			  <ccm:educationalcontext>
+			  <ccm:educationallearningresourcetype>
+				]]></html>
+		</template>
+		<template>
+			<id>search</id>
+			<html><![CDATA[
+		  <ccm:objecttype type="checkboxHorizontal">
+		  <ccm:taxonid>
+		  <ccm:educationalcontext>
+		  <ccm:educationalintendedenduserrole>
+		  <ccm:replicationsource>
+		  <cclom:general_keyword>
+		  <ccm:educationallearningresourcetype>
+		  <license>
+		]]></html>
+		</template>
+		<template>
+			<id>search_input</id>
+			<rel>suggestions</rel>
+			<html><![CDATA[
+			  <ccm:objecttype>
+			  <ccm:taxonid>
+			  <ccm:educationalcontext>
+		  	  <ccm:educationalintendedenduserrole>
+		      <ccm:educationallearningresourcetype>
+				]]></html>
+		</template>
+		<template>
+			<id>search_suggestions</id>
+			<rel>suggestions</rel>
+			<html><![CDATA[
+		  <ccm:educationalcontext>
+		  <cclom:general_keyword>
+		  <ccm:taxonid>
+		]]></html>
+		</template>
+		<template>
+			<id>collection_sidebar</id>
+			<html><![CDATA[
+					<cm:description>
+					<ccm:taxonid>
+					<ccm:educationalintendedenduserrole>
+					<ccm:educationalcontext>
+					<cclom:general_keyword hideIfEmpty="true">
+					<cclom:location>
+				]]></html>
+		</template>
+	</templates>
+	<queries>
+		<basequery>-TYPE:"ccm:toolpermission" AND NOT ASPECT:"ccm:metadataPresettingTemplate" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*" AND -ASPECT:"ccm:io_childobject"</basequery>
+		<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
+		<query join="AND"  id="collections">
+			<basequery>ASPECT:"ccm:collection"</basequery>
+			<basequery propertyNull="ngsearchword">ASPECT:"ccm:collection" AND @ccm\:educontextname:"${educontext}" AND @ccm\:collectionlevel0:true OR @ccm\:collection_pinned_status:true</basequery>
+			<property name="ngsearchword">
+				<statement>@ccm\:educontextname:"${educontext}" AND (@sys\:node-uuid:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
+				<exactMatching>false</exactMatching>
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+			</property>
+		</query>
+		<query join="AND" id="ngsearch">
+			<basequery>@cm\:edu_metadataset:"mds_oeh" AND ISNULL:@ccm\:tool_category</basequery>
+			<property name="ccm:replicationsource">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:taxonid">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:educationalintendedenduserrole">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:objecttype">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:educationalcontext">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:educationallearningresourcetype">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:sourceContentType">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:toolCategory">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:replicationsourceuuid">
+				<statement>@ccm\:replicationsourceuuid:"${value}"</statement>
+			</property>
+		</query>
+	</queries>
+	<queries syntax="dsl">
+		<basequery></basequery>
+		<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
+		<query join="AND"  id="workspace">
+			<property name="ngsearchword">
+				<statement>NOT TYPE:"ccm:notify" AND NOT ASPECT:"ccm:collection_io_reference" AND (@ccm\:replicationsourceuuid:"*${value}*" OR @sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+			</property>
+		</query>
+		<query join="AND" id="ngsearch">
+			<!--TODO basequery-->
+			<!--basequery>ISNULL:@ccm\:tool_category</basequery-->
+			<basequery>{"bool":{"must":[{"term":{"type":"ccm:io"}},{"term":{"nodeRef.storeRef.protocol":"workspace"}},{"term":{"properties.cm:edu_metadataset.keyword":"mds_oeh"}}],"must_not":[{"term":{"aspects":"ccm:metadataPresettingTemplate"}},{"term":{"aspects":"ccm:io_childobject"}},{"wildcard":{"properties.cm:name.keyword":"._*"}},{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}},{"exists":{"field":"ccm:tool_category"}}]}}</basequery>
+			<property name="ccm:replicationsource">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:taxonid">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+				<statement>{"term":{"properties.ccm:taxonid.keyword":"${valueRaw}"}}</statement>
+			</property>
+			<property name="ccm:educationalintendedenduserrole">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:objecttype">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:educationalcontext">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+				<statement>{"term":{"properties.ccm:educationalcontext.keyword":"${valueRaw}"}}</statement>
+			</property>
+			<property name="cclom:general_keyword">
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+				<statement>{"term":{"properties.cclom:general_keyword.keyword":"${value}"}}</statement>
+			</property>
+			<property name="ccm:educationallearningresourcetype">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:sourceContentType">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:toolCategory">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:replicationsourceuuid"/>
+		</query>
+	</queries>
+	<sorts>
+		<sort>
+			<id>collections</id>
+			<default>
+				<sortBy>cm:created</sortBy>
+				<sortAscending>true</sortAscending>
+			</default>
+		</sort>
+	</sorts>
+</metadataset>

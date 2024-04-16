@@ -6,22 +6,20 @@ import {
     OnChanges,
     OnInit,
     SimpleChanges,
-    ViewChild
+    ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { DateHelper } from '../../../../core-ui-module/DateHelper';
-import { FormatSizePipe } from '../../../../shared/pipes/file-size.pipe';
+import { DateHelper, FormatSizePipe } from 'ngx-edu-sharing-ui';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor/mds-editor-instance.service';
 import { MdsEditorViewComponent } from '../../mds-editor/mds-editor-view/mds-editor-view.component';
 import { ViewInstanceService } from '../../mds-editor/mds-editor-view/view-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../../mds-editor/widgets/mds-editor-widget-base';
-import {NodeHelperService} from '../../../../core-ui-module/node-helper.service';
-import {RestHelper} from '../../../../core-module/rest/rest-helper';
-import {RestConstants} from '../../../../core-module/rest/rest-constants';
+import { RestHelper } from '../../../../core-module/rest/rest-helper';
+import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { MdsWidgetType } from '../../types/types';
-import {UIHelper} from "../../../../core-ui-module/ui-helper";
-import {UIService} from "../../../../core-module/rest/services/ui.service";
-import {MatRipple} from "@angular/material/core";
+import { UIService } from '../../../../core-module/rest/services/ui.service';
+import { MatRipple } from '@angular/material/core';
+import { filter } from 'rxjs/operators';
 
 @Component({
     selector: 'es-mds-widget',
@@ -32,6 +30,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
     private static readonly inlineEditing: MdsWidgetType[] = [
         MdsWidgetType.Text,
         MdsWidgetType.Number,
+        MdsWidgetType.Date,
         MdsWidgetType.Email,
         MdsWidgetType.Textarea,
         MdsWidgetType.Singleoption,
@@ -59,7 +58,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
     private temporaryValue: string[] = undefined;
 
     constructor(
-        mdsEditorInstance: MdsEditorInstanceService,
+        public mdsEditorInstance: MdsEditorInstanceService,
         translate: TranslateService,
         private ui: UIService,
         private viewInstance: ViewInstanceService,
@@ -71,9 +70,14 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
         this.value = this.getNodeValue();
     }
 
-
     ngOnInit() {
         this.value = this.getNodeValue();
+        this.widget
+            .getInitialDisplayValues()
+            .pipe(filter((v) => !!v))
+            .subscribe(async (value) => {
+                this.value = value.values.map((v) => v.displayString);
+            });
     }
 
     getBasicType() {
@@ -164,18 +168,14 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
     }
 
     isEmpty() {
-        return (
-            this.value?.every((v) => !v) ||
-            this.value?.length === 0 ||
-            !this.value
-        );
+        return this.value?.every((v) => !v) || this.value?.length === 0 || !this.value;
     }
 
     formatDate() {
         return this.value.map((v) => {
             if (this.widget.definition.format) {
                 try {
-                    return new DatePipe(null).transform(v, this.widget.definition.format);
+                    return new DatePipe('en').transform(v, this.widget.definition.format);
                 } catch (e) {
                     console.warn('Could not format date', e, this.widget.definition);
                     return DateHelper.formatDate(this.translate, v, {
@@ -213,6 +213,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
         this.temporaryValue = instance.widget.getValue();
         this.value = this.getNodeValue();
         this.editWrapper.nativeElement.children[0].innerHTML = null;
+        await this.mdsEditorInstance.fetchDisplayValues(this.widget);
     }
 
     isEditable() {
@@ -220,16 +221,15 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
         return (
             this.mdsEditorInstance.editorMode === 'inline' &&
             this.widget.definition.interactionType === 'Input' &&
-            nodes?.length === 1 && RestHelper.hasAccessPermission(nodes[0], RestConstants.ACCESS_WRITE) &&
+            nodes?.length === 1 &&
+            RestHelper.hasAccessPermission(nodes[0], RestConstants.ACCESS_WRITE) &&
             this.supportsInlineEditing()
         );
     }
 
     async focus() {
         if (this.isEditable()) {
-            this.matRipple.launch({
-
-            });
+            this.matRipple.launch({});
             await this.ui.scrollSmoothElementToChild(this.editWrapper.nativeElement);
             //const result = await this.view.injectEditField(this, this.editWrapper.nativeElement.children[0]);
             //await this.ui.scrollSmoothElementToChild(result.htmlElement);

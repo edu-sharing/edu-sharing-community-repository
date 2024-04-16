@@ -19,15 +19,20 @@ import { MatFormFieldControl } from '@angular/material/form-field';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { MdsWidget } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
-import { distinctUntilChanged, map, startWith, takeUntil } from 'rxjs/operators';
-import { UIAnimation } from '../../../../../core-module/ui/ui-animation';
+import { debounceTime, distinctUntilChanged, map, startWith, takeUntil } from 'rxjs/operators';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
-import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { ViewInstanceService } from '../../mds-editor-view/view-instance.service';
-import { BulkBehavior, BulkMode, EditorBulkMode, InputStatus } from '../../../types/types';
+import {
+    BulkBehavior,
+    BulkMode,
+    EditorBulkMode,
+    InputStatus,
+    NativeWidgetComponent,
+} from '../../../types/types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { FormFieldRegistrationService } from './form-field-registration.service';
-import {UIService} from '../../../../../core-module/rest/services/ui.service';
+import { UIService } from '../../../../../core-module/rest/services/ui.service';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-mds-editor-widget-container',
@@ -92,9 +97,16 @@ export class MdsEditorWidgetContainerComponent
      */
     @Input() wrapInGroup = true;
 
+    /**
+     * should a progress spinner be shown
+     * (only applicable for widgets with non-native material fields)
+     */
+    @Input() showSpinner: boolean;
+
     @ContentChild(MatFormFieldControl) formFieldControl: MatFormFieldControl<any>;
 
     @HostBinding('class.disabled') isDisabled = false;
+    expandedState$ = new BehaviorSubject<'disabled' | 'expanded' | 'collapsed'>('disabled');
     @HostBinding('@showHideExtended') get showHideExtendedState(): string {
         return this.isHidden ? 'hidden' : 'shown';
     }
@@ -111,7 +123,7 @@ export class MdsEditorWidgetContainerComponent
     constructor(
         private elementRef: ElementRef,
         private uiService: UIService,
-        private mdsEditorInstance: MdsEditorInstanceService,
+        public mdsEditorInstance: MdsEditorInstanceService,
         private cdr: ChangeDetectorRef,
         private formFieldRegistration: FormFieldRegistrationService,
         private viewInstance: ViewInstanceService,
@@ -156,6 +168,7 @@ export class MdsEditorWidgetContainerComponent
         }
         this.wrapInFormField = this.wrapInFormField ?? !!this.control;
         if (this.widget) {
+            this.expandedState$.next(this.widget.definition?.expandable);
             this.widget.focusTrigger
                 .pipe(takeUntil(this.destroyed$))
                 .subscribe(() => this.injectedView?.focus());
@@ -203,7 +216,13 @@ export class MdsEditorWidgetContainerComponent
     }
 
     private initFormControl(formControl: AbstractControl): void {
-        this.widget.observeIsDisabled().subscribe((isDisabled) => this.setDisabled(isDisabled));
+        this.widget
+            .observeIsDisabled()
+            .pipe(
+                // debounce cause form control might not yet initialized
+                debounceTime(10),
+            )
+            .subscribe((isDisabled) => this.setDisabled(isDisabled));
         formControl.statusChanges
             .pipe(startWith(formControl.status), distinctUntilChanged())
             .subscribe((status: InputStatus) => {
@@ -236,7 +255,7 @@ export class MdsEditorWidgetContainerComponent
                 block: 'start',
             });*/
             console.log(this.injectedView, this.widget.definition.id);
-            setTimeout(() => this.injectedView?.focus(), );
+            setTimeout(() => this.injectedView?.focus());
         });
     }
 

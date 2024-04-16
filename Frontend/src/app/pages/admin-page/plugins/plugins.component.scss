@@ -1,0 +1,57 @@
+@import '../../../core-ui-module/styles/variables';
+.plugins {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    .plugin-list {
+        width: 100%;
+        max-width: 800px;
+        margin: 0;
+        padding: 40px 0 0 0;
+        li {
+            padding: 10px 0;
+            display: grid;
+            grid-template-columns: 60px auto;
+            i {
+                color: $textVeryLight;
+                font-size: 40px;
+            }
+            .state {
+                font-weight: bold;
+                color: darken($colorStatusNegative, 20%);
+                padding-bottom: 2px;
+                &.state-enabled {
+                    color: darken($colorStatusPositive, 20%);
+                }
+            }
+            .name-wrapper {
+                display: flex;
+                align-items: center;
+                padding-bottom: 2px;
+                .name {
+                    font-weight: bold;
+                    font-size: $fontSizeXLarge;
+                    flex-grow: 1;
+                }
+                .version {
+                    text-align: right;
+                    min-width: 20%;
+                    color: $textLight;
+                    font-size: 90%;
+                }
+            }
+
+            .description {
+                color: $textLight;
+            }
+        }
+    }
+    .more {
+        padding-top: 60px;
+        color: $textLight;
+        font-size: $fontSizeSmall;
+        > p {
+            margin: 2px 0;
+        }
+    }
+}

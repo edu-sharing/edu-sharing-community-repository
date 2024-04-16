@@ -1,0 +1,28 @@
+@import '../../../../core-ui-module/styles/variables';
+
+mat-form-field {
+    width: 100%;
+}
+
+.breadcrumb-style {
+    margin: 20px -25px -25px;
+    padding: 20px 25px;
+    background: $buttonHoverBackground;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .group-left {
+        display: flex;
+        flex-direction: column;
+        .breadcrumb-info {
+            padding-bottom: 5px;
+        }
+    }
+}
+
+es-info-message {
+    .link {
+        color: $primary;
+        text-transform: uppercase;
+    }
+}

@@ -25,7 +25,7 @@
               },
               {
                 "glob": "**/*",
-                "input": "node_modules/ngx-monaco-editor/assets/monaco",
+                "input": "node_modules/monaco-editor",
                 "output": "/assets/monaco/"
               },
               {
@@ -46,9 +46,8 @@
             "scripts": [
               "node_modules/jquery/dist/jquery.js",
               "src/assets/js/nouislider.min.js",
-              "node_modules/materialize-css/dist/js/materialize.min.js",
               "node_modules/moment/min/moment-with-locales.min.js",
-              "node_modules/chart.js/dist/Chart.js",
+              "node_modules/chart.js/dist/chart.umd.js",
               "node_modules/tinymce/tinymce.min.js"
             ],
             "vendorChunk": true,
@@ -56,7 +55,13 @@
             "buildOptimizer": false,
             "sourceMap": true,
             "optimization": false,
-            "namedChunks": true
+            "namedChunks": true,
+            "allowedCommonJsDependencies": [
+              "qrcode",
+              "uuid",
+              "lodash",
+              "moment"
+            ]
           },
           "configurations": {
             "production": {
@@ -67,7 +72,14 @@
                   "maximumError": "100kb"
                 }
               ],
-              "optimization": true,
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
               "outputHashing": "all",
               "sourceMap": false,
               "namedChunks": false,
@@ -105,15 +117,16 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "main": "src/test.ts",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
             "tsConfig": "tsconfig.spec.json",
-            "karmaConfig": "./karma.conf.js",
             "scripts": [
               "node_modules/jquery/dist/jquery.js",
               "src/assets/js/nouislider.min.js",
-              "node_modules/materialize-css/dist/js/materialize.min.js",
               "node_modules/moment/min/moment-with-locales.min.js",
-              "node_modules/chart.js/dist/Chart.js",
+              "node_modules/chart.js/dist/chart.umd.js",
               "node_modules/tinymce/tinymce.min.js"
             ],
             "styles": [
@@ -122,7 +135,8 @@
             ],
             "assets": [
               "src/assets"
-            ]
+            ],
+            "karmaConfig": "karma.conf.js"
           }
         },
         "lint": {
@@ -133,6 +147,24 @@
               "src/**/*.html"
             ],
             "cache": true
+          }
+        },
+        "storybook": {
+          "builder": "@storybook/angular:start-storybook",
+          "options": {
+            "configDir": ".storybook",
+            "browserTarget": "angular-edusharing:build",
+            "compodoc": false,
+            "port": 6006
+          }
+        },
+        "build-storybook": {
+          "builder": "@storybook/angular:build-storybook",
+          "options": {
+            "configDir": ".storybook",
+            "browserTarget": "angular-edusharing:build",
+            "compodoc": false,
+            "outputDir": "dist/storybook/angular-edusharing"
           }
         }
       }
@@ -161,7 +193,10 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "main": "projects/edu-sharing-api/src/test.ts",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
             "tsConfig": "projects/edu-sharing-api/tsconfig.spec.json",
             "karmaConfig": "projects/edu-sharing-api/karma.conf.js"
           }
@@ -208,7 +243,9 @@
             "styles": [
               "projects/embed/src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/jquery/dist/jquery.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -264,10 +301,8 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "main": "projects/embed/src/test.ts",
             "polyfills": "projects/embed/src/polyfills.ts",
             "tsConfig": "projects/embed/tsconfig.spec.json",
-            "karmaConfig": "projects/embed/karma.conf.js",
             "inlineStyleLanguage": "scss",
             "assets": [
               "projects/embed/src/favicon.ico",
@@ -276,7 +311,8 @@
             "styles": [
               "projects/embed/src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [],
+            "karmaConfig": "projects/embed/karma.conf.js"
           }
         },
         "lint": {
@@ -289,9 +325,193 @@
           }
         }
       }
+    },
+    "app-as-web-component": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        },
+        "@schematics/angular:application": {
+          "strict": true
+        }
+      },
+      "root": "projects/app-as-web-component",
+      "sourceRoot": "projects/app-as-web-component/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "deployUrl": "vendor/edu-sharing/",
+            "outputHashing": "none",
+            "outputPath": "dist/app-as-web-component",
+            "index": "projects/app-as-web-component/src/index.html",
+            "main": "projects/app-as-web-component/src/main.ts",
+            "polyfills": "projects/app-as-web-component/src/polyfills.ts",
+            "tsConfig": "projects/app-as-web-component/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "src/assets/",
+                "output": "/assets/"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/monaco-editor",
+                "output": "/assets/monaco/"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/tinymce",
+                "output": "/tinymce/"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/tinymce-i18n/langs5",
+                "output": "/tinymce/langs/"
+              },
+              "projects/app-as-web-component/src/favicon.ico",
+              "projects/app-as-web-component/src/assets"
+            ],
+            "styles": [
+              "src/app/core-ui-module/styles/core-base.scss",
+              "src/styles/main.scss",
+              "projects/app-as-web-component/src/styles.scss"
+            ],
+            "scripts": [
+              "node_modules/jquery/dist/jquery.js",
+              "src/assets/js/nouislider.min.js",
+              "node_modules/moment/min/moment-with-locales.min.js",
+              "node_modules/chart.js/dist/chart.umd.js",
+              "node_modules/tinymce/tinymce.min.js"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "15kb",
+                  "maximumError": "100kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/app-as-web-component/src/environments/environment.ts",
+                  "with": "projects/app-as-web-component/src/environments/environment.prod.ts"
+                },
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ]
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "proxyConfig": "src/proxy.conf.js"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "app-as-web-component:build:production"
+            },
+            "development": {
+              "browserTarget": "app-as-web-component:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "app-as-web-component:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": "projects/app-as-web-component/src/polyfills.ts",
+            "tsConfig": "projects/app-as-web-component/tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "projects/app-as-web-component/src/favicon.ico",
+              "projects/app-as-web-component/src/assets"
+            ],
+            "styles": [
+              "projects/app-as-web-component/src/styles.scss"
+            ],
+            "scripts": [],
+            "karmaConfig": "projects/app-as-web-component/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/app-as-web-component/**/*.ts",
+              "projects/app-as-web-component/**/*.html"
+            ]
+          }
+        }
+      }
+    },
+    "edu-sharing-ui": {
+      "projectType": "library",
+      "root": "projects/edu-sharing-ui",
+      "sourceRoot": "projects/edu-sharing-ui/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/edu-sharing-ui/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/edu-sharing-ui/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/edu-sharing-ui/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "projects/edu-sharing-ui/tsconfig.spec.json",
+            "karmaConfig": "projects/edu-sharing-ui/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/edu-sharing-ui/**/*.ts",
+              "projects/edu-sharing-ui/**/*.html"
+            ]
+          }
+        }
+      }
     }
   },
-  "defaultProject": "angular-edusharing",
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "es",
@@ -299,9 +519,18 @@
     },
     "@schematics/angular:directive": {
       "prefix": "es"
+    },
+    "@angular-eslint/schematics:application": {
+      "setParserOptionsProject": true
+    },
+    "@angular-eslint/schematics:library": {
+      "setParserOptionsProject": true
     }
   },
   "cli": {
-    "defaultCollection": "@angular-eslint/schematics"
+    "schematicCollections": [
+      "@angular-eslint/schematics"
+    ],
+    "analytics": false
   }
 }

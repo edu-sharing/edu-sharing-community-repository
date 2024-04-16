@@ -3,16 +3,45 @@
 mat-form-field {
     width: 100%;
 }
-.mat-chip-label{
+.mat-chip-label {
     @include limitLineLength(200px);
 }
 
 .input-wrapper {
     display: flex;
+    align-items: center;
     flex-grow: 1;
+    min-height: 30px;
+    button {
+        // margin: -16px -16px -16px 0;
+        position: absolute;
+        bottom: 10%;
+        right: -10px;
+    }
+}
+.chip-grid {
+    // spacing for drop-down button
+    padding-right: 35px;
 }
 
 .mat-select-arrow {
     // Use the button color which respects disabled state.
     color: unset;
+}
+.mat-chip-suggestion {
+    mat-icon {
+        line-height: normal;
+    }
+    color: $textLight;
+    background: repeating-linear-gradient(-45deg, #f2f2f2, #f2f2f2 5px, #fff 5px, #fff 10px);
+    .accept {
+        @include clickable();
+        width: 25px;
+        mat-icon {
+            color: $colorStatusPositive;
+        }
+    }
+    .decline {
+        color: $colorStatusNegative !important;
+    }
 }

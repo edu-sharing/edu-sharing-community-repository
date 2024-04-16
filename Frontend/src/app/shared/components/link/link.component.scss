@@ -1,20 +1,28 @@
-@import "../../../core-ui-module/styles/variables";
-:host ::ng-deep  {
-  a {
+@import '../../../core-ui-module/styles/variables';
+
+button {
     display: inline-flex;
     align-items: center;
     color: $primary;
+    background-color: unset;
+    border: unset;
+    padding: unset;
+    text-transform: unset;
     cursor: pointer;
-    > i {
-      font-size: 120%;
+    font-size: 100%;
+    border-bottom: 1px solid transparent; // Take up the same space as when focused
+    &:hover,
+    :host.highlight & {
+        color: $primaryDark;
     }
-    &:hover {
-      color: $primaryDark;
+    &:focus,
+    :host.highlight & {
+        box-shadow: none !important;
+        @include removeDefaultFocus();
+        border-bottom: 1px solid $focusColor;
     }
-    &:focus {
-      box-shadow: none !important;
-      @include removeDefaultFocus();
-      border-bottom: 1px solid $focusColor;
-    }
-  }
+}
+
+button ::ng-deep > i {
+    font-size: 120%;
 }

@@ -1,0 +1,207 @@
+@import '../../../../core-ui-module/styles/variables';
+
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+:host ::ng-deep {
+    .mat-tab-labels {
+        background-color: #fff;
+    }
+    .mat-checkbox-layout {
+        white-space: normal !important;
+        align-items: baseline !important;
+    }
+}
+
+es-mds-editor-widget-author {
+    flex-grow: 1;
+    padding-top: 20px;
+}
+
+.cc label {
+    width: 100%;
+}
+
+.cc h5 {
+    padding-bottom: 5px;
+}
+
+.cc .ccAbout {
+    text-align: center;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.licenseType {
+    width: 100%;
+    margin: 10px 0;
+}
+
+.custom {
+    > mat-form-field {
+        width: 100%;
+    }
+}
+
+h4 {
+    font-weight: bold;
+    font-size: 100%;
+    margin: 1.6rem 0 1rem 0;
+    color: $textLight;
+    font-weight: bold;
+}
+
+h5 {
+    font-weight: normal;
+    font-size: 90%;
+    color: $textLight;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.currentLicense {
+    text-align: center;
+    background-color: $backgroundColor;
+    padding: 10px 30px;
+    margin: 0 -20px;
+    h4 {
+        margin: 10px 0 20px 0;
+    }
+}
+
+.licenseName {
+    display: table;
+    margin: auto;
+    padding: 10px 0;
+    h4,
+    div {
+        display: table-cell;
+    }
+}
+
+.oerStatus {
+    padding-left: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 80%;
+    color: $textOnPrimary;
+    .oer {
+        background: #0b0;
+    }
+    .notOer {
+        background: #f5a623;
+    }
+    .oer,
+    .notOer {
+        padding: 4px 12px;
+        border-radius: 8px;
+    }
+}
+
+mat-radio-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden; // there might be a better solution though!
+    &.mat-group-gap {
+        gap: 20px;
+    }
+    .ccAuthor {
+        margin: 5px 20px;
+    }
+    mat-radio-button {
+        margin: -5px 0;
+    }
+}
+
+mat-radio-button {
+    margin-bottom: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.more-information-link {
+    margin-left: 64px;
+    margin-top: 0;
+    margin-bottom: 20px;
+    > a {
+        text-decoration: underline;
+    }
+}
+
+fieldset {
+    border: none;
+    margin: 0;
+    padding: 0;
+    legend {
+        font-weight: bold;
+        margin-bottom: 1em;
+        color: $textLight;
+    }
+}
+
+.oerSelect {
+    display: flex;
+    justify-content: flex-end;
+    padding-bottom: 10px;
+}
+
+.currentLicenseIcon {
+    height: 40px;
+    width: auto;
+}
+
+.currentLicenseDescription {
+    color: $textLight;
+}
+
+.currentLicenseDescription div {
+    margin: 0 10px;
+}
+
+.customLicenseDescription {
+    white-space: pre-line;
+}
+
+.license-additional-data {
+    display: flex;
+    justify-content: center;
+    padding-top: 10px;
+    > div {
+        margin: 0 10px;
+    }
+}
+
+.licenseUrl {
+    margin: 10px !important;
+    a {
+        text-decoration: underline;
+    }
+}
+.authors {
+    .mixed-authors {
+        padding: 30px 20px;
+        margin-bottom: 20px;
+        background-color: $cardLightBackground;
+        @include materialShadowBottom();
+        > span {
+            text-align: center;
+            white-space: pre-line;
+            &.title {
+                font-weight: bold;
+            }
+        }
+        > div {
+            display: flex;
+            justify-content: center;
+        }
+        justify-content: center;
+        display: grid;
+        grid-template-rows: auto auto auto;
+        grid-gap: 15px;
+        width: 100%;
+    }
+}

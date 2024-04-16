@@ -1,0 +1,50 @@
+<es-global-progress *ngIf="isLoading"></es-global-progress>
+<div class="appLogin" *ngIf="!isLoading">
+  <div class="infoTop" style="margin-top: -10px">
+    <h1>{{ 'LOGIN_APP.LOGIN' | translate }}</h1>
+    <div>{{ 'LOGIN_APP.LOGIN_INFO' | translate }}</div>
+  </div>
+  <es-card
+    modal="auto"
+    title="{{ 'LOGIN_APP.LOGIN_TITLE' | translate }}"
+    width="mlarge"
+    height="large"
+    avatar="assets/images/app-icon.svg"
+    [isCancelable]="true"
+    (onCancel)="buttonLoginBack()"
+    [buttons]="buttons"
+  >
+    <div class="card-content-padding">
+      <form (ngSubmit)="login()" #loginForm>
+        <mat-form-field>
+          <mat-label>{{ 'LOGIN.USERNAME' | translate }}</mat-label>
+          <input
+            matInput
+            required
+            autofocus
+            name="username"
+            id="username"
+            (ngModelChange)="checkConditions()"
+            [(ngModel)]="username"
+          />
+        </mat-form-field>
+        <div>
+          <es-input-password
+            label="{{ 'LOGIN.PASSWORD' | translate }}"
+            inputId="password"
+            [required]="true"
+            (valueChange)="checkConditions()"
+            (keydown.enter)="login()"
+            [(value)]="password"
+          ></es-input-password>
+        </div>
+      </form>
+      <div class="register" *ngIf="config.register.local || config.register.registerUrl">
+        {{ 'LOGIN.REGISTER_TEXT' | translate }}
+        <button mat-button color="primary" (click)="register()">
+          {{ 'LOGIN.REGISTER_LINK' | translate }} <i esIcon="arrow_forward"></i>
+        </button>
+      </div>
+    </div>
+  </es-card>
+</div>

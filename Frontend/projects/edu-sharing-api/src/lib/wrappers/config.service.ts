@@ -7,11 +7,13 @@ import {
     shareReplay,
     startWith,
     switchMap,
+    take,
+    tap,
 } from 'rxjs/operators';
 import { ApiRequestConfiguration } from '../api-request-configuration';
 import * as apiModels from '../api/models';
 import { ConfigV1Service } from '../api/services';
-import { switchReplay } from '../utils/switch-replay';
+import { switchReplay } from '../utils/rxjs-operators/switch-replay';
 
 export type ClientConfig = apiModels.Values;
 export type Variables = apiModels.Variables['current'];
@@ -28,10 +30,11 @@ export type Locale = 'de_DE' | 'en_US';
 export class ConfigService {
     private readonly updateTrigger = new Subject<void>();
     private readonly localeSubject = new BehaviorSubject<Locale | null>(null);
-
+    private configSubject = new BehaviorSubject<apiModels.Values | undefined>(undefined);
     private readonly config$ = this.updateTrigger.pipe(
         startWith(void 0 as void),
         switchReplay(() => this.configV1.getConfig1()),
+        tap((config) => this.configSubject.next(config.current)),
         map((config) => config.current ?? null),
     );
     private readonly variables$ = this.updateTrigger.pipe(
@@ -115,5 +118,38 @@ export class ConfigService {
      */
     observeTranslationOverrides(): Observable<{ [key: string]: string } | null> {
         return this.translationOverrides$;
+    }
+
+    private instantInternal<T>(
+        name: string,
+        defaultValue?: T,
+        object: any = this.configSubject.value,
+    ): T {
+        if (!object) return defaultValue as T;
+        let parts = name.split('.');
+        if (parts.length > 1) {
+            if (object[parts[0]]) {
+                let joined = name.substr(parts[0].length + 1);
+                return this.instantInternal(joined, defaultValue, object[parts[0]]);
+            } else {
+                return defaultValue as T;
+            }
+        }
+        if (object[name] != null) return object[name];
+        return defaultValue as T;
+    }
+    /**
+     * @deprecated
+     * Like `get`, but assumes that the configuration is already initialized.
+     *
+     * It is the responsibility of the caller to assure that the configuration is initialized! If you
+     * are not sure, use `get` instead.
+     */
+    public instant<T = string>(name: string, defaultValue?: T): T {
+        return this.instantInternal(name, defaultValue);
+    }
+    public async get<T = string>(name: string, defaultValue?: T): Promise<T> {
+        await this.observeConfig().pipe(take(1)).toPromise();
+        return this.instantInternal(name, defaultValue);
     }
 }

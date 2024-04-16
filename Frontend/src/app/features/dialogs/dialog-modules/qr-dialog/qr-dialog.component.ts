@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
-import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
+import { NodeHelperService } from '../../../../services/node-helper.service';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 
 export interface QrDialogData {

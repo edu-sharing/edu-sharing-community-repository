@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.edu_sharing</groupId>
+    <artifactId>edu_sharing-community-repository-backend-services-rest-client</artifactId>
+    <version>git</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>edu_sharing-community-repository-backend-services-rest-client-php</artifactId>
+  <packaging>jar</packaging>
+
+  <name>edu_sharing-community-repository-backend-services-rest-client-php</name>
+
+  <properties>
+
+    <composer.project>${composer.project.root}</composer.project>
+
+  </properties>
+
+  <build>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>generate-sources</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.openapitools</groupId>
+        <artifactId>openapi-generator-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <generatorName>php</generatorName>
+              <inputSpec>${project.build.directory}/api/openapi.json</inputSpec>
+              <apiPackage>api</apiPackage>
+              <modelPackage>model</modelPackage>
+              <skipValidateSpec>false</skipValidateSpec>
+              <gitUserId>${composer.vendor}</gitUserId>
+              <gitRepoId>${composer.project}</gitRepoId>
+              <artifactVersion>${composer.version}</artifactVersion>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>com.google.code.maven-replacer-plugin</groupId>
+        <artifactId>replacer</artifactId>
+        <executions>
+          <execution>
+            <id>fixLicense</id>
+            <phase>process-sources</phase>
+            <goals>
+              <goal>replace</goal>
+            </goals>
+            <configuration>
+              <basedir>${project.basedir}</basedir>
+              <includes>
+                <include>target/generated-sources/openapi/composer.json</include>
+              </includes>
+              <regex>true</regex>
+              <replacements>
+                <replacement>
+                  <token>unlicense</token>
+                  <value>GPL-3.0-or-later</value>
+                </replacement>
+              </replacements>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/bin.xml</descriptor>
+              </descriptors>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <finalName>${composer.vendor}/${composer.project}-${composer.version}</finalName>
+              <appendAssemblyId>false</appendAssemblyId>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>maven-upload-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>upload-file</goal>
+            </goals>
+            <phase>deploy</phase>
+            <configuration>
+              <file>${project.build.directory}/${composer.vendor}/${composer.project}-${composer.version}.zip</file>
+              <repositoryPath>/packages/upload/${composer.vendor}/${composer.project}/${composer.version}</repositoryPath>
+              <repositoryUrl>${composer.repo.url}</repositoryUrl>
+              <serverId>edusharing-remote</serverId>
+              <ignoreMissingFile>false</ignoreMissingFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+  <dependencies>
+
+    <!-- provided -->
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-services-rest-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+  </dependencies>
+
+</project>

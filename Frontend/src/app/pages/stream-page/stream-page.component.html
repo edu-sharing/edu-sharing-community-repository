@@ -1,0 +1,272 @@
+<h1 esTitle class="cdk-visually-hidden">{{ 'STREAM.TITLE' | translate }}</h1>
+<div
+  class="stream-container"
+  esInfiniteScroll
+  [scrollWindow]="true"
+  (scrolled)="onScroll()"
+  (click)="closeMenuOptions()"
+>
+  <div class="row">
+    <div class="row tab-group row-dark arrow-menu-arrow">
+      <div class="col s12">
+        <ul class="tabs tabs-fixed-width">
+          <li
+            class="clickable tab col s3"
+            tabindex="0"
+            (keyup.enter)="goToOption('new')"
+            (click)="goToOption('new')"
+          >
+            <a class="table-tab-title-short" [class.active]="mode === 'new'"
+              ><i class="material-icons">date_range</i
+              ><span>{{ 'STREAM.MENU.NEW' | translate }}</span></a
+            >
+          </li>
+          <li
+            class="clickable tab col s3"
+            tabindex="0"
+            (keyup.enter)="goToOption('relevant')"
+            (click)="goToOption('relevant')"
+          >
+            <a class="table-tab-title-short" [class.active]="mode === 'relevant'"
+              ><i class="material-icons">trending_up</i
+              ><span>{{ 'STREAM.MENU.RELEVANT' | translate }}</span></a
+            >
+          </li>
+          <li
+            class="clickable tab col s3"
+            tabindex="0"
+            (keyup.enter)="goToOption('marked')"
+            (click)="goToOption('marked')"
+          >
+            <a class="table-tab-title-short" [class.active]="mode === 'marked'"
+              ><i class="material-icons">toc</i
+              ><span>{{ 'STREAM.MENU.MARKED' | translate }}</span></a
+            >
+          </li>
+          <li
+            class="clickable tab col s3"
+            tabindex="0"
+            (keyup.enter)="goToOption('seen')"
+            (click)="goToOption('seen')"
+          >
+            <a class="table-tab-title-short" [class.active]="mode === 'seen'"
+              ><i class="material-icons">history</i
+              ><span>{{ 'STREAM.MENU.READ' | translate }}</span></a
+            >
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="col m4 l3 choose-menu-main" [ngClass]="showMenuOptions ? '' : 'hideMenu'">
+      <div
+        tabindex="0"
+        class="choose-menu"
+        (click)="goToOption('new')"
+        (keyup.enter)="goToOption('new')"
+        [ngClass]="mode === 'new' ? 'm-active' : 'm-inactive'"
+      >
+        <i aria-hidden="true" class="menuic material-icons">date_range</i>
+        <div class="menu-icon-text">{{ 'STREAM.MENU.NEW' | translate }}</div>
+      </div>
+      <div
+        tabindex="0"
+        class="choose-menu"
+        (click)="goToOption('relevant')"
+        (keyup.enter)="goToOption('relevant')"
+        [ngClass]="mode === 'relevant' ? 'm-active' : 'm-inactive'"
+      >
+        <i aria-hidden="true" class="menuic material-icons">trending_up</i>
+        <div class="menu-icon-text">{{ 'STREAM.MENU.RELEVANT' | translate }}</div>
+      </div>
+      <div
+        tabindex="0"
+        class="choose-menu"
+        (click)="goToOption('marked')"
+        (keyup.enter)="goToOption('new')"
+        [ngClass]="mode === 'marked' ? 'm-active' : 'm-inactive'"
+      >
+        <i aria-hidden="true" class="menuic material-icons">toc</i>
+        <div class="menu-icon-text">{{ 'STREAM.MENU.MARKED' | translate }}</div>
+      </div>
+      <div
+        tabindex="0"
+        class="choose-menu"
+        (click)="goToOption('seen')"
+        (keyup.enter)="goToOption('seen')"
+        [ngClass]="mode === 'seen' ? 'm-active' : 'm-inactive'"
+      >
+        <i aria-hidden="true" class="menuic material-icons">history</i>
+        <div class="menu-icon-text">{{ 'STREAM.MENU.READ' | translate }}</div>
+      </div>
+    </div>
+    <div class="col s12 m7 l6 remove-horizontal-padding">
+      <div class="margin-show">
+        <div class="stream-header-left stream-marginfix">
+          <div *ngIf="mode === 'new'" class="stream-title s10 m12">
+            {{ 'STREAM.MENU.NEW' | translate }}
+          </div>
+          <div *ngIf="mode === 'seen'" class="stream-title s10 m12">
+            {{ 'STREAM.MENU.READ' | translate }}
+          </div>
+          <div *ngIf="mode === 'relevant'" class="stream-title s10 m12">
+            {{ 'STREAM.MENU.RELEVANT' | translate }}
+          </div>
+          <div *ngIf="mode === 'marked'" class="stream-title s10 m12">
+            {{ 'STREAM.MENU.MARKED' | translate }}
+          </div>
+
+          <span id="stream-title-date" class="stream-title-date s12 m12">
+            {{ dateToDisplay }}
+          </span>
+        </div>
+        <div *ngIf="streams.length === 0 && isLoading"><es-spinner></es-spinner></div>
+        <!--<div class="stream-emptytxt" *ngIf="!allImagesLoaded">
+                <div *ngIf="imagesToLoad !== 0"><es-spinner></es-spinner></div>
+        </div>-->
+        <div class="stream-emptytxt" *ngIf="streams.length === 0 && !isLoading">
+          {{ 'STREAM.OBJECT.NOMATERIALS' | translate }}
+        </div>
+        <div *ngIf="mode === 'relevant'" class="stream-boxes">
+          <div *ngFor="let node of streamsRelevant" class="stream-box">
+            <div class="row row-nomargin">
+              <div class="stream-box-icon col s1">
+                <img src="{{ node.iconURL }}" alt="" class="stream-icon" />
+              </div>
+              <div class="stream-box-title col s9" (click)="onStreamObjectClick(node)">
+                {{ getTitle(node) }}
+              </div>
+              <div class="stream-box-main-vert col s2">
+                <es-actionbar
+                  [numberOfAlwaysVisibleOptions]="0"
+                  [numberOfAlwaysVisibleOptionsMobile]="0"
+                  [options]="options"
+                  [style]="'flat'"
+                  (click)="updateOptions(null)"
+                ></es-actionbar>
+              </div>
+            </div>
+            <div class="stream-box-desc">{{ node.properties['cclom:general_description'] }}</div>
+            <div class="stream-box-kompetenzen">
+              <div class="chip" *ngFor="let keyword of node.properties['cclom:general_keyword']">
+                {{ keyword }}
+              </div>
+            </div>
+            <div
+              tabindex="0"
+              [lazyLoad]="getPreview(node)"
+              class="stream-box-image"
+              (click)="onStreamObjectClick(node)"
+              (keyup.enter)="onStreamObjectClick(node)"
+            >
+              <div class="bottom-right">{{ node.properties['virtual:commentcount'][0] }}</div>
+              <div class="bottom-right-icon"><i class="material-icons stic">comment</i></div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="mode !== 'relevant'" class="stream-boxes">
+          <div
+            *ngFor="let strm of streams"
+            [ngClass]="strm.nodes.length === 0 ? 'hide' : 'stream-box'"
+          >
+            <div class="row row-nomargin">
+              <div class="stream-box-icon col s1" *ngIf="strm.nodes[0]">
+                <img src="{{ strm.nodes[0].iconURL }}" alt="" class="stream-icon" />
+              </div>
+              <div class="stream-box-title col s9" (click)="onStreamObjectClick(strm)">
+                <span *ngIf="getStreamTitle(strm)">{{
+                  strm.properties['add_to_stream_title']
+                }}</span>
+                <span *ngIf="!getStreamTitle(strm)">{{ strm.nodes[0] | nodeTitle }}</span>
+              </div>
+              <div class="stream-box-main-vert col s2">
+                <es-actionbar
+                  [numberOfAlwaysVisibleOptions]="0"
+                  [numberOfAlwaysVisibleOptionsMobile]="0"
+                  [options]="options"
+                  [style]="'flat'"
+                  (click)="updateOptions(strm)"
+                ></es-actionbar>
+              </div>
+            </div>
+
+            <div class="stream-box-desc">
+              <span *ngIf="strm.properties['add_to_stream_description']">{{
+                strm.properties['add_to_stream_description']
+              }}</span>
+            </div>
+
+            <div class="stream-box-kompetenzen">
+              <div
+                class="chip"
+                *ngFor="let keyword of $any(strm.properties['cclom:general_keyword'])"
+              >
+                {{ keyword }}
+              </div>
+            </div>
+
+            <div class="stream-box-nonodes" *ngIf="strm.nodes.length === 0">
+              {{ 'STREAM.OBJECT.NONODES' | translate }}
+            </div>
+            <div
+              tabindex="0"
+              [lazyLoad]="getPreview(strm.nodes[0])"
+              class="stream-box-image"
+              (click)="onStreamObjectClick(strm)"
+              (keyup.enter)="onStreamObjectClick(strm)"
+              *ngIf="strm.nodes[0]"
+            >
+              <div class="bottom-left">
+                {{
+                  strm.nodes[0].name.length > 40
+                    ? (strm.nodes[0].name | slice : 0 : 40) + '...'
+                    : strm.nodes[0].name
+                }}
+              </div>
+              <div class="bottom-right">{{ strm.nodes[0].commentCount }}</div>
+              <div class="bottom-right-icon"><i class="material-icons stic">comment</i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col m1 l3"></div>
+  </div>
+  <!-- row -->
+
+  <div class="create fixed-action-btn" *ngIf="createAllowed">
+    <div class="mobile-move-bottom">
+      <a
+        tabindex="0"
+        (click)="create()"
+        (keyup.enter)="create()"
+        class="btn-floating btn-large btn-complementary waves-effect"
+        ><i class="material-icons">add</i></a
+      >
+    </div>
+  </div>
+  <div
+    class="dialog dialogCreate"
+    *ngIf="showCreate"
+    (click)="showCreate = false"
+    (contextmenu)="showCreate = false; $event.preventDefault(); $event.stopPropagation()"
+  ></div>
+  <!-- <input type="file" accept="image/*" capture="camera" #camera (change)="uploadCamera($event)"> -->
+  <div
+    class="createMenu collection"
+    #dropdown
+    [@overlay]="showCreate && connectorList"
+    *ngIf="showCreate && connectorList"
+  >
+    <a
+      *ngFor="let connector of connectorList.connectors; let i = index"
+      class="collection-item"
+      [class.collection-item-separate]="!i"
+      tabindex="0"
+      (click)="showCreate = false; openCreateWithConnectorDialog(connector)"
+    >
+      <i class="material-icons">{{ connector.icon }}</i>
+      {{ 'CONNECTOR.' + connector.id + '.NAME' | translate
+      }}<img class="connectorBeta" [src]="'assets/images/beta.svg' | esAssetsPath"
+    /></a>
+  </div>
+</div>

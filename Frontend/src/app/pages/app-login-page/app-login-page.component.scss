@@ -1,0 +1,81 @@
+@import '../../core-ui-module/styles/variables';
+
+.appLogin {
+    background-color: #333;
+    width: 100%;
+    height: 100%;
+}
+.card,
+.card-high {
+    top: 15%;
+    @include materialShadowLarge();
+}
+:host ::ng-deep mat-form-field {
+    width: 100%;
+}
+.infoTop {
+    position: absolute;
+    top: 6%;
+    left: 50%;
+    margin-left: -265px;
+    max-width: 530px;
+    padding: 20px;
+    padding-top: 0;
+    div {
+        color: $textVeryLight;
+    }
+    h1 {
+        font-size: 120%;
+        font-weight: bold;
+        margin: 0;
+        margin-bottom: 5px;
+        color: #fff;
+    }
+}
+.register {
+    color: $textLight;
+    a {
+        text-transform: uppercase;
+        i {
+            font-size: 11pt;
+            position: relative;
+            top: 3px;
+        }
+    }
+}
+@media only screen and (max-width: $mobileWidth - $mobileStage*1) {
+    .infoTop {
+        left: 0;
+        width: 100%;
+        margin-left: 0;
+    }
+}
+@media only screen and (max-width: $mobileWidth+$mobileStage*1) {
+    .branding {
+        position: absolute;
+        top: 25px;
+        left: calc(50% - 75px);
+        height: 50px;
+        img {
+            width: 100px;
+            height: auto;
+        }
+    }
+}
+
+@media screen and (max-height: ($mobileHeight)) {
+    .card:not(.card-high) {
+        top: 20%;
+        bottom: auto;
+    }
+}
+
+@media screen and (max-height: ($mobileHeightWithKeyboard)) {
+    .card:not(.card-high) {
+        top: 0;
+        bottom: 0;
+    }
+    .infoTop {
+        display: none;
+    }
+}

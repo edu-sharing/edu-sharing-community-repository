@@ -1,0 +1,58 @@
+@import '../../../core-ui-module/styles/variables';
+
+:host ::ng-deep {
+    mat-form-field {
+        width: 100%;
+    }
+}
+form {
+    div {
+        position: relative;
+    }
+    label span {
+        color: $textLight;
+        font-size: 9pt;
+        text-transform: initial;
+        font-weight: normal;
+    }
+    input[type='checkbox'] + label {
+        height: unset;
+        display: inline-block;
+        margin-bottom: 15px;
+    }
+}
+.accept {
+    margin-top: 10px;
+}
+.name-input {
+    display: flex;
+    column-gap: 15px;
+    mat-form-field {
+        width: 0;
+        flex-grow: 2;
+        &.title {
+            flex-grow: 1;
+        }
+    }
+    .last-name {
+        margin-left: 10px;
+    }
+}
+mat-checkbox {
+    display: flex;
+    margin-top: 12px;
+}
+:host mat-checkbox ::ng-deep .mat-checkbox-layout {
+    white-space: normal !important;
+}
+.accept {
+    margin-top: 12px;
+}
+.imprint {
+    display: block;
+    margin: 0 35px;
+    font-size: 1rem;
+}
+.organization {
+    margin-top: 10px;
+}

@@ -1,0 +1,10 @@
+version: '3.7'
+
+services:
+
+
+  repository-service:
+    image: "${docker.registry}/${docker.repository}/${docker.prefix}-deploy-docker-build-service:${docker.tag}"
+
+  repository-transform-edu-sharing:
+    image: "${docker.registry}/${docker.repository}/${docker.prefix}-deploy-docker-build-transform-edu-sharing:${docker.tag}"

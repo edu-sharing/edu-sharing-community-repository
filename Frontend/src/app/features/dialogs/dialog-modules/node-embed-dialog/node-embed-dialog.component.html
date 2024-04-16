@@ -30,6 +30,7 @@
     </mat-form-field>
     <form class="preferences-form" [formGroup]="form">
       <mat-radio-group
+        *ngIf="!isCollectionReference()"
         class="version-radio-group"
         [attr.aria-label]="'EMBED.VERSION' | translate"
         formControlName="version"
@@ -52,7 +53,7 @@
             [max]="sizeConstraints.width.max"
           />
           <mat-error>
-            {{ 'EMBED.SIZE_CONSTRAINTS_ERROR_NOTICE' | translate: sizeConstraints.width }}
+            {{ 'EMBED.SIZE_CONSTRAINTS_ERROR_NOTICE' | translate : sizeConstraints.width }}
           </mat-error>
         </mat-form-field>
         <mat-form-field class="size-field">
@@ -65,7 +66,7 @@
             [max]="sizeConstraints.height.max"
           />
           <mat-error>
-            {{ 'EMBED.SIZE_CONSTRAINTS_ERROR_NOTICE' | translate: sizeConstraints.height }}
+            {{ 'EMBED.SIZE_CONSTRAINTS_ERROR_NOTICE' | translate : sizeConstraints.height }}
           </mat-error>
         </mat-form-field>
       </div>

@@ -4,9 +4,6 @@
     display: flex;
     flex-direction: row-reverse; // Automatically scroll to the end
     align-items: center;
-    // Make room for keyboard focus styles.
-    padding: 5px;
-    margin: -5px;
     overflow-y: hidden;
     overflow-x: auto;
     // Firefox
@@ -101,11 +98,15 @@ button {
     }
 }
 
+.breadcrumb-element-home {
+    text-decoration: none;
+}
+
 .breadcrumb-inner {
     color: $primary;
     display: flex;
     padding: 2px 4px;
-    font-size: 95%;
+    gap: 3px;
     white-space: nowrap;
     align-items: center;
 }
@@ -138,17 +139,7 @@ button {
     color: $textLight;
 }
 
-.dropdown-icon {
-    margin-top: -2px;
-}
-
 .breadcrumb-arrow {
     font-size: 15pt;
     color: $textLight;
-}
-
-.selected {
-    background-color: #fff;
-    border: 2px dashed $colorStatusPositive;
-    padding: 0 2px !important;
 }

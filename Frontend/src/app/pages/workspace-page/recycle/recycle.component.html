@@ -1,0 +1,58 @@
+<es-node-entries-wrapper
+  #list
+  [columns]="columns"
+  [checkbox]="true"
+  [displayType]="NodeEntriesDisplayType.Table"
+  [scope]="Scope.WorkspaceList"
+  [elementInteractionType]="InteractionType.Emitter"
+  [sort]="sort"
+  [dataSource]="dataSource"
+  (sortChange)="updateSort($event)"
+  (clickItem)="click($event)"
+  (fetchData)="refresh($event)"
+>
+  <ng-template #empty>
+    <h3 *ngIf="!!searchQuery" class="empty mat-heading-3">
+      {{ 'RECYCLE.NO_RESULTS_MESSAGE' | translate }}
+    </h3>
+    <h3 *ngIf="!searchQuery" class="empty mat-heading-3">
+      {{ 'RECYCLE.ARCHIVE_EMPTY' | translate }}
+    </h3>
+  </ng-template>
+</es-node-entries-wrapper>
+
+<ng-template #confirmDeleteDialog>
+  <p>{{ 'RECYCLE.DELETE.CONFIRM_MESSAGE' | translate }}</p>
+  <form>
+    <div class="checkbox">
+      <mat-checkbox name="skipDeleteConfirmation" [(ngModel)]="skipDeleteConfirmation">{{
+        'RECYCLE.DELETE.NOT_ASK_AGAIN' | translate
+      }}</mat-checkbox>
+    </div>
+  </form>
+</ng-template>
+
+<ng-template #restoreDialog let-restoreResult>
+  <div *ngIf="restoreResult.hasDuplicateNames">
+    <p>{{ 'RECYCLE.RESTORE.LIST_DUPLICATE_NAMES' | translate }}</p>
+    <div *ngFor="let result of restoreResult.results">
+      <div *ngIf="result.restoreStatus === 'DUPLICATENAME'">
+        {{ result.name }} <span class="restore-message">({{ result.message }})</span>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="restoreResult.hasParentFolderMissing">
+    <hr *ngIf="restoreResult.hasDuplicateNames" />
+    <p>{{ 'RECYCLE.RESTORE.LIST_PARENT_FOLDER_MISSING' | translate }}</p>
+    <div *ngFor="let result of restoreResult.results">
+      <div
+        *ngIf="
+          result.restoreStatus === 'FALLBACK_PARENT_NOT_EXISTS' ||
+          result.restoreStatus === 'FALLBACK_PARENT_NO_PERMISSION'
+        "
+      >
+        {{ result.name }} <span class="restore-message">({{ result.message }})</span>
+      </div>
+    </div>
+  </div>
+</ng-template>

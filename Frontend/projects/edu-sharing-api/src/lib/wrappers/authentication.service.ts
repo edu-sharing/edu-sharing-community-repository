@@ -11,12 +11,13 @@ import {
     share,
     startWith,
     switchMap,
+    take,
     tap,
 } from 'rxjs/operators';
 import { ApiRequestConfiguration } from '../api-request-configuration';
 import * as apiModels from '../api/models';
 import { AuthenticationV1Service as AuthenticationApiService } from '../api/services';
-import { switchReplay } from '../utils/switch-replay';
+import { switchReplay } from '../utils/rxjs-operators/switch-replay';
 
 export type LoginInfo = apiModels.Login;
 
@@ -27,6 +28,11 @@ type LoginAction =
           username: string;
           password: string;
           scope?: string;
+      }
+    | {
+          // Logs the user in with the provided credentials.
+          kind: 'loginToken';
+          accessToken: string;
       }
     | {
           // Logs the user out.
@@ -112,6 +118,8 @@ export class AuthenticationService {
      * interaction to not reset the auto-logout timeout.'
      */
     private loginInfoNeedRefresh = false;
+    /** Timeout for scheduled logout-time checks. */
+    private logoutCheckTimeout: ReturnType<typeof setTimeout> | null = null;
 
     constructor(
         private authentication: AuthenticationApiService,
@@ -133,6 +141,13 @@ export class AuthenticationService {
             username,
             password,
             scope,
+        });
+        return this.loginInfo$.pipe(first());
+    }
+    loginToken(accessToken: string): Observable<LoginInfo> {
+        this.loginActionTrigger.next({
+            kind: 'loginToken',
+            accessToken,
         });
         return this.loginInfo$.pipe(first());
     }
@@ -160,6 +175,15 @@ export class AuthenticationService {
         return this.loginInfo$;
     }
 
+    hasToolpermission(toolpermission: string) {
+        return this.observeLoginInfo()
+            .pipe(
+                map((login) => login.toolPermissions?.includes(toolpermission)),
+                take(1),
+            )
+            .toPromise() as Promise<boolean>;
+    }
+
     /**
      * Emits when the logged-in user changes.
      */
@@ -173,9 +197,8 @@ export class AuthenticationService {
      * This is usually not needed since `login` and `logout` will update login information
      * automatically. Use only if the login state was affected by some outside actor.
      */
-    forceLoginInfoRefresh(): Observable<LoginInfo> {
+    forceLoginInfoRefresh(): void {
         this.loginActionTrigger.next({ kind: 'forceRefresh' });
-        return this.loginInfo$.pipe(first());
     }
 
     /**
@@ -261,13 +284,48 @@ export class AuthenticationService {
         ])
             .pipe(map(([loginInfo]) => this.calculateAutoLogoutTimeAfterReset(loginInfo)))
             .subscribe((logoutTime) => this.autoLogoutTimeSubject.next(logoutTime));
-        this.autoLogoutTimeSubject
-            .pipe(debounce((logoutTime) => (logoutTime ? rxjs.timer(logoutTime) : rxjs.NEVER)))
-            .subscribe(() => {
+        this.autoLogoutTimeSubject.subscribe((autoLogoutTime) =>
+            this.scheduleLogoutTimeCheck(autoLogoutTime),
+        );
+        // `setTimeout` timers will be paused while the system is suspended. We use the `online`
+        // event to get notified of a resumed system and update the timeout.
+        window.addEventListener('online', () => this.checkLogoutTime());
+        this.autoLogoutSubject.subscribe(() => (this.loginInfoNeedRefresh = true));
+    }
+
+    /**
+     * Schedules a check of the auto-logout time at the given time.
+     *
+     * Only one check can be scheduled. Previous schedules will be overwritten each time this method
+     * is called.
+     */
+    private scheduleLogoutTimeCheck(timeOfCheck: Date | null) {
+        if (this.logoutCheckTimeout) {
+            clearTimeout(this.logoutCheckTimeout);
+            this.logoutCheckTimeout = null;
+        }
+        if (timeOfCheck) {
+            const delta = timeOfCheck.getTime() - new Date().getTime();
+            this.logoutCheckTimeout = setTimeout(() => this.checkLogoutTime(), delta);
+        }
+    }
+
+    /**
+     * Check the auto-logout time now.
+     *
+     * Either emit the `autoLogoutSubject` if the auto-logout time has been reached, or schedule
+     * another check at the time we expect it to be reached.
+     */
+    private checkLogoutTime() {
+        if (this.autoLogoutTimeSubject.value) {
+            const delta = this.autoLogoutTimeSubject.value.getTime() - new Date().getTime();
+            if (delta <= 0) {
                 this.autoLogoutTimeSubject.next(null);
                 this.autoLogoutSubject.next();
-            });
-        this.autoLogoutSubject.subscribe(() => (this.loginInfoNeedRefresh = true));
+            } else {
+                this.scheduleLogoutTimeCheck(this.autoLogoutTimeSubject.value);
+            }
+        }
     }
 
     /**
@@ -311,6 +369,8 @@ export class AuthenticationService {
                 } else {
                     return this.loginWithBasicAuth(action.username, action.password);
                 }
+            case 'loginToken':
+                return this.loginWithToken(action.accessToken);
             case 'logout':
                 return this.authentication.logout().pipe(switchMap(() => this.fetchLoginInfo()));
             case 'initial':
@@ -332,6 +392,14 @@ export class AuthenticationService {
             tap(() =>
                 this.apiRequestConfiguration.setBasicAuthForNextRequest({ username, password }),
             ),
+            switchMap(() => this.authentication.login()),
+        );
+    }
+    private loginWithToken(accessToken: string): Observable<LoginInfo> {
+        return rxjs.of(void 0).pipe(
+            // Make `setBasicAuthForNextRequest` part of the observable, so it is guaranteed to
+            // be run together with the login request.
+            tap(() => this.apiRequestConfiguration.setBearerAuthForNextRequest(accessToken)),
             switchMap(() => this.authentication.login()),
         );
     }

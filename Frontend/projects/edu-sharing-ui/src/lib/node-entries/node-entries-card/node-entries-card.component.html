@@ -1,0 +1,177 @@
+<div
+  [class]="
+    'grid-card' +
+    (isCollection
+      ? ' grid-card-collection grid-card-collection-scope-' +
+        node.collection.scope +
+        ' grid-card-collection-type-' +
+        node.collection.type
+      : '') +
+    ($any(node).virtual ? ' grid-card-virtual' : '') +
+    ' ' +
+    nodeEntriesGlobalService.getCustomCssClass(node)
+  "
+  [style.background-color]="isCollection ? node.collection.color : null"
+  [class.dynamic-single-click]="entriesService.singleClickHint === 'dynamic'"
+  [class.selected]="entriesService.selection.isSelected(node)"
+  (contextmenu)="openContextmenu($event)"
+  (keydown.ContextMenu)="openContextmenu($event)"
+>
+  <div
+    *ngIf="templatesService.overlay"
+    class="card-overlay"
+    (click)="
+      entriesService.clickItem.emit({
+        element: node,
+        source: ClickSource.Overlay
+      })
+    "
+  >
+    <ng-container
+      *ngTemplateOutlet="templatesService.overlay; context: { element: node }"
+    ></ng-container>
+  </div>
+  <button
+    *ngIf="dropdown"
+    #menuTrigger="matMenuTrigger"
+    mat-button
+    class="dropdown-dummy cdk-visually-hidden"
+    [style.left.px]="dropdownLeft"
+    [style.top.px]="dropdownTop"
+    [matMenuTriggerFor]="dropdown.menu"
+    tabindex="-1"
+    aria-hidden="true"
+  ></button>
+  <div class="card-top-bar" [style.background-color]="isCollection ? node.collection.color : null">
+    <div class="card-top-bar-collection-color" *ngIf="nodeHelper.isNodeCollection(node)"></div>
+    <es-node-type-badge [node]="node"></es-node-type-badge>
+    <div *ngIf="isCollection && node.collection.pinned" class="card-top-bar-flag">
+      <i esIcon="edu-pin"></i>
+    </div>
+    <div class="card-top-bar-empty"></div>
+    <es-node-stats-badges [node]="node"></es-node-stats-badges>
+    <div class="card-top-bar-checkbox" *ngIf="entriesService.checkbox">
+      <mat-checkbox
+        [checked]="entriesService.selection.isSelected(node)"
+        (change)="entriesService.onCheckboxChanged(node, $event.checked)"
+        color="primary"
+        aria-label="{{ 'SELECT' | translate : { element: (node | nodeTitle) } }}"
+      ></mat-checkbox>
+    </div>
+  </div>
+  <es-node-url
+    *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
+    mode="wrapper"
+    [node]="node"
+    esFocusState
+    #cardFocusState="esFocusState"
+  >
+    <ng-container
+      *ngTemplateOutlet="
+        image;
+        context: { playAnimation: cardFocusState.hovering || cardFocusState.hasFocus }
+      "
+    ></ng-container>
+    <ng-container *ngTemplateOutlet="meta"></ng-container>
+  </es-node-url>
+  <div
+    *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
+    matRipple
+    (click)="
+      entriesService.onClicked({
+        event: $event,
+        element: node,
+        source: ClickSource.Metadata
+      })
+    "
+    (dblclick)="
+      entriesService.dblClickItem.emit({
+        element: node,
+        source: ClickSource.Metadata
+      })
+    "
+    esFocusState
+    #cardFocusState="esFocusState"
+  >
+    <ng-container
+      *ngTemplateOutlet="
+        image;
+        context: { playAnimation: cardFocusState.hovering || cardFocusState.hasFocus }
+      "
+    ></ng-container>
+    <ng-container *ngTemplateOutlet="meta"></ng-container>
+  </div>
+  <div class="card-options" *ngIf="entriesService.options || showRatings">
+    <div class="card-rating-area">
+      <es-node-rating [node]="node"></es-node-rating>
+    </div>
+    <div class="card-options-area">
+      <es-option-button
+        *ngFor="let option of optionsOnCard()"
+        class="card-options-always"
+        [option]="option"
+        [node]="node"
+      ></es-option-button>
+      <div class="card-options-spacer"></div>
+      <button
+        *ngIf="dropdown"
+        mat-icon-button
+        color="primary"
+        (click)="openMenu(node)"
+        [matMenuTriggerFor]="dropdown.menu"
+        [attr.aria-label]="'OPTIONS_FOR' | translate : { element: (node | nodeTitle) }"
+        data-test="card-options-button"
+      >
+        <i esIcon="more_vert"></i>
+      </button>
+    </div>
+  </div>
+  <ng-template #image let-playAnimation="playAnimation">
+    <div
+      class="card-image-area"
+      [style.background-color]="isCollection ? node.collection.color : null"
+    >
+      <ng-container *ngIf="getTemplate(CustomFieldSpecialType.preview) as ref">
+        <ng-container *ngTemplateOutlet="ref; context: { node: this.node }"></ng-container>
+      </ng-container>
+      <ng-container *ngIf="!getTemplate(CustomFieldSpecialType.preview)">
+        <es-preview-image
+          *ngIf="!(isCollection && node.preview.isIcon)"
+          [node]="node"
+          [playAnimation]="playAnimation"
+        ></es-preview-image>
+        <div *ngIf="isCollection && node.preview.isIcon" class="card-collection-image">
+          <i esIcon="layers"></i>
+        </div>
+      </ng-container>
+    </div>
+  </ng-template>
+  <ng-template #meta let-link="link">
+    <div class="card-meta">
+      <div
+        *ngFor="let displayPart of getVisibleColumns(); let first = first"
+        class="card-meta-row card-meta-row-{{ displayPart.name | lowercase | propertySlug }}"
+        [class.card-meta-row-primary]="first"
+      >
+        <ng-container *ngIf="first">
+          <es-node-url
+            *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
+            [node]="node"
+            #link
+          >
+            <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
+          </es-node-url>
+          <div *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink">
+            <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="!first">
+          <label>
+            {{ displayPart | esListItemLabel | async }}
+          </label>
+          <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
+        </ng-container>
+      </div>
+    </div>
+  </ng-template>
+</div>

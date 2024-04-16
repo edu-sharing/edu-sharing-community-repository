@@ -1,0 +1,122 @@
+@import '../../../assets/scss/mixins';
+
+.actionbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.actionToggle > button {
+    color: var(--textLight);
+}
+button {
+    min-width: unset;
+}
+
+.light {
+    color: #fff;
+    background: transparent;
+}
+.disabled {
+    pointer-events: all;
+}
+.light a {
+    color: #fff;
+}
+
+.actionToggleDivider {
+    padding-left: 10px;
+    border-left: 1px solid #ddd;
+}
+.more {
+    color: var(--primary);
+    background-color: transparent;
+}
+.actionbar-background-dark {
+    .mat-button {
+        color: rgb(var(--palette-foreground-text-dark));
+        &:disabled {
+            color: rgba(var(--palette-foreground-text-dark), 0.75);
+        }
+    }
+}
+.actionbar-background-primary {
+    .mat-button {
+        color: rgb(var(--palette-foreground-text-dark));
+    }
+    .mat-flat-button {
+        background-color: #fff;
+        color: var(--primary);
+        &:disabled {
+            color: var(--textLight);
+        }
+    }
+}
+.actionbar-round {
+    button {
+        width: 45px;
+        height: 45px;
+        justify-content: center;
+    }
+    button {
+        border-radius: 50%;
+        @include materialShadow();
+    }
+    &.actionbar-background-primary {
+        .mat-button {
+            background-color: #fff;
+            color: var(--primary);
+        }
+    }
+    &.actionbar-all-flat button {
+        background: white;
+        color: var(--primary) !important;
+        &:disabled {
+            color: var(--textLight) !important;
+        }
+    }
+    .more,
+    .actionAlways {
+        background: white;
+        color: var(--primary);
+        display: flex;
+        width: 45px;
+        height: 45px;
+        line-height: 45px;
+        text-align: center;
+        align-items: center;
+        .edu-icons,
+        .material-icons {
+            position: relative;
+            font-size: 24px;
+        }
+        span {
+            display: none;
+        }
+    }
+    .action-always {
+        .edu-icons,
+        .material-icons {
+            right: 4px !important;
+        }
+    }
+}
+
+@mixin icon-button() {
+    .action-always {
+        padding: 0 1rem;
+    }
+    .action-always-caption {
+        display: none;
+    }
+    .mat-flat-button {
+        padding: 5px;
+    }
+}
+
+@media screen and (max-width: (calc(var(--mobileWidth) + var(--mobileStage) * 4))) {
+    @include icon-button();
+}
+
+.actionbar-icon-button {
+    @include icon-button();
+}

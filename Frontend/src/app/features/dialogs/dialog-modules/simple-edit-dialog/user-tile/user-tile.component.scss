@@ -1,0 +1,39 @@
+@import '../../../../../core-ui-module/styles/variables';
+
+.tile {
+    width: 167px;
+    height: 45px;
+    margin: 5px;
+    padding: 10px 15px;
+    border: 1px solid #eee;
+    border-radius: $buttonBorderRadius;
+    background-color: #fff;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    @include clickable();
+    .name,
+    es-user-avatar {
+        display: flex;
+        align-items: center;
+    }
+    es-user-avatar {
+        margin-bottom: -4px;
+    }
+    .name {
+        font-size: $fontSizeSmall;
+        text-align: left;
+        padding-left: 15px;
+        @include limitLineCount(2, 1.25);
+    }
+    &.active {
+        color: $textOnPrimary;
+        background-color: $primary;
+        &:hover {
+            background-color: rgb(var(--palette-primary-50));
+        }
+    }
+    &:hover {
+        background-color: $buttonHoverBackground;
+    }
+}

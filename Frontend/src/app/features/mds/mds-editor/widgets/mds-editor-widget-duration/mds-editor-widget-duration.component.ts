@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Options } from '@angular-slider/ngx-slider';
+import { Options } from 'ngx-slider-v2';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
@@ -24,11 +24,10 @@ export class MdsEditorWidgetDurationComponent extends MdsEditorWidgetBase implem
     hours: string;
     minutes: string;
 
-    ngOnInit() {
-        this.initCurrentValue();
+    async ngOnInit() {
+        await this.initCurrentValue();
         this.sliderOptions.floor = this.widget.definition.min ?? 0;
         this.sliderOptions.ceil = this.widget.definition.max ?? 599;
-        console.log(this.widget.definition, this.sliderOptions);
         this.updateInput();
         this.widget.observeIsDisabled().subscribe((isDisabled) => {
             this.sliderOptions = {
@@ -61,9 +60,9 @@ export class MdsEditorWidgetDurationComponent extends MdsEditorWidgetBase implem
         return value + ' ' + this.translate.instant('INPUT_MINUTES');
     }
 
-    private initCurrentValue(): void {
-        const initialValues = this.getInitialValue();
-        const value = parseInt(initialValues[0] ?? '0', 10);
+    private async initCurrentValue() {
+        const initialValues = (await this.widget.getInitalValuesAsync()).jointValues;
+        let value = parseInt(initialValues[0] ?? '0', 10);
         // Internally values are saved as [ms].
         const { valueMin, wasMin } = this.msToMin(value);
         this.currentValue = valueMin;

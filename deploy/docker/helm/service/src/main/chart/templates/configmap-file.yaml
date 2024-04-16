@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "edusharing_common_lib.names.name" . }}-file
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+data:
+{{- with .Values.config.override.config.application.client }}
+  config-application-client: | {{ . | nindent 4 }}
+{{- end }}
+{{- with .Values.config.override.config.application.mds }}
+  config-application-mds: | {{ . | nindent 4 }}
+{{- end }}
+{{- with .Values.config.override.logging.application }}
+  logging-application: | {{ . | nindent 4 }}
+{{- end }}
+{{- with .Values.config.override.logging.server }}
+  logging-server: | {{ . | nindent 4 }}
+{{- end }}
+{{- if .Values.proxy.enabled }}
+  proxy-config: |
+    vcl 4.1;
+
+    import std;
+
+    backend default {
+      .host = "127.0.0.1";
+      .port = "8081";
+
+      .connect_timeout = {{ .Values.proxy.config.backend.connectTimeout }}s;
+      .first_byte_timeout = {{ .Values.proxy.config.backend.firstByteTimeout }}s;
+      .between_bytes_timeout = {{ .Values.proxy.config.backend.betweenBytesTimeout }}s;
+      .max_connections = {{ .Values.proxy.config.backend.maxConnections }};
+
+      .probe = {
+        .url = "/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds={{ .Values.readinessProbe.timeoutSeconds }}";
+        .interval = {{ .Values.readinessProbe.periodSeconds }}s;
+        .timeout = {{ .Values.readinessProbe.timeoutSeconds }}s;
+        .window = {{ add .Values.readinessProbe.failureThreshold 1 }};
+        .threshold = {{ .Values.readinessProbe.failureThreshold }};
+      }
+    }
+
+    sub vcl_recv {
+      set req.backend_hint = default;
+
+      if (req.method == "GET" && req.url == "/health/ready") {
+        if (!std.healthy(req.backend_hint)) {
+          return (synth(503, "No healthy backends"));
+        }
+        return (synth(200, "OK"));
+      }
+
+      if (req.method == "POST" || req.method == "PUT" || req.method == "DELETE" || req.url ~ "/rest/") {
+        return (pass);
+      }
+
+      if (req.restarts > 0) {
+        set req.hash_always_miss = true;
+      }
+
+      if (req.url ~ "(\.css|\.eot|\.gif|\.ico|\.jpg|\.js|\.map|\.md|\.mjs|\.otf|\.png|\.scss|\.svg|\.svg|\.ts|\.ttf|\.txt|\.woff|\.woff2)") {
+        return (hash);
+      }
+    }
+
+    sub vcl_hit {
+      if (obj.ttl >= 0s) {
+        return (deliver);
+      }
+      return (restart);
+    }
+
+    sub vcl_backend_response {
+      {{- if .Values.proxy.config.deliver.gzip }}
+      if (beresp.http.Content-Type ~ "^(text/|application/(xml|json|javascript))") {
+        set beresp.do_gzip = true;
+      }
+      if (beresp.http.Content-Type ~ "^(image/|audio/|video/|application/(pdf|zip))") {
+        set beresp.do_gzip = false;
+      }
+      {{- end }}
+      if (bereq.url ~ "(\.css|\.eot|\.gif|\.ico|\.jpg|\.js|\.map|\.md|\.mjs|\.otf|\.png|\.scss|\.svg|\.svg|\.ts|\.ttf|\.txt|\.woff|\.woff2)") {
+        unset beresp.http.set-cookie;
+        set beresp.ttl = {{ .Values.proxy.config.cache.ttl }}s;
+        {{- if .Values.proxy.config.cache.control }}
+        set beresp.http.cache-control = "{{ .Values.proxy.config.cache.control }}, max-age={{ .Values.proxy.config.cache.ttl }}";
+        {{- end }}
+        return (deliver);
+      }
+    }
+
+    sub vcl_deliver {
+      unset resp.http.Via;
+    }
+{{- end }}

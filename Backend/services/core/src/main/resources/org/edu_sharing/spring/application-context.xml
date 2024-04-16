@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+          http://www.springframework.org/schema/context
+          http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+	<context:annotation-config/>
+	<context:component-scan base-package="org.edu_sharing"/>
+
+	<import resource="classpath:org/edu_sharing/spring/cache-manager.xml" />
+	<import resource="classpath:org/edu_sharing/spring/authentication-services.xml" />
+	<import resource="classpath:org/edu_sharing/spring/edu-sharing-sso-context.xml" />
+	<import resource="classpath:org/edu_sharing/spring/base-services.xml"/>
+	<import resource="classpath:org/edu_sharing/spring/feedback-services.xml"/>
+	<import resource="classpath:org/edu_sharing/spring/rendering-services.xml"/>
+	<import resource="classpath:org/edu_sharing/spring/jmx-services.xml"/>
+	<import resource="classpath:org/edu_sharing/spring/cluster-services.xml"/>
+	<import resource="classpath*:org/edu_sharing/spring/plugin-*.xml"/>
+	<import resource="classpath*:org/edu_sharing/spring/project-*.xml"/>
+
+</beans>

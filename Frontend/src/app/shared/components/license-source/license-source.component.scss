@@ -1,0 +1,18 @@
+@import '../../../core-ui-module/styles/variables';
+
+#reference-info-expander {
+    display: inline-flex;
+    vertical-align: middle;
+    padding-right: 5px;
+    font-weight: bold;
+    line-height: 24px;
+    text-decoration: none;
+}
+.ccAuthorGroup {
+    display: flex;
+    flex-direction: column;
+    padding-top: 10px;
+    mat-form-field {
+        width: 100%;
+    }
+}

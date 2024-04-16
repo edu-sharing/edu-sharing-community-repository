@@ -1,0 +1,40 @@
+@import '../../../core-ui-module/styles/variables';
+
+es-info-message {
+    display: flex;
+    padding: 20px 0;
+}
+
+.config {
+    width: 100%;
+    height: 100%;
+    max-width: 1300px;
+    padding-right: 20px;
+    .config-hide {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+        padding: 20px;
+        background-color: $actionDialogBackground;
+        border-radius: 20px;
+    }
+    .actions {
+        margin: 10px 0;
+    }
+}
+.config-size-medium {
+    es-code-editor {
+        min-height: 200px;
+    }
+}
+.size-chooser {
+    > mat-label {
+        padding-right: 20px;
+    }
+}
+.config-size-large {
+    es-code-editor {
+        min-height: 500px;
+        height: calc((100vh - 220px));
+    }
+}

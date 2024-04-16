@@ -1,0 +1,63 @@
+<div>
+  <div class="header" (esBorderBoxObserver)="setMainNavOffset($event.height - 75)">
+    <img [src]="'assets/images/layout/oer_bg.jpg' | esAssetsPath" esImageConfig alt="" />
+    <div class="headerGradient"></div>
+  </div>
+  <div class="heading">
+    <h1 esTitle>{{ 'OER.HEADING_TITLE' | translate }}</h1>
+    <h2>{{ 'OER.HEADING_DESCRIPTION' | translate }}</h2>
+  </div>
+  <div class="content">
+    <div class="collectionsGroup" *ngIf="nodes[COLLECTIONS] && nodes[COLLECTIONS].length">
+      <div class="caption">{{ 'OER.COLLECTIONS' | translate }}</div>
+      <div class="more" *ngIf="hasMore[COLLECTIONS] || true">
+        <a
+          tabindex="0"
+          class="clickable"
+          (click)="goToCollections()"
+          (keyup.enter)="goToCollections()"
+          >{{ (showMore[COLLECTIONS] ? 'HIDE_MORE' : 'SHOW_MORE') | translate }}</a
+        >
+      </div>
+      <div
+        class="noResults collections"
+        *ngIf="!loading[COLLECTIONS] && !nodes[COLLECTIONS].length"
+      >
+        {{ 'OER.NO_COLLECTION_RESULTS' | translate }}
+      </div>
+      <div>TODO</div>
+    </div>
+    <div class="materials">
+      <div class="caption">{{ 'OER.MATERIALS' | translate }}</div>
+      <div class="more" *ngIf="hasMore[MATERIALS]">
+        <a tabindex="0" class="clickable" (click)="goToSearch()">{{
+          (showMore[MATERIALS] ? 'HIDE_MORE' : 'SHOW_MORE') | translate
+        }}</a>
+      </div>
+      <div
+        class="noResults materials"
+        *ngIf="!(loading[MATERIALS] || (nodes[MATERIALS] && nodes[MATERIALS].length))"
+      >
+        {{ 'OER.NO_MATERIAL_RESULTS' | translate }}
+      </div>
+      TODO
+    </div>
+    <div class="tools" *ngIf="false">
+      <div class="caption">{{ 'OER.TOOLS' | translate }}</div>
+      <div class="more" *ngIf="hasMore[TOOLS]">
+        <a
+          tabindex="0"
+          class="clickable"
+          (click)="toggleMore(TOOLS)"
+          (keyup.enter)="toggleMore(TOOLS)"
+          >{{ (showMore[TOOLS] ? 'HIDE_MORE' : 'SHOW_MORE') | translate }}</a
+        >
+      </div>
+      <div class="noResults tools" *ngIf="!loading[TOOLS] && !nodes[TOOLS].length">
+        {{ 'OER.NO_TOOL_RESULTS' | translate }}
+      </div>
+      TODO
+    </div>
+  </div>
+</div>
+<es-footer [scope]="'oer'"></es-footer>

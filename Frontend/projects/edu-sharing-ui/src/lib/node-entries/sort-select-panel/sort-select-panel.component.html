@@ -1,0 +1,30 @@
+<mat-slide-toggle
+  *ngIf="active === 'ccm:collection_ordered_position'"
+  [(ngModel)]="customSortingInProgress"
+  (ngModelChange)="customSortingInProgressChange.emit($event)"
+>
+  {{ 'COLLECTIONS.SORT_SLIDER' | translate }}
+</mat-slide-toggle>
+<ng-container *ngIf="columns?.length">
+  <button
+    *ngIf="sortDropdown.menu"
+    [matMenuTriggerFor]="sortDropdown.menu"
+    mat-button
+    color="primary"
+  >
+    <span *ngIf="active">{{ 'NODE.' + active | translate }}</span>
+    <span *ngIf="!active">{{ 'SORT_BY' | translate }}</span>
+    <i
+      *ngIf="active && active !== 'ccm:collection_ordered_position'"
+      [esIcon]="'arrow_' + (direction === 'asc' ? 'upward' : 'downward')"
+    ></i>
+  </button>
+
+  <es-sort-dropdown
+    #sortDropdown
+    [columns]="columns"
+    [sortBy]="active"
+    [sortAscending]="direction === 'asc'"
+    (onSort)="onSort($event)"
+  ></es-sort-dropdown>
+</ng-container>

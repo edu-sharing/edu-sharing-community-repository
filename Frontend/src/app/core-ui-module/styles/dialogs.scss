@@ -1,352 +1,384 @@
-@import "variables";
+@import 'variables';
 
-$cardActionHeight:77px;
+$cardActionHeight: 77px;
 
-.dialog{
-  width:100%;
-  height:100%;
-  left:0;
-  top:0;
-  position:fixed;
+.dialog {
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    position: fixed;
 }
-.dialog-halign{
-  display: flex;
-  justify-content: center;
+.dialog-halign {
+    display: flex;
+    justify-content: center;
 }
-.dialog-valign{
-  display: flex;
-  align-items: center;
+.dialog-valign {
+    display: flex;
+    align-items: center;
 }
-.globalProgress{
-  z-index:$dialogZIndex+2;
+.globalProgress {
+    z-index: $dialogZIndex + 2;
 }
-.darken{
-  @include darken();
-  @include blurBackground();
+.darken {
+    @include darken();
+    @include blurBackground();
 }
-.darken-light{
-  @include darkenLight();
+.darken-light {
+    @include darkenLight();
 }
-.card{
-  z-index:$dialogZIndex+1;
-  color: $textMain;
-  background-color: #fff!important;
-  transition: all $transitionNormal;
+.card {
+    z-index: $dialogZIndex + 1;
+    color: $textMain;
+    background-color: #fff !important;
+    transition: all $transitionNormal;
 }
-.center-card{
-  position:fixed!important;
-  top:15%;
-  width:500px;
-  left:50%;
-  margin: auto!important;
-  margin-left:-250px!important;
+.center-card {
+    position: fixed !important;
+    top: 15%;
+    width: 500px;
+    left: 50%;
+    margin: auto !important;
+    margin-left: -250px !important;
 }
 /* keep compatibility with legacy dialogs */
 .card .card-content {
-  height: calc(100% - #{$cardActionHeight});
-  margin-bottom: 0;
+    height: calc(100% - #{$cardActionHeight});
+    margin-bottom: 0;
 
-  pre{
-    white-space: pre-line;
-  }
-  h1,h2,h3,h4,h5,h6{
-    margin: 1.5rem 0;
-  }
-  h1{
-    font-size:170%;
-  }
-  h2{
-    font-size: 150%;
-  }
-  h3{
-    font-size: 140%;
-  }
-  h4{
-    font-size: 130%;
-  }
-  h5{
-    font-size: 120%;
-  }
-  h6{
-    font-size: 110%;
-  }
-  label:first-child {
-    padding-bottom: 7px;
-    display: inline-block;
-  }
+    pre {
+        white-space: pre-line;
+    }
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        margin: 1.5rem 0;
+    }
+    h1 {
+        font-size: 170%;
+    }
+    h2 {
+        font-size: 150%;
+    }
+    h3 {
+        font-size: 140%;
+    }
+    h4 {
+        font-size: 130%;
+    }
+    h5 {
+        font-size: 120%;
+    }
+    h6 {
+        font-size: 110%;
+    }
+    label:first-child {
+        padding-bottom: 7px;
+        display: inline-block;
+    }
 }
-.card.card-no-action{
-  .card-content {
-    height: 100%;
-  }
-  .card-action{
-    display: none!important;
-  }
-  //padding-bottom: 40px;
+.card.card-no-action {
+    .card-content {
+        height: 100%;
+    }
+    .card-action {
+        display: none !important;
+    }
+    //padding-bottom: 40px;
 }
 
 .card .card-action {
-  display: flex;
-  align-items: flex-end;
-  justify-items: right;
-  min-height: $cardActionHeight;
-  /* justify-content: space-between; */
-  flex-direction: row-reverse;
-  a {
-    max-width: 400px;
-    word-break: break-all;
-  }
+    display: flex;
+    align-items: flex-end;
+    justify-items: right;
+    min-height: $cardActionHeight;
+    /* justify-content: space-between; */
+    flex-direction: row-reverse;
+    a {
+        max-width: 400px;
+        word-break: break-all;
+    }
 }
-.card .card-action-info{
-  align-items: center;
-  justify-content: center;
+.card .card-action-info {
+    align-items: center;
+    justify-content: center;
 }
-.card-action .card-content{
-  padding: $cardPadding!important;
-  padding-top:32px!important;
-  background: linear-gradient(to bottom, $actionDialogBackground 0%,$actionDialogBackground 60px,transparent 60px,transparent 100%);
+.card-action .card-content {
+    padding: $cardPadding !important;
+    padding-top: 32px !important;
+    background: linear-gradient(
+        to bottom,
+        $actionDialogBackground 0%,
+        $actionDialogBackground 60px,
+        transparent 60px,
+        transparent 100%
+    );
 }
 .card-actionbar .card-content {
-  padding-top:32px;
-  background: linear-gradient(to bottom, $actionDialogBackground 0%,$actionDialogBackground 120px,transparent 120px,transparent 100%);
+    padding-top: 32px;
+    background: linear-gradient(
+        to bottom,
+        $actionDialogBackground 0%,
+        $actionDialogBackground 120px,
+        transparent 120px,
+        transparent 100%
+    );
 }
-.card-action,.card-actionbar{
-  .card-title-actionbar{
-    position: relative;
-    top: -10px;
-    height:60px;
-  }
-  .card-title,
-  .card-cancel {
-    font-size: 12pt;
-    position: relative;
-    top: -25px;
-    &:focus{
-      @include removeDefaultFocus();
-      i{
-        @include focusShadow();
-      }
+.card-action,
+.card-actionbar {
+    .card-title-actionbar {
+        position: relative;
+        top: -10px;
+        height: 60px;
     }
-  }
+    .card-title,
+    .card-cancel {
+        font-size: 12pt;
+        position: relative;
+        top: -25px;
+        &:focus {
+            @include removeDefaultFocus();
+            i {
+                @include focusShadow();
+            }
+        }
+    }
 }
 
-.card-title{
-  word-break: break-all;
-  max-height: 48px;
-  overflow: hidden;
-  display:flex;
-  align-items:center;
-  @include unselectableText();
-  .card-title-back{
-    color: $primary;
-    @include clickable();
-    margin-right:15px;
-  }
-  .card-title-image{
-    width:auto;
-    height:25px;
-    margin-right:15px;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-  }
-}
-.center-card .card-scroll{
-  overflow-y: auto;
-  overflow-x: hidden;
-  @include iosScrolling();
-  padding-right: $cardPadding;
-  margin-right: $cardPadding*-1;
-  padding-left: $cardPadding;
-  margin-left: $cardPadding*-1;
-  height: calc(100% - 8px);
-
-  top: $cardPadding*-1;
-  position: relative;
-  padding-top: $cardPadding;
-  padding-bottom: $cardPadding;
-}
-.card-actionbar .card-scroll{
-  height: calc(100% - 68px);
-}
-.card-high{
-  top:10%;
-  bottom:10%;
-}
-
-.header-high{
-  background: linear-gradient(to bottom, $actionDialogBackground 0%,$actionDialogBackground 80px,transparent 80px,transparent 100%);
-
-  .card-title-info{
-    margin-top: -28px;
-    font-size: 9pt;
-    color: $textLight;
+.card-title {
+    word-break: break-all;
+    max-height: 48px;
+    overflow: hidden;
     display: flex;
     align-items: center;
-
-    img{
-      height: 20px;
-      width: auto;
-      margin-right: 14px;
+    @include unselectableText();
+    .card-title-back {
+        color: $primary;
+        @include clickable();
+        margin-right: 15px;
     }
-  }
+    .card-title-image {
+        width: auto;
+        height: 25px;
+        margin-right: 15px;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+}
+.center-card .card-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+    @include iosScrolling();
+    padding-right: $cardPadding;
+    margin-right: $cardPadding * -1;
+    padding-left: $cardPadding;
+    margin-left: $cardPadding * -1;
+    height: calc(100% - 8px);
 
-  .card-scroll{
-    top: 8px;
-    height:calc(100% - 28px);
-  }
-}
-.card-mwide{
-  width:600px;
-  margin-left:-300px!important;
-}
-.card-wide{
-  width:650px;
-  margin-left:-325px!important;
-}
-.card-xwide{
-  width:700px;
-  margin-left:-350px!important;
-}
-.card-xxwide{
-  width:800px;
-  margin-left:-400px!important;
-}
-.center-card .checkbox{
-  padding-top:10px;
-}
-.card-title-element{
-  font-size:140%;
-  font-weight:bold;
-  border-bottom: 1px solid #000;
-  padding-bottom:10px;
-  padding-top:8px;
-  float:left;
-  width:100%;
-  background-color: $workspaceMetadataBackground;
-  i{
-    margin-left:10px;
-    margin-right:10px;
-    color:#666;
+    top: $cardPadding * -1;
     position: relative;
-    top:5px;
-  }
+    padding-top: $cardPadding;
+    padding-bottom: $cardPadding;
+}
+.card-actionbar .card-scroll {
+    height: calc(100% - 68px);
+}
+.card-high {
+    top: 10%;
+    bottom: 10%;
+}
+
+.header-high {
+    background: linear-gradient(
+        to bottom,
+        $actionDialogBackground 0%,
+        $actionDialogBackground 80px,
+        transparent 80px,
+        transparent 100%
+    );
+
+    .card-title-info {
+        margin-top: -28px;
+        font-size: 9pt;
+        color: $textLight;
+        display: flex;
+        align-items: center;
+
+        img {
+            height: 20px;
+            width: auto;
+            margin-right: 14px;
+        }
+    }
+
+    .card-scroll {
+        top: 8px;
+        height: calc(100% - 28px);
+    }
+}
+.card-mwide {
+    width: 600px;
+    margin-left: -300px !important;
+}
+.card-wide {
+    width: 650px;
+    margin-left: -325px !important;
+}
+.card-xwide {
+    width: 700px;
+    margin-left: -350px !important;
+}
+.card-xxwide {
+    width: 800px;
+    margin-left: -400px !important;
+}
+.center-card .checkbox {
+    padding-top: 10px;
+}
+.card-title-element {
+    font-size: 140%;
+    font-weight: bold;
+    border-bottom: 1px solid #000;
+    padding-bottom: 10px;
+    padding-top: 8px;
+    float: left;
+    width: 100%;
+    background-color: $workspaceMetadataBackground;
+    i {
+        margin-left: 10px;
+        margin-right: 10px;
+        color: #666;
+        position: relative;
+        top: 5px;
+    }
 }
 .center-card .btn,
-.center-card .btn-flat{
-  float:right;
-  margin: 0 5px;
+.center-card .btn-flat {
+    float: right;
+    margin: 0 5px;
 }
-.card-cancel{
-  float:right;
-  padding-top: 10px;
-  @include clickable();
+.card-cancel {
+    float: right;
+    padding-top: 10px;
+    @include clickable();
 }
-.dialog-right{
-  position: fixed;
-  z-index: 100;
-  top:0;
-  right:0;
-  height:100%;
-  width:$dialogRightWidth;
-  background-color: #fff;
-  display: flex;
-  flex-direction: column;
-  @include materialShadow();
-  .title{
+.dialog-right {
+    position: fixed;
+    z-index: 100;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: $dialogRightWidth;
+    background-color: #fff;
     display: flex;
-    padding-left:$cardPadding;
-    font-size:110%;
-    color: $textMain;
-    background-color: $workspaceMetadataBackground;
-    word-break: break-all;
-    .label{
-      flex-grow: 1;
-      padding:16px 0;
+    flex-direction: column;
+    @include materialShadow();
+    > .title {
+        display: flex;
+        align-items: center;
+        padding: 6px 10px 6px $cardPadding;
+        font-size: 110%;
+        color: $textMain;
+        background-color: $workspaceMetadataBackground;
+        word-break: break-all;
+        .label {
+            flex-grow: 1;
+            padding: 16px 0;
+        }
+        button {
+            float: right;
+        }
     }
-    button{
-      float:right;
+    .content {
+        padding: 10px 0;
+        width: 100%;
+        flex-grow: 1;
+        overflow-x: hidden;
+        overflow-y: auto;
     }
-  }
-  .content{
-    padding:10px 0;
-    width: 100%;
-    flex-grow: 1;
-    overflow-x: hidden;
-    overflow-y: auto;
-  }
 }
-@mixin fullsizeCard(){
-  position:fixed;
-  width:100%;
-  left:0%;
-  margin-left:0!important;
+@mixin fullsizeCard() {
+    position: fixed;
+    width: 100%;
+    left: 0%;
+    margin-left: 0 !important;
 }
 @media screen and (max-width: ($mobileWidth + $mobileStage*1)) {
-  .card-mwide{
-    @include fullsizeCard();
-  }
+    .card-mwide {
+        @include fullsizeCard();
+    }
 }
 
 @media screen and (max-width: ($mobileWidth + $mobileStage*2)) {
-  .card-wide{
-    @include fullsizeCard();
-  }
+    .card-wide {
+        @include fullsizeCard();
+    }
 }
 @media screen and (max-width: ($mobileWidth + $mobileStage*3)) {
-  .card-xwide{
-    @include fullsizeCard();
-  }
+    .card-xwide {
+        @include fullsizeCard();
+    }
 }
 @media screen and (max-width: ($mobileWidth + $mobileStage*4)) {
-  .card-xxwide{
-    @include fullsizeCard();
-  }
+    .card-xxwide {
+        @include fullsizeCard();
+    }
 }
 @media screen and (max-width: ($mobileWidth)) {
-  .dialogOptions{
-    overflow: auto;
-    @include darken();
-    z-index:151;
-    background: linear-gradient(to top, #ffffff 0,#ffffff 120px,$darkenColor 120px,$darkenColor 100%);
-  }
+    .dialogOptions {
+        overflow: auto;
+        @include darken();
+        z-index: 151;
+        background: linear-gradient(
+            to top,
+            #ffffff 0,
+            #ffffff 120px,
+            $darkenColor 120px,
+            $darkenColor 100%
+        );
+    }
 }
 @media screen and (max-width: ($mobileWidth - $mobileStage*1)) {
-  .center-card{
-    @include fullsizeCard();
-  }
-  .card-low{
-    width:90%;
-    left:5%;
-  }
-  .center-card .btn,
-  .center-card .btn-flat{
-    margin: 0 0;
-    padding:0 1.5rem;
-  }
+    .center-card {
+        @include fullsizeCard();
+    }
+    .card-low {
+        width: 90%;
+        left: 5%;
+    }
+    .center-card .btn,
+    .center-card .btn-flat {
+        margin: 0 0;
+        padding: 0 1.5rem;
+    }
 }
 @media screen and (max-width: ($mobileHeightLandscape)) {
-  .center-card .card-action .btn,
-  .center-card .card-action .btn-flat{
-    padding:0 .2rem;
-  }
+    .center-card .card-action .btn,
+    .center-card .card-action .btn-flat {
+        padding: 0 0.2rem;
+    }
 }
 @media screen and (max-height: ($mobileHeight)) {
-  .card:not(.card-low), .card-high {
-    top: 0;
-    bottom: 0;
-    .scrollable{
-      height:100%;
+    .card:not(.card-low),
+    .card-high {
+        top: 0;
+        bottom: 0;
+        .scrollable {
+            height: 100%;
+        }
     }
-  }
 }
 @media screen and (max-height: ($mobileHeight - $mobileStage*2)) {
-  .card-low {
-    top: 0;
-    bottom: 0;
-    .scrollable{
-      height:100%;
+    .card-low {
+        top: 0;
+        bottom: 0;
+        .scrollable {
+            height: 100%;
+        }
     }
-  }
 }

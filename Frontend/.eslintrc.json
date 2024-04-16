@@ -3,7 +3,10 @@
   "ignorePatterns": [
     "projects/**/*"
   ],
-  "plugins": ["only-warn"],
+  "plugins": [
+    "only-warn",
+    "@typescript-eslint"
+  ],
   "overrides": [
     {
       "files": [
@@ -20,6 +23,7 @@
         "plugin:@angular-eslint/template/process-inline-templates"
       ],
       "rules": {
+        "@typescript-eslint/no-floating-promises": "error",
         "@angular-eslint/directive-selector": [
           "error",
           {
@@ -47,5 +51,8 @@
       ],
       "rules": {}
     }
+  ],
+  "extends": [
+    "plugin:storybook/recommended"
   ]
 }

@@ -1,0 +1,26 @@
+<form>
+  <mat-form-field>
+    <mat-label>{{ 'CONNECTOR.' + connector.id + '.PLACEHOLDER' | translate }}</mat-label>
+    <input matInput type="text" #input [(ngModel)]="name" name="filename" autofocus />
+  </mat-form-field>
+  <mat-form-field [class.hide]="connector.filetypes.length === 1">
+    <mat-label>{{ 'CONNECTOR_FORMAT_LABEL' | translate }}</mat-label>
+    <mat-select [(ngModel)]="type" name="filetype" [disabled]="connector.filetypes.length === 1">
+      <mat-option *ngFor="let filetype of connector.filetypes; let i = index" [value]="i">
+        {{
+          'CONNECTOR.MIMETYPE.' +
+            (filetype.mimetype === 'application/zip'
+              ? filetype.ccressourcetype +
+                '_' +
+                filetype.ccressourceversion +
+                '_' +
+                filetype.ccresourcesubtype
+              : filetype.mimetype) | translate
+        }}</mat-option
+      >
+    </mat-select>
+  </mat-form-field>
+</form>
+<div class="name" *ngIf="name.trim()">
+  {{ 'CONNECTOR.' + connector.id + '.FILENAME' | translate }}: {{ name }}.{{ getType().filetype }}
+</div>

@@ -1,0 +1,52 @@
+@import '../../core-ui-module/styles/variables';
+
+.card-content-padding {
+    > button {
+        margin: 20px 0;
+    }
+    .message,
+    .details {
+        white-space: pre-line;
+    }
+}
+.notice {
+    position: fixed;
+    z-index: $dialogZIndex + 10;
+    display: flex;
+    align-items: center;
+    padding: 15px 30px;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: $primary;
+    color: $textOnPrimary;
+    > div {
+        padding: 5px;
+    }
+    .description {
+        flex-grow: 4;
+        white-space: pre-line;
+    }
+    .more {
+        flex-grow: 1;
+        margin-right: 5px;
+        button {
+            text-decoration: underline;
+            border: none;
+            background: none;
+            padding: 0;
+            &.cdk-keyboard-focused {
+                @include setGlobalKeyboardFocus();
+            }
+        }
+    }
+    .cdk-keyboard-focused,
+    .more button.cdk-keyboard-focused {
+        outline-color: $textOnPrimary;
+    }
+}
+@media screen and (max-width: ($mobileWidth+$mobileStage*3)) {
+    .notice {
+        flex-direction: column;
+    }
+}

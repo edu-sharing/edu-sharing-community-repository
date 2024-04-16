@@ -9,7 +9,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { AppContainerService, UIAnimation } from 'ngx-edu-sharing-ui';
 
 interface Dimensions {
     size: number;
@@ -49,7 +49,7 @@ export class TutorialComponent {
 
     private interval: any;
 
-    constructor(private sanitizer: DomSanitizer) {}
+    constructor(private sanitizer: DomSanitizer, private appContainer: AppContainerService) {}
 
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
@@ -136,14 +136,18 @@ export class TutorialComponent {
     }
 
     private getDimensions(element: ElementRef): Dimensions {
+        const appContainer = this.appContainer.getScrollContainer();
+        const appContainerOffset = this.appContainer.hasScrollContainer()
+            ? appContainer.getBoundingClientRect()
+            : { left: 0, top: 0 };
         const rect = element.nativeElement.getBoundingClientRect();
         const size =
             Math.min(
-                Math.max(window.innerWidth, window.innerHeight) / 4,
+                Math.max(appContainer.clientWidth, appContainer.clientHeight) / 4,
                 Math.max(rect.width, rect.height),
             ) / 2;
-        const x = rect.left + rect.width / 2;
-        const y = rect.top + rect.height / 2;
+        const x = rect.left + rect.width / 2 - appContainerOffset.left;
+        const y = rect.top + rect.height / 2 - appContainerOffset.top;
         return { size, x, y };
     }
 

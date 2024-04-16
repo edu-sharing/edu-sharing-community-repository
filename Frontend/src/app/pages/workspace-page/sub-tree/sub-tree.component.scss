@@ -1,0 +1,78 @@
+@use 'sass:math';
+@import '../../../core-ui-module/styles/variables';
+
+.dropdown-dummy {
+    position: fixed;
+}
+.sub-tree-element {
+    display: flex;
+    align-items: center;
+    @include clickable();
+    padding-top: 12px;
+    padding-bottom: 12px;
+    white-space: nowrap;
+    margin: 4px 0;
+    &.cdk-drag-preview {
+        background-color: $workspaceTreeSelectedBackground;
+    }
+}
+
+:host ::ng-deep {
+    es-spinner-small .preloader-wrapper.small {
+        width: 14px;
+        height: 14px;
+    }
+}
+
+.spinner {
+    position: absolute;
+    top: -48px;
+    right: 0;
+    z-index: 10;
+    padding: 10px;
+}
+.expand-toggle {
+    @include removeButtonDefaultStyles();
+    display: flex;
+    align-items: center;
+    color: $textLight;
+    flex-shrink: 0;
+    width: 25px;
+}
+.moreOpen {
+    left: math.div($workspaceSidebarWidth - $contextMenuWidth, 2);
+    width: $contextMenuWidth;
+}
+.sub-tree-element:hover {
+    background-color: $workspaceTreeSelectedBackground;
+}
+.sub-tree-element-selected {
+    background-color: $workspaceTreeSelectedBackground !important;
+    background: $workspaceTreeSelectedBackgroundEffect;
+    font-weight: bold;
+}
+.name {
+    flex-grow: 1;
+    overflow: hidden;
+    mask-image: linear-gradient(to left, transparent 0 18px, black 60px);
+}
+.node-icon {
+    padding-right: 10px;
+    width: 30px;
+    height: 20px; /* ie fix */
+}
+.sub-tree-wrapper {
+    position: relative;
+}
+.empty {
+    font-style: italic;
+    padding-top: 10px;
+}
+.more-items {
+    color: $primary;
+    background-color: transparent;
+}
+.more-items-loading {
+    position: relative;
+    top: -15px;
+}

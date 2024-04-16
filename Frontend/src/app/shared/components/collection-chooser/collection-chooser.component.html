@@ -1,0 +1,110 @@
+<div class="title">
+  <div class="label">{{ title | translate }}</div>
+  <button mat-icon-button (click)="cancel()"><i esIcon="close"></i></button>
+</div>
+<div class="content" infinite-scroll [scrollWindow]="false" (scrolled)="loadLatest()">
+  <ng-container
+    *ngTemplateOutlet="beforeRecentRef; context: { $implicit: currentRoot }"
+  ></ng-container>
+  <div *ngIf="!currentRoot">
+    <h5 class="mat-heading-5">{{ 'COLLECTION_CHOOSER.ADD_TO_RECENT_COLLECTION' | translate }}</h5>
+    <div class="search">
+      <form (ngSubmit)="loadLatest(true)" autocomplete="off">
+        <mat-form-field floatLabel="always">
+          <mat-label>{{ 'COLLECTION_CHOOSER.SEARCH_COLLECTIONS' | translate }}</mat-label>
+          <i esIcon="search" matPrefix></i>
+          <input
+            matInput
+            type="search"
+            name="search"
+            [(ngModel)]="searchQueryInput"
+            placeholder="{{ 'COLLECTION_CHOOSER.SEARCH_COLLECTIONS' | translate }}"
+          />
+        </mat-form-field>
+      </form>
+    </div>
+    <!--       [validatePermissions]="hasWritePermissions" -->
+    <es-node-entries-wrapper
+      [dataSource]="dataSourceLatest"
+      [columns]="columns"
+      [checkbox]="false"
+      [displayType]="NodeEntriesDisplayType.SmallGrid"
+      [elementInteractionType]="InteractionType.Emitter"
+      [sort]="sort"
+      [gridConfig]="{
+        maxRows: !!searchQuery || showMore ? -1 : COLLECTION_LATEST_DEFAULT_COUNT
+      }"
+      (clickItem)="clickCollection($event.element)"
+      (dblClickItem)="clickCollection($event.element)"
+    >
+      <ng-template #empty>
+        <h5 class="noElements" *ngIf="searchQuery === ''">
+          {{ 'COLLECTION_CHOOSER.NO_RECENT_COLLECTIONS' | translate }}
+        </h5>
+        <h5 class="noElements" *ngIf="searchQuery !== ''">
+          {{ 'NO_MATCHES' | translate }}
+        </h5>
+      </ng-template>
+      <ng-template #overlay let-element="element">
+        <ng-container
+          *ngTemplateOutlet="overlayTemplate; context: { element: this.element }"
+        ></ng-container>
+      </ng-template>
+    </es-node-entries-wrapper>
+    <button
+      *ngIf="!searchQuery && (dataSourceLatest.itemsCap?.isActivelyCapping || showMore)"
+      mat-button
+      color="primary"
+      class="show-more"
+      (click)="showMore = !showMore"
+    >
+      <i [esIcon]="'keyboard_arrow_' + (showMore ? 'up' : 'down')"></i>
+      {{ (showMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate }}
+    </button>
+  </div>
+  <h5 class="mat-heading-5">{{ 'COLLECTION_CHOOSER.ADD_TO_MY_COLLECTION' | translate }}</h5>
+  <div class="breadcrumbs" *ngIf="currentRoot">
+    <button mat-button color="primary" (click)="navigateBack()"><i esIcon="arrow_back"></i></button>
+    <h5 class="mat-heading-5">{{ currentRoot.title ? currentRoot.title : currentRoot.name }}</h5>
+  </div>
+  <div class="list-my">
+    <es-node-entries-wrapper
+      [displayType]="NodeEntriesDisplayType.SmallGrid"
+      [elementInteractionType]="InteractionType.Emitter"
+      [dataSource]="dataSourceTree"
+      [columns]="columns"
+      [globalOptions]="canCreate ? [createCollectionOptionItem] : []"
+      (clickItem)="goIntoCollection($event.element)"
+      (dblClickItem)="goIntoCollection($event.element)"
+    >
+      <ng-template #overlay>
+        <div class="go-into">
+          <button mat-mini-fab [color]="$any('white')"><i esIcon="arrow_forward"></i></button>
+        </div>
+      </ng-template>
+      <ng-template #empty>
+        <h5 class="noElements" *ngIf="!currentRoot">
+          {{ 'COLLECTION_CHOOSER.NO_PERSONAL_COLLECTIONS' | translate }}
+        </h5>
+        <h5 class="noElements" *ngIf="currentRoot">
+          {{ 'COLLECTION_CHOOSER.NO_SUB_COLLECTIONS' | translate }}
+        </h5>
+      </ng-template>
+    </es-node-entries-wrapper>
+  </div>
+  <button
+    *ngIf="currentRoot"
+    class="add-to-personal"
+    mat-raised-button
+    color="primary"
+    (click)="clickCollection(currentRoot)"
+  >
+    {{ 'COLLECTION_CHOOSER.ADD_TO_SELECTED_COLLECTION' | translate }}
+  </button>
+</div>
+<ng-template #overlayTemplate let-element="element">
+  <div *ngIf="!hasWritePermissions(element)" class="no-permissions-overlay">
+    <i esIcon="security"></i>
+    <span>{{ 'NO_WRITE_PERMISSIONS' | translate }}</span>
+  </div>
+</ng-template>

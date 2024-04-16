@@ -1,0 +1,125 @@
+@import '../../../core-ui-module/styles/variables';
+
+:host {
+    display: flex;
+}
+
+:host ::ng-deep {
+    mat-header-row {
+        display: none;
+    }
+}
+.main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    > es-spinner {
+        display: flex;
+        justify-content: center;
+        margin-top: 30%;
+    }
+}
+.mimetype {
+    word-break: break-all;
+    padding-left: 5px;
+}
+.header {
+    display: flex;
+    background-color: $workspaceMetadataBackground;
+    align-items: center;
+    .name {
+        flex-grow: 1;
+        font-size: 110%;
+        padding: 10px 15px;
+        word-break: break-all;
+    }
+}
+
+mat-tab-group {
+    min-height: 0;
+}
+
+mat-tab-group ::ng-deep mat-tab-header {
+    background-color: $workspaceMetadataBackground;
+}
+
+.standalone-container {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.versionTitle {
+    font-weight: bold;
+}
+.versionComment {
+    font-style: italic;
+    padding-bottom: 10px;
+}
+.versionAuthor {
+    line-height: 1.25;
+}
+.versionDate {
+    color: $textLight;
+}
+.button-actions {
+    display: flex;
+    gap: 10px;
+}
+.content {
+    padding: 0 12px;
+}
+
+.content-properties {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 12px;
+}
+
+.content-versions {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 12px;
+    gap: 20px;
+}
+
+p.description {
+    margin-top: 0;
+    margin-bottom: 12px;
+}
+
+canvas {
+    align-self: flex-start;
+}
+.statistic-value {
+    display: grid;
+    width: 100%;
+    padding: 0 3px 0 25px;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+
+    .point {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        float: left;
+        text-align: center;
+        color: #383838;
+        font-weight: bold;
+        font-size: 26px;
+        i {
+            color: $textLight;
+            font-size: 20px;
+        }
+    }
+}
+
+.usage-counter {
+    font-weight: bold;
+}
+.license-value {
+    padding-top: 4px;
+    display: flex;
+    .license {
+        padding-right: 6px;
+        height: 21px;
+    }
+}

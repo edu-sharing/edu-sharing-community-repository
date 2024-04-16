@@ -1,0 +1,54 @@
+@import '../../core-ui-module/styles/variables';
+
+$toastLeft: $colorStatusPositive;
+$toastLeftWidth: 8px;
+
+::ng-deep {
+    .toast-message {
+        .mdc-snackbar__surface {
+            padding-left: $toastLeftWidth;
+        }
+
+        .mdc-snackbar__surface > .mdc-snackbar__label {
+            // Remove double padding introduced by Angular Material
+            padding: 0;
+        }
+    }
+
+    .toast-message {
+        // Uncomment to change text color
+        //
+        // --mdc-snackbar-supporting-text-color: white;
+
+        // Action button's text and ripple color
+        --mat-snack-bar-button-color: var(--palette-accent-200);
+    }
+
+    .toast-message-info .mdc-snackbar__surface {
+        background: linear-gradient(
+            to right,
+            $toastLeft 0%,
+            $toastLeft $toastLeftWidth,
+            $toastPrimary $toastLeftWidth,
+            $toastPrimary 100%
+        );
+    }
+
+    .toast-message-error .mdc-snackbar__surface {
+        background: linear-gradient(
+            to right,
+            $toastLeftError 0%,
+            $toastLeftError $toastLeftWidth,
+            $toastPrimary $toastLeftWidth,
+            $toastPrimary 100%
+        );
+    }
+}
+
+:host {
+    display: flex;
+}
+
+button {
+    font-weight: bold;
+}

@@ -14,37 +14,39 @@ h5 {
     line-height: 1.5;
 }
 
-.currentLicense{
+.currentLicense {
     text-align: center;
     background-color: $backgroundColor;
     padding: 10px 30px;
     margin: 0 -20px;
-    h4{
+    h4 {
         margin: 10px 0 20px 0;
     }
     width: calc(100% + 40px);
 }
-.licenseName{
+.licenseName {
     display: table;
     margin: auto;
     padding: 10px 0;
-    h4,div{
+    h4,
+    div {
         display: table-cell;
     }
 }
-.oerStatus{
+.oerStatus {
     padding-left: 10px;
     font-weight: bold;
     text-transform: uppercase;
     font-size: 80%;
-    color:$textOnPrimary;
-    .oer{
+    color: $textOnPrimary;
+    .oer {
         background: #0b0;
     }
-    .notOer{
-        background: #F5A623;
+    .notOer {
+        background: #f5a623;
     }
-    .oer,.notOer{
+    .oer,
+    .notOer {
         padding: 4px 12px;
         border-radius: 8px;
     }
@@ -53,21 +55,21 @@ h5 {
     display: flex;
     justify-content: center;
     padding-top: 10px;
-    >div{
-        margin:0 10px;
+    > div {
+        margin: 0 10px;
     }
 }
-.licenseUrl{
-    margin:10px!important;
+.licenseUrl {
+    margin: 10px !important;
     text-transform: uppercase;
 }
-.currentLicenseIcon{
-    height:40px;
-    width:auto;
+.currentLicenseIcon {
+    height: 40px;
+    width: auto;
 }
-.customLicenseDescription{
+.customLicenseDescription {
     white-space: pre-line;
 }
-.currentLicenseDescription{
+.currentLicenseDescription {
     color: $textLight;
 }

@@ -1,0 +1,73 @@
+@import '../../../../../core-ui-module/styles/variables';
+
+:host {
+    display: flex;
+}
+
+.receivers {
+    display: flex;
+    flex-direction: column;
+}
+
+hr {
+    margin: 2em 0;
+    width: 100%;
+}
+
+.no-history {
+    flex-grow: 1;
+    padding: 60px 0;
+    text-align: center;
+    color: $textLight;
+}
+.history {
+    width: 100%;
+    .user,
+    .date {
+        color: $textLight;
+    }
+    .user {
+        float: left;
+    }
+    .date {
+        float: right;
+    }
+    .box {
+        background-color: $backgroundColor;
+        padding: 10px 0;
+        display: flex;
+        width: 100%;
+        label {
+            padding-bottom: 5px;
+        }
+        .workflowStatus {
+            float: left;
+        }
+        .status,
+        .comment {
+            padding-top: 15px;
+        }
+        .row {
+            display: flex;
+            flex-direction: column;
+            &.arrow {
+                flex-grow: 0;
+                padding: 0 25px;
+                justify-content: center;
+            }
+            &.origin,
+            &.target {
+                flex-grow: 1;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        label {
+            float: left;
+            width: 100%;
+        }
+    }
+}

@@ -1,157 +1,113 @@
-@mixin clickable() {
-  cursor: pointer!important;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
+@mixin imageDisabledBlur() {
+    -webkit-filter: blur(3px);
+    filter: blur(3px);
 }
-@mixin imageDisabledBlur(){
-  -webkit-filter: blur(3px);
-  filter: blur(3px);
-}
-@mixin shortenText(){
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-@mixin materialShadow($important: false){
-  box-shadow:0 0 5px rgba(0,0,0,0.3) if($important,!important,null);
-}
-@mixin materialShadowSmall($important: false){
-    box-shadow:0 0 3px rgba(0,0,0,0.3) if($important,!important,null);
-}
-@mixin blurImage($blurStrength:25px){
-    position: absolute;
-    left:-$blurStrength*2;
-    top:-$blurStrength*2;
-    width:calc(100% + #{$blurStrength*4});
-    height:calc(100% + #{$blurStrength*4});
-    z-index: 0;
+@mixin shortenText() {
     overflow: hidden;
-    filter: blur($blurStrength);
-    object-fit: cover;
-    opacity: 0.7;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
-@mixin materialShadowMediumLarge($important: false, $opacity: 0.6){
-  box-shadow:0 0 25px rgba(0,0,0,$opacity) if($important,!important,null);
+@mixin materialShadowLarge($important: false) {
+    box-shadow: 0 10px 70px rgba(0, 0, 0, 0.15) if($important, !important, null);
 }
-@mixin materialShadowLarge($important: false){
-  box-shadow:0 10px 70px rgba(0, 0, 0, 0.15) if($important,!important,null);
+@mixin limitLineLength($width) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: $width;
 }
-@mixin limitLineLength($width){
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: $width;
+@mixin unselectableText() {
+    cursor: default;
+    user-select: none;
 }
-@mixin limitLineCount($count,$lineHeight:1.0){
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  line-height: $lineHeight+em;
-  max-height: $count*$lineHeight+em;
-  -webkit-line-clamp: $count; /* number of lines to show */
-  -webkit-box-orient: vertical;
-  /* autoprefixer: off */
-}
-@mixin fadeRight($color,$position){
-  background: linear-gradient(to right,rgba(red($color),green($color),blue($color),0.001) 0,$color $position);
-}
-@mixin unselectableText(){
-  cursor: default;
-  user-select: none;
-}
-@mixin materialShadowBottom(){
-  box-shadow:0 3px 3px rgba(0,0,0,0.1);
-}
-@mixin removeDefaultFocus(){
-  outline:none;
-}
-@mixin iosScrolling(){
-  /* ios scrolling fix */
-  -webkit-overflow-scrolling: touch;
+@mixin iosScrolling() {
+    /* ios scrolling fix */
+    -webkit-overflow-scrolling: touch;
 }
 @mixin placeholder {
-  ::-webkit-input-placeholder {@content}
-  :-moz-placeholder           {@content}
-  ::-moz-placeholder          {@content}
-  :-ms-input-placeholder      {@content}
+    ::-webkit-input-placeholder {
+        @content;
+    }
+    :-moz-placeholder {
+        @content;
+    }
+    ::-moz-placeholder {
+        @content;
+    }
+    :-ms-input-placeholder {
+        @content;
+    }
 }
-@mixin setGlobalInsetFocus(){
-  //respect element border radius
-  @include removeDefaultFocus();
-  box-shadow: inset 0 0 0 $focusWidth $focusColor !important;
-  @media(pointer: coarse){
-    box-shadow: none !important;
-  }
-}
-@mixin setGlobalKeyboardFocus($mode: 'outline') {
+@mixin setGlobalInsetFocus() {
     //respect element border radius
     @include removeDefaultFocus();
-    @if $mode=='outline' {
-        outline: $focusWidth solid $focusColor;
+    box-shadow: inset 0 0 0 $focusWidth $focusColor !important;
+    @media (pointer: coarse) {
+        box-shadow: none !important;
+    }
+}
+@mixin setGlobalKeyboardFocus($mode: 'outline', $color: $focusColor) {
+    //respect element border radius
+    @include removeDefaultFocus();
+    @if $mode== 'outline' {
+        outline: $focusWidth solid $color;
         outline-offset: 2px;
-    } @else if $mode=='border' {
-        border: $focusWidth solid $focusColor;
+    } @else if $mode== 'border' {
+        border: $focusWidth solid $color;
     }
 }
-@mixin setGlobalDashedFocus(){
-  @include removeDefaultFocus();
-  outline: $focusWidth dashed $focusColor;
+@mixin setGlobalDashedFocus() {
+    @include removeDefaultFocus();
+    outline: $focusWidth dashed $focusColor;
 }
 
-@mixin focusShadow($dark:true, $strength:0.1){
-  @include removeDefaultFocus();
-  -webkit-transform: scale(1);
-  transform: scale(1);
-  border: 0;
-  border-radius: 50%;
-  @if $dark==true {
-    -webkit-box-shadow: 0 0 0 10px rgba(0, 0, 0, $strength);
-    box-shadow: 0 0 0 10px rgba(0, 0, 0, 0.1);
-    background-color: rgba(0, 0, 0, 0.1);
-  } @else {
-    -webkit-box-shadow: 0 0 0 10px rgba(255, 255, 255, $strength);
-    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.1);
-    background-color: rgba(255, 255, 255, 0.1);
-  }
+@mixin focusShadow($dark: true, $strength: 0.1) {
+    @include removeDefaultFocus();
+    -webkit-transform: scale(1);
+    transform: scale(1);
+    border: 0;
+    border-radius: 50%;
+    @if $dark==true {
+        -webkit-box-shadow: 0 0 0 10px rgba(0, 0, 0, $strength);
+        box-shadow: 0 0 0 10px rgba(0, 0, 0, 0.1);
+        background-color: rgba(0, 0, 0, 0.1);
+    } @else {
+        -webkit-box-shadow: 0 0 0 10px rgba(255, 255, 255, $strength);
+        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.1);
+        background-color: rgba(255, 255, 255, 0.1);
+    }
 }
-@mixin darken(){
-  background-color:$darkenColor;
+@mixin darken() {
+    background-color: $darkenColor;
 }
-@mixin darkenLight(){
-  background-color:$darkenLightColor;
+@mixin darkenLight() {
+    background-color: $darkenLightColor;
 }
-@mixin blurBackground($radius: 5px){
-  backdrop-filter: blur($radius);
+@mixin blurBackground($radius: 5px) {
+    backdrop-filter: blur($radius);
 }
-@mixin  setGlobalFocus(){
-  //respect element border radius
-  @include  removeDefaultFocus();
-  box-shadow: 0 0 0 $focusWidth $focusColor !important;
+@mixin setGlobalFocus($color: $focusColor) {
+    //respect element border radius
+    @include removeDefaultFocus();
+    box-shadow: 0 0 0 $focusWidth $color !important;
 }
 
-// Apply the content styles in contrast mode. This is just enough contrast to be WCAG complient ---
-// not a high-contrast mode.
-//
-// Call without arguments for use in encapsulated component styles, e.g.,
-//     @include contrastMode {
-//         // Styles to apply in contrast mode
-//     }
-// To us in global context, pass 'global' as first argument, e.g.,
-//     @include contrastMode(global) { /* ... */ }
-@mixin contrastMode($scope: encapsulated) {
-  $contrastModeSelector: 'body.es-contrast-mode';
-  @if $scope == encapsulated {
-    :host-context(#{$contrastModeSelector}) & {
-      @content;
-    }
-  } @else if $scope == global {
-    #{if(&, '#{$contrastModeSelector} &', $contrastModeSelector)} {
-      @content;
-    }
-  } @else {
-    @error "Invalid scope #{$scope}.";
-  }
+@mixin removeButtonDefaultStyles {
+    background: unset;
+    border: unset;
+    padding: unset;
 }
+
+@mixin afterPseudoElement {
+    position: relative;
+    &:after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        @content;
+    }
+}
+@import 'projects/edu-sharing-ui/assets/scss/mixins';

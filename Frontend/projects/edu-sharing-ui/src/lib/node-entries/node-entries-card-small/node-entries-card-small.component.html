@@ -1,0 +1,110 @@
+<div
+  [class]="
+    'grid-card' +
+    (nodeHelper.isNodeCollection(node)
+      ? ' grid-card-collection grid-card-collection-scope-' +
+        node.collection.scope +
+        ' grid-card-collection-type-' +
+        node.collection.type
+      : '') +
+    (entriesService.singleClickHint === 'dynamic' ? ' dynamic-single-click' : '')
+  "
+  [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
+  (contextmenu)="openContextmenu($event)"
+  (keydown.ContextMenu)="openContextmenu($event)"
+>
+  <div
+    *ngIf="templatesService.overlay"
+    class="card-overlay"
+    (click)="
+      entriesService.clickItem.emit({
+        element: node,
+        source: ClickSource.Overlay
+      })
+    "
+  >
+    <ng-container
+      *ngTemplateOutlet="templatesService.overlay; context: { element: node }"
+    ></ng-container>
+  </div>
+  <es-node-url
+    *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
+    mode="wrapper"
+    [node]="node"
+    esFocusState
+    #cardFocusState="esFocusState"
+  >
+    <ng-container
+      *ngTemplateOutlet="
+        image;
+        context: { playAnimation: cardFocusState.hovering || cardFocusState.hasFocus }
+      "
+    ></ng-container>
+    <ng-container *ngTemplateOutlet="meta"></ng-container>
+  </es-node-url>
+  <ng-container *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink">
+    <ng-container *ngTemplateOutlet="image"></ng-container>
+    <ng-container *ngTemplateOutlet="meta"></ng-container>
+  </ng-container>
+</div>
+<ng-template #image let-playAnimation="playAnimation">
+  <div
+    class="card-image-area"
+    (click)="
+      entriesService.clickItem.emit({
+        element: node,
+        source: ClickSource.Preview
+      })
+    "
+  >
+    <div *ngIf="nodeHelper.isNodeCollection(node) && node.collection.pinned" class="collection-pin">
+      <i esIcon="edu-pin"></i>
+    </div>
+    <es-preview-image
+      *ngIf="!(nodeHelper.isNodeCollection(node) && node.preview.isIcon)"
+      [node]="node"
+      [playAnimation]="playAnimation"
+    ></es-preview-image>
+    <div
+      *ngIf="nodeHelper.isNodeCollection(node) && node.preview.isIcon"
+      class="card-collection-image"
+    >
+      <i esIcon="layers"></i>
+    </div>
+  </div>
+</ng-template>
+<ng-template #meta>
+  <div
+    class="card-meta"
+    (click)="
+      entriesService.clickItem.emit({
+        element: node,
+        source: ClickSource.Metadata
+      })
+    "
+  >
+    <div
+      *ngFor="let displayPart of entriesService.columns; let first = first"
+      class="card-meta-row"
+    >
+      <ng-container *ngIf="first">
+        <es-node-url
+          *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
+          [node]="node"
+          #link
+        >
+          <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
+        </es-node-url>
+        <div *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink">
+          <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="!first">
+        <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
+      </ng-container>
+    </div>
+  </div>
+  <ng-container
+    *ngTemplateOutlet="templatesService.actionArea; context: { element: node }"
+  ></ng-container>
+</ng-template>

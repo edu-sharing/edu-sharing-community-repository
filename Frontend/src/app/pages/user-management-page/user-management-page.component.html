@@ -1,0 +1,57 @@
+<ng-container *ngIf="!disabled || isAdmin">
+  <div role="main" esSkipTarget="MAIN_CONTENT">
+    <h1 esTitle class="cdk-visually-hidden">{{ 'PERMISSIONS.TITLE' | translate }}</h1>
+    <mat-tab-group
+      *ngIf="!isLoading"
+      mat-stretch-tabs
+      [color]="$any('dark')"
+      [selectedIndex]="tab"
+      (selectedIndexChange)="setTab($event)"
+    >
+      <mat-tab label="{{ 'PERMISSIONS.TAB.ORG' | translate }}">
+        <ng-template matTabContent>
+          <es-permissions-authorities
+            [mode]="'ORG'"
+            [searchQuery]="searchQuery"
+            (onSelection)="selected = $event ? $any($event[0]) : null"
+          ></es-permissions-authorities>
+        </ng-template>
+      </mat-tab>
+      <mat-tab
+        label="{{ 'PERMISSIONS.TAB.GROUP' | translate }}{{
+          selected ? ' (' + selected.profile?.displayName + ')' : ''
+        }}"
+        *ngIf="selected || isAdmin"
+      >
+        <ng-template matTabContent>
+          <es-permissions-authorities
+            [mode]="'GROUP'"
+            [searchQuery]="searchQuery"
+            [org]="selected"
+            (onDeselectOrg)="selected = null"
+            (setTab)="setTab($event)"
+          ></es-permissions-authorities>
+        </ng-template>
+      </mat-tab>
+      <mat-tab
+        label="{{ 'PERMISSIONS.TAB.USER' | translate }}{{
+          selected ? ' (' + selected.profile?.displayName + ')' : ''
+        }}"
+        *ngIf="selected || isAdmin"
+      >
+        <ng-template matTabContent>
+          <es-permissions-authorities
+            [mode]="'USER'"
+            [searchQuery]="searchQuery"
+            [org]="selected"
+            (onDeselectOrg)="selected = null"
+            (setTab)="setTab($event)"
+          ></es-permissions-authorities>
+        </ng-template>
+      </mat-tab>
+      <mat-tab label="{{ 'PERMISSIONS.TAB.DELETE' | translate }}" *ngIf="!selected && isAdmin">
+        <es-permissions-delete></es-permissions-delete>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</ng-container>

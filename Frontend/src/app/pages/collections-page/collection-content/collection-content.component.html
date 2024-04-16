@@ -1,0 +1,169 @@
+<div role="main" esSkipTarget="MAIN_CONTENT" class="collections-master-div">
+  <section class="collections-cards-div">
+    <div
+      class="collections-wrapper"
+      [class.wrapper-empty]="dataSourceCollections.isEmpty()"
+      [class.wrapper-edit]="isUserAllowedToEdit(collection)"
+    >
+      <es-node-entries-wrapper
+        [dataSource]="dataSourceCollections"
+        [elementInteractionType]="interactionType"
+        [columns]="collectionsColumns"
+        (clickItem)="clickItem.emit($event)"
+        (fetchData)="loadMoreCollections()"
+        [displayType]="NodeEntriesDisplayType.SmallGrid"
+        [globalOptions]="createAllowed() ? [createSubCollectionOptionItem] : []"
+        [dragDrop]="{
+          dragAllowed: isAllowedToEditCollection(),
+          dropAllowed: canDropOnCollection,
+          dropped: dropOnCollection
+        }"
+        [sort]="{
+          active: sortCollections.active,
+          direction: sortCollections.direction,
+          customSortingInProgress: sortCollections.customSortingInProgress,
+          columns: sortCollections.columns,
+          allowed:
+            !isMobile() &&
+            dataSourceCollections.getData()?.length > 1 &&
+            isUserAllowedToEdit(collection) &&
+            !sortReferences?.customSortingInProgress
+        }"
+        (sortChange)="setCollectionSort($event)"
+      >
+        <ng-template #title>
+          <div class="heading-group">
+            <h2
+              class="mat-heading-3"
+              *ngIf="isAllowedToEditCollection() || !dataSourceCollections.isEmpty()"
+            >
+              <ng-container *ngIf="isRootLevel">{{
+                'COLLECTIONS.TAB.' + scope + '_LONG' | translate
+              }}</ng-container>
+              <ng-container *ngIf="!isRootLevel">{{
+                'COLLECTION.INFO_REFERENCES_MULTI' | translate
+              }}</ng-container>
+            </h2>
+          </div>
+        </ng-template>
+        <ng-template #empty>
+          <div
+            *ngIf="!createAllowed()"
+            class="collection-nocontent-container collection-nocontent-big"
+          >
+            <ng-container *ngTemplateOutlet="emptyRef"></ng-container>
+          </div>
+        </ng-template>
+      </es-node-entries-wrapper>
+      <div
+        *ngIf="
+          !isRootLevel &&
+          dataSourceCollections.isEmpty() &&
+          !dataSourceCollections.isLoading &&
+          isUserAllowedToEdit(collection)
+        "
+      >
+        <div class="collection-nocontent-big">
+          {{ 'COLLECTIONS.NO_SUBCOLLECTIONS' | translate }}
+        </div>
+        <div class="section-headline collection-nocontent-container">
+          <div class="collection-nocontent-small">
+            {{ 'COLLECTIONS.NO_SUBCOLLECTIONS_HINT' | translate }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <ng-container *ngIf="!isRootLevel">
+    <es-collection-proposals
+      [collection]="collection"
+      [canEdit]="isAllowedToEditCollection()"
+      (onContentClick)="onContentClick($any($event))"
+    ></es-collection-proposals>
+    <section class="collections-cards-div" *ngIf="!isRootLevel">
+      <es-actionbar
+        #actionbarReferences
+        class="actionbarMaterials"
+        [numberOfAlwaysVisibleOptions]="1"
+      ></es-actionbar>
+      <div
+        class="references-wrapper"
+        [class.wrapper-table]="referencesDisplayType === NodeEntriesDisplayType.Table"
+        [class.wrapper-empty]="dataSourceReferences.isEmpty()"
+        [class.wrapper-edit]="isUserAllowedToEdit(collection)"
+      >
+        <es-node-entries-wrapper
+          #listReferences
+          [elementInteractionType]="InteractionType.Emitter"
+          [dataSource]="dataSourceReferences"
+          [scope]="Scope.CollectionsReferences"
+          [primaryInstance]="true"
+          [columns]="referencesColumns"
+          [(displayType)]="referencesDisplayType"
+          [dragDrop]="{
+            dragAllowed: isAllowedToEditCollection(),
+            dropAllowed: canDropOnRef,
+            dropped: dropOnRef
+          }"
+          [sort]="{
+            active: sortReferences.active,
+            direction: sortReferences.direction,
+            customSortingInProgress: sortReferences.customSortingInProgress,
+            columns: sortReferences.columns,
+            allowed:
+              !isMobile() &&
+              dataSourceReferences.getData()?.length > 1 &&
+              isUserAllowedToEdit(collection) &&
+              !sortCollections?.customSortingInProgress
+          }"
+          (clickItem)="onContentClick($event)"
+          (sortChange)="setReferenceSort($event)"
+          [globalOptions]="
+            isUserAllowedToEdit(collection)
+              ? [addMaterialSearchOptionItem, addMaterialBinaryOptionItem]
+              : []
+          "
+          (fetchData)="loadMoreReferences($event)"
+        >
+          <ng-template #title>
+            <div class="content-header heading-group">
+              <h2 class="mat-heading-3">
+                {{ 'collections_content' | translate }}
+              </h2>
+            </div>
+          </ng-template>
+          <ng-template #overlay let-element="element">
+            <div class="node-deleted" *ngIf="isDeleted(element)">
+              <div>
+                <i esIcon="delete"></i>
+                <div class="headline">{{ 'ORIGINAL_DELETED' | translate }}</div>
+                <div class="subline">{{ 'ORIGINAL_DELETED_INFO' | translate }}</div>
+                <button
+                  mat-button
+                  color="primary"
+                  (click)="
+                    deleteReference(element); $event.stopPropagation(); $event.preventDefault()
+                  "
+                  *ngIf="canDelete(element)"
+                >
+                  {{ 'ORIGINAL_DELETE' | translate }}
+                </button>
+              </div>
+            </div>
+          </ng-template>
+        </es-node-entries-wrapper>
+        <div
+          *ngIf="!dataSourceReferences.isLoading && dataSourceReferences.isEmpty()"
+          class="section-headline collection-nocontent-container"
+        >
+          <div class="collection-nocontent-big">
+            {{ 'collections_noContentAvailable' | translate }}
+          </div>
+          <div class="collection-nocontent-small" *ngIf="isUserAllowedToEdit(collection)">
+            {{ 'collections_howToAddContent' | translate }}
+          </div>
+        </div>
+      </div>
+    </section>
+  </ng-container>
+</div>

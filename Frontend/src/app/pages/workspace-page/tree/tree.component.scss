@@ -1,0 +1,30 @@
+@import '../../../core-ui-module/styles/variables';
+
+.rootNode {
+    display: flex;
+    align-items: center;
+    @include clickable();
+    padding-left: 10px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    margin: 4px 0;
+}
+.typeIcon {
+    margin-right: 7px;
+}
+.arrow {
+    padding-left: 3px;
+}
+.rootNode i {
+    padding-right: 9px;
+    color: $textLight;
+    position: relative;
+}
+
+.rootNodeSelected {
+    color: $primary;
+    font-weight: bold;
+}
+.rootNodeSelected i {
+    color: $primary;
+}

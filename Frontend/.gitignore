@@ -8,7 +8,7 @@
 /tmp
 
 # dependencies
-/node_modules*
+node_modules
 /bower_components
 
 # IDEs and editors
@@ -42,3 +42,16 @@ docs/
 # edu-sharing
 src/assets/endpoint.txt
 /storybook-static/*
+
+# maven
+node/
+
+# generated sources
+src/app/rest
+
+# Playwright tests
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/playwright/storage/*.json
+/playwright/out

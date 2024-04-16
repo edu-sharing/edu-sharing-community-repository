@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+ 
+
+<beans>
+
+   <!-- global-properties moved to custom-core-services-context.xml -->
+
+    <!-- edu-sharing properties cache bean like cache-context.xml -->
+    <bean name="eduSharingPropertiesCache" factory-bean="cacheFactory" factory-method="createCache">
+      <constructor-arg value="cache.eduSharingPropertiesCache"/>      
+   </bean>
+   <bean name="eduSharingPersonCache" factory-bean="cacheFactory" factory-method="createCache">
+      <constructor-arg value="cache.eduSharingPersonCache"/>      
+   </bean>
+   <bean name="eduSharingEduGroupCache" factory-bean="cacheFactory" factory-method="createCache">
+   		<constructor-arg value="cache.eduSharingEduGroupCache"/> 
+   </bean>
+
+    <bean name="eduSharingEduGroupFolderCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingEduGroupFolderCache"/>
+    </bean>
+
+   <bean name="eduSharingRatingCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingRatingCache"/>
+   </bean>
+   
+   <bean name="eduSharingShibbolethSessionsCache" factory-bean="cacheFactory" factory-method="createCache">
+   		<constructor-arg value="cache.eduSharingShibbolethSessionsCache"/> 
+   </bean> 
+    
+    <bean name="eduSharingTokenCache" factory-bean="cacheFactory" factory-method="createCache">
+   		<constructor-arg value="cache.eduSharingTokenCache"/> 
+   </bean> 
+   
+   <bean name="eduSharingEditLockCache" factory-bean="cacheFactory" factory-method="createCache">
+   		<constructor-arg value="cache.eduSharingEditLockCache"/> 
+   </bean>
+
+    <bean name="eduSharingRegisterUserCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingRegisterUserCache"/>
+    </bean>
+
+    <bean name="eduSharingRecoverPasswordCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingRecoverPasswordCache"/>
+    </bean>
+
+    <bean name="eduSharingJobsListCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingJobsListCache"/>
+    </bean>
+
+    <bean name="eduSharingApplicationInfoCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingApplicationInfoCache"/>
+    </bean>
+
+    <bean name="eduSharingMdsCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingMdsCache"/>
+    </bean>
+
+    <bean name="eduSharingConfigCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingConfigCache"/>
+    </bean>
+
+    <bean name="eduSharingVersionCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingVersionCache"/>
+    </bean>
+
+    <bean name="eduSharingLightBendConfigCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingLightBendConfigCache"/>
+    </bean>
+
+    <bean name="eduSharingUserCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingUserCache"/>
+    </bean>
+
+    <bean name="eduSharingLtiSessionsCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingLtiSessionsCache"/>
+    </bean>
+    <bean name="eduSharingLockCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingLockCache"/>
+    </bean>
+</beans>

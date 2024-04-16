@@ -1,0 +1,156 @@
+<es-global-progress *ngIf="isLoading"></es-global-progress>
+<div *ngIf="!isLoading">
+  <es-card
+    role="main"
+    esSkipTarget="MAIN_CONTENT"
+    title="{{ caption | translate }}"
+    avatar="assets/images/app-icon.svg"
+    subtitle="{{ 'LOGIN.SUBTITLE' | translate }}"
+    [isCancelable]="false"
+    [priority]="-30"
+    modal="auto"
+    [buttons]="buttons"
+    [width]="showProviders ? 'xxlarge' : 'normal'"
+    [height]="showProviders ? '' : 'large'"
+    [attr.showProviders]="showProviders"
+  >
+    <div class="login-content">
+      <h1 esTitle class="cdk-visually-hidden">{{ 'LOGIN.TITLE' | translate }}</h1>
+      <div class="branding">
+        <img
+          [src]="'assets/images/logo.svg' | esAssetsPath"
+          esImageConfig
+          alt="{{ 'LOGIN.APP_LOGO' | translate }}"
+        />
+      </div>
+      <div class="groups">
+        <div class="providers-select" *ngIf="showProviders">
+          <div class="group-heading">{{ 'LOGIN.PROVIDER_SELECT_GROUP' | translate }}</div>
+          <div class="group-description">
+            {{ 'LOGIN.PROVIDER_SELECT_GROUP_DESCRIPTION' | translate }}
+          </div>
+          <mat-form-field floatLabel="always">
+            <mat-label>{{ 'LOGIN.PROVIDER_LABEL' | translate }}</mat-label>
+            <input
+              type="text"
+              matInput
+              placeholder="{{ 'LOGIN.PROVIDER_PLACEHOLDER' | translate }}"
+              (keydown.enter)="goToProvider()"
+              [formControl]="providerControl"
+              [matAutocomplete]="autoProvider"
+            />
+            <mat-autocomplete
+              #autoProvider="matAutocomplete"
+              [displayWith]="currentProviderDisplay"
+            >
+              <mat-optgroup
+                *ngFor="let group of filteredProviders | async"
+                [label]="group.group.name"
+              >
+                <mat-option
+                  *ngFor="let option of group.providers"
+                  [value]="option"
+                  (onSelectionChange)="currentProvider = option"
+                >
+                  <div class="mat-option-primary">{{ option.name }}</div>
+                  <div class="mat-option-secondary">
+                    {{ option.url | esUrl : { mode: 'domain' } }}
+                  </div>
+                </mat-option>
+              </mat-optgroup>
+            </mat-autocomplete>
+          </mat-form-field>
+          <div class="sso-group">
+            <img class="sso-logo" [src]="'assets/images/sso_logo.svg' | esAssetsPath" />
+            <div class="group-actions">
+              <button mat-raised-button color="primary" (click)="goToProvider()">
+                {{ 'LOGIN.GO_TO_PROVIDER' | translate }}
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="login-form">
+          <div class="group-heading" *ngIf="showProviders">
+            {{ 'LOGIN.LOGIN_GROUP' | translate }}
+          </div>
+          <div class="group-description" *ngIf="showProviders">
+            {{ 'LOGIN.LOGIN_GROUP_DESCRIPTION' | translate }}
+          </div>
+          <form (ngSubmit)="login()" #loginForm>
+            <mat-form-field floatLabel="always" *ngIf="!isSafeLogin">
+              <mat-label>{{ 'LOGIN.USERNAME' | translate }}</mat-label>
+              <input
+                matInput
+                #usernameInput
+                required
+                name="username"
+                id="username"
+                (keydown.enter)="login()"
+                (keyup)="checkConditions()"
+                [(ngModel)]="username"
+                autofocus
+                autocapitalize="none"
+              />
+            </mat-form-field>
+            <div class="password-field">
+              <es-input-password
+                #passwordInput
+                inputId="password"
+                label="{{ 'LOGIN.PASSWORD' | translate }}"
+                floatLabel="always"
+                [required]="true"
+                (keydown.enter)="login()"
+                [(value)]="password"
+              ></es-input-password>
+              <div
+                class="forgot-password"
+                *ngIf="
+                  (config.register.local && config.register.recoverPassword !== false) ||
+                  config.register.recoverPassword === true ||
+                  config.register.recoverUrl
+                "
+              >
+                <a
+                  *ngIf="config.register.local || config.register.recoverPassword === true"
+                  cdkMonitorElementFocus
+                  [routerLink]="['/' + ROUTER_PREFIX + 'register', 'request']"
+                >
+                  {{ 'LOGIN.RECOVER_PASSWORD' | translate }}
+                </a>
+                <a
+                  *ngIf="!(config.register.local || config.register.recoverPassword === true)"
+                  [href]="config.register.recoverUrl"
+                  cdkMonitorElementFocus
+                >
+                  {{ 'LOGIN.RECOVER_PASSWORD' | translate }}
+                </a>
+              </div>
+            </div>
+          </form>
+          <div class="useUrl" *ngIf="config.loginUrl && !showProviders && !isSafeLogin">
+            <div>{{ 'LOGIN.USE_URL_TEXT' | translate }}</div>
+            <es-mat-link (click)="openLoginUrl()" class="goto">
+              <span>{{ 'LOGIN.USE_URL_LINK' | translate }}</span>
+              <i class="material-icons">arrow_forward</i>
+            </es-mat-link>
+          </div>
+          <div class="group-actions" *ngIf="showProviders">
+            <button mat-button color="primary" *ngIf="canRegister()" (click)="register()">
+              {{ 'LOGIN.REGISTER_TEXT' | translate }}
+            </button>
+            <button mat-raised-button color="primary" [class.disabled]="disabled" (click)="login()">
+              {{ 'LOGIN.LOGIN' | translate }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="login-help" *ngIf="showProviders">
+      <div innerHTML="{{ 'LOGIN.ACTION_HELP' | translate }}"></div>
+    </div>
+  </es-card>
+  <es-powered-by
+    mode="color"
+    [ngClass]="{ 'powered-down': config.register.local || config.register.registerUrl }"
+  ></es-powered-by>
+</div>

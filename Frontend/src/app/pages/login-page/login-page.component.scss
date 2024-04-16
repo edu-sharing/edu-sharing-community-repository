@@ -1,0 +1,157 @@
+@import '../../core-ui-module/styles/variables';
+@import '../../shared/components/card/variables';
+
+.login-content {
+    padding: $cardPadding;
+}
+:host ::ng-deep .login-content {
+    mat-form-field {
+        width: calc(100% - 0.2rem);
+    }
+}
+es-powered-by {
+    position: fixed;
+    left: 0;
+    bottom: 5%;
+}
+.powered-down {
+    top: calc(50% + 375px);
+    @media (max-height: 850px) {
+        display: none;
+    }
+}
+.branding {
+    width: 100%;
+    height: 100px;
+    text-align: center;
+    margin-top: 10px;
+    img {
+        max-height: 100px;
+    }
+}
+.password-field {
+    display: flex;
+    flex-direction: column-reverse;
+    .forgot-password {
+        display: flex;
+        width: 100%;
+        justify-content: flex-end;
+        height: 1.25em;
+        a {
+            font-size: $fontSizeXSmall;
+            &.cdk-keyboard-focused {
+                @include setGlobalKeyboardFocus();
+            }
+        }
+    }
+}
+.groups {
+    display: flex;
+    padding: $cardPadding 0;
+    .providers-select {
+        border-right: 1px solid $textLight;
+        padding-right: 30px;
+    }
+    .login-form {
+        padding-left: 30px;
+        display: flex;
+        flex-direction: column;
+        > form {
+            flex-grow: 1;
+            [showProviders='false'] & > mat-form-field {
+                margin-bottom: 20px;
+            }
+        }
+    }
+    > div {
+        width: 0;
+        flex-grow: 1;
+        .group-heading {
+            width: 100%;
+            padding: 5px 10px;
+            margin-bottom: 10px;
+            color: $textLight;
+            text-transform: uppercase;
+            font-size: 130%;
+            border-bottom: 1px solid $textLight;
+            text-align: center;
+        }
+        .group-description {
+            color: $textLight;
+            padding: 0 10px 20px 10px;
+            text-align: center;
+        }
+        .group-actions {
+            text-align: right;
+        }
+        .sso-group {
+            display: flex;
+            .group-actions {
+                flex-grow: 1;
+                align-self: flex-end;
+            }
+            .sso-logo {
+                padding-left: 10px;
+                height: 155px;
+            }
+        }
+        mat-form-field {
+            width: 100%;
+        }
+    }
+}
+.login-help {
+    text-align: center;
+    padding-bottom: $cardPadding;
+}
+.useUrl {
+    .goto {
+        display: inline-flex;
+        align-items: center;
+        padding-top: 5px;
+        i {
+            padding-left: 4px;
+            font-size: 20px;
+        }
+    }
+}
+@media screen and (max-height: $mobileHeight) {
+    es-powered-by {
+        display: none;
+    }
+}
+@media screen and (max-width: $mobileWidth+$mobileStage*1) {
+    .groups {
+        flex-direction: column;
+        .providers-select {
+            border-right: none;
+            padding-right: 0;
+        }
+        .login-form {
+            padding-top: 10px;
+            padding-left: 0;
+        }
+        > div {
+            padding: 10px 0;
+            width: 100%;
+        }
+    }
+}
+@media screen and (max-width: $mobileTabSwitchWidth) {
+    es-powered-by {
+        display: none;
+    }
+    .login-help {
+        display: none;
+    }
+}
+@media screen and (max-width: $mobileWidth+$mobileStage*1), (max-height: 750px) {
+    [showProviders='true'] .branding {
+        display: none;
+    }
+}
+@media screen and (max-height: 650px) {
+    .branding {
+        display: none;
+    }
+}

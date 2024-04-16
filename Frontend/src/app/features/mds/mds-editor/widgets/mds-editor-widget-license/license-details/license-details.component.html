@@ -1,41 +1,48 @@
 <div class="currentLicense">
-  <h4  *ngIf="type!='MULTI'">{{'WORKSPACE.LICENSE.CURRENT' | translate}}</h4>
-  <img *ngIf="type!='MULTI'" class="currentLicenseIcon" src="{{getLicenseIcon()}}">
-  <div class="license-additional-data" *ngIf="type=='CC_BY' || type=='CC_BY_SA'">
-    <div *ngIf="ccVersion!='4.0'" class="licenseLocale">
-      {{'COUNTRY_CODE.'+(ccCountry ? ccCountry : 'INTERNATIONAL') | translate}}
+  <h4 *ngIf="type !== 'MULTI'">{{ 'WORKSPACE.LICENSE.CURRENT' | translate }}</h4>
+  <img *ngIf="type !== 'MULTI'" class="currentLicenseIcon" src="{{ getLicenseIcon() }}" />
+  <div class="license-additional-data" *ngIf="type === 'CC_BY' || type === 'CC_BY_SA'">
+    <div *ngIf="ccVersion != '4.0'" class="licenseLocale">
+      {{ 'COUNTRY_CODE.' + (ccCountry ? ccCountry : 'INTERNATIONAL') | translate }}
     </div>
     <div class="licenseVersion">
-      {{ccVersion}}
+      {{ ccVersion }}
     </div>
   </div>
   <div class="licenseName">
-    <h4>{{getLicenseName()}}</h4>
-    <div class="oerStatus" *ngIf="getLicenseProperty()!='MULTI'">
-      <span class="oer" *ngIf="isOerLicense()">{{'WORKSPACE.LICENSE.OER' | translate }}</span>
-      <span class="notOer" *ngIf="!isOerLicense()">{{'WORKSPACE.LICENSE.NOT_OER' | translate }}</span>
+    <h4>{{ getLicenseName() }}</h4>
+    <div class="oerStatus" *ngIf="getLicenseProperty() !== 'MULTI'">
+      <span class="oer" *ngIf="isOerLicense()">{{ 'WORKSPACE.LICENSE.OER' | translate }}</span>
+      <span class="notOer" *ngIf="!isOerLicense()">{{
+        'WORKSPACE.LICENSE.NOT_OER' | translate
+      }}</span>
     </div>
   </div>
   <div class="currentLicenseDescription">
-    <div class="customLicenseDescription" *ngIf="type=='CUSTOM'">{{rightsDescription}}</div>
-    <div *ngIf="type!='CUSTOM' && type!='COPYRIGHT'" innerHTML="{{ 'LICENSE.DESCRIPTION.'+(type==='PDM' ? 'CC_0' : type) | translate }}">
+    <div class="customLicenseDescription" *ngIf="type === 'CUSTOM'">{{ rightsDescription }}</div>
+    <div
+      *ngIf="type !== 'CUSTOM' && type !== 'COPYRIGHT'"
+      innerHTML="{{ 'LICENSE.DESCRIPTION.' + (type === 'PDM' ? 'CC_0' : type) | translate }}"
+    ></div>
+    <div *ngIf="type === 'COPYRIGHT'">
+      <div innerHTML="{{ 'LICENSE.DESCRIPTION.' + copyrightType | translate }}"></div>
     </div>
-    <div *ngIf="type=='COPYRIGHT'">
-      <div innerHTML="{{ 'LICENSE.DESCRIPTION.'+copyrightType | translate}}"></div>
-    </div>
-    <div *ngIf="type=='CC_BY'">
+    <div *ngIf="type === 'CC_BY'">
       <div *ngIf="ccShare">
-        {{ 'LICENSE.DESCRIPTION.CC_SHARE_'+ccShare | translate}}
+        {{ 'LICENSE.DESCRIPTION.CC_SHARE_' + ccShare | translate }}
       </div>
       <div *ngIf="ccCommercial">
-        {{ 'LICENSE.DESCRIPTION.CC_COMMERCIAL_'+ccCommercial | translate}}
+        {{ 'LICENSE.DESCRIPTION.CC_COMMERCIAL_' + ccCommercial | translate }}
       </div>
-      <div *ngIf="ccVersion!='4.0'">
-        {{ 'WORKSPACE.LICENSE.LOCALE' | translate:{locale:ccCountry} }} {{'COUNTRY_CODE.'+(ccCountry ? ccCountry : 'INTERNATIONAL') | uppercase | translate}}.
+      <div *ngIf="ccVersion != '4.0'">
+        {{ 'WORKSPACE.LICENSE.LOCALE' | translate : { locale: ccCountry } }}
+        {{ 'COUNTRY_CODE.' + (ccCountry ? ccCountry : 'INTERNATIONAL') | uppercase | translate }}.
       </div>
     </div>
-    <div *ngIf="type=='CC_BY' || type=='CC_0'" class="licenseUrl">
-      <a [href]="getLicenseUrl()" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a>
+    <div *ngIf="type === 'CC_BY' || type === 'CC_0'" class="licenseUrl">
+      <a [href]="getLicenseUrl() | async" target="_blank">{{
+        'WORKSPACE.LICENSE.MORE' | translate
+      }}</a>
     </div>
   </div>
 </div>

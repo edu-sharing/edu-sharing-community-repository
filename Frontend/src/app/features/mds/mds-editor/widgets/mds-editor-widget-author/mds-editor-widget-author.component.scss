@@ -1,3 +1,5 @@
+@import '../mds-editor-widget-vcard/vcard';
+
 :host ::ng-deep .mat-tab-labels {
     background-color: transparent;
 }
@@ -11,7 +13,7 @@ mat-tab-group {
     margin-bottom: 20px;
 
     .author-checkbox {
-        margin: 20px 0 10px 10%;
+        margin: 10px 0 10px 10%;
     }
 
     .author-tabs {
@@ -24,7 +26,8 @@ mat-tab-group {
     }
 
     .authorFreetext {
-        width: 100%;
+        display: flex;
+        flex-grow: 1;
         margin-top: 5px;
 
         textarea {
@@ -33,7 +36,8 @@ mat-tab-group {
     }
 
     .contributors {
+        margin-top: 15px;
         display: flex;
-        margin-left: 62px;
+        margin-left: 30px;
     }
 }

@@ -1,30 +1,32 @@
 import { trigger } from '@angular/animations';
 import {
     AfterContentInit,
-    Component, ContentChild,
+    Component,
+    ContentChild,
     ElementRef,
     EventEmitter,
     HostListener,
     Input,
     OnDestroy,
-    Output, TemplateRef,
+    Output,
+    TemplateRef,
     ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
+import { UniversalNode } from '../../../core-module/rest/definitions';
 import {
-    DialogButton, Group,
+    DialogButton,
+    Group,
     Node,
     Organization,
     RestHelper,
-    UIService, UserSimple,
+    UIService,
 } from '../../../core-module/core.module';
-import { Helper } from '../../../core-module/rest/helper';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { CardService } from '../../../core-ui-module/card.service';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
-import {AuthorityNamePipe} from '../../pipes/authority-name.pipe';
-import {Observable, BehaviorSubject} from 'rxjs';
-import {KeyEvents} from '../../../core-module/ui/key-events';
+import { KeyEvents } from '../../../util/key-events';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
+import { CardService } from '../../../services/card.service';
+import { JumpMark, JumpMarksService } from '../../../services/jump-marks.service';
+import { AuthorityNamePipe } from '../../pipes/authority-name.pipe';
 
 /**
  * A common edu-sharing modal card
@@ -33,15 +35,13 @@ import {KeyEvents} from '../../../core-module/ui/key-events';
     selector: 'es-card',
     templateUrl: 'card.component.html',
     styleUrls: ['card.component.scss'],
+    providers: [JumpMarksService],
     animations: [trigger('cardAnimation', UIAnimation.cardAnimation())],
 })
 export class CardComponent implements AfterContentInit, OnDestroy {
-    @ViewChild('cardContainer')
-    cardContainer: ElementRef<HTMLElement>;
-    @ViewChild('jumpmarksRef')
-    jumpmarksRef: ElementRef;
-    @ViewChild('cardActions')
-    cardActions: ElementRef<HTMLElement>;
+    @ViewChild('cardContainer') cardContainer: ElementRef<HTMLElement>;
+    @ViewChild('jumpmarksRef') jumpmarksRef: ElementRef;
+    @ViewChild('cardActions') cardActions: ElementRef<HTMLElement>;
 
     /**
      * the title of the card. Should be pre-translated
@@ -87,14 +87,15 @@ export class CardComponent implements AfterContentInit, OnDestroy {
     /**
      * Jumpmarks for the left side (used for the mds dialog)
      */
-    @Input() jumpmarks: CardJumpmark[];
+    @Input()
+    jumpmarks: JumpMark[];
     @Input() priority = 0;
 
     /**
      * Optional, bind a Node or Node-Array to this element
      * If this is used, the subtitle and avatar is automatically set depending on the given data
      */
-    @Input() set node(node: Node | Node[] | Group | Organization) {
+    @Input() set node(node: UniversalNode | UniversalNode[] | Group | Organization) {
         if (!node) {
             return;
         }
@@ -105,7 +106,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         if (nodes && nodes.length) {
             if (nodes.length === 1 && nodes[0]) {
                 // Group
-                if((nodes[0] as any).profile) {
+                if ((nodes[0] as any).profile) {
                     this.icon = 'group';
                     this.subtitle = new AuthorityNamePipe(this.translate).transform(nodes[0]);
                 } else {
@@ -114,10 +115,9 @@ export class CardComponent implements AfterContentInit, OnDestroy {
                 }
             } else {
                 this.avatar = null;
-                this.subtitle = this.translate.instant(
-                    'CARD_SUBTITLE_MULTIPLE',
-                    { count: nodes.length },
-                );
+                this.subtitle = this.translate.instant('CARD_SUBTITLE_MULTIPLE', {
+                    count: nodes.length,
+                });
             }
         }
     }
@@ -167,14 +167,16 @@ export class CardComponent implements AfterContentInit, OnDestroy {
      * Buttons on the left side (Secondary)
      */
     _buttonsLeft: DialogButton[];
-    jumpmarkActive: CardJumpmark;
-
-    onScrollToJumpmark = new EventEmitter<CardJumpmark>();
+    jumpmarkActive: JumpMark;
 
     private static modalCards: CardComponent[] = [];
 
     private shouldUpdateJumpmarkOnScroll = true;
 
+    /**
+     * @Deprecated
+     * Consider using the new CardDialogService.openDialogs
+     */
     static getNumberOfOpenCards() {
         return CardComponent.modalCards.length;
     }
@@ -183,6 +185,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         private uiService: UIService,
         private translate: TranslateService,
         private cardService: CardService,
+        private jumpMarksService: JumpMarksService,
     ) {
         CardComponent.modalCards.splice(0, 0, this);
         cardService.setNumberModalCards(CardComponent.modalCards.length);
@@ -190,6 +193,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         uiService.waitForComponent(this, 'jumpmarksRef').subscribe(() => {
             this.updateActiveJumpmark();
         });
+        this.registerJumpMarkHandler();
     }
 
     ngAfterContentInit() {
@@ -199,10 +203,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
     }
 
     ngOnDestroy() {
-        CardComponent.modalCards.splice(
-            CardComponent.modalCards.indexOf(this),
-            1,
-        );
+        CardComponent.modalCards.splice(CardComponent.modalCards.indexOf(this), 1);
         if (CardComponent.modalCards.length === 0) {
             document.body.style.overflow = null;
         }
@@ -211,11 +212,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
 
     @HostListener('window:resize')
     onResize() {
-        if (
-            document.activeElement &&
-            this.cardContainer &&
-            this.cardContainer.nativeElement
-        ) {
+        if (document.activeElement && this.cardContainer && this.cardContainer.nativeElement) {
             this.uiService.scrollSmoothElementToChild(
                 document.activeElement,
                 this.cardContainer.nativeElement,
@@ -238,8 +235,8 @@ export class CardComponent implements AfterContentInit, OnDestroy {
             this.cancel();
             return true;
         }
-        if(this.modal === 'always') {
-            if(KeyEvents.isChildEvent(event, this.cardContainer)) {
+        if (this.modal === 'always') {
+            if (KeyEvents.isChildEvent(event, this.cardContainer)) {
                 event.stopPropagation();
                 return true;
             }
@@ -265,30 +262,38 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         }
     }
 
-    async scrollSmooth(jumpmark: CardJumpmark): Promise<void> {
-        const headingElement = document.getElementById(jumpmark.id);
+    async scrollToJumpMark(jumpMark: JumpMark): Promise<void> {
+        this.jumpMarksService.beforeScrollToJumpMark.next(jumpMark);
+        const headingElement = document.getElementById(jumpMark.id);
         let pos = headingElement.offsetTop;
-        // In case our headingElement is sticky, we cannot use its own offset since it moves around.
-        // We require for the header to be the first child of its parent in that case. We keep the
-        // simple position calculation from above for backwards compatibility.
+        // In case our headingElement is sticky, we cannot use its own offset since it moves
+        // around. We require for the header to be the first child of its parent in that case.
+        // We keep the simple position calculation from above for backwards compatibility.
         if (window.getComputedStyle(headingElement).position === 'sticky') {
             pos = headingElement.parentElement.offsetTop;
         }
-        this.jumpmarkActive = jumpmark;
+        this.jumpmarkActive = jumpMark;
         this.shouldUpdateJumpmarkOnScroll = false;
-        this.onScrollToJumpmark.emit(jumpmark);
         await this.uiService.scrollSmoothElement(pos, this.cardContainer.nativeElement, 0.5);
-        // Leave a little time for the last scroll event to propagate before enabling updates again.
+        // Leave a little time for the last scroll event to propagate before enabling updates
+        // again.
         window.setTimeout(() => (this.shouldUpdateJumpmarkOnScroll = true), 20);
     }
 
+    private registerJumpMarkHandler(): void {
+        this.jumpMarksService.triggerScrollToJumpMark.subscribe(({ jumpMark }) => {
+            if (typeof jumpMark === 'string') {
+                jumpMark = this.jumpmarks.find((j) => j.id === jumpMark);
+            }
+            void this.scrollToJumpMark(jumpMark);
+        });
+    }
+
     private setInitialFocus() {
-        const inputs = Array.from(
-            this.cardContainer.nativeElement.getElementsByTagName('input'),
-        );
-        if (inputs.some(el => el.autofocus)) {
+        const inputs = Array.from(this.cardContainer.nativeElement.getElementsByTagName('input'));
+        if (inputs.some((el) => el.autofocus)) {
             // Focus the first input field that sets `autofocus`.
-            inputs.find(el => el.autofocus).focus();
+            inputs.find((el) => el.autofocus).focus();
             return;
         } else if (inputs.length) {
             // Else, focus the first input field.
@@ -296,10 +301,10 @@ export class CardComponent implements AfterContentInit, OnDestroy {
             return;
         } else if (this.cardActions) {
             // Else, focus the right-most action button that is not disabled.
-            const actionButtons = Array.from(
-                this.cardActions.nativeElement.children,
-            ).map(el => el.children[0] as HTMLButtonElement);
-            const lastButton = actionButtons.reverse().find(el => !el.disabled);
+            const actionButtons = Array.from(this.cardActions.nativeElement.children).map(
+                (el) => el.children[0] as HTMLButtonElement,
+            );
+            const lastButton = actionButtons.reverse().find((el) => !el.disabled);
             if (lastButton) {
                 lastButton.focus();
                 return;
@@ -326,23 +331,23 @@ export class CardComponent implements AfterContentInit, OnDestroy {
      *
      * Returns `null` if no active jumpmark could be found.
      */
-    private getActiveJumpmark(): CardJumpmark | null {
+    private getActiveJumpmark(): JumpMark | null {
         // Check how much of any jumpmark section is visible on screen. Return either the first
         // (topmost) section that is visible completely or, if there is none, the one with that
         // covers most of the card's pixels.
         //
         // For sticky headings, We have an alternative approach of determining the active jumpmark:
         // the heading currently sticking to the top of the card is always active.
-        const cardTop = this.cardContainer.nativeElement.getBoundingClientRect().top
-        const cardBottom = this.cardContainer.nativeElement.getBoundingClientRect().bottom
-        let activeJumpmark: CardJumpmark = null;
+        const cardTop = this.cardContainer.nativeElement.getBoundingClientRect().top;
+        const cardBottom = this.cardContainer.nativeElement.getBoundingClientRect().bottom;
+        let activeJumpmark: JumpMark = null;
         let maxPixelsVisible = 0;
         for (const jumpmark of this.jumpmarks ?? []) {
             const headingElement = document.getElementById(jumpmark.id);
             const sectionTop = headingElement.getBoundingClientRect().top;
             if (window.getComputedStyle(headingElement).position === 'sticky') {
                 if (sectionTop >= cardTop) {
-                    return jumpmark
+                    return jumpmark;
                 } else {
                     continue;
                 }
@@ -352,8 +357,8 @@ export class CardComponent implements AfterContentInit, OnDestroy {
                 // The section is completely visible.
                 return jumpmark;
             }
-            const pixelsVisible = Math.min(sectionBottom, cardBottom)
-                - Math.max(sectionTop, cardTop);
+            const pixelsVisible =
+                Math.min(sectionBottom, cardBottom) - Math.max(sectionTop, cardTop);
             if (pixelsVisible > maxPixelsVisible) {
                 maxPixelsVisible = pixelsVisible;
                 activeJumpmark = jumpmark;
@@ -370,13 +375,4 @@ export enum CardType {
     Question = 'Question',
     Warning = 'Warning',
     Error = 'Error',
-}
-export class CardJumpmark {
-    /**
-     *
-     * @param id the id (as in html)
-     * @param label the pre-translated label
-     * @param icon the icon
-     */
-    constructor(public id: string, public label: string, public icon: string) {}
 }

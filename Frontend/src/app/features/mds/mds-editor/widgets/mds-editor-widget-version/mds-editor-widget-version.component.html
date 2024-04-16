@@ -1,7 +1,4 @@
-<es-mds-editor-widget-container
-  *ngIf="show"
-  [label]="'WORKSPACE.EDITOR.VERSION' | translate"
->
+<es-mds-editor-widget-container *ngIf="show" [label]="'WORKSPACE.EDITOR.VERSION' | translate">
   <div class="version-container">
     <div>
       <input
@@ -27,11 +24,11 @@
         />
       </mat-form-field>
     </div>
-    <mat-chip-list *ngIf="file">
-      <mat-chip (removed)="file = null">
+    <mat-chip-listbox *ngIf="file">
+      <mat-chip-option (removed)="file = null">
         {{ file.name }}
         <mat-icon matChipRemove>cancel</mat-icon>
-      </mat-chip>
-    </mat-chip-list>
+      </mat-chip-option>
+    </mat-chip-listbox>
   </div>
 </es-mds-editor-widget-container>

@@ -1,28 +1,17 @@
-import {forkJoin as observableForkJoin,  Observable, throwError } from 'rxjs';
-import {
-    Component,
-    ElementRef,
-    EventEmitter,
-    HostListener,
-    Input,
-    NgZone,
-    Output,
-    ViewChild,
-} from '@angular/core';
+import { forkJoin as observableForkJoin, throwError } from 'rxjs';
+import { Component, EventEmitter, Input, NgZone, Output } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { Toast } from '../../../../core-ui-module/toast';
-import { VCard } from '../../../../core-module/ui/VCard';
+import { Toast } from '../../../../services/toast';
+import { DateHelper, UIAnimation, VCard } from 'ngx-edu-sharing-ui';
 import { Helper } from '../../../../core-module/rest/helper';
-import { UIHelper } from '../../../../core-ui-module/ui-helper';
-import {NodeHelperService} from '../../../../core-ui-module/node-helper.service';
+import { NodeHelperService } from '../../../../services/node-helper.service';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../../core-module/ui/ui-animation';
 import {
-    Node,
-    NodeList,
     DialogButton,
     MdsValueList,
+    Node,
+    NodeList,
     NodeWrapper,
     RestConnectorService,
     RestConstants,
@@ -32,17 +21,17 @@ import {
     RestNodeService,
     RestSearchService,
     RestToolService,
-    UIService,
     RestUtilitiesService,
+    UIService,
 } from '../../../../core-module/core.module';
-import { CardJumpmark } from '../../../../shared/components/card/card.component';
+import { JumpMark } from '../../../../services/jump-marks.service';
 import { MdsHelper } from '../../../../core-module/rest/mds-helper';
-import { MdsType, UserPresentableError, MdsDefinition, BulkBehavior, Values } from '../../types/types';
+import { BulkBehavior, MdsDefinition, MdsType } from '../../types/types';
 import { MdsEditorCommonService } from '../../mds-editor/mds-editor-common.service';
-import {DateHelper} from '../../../../core-ui-module/DateHelper';
-import { MdsService, MdsValue, ConfigService } from 'ngx-edu-sharing-api';
+import { ConfigService, MdsService, MdsValue } from 'ngx-edu-sharing-api';
 import { first } from 'rxjs/operators';
-import { DialogsService } from '../../../../modules/management-dialogs/dialogs.service';
+import { DialogsService } from '../../../dialogs/dialogs.service';
+
 declare var noUiSlider: any;
 
 @Component({
@@ -55,15 +44,15 @@ declare var noUiSlider: any;
     ],
 })
 export class MdsComponent {
-  /**
-   * priority, useful if the dialog seems not to be in the foreground
-   * Values greater 0 will raise the z-index
-   * Default is 1 for mds
-   */
-  @Input() priority = 1;
-  @Input() addWidget=false;
-  @Input() embedded=false;
-  @Input() displayJumpmarks=true;
+    /**
+     * priority, useful if the dialog seems not to be in the foreground
+     * Values greater 0 will raise the z-index
+     * Default is 1 for mds
+     */
+    @Input() priority = 1;
+    @Input() addWidget = false;
+    @Input() embedded = false;
+    @Input() displayJumpmarks = true;
 
     /**
      * bulk behaviour: this controls how the bulk feature shall behave
@@ -104,7 +93,7 @@ export class MdsComponent {
      * mode, currently "search" or "default"
      * @type {string}
      */
-  @Input() mode : 'search' | 'default'='default';
+    @Input() mode: 'search' | 'default' = 'default';
 
     @Output() extendedChange = new EventEmitter();
     private static AUTHOR_TYPE_FREETEXT = 0;
@@ -120,7 +109,7 @@ export class MdsComponent {
     private mdsId = new Date().getTime();
     private childobjectDrag: number;
     private initialValues: any;
-    @Input() set suggestions(suggestions: {[property: string]: MdsValue[]}) {
+    @Input() set suggestions(suggestions: { [property: string]: MdsValue[] }) {
         this._suggestions = suggestions;
         this.applySuggestions();
     }
@@ -168,13 +157,14 @@ export class MdsComponent {
         this.isLoading = true;
         this.mdsService.getSet(this._setId, this._repository).subscribe(
             (data: any) => {
-                this.config.observeVariables().pipe(first()).subscribe(
-                    (variables) => {
+                this.config
+                    .observeVariables()
+                    .pipe(first())
+                    .subscribe((variables) => {
                         this.mds = data;
                         this.variables = variables;
                         this.loadMdsFinal();
-                    },
-                );
+                    });
             },
             (error: any) => this.toast.error(error),
         );
@@ -207,7 +197,7 @@ export class MdsComponent {
             let mdsId: string;
             let mdsDefinition: MdsDefinition;
             try {
-                mdsId = this.mdsEditorCommon.getMdsId(nodesConverted)
+                mdsId = this.mdsEditorCommon.getMdsId(nodesConverted);
                 mdsDefinition = await this.newMdsService
                     .getMetadataSet({ metadataSet: mdsId })
                     .toPromise();
@@ -245,7 +235,7 @@ export class MdsComponent {
     @Output() onMdsLoaded = new EventEmitter();
     rendered: SafeHtml;
     renderedSuggestions: SafeHtml;
-    jumpmarks: CardJumpmark[];
+    jumpmarks: JumpMark[];
     isLoading = false;
 
     private widgetName = 'cclom:general_keyword';
@@ -497,9 +487,7 @@ export class MdsComponent {
         for (let viewId of group.views) {
             for (let view of data.views) {
                 if (view.id == viewId) {
-                    this.jumpmarks.push(
-                        new CardJumpmark(view.id + '_header', view.caption, view.icon),
-                    );
+                    this.jumpmarks.push(new JumpMark(view.id + '_header', view.caption, view.icon));
                     break;
                 }
             }
@@ -801,24 +789,32 @@ export class MdsComponent {
             );
         } else {
             // can be bulk mode
-                  observableForkJoin(this.currentNodes.map((n) => {
+            observableForkJoin(
+                this.currentNodes.map((n) => {
                     const props = this.getValues(n.properties);
-                    if(props) {
-                      return this.node.editNodeMetadataNewVersion(n.ref.id, version, this.getValues(n.properties))
+                    if (props) {
+                        return this.node.editNodeMetadataNewVersion(
+                            n.ref.id,
+                            version,
+                            this.getValues(n.properties),
+                        );
                     } else {
-                      return throwError(null);
+                        return throwError(null);
                     }
-                  }))
-                      .subscribe((nodes) => {
-                        this.currentNodes = nodes.map((n) => n.node);
-                        this.onUpdatePreview(callback);
-                      },(error) => {
-                        if(error) {
-                          this.toast.error(error);
-                        }
-                        this.globalProgress = false;
-                      });
-                }
+                }),
+            ).subscribe(
+                (nodes) => {
+                    this.currentNodes = nodes.map((n) => n.node);
+                    this.onUpdatePreview(callback);
+                },
+                (error) => {
+                    if (error) {
+                        this.toast.error(error);
+                    }
+                    this.globalProgress = false;
+                },
+            );
+        }
     }
     public setValuesByProperty(data: any, properties: any) {
         setTimeout(() => {
@@ -903,8 +899,10 @@ export class MdsComponent {
                         }
                     } else if (widget.type == 'singleoption') {
                         element.value = props[0] ? props[0] : '';
-                    } else if(widget.type == 'date') {
-                        element.value=props[0] ? DateHelper.formatDateByPattern(props[0],'y-M-d') : '';
+                    } else if (widget.type == 'date') {
+                        element.value = props[0]
+                            ? DateHelper.formatDateByPattern(props[0], 'y-M-d')
+                            : '';
                     } else {
                         let caption = props[0];
                         if (widget.values) {
@@ -1183,16 +1181,16 @@ export class MdsComponent {
             </div>`
         );
     }
-  escapeUnsafeData(unsafe: string) {
-    return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-  }
+    escapeUnsafeData(unsafe: string) {
+        return unsafe
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
     private getMultivalueBadge(value: string, caption: string = value) {
-        caption = this.escapeUnsafeData(caption)
+        caption = this.escapeUnsafeData(caption);
         return (
             '<div class="badge" data-value="' +
             value +
@@ -1430,13 +1428,20 @@ export class MdsComponent {
                         property: id,
                         pattern: element.value,
                     },
-                    criteria:this.mode==='search' ?
-                        RestSearchService.convertCritierias(
-                            Helper.arrayJoin(this._currentValues,this.getValues()),this.mds.widgets
-                        ) : null,
-                },this._setId,this._repository).subscribe((data:MdsValueList)=>{
-                  if(this.lastMdsQuery!=element.value)
-                    return;
+                    criteria:
+                        this.mode === 'search'
+                            ? RestSearchService.convertCritierias(
+                                  Helper.arrayJoin(this._currentValues, this.getValues()),
+                                  this.mds.widgets,
+                              )
+                            : null,
+                },
+                this._setId,
+                this._repository,
+            )
+            .subscribe(
+                (data: MdsValueList) => {
+                    if (this.lastMdsQuery != element.value) return;
 
                     for (let i = 1; i < elements.length; ) {
                         list.removeChild(elements.item(i));
@@ -1760,9 +1765,20 @@ export class MdsComponent {
                 widget.valuesTree[value.parent].push(value);
             }
         }
-    let html=this.autoSuggestField(widget,'',false,
-                this.getWindowComponent()+`.openTree('`+widget.id+`')`,'arrow_forward',widget.type=='singlevalueTree')
-        +`     <div class="dialog darken mds-tree-dialog" style="display:none;z-index:`+(122 + this.priority)+`;" id="`+domId+`_tree">
+        let html =
+            this.autoSuggestField(
+                widget,
+                '',
+                false,
+                this.getWindowComponent() + `.openTree('` + widget.id + `')`,
+                'arrow_forward',
+                widget.type == 'singlevalueTree',
+            ) +
+            `     <div class="dialog darken mds-tree-dialog" style="display:none;z-index:` +
+            (132 + this.priority) +
+            `;" id="` +
+            domId +
+            `_tree">
                 <div class="card center-card card-wide card-high card-action">
                   <div class="card-content">
                   <div class="card-cancel" onclick="document.getElementById('` +
@@ -2316,9 +2332,8 @@ export class MdsComponent {
             document
                 .getElementById(this.getDomId('preview'))
                 .setAttribute('data-custom', true as any);
-            (document.getElementById(
-                this.getDomId('preview'),
-            ) as any).src = window.URL.createObjectURL(element.files[0]);
+            (document.getElementById(this.getDomId('preview')) as any).src =
+                window.URL.createObjectURL(element.files[0]);
             document.getElementById(this.getDomId('preview-deleted')).style.display = 'none';
             document.getElementById(this.getDomId('preview-delete')).style.display = null;
         }
@@ -2402,10 +2417,10 @@ export class MdsComponent {
             properties: this.getChildobjectProperties(this.childobjects[pos], pos),
         };
     }
-    private setEditChildobjectLicense(pos: number) {
-        const child =  this.childobjects[pos];
+    private async setEditChildobjectLicense(pos: number) {
+        const child = this.childobjects[pos];
         const properties = this.getChildobjectProperties(this.childobjects[pos], pos);
-        const dialogRef = this.dialogs.openLicenseDialog({ properties });
+        const dialogRef = await this.dialogs.openLicenseDialog({ kind: 'properties', properties });
         dialogRef.afterClosed().subscribe((newProperties) => {
             if (newProperties) {
                 this.setChildobjectProperties(newProperties, { child, properties });
@@ -2492,8 +2507,13 @@ export class MdsComponent {
         this.refreshChildobjects();
     }
 
-    openUploadSelectDialog(): void {
-        const dialogRef = this.dialogs.openUploadSelectDialog({ showLti: false });
+    async openUploadSelectDialog(): Promise<void> {
+        const dialogRef = await this.dialogs.openAddMaterialDialog({
+            parent: null,
+            chooseParent: false,
+            multiple: false,
+            showLti: false,
+        });
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
                 switch (result.kind) {
@@ -2508,8 +2528,8 @@ export class MdsComponent {
         });
     }
 
-    private addChildobjectLink(event: any) {
-        let link = this.nodeHelper.addHttpIfRequired(event.link);
+    private addChildobjectLink(link: string) {
+        link = this.nodeHelper.addHttpIfRequired(link);
         let properties = RestHelper.createNameProperty(link);
         properties[RestConstants.CCM_PROP_IO_WWWURL] = [link];
         properties[RestConstants.LOM_PROP_TITLE] = [link];
@@ -2864,7 +2884,7 @@ export class MdsComponent {
                 },
             );
         } else if (preview) {
-            this.node.uploadNodePreview(this.currentNodes[0].ref.id, preview).subscribe(
+            this.node.uploadNodePreview(this.currentNodes[0].ref.id, preview, false).subscribe(
                 () => {
                     this.onAddChildobject(callback);
                 },
@@ -3183,10 +3203,17 @@ export class MdsComponent {
                                     this.globalProgress = false;
                                     return;
                                 }
-                                if(RestHelper.errorMatchesAny(error,RestConstants.CONTENT_VIRUS_EXCEPTION)){
-                                  this.toast.error(null,"MDS.ADD_CHILD_OBJECT_VIRUS_DETECTED",{name:child.name});
-                                  this.globalProgress=false;
-                                  return;
+                                if (
+                                    RestHelper.errorMatchesAny(
+                                        error,
+                                        RestConstants.CONTENT_VIRUS_EXCEPTION,
+                                    )
+                                ) {
+                                    this.toast.error(null, 'MDS.ADD_CHILD_OBJECT_VIRUS_DETECTED', {
+                                        name: child.name,
+                                    });
+                                    this.globalProgress = false;
+                                    return;
                                 }
                             },
                         );
@@ -3224,27 +3251,30 @@ export class MdsComponent {
     }
 
     private loadConfig() {
-        this.config.observeVariables().pipe(first()).subscribe((variables) => {
-            this.variables = variables;
-            const node = this.currentNodes[0];
-            for (const property in node.properties) {
-                this.properties.push(property);
-            }
-            this.properties.sort();
-            let nodeGroup;
-            try {
-                nodeGroup = this._groupId || this.mdsEditorCommon.getGroupId(this.currentNodes);
-            } catch (error) {
-                this.toast.error(null, error.message);
-                this.cancel();
-                return;
-            }
-            this.renderGroup(nodeGroup, this.mds);
-            setTimeout(() => {
-                this.initialValues = this.getValues();
-            }, 15);
-            this.isLoading = false;
-        });
+        this.config
+            .observeVariables()
+            .pipe(first())
+            .subscribe((variables) => {
+                this.variables = variables;
+                const node = this.currentNodes[0];
+                for (const property in node.properties) {
+                    this.properties.push(property);
+                }
+                this.properties.sort();
+                let nodeGroup;
+                try {
+                    nodeGroup = this._groupId || this.mdsEditorCommon.getGroupId(this.currentNodes);
+                } catch (error) {
+                    this.toast.error(null, error.message);
+                    this.cancel();
+                    return;
+                }
+                this.renderGroup(nodeGroup, this.mds);
+                setTimeout(() => {
+                    this.initialValues = this.getValues();
+                }, 15);
+                this.isLoading = false;
+            });
     }
 
     getCurrentProperties() {

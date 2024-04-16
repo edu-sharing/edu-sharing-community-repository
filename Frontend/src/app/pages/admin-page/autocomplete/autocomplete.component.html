@@ -1,0 +1,66 @@
+<div class="dialog" *ngIf="showSuggestions" (click)="showSuggestions = false"></div>
+<div class="form-group edusharing-autocomplete-wrapper">
+  <form (ngSubmit)="addValue()">
+    <mat-form-field>
+      <input
+        matInput
+        name="valueInput"
+        class="searchInput"
+        [(ngModel)]="valueInput"
+        (ngModelChange)="updateValue()"
+        (keyup.enter)="addValue()"
+        [disabled]="disabled"
+        placeholder="{{ placeholder | translate }}"
+        title="{{ placeholder | translate }}"
+        autocomplete="off"
+      />
+      <mat-hint *ngIf="hintBottom">{{ hintBottom | translate }}</mat-hint>
+    </mat-form-field>
+  </form>
+  <ul class="suggestbox" *ngIf="showSuggestions">
+    <li *ngFor="let suggestion of _suggestions">
+      <a
+        (click)="handleSuggestClick(suggestion)"
+        [class.activeItem]="activeItem == suggestion.index"
+        title="{{ 'SUGGESTION' | translate }} {{ suggestion.title }}"
+      >
+        <div *ngIf="contentRef">
+          <ng-container
+            *ngTemplateOutlet="contentRef; context: { suggestion: suggestion }"
+          ></ng-container>
+        </div>
+        <div *ngIf="!contentRef">
+          <span *ngIf="suggestion.materialIcon" class="material-icons">{{
+            suggestion.materialIcon
+          }}</span>
+          <ng-container
+            *ngTemplateOutlet="iconRef; context: { suggestion: suggestion }"
+          ></ng-container>
+          <span class="data">
+            <span class="primary">{{ suggestion.title }}</span>
+            <span class="secondary" *ngIf="suggestion.secondaryTitle">{{
+              suggestion.secondaryTitle
+            }}</span>
+          </span>
+          <ng-container
+            *ngTemplateOutlet="suggestRef; context: { suggestion: suggestion }"
+          ></ng-container>
+        </div>
+      </a>
+    </li>
+  </ul>
+  <div
+    role="button"
+    tabindex="0"
+    title="{{ 'FILTER' | translate }} {{ placeholder }}. {{ 'VALUE' | translate }} {{
+      item.title
+    }}. {{ 'CLICKTOREMOVE' | translate }}."
+    class="badge clickable"
+    *ngFor="let item of chosen"
+    (keyup.enter)="removeValue(item)"
+    (click)="removeValue(item)"
+  >
+    <span>{{ item.title }}</span
+    ><i class="material-icons">cancel</i>
+  </div>
+</div>

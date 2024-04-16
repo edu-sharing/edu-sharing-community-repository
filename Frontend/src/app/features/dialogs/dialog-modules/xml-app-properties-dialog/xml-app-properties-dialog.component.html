@@ -1,0 +1,56 @@
+<div class="warning">{{ 'ADMIN.APPLICATIONS.APP_XML_WARNING' | translate }}</div>
+<div *ngFor="let value of propertyKeys; let i = index" class="appEditor">
+  <mat-form-field class="mat-input-group">
+    <mat-label>{{ value }}</mat-label>
+    <textarea
+      matInput
+      cdkTextareaAutosize
+      cdkAutosizeMinRows="2"
+      cdkAutosizeMaxRows="5"
+      *ngIf="isMultilineProperty(value)"
+      class="materialize-textarea"
+      [(ngModel)]="data.properties[value]"
+      (ngModelChange)="onChange()"
+    ></textarea>
+    <input
+      matInput
+      *ngIf="!isMultilineProperty(value)"
+      type="text"
+      [(ngModel)]="data.properties[value]"
+      (ngModelChange)="onChange()"
+    />
+    <!-- Api does currently not support deleting -->
+    <i class="material-icons clickable" (click)="removeAppProperty(i)" *ngIf="false">delete</i>
+    <mat-hint *ngIf="data.appName">{{
+      'ADMIN.APPLICATIONS.' + data.appName + '.' + value | translate : { fallback: '' }
+    }}</mat-hint>
+  </mat-form-field>
+</div>
+<div class="add-property">
+  <h4 class="property mat-heading-4 mat-heading-underline">
+    {{ 'ADMIN.APPLICATIONS.ADD_PROPERTY' | translate }}
+  </h4>
+  <mat-form-field>
+    <mat-label>{{ 'ADMIN.APPLICATIONS.PROPERTY_NAME_PLACEHOLDER' | translate }}</mat-label>
+    <input
+      matInput
+      type="text"
+      id="additionalProperty"
+      [(ngModel)]="xmlAppAdditionalPropertyName"
+      (ngModelChange)="onChange()"
+    />
+    <mat-hint *ngIf="data.appName">{{
+      'ADMIN.APPLICATIONS.' + data.appName + '.' + xmlAppAdditionalPropertyName
+        | translate : { fallback: '' }
+    }}</mat-hint>
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>{{ 'ADMIN.APPLICATIONS.PROPERTY_VALUE_PLACEHOLDER' | translate }}</mat-label>
+    <input
+      matInput
+      type="text"
+      [(ngModel)]="xmlAppAdditionalPropertyValue"
+      (ngModelChange)="onChange()"
+    />
+  </mat-form-field>
+</div>

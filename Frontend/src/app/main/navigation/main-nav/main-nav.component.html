@@ -2,22 +2,13 @@
   <es-skip-nav></es-skip-nav>
   <es-banner [scope]="mainNavConfig.currentScope" (onUpdate)="refreshBanner()"></es-banner>
 
-  <div role="navigation" [attr.aria-label]="'NAV.MAIN' | translate">
+  <div
+    *ngIf="mainNavConfig.showNavigation"
+    class="navigation-container"
+    role="navigation"
+    [attr.aria-label]="'NAV.MAIN' | translate"
+  >
     <es-user-profile *ngIf="showProfile" (onCancel)="showProfile = false"></es-user-profile>
-
-    <es-card
-      *ngIf="licenseDialog"
-      title="{{ 'LICENSE_INFORMATION' | translate }}"
-      width="xxlarge"
-      height="xxlarge"
-      [isCancelable]="true"
-      (onCancel)="licenseDialog = false"
-    >
-      <div class="card-content-padding card-licenses">
-        <es-spinner *ngIf="!licenseDetails"></es-spinner>
-        <div [innerHTML]="licenseDetails"></div>
-      </div>
-    </es-card>
 
     <es-global-progress *ngIf="globalProgress"></es-global-progress>
     <es-tutorial
@@ -27,44 +18,8 @@
       [showSkip]="false"
     ></es-tutorial>
 
-    <div class="dialog darken" *ngIf="licenseAgreement" [@fade]="licenseAgreement"></div>
-    <div
-      class="card card-agreement center-card card-scroll card-high card-wide card-action"
-      *ngIf="licenseAgreement"
-      [@cardAnimation]="licenseAgreement"
-    >
-      <div class="card-content">
-        <div class="card-title">{{ 'LICENSE_AGREEMENT.TITLE' | translate }}</div>
-        <div class="agreementGroup card-scroll">
-          <div class="agreement" [innerHTML]="licenseAgreementHTML"></div>
-        </div>
-        <div *ngIf="licenseAgreementHTML">
-          <mat-checkbox [(ngModel)]="acceptLicenseAgreement">{{
-            'LICENSE_AGREEMENT.CHECKBOX' | translate
-          }}</mat-checkbox>
-        </div>
-      </div>
-      <div class="card-action">
-        <a
-          tabindex="0"
-          class="waves-effect waves-light btn"
-          [class.disabled]="!acceptLicenseAgreement"
-          (keyup.enter)="saveLicenseAgreement()"
-          (click)="saveLicenseAgreement()"
-          >{{ 'LICENSE_AGREEMENT.ACCEPT' | translate }}</a
-        >
-        <a
-          tabindex="0"
-          class="waves-effect waves-light btn-flat"
-          (keyup.enter)="logout()"
-          (click)="logout()"
-          >{{ 'LICENSE_AGREEMENT.DECLINE' | translate }}</a
-        >
-      </div>
-    </div>
-
     <es-top-bar
-      class="topBar {{ 'topBar-' + mainNavConfig.currentScope }} scrollWithBanner"
+      class="topBar {{ 'topBar-' + mainNavConfig.currentScope }}"
       [class.noUser]="!showUser"
       [autoLogoutTimeout$]="autoLogoutTimeout$"
       [canOpen]="canOpen"
@@ -76,7 +31,7 @@
       [isCreateAllowed]="isCreateAllowed()"
       [isSafe]="isSafe()"
       [mainMenuStyle]="mainMenuStyle"
-      [searchEnabled]="mainNavConfig.searchEnabled"
+      [searchEnabled]="searchFieldEnabled"
       [showChat]="showChat()"
       [showScope]="mainNavConfig.showScope"
       [showUser]="showUser"
@@ -85,21 +40,11 @@
       (created)="mainNavConfig.onCreate && mainNavConfig.onCreate($event)"
       (createNotAllowed)="mainNavConfig.onCreateNotAllowed && mainNavConfig.onCreateNotAllowed()"
       (openChat)="openChat()"
-      (openImprint)="openImprint()"
-      (openPrivacy)="openPrivacy()"
       (showLicenses)="showLicenses()"
     >
       <es-search-field
         data-selector-search-field
-        *ngIf="mainNavConfig.searchEnabled"
-        [(searchString)]="searchQuery"
-        (searchStringChange)="
-          mainNavConfig.searchQueryChange && mainNavConfig.searchQueryChange($event)
-        "
-        [placeholder]="mainNavConfig.searchPlaceholder"
-        [enableFiltersAndSuggestions]="mainNavConfig.currentScope === 'search'"
-        (search)="doSearch(searchQuery)"
-        (clear)="clearSearch()"
+        *ngIf="searchFieldEnabled && !mainNavConfig.hideSearchField"
       ></es-search-field
     ></es-top-bar>
 

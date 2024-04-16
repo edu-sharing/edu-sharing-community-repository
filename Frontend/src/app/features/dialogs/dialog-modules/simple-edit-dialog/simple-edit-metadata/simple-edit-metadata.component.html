@@ -1,0 +1,10 @@
+<es-mds-editor-wrapper
+  #mds
+  class="mds-simple-editor"
+  [embedded]="true"
+  [allowReplacing]="!fromUpload"
+  [bulkBehaviour]="fromUpload ? BulkBehaviour.Replace : BulkBehaviour.Default"
+  groupId="io_simple"
+  [nodes]="nodes"
+  (onCancel)="onError.emit()"
+></es-mds-editor-wrapper>

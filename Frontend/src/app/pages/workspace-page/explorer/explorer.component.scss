@@ -1,0 +1,22 @@
+@import '../../../core-ui-module/styles/variables';
+
+.noElementsInfo {
+    > div.clickable {
+        color: $primary;
+        text-transform: uppercase;
+        margin-top: 5px;
+    }
+}
+:host ::ng-deep {
+    @media screen and (max-width: $mobileTabSwitchWidth) {
+        .list > div {
+            // keep space for scrolling to the very end
+            margin-bottom: $mobileTabNavHeight;
+        }
+    }
+}
+
+es-node-entries-wrapper.grid {
+    display: block;
+    margin: 10px 20px;
+}

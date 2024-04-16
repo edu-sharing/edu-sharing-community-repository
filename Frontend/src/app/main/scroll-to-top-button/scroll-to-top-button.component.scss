@@ -1,0 +1,22 @@
+@import '../../core-ui-module/styles/variables';
+
+#scrollToTop {
+    transition: all $transitionNormal;
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    padding: 0 17px;
+    border-radius: 50px 50px 0 0;
+    font-size: $fontSizeXSmall;
+    background-color: $primary;
+    color: $textOnPrimary;
+    &:focus {
+        // Draw above custom footers and the mobile slide-in menubar when focused.
+        z-index: 200;
+    }
+    i {
+        font-size: 16px;
+    }
+}

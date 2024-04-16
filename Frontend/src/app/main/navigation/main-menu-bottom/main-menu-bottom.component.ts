@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ConfigEntry } from '../../../core-ui-module/node-helper.service';
+import { ConfigEntry } from '../../../services/node-helper.service';
 import { MainMenuEntriesService } from '../main-menu-entries.service';
 
 @Component({

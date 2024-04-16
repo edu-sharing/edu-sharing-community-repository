@@ -52,9 +52,10 @@
         <button
           mat-icon-button
           matTreeNodeToggle
+          (click)="changeDetectorRef.detectChanges()"
           [attr.aria-label]="
             (treeControl.isExpanded(node) ? 'COLLAPSE' : 'EXPAND')
-              | translate: { element: node.caption }
+              | translate : { element: node.caption }
           "
         >
           <mat-icon class="mat-icon-rtl-mirror">
@@ -83,7 +84,7 @@
         [indeterminate]="node.isIndeterminate"
         [disabled]="getIsDisabled(node)"
         (change)="toggleNode(node, $event.checked)"
-        ><span [innerHTML]="node.caption | escapeHtml | highlight: filterString"></span
+        ><span [innerHTML]="node.caption | escapeHtml | highlight : filterString"></span
       ></mat-checkbox>
       <!-- Treeitems don't have a meaningful 'checked' state that is announced to screen-reader
       users. We would need a new role like 'treeitemcheckbox' for that. This is our workaround.
@@ -104,7 +105,7 @@
         [checked]="getIsChecked(node)"
         [disabled]="getIsDisabled(node)"
         (change)="toggleNode(node, true)"
-        ><span [innerHTML]="node.caption | escapeHtml | highlight: filterString"></span
+        ><span [innerHTML]="node.caption | escapeHtml | highlight : filterString"></span
       ></mat-radio-button>
       <span class="cdk-visually-hidden" [id]="getCheckboxId(node) + '-state'">
         {{

@@ -1,0 +1,156 @@
+<metadataset id="default" label="default" hidden="false">
+	<name>Core Metadataset</name>
+	<inherit>mds</inherit>
+	<i18n>mds_translation</i18n>
+	<widgets>
+		<widget>
+			<id>virtual:title</id>
+			<caption>Title</caption>
+			<placeholder>z.B. Goethe</placeholder>
+			<type>text</type>
+		</widget>
+		<widget>
+			<id>virtual:place</id>
+			<type>text</type>
+			<suggestionSource>Search</suggestionSource>
+			<caption>Ort</caption>
+			<placeholder>z.B. Frankfurt</placeholder>
+		</widget>
+		<widget>
+			<id>virtual:affiliate</id>
+			<type>text</type>
+			<caption>Person/Organisation</caption>
+			<placeholder>z.B. Goethe, Johann Wolfgang von</placeholder>
+		</widget>
+		<!-- new -->
+		<widget>
+			<id>cclom:general_keyword</id>
+			<type>multivalueSuggestBadges</type>
+			<caption>Stichwort</caption>
+			<placeholder>z.B. Aufsatz</placeholder>
+			<searchable>true</searchable>
+		</widget>
+		<widget>
+			<id>virtual:language</id>
+			<type>multivalueFixedBadges</type>
+			<caption>Sprache</caption>
+			<placeholder>z.B. Deutsch</placeholder>
+		</widget>
+		<widget>
+			<id>virtual:type</id>
+			<type>multivalueFixedBadges</type>
+			<caption>Medientyp</caption>
+			<placeholder>z.B. Bild</placeholder>
+		</widget>
+		<widget>
+			<id>virtual:sector</id>
+			<type>multivalueFixedBadges</type>
+			<caption>Sparte</caption>
+			<placeholder>z.B. Forschung</placeholder>
+		</widget>
+		<widget>
+			<id>virtual:provider</id>
+			<type>multivalueFixedBadges</type>
+			<caption>Datengeber</caption>
+			<placeholder>z.B. Bundesarchiv</placeholder>
+		</widget>
+
+	</widgets>
+	<templates>
+		<template>
+			<id>search</id>
+			<html><![CDATA[
+	            <virtual:title>
+	            <virtual:place>
+	            <virtual:affiliate>
+	            <cclom:general_keyword>
+		  ]]></html>
+		</template>
+		<template>
+			<id>node_general_render</id>
+			<caption>dialog_upload_tab_basic</caption>
+			<html><![CDATA[
+	            <cclom:title>
+	            <cclom:general_description>
+	            <cclom:general_keyword>
+	            <sys:node-uuid>
+			]]></html>
+		</template>
+	</templates>
+	<sorts>
+		<sort>
+			<id>search</id>
+			<columns>
+				<column>score</column>
+			</columns>
+			<default>
+				<sortBy>score</sortBy>
+				<sortAscending>false</sortAscending>
+			</default>
+			<!-- no columns because we currently don't support sorting for this repository -->
+		</sort>
+	</sorts>
+	<lists>
+		<list>
+			<id>search</id>
+			<columns>
+				<column>cm:title</column>
+				<column>cm:creator</column>
+				<column>ccm:commonlicense_key</column>
+				<column>ccm:replicationsource</column>
+
+			</columns>
+		</list>
+	</lists>
+	<groups>
+		<group>
+			<id>ngsearch</id>
+			<rendering>angular</rendering>
+			<views>
+				<view>search</view>
+			</views>
+		</group>
+	</groups>
+	<queries>
+		<query join="AND" id="ngsearch">
+			<property name="virtual:title"></property>
+			<property name="virtual:place">
+				<facets>
+					<facet>place_fct</facet>
+				</facets>
+			</property>
+			<property name="virtual:affiliate">
+				<facets>
+					<facet>affiliate_fct</facet>
+				</facets>
+			</property>
+			<property name="cclom:general_keyword">
+				<facets>
+					<facet>keywords_fct</facet>
+				</facets>
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+			</property>
+			<property name="virtual:language">
+				<facets>
+					<facet>language_fct</facet>
+				</facets>
+			</property>
+			<property name="virtual:type">
+				<facets>
+					<facet>type_fct</facet>
+				</facets>
+			</property>
+			<property name="virtual:sector">
+				<facets>
+					<facet>sector_fct</facet>
+				</facets>
+			</property>
+			<property name="virtual:provider">
+				<facets>
+					<facet>provider_fct</facet>
+				</facets>
+			</property>
+		</query>
+	</queries>
+</metadataset>

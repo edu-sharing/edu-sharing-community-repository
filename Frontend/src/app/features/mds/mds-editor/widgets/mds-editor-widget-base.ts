@@ -1,7 +1,7 @@
-import { ValidatorFn, Validators } from '@angular/forms';
-import { MdsEditorWidgetCore } from '../mds-editor-instance.service';
-import { assertUnreachable, InputStatus, RequiredMode } from '../../types/types';
-import {Directive, EventEmitter} from '@angular/core';
+import { FormControl, ValidatorFn, Validators } from '@angular/forms';
+import { InputStatus, MdsWidget, RequiredMode } from '../../types/types';
+import { Directive, EventEmitter } from '@angular/core';
+import { MdsEditorWidgetCore } from '../mds-editor-widget-core.directive';
 
 export enum ValueType {
     String,
@@ -19,25 +19,6 @@ export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
     onBlur = new EventEmitter<void>();
 
     /**
-     * @deprecated use `widget.initialValues` directly
-     */
-    protected getInitialValue(): readonly string[] {
-        if (!this.widget.getInitialValues().individualValues) {
-            return this.widget.getInitialValues().jointValues;
-        } else {
-            switch (this.valueType) {
-                case ValueType.String:
-                    return [this.translate.instant('MDS.DIFFERENT_VALUES')];
-                case ValueType.MultiValue:
-                case ValueType.Range:
-                    return [];
-                default:
-                    assertUnreachable(this.valueType);
-            }
-        }
-    }
-
-    /**
      * this method should set focus on the primary input of the widget
      */
     focus(): void {
@@ -50,6 +31,16 @@ export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
 
     protected setStatus(value: InputStatus): void {
         this.widget.setStatus(value);
+    }
+
+    /**
+     * register the form control that should be updated when external value changes received
+     */
+    protected registerValueChanges(formControl: FormControl) {
+        this.widget.setValueExternal.subscribe((value) => {
+            formControl.setValue(value);
+            this.setValue(value, true);
+        });
     }
 
     protected getStandardValidators(
@@ -68,5 +59,24 @@ export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
             validators.push(overrides.requiredValidator ?? Validators.required);
         }
         return validators;
+    }
+    protected static attachGraphqlSelection(definition: MdsWidget, fields: string[]) {
+        const id = MdsEditorWidgetBase.mapGraphqlId(definition);
+        if (id) {
+            const originalId = id[0];
+            return fields.map((f) => originalId + '.' + f);
+        }
+        return null;
+    }
+    public static mapGraphqlId(definition: MdsWidget) {
+        // @TODO: make types!
+        const id = (definition as any).ids?.graphql;
+        if (id) {
+            return [(definition as any).ids?.graphql];
+        }
+        return null;
+    }
+    public static mapGraphqlSuggestionId(definition: MdsWidget): string[] {
+        return [];
     }
 }

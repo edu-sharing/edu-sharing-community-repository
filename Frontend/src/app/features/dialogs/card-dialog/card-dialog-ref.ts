@@ -2,19 +2,25 @@ import { ESCAPE, hasModifierKey } from '@angular/cdk/keycodes';
 import { OverlayRef, OverlaySizeConfig } from '@angular/cdk/overlay';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, take } from 'rxjs/operators';
+import { DISCARD_OR_BACK } from '../dialog-modules/generic-dialog/generic-dialog-data';
+import { DialogsService } from '../dialogs.service';
 import { CardDialogConfig, Closable } from './card-dialog-config';
 import { CardDialogContainerComponent } from './card-dialog-container/card-dialog-container.component';
 import { CardDialogState } from './card-dialog-state';
 // A lot of this code is copied from
 // https://github.com/angular/components/blob/13.3.x/src/material/dialog/dialog-ref.ts.
 
+type LifecycleState = 'open' | 'closing' | 'closed';
+
 export class CardDialogRef<D = unknown, R = unknown> {
+    private readonly beforeClosedSubject = new Subject<R | undefined>();
     private readonly afterClosedSubject = new Subject<R | undefined>();
     /** Handle to the timeout that's running as a fallback in case the exit animation doesn't fire. */
     private closeFallbackTimeout: ReturnType<typeof setTimeout>;
     private result: R;
     private configSubject: BehaviorSubject<CardDialogConfig<D>>;
     private stateSubject: BehaviorSubject<CardDialogState>;
+    private lifecycleState: LifecycleState = 'open';
 
     get config() {
         return this.configSubject.value;
@@ -29,6 +35,7 @@ export class CardDialogRef<D = unknown, R = unknown> {
         private containerInstance: CardDialogContainerComponent,
         config: CardDialogConfig<D>,
         state: CardDialogState,
+        private dialogs: DialogsService,
     ) {
         this.configSubject = new BehaviorSubject(config);
         this.stateSubject = new BehaviorSubject(state);
@@ -59,8 +66,8 @@ export class CardDialogRef<D = unknown, R = unknown> {
                 take(1),
             )
             .subscribe((event) => {
-                // this._beforeClosed.next(dialogResult);
-                // this._beforeClosed.complete();
+                this.beforeClosedSubject.next(result);
+                this.beforeClosedSubject.complete();
                 this.overlayRef.detachBackdrop();
 
                 // The logic that disposes of the overlay depends on the exit animation completing, however
@@ -74,8 +81,12 @@ export class CardDialogRef<D = unknown, R = unknown> {
                 );
             });
 
-        // this._state = MatDialogState.CLOSING;
+        this.lifecycleState = 'closing';
         this.containerInstance.startExitAnimation();
+    }
+
+    beforeClosed(): Observable<R | null> {
+        return this.beforeClosedSubject.asObservable();
     }
 
     afterClosed(): Observable<R | null> {
@@ -105,30 +116,59 @@ export class CardDialogRef<D = unknown, R = unknown> {
         );
     }
 
-    /** @returns whether the cancel try was acknowledged */
-    tryCancel(trigger: 'backdrop' | 'x-button' | 'esc-key'): boolean {
+    tryCancel(trigger: 'backdrop' | 'x-button' | 'esc-key' | 'navigation'): {
+        acknowledged: boolean;
+        closed: Promise<boolean>;
+    } {
         switch (this.config.closable) {
             case Closable.Casual:
                 this.close();
-                return true;
+                return { acknowledged: true, closed: Promise.resolve(true) };
             case Closable.Standard:
                 switch (trigger) {
                     case 'backdrop':
-                        return false;
+                        return { acknowledged: false, closed: Promise.resolve(false) };
                     case 'x-button':
                     case 'esc-key':
+                    case 'navigation':
                         this.close();
-                        return true;
+                        return { acknowledged: true, closed: Promise.resolve(true) };
                 }
             case Closable.Confirm:
-                // TODO implement
-                return true;
+                switch (trigger) {
+                    case 'backdrop':
+                        return { acknowledged: false, closed: Promise.resolve(false) };
+                    case 'x-button':
+                    case 'esc-key':
+                    case 'navigation':
+                        const closed = this.dialogs
+                            .openGenericDialog({
+                                title: 'DIALOG.CONFIRM_DISCARD_TITLE',
+                                message: 'DIALOG.CONFIRM_DISCARD_MESSAGE',
+                                buttons: DISCARD_OR_BACK,
+                            })
+                            .then((dialogRef) => dialogRef.afterClosed().toPromise())
+                            .then((response) => {
+                                if (response === 'DISCARD') {
+                                    this.close();
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            });
+                        return { acknowledged: true, closed };
+                }
             case Closable.Disabled:
-                return false;
+                return { acknowledged: false, closed: Promise.resolve(false) };
         }
     }
 
+    getLifecycleState(): LifecycleState {
+        return this.lifecycleState;
+    }
+
     private finishDialogClose(): void {
+        this.lifecycleState = 'closed';
         this.overlayRef.dispose();
     }
 
@@ -136,11 +176,11 @@ export class CardDialogRef<D = unknown, R = unknown> {
         this.overlayRef
             .keydownEvents()
             .pipe(
-                filter(() => !this.state.isLoading),
+                filter(() => !this.state.isLoading && this.state.autoSavingState !== 'saving'),
                 filter((event) => event.keyCode === ESCAPE && !hasModifierKey(event)),
             )
             .subscribe((event) => {
-                const acknowledged = this.tryCancel('esc-key');
+                const acknowledged = this.tryCancel('esc-key').acknowledged;
                 if (acknowledged) {
                     event.preventDefault();
                 }
@@ -148,12 +188,12 @@ export class CardDialogRef<D = unknown, R = unknown> {
 
         this.overlayRef
             .backdropClick()
-            .pipe(filter(() => !this.state.isLoading))
-            .subscribe(() => {
-                const acknowledged = this.tryCancel('backdrop');
-                if (!acknowledged) {
+            .pipe(filter(() => !this.state.isLoading && this.state.autoSavingState !== 'saving'))
+            .subscribe(async () => {
+                const closed = await this.tryCancel('backdrop').closed;
+                if (!closed) {
                     // Move focus back to the dialog.
-                    this.containerInstance.trapFocus();
+                    void this.containerInstance.trapFocus();
                 }
             });
     }

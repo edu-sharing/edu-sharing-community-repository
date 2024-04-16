@@ -1,0 +1,51 @@
+<es-spinner *ngIf="loading"></es-spinner>
+<div class="done-info" *ngIf="!loading">
+  <img
+    *ngIf="inputState === 'done'"
+    [src]="'assets/images/register/register-confirm.svg' | esAssetsPath"
+    alt=""
+  />
+  <img
+    *ngIf="inputState !== 'done'"
+    [src]="'assets/images/register/register-mail.svg' | esAssetsPath"
+    alt=""
+  />
+  <h4>{{ 'REGISTER.DONE.TITLE' | translate }}</h4>
+  <p class="mail-info">
+    {{ 'REGISTER.DONE.MAIL_INFO' | translate }}
+    <span (click)="editMail()">{{ email }} <i *ngIf="!keyUrl" class="material-icons">edit</i></span>
+    {{ 'REGISTER.DONE.MAIL_INFO2' | translate }}
+  </p>
+  <p>
+    {{
+      (inputState === 'done-reset' ? 'REGISTER.REQUEST' : 'REGISTER.DONE') + '.MAIL_NOTE'
+        | translate
+    }}
+  </p>
+  <div *ngIf="!keyUrl" class="keyForm">
+    <form (ngSubmit)="keyInput.trim() ? activate(keyInput) : null">
+      <mat-form-field>
+        <mat-label>{{ 'REGISTER.DONE.KEY_PL' | translate }}</mat-label>
+        <input
+          matInput
+          id="key"
+          name="key"
+          [(ngModel)]="keyInput"
+          (ngModelChange)="onStateChanged.emit()"
+        />
+        <mat-hint>{{ 'REGISTER.DONE.ACTIVATE_HINT' | translate }}</mat-hint>
+      </mat-form-field>
+    </form>
+  </div>
+
+  <strong>{{ 'REGISTER.DONE.NO_MAIL' | translate }}</strong>
+  <small>{{ 'REGISTER.DONE.NO_MAIL_INFO' | translate }}</small>
+  <a
+    *ngIf="!keyUrl"
+    class="send-mail"
+    tabindex="0"
+    (click)="sendMail()"
+    (keyup.enter)="sendMail()"
+    >{{ 'REGISTER.DONE.SEND_MAIL' | translate }}</a
+  >
+</div>

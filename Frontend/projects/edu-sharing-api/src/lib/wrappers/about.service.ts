@@ -8,9 +8,11 @@ import { About } from '../models';
     providedIn: 'root',
 })
 export class AboutService {
-    private readonly about$ = this.about.about().pipe(shareReplay(1));
+    private readonly about$;
 
-    constructor(private about: AboutApiService) {}
+    constructor(private about: AboutApiService) {
+        this.about$ = this.about.about().pipe(shareReplay(1));
+    }
 
     getAbout(): Observable<About> {
         return this.about$;

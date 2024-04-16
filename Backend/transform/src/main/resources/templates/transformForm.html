@@ -1,0 +1,24 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div>
+    <h2>Test Transformation video to png/gif</h2>
+    <form method="POST" enctype="multipart/form-data" action="/transform">
+        <table>
+            <tr><td><div style="text-align:right">file *</div></td><td><input type="file" name="file" /></td></tr>
+            <tr><td><div style="text-align:right">sourceMimetype *</div></td><td><input type="text" name="sourceMimetype" value="video/mp4" /></td></tr>
+            <tr><td><div style="text-align:right">targetExtension *</div></td><td><input type="text" name="targetExtension" value="gif" /></td></tr>
+            <tr><td><div style="text-align:right">targetMimetype *</div></td><td><input type="text" name="targetMimetype" value="image/gif" /></td></tr>
+            <tr><td><div style="text-align:right">timeout</div></td><td><input type="text" name="timeout" value="" /></td></tr>
+            <tr><td><div style="text-align:right">testDelay</div></td><td><input type="text" name="testDelay" value="" /></td></tr>
+            <tr><td></td><td><input type="submit" value="Transform" /></td></tr>
+        </table>
+    </form>
+</div>
+
+<div>
+    <a href="/log">Log entries</a>
+</div>
+
+</body>
+</html>

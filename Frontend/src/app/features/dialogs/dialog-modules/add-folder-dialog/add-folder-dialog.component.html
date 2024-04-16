@@ -1,0 +1,20 @@
+<mat-form-field>
+  <mat-label>{{ 'WORKSPACE.FOLDER_PLACEHOLDER' | translate }}</mat-label>
+  <input
+    matInput
+    [(ngModel)]="folderName"
+    (ngModelChange)="updateButtons()"
+    (keyup.enter)="addFolder()"
+    autofocus
+    autocomplete="off"
+    data-test="add-folder-name-input"
+  />
+</mat-form-field>
+<div *ngIf="mdsSets && mdsSets.length > 1">
+  <mat-form-field>
+    <mat-label>{{ 'WORKSPACE.ADD_FOLDER_METADATASET' | translate }}</mat-label>
+    <mat-select id="mdsSet" [(ngModel)]="mdsSet">
+      <mat-option *ngFor="let mds of mdsSets" [value]="mds.id">{{ mds.name }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>

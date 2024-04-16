@@ -1,22 +1,49 @@
 <!-- Used inside a button, which gets wrapped in a `span`, so use `span`s for everything to comply
 with the W3C spec. -->
-<span class="avatar size_{{size}}" role="presentation">
+<span class="avatar size_{{ size }}" role="presentation">
   <span class="avatarOuter sizable">
     <ng-container *ngIf="_user?.authorityType === 'GROUP'">
-      <span *ngFor="let i of [0,1,2]" class="avatarCircle sizable avatarCircleGroup" style.border-color="{{ _user | authorityColor}}"></span>
+      <span
+        *ngFor="let i of [0, 1, 2]"
+        class="avatarCircle sizable avatarCircleGroup"
+        style.border-color="{{ _user | authorityColor }}"
+      ></span>
     </ng-container>
-    <img *ngIf="isEditorialUser()" class="editorial-badge" src="assets/images/editorial-badge.svg" alt="">
-    <span class="avatarCircle sizable" style.border-color="{{ _user | authorityColor}}" [class.clickable]="link" (click)="link ? openProfile() : null">
+    <img
+      *ngIf="isEditorialUser()"
+      class="editorial-badge"
+      [src]="'assets/images/editorial-badge.svg' | esAssetsPath"
+      alt=""
+    />
+    <span
+      class="avatarCircle sizable"
+      style.border-color="{{ _user | authorityColor }}"
+      [class.clickable]="link"
+      (click)="link ? openProfile() : null"
+    >
       <span *ngIf="_customImage">
-        <img [src]="_customImage" class="userImage sizable" alt="user image">
+        <img [src]="_customImage" class="userImage sizable" alt="user image" />
       </span>
       <span *ngIf="!_customImage">
-        <img *ngIf="_user?.profile?.avatar && !isSafe()" [src]="_user.profile.avatar+'&crop=true&width=200&height=200'" class="userImage sizable" alt="">
-        <span class="user-letter"
-             aria-hidden="true"
-             style.background-color="{{ _user | authorityColor}}"
-             *ngIf="!icon && _user && !(_user?.profile?.avatar && !isSafe())">{{getLetter(_user)}}</span>
-        <i class="user-icon" [esIcon]="icon" style.background-color="{{ _user | authorityColor}}" *ngIf="icon"></i>
+        <img
+          *ngIf="_user?.profile?.avatar && !isSafe()"
+          [src]="_user.profile.avatar + '&crop=true&width=200&height=200'"
+          class="userImage sizable"
+          alt=""
+        />
+        <span
+          class="user-letter"
+          aria-hidden="true"
+          style.background-color="{{ _user | authorityColor }}"
+          *ngIf="!icon && _user && !(_user?.profile?.avatar && !isSafe())"
+          >{{ getLetter(_user) }}</span
+        >
+        <i
+          class="user-icon"
+          [esIcon]="icon"
+          style.background-color="{{ _user | authorityColor }}"
+          *ngIf="icon"
+        ></i>
       </span>
     </span>
   </span>

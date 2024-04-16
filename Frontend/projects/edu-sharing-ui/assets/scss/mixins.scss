@@ -1,0 +1,95 @@
+@mixin clickable() {
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+@mixin limitLineCount($count, $lineHeight: 1) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    line-height: $lineHeight + em;
+    max-height: $count * $lineHeight + em;
+    -webkit-line-clamp: $count; /* number of lines to show */
+    -webkit-box-orient: vertical;
+    /* autoprefixer: off */
+}
+@mixin materialShadow($important: false) {
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3) if($important, !important, null);
+}
+@mixin materialShadowBottom($opacity: 0.1) {
+    box-shadow: 0 3px 3px rgba(0, 0, 0, $opacity);
+}
+@mixin materialShadowSmall($important: false) {
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.3) if($important, !important, null);
+}
+@mixin materialShadowMediumLarge($important: false, $opacity: 0.6) {
+    box-shadow: 0 0 25px rgba(0, 0, 0, $opacity) if($important, !important, null);
+}
+@mixin materialScrollbar() {
+    &::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        background-color: transparent;
+    }
+    &::-webkit-scrollbar {
+        height: 10px;
+        background-color: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+        max-width: 20px;
+        border-radius: 10px;
+        // -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+        background-color: var(--primary);
+    }
+}
+@mixin removeDefaultFocus() {
+    outline: none;
+}
+@mixin setGlobalKeyboardFocus($mode: 'outline') {
+    //respect element border radius
+    @include removeDefaultFocus();
+    @if $mode== 'outline' {
+        outline: var(--focusWidth) solid var(--palette-primary-300);
+        outline-offset: 2px;
+    } @else if $mode== 'border' {
+        border: var(--focusWidth) solid var(--palette-primary-300);
+    }
+}
+// Apply the content styles in contrast mode. This is just enough contrast to be WCAG complient ---
+// not a high-contrast mode.
+//
+// Call without arguments for use in encapsulated component styles, e.g.,
+//     @include contrastMode {
+//         // Styles to apply in contrast mode
+//     }
+// To us in global context, pass 'global' as first argument, e.g.,
+//     @include contrastMode(global) { /* ... */ }
+@mixin contrastMode($scope: encapsulated) {
+    $contrastModeSelector: 'body.es-contrast-mode';
+    @if $scope == encapsulated {
+        :host-context(#{$contrastModeSelector}) & {
+            @content;
+        }
+    } @else if $scope == global {
+        #{if(&, '#{$contrastModeSelector} &', $contrastModeSelector)} {
+            @content;
+        }
+    } @else {
+        @error "Invalid scope #{$scope}.";
+    }
+}
+@mixin blurImage($blurStrength: 25px) {
+    position: absolute;
+    left: -$blurStrength * 2;
+    top: -$blurStrength * 2;
+    width: calc(100% + #{$blurStrength * 4});
+    height: calc(100% + #{$blurStrength * 4});
+    z-index: 0;
+    overflow: hidden;
+    filter: blur($blurStrength);
+    object-fit: cover;
+    opacity: 0.7;
+}

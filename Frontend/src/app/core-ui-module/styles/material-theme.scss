@@ -1,67 +1,39 @@
 @use '@angular/material' as mat;
-@import "variables";
+@use 'angular-material-css-vars/main' as mat-css;
+@use 'angular-material-css-vars/public-util' as mat-css-utilities;
 
-// Include the common styles for Angular Material. We include this here so that you only
-// have to load a single css file for Angular Material in your app.
-// Be sure that you only ever include this mixin once!
-@include mat.core();
-// @include mat.strong-focus-indicators();
+@import 'variables';
+@import 'branding';
 
+// optional
+$mat-css-dark-theme-selector: '.isDarkTheme';
+$mat-css-light-theme-selector: '.isLightTheme';
+
+// init theme
+@include mat-css.init-material-css-vars() using($mat-css-theme) {
+    // If your app has any theme mixins, call them here.
+    // $mat-css-theme gets set to an appropriate value before this content is called.
+    // @include your-custom-component-theme($mat-css-theme);
+}
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
-// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// (impomatrted above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
+
 $custom-typography: mat.define-typography-config(
     $font-family: $primaryFontFamily,
     $body-1: mat.define-typography-level(100%, normal, 400),
-    $body-2: mat.define-typography-level(100%, normal, 600),
+    $body-2: mat.define-typography-level(100%, normal, 400),
+    // mat-optgroups labels, input placeholder
+    $subtitle-1: mat.define-typography-level(90%, normal, 400),
+    // mat-table cells
+    $subtitle-2: mat.define-typography-level(90%, normal, 600),
+    // mat-table header
     $button: mat.define-typography-level(100%, normal, 400),
-    $headline: mat.define-typography-level(150%, normal, 400),
-    $title: mat.define-typography-level(130%, normal, 400),
-    $input: mat.define-typography-level(inherit, 1.25, 400)
+    $headline-1: mat.define-typography-level(150%, normal, 400),
+    $headline-2: mat.define-typography-level(140%, normal, 400),
 ) !default;
 // Override typography for all Angular Material, including mat-base-typography and all components.
 @include mat.all-component-typographies($custom-typography);
-$mat-custom: (
-    50: lighten($primary,50%),
-    100: lighten($primary,40%),
-    200: lighten($primary,30%),
-    300: lighten($primary,20%),
-    400: lighten($primary,10%),
-    500: $primary,
-    600: darken($primary,10%),
-    700: darken($primary,20%),
-    800: darken($primary,30%),
-    900: darken($primary,40%),
-    A100: lighten($primary,40%),
-    A200: lighten($primary,30%),
-    A400: $primary,
-    A700: darken($primary,20%),
-    contrast: (
-        50: $textOnPrimaryLight,
-        100: $textOnPrimaryLight,
-        200: $textOnPrimaryLight,
-        300: $textOnPrimaryLight,
-        400: $textOnPrimary,
-        500: $textOnPrimary,
-        600: $textOnPrimary,
-        700: $textOnPrimary,
-        800: $textOnPrimary,
-        900: $textOnPrimary,
-        A100: $textOnPrimaryLight,
-        A200: $textOnPrimaryLight,
-        A400: $textOnPrimary,
-        A700: $textOnPrimary,
-    )
-);
-
-$candy-app-primary: mat.define-palette($mat-custom);
-$candy-app-accent:  mat.define-palette($mat-custom);
-
-// The warn palette is optional (defaults to red).
-$candy-app-warn:    mat.define-palette(mat.$red-palette);
-
-// Create the theme object (a Sass map containing all of the palettes).
-$candy-app-theme: mat.define-light-theme($candy-app-primary, $candy-app-accent, $candy-app-warn);
 
 // Override the themes foreground colors.
 // WCAG minimums are
@@ -93,35 +65,41 @@ $candy-app-theme: mat.define-light-theme($candy-app-primary, $candy-app-accent, 
 // );
 
 $dark-dividers: rgba(black, 0.12);
-$dark-disabled-text: rgba(black, 0.54);  // increased contrast
+$dark-disabled-text: rgba(black, 0.54); // increased contrast
 $dark-secondary-text: rgba(black, 0.54);
+
+:root {
+    --mdc-fab-container-color: #{$backgroundColor};
+}
+
+.mdc-button {
+    span {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+}
+
 $light-theme-foreground-palette: (
-  base:              black,
-  divider:           $dark-dividers,
-  dividers:          $dark-dividers,
-  disabled:          $dark-disabled-text,
-  disabled-button:   rgba(black, 0.26),
-  disabled-text:     $dark-disabled-text,
-  elevation:         black,
-  hint-text:         $dark-disabled-text,
-  secondary-text:    $dark-secondary-text,
-  icon:              rgba(black, 0.54),
-  icons:             rgba(black, 0.54),
-  text:              rgba(black, 0.87),
-  slider-min:        rgba(black, 0.87),
-  slider-off:        rgba(black, 0.26),
-  slider-off-active: rgba(black, 0.38),
+    base: black,
+    divider: $dark-dividers,
+    dividers: $dark-dividers,
+    disabled: $dark-disabled-text,
+    disabled-button: rgba(black, 0.26),
+    disabled-text: $dark-disabled-text,
+    elevation: black,
+    hint-text: $dark-disabled-text,
+    secondary-text: $dark-secondary-text,
+    icon: rgba(black, 0.54),
+    icons: rgba(black, 0.54),
+    text: rgba(black, 0.87),
+    slider-min: rgba(black, 0.87),
+    slider-off: rgba(black, 0.26),
+    slider-off-active: rgba(black, 0.38),
 );
 
-$my-app-theme-custom: map-merge($candy-app-theme, (foreground: $light-theme-foreground-palette));
-// Include theme styles for core and each component used in your app.
-// Alternatively, you can import and @include the theme mixins for each component
-// that you are using.
-@include mat.all-component-themes($my-app-theme-custom);
-// @include mat.strong-focus-indicators-theme($my-app-theme-custom);
-
 /** custom project specifics */
-[matripplecolor=primary] {
+[matripplecolor='primary'] {
     > .mat-ripple-element {
         background-color: $primary;
         opacity: 0.1;
@@ -130,58 +108,48 @@ $my-app-theme-custom: map-merge($candy-app-theme, (foreground: $light-theme-fore
 /*
   material toggle buttons
  */
-mat-button-toggle-group{
-    .mat-button-toggle-checked.mat-button-toggle-appearance-standard{
+mat-button-toggle-group {
+    .mat-button-toggle-checked.mat-button-toggle-appearance-standard {
         color: $textOnPrimary;
         background-color: $primary;
     }
-    .mat-button-toggle-appearance-standard .mat-button-toggle-focus-overlay{
+    .mat-button-toggle-appearance-standard .mat-button-toggle-focus-overlay {
         background-color: $primary;
     }
     /*
       bugfix: overlay is not big enough
      */
-    .mat-button-toggle-checked .mat-button-toggle-focus-overlay{
+    .mat-button-toggle-checked .mat-button-toggle-focus-overlay {
         border-bottom-width: 100px;
     }
-    &.toggle-full-size{
+    &.toggle-full-size {
         width: 100%;
-        mat-button-toggle{
+        mat-button-toggle {
             flex-grow: 1;
         }
     }
 }
-.mat-tooltip{
-    background-color: $primaryLight;
+.mat-tooltip {
+    background-color: $primaryVeryLight !important;
     color: $textMain !important;
     font-weight: bold;
 }
-.mat-tab-labels {
-    background-color: $actionDialogBackground;
-    .mat-tab-label {
-        &.cdk-keyboard-focused{
-            @include setGlobalKeyboardFocus('border');
-        }
-        &.mat-tab-label-active{
-            opacity: 0.9;
-        }
-        &.mat-tab-disabled {
-            // Disabled styles are already reflected via label color, don't further reduce contrast.
-            opacity: 1;
-        }
-        .tab-icon{
-            margin-right: 5px;
-        }
+.mdc-tab__content {
+    .mdc-tab__text-label {
+        display: flex;
+        gap: 10px; // padding for icons
     }
 }
-.mat-tab-group .mat-ink-bar {
-    height: 4px;
+mat-tab-group {
+    mat-tab-header {
+        background-color: $backgroundColor;
+    }
 }
-.mat-tab-group.mat-dark{
-    .mat-tab-header{
+.mat-tab-group.mat-dark {
+    .mat-tab-header {
         background-color: $workspaceTopBarBackground;
     }
-    .mat-tab-header-pagination .mat-tab-header-pagination-chevron{
+    .mat-tab-header-pagination .mat-tab-header-pagination-chevron {
         border-color: $workspaceTopBarFontColor;
     }
     .mat-tab-labels {
@@ -196,29 +164,29 @@ mat-button-toggle-group{
             }
         }
     }
-    .mat-ink-bar{
+    .mat-ink-bar {
         background-color: $primaryLight;
     }
 }
 // a mat table with clickable columns
-.mat-table-clickable{
-    .mat-row{
+.mat-table-clickable {
+    .mat-row {
         @include clickable();
         transition: all $transitionNormal;
-        &:hover{
+        &:hover {
             background-color: $itemSelectedBackground;
         }
     }
 }
-.mat-fab.mat-white,
-.mat-mini-fab.mat-white{
+.mat-mdc-fab.mat-white,
+.mat-mini-fab.mat-white {
     // white background, primary as content color
     color: $primary;
 }
-.mat-flat-button,
-.mat-raised-button,
-.mat-fab,
-.mat-mini-fab {
+.mat-mdc-unelevated-button:not(:disabled),
+.mat-mdc-raised-button:not(:disabled),
+.mat-mdc-fab:not(:disabled),
+.mat-mdc-mini-fab:not(:disabled) {
     // `color="warn"`
     &.mat-warn {
         // Red background, same as negative
@@ -238,7 +206,7 @@ mat-button-toggle-group{
         color: white;
     }
 }
-.mat-form-field .mat-button-select-arrow{
+.mat-form-field .mat-button-select-arrow {
     width: 25px;
     height: 25px;
     margin-right: 2px;
@@ -250,68 +218,76 @@ mat-button-toggle-group{
     left: -0.1em;
 }
 // align subscript/bottom hint to complete left/right
-.mat-form-field-appearance-outline .mat-form-field-subscript-wrapper{
+.mat-form-field-appearance-outline .mat-form-field-subscript-wrapper {
     padding: 0 !important;
 }
-.mat-form-field.mat-form-field-no-padding{
+.mat-form-field.mat-form-field-no-padding {
     .mat-form-field-wrapper {
         padding-bottom: 0;
     }
 }
-.mat-form-field.mat-form-field-max-width{
+.mat-form-field.mat-form-field-max-width {
     .mat-form-field-wrapper {
         width: 100%;
     }
 }
 // form border on hover
-.mat-form-field-appearance-outline .mat-form-field-outline-thick{
-    color:$primaryMediumLight;
+.mat-form-field-appearance-outline {
+    --mdc-outlined-text-field-hover-outline-color: #{mat-css-utilities.mat-css-color-primary(300)};
 }
-.mat-form-field-dark{
-    input,textarea {
+.mat-form-field-dark {
+    input,
+    textarea {
         caret-color: $primaryDark;
     }
     .mat-form-field-outline,
-    .mat-form-field-label{
-        color: rgba(0,0,0,0.6);
+    .mat-form-field-label {
+        color: rgba(0, 0, 0, 0.6);
     }
-    &.mat-focused{
+    &.mat-focused {
         .mat-form-field-outline,
-        .mat-form-field-label{
-            color: rgba(0,0,0,0.7);
+        .mat-form-field-label {
+            color: rgba(0, 0, 0, 0.7);
         }
     }
 }
-.mat-form-field-bright{
-    input,textarea {
-        caret-color: $primaryLight;
+.mat-mdc-form-field.mat-form-field-bright {
+    input,
+    textarea {
+        --mdc-outlined-text-field-caret-color: #{$primaryLight};
     }
-    .mat-form-field-outline,
-    .mat-form-field-label{
-        color: rgba(255,255,255,0.6);
+    --mdc-outlined-text-field-label-text-color: rgba(255, 255, 255, 0.87);
+    --mdc-outlined-text-field-outline-color: rgba(255, 255, 255, 0.6);
+    --mdc-outlined-text-field-hover-outline-color: rgba(255, 255, 255, 0.87);
+    --mdc-outlined-text-field-focus-outline-color: #{mat-css-utilities.mat-css-color-primary(100)};
+    .mdc-text-field--focused:not(.mdc-text-field--disabled) .mdc-floating-label {
+        color: mat-css-utilities.mat-css-color-primary(50);
     }
-    &.mat-focused{
-        .mat-form-field-outline,
-        .mat-form-field-label{
-            color: rgba(255,255,255,0.7);
-        }
-    }
+    --mdc-outlined-text-field-input-text-color: rgba(255, 255, 255);
 }
-mat-slide-toggle.mat-primary-bright{
-    &.mat-checked {
-        .mat-slide-toggle-thumb {
-            background-color: $primaryMediumLight;
-        }
-        .mat-slide-toggle-bar{
-            background-color: $primaryLight;
-        }
-    }
-    .mat-slide-toggle-content{
+mat-slide-toggle.mat-mdc-slide-toggle.mat-primary-bright {
+    --mdc-switch-unselected-handle-color: #fff;
+    --mdc-switch-unselected-hover-handle-color: #{$primaryVeryLight};
+    --mdc-switch-unselected-focus-handle-color: #{$primaryVeryLight};
+    --mdc-switch-unselected-pressed-handle-color: #{$primaryVeryLight};
+    --mdc-switch-unselected-icon-color: #{$textLight};
+    --mdc-switch-selected-handle-color: #fff;
+    --mdc-switch-selected-hover-handle-color: #{$primaryVeryLight};
+    --mdc-switch-selected-focus-handle-color: #{$primaryVeryLight};
+    --mdc-switch-selected-pressed-handle-color: #{$primaryVeryLight};
+    --mdc-switch-selected-icon-color: #{$primary};
+    .mdc-form-field label {
         color: #fff;
     }
 }
+.mat-slide-toggle.cdk-keyboard-focused .mat-slide-toggle-thumb-container .mat-focus-indicator {
+    @include setGlobalKeyboardFocus();
+}
+
 // will fix g and y to cut off with custom font
-input.mat-input-element, mat-label, .mat-select-value{
+input.mat-input-element,
+mat-label,
+.mat-select-value {
     line-height: normal;
 }
 .mat-input-element::placeholder {
@@ -329,20 +305,56 @@ input.mat-input-element, mat-label, .mat-select-value{
         top: calc(1.9375em + #{$mat-form-field-floating-label-offset});
     }
     &.mat-form-field-can-float.mat-form-field-should-float .mat-form-field-label,
-    &.mat-form-field-can-float .mat-input-server:focus + .mat-form-field-label-wrapper .mat-form-field-label {
-        transform: translateY(calc(-1.68748em - #{$mat-form-field-floating-label-offset})) scale(0.75);
+    &.mat-form-field-can-float
+        .mat-input-server:focus
+        + .mat-form-field-label-wrapper
+        .mat-form-field-label {
+        transform: translateY(calc(-1.68748em - #{$mat-form-field-floating-label-offset}))
+            scale(0.75);
     }
 }
-.mat-autocomplete-high{
+.mat-autocomplete-high {
     max-height: 350px;
 }
-.mat-checkbox-inner-container{
-    width:18px !important;
-    height:18px !important;
-    margin: 2px 18px auto 0 !important;
-    .mat-checkbox-frame {
-        border-color: $primary;
-        background-color: #fff;
+.mdc-button__label {
+    display: inline-flex;
+}
+.mat-flat-button {
+    padding: 0 15px !important;
+    .mdc-button__label {
+        color: $textOnPrimary !important;
+    }
+    background-color: $primary !important;
+}
+body {
+    // Background for raised button
+    --mdc-protected-button-container-color: white;
+}
+// improve default positioning of outlined fields with label
+.mat-mdc-text-field-wrapper.mdc-text-field--outlined {
+    .mat-mdc-form-field-infix {
+        padding-top: 20px;
+        min-height: unset;
+    }
+}
+.mat-mdc-checkbox {
+    .mdc-checkbox__background {
+        border-color: $primary !important;
+        background-color: #fff !important;
+
+        .mdc-checkbox__checkmark {
+            color: #fff !important;
+        }
+    }
+    &.mat-mdc-checkbox-checked {
+        .mdc-checkbox__background {
+            background-color: $primary !important;
+            .mdc-checkbox__checkmark,
+            .mdc-checkbox__mixedmark {
+                color: #fff !important;
+                border-color: #fff !important;
+            }
+        }
     }
 }
 .mat-radio-container {
@@ -350,69 +362,73 @@ input.mat-input-element, mat-label, .mat-select-value{
         border-color: $primary;
     }
 }
-.mat-checkbox-label {
+.mat-mdc-checkbox-label {
     line-height: 17pt !important;
     font-size: 1rem;
     color: $textMain;
-    > .label-secondary{
+    > .label-secondary {
         line-height: normal !important;
     }
 }
-.mat-checkbox-disabled {
+.mat-mdc-checkbox-disabled {
     $disabled-color: #919191; // 3:1 on #fafafa (fill-color of checkmark)
     &.mat-checkbox-checked,
     &.mat-checkbox-indeterminate {
-      .mat-checkbox-background {
-        background-color: $disabled-color;
-      }
+        .mat-checkbox-background {
+            background-color: $disabled-color;
+        }
     }
     &:not(.mat-checkbox-checked) {
-      .mat-checkbox-frame {
-        border-color: $disabled-color;
-      }
+        .mat-checkbox-frame {
+            border-color: $disabled-color;
+        }
     }
 }
-.mat-checkbox.cdk-keyboard-focused .mat-focus-indicator {
+.mat-mdc-checkbox.cdk-keyboard-focused .mat-focus-indicator {
     @include setGlobalKeyboardFocus();
 }
-.mat-flat-button,.mat-raised-button{
-    min-height: 36px;
+.mat-mdc-raised-button {
+    &:not(.mat-primary) {
+        color: $primary !important;
+    }
+    &.mat-primary {
+        color: $textOnPrimary !important;
+    }
 }
-.mat-raised-button{
-    color: $primary;
-}
-.mat-button.mat-cancel{
+.mat-mdc-button.mat-cancel {
     color: $textMediumLight;
-    &:hover{
+    &:hover {
         color: $primary;
     }
 }
-button{
-    &.mat-button, &.mat-flat-button, &.mat-raised-button, &.mat-icon-button, &.mat-fab {
+// Undo default style of mat-icon.
+//
+// We assign icons the class .mat-icon so other Material components will treat them as icons, but we
+// don't use the actual mat-icon component. Some styles rely on setting the elements width and
+// height by changing its font-size.
+//
+// Note that the default style of mat-icon is only loaded when the mat-icon component is used, which
+// is rare but does happen.
+i.mat-icon {
+    height: 1em;
+    width: 1em;
+}
+button {
+    &.mat-mdc-button,
+    &.mat-mdc-unelevated-button,
+    &.mat-mdc-raised-button,
+    &.mat-mdc-icon-button,
+    &.mat-mdc-fab {
         &.cdk-keyboard-focused {
             @include setGlobalKeyboardFocus();
         }
     }
 }
-.mat-button-wrapper{
-    position: relative;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    > i {
-        width: 35px;
-    }
-}
-.mat-button-no-uppercase .mat-button-wrapper{
+.mat-button-no-uppercase .mat-button-wrapper {
     text-transform: none;
 }
-.mat-calendar-table-header-divider{
+.mat-calendar-table-header-divider {
     display: none;
-}
-.mat-chip{
-    i {
-        font-size: 1.45rem;
-    }
 }
 .mat-option {
     font-size: 100%;
@@ -426,7 +442,8 @@ button{
         line-height: initial;
         color: $textLight;
     }
-    &:hover:not(.mat-option-disabled), .mat-option:focus:not(.mat-option-disabled){
+    &:hover:not(.mat-option-disabled),
+    .mat-option:focus:not(.mat-option-disabled) {
         background-color: $buttonHoverBackground;
     }
     &.mat-focus-indicator.mat-active::before {
@@ -438,19 +455,18 @@ button{
         right: 0;
         bottom: 0;
         position: absolute;
-        box-sizing: border-box;
         pointer-events: none;
         @include setGlobalKeyboardFocus($mode: 'border');
     }
 }
 
-label .label-secondary{
+label .label-secondary {
     font-size: 90%;
     color: $textLight;
 }
 /* a badge (usually counter) inside an (icon) button
  */
-.mat-button-badge{
+.mat-button-badge {
     position: absolute;
     right: -3px;
     top: -3px;
@@ -465,40 +481,43 @@ label .label-secondary{
     justify-content: center;
     align-items: center;
 }
-.monaco-editor{
-    background-color: transparent!important;
-    mat-label,mat-hint{
-        padding:2px 0;
+.monaco-editor {
+    background-color: transparent !important;
+    mat-label,
+    mat-hint {
+        padding: 2px 0;
         font-size: 75%;
         color: $textLight;
     }
 }
-.mat-card-subtitle,.mat-hint, .mat-slide-toggle-content{
+.mat-card-subtitle,
+mat-hint,
+mat-slide-toggle .mdc-form-field label {
     color: $textLight;
 }
 // prevent umlauts from cutting off
-.mat-hint,.mat-error{
+mat-hint,
+mat-error {
+    font-size: $fontSizeSmall;
     line-height: 1.5;
 }
 
 // Show toggle on the right place
-.toggle-reverse{
-    .mat-slide-toggle-label {
+.toggle-reverse {
+    .mdc-form-field {
         flex-direction: row-reverse;
-    }
-    .mat-slide-toggle-content {
-        margin-right: 18px;
+        gap: 10px;
     }
 }
-.mat-slide-toggle-twoside{
+.mat-slide-toggle-twoside {
     display: flex;
     align-items: center;
-    >mat-label{
-        color:$textLight;
-        padding:0 8px;
+    > mat-label {
+        color: $textLight;
+        padding: 0 8px;
     }
 }
-mat-label.mat-label-standalone{
+mat-label.mat-label-standalone {
     font-size: $fontSizeSmall;
     color: $textLight;
 }
@@ -507,7 +526,7 @@ mat-label.mat-label-standalone{
     .mat-option-text {
         display: flex;
         align-items: center;
-        >i {
+        > i {
             margin-right: 5px;
         }
     }
@@ -527,13 +546,21 @@ mat-select.mat-select-icon {
     }
 }
 
-.mat-select-panel, .mat-autocomplete-panel {
+.mat-select-panel,
+.mat-autocomplete-panel {
     .mat-option:not(.mat-option-disabled) {
         color: $primary;
     }
-    .mat-option.mat-selected:not(.mat-option-multiple){
+    .mat-option.mat-selected:not(.mat-option-multiple) {
         background-color: $cardLightBackground;
         font-weight: bold;
+    }
+}
+.mat-mdc-standard-chip:not(.mdc-evolution-chip--disabled) {
+    background-color: var(--palette-primary-100) !important;
+    .mat-mdc-chip-remove {
+        color: $primary !important;
+        opacity: 1 !important;
     }
 }
 .mat-chip-list {
@@ -543,11 +570,11 @@ mat-select.mat-select-icon {
         overflow: hidden;
         &.indeterminate {
             background: repeating-linear-gradient(
-                    -45deg,
-                    $primaryLight,
-                    $primaryLight 5px,
-                    rgba(0, 0, 0, 0.04) 5px,
-                    rgba(0, 0, 0, 0.04) 10px
+                -45deg,
+                $primaryLight,
+                $primaryLight 5px,
+                rgba(0, 0, 0, 0.04) 5px,
+                rgba(0, 0, 0, 0.04) 10px
             );
             color: $textLight;
         }
@@ -562,19 +589,18 @@ mat-select.mat-select-icon {
         }
     }
 }
-.mat-menu-panel {
+.mat-mdc-menu-panel {
     min-height: initial !important;
-    overflow-x: hidden! important; // prevent scrollbars on FF
+    overflow-x: hidden !important; // prevent scrollbars on FF
 }
 
 .cdk-drag-preview {
-    box-sizing: border-box;
     border-radius: 4px;
     @include materialShadowBottom();
 }
 
 .cdk-drag-placeholder {
-    opacity: 0;
+    opacity: 0.5;
 }
 
 .cdk-drag-animating {
@@ -589,7 +615,7 @@ mat-form-field {
             padding-left: 5px;
         }
     }
-    &.mat-form-field-disabled{
+    &.mat-form-field-disabled {
         .mat-form-field-suffix {
             > span {
                 color: $textLight;
@@ -608,7 +634,7 @@ mat-form-field {
     }
     .cdk-overlay-pane .suggestion-card,
     .cdk-overlay-pane .mat-autocomplete-panel,
-    .cdk-overlay-pane .mat-menu-panel,
+    .cdk-overlay-pane .mat-mdc-menu-panel,
     .cdk-overlay-pane .mat-tooltip {
         outline: 1px solid rgba(black, 0.42);
     }

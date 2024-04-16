@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.edu_sharing</groupId>
+    <artifactId>edu_sharing-community-repository-backend-services-rest</artifactId>
+    <version>git</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>edu_sharing-community-repository-backend-services-rest-client</artifactId>
+  <packaging>pom</packaging>
+
+  <name>edu_sharing-community-repository-backend-services-rest-client</name>
+
+  <properties>
+
+    <composer.project.root>community-repository-rest-client</composer.project.root>
+    <java.package.root>${java.root.generated}.repository.backend.services.rest.client</java.package.root>
+
+  </properties>
+
+  <build>
+
+    <pluginManagement>
+
+      <plugins>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <configuration>
+            <includeArtifactIds>
+              edu_sharing-community-repository-backend-services-rest-api
+            </includeArtifactIds>
+            <excludes>META-INF/**</excludes>
+            <outputDirectory>${project.build.directory}/api</outputDirectory>
+          </configuration>
+        </plugin>
+
+      </plugins>
+
+    </pluginManagement>
+
+  </build>
+
+  <modules>
+    <module>java</module>
+    <module>php</module>
+    <module>typescript</module>
+  </modules>
+
+</project>

@@ -1,0 +1,33 @@
+.modal-card-content {
+    padding: 0 25px;
+    .mat-form-field {
+        width: 100%;
+    }
+}
+::ng-deep .mat-menu-template {
+    max-width: 400px;
+}
+
+fieldset {
+    border: none;
+    legend {
+        padding-bottom: 0.25em;
+    }
+    .mat-hint {
+        display: block;
+        margin-bottom: 0.25em;
+    }
+    .buttons {
+        padding: 10px 0;
+    }
+    button {
+        margin-bottom: 12px;
+        &:not(:last-of-type) {
+            margin-right: 20px;
+        }
+        .drop-down-arrow {
+            margin-right: -10px;
+            margin-left: 5px;
+        }
+    }
+}

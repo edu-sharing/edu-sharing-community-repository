@@ -1,22 +1,67 @@
-<es-card-header
-  [id]="id"
-  [title]="config.title | translate"
-  [subtitle]="config.subtitle | translate"
-  [avatar]="config.avatar"
-  (closeButtonClick)="onCloseButtonClick()"
-  [showCloseButton]="shouldShowCloseButton()"
-  [disableCloseButton]="isLoading"
-></es-card-header>
-
-<div
-  class="card-content"
-  [style.padding.px]="config.contentPadding"
-  [attr.aria-hidden]="isLoading"
->
-  <ng-template cdkPortalOutlet></ng-template>
-  <div *ngIf="isLoading" class="loading-overlay">
-    <es-spinner></es-spinner>
-  </div>
+<div *ngIf="config.jumpMarks?.length > 1 && (hideJumpMarks | async) === false" @slideInFromRight>
+  <es-card-jump-marks
+    class="jump-marks mat-elevation-z24"
+    [jumpMarks]="config.jumpMarks"
+    [activeJumpMark]="activeJumpMark"
+    (scrollToJumpMark)="jumpMarksHandler.scrollToJumpMark($event)"
+  ></es-card-jump-marks>
 </div>
 
-<es-card-actions *ngIf="buttons && buttons.length > 0" [buttons]="buttons"></es-card-actions>
+<div class="card-dialog mat-elevation-z24" [class.card-dialog-mobile]="isMobile">
+  <es-card-header
+    [id]="id"
+    [title]="config.title | translate"
+    [subtitle]="config.subtitle | translate"
+    [avatar]="config.avatar"
+    (closeButtonClick)="onCloseButtonClick()"
+    [showCloseButton]="shouldShowCloseButton()"
+    [additionalContent]="config.customHeaderBarContent"
+    [disableCloseButton]="
+      isLoading || autoSavingState === 'saving' || closeButtonTemporarilyDisabled
+    "
+    class="card-dialog-header"
+  ></es-card-header>
+
+  <div class="card-content-container">
+    <div
+      #cardContent
+      class="card-content"
+      [style.padding.px]="config.contentPadding"
+      [attr.aria-hidden]="isLoading"
+      [esJumpMarksHandler]="config.jumpMarks"
+      (activeJumpMarkChanged)="activeJumpMark = $event"
+      #jumpMarksHandler="esJumpMarksHandler"
+      cdkScrollable
+      [@expandContent]="{
+        value: expandAnimation.state,
+        params: {
+          height: expandAnimation.height,
+          width: expandAnimation.width
+        }
+      }"
+    >
+      <ng-template cdkPortalOutlet></ng-template>
+    </div>
+    <div *ngIf="isLoading" class="loading-overlay">
+      <es-spinner></es-spinner>
+    </div>
+  </div>
+
+  <es-card-actions
+    *ngIf="(buttons && buttons.length > 0) || config.customBottomBarContent || autoSavingState"
+    [buttons]="buttons"
+    [additionalContent]="config.customBottomBarContent ?? savingInfo"
+  ></es-card-actions>
+
+  <ng-template #savingInfo>
+    <p *ngIf="autoSavingState === 'saving'" class="saving-info" aria-live="polite">
+      {{ 'DIALOG.SAVING' | translate }}
+    </p>
+    <p *ngIf="autoSavingState === 'saved'" class="saving-info" aria-live="polite">
+      {{ 'DIALOG.SAVED' | translate }}
+    </p>
+    <p *ngIf="autoSavingState === 'error'" class="saving-error" aria-live="polite">
+      {{ 'DIALOG.SAVING_ERROR' | translate }}
+    </p>
+  </ng-template>
+</div>

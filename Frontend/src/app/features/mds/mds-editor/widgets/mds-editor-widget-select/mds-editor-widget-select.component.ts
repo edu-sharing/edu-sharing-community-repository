@@ -1,10 +1,9 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { UntypedFormControl } from '@angular/forms';
 import { MatTooltip } from '@angular/material/tooltip';
-import { skip } from 'rxjs/operators';
-import { MdsWidgetValue } from '../../../types/types';
+import { MdsWidget, MdsWidgetValue } from '../../../types/types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
-import {MatSelect} from '@angular/material/select';
+import { MatSelect } from '@angular/material/select';
 
 @Component({
     selector: 'es-mds-editor-widget-select',
@@ -16,7 +15,7 @@ export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implemen
     @ViewChild(MatSelect) matSelect: MatSelect;
 
     values: Promise<MdsWidgetValue[]>;
-    formControl: FormControl;
+    formControl: UntypedFormControl;
 
     readonly showTooltip = (() => {
         let previousTooltip: MatTooltip;
@@ -31,9 +30,9 @@ export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implemen
         this.matSelect.open();
     }
 
-    ngOnInit() {
-        this.formControl = new FormControl(null, this.getStandardValidators());
-        const initialValue = this.widget.getInitialValues().jointValues[0];
+    async ngOnInit() {
+        this.formControl = new UntypedFormControl(null, this.getStandardValidators());
+        const initialValue = (await this.widget.getInitalValuesAsync()).jointValues[0];
         this.values = this.widget.getSuggestedValues();
         if (initialValue) {
             this.values.then((values) => {
@@ -47,14 +46,19 @@ export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implemen
                 }
             });
         }
-        // skip first because the form will always fire a value on init
-        this.formControl.valueChanges.pipe(skip(1)).subscribe((value) => {
+        this.formControl.valueChanges.subscribe((value) => {
             this.setValue(value ? [value.id] : [null]);
         });
+        this.registerValueChanges(this.formControl);
     }
 
     onActiveDescendantChanges(elementId: string) {
         const element = document.getElementById(elementId);
         this.showTooltip((element as any)?.tooltip);
+    }
+
+    public static mapGraphqlId(definition: MdsWidget) {
+        // attach the "RangedValue" graphql Attributes
+        return MdsEditorWidgetBase.attachGraphqlSelection(definition, ['id', 'value']);
     }
 }

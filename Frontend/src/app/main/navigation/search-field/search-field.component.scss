@@ -1,35 +1,50 @@
 @import '../../../core-ui-module/styles/variables';
 
+@mixin suggestionCardHeading {
+    font-size: $fontSizeSmall;
+    color: $textLight;
+}
+
 :host {
     position: relative;
-    display: block;
+    display: flex;
 }
 
-:host mat-form-field.search-field ::ng-deep {
-    .mat-form-field-wrapper {
-        padding-bottom: 0;
-    }
-    .mat-form-field-underline {
-        display: none;
-    }
-    .mat-form-field-infix {
-        padding: 0;
-        border: none;
-    }
-}
-
-mat-form-field {
-    width: 100%;
+form {
+    display: flex;
+    flex-grow: 1;
+    min-width: 0;
 }
 
 .search-field-wrapper {
     width: 100%;
     display: flex;
     background: $workspaceTopBarInputBackground;
-    border-radius: 2px;
-    padding: 4px;
+    border-radius: 3px;
+    .search-field {
+        display: flex;
+        width: 100%;
+        input {
+            background: unset;
+            height: 100%;
+            border: none;
+            &:focus {
+                border: none;
+                outline: none;
+            }
+            // Remove clear button inserted by browsers
+            &::ms-clear {
+                display: none;
+            }
+            &::-webkit-search-cancel-button {
+                display: none;
+            }
+        }
+        button {
+            color: $textMain;
+        }
+    }
     &.input-has-focus {
-        border-radius: 0;
         &:not(.cdk-keyboard-focused) {
             @include setGlobalFocus();
         }
@@ -37,6 +52,14 @@ mat-form-field {
             transition: none;
             @include setGlobalKeyboardFocus();
         }
+    }
+}
+
+.filters-button {
+    margin-right: -6px;
+    &.mat-badge ::ng-deep .mat-badge-content {
+        right: -3px;
+        top: -3px;
     }
 }
 
@@ -48,27 +71,38 @@ mat-form-field {
     }
     > label {
         display: flex;
-        color: $textLight;
-        font-size: $fontSizeSmall;
-        text-transform: uppercase;
+        @include suggestionCardHeading;
         margin-bottom: 5px;
     }
+}
+.suggestion-card {
     .chips-wrapper {
         display: flex;
         width: 100%;
         flex-wrap: wrap;
-        .mat-chip.mat-standard-chip {
-            word-break: break-word;
+    }
 
-            @each $property, $color in $chip-colors {
-                &.filter-chip-#{$property} {
-                    background-color: $color;
-                }
+    ::ng-deep .mat-mdc-standard-chip {
+        word-break: break-word;
+        height: unset;
+        @each $property, $color in $chip-colors {
+            &.filter-chip-#{$property} {
+                background-color: $color !important;
             }
-            .mat-chip-remove {
-                color: inherit;
-                opacity: 0.4;
-            }
+        }
+
+        .remove-chip {
+            color: var(--textLight) !important;
+        }
+
+        .mdc-evolution-chip__text-label {
+            padding: 5px 0;
+            white-space: normal;
+        }
+
+        .mat-mdc-chip-remove {
+            color: inherit;
+            opacity: 0.4;
         }
     }
 }
@@ -77,24 +111,13 @@ mat-form-field {
     flex: 1 0 0;
     display: flex;
     align-items: center;
-    min-width: 220px;
-    .filter-prefix {
-        font-weight: bold;
-        padding: 5px;
-        width: 24px;
-        font-size: $fontSizeXSmall;
-        text-align: center;
-        border-radius: 50%;
-        background-color: darken($warningMedium, 14%);
-        user-select: none;
-        margin: 0 5px;
-    }
+    min-width: 120px;
 }
 
 .search-input {
+    padding: 0 1em;
     color: $workspaceTopBarInputText;
-    flex-grow: 1;
-    background: none;
+    -webkit-appearance: none; // Fix white background on Safari
     width: unset;
     min-width: 0;
     flex: 1 0 0;
@@ -104,15 +127,27 @@ mat-form-field {
 }
 
 .submit-button {
-    border-radius: 0 2px 2px 0;
-    color: $workspaceTopBarInputText;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0 3px 3px 0;
     background-color: mix($workspaceTopBarInputBackground, $workspaceTopBarBackground, 80%);
+    & ::ng-deep .mdc-icon-button__ripple {
+        border-radius: unset;
+    }
 }
 
 .clear-button {
-    color: rgba($workspaceTopBarInputText, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0;
+    color: #{rgba($workspaceTopBarInputText, 0.8)};
     &.cdk-keyboard-focused {
         @include setGlobalKeyboardFocus('border');
+    }
+    @media all and (max-width: ($mobileWidth - $mobileStage*3)) {
+        display: none;
     }
 }
 
@@ -126,9 +161,7 @@ mat-form-field {
 ::ng-deep .cdk-overlay-container .suggestion-card {
     es-mds-editor-widget-container {
         label {
-            font-size: $fontSizeSmall;
-            color: $textLight;
-            text-transform: uppercase;
+            @include suggestionCardHeading;
         }
     }
 }

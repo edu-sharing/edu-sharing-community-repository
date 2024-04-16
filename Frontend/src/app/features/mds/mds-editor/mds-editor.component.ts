@@ -1,8 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { MdsEditorInstanceService } from './mds-editor-instance.service';
-import { EditorMode } from '../types/mds-types';
-import { Values } from '../types/types';
+import { EditorMode, Values } from '../types/types';
 
 /** Information that require a re-initialization once changed. */
 interface InitInfo {
@@ -58,7 +57,6 @@ export class MdsEditorComponent implements OnInit {
     }
 
     private init(info: Partial<InitInfo>): void {
-        console.log('mds init')
         if (info.repository && info.metadataSet && info.group) {
             this.mdsEditorInstance.initWithoutNodes(
                 info.group,

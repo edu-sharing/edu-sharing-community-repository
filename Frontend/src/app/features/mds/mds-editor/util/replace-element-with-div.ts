@@ -5,17 +5,22 @@
  *
  * Sets the attribute "data-element" to the old element tag name.
  */
-export function replaceElementWithDiv(element: Element, mode: 'append' | 'replace' = 'replace'): HTMLDivElement {
+export function replaceElementWithDiv(
+    element: Element,
+    mode: 'append' | 'replace' = 'replace',
+): HTMLDivElement {
     const div = document.createElement('div');
     div.setAttribute('data-element', element.localName);
     for (const attribute of element.attributes) {
         const targetAttributeName = getTargetAttributeName(attribute);
         div.setAttribute(targetAttributeName, attribute.nodeValue);
     }
-    if(element.parentNode) {
-        if(mode === 'append') {
-            element.parentNode.append(div);
-        } else if(mode === 'replace') {
+    if (element.parentNode) {
+        if (mode === 'append') {
+            // keep the positioning
+            element.parentNode.insertBefore(div, element);
+            // element.parentNode.append(div);
+        } else if (mode === 'replace') {
             element.parentNode.replaceChild(div, element);
         }
     } else {

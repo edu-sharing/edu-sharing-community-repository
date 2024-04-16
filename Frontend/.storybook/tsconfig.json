@@ -1,11 +1,12 @@
 {
-  "extends": "../tsconfig.json",
-  "exclude": [
-    "../src/test.ts",
-    "../src/**/*.spec.ts",
-    "../projects/**/*.spec.ts"
-  ],
-  "include": [
-    "../src/**/*"
-  ]
+  "extends": "../tsconfig.app.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "types": ["node", "jquery"],
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true
+  },
+  "exclude": ["../src/test.ts", "../src/**/*.spec.ts", "../projects/edu-sharing-ui/**/*.spec.ts"],
+  "include": ["../src/**/*", "../projects/edu-sharing-ui/**/*", "./preview.ts"],
+  "files": ["./typings.d.ts"]
 }

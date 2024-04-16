@@ -1,6 +1,6 @@
 <div *ngIf="avatar" class="card-dialog-avatar">
   <i *ngIf="avatar.kind === 'icon'" [esIcon]="avatar.icon"></i>
-  <img *ngIf="avatar.kind === 'image'" [src]="avatar.url" alt="" esImage-config />
+  <img *ngIf="avatar.kind === 'image'" [src]="avatar.url" alt="" esImageConfig />
 </div>
 
 <div class="card-dialog-header-text">
@@ -8,6 +8,10 @@
   <p id="card-dialog-subtitle-{{ id }}" class="card-dialog-subtitle" *ngIf="subtitle">
     {{ subtitle }}
   </p>
+</div>
+
+<div class="additional-content" *ngIf="additionalContent">
+  <ng-container [ngTemplateOutlet]="additionalContent"></ng-container>
 </div>
 
 <div class="card-dialog-close-button-box" *ngIf="showCloseButton">

@@ -1,0 +1,61 @@
+<div class="block">
+  <div class="top">
+    <h3 class="mat-heading-3">
+      {{ 'SIMPLE_EDIT.METADATA.TITLE' | translate }}
+    </h3>
+    <div>
+      <button mat-button color="primary" (click)="_openMetadata()" data-test="more-metadata-button">
+        <i esIcon="edit"></i> {{ 'SIMPLE_EDIT.METADATA.MORE' | translate }}
+      </button>
+    </div>
+  </div>
+  <es-simple-edit-metadata
+    #metadata
+    [nodes]="_nodes"
+    [fromUpload]="data.fromUpload"
+    (onError)="_handleError($event)"
+  ></es-simple-edit-metadata>
+</div>
+<div class="block">
+  <div class="top">
+    <h3 class="mat-heading-3">
+      {{ 'SIMPLE_EDIT.INVITE.TITLE' | translate }}
+    </h3>
+    <div>
+      <button
+        mat-button
+        color="primary"
+        [disabled]="!tpInvite || !(_nodes | hasPermission : 'ChangePermissions')"
+        (click)="_openShare()"
+      >
+        <i esIcon="group_add"></i> {{ 'SIMPLE_EDIT.INVITE.MORE' | translate }}
+      </button>
+    </div>
+  </div>
+  <es-simple-edit-invite
+    #invite
+    [nodes]="_nodes"
+    [fromUpload]="data.fromUpload"
+    (onError)="_handleError($event)"
+    (onInitFinished)="_updateInitState('invite')"
+  ></es-simple-edit-invite>
+</div>
+<div class="block">
+  <div class="top">
+    <h3 class="mat-heading-3">
+      {{ 'SIMPLE_EDIT.LICENSE.TITLE' | translate }}
+    </h3>
+    <div>
+      <button mat-button color="primary" [disabled]="!tpLicense" (click)="_openLicense()">
+        <i esIcon="copyright"></i> {{ 'SIMPLE_EDIT.LICENSE.MORE' | translate }}
+      </button>
+    </div>
+  </div>
+  <es-simple-edit-license
+    #license
+    [nodes]="_nodes"
+    [fromUpload]="data.fromUpload"
+    (onError)="_handleError($event)"
+    (onInitFinished)="_updateInitState('license')"
+  ></es-simple-edit-license>
+</div>

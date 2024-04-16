@@ -1,0 +1,27 @@
+<span
+  matSnackBarLabel
+  *ngIf="data.html"
+  [innerHTML]="data.message"
+  data-test="toast-message"
+></span>
+<span matSnackBarLabel *ngIf="!data.html" data-test="toast-message">{{ data.message }}</span>
+<span matSnackBarActions>
+  <button matSnackBarAction mat-button *ngIf="data.action" (click)="data.action.callback()">
+    {{ data.action.label }}
+  </button>
+</span>
+
+<!-- 
+TOAST_DURATION.Infinite is not a selectable option on the accessibility panel, so we ignore this for
+now.
+-->
+<!-- <div class="toast-group">
+  <button
+    *ngIf="toast.duration === TOAST_DURATION.Infinite"
+    mat-button
+    class="dismiss "
+    (click)="snackBar.dismiss()"
+  >
+    {{ 'ACCESSIBILITY.DISMISS_TOAST' | translate }}
+  </button>
+</div> -->

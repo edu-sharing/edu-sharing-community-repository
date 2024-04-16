@@ -1,17 +1,17 @@
-@import "../../../core-ui-module/styles/variables";
+@import '../../../core-ui-module/styles/variables';
 
-.drop-zone{
-  z-index: 100;
-  text-align: center;
-  div{
-    position: relative;
-    top:30%;
-    color:#fff;
-  }
-  p{
-    font-size:150%;
-  }
-  i{
-    font-size:120pt;
-  }
+.drop-zone {
+    z-index: 100;
+    text-align: center;
+    div {
+        position: relative;
+        top: 30%;
+        color: #fff;
+    }
+    p {
+        font-size: 150%;
+    }
+    i {
+        font-size: 120pt;
+    }
 }

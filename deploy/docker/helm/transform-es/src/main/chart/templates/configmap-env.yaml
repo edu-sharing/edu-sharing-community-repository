@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "edusharing_common_lib.names.name" . }}-env
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+data:
+  JAVA_OPTS: >-
+    {{- with .Values.config.jvm.ram.minPercentage }}
+    -XX:InitialRAMPercentage={{ . }}
+    {{- end }}
+    {{- with .Values.config.jvm.ram.maxPercentage }}
+    -XX:MaxRAMPercentage={{ . }}
+    {{- end }}    
+    -Dcom.sun.management.jmxremote
+    -Dcom.sun.management.jmxremote.authenticate=false
+    -Dcom.sun.management.jmxremote.port=7199
+    -Dcom.sun.management.jmxremote.ssl=false
+    {{- if default .Values.global.debug .Values.debug }}
+    -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:5005
+    {{- end }}
+  SPRING_APPLICATION_JSON: {{ .Values.config.override | quote }}

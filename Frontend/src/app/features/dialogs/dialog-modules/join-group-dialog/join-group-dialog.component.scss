@@ -1,0 +1,60 @@
+@import '../../../../core-ui-module/styles/variables';
+
+$cardPadding: 25px;
+
+.select-group {
+    display: flex;
+    flex-direction: column;
+    p {
+        display: flex;
+        justify-content: center;
+    }
+    .no-groups-message {
+        margin-top: 20%;
+        color: $textLight;
+    }
+    button {
+        margin: 0 -#{$cardPadding};
+        padding: 0 $cardPadding;
+        border-radius: 0;
+        background: none;
+        border: none;
+        &.is-member {
+            app-authority-row {
+                opacity: 0.75;
+                filter: grayscale(100%);
+                backdrop-filter: grayscale(100%);
+            }
+        }
+        &.selected {
+            background: var(--listItemSelectedBackgroundEffect);
+        }
+        es-authority-row {
+            display: flex;
+            width: 100%;
+            text-align: left;
+        }
+    }
+}
+
+.confirm-group {
+    display: flex;
+    flex-direction: column;
+    p {
+        display: flex;
+        justify-content: center;
+    }
+    .group-name {
+        margin-bottom: 2em;
+    }
+    es-input-password {
+        display: flex;
+        margin-top: 20px;
+        width: 100%;
+        ::ng-deep {
+            mat-form-field {
+                width: 100%;
+            }
+        }
+    }
+}

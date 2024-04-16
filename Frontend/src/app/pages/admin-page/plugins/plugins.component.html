@@ -1,0 +1,34 @@
+<div class="plugins">
+  <h3 class="mat-heading-3 mat-heading-underline">{{ 'ADMIN.PLUGINS.TITLE' | translate }}</h3>
+  <es-info-message mode="info">{{ 'ADMIN.PLUGINS.INFO' | translate }}</es-info-message>
+  <ul class="plugin-list">
+    <li *ngFor="let p of plugins">
+      <i esIcon="extension"></i>
+      <div>
+        <div class="name-wrapper">
+          <div class="name">
+            {{
+              'ADMIN.PLUGINS.PLUGIN_DETAILS.' + p.name + '.TITLE' | translate : { fallback: p.name }
+            }}
+          </div>
+          <div class="version">{{ p.version }}</div>
+        </div>
+        <div class="state" [class.state-enabled]="p.enabled">
+          {{ 'ADMIN.PLUGINS.' + (p.enabled ? 'ENABLED' : 'DISABLED') | translate }}
+        </div>
+        <div class="description">
+          {{
+            'ADMIN.PLUGINS.PLUGIN_DETAILS.' + p.name + '.DESCRIPTION'
+              | translate : { fallback: ('ADMIN.PLUGINS.NO_DESCRIPTION' | translate) }
+          }}
+        </div>
+      </div>
+    </li>
+  </ul>
+  <div class="more">
+    <p>{{ 'ADMIN.PLUGINS.MORE' | translate }}</p>
+    <a href="https://edu-sharing.com/extensions/" target="_blank">{{
+      'ADMIN.PLUGINS.MORE_LINK' | translate
+    }}</a>
+  </div>
+</div>

@@ -1,11 +1,14 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { AccessibilityComponent } from '../../common/ui/accessibility/accessibility.component';
-import { CookieInfoComponent } from '../../common/ui/cookie-info/cookie-info.component';
+import { Injectable, TemplateRef } from '@angular/core';
+import * as rxjs from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { FrameEventsService, Node } from '../../core-module/core.module';
+import { DialogsService } from '../../features/dialogs/dialogs.service';
+import { ManagementDialogsService } from '../../features/management-dialogs/management-dialogs.service';
 import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.component';
-import { ManagementDialogsService } from '../../modules/management-dialogs/management-dialogs.service';
+import { CookieInfoComponent } from '../cookie-info/cookie-info.component';
 import { SkipNavService } from './skip-nav/skip-nav.service';
+import { OptionItem } from 'ngx-edu-sharing-ui';
 
 export class MainNavCreateConfig {
     /** allowed / display new material button */
@@ -18,13 +21,13 @@ export class MainNavCreateConfig {
 
 export class MainNavConfig {
     /**
-     * Show or hide the complete navigation
+     * Show or hide the entire component including banner and navigation bar
      */
     show? = true;
     /**
-     * Show and enables the search field
+     * Show or hide the navigation bar
      */
-    searchEnabled?: boolean;
+    showNavigation? = true;
     /**
      * Shows the current location
      */
@@ -33,10 +36,6 @@ export class MainNavConfig {
      * Shows and enables the user menu
      */
     showUser? = true;
-    /**
-     * The placeholder text for the search field, will be translated
-     */
-    searchPlaceholder?: string;
     /**
      * When true, the sidebar can be clicked to open the menu
      */
@@ -49,19 +48,34 @@ export class MainNavConfig {
      * "add material" options
      */
     create?: MainNavCreateConfig = new MainNavCreateConfig();
-    searchQuery?: string;
     currentScope: string;
+
+    /**
+     * additional scope info, i.e. for collections this can be "edit" when in edit/create context
+     */
+    additionalScope?: 'edit';
+    /**
+     * Hide the search field although it was enabled via `SearchFieldService`.
+     *
+     * Use if you include the search-field component yourself in your page.
+     */
+    hideSearchField? = false;
+    /**
+     * Custom options that should be placed in the "New" menu
+     */
+    customCreateOptions?: OptionItem[];
 
     /**
      * If create is allowed, this event will fire the new nodes
      */
     onCreate?: (node: Node[]) => void;
     onCreateNotAllowed?: () => void;
-    /**
-     * Called when a search event happened, emits the search string and additional event info.
-     */
-    onSearch?: (query: string, cleared: boolean) => void;
-    searchQueryChange?: (searchQuery: string) => void;
+}
+
+export enum TemplateSlot {
+    MainScopeButton,
+    BeforeUserMenu,
+    BelowTopBar,
 }
 
 @Injectable({
@@ -70,34 +84,47 @@ export class MainNavConfig {
 export class MainNavService {
     private mainnav: MainNavComponent;
     private cookieInfo: CookieInfoComponent;
-    private accessibility: AccessibilityComponent;
     private mainNavConfigSubject = new BehaviorSubject<MainNavConfig>(new MainNavConfig());
+    private mainNavConfigOverrideSubject = new BehaviorSubject<Partial<MainNavConfig> | null>(null);
+    private customTemplates: { [key in TemplateSlot]?: TemplateRef<any> } = {};
+    /**
+     * is triggered when a connector or lti element was successfully created
+     * The observable will receive the newly generated node
+     */
+    onConnectorCreated = new Subject<Node>();
 
     constructor(
-        private dialogs: ManagementDialogsService,
+        private managementDialogs: ManagementDialogsService,
         private event: FrameEventsService,
         private skipNav: SkipNavService,
+        private dialogs: DialogsService,
     ) {}
 
+    /**
+     * register a template to be used in the top bar instead of the default one
+     */
+    registerCustomTemplateSlot(slot: TemplateSlot, template: TemplateRef<any>) {
+        this.customTemplates[slot] = template;
+    }
+    getCustomTemplateSlot(slot: TemplateSlot) {
+        return this.customTemplates[slot];
+    }
     getDialogs() {
-        return this.dialogs.getDialogsComponent();
+        return this.managementDialogs.getDialogsComponent();
     }
 
     getCookieInfo() {
         return this.cookieInfo;
     }
 
-    getAccessibility() {
-        return this.accessibility;
-    }
-
     registerCookieInfo(cookieInfo: CookieInfoComponent) {
         this.cookieInfo = cookieInfo;
     }
 
-    registerAccessibility(accessibility: AccessibilityComponent) {
-        this.accessibility = accessibility;
-        this.skipNav.register('ACCESSIBILITY_SETTINGS', () => accessibility.show());
+    registerAccessibility() {
+        this.skipNav.register('ACCESSIBILITY_SETTINGS', () =>
+            this.dialogs.openAccessibilityDialog(),
+        );
     }
 
     getMainNav() {
@@ -117,6 +144,9 @@ export class MainNavService {
             ...new MainNavConfig(),
             ...config,
         });
+        setTimeout(() => {
+            this.getMainNav()?.refreshBanner();
+        });
     }
 
     /**
@@ -129,7 +159,17 @@ export class MainNavService {
         });
     }
 
+    /**
+     * Override individual values for the entire application, independently of what values are given
+     * with `setMainNavConfig` and `patchMainNavConfig`.
+     */
+    globallyOverrideMainNavConfig(config: Partial<MainNavConfig>): void {
+        this.mainNavConfigOverrideSubject.next(config);
+    }
+
     observeMainNavConfig(): Observable<MainNavConfig> {
-        return this.mainNavConfigSubject.asObservable();
+        return rxjs
+            .combineLatest([this.mainNavConfigSubject, this.mainNavConfigOverrideSubject])
+            .pipe(map(([config, override]) => ({ ...config, ...(override ?? {}) })));
     }
 }

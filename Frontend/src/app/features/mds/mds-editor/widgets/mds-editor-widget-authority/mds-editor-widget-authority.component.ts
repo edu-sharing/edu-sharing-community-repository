@@ -1,6 +1,6 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import {
     MatAutocomplete,
     MatAutocompleteSelectedEvent,
@@ -20,14 +20,14 @@ import {
 } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsWidgetType, MdsWidgetValue } from '../../../types/types';
-import {DisplayValue, DisplayValues} from '../DisplayValues';
+import { DisplayValue, DisplayValues } from '../DisplayValues';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
-import {Authority, AuthorityProfile, Group} from '../../../../../core-module/rest/data-object';
-import {AuthorityNamePipe} from '../../../../../shared/pipes/authority-name.pipe';
-import {AuthorityAffiliationPipe} from '../../../../../shared/pipes/authority-affiliation.pipe';
+import { Authority, AuthorityProfile, Group } from '../../../../../core-module/rest/data-object';
+import { AuthorityNamePipe } from '../../../../../shared/pipes/authority-name.pipe';
+import { AuthorityAffiliationPipe } from '../../../../../shared/pipes/authority-affiliation.pipe';
 import { waitForAsync } from '@angular/core/testing';
-import {RestConnectorService} from '../../../../../core-module/rest/services/rest-connector.service';
-import {RestConstants} from '../../../../../core-module/rest/rest-constants';
+import { RestConnectorService } from '../../../../../core-module/rest/services/rest-connector.service';
+import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { AuthoritySearchInputComponent } from '../../../../../shared/components/authority-search-input/authority-search-input.component';
 
 @Component({
@@ -36,15 +36,16 @@ import { AuthoritySearchInputComponent } from '../../../../../shared/components/
     styleUrls: ['./mds-editor-widget-authority.component.scss'],
 })
 export class MdsEditorWidgetAuthorityComponent extends MdsEditorWidgetBase implements OnInit {
-    @ViewChild('authoritySearchInputComponent') authoritySearchInputComponent: AuthoritySearchInputComponent;
+    @ViewChild('authoritySearchInputComponent')
+    authoritySearchInputComponent: AuthoritySearchInputComponent;
     @ViewChild(MatAutocompleteTrigger, { read: MatAutocompleteTrigger })
     trigger: MatAutocompleteTrigger;
     @ViewChild('auto') matAutocomplete: MatAutocomplete;
 
     readonly valueType: ValueType = ValueType.MultiValue;
     readonly separatorKeysCodes: number[] = [ENTER, COMMA];
-    inputControl = new FormControl();
-    chipsControl: FormControl;
+    inputControl = new UntypedFormControl();
+    chipsControl: UntypedFormControl;
     autocompleteValues: Observable<DisplayValue[]>;
     indeterminateValues$: BehaviorSubject<string[]>;
     showDropdownArrow: boolean;
@@ -71,22 +72,27 @@ export class MdsEditorWidgetAuthorityComponent extends MdsEditorWidgetBase imple
     }
 
     ngOnInit(): void {
-        this.chipsControl = new FormControl(
+        this.chipsControl = new UntypedFormControl(
             [
                 ...this.widget.getInitialValues().jointValues,
                 ...(this.widget.getInitialValues().individualValues ?? []),
-            ].filter((value) => !!value).map((value: string) => ({
-                    key: value,
-                    label: value,
-                }) as DisplayValue),
-            this.getStandardValidators()
+            ]
+                .filter((value) => !!value)
+                .map(
+                    (value: string) =>
+                        ({
+                            key: value,
+                            label: value,
+                        } as DisplayValue),
+                ),
+            this.getStandardValidators(),
         );
         this.indeterminateValues$ = new BehaviorSubject(
             this.widget.getInitialValues().individualValues,
         );
-        this.conntector.hasToolPermission(RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH).subscribe((tp) =>
-            this.globalSearchAllowed = tp
-        )
+        this.conntector
+            .hasToolPermission(RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH)
+            .subscribe((tp) => (this.globalSearchAllowed = tp));
         this.chipsControl.valueChanges
             .pipe(distinctUntilChanged())
             .subscribe((values: DisplayValue[]) => this.setValue(values.map((value) => value.key)));
@@ -95,7 +101,7 @@ export class MdsEditorWidgetAuthorityComponent extends MdsEditorWidgetBase imple
             this.widget.setIndeterminateValues(indeterminateValues),
         );
         this.widget.addValue.subscribe((value: MdsWidgetValue) =>
-            this.chipsControl.setValue([...this.chipsControl.value, value])
+            this.chipsControl.setValue([...this.chipsControl.value, value]),
         );
     }
 
@@ -122,14 +128,14 @@ export class MdsEditorWidgetAuthorityComponent extends MdsEditorWidgetBase imple
         this.authoritySearchInputComponent?.inputElement?.nativeElement?.focus();
     }
 
-    add(value: Authority|string): void {
-        if(value instanceof String) {
+    add(value: Authority | string): void {
+        if (value instanceof String) {
             console.warn('Authority widget does currently not support state handling');
         } else {
             const displayValue: DisplayValue = {
                 label: new AuthorityNamePipe(this.translate).transform(value),
                 hint: new AuthorityAffiliationPipe(this.translate).transform(value),
-                key: (value as Authority).authorityName
+                key: (value as Authority).authorityName,
             };
             if (!this.chipsControl.value.some((v: DisplayValue) => v.key === displayValue.key)) {
                 this.chipsControl.setValue([...this.chipsControl.value, displayValue]);

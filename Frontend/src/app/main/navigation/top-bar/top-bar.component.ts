@@ -12,11 +12,11 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import { User } from 'ngx-edu-sharing-api';
 import { Observable } from 'rxjs';
 import { ConfigurationService, Node, RestConnectorService } from '../../../core-module/core.module';
-import { OptionItem } from '../../../core-ui-module/option-item';
+import { OptionItem } from 'ngx-edu-sharing-ui';
 import { CreateMenuComponent } from '../create-menu/create-menu.component';
 import { MainMenuDropdownComponent } from '../main-menu-dropdown/main-menu-dropdown.component';
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';
-import { MainNavCreateConfig } from '../main-nav.service';
+import { MainNavCreateConfig, MainNavService, TemplateSlot } from '../main-nav.service';
 
 @Component({
     selector: 'es-top-bar',
@@ -24,11 +24,13 @@ import { MainNavCreateConfig } from '../main-nav.service';
     styleUrls: ['./top-bar.component.scss'],
 })
 export class TopBarComponent {
+    readonly TemplateSlot = TemplateSlot;
     @ContentChild('createButton') createButtonRef: TemplateRef<any>;
     @ViewChild('createMenu') createMenu: CreateMenuComponent;
     @ViewChild('dropdownTriggerDummy') createMenuTrigger: MatMenuTrigger;
     @ViewChild('mainMenuDropdown') mainMenuDropdown: MainMenuDropdownComponent;
     @ViewChild('mainMenuSidebar') mainMenuSidebar: MainMenuSidebarComponent;
+    @ViewChild('userRef') userRef: ElementRef;
 
     @Input() autoLogoutTimeout$: Observable<string>;
     @Input() canOpen = true;
@@ -50,17 +52,18 @@ export class TopBarComponent {
     @Output() created = new EventEmitter<Node[]>();
     @Output() createNotAllowed = new EventEmitter<void>();
     @Output() openChat = new EventEmitter<void>();
-    @Output() openImprint = new EventEmitter<void>();
-    @Output() openPrivacy = new EventEmitter<void>();
     @Output() showLicenses = new EventEmitter<void>();
+    @Output() onCloseScopeSelector = new EventEmitter<void>();
 
     createMenuX: number;
     createMenuY: number;
+    toggleSidebar = () => this.mainMenuSidebar.toggle();
 
     constructor(
         // FIXME: Required values should be passed as inputs.
         public connector: RestConnectorService,
         private configService: ConfigurationService,
+        public mainNavService: MainNavService,
         public elementRef: ElementRef,
     ) {}
 
@@ -76,6 +79,10 @@ export class TopBarComponent {
                 this.mainMenuDropdown.dropdown.menuTrigger.openMenu();
             }
         }
+    }
+
+    isSidenavOpen() {
+        return this.mainMenuSidebar?.show;
     }
 
     openCreateMenu(x: number, y: number) {

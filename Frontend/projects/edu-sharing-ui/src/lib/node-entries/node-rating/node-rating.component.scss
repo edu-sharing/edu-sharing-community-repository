@@ -1,0 +1,35 @@
+.stars {
+    display: flex;
+    align-items: center;
+    span {
+        padding-left: 8px;
+    }
+}
+.likes {
+    display: flex;
+    align-items: center;
+}
+.mdc-icon-button.mat-primary {
+    color: var(--textLight);
+    display: flex;
+    align-items: center;
+    padding: 0;
+    &.star,
+    &.delete {
+        min-width: unset;
+        width: 18px;
+        height: 18px;
+        i {
+            font-size: 17px;
+            line-height: 1;
+        }
+        ::ng-deep {
+            .mat-mdc-button-touch-target {
+                display: none;
+            }
+        }
+        &.star-hover {
+            color: var(--colorStarActive);
+        }
+    }
+}

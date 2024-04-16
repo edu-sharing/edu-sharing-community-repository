@@ -1,0 +1,8 @@
+<ul cdkDropList (cdkDropListDropped)="onDropped($event)">
+  <li *ngFor="let collection of pinnedCollections; index as index" cdkDrag>
+    <mat-checkbox [checked]="isChecked(collection)" (change)="setChecked(collection, $event)">
+      {{ getName(collection) }}
+    </mat-checkbox>
+    <i esIcon="drag_handle" class="drag-handle" cdkDragHandle></i>
+  </li>
+</ul>

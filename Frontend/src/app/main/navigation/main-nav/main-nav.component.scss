@@ -1,8 +1,8 @@
 @import '../../../core-ui-module/styles/variables';
-@import '../../../core-ui-module/styles/toast';
 
 ::ng-deep {
-    .mobile-move-top, .mobile-move-bottom {
+    .mobile-move-top,
+    .mobile-move-bottom {
         &:focus-within {
             // Don't hide any dynamic elements when focused.
             top: 0 !important;
@@ -10,32 +10,20 @@
     }
 }
 
-.topBar {
-    position: fixed;
+.navigation-container {
+    position: sticky;
     top: 0;
-    left: 0;
-    width: 100%;
-    max-width: 100%;
     z-index: $topBarZIndex;
 }
-:host ::ng-deep .card-licenses{
-    pre{
-        white-space: pre-wrap;
-    }
+
+.topBar {
+    width: 100%;
+    max-width: 100%;
 }
 .dialog {
     z-index: $dialogZIndex + 5;
 }
-.card-agreement {
-    z-index: $dialogZIndex + 6;
-    .card-content {
-        display: flex;
-        flex-direction: column;
-    }
-    .card-scroll {
-        height: calc(100% - 68px);
-    }
-}
+
 es-user-profile {
     display: inherit !important;
 }
@@ -43,9 +31,9 @@ es-user-profile {
 .topBar {
     @include placeholder {
         color: mix(
-                $workspaceTopBarInputBackground,
-                $workspaceTopBarInputText,
-                20%
+            $workspaceTopBarInputBackground,
+            $workspaceTopBarInputText,
+            20%
         ); //rgba(255,255,255,0.165);/* => #595959;*/
     }
 }

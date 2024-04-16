@@ -1,0 +1,77 @@
+<div class="sub-tree-wrapper">
+  <es-dropdown #dropdown></es-dropdown>
+  <button
+    #dropdownTrigger="matMenuTrigger"
+    mat-button
+    class="dropdown-dummy"
+    [style.left]="dropdownLeft"
+    [style.top]="dropdownTop"
+    tabindex="-1"
+    aria-hidden="true"
+    [matMenuTriggerFor]="dropdown.menu"
+  ></button>
+
+  <div *ngIf="_nodes && _nodes.length" [@open]="_nodes && _nodes.length">
+    <div *ngFor="let node of _nodes; let i = index" (contextmenu)="contextMenu($event, node)">
+      <div
+        class="sub-tree-element"
+        cdkDrag
+        [cdkDragDisabled]="ui.isTouchSubject | async"
+        [cdkDragData]="[node]"
+        esNodesDrag
+        [esNodesDropTarget]="node"
+        [canDropNodes]="canDropOnNode"
+        (nodeDropped)="onDropped($event)"
+        [style.paddingLeft.px]="(depth + 1) * 20"
+        [class.sub-tree-element-selected]="isSelected(node)"
+        (click)="openOrCloseNode(node)"
+      >
+        <button
+          class="expand-toggle"
+          (click)="toggleNodeExpansion($event, node)"
+          [class.opacity-invisible]="_hasChildren[node.ref.id] === false"
+        >
+          <i *ngIf="!isOpen(node)" esIcon="keyboard_arrow_right"></i>
+          <i *ngIf="isOpen(node)" esIcon="keyboard_arrow_down"></i>
+        </button>
+        <img class="node-icon" src="{{ node | esNodeIcon | async }}" alt="{{ node.name }}" />
+        <span class="name">{{ node.name }}</span>
+      </div>
+      <es-workspace-sub-tree
+        class="sub-tree"
+        *ngIf="isOpen(node)"
+        [node]="node.ref.id"
+        [currentPath]="currentPath"
+        (onLoading)="setLoadingState($event, i)"
+        (onUpdateOptions)="updateOptions($event)"
+        (hasChildren)="_hasChildren[node.ref.id] = $event"
+        (onClick)="openPathEvent($event)"
+        (onDrop)="dropToParent($event)"
+        [depth]="depth + 1"
+      ></es-workspace-sub-tree>
+    </div>
+    <button
+      mat-flat-button
+      color="primary"
+      class="more-items"
+      (click)="loadAll()"
+      *ngIf="moreItems > 0 && !loadingMore"
+      [style.marginLeft.px]="50 + depth * 20"
+    >
+      {{ 'WORKSPACE.TREE_MORE_ITEMS' | translate : { count: moreItems } }}
+    </button>
+    <es-spinner
+      class="more-items-loading"
+      *ngIf="loadingMore"
+      [style.marginLeft.px]="50 + depth * 20"
+    ></es-spinner>
+  </div>
+  <div class="spinner" *ngIf="loading">
+    <es-spinner-small></es-spinner-small>
+  </div>
+</div>
+<!--
+<div [style.paddingLeft.px]="depth*20" *ngIf="!loading && (!_nodes || !_nodes.length)" class="empty">
+  {{ 'WORKSPACE.NO_SUB_NODES' | translate }}
+</div>
+-->

@@ -1,0 +1,61 @@
+<ng-container>
+  <form [formGroup]="notificationForm">
+    <mat-radio-group formControlName="configMode">
+      <mat-radio-button value="uniformly">
+        <es-multi-line-label>
+          <ng-container slot="label">
+            {{ 'NOTIFICATION.CONFIG.uniformly' | translate }}
+          </ng-container>
+          <ng-container slot="description">
+            {{ 'NOTIFICATION.CONFIG.uniformly_DESCRIPTION' | translate }}
+          </ng-container>
+        </es-multi-line-label>
+      </mat-radio-button>
+      <mat-radio-button value="individual">
+        <es-multi-line-label>
+          <ng-container slot="label">
+            {{ 'NOTIFICATION.CONFIG.individual' | translate }}
+          </ng-container>
+          <ng-container slot="description">
+            {{ 'NOTIFICATION.CONFIG.individual_DESCRIPTION' | translate }}
+          </ng-container>
+        </es-multi-line-label>
+      </mat-radio-button>
+    </mat-radio-group>
+    <div class="extended-group" *ngIf="notificationForm.get('configMode').value === 'uniformly'">
+      <ng-container
+        *ngTemplateOutlet="
+          interval;
+          context: { formControl: notificationForm.get('defaultInterval') }
+        "
+      ></ng-container>
+    </div>
+    <div
+      class="extended-group notification-individual"
+      *ngIf="notificationForm.get('configMode').value === 'individual'"
+    >
+      <div *ngFor="let group of getGroups()">
+        <h6 class="mat-heading-6">{{ 'NOTIFICATION.GROUP.' + group | translate }}</h6>
+        <ng-container
+          *ngTemplateOutlet="
+            interval;
+            context: { formControl: notificationForm.get('intervals').get(group) }
+          "
+        ></ng-container>
+      </div>
+    </div>
+  </form>
+</ng-container>
+<ng-template #interval let-formControl="formControl">
+  <mat-form-field>
+    <mat-label>{{ 'NOTIFICATION.INTERVAL_LABEL' | translate }}</mat-label>
+    <mat-select [formControl]="formControl">
+      <mat-option value="immediately">
+        {{ 'NOTIFICATION.INTERVAL.immediately' | translate }}</mat-option
+      >
+      <mat-option value="daily"> {{ 'NOTIFICATION.INTERVAL.daily' | translate }}</mat-option>
+      <mat-option value="weekly"> {{ 'NOTIFICATION.INTERVAL.weekly' | translate }}</mat-option>
+      <mat-option value="disabled"> {{ 'NOTIFICATION.INTERVAL.disabled' | translate }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+</ng-template>

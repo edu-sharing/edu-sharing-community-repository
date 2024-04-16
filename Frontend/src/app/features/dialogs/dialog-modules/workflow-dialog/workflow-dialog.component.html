@@ -1,0 +1,57 @@
+<div class="workflow-content">
+  <div class="row">
+    <div class="inputs">
+      <es-authority-search-input
+        [disabled]="!status.hasReceiver"
+        [globalSearchAllowed]="globalAllowed"
+        [groupType]="TYPE_EDITORIAL"
+        [showRecent]="false"
+        (onChooseAuthority)="addSuggestion($event)"
+        [placeholder]="'WORKSPACE.WORKFLOW.RECEIVERS'"
+        hint="{{ 'WORKSPACE.WORKFLOW.RECEIVERS_HINT' | translate }}"
+      ></es-authority-search-input>
+      <mat-form-field class="status-select">
+        <mat-select
+          [value]="status"
+          (valueChange)="setStatus($event)"
+          [style.--status-color]="status.color"
+        >
+          <mat-option
+            *ngFor="let option of validStatus"
+            [value]="option"
+            [disabled]="!isAllowedAsNext(option)"
+          >
+            <span class="workflow-dialog-status-option" [style.--status-color]="option.color">
+              {{ 'WORKFLOW.' + option.id | translate }}
+            </span>
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="receivers">
+      <mat-chip-listbox *ngIf="status.hasReceiver">
+        <mat-chip-option
+          *ngFor="let receiver of receivers"
+          [selectable]="false"
+          (removed)="removeReceiver(receiver)"
+          class="badge"
+        >
+          <div class="mat-chip-group">
+            <span class="primary">{{ receiver | authorityName }}</span>
+            <span class="secondary">{{ receiver | permissionName : { field: 'secondary' } }}</span>
+          </div>
+          <i matChipRemove esIcon="cancel"></i>
+        </mat-chip-option>
+      </mat-chip-listbox>
+    </div>
+  </div>
+  <mat-form-field class="comment">
+    <mat-label>{{ 'WORKSPACE.WORKFLOW.COMMENT' | translate }}</mat-label>
+    <input matInput [(ngModel)]="comment" />
+    <mat-hint>{{ 'WORKSPACE.WORKFLOW.COMMENT_INFO' | translate }}</mat-hint>
+  </mat-form-field>
+  <div class="historyLabel" *ngIf="history?.length">
+    {{ 'WORKSPACE.WORKFLOW.HISTORY' | translate }}
+  </div>
+</div>
+<es-workflow-list [history]="history"></es-workflow-list>

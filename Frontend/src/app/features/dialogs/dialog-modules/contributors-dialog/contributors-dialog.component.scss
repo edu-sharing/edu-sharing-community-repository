@@ -1,0 +1,38 @@
+@import '../../../../core-ui-module/styles/variables';
+@import '../../../../shared/components/card/variables';
+
+.lifecycleHeading,
+.metadataHeading {
+    font-weight: bold;
+    color: $textLight;
+    margin: 0 0 10px 0;
+}
+
+.role {
+    color: $textLight;
+}
+
+.group {
+    padding-bottom: 10px;
+}
+mat-chip-grid {
+    mat-chip {
+        ::ng-deep .mat-mdc-chip-action {
+            @include clickable();
+        }
+    }
+}
+
+.metadataHeading {
+    padding-top: 30px;
+}
+
+.btnAdd {
+    margin-top: 10px;
+    float: none !important;
+    display: inline-flex;
+    align-items: center;
+    .material-icons {
+        top: 0;
+    }
+}

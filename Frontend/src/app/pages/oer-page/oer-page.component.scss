@@ -1,0 +1,195 @@
+@import '../../core-ui-module/styles/variables';
+
+::ng-deep .topBar-oer {
+    > div {
+        background: transparent !important;
+    }
+    .topBarSearch form input {
+        background-color: rgba(255, 255, 255, 1) !important;
+    }
+    .topBarSearch {
+        position: initial !important;
+    }
+    .topBarSearch form input,
+    .topBarSearch form i {
+        color: #505050 !important;
+    }
+    .userMenu {
+        position: absolute !important;
+    }
+    .topBarSearch form {
+        margin: auto;
+        .searchClearIcon {
+            right: 5px;
+        }
+    }
+    .topBarSearch form,
+    .topBarSearch input {
+        width: 500px;
+        box-sizing: border-box;
+    }
+    .topbar-search-right {
+        width: 300px;
+        text-align: right;
+        display: flex !important;
+        align-items: center;
+        justify-content: flex-end;
+    }
+    @media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
+        .topBarSearch form,
+        .topBarSearch input {
+            width: 100%;
+            box-sizing: content-box;
+        }
+    }
+
+    @media screen and (max-width: ($mobileWidth+$mobileStage*3)) {
+        .user {
+            width: auto;
+        }
+    }
+    @media screen and (max-width: ($mobileWidth+$mobileStage*2)) {
+        .topbar-search-right {
+            width: auto;
+        }
+        .searchInputGroup {
+            width: 100% !important;
+        }
+    }
+    @media screen and (max-width: ($mobileWidth)) {
+        .topBarSearch form,
+        .topBarSearch input {
+            box-sizing: border-box;
+        }
+    }
+}
+
+@media screen and (max-width: ($mobileWidth+$mobileStage*3)) {
+    .heading {
+        display: none;
+    }
+}
+
+.heading {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    margin-top: 3%;
+    width: 100%;
+    text-align: center;
+    color: #fff;
+    h1 {
+        font-size: 240%;
+    }
+    h2 {
+        font-size: 120%;
+        white-space: pre-line;
+    }
+    h1,
+    h2 {
+        text-shadow: 0 0 10px #000;
+    }
+}
+.header {
+    position: relative;
+    img {
+        object-fit: cover;
+        width: 100%;
+        max-height: 300px;
+        min-height: 80px;
+    }
+    .headerGradient {
+        position: absolute;
+        z-index: 1;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 5px;
+        background: linear-gradient(rgba(0, 0, 0, 0.0001) 0, rgba(0, 0, 0, 0.5) 100%);
+    }
+}
+
+.content {
+    position: relative;
+    top: -20px;
+    width: calc(100% + 10px);
+    padding: 0 4%;
+    overflow: hidden;
+}
+.caption {
+    float: left;
+    color: $textLight;
+    margin-left: 15px;
+}
+.more {
+    float: right;
+    text-transform: uppercase;
+    font-weight: bold;
+    a {
+        padding: 0 10px;
+    }
+}
+.list {
+    width: calc(100% + #{$cardWidth + 60px});
+    float: left;
+    overflow: hidden;
+    margin: 10px 0;
+}
+.collections {
+    min-height: $listCardSmallHeight + 15px;
+    max-height: $listCardSmallHeight + 15px;
+    margin-bottom: 70px;
+}
+.materials {
+    min-height: $cardHeight + 15px;
+    max-height: $cardHeight + 15px;
+}
+.scrollContent {
+    overflow-x: auto;
+}
+.listLoading {
+    width: 100%;
+}
+.listMore {
+    width: 100%;
+    max-height: none;
+}
+.noResults {
+    float: left;
+    width: 100%;
+    font-size: 120%;
+    color: $noResultsColor;
+    text-align: center;
+    padding-top: 20px;
+}
+@media (pointer: coarse) {
+    :host ::ng-deep .collections {
+        width: 100%;
+        overflow-x: auto;
+        @include iosScrolling();
+        .list {
+            width: max-content;
+        }
+    }
+}
+
+@media all and (max-width: $mobileWidth+$mobileStage*2) {
+    :host ::ng-deep .collections {
+        .list {
+            width: max-content;
+        }
+    }
+    .collections {
+        width: calc(100% + 40px);
+        margin: 10px -20px;
+        padding: 0 20px;
+    }
+}
+
+@media all and (max-width: $mobileWidth) {
+    .materials {
+        .list {
+            width: 100%;
+        }
+    }
+}

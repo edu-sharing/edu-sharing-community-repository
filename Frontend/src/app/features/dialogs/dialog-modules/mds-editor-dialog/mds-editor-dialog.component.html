@@ -1,0 +1,9 @@
+<es-mds-editor-core></es-mds-editor-core>
+
+<ng-template #customBottomBarContent>
+  <es-input-fill-progress
+    [current]="completedProperties"
+    [maximum]="totalProperties"
+    (showMissing)="onShowMissing()"
+  ></es-input-fill-progress>
+</ng-template>

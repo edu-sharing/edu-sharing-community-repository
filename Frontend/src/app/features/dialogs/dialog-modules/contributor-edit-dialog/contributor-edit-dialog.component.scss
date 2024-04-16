@@ -1,0 +1,123 @@
+@import '../../../../core-ui-module/styles/variables';
+@import '../../../../shared/components/card/variables';
+
+:host ::ng-deep {
+    .mat-tab-body-wrapper {
+        padding: $cardPadding;
+    }
+}
+
+:host ::ng-deep .mat-autocomplete-panel.mat-autocomplete-person {
+    @media screen and (min-width: map-get($widths, 'normal')) {
+        position: fixed;
+        left: calc(50% - 124px);
+        width: 340px;
+    }
+}
+
+:host ::ng-deep {
+    es-calendar {
+        input {
+            width: 100px;
+        }
+        .picker {
+            left: -40px;
+        }
+    }
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+.contributor-content {
+    padding: 0 $cardPadding;
+}
+
+.author-checkbox {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 10px;
+}
+
+h2 {
+    font-size: 110%;
+    margin-top: 5px;
+}
+
+.edit-reset {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.persistent-id {
+    padding-top: 15px;
+    mat-form-field {
+        padding-bottom: 10px;
+    }
+}
+.author-group {
+    padding: 15px 20px 30px 20px;
+}
+.table {
+    display: flex;
+    flex-grow: 1;
+    grid-gap: 10px;
+    mat-form-field {
+        width: 100%;
+    }
+    .calendar {
+        display: flex;
+    }
+    .title {
+        width: 0;
+        flex-grow: 2;
+    }
+    .givenname,
+    .surname {
+        width: 0;
+        flex-grow: 4;
+    }
+
+    > div {
+        flex-grow: 1;
+    }
+    .datePicker {
+        display: flex;
+        width: 100%;
+        align-items: flex-start;
+        .clickable {
+            color: $textLight;
+        }
+        > div {
+            display: flex;
+            align-items: center;
+            padding-top: 8px;
+            margin-bottom: 24px;
+            justify-content: right;
+            > i {
+                margin: 0 5px;
+            }
+        }
+        es-calendar {
+            flex-grow: 1;
+        }
+    }
+}
+
+.moreOpen {
+    margin-top: 20px;
+}
+
+.more {
+    text-transform: uppercase;
+    > i {
+        position: relative;
+        top: 7px;
+    }
+}

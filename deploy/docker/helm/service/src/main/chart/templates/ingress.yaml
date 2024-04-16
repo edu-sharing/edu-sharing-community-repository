@@ -1,0 +1,61 @@
+{{- if not .Values.global.cluster.istio.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "edusharing_common_lib.names.name" . }}-exact
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+  {{- with merge .Values.ingress.annotations .Values.global.cluster.cert.annotations }}
+  annotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.global.cluster.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.global.cluster.ingress.ingressClassName | quote }}
+  {{- end }}
+  {{- with .Values.ingress.tls }}
+  tls: {{ toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  - host: {{ . }}
+    http:
+      paths:
+      - path: /
+        pathType: Exact
+        backend:
+          service:
+            name: {{ include "edusharing_common_lib.names.name" $ }}
+            port:
+              number: {{ $.Values.service.port.api.external }}
+  {{- end }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "edusharing_common_lib.names.name" . }}-prefix
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+  {{- with merge .Values.ingress.annotations .Values.global.cluster.cert.annotations }}
+  annotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.global.cluster.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.global.cluster.ingress.ingressClassName | quote }}
+  {{- end }}
+  {{- with .Values.ingress.tls }}
+  tls: {{ toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  - host: {{ . }}
+    http:
+      paths:
+      {{- range $.Values.ingress.paths }}
+      - path: {{ . }}
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "edusharing_common_lib.names.name" $ }}
+            port:
+              number: {{ $.Values.service.port.api.external }}
+      {{- end }}
+  {{- end }}
+{{- end }}

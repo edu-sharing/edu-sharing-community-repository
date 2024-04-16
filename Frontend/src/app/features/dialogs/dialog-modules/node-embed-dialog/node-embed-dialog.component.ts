@@ -4,24 +4,24 @@ import {
     ChangeDetectorRef,
     Component,
     ElementRef,
-    HostBinding,
     Inject,
     NgZone,
     OnDestroy,
     OnInit,
     ViewChild,
 } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { first, startWith, take } from 'rxjs/operators';
-import { DialogButton, RestHelper } from 'src/app/core-module/core.module';
-import { Toast, ToastType } from 'src/app/core-ui-module/toast';
-import { UIHelper } from 'src/app/core-ui-module/ui-helper';
+import { startWith, take } from 'rxjs/operators';
+import { DialogButton, RestConstants, RestHelper } from '../../../../core-module/core.module';
+import { Toast, ToastType } from '../../../../services/toast';
+import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { Node } from '../../../../core-module/rest/data-object';
 import { MainNavService } from '../../../../main/navigation/main-nav.service';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { DialogsService } from '../../dialogs.service';
 
 export interface NodeEmbedDialogData {
     node: Node;
@@ -37,7 +37,6 @@ export interface NodeEmbedDialogData {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
-    @HostBinding('hidden') hidden: string | null = null;
     @ViewChild('textarea') textareaRef: ElementRef<HTMLTextAreaElement>;
 
     readonly buttons = [new DialogButton('OPTIONS.COPY', { color: 'primary' }, () => this.copy())];
@@ -47,16 +46,16 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
         height: { min: 200, max: 1200 },
     };
 
-    readonly form = new FormGroup({
-        width: new FormControl(400, [
+    readonly form = new UntypedFormGroup({
+        width: new UntypedFormControl(400, [
             Validators.min(this.sizeConstraints.width.min),
             Validators.max(this.sizeConstraints.width.max),
         ]),
-        height: new FormControl(300, [
+        height: new UntypedFormControl(300, [
             Validators.min(this.sizeConstraints.height.min),
             Validators.max(this.sizeConstraints.height.max),
         ]),
-        version: new FormControl('fixed'),
+        version: new UntypedFormControl('fixed'),
     });
 
     embedCode = '';
@@ -67,6 +66,7 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
     constructor(
         @Inject(CARD_DIALOG_DATA) public data: NodeEmbedDialogData,
         private dialogRef: CardDialogRef,
+        private dialogs: DialogsService,
         private changeDetectorRef: ChangeDetectorRef,
         private location: Location,
         private mainNav: MainNavService,
@@ -86,15 +86,11 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
         this.destroyed$.complete();
     }
 
-    openInviteDialog(): void {
-        // We cannot show the invite dialog on top of this dialog, since this dialog is attached via
-        // a `cdkOverlay`, so instead, we just hide this dialog until the invite dialog is closed.
-        this.hidden = 'true';
-        this.mainNav.getDialogs().nodeShare = [this.data.node];
-        this.mainNav
-            .getDialogs()
-            .nodeShareChange.pipe(first((value) => !value))
-            .subscribe(() => (this.hidden = null));
+    async openInviteDialog(): Promise<void> {
+        const dialogRef = await this.dialogs.openShareDialog({ nodes: [this.data.node] });
+        dialogRef.afterClosed().subscribe(() => {
+            // TODO: Update `isPublic` if necessary.
+        });
     }
 
     private registerFormChanges(): void {
@@ -147,10 +143,14 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
     }
 
     private getEmbedLink(node: Node, version: 'fixed' | 'newest'): string {
+        // Note that this does not work when the application itself is used in an embedded context
+        // since this method relies on the current page's URL to match the origin and base HREF of
+        // the backend.
         const routerLink = 'eduservlet/render';
         const queryParams = {
             node_id: node.ref.id,
-            version: version === 'fixed' ? node.content.version : null,
+            version:
+                version === 'fixed' && !this.isCollectionReference() ? node.content.version : null,
             // Currently, `RenderingServlet` only supports local nodes. Uncomment, when other
             // repositories become supported.
             //
@@ -158,5 +158,8 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
         };
         const urlTree = this.router.createUrlTree([routerLink], { queryParams });
         return location.origin + this.location.prepareExternalUrl(urlTree.toString());
+    }
+    isCollectionReference() {
+        return this.data.node.aspects.includes(RestConstants.CCM_ASPECT_IO_REFERENCE);
     }
 }

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormControl, ValidatorFn } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, ValidatorFn } from '@angular/forms';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
@@ -9,20 +9,21 @@ import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 })
 export class MdsEditorWidgetCheckboxComponent extends MdsEditorWidgetBase implements OnInit {
     readonly valueType: ValueType = ValueType.String;
-    formControl: FormControl;
+    formControl: UntypedFormControl;
     isIndeterminate: boolean;
 
     ngOnInit(): void {
-        const initialValue = this.widget.getInitialValues().jointValues[0];
-        this.isIndeterminate = !!this.widget.getInitialValues().individualValues;
+        const initialValue = this.widget.getInitialValues()?.jointValues?.[0];
+        this.isIndeterminate = !!this.widget.getInitialValues()?.individualValues;
         this.setIndeterminateValues(this.isIndeterminate);
-        this.formControl = new FormControl(
+        this.formControl = new UntypedFormControl(
             initialValue === 'true',
             this.getStandardValidators({ requiredValidator }),
         );
         this.formControl.valueChanges.subscribe((value: boolean) => {
-            this.setValue([value.toString()], this.formControl.dirty);
+            this.setValue([value ? value.toString() : 'false'], this.formControl.dirty);
         });
+        this.registerValueChanges(this.formControl);
     }
 
     onIndeterminateChange(isIndeterminate: boolean): void {
