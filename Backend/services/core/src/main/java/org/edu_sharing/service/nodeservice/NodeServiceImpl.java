@@ -441,7 +441,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		// this method uses nodeServiceAlfresco instead of nodeService
 		// to prevent that recursive fetch data of user homes will fetch (and also produce duplicates) of the shared org folders
 
-		List<NodeRef> result = new ArrayList<>();
+		List<NodeRef> result = Collections.synchronizedList(new ArrayList<>());
 		try {
 			NodeRef nodeRef = new NodeRef(store, nodeId);
 			//logger.info("nodeRef:"+ nodeRef +"path: " + nodeServiceAlfresco.getPath(nodeRef).toDisplayPath(serviceRegistry.getNodeService(),serviceRegistry.getPermissionService()));
