@@ -95,6 +95,7 @@ public class OrganisationLifecycleServiceTestSetup {
 
             //safe
             NodeServiceInterceptor.setEduSharingScope(CCConstants.CCM_VALUE_SCOPE_SAFE);
+
             NodeRef ref  = AuthenticationUtil.runAsSystem(() -> {
                         AuthenticationUtil.setFullyAuthenticatedUser(user);
                         AuthenticationUtil.setRunAsUserSystem();
@@ -102,6 +103,16 @@ public class OrganisationLifecycleServiceTestSetup {
                     }
             );
             createFoldersFiles(user, numberOfHomeFolders, numberOfHomeDocs, ref);
+
+            //create/get safe org
+            String authorityNameOrgSafe = orgAuthorityName+"_safe";
+            Map<QName, Serializable> orgSafeProps = AuthenticationUtil.runAsSystem(() -> organisationService.getOrganisation(organisationService.getCleanName(authorityNameOrgSafe)));
+            NodeRef orgSafeFolder = (NodeRef) orgSafeProps.get(QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
+            String organisationAdminGroup = AuthenticationUtil.runAsSystem(() -> organisationService.getOrganisationAdminGroup(authorityNameOrgSafe));
+            AuthenticationUtil.runAsSystem(() -> {authorityService.addAuthority(organisationAdminGroup, user);return null;});
+
+            createFoldersFiles(user,numberOfSharedFolders,numberOfSharedDocs,orgSafeFolder);
+
             NodeServiceInterceptor.setEduSharingScope(null);
         }
     }
