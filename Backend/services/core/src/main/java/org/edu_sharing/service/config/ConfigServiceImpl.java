@@ -41,9 +41,11 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.json.JSONObject;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 
 
-public class ConfigServiceImpl implements ConfigService{
+public class ConfigServiceImpl implements ConfigService, ApplicationListener<ContextRefreshedEvent> {
 	private static Logger logger=Logger.getLogger(ConfigServiceImpl.class);
 	private static String CACHE_KEY = "CLIENT_CONFIG";
 	// we use a non-serializable Config as value because this is a local cache and not distributed
@@ -275,14 +277,18 @@ public class ConfigServiceImpl implements ConfigService{
 		
 	}
 
-	@Override
-	public void refresh() {
+	private void refresh() {
 		configCache.remove(CACHE_KEY);
 		try {
 			getConfig();
 		} catch (Exception e) {
 			logger.error("error refreshing client config: "+e.getMessage(),e);
 		}
+	}
+
+	@Override
+	public void onApplicationEvent(ContextRefreshedEvent event) {
+		refresh();
 	}
 
 

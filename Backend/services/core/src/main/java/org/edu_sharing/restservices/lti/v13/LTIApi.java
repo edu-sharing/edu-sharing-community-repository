@@ -53,6 +53,7 @@ import org.edu_sharing.service.lti13.registration.DynamicRegistrationTokens;
 import org.edu_sharing.service.lti13.registration.RegistrationService;
 import org.edu_sharing.service.lti13.uoc.Config;
 import org.edu_sharing.service.usage.Usage2Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
 
@@ -68,9 +69,14 @@ import java.util.*;
 public class LTIApi {
 
     Logger logger = Logger.getLogger(LTIApi.class);
+
     Usage2Service usageService = new Usage2Service();
-    ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-    AuthenticationComponent authenticationComponent = (AuthenticationComponent)applicationContext.getBean("authenticationComponent");
+
+    @Autowired
+    AuthenticationComponent authenticationComponent;
+
+    @Autowired
+    RegistrationService registrationService;
 
     @POST
     @Path("/oidc/login_initiations")
@@ -584,7 +590,6 @@ public class LTIApi {
                                            @Context HttpServletRequest req){
 
        try{
-            RegistrationService registrationService = new RegistrationService();
             Throwable throwable = AuthenticationUtil.runAsSystem(() -> {
                 try {
                     registrationService.ltiDynamicRegistration(openidConfiguration, registrationToken, eduSharingRegistrationToken);
@@ -596,8 +601,8 @@ public class LTIApi {
             if(throwable != null) throw throwable;
 
            String serverPort = "";
-           if(!("443".equals(new Integer(req.getServerPort()).toString()) || "80".equals(new Integer(req.getServerPort()).toString()))){
-               serverPort = ":" + new Integer(req.getServerPort()).toString();
+           if(!("443".equals(Integer.toString(req.getServerPort()))|| "80".equals(Integer.toString(req.getServerPort())))){
+               serverPort = ":" + Integer.toString(req.getServerPort());
            }
 
            return Response.seeOther(new URI(req.getScheme() +"://"
@@ -631,7 +636,6 @@ public class LTIApi {
                                        @Context HttpServletRequest req){
 
         try {
-            RegistrationService registrationService = new RegistrationService();
             if(generate){
                 registrationService.generate();
             }
@@ -661,7 +665,6 @@ public class LTIApi {
         try {
             DynamicRegistrationToken dynamicRegistrationToken = new DynamicRegistrationToken();
             dynamicRegistrationToken.setToken(token);
-            RegistrationService registrationService = new RegistrationService();
             registrationService.remove(dynamicRegistrationToken);
             return Response.status(Response.Status.OK).entity(registrationService.get()).build();
         }catch(Throwable e){
@@ -693,7 +696,7 @@ public class LTIApi {
                                  @Context HttpServletRequest req
     ){
         try {
-            new RegistrationService().registerPlatform(platformId,clientId,deploymentId,authenticationRequestUrl,keysetUrl,keyId,authTokenUrl);
+            registrationService.registerPlatform(platformId,clientId,deploymentId,authenticationRequestUrl,keysetUrl,keyId,authTokenUrl);
             return Response.ok().build();
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
@@ -721,8 +724,7 @@ public class LTIApi {
                                    @Context HttpServletRequest req
     ){
         try {
-
-            new RegistrationService().registerPlatform(baseUrl,clientId,deploymentId,
+            registrationService.registerPlatform(baseUrl,clientId,deploymentId,
                     baseUrl + LTIConstants.MOODLE_AUTHENTICATION_REQUEST_URL_PATH,
                     baseUrl + LTIConstants.MOODLE_KEYSET_URL_PATH,
                     null,

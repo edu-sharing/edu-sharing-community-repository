@@ -8,6 +8,7 @@ import org.alfresco.repo.nodelocator.NodeLocatorService;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.repo.search.SearchTrackingComponent;
+import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.MutableAuthenticationDao;
 import org.alfresco.repo.tenant.TenantService;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
@@ -297,4 +298,15 @@ public class AlfrescoBeanConfig {
     public HomeFolderTool homeFolderTool(){
         return new HomeFolderTool(serviceRegistry);
     }
+
+    @Bean
+    public AuthenticationComponent authenticationComponent()  {
+        return applicationContext.getBean("authenticationComponent", AuthenticationComponent.class);
+    }
+
+    @Bean(name = "moduleService")
+    public ModuleService moduleServiceWithoutSecurity() {
+        return serviceRegistry.getModuleService();
+    }
+
 }

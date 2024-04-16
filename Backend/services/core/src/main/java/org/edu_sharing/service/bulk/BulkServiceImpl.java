@@ -28,6 +28,8 @@ import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -36,7 +38,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class BulkServiceImpl implements BulkService {
+public class BulkServiceImpl implements BulkService, ApplicationListener<ContextRefreshedEvent> {
 	public static final String PRIMARY_FOLDER_NAME = "SYNC_OBJ";
 	public static final String NEW_DATA_FOLDER_NAME = "NEW";
 
@@ -149,7 +151,11 @@ public class BulkServiceImpl implements BulkService {
 	}
 
 	@Override
-	public void refresh() {
+	public void onApplicationEvent(ContextRefreshedEvent event) {
+		refresh();
+	}
+
+	private void refresh() {
 		Config config = LightbendConfigLoader.get().getConfig("repository.bulk");
 		interceptors = config.getStringList("interceptors").stream().map(i -> {
 			try {
@@ -160,6 +166,8 @@ public class BulkServiceImpl implements BulkService {
 			}
 		}).collect(Collectors.toList());
 	}
+
+
 
 	@Override
 	public NodeRef sync(String group, List<String> match, List<String> groupBy, String type, List<String> aspects, HashMap<String, String[]> properties, boolean resetVersion) throws Throwable {
@@ -420,4 +428,5 @@ public class BulkServiceImpl implements BulkService {
 			return false;
 		}).collect(Collectors.toList());
 	}
+
 }

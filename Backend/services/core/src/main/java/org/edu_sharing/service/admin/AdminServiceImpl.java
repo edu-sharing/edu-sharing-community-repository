@@ -19,6 +19,7 @@ import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import lombok.RequiredArgsConstructor;
 import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -82,13 +83,19 @@ import org.edu_sharing.service.version.RepositoryVersionInfo;
 import org.edu_sharing.service.version.VersionService;
 import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.google.common.io.Files;
 
+@Component
+@RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
+
+    private final ModuleService moduleService;
+    private final VersionService versionService;
 
     //cause standard properties class does not save the values sorted
     class SortedProperties extends Properties {
@@ -111,8 +118,6 @@ public class AdminServiceImpl implements AdminService {
 
     }
 
-    ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-    ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
     private static Logger logger = Logger.getLogger(AdminServiceImpl.class);
 
@@ -1025,7 +1030,7 @@ public class AdminServiceImpl implements AdminService {
         HashMap<String, Object> paramsMap = new HashMap<String, Object>();
         paramsMap.put(ExporterJob.PARAM_LUCENE_FILTER, filterQuery);
         paramsMap.put(ExporterJob.PARAM_OUTPUT_DIR, targetDir);
-        paramsMap.put(ExporterJob.PARAM_WITH_SUBOBJECTS, new Boolean(subobjectHandler).toString());
+        paramsMap.put(ExporterJob.PARAM_WITH_SUBOBJECTS, Boolean.toString(subobjectHandler));
         paramsMap.put(JobHandler.AUTH_INFO_KEY, getAuthInfo());
         ImmediateJobListener jobListener = JobHandler.getInstance().startJob(ExporterJob.class, paramsMap);
         if (jobListener.isVetoed()) {
@@ -1129,7 +1134,6 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public Collection<PluginStatus> getPlugins() {
-        ModuleService moduleService = (ModuleService) applicationContext.getBean("moduleService");
         return moduleService.getAllModules().stream().map(m ->
                 new PluginStatus(m.getTitle(), m.getModuleVersionNumber().toString(), m.getInstallState().equals(ModuleInstallState.INSTALLED))
         ).collect(Collectors.toList());
@@ -1138,7 +1142,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public RepositoryVersionInfo getVersion() {
         try {
-            return VersionService.getRepositoryVersionInfo();
+            return versionService.getRepositoryVersionInfo();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -45,20 +45,15 @@ import org.edu_sharing.metadataset.v2.MetadataSetInfo;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.jobs.quartz.JobHandler;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.AuthenticatorRemoteAppResult;
 import org.edu_sharing.repository.server.tools.AuthenticatorRemoteRepository;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
-import org.edu_sharing.service.bulk.BulkServiceFactory;
-import org.edu_sharing.service.bulk.BulkServiceInterceptorInterface;
-import org.edu_sharing.service.config.ConfigServiceFactory;
-import org.edu_sharing.service.feedback.FeedbackServiceFactory;
-import org.edu_sharing.service.feedback.FeedbackServiceImpl;
 import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.provider.ProviderHelper;
-import org.edu_sharing.service.version.VersionService;
+import org.edu_sharing.spring.ApplicationContextFactory;
+import org.edu_sharing.spring.scope.refresh.ContextRefresher;
 
 public class RepoFactory {
 
@@ -235,21 +230,12 @@ public class RepoFactory {
 	}
 
 	public static void refresh() {
+
 		lastRefreshed = System.currentTimeMillis();
-		ApplicationInfoList.refresh();
-		LightbendConfigHelper.refresh();
 		appClassCache.clear();
-		BulkServiceFactory.getInstance().refresh();
-		MetadataReader.refresh();
-		FeedbackServiceFactory.getLocalService().refresh();
-		ConfigServiceFactory.refresh();
-		VersionService.invalidateCache();
-		try {
-			JobHandler.getInstance().refresh(false);
-		} catch (Exception ignored) {}
 		eduSharingProps = null;
-		PropertiesInterceptorFactory.refresh();
-		ProviderHelper.clearCache();
+		ContextRefresher contextRefresher = ApplicationContextFactory.getApplicationContext().getBean(ContextRefresher.class);
+		contextRefresher.refresh();
 	}
 
 	public static List<MetadataSetInfo> getMetadataSetsForRepository(String repositoryId) throws Exception {

@@ -87,10 +87,4 @@ public class ConfigServiceFactory {
 			return DEFAULT_LANGUAGES;
 		}
 	}
-
-	/* refresh the current config cache
-	 */
-	public static void refresh() {
-		ConfigServiceFactory.getConfigService().refresh();
-	}
 }
