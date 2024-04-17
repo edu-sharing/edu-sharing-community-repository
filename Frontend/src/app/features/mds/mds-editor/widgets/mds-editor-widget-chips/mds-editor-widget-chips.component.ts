@@ -447,10 +447,6 @@ export class MdsEditorWidgetChipsComponent
     }
 
     getSuggestions() {
-        console.log(this.widget.definition.id);
-        if (this.widget.definition.id === 'ccm:oeh_lrt') {
-            console.log(this.chipsSuggestions);
-        }
         return this.chipsSuggestions?.filter(
             (s) => !this.chipsControl.value.some((s1: DisplayValue) => s1.key === s.value),
         );
