@@ -40,6 +40,7 @@ import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
 import { Helper } from '../../../../../core-module/rest/helper';
 import { SuggestionResponseDto, SuggestionStatus } from 'ngx-edu-sharing-api';
+import { AuthorityNamePipe } from '../../../../../shared/pipes/authority-name.pipe';
 
 @Component({
     templateUrl: './mds-editor-widget-chips.component.html',
@@ -302,7 +303,7 @@ export class MdsEditorWidgetChipsComponent
         return `${this.translate.instant('MDS.SUGGESTION_TOOLTIP', {
             value: this.toDisplayValues(suggestion.value as string).label,
             // @TODO
-            creator: suggestion.createdBy,
+            creator: new AuthorityNamePipe(this.translate).transform(suggestion.createdBy),
         })}`;
     }
 
@@ -446,76 +447,17 @@ export class MdsEditorWidgetChipsComponent
     }
 
     getSuggestions() {
+        console.log(this.widget.definition.id);
+        if (this.widget.definition.id === 'ccm:oeh_lrt') {
+            console.log(this.chipsSuggestions);
+        }
         return this.chipsSuggestions?.filter(
             (s) => !this.chipsControl.value.some((s1: DisplayValue) => s1.key === s.value),
         );
-    }
-    public static mapGraphqlSuggestionId(definition: MdsWidget) {
-        const id = MdsEditorWidgetBase.mapGraphqlId(definition)?.[0];
-        if (id) {
-            return [
-                MdsEditorInstanceService.mapGraphqlField(id, (a) => {
-                    a.push('value');
-                    return a;
-                }),
-                MdsEditorInstanceService.mapGraphqlField(id, (a) => {
-                    a.push('info');
-                    a.push('status');
-                    return a;
-                }),
-                MdsEditorInstanceService.mapGraphqlField(id, (a) => {
-                    a.push('version');
-                    return a;
-                }),
-                MdsEditorInstanceService.mapGraphqlField(id, (a) => {
-                    a.push('info');
-                    a.push('editor');
-                    return a;
-                }),
-            ];
-        }
-        return [];
     }
 }
 @Component({
     templateUrl: './mds-editor-widget-chips.component.html',
     styleUrls: ['./mds-editor-widget-chips.component.scss'],
 })
-export class MdsEditorWidgetChipsRangedValueComponent extends MdsEditorWidgetChipsComponent {
-    public static mapGraphqlId(definition: MdsWidget) {
-        // attach the "RangedValue" graphql Attributes
-        return MdsEditorWidgetBase.attachGraphqlSelection(definition, ['id', 'value']);
-    }
-    public static mapGraphqlSuggestionId(definition: MdsWidget) {
-        const id = MdsEditorWidgetBase.mapGraphqlId(definition)?.[0];
-        if (id) {
-            return [
-                MdsEditorInstanceService.mapGraphqlField(id, (a) => {
-                    a.push('value');
-                    a.push('id');
-                    return a;
-                }),
-                MdsEditorInstanceService.mapGraphqlField(id, (a) => {
-                    a.push('value');
-                    a.push('value');
-                    return a;
-                }),
-                MdsEditorInstanceService.mapGraphqlField(id, (a) => {
-                    a.push('info');
-                    a.push('status');
-                    return a;
-                }),
-                MdsEditorInstanceService.mapGraphqlField(id, (a) => {
-                    a.push('version');
-                    return a;
-                }),
-                MdsEditorInstanceService.mapGraphqlField(id, (a) => {
-                    a.push('info');
-                    a.push('editor');
-                    return a;
-                }),
-            ];
-        }
-        return [];
-    }
-}
+export class MdsEditorWidgetChipsRangedValueComponent extends MdsEditorWidgetChipsComponent {}

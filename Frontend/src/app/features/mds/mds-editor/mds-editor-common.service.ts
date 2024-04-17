@@ -152,7 +152,7 @@ export class MdsEditorCommonService {
 
     async fetchNodesSuggestions(nodes: Node[]): Promise<NodeSuggestionResponseDto[]> {
         console.log('Read suggestions!');
-        /*return await forkJoin(
+        return await forkJoin(
             nodes.map((n) =>
                 this.suggestionsV1Service.getSuggestionsByNodeId({
                     repository: HOME_REPOSITORY,
@@ -162,7 +162,7 @@ export class MdsEditorCommonService {
         )
             .pipe()
             .toPromise();
-        */
+        /*
         return [
             {
                 nodeId: nodes[0].ref.id,
@@ -214,7 +214,7 @@ export class MdsEditorCommonService {
                     ],
                 },
             },
-        ];
+        ];*/
     }
 }
 

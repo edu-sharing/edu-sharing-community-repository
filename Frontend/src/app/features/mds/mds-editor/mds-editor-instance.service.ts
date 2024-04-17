@@ -3,10 +3,12 @@ import {
     AboutService,
     ConfigService,
     FacetsDict,
+    HOME_REPOSITORY,
     MdsService,
     MdsViewRelation,
     NodeSuggestionResponseDto,
     SuggestionResponseDto,
+    SuggestionsV1Service,
 } from 'ngx-edu-sharing-api';
 import {
     BehaviorSubject,
@@ -709,11 +711,9 @@ export class MdsEditorInstanceService implements OnDestroy {
         private mdsEditorCommonService: MdsEditorCommonService,
         private mdsService: MdsService,
         private aboutService: AboutService,
-        // private apollo: Apollo,
-        // private metadatasGQL: MetadatasGQL,
-        // private suggestionsGQL: SuggestionsGQL,
         private restMdsService: RestMdsService,
         private configService: ConfigurationService,
+        private suggestionsService: SuggestionsV1Service,
         private restConnector: RestConnectorService,
         private config: ConfigService,
     ) {
@@ -1714,10 +1714,36 @@ export class MdsEditorInstanceService implements OnDestroy {
     }
 
     private async saveSuggestions(): Promise<void> {
-        const suggestions = this.suggestions.filter(
+        const suggestionsObject = this.suggestions.filter(
             (s) => s.nodeId === this.nodes$.value[0].ref.id,
-        )?.[0].suggestions;
-        console.log('suggestions save', suggestions);
+        )?.[0];
+        const suggestions: NodeSuggestionResponseDto[] = Object.keys(suggestionsObject)
+            .map((key) => suggestions[key].suggestions)
+            .reduce((a, b) => a.concat(b));
+
+        const accepted = suggestions.filter(s.status === 'ACCEPTED').map((s) => s.id);
+        const declined = suggestions.filter(s.status === 'DECLINED').map((s) => s.id);
+        try {
+            console.log('suggestions save', suggestions, suggestionsObject);
+
+            await this.suggestionsService
+                .updateStatus({
+                    repository: HOME_REPOSITORY,
+                    node: this.nodes$.value[0].ref.id,
+                    id: accepted,
+                    status: 'ACCEPTED',
+                })
+                .toPromise();
+
+            await this.suggestionsService
+                .updateStatus({
+                    repository: HOME_REPOSITORY,
+                    node: this.nodes$.value[0].ref.id,
+                    id: declined,
+                    status: 'DECLINED',
+                })
+                .toPromise();
+        } catch (e) {}
         return null;
     }
 

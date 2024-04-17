@@ -70,7 +70,9 @@
   <h5 class="mat-heading-5">{{ 'MDS.SUGGESTIONS.LIST_TITLE' | translate }}</h5>
   <div class="suggestion" *ngFor="let suggestion of getSuggestions()">
     <div class="info">
-      {{ suggestion.createdBy }}
+      <es-user-avatar [user]="suggestion.createdBy" size="xxsmall">
+        {{ suggestion.createdBy | authorityName }}</es-user-avatar
+      >
       <i [esIcon]="suggestion.type === 'AI' ? 'settings' : 'person'"></i>
     </div>
     <div class="content-wrapper">
