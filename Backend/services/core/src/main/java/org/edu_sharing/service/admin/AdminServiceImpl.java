@@ -82,6 +82,7 @@ import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.service.version.RepositoryVersionInfo;
 import org.edu_sharing.service.version.VersionService;
 import org.edu_sharing.spring.ApplicationContextFactory;
+import org.edu_sharing.spring.scope.refresh.ContextRefreshUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
@@ -419,7 +420,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public void refreshApplicationInfo() {
-        RepoFactory.refresh();
+        ContextRefreshUtils.refreshContext();
     }
 
     private String getAppPropertiesApplications() throws Exception {
@@ -458,7 +459,7 @@ public class AdminServiceImpl implements AdminService {
                 PropertiesHelper.Config.getPropertyFilePath(info.getAppFileName())
         ));
         appFile.renameTo(new File(appFile.getAbsolutePath() + System.currentTimeMillis() + ".bak"));
-        RepoFactory.refresh();
+        ContextRefreshUtils.refreshContext();
     }
 
     @Override
@@ -597,7 +598,7 @@ public class AdminServiceImpl implements AdminService {
             homeAppProps.storeToXML(new FileOutputStream(new File(homeAppPath)), " added contenturl and preview url");
         }
 
-        RepoFactory.refresh();
+        ContextRefreshUtils.refreshContext();
 
         HashMap<String, String> result = new HashMap<String, String>();
         for (Object key : props.keySet()) {
@@ -1023,7 +1024,7 @@ public class AdminServiceImpl implements AdminService {
         for (String key : properties.keySet()) {
             PropertiesHelper.setProperty(key, properties.get(key), appFile.getAbsolutePath(), PropertiesHelper.XML);
         }
-        RepoFactory.refresh();
+        ContextRefreshUtils.refreshContext();
     }
 
     public void exportLom(String filterQuery, String targetDir, boolean subobjectHandler) throws Exception {

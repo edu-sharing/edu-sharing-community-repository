@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.edu_sharing.lightbend.LightbendConfigHelper;
 import org.edu_sharing.metadataset.v2.MetadataReader;
+import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.provider.ProviderHelper;
@@ -48,7 +49,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.support.StandardServletEnvironment;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class ContextRefresher {
 
@@ -59,6 +59,7 @@ public class ContextRefresher {
     }
 
     public synchronized void refresh() {
+        RepoFactory.refresh();
         ApplicationInfoList.refresh();
         LightbendConfigHelper.refresh();
         MetadataReader.refresh();

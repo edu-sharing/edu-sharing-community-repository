@@ -102,4 +102,7 @@
   <bean id="notificationServiceFactory" class="org.edu_sharing.service.notification.NotificationServiceFactoryImpl"/>
   <bean id="permissionChecking" class="org.edu_sharing.service.permission.PermissionChecking"/>
   <bean id="suggestionService" class="org.edu_sharing.service.suggestion.DefaultSuggestionService"/>
+  <bean id="contextRefresher" class="org.edu_sharing.spring.scope.refresh.ContextRefresher">
+    <constructor-arg name="scope" ref="refreshScope"/>
+  </bean>
 </beans>

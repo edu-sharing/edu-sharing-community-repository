@@ -230,12 +230,11 @@ public class RepoFactory {
 	}
 
 	public static void refresh() {
-
 		lastRefreshed = System.currentTimeMillis();
 		appClassCache.clear();
 		eduSharingProps = null;
-		ContextRefresher contextRefresher = ApplicationContextFactory.getApplicationContext().getBean(ContextRefresher.class);
-		contextRefresher.refresh();
+//		ContextRefresher contextRefresher = ApplicationContextFactory.getApplicationContext().getBean(ContextRefresher.class);
+//		contextRefresher.refresh();
 	}
 
 	public static List<MetadataSetInfo> getMetadataSetsForRepository(String repositoryId) throws Exception {
