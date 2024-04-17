@@ -462,7 +462,7 @@ public class PersonDao {
 	public void changeAvatar(InputStream is) throws DAOException {
 		try {
 		org.alfresco.service.cmr.repository.NodeRef currentAvatar = getAvatarNode();
-		is=ImageTool.autoRotateImage(is,ImageTool.MAX_THUMB_SIZE);
+		ImageTool.VerifyResult result = ImageTool.verifyAndPreprocessImage(is, ImageTool.MAX_THUMB_SIZE);
 		String nodeId=null;
 		if(currentAvatar==null) {
 			nodeId = this.nodeService.createNode(getNodeId(), CCConstants.CCM_TYPE_IO, new HashMap<>(), CCConstants.ASSOC_USER_PREFERENCEIMAGE);
@@ -472,7 +472,7 @@ public class PersonDao {
 			nodeId=currentAvatar.getId();
 		}
 		NodeServiceHelper.setCreateVersion(nodeId,false);
-		nodeService.writeContent(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, is, "image", null, CCConstants.CM_PROP_CONTENT);
+		nodeService.writeContent(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, result.getInputStream(), result.getMediaType().toString(), null, CCConstants.CM_PROP_CONTENT);
 		this.nodeService.setPermissions(nodeId, CCConstants.AUTHORITY_GROUP_EVERYONE,new String[]{CCConstants.PERMISSION_CONSUMER},true);
 		}catch(Throwable t) {
 			throw DAOException.mapping(t);
