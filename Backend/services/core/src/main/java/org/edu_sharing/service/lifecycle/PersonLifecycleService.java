@@ -198,7 +198,7 @@ public class PersonLifecycleService {
 
 			/**
 			 * cleanup safe homefolder before default homefolder. cause as soon as personService.getPerson(username) is called
-			 * the deleted homeFolder will be there again and would not be deleted
+			 * the deleted homeFolder will be recreated and would not be deleted
 			 */
 			result.homeFolder.put(CCConstants.CCM_VALUE_SCOPE_SAFE,handleHomeHolder(personNodeRef, options, CCConstants.CCM_VALUE_SCOPE_SAFE, deletedUsername));
 			result.homeFolder.put(DEFAULT_SCOPE,handleHomeHolder(personNodeRef, options, null, deletedUsername));
