@@ -434,6 +434,10 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId);
 			String mimetype=NodeServiceFactory.getLocalService().getContentMimetype(storeRef.getProtocol(), storeRef.getIdentifier(),nodeId);
 			if(mimetype!=null && mimetype.startsWith("image")) {
+				if(mimetype.endsWith("svg+xml")) {
+					// block svg to prevent js-based content to load from browser
+					return false;
+				}
 				if(deliverContentAsSystem(nodeRef,  CCConstants.CM_PROP_CONTENT, req, resp))
 					return true;
 			}
