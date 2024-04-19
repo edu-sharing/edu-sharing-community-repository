@@ -169,11 +169,13 @@ public abstract class OrganisationDeleteProtocolService {
         protEntry.collections = 0;
         protEntry.collectionRefs = 0;
         rs.collections.getCollections().stream().forEach(e -> {
-            if (e.getType().equals(CCConstants.CCM_TYPE_IO)) {
-                protEntry.collectionRefs++;
-            }
             if (e.getType().equals(CCConstants.CCM_TYPE_MAP)) {
                 protEntry.collections++;
+            }
+        });
+        rs.collections.getRefs().stream().forEach(e ->{
+            if (e.getType().equals(CCConstants.CCM_TYPE_IO)) {
+                protEntry.collectionRefs++;
             }
         });
 
