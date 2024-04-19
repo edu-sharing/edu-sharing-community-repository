@@ -389,7 +389,7 @@ public class PersonLifecycleService {
 			if(options.collections.privateCollections.equals(PersonDeleteOptions.DeleteMode.delete)) {
 				// the maps may be not enough if the user contributed to foreign collections
 				deleteAllRefs(collectionsIos);
-				deleteAllRefs(collectionsMaps);
+				deleteAllRefsReverse(collectionsMaps);
 			}
 			else if(options.collections.privateCollections.equals(PersonDeleteOptions.DeleteMode.assign)) {
 				setOwnerAndPermissions(collectionsMaps, userName, options);
@@ -753,6 +753,12 @@ public class PersonLifecycleService {
 
 	public void deleteAllRefs(Collection<NodeRef> refs) {
 		refs.forEach((ref)->NodeServiceFactory.getLocalService().removeNode(ref.getId(),null,false));
+	}
+
+	public void deleteAllRefsReverse(Collection<NodeRef> refs){
+		List<NodeRef> list = refs.stream().collect(Collectors.toList());
+		Collections.reverse(list);
+		list.forEach((ref)->NodeServiceFactory.getLocalService().removeNode(ref.getId(),null,false));
 	}
 
 
