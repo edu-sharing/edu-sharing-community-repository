@@ -16,6 +16,9 @@ import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
+import org.edu_sharing.service.collection.Collection;
+import org.edu_sharing.service.collection.CollectionService;
+import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
 import java.io.Serializable;
@@ -43,6 +46,8 @@ public class OrganisationLifecycleServiceTestSetup {
     int numberOfSharedDocs = 10;
     int numberOfSharedFolders = 4;
 
+    int numberOfCollections = 3;
+    int numberOfCollectionRefs = 7;
 
     List<NodeRef> persons = new ArrayList<>();
     String orgAuthorityName;
@@ -126,14 +131,57 @@ public class OrganisationLifecycleServiceTestSetup {
                 folderList.add(createNode(parent, CCConstants.CCM_TYPE_MAP, folderProps));
             }
 
+            List<NodeRef> fileList = new ArrayList<>();
             for(int i = 0; i < nrOfDocs; i++){
                 int parentFolderIdx = RandomUtils.nextInt(0,folderList.size() -1);
                 Map<QName,Serializable> props = new HashMap<>();
                 props.put(ContentModel.PROP_NAME, RandomStringUtils.random(6, true, false)+"."+RandomStringUtils.random(3, true, false));
-                createNode(folderList.get(parentFolderIdx),CCConstants.CCM_TYPE_IO,props);
+                fileList.add(createNode(folderList.get(parentFolderIdx),CCConstants.CCM_TYPE_IO,props));
             }
+
+            NodeRef personHomeFolder = (NodeRef) nodeService.getProperty(personService.getPerson(user),ContentModel.PROP_HOMEFOLDER);
+            if(personHomeFolder.equals(parent) ){
+                createCollectionsAndRefs(user, fileList);
+            }
+
             return null;
         },user);
+    }
+
+    private void createCollectionsAndRefs(String user, List<NodeRef> fileList) {
+        CollectionService collectionService = CollectionServiceFactory.getLocalService();
+        Collection level0Col = null;
+        List<Collection> collectionList = new ArrayList<>();
+        for(int i = 0; i < numberOfCollections; i++){
+            try {
+                Collection col = new Collection();
+                if (level0Col != null) {
+                    col.setTitle(RandomStringUtils.random(6, true, false));
+                    col = collectionService.create(level0Col.getNodeId(), col);
+                }
+
+                if (level0Col == null) {
+                    col.setTitle(user + RandomStringUtils.random(6, true, false));
+                    col.setLevel0(true);
+                    col = collectionService.create(null, col);
+                    level0Col = col;
+                }
+
+                collectionList.add(col);
+            }catch (Throwable e){
+                throw new RuntimeException(e);
+            }
+        }
+
+        for(int i = 0; i < numberOfCollectionRefs;i++){
+            int fileIdx = RandomUtils.nextInt(0, fileList.size() -1);
+            int collectionIdx = RandomUtils.nextInt(0,collectionList.size() -1);
+            try {
+                collectionService.addToCollection(collectionList.get(collectionIdx).getNodeId(), fileList.get(fileIdx).getId(),null,true);
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private NodeRef createNode(NodeRef parent,String type, Map<QName,Serializable> props){
