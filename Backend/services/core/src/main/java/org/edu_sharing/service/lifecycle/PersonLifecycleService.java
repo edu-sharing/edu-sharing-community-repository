@@ -200,6 +200,7 @@ public class PersonLifecycleService {
 			 * cleanup safe homefolder before default homefolder. cause as soon as personService.getPerson(username) is called
 			 * the deleted homeFolder will be recreated and would not be deleted
 			 */
+			result.collections=handleCollections(personNodeRef,options);
 			result.homeFolder.put(CCConstants.CCM_VALUE_SCOPE_SAFE,handleHomeHolder(personNodeRef, options, CCConstants.CCM_VALUE_SCOPE_SAFE, deletedUsername));
 			result.homeFolder.put(DEFAULT_SCOPE,handleHomeHolder(personNodeRef, options, null, deletedUsername));
 
@@ -207,7 +208,7 @@ public class PersonLifecycleService {
 					getElements().stream().map((e)->new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,e.getId())).collect(Collectors.toList());
 			result.sharedFolders.put(DEFAULT_SCOPE,handleForeignFiles(personNodeRef,filesToIgnore,options,null, deletedUsername));
 			result.sharedFolders.put(CCConstants.CCM_VALUE_SCOPE_SAFE,handleForeignFiles(personNodeRef,filesToIgnore,options,CCConstants.CCM_VALUE_SCOPE_SAFE, deletedUsername));
-			result.collections=handleCollections(personNodeRef,options);
+
 
 			handleStream(personNodeRef,options);
 			if(options.comments.delete){
