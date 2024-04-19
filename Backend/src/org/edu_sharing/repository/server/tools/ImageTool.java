@@ -13,11 +13,6 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import org.apache.activemq.util.ByteArrayInputStream;
-import org.apache.catalina.util.IOTools;
-
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
@@ -184,10 +179,29 @@ public class ImageTool {
 		return new VerifyResult(result, mediaType);
 	}
 
-	@Data
-	@AllArgsConstructor
 	public static class VerifyResult {
 		InputStream inputStream;
 		MediaType mediaType;
+
+		public VerifyResult(InputStream inputStream, MediaType mediaType) {
+			this.inputStream = inputStream;
+			this.mediaType = mediaType;
+		}
+
+		public InputStream getInputStream() {
+			return inputStream;
+		}
+
+		public void setInputStream(InputStream inputStream) {
+			this.inputStream = inputStream;
+		}
+
+		public MediaType getMediaType() {
+			return mediaType;
+		}
+
+		public void setMediaType(MediaType mediaType) {
+			this.mediaType = mediaType;
+		}
 	}
 }
