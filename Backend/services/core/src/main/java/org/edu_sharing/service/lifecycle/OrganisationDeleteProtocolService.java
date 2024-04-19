@@ -127,8 +127,9 @@ public abstract class OrganisationDeleteProtocolService {
         protocolEntry(protEntry);
     }
 
-    public void protocolPersons(String orga, PersonDeleteResult rs) {
+    public void protocolPerson(String orga, PersonDeleteResult rs) {
         OrganisationDeleteProtocol protEntry = OrganisationDeleteProtocol.instance(orga,rs.authorityName);
+        protEntry.user = 1;
 
         {
             Pair<Integer, Integer> subCount = countFilesFolders(rs.homeFolder.get(PersonLifecycleService.DEFAULT_SCOPE));
@@ -227,6 +228,7 @@ public abstract class OrganisationDeleteProtocolService {
         int collectionRefs;
         int subGroup;
         int subGroupSafe;
+        int user;
 
         enum EVENTS {ERROR, INFO}
 
@@ -260,6 +262,7 @@ public abstract class OrganisationDeleteProtocolService {
                     "collectionRefs",
                     "subGroup",
                     "subGroupSafe",
+                    "user",
                     "message"};
         }
 
@@ -277,6 +280,7 @@ public abstract class OrganisationDeleteProtocolService {
                     new Integer(collectionRefs).toString(),
                     new Integer(subGroup).toString(),
                     new Integer(subGroupSafe).toString(),
+                    new Integer(user).toString(),
                     message
             };
         }

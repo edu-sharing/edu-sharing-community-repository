@@ -84,7 +84,7 @@ public class OrganisationLifecycleService {
         for (String user : users) {
             try {
                 PersonDeleteResult personDeleteResult = deleteUser(authorityName, user);
-                protocolService.protocolPersons(orga, personDeleteResult);
+                protocolService.protocolPerson(orga, personDeleteResult);
             } catch (RuntimeException e) {
                 logger.error(e.getMessage(),e);
                 protocolService.protocolError(orga, user, e.getMessage());
