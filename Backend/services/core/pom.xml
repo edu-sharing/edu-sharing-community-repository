@@ -317,7 +317,6 @@
       <artifactId>spring-security-config</artifactId>
       <scope>provided</scope>
     </dependency>
-
   </dependencies>
 
 </project>

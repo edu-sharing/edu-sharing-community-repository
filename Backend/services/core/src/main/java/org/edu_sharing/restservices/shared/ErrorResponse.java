@@ -58,7 +58,7 @@ public class ErrorResponse {
 		if(t instanceof AlfrescoRuntimeException && t.getCause() != null) {
 			t = t.getCause();
 		}
-		if(t instanceof RuntimeException && t.getCause() != null) {
+		if(t instanceof RuntimeException && !(t instanceof DAOException) && t.getCause() != null) {
 			t = t.getCause();
 		}
 		if(t instanceof DAOValidationException) {

@@ -21,13 +21,13 @@ import {
     TemporaryStorageService,
 } from 'ngx-edu-sharing-ui';
 import {
+    forkJoin,
+    forkJoin as observableForkJoin,
+    fromEvent,
     Observable,
+    of,
     Subject,
     Subscription,
-    forkJoin,
-    fromEvent,
-    forkJoin as observableForkJoin,
-    of,
 } from 'rxjs';
 import { catchError, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { BridgeService } from '../core-bridge-module/bridge.service';
@@ -345,7 +345,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     }
 
     private isOptionAvailable(option: OptionItem, objects: Node[] | any[], data: OptionData) {
-        if (option.elementType.indexOf(this.getType(objects)) === -1) {
+        if (!this.getType(objects).every((t) => option.elementType.includes(t))) {
             // console.log('types not matching', objects, this.getType(objects), option);
             return false;
         }
@@ -392,14 +392,14 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         return data.selectedObjects && data.selectedObjects.length;
     }
 
-    private getType(objects: Node[]): ElementType {
+    private getType(objects: Node[]): ElementType[] {
         if (objects) {
             const types = Array.from(new Set(objects.map((o) => this.getTypeSingle(o))));
-            if (types.length === 1) {
-                return types[0];
+            if (types.length > 0) {
+                return types;
             }
         }
-        return ElementType.Unknown;
+        return [ElementType.Unknown];
     }
 
     private getTypeSingle(object: Node | any) {
@@ -482,7 +482,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         applyNode.group = DefaultGroups.Primary;
         applyNode.priority = 10;
         applyNode.customEnabledCallback = (nodes) => {
-            console.log(this.queryParams, nodes?.[0].downloadUrl);
             // either apply directories is true or it is an file
             return (
                 (nodes?.[0].isDirectory ? this.queryParams.applyDirectories === 'true' : true) &&
@@ -730,6 +729,8 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             this.nodeHelper.addNodesToLTIPlatform(nodes);
         });
         addNodeToLTIPlatform.elementType = OptionsHelperService.ElementTypesAddToCollection;
+        addNodeToLTIPlatform.permissions = [RestConstants.ACCESS_CC_PUBLISH];
+        addNodeToLTIPlatform.permissionsRightMode = NodesRightMode.Original;
         addNodeToLTIPlatform.showAsAction = true;
         addNodeToLTIPlatform.showAlways = true;
         addNodeToLTIPlatform.constrains = [Constrain.Files, Constrain.User, Constrain.LTIMode];
@@ -1081,11 +1082,12 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         );
         // do not allow copy of map links if tp is missing
         copyNodes.customEnabledCallback = (node) =>
-            node?.some((n) => this.getTypeSingle(n) === ElementType.MapRef)
+            node.every((n) => !n.aspects?.includes(RestConstants.CCM_ASPECT_COLLECTION)) &&
+            (node?.some((n) => this.getTypeSingle(n) === ElementType.MapRef)
                 ? this.connector.hasToolPermissionInstant(
                       RestConstants.TOOLPERMISSION_CREATE_MAP_LINK,
                   )
-                : true;
+                : true);
 
         copyNodes.elementType = [ElementType.Node, ElementType.SavedSearch, ElementType.MapRef];
         copyNodes.constrains = [Constrain.HomeRepository, Constrain.User];
@@ -1286,12 +1288,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             (object) =>
                 this.dialogs.openSendFeedbackDialog({ node: this.getObjects(object, data)[0] }),
         );
-        feedbackMaterial.constrains = [
-            Constrain.HomeRepository,
-            Constrain.Files,
-            Constrain.NoBulk,
-            Constrain.User,
-        ];
+        feedbackMaterial.constrains = [Constrain.HomeRepository, Constrain.Files, Constrain.NoBulk];
         feedbackMaterial.permissions = [RestConstants.PERMISSION_FEEDBACK];
         feedbackMaterial.permissionsRightMode = NodesRightMode.Original;
         feedbackMaterial.scopes = [Scope.Render];

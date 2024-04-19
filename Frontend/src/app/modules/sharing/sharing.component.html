@@ -8,7 +8,7 @@
       [ngClass]="{ 'details-opacity': !(!sharingInfo.password || sharingInfo.passwordMatches) }"
     >
       <div class="details-type">
-        <img class="icon" [src]="sharingInfo.node | esNodeIcon" />
+        <img class="icon" [src]="sharingInfo.node | esNodeIcon | async" />
         <div>
           <div class="name">{{ sharingInfo.node.name }}</div>
           <div class="subobjects" *ngIf="childCount() > 0">

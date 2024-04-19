@@ -134,6 +134,13 @@
       },
       "Admin": {
         "properties": {
+          "editorType": {
+            "enum": [
+              "Textarea",
+              "Monaco"
+            ],
+            "type": "string"
+          },
           "statistics": {
             "$ref": "#/components/schemas/Statistics"
           }
@@ -21316,6 +21323,14 @@
             "description": "launchPresentation. how the resourcelink will be embedded. valid values: window,iframe",
             "in": "query",
             "name": "launchPresentation",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "jwt for checking access in lms context",
+            "in": "query",
+            "name": "jwt",
             "schema": {
               "type": "string"
             }

@@ -522,6 +522,18 @@
     </dependency>
 
     <dependency>
+      <groupId>org.apache.xmlgraphics</groupId>
+      <artifactId>batik-transcoder</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.xmlgraphics</groupId>
+      <artifactId>batik-codec</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
       <groupId>net.sourceforge.cardme</groupId>
       <artifactId>cardme</artifactId>
       <scope>runtime</scope>
@@ -623,11 +635,11 @@
       </exclusions>
     </dependency>
 
-    <!--dependency>
+    <dependency>
       <groupId>org.glassfish.jersey.ext</groupId>
-      <artifactId>jersey-spring5</artifactId>
+      <artifactId>jersey-spring6</artifactId>
       <scope>runtime</scope>
-    </dependency-->
+    </dependency>
 
     <dependency>
       <groupId>org.glassfish.jersey.inject</groupId>

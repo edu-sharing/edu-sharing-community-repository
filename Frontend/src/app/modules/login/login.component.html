@@ -31,6 +31,7 @@
               type="text"
               matInput
               placeholder="{{ 'LOGIN.PROVIDER_PLACEHOLDER' | translate }}"
+              (keydown.enter)="goToProvider()"
               [formControl]="providerControl"
               [matAutocomplete]="autoProvider"
             />
