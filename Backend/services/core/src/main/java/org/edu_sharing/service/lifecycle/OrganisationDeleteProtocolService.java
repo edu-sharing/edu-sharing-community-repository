@@ -258,7 +258,7 @@ public abstract class OrganisationDeleteProtocolService {
         }
 
         public String[] getArray(){
-            return new String[]{new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(date), event, organisation,authority,
+            return new String[]{new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(date), event, organisation,authority,
                     new Integer(docs).toString(),
                     new Integer(docsShared).toString(),
                     new Integer(docsSafe).toString(),
