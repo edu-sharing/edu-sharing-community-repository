@@ -60,16 +60,20 @@ public class OrganisationLifecycleService {
     public void deleteOrganisation() {
         String authorityName = organisationService.getAuthorityName(this.organisation );
 
-        if(!authorityService.authorityExists(authorityName)){
-            logger.error("authority does not exists " + authorityName);
-            return;
-        }
-
         logger.info("starting for organisation:" + authorityName);
         try {
+            if(!authorityService.authorityExists(authorityName)){
+                logger.error("authority does not exists " + authorityName);
+                throw new Exception("authority does not exists " + authorityName);
+            }
+
             deleteOrganisationWithContext(this.organisation , authorityName);
-            protocolService.writeProtocolToAlfrescoNode(OrganisationDeleteProtocolServiceCSV.MIMETYPE);
+
+        }catch(Throwable e){
+            logger.error(e.getMessage(),e);
+            protocolService.protocolError(this.organisation, this.organisation, e.getMessage() );
         }finally {
+            protocolService.writeProtocolToAlfrescoNode(OrganisationDeleteProtocolServiceCSV.MIMETYPE);
             protocolService.cleanUp();
         }
     }
