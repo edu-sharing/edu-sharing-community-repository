@@ -1,6 +1,5 @@
 package org.edu_sharing.service.lifecycle;
 
-import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.service.ServiceRegistry;
@@ -16,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 
 import java.io.*;
-import java.nio.file.Files;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -117,21 +116,19 @@ public abstract class OrganisationDeleteProtocolService {
 
     public void protocolError(String orga, String user, String errorMessage) {
         OrganisationDeleteProtocol protEntry = new OrganisationDeleteProtocol();
+        protEntry.event = OrganisationDeleteProtocol.EVENTS.ERROR.name();
         protEntry.authority = user;
         protEntry.collections = 0;
         protEntry.date = new Date();
         protEntry.docs = 0;
         protEntry.folders = 0;
-        protEntry.error = errorMessage;
+        protEntry.message = errorMessage;
         protEntry.organisation = orga;
         protocolEntry(protEntry);
     }
 
     public void protocolPersons(String orga, PersonDeleteResult rs) {
-        OrganisationDeleteProtocol protEntry = new OrganisationDeleteProtocol();
-        protEntry.organisation = orga;
-        protEntry.date = new Date();
-        protEntry.authority = rs.authorityName;
+        OrganisationDeleteProtocol protEntry = OrganisationDeleteProtocol.instance(orga,rs.authorityName);
 
         {
             Pair<Integer, Integer> subCount = countFilesFolders(rs.homeFolder.get(PersonLifecycleService.DEFAULT_SCOPE));
@@ -212,7 +209,8 @@ public abstract class OrganisationDeleteProtocolService {
 
     public static class OrganisationDeleteProtocol {
         Date date;
-        String error;
+        String event;
+        String message;
         String organisation;
         String authority;
         int docs;
@@ -226,6 +224,7 @@ public abstract class OrganisationDeleteProtocolService {
         int collections;
         int collectionRefs;
 
+        enum EVENTS {ERROR, INFO}
 
 
         /**
@@ -236,6 +235,7 @@ public abstract class OrganisationDeleteProtocolService {
          */
         public static OrganisationDeleteProtocol instance(String organisation, String authority){
             OrganisationDeleteProtocol protEntry = new OrganisationDeleteProtocol();
+            protEntry.event = EVENTS.INFO.name();
             protEntry.organisation = organisation;
             protEntry.authority = authority;
             protEntry.date = new Date();
@@ -243,7 +243,7 @@ public abstract class OrganisationDeleteProtocolService {
         }
 
         public static String[] getHeader(){
-            return new String[]{"error","organisation","authority",
+            return new String[]{"date", "event", "organisation","authority",
                     "docs",
                     "docsShared",
                     "docsSafe",
@@ -253,11 +253,12 @@ public abstract class OrganisationDeleteProtocolService {
                     "foldersSafe",
                     "foldersSharedSafe",
                     "collections",
-                    "collectionRefs"};
+                    "collectionRefs",
+                    "message"};
         }
 
         public String[] getArray(){
-            return new String[]{error,organisation,authority,
+            return new String[]{new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(date), event, organisation,authority,
                     new Integer(docs).toString(),
                     new Integer(docsShared).toString(),
                     new Integer(docsSafe).toString(),
@@ -267,7 +268,8 @@ public abstract class OrganisationDeleteProtocolService {
                     new Integer(foldersSafe).toString(),
                     new Integer(foldersSharedSafe).toString(),
                     new Integer(collections).toString(),
-                    new Integer(collectionRefs).toString()
+                    new Integer(collectionRefs).toString(),
+                    message
             };
         }
     }
