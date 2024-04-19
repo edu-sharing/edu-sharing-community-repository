@@ -137,7 +137,9 @@ public class OrganisationLifecycleService {
             authorityService.deleteAuthority(authority);
             result.add(authority);
         }
-        protocolService.protocolSubGroups(orga,result);
+        String scope = null;
+        if(authorityName.endsWith("_safe")) scope = CCConstants.CCM_VALUE_SCOPE_SAFE;
+        protocolService.protocolSubGroups(orga,result,scope);
     }
 
     protected PersonDeleteResult deleteUser(String orgAuthorityName, String userName) {

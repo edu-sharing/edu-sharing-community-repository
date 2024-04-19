@@ -199,10 +199,12 @@ public abstract class OrganisationDeleteProtocolService {
         return new Pair<>(docs.get(),folders.get());
     }
 
-    public void protocolSubGroups(String orga, List<String> subgroups){
+    public void protocolSubGroups(String orga, List<String> subgroups, String scope){
 
         subgroups.stream().forEach(s -> {
             OrganisationDeleteProtocol protEntry = OrganisationDeleteProtocol.instance(orga,s);
+            if(CCConstants.CCM_VALUE_SCOPE_SAFE.equals(scope)) protEntry.subGroupSafe = 1;
+            else protEntry.subGroup = 1;
             protocolEntry(protEntry);
         });
     }
@@ -223,6 +225,8 @@ public abstract class OrganisationDeleteProtocolService {
         int foldersSharedSafe;
         int collections;
         int collectionRefs;
+        int subGroup;
+        int subGroupSafe;
 
         enum EVENTS {ERROR, INFO}
 
@@ -254,6 +258,8 @@ public abstract class OrganisationDeleteProtocolService {
                     "foldersSharedSafe",
                     "collections",
                     "collectionRefs",
+                    "subGroup",
+                    "subGroupSafe",
                     "message"};
         }
 
@@ -269,6 +275,8 @@ public abstract class OrganisationDeleteProtocolService {
                     new Integer(foldersSharedSafe).toString(),
                     new Integer(collections).toString(),
                     new Integer(collectionRefs).toString(),
+                    new Integer(subGroup).toString(),
+                    new Integer(subGroupSafe).toString(),
                     message
             };
         }
