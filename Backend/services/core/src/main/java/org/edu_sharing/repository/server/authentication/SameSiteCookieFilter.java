@@ -80,7 +80,7 @@ public class SameSiteCookieFilter implements jakarta.servlet.Filter {
         	boolean forcedByConfig = false;
         	//default handling
         	if(cookieAttributes == null) {
-        		cookieAttributes = "SameSite=None";
+        		cookieAttributes = "SameSite=None; HttpOnly";
         	}//plain tomcat JSESSIONID
         	else if(cookieAttributes.trim().equals("")) {
         		logger.debug("default JSESSIONID. No cookie attribute set.");
@@ -99,8 +99,8 @@ public class SameSiteCookieFilter implements jakarta.servlet.Filter {
                             .filter(cookie -> cookie.startsWith("JSESSIONID") && !cookie.contains("Secure"))
 							.findAny();
             		if(cookieJSessionId.isPresent()) {
-            			logger.debug("no Secure Attribut found. will not set SameSite cookie");
-            			return;
+            			logger.debug("no Secure Attribut found. will not set SameSite cookie, only HttpOnly");
+						cookieAttributes = "HttpOnly";
             		}
             	}
             	
