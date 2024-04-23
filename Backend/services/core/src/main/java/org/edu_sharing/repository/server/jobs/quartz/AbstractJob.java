@@ -35,6 +35,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.quartz.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class AbstractJob implements Job,InterruptableJob {
 	// add your job description
@@ -42,6 +43,9 @@ public abstract class AbstractJob implements Job,InterruptableJob {
 	protected Log logger = LogFactory.getLog(this.getClass());
 	
 	boolean isStarted = false;
+
+	@Autowired
+	private JobHandler jobHandler;
 
 	@Getter
     protected JobDataMap jobDataMap;
@@ -91,6 +95,11 @@ public abstract class AbstractJob implements Job,InterruptableJob {
 
 	@Override
 	public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+		updateJobInfo(jobExecutionContext);
 		this.jobDataMap=jobExecutionContext.getJobDetail().getJobDataMap();
+	}
+
+	protected void updateJobInfo(JobExecutionContext jobExecutionContext) {
+		jobHandler.updateJobThreadId(jobExecutionContext.getJobDetail(), Thread.currentThread().getId());
 	}
 }

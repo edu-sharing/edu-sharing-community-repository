@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import com.typesafe.config.Config;
@@ -18,6 +19,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.jetbrains.annotations.NotNull;
 import org.quartz.*;
 import org.quartz.impl.JobDetailImpl;
 import org.quartz.impl.matchers.GroupMatcher;
@@ -43,7 +45,7 @@ public class JobHandler implements ApplicationListener<ContextRefreshedEvent> {
     public static final Object KEY_RESULT_DATA = "JOB_RESULT_DATA";
     private static final int MAX_JOB_LOG_COUNT = 20; // maximal number of jobs to store for history and gui
     //public final static SimpleCache<String, List<JobInfo>> jobs = (SimpleCache)  AlfAppContextGate.getApplicationContext().getBean("eduSharingJobsListCache");
-    public final static Map<String, List<JobInfo>> jobs = new HashMap<>();
+    public final static Map<String, List<JobInfo>> jobs = new ConcurrentHashMap<>();
     private static final String JOB_LIST_KEY = "jobs";
 
     //private final ApplicationContext eduApplicationContext = null;
@@ -169,6 +171,17 @@ public class JobHandler implements ApplicationListener<ContextRefreshedEvent> {
             if (info.equalsDetail(jobDetail)) {
                 ((JobDetailImpl) jobDetail).setName(name);
                 info.setJobDetail(jobDetail);
+                refreshJobsCache(info);
+                return;
+            }
+        }
+    }
+
+    public void updateJobThreadId(@NotNull JobDetail jobDetail, long id) {
+        for (JobInfo info : getJobs()) {
+
+            if (info.equalsDetail(jobDetail)) {
+                info.setThreadId(id);
                 refreshJobsCache(info);
                 return;
             }
@@ -409,7 +422,6 @@ public class JobHandler implements ApplicationListener<ContextRefreshedEvent> {
 
         // use startDelayed() to not block server startup by IMMEDIATE jobs
         quartzScheduler.startDelayed(10);
-
         refresh(true);
     }
 
