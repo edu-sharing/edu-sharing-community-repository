@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
  */
 public class MetadataTemplateRenderer {
 
-	private final HashMap<String, String[]> propertiesNative;
+	private final Map<String, String[]> propertiesNative;
 
 	public enum RenderingMode{
 		HTML,
@@ -81,8 +81,8 @@ public class MetadataTemplateRenderer {
 	public Map<String, String[]> getProcessedProperties(){
 		return this.properties;
 	}
-	public static HashMap<String, String[]> convertProps(Map<String, Object> props) {
-		HashMap<String, String[]> propsConverted = new HashMap<>();
+	public static Map<String, String[]> convertProps(Map<String, Object> props) {
+		Map<String, String[]> propsConverted = new HashMap<>();
 		for(String key : props.keySet()){
 			String keyLocal= CCConstants.getValidLocalName(key);
 
@@ -212,9 +212,9 @@ public class MetadataTemplateRenderer {
 					int i = 0;
 					for (String value : values) {
 						String rawValue = value;
-						HashMap<String, Object> vcardData = null;
+						Map<String, Object> vcardData = null;
 						if ("vcard".equals(widget.getType())) {
-							ArrayList<HashMap<String, Object>> map = VCardConverter.vcardToHashMap(
+							ArrayList<Map<String, Object>> map = VCardConverter.vcardToMap(
 									// html in vcards gets escaped beforehand for security reason, unescape special chars to not break the format
 									org.apache.commons.lang.StringEscapeUtils.unescapeHtml(value)
 							);
@@ -621,8 +621,8 @@ public class MetadataTemplateRenderer {
 		return cleaned;
 	}
 	*/
-	public HashMap<String, String[]> cleanupTextMultivalueProperties(Map<String, String[]> properties, boolean htmlMode) {
-		HashMap<String,String[]> cleaned=new HashMap<>();
+	public Map<String, String[]> cleanupTextMultivalueProperties(Map<String, String[]> properties, boolean htmlMode) {
+		Map<String,String[]> cleaned=new HashMap<>();
 		for(Map.Entry<String,String[]> entry : properties.entrySet()){
 			if(entry.getValue()==null) {
 				cleaned.put(entry.getKey(), null);

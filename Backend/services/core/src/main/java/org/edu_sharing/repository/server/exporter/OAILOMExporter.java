@@ -51,7 +51,7 @@ public class OAILOMExporter {
 
 	public static String configCatalog = "exporter.oai.lom.identifier.catalog";
 	protected String lomIdentifierCatalog = (LightbendConfigLoader.get().hasPath(configCatalog)) ? LightbendConfigLoader.get().getString(configCatalog) : ApplicationInfoList.getHomeRepository().getAppId();
-	protected HashMap<String, Object> properties;
+	protected Map<String, Object> properties;
 
 	public OAILOMExporter() throws ParserConfigurationException {
 		ApplicationContext context = AlfAppContextGate.getApplicationContext();

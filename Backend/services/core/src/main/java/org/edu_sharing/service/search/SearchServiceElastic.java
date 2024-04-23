@@ -833,7 +833,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     private <T extends NodeRefImpl> T transform(Class<T> clazz, Set<String> authorities, String user, Map<String, Object> sourceAsMap, boolean resolveCollections) throws IllegalAccessException, InstantiationException {
         boolean isAdmin = AuthorityServiceHelper.isAdmin();
-        HashMap<String, MetadataSet> mdsCache = new HashMap<>();
+        Map<String, MetadataSet> mdsCache = new HashMap<>();
         String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
 
         Map<String, Serializable> properties = (Map) sourceAsMap.get("properties");
@@ -849,7 +849,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         String protocol = (String) storeRef.get("protocol");
         String identifier = (String) storeRef.get("identifier");
 
-        HashMap<String, Object> props = new HashMap<>();
+        Map<String, Object> props = new HashMap<>();
 
         for (Map.Entry<String, Serializable> entry : properties.entrySet()) {
 
@@ -970,7 +970,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         eduNodeRef.setAspects(((List<String>) sourceAsMap.get("aspects")).
                 stream().map(CCConstants::getValidGlobalName).filter(Objects::nonNull).collect(Collectors.toList()));
 
-        HashMap<String, Boolean> permissions = new HashMap<>();
+        Map<String, Boolean> permissions = new HashMap<>();
         permissions.put(CCConstants.PERMISSION_READ, true);
         String guestUser = ApplicationInfoList.getHomeRepository().getGuest_username();
         long millis = System.currentTimeMillis();
@@ -1120,7 +1120,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     /**
      * check if the user has permissions on this element via a collection and give him all permissions as it is an usage access
      */
-    private static void processCollectionUsagePermissions(Set<String> authorities, String user, Map<String, Object> sourceAsMap, HashMap<String, Boolean> permissions) {
+    private static void processCollectionUsagePermissions(Set<String> authorities, String user, Map<String, Object> sourceAsMap, Map<String, Boolean> permissions) {
         if (permissions.size() == 1) {
             List<Map<String, Object>> collections = (List<Map<String, Object>>) sourceAsMap.get("collections");
             for (Map<String, Object> collection : Optional.ofNullable(collections).orElse(Collections.emptyList())) {

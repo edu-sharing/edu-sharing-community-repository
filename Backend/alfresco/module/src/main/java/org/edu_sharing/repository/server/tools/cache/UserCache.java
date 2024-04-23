@@ -59,7 +59,7 @@ public class UserCache {
             user.setGivenName((String)props.get(QName.createQName(CCConstants.CM_PROP_PERSON_FIRSTNAME)));
             user.setSurname(((String)props.get(QName.createQName(CCConstants.CM_PROP_PERSON_LASTNAME))));
             user.setNodeId(persNoderef.getId());
-            HashMap<String,Serializable> userProperties = new HashMap<>();
+            Map<String, Serializable> userProperties = new HashMap<>();
             for (Map.Entry<QName, Serializable> entry : props.entrySet()) {
                 Serializable value = entry.getValue();
                 userProperties.put(

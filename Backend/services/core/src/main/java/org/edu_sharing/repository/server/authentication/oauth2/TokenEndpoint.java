@@ -28,6 +28,7 @@ import org.springframework.context.ApplicationContext;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.Map;
 
 public class TokenEndpoint extends HttpServlet {
 
@@ -81,7 +82,7 @@ public class TokenEndpoint extends HttpServlet {
 						String username = oauthRequest.getUsername();
 						
 						// check
-						HashMap<String, String> authInfo = RepoFactory.getAuthenticationToolInstance(null)
+						Map<String, String> authInfo = RepoFactory.getAuthenticationToolInstance(null)
 							.createNewSession(username, oauthRequest.getPassword());
 
 						tokenService.createToken(username, accessToken, refreshToken, clientId,authInfo.get(CCConstants.AUTH_TICKET));
@@ -119,7 +120,7 @@ public class TokenEndpoint extends HttpServlet {
 				else if (GrantType.CLIENT_CREDENTIALS.toString().equals(grantType)) {
 					try {
 
-						HashMap<String, String> authInfo = RepoFactory.getAuthenticationToolInstance(null)
+						Map<String, String> authInfo = RepoFactory.getAuthenticationToolInstance(null)
 							.validateAuthentication(request.getSession());
 						String userName=authInfo.get("UserName");
 						if(authInfo==null || userName==null)

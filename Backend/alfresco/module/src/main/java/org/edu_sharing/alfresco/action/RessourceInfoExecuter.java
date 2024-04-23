@@ -289,7 +289,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 					nodeService.setProperty(actionedUponNodeRef, QName.createQName(CCM_PROP_IO_RESSOURCEVERSION),
 							ressourceVersion);
 					if (isQtiList.size() > 0) {
-						ArrayList<String> qtiInfoSubtypeList = new ArrayList<String>();
+						ArrayList<String> qtiInfoSubtypeList = new ArrayList<>();
 						for (RessourceInfoTool.QTIInfo qtiInfo : isQtiList) {
 							String subtype = qtiInfo.getSubtype();
 							if (subtype != null && !subtype.trim().equals("")

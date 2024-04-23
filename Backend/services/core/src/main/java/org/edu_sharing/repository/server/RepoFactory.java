@@ -27,10 +27,7 @@
  */
 package org.edu_sharing.repository.server;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -64,9 +61,9 @@ public class RepoFactory {
 	 * time then use direct contructor calls with getInstance of the
 	 * MCBaseClient subclass
 	 */
-	static HashMap<String, MCBaseClient> appClassCache = new HashMap<String, MCBaseClient>();
+	static Map<String, MCBaseClient> appClassCache = new HashMap<>();
 	
-	static HashMap<String,AuthenticationTool> appAuthToolCache = new HashMap<String,AuthenticationTool>();
+	static Map<String,AuthenticationTool> appAuthToolCache = new HashMap<>();
 
 	private static Log logger = LogFactory.getLog(RepoFactory.class);
 
@@ -95,7 +92,7 @@ public class RepoFactory {
 		AuthenticationTool authTool = RepoFactory.getAuthenticationToolInstance(repositoryId);
 		
 		//for remote repositories: the authinfo is created by this method if its missing
-		HashMap<String,String> authInfo = authTool.validateAuthentication(session);
+		Map<String,String> authInfo = authTool.validateAuthentication(session);
 		
 		ApplicationInfo repInfo = ApplicationInfoList.getRepositoryInfoById(repositoryId);
 		if(authInfo != null){
@@ -119,7 +116,7 @@ public class RepoFactory {
 	 * @return
 	 * @throws Throwable
 	 */
-	public static MCBaseClient getInstance(String repositoryId, HashMap homeRepAuthInfo) throws Throwable {
+	public static MCBaseClient getInstance(String repositoryId, Map<String, String> homeRepAuthInfo) throws Throwable {
 
 		logger.debug("repositoryId:" + repositoryId);
 		ApplicationInfo repInfo = null;
@@ -128,7 +125,7 @@ public class RepoFactory {
 		} else {
 			repInfo = ApplicationInfoList.getRepositoryInfoById(repositoryId);
 		}
-		HashMap remoteAuthInfo = null;
+		Map<String, String> remoteAuthInfo = null;
 
 		// authenticate when it's an remote Repository and an
 		// AuthenticationWebservice is configured
@@ -155,7 +152,7 @@ public class RepoFactory {
 	 * @return
 	 * @throws Throwable
 	 */
-	public static MCBaseClient getInstanceForRepo(ApplicationInfo repInfo, HashMap authInfo) throws Throwable {
+	public static MCBaseClient getInstanceForRepo(ApplicationInfo repInfo, Map<String,String> authInfo) throws Throwable {
 
 		
 		String repositoryId = repInfo.getAppId();
@@ -242,7 +239,7 @@ public class RepoFactory {
 			repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
 		}
 		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(repositoryId);
-		ArrayList<MetadataSetInfo> sets = new ArrayList<MetadataSetInfo>();
+		ArrayList<MetadataSetInfo> sets = new ArrayList<>();
 		for(String id : appInfo.getMetadatsets()){
 			MetadataSetInfo info=new MetadataSetInfo();
 			MetadataSet mds = MetadataHelper.getMetadataset(appInfo, id);

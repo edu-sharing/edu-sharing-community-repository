@@ -474,7 +474,7 @@ public class PersonLifecycleService {
 
 		}
 		else{
-			List<NodeRef> allFiles = new ArrayList<NodeRef>();
+			List<NodeRef> allFiles = new ArrayList<>();
 			shared.forEach(
 					(childAssociationRef -> {
 						allFiles.addAll(NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, childAssociationRef.getChildRef().getId(), null, RecurseMode.Folders));
@@ -679,14 +679,14 @@ public class PersonLifecycleService {
 			NodeRef deleted = getDeletedFolderForOrg(options, scope);
 			String userFolder = NodeServiceFactory.getLocalService().findNodeByName(deleted.getId(), username);
 			if (userFolder == null) {
-				HashMap<String, Object> props = new HashMap<>();
+				Map<String, Object> props = new HashMap<>();
 				props.put(CCConstants.CM_NAME, username);
 				userFolder = NodeServiceFactory.getLocalService().createNodeBasic(deleted.getId(), CCConstants.CCM_TYPE_MAP, props);
 			}
 			if (subfolder == null)
 				return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, userFolder);
 
-			HashMap<String, Object> props = new HashMap<>();
+			Map<String, Object> props = new HashMap<>();
 			props.put(CCConstants.CM_NAME, subfolder);
 			return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, NodeServiceFactory.getLocalService().createNodeBasic(userFolder, CCConstants.CCM_TYPE_MAP, props));
 		}catch(Exception e){
@@ -716,7 +716,7 @@ public class PersonLifecycleService {
 
 		String deletedHome= NodeServiceFactory.getLocalService().findNodeByName(orgHome.getId(),DELETED_PERSONS_FOLDER);
 		if(deletedHome==null) {
-			HashMap<String, Object> props=new HashMap<>();
+			Map<String, Object> props=new HashMap<>();
 			props.put(CCConstants.CM_NAME,DELETED_PERSONS_FOLDER);
 			deletedHome=NodeServiceFactory.getLocalService().createNodeBasic(orgHome.getId(), CCConstants.CCM_TYPE_MAP, props);
 			NodeRef deletedRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, deletedHome);
@@ -790,7 +790,7 @@ public class PersonLifecycleService {
 		if(creator instanceof ArrayList){
 			creators= (ArrayList<String>) creator;
 		}else{
-			creators = new ArrayList<String>();
+			creators = new ArrayList<>();
 			creators.add((String)creator);
 		}
 		if(creators.size()>0) {
@@ -800,8 +800,8 @@ public class PersonLifecycleService {
 			String lastName = (String) nodeService.getProperty(authority, QName.createQName(CCConstants.CM_PROP_PERSON_LASTNAME));
 			// filter all elements where current user is really attached
 			creators= creators.stream().filter((c) -> {
-				HashMap<String, Object> vcard = VCardConverter.
-						getVCardHashMap(CCConstants.CCM_TYPE_IO, CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR, c);
+				Map<String, Object> vcard = VCardConverter.
+						getVCardMap(CCConstants.CCM_TYPE_IO, CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR, c);
 				if (vcard != null && vcard.size() > 0) {
 					if (Objects.equals(firstName, vcard.get(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR+CCConstants.VCARD_GIVENNAME)) &&
 							Objects.equals(lastName, vcard.get(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR+CCConstants.VCARD_SURNAME))) {
@@ -837,15 +837,15 @@ public class PersonLifecycleService {
 		QName qnameMetadata = QName.createQName(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR);
 		List<String> contributerAuthor = (List<String>)nodeService.getProperty(nodeRef, qnameAuthor);
 		List<String> contributerMetadata = (List<String>)nodeService.getProperty(nodeRef,qnameMetadata);
-		contributerAuthor.removeIf(author -> contains(VCardConverter.vcardToHashMap(author), firstName, lastName));
+		contributerAuthor.removeIf(author -> contains(VCardConverter.vcardToMap(author), firstName, lastName));
 		nodeService.setProperty(nodeRef, qnameAuthor, (ArrayList)contributerAuthor);
 
-		contributerMetadata.removeIf(metadataContributer -> contains(VCardConverter.vcardToHashMap(metadataContributer), firstName, lastName));
+		contributerMetadata.removeIf(metadataContributer -> contains(VCardConverter.vcardToMap(metadataContributer), firstName, lastName));
 		nodeService.setProperty(nodeRef, qnameMetadata, (ArrayList)contributerMetadata);
 
 	}
 
-	private boolean contains(ArrayList<HashMap<String, Object>> vcardList, String firstName, String lastName) {
+	private boolean contains(ArrayList<Map<String, Object>> vcardList, String firstName, String lastName) {
 
 		if(vcardList != null && vcardList.size() > 0) {
 			Map<String,Object> vcard = vcardList.iterator().next();

@@ -22,7 +22,6 @@ import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescript
 import org.edu_sharing.repository.server.tools.NodeTool;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
-import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.mediacenter.MediacenterService;
@@ -41,11 +40,8 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
-import java.awt.*;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -56,7 +52,6 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.edu_sharing.alfresco.service.AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP;
 import static org.edu_sharing.alfresco.service.AuthorityService.ORG_GROUP_PREFIX;
 
 @JobDescription(description = "Creates reports for all mediacenters on the 1st of each month for the last month")
@@ -358,7 +353,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 					).collect(Collectors.toList())
 			));
 		});
-		ArrayList<ReportEntry> entries = new ArrayList<ReportEntry>();
+		ArrayList<ReportEntry> entries = new ArrayList<>();
 		for (Map.Entry<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> entry : data.entrySet()) {
 			if(isInterrupted()) {
 				return;
@@ -374,7 +369,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 								if(e.size() == 1) {
 									prop = VCardConverter.getNameForVCardString(prop);
 								} else {
-									ArrayList<HashMap<String, Object>> vcard = VCardConverter.vcardToHashMap(null, prop);
+									ArrayList<Map<String, Object>> vcard = VCardConverter.vcardToMap(null, prop);
 									if (vcard.size() == 0) {
 										return "";
 									}

@@ -43,7 +43,7 @@ public class NodeFrontpage {
     private SearchService searchService= SearchServiceFactory.getLocalService();
     private NodeService nodeService=NodeServiceFactory.getLocalService();
     private PermissionService permissionService= PermissionServiceFactory.getLocalService();
-    private HashMap<String, Date> APPLY_DATES;
+    private Map<String, Date> APPLY_DATES;
 
     SearchServiceElastic searchServiceElastic = new SearchServiceElastic(ApplicationInfoList.getHomeRepository().getAppId());
 

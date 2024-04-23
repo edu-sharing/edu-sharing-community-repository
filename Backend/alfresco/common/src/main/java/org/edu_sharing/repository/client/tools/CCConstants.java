@@ -1029,9 +1029,9 @@ public class CCConstants {
     public static final String TEMPLATE_NODE_NAME = ".METADATA_TEMPLATE";
 
 
-    private static HashMap<String,String> lifecycleContributerPropsMap = new HashMap<String,String>();
+    private static Map<String,String> lifecycleContributerPropsMap = new HashMap<>();
 
-	public static HashMap<String, String> getLifecycleContributerPropsMap() {
+	public static Map<String, String> getLifecycleContributerPropsMap() {
 		if(lifecycleContributerPropsMap.size() == 0){
 			lifecycleContributerPropsMap.put("publisher", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER);
 			lifecycleContributerPropsMap.put("unknown", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_UNKNOWN);
@@ -1121,9 +1121,9 @@ public class CCConstants {
 		return  getLifecycleContributerPropsMap().get(role);
 	}
 
-	private static HashMap<String,String> metadataContributerPropsMap = new HashMap<String,String>();
+	private static Map<String,String> metadataContributerPropsMap = new HashMap<>();
 
-	public static HashMap<String, String> getMetadataContributerPropsMap() {
+	public static Map<String, String> getMetadataContributerPropsMap() {
 		if(metadataContributerPropsMap.size() == 0){
 			metadataContributerPropsMap.put("creator", CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR);
 			metadataContributerPropsMap.put("provider", CCM_PROP_IO_REPL_METADATACONTRIBUTER_PROVIDER);
@@ -1622,7 +1622,7 @@ public class CCConstants {
 
 	public static ArrayList<String> getDetailPropList(){
 		if(detailsProps == null){
-			detailsProps = new ArrayList<String>();
+			detailsProps = new ArrayList<>();
 			detailsProps.add(CM_PROP_C_TITLE);
 			detailsProps.add(CM_PROP_C_CREATOR);
 			detailsProps.add(CM_PROP_C_CREATED);
@@ -1936,7 +1936,7 @@ public class CCConstants {
 
 	public static Map<String,String> getLicenseMap(){
 		if(licenseMap == null) {
-			licenseMap = new HashMap<String,String>();
+			licenseMap = new HashMap<>();
 			licenseMap.put(CCConstants.COMMON_LICENSE_CC_BY_SA_LINK.split("\\$")[0],CCConstants.COMMON_LICENSE_CC_BY_SA);
 			licenseMap.put(CCConstants.COMMON_LICENSE_CC_BY_LINK.split("\\$")[0],CCConstants.COMMON_LICENSE_CC_BY);
 			licenseMap.put(CCConstants.COMMON_LICENSE_CC_BY_ND_LINK.split("\\$")[0],CCConstants.COMMON_LICENSE_CC_BY_ND);
@@ -2119,14 +2119,14 @@ public class CCConstants {
 
 	public static final String CC_CACHE_MILLISECONDS_KEY = "CC_CACHE_MILLISECONDS_KEY";
 
-	private static HashMap<String, String> nameSpaceMap = null;
+	private static Map<String, String> nameSpaceMap = null;
 
     /**
 	 * @return <namespace,localnamespace>
 	 */
-	public static HashMap<String, String> getNameSpaceMap() {
+	public static Map<String, String> getNameSpaceMap() {
 		if(nameSpaceMap == null){
-			nameSpaceMap = new HashMap<String, String>();
+			nameSpaceMap = new HashMap<>();
 			nameSpaceMap.put(NAMESPACE_CCM, NAMESPACE_SHORT_CCM);
 			nameSpaceMap.put(NAMESPACE_CM, NAMESPACE_SHORT_CM);
 			nameSpaceMap.put(NAMESPACE_LOM, NAMESPACE_SHORT_LOM);

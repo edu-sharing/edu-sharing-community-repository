@@ -131,7 +131,7 @@ public class PreviewServlet extends HttpServlet {
 
 			// check nodetype for security reasons
 			String inNodeId=nodeId;
-			HashMap<String,Object> props = new HashMap<>();
+			Map<String,Object> props;
 			if (nodeId != null) {
 				try {
 					props = nodeService.getProperties(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId);
@@ -212,9 +212,9 @@ public class PreviewServlet extends HttpServlet {
 			PreviewDetail getPrevResult = null;
 			// check if version is requested and version seems to be NOT the current node version
 			if(version != null && !version.trim().equals("") && !isCollection && !version.equals(props.get(CCConstants.LOM_PROP_LIFECYCLE_VERSION))){
-				HashMap<String, HashMap<String,Object>> versionHistory = nodeService.getVersionHistory(nodeId);
+				Map<String, Map<String,Object>> versionHistory = nodeService.getVersionHistory(nodeId);
 				if(versionHistory != null){
-					for(Map.Entry<String, HashMap<String,Object>> entry : versionHistory.entrySet()){
+					for(Map.Entry<String, Map<String,Object>> entry : versionHistory.entrySet()){
 						String tmpVers = (String)entry.getValue().get(CCConstants.LOM_PROP_LIFECYCLE_VERSION);
 						if(version.equals(tmpVers)){
 
@@ -273,7 +273,7 @@ public class PreviewServlet extends HttpServlet {
 				if (getPrevResult.getType().equals(PreviewDetail.TYPE_GENERATED)) {
 
 
-					HashMap<String, Object> previewProps = null;
+					Map<String, Object> previewProps = null;
 					final String fnodeId = nodeId;
 					if(isCollection) {
 						prevNodeRef = AuthenticationUtil.runAsSystem(
@@ -331,21 +331,18 @@ public class PreviewServlet extends HttpServlet {
 		 * fallback to mime first, then default
 		 */
 		try{
-			HashMap<String,Object> props;
+			Map<String,Object> props;
 			String[] aspects=new String[]{};
 			String type=null;
 			if(isCollection){
 				final String nodeIdFinal=nodeId;
-				props=AuthenticationUtil.runAsSystem(new RunAsWork<HashMap<String,Object>>() {
-					@Override
-					public HashMap<String, Object> doWork() throws Exception {
-						try{
-							return NodeServiceFactory.getLocalService().getProperties(storeRef.getProtocol(), storeRef.getIdentifier(),nodeIdFinal);
-						}catch(Throwable t){
-							throw new Exception(t);
-						}
-					}
-				});
+				props=AuthenticationUtil.runAsSystem(() -> {
+                    try{
+                        return NodeServiceFactory.getLocalService().getProperties(storeRef.getProtocol(), storeRef.getIdentifier(),nodeIdFinal);
+                    }catch(Throwable t){
+                        throw new Exception(t);
+                    }
+                });
 			}
 			else{
 				props=nodeService.getProperties(storeRef.getProtocol(), storeRef.getIdentifier(),nodeId);
@@ -366,7 +363,7 @@ public class PreviewServlet extends HttpServlet {
 			throw new AccessDeniedException("No "+CCConstants.PERMISSION_READ_PREVIEW+" on "+nodeId);
 	}
 
-	private void validateScope(HttpServletRequest req, HashMap<String, Object> props) {
+	private void validateScope(HttpServletRequest req, Map<String, Object> props) {
 		String scope=(String) req.getSession().getAttribute(CCConstants.AUTH_SCOPE);
 		// Allow only valid scope
 		if(props.containsKey(CCConstants.CCM_PROP_EDUSCOPE_NAME)){
@@ -703,7 +700,7 @@ public class PreviewServlet extends HttpServlet {
 	public static PreviewDetail getPreview(NodeService nodeService,String storeProtocol, String storeIdentifier, String nodeId){
 		return getPreview(nodeService,storeProtocol,storeIdentifier,nodeId,null);
 	}
-	public static PreviewDetail getPreview(NodeService nodeService,String storeProtocol, String storeIdentifier, String nodeId,HashMap<String, Object> nodeProps){
+	public static PreviewDetail getPreview(NodeService nodeService,String storeProtocol, String storeIdentifier, String nodeId,Map<String, Object> nodeProps){
 		StoreRef storeRef = new StoreRef(storeProtocol,storeIdentifier);
 		NodeRef nodeRef = new NodeRef(storeRef,nodeId);
 		if(!nodeService.getType(nodeId).equals(CCConstants.CCM_TYPE_IO)){

@@ -183,17 +183,17 @@ public class MediacenterServiceImpl implements MediacenterService {
          */
         NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(alfAuthorityName);
 
-        Map<QName, Serializable> groupExtProps = new HashMap<QName, Serializable>();
+        Map<QName, Serializable> groupExtProps = new HashMap<>();
         groupExtProps.put(QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), AuthorityService.MEDIA_CENTER_GROUP_TYPE);
         nodeService.addAspect(authorityNodeRef, QName.createQName(CCConstants.CCM_ASPECT_GROUPEXTENSION), groupExtProps);
 
-        Map<QName, Serializable> groupAddressProps = new HashMap<QName, Serializable>();
+        Map<QName, Serializable> groupAddressProps = new HashMap<>();
         if (postalCode != null)
             groupAddressProps.put(QName.createQName(CCConstants.CCM_PROP_ADDRESS_POSTALCODE), postalCode);
         if (city != null) groupAddressProps.put(QName.createQName(CCConstants.CCM_PROP_ADDRESS_CITY), city);
         nodeService.addAspect(authorityNodeRef, QName.createQName(CCConstants.CCM_ASPECT_ADDRESS), groupAddressProps);
 
-        Map<QName, Serializable> groupMZProps = new HashMap<QName, Serializable>();
+        Map<QName, Serializable> groupMZProps = new HashMap<>();
         groupMZProps.put(QName.createQName(CCConstants.CCM_PROP_MEDIACENTER_ID), id);
         if (city != null) groupMZProps.put(QName.createQName(CCConstants.CCM_PROP_ADDRESS_CITY), city);
         nodeService.addAspect(authorityNodeRef, QName.createQName(CCConstants.CCM_ASPECT_MEDIACENTER), groupMZProps);
@@ -306,7 +306,7 @@ public class MediacenterServiceImpl implements MediacenterService {
                         if (rs == null || rs.length() < 1) {
                             logger.error("no mediacenters found");
                         } else {
-                            Map<String, List<String>> existingMZsAndSchools = new HashMap<String, List<String>>();
+                            Map<String, List<String>> existingMZsAndSchools = new HashMap<>();
                             for (NodeRef mzNodeRef : rs.getNodeRefs()) {
                                 String authorityName = (String) nodeService.getProperty(mzNodeRef, ContentModel.PROP_AUTHORITY_NAME);
                                 String mzId = authorityName.replace("GROUP_MEDIA_CENTER_", "");
@@ -331,7 +331,7 @@ public class MediacenterServiceImpl implements MediacenterService {
 
                                         List<String> schools = existingMZsAndSchools.get(mzId);
                                         if (schools == null) {
-                                            schools = new ArrayList<String>();
+                                            schools = new ArrayList<>();
                                         }
                                         if (!schools.contains(schoolId)) {
                                             schools.add(schoolId);
@@ -347,7 +347,7 @@ public class MediacenterServiceImpl implements MediacenterService {
                                 List<String> newSchools = newMZsAndSchools.get(mzAndSchools.getKey());
                                 if (newSchools == null) {
                                     logger.info("existing mz:" + mzAndSchools.getKey() + " has a null school list in new sheet");
-                                    newSchools = new ArrayList<String>();
+                                    newSchools = new ArrayList<>();
                                 }
 
                                 if (mzAndSchools.getValue() == null) {
@@ -422,11 +422,11 @@ public class MediacenterServiceImpl implements MediacenterService {
     }
 
     Map<String, List<String>> listToUniqueMap(List<List<String>> records) {
-        Map<String, List<String>> result = new HashMap<String, List<String>>();
+        Map<String, List<String>> result = new HashMap<>();
 
         for (List<String> record : records) {
             if (!result.containsKey(record.get(0))) {
-                List<String> list = new ArrayList<String>();
+                List<String> list = new ArrayList<>();
                 list.add(record.get(1));
                 result.put(record.get(0), list);
             } else {
@@ -625,10 +625,10 @@ public class MediacenterServiceImpl implements MediacenterService {
             logger.error("no imported objects folder found");
             return;
         }
-        HashMap<String, NodeRef> importedNodes = new NodeHelper().getImportedNodes(impFolderId);
+        Map<String, NodeRef> importedNodes = new NodeHelper().getImportedNodes(impFolderId);
 
 
-        HashMap<String, List<String>> sodisMediacenterIdNodes = new HashMap<>();
+        Map<String, List<String>> sodisMediacenterIdNodes = new HashMap<>();
         for (String mediacenterId : allMediacenterIds) {
             logger.info("cache provider mediacenter nodes mediacenterId:" + mediacenterId + " already cached:" + sodisMediacenterIdNodes.size());
             List<String> nodes = MediacenterLicenseProviderFactory.getMediacenterLicenseProvider().getNodes(mediacenterId);
@@ -636,8 +636,8 @@ public class MediacenterServiceImpl implements MediacenterService {
         }
 
 
-        HashMap<String, List<NodeRef>> addToMediacenterList = new HashMap<>();
-        HashMap<String, List<NodeRef>> removeFromMediacenterList = new HashMap<>();
+        Map<String, List<NodeRef>> addToMediacenterList = new HashMap<>();
+        Map<String, List<NodeRef>> removeFromMediacenterList = new HashMap<>();
 
         for (String mediacenterId : allMediacenterIds) {
             logger.info("collect differences for " + mediacenterId);
@@ -664,7 +664,7 @@ public class MediacenterServiceImpl implements MediacenterService {
                 if (sodisLicensedNodes.contains(entry.getKey()) && (!hasConsumerPermission || !hasPublishPermission)) {
                     List<NodeRef> nodeRefs = addToMediacenterList.get(mediacenterName);
                     if (nodeRefs == null) {
-                        nodeRefs = new ArrayList<NodeRef>();
+                        nodeRefs = new ArrayList<>();
                         addToMediacenterList.put(mediacenterName, nodeRefs);
                     }
                     nodeRefs.add(entry.getValue());
@@ -672,7 +672,7 @@ public class MediacenterServiceImpl implements MediacenterService {
                         && (hasConsumerPermission || hasPublishPermission)) {
                     List<NodeRef> nodeRefs = removeFromMediacenterList.get(mediacenterName);
                     if (nodeRefs == null) {
-                        nodeRefs = new ArrayList<NodeRef>();
+                        nodeRefs = new ArrayList<>();
                         removeFromMediacenterList.put(mediacenterName, nodeRefs);
                     }
                     nodeRefs.add(entry.getValue());
@@ -868,7 +868,7 @@ public class MediacenterServiceImpl implements MediacenterService {
     }
 
     private NodeRef getNodeRefByReplicationSourceId(String replicationSourceId){
-        NodeRef nodeRef = getPersistentHandlerEdusharing().getNodeIfExists(new HashMap<String, Object>() {
+        NodeRef nodeRef = getPersistentHandlerEdusharing().getNodeIfExists(new HashMap<>() {
             {
                 put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID, replicationSourceId);
             }}
@@ -876,19 +876,14 @@ public class MediacenterServiceImpl implements MediacenterService {
 
         if(nodeRef == null){
             logger.info("creating dummy object for:"+replicationSourceId);
-            HashMap<String,Object> properties = new HashMap<>();
+            Map<String,Object> properties = new HashMap<>();
             properties.put(CCConstants.CM_NAME,replicationSourceId);
             properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP, "1900-01-01T00:00:00Z");
             properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID,replicationSourceId);
             properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,MediacenterLicenseProviderFactory.getMediacenterLicenseProvider().getCatalogId());
             properties.put(CCConstants.CCM_PROP_IO_TECHNICAL_STATE,"problem_notAvailable");
             try {
-                String nodeId = getPersistentHandlerEdusharing().safe(new RecordHandlerInterfaceBase() {
-                    @Override
-                    public HashMap<String, Object> getProperties() {
-                        return properties;
-                    }
-                },null,MediacenterLicenseProviderFactory.getMediacenterLicenseProvider().getSet());
+                String nodeId = getPersistentHandlerEdusharing().safe((RecordHandlerInterfaceBase) () -> properties,null,MediacenterLicenseProviderFactory.getMediacenterLicenseProvider().getSet());
                 if(nodeId != null){
                     nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
                 }

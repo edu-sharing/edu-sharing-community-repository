@@ -179,13 +179,13 @@ public class JobHandler implements ApplicationListener<ContextRefreshedEvent> {
 
         Class jobClass = null;
         Trigger trigger = null;
-        HashMap<String, Object> params = null;
+        Map<String, Object> params = null;
         String jobname = null;
 
         public JobConfig() {
         }
 
-        public JobConfig(Class jobClass, Trigger trigger, HashMap<String, Object> params, String name) {
+        public JobConfig(Class jobClass, Trigger trigger, Map<String, Object> params, String name) {
             this.jobClass = jobClass;
             this.trigger = trigger;
             this.params = params;
@@ -208,11 +208,11 @@ public class JobHandler implements ApplicationListener<ContextRefreshedEvent> {
             this.trigger = trigger;
         }
 
-        public HashMap<String, Object> getParams() {
+        public Map<String, Object> getParams() {
             return params;
         }
 
-        public void setParams(HashMap<String, Object> params) {
+        public void setParams(Map<String, Object> params) {
             this.params = params;
         }
 
@@ -440,7 +440,7 @@ public class JobHandler implements ApplicationListener<ContextRefreshedEvent> {
                 if (jobName == null || jobName.trim().equals("")) {
                     jobName = clazz.getSimpleName() + "_JobName_" + System.currentTimeMillis();
                 }
-                HashMap<String, Object> params = new HashMap<>();
+                Map<String, Object> params =  new HashMap<>();
                 if (job.hasPath("params")) {
                     for (Map.Entry<String, ConfigValue> configParams : job.getConfig("params").entrySet()) {
                         params.put(configParams.getKey(), configParams.getValue().unwrapped());
@@ -593,7 +593,7 @@ public class JobHandler implements ApplicationListener<ContextRefreshedEvent> {
      * @return ImmediateJobListener
      * @throws SchedulerException
      */
-    public ImmediateJobListener startJob(Class jobClass, HashMap<String, Object> params) throws SchedulerException, Exception {
+    public ImmediateJobListener startJob(Class jobClass, Map<String, Object> params) throws SchedulerException, Exception {
         checkPrimaryRepository();
 
         String jobName = jobClass.getSimpleName() + IMMEDIATE_JOBNAME_SUFFIX;
@@ -641,7 +641,7 @@ public class JobHandler implements ApplicationListener<ContextRefreshedEvent> {
         return iJobListener;
     }
 
-    public static JobDataMap createJobDataMap(HashMap<String, Object> params) {
+    public static JobDataMap createJobDataMap(Map<String, Object> params) {
         JobDataMap jdm = new JobDataMap();
 
         if (params != null && params.size() > 0) {

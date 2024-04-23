@@ -23,7 +23,7 @@ public class JobLogger extends AbstractAppender {
     /**
      * logs are not shared in cluster for performance reasongs
      */
-    private static HashMap<JobInfo, List<LogEntry>> logs = new HashMap<>();
+    private static Map<JobInfo, List<LogEntry>> logs = new HashMap<>();
 
     private final ApplicationContext applicationContext;
 

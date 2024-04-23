@@ -190,7 +190,7 @@ public class ConfigApi {
 	private Map<String,String> convertKeyValue(List<org.edu_sharing.alfresco.service.config.model.KeyValuePair> pairs) {
 		if(pairs==null)
 			return null;
-		Map<String,String> map=new HashMap<String, String>();
+		Map<String,String> map=new HashMap<>();
 		for(org.edu_sharing.alfresco.service.config.model.KeyValuePair pair : pairs) {
 			map.put(pair.key, pair.value);
 		}

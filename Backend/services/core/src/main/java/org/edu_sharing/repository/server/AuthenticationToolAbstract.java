@@ -44,8 +44,8 @@ public abstract class AuthenticationToolAbstract implements AuthenticationTool {
 	}
 	
 	@Override
-	public HashMap<String, String> getAuthentication(HttpSession session) {
-		HashMap<String,String> result = new HashMap<String,String>();
+	public Map<String, String> getAuthentication(HttpSession session) {
+		Map<String,String> result = new HashMap<>();
 		String currentTicket = (String)session.getAttribute(CCConstants.AUTH_TICKET);
 		String userName = (String)session.getAttribute(CCConstants.AUTH_USERNAME);
 		

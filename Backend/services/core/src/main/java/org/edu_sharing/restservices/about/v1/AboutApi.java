@@ -68,7 +68,7 @@ public class AboutApi  {
 	    	
 	    	about.setThemesUrl(new MimeTypesV2(ApplicationInfoList.getHomeRepository()).getThemePath());
 	    	
-	    	Map<String, AboutService> services = new HashMap<String, AboutService>();
+	    	Map<String, AboutService> services = new HashMap<>();
 	    	for (Class<?> clazz : ApiApplication.SERVICES) {
 	
 				ApiService rest = clazz.getAnnotation(ApiService.class);

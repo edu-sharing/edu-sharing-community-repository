@@ -124,7 +124,7 @@ public class LDAPAuthenticationFilter implements Filter, DependencyInjectedFilte
     
     static
     {
-        Map<String, CharsetDecoder> decoders = new LinkedHashMap<String, CharsetDecoder>(ENCODINGS.length * 2);
+        Map<String, CharsetDecoder> decoders = new LinkedHashMap<>(ENCODINGS.length * 2);
         for (String encoding : ENCODINGS)
         {
             if (!decoders.containsKey(encoding))

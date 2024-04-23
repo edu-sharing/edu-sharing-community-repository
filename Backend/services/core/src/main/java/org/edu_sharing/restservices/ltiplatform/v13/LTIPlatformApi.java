@@ -289,7 +289,7 @@ public class LTIPlatformApi {
              * @TODO build id_token and send it to redirect_uri
              */
 
-            HashMap<String, String> formParams = new HashMap<>();
+            Map<String,String> formParams = new HashMap<>();
             formParams.put("id_token", jwt);
             formParams.put("state", state);
             return Response.ok(ApiTool.getHTML(redirect_uri, formParams)).build();
@@ -900,7 +900,7 @@ public class LTIPlatformApi {
             List<String> nodeIds = new ArrayList<>();
             List<String> titles = new ArrayList<>();
             for (Map<String, Object> contentItem : contentItems) {
-                HashMap<String, String[]> properties = new HashMap<>();
+                Map<String, String[]> properties = new HashMap<>();
                 String type = (String) contentItem.get("type");
                 if (!LTIConstants.DEEP_LINK_LTIRESOURCELINK.equals(type)) {
                     throw new Exception("unsupported lti type:" + type);
@@ -1247,7 +1247,7 @@ public class LTIPlatformApi {
             })
 
     public Response testToken(
-            @Parameter(description = "properties", required = true) HashMap<String, String> properties,
+            @Parameter(description = "properties", required = true) Map<String, String> properties,
             @Context HttpServletRequest req) {
 
 

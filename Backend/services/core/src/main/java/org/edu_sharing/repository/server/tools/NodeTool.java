@@ -2,6 +2,7 @@ package org.edu_sharing.repository.server.tools;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
@@ -14,11 +15,11 @@ public class NodeTool {
 			
 			String name = path[0];
 			
-			HashMap<String, Object> child = client.getChild(nodeId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME, name);
+			Map<String, Object> child = client.getChild(nodeId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME, name);
 			
 			if (child == null) {
 				
-				HashMap<String, Object> _props = new HashMap<String, Object>();
+				Map<String, Object> _props = new HashMap<>();
 				_props.put(CCConstants.CM_NAME, name);
 				
 				nodeId = client.createNode(nodeId, CCConstants.CCM_TYPE_MAP, _props);

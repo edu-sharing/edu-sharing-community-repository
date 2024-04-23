@@ -23,6 +23,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AuthenticationFilter implements jakarta.servlet.Filter {
 	
@@ -270,7 +271,7 @@ public class AuthenticationFilter implements jakarta.servlet.Filter {
 		}
 		try{
 			AuthenticationTool authTool = RepoFactory.getAuthenticationToolInstance(null);
-			HashMap<String,String> result = authTool.createNewSession(guestUn, guestPw);
+			Map<String,String> result = authTool.createNewSession(guestUn, guestPw);
 			
 			//save ticket in session
 			HttpSession session = req.getSession();

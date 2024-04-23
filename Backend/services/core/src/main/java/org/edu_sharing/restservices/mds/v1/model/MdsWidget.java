@@ -155,14 +155,14 @@ public class MdsWidget {
 		if(widget.getValues()!=null){
 			this.hasValues = true;
 			if(widget.isValuespaceClient()) {
-				values = new ArrayList<MdsValue>();
+				values = new ArrayList<>();
 				for (MetadataKey key : widget.getValues()) {
 					values.add(new MdsValue(key));
 				}
 			}
 		}
 		if(widget.getSubwidgets()!=null){
-			mdsSubwidgets =new ArrayList<MdsSubwidget>();
+			mdsSubwidgets =new ArrayList<>();
 			for(MetadataWidget.Subwidget key : widget.getSubwidgets()){
 				mdsSubwidgets.add(new MdsSubwidget(key));
 			}

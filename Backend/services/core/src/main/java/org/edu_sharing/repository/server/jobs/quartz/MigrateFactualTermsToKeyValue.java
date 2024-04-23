@@ -20,10 +20,7 @@ import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class MigrateFactualTermsToKeyValue extends AbstractJob{
 
@@ -103,7 +100,7 @@ public class MigrateFactualTermsToKeyValue extends AbstractJob{
                 ArrayList<String> displays = new ArrayList<>();
                 for(String displayName : displayNames){
 
-                    List<HashMap<String, Object>> matches = serviceRegistry.getRetryingTransactionHelper().doInTransaction(()-> ph.getEntriesByDisplayValue(displayName));
+                    List<Map<String, Object>> matches = serviceRegistry.getRetryingTransactionHelper().doInTransaction(()-> ph.getEntriesByDisplayValue(displayName));
 
                     if(matches.size() == 0){
                         logger.error(n+";no keyword matches;" + displayName);

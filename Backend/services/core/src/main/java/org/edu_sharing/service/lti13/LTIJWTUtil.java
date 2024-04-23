@@ -276,13 +276,13 @@ public class LTIJWTUtil {
             deepLink.put(LTIConstants.DEEP_LINK_URL, ApplicationInfoList.getHomeRepository().getClientBaseUrl() + "/rest/lti/v13/"+LTIConstants.LTI_TOOL_REDIRECTURL_PATH+"/"+node.getRef().getId());
 
             //@TODO must custom part always be send? is only need when platform is also a tool that has customcontent option
-            HashMap<String,String> custom = new HashMap<>();
+            Map<String,String> custom = new HashMap<>();
             custom.put("nodeId",node.getRef().getId());
             custom.put("repositoryId",node.getRef().getRepo());
             deepLink.put("custom",custom);
 
             try {
-                HashMap<String,String> thumbnail = new HashMap<>();
+                Map<String,String> thumbnail = new HashMap<>();
                 //thumbnail.put("url",node.getPreview().getUrl());
                 thumbnail.put("url",new MimeTypesV2().getIcon(node.getType(),NodeServiceFactory.getLocalService().getProperties(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier() ,node.getRef().getId()) ,node.getAspects()));
                 thumbnail.put("width",""+node.getPreview().getWidth());
@@ -401,7 +401,7 @@ public class LTIJWTUtil {
             throw new ValidationException("wrong nodeId");
         }
 
-        HashMap<String,String> tokenData = new Gson().fromJson(ApiTool.decrpt(token), HashMap.class);
+        Map<String,String> tokenData = new Gson().fromJson(ApiTool.decrpt(token), HashMap.class);
         if(!appId.equals(tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID))){
             throw new ValidationException("mismatch appId");
         }
@@ -498,7 +498,7 @@ public class LTIJWTUtil {
          *
          */
         //validate that token appId (tool) is the same as the session appId (tool)
-        HashMap<String,String> tokenData = new Gson().fromJson(ApiTool.decrpt(token), HashMap.class);
+        Map<String,String> tokenData = new Gson().fromJson(ApiTool.decrpt(token), HashMap.class);
         if(!sessionObject.getAppId().equals(tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID))){
             throw new ValidationException("mismatch appId");
         }

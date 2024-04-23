@@ -29,7 +29,7 @@ public class SortDefinition implements Serializable {
 	transient ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	transient ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	
-	List<SortDefinitionEntry> sortDefinitionEntries = new ArrayList<SortDefinitionEntry>();
+	List<SortDefinitionEntry> sortDefinitionEntries = new ArrayList<>();
 
     public static class SortDefinitionEntry implements Serializable{
 		String property;

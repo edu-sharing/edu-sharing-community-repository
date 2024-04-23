@@ -110,7 +110,7 @@ public class PersonDao {
 
 			} catch (NoSuchPersonException e) {
 
-				HashMap<String, Serializable> userInfo = profileToMap(profile);
+				Map<String, Serializable> userInfo = profileToMap(profile);
 				userInfo.put(CCConstants.PROP_USERNAME, userName);
 
 				AuthorityServiceFactory.getAuthorityService(repoDao.getId()).createOrUpdateUser(userInfo);
@@ -184,7 +184,7 @@ public class PersonDao {
 				String groupFolderId = ((MCAlfrescoAPIClient)baseClient).getGroupFolderId(getUserName());
 				if (groupFolderId != null) {
 
-					HashMap<String, HashMap<String, Object>> children = baseClient.getChildren(groupFolderId);
+					Map<String, Map<String, Object>> children = baseClient.getChildren(groupFolderId);
 
 					for (Object key : children.keySet()) {
 
@@ -201,7 +201,7 @@ public class PersonDao {
 
 		try {
 
-			HashMap<String, Serializable> newUserInfo = profileToMap(profile);
+			Map<String, Serializable> newUserInfo = profileToMap(profile);
 			newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
 			authorityService.createOrUpdateUser(newUserInfo);
 		} catch (Throwable t) {
@@ -211,8 +211,8 @@ public class PersonDao {
 
 	}
 
-	private static HashMap<String, Serializable> profileToMap(UserProfileEdit profile) {
-		HashMap<String, Serializable> newUserInfo = new HashMap<>();
+	private static Map<String, Serializable> profileToMap(UserProfileEdit profile) {
+		Map<String, Serializable> newUserInfo = new HashMap<>();
 		newUserInfo.put(CCConstants.PROP_USER_FIRSTNAME, profile.getFirstName());
 		newUserInfo.put(CCConstants.PROP_USER_LASTNAME, profile.getLastName());
 		newUserInfo.put(CCConstants.PROP_USER_EMAIL, profile.getEmail());
@@ -320,7 +320,7 @@ public class PersonDao {
 
 			initGroupFolders();
 
-			List<NodeRef> sharedFolderRefs = new ArrayList<NodeRef>();
+			List<NodeRef> sharedFolderRefs = new ArrayList<>();
 	    	for (String sharedFolderId : sharedFolderIds) {
 
 	        	NodeRef sharedFolderRef = new NodeRef();
@@ -592,7 +592,7 @@ public class PersonDao {
 	public void setPreferences(String preferences) throws Exception{
 		// validate json
 		new JSONObject(preferences);
-		HashMap<String, String> newUserInfo = new HashMap<String, String>();
+		Map<String, Object> newUserInfo = new HashMap<>();
 		newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
 		newUserInfo.put(CCConstants.CCM_PROP_PERSON_PREFERENCES, preferences);
 		((MCAlfrescoAPIClient)this.baseClient).updateUser(newUserInfo);
@@ -617,7 +617,7 @@ public class PersonDao {
 	 * @param  profileSettings (Object)
 	 */
 	public void setProfileSettings(ProfileSettings profileSettings) throws Exception{
-		HashMap<String, Serializable> newUserInfo = new HashMap<>();
+		Map<String, Object> newUserInfo = new HashMap<>();
 		newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
 		newUserInfo.put(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL, profileSettings.getShowEmail());
 		((MCAlfrescoAPIClient)this.baseClient).updateUser(newUserInfo);

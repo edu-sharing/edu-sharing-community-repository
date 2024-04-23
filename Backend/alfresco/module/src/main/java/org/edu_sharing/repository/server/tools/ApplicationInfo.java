@@ -939,7 +939,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	 * @return
 	 */
 	public boolean isTrustedHost(String hostName){
-		List<String> hostList = new ArrayList<String>();
+		List<String> hostList = new ArrayList<>();
 		hostList.add(host);
 		if(this.getDomain() != null && !this.getDomain().equals("")){
 			hostList.add(this.getDomain());

@@ -763,7 +763,7 @@ public class LTIApi {
         try{
             Jws<Claims> claims = new LTIJWTUtil().validateForInitialToolSession(jwt);
             String token = claims.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_TOKEN, String.class);
-            HashMap<String,String> tokenData = new Gson().fromJson(ApiTool.decrpt(token), HashMap.class);
+            Map<String, String> tokenData = (Map<String,String>)new Gson().fromJson(ApiTool.decrpt(token), Map.class);
             String user = tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_USER);
             //context is the embedding node
             String contextId = tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_NODEID);

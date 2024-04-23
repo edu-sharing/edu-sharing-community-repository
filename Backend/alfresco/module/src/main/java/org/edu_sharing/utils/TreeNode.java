@@ -139,7 +139,7 @@ public class TreeNode<V> {
 
     public static <K, V> TreeNode<V> of(V rootElement, Collection<V> collection, Function<V, K> keyProvider, Function<V, K> parentKeyProvider) {
         TreeNode<V> root = new TreeNode<>(rootElement);
-        LinkedHashMap<K, TreeNode<V>> nodes = new LinkedHashMap<>();
+        Map<K, TreeNode<V>> nodes = new LinkedHashMap<>();
         collection.forEach(x -> {
             K parentKey = parentKeyProvider.apply(x);
             TreeNode<V> node = new TreeNode<>(x);

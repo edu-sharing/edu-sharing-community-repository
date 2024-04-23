@@ -83,7 +83,7 @@ public class EduGroupCache {
 	}
 	
 	public static String[] getNames(){
-		ArrayList<String> names = new ArrayList<String>();
+		ArrayList<String> names = new ArrayList<>();
 		for(NodeRef nodeRef : cache.getKeys()){
 			names.add((String)cache.get(nodeRef).get(ContentModel.PROP_AUTHORITY_NAME));
 		}
@@ -134,7 +134,7 @@ public class EduGroupCache {
 		logger.info("starting");
 		AuthorityService authorityService =serviceRegistry.getAuthorityService();
 		NodeService nodeServiceAlfresco = (NodeService) AlfAppContextGate.getApplicationContext().getBean("alfrescoDefaultDbNodeService");
-		List<NodeRef> result = new ArrayList<NodeRef>();
+		List<NodeRef> result = new ArrayList<>();
 		Set<String> allGroups = authorityService.getAllAuthoritiesInZone(AuthorityService.ZONE_APP_DEFAULT, AuthorityType.GROUP);
 		for(String authority : allGroups) {
 			NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(authority);

@@ -370,7 +370,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             if(current==null) {
                 current = new HashMap<>();
             }
-            HashMap<String, Long> counted = getArrayAggToCounts((String[]) resultSet.getArray(field).getArray());
+            Map<String, Long> counted = getArrayAggToCounts((String[]) resultSet.getArray(field).getArray());
             if(field.equals("authority_mediacenter") && mediacenter != null) {
                 counted = counted.entrySet().stream().filter(
                         e -> mediacenter.equals(e.getKey())
@@ -382,7 +382,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     }
 
     @NotNull
-    private static HashMap<String, Long> getArrayAggToCounts(String[] arrayAgg) throws SQLException {
+    private static Map<String, Long> getArrayAggToCounts(String[] arrayAgg) throws SQLException {
         // the sql field will add each property to an array like 1,2,1,3
         // we will map it to {1:2,2:1,3:1}
         return new HashMap<>(Arrays.stream(arrayAgg).map((a)->a==null ? "" : a)

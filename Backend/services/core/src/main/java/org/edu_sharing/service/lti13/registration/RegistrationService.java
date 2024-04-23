@@ -276,7 +276,7 @@ public class RegistrationService {
                                   String keysetUrl,
                                   String keyId,
                                   String authTokenUrl, DynamicRegistrationToken token) throws Exception{
-        HashMap<String,String> properties = new HashMap<>();
+        Map<String,String> properties = new HashMap<>();
         String appId = new RepoTools().getAppId(platformId,clientId,deploymentId);
         properties.put(ApplicationInfo.KEY_APPID, appId);
         properties.put(ApplicationInfo.KEY_TYPE, ApplicationInfo.TYPE_LTIPLATFORM);
@@ -399,7 +399,7 @@ public class RegistrationService {
     public ApplicationInfo registerTool(String clientId, String initiateLoginUri, String jwksuri,
                                         String targetLinkUri, String redirectUris, String logoUri,
                                         String customParameters, String description, String clientName, String targetLinkUriDeepLink, String toolUrl) throws Exception {
-        HashMap<String,String> properties = new HashMap<>();
+        Map<String,String> properties = new HashMap<>();
 
         /**
          * fallback to required redrect Urls

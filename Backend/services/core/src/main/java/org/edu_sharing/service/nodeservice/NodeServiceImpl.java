@@ -98,7 +98,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		dictionaryService = serviceRegistry.getDictionaryService();
 		repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
 		this.appId=appId;
-		HashMap homeAuthInfo = null;
+		Map<String, String> homeAuthInfo = null;
 		if(!ApplicationInfoList.getRepositoryInfoById(repositoryId).ishomeNode()){
 			homeAuthInfo = new AuthenticationToolAPI().getAuthentication(Context.getCurrentInstance().getRequest().getSession());
 		}
@@ -110,11 +110,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 
 	}
-	public void updateNode(String nodeId, HashMap<String, String[]> props) throws Throwable{
+	public void updateNode(String nodeId, Map<String, String[]> props) throws Throwable{
 		String nodeType = getType(nodeId);
 		String[] aspects = getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
 		String parentId = nodeService.getPrimaryParent(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)).getParentRef().getId();
-		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,aspects, nodeId, parentId,null);
+		Map<String,Object> toSafeProps = getToSafeProps(props,nodeType,aspects, nodeId, parentId,null);
 		updateNodeNative(nodeId, toSafeProps);
 	}
 
@@ -169,31 +169,31 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 	}
 
-	private void resetVersion(NodeRef nodeRef) throws Throwable {
+	private void resetVersion(NodeRef nodeRef) {
 		if(CCConstants.CCM_TYPE_IO.equals(getType(nodeRef.getId()))) {
-			HashMap<String, Object> props = new HashMap<String,Object>();
+			Map<String, Object> props = new HashMap<>();
 			props.put(CCConstants.LOM_PROP_LIFECYCLE_VERSION,"1.0");
 			updateNodeNative(nodeRef.getId(), props);
 		}
 	}
 
-	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props) throws Throwable{
-		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,null, null,parentId,null);
+	public String createNode(String parentId, String nodeType, Map<String, String[]> props) throws Throwable{
+		Map<String,Object> toSafeProps = getToSafeProps(props,nodeType,null, null,parentId,null);
 		return createNodeBasic(parentId, nodeType, toSafeProps);
 	}
 
 	@Override
-	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props, String childAssociation)
+	public String createNode(String parentId, String nodeType, Map<String, String[]> props, String childAssociation)
 			throws Throwable {
-		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,null, null,parentId,null);
+		Map<String,Object> toSafeProps = getToSafeProps(props,nodeType,null, null,parentId,null);
 		return this.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId, nodeType,childAssociation, toSafeProps);
 	}
 	@Override
-	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, ?> _props) {
+	public String createNodeBasic(String parentID, String nodeTypeString, Map<String, ?> _props) {
 		return this.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentID, nodeTypeString,CCConstants.CM_ASSOC_FOLDER_CONTAINS, _props);
 	}
 	@Override
-	public String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation, HashMap<String, ?> _props) {
+	public String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation, Map<String, ?> _props) {
 		childAssociation = (childAssociation == null) ? CCConstants.CM_ASSOC_FOLDER_CONTAINS : childAssociation;
 
 		NodeRef parentNodeRef = new NodeRef(store, parentID);
@@ -246,7 +246,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return repositoryHelper.getCompanyHome().getId();
 	}
 
-	private HashMap<String,Object> getToSafeProps(HashMap<String, String[]> props, String nodeType, String[] aspects, String nodeId, String parentId,String templateName) throws Throwable{
+	private Map<String,Object> getToSafeProps(Map<String, String[]> props, String nodeType, String[] aspects, String nodeId, String parentId,String templateName) throws Throwable{
 		String[] metadataSetIdArr = props.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
 
 		String metadataSetId = (metadataSetIdArr != null && metadataSetIdArr.length > 0) ? metadataSetIdArr[0] : null;
@@ -285,7 +285,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 
 		MetadataSet mds = MetadataHelper.getMetadataset(getApplication(), metadataSetId);
-		HashMap<String,Object> toSafe = new HashMap<String,Object>();
+		Map<String,Object> toSafe = new HashMap<>();
 		for (MetadataWidget widget : (templateName==null ?
 				mds.getWidgetsByNode(nodeType,Arrays.asList(ArrayUtils.nullToEmpty(aspects)), false) :
 				mds.getWidgetsByTemplate(templateName))) {
@@ -402,8 +402,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return safe;
 	}
 	@Override
-	public HashMap<String, String[]> getNameProperty(String name) {
-		HashMap<String, String[]> map=new HashMap<String, String[]>();
+	public Map<String, String[]> getNameProperty(String name) {
+		Map<String, String[]> map= new HashMap<>();
 		map.put(CCConstants.CM_NAME, new String[]{name});
 		return map;
 	}
@@ -426,11 +426,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return childAssocList;
 	}
 
-	public HashMap<String, HashMap<String, Object>> getChildrenByType(StoreRef store, String nodeId, String type) {
-		HashMap<String, HashMap<String, Object>> result = new HashMap<String, HashMap<String, Object>>();
+	public Map<String, Map<String, Object>> getChildrenByType(StoreRef store, String nodeId, String type) {
+		Map<String, Map<String, Object>> result = new HashMap<>();
 		List<ChildAssociationRef> childAssocList = getChildrenAssocsByType(store,nodeId,type);
 		for (ChildAssociationRef child : childAssocList) {
-			HashMap<String, Object> resultProps = getPropertiesWithoutChildren(child.getChildRef());
+			Map<String, Object> resultProps = getPropertiesWithoutChildren(child.getChildRef());
 			String childNodeId = child.getChildRef().getId();
 			result.put(childNodeId, resultProps);
 		}
@@ -505,9 +505,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 
 
-	private HashMap<String, Object> getPropertiesWithoutChildren(NodeRef nodeRef) {
+	private Map<String, Object> getPropertiesWithoutChildren(NodeRef nodeRef) {
 		Map<QName, Serializable> childPropMap = nodeService.getProperties(nodeRef);
-		HashMap<String, Object> resultProps = new HashMap<String, Object>();
+		Map<String, Object> resultProps = new HashMap<>();
 
 		String nodeType = nodeService.getType(nodeRef).toString();
 
@@ -522,7 +522,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 			// VCard
 			String type = nodeService.getType(nodeRef).toString();
-			HashMap<String, Object> vcard = VCardConverter.getVCardHashMap(type, qname.toString(), value);
+			Map<String, Object> vcard = VCardConverter.getVCardMap(type, qname.toString(), value);
 			if (vcard != null && vcard.size() > 0)
 				resultProps.putAll(vcard);
 
@@ -641,7 +641,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	@Override
-	public void updateNodeNative(String nodeId, HashMap<String, ?> _props) {
+	public void updateNodeNative(String nodeId, Map<String, ?> _props) {
 		this.updateNodeNative(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, _props);
 	}
 
@@ -712,19 +712,19 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 	}
 
-	Map<QName, Serializable> transformPropMap(Map map) {
-		Map<QName, Serializable> result = new HashMap<QName, Serializable>();
+	Map<QName, Serializable> transformPropMap(Map<String, ?> map) {
+		Map<QName, Serializable> result = new HashMap<>();
 		for (Object key : map.keySet()) {
 
 			try {
 				Object value = map.get(key);
-				if (value instanceof HashMap) {
-					value = getMLText((HashMap) value);
+				if (value instanceof Map) {
+					value = getMLText((Map) value);
 				} else if (value instanceof List) {
 					List transformedList = new ArrayList();
-					for (Object valCol : (ArrayList) value) {
-						if (valCol instanceof HashMap) {
-							transformedList.add(getMLText((HashMap) valCol));
+					for (Object valCol : (List) value) {
+						if (valCol instanceof Map) {
+							transformedList.add(getMLText((Map) valCol));
 						} else {
 							transformedList.add(valCol);
 						}
@@ -740,11 +740,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return result;
 	}
 
-	private MLText getMLText(HashMap i18nMap) {
+	private MLText getMLText(Map<String, String> i18nMap) {
 		MLText mlText = new MLText();
-		for (Object obj : i18nMap.keySet()) {
-			String locale = (String) obj;
-			mlText.addValue(new Locale(locale), (String) i18nMap.get(obj));
+		for (String locale : i18nMap.keySet()) {
+			mlText.addValue(new Locale(locale), i18nMap.get(locale));
 		}
 		return mlText;
 	}
@@ -797,7 +796,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		if(inbox!=null && inbox.size()>0)
 			return inbox.get(0).getChildRef().getId();
 		if(createIfNotExists) {
-			HashMap<String, Object> properties = new HashMap<>();
+			Map<String, Object> properties = new HashMap<>();
 			properties.put(CCConstants.CM_NAME, "Inbox");
 			properties.put(CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_USERINBOX);
 			return createNodeBasic(userhome.getId(), CCConstants.CCM_TYPE_MAP, properties);
@@ -811,7 +810,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		if(savedSearch!=null && savedSearch.size()>0)
 			return savedSearch.get(0).getChildRef().getId();
 		if(createIfNotExists) {
-			HashMap<String, Object> properties = new HashMap<>();
+			Map<String, Object> properties = new HashMap<>();
 			properties.put(CCConstants.CM_NAME, "SavedSearch");
 			properties.put(CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH);
 			return createNodeBasic(userhome.getId(), CCConstants.CCM_TYPE_MAP, properties);
@@ -841,7 +840,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 		list=filtered;
 
-		HashMap<String,Object> cache=new HashMap();
+		Map<String,Object> cache=new HashMap<>();
 		Collections.sort(list, (o1, o2) -> sortNodes(cache,getAsNode(o1),getAsNode(o2),sortDefinition));
 		return list;
 	}
@@ -863,7 +862,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return node;
 	}
 
-	private int sortNodes(HashMap<String, Object> cache, NodeRef n1, NodeRef n2, SortDefinition sortDefinition) {
+	private int sortNodes(Map<String, Object> cache, NodeRef n1, NodeRef n2, SortDefinition sortDefinition) {
 		String keyType1=n1.toString()+"_TYPE";
 		String keyType2=n2.toString()+"_TYPE";
 
@@ -1120,16 +1119,16 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	@Override
-	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable{
+	public Map<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable{
 		return apiClient.getProperties(storeProtocol, storeId, nodeId);
 	}
 
 	@Override
-	public HashMap<String, Object> getPropertiesDynamic(String storeProtocol, String storeId, String nodeId) throws Throwable{
+	public Map<String, Object> getPropertiesDynamic(String storeProtocol, String storeId, String nodeId) throws Throwable{
 		throw new NotImplementedException("getPropertiesDynamic may not be called for the local repository (was the remote repo removed?)");
 	}
 	@Override
-	public HashMap<String, Object> getPropertiesPersisting(String storeProtocol, String storeId, String nodeId) throws Throwable{
+	public Map<String, Object> getPropertiesPersisting(String storeProtocol, String storeId, String nodeId) throws Throwable{
 		throw new NotImplementedException("getPropertiesPersisting may not be called for the local repository (was the remote repo removed?)");
 	}
 
@@ -1257,7 +1256,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 		String handle = null;
 
-		Map<QName, Serializable> publishedProps = new HashMap<QName, Serializable>();
+		Map<QName, Serializable> publishedProps = new HashMap<>();
 
 		if(handleMode.equals(HandleMode.distinct)) {
 			try {
@@ -1365,9 +1364,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			return null;
 
 		addAspect(nodeId,CCConstants.CCM_ASPECT_METADATA_PRESETTING);
-		HashMap<String,String[]> props = new HashMap<>();
+		Map<String,String[]> props = new HashMap<>();
 		props.put(CCConstants.CM_NAME,new String[]{CCConstants.TEMPLATE_NODE_NAME});
-		String id=createNode(nodeId,CCConstants.CCM_TYPE_IO,props);
+		String id=createNode(nodeId,CCConstants.CCM_TYPE_IO, props);
 		nodeService.createAssociation(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),
 				new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,id),
 				assocQName);
@@ -1375,11 +1374,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return id;
 	}
 	@Override
-	public void setTemplateProperties(String nodeId, HashMap<String, String[]> props) throws Throwable {
+	public void setTemplateProperties(String nodeId, Map<String, String[]> props) throws Throwable {
 		//updateNode(getOrCreateTemplateNode(nodeId),props);
 		String template = getTemplateNode(nodeId,true);
 		String nodeType = getType(template);
-		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,null, template, nodeId,"io_template");
+		Map<String, Object> toSafeProps = getToSafeProps(props, nodeType, null, template, nodeId, "io_template");
 		updateNodeNative(template, toSafeProps);
 	}
 
@@ -1479,7 +1478,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	@Override
-	public HashMap<String, HashMap<String, Object>> getVersionHistory(String nodeId) throws Throwable {
+	public Map<String, Map<String, Object>> getVersionHistory(String nodeId) throws Throwable {
 		return apiClient.getVersionHistory(nodeId);
 	}
 
@@ -1588,7 +1587,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	@Override
-	public GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId, HashMap<String, Object> nodeProps, String version){
+	public GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId, Map<String, Object> nodeProps, String version){
 		boolean isIcon;
 		if(nodeProps == null) {
 			NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeIdentifier), nodeId);

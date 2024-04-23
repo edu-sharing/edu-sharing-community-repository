@@ -109,7 +109,7 @@ public class ShibbolethServlet extends HttpServlet {
 		}
 
 		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
-		HashMap<String,String> validAuthInfo = authTool.validateAuthentication(req.getSession());
+		Map<String,String> validAuthInfo = authTool.validateAuthentication(req.getSession());
 
 		redirectUrl = (String)req.getSession().getAttribute(NgServlet.PREVIOUS_ANGULAR_URL);
 		// prefer the login url since it will intercept the regular angular url
@@ -147,7 +147,7 @@ public class ShibbolethServlet extends HttpServlet {
 				req.setCharacterEncoding("UTF-8");
 			}
 
-			HashMap<String,String> ssoMap = new HashMap<String,String>();
+			Map<String,String> ssoMap = new HashMap<>();
 			for(String ssoKey : ssoMapper.getMappingConfig().getAllSSOAttributes()){
 				ssoMap.put(ssoKey, getShibValue(ssoKey,req));
 			}

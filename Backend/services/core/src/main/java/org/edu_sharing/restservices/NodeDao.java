@@ -189,7 +189,7 @@ public class NodeDao {
     }
 
     public NodeDao copyProperties(NodeDao fromDao) throws DAOException {
-        HashMap<String, String[]> props = fromDao.getAllProperties();
+        Map<String, String[]> props = fromDao.getAllProperties();
         props.remove(CCConstants.getValidLocalName(CCConstants.CM_NAME));
         return changeProperties(props);
     }
@@ -420,8 +420,8 @@ public class NodeDao {
 
         NodeSearch result = new NodeSearch();
 
-        List<NodeRef> data = new ArrayList<NodeRef>();
-        List<Node> nodes = new ArrayList<Node>();
+        List<NodeRef> data = new ArrayList<>();
+        List<Node> nodes = new ArrayList<>();
         result.setResult(data);
         result.setNodes(nodes);
 
@@ -491,8 +491,8 @@ public class NodeDao {
     private final RepositoryDao repoDao;
     private final String nodeId;
 
-    private HashMap<String, Object> nodeProps;
-    private HashMap<String, HashMap<String, Object>> nodeHistory;
+    private Map<String, Object> nodeProps;
+    private Map<String, Map<String, Object>> nodeHistory;
 
     private Map<String, Boolean> hasPermissions;
 
@@ -601,7 +601,7 @@ public class NodeDao {
             if (!CCConstants.getValidLocalName(CCConstants.CCM_TYPE_SAVED_SEARCH).equals(getType())) {
                 throw new IllegalArgumentException("The given node must be of type " + CCConstants.CCM_TYPE_SAVED_SEARCH);
             }
-            HashMap<String, Object> props = getNativeProperties();
+            Map<String, Object> props = getNativeProperties();
             RepositoryDao repoDao = RepositoryDao
                     .getRepository((String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY));
             MdsDao mdsDao = MdsDao.getMds(repoDao, (String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_MDS));
@@ -713,10 +713,10 @@ public class NodeDao {
                     if (key.matches("ccm:[a-zA-Z]*contributer_[a-zA-Z_-]*")) {
                         String value = (String) this.nodeProps.get(prop);
                         for (String v : ValueTool.getMultivalue(value)) {
-                            ArrayList<HashMap<String, Object>> vcds = VCardConverter.vcardToHashMap(v);
+                            ArrayList<Map<String, Object>> vcds = VCardConverter.vcardToMap(v);
                             if (vcds.size() > 0) {
                                 Contributor contributor = new Contributor();
-                                HashMap<String, Object> vcd = vcds.get(0);
+                                Map<String, Object> vcd = vcds.get(0);
                                 contributor.setFirstname((String) vcd.get(CCConstants.VCARD_GIVENNAME));
                                 contributor.setLastname((String) vcd.get(CCConstants.VCARD_SURNAME));
                                 contributor.setProperty(key);
@@ -739,7 +739,7 @@ public class NodeDao {
             }
             if (nodeRef.getAspects() == null) {
                 String[] aspects = nodeService.getAspects(this.storeProtocol, this.storeId, nodeId);
-                this.aspects = (aspects != null) ? Arrays.asList(aspects) : new ArrayList<String>();
+                this.aspects = (aspects != null) ? Arrays.asList(aspects) : new ArrayList<>();
             } else {
                 this.aspects = nodeRef.getAspects();
             }
@@ -755,18 +755,18 @@ public class NodeDao {
             } else if (this.aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)) {
                 // just fetch dynamic data which needs to be fetched, because the local io already has metadata
                 String originalNodeId = this.getReferenceOriginalId();
-                HashMap<String, HashMap<String, Object>> history = AuthenticationUtil.runAsSystem(() -> {
+                Map<String, Map<String, Object>> history = AuthenticationUtil.runAsSystem(() -> {
                     try {
                         return this.nodeService.getVersionHistory(originalNodeId);
                     } catch (Throwable t) {
                         throw new RuntimeException(t);
                     }
                 });
-                Optional<Entry<String, HashMap<String, Object>>> entry = history == null ? Optional.empty() : history.entrySet().stream().findFirst();
+                Optional<Entry<String, Map<String, Object>>> entry = history == null ? Optional.empty() : history.entrySet().stream().findFirst();
                 if (!entry.isPresent() || CCConstants.VERSION_COMMENT_REMOTE_OBJECT_INIT.equals(entry.get().getValue().get(CCConstants.CCM_PROP_IO_VERSION_COMMENT))) {
                     try {
                         NodeService nodeServiceRemote = NodeServiceFactory.getNodeService((String) this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
-                        HashMap<String, Object> nodePropsReplace = nodeServiceRemote.getPropertiesDynamic(
+                        Map<String, Object> nodePropsReplace = nodeServiceRemote.getPropertiesDynamic(
                                 null, null, (String) this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
                         nodePropsReplace.remove(CCConstants.SYS_PROP_NODE_UID);
                         nodePropsReplace.remove(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID);
@@ -938,19 +938,19 @@ public class NodeDao {
     }
 
     public NodeDao createChild(String type, List<String> aspects,
-                               HashMap<String, String[]> properties, boolean renameIfExists) throws DAOException {
+                               Map<String, String[]> properties, boolean renameIfExists) throws DAOException {
         return this.createChild(type, aspects, properties, renameIfExists, null);
     }
 
     public NodeDao createChild(String type, List<String> aspects,
-                               HashMap<String, String[]> properties, boolean renameIfExists, String childAssoc) throws DAOException {
+                               Map<String, String[]> properties, boolean renameIfExists, String childAssoc) throws DAOException {
 
         try {
             NameSpaceTool<String> nameSpaceTool = new NameSpaceTool<String>();
             type = nameSpaceTool.transformToLongQName(type);
             if (childAssoc != null)
                 childAssoc = CCConstants.getValidGlobalName(childAssoc);
-            HashMap<String, String[]> props = transformProperties(properties);
+            Map<String, String[]> props = transformProperties(properties);
             String childId;
 
             String originalNameArr[] = props.get(CCConstants.CM_NAME);
@@ -1043,7 +1043,7 @@ public class NodeDao {
     public List<NodeRef> getChildren(String assocName, List<String> filter, SortDefinition sortDefinition) throws DAOException {
 
         try {
-            List<NodeRef> result = new ArrayList<NodeRef>();
+            List<NodeRef> result = new ArrayList<>();
 
 
             if (assocName != null && !assocName.isEmpty()) {
@@ -1075,7 +1075,7 @@ public class NodeDao {
     public List<NodeRef> getAssocs(AssocInfo assoc, List<String> filter, SortDefinition sortDefinition) throws DAOException {
 
         try {
-            List<NodeRef> result = new ArrayList<NodeRef>();
+            List<NodeRef> result = new ArrayList<>();
             assoc.setAssocName(CCConstants.getValidGlobalName(assoc.getAssocName()));
             List<AssociationRef> assocs = nodeService.getNodesByAssoc(getId(), assoc);
             assocs = ((NodeServiceImpl) NodeServiceFactory.getLocalService()).sortNodeRefList(assocs, filter, sortDefinition);
@@ -1102,7 +1102,7 @@ public class NodeDao {
         }
     }
 
-    public NodeDao changeProperties(HashMap<String, String[]> properties)
+    public NodeDao changeProperties(Map<String, String[]> properties)
             throws DAOException {
 
         try {
@@ -1118,7 +1118,7 @@ public class NodeDao {
     }
 
     public NodeDao changePropertiesWithVersioning(
-            HashMap<String, String[]> properties, String comment) throws DAOException {
+            Map<String, String[]> properties, String comment) throws DAOException {
 
         // Throws ConcurrencyFailureException if the previous call changes the preview (DESP-851)
         ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
@@ -1152,7 +1152,7 @@ public class NodeDao {
         try {
             ImageTool.VerifyResult result = ImageTool.verifyAndPreprocessImage(is, ImageTool.MAX_THUMB_SIZE);
 
-            HashMap<String, String[]> props = new HashMap<>();
+            Map<String, String[]> props = new HashMap<>();
             if (version) {
                 props.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, new String[]{CCConstants.VERSION_COMMENT_PREVIEW_CHANGED});
                 //mergeVersionComment(props, versionComment);
@@ -1185,7 +1185,7 @@ public class NodeDao {
                                  String versionComment) throws DAOException {
 
         try {
-            HashMap<String, String[]> props = new HashMap<>();
+            Map<String, String[]> props = new HashMap<>();
 
             boolean version = versionComment != null && !versionComment.isEmpty();
             // 1. update
@@ -1209,7 +1209,7 @@ public class NodeDao {
         }
     }
 
-    private void mergeVersionComment(HashMap<String, String[]> properties,
+    private void mergeVersionComment(Map<String, String[]> properties,
                                      String versionComment) {
 
         properties.remove(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_VERSION_COMMENT));
@@ -1226,8 +1226,8 @@ public class NodeDao {
     }
 
     public List<NodeVersion> getHistory() throws DAOException {
-        List<NodeVersion> history = new ArrayList<NodeVersion>();
-        for (Entry<String, HashMap<String, Object>> version : getNodeHistory().entrySet()) {
+        List<NodeVersion> history = new ArrayList<>();
+        for (Entry<String, Map<String, Object>> version : getNodeHistory().entrySet()) {
             NodeVersion nodeVersion = convertVersionProps(version.getKey(), version.getValue());
             history.add(nodeVersion);
         }
@@ -1263,7 +1263,7 @@ public class NodeDao {
 
             String versionLabel = getVersionLabel(major, minor);
 
-            HashMap<String, Object> versionProps = getNodeHistory().get(versionLabel);
+            Map<String, Object> versionProps = getNodeHistory().get(versionLabel);
 
             if (versionProps == null) {
                 return null;
@@ -1559,17 +1559,17 @@ public class NodeDao {
 
             ACL local = new ACL();
             local.setInherited(permissions.isInherited());
-            local.setPermissions(new ArrayList<ACE>());
+            local.setPermissions(new ArrayList<>());
 
             result.setLocalPermissions(local);
-            result.setInheritedPermissions(new ArrayList<ACE>());
+            result.setInheritedPermissions(new ArrayList<>());
 
             org.edu_sharing.repository.client.rpc.ACE[] aces = permissions.getAces();
 
             if (aces != null) {
 
-                HashMap<Authority, List<String>> authPerm = new HashMap<Authority, List<String>>();
-                HashMap<Authority, List<String>> authPermInherited = new HashMap<Authority, List<String>>();
+                Map<Authority, List<String>> authPerm = new HashMap<>();
+                Map<Authority, List<String>> authPermInherited = new HashMap<>();
                 for (org.edu_sharing.repository.client.rpc.ACE ace : aces) {
 
                     if ("acepted".equals(ace.getAccessStatus())) {
@@ -1590,7 +1590,7 @@ public class NodeDao {
 
                             List<String> tmpPerms = authPermInherited.get(authority);
                             if (tmpPerms == null) {
-                                tmpPerms = new ArrayList<String>();
+                                tmpPerms = new ArrayList<>();
                             }
                             // do not duplicate existing permissions
                             if (!tmpPerms.contains(ace.getPermission()))
@@ -1600,7 +1600,7 @@ public class NodeDao {
                         } else {
                             List<String> tmpPerms = authPerm.get(authority);
                             if (tmpPerms == null) {
-                                tmpPerms = new ArrayList<String>();
+                                tmpPerms = new ArrayList<>();
                             }
                             // do not duplicate existing permissions
                             if (!tmpPerms.contains(ace.getPermission()))
@@ -1698,8 +1698,8 @@ public class NodeDao {
         }
     }
 
-    private HashMap<String, String[]> transformProperties(
-            HashMap<String, String[]> properties) {
+    private Map<String, String[]> transformProperties(
+            Map<String, String[]> properties) {
         return NodeServiceHelper.transformShortToLongProperties(properties);
     }
 
@@ -1979,13 +1979,12 @@ public class NodeDao {
     public NodeVersion getVersion(int major, int minor) throws DAOException {
 
         String versionLabel = getVersionLabel(major, minor);
-
-        HashMap<String, Object> versionProps = getNodeHistory().get(versionLabel);
+        Map<String, Object> versionProps = getNodeHistory().get(versionLabel);
 
         return convertVersionProps(versionLabel, versionProps);
     }
 
-    private NodeVersion convertVersionProps(String versionLabel, HashMap<String, Object> versionProps) throws DAOException {
+    private NodeVersion convertVersionProps(String versionLabel, Map<String, Object> versionProps) throws DAOException {
         if (versionProps == null) {
             return null;
         }
@@ -2033,33 +2032,33 @@ public class NodeDao {
         return version;
     }
 
-    public HashMap<String, Object> getNativeProperties() {
+    public Map<String, Object> getNativeProperties() {
         return nodeProps;
     }
 
-    public void setNativeProperties(HashMap<String, Object> nodeProps) {
+    public void setNativeProperties(Map<String, Object> nodeProps) {
         this.nodeProps = nodeProps;
     }
 
-    public HashMap<String, String[]> getAllProperties() throws DAOException {
+    public Map<String, String[]> getAllProperties() throws DAOException {
         return getProperties(null, Filter.createShowAllFilter());
     }
 
-    private HashMap<String, String[]> getProperties() throws DAOException {
+    private Map<String, String[]> getProperties() throws DAOException {
         return getProperties(null);
     }
 
-    private HashMap<String, String[]> getProperties(String versionLabel) throws DAOException {
+    private Map<String, String[]> getProperties(String versionLabel) throws DAOException {
         return getProperties(versionLabel, filter);
     }
 
-    public HashMap<String, Object> getNativeProperties(String versionLabel) throws DAOException {
+    public Map<String, Object> getNativeProperties(String versionLabel) throws DAOException {
         return versionLabel != null ? getNodeHistory()
                 .get(versionLabel) : nodeProps;
     }
 
     public void addWorkflowHistory(WorkflowHistory history, boolean sendMail) throws DAOException {
-        HashMap<String, Object> properties = getNativeProperties();
+        Map<String, Object> properties = getNativeProperties();
         String nodeType = nodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
         List<String> aspects = Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
 
@@ -2145,21 +2144,21 @@ public class NodeDao {
         }
     }
 
-    private HashMap<String, String[]> getProperties(String versionLabel, Filter filter) throws DAOException {
-        HashMap<String, Object> props = getNativeProperties(versionLabel);
+    private Map<String, String[]> getProperties(String versionLabel, Filter filter) throws DAOException {
+        Map<String, Object> props = getNativeProperties(versionLabel);
         return convertProperties(filter, props);
     }
 
-    private HashMap<String, String[]> convertProperties(Filter filter, HashMap<String, Object> props) {
+    private Map<String, String[]> convertProperties(Filter filter, Map<String, Object> props) {
         if (props == null) {
             return null;
         }
 
         if (filter.getProperties().size() == 0) {
-            return new HashMap<String, String[]>();
+            return new HashMap<>();
         }
 
-        HashMap<String, String[]> properties = new HashMap<String, String[]>();
+        Map<String, String[]> properties = new HashMap<>();
         if (LightbendConfigCache.getBoolean("repository.privacy.filterVCardEmail")) {
             List<String> cleanup = new ArrayList<>();
             for (Entry<String, Object> entry : props.entrySet()) {
@@ -2203,7 +2202,7 @@ public class NodeDao {
     }
 
     private List<String> getPropertyValues(Object value) {
-        List<String> values = new ArrayList<String>();
+        List<String> values = new ArrayList<>();
         if (value != null) {
             if (value instanceof Date) {
                 values.add(String.valueOf(((Date) value).getTime()));
@@ -2261,17 +2260,17 @@ public class NodeDao {
         return new MimeTypesV2(repoDao.getApplicationInfo()).getPreview(type, nodeProps, aspects);
     }
 
-    public HashMap<String, HashMap<String, Object>> getNodeHistory() throws DAOException {
+    public Map<String, Map<String, Object>> getNodeHistory() throws DAOException {
         try {
             if (nodeHistory == null) {
                 this.nodeHistory = new HashMap<>();
 
-                HashMap<String, HashMap<String, Object>> versionHistory = nodeService
+                Map<String, Map<String, Object>> versionHistory = nodeService
                         .getVersionHistory(nodeId);
 
                 if (versionHistory != null) {
 
-                    for (HashMap<String, Object> version : versionHistory.values()) {
+                    for (Map<String, Object> version : versionHistory.values()) {
                         nodeHistory.put((String) version
                                 .get(CCConstants.CM_PROP_VERSIONABLELABEL), version);
                     }
@@ -2484,7 +2483,7 @@ public class NodeDao {
     public void reportNode(String reason, String userEmail, String userComment) throws DAOException {
         try {
             String type = nodeService.getType(nodeId);
-            HashMap<String, Object> properties = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
+            Map<String, Object> properties = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
             List<String> aspects = Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
             NotificationServiceFactoryUtility.getLocalService()
                     .notifyNodeIssue(nodeId, reason, type, aspects, properties, userEmail, userComment);
@@ -2504,7 +2503,7 @@ public class NodeDao {
         try {
             String parent = RepositoryDao.getHomeRepository().getUserSavedSearch(true);
             NodeDao parentDao = new NodeDao(RepositoryDao.getHomeRepository(), parent);
-            HashMap<String, String[]> props = new HashMap();
+            Map<String, String[]> props = new HashMap<>();
             props.put(CCConstants.CM_NAME, new String[]{NodeServiceHelper.cleanupCmName(name)});
             props.put(CCConstants.LOM_PROP_GENERAL_TITLE, new String[]{name});
             props.put(CCConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY, new String[]{repoId});
@@ -2567,7 +2566,7 @@ public class NodeDao {
         }
     }
 
-    public NodeDao changeTemplateProperties(Boolean enable, HashMap<String, String[]> properties) throws DAOException {
+    public NodeDao changeTemplateProperties(Boolean enable, Map<String, String[]> properties) throws DAOException {
         try {
             nodeService.setTemplateStatus(nodeId, enable);
             if (enable) {
@@ -2680,11 +2679,11 @@ public class NodeDao {
      * If the NodeDao is a child, then all properties including inherited are returned
      * otherwise, the own properties are returned
      */
-    public HashMap<String, Object> getInheritedPropertiesFromParent() throws Throwable {
+    public Map<String, Object> getInheritedPropertiesFromParent() throws Throwable {
         if (getAspectsNative().contains(CCConstants.CCM_ASPECT_IO_CHILDOBJECT)) {
             Map<String, Object> propsChild = getNativeProperties();
             String parentRef = NodeServiceFactory.getLocalService().getPrimaryParent(getRef().getId());
-            HashMap<String, Object> propsParent =
+            Map<String, Object> propsParent =
                     NodeServiceHelper.getProperties(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentRef));
             // ignore some technical properties, like mimetypes etc. (configured via lightbend)
             for (String prop : LightbendConfigLoader.get().getStringList("repository.childobjects.ignoredInheritMetadata")) {

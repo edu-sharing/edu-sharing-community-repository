@@ -31,11 +31,8 @@ import com.typesafe.config.Config;
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -56,7 +53,7 @@ public class AuthMethodSSO implements AuthMethodInterface {
 
 
 	@Override
-	public String authenticate(HashMap<String, String> params) throws AuthenticationException {
+	public String authenticate(Map<String, String> params) throws AuthenticationException {
 		//for security reasons: sso auth should be explicit activated in config
 		//so that we don't get an open gate when someone forgets to remove the shibboleth servlet from web.xml and don't protects this url
 		//(shibboleth header usage)

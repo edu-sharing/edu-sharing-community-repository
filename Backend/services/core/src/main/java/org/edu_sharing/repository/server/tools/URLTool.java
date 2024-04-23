@@ -29,6 +29,7 @@ package org.edu_sharing.repository.server.tools;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -212,7 +213,7 @@ public class URLTool{
 			String repoId = (String)alfNodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
 			String remoteNodeId = (String)alfNodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
 			try {
-				HashMap<String, Object> props = NodeServiceFactory.getNodeService(repoId).getProperties(null,null,remoteNodeId);
+				Map<String, Object> props = NodeServiceFactory.getNodeService(repoId).getProperties(null, null, remoteNodeId);
 				return  (String)props.get(CCConstants.CM_ASSOC_THUMBNAILS);
 			} catch (Throwable e) {
 				// TODO Auto-generated catch block

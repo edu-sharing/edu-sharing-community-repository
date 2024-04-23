@@ -102,7 +102,7 @@ public class SearchApi {
 			token.setExcludes(parameters.getExcludes());
 			NodeSearch search = NodeDao.search(repoDao, mdsDao, query, parameters.getCriteria(), token, filter, parametersToDaoTransformer(parameters));
 
-			List<Node> data = null;//new ArrayList<Node>();
+			List<Node> data = null;//new ArrayList<>();
 			if(search.getNodes().isEmpty()){
 				//searched repo deliveres only nodeRefs by query time
 				data = NodeDao.convertToRest(repoDao, search.getResult(), filter, parametersToDaoTransformer(parameters));
@@ -195,7 +195,7 @@ public class SearchApi {
 			token.setExcludes(parameters.getExcludes());
 			NodeSearch search = NodeDao.search(repoDao, mdsDao, query, parameters.getCriteria(), token, filter, parametersToDaoTransformer(parameters));
 
-			List<Node> nodes = null;//new ArrayList<Node>();
+			List<Node> nodes = null;//new ArrayList<>();
 			if(search.getNodes().size() == 0){
 				//searched repo deliveres only nodeRefs by query time
 				nodes = NodeDao.convertToRest(repoDao, search.getResult(), filter, null);
@@ -401,7 +401,7 @@ public class SearchApi {
 			NodeSearch nodeSearch = NodeDao.searchFingerprint(repoDao, nodeId, filter);
 			SearchResultNode response = new SearchResultNode();
 
-			List<Node> data = new ArrayList<Node>();
+			List<Node> data = new ArrayList<>();
 			for (org.edu_sharing.restservices.shared.NodeRef ref : nodeSearch.getResult()) {
 				data.add(NodeDao.getNode(repoDao, ref.getId(), filter).asNode());
 			}
@@ -499,7 +499,7 @@ public class SearchApi {
 			token.setLuceneString(query);
 			NodeSearch search = NodeDao.search(repoDao, token);
 
-			List<Node> data = new ArrayList<Node>();
+			List<Node> data = new ArrayList<>();
 			for (NodeRef ref : search.getResult()) {
 				data.add(NodeDao.getNode(repoDao, ref.getId(),filter).asNode());
 			}
@@ -626,7 +626,7 @@ public class SearchApi {
 			Filter filter = new Filter(propertyFilter);
 			NodeSearch search = NodeDao.getMetadata(repoDao, nodeIds, filter);
 
-			List<Node> data = null;//new ArrayList<Node>();
+			List<Node> data = null;//new ArrayList<>();
 			if(search.getNodes().size() < search.getResult().size()){
 				//searched repo deliveres only nodeRefs by query time
 				data = NodeDao.convertToRest(repoDao, search.getResult(), null, null);

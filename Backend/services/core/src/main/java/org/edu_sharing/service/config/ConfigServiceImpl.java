@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
@@ -195,12 +196,12 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Con
 			nodeId = child.getId();
 		}catch(Throwable t){
 			// does not exists -> we will create a new node
-			HashMap<String, String[]> props=new HashMap<>();
+			Map<String, String[]> props=new HashMap<>();
 			props.put(CCConstants.CM_NAME,new String[]{key});
 			nodeId=nodeService.createNode(folder,CCConstants.CCM_TYPE_CONFIGOBJECT,props);
 		}
 
-		HashMap<String, Object> props=new HashMap<>();
+		Map<String, Object> props=new HashMap<>();
 		props.put(CCConstants.CCM_PROP_CONFIGOBJECT_VALUE,object.toString());
 		nodeService.updateNodeNative(nodeId,props);
 		DynamicConfig result=new DynamicConfig();

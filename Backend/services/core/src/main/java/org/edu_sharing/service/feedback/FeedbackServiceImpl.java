@@ -102,7 +102,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationListener
                 nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(),
                 CCConstants.CCM_PROP_MATERIAL_FEEDBACK_DATA
         );
-        HashMap<String, List<String>> mapData = new Gson().fromJson(data, new TypeToken<HashMap>() {
+        Map<String, List<String>> mapData = new Gson().fromJson(data, new TypeToken<Map<String,Object>>() {
         }.getType());
         feedbackData.setData(mapData);
         return feedbackData;
@@ -126,7 +126,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationListener
             try {
                 // will reset after runAs automatically
                 AuthenticationUtil.setFullyAuthenticatedUser(AuthenticationUtil.SYSTEM_USER_NAME);
-                HashMap<String, Object> props = new HashMap<>();
+                Map<String, Object> props = new HashMap<>();
                 props.put(
                         CCConstants.CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY,
                         getHashedAuthority(userId)

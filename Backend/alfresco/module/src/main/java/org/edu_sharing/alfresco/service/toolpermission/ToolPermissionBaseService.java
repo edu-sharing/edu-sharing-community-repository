@@ -133,7 +133,7 @@ public class ToolPermissionBaseService {
     private NodeRef createNewFolder(NodeRef parentRef, String name, String mapType) {
         NodeRef result;
         String folderName = I18nServer.getTranslationDefaultResourcebundle(name);
-        HashMap<QName, Serializable> props  = new HashMap<>();
+        Map<QName, Serializable> props  = new HashMap<>();
         props.put(QName.createQName(CCConstants.CM_NAME), folderName);
 
         MLText i18nTitle = new MLText();
@@ -160,7 +160,7 @@ public class ToolPermissionBaseService {
         AuthenticationUtil.RunAsWork<List<String>> runas = new AuthenticationUtil.RunAsWork<List<String>>() {
             @Override
             public List<String> doWork() throws Exception {
-                List<String> result = new ArrayList<String>();
+                List<String> result = new ArrayList<>();
                 try {
                     List<ChildAssociationRef> childAssocRefs = nodeService.getChildAssocs(getEdu_SharingToolPermissionsFolder());
                     for(ChildAssociationRef childAssocRef : childAssocRefs) {
@@ -284,7 +284,7 @@ public class ToolPermissionBaseService {
 
     protected NodeRef createToolpermission(String toolPermission) throws Throwable {
         logger.info("ToolPermission" + toolPermission+ " does not exists. will create it.");
-        HashMap<QName, Serializable> props = new HashMap();
+        Map<QName, Serializable> props = new HashMap();
         props.put(QName.createQName(CCConstants.CM_NAME), toolPermission);
 
         NodeRef result = nodeService.createNode(getEdu_SharingToolPermissionsFolder(),
@@ -331,7 +331,7 @@ public class ToolPermissionBaseService {
         return toInit;
     }
     public List<String> getAllPredefinedToolPermissions(){
-        List<String> toInit=new ArrayList<String>();
+        List<String> toInit=new ArrayList<>();
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE);

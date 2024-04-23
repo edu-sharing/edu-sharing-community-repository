@@ -268,7 +268,7 @@ public class MetadataReader {
                     if (attributes.getNamedItem("asFilter") != null && attributes.getNamedItem("asFilter").getTextContent() != null) {
                         parameter.setAsFilter(new Boolean(attributes.getNamedItem("asFilter").getTextContent()));
                     }
-                    Map<String, String> statements = new HashMap<String, String>();
+                    Map<String, String> statements = new HashMap<>();
                     for (int k = 0; k < list3.getLength(); k++) {
                         Node data = list3.item(k);
                         String name = data.getNodeName();

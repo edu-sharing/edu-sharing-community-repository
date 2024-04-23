@@ -139,7 +139,7 @@ public class OaiServlet extends HttpServlet{
 
         @Override
         public ListItemIdentifiersResult getIdentifiersFrom(int from, int length, Date date, String set) throws OAIException {
-            HashMap<String, String[]> criterias = new HashMap<>();
+            Map<String, String[]> criterias = new HashMap<>();
             criterias.put("from",new String[]{convertDateSolr(date)});
             return getIdentifiersSolr(from, length,criterias, set);
         }
@@ -150,13 +150,13 @@ public class OaiServlet extends HttpServlet{
 
         @Override
         public ListItemIdentifiersResult getIdentifiersUntil(int from, int length, Date date, String set) throws OAIException {
-            HashMap<String, String[]> criterias = new HashMap<>();
+            Map<String, String[]> criterias = new HashMap<>();
             criterias.put("until",new String[]{convertDateSolr(date)});
             return getIdentifiersSolr(from, length,criterias, set);        }
 
         @Override
         public ListItemIdentifiersResult getIdentifiersFromUntil(int from, int length, Date fromDate, Date untilDate, String set) throws OAIException {
-            HashMap<String, String[]> criterias = new HashMap<>();
+            Map<String, String[]> criterias = new HashMap<>();
             criterias.put("from",new String[]{convertDateSolr(fromDate)});
             criterias.put("until",new String[]{convertDateSolr(untilDate)});
             return getIdentifiersSolr(from, length, criterias, set);
