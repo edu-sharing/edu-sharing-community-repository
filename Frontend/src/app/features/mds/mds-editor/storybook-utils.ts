@@ -78,12 +78,16 @@ export class WidgetDummy {
         return [
             {
                 value: 'hello world',
-                createdBy: 'Superschlauer Duper KI',
+                createdBy: {
+                    authorityName: 'Superschlauer Duper KI',
+                },
                 status: 'PENDING',
             },
             {
                 value: 'AB\nDEF',
-                createdBy: 'Noch schlauerer Redakteur',
+                createdBy: {
+                    authorityName: 'Noch schlauerer Redakteur',
+                },
                 status: 'PENDING',
             },
         ];
