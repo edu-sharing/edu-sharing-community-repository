@@ -215,7 +215,7 @@ public class SecurityConfigurationSaml {
     X509Certificate relyingPartyCertificate() {
         try(InputStream inputStream = config.getBoolean("security.sso.saml.useHomeApplicationKeys")
                 ? IOUtils.toInputStream(getHomeAppCert(),"UTF-8")
-                : new ClassPathResource(config.getString("security.sso.saml.publicKey.location")).getInputStream()) {
+                : new ClassPathResource(config.getString("security.sso.saml.certificate.location")).getInputStream()) {
             return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(inputStream);
         }catch (Exception e){
             throw new RuntimeException(e);
