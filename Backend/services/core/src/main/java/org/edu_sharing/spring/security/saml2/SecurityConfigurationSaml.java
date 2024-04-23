@@ -5,7 +5,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.config.ConfigServiceFactory;
@@ -32,26 +31,19 @@ import org.springframework.security.saml2.provider.service.registration.RelyingP
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrations;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.util.matcher.AndRequestMatcher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.math.BigInteger;
-import java.security.PublicKey;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Random;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -157,9 +149,7 @@ public class SecurityConfigurationSaml {
 
     @Bean
     RelyingPartyRegistrationRepository relyingPartyRegistrationRepository() {
-        try(InputStream inputStream = config.getBoolean("security.sso.saml.useHomeApplicationKeys")
-                ? IOUtils.toInputStream(getHomeAppPrivateKey(),"UTF-8")
-                : new ClassPathResource(config.getString("security.sso.saml.privateKey.location")).getInputStream()){
+        try(InputStream inputStream = getPKInputStream()){
 
             Converter<InputStream, RSAPrivateKey> converter = RsaKeyConverters.pkcs8();
             RSAPrivateKey privateKey = converter.convert(inputStream);
@@ -181,10 +171,20 @@ public class SecurityConfigurationSaml {
         }
     }
 
-    private String getHomeAppPrivateKey(){
+    private @NotNull InputStream getPKInputStream() throws IOException {
+        if(config.getBoolean("security.sso.saml.useHomeApplicationKeys")){
+            return  IOUtils.toInputStream(cleanupPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey()), "UTF-8");
+        }else if(config.hasPath("security.sso.saml.privateKey.value")){
+            return IOUtils.toInputStream(config.getString("security.sso.saml.privateKey.value"), "UTF-8");
+        }else{
+            return new ClassPathResource(config.getString("security.sso.saml.privateKey.location")).getInputStream();
+        }
+    }
+
+    private String cleanupPrivateKey(String key){
         String begin = "-----BEGIN PRIVATE KEY-----";
         String end = "-----END PRIVATE KEY-----";
-        String privKey = ApplicationInfoList.getHomeRepository().getPrivateKey();
+        String privKey = key;
         privKey = privKey.trim();
         privKey = privKey.replaceAll("(.{64})", "$1"+System.lineSeparator());
 
@@ -194,31 +194,38 @@ public class SecurityConfigurationSaml {
         if(!privKey.endsWith(end)){
             privKey= privKey + System.lineSeparator() + end;
         }
-        System.out.println(privKey);
         return privKey;
     }
 
-    private String getHomeAppCert(){
+    private String cleanupCert(String value){
         String begin = "-----BEGIN CERTIFICATE-----";
         String end = "-----END CERTIFICATE-----";
-        String cert = ApplicationInfoList.getHomeRepository().getCertificate();
+        String cert = value;
         cert = cert.replace(begin,"");
         cert = cert.replace(end,"");
         cert = cert.trim();
         cert = cert.replaceAll("(.{64})", "$1"+System.lineSeparator());
         cert = begin + System.lineSeparator() + cert;
         cert = cert + System.lineSeparator() +end;
-        System.out.println(cert);
         return cert;
     }
 
     X509Certificate relyingPartyCertificate() {
-        try(InputStream inputStream = config.getBoolean("security.sso.saml.useHomeApplicationKeys")
-                ? IOUtils.toInputStream(getHomeAppCert(),"UTF-8")
-                : new ClassPathResource(config.getString("security.sso.saml.certificate.location")).getInputStream()) {
+        try(InputStream inputStream = getCertInputStream()) {
             return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(inputStream);
         }catch (Exception e){
             throw new RuntimeException(e);
         }
+    }
+
+    private @NotNull InputStream getCertInputStream() throws IOException {
+        if(config.getBoolean("security.sso.saml.useHomeApplicationKeys")){
+            return IOUtils.toInputStream(cleanupCert(ApplicationInfoList.getHomeRepository().getCertificate()), "UTF-8");
+        }else if(config.hasPath("security.sso.saml.certificate.value")){
+            return IOUtils.toInputStream(config.getString("security.sso.saml.certificate.value"), "UTF-8");
+        }else{
+            return new ClassPathResource(config.getString("security.sso.saml.certificate.location")).getInputStream();
+        }
+
     }
 }
