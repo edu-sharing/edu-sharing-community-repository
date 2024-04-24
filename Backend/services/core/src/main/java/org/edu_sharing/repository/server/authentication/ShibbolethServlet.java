@@ -290,8 +290,14 @@ public class ShibbolethServlet extends HttpServlet {
             	Object credential = authentication.getCredentials();
             	if(credential instanceof SAMLCredential) {
 					SAMLCredential samlCredential = (SAMLCredential) credential;
-					String[] values = samlCredential.getAttributeAsStringArray(attName);
+					String[] values = null;
+					try{
+						values = samlCredential.getAttributeAsStringArray(attName);
+					}catch (Exception e){
+						logger.warn("att "+attName +" could not be resolved. " + e.getMessage());
+					}
 					if (values == null) {
+						logger.info("att "+attName +" is null");
 						return null;
 					}
 					return String.join(";", values);
