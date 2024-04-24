@@ -2053,6 +2053,10 @@
             ],
             "type": "string"
           },
+          "threadId": {
+            "format": "int64",
+            "type": "integer"
+          },
           "worstLevel": {
             "$ref": "#/components/schemas/Level"
           }
