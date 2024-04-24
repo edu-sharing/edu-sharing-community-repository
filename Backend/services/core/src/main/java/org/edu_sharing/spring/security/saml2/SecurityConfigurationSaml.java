@@ -44,6 +44,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -149,22 +152,24 @@ public class SecurityConfigurationSaml {
 
     @Bean
     RelyingPartyRegistrationRepository relyingPartyRegistrationRepository() {
-        try(InputStream inputStream = getPKInputStream()){
+        try(InputStream pkInputStream = getPKInputStream()){
 
             Converter<InputStream, RSAPrivateKey> converter = RsaKeyConverters.pkcs8();
-            RSAPrivateKey privateKey = converter.convert(inputStream);
+            RSAPrivateKey privateKey = converter.convert(pkInputStream);
 
-            RelyingPartyRegistration relyingPartyRegistration = RelyingPartyRegistrations
-                    .fromMetadataLocation(config.getString("security.sso.saml.idp.metadata.url"))
-                    .registrationId("one")
-                    .decryptionX509Credentials(
-                            (c) -> c.add(Saml2X509Credential.decryption(privateKey, relyingPartyCertificate())))
-                    .signingX509Credentials(
-                            (c) -> c.add(Saml2X509Credential.signing(privateKey, relyingPartyCertificate())))
-                    .singleLogoutServiceLocation("{baseUrl}/logout/saml2/slo")
-                    //.singleLogoutServiceResponseLocation(ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/shibboleth")
-                    //.singleLogoutServiceBinding(Saml2MessageBinding.POST)
-                    .build();
+            String globalSPRegistrationId = "one";
+            List<RelyingPartyRegistration> relyingPartyRegistration = RelyingPartyRegistrations
+                    .collectionFromMetadataLocation(config.getString("security.sso.saml.idp.metadata.url"))
+                    .stream().map((builder) -> builder
+                            .registrationId(UUID.randomUUID().toString())
+                            .entityId("{baseUrl}/saml2/service-provider-metadata/" + globalSPRegistrationId)
+                            .assertionConsumerServiceLocation("{baseUrl}/login/saml2/sso/" + globalSPRegistrationId)
+                            .singleLogoutServiceLocation("{baseUrl}/logout/saml2/slo")
+                            .signingX509Credentials(
+                                    (c) -> c.add(Saml2X509Credential.signing(privateKey, relyingPartyCertificate())))
+                            .decryptionX509Credentials(
+                                    (c) -> c.add(Saml2X509Credential.decryption(privateKey, relyingPartyCertificate())))
+                    .build()).collect(Collectors.toList());
             return new InMemoryRelyingPartyRegistrationRepository(relyingPartyRegistration);
         }catch (IOException e){
             throw new RuntimeException(e);
