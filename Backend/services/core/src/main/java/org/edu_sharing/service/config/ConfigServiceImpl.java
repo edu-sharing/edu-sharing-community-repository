@@ -13,9 +13,7 @@ import jakarta.xml.bind.Unmarshaller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.google.gson.Gson;
-import com.google.gson.TypeAdapter;
-import net.shibboleth.utilities.java.support.annotation.Prototype;
+import lombok.RequiredArgsConstructor;
 import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -42,14 +40,15 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.spring.scope.refresh.RefreshScopeRefreshedEvent;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 
 
 @Service
-public class ConfigServiceImpl implements ConfigService, ApplicationListener<ContextRefreshedEvent> {
+@RequiredArgsConstructor
+public class ConfigServiceImpl implements ConfigService, ApplicationListener<RefreshScopeRefreshedEvent> {
 	private static Logger logger=Logger.getLogger(ConfigServiceImpl.class);
 	private static String CACHE_KEY = "CLIENT_CONFIG";
 	// we use a non-serializable Config as value because this is a local cache and not distributed
@@ -82,16 +81,7 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Con
 	private DocumentBuilder builder;
 	private JSONObject json;
 	*/
-	
-	public ConfigServiceImpl(){
-		nodeService=NodeServiceFactory.getLocalService();
-		permissionService=PermissionServiceFactory.getLocalService();
-		/*
-		json = XML.toJSONObject(FileUtils.readFileToString(CONFIG_XML,"UTF-8"));
-		builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-		doc = builder.parse(CONFIG_XML);
-		*/
-	}
+
 	/*
 	public JSONObject getAsJson(String contextId) throws Exception {
 		JSONObject copy = new JSONObject(json, JSONObject.getNames(json));
@@ -291,7 +281,7 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Con
 	}
 
 	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event) {
+	public void onApplicationEvent(RefreshScopeRefreshedEvent event) {
 		refresh();
 	}
 

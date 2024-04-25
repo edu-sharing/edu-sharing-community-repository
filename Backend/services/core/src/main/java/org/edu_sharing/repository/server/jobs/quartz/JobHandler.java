@@ -14,18 +14,17 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigValue;
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 
-import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.service.ServiceRegistry;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.spring.scope.refresh.RefreshScopeRefreshedEvent;
 import org.jetbrains.annotations.NotNull;
 import org.quartz.*;
 import org.quartz.impl.JobDetailImpl;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +39,7 @@ import static org.quartz.CronScheduleBuilder.*;
  * @author rudi start jobs, start scheduling of an job, stop scheduling of a job
  */
 @Component
-public class JobHandler implements ApplicationListener<ContextRefreshedEvent> {
+public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEvent> {
 
     public static final Object KEY_RESULT_DATA = "JOB_RESULT_DATA";
     private static final int MAX_JOB_LOG_COUNT = 20; // maximal number of jobs to store for history and gui
@@ -58,7 +57,7 @@ public class JobHandler implements ApplicationListener<ContextRefreshedEvent> {
 
 
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
+    public void onApplicationEvent(RefreshScopeRefreshedEvent event) {
         try {
             JobHandler.getInstance().refresh(false);
         } catch (Exception ignored) {}

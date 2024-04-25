@@ -28,8 +28,8 @@ import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
+import org.edu_sharing.spring.scope.refresh.RefreshScopeRefreshedEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -38,7 +38,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class BulkServiceImpl implements BulkService, ApplicationListener<ContextRefreshedEvent> {
+public class BulkServiceImpl implements BulkService, ApplicationListener<RefreshScopeRefreshedEvent> {
 	public static final String PRIMARY_FOLDER_NAME = "SYNC_OBJ";
 	public static final String NEW_DATA_FOLDER_NAME = "NEW";
 
@@ -151,7 +151,7 @@ public class BulkServiceImpl implements BulkService, ApplicationListener<Context
 	}
 
 	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event) {
+	public void onApplicationEvent(RefreshScopeRefreshedEvent event) {
 		refresh();
 	}
 

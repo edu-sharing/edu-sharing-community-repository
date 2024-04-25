@@ -10,31 +10,28 @@ import java.util.stream.Stream;
 
 import com.google.gson.Gson;
 import org.alfresco.repo.cache.SimpleCache;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
-import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.restservices.about.v1.model.Licenses;
 import org.edu_sharing.restservices.about.v1.model.Services;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.rendering.RenderingServiceFactory;
 import org.edu_sharing.service.rendering.RenderingVersionInfo;
-import org.glassfish.jersey.server.monitoring.ApplicationEventListener;
+import org.edu_sharing.spring.scope.refresh.RefreshScopeRefreshedEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 
 @Service
-public class VersionService implements ApplicationListener<ContextRefreshedEvent> {
+public class VersionService implements ApplicationListener<RefreshScopeRefreshedEvent> {
 	static Logger logger = Logger.getLogger(VersionService.class);
 
 	public SimpleCache<Type, String> versionCache = (SimpleCache<Type, String>) AlfAppContextGate.getApplicationContext().getBean("eduSharingVersionCache", SimpleCache.class);
 
 
 	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event) {
+	public void onApplicationEvent(RefreshScopeRefreshedEvent event) {
 		versionCache.clear();
 	}
 

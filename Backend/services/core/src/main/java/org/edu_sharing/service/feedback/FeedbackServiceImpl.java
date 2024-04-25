@@ -25,17 +25,17 @@ import org.edu_sharing.service.nodeservice.annotation.NodeManipulation;
 import org.edu_sharing.service.nodeservice.annotation.NodeOriginal;
 import org.edu_sharing.service.permission.annotation.NodePermission;
 import org.edu_sharing.service.permission.annotation.Permission;
+import org.edu_sharing.spring.scope.refresh.RefreshScopeRefreshedEvent;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Log4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class FeedbackServiceImpl implements FeedbackService, ApplicationListener<ContextRefreshedEvent> {
+public class FeedbackServiceImpl implements FeedbackService, ApplicationListener<RefreshScopeRefreshedEvent> {
     private final NodeService nodeService;
     UserMode userMode;
     boolean allowMultiple;
@@ -70,7 +70,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationListener
     }
 
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
+    public void onApplicationEvent(RefreshScopeRefreshedEvent event) {
         refresh();
     }
 
