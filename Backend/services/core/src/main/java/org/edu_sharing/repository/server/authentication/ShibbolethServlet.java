@@ -29,6 +29,11 @@ package org.edu_sharing.repository.server.authentication;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+
+import org.opensaml.saml2.core.Attribute;
+import org.opensaml.xml.XMLObject;
+import org.opensaml.xml.schema.XSAny;
+import org.opensaml.xml.schema.XSString;
 import org.springframework.extensions.surf.util.URLDecoder;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -295,6 +300,32 @@ public class ShibbolethServlet extends HttpServlet {
 						values = samlCredential.getAttributeAsStringArray(attName);
 					}catch (Exception e){
 						logger.warn("att "+attName +" could not be resolved. " + e.getMessage());
+						if(logger.isDebugEnabled()){
+							logger.debug(e);
+							List<Attribute> attributes = samlCredential.getAttributes();
+							if(attributes != null){
+								logger.debug("found "+ attributes.size() + " attributes");
+								for(Attribute att : attributes){
+									logger.debug("Att" + att.getName() +" fn:" +att.getFriendlyName() + " nf:" +att.getNameFormat());
+									List<XMLObject> attributeValues = att.getAttributeValues();
+									if(attributeValues != null && attributeValues.size()  > 0){
+										for(XMLObject xmlValue : attributeValues){
+											if(xmlValue == null){
+												logger.info ( "xmlValue is null");
+											}else if (xmlValue instanceof XSString) {
+												logger.info ( "XSString val:" +  ((XSString) xmlValue).getValue() );
+											} else if (xmlValue instanceof XSAny) {
+												logger.info ( "XSAny val:" +  ((XSAny) xmlValue).getTextContent() );
+											} else {
+												logger.info("unkown value class:" +xmlValue.getClass().getName());
+											}
+										}
+									}else{
+										logger.debug("no attribute values");
+									}
+								}
+							}else logger.debug("samlCredential.getAttributes() is null");
+						}
 					}
 					if (values == null) {
 						logger.info("att "+attName +" is null");
