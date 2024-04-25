@@ -41,6 +41,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
@@ -160,19 +162,36 @@ public class SecurityConfigurationSaml {
             String globalSPRegistrationId = "one";
             List<RelyingPartyRegistration> relyingPartyRegistration = RelyingPartyRegistrations
                     .collectionFromMetadataLocation(config.getString("security.sso.saml.idp.metadata.url"))
-                    .stream().map((builder) -> builder
-                            .registrationId(UUID.randomUUID().toString())
-                            .entityId("{baseUrl}/saml2/service-provider-metadata/" + globalSPRegistrationId)
-                            .assertionConsumerServiceLocation("{baseUrl}/login/saml2/sso/" + globalSPRegistrationId)
-                            .singleLogoutServiceLocation("{baseUrl}/logout/saml2/slo")
-                            .signingX509Credentials(
-                                    (c) -> c.add(Saml2X509Credential.signing(privateKey, relyingPartyCertificate())))
-                            .decryptionX509Credentials(
-                                    (c) -> c.add(Saml2X509Credential.decryption(privateKey, relyingPartyCertificate())))
-                    .build()).collect(Collectors.toList());
+                    .stream().map((builder) -> {
+                        String relyingPartyId = getRelyingPartyId(builder);
+                        return builder.registrationId(relyingPartyId)
+                                .entityId("{baseUrl}/saml2/service-provider-metadata/" + globalSPRegistrationId)
+                                .assertionConsumerServiceLocation("{baseUrl}/login/saml2/sso/" + globalSPRegistrationId)
+                                .singleLogoutServiceLocation("{baseUrl}/logout/saml2/slo")
+                                .signingX509Credentials(
+                                        (c) -> c.add(Saml2X509Credential.signing(privateKey, relyingPartyCertificate())))
+                                .decryptionX509Credentials(
+                                        (c) -> c.add(Saml2X509Credential.decryption(privateKey, relyingPartyCertificate())))
+                                .build();
+                    }).collect(Collectors.toList());
             return new InMemoryRelyingPartyRegistrationRepository(relyingPartyRegistration);
         }catch (IOException e){
             throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * tries to get idp domain
+     * @param b
+     * @return
+     */
+    String getRelyingPartyId(RelyingPartyRegistration.Builder b){
+        try {
+            URI uri = new URI(b.build().getAssertingPartyDetails().getEntityId());
+            String host = uri.getHost();
+            return host;
+        } catch (URISyntaxException e) {
+            return UUID.randomUUID().toString();
         }
     }
 
