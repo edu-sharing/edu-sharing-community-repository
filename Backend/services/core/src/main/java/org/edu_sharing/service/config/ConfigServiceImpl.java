@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
+import net.shibboleth.utilities.java.support.annotation.Prototype;
 import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -44,8 +45,10 @@ import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.stereotype.Service;
 
 
+@Service
 public class ConfigServiceImpl implements ConfigService, ApplicationListener<ContextRefreshedEvent> {
 	private static Logger logger=Logger.getLogger(ConfigServiceImpl.class);
 	private static String CACHE_KEY = "CLIENT_CONFIG";

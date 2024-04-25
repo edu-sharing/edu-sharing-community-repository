@@ -10,13 +10,16 @@ import org.edu_sharing.repository.server.RequestHelper;
 
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
+import org.edu_sharing.spring.ApplicationContextFactory;
+
 import java.util.List;
 
 public class ConfigServiceFactory {
     private static final String[] DEFAULT_LANGUAGES = new String[]{"de", "en"};
 	static Logger logger = Logger.getLogger(ConfigServiceFactory.class);
+
 	public static ConfigService getConfigService(){
-		return new ConfigServiceImpl();
+		return ApplicationContextFactory.getApplicationContext().getBean(ConfigService.class);
 	}
 	public static Config getCurrentConfig() throws Exception {
 		if(Context.getCurrentInstance()!=null)
