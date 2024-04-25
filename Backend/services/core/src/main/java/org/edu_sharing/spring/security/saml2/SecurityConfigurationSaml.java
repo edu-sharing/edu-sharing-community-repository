@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.config.ConfigServiceFactory;
@@ -36,6 +37,7 @@ import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuc
 import org.springframework.security.web.util.matcher.AndRequestMatcher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,6 +61,8 @@ public class SecurityConfigurationSaml {
 
     Config config = LightbendConfigLoader.get();
 
+    Logger logger = Logger.getLogger(SecurityConfigurationSaml.class);
+
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return EduWebSecurityCustomizer.webSecurityCustomizer();
@@ -66,15 +70,20 @@ public class SecurityConfigurationSaml {
 
     @Bean
     SecurityFilterChain app(HttpSecurity http) throws Exception {
+
         http
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(new AntPathRequestMatcher("/shibboleth")).authenticated()
                         .requestMatchers(new AntPathRequestMatcher("/**")).permitAll()
                 )
 
-                .saml2Login((login) -> login
-
-                        .successHandler(new EduAuthSuccsessHandler())
+                .saml2Login((login) -> {
+                            String loginPath = getLoginPath();
+                            if(StringUtils.hasText(loginPath)){
+                                login.loginPage(loginPath);
+                            }
+                            login.successHandler(new EduAuthSuccsessHandler());
+                        }
                         //don't use this cause it uses SavedRequestAwareAuthenticationSuccessHandler
                         //.defaultSuccessUrl("/shibboleth")
                 )
@@ -93,6 +102,31 @@ public class SecurityConfigurationSaml {
         CSRFConfig.config(http);
 
         return http.build();
+    }
+
+    /**
+     * default spring-security login page is /login
+     * when it's set by Saml2LoginConfigurer the DefaultLoginPageGeneratingFilter is not used, so init loginPath with null
+     * if more than one idp is configured with default config a list of all registered idp' is shown
+     * org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter.generateLoginPageHtml
+     *
+     * @return "/components/login"  when loginProvidersUrl + loginAllowLocal is set to allow custom wayf list else returns null
+     */
+    private String getLoginPath() {
+        String loginPath = null;
+        org.edu_sharing.alfresco.service.config.model.Config clientConfig = null;
+        try {
+            clientConfig = ConfigServiceFactory.getCurrentConfig();
+            String loginProvidersUrl = clientConfig.getValue("loginProvidersUrl", null);
+            boolean allowLocal = clientConfig.getValue("loginAllowLocal",false);
+            //check for both loginProvidersUrl ends in endless loop
+            if(loginProvidersUrl != null && allowLocal){
+                loginPath =   "/components/login";
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(),e);
+        }
+        return loginPath;
     }
 
     /**
