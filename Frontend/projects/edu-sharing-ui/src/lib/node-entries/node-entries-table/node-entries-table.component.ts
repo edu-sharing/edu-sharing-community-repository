@@ -336,4 +336,8 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         await this.applicationRef.tick();
         this.dropdown.menu.focusFirstItem();
     }
+
+    isBlocked(node: Node) {
+        return node.properties?.[RestConstants.CCM_PROP_IMPORT_BLOCKED]?.[0] === 'true';
+    }
 }

@@ -364,4 +364,8 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
     isCustomTemplate() {
         return this.entriesService.dataSource instanceof CustomTemplatesDataSource;
     }
+
+    isBlocked(node: Node) {
+        return node.properties?.[RestConstants.CCM_PROP_IMPORT_BLOCKED]?.[0] === 'true';
+    }
 }

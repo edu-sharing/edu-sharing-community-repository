@@ -169,7 +169,7 @@ public class ImageTool {
 		if(!mediaType.getType().equals("image") && !mediaType.getType().equals("text")) {
 			throw new NodeMimetypeValidationException("Invalid mime type for image: " + mediaType.getType() + "/" + mediaType.getSubtype());
 		}
-		if(mediaType.getType().equals("text") || mediaType.equals(MediaType.image("svg"))) {
+		if(mediaType.getType().equals("text") || mediaType.equals(MediaType.image("svg+xml"))) {
 			try {
 				data = convertSvgToPng(data);
 				mediaType = MediaType.image("png");
