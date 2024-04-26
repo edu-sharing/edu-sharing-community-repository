@@ -41,7 +41,7 @@ export class ConfigService {
         startWith(void 0 as void),
         switchReplay(() => this.configV1.getConfig1()),
         tap((config) => this.configSubject.next(config.current)),
-        map((config) => config.current ?? null),
+        map((config) => (config.current ? config : null)),
     );
     private readonly variables$ = this.updateTrigger.pipe(
         startWith(void 0 as void),
@@ -78,7 +78,11 @@ export class ConfigService {
         if (forceUpdate) {
             this.updateTrigger.next();
         }
-        return this.config$;
+        return this.config$.pipe(map((c) => c?.current ?? null));
+    }
+
+    observeContextId(): Observable<string | null> {
+        return this.config$.pipe(map((c) => c?.contextId ?? null));
     }
 
     /**
