@@ -310,9 +310,7 @@ public class ShibbolethServlet extends HttpServlet {
 							if(authentication.getDetails() != null && authentication.getDetails() instanceof String){
 								logger.info("fetching username form authentication.details");
 								String userName = (String) authentication.getDetails();
-								if(userName != null){
-									values = new String[]{userName};
-								}
+								values = new String[]{userName};
 							}
 
 						}
