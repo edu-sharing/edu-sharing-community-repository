@@ -30,6 +30,7 @@ package org.edu_sharing.repository.server.authentication;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import org.edu_sharing.saml.ESSAMLUserDetailsService;
 import org.opensaml.saml2.core.Attribute;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.schema.XSAny;
@@ -73,6 +74,9 @@ public class ShibbolethServlet extends HttpServlet {
 	Boolean useHeaders = null;
 	private String redirectUrl;
 
+	ApplicationContext eduApplicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
+	SSOAuthorityMapper ssoMapper = (SSOAuthorityMapper)eduApplicationContext.getBean("ssoAuthorityMapper");
+
 	@Override
 	public void init() throws ServletException {
 		super.init();
@@ -82,10 +86,6 @@ public class ShibbolethServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-
-		ApplicationContext eduApplicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
-
-		SSOAuthorityMapper ssoMapper = (SSOAuthorityMapper)eduApplicationContext.getBean("ssoAuthorityMapper");
 		logger.info("req.getRemoteUser():"+req.getRemoteUser() +" isPreferRemoteUser:" + ssoMapper.isPreferRemoteUser());
 
 		List<String> additionalAttributes = null;
@@ -300,31 +300,14 @@ public class ShibbolethServlet extends HttpServlet {
 						values = samlCredential.getAttributeAsStringArray(attName);
 					}catch (Exception e){
 						logger.warn("att "+attName +" could not be resolved. " + e.getMessage());
-						if(logger.isDebugEnabled()){
-							logger.debug(e);
-							List<Attribute> attributes = samlCredential.getAttributes();
-							if(attributes != null){
-								logger.debug("found "+ attributes.size() + " attributes");
-								for(Attribute att : attributes){
-									logger.debug("Att" + att.getName() +" fn:" +att.getFriendlyName() + " nf:" +att.getNameFormat());
-									List<XMLObject> attributeValues = att.getAttributeValues();
-									if(attributeValues != null && attributeValues.size()  > 0){
-										for(XMLObject xmlValue : attributeValues){
-											if(xmlValue == null){
-												logger.info ( "xmlValue is null");
-											}else if (xmlValue instanceof XSString) {
-												logger.info ( "XSString val:" +  ((XSString) xmlValue).getValue() );
-											} else if (xmlValue instanceof XSAny) {
-												logger.info ( "XSAny val:" +  ((XSAny) xmlValue).getTextContent() );
-											} else {
-												logger.info("unkown value class:" +xmlValue.getClass().getName());
-											}
-										}
-									}else{
-										logger.debug("no attribute values");
-									}
-								}
-							}else logger.debug("samlCredential.getAttributes() is null");
+
+						if(attName.equals(ssoMapper.getSSOUsernameProp())){
+							if(authentication.getDetails() != null && authentication.getDetails() instanceof String){
+								logger.info("fetching username form authentication.details");
+								String userName = (String) authentication.getDetails();
+								values = new String[]{userName};
+							}
+
 						}
 					}
 					if (values == null) {
