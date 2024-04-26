@@ -873,6 +873,9 @@
       },
       "Config": {
         "properties": {
+          "contextId": {
+            "type": "string"
+          },
           "current": {
             "$ref": "#/components/schemas/Values"
           },
