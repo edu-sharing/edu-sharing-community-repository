@@ -30,6 +30,7 @@ package org.edu_sharing.repository.server.authentication;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import org.edu_sharing.saml.ESSAMLCredential;
 import org.edu_sharing.saml.ESSAMLUserDetailsService;
 import org.opensaml.saml2.core.Attribute;
 import org.opensaml.xml.XMLObject;
@@ -297,7 +298,11 @@ public class ShibbolethServlet extends HttpServlet {
 					SAMLCredential samlCredential = (SAMLCredential) credential;
 					String[] values = null;
 					try{
-						values = samlCredential.getAttributeAsStringArray(attName);
+						if(samlCredential instanceof ESSAMLCredential){
+							values = ((ESSAMLCredential)samlCredential).getEsAttributeAsStringArray(attName);
+						}else{
+							values = samlCredential.getAttributeAsStringArray(attName);
+						}
 					}catch (Exception e){
 						logger.warn("att "+attName +" could not be resolved. " + e.getMessage());
 
