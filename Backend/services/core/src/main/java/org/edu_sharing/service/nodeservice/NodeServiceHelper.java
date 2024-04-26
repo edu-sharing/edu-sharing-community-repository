@@ -1,6 +1,5 @@
 package org.edu_sharing.service.nodeservice;
 
-import bsh.StringUtil;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
