@@ -23,10 +23,7 @@ import org.edu_sharing.alfresco.RestrictedAccessException;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.tools.ActionObserver;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.HttpQueryTool;
-import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.NodeService;
@@ -432,10 +429,6 @@ public class PreviewServlet extends HttpServlet {
 			NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId);
 			String mimetype=NodeServiceFactory.getLocalService().getContentMimetype(storeRef.getProtocol(), storeRef.getIdentifier(),nodeId);
 			if(mimetype!=null && mimetype.startsWith("image")) {
-				if(mimetype.endsWith("svg+xml")) {
-					// block svg to prevent js-based content to load from browser
-					return false;
-				}
 				if(deliverContentAsSystem(nodeRef,  CCConstants.CM_PROP_CONTENT, req, resp))
 					return true;
 			}
@@ -457,7 +450,7 @@ public class PreviewServlet extends HttpServlet {
 					public void handle(InputStream httpResult) {
 						resp.setHeader("Content-Type", "image/jpeg");
 						try {
-							DataInputStream extImgTransformed = postProcessImage(nodeId, new DataInputStream(httpResult), req);
+							DataInputStream extImgTransformed = postProcessImage(nodeId, new DataInputStream(httpResult), req, null);
 							StreamUtils.copy(extImgTransformed, resp.getOutputStream());
 						} catch (IOException e) {
 							throw new RuntimeException(e);
@@ -473,7 +466,7 @@ public class PreviewServlet extends HttpServlet {
 		return true;
 	}
 
-	private DataInputStream postProcessImage(String nodeId,DataInputStream in,HttpServletRequest req){
+	private DataInputStream postProcessImage(String nodeId, DataInputStream in, HttpServletRequest req, String mimetype){
 		float quality=DEFAULT_QUALITY;
 
 		int width=0,height=0,maxHeight=0,maxWidth=0;
@@ -535,8 +528,12 @@ public class PreviewServlet extends HttpServlet {
 				byte[] img=StreamUtils.copyToByteArray(in);
 				return new DataInputStream(new ByteArrayInputStream(img));
 			}
-
-			BufferedImage img=ImageIO.read(in);
+			BufferedImage img;
+			if(Objects.equals("image/svg+xml", mimetype)) {
+				img = ImageIO.read(new ByteArrayInputStream(ImageTool.convertSvgToPng(in)));
+			} else {
+				img = ImageIO.read(in);
+			}
 
 			try{
 				float aspect=Float.parseFloat(req.getParameter("aspect"));
@@ -657,7 +654,7 @@ public class PreviewServlet extends HttpServlet {
 				DataInputStream in = new DataInputStream(is);
 				if(mimetype.startsWith("image")) {
 					try {
-						DataInputStream tmp = postProcessImage(nodeRef.getId(), in, req);
+						DataInputStream tmp = postProcessImage(nodeRef.getId(), in, req, mimetype);
 						if (tmp != null) {
 							in = tmp;
 							mimetype = "image/jpeg";
