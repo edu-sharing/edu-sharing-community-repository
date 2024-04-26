@@ -36,10 +36,8 @@ import org.edu_sharing.alfresco.service.config.model.Language;
 import org.edu_sharing.alfresco.service.config.model.Values;
 import org.edu_sharing.alfresco.service.config.model.Variables;
 import org.edu_sharing.service.nodeservice.NodeService;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
-import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.spring.scope.refresh.RefreshScopeRefreshedEvent;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationListener;
@@ -135,7 +133,9 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
 			throw new IOException(file + " missing");
 		return is;
 	}
-	private Context getContext(String domain) throws Exception {
+
+	@Override
+	public Context getContext(String domain) throws Exception {
 		Config config=getConfig();
 		if(config.contexts!=null && config.contexts.context!=null) {
 			for (Context context : config.contexts.context) {
@@ -151,30 +151,28 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
 		return null;
 	}
 	@Override
-	public String getContextId(String domain) throws Exception {
-		Context context = getContext(domain);
-		if(context!=null)
-			return context.id;
-		return null;
-	}
-	@Override
 	public Config getConfigByDomain(String domain) throws Exception {
 		Context context=getContext(domain);
 		if(context == null) {
-			throw new IllegalArgumentException("Context with domain "+domain+" does not exists");
+			throw new IllegalArgumentException("Context with domain "+ domain +" does not exists");
 		}
+		return getConfigByContext( context);
+
+	}
+
+	@Override
+	public Config getConfigByContext(Context context) throws Exception {
 		if(!"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()) && configCache.getKeys().contains(CACHE_KEY + "_" + context)) {
 			return configCache.get(CACHE_KEY + "_" + context);
 		}
 		Config config=getConfig().deepCopy();
-		overrideValues(config.values,context.values);
+		overrideValues(config.values, context.values);
 		if(context.language!=null)
-			config.language = overrideLanguage(config.language,context.language);
+			config.language = overrideLanguage(config.language, context.language);
 		if(context.variables!=null)
-			config.variables = overrideVariables(config.variables,context.variables);
+			config.variables = overrideVariables(config.variables, context.variables);
 		configCache.put(CACHE_KEY + "_" + context, config);
 		return config;
-
 	}
 
 	@Override
