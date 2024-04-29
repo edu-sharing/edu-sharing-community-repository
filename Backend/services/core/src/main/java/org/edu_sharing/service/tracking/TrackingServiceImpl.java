@@ -4,16 +4,21 @@ import jakarta.servlet.http.HttpSession;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.binding.BindingException;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.service.AuthorityService;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
+import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
+import org.edu_sharing.service.mediacenter.MediacenterService;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -28,6 +33,7 @@ import org.json.JSONObject;
 import org.postgresql.util.PGobject;
 import org.postgresql.util.PSQLException;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Date;
 import java.sql.*;
 import java.text.SimpleDateFormat;
@@ -51,7 +57,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
     public static String TRACKING_UPDATE_NODE = "UPDATE " + TRACKING_NODE_TABLE_ID + " SET authority = ? WHERE authority = ?";
     public static String TRACKING_UPDATE_USER = "UPDATE " + TRACKING_USER_TABLE_ID + " SET authority = ? WHERE authority = ?";
 
-    public static String TRACKING_INSERT_NODE = "insert into " + TRACKING_NODE_TABLE_ID + " (node_id,node_uuid,original_node_uuid,node_version,authority,authority_organization,authority_mediacenter,time,type,data) VALUES (?,?,?,?,?,?,?,?,?,?)";
+    public static String TRACKING_INSERT_NODE = "insert into " + TRACKING_NODE_TABLE_ID + " (node_id,node_uuid,original_node_uuid,node_version,authority,authority_organization,authority_mediacenter,time,type,data,licence, shared_with_mediacenters) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
     public static String TRACKING_INSERT_USER = "insert into " + TRACKING_USER_TABLE_ID + " (authority,authority_organization,authority_mediacenter,time,type,data) VALUES (?,?,?,?,?,?)";
     public static String TRACKING_STATISTICS_CUSTOM_GROUPING = "SELECT type,COUNT(*) :fields from :table as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
@@ -221,6 +227,16 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
                 obj.setValue(json.toString());
             statement.setObject(10, obj);
 
+            String licence = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
+            statement.setString(11, licence);
+
+            if(LightbendConfigLoader.get().getBoolean("repository.tracking.sharedWithMediacenter")) {
+                MediacenterService mediacenterService = MediacenterServiceFactory.getLocalService();
+                statement.setArray(12, statement.getConnection().createArrayOf("VARCHAR", mediacenterService.getMediacenterAuthoritiesByNode(nodeRef.getId()).toArray()));
+            }else{
+                statement.setArray(12, null);
+            }
+
             return true;
         });
     }
@@ -345,8 +361,6 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
             }
             Collections.sort(result);
             return result;
-        } catch (Throwable t) {
-            throw t;
         } finally {
             dbAlf.cleanUp(con, statement);
         }
@@ -354,7 +368,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
 
     private void mapResult(EventType type, List<String> additionalFields, List<String> groupFields, ResultSet resultSet, StatisticEntry entry, String mediacenter) throws SQLException {
         setAuthorityFromResult(resultSet, entry, mediacenter);
-        if (additionalFields != null && additionalFields.size() > 0) {
+        if (additionalFields != null && !additionalFields.isEmpty()) {
             mapAdditionalFields(type, additionalFields, resultSet, entry, mediacenter);
         }
         try {
@@ -446,8 +460,6 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
             }
             Collections.sort(result);
             return result;
-        } catch (Throwable t) {
-            throw t;
         } finally {
             dbAlf.cleanUp(con, statement);
         }
@@ -523,11 +535,13 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
             query = query.replace(":fields", fields);
             statement = con.prepareStatement(query);
             int index = 1;
-            if (dateFrom == null)
+            if (dateFrom == null) {
                 dateFrom = new java.util.Date(0);
+            }
             statement.setTimestamp(index++, Timestamp.valueOf(dateFrom.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
-            if (dateTo == null)
+            if (dateTo == null) {
                 dateTo = new java.util.Date();
+            }
             statement.setTimestamp(index++, Timestamp.valueOf(dateTo.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
             statement.setString(index++, mediacenter);
             statement.setArray(index++, con.createArrayOf("text", nodes.stream().map(NodeRef::getId).toArray()));
@@ -542,8 +556,6 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
                 }
             }
             return data;
-        } catch (Throwable t) {
-            throw t;
         } finally {
             dbAlf.cleanUp(con, statement);
         }
@@ -566,11 +578,13 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
             statement = con.prepareStatement(query);
             int index = 1;
             statement.setString(index++, mediacenter);
-            if (dateFrom == null)
+            if (dateFrom == null) {
                 dateFrom = new java.util.Date(0);
+            }
             statement.setTimestamp(index++, Timestamp.valueOf(dateFrom.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
-            if (dateTo == null)
+            if (dateTo == null) {
                 dateTo = new java.util.Date();
+            }
             statement.setTimestamp(index++, Timestamp.valueOf(dateTo.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
 
             ResultSet resultSet = statement.executeQuery();
@@ -586,8 +600,6 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
                 }
             }
             return data;
-        } catch (Throwable t) {
-            throw t;
         } finally {
             dbAlf.cleanUp(con, statement);
         }
@@ -630,14 +642,14 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
     private void setAuthorityFromResult(ResultSet resultSet, StatisticEntry entry, String mediacenter) throws SQLException {
         try {
             entry.getAuthorityInfo().setAuthority(resultSet.getString("authority"));
-        } catch (PSQLException e) {
+        } catch (PSQLException ignored) {
         }
         try {
             Array orgs = resultSet.getArray("authority_organization");
             if (orgs != null) {
                 entry.getAuthorityInfo().setOrganizations((String[]) orgs.getArray());
             }
-        } catch (PSQLException e) {
+        } catch (PSQLException ignored) {
         }
         try {
             Array mediacenters = resultSet.getArray("authority_mediacenter");
@@ -649,11 +661,11 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
                     entry.getAuthorityInfo().setMediacenters((String[]) mediacenters.getArray());
                 }
             }
-        } catch (PSQLException e) {
+        } catch (PSQLException ignored) {
         }
     }
 
-    private <T extends StatisticEntry> List<T> initList(Class<T> clz, GroupingType type, java.util.Date dateFrom, java.util.Date dateTo) throws IllegalAccessException, InstantiationException {
+    private <T extends StatisticEntry> List<T> initList(Class<T> clz, GroupingType type, java.util.Date dateFrom, java.util.Date dateTo) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         long DAY_DURATION = 1000 * 60 * 60 * 24;
 
         List<T> list = new ArrayList<>();
@@ -671,7 +683,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
         }
         SimpleDateFormat dt = new SimpleDateFormat(pattern);
         while (date.getTime() < dateTo.getTime() - DAY_DURATION) {
-            T obj = clz.newInstance();
+            T obj = clz.getDeclaredConstructor().newInstance();
             obj.setDate(dt.format(date));
             if (!list.contains(obj))
                 list.add(obj);
@@ -722,12 +734,12 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
             if (groupFields != null && !groupFields.isEmpty()) {
                 for (String field : groupFields) {
                     grouping.append(",").append(makeDbField(field, false));
-                    fields.append(",").append(makeDbField(field, false) + " as " + field);
+                    fields.append(",").append(makeDbField(field, false)).append(" as ").append(field);
                 }
             }
-            if (additionalFields != null && additionalFields.size() > 0) {
+            if (additionalFields != null && !additionalFields.isEmpty()) {
                 for (String field : additionalFields) {
-                    fields.append(",ARRAY_AGG(").append(makeDbField(field, true) + ") as " + field);
+                    fields.append(",ARRAY_AGG(").append(makeDbField(field, true)).append(") as ").append(field);
                     // if additional fields and no grouping is provided, add them to grouping otherwise there will be a postgres exception when fetching
                     // nope: it is now using ARRAY_AGG
                     //if(groupFields==null || groupFields.isEmpty()){
@@ -777,6 +789,6 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
     }
 
     private interface FillStatement {
-        boolean onFillStatement(PreparedStatement statement) throws SQLException;
+        boolean onFillStatement(PreparedStatement statement) throws Exception;
     }
 }
