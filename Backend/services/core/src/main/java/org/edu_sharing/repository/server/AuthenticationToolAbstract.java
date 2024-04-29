@@ -100,6 +100,8 @@ public abstract class AuthenticationToolAbstract implements AuthenticationTool {
 		Map<String,String> locales = new HashMap<>();
 		locales.put("de","de_DE");
 		locales.put("en","en_US");
+		locales.put("fr","fr_FR");
+		locales.put("it","it_IT");
 		return locales.get(language);
 	}
 }
