@@ -529,7 +529,9 @@ public class PreviewServlet extends HttpServlet {
 				return new DataInputStream(new ByteArrayInputStream(img));
 			}
 			BufferedImage img;
+			boolean svg = false;
 			if(Objects.equals("image/svg+xml", mimetype)) {
+				svg = true;
 				img = ImageIO.read(new ByteArrayInputStream(ImageTool.convertSvgToPng(in)));
 			} else {
 				img = ImageIO.read(in);
@@ -569,7 +571,7 @@ public class PreviewServlet extends HttpServlet {
 						scale=false;
 					}
 				}
-				if(!scale)
+				if(!scale && !svg)
 					return null;
 				BufferedImage cropped=new BufferedImage(width,height, BufferedImage.TYPE_INT_ARGB); // getType() sometimes return 0
 				float aspectCrop=(float)width/(float)height;
@@ -684,6 +686,9 @@ public class PreviewServlet extends HttpServlet {
 		// fix to proper mimetype (usually comes at "image/svg xml" which is not valid)
 		if(mimetype.startsWith("image/svg")){
 			mimetype = "image/svg+xml";
+		}
+		if(mimetype.equals("image/svg+xml")) {
+			throw new RuntimeException("svg is not supported and could not be converted");
 		}
 		resp.setContentType(mimetype);
 
