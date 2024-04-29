@@ -505,7 +505,7 @@ public class LTIApi {
                                 null);
                     }
                 }
-
+                req.getSession().removeAttribute(LTISessionObject.class.getName());
                 return Response.ok(dl).build();
             }else{
                 throw new Exception("no active lti session");

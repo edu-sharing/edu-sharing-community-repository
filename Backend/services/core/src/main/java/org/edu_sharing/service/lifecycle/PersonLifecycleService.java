@@ -42,33 +42,33 @@ import java.util.stream.Collectors;
 
 /**
  * Konzept LöschJob -> status todelete
- * 
+ *
  * Filter in personsearch (invite, workflow - non active)
- * 
- * validate session only active, 
+ *
+ * validate session only active,
  * webdav auth, share auth ....
- * 
+ *
  * on create person set personstatus to 'active'
- * 
+ *
  * job that sets active status for existing persons when edu-sharing property 'person_active_status' is set
- * 
+ *
  * user_home remove with/without cc -> with: move cc content to cc_user space (hirachical date folders structure)
- * 
- * 
+ *
+ *
  * all files in shared content will be deleted except OER(cc) content:
  * student, external, teacher trainee's
  * instance owner becomes owner
  * Collections -> delete?
- * 
- * all files in shared content stay and will be given to an Instanceowner 
+ *
+ * all files in shared content stay and will be given to an Instanceowner
  * Teacher, Staff
- * 
+ *
  * InviteHistory: delete or rename
- * 
+ *
  * filtered in invite dialogs
- * 
+ *
  * cause of owner (first/lastname) remove file from properties cache
- * 
+ *
  *
  * --> no username use firstName and lastName
  * 		Problems: user with same name, and marriage
@@ -107,25 +107,25 @@ public class PersonLifecycleService {
 	public static String ROLE_EXTERNAL = "external";
 	public static String ROLE_TEACHER_TRAINEES = "teacher_trainees";
 	public String[] ROLE_GROUP_REMOVE_SHARED = {ROLE_STUDENT,ROLE_EXTERNAL,ROLE_TEACHER_TRAINEES};
-	
+
 	public static String ROLE_TEACHER = "teacher";
 	public static String ROLE_STAFF = "staff";
 	public String[] ROLE_GROUP_KEEP_SHARED = {ROLE_TEACHER,ROLE_STAFF};
-	
-	
+
+
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-	
+
 	SearchService searchService = serviceRegistry.getSearchService();
-	
+
 	NodeService nodeService = serviceRegistry.getNodeService();
-	
+
 	PersonService personService = serviceRegistry.getPersonService();
-	
+
 	AuthorityService authorityService = serviceRegistry.getAuthorityService();
-	
+
 	PermissionService permissionService = serviceRegistry.getPermissionService();
-	
+
 	OwnableService ownableService = serviceRegistry.getOwnableService();
 
 	TransactionService transactionService = serviceRegistry.getTransactionService();
@@ -142,7 +142,7 @@ public class PersonLifecycleService {
 	}
 
 	Logger logger = Logger.getLogger(PersonLifecycleService.class);
-	
+
 	//public static String ROLE_
 
 	/*
@@ -160,7 +160,7 @@ public class PersonLifecycleService {
 		}
 	}
     */
-	
+
 	public PersonReport deletePersons(List<String> usernames, PersonDeleteOptions options) {
 		List<PersonDeleteResult> results=new ArrayList<>();
 		for(String user : usernames) {
@@ -172,7 +172,7 @@ public class PersonLifecycleService {
 		report.results=results;
 		return report;
 	}
-	
+
 	private PersonDeleteResult deletePerson(NodeRef personNodeRef, PersonDeleteOptions options) {
 		PersonDeleteResult result=new PersonDeleteResult();
 		String status = (String)nodeService.getProperty(personNodeRef,
@@ -753,7 +753,13 @@ public class PersonLifecycleService {
 	}
 
 	public void deleteAllRefs(Collection<NodeRef> refs) {
-		refs.forEach((ref)->NodeServiceFactory.getLocalService().removeNode(ref.getId(),null,false));
+		refs.forEach((ref)->{
+			try {
+				NodeServiceFactory.getLocalService().removeNode(ref.getId(),null,false);
+			} catch (InvalidNodeRefException ignored){
+
+			}
+		});
 	}
 
 	public void deleteAllRefsReverse(Collection<NodeRef> refs){
@@ -767,7 +773,7 @@ public class PersonLifecycleService {
 		String license = NodeServiceHelper.getProperty(ref, CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
 		return CCConstants.getAllCCLicenseKeys().contains(license);
 	}
-	
+
 	private void setOwner(NodeRef nodeRef, String oldOwner, String newOwner, PersonDeleteOptions options) {
 		RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
 		rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
@@ -832,12 +838,12 @@ public class PersonLifecycleService {
 		nodeService.addAspect(nodeRef, ContentModel.ASPECT_TEMPORARY, null);
 		nodeService.deleteNode(nodeRef);
 	}
-	
+
 	public void removeContributer(NodeRef nodeRef, String username){
 		NodeRef personNodeRef = personService.getPerson(username);
 		String firstName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_FIRSTNAME));
 		String lastName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_LASTNAME));
-		
+
 		QName qnameAuthor = QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR);
 		QName qnameMetadata = QName.createQName(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR);
 		List<String> contributerAuthor = (List<String>)nodeService.getProperty(nodeRef, qnameAuthor);
@@ -847,11 +853,11 @@ public class PersonLifecycleService {
 
 		contributerMetadata.removeIf(metadataContributer -> contains(VCardConverter.vcardToHashMap(metadataContributer), firstName, lastName));
 		nodeService.setProperty(nodeRef, qnameMetadata, (ArrayList)contributerMetadata);
-		
+
 	}
-	
+
 	private boolean contains(ArrayList<HashMap<String, Object>> vcardList, String firstName, String lastName) {
-		
+
 		if(vcardList != null && vcardList.size() > 0) {
 			Map<String,Object> vcard = vcardList.iterator().next();
 			String vcFirstName = (String)vcard.get(CCConstants.VCARD_GIVENNAME);
@@ -859,10 +865,10 @@ public class PersonLifecycleService {
 
 			return firstName.equals(vcFirstName) && lastName.equals(vcLastName);
 		}
-		
+
 		return false;
 	}
-	
+
 	public void deleteCollections(String userName) {
 
 		SearchParameters sp = new SearchParameters();

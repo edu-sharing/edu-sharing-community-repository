@@ -179,10 +179,18 @@
     <div>
       <mat-form-field>
         <mat-label>{{ 'WORKSPACE.CONTRIBUTOR.SCOPE' | translate }}</mat-label>
-        <mat-select id="scope" [(ngModel)]="role" (ngModelChange)="updateSubtitle()">
-          <mat-option *ngFor="let role of roles" value="{{ role }}">{{
-            'WORKSPACE.CONTRIBUTOR.TYPE.' + role.toUpperCase() | translate
-          }}</mat-option>
+        <mat-select
+          id="scope"
+          [(ngModel)]="role"
+          (ngModelChange)="updateSubtitle()"
+          panelClass="contributor-role-select"
+        >
+          <mat-option
+            *ngFor="let role of roles"
+            value="{{ role }}"
+            ngClass="mat-option-role-{{ role }}"
+            >{{ 'WORKSPACE.CONTRIBUTOR.TYPE.' + role.toUpperCase() | translate }}</mat-option
+          >
         </mat-select>
       </mat-form-field>
     </div>

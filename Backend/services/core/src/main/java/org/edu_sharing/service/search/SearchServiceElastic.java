@@ -637,6 +637,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 for (String k : key) {
                     long count = b.getDocCount();
                     NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
+                    // skip duplicate entries
+                    if(values.stream().anyMatch(v -> v.getValue().equals(k))) {
+                        continue;
+                    }
                     value.setValue(k);
                     value.setCount((int) count);
                     values.add(value);

@@ -15,7 +15,8 @@ public class SchemaFactory extends javax.xml.validation.SchemaFactory{
 
     java.util.logging.Logger logger =  java.util.logging.Logger.getLogger(this.getClass().getName());
 
-    com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory wrapped = new com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory();
+    com.sun.org.apache.xerces.internal.jaxp.validation
+            .XMLSchemaFactory wrapped = new com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory();
 
 
     public SchemaFactory(){
