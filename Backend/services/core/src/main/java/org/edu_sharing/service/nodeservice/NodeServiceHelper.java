@@ -8,6 +8,7 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -369,6 +370,9 @@ public class NodeServiceHelper {
 
 
 	public static String getContainerId(String rootId, String pattern) {
+		if(StringUtils.isBlank(pattern)) {
+			return rootId;
+		}
 		String result = null;
 		try{
 			MCAlfrescoAPIClient client = new MCAlfrescoAPIClient();

@@ -193,6 +193,7 @@
     (nodeDropped)="drop($event)"
     class="mat-row"
     [class.mat-row-selected]="entriesService.selection.isSelected(node)"
+    [class.mat-row-import-blocked]="isBlocked(node)"
     [class.selected-when-dragging]="isDragging && entriesService.selection.isSelected(node)"
     [class.mat-row-virtual]="node.virtual"
     [class.mat-row-virtual-first]="
