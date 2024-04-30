@@ -38,16 +38,16 @@ public class OrganisationLifecycleServiceTestSetup {
 
     int numberOfPersons = 10;
 
-    int numberOfHomeDocs = 12;
+    int numberOfHomeDocs = 1200;
 
     //+ 3 (dokuments,images,shared)
-    int numberOfHomeFolders = 9;
+    int numberOfHomeFolders = 1200;
 
-    int numberOfSharedDocs = 10;
-    int numberOfSharedFolders = 4;
+    int numberOfSharedDocs = 100;
+    int numberOfSharedFolders = 40;
 
-    int numberOfCollections = 3;
-    int numberOfCollectionRefs = 7;
+    int numberOfCollections = 30;
+    int numberOfCollectionRefs = 79;
 
     List<NodeRef> persons = new ArrayList<>();
     String orgAuthorityName;
@@ -99,26 +99,40 @@ public class OrganisationLifecycleServiceTestSetup {
 
 
             //safe
-            NodeServiceInterceptor.setEduSharingScope(CCConstants.CCM_VALUE_SCOPE_SAFE);
+            boolean safeFoldersManaged = ScopeUserHomeServiceFactory.getScopeUserHomeService().isManageEduGroupFolders();
+            try {
+                NodeServiceInterceptor.setEduSharingScope(CCConstants.CCM_VALUE_SCOPE_SAFE);
 
-            NodeRef ref  = AuthenticationUtil.runAsSystem(() -> {
-                        AuthenticationUtil.setFullyAuthenticatedUser(user);
-                        AuthenticationUtil.setRunAsUserSystem();
-                        return  ScopeUserHomeServiceFactory.getScopeUserHomeService().getUserHome(user, CCConstants.CCM_VALUE_SCOPE_SAFE, true);
-                    }
-            );
-            createFoldersFiles(user, numberOfHomeFolders, numberOfHomeDocs, ref);
+                if(!safeFoldersManaged) {
+                    ScopeUserHomeServiceFactory.getScopeUserHomeService().setManageEduGroupFolders(true);
+                }
 
-            //create/get safe org
-            String authorityNameOrgSafe = orgAuthorityName+"_safe";
-            Map<QName, Serializable> orgSafeProps = AuthenticationUtil.runAsSystem(() -> organisationService.getOrganisation(organisationService.getCleanName(authorityNameOrgSafe)));
-            NodeRef orgSafeFolder = (NodeRef) orgSafeProps.get(QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
-            String organisationAdminGroup = AuthenticationUtil.runAsSystem(() -> organisationService.getOrganisationAdminGroup(authorityNameOrgSafe));
-            AuthenticationUtil.runAsSystem(() -> {authorityService.addAuthority(organisationAdminGroup, user);return null;});
+                NodeRef ref  = AuthenticationUtil.runAsSystem(() -> {
+                            AuthenticationUtil.setFullyAuthenticatedUser(user);
+                            AuthenticationUtil.setRunAsUserSystem();
+                            return  ScopeUserHomeServiceFactory.getScopeUserHomeService().getUserHome(user, CCConstants.CCM_VALUE_SCOPE_SAFE, true);
+                        }
+                );
+                createFoldersFiles(user, numberOfHomeFolders, numberOfHomeDocs, ref);
 
-            createFoldersFiles(user,numberOfSharedFolders,numberOfSharedDocs,orgSafeFolder);
+                //create/get safe org
 
-            NodeServiceInterceptor.setEduSharingScope(null);
+                String authorityNameOrgSafe = orgAuthorityName + "_safe";
+                Map<QName, Serializable> orgSafeProps = AuthenticationUtil.runAsSystem(() -> organisationService.getOrganisation(organisationService.getCleanName(authorityNameOrgSafe)));
+                NodeRef orgSafeFolder = (NodeRef) orgSafeProps.get(QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
+                String organisationAdminGroup = AuthenticationUtil.runAsSystem(() -> organisationService.getOrganisationAdminGroup(authorityNameOrgSafe));
+                AuthenticationUtil.runAsSystem(() -> {
+                    authorityService.addAuthority(organisationAdminGroup, user);
+                    return null;
+                });
+                createFoldersFiles(user, numberOfSharedFolders, numberOfSharedDocs, orgSafeFolder);
+
+            }finally {
+                NodeServiceInterceptor.setEduSharingScope(null);
+                if(!safeFoldersManaged) {
+                    ScopeUserHomeServiceFactory.getScopeUserHomeService().setManageEduGroupFolders(false);
+                }
+            }
         }
     }
 
