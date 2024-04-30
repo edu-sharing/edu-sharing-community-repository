@@ -53,6 +53,8 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     showProviders = false;
     username = '';
 
+    loginSafeFailed = false;
+
     private next = '';
     private providers: any;
     private scope = '';
@@ -252,6 +254,9 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
                     ) {
                         this.toast.error(null, 'LOGIN.SAFE_PREVIOUS');
                     } else if (data.statusCode === RestConstants.STATUS_CODE_PASSWORD_EXPIRED) {
+                        if (this.isSafeLogin) {
+                            this.loginSafeFailed = true;
+                        }
                         this.toast.error(
                             null,
                             'LOGIN.PASSWORD_EXPIRED' + (this.isSafeLogin ? '_SAFE' : ''),
@@ -259,6 +264,9 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
                     } else if (data.statusCode === RestConstants.STATUS_CODE_PERSON_BLOCKED) {
                         this.toast.error(null, 'LOGIN.PERSON_BLOCKED');
                     } else {
+                        if (this.isSafeLogin) {
+                            this.loginSafeFailed = true;
+                        }
                         this.toast.error(null, 'LOGIN.ERROR' + (this.isSafeLogin ? '_SAFE' : ''));
                     }
                     this.password = '';

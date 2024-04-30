@@ -138,6 +138,14 @@
               {{ 'LOGIN.LOGIN' | translate }}
             </button>
           </div>
+
+          <div
+            *ngIf="isSafeLogin && loginSafeFailed"
+            innerHTML="{{
+              'LOGIN.ERROR_SAFE_DETAIL'
+                | translate: { safeAccountUrl: config.register.recoverUrlSafe }
+            }}"
+          ></div>
         </div>
       </div>
     </div>

@@ -9,6 +9,7 @@ public class Register implements Serializable {
     @XmlElement public Boolean recoverPassword;
     @XmlElement public String loginUrl;
     @XmlElement public String recoverUrl;
+    @XmlElement public String recoverUrlSafe;
     @XmlElement public List<String> requiredFields;
 
 }

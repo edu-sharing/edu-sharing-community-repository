@@ -10,6 +10,7 @@
     "RECOVER_PASSWORD": "Passwort vergessen?",
     "ERROR": "Zugangsdaten fehlerhaft",
     "ERROR_SAFE": "Safe-Passwort ungültig",
+    "ERROR_SAFE_DETAIL": "Die Anmeldung war nicht erfolgreich. Zum Ändern Ihres Kennwortes besuchen Sie bitte <a href=\"{{safeAccountUrl}}\">Mein Konto</a>. Falls sie bisher kein Datensafe-Kennwort besitzen, bitten Sie Ihre Administratorin oder Ihren Administrator, Ihnen ein temporäres Datensafe-Einmalkennwort zu erstellen, mit welchem Sie ein neues Datensafe-Kennwort setzen können",
     "PERSON_BLOCKED": "Ihr Zugang wurde gesperrt. Wenden Sie sich an einen Administrierenden des Systems.",
     "PASSWORD_EXPIRED": "Das Passwort ist abgelaufen und muss zuerst geändert werden",
     "PASSWORD_EXPIRED_SAFE": "Das Safe-Passwort ist abgelaufen und muss zuerst geändert werden.",
