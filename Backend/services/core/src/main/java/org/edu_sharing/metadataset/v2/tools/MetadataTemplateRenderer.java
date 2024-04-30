@@ -615,7 +615,10 @@ public class MetadataTemplateRenderer {
 				value += " <span class=\"value-description\">" + entry.getDescription() + "</span>";
 			}
 			if(entry.getIcon() != null) {
-				value = "<img src=\"" + (entry.getIcon().startsWith("http://") || entry.getIcon().startsWith("https://") ? entry.getIcon() : "assets/images/" + entry.getIcon()) + "\" alt=\"\"><div>" + value + "</div>";
+				value = "<img src=\"" + (entry.getIcon().startsWith("http://") || entry.getIcon().startsWith("https://") ? entry.getIcon() : "assets/images/" + entry.getIcon()) + "\" alt=\"\"><div class=\"value-group\">" + value + "</div>";
+			}
+			if(entry.getUrl() != null) {
+				value = "<a href=\"" + entry.getUrl() + "\" target=\"_BLANK\">" + value + "</a>";
 			}
 		}
 

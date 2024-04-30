@@ -646,6 +646,8 @@ public class MetadataReader {
                 key.setParent(attributes.getNamedItem("parent").getTextContent());
             if (attributes != null && attributes.getNamedItem("icon") != null)
                 key.setIcon(attributes.getNamedItem("icon").getTextContent());
+            if (attributes != null && attributes.getNamedItem("url") != null)
+                key.setUrl(attributes.getNamedItem("url").getTextContent());
             String fallback = null;
             if (!cap.isEmpty()) fallback = cap;
             key.setCaption(getTranslation(key,
