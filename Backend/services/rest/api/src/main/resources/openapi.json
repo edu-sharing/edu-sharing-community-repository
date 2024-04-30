@@ -4083,6 +4083,9 @@
           "recoverUrl": {
             "type": "string"
           },
+          "recoverUrlSafe": {
+            "type": "string"
+          },
           "requiredFields": {
             "items": {
               "type": "string"
