@@ -390,7 +390,7 @@ public class PersonLifecycleService {
 			if(options.collections.privateCollections.equals(PersonDeleteOptions.DeleteMode.delete)) {
 				// the maps may be not enough if the user contributed to foreign collections
 				deleteAllRefs(collectionsIos);
-				deleteAllRefsReverse(collectionsMaps);
+				deleteAllRefs(collectionsMaps);
 			}
 			else if(options.collections.privateCollections.equals(PersonDeleteOptions.DeleteMode.assign)) {
 				setOwnerAndPermissions(collectionsMaps, userName, options);
@@ -755,19 +755,12 @@ public class PersonLifecycleService {
 	public void deleteAllRefs(Collection<NodeRef> refs) {
 		refs.forEach((ref)->{
 			try {
-				NodeServiceFactory.getLocalService().removeNode(ref.getId(),null,false);
-			} catch (InvalidNodeRefException ignored){
-
+				NodeServiceFactory.getLocalService().removeNode(ref.getId(), null, false);
+			}catch(InvalidNodeRefException e){
+				logger.warn("nodeRef was already deleted: " + ref);
 			}
 		});
 	}
-
-	public void deleteAllRefsReverse(Collection<NodeRef> refs){
-		List<NodeRef> list = refs.stream().collect(Collectors.toList());
-		Collections.reverse(list);
-		list.forEach((ref)->NodeServiceFactory.getLocalService().removeNode(ref.getId(),null,false));
-	}
-
 
 	private boolean hasCCLicense(NodeRef ref) {
 		String license = NodeServiceHelper.getProperty(ref, CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
