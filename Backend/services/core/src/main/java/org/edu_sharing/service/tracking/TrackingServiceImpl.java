@@ -1,10 +1,11 @@
 package org.edu_sharing.service.tracking;
 
 import jakarta.servlet.http.HttpSession;
+import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.transaction.TransactionService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.binding.BindingException;
 import org.apache.ibatis.session.SqlSession;
@@ -12,9 +13,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
-import org.edu_sharing.alfresco.service.AuthorityService;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
-import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
@@ -32,6 +31,8 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.postgresql.util.PGobject;
 import org.postgresql.util.PSQLException;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Date;
@@ -42,6 +43,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Service
 public class TrackingServiceImpl extends TrackingServiceDefault {
     private static final List<String> EXISTING_FIELDS = Arrays.asList("authority", "authority_organization", "authority_mediacenter");
     private static final String SESSION_AUTHORITY_MEDIACENTERS = "SESSION_AUTHORITY_MEDIACENTERS";
@@ -107,22 +109,9 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
             " ORDER BY date";
     private final TrackingServiceCustomInterface customTrackingService;
 
-    public TrackingServiceImpl() {
-        /*
-        SqlSessionFactoryBuilder builder = new SqlSessionFactoryBuilder();
-        PGPoolingDataSource source = new PGPoolingDataSource();
-        source.setDataSourceName("tracking data source");
-        source.setServerName("localhost");
-        source.setDatabaseName("edu_tracking_node");
-        source.setUser("testuser");
-        source.setPassword("testpassword");
-        source.setMaxConnections(10);
-
-        TransactionFactory transactionFactory = new JdbcTransactionFactory();
-        Environment environment = new Environment("tracking", transactionFactory, source);
-        Configuration configuration = new Configuration(environment);
-        */
-        customTrackingService = TrackingServiceFactory.getTrackingServiceCustom();
+    public TrackingServiceImpl(TrackingServiceFactory trackingServiceFactory, TransactionService transactionService, @Qualifier("policyBehaviourFilter") BehaviourFilter policyBehaviourFilter) {
+        super(transactionService, policyBehaviourFilter);
+        customTrackingService = trackingServiceFactory.getTrackingServiceCustom();
         try {
             new ConnectionDBAlfresco().getSqlSessionFactoryBean().getConfiguration().addMapper(EduTrackingMapper.class);
         } catch (BindingException ignored) {
