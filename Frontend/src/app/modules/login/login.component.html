@@ -49,7 +49,9 @@
                   (onSelectionChange)="currentProvider = option"
                 >
                   <div class="mat-option-primary">{{ option.name }}</div>
-                  <div class="mat-option-secondary">{{ option.url | url: { mode: 'domain' } }}</div>
+                  <div class="mat-option-secondary">
+                    {{ option.url | url: { mode: 'domain' } }}
+                  </div>
                 </mat-option>
               </mat-optgroup>
             </mat-autocomplete>
@@ -136,6 +138,14 @@
               {{ 'LOGIN.LOGIN' | translate }}
             </button>
           </div>
+
+          <div
+            *ngIf="isSafeLogin && loginSafeFailed"
+            innerHTML="{{
+              'LOGIN.ERROR_SAFE_DETAIL'
+                | translate: { safeAccountUrl: config.register.recoverUrlSafe }
+            }}"
+          ></div>
         </div>
       </div>
     </div>

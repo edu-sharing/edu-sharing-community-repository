@@ -38,6 +38,7 @@ import javax.servlet.ServletContext;
 
 import com.typesafe.config.Config;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.commons.mail.SimpleEmail;
@@ -46,9 +47,10 @@ import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 
 
 public class Mail {
-	
+
 
 	public static String AUTH_TYPE_TLS = "tls";
+	public static String AUTH_TYPE_SSL = "ssl";
 	private org.apache.log4j.Category logger = null;
 
 	private Config configSMTP = null;
@@ -64,39 +66,48 @@ public class Mail {
 		}
 	}
 
-	private void sendMail(String sender, String senderName, String receiver, String subject, String message) throws EmailException {
-		logger.info("start mailing sender:" + sender + " receiver" + receiver + " message" + message);
+	private void setEmailSettings(Email email){
 
-		
 		String mailServer = configSMTP.getString("host");
 		int smtpPort = configSMTP.getInt("port");
 		String username = configSMTP.getString("username");
 		String password = configSMTP.getString("password");
 		String authType = configSMTP.getString("authtype");
 		logger.info("mailServer:" + mailServer + " smtpPort:" + smtpPort + "username:" + username + "password:" + password);
-		SimpleEmail email = new SimpleEmail();
-		
-		
+
+
 		email.setCharset("utf-8");
-		
+
 		email.setDebug(true);
 		email.setHostName(mailServer);
-		email.setSmtpPort((int) smtpPort);
-		
-		if(authType != null && !authType.trim().equals("")){
-			if(authType.trim().equals(AUTH_TYPE_TLS)){
-				email.setTLS(true);
+		email.setSmtpPort(smtpPort);
+
+		if(StringUtils.isNotBlank(authType)){
+			if(authType.trim().toLowerCase().equals(AUTH_TYPE_TLS)){
+				email.setStartTLSEnabled(true);
+			}else if(authType.trim().toLowerCase().equals(AUTH_TYPE_SSL)) {
+				email.setSSLOnConnect(true);
+				email.setSslSmtpPort(Integer.toString(smtpPort));
 			}else{
 				logger.info("auth type "+authType +" not supported at the moment");
 			}
 		}
-		
-		
 
-		if ((username != null && password != null) && (!username.trim().equals("") && !password.trim().equals(""))) {
+		if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password)) {
 			logger.info("email.setAuthentication()");
 			email.setAuthentication(username, password);
 		}
+
+
+
+	}
+
+	private void sendMail(String sender, String senderName, String receiver, String subject, String message) throws EmailException {
+		logger.info("start mailing sender:" + sender + " receiver" + receiver + " message" + message);
+		
+		SimpleEmail email = new SimpleEmail();
+		setEmailSettings(email);
+
 		try{
 			logger.info("start sending mail...");
 			logger.info("sender:" + sender);
@@ -109,7 +120,7 @@ public class Mail {
 			}else{
 				email.setFrom(sender);
 			}
-			
+
 			email.addTo(receiver);
 			email.setSubject(subject);
 			email.setMsg(message);
@@ -123,43 +134,14 @@ public class Mail {
 				logger.error("message:" + message);
 				logger.error("Exception Message:" + e.getMessage());
 			}else throw e;
-			
 		}
-		
-
 	}
+
 	private void sendMailHtml(ServletContext context, String sender, String senderName, String replyTo, String receiver, String subject, String message) throws EmailException {
 		logger.info("start mailing sender:" + sender + " receiver" + receiver + " message" + message);
-
-		String mailServer = configSMTP.getString("host");
-		int smtpPort = configSMTP.getInt("port");
-		String username = configSMTP.getString("username");
-		String password = configSMTP.getString("password");
-		String authType = configSMTP.getString("authtype");
-		logger.info("mailServer:" + mailServer + " smtpPort:" + smtpPort + "username:" + username + "password:" + password);
 		HtmlEmail email = new HtmlEmail();
-		
-		
-		email.setCharset("utf-8");
-		
-		email.setDebug(false);
-		email.setHostName(mailServer);
-		email.setSmtpPort((int) smtpPort);
-		
-		if(authType != null && !authType.trim().equals("")){
-			if(authType.toLowerCase().trim().equals(AUTH_TYPE_TLS)){
-				email.setTLS(true);
-			}else{
-				logger.info("auth type "+authType +" not supported at the moment");
-			}
-		}
-		
-		
+		setEmailSettings(email);
 
-		if ((username != null && password != null) && (!username.trim().equals("") && !password.trim().equals(""))) {
-			logger.debug("email.setAuthentication()");
-			email.setAuthentication(username, password);
-		}
 		try{
 			logger.info("start sending mail...");
 			logger.debug("sender:" + sender);

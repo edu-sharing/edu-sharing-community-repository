@@ -53,6 +53,8 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     showProviders = false;
     username = '';
 
+    loginSafeFailed = false;
+
     private next = '';
     private providers: any;
     private scope = '';
@@ -230,7 +232,11 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
             this.connector.getAbsoluteServerUrl() + this.configService.instant('loginUrl');
         url = url
             .replace(':target', encodeURIComponent(target))
-            .replace(':entity', encodeURIComponent(this.currentProvider.url));
+            // remove invalid parameters for multiple universities using the same idp
+            .replace(
+                ':entity',
+                encodeURIComponent(this.currentProvider.url.replace(/@_.*?_@/, '')),
+            );
         // @TODO: Redirect to shibboleth provider
         UIHelper.openUrl(url, this.bridge, OPEN_URL_MODE.Current);
     }
@@ -248,6 +254,9 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
                     ) {
                         this.toast.error(null, 'LOGIN.SAFE_PREVIOUS');
                     } else if (data.statusCode === RestConstants.STATUS_CODE_PASSWORD_EXPIRED) {
+                        if (this.isSafeLogin) {
+                            this.loginSafeFailed = true;
+                        }
                         this.toast.error(
                             null,
                             'LOGIN.PASSWORD_EXPIRED' + (this.isSafeLogin ? '_SAFE' : ''),
@@ -255,6 +264,9 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
                     } else if (data.statusCode === RestConstants.STATUS_CODE_PERSON_BLOCKED) {
                         this.toast.error(null, 'LOGIN.PERSON_BLOCKED');
                     } else {
+                        if (this.isSafeLogin) {
+                            this.loginSafeFailed = true;
+                        }
                         this.toast.error(null, 'LOGIN.ERROR' + (this.isSafeLogin ? '_SAFE' : ''));
                     }
                     this.password = '';

@@ -28,7 +28,7 @@ import {
     takeUntil,
 } from 'rxjs/operators';
 import { Toast } from '../../../core-ui-module/toast';
-import { ListItem, Node, UIService } from '../../../core-module/core.module';
+import { ListItem, Node, RestConstants, UIService } from '../../../core-module/core.module';
 import { NodeEntriesService } from '../../../core-ui-module/node-entries.service';
 import { Target } from '../../../core-ui-module/option-item';
 import { DragData } from '../../../services/nodes-drag-drop.service';
@@ -334,5 +334,9 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         this.entriesService.selection.clickSource = ClickSource.Dropdown;
         await this.applicationRef.tick();
         this.dropdown.menu.focusFirstItem();
+    }
+
+    isBlocked(node: Node) {
+        return node.properties?.[RestConstants.CCM_PROP_IMPORT_BLOCKED]?.[0] === 'true';
     }
 }

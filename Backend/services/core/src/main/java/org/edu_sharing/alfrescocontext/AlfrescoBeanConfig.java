@@ -8,6 +8,7 @@ import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.repo.solr.SOLRTrackingComponent;
 import org.alfresco.repo.tenant.TenantService;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
+import org.alfresco.repo.web.filter.beans.DependencyInjectedFilter;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.attributes.AttributeService;
@@ -30,6 +31,7 @@ import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.cmr.workflow.WorkflowService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -240,4 +242,8 @@ public class AlfrescoBeanConfig {
   public WorkflowService workflowService() {
     return serviceRegistry.getWorkflowService();
   }
+
+  @Bean(name="WebDavAuthenticationFilter")
+  @ConditionalOnMissingBean(name = "WebDavAuthenticationFilter")
+  public DependencyInjectedFilter webDavAuthenticationFilter(){ return applicationContext.getBean("WebDavAuthenticationFilter", DependencyInjectedFilter.class); }
 }

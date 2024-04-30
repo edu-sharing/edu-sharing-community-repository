@@ -257,7 +257,9 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
                 return;
             }
             const updatedNodes = await this.mdsEditorInstance.save();
-            this.toast.toast(this.toastOnSave);
+            if (this.toastOnSave) {
+                this.toast.toast(this.toastOnSave);
+            }
             this.onDone.emit(updatedNodes);
         } catch (error) {
             this.handleError(error);

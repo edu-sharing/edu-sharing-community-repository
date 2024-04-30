@@ -1113,18 +1113,16 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			if (searchWord != null) {
 				searchWord = searchWord.replaceAll("[\\*\\?]", "");
 			}
-			
-			for (String token : StringTool.getPhrases(searchWord)) {
 
-				boolean isPhrase = token.startsWith("\"") && token.endsWith("\"");
+			String token = searchWord;
+			boolean isPhrase = token.startsWith("\"") && token.endsWith("\"");
 
-				if (isPhrase) {
-					token = (token.length() > 2) ? token.substring(1, token.length() - 1) : "";
-				}
+			if (isPhrase) {
+				token = (token.length() > 2) ? token.substring(1, token.length() - 1) : "";
+			}
 
-				if (token.length() > 0) {
-					subQuery.append("=@cm:authorityDisplayName:").append("\"").append(token).append("\"");
-				}
+			if (token.length() > 0) {
+				subQuery.append("=@cm:authorityDisplayName:").append("\"").append(token).append("\"");
 			}
 
 			// if not fuzzy and no value for email return empty result

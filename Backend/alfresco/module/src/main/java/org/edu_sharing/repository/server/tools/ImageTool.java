@@ -6,6 +6,9 @@ import com.drew.metadata.Directory;
 import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.sun.star.uno.Exception;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.apache.commons.io.IOUtils;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.detect.Detector;
 import org.apache.tika.io.TikaInputStream;
@@ -20,7 +23,7 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.*;
 
-/** 
+/**
  * 
  * @author Torsten
  * Tool for common image tasks like rotating by exif orientation
@@ -145,18 +148,30 @@ public class ImageTool {
 
 	/**
 	 * checks if given input stream is an image mimetype and throws an exception otherwise
+	 * Will also auto convert svg to remove malicious data and auto rotate jpgs based on exif data
 	 */
-	public static InputStream verifyImage(InputStream is) throws MimeTypeException, IOException {
-		byte[] data=org.apache.poi.util.IOUtils.toByteArray(is);
+	public static VerifyResult verifyAndPreprocessImage(InputStream is, int maxSize) throws MimeTypeException, IOException {
+		byte[] data= IOUtils.toByteArray(is);
 		TikaConfig config = TikaConfig.getDefaultConfig();
 		Detector detector = config.getDetector();
 		TikaInputStream stream = TikaInputStream.get(data);
 		Metadata metadata = new Metadata();
 		MediaType mediaType = detector.detect(stream, metadata);
-		if(!mediaType.getType().equals("image")) {
+		if(!mediaType.getType().equals("image") && !mediaType.getType().equals("text")) {
 			// TODO: convert to NodeMimetypeValidationException after merge of file filter completed
 			throw new MimeTypeException("Invalid mime type for image: " + mediaType.getType() + "/" + mediaType.getSubtype());
 		}
-		return new ByteArrayInputStream(data);
+		if(mediaType.getType().equals("text") || mediaType.equals(MediaType.image("svg+xml"))) {
+			throw new MimeTypeException("svg is currently not supported");
+		}
+		InputStream result = autoRotateImage(new java.io.ByteArrayInputStream(data), ImageTool.MAX_THUMB_SIZE);
+		return new VerifyResult(result, mediaType);
+	}
+
+	@Data
+	@AllArgsConstructor
+	public static class VerifyResult {
+		InputStream inputStream;
+		MediaType mediaType;
 	}
 }

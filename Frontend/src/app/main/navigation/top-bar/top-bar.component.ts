@@ -53,6 +53,7 @@ export class TopBarComponent {
     @Output() createNotAllowed = new EventEmitter<void>();
     @Output() openChat = new EventEmitter<void>();
     @Output() showLicenses = new EventEmitter<void>();
+    @Output() onCloseScopeSelector = new EventEmitter<void>();
 
     createMenuX: number;
     createMenuY: number;

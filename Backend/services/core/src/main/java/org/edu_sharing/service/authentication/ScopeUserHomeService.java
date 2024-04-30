@@ -10,6 +10,7 @@ public interface ScopeUserHomeService {
 	EduGroup getOrCreateScopedEduGroup(String authority, String scope);
 
 	public void setManageEduGroupFolders(boolean manageEduGroupFolders);
-	
+
+	public boolean isManageEduGroupFolders();
 
 }
