@@ -24,11 +24,16 @@ export class CheckTextOverflowDirective implements OnInit {
     }
 
     private hasTextOverflow_(): boolean {
+        if (!this.textElement && this.selector) {
+            // refetch element in case it has changed
+            this.textElement = this.getTextElement();
+        }
         const element = this.textElement;
         if (element) {
             return (
                 element.offsetWidth < element.scrollWidth ||
-                element.offsetHeight < element.scrollHeight
+                // use buffer to prevent overflow caused by small margins
+                element.offsetHeight + 5 < element.scrollHeight
             );
         } else {
             return false;
