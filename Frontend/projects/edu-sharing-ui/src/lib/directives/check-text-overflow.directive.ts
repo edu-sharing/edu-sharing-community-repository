@@ -26,7 +26,10 @@ export class CheckTextOverflowDirective implements OnInit {
     private hasTextOverflow_(): boolean {
         const element = this.textElement;
         if (element) {
-            return element.offsetWidth < element.scrollWidth;
+            return (
+                element.offsetWidth < element.scrollWidth ||
+                element.offsetHeight < element.scrollHeight
+            );
         } else {
             return false;
         }
