@@ -131,10 +131,10 @@ public abstract class OrganisationDeleteProtocolService {
         }
     }
 
-    public void protocolError(String orga, String user, String errorMessage) {
+    public void protocolError(String orga, String authority, String errorMessage) {
         OrganisationDeleteProtocol protEntry = new OrganisationDeleteProtocol();
         protEntry.event = OrganisationDeleteProtocol.EVENTS.ERROR.name();
-        protEntry.authority = user;
+        protEntry.authority = authority;
         protEntry.collections = 0;
         protEntry.date = new Date();
         protEntry.docs = 0;
