@@ -12,6 +12,7 @@ import { EditorComponent } from '@tinymce/tinymce-angular';
 import { EventObj } from '@tinymce/tinymce-angular/editor/Events';
 import { PlatformLocation } from '@angular/common';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
+import { CardDialogService } from '../../../../dialogs/card-dialog/card-dialog.service';
 
 @Component({
     selector: 'es-mds-editor-widget-checkbox',
@@ -49,6 +50,7 @@ export class MdsEditorWidgetTinyMCE extends MdsEditorWidgetBase implements OnIni
     constructor(
         private platformLocation: PlatformLocation,
         public mdsEditorInstance: MdsEditorInstanceService,
+        public cardService: CardDialogService,
         protected translate: TranslateService,
     ) {
         super(mdsEditorInstance, translate);
@@ -68,11 +70,13 @@ export class MdsEditorWidgetTinyMCE extends MdsEditorWidgetBase implements OnIni
     }
 
     focus(): void {
+        console.log('focus');
         this.editorComponent.editor.focus();
         // this.editor.editorElem.focus();
     }
 
     blur(): void {
+        console.log('blur');
         this.editorComponent.editor.blur();
     }
 
@@ -94,6 +98,8 @@ export class MdsEditorWidgetTinyMCE extends MdsEditorWidgetBase implements OnIni
             this.dummyControl.registerOnDisabledChange((isDisabled) =>
                 this.editorComponent.editor.mode.set(isDisabled ? 'readonly' : 'design'),
             );
+            // we need to disable the focus trap cause otherwise any overlay dialogs (i.e. insert link) of tinymce will break
+            this.cardService.getFocusTraps().forEach((f) => f._disable());
         });
     }
 }
