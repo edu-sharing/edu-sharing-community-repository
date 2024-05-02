@@ -59,7 +59,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
     public static String TRACKING_UPDATE_NODE = "UPDATE " + TRACKING_NODE_TABLE_ID + " SET authority = ? WHERE authority = ?";
     public static String TRACKING_UPDATE_USER = "UPDATE " + TRACKING_USER_TABLE_ID + " SET authority = ? WHERE authority = ?";
 
-    public static String TRACKING_INSERT_NODE = "insert into " + TRACKING_NODE_TABLE_ID + " (node_id,node_uuid,original_node_uuid,node_version,authority,authority_organization,authority_mediacenter,time,type,data,licence, shared_with_mediacenters) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+    public static String TRACKING_INSERT_NODE = "insert into " + TRACKING_NODE_TABLE_ID + " (node_id,node_uuid,original_node_uuid,node_version,authority,authority_organization,authority_mediacenter,time,type,data,license, shared_with_mediacenters) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
     public static String TRACKING_INSERT_USER = "insert into " + TRACKING_USER_TABLE_ID + " (authority,authority_organization,authority_mediacenter,time,type,data) VALUES (?,?,?,?,?,?)";
     public static String TRACKING_STATISTICS_CUSTOM_GROUPING = "SELECT type,COUNT(*) :fields from :table as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
@@ -216,8 +216,8 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
                 obj.setValue(json.toString());
             statement.setObject(10, obj);
 
-            String licence = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
-            statement.setString(11, licence);
+            String license = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
+            statement.setString(11, license);
 
             if(LightbendConfigLoader.get().getBoolean("repository.tracking.sharedWithMediacenter")) {
                 MediacenterService mediacenterService = MediacenterServiceFactory.getLocalService();
