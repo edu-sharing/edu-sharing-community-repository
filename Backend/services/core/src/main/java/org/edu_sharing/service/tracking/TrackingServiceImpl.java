@@ -1,6 +1,7 @@
 package org.edu_sharing.service.tracking;
 
 import jakarta.servlet.http.HttpSession;
+import lombok.Value;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -42,10 +43,33 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class TrackingServiceImpl extends TrackingServiceDefault {
-    private static final List<String> EXISTING_FIELDS = Arrays.asList("authority", "authority_organization", "authority_mediacenter");
+    private static final Map<String, FieldDescription> EXISTING_FIELDS = Stream.of(
+            new FieldDescription("node_id", false, false),
+            new FieldDescription("node_uuid", false, false),
+            new FieldDescription("authority", false, false),
+            new FieldDescription("time", false, false),
+            new FieldDescription("type", false, false),
+            new FieldDescription("data", false, true),
+            new FieldDescription("node_version", false, false),
+            new FieldDescription("authority_organization", true, false),
+            new FieldDescription("authority_mediacenter", true, false),
+            new FieldDescription("original_node_uuid", false, false),
+            new FieldDescription("license", false, false),
+            new FieldDescription("shared_with_mediacenters", true, false)
+    ).collect(Collectors.toMap(FieldDescription::getName, x -> x));
+
+
+    @Value
+    private static class FieldDescription {
+        String name;
+        boolean array;
+        boolean json;
+    }
+
     private static final String SESSION_AUTHORITY_MEDIACENTERS = "SESSION_AUTHORITY_MEDIACENTERS";
     private static final String SESSION_AUTHORITY_ORGANIZATIONS = "SESSION_AUTHORITY_ORGANIZATIONS";
     public static Logger logger = Logger.getLogger(TrackingServiceImpl.class);
@@ -219,10 +243,10 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
             String license = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
             statement.setString(11, license);
 
-            if(LightbendConfigLoader.get().getBoolean("repository.tracking.sharedWithMediacenter")) {
+            if (LightbendConfigLoader.get().getBoolean("repository.tracking.sharedWithMediacenter")) {
                 MediacenterService mediacenterService = MediacenterServiceFactory.getLocalService();
                 statement.setArray(12, statement.getConnection().createArrayOf("VARCHAR", mediacenterService.getMediacenterAuthoritiesByNode(nodeRef.getId()).toArray()));
-            }else{
+            } else {
                 statement.setArray(12, null);
             }
 
@@ -746,14 +770,19 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
     }
 
     private String makeDbField(String field, boolean useFirstIndex) {
-        if (EXISTING_FIELDS.contains(field)) {
-            if (useFirstIndex)
-                return field + "[1]";
-            return field;
-        } else if (field.toLowerCase().matches("[a-z]*[0-9]*")) {
-            return "data ->> '" + field + "'";
-        } else
+        FieldDescription fieldDescription = EXISTING_FIELDS.get(field);
+        if (fieldDescription == null) {
+            if (field.toLowerCase().matches("[a-z]*[0-9]*")) {
+                return "data ->> '" + field + "'";
+            }
             throw new IllegalArgumentException("Fields for filter and grouping should only contain numbers and letters");
+        }
+
+        if (fieldDescription.isArray() && useFirstIndex) {
+            return field + "[1]";
+        }
+
+        return field;
     }
 
     private static boolean execDatabaseQuery(String statementContent, FillStatement fillStatement) {
