@@ -1,6 +1,7 @@
 package org.edu_sharing.service.lifecycle;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.content.ContentStore;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
@@ -35,6 +36,8 @@ public abstract class OrganisationDeleteProtocolService {
 
     String organisation;
 
+    private static String STORE_LOCATION = "jobsProtocolCache";
+
     protected OrganisationDeleteProtocolService(String organisation){
         this.organisation = organisation;
         this.tempFile = createProtocolTempFile(organisation);
@@ -47,7 +50,21 @@ public abstract class OrganisationDeleteProtocolService {
     public abstract void cleanUp();
 
     private File createProtocolTempFile(String organisation){
-        return TempFileProvider.createTempFile(organisation, getProtcolFormatSuffix());
+        return TempFileProvider.createTempFile(organisation, getProtcolFormatSuffix(),getCacheStore());
+    }
+
+    private File getRootLocation() {
+        ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+        ContentStore store = (ContentStore) applicationContext.getBean("fileContentStore");
+        return new File(store.getRootLocation()).getParentFile();
+    }
+
+    private File getCacheStore(){
+        File cacheStore = new File(getRootLocation(), STORE_LOCATION);
+        if (! cacheStore.exists()) {
+            cacheStore.mkdir();
+        }
+        return cacheStore;
     }
 
     public void writeProtocolToAlfrescoNode(String mimeType) {
