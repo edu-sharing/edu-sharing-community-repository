@@ -6,6 +6,7 @@ import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 
 @Component
@@ -31,11 +32,13 @@ public class TrackingServiceFactory {
     @Obsolete
     @Nullable private TrackingServiceCustomInterface getTrackingServiceCustomInterfaceByClassName() {
         try {
-            return (TrackingServiceCustomInterface) Class.forName(TrackingService.class.getName() + "Custom").newInstance();
+            TrackingServiceCustomInterface trackingServiceCustomInterface = (TrackingServiceCustomInterface) Class.forName(TrackingService.class.getName() + "Custom").getDeclaredConstructor().newInstance();
+            logger.warn("Instantiating TrackingServiceCustomInterface by class name is obsolete. Please use Spring beans instead (e.g. @Service annotation)");
+            return trackingServiceCustomInterface;
         } catch (ClassNotFoundException t) {
             logger.debug("no class " + TrackingService.class.getName() + "Custom" + " found, will use default implementation for tracking");
             return null;
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
     }
