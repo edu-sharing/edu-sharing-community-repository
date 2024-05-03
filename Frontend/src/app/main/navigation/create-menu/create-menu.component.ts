@@ -332,7 +332,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             parent: await this.getParent(),
             chooseParent: this.showPicker,
         });
-        if (nodes) {
+        if (nodes && Array.isArray(nodes)) {
             this.onCreate.emit(nodes);
         }
     }

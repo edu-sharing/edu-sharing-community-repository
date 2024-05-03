@@ -62,6 +62,7 @@ export * from './lib/translations/fallback-translation-handler';
 export * from './lib/translations/translation-loader';
 export * from './lib/translations/translations.module';
 export * from './lib/translations/translations.service';
+export * from './lib/types/api-models';
 export * from './lib/types/accessibillity';
 export * from './lib/types/drag-drop';
 export * from './lib/types/injection-tokens';

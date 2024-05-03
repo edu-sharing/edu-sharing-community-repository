@@ -105,7 +105,9 @@ export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
     private initButtons(): void {
         this.dialogRef.patchConfig({
             buttons: [
-                new DialogButton('CANCEL', { color: 'standard' }, () => this.dialogRef.close(null)),
+                new DialogButton('CANCEL', { color: 'standard' }, () =>
+                    this.dialogRef.close('CANCEL'),
+                ),
                 new DialogButton('SAVE', { color: 'primary' }, () => this.save()),
             ],
         });
@@ -170,7 +172,7 @@ export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
         } else {
             // No changes, behave like close.
             if (this.mdsEditorInstance.getIsValid()) {
-                this.dialogRef.close(null);
+                this.dialogRef.close('NO-CHANGES');
             } else {
                 this.mdsEditorInstance.showMissingRequiredWidgets();
             }
