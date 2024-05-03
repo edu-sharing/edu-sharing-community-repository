@@ -33,7 +33,11 @@ public class ConfigServiceFactory {
 	}
 	public static String getCurrentContextId(HttpServletRequest req){
 		try {
-			return getConfigService().getContext(getCurrentDomain(req)).id;
+			org.edu_sharing.alfresco.service.config.model.Context context = getConfigService().getContext(getCurrentDomain(req));
+			if(context == null) {
+				return null;
+			}
+			return context.id;
 		} catch (Exception e) {
 			logger.info(e.getMessage(),e);
 			return null;
