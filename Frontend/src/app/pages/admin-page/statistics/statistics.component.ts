@@ -1,5 +1,7 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import {
+    ApplicationRef,
+    ChangeDetectorRef,
     Component,
     ElementRef,
     EventEmitter,
@@ -254,6 +256,8 @@ export class AdminStatisticsComponent implements OnInit {
         private uiService: UIService,
         private toast: Toast,
         private storage: SessionStorageService,
+        private changeDetectorRef: ChangeDetectorRef,
+        private applicationRef: ApplicationRef,
         private connector: RestConnectorService,
         private translate: TranslateService,
         private searchService: SearchService,
@@ -298,7 +302,7 @@ export class AdminStatisticsComponent implements OnInit {
         this.applyTemplate(this.currentTemplate, false);
         // e.g. ['school']
         this.additionalGroups = await this.config.get('admin.statistics.groups', []).toPromise();
-        this.customGroups = ['authority_organization', 'authority_mediacenter'].concat(
+        this.customGroups = ['authority_organization', 'authority_mediacenter', 'license'].concat(
             this.additionalGroups,
         );
         if (this.customGroups.length) {
@@ -1052,5 +1056,9 @@ export class AdminStatisticsComponent implements OnInit {
 
     downloadArchivedNode(element: Node) {
         this.nodeHelperService.downloadNodes([element]);
+    }
+
+    toggleModes() {
+        this.showModes = !this.showModes;
     }
 }
