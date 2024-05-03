@@ -53,8 +53,12 @@ public class ConfigApi {
 	    	config.setGlobal(configService.getConfig().values);
 	    	try {
 				Context context = configService.getContext(ConfigServiceFactory.getCurrentDomain());
-				config.setContextId(context.id);
-	    		config.setCurrent(configService.getConfigByContext(context).values);
+				if(context != null) {
+					config.setContextId(context.id);
+					config.setCurrent(configService.getConfigByContext(context).values);
+				} else {
+					config.setCurrent(config.getGlobal());
+				}
 	    	}catch(IllegalArgumentException e) {
 	    		logger.debug(e.getMessage());
 	    		// context for domain does not exist -> use default
