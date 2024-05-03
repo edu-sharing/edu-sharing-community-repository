@@ -30,6 +30,7 @@ import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.edu_sharing.spring.security.basic.CSRFConfig;
 import org.springframework.context.ApplicationContext;
 
 public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
@@ -77,6 +78,7 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
 						String authMethod = ("alfrescoNtlm1".equals(succsessfullAuthMethod) || "alfinst".equals(succsessfullAuthMethod)) ? CCConstants.AUTH_TYPE_DEFAULT : CCConstants.AUTH_TYPE + succsessfullAuthMethod;
 						String username = validatedAuth.get(CCConstants.AUTH_USERNAME);
 						authTool.storeAuthInfoInSession(username, validatedAuth.get(CCConstants.AUTH_TICKET), authMethod, session);
+						CSRFConfig.csrfInitCookie(httpReq,httpResp);
 					}
 				} else if (authHdr.length() > 6 && authHdr.substring(0, 6).equalsIgnoreCase("Bearer")) {
 					
