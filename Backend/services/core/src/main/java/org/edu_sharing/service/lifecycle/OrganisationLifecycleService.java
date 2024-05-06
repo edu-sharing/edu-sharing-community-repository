@@ -205,24 +205,43 @@ public class OrganisationLifecycleService {
         Set<String> containedAuthorities = authorityService.getContainedAuthorities(AuthorityType.GROUP, authorityName, false);
         List<String> result = new ArrayList<>();
         for(String authority : containedAuthorities){
+
+            checkAuthorityOnlyExistsInOneOrg(authorityName,authority);
+
             authorityService.deleteAuthority(authority);
             result.add(authority);
         }
         String scope = null;
         if(authorityName.endsWith("_safe")) scope = CCConstants.CCM_VALUE_SCOPE_SAFE;
         protocolService.protocolSubGroups(orga,result,scope);
+
+        Set<String> containedAuthoritiesRemained = authorityService.getContainedAuthorities(AuthorityType.GROUP, authorityName, false);
+        if(containedAuthoritiesRemained != null && containedAuthoritiesRemained.size() > 0){
+            throw new RuntimeException("the following subgroups of "+ authorityName + " could not be deleted:"
+                    + String.join(",", containedAuthoritiesRemained));
+        }
     }
 
     protected PersonDeleteResult deleteUser(String orgAuthorityName, String userName) {
         logger.info("deleting user:" + userName);
 
+        checkAuthorityOnlyExistsInOneOrg(orgAuthorityName, userName);
+
+
+        NodeRef nodeRef = personService.getPerson(userName);
+        nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS), PersonLifecycleService.PersonStatus.todelete.name());
+
+        return personLifecycleService.deletePersons(Arrays.asList(userName), getPersonDeleteOptions()).results.get(0);
+    }
+
+    private void checkAuthorityOnlyExistsInOneOrg(String orgAuthorityName, String authority) {
         //check user exists only in organisation orgAuthorityName
-        Set<String> containedAuthorities = authorityService.getContainingAuthorities(AuthorityType.GROUP, userName, false);
+        Set<String> containedAuthorities = authorityService.getContainingAuthorities(AuthorityType.GROUP, authority, false);
         List<String> orgMemberships = containedAuthorities.stream()
                 .filter(g -> g.startsWith("GROUP_ORG_"))
                 .collect(Collectors.toList());
         if(!orgMemberships.contains(orgAuthorityName)){
-            throw new RuntimeException("user " + userName + " is not member of organisation " + orgAuthorityName);
+            throw new RuntimeException("authority " + authority + " is not member of organisation " + orgAuthorityName);
         }
 
         String orgAuthorityNameSafe = orgAuthorityName + "_" + CCConstants.CCM_VALUE_SCOPE_SAFE;
@@ -230,14 +249,8 @@ public class OrganisationLifecycleService {
                 .filter(a -> (!a.equals(orgAuthorityName) && !a.equals(orgAuthorityNameSafe)))
                 .collect(Collectors.toList());
         if(orgMemberships.size() > 0){
-            throw new RuntimeException("user " + userName + " is member of more than one organisation");
+            throw new RuntimeException("authority " + authority + " is member of more than one organisation");
         }
-
-
-        NodeRef nodeRef = personService.getPerson(userName);
-        nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS), PersonLifecycleService.PersonStatus.todelete.name());
-
-        return personLifecycleService.deletePersons(Arrays.asList(userName), getPersonDeleteOptions()).results.get(0);
     }
 
     private static @NotNull PersonDeleteOptions getPersonDeleteOptions() {
