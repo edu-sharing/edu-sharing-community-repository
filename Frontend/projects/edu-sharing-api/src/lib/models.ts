@@ -33,6 +33,8 @@ export {
     NodeVersionRefEntries,
     NodeRef,
     NodeStats,
+    Config,
+    ConfigThemeColor,
     Organization,
     Group,
     Pagination,

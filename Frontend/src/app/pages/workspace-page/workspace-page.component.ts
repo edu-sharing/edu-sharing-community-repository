@@ -2,7 +2,7 @@ import { trigger } from '@angular/animations';
 import { Component, HostListener, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { UserService } from 'ngx-edu-sharing-api';
+import { ConfigService, UserService } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     AppContainerService,
@@ -26,7 +26,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { delay, first, map, takeUntil } from 'rxjs/operators';
+import { delay, first, map, take, takeUntil } from 'rxjs/operators';
 import {
     ConfigurationService,
     Connector,
@@ -68,6 +68,7 @@ import { WorkspaceExplorerComponent } from './explorer/explorer.component';
 import { WorkspaceTreeComponent } from './tree/tree.component';
 import { canDragDrop, canDropOnNode } from './workspace-utils';
 import { WorkspaceService } from './workspace.service';
+import { ThemeService, Variable } from '../../services/theme.service';
 
 @Component({
     selector: 'es-workspace-page',
@@ -199,6 +200,8 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         private toolService: RestToolService,
         private translate: TranslateService,
         private translations: TranslationsService,
+        private configService: ConfigService,
+        private themeService: ThemeService,
         private ui: UIService,
         private workspace: WorkspaceService,
     ) {
@@ -481,6 +484,13 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         this.connector.scope = this.isSafe ? RestConstants.SAFE_SCOPE : null;
         this.isLoggedIn = true;
         this.globalProgress = false;
+
+        if (this.isSafe) {
+            const config = await this.configService.observeConfig().pipe(take(1)).toPromise();
+            if (config.themeColors?.colorSafe) {
+                this.themeService.applyFromConfigColors(config.themeColors.colorSafe);
+            }
+        }
     }
 
     private handleQueryParamsUpdate(params: Params) {

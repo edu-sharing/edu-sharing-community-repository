@@ -24,6 +24,7 @@ import { AuthenticationService, LoginInfo } from 'ngx-edu-sharing-api';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { Subject } from 'rxjs';
+import { ThemeService } from '../../services/theme.service';
 
 @Component({
     selector: 'es-login-page',
@@ -67,9 +68,12 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
         private route: ActivatedRoute,
         private bridge: BridgeService,
         private authentication: AuthenticationService,
+        private themeService: ThemeService,
         private loadingScreen: LoadingScreenService,
         private mainNav: MainNavService,
     ) {
+        // reset the theme in case user was in safe previously
+        this.themeService.initWithDefaults();
         const loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
         this.isLoading = true;
         this.updateButtons();
