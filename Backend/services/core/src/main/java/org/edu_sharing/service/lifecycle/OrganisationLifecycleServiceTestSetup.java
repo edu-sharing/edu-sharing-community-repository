@@ -38,16 +38,16 @@ public class OrganisationLifecycleServiceTestSetup {
 
     int numberOfPersons = 10;
 
-    int numberOfHomeDocs = 1200;
+    int numberOfHomeDocs = 12;
 
     //+ 3 (dokuments,images,shared)
-    int numberOfHomeFolders = 1200;
+    int numberOfHomeFolders = 9;
 
-    int numberOfSharedDocs = 100;
-    int numberOfSharedFolders = 40;
+    int numberOfSharedDocs = 10;
+    int numberOfSharedFolders = 4;
 
-    int numberOfCollections = 30;
-    int numberOfCollectionRefs = 79;
+    int numberOfCollections = 3;
+    int numberOfCollectionRefs = 7;
 
     List<NodeRef> persons = new ArrayList<>();
     String orgAuthorityName;

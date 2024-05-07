@@ -164,7 +164,7 @@ public class PersonLifecycleService {
 	public PersonReport deletePersons(List<String> usernames, PersonDeleteOptions options) {
 		List<PersonDeleteResult> results=new ArrayList<>();
 		for(String user : usernames) {
-			NodeRef personNodeRef = personService.getPerson(user);
+			NodeRef personNodeRef = personService.getPerson(user,false);
 			results.add(deletePerson(personNodeRef,options));
 		}
 		PersonReport report=new PersonReport();
@@ -833,7 +833,7 @@ public class PersonLifecycleService {
 	}
 
 	public void removeContributer(NodeRef nodeRef, String username){
-		NodeRef personNodeRef = personService.getPerson(username);
+		NodeRef personNodeRef = personService.getPerson(username,false);
 		String firstName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_FIRSTNAME));
 		String lastName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_LASTNAME));
 
