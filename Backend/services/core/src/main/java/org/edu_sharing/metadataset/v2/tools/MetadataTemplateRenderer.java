@@ -598,15 +598,31 @@ public class MetadataTemplateRenderer {
 			}
 		}
 		Map<String, MetadataKey> valuesMap = widget.getValuesAsMap();
-		if(valuesMap.containsKey(value))
-			value=valuesMap.get(value).getCaption();
+		MetadataKey entry = null;
+		if(valuesMap.containsKey(value)) {
+			entry = valuesMap.get(value);
+			value = valuesMap.get(value).getCaption();
+		}
 
 		if(widget.getFormat()!=null && !widget.getFormat().isEmpty()){
 			if(widget.getFormat().contains("${value}")) {
 				value = widget.getFormat().replace("${value}", value);
 			}
 		}
-		return value;
+		if(entry != null) {
+			value = "<span class=\"value-caption\">" + value + "</span>";
+			if(entry.getDescription() != null) {
+				value += " <span class=\"value-description\">" + entry.getDescription() + "</span>";
+			}
+			if(entry.getIcon() != null) {
+				value = "<img src=\"" + (entry.getIcon().startsWith("http://") || entry.getIcon().startsWith("https://") ? entry.getIcon() : "assets/images/" + entry.getIcon()) + "\" alt=\"\"><div class=\"value-group\">" + value + "</div>";
+			}
+			if(entry.getUrl() != null) {
+				value = "<a href=\"" + entry.getUrl() + "\" target=\"_BLANK\">" + value + "</a>";
+			}
+		}
+
+			return value;
 	}
 
 	/*

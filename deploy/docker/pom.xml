@@ -47,7 +47,7 @@
     </docker.edu_sharing.community.common.postgresql.name>
 
     <docker.edu_sharing.community.common.postgresql.tag>
-      13.9.0
+      13.14.0
     </docker.edu_sharing.community.common.postgresql.tag>
 
     <docker.edu_sharing.community.common.postgresql.exporter.name>

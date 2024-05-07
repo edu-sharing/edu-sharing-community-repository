@@ -33,24 +33,6 @@
     {{ $any(getNode()).name }}
   </span>
   <span
-    *ngSwitchCase="'title'"
-    [matTooltip]="provideLabel ? $any(getNode()).title || $any(getNode()).name : null"
-  >
-    {{ $any(getNode()).title || $any(getNode()).name }}
-  </span>
-  <span
-    *ngSwitchCase="'cm:title'"
-    [matTooltip]="provideLabel ? $any(getNode()).title || $any(getNode()).name : null"
-  >
-    {{ $any(getNode()).title || $any(getNode()).name }}
-  </span>
-  <span
-    *ngSwitchCase="'cclom:title'"
-    [matTooltip]="provideLabel ? $any(getNode()).title || $any(getNode()).name : null"
-  >
-    {{ $any(getNode()).title || $any(getNode()).name }}
-  </span>
-  <span
     *ngSwitchCase="'mediatype'"
     [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
   >
@@ -160,22 +142,35 @@
     <!-- use node instead of getNode() to access the raw proposal data! -->
     {{ ('PROPOSAL_STATUS.' + $any(node).properties['ccm:collection_proposal_status']?.[0]) | translate:{fallback: ''} }}
   </span>
-  <span *ngSwitchDefault [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
+  <span
+    *ngSwitchDefault
+    esCheckTextOverflow
+    #text="esCheckTextOverflow"
+    [matTooltip]="
+      provideLabel ? (getI18n(item) | translate) : text.hasTextOverflow() ? content.innerText : null
+    "
+    #content
+  >
     <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
-    <ng-container
-      *ngIf="DATE_FIELDS.indexOf(item.name) === -1 && VCARD_FIELDS.indexOf(item.name) === -1"
-    >
-      {{ displayName$ | async }}
+    <ng-container *ngIf="['title', 'cm:title', 'cclom:title'].includes(item.name)">
+      {{ $any(getNode()).title || $any(getNode()).name }}
     </ng-container>
-    <ng-container *ngIf="DATE_FIELDS.includes(item.name)">
-      {{ $any(getNode()).properties[item.name]?.[0] | formatDate: { async: true, time: true, relative: true } | async }}
-    </ng-container>
-    <ng-container *ngIf="VCARD_FIELDS.includes(item.name)">
-      {{
-        $any(getNode()).properties[item.name]
-          ? ($any(getNode()).properties[item.name][0] | vcardName)
-          : ''
-      }}
+    <ng-container *ngIf="!['title', 'cm:title', 'cclom:title'].includes(item.name)">
+      <ng-container
+        *ngIf="DATE_FIELDS.indexOf(item.name) === -1 && VCARD_FIELDS.indexOf(item.name) === -1"
+      >
+        {{ displayName$ | async }}
+      </ng-container>
+      <ng-container *ngIf="DATE_FIELDS.includes(item.name)">
+        {{ $any(getNode()).properties[item.name]?.[0] | formatDate: { async: true, time: true, relative: true } | async }}
+      </ng-container>
+      <ng-container *ngIf="VCARD_FIELDS.includes(item.name)">
+        {{
+          $any(getNode()).properties[item.name]
+            ? ($any(getNode()).properties[item.name][0] | vcardName)
+            : ''
+        }}
+      </ng-container>
     </ng-container>
   </span>
 </ng-container>
