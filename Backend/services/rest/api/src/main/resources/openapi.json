@@ -960,6 +960,12 @@
               "$ref": "#/components/schemas/ConfigThemeColor"
             },
             "type": "array"
+          },
+          "colorSafe": {
+            "items": {
+              "$ref": "#/components/schemas/ConfigThemeColor"
+            },
+            "type": "array"
           }
         },
         "type": "object"
