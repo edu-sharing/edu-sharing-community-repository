@@ -169,9 +169,9 @@ public class ImageTool {
 		if(!mediaType.getType().equals("image") && !mediaType.getType().equals("text")) {
 			throw new NodeMimetypeValidationException("Invalid mime type for image: " + mediaType.getType() + "/" + mediaType.getSubtype());
 		}
-		if(mediaType.getType().equals("text") || mediaType.equals(MediaType.image("svg"))) {
+		if(mediaType.getType().equals("text") || mediaType.equals(MediaType.image("svg+xml"))) {
 			try {
-				data = convertSvgToPng(data);
+				data = convertSvgToPng(new ByteArrayInputStream(data));
 				mediaType = MediaType.image("png");
 			}catch(Throwable t) {
 				Logger.getLogger(ImageTool.class).info("Svg parse error", t);
@@ -183,8 +183,8 @@ public class ImageTool {
 	}
 
 
-	private static byte[] convertSvgToPng(byte[] data) throws Exception {
-		TranscoderInput input = new TranscoderInput(new ByteArrayInputStream(data));
+	public static byte[] convertSvgToPng(InputStream data) throws Exception {
+		TranscoderInput input = new TranscoderInput(data);
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		TranscoderOutput output = new TranscoderOutput(bos);
 		PNGTranscoder transcoder = new PNGTranscoder();

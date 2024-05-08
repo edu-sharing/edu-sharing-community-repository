@@ -163,7 +163,13 @@
               }}
             </button>
           </ng-container>
-          TODO
+          <es-node-entries-wrapper
+            #groupEntriesTable
+            [dataSource]="mediacenterGroups"
+            [columns]="groupColumns"
+            [displayType]="NodeEntriesDisplayType.Table"
+            [checkbox]="false"
+          ></es-node-entries-wrapper>
         </div>
       </mat-tab>
       <mat-tab label="{{ 'ADMIN.MEDIACENTER.NODES.TITLE' | translate }}">

@@ -54,11 +54,14 @@ import org.edu_sharing.service.authentication.EduAuthentication;
 import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.security.core.AuthenticatedPrincipal;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.saml2.provider.service.authentication.DefaultSaml2AuthenticatedPrincipal;
 import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal;
+import org.springframework.security.saml2.provider.service.authentication.Saml2Authentication;
 
 public class ShibbolethServlet extends HttpServlet {
 
@@ -299,6 +302,14 @@ public class ShibbolethServlet extends HttpServlet {
 						return ((ArrayList<String>)att).stream().collect(Collectors.joining(";"));
 					}
 					return (att != null) ? att.toString() : null;
+				}
+				if(authentication instanceof Saml2Authentication){
+					Saml2AuthenticatedPrincipal samlAuthentication = (Saml2AuthenticatedPrincipal) authentication.getPrincipal();
+					if(samlAuthentication.getAttribute(attName) != null) {
+						return samlAuthentication.getAttribute(attName).stream().findFirst().map(Object::toString).orElse(null);
+					}else{
+						logger.info("att:" +attName +" is null");
+					}
 				}
 			}
 

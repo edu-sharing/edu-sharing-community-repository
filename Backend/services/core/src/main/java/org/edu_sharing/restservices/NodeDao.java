@@ -11,13 +11,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.MetadataQuery;
-import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
-import org.edu_sharing.metadataset.v2.MetadataReader;
+import org.edu_sharing.metadataset.v2.*;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.Share;
@@ -191,7 +191,30 @@ public class NodeDao {
     public NodeDao copyProperties(NodeDao fromDao) throws DAOException {
         Map<String, String[]> props = fromDao.getAllProperties();
         props.remove(CCConstants.getValidLocalName(CCConstants.CM_NAME));
-        return changeProperties(props);
+        try {
+            MetadataSet mds = MetadataHelper.getMetadataset(new NodeRef(repoDao, getId()));
+            HashSet<String> defaultProps = mds.getWidgetsByNode(getType(), getAspectsNative(), false).stream().map(MetadataWidget::getId).collect(Collectors.toCollection(HashSet::new));
+            defaultProps.addAll(Arrays.stream(NodeCustomizationPolicies.SAFE_PROPS).map(CCConstants::getValidLocalName).collect(Collectors.toList()));
+            defaultProps.addAll(Arrays.stream(NodeCustomizationPolicies.LICENSE_PROPS).map(CCConstants::getValidLocalName).collect(Collectors.toList()));
+            for (String prop : defaultProps) {
+                if (!props.containsKey(prop)) {
+                    // delete removed properties
+                    nodeService.removeProperty(getStoreProtocol(), getStoreIdentifier(), getId(), prop);
+                }
+            }
+            // copy version
+            List<String> copyNative = Arrays.asList(CCConstants.LOM_PROP_LIFECYCLE_VERSION);
+            for (String prop : copyNative) {
+                nodeService.setProperty(getStoreProtocol(), getStoreIdentifier(), getId(),
+                        prop,
+                        nodeService.getPropertyNative(fromDao.getStoreProtocol(), fromDao.getStoreIdentifier(), fromDao.getId(), prop),
+                        false);
+            }
+
+            return changeProperties(props);
+        } catch (Throwable t) {
+            throw DAOException.mapping(t);
+        }
     }
 
 

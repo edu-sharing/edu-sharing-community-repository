@@ -102,6 +102,13 @@ $horizontalScrollPadding: 1.5em;
             scroll-snap-stop: always;
         }
     }
+
+    .card-import-blocked {
+        ::ng-deep .card-meta {
+            opacity: 0.75;
+            text-decoration: line-through;
+        }
+    }
     > .card-grid-drag-wrapper {
         position: relative;
         // .cdk-drag-placeholder ~ .card-grid-drop-blocked-container {

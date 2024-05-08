@@ -40,6 +40,7 @@ public class MetadataKey extends MetadataTranslatable {
     private String key;
     @JacksonXmlProperty(isAttribute = true, localName = "cap")
     private String caption;
+    private String icon;
     @JacksonXmlProperty(isAttribute = true)
     private String description;
     @JacksonXmlProperty(isAttribute = true)

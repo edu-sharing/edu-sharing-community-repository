@@ -68,7 +68,8 @@ import { WorkspaceExplorerComponent } from './explorer/explorer.component';
 import { WorkspaceTreeComponent } from './tree/tree.component';
 import { canDragDrop, canDropOnNode } from './workspace-utils';
 import { WorkspaceService } from './workspace.service';
-import { ThemeService, Variable } from '../../services/theme.service';
+import { ThemeService } from '../../services/theme.service';
+import { RecycleMainComponent } from './recycle/recycle.component';
 
 @Component({
     selector: 'es-workspace-page',
@@ -103,6 +104,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
     @ViewChild('explorer') explorer: WorkspaceExplorerComponent;
 
     @ViewChild(WorkspaceTreeComponent) treeComponent: WorkspaceTreeComponent;
+    @ViewChild(RecycleMainComponent) recycleMainComponent: RecycleMainComponent;
     @ViewChild('actionbar') actionbarRef: ActionbarComponent;
 
     cardHasOpenModals$: Observable<boolean>;
@@ -677,15 +679,15 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
     }
 
     setSelection(nodes: Node[]) {
-        this.explorer.nodeEntries.getSelection().clear();
-        this.explorer.nodeEntries.getSelection().select(...nodes);
+        this.explorer?.nodeEntries.getSelection().clear();
+        this.explorer?.nodeEntries.getSelection().select(...nodes);
         this.setFixMobileNav();
     }
 
     private setFixMobileNav() {
         this.mainNavService
             .getMainNav()
-            .setFixMobileElements(this.explorer.nodeEntries.getSelection().selected?.length > 0);
+            .setFixMobileElements(this.explorer?.nodeEntries.getSelection().selected?.length > 0);
     }
 
     private closeMetadata() {
