@@ -35,6 +35,11 @@ type LoginAction =
           accessToken: string;
       }
     | {
+          // Logs the user in with the provided credentials.
+          kind: 'loginEduTicket';
+          ticket: string;
+      }
+    | {
           // Logs the user out.
           kind: 'logout';
       }
@@ -148,6 +153,14 @@ export class AuthenticationService {
         this.loginActionTrigger.next({
             kind: 'loginToken',
             accessToken,
+        });
+        return this.loginInfo$.pipe(first());
+    }
+
+    loginEduTicket(ticket: string): Observable<LoginInfo> {
+        this.loginActionTrigger.next({
+            kind: 'loginEduTicket',
+            ticket,
         });
         return this.loginInfo$.pipe(first());
     }
@@ -371,6 +384,8 @@ export class AuthenticationService {
                 }
             case 'loginToken':
                 return this.loginWithToken(action.accessToken);
+            case 'loginEduTicket':
+                return this.loginWithEduTicket(action.ticket);
             case 'logout':
                 return this.authentication.logout().pipe(switchMap(() => this.fetchLoginInfo()));
             case 'initial':
