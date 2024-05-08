@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthenticationService } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'app-root',
@@ -17,7 +18,13 @@ export class AppComponent implements OnInit {
     }
     private _searchString: string;
 
-    constructor(private router: Router) {}
+    constructor(
+        private router: Router,
+        /**
+         * service to allow access for sending authentication data
+         */
+        public authenticationService: AuthenticationService,
+    ) {}
 
     ngOnInit(): void {
         // We need this to hook up routing to our LocationStrategy. Otherwise calls on Location
