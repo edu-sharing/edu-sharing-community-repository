@@ -385,6 +385,9 @@ export class AuthenticationService {
         });
     }
 
+    /**
+     * request authentication by providing an username and password
+     */
     private loginWithBasicAuth(username: string, password: string): Observable<LoginInfo> {
         return rxjs.of(void 0).pipe(
             // Make `setBasicAuthForNextRequest` part of the observable, so it is guaranteed to
@@ -395,11 +398,26 @@ export class AuthenticationService {
             switchMap(() => this.authentication.login()),
         );
     }
+    /**
+     * request authentication by providing an oauth token
+     */
     private loginWithToken(accessToken: string): Observable<LoginInfo> {
         return rxjs.of(void 0).pipe(
             // Make `setBasicAuthForNextRequest` part of the observable, so it is guaranteed to
             // be run together with the login request.
             tap(() => this.apiRequestConfiguration.setBearerAuthForNextRequest(accessToken)),
+            switchMap(() => this.authentication.login()),
+        );
+    }
+
+    /**
+     * request authentication by providing an edu-sharing ticket (usually gathered via authByApp)
+     */
+    private loginWithEduTicket(ticket: string): Observable<LoginInfo> {
+        return rxjs.of(void 0).pipe(
+            // Make `setBasicAuthForNextRequest` part of the observable, so it is guaranteed to
+            // be run together with the login request.
+            tap(() => this.apiRequestConfiguration.setEduTicketAuthForNextRequest(ticket)),
             switchMap(() => this.authentication.login()),
         );
     }
