@@ -425,7 +425,7 @@ public class NodeServiceHelper {
 				String key = path.toString();
 				result = cache.get(key);
 				if(result == null){
-					result = new NodeTool().createOrGetNodeByName(client, rootId, items);
+					result = NodeTool.createOrGetNodeByName(rootId, items);
 					cache.put(key, result);
 				}
 			} catch(Throwable e) {
@@ -473,7 +473,7 @@ public class NodeServiceHelper {
 
 			collectionPath = collectionPath.replaceAll("[a-zA-Z]*:", "");
 			collectionPath = (collectionPath.startsWith("/"))? collectionPath.replaceFirst("/", "") : collectionPath;
-			rootId = new NodeTool().createOrGetNodeByName(client,startAt , collectionPath.split("/"));
+			rootId = NodeTool.createOrGetNodeByName(startAt , collectionPath.split("/"));
 		}else{
 			rootId = search.keySet().iterator().next();
 		}

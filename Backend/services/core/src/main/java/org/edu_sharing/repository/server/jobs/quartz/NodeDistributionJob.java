@@ -107,7 +107,7 @@ public class NodeDistributionJob extends AbstractJob {
 				
 				if (nodeId == null) {
 					
-					cache.put(key, nodeId = new NodeTool().createOrGetNodeByName(client, rootId, items));
+					cache.put(key, nodeId = NodeTool.createOrGetNodeByName(rootId, items));
 				}
 				
 				String childName = childProps.get(CCConstants.CM_NAME).toString();
