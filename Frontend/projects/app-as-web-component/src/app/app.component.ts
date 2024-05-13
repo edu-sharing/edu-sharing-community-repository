@@ -18,6 +18,16 @@ export class AppComponent implements OnInit {
     }
     private _searchString: string;
 
+    @Input()
+    get ticket(): string {
+        return this._ticket;
+    }
+    set ticket(value: string) {
+        this._ticket = value;
+        this.onTicketStringChanged();
+    }
+    private _ticket: string;
+
     constructor(
         private router: Router,
         /**
@@ -44,5 +54,9 @@ export class AppComponent implements OnInit {
                 q: searchString,
             },
         });
+    }
+
+    private onTicketStringChanged() {
+        this.authenticationService.loginEduTicket(this.ticket);
     }
 }
