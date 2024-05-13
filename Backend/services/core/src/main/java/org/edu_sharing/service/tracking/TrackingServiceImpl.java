@@ -399,7 +399,8 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
     private static void mapAdditionalFields(EventType type, List<String> additionalFields, ResultSet resultSet, StatisticEntry entry, String mediacenter) throws SQLException {
         for (String field : additionalFields) {
 
-            Map<String, Map<String, Long>> current = entry.getGroups().get(type);
+            Map<EventType, Map<String, Map<String, Long>>> groups = entry.getGroups();
+            Map<String, Map<String, Long>> current = groups.get(type);
             if (current == null) {
                 current = new HashMap<>();
             }
@@ -410,7 +411,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
                 ).collect(HashMap::new, (m, v) -> m.put(v.getKey(), v.getValue()), HashMap::putAll);
             }
             current.put(field, counted);
-            entry.getGroups().put(type, current);
+            groups.put(type, current);
         }
     }
 
