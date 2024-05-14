@@ -206,7 +206,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
 
     onEvent(event: string, data: Node): void {
         if (event === FrameEventsService.EVENT_APPLY_NODE) {
-            const imageData = data.preview?.data?.[0];
+            const imageData = data.preview?.data;
             if (imageData) {
                 this.imageData = imageData;
                 this.updateImageOptions();

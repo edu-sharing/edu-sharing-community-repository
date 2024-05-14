@@ -17,6 +17,9 @@ import org.edu_sharing.restservices.*;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.http.HttpStatus;
+import org.edu_sharing.service.foldertemplates.LoggingErrorHandler;
+import org.edu_sharing.service.usage.UsageException;
+import org.edu_sharing.service.usage.UsageService;
 
 @Schema(description = "")
 public class ErrorResponse {
@@ -62,6 +65,9 @@ public class ErrorResponse {
     	if(t instanceof DAOSecurityException) {
     		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
     	}
+		if(t instanceof UsageException && UsageService.NO_CCPUBLISH_PERMISSION.equals(t.getMessage())) {
+			return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
+		}
         if(t instanceof DAOMissingException) {
     		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
     	}
