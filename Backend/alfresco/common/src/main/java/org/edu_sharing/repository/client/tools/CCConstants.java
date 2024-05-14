@@ -2100,21 +2100,19 @@ public class CCConstants {
 
 	public static final String CC_CACHE_MILLISECONDS_KEY = "CC_CACHE_MILLISECONDS_KEY";
 
-	private static HashMap<String, String> nameSpaceMap = null;
+	private static final Map<String, String> nameSpaceMap = Map.of(
+			NAMESPACE_CCM, NAMESPACE_SHORT_CCM,
+			NAMESPACE_CM, NAMESPACE_SHORT_CM,
+			NAMESPACE_LOM, NAMESPACE_SHORT_LOM,
+			NAMESPACE_SYS,  NAMESPACE_SHORT_SYS,
+			NAMESPACE_VIRTUAL, NAMESPACE_SHORT_VIRTUAL,
+			NAMESPACE_EXIF, NAMESPACE_SHORT_EXIF
+	);
 
     /**
 	 * @return <namespace,localnamespace>
 	 */
-	public static HashMap<String, String> getNameSpaceMap() {
-		if(nameSpaceMap == null){
-			nameSpaceMap = new HashMap<String, String>();
-			nameSpaceMap.put(NAMESPACE_CCM, NAMESPACE_SHORT_CCM);
-			nameSpaceMap.put(NAMESPACE_CM, NAMESPACE_SHORT_CM);
-			nameSpaceMap.put(NAMESPACE_LOM, NAMESPACE_SHORT_LOM);
-			nameSpaceMap.put(NAMESPACE_SYS,  NAMESPACE_SHORT_SYS);
-			nameSpaceMap.put(NAMESPACE_VIRTUAL, NAMESPACE_SHORT_VIRTUAL);
-			nameSpaceMap.put(NAMESPACE_EXIF, NAMESPACE_SHORT_EXIF);
-		}
+	public static Map<String, String> getNameSpaceMap() {
 		return nameSpaceMap;
 	}
 
