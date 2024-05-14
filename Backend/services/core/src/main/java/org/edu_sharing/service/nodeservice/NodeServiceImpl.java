@@ -247,7 +247,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	private Map<String,Object> getToSafeProps(Map<String, String[]> props, String nodeType, String[] aspects, String nodeId, String parentId,String templateName) throws Throwable{
-		String[] metadataSetIdArr = props.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
+		Map<String, String[]> propsCopy = new HashMap<>(props);
+		String[] metadataSetIdArr = propsCopy.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
 
 		String metadataSetId = (metadataSetIdArr != null && metadataSetIdArr.length > 0) ? metadataSetIdArr[0] : null;
 		if(metadataSetId == null && nodeId != null) {
@@ -278,7 +279,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					}else {
 						mdsId = CCConstants.metadatasetdefault_id;
 					}
-					props.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, new String[] {mdsId});
+					propsCopy.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, new String[] {mdsId});
 					return mdsId;
 				}
 			});
@@ -296,11 +297,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				continue;
 			}
 			id=CCConstants.getValidGlobalName(id);
-			String[] propsValue = props.get(id);
+			String[] propsValue = propsCopy.get(id);
 			List<Serializable> values = propsValue != null ? Arrays.asList((Serializable[])propsValue) : null;
 			if("range".equals(widget.getType())){
-				String [] valuesFrom = props.get(id+"_from");
-				String [] valuesTo = props.get(id+"_to");
+				String [] valuesFrom = propsCopy.get(id+"_from");
+				String [] valuesTo = propsCopy.get(id+"_to");
 				if(valuesFrom==null || valuesTo==null)
 					continue;
 				toSafe.put(id+"_from",valuesFrom[0]);
@@ -313,7 +314,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			} else if("date".equals(widget.getType())){
 				try {
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-					values = Arrays.stream(props.get(id)).map((p) -> {
+					values = Arrays.stream(propsCopy.get(id)).map((p) -> {
 						try {
 							return sdf.parse(p);
 						} catch (ParseException e) {
@@ -340,7 +341,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			}
 
 			if(widget.getSuggestDisplayProperty() != null){
-				String[] keys = props.get(id);
+				String[] keys = propsCopy.get(id);
 				if(keys != null) {
 					Set<String> displayStrings = new HashSet<>();
 					for (String key : keys) {
@@ -353,9 +354,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 
 		for(String property : getAllSafeProps()){
-			if(!props.containsKey(property)) continue;
+			if(!propsCopy.containsKey(property)) continue;
 
-			NodeServiceHelper.convertMutlivaluePropToGeneric(props.get(property), toSafe, property);
+			NodeServiceHelper.convertMutlivaluePropToGeneric(propsCopy.get(property), toSafe, property);
 		}
 		// removed in 5.1
 		/*
