@@ -50,7 +50,7 @@
     <postgresql.jdbc.version>42.5.0</postgresql.jdbc.version>
     <tomcat.version>10.1.17</tomcat.version>
     <jackson.version>2.15.2</jackson.version>
-    <mongodb.version>4.11.2</mongodb.version>
+    <mongodb.version>5.1.0</mongodb.version>
     <spring.version>6.0.14</spring.version>
     <!--
       do not update to 6.2.2 cause it breaks openidconnect backchannel logout
