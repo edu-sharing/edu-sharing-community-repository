@@ -44,7 +44,7 @@
     <npm.args.install>install</npm.args.install>
     <npm.args.build>run build</npm.args.build>
 
-    <postgresql.jdbc.version>42.5.0</postgresql.jdbc.version>
+    <postgresql.jdbc.version>42.5.6</postgresql.jdbc.version>
     <tomcat.version>10.1.17</tomcat.version>
     <jackson.version>2.15.2</jackson.version>
     <mongodb.version>5.1.0</mongodb.version>
@@ -517,7 +517,7 @@
       <dependency>
         <groupId>com.hazelcast</groupId>
         <artifactId>hazelcast</artifactId>
-        <version>5.3.6</version>
+        <version>5.3.7</version>
       </dependency>
 
       <dependency>
