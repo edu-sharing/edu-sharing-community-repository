@@ -325,6 +325,21 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					logger.info("Could not parse date for widget id " + widget.getId() + ": " + t.getMessage());
 					values = new ArrayList<>();
 				}
+			}else if("datetime".equals(widget.getType())){
+				try {
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+					values = Arrays.stream(props.get(id)).map((p) -> {
+						try {
+							return sdf.parse(p);
+						} catch (ParseException e) {
+							throw new RuntimeException(e);
+						}
+					}).collect(Collectors.toList());
+
+				}catch(Throwable t){
+					logger.info("Could not parse date for widget id " + widget.getId() + ": " + t.getMessage());
+					values = new ArrayList<>();
+				}
 			}
 			// changed: otherwise reset values for multivalue fields is not possible
 			// if(values==null || values.length==0)
