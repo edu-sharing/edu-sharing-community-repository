@@ -155,6 +155,7 @@ services:
       - "repository-service-volume-config-cluster:/opt/bitnami/tomcat/shared/classes/config/cluster"
       - "repository-service-volume-config-node:/opt/bitnami/tomcat/shared/classes/config/node"
       - "repository-service-volume-data:/opt/alfresco/alf_data"
+      - "repository-service-volume-safe:/opt/alfresco/alf_safe"
     depends_on:
       - repository-database
       - repository-transform
@@ -184,3 +185,4 @@ volumes:
   repository-service-volume-config-cluster:
   repository-service-volume-config-node:
   repository-service-volume-data:
+  repository-service-volume-safe:
