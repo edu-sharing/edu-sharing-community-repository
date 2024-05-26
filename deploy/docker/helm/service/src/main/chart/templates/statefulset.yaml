@@ -44,6 +44,11 @@ spec:
           if [[ ! "$(ls -A /opt/alfresco/alf_data)" ]]; then
             chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /opt/alfresco/alf_data
           fi
+          {{- if .Values.persistence.share.safe.enabled }}
+          if [[ ! "$(ls -A /opt/alfresco/alf_safe)" ]]; then
+            chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /opt/alfresco/alf_safe
+          fi
+          {{- end }}
         volumeMounts:
         - name: data
           mountPath: /opt/bitnami/tomcat/shared/classes/config/node
