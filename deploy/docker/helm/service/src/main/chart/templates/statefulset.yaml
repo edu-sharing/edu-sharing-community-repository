@@ -51,6 +51,10 @@ spec:
           mountPath: /opt/bitnami/tomcat/shared/classes/config/cluster
         - name: share-data
           mountPath: /opt/alfresco/alf_data
+        {{- if .Values.persistence.share.safe.enabled }}
+        - name: share-safe
+          mountPath: /opt/alfresco/alf_safe
+        {{- end }}
         {{- with .Values.init.permission.resources }}
         resources: {{ toYaml . | nindent 10 }}
         {{- end }}
@@ -350,6 +354,11 @@ spec:
       - name: share-data
         persistentVolumeClaim:
           claimName: {{ include "edusharing_repository_service.pvc.share.data" . }}
+      {{- if .Values.persistence.share.safe.enabled }}
+      - name: share-safe
+        persistentVolumeClaim:
+          claimName: {{ include "edusharing_repository_service.pvc.share.safe" . }}
+      {{- end }}
       - name: file
         configMap:
           name: {{ include "edusharing_common_lib.names.name" . }}-file
