@@ -895,6 +895,18 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
         for (const widget of this.widgets.value) {
             widget.initWithValues(initialValues);
+            if (
+                widget.definition.type === MdsWidgetType.MultiValueFixedBadges &&
+                !widget.definition.values &&
+                widget.getInitialValues().jointValues
+            ) {
+                const mdsValueList = await widget.getValuesForKeys(
+                    widget.getInitialValues().jointValues,
+                );
+                if (mdsValueList) {
+                    widget.setInitialDisplayValues(mdsValueList);
+                }
+            }
         }
         for (const widget of this.nativeWidgets.value) {
             if (widget instanceof MdsEditorWidgetCore) {
