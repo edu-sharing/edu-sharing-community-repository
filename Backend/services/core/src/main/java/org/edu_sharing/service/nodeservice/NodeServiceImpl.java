@@ -310,7 +310,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				logger.info("will save property "+widget.getId()+" with predefined defaultvalue "+widget.getDefaultvalue());
 				toSafe.put(id,widget.getDefaultvalue());
 				continue;
-			} else if("date".equals(widget.getType())){
+			} else if("date".equals(widget.getType()) && props.containsKey(id)){
 				try {
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 					values = Arrays.stream(props.get(id)).map((p) -> {
@@ -325,7 +325,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					logger.info("Could not parse date for widget id " + widget.getId() + ": " + t.getMessage());
 					values = new ArrayList<>();
 				}
-			}else if("datetime".equals(widget.getType())){
+			}else if("datetime".equals(widget.getType()) && props.containsKey(id)){
 				try {
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
 					values = Arrays.stream(props.get(id)).map((p) -> {
