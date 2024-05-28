@@ -1,4 +1,4 @@
-import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition } from '@angular/cdk/overlay';
+import {CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition} from '@angular/cdk/overlay';
 import {
     AfterViewInit,
     Component,
@@ -9,8 +9,8 @@ import {
     OnInit,
     ViewChild,
 } from '@angular/core';
-import { UntypedFormControl } from '@angular/forms';
-import { MatChip } from '@angular/material/chips';
+import {UntypedFormControl} from '@angular/forms';
+import {MatChip} from '@angular/material/chips';
 import {
     FacetsDict,
     LabeledValue,
@@ -19,18 +19,20 @@ import {
     MdsService,
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, switchMap, takeUntil } from 'rxjs/operators';
-import { MdsHelperService } from 'ngx-edu-sharing-ui';
-import { SearchFieldFacetsComponent } from '../../../features/mds/mds-editor/search-field-facets/search-field-facets.component';
+import {BehaviorSubject, Subject} from 'rxjs';
+import {distinctUntilChanged, filter, map, switchMap, takeUntil} from 'rxjs/operators';
+import {MdsHelperService} from 'ngx-edu-sharing-ui';
+import {
+    SearchFieldFacetsComponent
+} from '../../../features/mds/mds-editor/search-field-facets/search-field-facets.component';
 import {
     MdsWidgetTree,
     Tree,
 } from '../../../features/mds/mds-editor/widgets/mds-editor-widget-tree/tree';
-import { MdsWidgetType, Values } from '../../../features/mds/types/types';
-import { LoadingScreenService } from '../../loading-screen/loading-screen.service';
-import { SearchFieldInternalService } from './search-field-internal.service';
-import { SearchFieldConfig } from './search-field.service';
+import {MdsWidgetType, Values} from '../../../features/mds/types/types';
+import {LoadingScreenService} from '../../loading-screen/loading-screen.service';
+import {SearchFieldInternalService} from './search-field-internal.service';
+import {SearchFieldConfig} from './search-field.service';
 
 @Component({
     selector: 'es-search-field',
@@ -310,7 +312,11 @@ export class SearchFieldComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     getTooltip(property: string, value: LabeledValue) {
-        const widget = MdsHelperService.getWidget(property, undefined, this.mds.widgets) as MdsWidgetTree;
+        const widget = MdsHelperService.getWidget(
+            property,
+            undefined,
+            this.mds.widgets,
+        ) as MdsWidgetTree;
         if (
             [
                 MdsWidgetType.MultiValueTree.toString(),

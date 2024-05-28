@@ -1,29 +1,19 @@
-import {
-    Component,
-    EventEmitter,
-    Input,
-    OnDestroy,
-    OnInit,
-    Output,
-    ViewChild,
-} from '@angular/core';
-import { SearchService } from 'ngx-edu-sharing-api';
-import * as rxjs from 'rxjs';
-import { Subject } from 'rxjs';
-import { first, map, switchMap, takeUntil } from 'rxjs/operators';
-import { Node, RestConstants } from '../../../../core-module/core.module';
-import { Toast } from '../../../../core-ui-module/toast';
-import { MdsEditorInstanceService } from '../mds-editor-instance.service';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output,} from '@angular/core';
+import {SearchService} from 'ngx-edu-sharing-api';
+import {Subject} from 'rxjs';
+import {first} from 'rxjs/operators';
+import {Node, RestConstants} from '../../../../core-module/core.module';
+import {Toast} from '../../../../core-ui-module/toast';
+import {MdsEditorInstanceService} from '../mds-editor-instance.service';
 import {
     BulkBehavior,
     EditorMode,
     EditorType,
     MdsWidget,
-    MdsWidgetValue,
     UserPresentableError,
     Values,
 } from '../../types/types';
-import { valuesDictIsEquivalent } from './values-dict-is-equivalent';
+import {valuesDictIsEquivalent} from './values-dict-is-equivalent';
 
 /**
  * Wrapper component to select between the legacy `<es-mds>` component and the Angular-native
@@ -41,7 +31,6 @@ import { valuesDictIsEquivalent } from './values-dict-is-equivalent';
 })
 export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
     // tslint:disable: no-output-on-prefix  // Keep API compatibility.
-
 
     @Input() addWidget = false;
     @Input() allowReplacing = true;
