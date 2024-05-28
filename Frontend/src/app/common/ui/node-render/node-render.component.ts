@@ -62,7 +62,7 @@ import {
     RestUsageService,
     UIService,
 } from '../../../core-module/core.module';
-import { MdsHelper } from '../../../core-module/rest/mds-helper';
+import { MdsHelperService } from 'ngx-edu-sharing-ui';
 import { RestTrackingService } from '../../../core-module/rest/services/rest-tracking.service';
 import { CardService } from '../../../core-ui-module/card.service';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
@@ -473,7 +473,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                         this._node = data.node;
                         this.isOpenable = this.connectors.connectorSupportsEdit(this._node) != null;
                         const finish = (set: Mds = null) => {
-                            this.similarNodeColumns = MdsHelper.getColumns(
+                            this.similarNodeColumns = MdsHelperService.getColumns(
                                 this.translate,
                                 set,
                                 'search',

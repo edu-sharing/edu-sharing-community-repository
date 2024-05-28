@@ -23,7 +23,7 @@ import {
     tap,
 } from 'rxjs/operators';
 import { ListItem, ListItemSort, ListSortConfig, notNull } from 'ngx-edu-sharing-ui';
-import { MdsHelper } from '../../core-module/rest/mds-helper';
+import { MdsHelperService } from 'ngx-edu-sharing-ui';
 import {
     fromSearchResults,
     NodeDataSourceRemote,
@@ -180,24 +180,26 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
                 ),
             );
         // Register columns.
-        mds.pipe(map((mds) => MdsHelper.getColumns(this._translate, mds, 'search'))).subscribe(
-            this.resultColumns,
-        );
         mds.pipe(
-            map((mds) => MdsHelper.getColumns(this._translate, mds, 'searchCollections')),
+            map((mds) => MdsHelperService.getColumns(this._translate, mds, 'search')),
+        ).subscribe(this.resultColumns);
+        mds.pipe(
+            map((mds) => MdsHelperService.getColumns(this._translate, mds, 'searchCollections')),
         ).subscribe(this.collectionColumns);
         // Register sort.
-        mds.pipe(map((mds) => MdsHelper.getSortInfo(mds, 'search'))).subscribe((sortInfo) => {
-            this.sortConfig.next({
-                allowed: true,
-                active: sortInfo.default.sortBy,
-                direction: sortInfo.default.sortAscending ? 'asc' : 'desc',
-                columns: sortInfo.columns?.map(
-                    ({ id, mode }) =>
-                        new ListItemSort('NODE', id, mode as 'ascending' | 'descending'),
-                ),
-            });
-        });
+        mds.pipe(map((mds) => MdsHelperService.getSortInfo(mds, 'search'))).subscribe(
+            (sortInfo) => {
+                this.sortConfig.next({
+                    allowed: true,
+                    active: sortInfo.default.sortBy,
+                    direction: sortInfo.default.sortAscending ? 'asc' : 'desc',
+                    columns: sortInfo.columns?.map(
+                        ({ id, mode }) =>
+                            new ListItemSort('NODE', id, mode as 'ascending' | 'descending'),
+                    ),
+                });
+            },
+        );
     }
 
     private _getSearchRemote(params: SearchRequestParams): NodeRemote<Node> {
