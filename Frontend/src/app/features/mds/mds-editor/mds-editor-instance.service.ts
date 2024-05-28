@@ -839,19 +839,12 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
         for (const widget of this.widgets.value) {
             widget.initWithNodes(this.nodes$.value);
-            if (
-                widget.definition.type === MdsWidgetType.MultiValueFixedBadges &&
-                !widget.definition.values &&
-                widget.getInitialValues().jointValues
-            ) {
-                const mdsValueList = await widget.getValuesForKeys(
-                    widget.getInitialValues().jointValues,
-                );
-                if (mdsValueList) {
-                    widget.setInitialDisplayValues(mdsValueList);
-                }
-            }
+            await this.fetchDisplayValues(widget);
         }
+        // keep this for debugging purposes
+        /*console.table(this.widgets.value.map( ({definition}) => [
+            definition.id, definition.type, definition.interactionType, definition.caption
+        ]));*/
         setTimeout(() => this.widgets.next(this.widgets.value.slice()), 5000);
         // to lower case because of remote repos wrong mapping
         return this.getGroup(
@@ -895,18 +888,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
         for (const widget of this.widgets.value) {
             widget.initWithValues(initialValues);
-            if (
-                widget.definition.type === MdsWidgetType.MultiValueFixedBadges &&
-                !widget.definition.values &&
-                widget.getInitialValues().jointValues
-            ) {
-                const mdsValueList = await widget.getValuesForKeys(
-                    widget.getInitialValues().jointValues,
-                );
-                if (mdsValueList) {
-                    widget.setInitialDisplayValues(mdsValueList);
-                }
-            }
+            await this.fetchDisplayValues(widget);
         }
         for (const widget of this.nativeWidgets.value) {
             if (widget instanceof MdsEditorWidgetCore) {
@@ -920,7 +902,20 @@ export class MdsEditorInstanceService implements OnDestroy {
             groupId,
         ).rendering?.toLowerCase() as EditorType;
     }
-
+    async fetchDisplayValues(widget: Widget) {
+        if (
+            widget.definition.type === MdsWidgetType.MultiValueFixedBadges &&
+            !widget.definition.values &&
+            widget.getInitialValues().jointValues
+        ) {
+            const mdsValueList = await widget.getValuesForKeys(
+                widget.getInitialValues().jointValues,
+            );
+            if (mdsValueList) {
+                widget.setInitialDisplayValues(mdsValueList);
+            }
+        }
+    }
     async clearValues(): Promise<void> {
         // At the moment, widget components don't support changing or resetting the value from
         // outside the component. Therefore, we have to reload and redraw everything here.
