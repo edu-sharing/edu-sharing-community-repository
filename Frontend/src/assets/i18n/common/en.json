@@ -715,6 +715,12 @@
     "API_FORBIDDEN": "No permissions to access this content",
     "API_FORBIDDEN_LOGIN": "Please login to access this section"
   },
+  "NODE_SEARCH_SELECTOR": {
+    "MORE_FILTERS": "Extended search filters",
+    "NO_MATCHES": "No elements machted",
+    "NO_RECENT": "No recently invited users or groups",
+    "NO_PERMISSIONS": "You're having insufficient permissions on the given element"
+  },
   "VCARD": {
     "Givenname": "First name",
     "Surname": "Last name",

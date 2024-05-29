@@ -870,6 +870,7 @@
   "NODE_SEARCH_SELECTOR": {
     "MORE_FILTERS": "Erweiterte Suchfilter",
     "NO_MATCHES": "Keine Elemente entsprechen der Suchanfrage",
+    "NO_RECENT": "Keine zuletzt eingeladenen Personen oder Gruppen",
     "NO_PERMISSIONS": "Ihre Berechtigungen an diesem Element sind unzureichend"
   },
   "NODE_RELATIONS": {
