@@ -2132,7 +2132,14 @@ public class NodeDao {
                 }
                 history.setReceiver(list);
                 history.setStatus(json.getString("status"));
-                history.setTime(Long.parseLong(json.getString("time")));
+                Object time = json.get("time");
+                if(time instanceof String) {
+                    history.setTime(Long.parseLong((String) time));
+                } else if(time instanceof Long) {
+                    history.setTime((Long) time);
+                } else {
+                    logger.info("Can not cast time: " + time + ":" + json.toString());
+                }
 
                 workflow.add(history);
             }
