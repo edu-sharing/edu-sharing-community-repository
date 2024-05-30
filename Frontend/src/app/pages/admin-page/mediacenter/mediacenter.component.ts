@@ -40,6 +40,7 @@ import { OptionsHelperService } from '../../../services/options-helper.service';
     selector: 'es-admin-mediacenter',
     templateUrl: 'mediacenter.component.html',
     styleUrls: ['mediacenter.component.scss'],
+    providers: [OptionsHelperService],
 })
 export class AdminMediacenterComponent {
     readonly AuthoritySearchMode = AuthoritySearchMode;
@@ -163,7 +164,8 @@ export class AdminMediacenterComponent {
             this.mediacenterServiceLegacy
                 .getManagedGroups(mediacenter.authorityName)
                 .subscribe((groups) => {
-                    this.mediacenterGroups.setData(groups.map((g) => g.group) as Group[]);
+                    console.log(groups);
+                    this.mediacenterGroups.setData(groups as Group[]);
                     this.mediacenterGroups.isLoading = false;
                 });
             this.mediacenterNodesDataSource.reset();
@@ -330,7 +332,7 @@ export class AdminMediacenterComponent {
             .addManagedGroup(this.currentMediacenterCopy.authorityName, this.addGroup.authorityName)
             .subscribe(
                 (groups) => {
-                    this.mediacenterGroups.setData(groups.map((g) => g.group) as Group[]);
+                    this.mediacenterGroups.setData(groups as Group[]);
                     this.toast.toast('ADMIN.MEDIACENTER.GROUPS.ADDED', {
                         name: this.addGroup.profile.displayName,
                     });
@@ -380,7 +382,7 @@ export class AdminMediacenterComponent {
             .removeManagedGroup(this.currentMediacenterCopy.authorityName, authority.authorityName)
             .subscribe(
                 (groups) => {
-                    this.mediacenterGroups.setData(groups.map((g) => g.group) as Group[]);
+                    this.mediacenterGroups.setData(groups as Group[]);
                     this.toast.toast('ADMIN.MEDIACENTER.GROUPS.REMOVED', {
                         name: authority.profile.displayName,
                     });
