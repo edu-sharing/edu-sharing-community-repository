@@ -1,10 +1,10 @@
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output,} from '@angular/core';
-import {SearchService} from 'ngx-edu-sharing-api';
-import {Subject} from 'rxjs';
-import {first} from 'rxjs/operators';
-import {Node, RestConstants} from '../../../../core-module/core.module';
-import {Toast} from '../../../../core-ui-module/toast';
-import {MdsEditorInstanceService} from '../mds-editor-instance.service';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { SearchService } from 'ngx-edu-sharing-api';
+import { Subject } from 'rxjs';
+import { first } from 'rxjs/operators';
+import { Node, RestConstants } from '../../../../core-module/core.module';
+import { Toast } from '../../../../core-ui-module/toast';
+import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import {
     BulkBehavior,
     EditorMode,
@@ -13,7 +13,7 @@ import {
     UserPresentableError,
     Values,
 } from '../../types/types';
-import {valuesDictIsEquivalent} from './values-dict-is-equivalent';
+import { valuesDictIsEquivalent } from './values-dict-is-equivalent';
 
 /**
  * Wrapper component to select between the legacy `<es-mds>` component and the Angular-native
