@@ -1,19 +1,16 @@
 package org.edu_sharing.service.nodeservice;
 
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URLEncoder;
 import java.rmi.RemoteException;
 import java.util.*;
-import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.MLText;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.namespace.QName;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -114,7 +111,15 @@ public class NodeServiceWSImpl extends NodeServiceAdapter {
 	
 	@Override
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable {
-		NodeEntry entry = (NodeEntry) RepoProxyFactory.getRepoProxy().getMetadata(appId, nodeId, Collections.singletonList(Filter.ALL), null).getEntity();
+		Object entity = RepoProxyFactory.getRepoProxy().getMetadata(appId, nodeId, Collections.singletonList(Filter.ALL), null).getEntity();
+		NodeEntry entry;
+		if(entity instanceof String) {
+			entry = new ObjectMapper().readValue((String) entity, NodeEntry.class);
+		}else if (entity instanceof NodeEntry){
+			entry = (NodeEntry)entity;
+		}else{
+			throw new NotImplementedException(String.format("Retrieved Metadata from appId \"%s\" with unknown type \"%s\"", appId, entity.getClass().getName()));
+		}
 		HashMap<String, Object> result = new HashMap<>();
 		for(Map.Entry<String, List<String>> e : entry.getNode().getProperties().entrySet()){
 			String globalKey = CCConstants.getValidGlobalName(e.getKey());
