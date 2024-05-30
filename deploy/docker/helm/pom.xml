@@ -72,7 +72,6 @@
     <module>service</module>
     <module>transform-aio</module>
     <module>transform-es</module>
-    <module>alfresco-share</module>
   </modules>
 
 </project>

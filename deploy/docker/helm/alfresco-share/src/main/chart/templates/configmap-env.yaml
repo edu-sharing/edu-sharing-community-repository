@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ include "edusharing_common_lib.names.name" . }}-env
-  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
-data:
-  REPO_HOST: {{ .Values.config.repository.host | quote }}
-  REPO_PORT: {{ .Values.config.repository.port | quote }}
