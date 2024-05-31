@@ -268,7 +268,6 @@ export class MdsEditorInstanceService implements OnDestroy {
                 this.initialValues = this.calculateInitialValues(nodeValues as string[][]);
             }
             if ((nodes[0] as Node)?.ref?.id) {
-                console.warn('Suggestions are not supported without graphql');
             } else {
                 this.suggestionValues = [].concat(
                     ...(nodes as Metadata[]).map((m) =>

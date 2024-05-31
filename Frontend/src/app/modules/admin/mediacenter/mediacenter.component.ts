@@ -26,7 +26,7 @@ import {
 } from '../../../core-module/core.module';
 import { CsvHelper } from '../../../core-module/csv.helper';
 import { Helper } from '../../../core-module/rest/helper';
-import { MdsHelper } from '../../../core-module/rest/mds-helper';
+import { MdsHelperService } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { Toast } from '../../../core-ui-module/toast';
@@ -148,8 +148,16 @@ export class AdminMediacenterComponent {
         );
         this.refresh();
         this.mdsService.getSet().subscribe((mds) => {
-            this.nodeColumns = MdsHelper.getColumns(this.translate, mds, 'mediacenterManaged');
-            this.groupColumns = MdsHelper.getColumns(this.translate, mds, 'mediacenterGroups');
+            this.nodeColumns = MdsHelperService.getColumns(
+                this.translate,
+                mds,
+                'mediacenterManaged',
+            );
+            this.groupColumns = MdsHelperService.getColumns(
+                this.translate,
+                mds,
+                'mediacenterGroups',
+            );
         });
     }
 

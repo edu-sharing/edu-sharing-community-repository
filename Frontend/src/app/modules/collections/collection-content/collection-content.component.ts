@@ -53,7 +53,7 @@ import {
     Permission,
 } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
-import { MdsHelper } from '../../../core-module/rest/mds-helper';
+import { MdsHelperService } from 'ngx-edu-sharing-ui';
 import { RequestObject } from '../../../core-module/rest/request-object';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
@@ -233,7 +233,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         const set = await this.mdsService
             .getMetadataSet({ metadataSet: mdsSets[0].id })
             .toPromise();
-        this.referencesColumns = MdsHelper.getColumns(
+        this.referencesColumns = MdsHelperService.getColumns(
             this.translation,
             set,
             'collectionReferences',
