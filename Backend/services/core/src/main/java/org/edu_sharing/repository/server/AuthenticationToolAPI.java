@@ -186,6 +186,7 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 	public HashMap<String,String> validateAuthentication(HttpSession session){
 		HashMap<String,String> result = null;
 		String currentTicket = (String)session.getAttribute(CCConstants.AUTH_TICKET);
+		log.debug("session id" + session.getId() +" ticketId:"+currentTicket);
 		if(currentTicket != null){
 			try{
 				authenticationService.validate(currentTicket);

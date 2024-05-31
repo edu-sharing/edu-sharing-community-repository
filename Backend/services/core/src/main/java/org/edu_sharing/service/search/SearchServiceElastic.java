@@ -504,6 +504,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             if (searchToken.getSortDefinition() != null) {
                 searchToken.getSortDefinition().applyToSearchSourceBuilder(searchRequestBuilder);
             }
+            searchRequestBuilder.source(SourceConfig.of(s -> s.filter(f -> f.excludes("content.fulltext"))));
 
 
             // logger.info("query: "+searchSourceBuilder.toString());
