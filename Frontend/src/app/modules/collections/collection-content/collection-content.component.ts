@@ -210,10 +210,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             .pipe(takeUntil(this.destroyed$))
             .subscribe((login) => {
                 this.login = login;
-                this.addMaterialBinaryOptionItem.isEnabled = login.toolPermissions.includes(
+                this.addMaterialBinaryOptionItem.isEnabled = login.toolPermissions?.includes(
                     RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,
                 );
-                this.createSubCollectionOptionItem.isEnabled = login.toolPermissions.includes(
+                this.createSubCollectionOptionItem.isEnabled = login.toolPermissions?.includes(
                     RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS,
                 );
             });
