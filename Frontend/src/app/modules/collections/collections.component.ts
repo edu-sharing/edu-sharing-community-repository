@@ -516,9 +516,9 @@ export class CollectionsMainComponent implements OnDestroy {
                 return allowed;
             }
             if (this.tabSelected === RestConstants.COLLECTIONSCOPE_ORGA) {
-                allowed = allowed && this.connector.hasToolPermissionInstant(
-                    RestConstants.TOOLPERMISSION_INVITE
-                );
+                allowed =
+                    allowed &&
+                    this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE);
             } else {
                 // for anything else, the user must be able to invite everyone
                 allowed =
