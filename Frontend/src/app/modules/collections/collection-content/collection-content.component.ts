@@ -313,6 +313,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 }
             }
         }
+        // update the main nav buttons & availability
+        this.mainNavUpdateTrigger.next();
     }
 
     isUserAllowedToEdit(collection: Node) {
