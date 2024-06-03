@@ -70,11 +70,16 @@ public class CommentServiceImpl implements CommentService{
 		throwIfNoComment(commentId);
 		HashMap<String, Object> props = new HashMap<String,Object>();
 		props.put(CCConstants.CCM_PROP_COMMENT_CONTENT,comment);
-		NodeRef replyTo = new NodeRef(nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), commentId, CCConstants.CCM_PROP_COMMENT_REPLY));
-		nodeService.updateNodeNative(commentId, props);
+        NodeRef replyTo = null;
+        try {
+            replyTo = (NodeRef) nodeService.getPropertyNative(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), commentId, CCConstants.CCM_PROP_COMMENT_REPLY);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+        nodeService.updateNodeNative(commentId, props);
 		String parentNode = nodeService.getPrimaryParent(commentId);
 
-		notify(parentNode, comment, replyTo.getId(), Status.CHANGED);
+		notify(parentNode, comment, replyTo == null ? null : replyTo.getId(), Status.CHANGED);
 	}
 
 	private void throwIfNoComment(String commentId) {
