@@ -41,7 +41,10 @@
       class="empty"
       *ngIf="
         isFromHomeRepo &&
-        !versions?.length && !relations?.length && !forkedChilds?.length && !forkedOrigin
+        !versions?.length &&
+        !relations?.length &&
+        !forkedChilds?.length &&
+        !forkedOrigin
       "
     >
       {{ 'NODE_RELATIONS.NO_RELATIONS' | translate }}
