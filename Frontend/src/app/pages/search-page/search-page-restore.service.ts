@@ -1,6 +1,6 @@
 import { ViewportScroller } from '@angular/common';
 import { Injectable } from '@angular/core';
-import { NavigationStart, Router, Scroll } from '@angular/router';
+import { NavigationStart, Router } from '@angular/router';
 import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
 import { debounceTime, delay, filter, map, switchMap } from 'rxjs/operators';
@@ -16,13 +16,8 @@ class RestoreEntry {
      *   ready to be restored.
      */
     state: 'active' | 'restore' = null;
-    navigationId: number;
     scrollPosition: [number, number] | null = null;
     dataSourceStates: { [key: string]: NodeDataSourceRemoteState } = {};
-
-    constructor(navigationId: number) {
-        this.navigationId = navigationId;
-    }
 }
 
 @Injectable({
@@ -88,46 +83,45 @@ export class SearchPageRestoreService {
     }
 
     private _getRestoreEntry(): RestoreEntry | null {
-        return (
-            this._entries.find(
-                ({ state, navigationId }) =>
-                    state === 'restore' && navigationId === this._currentNavigationId,
-            ) ?? null
-        );
+        return this._entries.find(({ state }) => state === 'restore') ?? null;
     }
 
     private _getEntryOrCreate(): RestoreEntry {
-        let entry = this._entries.find(
-            ({ navigationId }) => navigationId === this._currentNavigationId,
-        );
+        let entry = this._entries[0];
         if (entry == null) {
-            entry = new RestoreEntry(this._currentNavigationId);
+            entry = new RestoreEntry();
             this._entries.push(entry);
         }
         return entry;
     }
 
     private _registerRouterEvents(): void {
+        // store the last scroll position
         this._router.events
-            .pipe(filter((event): event is NavigationStart => event instanceof NavigationStart))
+            .pipe(
+                filter((event): event is NavigationStart => event instanceof NavigationStart),
+                filter(
+                    (event) =>
+                        event.url.includes('/render') && event.navigationTrigger === 'imperative',
+                ),
+            )
             .subscribe((event) => {
-                this._currentNavigationId = event.id;
-                if (event.navigationTrigger === 'popstate') {
-                    const restoredId = event.restoredState.navigationId;
-                    const entry = this._entries.find(
-                        ({ navigationId }) => navigationId === restoredId,
-                    );
-                    if (entry) {
-                        entry.state = 'restore';
-                        entry.navigationId = event.id;
-                    }
-                }
+                this._getEntryOrCreate().scrollPosition = [window.scrollX, window.scrollY];
             });
+        // load the last scroll position
         this._router.events
-            .pipe(filter((event): event is Scroll => event instanceof Scroll))
+            .pipe(
+                filter((event): event is NavigationStart => event instanceof NavigationStart),
+                filter(
+                    (event) =>
+                        event.url.includes('/search') && event.navigationTrigger === 'popstate',
+                ),
+            )
             .subscribe((event) => {
-                if (event.position) {
-                    this._getEntryOrCreate().scrollPosition = event.position;
+                const restoredId = event.restoredState.navigationId;
+                const entry = this._entries[0];
+                if (entry) {
+                    entry.state = 'restore';
                 }
             });
     }
