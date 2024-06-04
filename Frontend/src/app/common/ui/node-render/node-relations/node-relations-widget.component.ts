@@ -2,10 +2,11 @@ import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/cor
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { TranslateService } from '@ngx-translate/core';
 import { Node } from '../../../../core-module/rest/data-object';
-import { NodeService, RelationData, RelationService } from 'ngx-edu-sharing-api';
+import { NetworkService, NodeService, RelationData, RelationService } from 'ngx-edu-sharing-api';
 import { ListItem } from 'ngx-edu-sharing-ui';
 import { forkJoin as observableForkJoin } from 'rxjs';
 import { RestHelper } from '../../../../core-module/rest/rest-helper';
+import { first } from 'rxjs/operators';
 
 @Component({
     selector: 'es-mds-node-relations-widget',
@@ -20,17 +21,27 @@ export class MdsNodeRelationsWidgetComponent implements OnInit, OnChanges {
     versions: Node[];
     forkedOrigin: Node;
     forkedChilds: Node[];
+    isFromHomeRepo: boolean;
 
     constructor(
         private translate: TranslateService,
         private relationService: RelationService,
         private nodeService: NodeService,
+        private networkService: NetworkService,
     ) {}
 
     ngOnInit(): void {}
 
-    ngOnChanges(changes?: SimpleChanges) {
+    async ngOnChanges(changes?: SimpleChanges) {
         if (this.node) {
+            this.isFromHomeRepo = await this.networkService
+                .isFromHomeRepository(this.node)
+                .pipe(first())
+                .toPromise();
+            if (!this.isFromHomeRepo) {
+                this.loading = false;
+                return;
+            }
             observableForkJoin([
                 this.nodeService.getForkedChilds(this.node),
                 this.nodeService.getPublishedCopies(this.node.ref.id),

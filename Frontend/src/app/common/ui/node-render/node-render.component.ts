@@ -18,7 +18,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ConfigService, ProposalNode } from 'ngx-edu-sharing-api';
+import { ConfigService, NetworkService, ProposalNode } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     DefaultGroups,
@@ -26,6 +26,7 @@ import {
     InteractionType,
     ListItem,
     LocalEventsService,
+    MdsHelperService,
     NodeDataSource,
     NodeEntriesDisplayType,
     OptionItem,
@@ -38,7 +39,7 @@ import {
     UIConstants,
 } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
-import { filter, skipWhile, takeUntil } from 'rxjs/operators';
+import { filter, first, skipWhile, takeUntil } from 'rxjs/operators';
 import { OptionsHelperService } from 'src/app/core-ui-module/options-helper.service';
 import {
     ConfigurationHelper,
@@ -62,7 +63,6 @@ import {
     RestUsageService,
     UIService,
 } from '../../../core-module/core.module';
-import { MdsHelperService } from 'ngx-edu-sharing-ui';
 import { RestTrackingService } from '../../../core-module/rest/services/rest-tracking.service';
 import { CardService } from '../../../core-ui-module/card.service';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
@@ -121,7 +121,8 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         private configLegacy: ConfigurationService,
         private configService: ConfigService,
         private route: ActivatedRoute,
-        private networkService: RestNetworkService,
+        private networkServiceLegacy: RestNetworkService,
+        private networkService: NetworkService,
         private breadcrumbsService: BreadcrumbsService,
         private bridge: BridgeService,
         private _ngZone: NgZone,
@@ -145,14 +146,12 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         this.translations.waitForInit().subscribe(() => {
             this.banner = ConfigurationHelper.getBanner(this.configService);
             this.connector.setRoute(this.route, this.router);
-            this.networkService.prepareCache();
+            this.networkServiceLegacy.prepareCache();
             this.route.queryParams.subscribe((params: Params) => {
                 this.closeOnBack = params.closeOnBack === 'true';
                 this.editor = params.editor;
                 this.fromLogin = params.fromLogin === 'true' || params.redirectFromSSO === 'true';
-                this.repository = params.repository
-                    ? params.repository
-                    : RestConstants.HOME_REPOSITORY;
+                this.repository = params.repo || params.repository || RestConstants.HOME_REPOSITORY;
                 this.queryParams = params;
                 const childobject = params.childobject_id ? params.childobject_id : null;
                 this.isChildobject = childobject != null;
@@ -244,6 +243,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
     @ViewChild('actionbar') actionbar: ActionbarComponent;
     isChildobject = false;
     _node: Node;
+    _fromHomeRepository: boolean;
     _nodeId: string;
     @Output() onClose = new EventEmitter();
     similarNodeColumns: ListItem[] = [];
@@ -418,7 +418,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             return (
                 this._node.downloadUrl != null &&
                 (!this._node.properties[RestConstants.CCM_PROP_IO_WWWURL] ||
-                    !RestNetworkService.isFromHomeRepo(this._node))
+                    !this._fromHomeRepository)
             );
         };
         download.group = DefaultGroups.View;
@@ -442,7 +442,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         }
         this.addDownloadButton(download);
     }
-    private loadRenderData() {
+    private async loadRenderData() {
         const loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
         this.isLoading = true;
         this.optionsHelper.clearComponents(this.actionbar);
@@ -465,12 +465,24 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                 this.repository,
             )
             .subscribe(
-                (data) => {
+                async (data) => {
                     if (!data.detailsSnippet) {
                         console.error(data);
                         this.toast.error(null, 'RENDERSERVICE_API_ERROR');
                     } else {
                         this._node = data.node;
+                        this._fromHomeRepository = await this.networkService
+                            .isFromHomeRepository(this._node)
+                            .pipe(first())
+                            .toPromise();
+                        if (this._fromHomeRepository) {
+                            console.log('home', this._node);
+                            this.nodeApi
+                                .getNodeParents(this._nodeId)
+                                .subscribe((nodes) =>
+                                    this.breadcrumbsService.setNodePath(nodes.nodes.reverse()),
+                                );
+                        }
                         this.isOpenable = this.connectors.connectorSupportsEdit(this._node) != null;
                         const finish = (set: Mds = null) => {
                             this.similarNodeColumns = MdsHelperService.getColumns(
@@ -523,9 +535,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                     loadingTask.done();
                 },
             );
-        this.nodeApi
-            .getNodeParents(this._nodeId)
-            .subscribe((nodes) => this.breadcrumbsService.setNodePath(nodes.nodes.reverse()));
     }
     private postprocessHtml() {
         if (!this.configLegacy.instant('rendering.showPreview', true)) {
