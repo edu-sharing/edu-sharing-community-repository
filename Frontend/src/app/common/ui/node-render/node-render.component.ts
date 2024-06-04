@@ -2,6 +2,7 @@ import { trigger } from '@angular/animations';
 import { Location, PlatformLocation } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import {
+    AfterViewInit,
     ChangeDetectorRef,
     Component,
     ComponentFactoryResolver,
@@ -85,7 +86,7 @@ import { CardDialogService } from '../../../features/dialogs/card-dialog/card-di
     providers: [OptionsHelperDataService, RenderHelperService],
     animations: [trigger('fadeFast', UIAnimation.fade(UIAnimation.ANIMATION_TIME_FAST))],
 })
-export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
+export class NodeRenderComponent implements EventListener, OnInit, OnDestroy, AfterViewInit {
     readonly DisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     @Input() set node(node: Node | string) {
@@ -184,6 +185,12 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             });
         });
         this.frame.broadcastEvent(FrameEventsService.EVENT_VIEW_OPENED, 'node-render');
+    }
+
+    ngAfterViewInit(): void {
+        this.mainNavService.getDialogs().onStoredAddToCollection.subscribe((event) => {
+            this.refresh();
+        });
     }
 
     ngOnInit(): void {
