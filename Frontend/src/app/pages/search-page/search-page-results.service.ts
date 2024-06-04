@@ -22,8 +22,14 @@ import {
     takeUntil,
     tap,
 } from 'rxjs/operators';
-import { ListItem, ListItemSort, ListSortConfig, NodeEntriesDisplayType, notNull } from 'ngx-edu-sharing-ui';
-import { MdsHelperService } from 'ngx-edu-sharing-ui';
+import {
+    ListItem,
+    ListItemSort,
+    ListSortConfig,
+    MdsHelperService,
+    NodeEntriesDisplayType,
+    notNull,
+} from 'ngx-edu-sharing-ui';
 import {
     fromSearchResults,
     NodeDataSourceRemote,
@@ -44,6 +50,7 @@ export interface SearchPageResults {
 }
 export interface SearchPageState {
     displayType: NodeEntriesDisplayType;
+    sortConfig: ListSortConfig;
 }
 
 @Injectable()
@@ -53,7 +60,6 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
     readonly collectionsDataSource = new NodeDataSourceRemote(this._injector);
     readonly resultColumns = new BehaviorSubject<ListItem[]>([]);
     readonly collectionColumns = new BehaviorSubject<ListItem[]>([]);
-    readonly sortConfig = new BehaviorSubject<ListSortConfig>(null);
     readonly loadingParams = new BehaviorSubject<boolean>(true);
     readonly loadingContent = new BehaviorSubject<boolean>(true);
     readonly loadingCollections = new BehaviorSubject<boolean>(true);
@@ -61,7 +67,8 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
     readonly diffCount = new BehaviorSubject<number>(0);
     // stores the state of the primary, configurable node entries component
     readonly state = new BehaviorSubject<SearchPageState>({
-        displayType: NodeEntriesDisplayType.Grid
+        displayType: NodeEntriesDisplayType.Grid,
+        sortConfig: null,
     });
 
     private readonly _destroyed = new Subject<void>();
@@ -92,7 +99,7 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
 
     private _registerPageRestore() {
         // restore last state
-        if(this._searchPageRestore.getRestoreEntry()) {
+        if (this._searchPageRestore.getRestoreEntry()) {
             this.state.next(this._searchPageRestore.getRestoreEntry().searchState);
         }
         this._searchPageRestore.registerDataSource('materials', this.resultsDataSource);
@@ -201,17 +208,28 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
         // Register sort.
         mds.pipe(map((mds) => MdsHelperService.getSortInfo(mds, 'search'))).subscribe(
             (sortInfo) => {
-                this.sortConfig.next({
-                    allowed: true,
-                    active: sortInfo.default.sortBy,
-                    direction: sortInfo.default.sortAscending ? 'asc' : 'desc',
-                    columns: sortInfo.columns?.map(
-                        ({ id, mode }) =>
-                            new ListItemSort('NODE', id, mode as 'ascending' | 'descending'),
-                    ),
-                });
+                if (this.state.value.sortConfig === null) {
+                    this.patchState({
+                        sortConfig: {
+                            allowed: true,
+                            active: sortInfo.default.sortBy,
+                            direction: sortInfo.default.sortAscending ? 'asc' : 'desc',
+                            columns: sortInfo.columns?.map(
+                                ({ id, mode }) =>
+                                    new ListItemSort(
+                                        'NODE',
+                                        id,
+                                        mode as 'ascending' | 'descending',
+                                    ),
+                            ),
+                        },
+                    });
+                }
             },
         );
+    }
+    patchState(data: Partial<SearchPageState>) {
+        this.state.next({ ...this.state.value, ...data });
     }
 
     private _getSearchRemote(params: SearchRequestParams): NodeRemote<Node> {

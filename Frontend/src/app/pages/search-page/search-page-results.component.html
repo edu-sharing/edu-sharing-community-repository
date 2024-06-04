@@ -43,9 +43,9 @@
   [dataSource]="resultsDataSource"
   [scope]="Scope.Search"
   [columns]="resultColumns.value"
-  [displayType]="(results.state | async).displayType"
+  [displayType]="(state | async).displayType"
   (displayTypeChange)="setDisplayType($event)"
-  [sort]="sortConfig | async"
+  [sort]="(state | async).sortConfig"
   [primaryInstance]="true"
   [initConfig]="{ actionbar, customOptions: addToCollectionMode.value?.customOptions}"
 >
