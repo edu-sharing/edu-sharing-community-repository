@@ -476,7 +476,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                             .pipe(first())
                             .toPromise();
                         if (this._fromHomeRepository) {
-                            console.log('home', this._node);
                             this.nodeApi
                                 .getNodeParents(this._nodeId)
                                 .subscribe((nodes) =>
