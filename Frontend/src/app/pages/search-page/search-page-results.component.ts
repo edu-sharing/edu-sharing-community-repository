@@ -37,7 +37,7 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
 
     constructor(
         private globalSearchPageInternal: GlobalSearchPageServiceInternal,
-        private results: SearchPageResultsService,
+        public results: SearchPageResultsService,
         private searchPage: SearchPageService,
         private temporaryStorageService: TemporaryStorageService,
         private announcer: LiveAnnouncer,
@@ -82,5 +82,9 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
             return 'count-ngsearchword';
         }
         return '';
+    }
+
+    setDisplayType(displayType: NodeEntriesDisplayType) {
+        this.results.state.next({...this.results.state.value, displayType: displayType})
     }
 }

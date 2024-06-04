@@ -22,7 +22,7 @@ import {
     takeUntil,
     tap,
 } from 'rxjs/operators';
-import { ListItem, ListItemSort, ListSortConfig, notNull } from 'ngx-edu-sharing-ui';
+import { ListItem, ListItemSort, ListSortConfig, NodeEntriesDisplayType, notNull } from 'ngx-edu-sharing-ui';
 import { MdsHelperService } from 'ngx-edu-sharing-ui';
 import {
     fromSearchResults,
@@ -42,6 +42,9 @@ export interface SearchPageResults {
     loadingProgress: Observable<number>;
     addNodes: (nodes: Node[]) => void;
 }
+export interface SearchPageState {
+    displayType: NodeEntriesDisplayType;
+}
 
 @Injectable()
 export class SearchPageResultsService implements SearchPageResults, OnDestroy {
@@ -56,6 +59,10 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
     readonly loadingCollections = new BehaviorSubject<boolean>(true);
     readonly loadingProgress = new BehaviorSubject<number>(0);
     readonly diffCount = new BehaviorSubject<number>(0);
+    // stores the state of the primary, configurable node entries component
+    readonly state = new BehaviorSubject<SearchPageState>({
+        displayType: NodeEntriesDisplayType.Grid
+    });
 
     private readonly _destroyed = new Subject<void>();
 
@@ -84,8 +91,13 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
     }
 
     private _registerPageRestore() {
+        // restore last state
+        if(this._searchPageRestore.getRestoreEntry()) {
+            this.state.next(this._searchPageRestore.getRestoreEntry().searchState);
+        }
         this._searchPageRestore.registerDataSource('materials', this.resultsDataSource);
         this._searchPageRestore.registerDataSource('collections', this.collectionsDataSource);
+        this._searchPageRestore.registerSearchState(this.state);
     }
 
     private _registerSearchObservables() {

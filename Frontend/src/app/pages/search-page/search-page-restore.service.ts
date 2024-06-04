@@ -2,10 +2,11 @@ import { ViewportScroller } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
 import * as rxjs from 'rxjs';
-import { Subject } from 'rxjs';
+import {BehaviorSubject, Subject} from 'rxjs';
 import { debounceTime, delay, filter, map, switchMap } from 'rxjs/operators';
 import { NodeDataSourceRemote, NodeDataSourceRemoteState } from './node-data-source-remote';
 import { notNull } from 'ngx-edu-sharing-ui';
+import {SearchPageState} from "./search-page-results.service";
 
 class RestoreEntry {
     /**
@@ -16,6 +17,7 @@ class RestoreEntry {
      *   ready to be restored.
      */
     state: 'active' | 'restore' = null;
+    searchState: SearchPageState = null;
     scrollPosition: [number, number] | null = null;
     dataSourceStates: { [key: string]: NodeDataSourceRemoteState } = {};
 }
@@ -34,6 +36,9 @@ export class SearchPageRestoreService {
         this._registerRestoreScrollTrigger();
     }
 
+    registerSearchState(state: BehaviorSubject<SearchPageState>): void {
+        state.subscribe((s) => this._getEntryOrCreate().searchState = s);
+    }
     registerDataSource(key: string, dataSource: NodeDataSourceRemote): void {
         dataSource
             .connect()
@@ -46,7 +51,7 @@ export class SearchPageRestoreService {
     }
 
     private _restoreState(key: string): NodeDataSourceRemoteState | null {
-        const entry = this._getRestoreEntry();
+        const entry = this.getRestoreEntry();
         this._restoreScrollTrigger.next(entry);
         return entry?.dataSourceStates[key] ?? null;
     }
@@ -82,7 +87,7 @@ export class SearchPageRestoreService {
         entry.dataSourceStates[key] = state;
     }
 
-    private _getRestoreEntry(): RestoreEntry | null {
+    getRestoreEntry(): RestoreEntry | null {
         return this._entries.find(({ state }) => state === 'restore') ?? null;
     }
 
