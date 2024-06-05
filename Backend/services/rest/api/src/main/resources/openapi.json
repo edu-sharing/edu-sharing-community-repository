@@ -4767,6 +4767,9 @@
       },
       "RepositoryVersionInfo": {
         "properties": {
+          "build": {
+            "$ref": "#/components/schemas/VersionBuild"
+          },
           "git": {
             "$ref": "#/components/schemas/VersionGit"
           },
@@ -6564,6 +6567,14 @@
             "type": "string"
           },
           "qualifier": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VersionBuild": {
+        "properties": {
+          "timestamp": {
             "type": "string"
           }
         },

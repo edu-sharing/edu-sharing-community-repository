@@ -15,6 +15,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
@@ -141,6 +142,9 @@ public class SortDefinition implements Serializable {
 				String property = CCConstants.getValidGlobalName(sortDefintionEntry.getProperty());
 				if(sortDefintionEntry.getProperty().equalsIgnoreCase("sys:node-uuid")) {
 					// do nothing, this field is already a keyword!
+				} else if(Arrays.asList("cm:created", "cm:modified").contains(sortDefintionEntry.getProperty())) {
+					// use numeric
+					addSuffix = "number";
 				} else if(property != null){
 					PropertyDefinition propDef = serviceRegistry.getDictionaryService().getProperty(QName.createQName(property));
 					if(propDef != null) {

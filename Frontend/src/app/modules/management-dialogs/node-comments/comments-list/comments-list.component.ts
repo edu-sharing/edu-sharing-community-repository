@@ -4,7 +4,6 @@ import { OptionItem, UIAnimation } from 'ngx-edu-sharing-ui';
 import {
     Comment,
     Comments,
-    DialogButton,
     LoginResult,
     Node,
     RestCommentsService,
@@ -16,6 +15,8 @@ import {
 import { Toast } from '../../../../core-ui-module/toast';
 import { DialogsService } from '../../../../features/dialogs/dialogs.service';
 import { YES_OR_NO } from '../../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import { NetworkService } from 'ngx-edu-sharing-api';
+import { first } from 'rxjs/operators';
 
 @Component({
     selector: 'es-comments-list',
@@ -40,6 +41,7 @@ export class CommentsListComponent {
     loading: boolean;
     sending: boolean;
     hasPermission: boolean;
+    isFromHomeRepo: boolean;
 
     @Input() set node(node: Node) {
         this._node = node;
@@ -56,6 +58,7 @@ export class CommentsListComponent {
 
     constructor(
         private commentsApi: RestCommentsService,
+        private networkService: NetworkService,
         private connector: RestConnectorService,
         private dialogs: DialogsService,
         private iam: RestIamService,
@@ -132,7 +135,7 @@ export class CommentsListComponent {
         return options;
     }
     public canComment() {
-        if (this.isGuest || !this.user || !this.hasPermission) return false;
+        if (!this.isFromHomeRepo || this.isGuest || !this.user || !this.hasPermission) return false;
         return this._node.access.indexOf(RestConstants.ACCESS_COMMENT) !== -1;
     }
     public addComment() {
@@ -161,11 +164,20 @@ export class CommentsListComponent {
         this.onCancel.emit();
     }
 
-    private refresh() {
+    private async refresh() {
         this.comments = null;
         if (!this._node) return;
         if (this.loading) {
             setTimeout(() => this.refresh(), 100);
+            return;
+        }
+        this.isFromHomeRepo = await this.networkService
+            .isFromHomeRepository(this._node)
+            .pipe(first())
+            .toPromise();
+        if (!this.isFromHomeRepo) {
+            this.loading = false;
+            this.comments = [];
             return;
         }
         this.loading = true;

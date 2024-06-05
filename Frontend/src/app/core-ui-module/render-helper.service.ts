@@ -4,8 +4,8 @@ import {
     Injectable,
     ViewContainerRef,
 } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { EventType, Node } from '../core-module/rest/data-object';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { RestUsageService } from '../core-module/rest/services/rest-usage.service';
@@ -26,6 +26,7 @@ import { replaceElementWithDiv } from '../features/mds/mds-editor/util/replace-e
 import { MdsEditorWrapperComponent } from '../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { RestTrackingService } from '../core-module/rest/services/rest-tracking.service';
 import { VideoControlsComponent } from './components/video-controls/video-controls.component';
+import { NetworkService } from 'ngx-edu-sharing-api';
 
 @Injectable()
 export class RenderHelperService {
@@ -40,6 +41,7 @@ export class RenderHelperService {
         private componentFactoryResolver: ComponentFactoryResolver,
         private usageApi: RestUsageService,
         private optionsHelperService: OptionsHelperDataService,
+        private networkService: NetworkService,
         private tracking: RestTrackingService,
     ) {}
 
@@ -180,9 +182,19 @@ export class RenderHelperService {
 
     private getCollectionsContainingNode(node: Node): Observable<Node[]> {
         const id = this.getOriginalId(node);
-        return this.usageApi.getNodeUsagesCollection(id, node.ref.repo).pipe(
-            map((usages) => usages.filter((usage) => usage.collectionUsageType === 'ACTIVE')),
-            map((usages) => usages.map((usage) => usage.collection)),
+        return this.networkService.isFromHomeRepository(node).pipe(
+            switchMap((home) => {
+                if (home) {
+                    return this.usageApi.getNodeUsagesCollection(id, node.ref.repo).pipe(
+                        map((usages) =>
+                            usages.filter((usage) => usage.collectionUsageType === 'ACTIVE'),
+                        ),
+                        map((usages) => usages.map((usage) => usage.collection)),
+                    );
+                } else {
+                    return of([]);
+                }
+            }),
         );
     }
 

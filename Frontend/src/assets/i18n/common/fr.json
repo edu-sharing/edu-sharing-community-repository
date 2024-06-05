@@ -31,9 +31,9 @@
   "FIELD_REQUIRED": "Exigée",
   "FIELD_VALIDATION_ERROR_INTEGER": "Utiliser des nombres entiers",
   "EXTENSION_NOT_MATCH": "Modifier l'extension de fichier ?",
-  "EXTENSION_NOT_MATCH_INFO": "Êtes-vous sûr de vouloir modifier l'extension du fichier de \"{{extensionAncienne}}\" à \"{{extensionNouvelle}}\" ?\n\n{{avertissement}}",
-  "EXTENSION_NOT_MATCH_INFO_OLD": "Êtes-vous sûr de vouloir supprimer l'extension de fichier \"{{extensionOld}}\" ?\n\n{{avertissement}}",
-  "EXTENSION_NOT_MATCH_INFO_NEW": "Êtes-vous sûr de vouloir ajouter l'extension de fichier \"{{extensionNouvelle}}\" ?\n\n{{avertissement}}",
+  "EXTENSION_NOT_MATCH_INFO": "Êtes-vous sûr de vouloir modifier l'extension du fichier de \"{{extensionOld}}\" à \"{{extensionNew}}\" ?\n\n{{warning}}",
+  "EXTENSION_NOT_MATCH_INFO_OLD": "Êtes-vous sûr de vouloir supprimer l'extension de fichier \"{{extensionOld}}\" ?\n\n{{warning}}",
+  "EXTENSION_NOT_MATCH_INFO_NEW": "Êtes-vous sûr de vouloir ajouter l'extension de fichier \"{{extensionNew}}\" ?\n\n{{warning}}",
   "EXTENSION_NOT_MATCH_WARNING": "Le fichier peut devenir inutilisable lorsqu'il est téléchargé ou ouvert.",
   "EXTENSION_CHANGE": "Oui, changer",
   "EXTENSION_KEEP": "Conserver l'extension",
@@ -51,7 +51,7 @@
   "FIELD_MUST_BE_FILLED": "Ce champ ne peut pas être vide.",
   "CHOOSE_DATE": "Choisir la date",
   "CARD_SUBTITLE_MULTIPLE": "Éléments {{count}}",
-  "SELECT_COLLECTION": "Ajouter à \"{{nom}}",
+  "SELECT_COLLECTION": "Ajouter à \"{{name}}",
   "SELECT_ROOT_NAME": "Accueil",
   "SELECT_ROOT": "sélectionner la maison",
   "SELECT_ROOT_DISABLED": "sélectionner un élément",
@@ -62,8 +62,8 @@
   "INFORMATION": "l'information",
   "TODAY": "aujourd'hui",
   "YESTERDAY": "hier",
-  "DAYS_AGO": "Il y a {{ jours }} jours",
-  "HOURS_AGO": "Il y a {{ heures }} heures",
+  "DAYS_AGO": "Il y a {{ days }} jours",
+  "HOURS_AGO": "Il y a {{ hours }} heures",
   "MINUTES_AGO": "Il y a {{ minutes }} minutes",
   "JUST_NOW": "A l'instant",
   "CREATE": "créer",
@@ -76,13 +76,13 @@
   "CLEAR_FILTERS": "Effacer tous les filtres",
   "EDIT_ACCOUNT": "Gérer le compte",
   "CHANGE_LANGUAGE": "Changer de langue",
-  "DEFAULT_METADATASET": "Jeu de métadonnées par défaut ({{nom}})",
+  "DEFAULT_METADATASET": "Jeu de métadonnées par défaut ({{name}})",
   "NO_MATCHES": "Aucune correspondance trouvée",
   "NO_CC_PUBLISH": "pas d'autorisation de publication pour l'objet",
-  "SELECT": "sélectionner {{ élément }}",
-  "EDIT": "éditer {{ chose }}",
-  "EXPAND": "expand {{ élément }}",
-  "COLLAPSE": "effondrement {{ élément }}",
+  "SELECT": "sélectionner {{ element }}",
+  "EDIT": "éditer {{ thing }}",
+  "EXPAND": "expand {{ element }}",
+  "COLLAPSE": "effondrement {{ element }}",
   "CHECKBOX_CHECKED": "case à cocher cochée",
   "CHECKBOX_NOT_CHECKED": "case à cocher non cochée",
   "RADIO_BUTTON_SELECTED": "bouton radio sélectionné",
@@ -101,7 +101,7 @@
   "SEARCH_COLLECTIONS": "Recherche de collection...",
   "SUB_CATEGORY_ARIA": "sous-catégorie",
   "ASK_CC_PUBLISH": "Demander",
-  "ASK_CC_PUBLISH_SUBJECT": "Demande de permissions pour l'élément {{nom}}",
+  "ASK_CC_PUBLISH_SUBJECT": "Demande de permissions pour l'élément {{name}}",
   "ORIGINAL_DELETE": "Retirer",
   "ORIGINAL_DELETED": "Contenu supprimé",
   "ORIGINAL_DELETED_INFO": "Seules les métadonnées sont accessibles",
@@ -157,9 +157,9 @@
     "TOOLPERMISSION_VIDEO_AUDIO_CUT": "Les fichiers vidéo et audio peuvent être coupés lorsqu'ils sont ajoutés aux collections.",
     "TOOLPERMISSION_COLLECTION_CHANGE_OWNER": "Permission de changer le nom propre d'une collection",
     "TOOLPERMISSION_RATE": "L'autorisation de noter les ressources",
-    "TOOLPERMISSION_CONNECTOR": "L'éditeur \"{{connecteur}}\" peut être utilisé",
-    "TOOLPERMISSION_CONNECTOR_SAFE": "L'éditeur \"{{connecteur}}\" peut être utilisé en toute sécurité",
-    "TOOLPERMISSION_REPOSITORY": "Le référentiel \"{{référentiel}}\" peut être visualisé et parcouru et les médias peuvent en être extraits.",
+    "TOOLPERMISSION_CONNECTOR": "L'éditeur \"{{connector}}\" peut être utilisé",
+    "TOOLPERMISSION_CONNECTOR_SAFE": "L'éditeur \"{{connector}}\" peut être utilisé en toute sécurité",
+    "TOOLPERMISSION_REPOSITORY": "Le référentiel \"{{repository}}\" peut être visualisé et parcouru et les médias peuvent en être extraits.",
     "TOOLPERMISSION_CREATE_MAP_LINK": "Créer des dossiers qui renvoient à d'autres dossiers",
     "TOOLPERMISSION_SIGNUP_GROUP": "S'inscrire à une organisation/un groupe (ne s'applique qu'aux organisations/groupes configurés pour l'inscription)"
   },
@@ -185,7 +185,7 @@
   "NEW_PASSWORD": "Nouveau mot de passe",
   "NEW_PASSWORD_REPEAT": "Confirmer le nouveau mot de passe",
   "WRONG_PASSWORD": "Le mot de passe saisi n'est pas valide",
-  "PASSWORD_MIN_LENGTH": "Le mot de passe doit comporter au moins {{longueur}} caractères.",
+  "PASSWORD_MIN_LENGTH": "Le mot de passe doit comporter au moins {{length}} caractères.",
   "PASSWORD_NOT_MATCH": "Les mots de passe ne correspondent pas",
   "LEARNINGAGE_YEAR": "Années",
   "PROGRESS_DIALOG_DEFAULT_TITLE": "La tâche est exécutée...",
@@ -281,13 +281,13 @@
   "NODE_VARIANT": {
     "TITLE": "Créer une nouvelle variante",
     "NEW_VARIANT": "Nouveau titre :",
-    "DEFAULT_NAME": "Variante de {{nom}}",
+    "DEFAULT_NAME": "Variante de {{name}}",
     "BREADCRUMB_INFO": "Sauvegarder la variante dans :",
     "CHOOSE": "Lieu de stockage",
     "FILE_PICKER_TITLE": "Choisir le lieu de stockage",
     "CREATE": "Créer",
     "CREATE_EDIT": "Créer et ouvrir",
-    "CREATED": "Une nouvelle variante a été créée et enregistrée dans le dossier \"{{dossier}}\"",
+    "CREATED": "Une nouvelle variante a été créée et enregistrée dans le dossier \"{{folder}}\"",
     "CREATED_LINK": "montrer",
     "WARNING": {
       "NO_LICENSE": "Ce matériel n'est pas accompagné d'une licence.\nVous pouvez prendre contact avec l'auteur du matériel afin d'éviter toute violation de licence.",
@@ -304,14 +304,14 @@
     "CHOOSE": "Lieu de stockage",
     "FILE_PICKER_TITLE": "Choisir le lieu de stockage",
     "CREATE": "Créer un lien",
-    "CREATED": "Le lien a été créé et enregistré dans le dossier \"{{dossier}}\"",
+    "CREATED": "Le lien a été créé et enregistré dans le dossier \"{{folder}}\"",
     "CREATED_LINK": "montrer"
   },
   "NODE_REPORT": {
     "TITLE": "Signaler un problème",
     "SUBTITLE": "Signaler une question ou un problème",
     "REPORT": "rapport",
-    "REPORT_INFO": "Signaler un problème avec \"{{nom}}\"",
+    "REPORT_INFO": "Signaler un problème avec \"{{name}}\"",
     "COMMENT": "Fournir des informations supplémentaires sur le problème rencontré",
     "COMMENT_PLACEHOLDER": "Fournir des détails...",
     "EMAIL": "votre adresse électronique",
@@ -528,7 +528,7 @@
   "LIST": {
     "REORDER_TITLE": "Modifier les colonnes",
     "REORDER_DRAG_DROP": "Vous pouvez modifier l'ordre des éléments par \"glisser-déposer\".",
-    "TOTAL_COUNT_TOOLTIP": "Les éléments {{sélectionnés}} sélectionnés parmi un total de {{total}}"
+    "TOTAL_COUNT_TOOLTIP": "Les éléments {{selected}} sélectionnés parmi un total de {{total}}"
   },
   "DIALOG": {
     "COLLECTION_SHARE_PUBLIC": "Ajouter une ressource à la collection ?",
@@ -613,21 +613,21 @@
     "LICENSE_NO_PERMISSIONS_SAFE": "Vous ne pouvez pas changer de licence dans un environnement sûr",
     "ADD_CHILD_OBJECT": "Ajouter d'autres ressources",
     "ADD_CHILD_OBJECT_DESCRIPTION": "Créer une série en attachant d'autres ressources à cet objet",
-    "ADD_CHILD_OBJECT_QUOTA_REACHED": "Erreur lors du téléchargement de \"{{ nom }}\" : Quota de téléchargement atteint",
-    "ADD_CHILD_OBJECT_VIRUS_DETECTED": "Erreur lors du téléchargement de \"{{ nom }}\" : Virus détecté. Le fichier a été supprimé",
+    "ADD_CHILD_OBJECT_QUOTA_REACHED": "Erreur lors du téléchargement de \"{{ name }}\" : Quota de téléchargement atteint",
+    "ADD_CHILD_OBJECT_VIRUS_DETECTED": "Erreur lors du téléchargement de \"{{ name }}\" : Virus détecté. Le fichier a été supprimé",
     "CONFIRM_DISCARD_TITLE": "Rejeter les modifications ?",
     "CONFIRM_DISCARD_MESSAGE": "Fermer la boîte de dialogue sans enregistrer les modifications ?",
     "REQUIRED_MESSAGE": "Le champ est obligatoire",
     "REQUIRED_FOR_PUBLISH_MESSAGE": "Le champ est obligatoire pour la publication",
-    "INDETERMINATE_NOTICE": "Cliquez sur la puce pour ajouter la valeur \"{{ valeur }}\" à tous les éléments, ou retirez-la pour la supprimer de tous les éléments.",
+    "INDETERMINATE_NOTICE": "Cliquez sur la puce pour ajouter la valeur \"{{ value }}\" à tous les éléments, ou retirez-la pour la supprimer de tous les éléments.",
     "SHOW_OPTIONS_BUTTON": "Afficher les options",
-    "FILTER_FOR": "Filtre pour \"{{valeur}}\" ({{count}} élément(s) correspondant(s))",
+    "FILTER_FOR": "Filtre pour \"{{value}}\" ({{count}} élément(s) correspondant(s))",
     "FILTER_TREE": "Filtre...",
     "OPEN_CLOSE_EXTENDED": "Vue ouverte/fermée"
   },
   "SIMPLE_EDIT": {
     "TITLE": "Édition rapide",
-    "SAVED": "L'élément {{nom}} a été modifié",
+    "SAVED": "L'élément {{name}} a été modifié",
     "SAVED_MULTIPLE": "{{count}} Les éléments ont été modifiés",
     "METADATA": {
       "TITLE": "Métadonnées",
@@ -647,8 +647,8 @@
       "UNSET": "Ajouter aucun",
       "PUBLISH": "Tous (Publier)",
       "GROUP_TYPES": {
-        "ORG_ADMINISTRATORS": "Administrateur-trices de\n{{école}}",
-        "TEACHER": "Enseignant-es de\n{{école}}"
+        "ORG_ADMINISTRATORS": "Administrateur-trices de\n{{school}}",
+        "TEACHER": "Enseignant-es de\n{{school}}"
       }
     },
     "LICENSE": {
@@ -693,7 +693,7 @@
     "DOWNLOAD_ZIP": "Télécharger au format Zip",
     "LINK": "Vers la page d'origine",
     "INVITED_AND_CREATED_BY": "Créé et partagé par {{inviter}}",
-    "INVITED_PLUS_CREATED_BY": "Partagé par {{inviter}}, créé par {{créateur}}",
+    "INVITED_PLUS_CREATED_BY": "Partagé par {{inviter}}, créé par {{creator}}",
     "ENTER_PASSWORD": "suivant",
     "ERROR_INVALID_PASSWORD": "mot de passe invalide",
     "PASSWORD": "Mot de passe",
@@ -709,7 +709,7 @@
   "TOAST": {
     "NODE_LOCKED": "Le document est actuellement utilisé par un-e autre utilisateur-trice et ne peut être ouvert.",
     "RENDER_NOT_FOUND": "L'élément demandé est supprimé ou n'existe pas",
-    "FIELD_REQUIRED": "Le champ {{ nom }} est obligatoire",
+    "FIELD_REQUIRED": "Le champ {{ name }} est obligatoire",
     "API_FORBIDDEN": "Aucune autorisation pour accéder à ce contenu",
     "API_FORBIDDEN_LOGIN": "Veuillez vous connecter pour accéder à cette section"
   },
@@ -771,7 +771,7 @@
       "AlreadyInList": "Vous êtes déjà sur la liste d'attente pour ce groupe. Vous recevrez une notification par e-mail dès que vous serez accepté.",
       "AlreadyMember": "Vous êtes déjà membre du groupe sélectionné.",
       "ADDED_TO_LIST": "Vous avez été placé sur la liste d'attente et l'administrateur-trice du groupe en sera informé-e. Vous recevrez une notification par courriel lorsque vous serez approuvé-e.",
-      "ADDED_TO_GROUP": "Vous êtes maintenant membre du groupe {{groupe}}."
+      "ADDED_TO_GROUP": "Vous êtes maintenant membre du groupe {{group}}."
     }
   },
   "KEY_MODIFIER": {
