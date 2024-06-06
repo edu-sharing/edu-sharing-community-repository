@@ -665,23 +665,18 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		try {
 			NodeRef nodeRef = new NodeRef(store, nodeId);
 			Map<QName, Serializable> props = transformPropMap(_props);
-			Map<String, Object> propsNotNull = new HashMap<>();
+			Map<String, Object> propsConverted = new HashMap<>();
+			Set<QName> propsNull = new HashSet<>();
 
 			// do in transaction to disable behaviour
 			// otherwise interceptors might be called multiple times -> the final update props is enough!
-			serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
-				policyBehaviourFilter.disableBehaviour(nodeRef);
-				for(Map.Entry<QName, Serializable> prop : props.entrySet()){
-					// instead of storing props as null (which can cause solr erros), remove them completely from the node!
-					if(prop.getValue()==null) {
-						nodeService.removeProperty(nodeRef, prop.getKey());
-					}else
-						propsNotNull.put(prop.getKey().toString(),prop.getValue());
+			for(Map.Entry<QName, Serializable> prop : props.entrySet()){
+				// instead of storing props as null (which can cause solr erros), remove them completely from the node!
+				if(prop.getValue()==null) {
+					propsNull.add(prop.getKey());
 				}
-				policyBehaviourFilter.enableBehaviour(nodeRef);
-				return null;
-			});
-
+				propsConverted.put(prop.getKey().toString(),prop.getValue());
+			}
 
 			// don't do this cause it's slow:
 			/*
@@ -691,15 +686,15 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			 */
 
 			// prevent overwriting of properties that don't come with param _props
-			Set<String> changedProps = propsNotNull.keySet();
+			Set<String> changedProps = propsConverted.keySet();
 			Map<QName, Serializable> currentProps = nodeService.getProperties(nodeRef);
 			for (Map.Entry<QName, Serializable> entry : currentProps.entrySet()) {
 				if (!changedProps.contains(entry.getKey().toString())) {
-					propsNotNull.put(entry.getKey().toString(), entry.getValue());
+					propsConverted.put(entry.getKey().toString(), entry.getValue());
 				}
 			}
 
-			Map<String, Object> propsFinal = propsNotNull;
+			Map<String, Object> propsFinal = propsConverted;
 
 			for (PropertiesSetInterceptor i : PropertiesInterceptorFactory.getPropertiesSetInterceptors()) {
 				try {
@@ -717,7 +712,17 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					HashMap::putAll
 			);
 			nodeService.setProperties(nodeRef, propsStore);
-
+			// do in transaction to disable behaviour
+			// otherwise interceptors might be called multiple times -> the final update props is enough!
+			// to it AFTER set properties so the values can be sent as NULL-Values into setProperties to be read by interceptors
+			serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+				policyBehaviourFilter.disableBehaviour(nodeRef);
+				for(QName prop : propsNull){
+					nodeService.removeProperty(nodeRef, prop);
+				}
+				policyBehaviourFilter.enableBehaviour(nodeRef);
+				return null;
+			});
 		} catch (org.hibernate.StaleObjectStateException e) {
 			// this occurs sometimes in workspace
 			// it seems it is an alfresco bug:
