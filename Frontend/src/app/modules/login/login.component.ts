@@ -121,7 +121,8 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
                         } else if (data.currentScope === this.scope) {
                             if (
                                 data.statusCode === RestConstants.STATUS_CODE_OK &&
-                                params.local !== 'true'
+                                // force redirect when local was NOT requested or redirectFromSSO was enforced
+                                (params.local !== 'true' || params.redirectFromSSO === 'true')
                             ) {
                                 this.goToNext(data);
                             }
