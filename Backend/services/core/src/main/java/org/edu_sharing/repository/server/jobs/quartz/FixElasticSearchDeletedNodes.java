@@ -199,7 +199,7 @@ public class FixElasticSearchDeletedNodes extends AbstractJob{
 
             if(execute) {
                 update(UpdateRequest.of(req->req
-                        .index(INDEX_WORKSPACE)
+                        .index(SearchServiceElastic.WORKSPACE_INDEX)
                         .id(searchHit.id())
                         .script(src->src.inline(il->il.lang("painless").source("ctx._source.remove(params.get('value'))").params(params)))));
             }
@@ -223,7 +223,7 @@ public class FixElasticSearchDeletedNodes extends AbstractJob{
 
             if(execute) {
                 update(UpdateRequest.of(req->req
-                        .index(INDEX_WORKSPACE)
+                        .index(SearchServiceElastic.WORKSPACE_INDEX)
                         .id(searchHit.id())
                         .doc(data)));
             }
