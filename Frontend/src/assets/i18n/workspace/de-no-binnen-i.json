@@ -4,7 +4,6 @@
       "PUBLISH": {
         "AUTHOR_REQUIRED": "Um das Material zu veröffentlichen muss eine Autorin/ein Autor definiert werden"
       }
-
     },
 
     "EDITOR": {
@@ -23,9 +22,7 @@
     },
 
     "CONTRIBUTOR": {
-
       "TYPE": {
-
         "AUTHOR": "Autorin/Autor",
         "ADD_TITLE": "Neue beteiligte Person angeben",
         "PUBLISHER": "Herausgeberschaft",
@@ -37,12 +34,7 @@
         "SCRIPT_WRITER": "Scriptwriting",
         "CREATOR": "Erstellung",
         "PROVIDER": "Herausgeberschaft"
-
-
-
-
       }
-
     }
   }
 }
