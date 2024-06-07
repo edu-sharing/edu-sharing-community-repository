@@ -48,9 +48,6 @@ public class FixElasticSearchDeletedNodes extends AbstractJob{
     ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
     ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
     NodeService nodeService = serviceRegistry.getNodeService();
-
-    public static String INDEX_WORKSPACE = "workspace";
-
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         execute = Boolean.parseBoolean( (String) jobExecutionContext.getJobDetail().getJobDataMap().get("execute"));
@@ -75,7 +72,7 @@ public class FixElasticSearchDeletedNodes extends AbstractJob{
         int page = 0;
         do{
             if(response == null) {
-                response = search(INDEX_WORKSPACE, queryBuilder, scroll);
+                response = search(SearchServiceElastic.WORKSPACE_INDEX, queryBuilder, scroll);
             }else {
                 response = scroll(scroll,response.scrollId());
             }
