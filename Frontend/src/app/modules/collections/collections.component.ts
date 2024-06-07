@@ -526,7 +526,7 @@ export class CollectionsMainComponent implements OnDestroy {
                     this.connector.hasToolPermissionInstant(
                         RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
                     );
-                if (this.tabSelected === RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL) {
+                if (this.tabSelected === RestConstants.COLLECTIONSCOPE_TYPE_MEDIA_CENTER) {
                     allowed = allowed && this.adminMediacenters?.length === 1;
                 } else if (this.tabSelected === RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL) {
                     allowed =
