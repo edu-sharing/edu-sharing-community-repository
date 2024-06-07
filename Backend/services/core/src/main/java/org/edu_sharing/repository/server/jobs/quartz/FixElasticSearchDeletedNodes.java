@@ -145,7 +145,7 @@ public class FixElasticSearchDeletedNodes extends AbstractJob{
 
                 if(execute){
                     searchServiceElastic.deleteNative(DeleteRequest.of(req->req
-                            .index(INDEX_WORKSPACE)
+                            .index(SearchServiceElastic.WORKSPACE_INDEX)
                             .id(dbid)));
                 }
             }
