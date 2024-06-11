@@ -10150,7 +10150,7 @@
             "in": "query",
             "name": "appender",
             "schema": {
-              "default": "File",
+              "default": "ConsoleAppender",
               "type": "string"
             }
           }
