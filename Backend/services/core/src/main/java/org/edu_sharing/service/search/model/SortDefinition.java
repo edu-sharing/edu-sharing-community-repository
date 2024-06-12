@@ -145,6 +145,12 @@ public class SortDefinition implements Serializable {
 				} else if(Arrays.asList("cm:created", "cm:modified").contains(sortDefintionEntry.getProperty())) {
 					// use numeric
 					addSuffix = "number";
+				} else if(List.of("ccm:replicationsourcetimestamp").contains(sortDefintionEntry.getProperty())) {
+					// use date
+					addSuffix = "date";
+				} else if(List.of("cclom:title").contains(sortDefintionEntry.getProperty())) {
+					// temporary fix in 9.0, can be removed in 9.1 (tracker: 216445ab)
+					addSuffix = "keyword";
 				} else if(property != null){
 					PropertyDefinition propDef = serviceRegistry.getDictionaryService().getProperty(QName.createQName(property));
 					if(propDef != null) {
