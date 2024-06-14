@@ -53,7 +53,7 @@ public class HandleService {
 			/**
 			 * config dir: must be writeable
 			 */
-			String configDir = config.getString("configDir");
+			String configDir = (config.hasPath("configDir")) ? config.getString("configDir") : null;
 			if(configDir != null){
 				System.setProperty("net.handle.configDir", configDir);
 			}
