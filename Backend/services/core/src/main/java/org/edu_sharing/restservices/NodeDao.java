@@ -169,12 +169,13 @@ public class NodeDao {
         try {
             MetadataSet mds = MetadataHelper.getMetadataset(new NodeRef(repoDao, getId()));
             HashSet<String> defaultProps = mds.getWidgetsByNode(getType(), getAspectsNative(), false).stream().map(MetadataWidget::getId).collect(Collectors.toCollection(HashSet::new));
+            defaultProps.addAll(mds.getWidgetsByNode(getType(), getAspectsNative(), false).stream().map(MetadataWidget::getSuggestDisplayProperty).filter(Objects::nonNull).collect(Collectors.toSet()));
             defaultProps.addAll(Arrays.stream(NodeCustomizationPolicies.SAFE_PROPS).map(CCConstants::getValidLocalName).collect(Collectors.toList()));
             defaultProps.addAll(Arrays.stream(NodeCustomizationPolicies.LICENSE_PROPS).map(CCConstants::getValidLocalName).collect(Collectors.toList()));
             for (String prop : defaultProps) {
-                if (!props.containsKey(prop)) {
+                if (!props.containsKey(prop) && CCConstants.getValidGlobalName(prop) != null) {
                     // delete removed properties
-                    nodeService.removeProperty(getStoreProtocol(), getStoreIdentifier(), getId(), prop);
+                    nodeService.removeProperty(getStoreProtocol(), getStoreIdentifier(), getId(), CCConstants.getValidGlobalName(prop));
                 }
             }
             // copy version
