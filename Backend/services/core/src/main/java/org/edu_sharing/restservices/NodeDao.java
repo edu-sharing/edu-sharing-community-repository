@@ -40,6 +40,7 @@ import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.shared.NodeSearch.Facet;
 import org.edu_sharing.restservices.shared.NodeSearch.Facet.Value;
+import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.collection.CollectionService;
@@ -191,12 +192,13 @@ public class NodeDao {
         try {
             MetadataSet mds = MetadataHelper.getMetadataset(new NodeRef(repoDao, getId()));
             HashSet<String> defaultProps = mds.getWidgetsByNode(getType(), getAspectsNative(), false).stream().map(MetadataWidget::getId).collect(Collectors.toCollection(HashSet::new));
+            defaultProps.addAll(mds.getWidgetsByNode(getType(), getAspectsNative(), false).stream().map(MetadataWidget::getSuggestDisplayProperty).filter(Objects::nonNull).collect(Collectors.toSet()));
             defaultProps.addAll(Arrays.stream(NodeCustomizationPolicies.SAFE_PROPS).map(CCConstants::getValidLocalName).collect(Collectors.toList()));
             defaultProps.addAll(Arrays.stream(NodeCustomizationPolicies.LICENSE_PROPS).map(CCConstants::getValidLocalName).collect(Collectors.toList()));
             for (String prop : defaultProps) {
-                if (!props.containsKey(prop)) {
+                if (!props.containsKey(prop) && CCConstants.getValidGlobalName(prop) != null) {
                     // delete removed properties
-                    nodeService.removeProperty(getStoreProtocol(), getStoreIdentifier(), getId(), prop);
+                    nodeService.removeProperty(getStoreProtocol(), getStoreIdentifier(), getId(), CCConstants.getValidGlobalName(prop));
                 }
             }
             // copy version
@@ -1953,6 +1955,10 @@ public class NodeDao {
 				return RatingServiceFactory.getRatingService(repoDao.getId()).getAccumulatedRatings(getNodeRef(), null);
 			}
         } catch (Throwable t) {
+            if(t.getCause() instanceof InsufficientPermissionException) {
+                // ignored
+                return null;
+            }
             logger.info("Can not fetch ratings for node " + nodeId + ": " + t.getMessage());
             logger.debug(t);
             return null;
