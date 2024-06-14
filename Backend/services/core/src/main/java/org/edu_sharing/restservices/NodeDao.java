@@ -173,7 +173,13 @@ public class NodeDao {
             defaultProps.addAll(Arrays.stream(NodeCustomizationPolicies.SAFE_PROPS).map(CCConstants::getValidLocalName).collect(Collectors.toList()));
             defaultProps.addAll(Arrays.stream(NodeCustomizationPolicies.LICENSE_PROPS).map(CCConstants::getValidLocalName).collect(Collectors.toList()));
             for (String prop : defaultProps) {
-                if (!props.containsKey(prop) && CCConstants.getValidGlobalName(prop) != null) {
+                if (!props.containsKey(prop) && CCConstants.getValidGlobalName(prop) != null &&
+                    // protected publish props
+                    !Arrays.asList(
+                            CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL, CCConstants.CCM_PROP_IO_PUBLISHED_MODE,
+                            CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID, CCConstants.CCM_PROP_IO_PUBLISHED_DATE
+                    ).contains(CCConstants.getValidGlobalName(prop))
+                ) {
                     // delete removed properties
                     nodeService.removeProperty(getStoreProtocol(), getStoreIdentifier(), getId(), CCConstants.getValidGlobalName(prop));
                 }
