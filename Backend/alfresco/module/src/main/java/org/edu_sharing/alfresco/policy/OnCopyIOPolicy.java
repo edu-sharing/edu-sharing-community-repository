@@ -90,8 +90,7 @@ public class OnCopyIOPolicy implements OnCopyCompletePolicy, CopyServicePolicies
 			nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_TRACKING_VIEWS));
 		}
 
-		// @TODO: Enable in 9.0!
-		// removeCopiedUsages(nodeService, targetNodeRef);
+		removeCopiedUsages(nodeService, targetNodeRef);
 	}
 	
 	
