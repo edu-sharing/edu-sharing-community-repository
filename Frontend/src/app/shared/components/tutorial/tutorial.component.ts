@@ -65,7 +65,7 @@ export class TutorialComponent {
 
     wasTutorialShown(heading: string) {
         const item = localStorage.getItem('TUTORIAL.' + heading);
-        return false; //item;
+        return item;
     }
 
     setTutorialShown(heading: string) {
