@@ -940,6 +940,14 @@
         },
         "type": "object"
       },
+      "ConfigTutorial": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "ConfigUpload": {
         "properties": {
           "postDialog": {
@@ -6491,6 +6499,9 @@
           },
           "themeColors": {
             "$ref": "#/components/schemas/ConfigThemeColors"
+          },
+          "tutorial": {
+            "$ref": "#/components/schemas/ConfigTutorial"
           },
           "upload": {
             "$ref": "#/components/schemas/ConfigUpload"
