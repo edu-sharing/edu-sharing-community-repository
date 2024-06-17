@@ -301,6 +301,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         Aggregation definition = aggregations.get(a.getKey());
                         StringTermsAggregate sterms = aggregation.getValue().sterms();
                         facetsResult.add(getFacet(aggregation.getKey(), sterms, definition));
+                    } else if (aggregation.getValue().isNested()) {
+                        Aggregation definition = aggregations.get(a.getKey());
+                        NestedAggregate nested = aggregation.getValue().nested();
+                        StringTermsAggregate sterms = nested.aggregations().values().stream().findFirst().get().sterms();
+                        facetsResult.add(getFacet(aggregation.getKey(), sterms, definition));
                     }
                 }
             } else {
