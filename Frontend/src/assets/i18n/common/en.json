@@ -330,6 +330,7 @@
     "NEW_COMMENT_PLACEHOLDER": "New comment...",
     "COMMENT_EMPTY": "Please enter a comment",
     "NO_COMMENTS": "No comments yet",
+    "NO_GUEST_COMMENTING": "Please login to comment elements",
     "NO_PERMISSION": "Commenting is disabled for this element",
     "NOT_SUPPORTED_REMOTELY": "Commenting is not supported for external elements",
     "OPTION_EDIT": "edit",

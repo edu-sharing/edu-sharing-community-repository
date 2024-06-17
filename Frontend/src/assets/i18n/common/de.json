@@ -444,6 +444,7 @@
     "TITLE": "Kommentare",
     "NEW_COMMENT_PLACEHOLDER": "Neuer Kommentar...",
     "NO_COMMENTS": "Noch keine Kommentare vorhanden",
+    "NO_GUEST_COMMENTING": "Bitte einloggen, um Elemente zu kommentieren",
     "NO_PERMISSION": "Das Kommentieren ist für dieses Element deaktiviert",
     "NOT_SUPPORTED_REMOTELY": "Das Kommentieren von externen Elementen wird nicht unterstützt",
     "COMMENT_EMPTY": "Bitte einen Kommentar eingeben",
