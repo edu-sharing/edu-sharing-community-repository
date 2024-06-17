@@ -169,6 +169,12 @@ public class MetadataTemplateRenderer {
 					values = new String[]{"-"};
 					wasEmpty = true;
 				}
+				// handle false/disabled same as empty for checkbox widgets
+				if("checkbox".equals(widget.getType()) && !wasEmpty) {
+					if(values.length == 1 && StringUtils.equalsIgnoreCase(values[0], "false")) {
+						wasEmpty = true;
+					}
+				}
 				if("range".equals(widget.getType()) && wasEmpty) {
 					String[] from = properties.get(srcWidget.getId() + "_from");
 					String[] to = properties.get(srcWidget.getId() + "_to");
