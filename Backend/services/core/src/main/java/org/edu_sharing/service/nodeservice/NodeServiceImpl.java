@@ -35,6 +35,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
+import org.edu_sharing.alfresco.policy.OnCopyIOPolicy;
 import org.edu_sharing.alfresco.service.handleservice.HandleService;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -140,6 +141,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toNodeId),
 					QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS),
 					QName.createQName(originalName), copyChildren);
+
 			int renameCounter = 1;
 			while(true) {
 				try {
@@ -1213,6 +1215,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				NodeRef newNode;
 				try {
 					newNode = copyNode(nodeId, container, true);
+					OnCopyIOPolicy.removeCopiedUsages(nodeService, newNode);
 				} catch (Throwable t) {
 					throw new RuntimeException(t);
 				}
