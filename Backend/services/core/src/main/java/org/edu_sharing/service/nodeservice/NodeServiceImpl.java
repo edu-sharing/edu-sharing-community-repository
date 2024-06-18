@@ -29,6 +29,8 @@ import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.policy.OnCopyIOPolicy;
 import org.edu_sharing.alfresco.service.handleservice.HandleService;
+import org.edu_sharing.alfresco.service.handleservice.HandleServiceFactory;
+import org.edu_sharing.alfresco.service.handleservice.HandleServiceImpl;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -43,8 +45,10 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.HandleMode;
+import org.edu_sharing.service.permission.HandleParam;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.search.Suggestion;
@@ -1177,7 +1181,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	@Override
-	public String publishCopy(String nodeId, HandleMode handleMode) throws Throwable {
+	public String publishCopy(String nodeId, HandleParam handleParam) throws Throwable {
 		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY);
 		if(PermissionServiceFactory.getLocalService().hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE,
 						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
@@ -1236,8 +1240,19 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					setPermissions(newNode.getId(), CCConstants.AUTHORITY_GROUP_EVERYONE,
 							new String[]{CCConstants.PERMISSION_CONSUMER, CCConstants.PERMISSION_CC_PUBLISH},
 							true);
-					if(handleMode != null) {
-						createHandle(newNode, currentCopies, handleMode);
+					if(handleParam != null) {
+						if(handleParam.handleService != null){
+							HandleService instance = HandleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.handle);
+							if(instance.enabled()){
+								createHandle(newNode, currentCopies,instance , handleParam.handleService );
+							}else logger.error("handle service not enabled");
+						}
+						if(handleParam.doiService != null){
+							HandleService doiService = HandleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.doi);
+							if(doiService.enabled()){
+								createHandle(newNode, currentCopies, doiService, handleParam.doiService );
+							}else logger.error("doi service not enabled");
+						}
 					}
 
 					policyBehaviourFilter.enableBehaviour(newNode);
@@ -1250,15 +1265,13 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 
 	@Override
-	public void createHandle(NodeRef nodeRef, List<String> publishedCopies, HandleMode handleMode) throws Exception {
+	public void createHandle(NodeRef nodeRef, List<String> publishedCopies, HandleService handleService, HandleMode handleMode) throws Exception {
 		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE);
-		HandleService handleService = null;
 		try {
-			handleService = new HandleService();
 			/**
 			 * test handleservice to prevent property handleid isset but can not be pushed to handleservice cause of configration problems
 			 */
-			handleService.handleServiceAvailable();
+			if(!handleService.available()) throw new Exception("handleservice unavailable");
 		} catch (Exception e) {
 			// DEBUG ONLY
 			//handle = "test/" + Math.random();
@@ -1268,9 +1281,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		// fetch the last given handle from the currently existing copies
 		if(handleMode.equals(HandleMode.update) && publishedCopies.size() > 0 ){
 			Set<String> handles = publishedCopies.stream().filter((c) ->
-					getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID) != null
+					getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, handleService.getHandleIdProperty()) != null
 			).map((c) ->
-					getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID)
+					getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, handleService.getHandleIdProperty())
 			).distinct().collect(Collectors.toSet());
 			if(handles.size() != 1){
 				throw new IllegalStateException("Multiple handles found but handleMode " + handleMode + " was requested");
@@ -1284,7 +1297,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 		if(handleMode.equals(HandleMode.distinct)) {
 			try {
-				handle = handleService.generateHandle();
+				handle = handleService.generateId();
 
 			} catch (Exception e) {
 				logger.error("sql error while creating handle id", e);
@@ -1303,7 +1316,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_DATE), new Date());
 
 		if (handle != null) {
-			publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID), handle);
+			publishedProps.put(QName.createQName(handleService.getHandleIdProperty()), handle);
 		}
 
 		if (!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED))) {
@@ -1330,15 +1343,15 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					logger.error(e1.getMessage(), e1);
 				}*/
 		if (handle != null) {
-			String contentLink = URLTool.getNgRenderNodeUrl(nodeRef.getId(), null, false);
+			String contentLink = URLHelper.getNgRenderNodeUrl(nodeRef.getId(), null, false);
+			Map<QName, Serializable> properties = nodeService.getProperties(nodeRef);
 			if (handleMode.equals(HandleMode.distinct)) {
 				logger.info("Create handle " + handle + ", " + contentLink);
-				handleService.createHandle(handle, handleService.getDefautValues(contentLink));
+				handleService.create(handle, properties);
 			} else if (handleMode.equals(HandleMode.update)) {
 				logger.info("Update handle " + handle + ", " + contentLink);
-				handleService.updateHandle(handle, handleService.getDefautValues(contentLink));
+				handleService.update(handle,properties);
 			}
-
 		}
 
 	}
@@ -1363,7 +1376,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 	@Override
 	public String getPreviewUrl(String storeProtocol, String storeId, String nodeId, String version) {
-		String previewURL = URLTool.getBaseUrl(true);
+		String previewURL = URLHelper.getBaseUrl(true);
 		previewURL += "/preview?nodeId="+nodeId+"&storeProtocol="+storeProtocol+"&storeId="+storeId+"&dontcache="+System.currentTimeMillis();
 		if(version!=null){
 			previewURL +="&version="+version;
