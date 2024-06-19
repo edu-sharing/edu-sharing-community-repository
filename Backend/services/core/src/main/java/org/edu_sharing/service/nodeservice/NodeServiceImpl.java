@@ -46,6 +46,8 @@ import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.tools.URLHelper;
+import org.edu_sharing.service.handleservice.FeatureInfoDoiService;
+import org.edu_sharing.service.handleservice.FeatureInfoHandleService;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.service.permission.HandleParam;
@@ -54,7 +56,9 @@ import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.search.Suggestion;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
+import org.edu_sharing.spring.ApplicationContextFactory;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 
 import java.io.InputStream;
@@ -1241,17 +1245,26 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 							new String[]{CCConstants.PERMISSION_CONSUMER, CCConstants.PERMISSION_CC_PUBLISH},
 							true);
 					if(handleParam != null) {
+						ApplicationContext eduAppContext = ApplicationContextFactory.getApplicationContext();
 						if(handleParam.handleService != null){
-							HandleService instance = HandleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.handle);
-							if(instance.enabled()){
-								createHandle(newNode, currentCopies,instance , handleParam.handleService );
-							}else logger.error("handle service not enabled");
+							try{
+								eduAppContext.getBean(FeatureInfoHandleService.class);
+								createHandle(newNode, currentCopies,
+										HandleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.handle),
+										handleParam.handleService );
+							}catch (NoSuchBeanDefinitionException e){
+								logger.error("handle service not enabled");
+							}
 						}
 						if(handleParam.doiService != null){
-							HandleService doiService = HandleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.doi);
-							if(doiService.enabled()){
-								createHandle(newNode, currentCopies, doiService, handleParam.doiService );
-							}else logger.error("doi service not enabled");
+							try{
+								eduAppContext.getBean(FeatureInfoDoiService.class);
+								createHandle(newNode, currentCopies,
+										HandleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.doi),
+										handleParam.doiService );
+							}catch (NoSuchBeanDefinitionException e){
+								logger.error("doi service not enabled");
+							}
 						}
 					}
 
