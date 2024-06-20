@@ -85,9 +85,20 @@ public class DOIService implements HandleService {
         HttpEntity<DOI> entity = new HttpEntity<>(doi,getHttpHeaders());
         ResponseEntity<DOI> doiResponseEntity = template.exchange(baseUrl+"/dois/"+id, HttpMethod.PUT, entity, DOI.class);
         if(!doiResponseEntity.getStatusCode().is2xxSuccessful()){
-            throw new Exception("update id:" + id + " failed. api returned: " + doiResponseEntity.getStatusCode());
+            throw new DOIServiceException("update id:" + id + " failed. api returned: " + doiResponseEntity.getStatusCode());
         }
         return doiResponseEntity.getBody().getData().getId();
+    }
+
+    @Override
+    public String delete(String id) throws Exception {
+        //only works for drafts
+        HttpEntity<Void> entity = new HttpEntity<>(getHttpHeaders());
+        ResponseEntity<Void> doiResponseEntity = template.exchange(baseUrl+"/dois/"+id, HttpMethod.DELETE, entity,Void.class);
+        if(!doiResponseEntity.getStatusCode().is2xxSuccessful()){
+            throw new DOIServiceException("delete id:" + id + " failed. api returned: " + doiResponseEntity.getStatusCode());
+        }
+        return id;
     }
 
 

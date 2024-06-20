@@ -71,6 +71,12 @@ public class HandleServiceImpl implements HandleService{
 	}
 
 	@Override
+	public String delete(String id) throws Exception {
+		//not implemented
+		return "";
+	}
+
+	@Override
 	public String getHandleIdProperty() {
 		return CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID;
 	}

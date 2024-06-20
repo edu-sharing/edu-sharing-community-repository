@@ -1303,48 +1303,51 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			currentHandle = handles.iterator().next();
 		}
 
+		String generated = null;
 		String handle = null;
 
 		Map<QName, Serializable> publishedProps = new HashMap<QName, Serializable>();
 
-		if(handleMode.equals(HandleMode.distinct)) {
-			try {
-				handle = handleService.generateId();
+		try {
+			if (handleMode.equals(HandleMode.distinct)) {
+				try {
+					generated = handleService.generateId();
+					handle = generated;
 
-			} catch (Exception e) {
-				logger.error("sql error while creating handle id", e);
-				// DEBUG ONLY
-				//handle = "test/" + Math.random();
-				throw new RuntimeException("Handle generation throwed an error: " + e.getMessage(), e);
+				} catch (Exception e) {
+					logger.error("sql error while creating handle id", e);
+					// DEBUG ONLY
+					//handle = "test/" + Math.random();
+					throw new RuntimeException("Handle generation throwed an error: " + e.getMessage(), e);
+				}
+			} else {
+				if (currentHandle == null) {
+					throw new IllegalArgumentException("Handle Mode " + handleMode + " requested but no handle assigned yet");
+				}
+				handle = currentHandle;
 			}
-		} else {
-			if(currentHandle == null){
-				throw new IllegalArgumentException("Handle Mode " + handleMode + " requested but no handle assigned yet");
+
+
+			publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_DATE), new Date());
+
+			if (handle != null) {
+				publishedProps.put(QName.createQName(handleService.getHandleIdProperty()), handle);
 			}
-			handle = currentHandle;
-		}
 
-
-		publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_DATE), new Date());
-
-		if (handle != null) {
-			publishedProps.put(QName.createQName(handleService.getHandleIdProperty()), handle);
-		}
-
-		if (!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED))) {
-			nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED), publishedProps);
-		} else {
-			for (Map.Entry<QName, Serializable> entry : publishedProps.entrySet()) {
-				nodeService.setProperty(nodeRef, entry.getKey(), entry.getValue());
+			if (!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED))) {
+				nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED), publishedProps);
+			} else {
+				for (Map.Entry<QName, Serializable> entry : publishedProps.entrySet()) {
+					nodeService.setProperty(nodeRef, entry.getKey(), entry.getValue());
+				}
 			}
-		}
 
-		/**
-		 * create version for the published node
-		 * NO: NOT NEEDED ANYMORE!
-		 * The version is implicitly correct because a copied node has exact ONE version!
-		 *
-		 */
+			/**
+			 * create version for the published node
+			 * NO: NOT NEEDED ANYMORE!
+			 * The version is implicitly correct because a copied node has exact ONE version!
+			 *
+			 */
 				/*
 				Map<QName, Serializable> props = nodeService.getProperties(nodeRef);
 				props.put(QName.createQName(CCConstants.CCM_PROP_IO_VERSION_COMMENT), NODE_PUBLISHED);
@@ -1354,16 +1357,23 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					// TODO Auto-generated catch block
 					logger.error(e1.getMessage(), e1);
 				}*/
-		if (handle != null) {
-			String contentLink = URLHelper.getNgRenderNodeUrl(nodeRef.getId(), null, false);
-			Map<QName, Serializable> properties = nodeService.getProperties(nodeRef);
-			if (handleMode.equals(HandleMode.distinct)) {
-				logger.info("Create handle " + handle + ", " + contentLink);
-				handleService.create(handle, properties);
-			} else if (handleMode.equals(HandleMode.update)) {
-				logger.info("Update handle " + handle + ", " + contentLink);
-				handleService.update(handle,properties);
+			if (handle != null) {
+				String contentLink = URLHelper.getNgRenderNodeUrl(nodeRef.getId(), null, false);
+				Map<QName, Serializable> properties = nodeService.getProperties(nodeRef);
+				if (handleMode.equals(HandleMode.distinct)) {
+					logger.info("Create handle " + handle + ", " + contentLink);
+					handleService.create(handle, properties);
+				} else if (handleMode.equals(HandleMode.update)) {
+					logger.info("Update handle " + handle + ", " + contentLink);
+					handleService.update(handle, properties);
+				}
 			}
+		}catch (Exception e){
+			//cleanup draft
+			if(generated != null){
+				handleService.delete(generated);
+			}
+			throw e;
 		}
 
 	}

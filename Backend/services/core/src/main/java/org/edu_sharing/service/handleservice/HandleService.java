@@ -19,6 +19,8 @@ public interface HandleService {
 
     public String update(String id, Map<QName, Serializable> properties) throws Exception;
 
+    public String delete(String id) throws Exception;
+
 
     public default String getContentLink(Map<QName, Serializable> properties) throws Exception{
         return URLHelper.getNgRenderNodeUrl((String)properties.get(ContentModel.PROP_NODE_UUID), null, false);
