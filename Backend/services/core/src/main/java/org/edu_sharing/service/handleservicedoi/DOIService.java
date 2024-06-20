@@ -2,10 +2,17 @@ package org.edu_sharing.service.handleservicedoi;
 
 import com.typesafe.config.Config;
 import org.alfresco.model.ContentModel;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.metadataset.v2.MetadataKey;
+import org.edu_sharing.metadataset.v2.MetadataSet;
+import org.edu_sharing.metadataset.v2.MetadataWidget;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
+import org.edu_sharing.repository.server.jobs.quartz.MigrateMetadataValuespaceJob;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.handleservice.HandleService;
 import org.edu_sharing.service.handleservice.HandleServiceNotConfiguredException;
 import org.edu_sharing.service.handleservicedoi.model.DOI;
@@ -18,6 +25,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DOIService implements HandleService {
 
@@ -165,13 +173,12 @@ public class DOIService implements HandleService {
         //learning resourcetype
         List<String> lrts = (List<String>) properties.get(QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE));
         if(lrts == null || lrts.size() == 0){
-            throw new Exception("missing replication learning source type");
-            /**
-             * @TODO validate / map correct values
-             * http://schema.datacite.org/meta/kernel-4.5/include/datacite-resourceType-v4.xsd
-             */
+            throw new DOIServiceMissingAttributeException(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER), "resourceTypeGeneral");
         }
-        Data.Types t = Data.Types.builder().resourceTypeGeneral("Other").build();
+
+        String mapping = getMapping(properties,CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER),lrts.get(0));
+        if(mapping == null) mapping = "Other";
+        Data.Types t = Data.Types.builder().resourceTypeGeneral(mapping).build();
         doi.getData().getAttributes().setTypes(t);
 
 
@@ -191,6 +198,25 @@ public class DOIService implements HandleService {
     public static final String getBasicAuthenticationHeader(String username, String password) {
         String valueToEncode = username + ":" + password;
         return "Basic " + Base64.getEncoder().encodeToString(valueToEncode.getBytes());
+    }
+
+    public String getMapping(Map<QName,Serializable> properties, String mdsWidgetId, String key){
+        try {
+            String mdsSet = (String)properties.get(QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
+            if(mdsSet==null || mdsSet.isEmpty())
+                mdsSet=CCConstants.metadatasetdefault_id;
+
+            MetadataSet mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(),mdsSet);
+            MetadataWidget widget = mds.findWidget(mdsWidgetId);
+            Map<String, Collection<MetadataKey.MetadataKeyRelated>> valuespaceMappingByRelation = widget.getValuespaceMappingByRelation(MetadataKey.MetadataKeyRelated.Relation.closeMatch);
+            Collection<MetadataKey.MetadataKeyRelated> metadataKeyRelateds = valuespaceMappingByRelation.get(key);
+            if(metadataKeyRelateds != null && metadataKeyRelateds.size() > 0){
+               return metadataKeyRelateds.iterator().next().getKey();
+            }
+        }catch (Exception e){
+            logger.debug(e.getMessage(),e);
+        }
+        return null;
     }
 
 }
