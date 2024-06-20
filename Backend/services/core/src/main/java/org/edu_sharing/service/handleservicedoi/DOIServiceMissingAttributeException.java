@@ -1,5 +1,8 @@
 package org.edu_sharing.service.handleservicedoi;
 
+import lombok.Getter;
+
+@Getter
 public class DOIServiceMissingAttributeException extends DOIServiceException{
 
     String property;

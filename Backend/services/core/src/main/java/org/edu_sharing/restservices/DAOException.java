@@ -16,6 +16,7 @@ import org.edu_sharing.alfresco.policy.NodeMimetypeValidationException;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.collection.DuplicateNodeException;
+import org.edu_sharing.service.handleservicedoi.DOIServiceException;
 import org.edu_sharing.service.permission.PermissionException;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.alfresco.RestrictedAccessException;
@@ -96,6 +97,13 @@ public class DAOException extends Exception {
 		){
 			return new DAOVirusScanFailedException(t.getCause(),nodeId);
 		}
+		if(t instanceof AlfrescoRuntimeException
+				&& t.getCause() != null
+				&& t.getCause() instanceof DOIServiceException
+		){
+			return new DAODOIServiceException((DOIServiceException)t.getCause(),nodeId);
+		}
+
 		if (t instanceof NodeExistsException) {
 			
 			return new DAOValidationException(t,nodeId); 
