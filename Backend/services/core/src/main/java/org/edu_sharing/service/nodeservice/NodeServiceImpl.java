@@ -45,7 +45,7 @@ import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.tools.URLHelper;
-import org.edu_sharing.service.handleservice.FeatureInfoDoiService;
+import org.edu_sharing.service.handleservicedoi.FeatureInfoDoiService;
 import org.edu_sharing.service.handleservice.FeatureInfoHandleService;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.HandleMode;
