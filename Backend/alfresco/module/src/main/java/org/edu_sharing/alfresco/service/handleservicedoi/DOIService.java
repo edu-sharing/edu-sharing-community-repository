@@ -127,7 +127,7 @@ public class DOIService implements HandleService {
         List<String> author = (List<String>) properties.get(QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR));
         if(author == null || author.isEmpty()){
             if(StringUtils.isEmpty((String) properties.get(ContentModel.PROP_CREATOR))){
-                throw new Exception("missing creator");
+                throw new DOIServiceMissingAttributeException(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR),"Creator");
             }
             creator = (String) properties.get(ContentModel.PROP_CREATOR);
             doi.getData().getAttributes().getCreators().add(Data.Creator.builder().name(creator).build());
@@ -138,8 +138,9 @@ public class DOIService implements HandleService {
 
         //title
         String title = (String) properties.get(QName.createQName(CCConstants.LOM_PROP_GENERAL_TITLE));
+
         if(StringUtils.isEmpty(title)){
-            title = (String) properties.get(ContentModel.PROP_NAME);
+            throw new DOIServiceMissingAttributeException(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_TITLE),"Title");
         }
         doi.getData().getAttributes().getTitles().add(Data.Title.builder().title(title).build());
 
@@ -147,14 +148,14 @@ public class DOIService implements HandleService {
         List<String> publisherList = (List<String>)properties.get(QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER));
         String publisher;
         if(publisherList == null || publisherList.isEmpty()){
-            publisher = (String) properties.get(ContentModel.PROP_CREATOR);
+            throw new DOIServiceMissingAttributeException(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER),"Publisher");
         }else publisher = publisherList.get(0);
         doi.getData().getAttributes().setPublisher(VCardConverter.getNameForVCardString(publisher));
 
         //published year
         Date d = (Date) properties.get(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_DATE));
         if(d == null){
-            throw new Exception("missing published date");
+            throw new DOIServiceMissingAttributeException(CCConstants.getValidLocalName(CCConstants.CCM_PROP_PUBLISHED_DATE),"PublicationYear");
         }
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(d);
