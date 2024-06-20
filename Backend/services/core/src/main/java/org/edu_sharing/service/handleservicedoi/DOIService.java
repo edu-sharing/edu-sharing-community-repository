@@ -142,18 +142,22 @@ public class DOIService implements HandleService {
 
         //creator
         //the main researchers involved working on the data, or the authors of the publication in priority order. May be a corporate/institutional or personal name.
-        String creator;
         List<String> author = (List<String>) properties.get(QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR));
+        List<String> authorFreetext = (List<String>) properties.get(QName.createQName(CCConstants.CCM_PROP_AUTHOR_FREETEXT));
         if(author == null || author.isEmpty()){
-            if(StringUtils.isEmpty((String) properties.get(ContentModel.PROP_CREATOR))){
+            if(authorFreetext == null || authorFreetext.isEmpty()){
                 throw new DOIServiceMissingAttributeException(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR),"Creator");
             }
-            creator = (String) properties.get(ContentModel.PROP_CREATOR);
-            doi.getData().getAttributes().getCreators().add(Data.Creator.builder().name(creator).build());
-        }else{
+        }
+        if(author != null && !author.isEmpty()) {
             author.stream().forEach(a -> doi.getData().getAttributes().getCreators()
                     .add(Data.Creator.builder().name(VCardConverter.getNameForVCardString(a)).build()));
         }
+        if(authorFreetext != null && !authorFreetext.isEmpty()){
+            authorFreetext.stream().forEach(a -> doi.getData().getAttributes().getCreators()
+                    .add(Data.Creator.builder().name(a).build()));
+        }
+
 
         //title
         String title = (String) properties.get(QName.createQName(CCConstants.LOM_PROP_GENERAL_TITLE));
