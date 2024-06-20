@@ -1,4 +1,4 @@
-package org.edu_sharing.alfresco.service.handleservicedoi.model;
+package org.edu_sharing.service.handleservicedoi.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;

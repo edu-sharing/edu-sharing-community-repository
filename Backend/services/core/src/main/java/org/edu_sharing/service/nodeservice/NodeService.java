@@ -4,7 +4,7 @@ import lombok.NonNull;
 import org.alfresco.service.cmr.repository.*;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfresco.service.handleservice.HandleService;
+import org.edu_sharing.service.handleservice.HandleService;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.HandleMode;

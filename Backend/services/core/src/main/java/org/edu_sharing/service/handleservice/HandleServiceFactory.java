@@ -1,7 +1,7 @@
-package org.edu_sharing.alfresco.service.handleservice;
+package org.edu_sharing.service.handleservice;
 
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfresco.service.handleservicedoi.DOIService;
+import org.edu_sharing.service.handleservicedoi.DOIService;
 
 public class HandleServiceFactory {
 

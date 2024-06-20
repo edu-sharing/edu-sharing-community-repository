@@ -1,4 +1,4 @@
-package org.edu_sharing.alfresco.service.handleservicedoi;
+package org.edu_sharing.service.handleservicedoi;
 
 import com.typesafe.config.Config;
 import org.alfresco.model.ContentModel;
@@ -6,10 +6,10 @@ import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
-import org.edu_sharing.alfresco.service.handleservice.HandleService;
-import org.edu_sharing.alfresco.service.handleservice.HandleServiceNotConfiguredException;
-import org.edu_sharing.alfresco.service.handleservicedoi.model.DOI;
-import org.edu_sharing.alfresco.service.handleservicedoi.model.Data;
+import org.edu_sharing.service.handleservice.HandleService;
+import org.edu_sharing.service.handleservice.HandleServiceNotConfiguredException;
+import org.edu_sharing.service.handleservicedoi.model.DOI;
+import org.edu_sharing.service.handleservicedoi.model.Data;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.springframework.http.*;
@@ -32,7 +32,7 @@ public class DOIService implements HandleService {
 
     RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 
-    public DOIService() throws HandleServiceNotConfiguredException{
+    public DOIService() throws HandleServiceNotConfiguredException {
         Config config = LightbendConfigLoader.get().getConfig("repository.doiservice");
         baseUrl = config.getString("baseUrl");
         accountId = config.getString("accountId");
