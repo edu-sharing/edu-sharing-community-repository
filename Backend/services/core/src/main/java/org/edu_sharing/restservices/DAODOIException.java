@@ -8,24 +8,17 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DAODOIServiceException extends DAOException{
+public class DAODOIException extends DAOException{
 
     DOIServiceException cause;
 
-    public DAODOIServiceException(DOIServiceException t, String nodeId) {
+    public DAODOIException(DOIServiceException t, String nodeId) {
         super(t, nodeId);
         cause = (DOIServiceException) t;
     }
 
     @Override
     public Map<String, Serializable> getDetails() {
-        if(cause instanceof DOIServiceMissingAttributeException){
-            return new HashMap<>() {{
-                put("property", ((DOIServiceMissingAttributeException)cause).getProperty());
-                put("schemaField", ((DOIServiceMissingAttributeException)cause).getSchemaField());
-                put("cause",cause.getClass().getSimpleName());
-            }};
-        }
         if(cause instanceof DOIServiceNotConfiguredException){
             return new HashMap<>() {{
                 put("message", "doi service not configured");
@@ -36,5 +29,14 @@ public class DAODOIServiceException extends DAOException{
             put("message", "doi service method failed");
             put("cause",cause.getClass().getSimpleName());
         }};
+    }
+
+    public static DAODOIException instance(DOIServiceException t, String nodeId) {
+
+        if(t instanceof DOIServiceMissingAttributeException){
+            return new DAODOIMissingAttributeException((DOIServiceMissingAttributeException)t,nodeId);
+        }
+
+        return new DAODOIException(t, nodeId);
     }
 }

@@ -101,7 +101,7 @@ public class DAOException extends Exception {
 				&& t.getCause() != null
 				&& t.getCause() instanceof DOIServiceException
 		){
-			return new DAODOIServiceException((DOIServiceException)t.getCause(),nodeId);
+			return DAODOIException.instance((DOIServiceException)t.getCause(),nodeId);
 		}
 
 		if (t instanceof NodeExistsException) {
