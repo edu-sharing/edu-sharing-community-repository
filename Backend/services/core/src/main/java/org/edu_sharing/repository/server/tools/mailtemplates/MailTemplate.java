@@ -12,7 +12,6 @@ import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
-import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.mime.MimeTypesV2;
@@ -36,6 +35,8 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.edu_sharing.repository.tools.URLHelper;
 
 public class MailTemplate {
 	static XPathFactory pfactory = XPathFactory.newInstance();
@@ -110,16 +111,16 @@ public class MailTemplate {
 		);
 		if(MimeTypesV2.MIME_DIRECTORY.equals(mime)){
 			if(nodeService.hasAspect(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,CCConstants.CCM_ASPECT_COLLECTION)){
-				target.put(keyName, URLTool.getNgComponentsUrl() + "collections/?id="+nodeId);
-				target.put(keyName + ".static", URLTool.getNgComponentsUrl(false) + "collections/?id="+nodeId);
+				target.put(keyName, URLHelper.getNgComponentsUrl() + "collections/?id="+nodeId);
+				target.put(keyName + ".static", URLHelper.getNgComponentsUrl(false) + "collections/?id="+nodeId);
 				return;
 			}
-			target.put(keyName, URLTool.getNgComponentsUrl() +  "workspace/?id="+nodeId);
-			target.put(keyName + ".static", URLTool.getNgComponentsUrl(false) +  "workspace/?id="+nodeId);
+			target.put(keyName, URLHelper.getNgComponentsUrl() +  "workspace/?id="+nodeId);
+			target.put(keyName + ".static", URLHelper.getNgComponentsUrl(false) +  "workspace/?id="+nodeId);
 			return;
 		}
-		target.put(keyName, URLTool.getNgComponentsUrl() + "render/"+nodeId+"?closeOnBack=true");
-		target.put(keyName + ".static", URLTool.getNgComponentsUrl(false) + "render/"+nodeId+"?closeOnBack=true");
+		target.put(keyName, URLHelper.getNgComponentsUrl() + "render/"+nodeId+"?closeOnBack=true");
+		target.put(keyName + ".static", URLHelper.getNgComponentsUrl(false) + "render/"+nodeId+"?closeOnBack=true");
 	}
 	public static UserMail getUserMailData(String authorityName) {
 

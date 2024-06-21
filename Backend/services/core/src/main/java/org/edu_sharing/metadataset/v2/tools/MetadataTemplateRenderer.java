@@ -17,8 +17,8 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.tools.DateTool;
-import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
+import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -456,7 +456,7 @@ public class MetadataTemplateRenderer {
 					widgetHtml.
 							append("<div class=\"mdsValue\">").
 							append("<a href=\"").
-							append(URLTool.getNgRenderNodeUrl(nodeRef.getId(), null)).
+							append(URLHelper.getNgRenderNodeUrl(nodeRef.getId(), null)).
 							append("?action=OPTIONS.MATERIAL_FEEDBACK&feedbackClose=true\"").
 							append(" data-es-auth-required=\"true\"").
 							append(" data-es-action=\"OPTIONS.MATERIAL_FEEDBACK\"");
