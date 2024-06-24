@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import {
     distinctUntilChanged,
     filter,
@@ -51,9 +51,9 @@ export class ConfigService {
     private readonly defaultTranslations$ = this.localeSubject.pipe(
         filter((locale) => locale !== null),
         distinctUntilChanged(),
-        switchMap((locale) => of({ locale: locale, dict: this.configV1.getLanguageDefaults() })),
+        switchMap(() => this.configV1.getLanguageDefaults()),
         shareReplay(1),
-    ) as unknown as Observable<{ locale: Locale; dict: Observable<TranslationsDict> }>;
+    ) as unknown as Observable<TranslationsDict>;
     private readonly translationOverrides$ = this.localeSubject.pipe(
         filter((locale) => locale !== null),
         distinctUntilChanged(),
@@ -111,10 +111,7 @@ export class ConfigService {
      *
      * @returns a nested dictionary of default translations
      */
-    observeDefaultTranslations(): Observable<{
-        locale: Locale;
-        dict: Observable<TranslationsDict>;
-    }> {
+    observeDefaultTranslations(): Observable<TranslationsDict> {
         return this.defaultTranslations$;
     }
 
