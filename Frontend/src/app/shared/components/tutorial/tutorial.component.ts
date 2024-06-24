@@ -9,9 +9,8 @@ import {
     ViewChild,
 } from '@angular/core';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
-import { ConfigService } from 'ngx-edu-sharing-api';
+import { ConfigService, ConfigTutorial } from 'ngx-edu-sharing-api';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
-import { ConfigTutorial } from '../../../../../dist/edu-sharing-api/lib/api/models/config-tutorial';
 
 interface Dimensions {
     size: number;
