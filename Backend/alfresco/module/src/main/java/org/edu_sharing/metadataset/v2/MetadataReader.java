@@ -279,14 +279,21 @@ public class MetadataReader {
                         }
                         if (name.equals("facets")) {
                             NodeList facets = data.getChildNodes();
-                            List<String> facetsList = new ArrayList<>();
+                            List<MetadataQueryParameter.MetadataQueryFacet> facetsList = new ArrayList<>();
                             for (int l = 0; l < facets.getLength(); l++) {
                                 String facetName = facets.item(l).getNodeName();
                                 String facetValue = facets.item(l).getTextContent();
-                                if (facetName.equals("facet"))
-                                    facetsList.add(facetValue);
+                                if (facetName.equals("facet")) {
+                                    MetadataQueryParameter.MetadataQueryFacet facet = new MetadataQueryParameter.MetadataQueryFacet();
+                                    facet.setValue(facetValue);
+                                    NamedNodeMap att = facets.item(l).getAttributes();
+                                    if(att != null && att.getNamedItem("nested") != null) {
+                                        facet.setNested(att.getNamedItem("nested").getTextContent());
+                                    }
+                                    facetsList.add(facet);
+                                }
                             }
-                            if (facetsList.size() > 0)
+                            if (!facetsList.isEmpty())
                                 parameter.setFacets(facetsList);
                         }
                         if (name.equals("ignorable"))

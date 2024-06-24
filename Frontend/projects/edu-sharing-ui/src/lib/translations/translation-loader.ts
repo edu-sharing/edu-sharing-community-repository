@@ -89,7 +89,9 @@ export class TranslationLoader implements TranslateLoader {
     private getOriginalTranslations(lang: string): Observable<Dictionary> {
         switch (this.getSource()) {
             case 'repository':
-                return this.configService.observeDefaultTranslations().pipe(first());
+                return this.configService
+                    .observeDefaultTranslations()
+                    .pipe(first()) as unknown as Observable<Dictionary>;
             case 'local':
                 return this.mergeTranslations(this.fetchTranslations(lang));
         }
