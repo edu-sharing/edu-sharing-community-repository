@@ -2120,6 +2120,10 @@
 	    		<property name="ccm:published_handle_id">
 	    			<type>d:text</type>
 	    		</property>
+				<property name="ccm:published_doi_id">
+					<type>d:text</type>
+				</property>
+
 				<!-- noderef of the original node this one is a copy of -->
 				<property name="ccm:published_original">
 					<type>d:noderef</type>

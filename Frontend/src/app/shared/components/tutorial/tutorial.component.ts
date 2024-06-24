@@ -9,6 +9,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
+import { ConfigService } from 'ngx-edu-sharing-api';
 import { AppContainerService, UIAnimation } from 'ngx-edu-sharing-ui';
 
 interface Dimensions {
@@ -86,7 +87,11 @@ export class TutorialComponent {
         this.onNext.emit();
     }
 
-    private setElement(element: ElementRef) {
+    private async setElement(element: ElementRef) {
+        this.config = await this.configService.get<ConfigTutorial>('tutorial', { enabled: true });
+        if (!this.config?.enabled) {
+            return;
+        }
         if (!element) {
             return;
         }

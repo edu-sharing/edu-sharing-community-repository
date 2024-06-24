@@ -48,6 +48,7 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.restservices.shared.Contributor;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.restservices.shared.NodeSearch;
@@ -314,6 +315,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     if (aggregation.getValue().isSterms()) {
                         Aggregation definition = aggregations.get(a.getKey());
                         StringTermsAggregate sterms = aggregation.getValue().sterms();
+                        facetsResult.add(getFacet(aggregation.getKey(), sterms, definition));
+                    } else if (aggregation.getValue().isNested()) {
+                        Aggregation definition = aggregations.get(a.getKey());
+                        NestedAggregate nested = aggregation.getValue().nested();
+                        StringTermsAggregate sterms = nested.aggregations().values().stream().findFirst().get().sterms();
                         facetsResult.add(getFacet(aggregation.getKey(), sterms, definition));
                     }
                 }
@@ -957,7 +963,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
 
         org.alfresco.service.cmr.repository.NodeRef alfNodeRef = new org.alfresco.service.cmr.repository.NodeRef(new StoreRef(protocol, identifier), nodeId);
-        String contentUrl = URLTool.getNgRenderNodeUrl(nodeId, null);
+        String contentUrl = URLHelper.getNgRenderNodeUrl(nodeId, null);
         contentUrl = URLTool.addOAuthAccessToken(contentUrl);
         props.put(CCConstants.CONTENTURL, contentUrl);
 

@@ -85,6 +85,8 @@ import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.edu_sharing.service.permission.HandleParam;
+
 public class NodeDao {
     private static Logger logger = Logger.getLogger(NodeDao.class);
     private static final StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
@@ -2737,9 +2739,9 @@ public class NodeDao {
         }
     }
 
-    public NodeDao publishCopy(HandleMode handleMode) throws DAOException {
+    public NodeDao publishCopy(HandleParam handleParam) throws DAOException {
         try {
-            return NodeDao.getNode(repoDao, nodeService.publishCopy(nodeId, handleMode), Filter.createShowAllFilter());
+            return NodeDao.getNode(repoDao, nodeService.publishCopy(nodeId, handleParam), Filter.createShowAllFilter());
         } catch (Throwable t) {
             throw DAOException.mapping(t);
         }
