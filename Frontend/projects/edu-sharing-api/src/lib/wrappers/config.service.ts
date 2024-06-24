@@ -111,7 +111,10 @@ export class ConfigService {
      *
      * @returns a nested dictionary of default translations
      */
-    observeDefaultTranslations() {
+    observeDefaultTranslations(): Observable<{
+        locale: Locale;
+        dict: Observable<TranslationsDict>;
+    }> {
         return this.defaultTranslations$;
     }
 

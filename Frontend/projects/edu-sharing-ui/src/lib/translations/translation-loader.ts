@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { TranslateLoader } from '@ngx-translate/core';
-import { ConfigService, LANGUAGES } from 'ngx-edu-sharing-api';
+import { ConfigService, LANGUAGES, TranslationsDict } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { concat, Observable, of } from 'rxjs';
 import { catchError, filter, first, map, reduce, switchMap, tap } from 'rxjs/operators';
@@ -90,7 +90,7 @@ export class TranslationLoader implements TranslateLoader {
                     filter((arg) => arg.locale === LANGUAGES[lang]),
                     switchMap((arg) => arg.dict.pipe(first())),
                     first(),
-                );
+                ) as unknown as Observable<Dictionary>;
             case 'local':
                 return this.mergeTranslations(this.fetchTranslations(lang));
         }
