@@ -143,6 +143,8 @@
       "NO_FUZZY": "Inserire l'indirizzo e-mail completo per aggiungere gli utenti",
       "DOI": "Fornire con DOI",
       "DOI_INFO": "DOI (Digital Object Identifier) è un ID standardizzato per l'identificazione globale e unica del materiale recuperato.",
+      "HANDLE": "Fornire con handle",
+      "HANDLE_INFO": "handle (Digital Object Identifier) è un ID standardizzato per l'identificazione globale e unica del materiale recuperato.",
       "PUBLISHING_WARNING_TITLE": "Pubblicare un elemento?",
       "PUBLISHING_WARNING_MESSAGE": "Se si continua, l'elemento corrente verrà condiviso con tutti gli utenti del sistema e sarà accessibile a tutti.\n\nSiete sicuri di voler pubblicare questo elemento?",
       "ERROR_INVALID_TYPE_COMBINATION": "elementi di tipo diverso non possono essere condivisi in blocco",

@@ -9,6 +9,7 @@ export {
     FeedbackData,
     LicenseAgreement,
     ManualRegistrationData,
+    HandleParam,
     Mds as MdsDefinition,
     MdsGroup,
     MdsQueryCriteria,

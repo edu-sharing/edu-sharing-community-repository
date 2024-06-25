@@ -1315,7 +1315,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					handle = generated;
 
 				} catch (Exception e) {
-					logger.error("sql error while creating handle id", e);
+					logger.error("Internal error while creating handle id", e);
 					// DEBUG ONLY
 					//handle = "test/" + Math.random();
 					throw new RuntimeException("Handle generation throwed an error: " + e.getMessage(), e);
