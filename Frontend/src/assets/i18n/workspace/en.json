@@ -60,7 +60,8 @@
       "VIRUS": "Virus detected. File was deleted.",
       "VIRUS_SCAN_FAILED": "Error verifying the file. Please try again.",
       "MIMETYPE_VERIFICATION": "File content was not allowed or could not be verified. File was deleted.",
-      "FILETYPE_VERIFICATION": "File extension could not be verified. File was deleted."
+      "FILETYPE_VERIFICATION": "File extension could not be verified. File was deleted.",
+      "FILE_SIZE_EXCEEDED": "Maximum allowed file size exceeded (file size: {{actualSize}}, maximum allowed: {{maxSize}})"
     },
     "ADD_FOLDER_TITLE": "Add new folder",
     "ADD_FOLDER_METADATASET": "Metadataset of folder",
@@ -265,6 +266,23 @@
         "IMPORT_BLOCKED": "Changed status of import-blocking"
       }
     },
+    "LTI_TOOLS": {
+      "TITLE": "LTI tools",
+      "TITLE_TOOL": "Info for tool {{ tool }}",
+      "TITLE_CONFIG": "Configurations for tool {{ tool }}",
+      "TITLE_CREATE_LTI": "Create new {{ tool }} object",
+      "NEW_TOOL": "New tool",
+      "EDIT_TOOL": "Edit tool info",
+      "CREATE_LOCATION": "File location:",
+      "MANAGE_CONFIGS": "Manage configurations",
+      "CREATE_NAME_PLACEHOLDER": "Enter name...",
+      "NEW_CONFIG": "Create configuration",
+      "EDIT_CONFIG": "Edit configuration",
+      "USE_TOOL": "Apply now",
+      "DELETE_CONFIG": "Delete configuration",
+      "DELETE_CONFIG_TITLE": "Delete configuration?",
+      "DELETE_CONFIG_MESSAGE": "Are you sure you want to delete the selected tool configuration?\nAny objects already created using this configuration will become invalid."
+    },
     "LTI_V13_PLATFORM": {
       "NODE": {
         "CREATE": {
@@ -289,7 +307,8 @@
       "REPLACE_MATERIAL": "Replace material",
       "REPLACE_PREVIEW": "Replace preview",
       "DELETE_PREVIEW": "Delete preview",
-      "UPDATED": "Information updated"
+      "UPDATED": "Information updated",
+      "PREVIEW_DELETED": "Thumbnail is deleted"
     },
     "REVERTED_VERSION": "Version has been reverted successfully",
     "NODE_TEMPLATE": {
@@ -326,6 +345,7 @@
       "NOBODY": "<not assigned>",
       "OLD_STATUS": "old status",
       "NEW_STATUS": "new status",
+      "INFO_MESSAGE": "Please note that the choosen person/group will need to get full access to this material in the process in order to change and and update the material and workflow.",
       "HISTORY": "workflow activities",
       "NO_COMMENT": "Please enter a comment for workflow activity.",
       "NO_RECEIVER": "Please enter a receiver for workflow activity.",
@@ -333,6 +353,7 @@
       "USER_NO_PERMISSION": "Missing permissions",
       "USER_NO_PERMISSION_INFO": "The user/group in charge '{{user}}' has currently no permission to access this document / these documents. Do you want to grant them coordinator permissions?\n\nCoordinators may edit the material and grant additional users access.",
       "PROCEED": "Yes, grant permissions",
+      "SAVE": "Save",
       "BULK_WORKFLOWS_EXIST": "Some of the selected documents already have an active workflow. Please edit these documents separately."
     },
     "CONTRIBUTOR": {

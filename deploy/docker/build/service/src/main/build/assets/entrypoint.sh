@@ -247,8 +247,6 @@ xmlstarlet ed -L \
 	-i '$internal' -t attr -n "address" -v "${my_bind}" \
 	-i '$internal' -t attr -n "port" -v "8080" \
 	-i '$internal' -t attr -n "scheme" -v "http" \
-	-i '$internal' -t attr -n "proxyName" -v "${my_host_internal}" \
-	-i '$internal' -t attr -n "proxyPort" -v "${my_port_internal}" \
 	-i '$internal' -t attr -n "protocol" -v "org.apache.coyote.http11.Http11NioProtocol" \
 	-i '$internal' -t attr -n "connectionTimeout" -v "${my_wait_internal}" \
 	-i '$internal' -t attr -n "maxThreads" -v "${my_pool_internal}" \
@@ -257,8 +255,6 @@ xmlstarlet ed -L \
 	-i '$external1' -t attr -n "address" -v "${my_bind}" \
 	-i '$external1' -t attr -n "port" -v "8081" \
 	-i '$external1' -t attr -n "scheme" -v "${my_prot_external}" \
-	-i '$external1' -t attr -n "proxyName" -v "${my_host_external}" \
-	-i '$external1' -t attr -n "proxyPort" -v "${my_port_external}" \
 	-i '$external1' -t attr -n "protocol" -v "org.apache.coyote.http11.Http11NioProtocol" \
 	-i '$external1' -t attr -n "connectionTimeout" -v "${my_wait_external}" \
 	-i '$external1' -t attr -n "maxThreads" -v "${my_pool_external}" \
@@ -267,8 +263,6 @@ xmlstarlet ed -L \
 	-i '$external2' -t attr -n "address" -v "${my_bind}" \
 	-i '$external2' -t attr -n "port" -v "8009" \
 	-i '$external2' -t attr -n "scheme" -v "${my_prot_external}" \
-	-i '$external2' -t attr -n "proxyName" -v "${my_host_external}" \
-	-i '$external2' -t attr -n "proxyPort" -v "${my_port_external}" \
 	-i '$external2' -t attr -n "protocol" -v "org.apache.coyote.ajp.AjpNioProtocol" \
 	-i '$external2' -t attr -n "URIEncoding" -v "UTF-8" \
 	-i '$external2' -t attr -n "connectionTimeout" -v "${my_wait_external}" \

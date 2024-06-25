@@ -21,6 +21,7 @@ export {
     MdsWidgetCondition,
     MetadataSetInfo,
     NotificationEventDto as Notification,
+    ConfigTutorial,
     Mediacenter,
     NotificationConfig,
     Node,

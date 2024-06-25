@@ -27,7 +27,9 @@ import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
-import org.edu_sharing.alfresco.service.handleservice.HandleService;
+import org.edu_sharing.alfresco.policy.OnCopyIOPolicy;
+import org.edu_sharing.service.handleservice.HandleService;
+import org.edu_sharing.service.handleservice.HandleServiceFactory;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -42,14 +44,20 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.repository.tools.URLHelper;
+import org.edu_sharing.service.handleservicedoi.FeatureInfoDoiService;
+import org.edu_sharing.service.handleservice.FeatureInfoHandleService;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.HandleMode;
+import org.edu_sharing.service.permission.HandleParam;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.search.Suggestion;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
+import org.edu_sharing.spring.ApplicationContextFactory;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 
 import java.io.InputStream;
@@ -140,6 +148,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toNodeId),
 					QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS),
 					QName.createQName(originalName), copyChildren);
+
 			int renameCounter = 1;
 			while(true) {
 				try {
@@ -310,9 +319,24 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				logger.info("will save property "+widget.getId()+" with predefined defaultvalue "+widget.getDefaultvalue());
 				toSafe.put(id,widget.getDefaultvalue());
 				continue;
-			} else if("date".equals(widget.getType())){
+			} else if("date".equals(widget.getType()) && props.containsKey(id)){
 				try {
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+					values = Arrays.stream(props.get(id)).map((p) -> {
+						try {
+							return sdf.parse(p);
+						} catch (ParseException e) {
+							throw new RuntimeException(e);
+						}
+					}).collect(Collectors.toList());
+
+				}catch(Throwable t){
+					logger.info("Could not parse date for widget id " + widget.getId() + ": " + t.getMessage());
+					values = new ArrayList<>();
+				}
+			}else if("datetime".equals(widget.getType()) && props.containsKey(id)){
+				try {
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
 					values = Arrays.stream(props.get(id)).map((p) -> {
 						try {
 							return sdf.parse(p);
@@ -650,23 +674,18 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		try {
 			NodeRef nodeRef = new NodeRef(store, nodeId);
 			Map<QName, Serializable> props = transformPropMap(_props);
-			Map<String, Object> propsNotNull = new HashMap<>();
+			Map<String, Object> propsConverted = new HashMap<>();
+			Set<QName> propsNull = new HashSet<>();
 
 			// do in transaction to disable behaviour
 			// otherwise interceptors might be called multiple times -> the final update props is enough!
-			serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
-				policyBehaviourFilter.disableBehaviour(nodeRef);
-				for(Map.Entry<QName, Serializable> prop : props.entrySet()){
-					// instead of storing props as null (which can cause solr erros), remove them completely from the node!
-					if(prop.getValue()==null) {
-						nodeService.removeProperty(nodeRef, prop.getKey());
-					}else
-						propsNotNull.put(prop.getKey().toString(),prop.getValue());
+			for(Map.Entry<QName, Serializable> prop : props.entrySet()){
+				// instead of storing props as null (which can cause solr erros), remove them completely from the node!
+				if(prop.getValue()==null) {
+					propsNull.add(prop.getKey());
 				}
-				policyBehaviourFilter.enableBehaviour(nodeRef);
-				return null;
-			});
-
+				propsConverted.put(prop.getKey().toString(),prop.getValue());
+			}
 
 			// don't do this cause it's slow:
 			/*
@@ -676,15 +695,15 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			 */
 
 			// prevent overwriting of properties that don't come with param _props
-			Set<String> changedProps = propsNotNull.keySet();
+			Set<String> changedProps = propsConverted.keySet();
 			Map<QName, Serializable> currentProps = nodeService.getProperties(nodeRef);
 			for (Map.Entry<QName, Serializable> entry : currentProps.entrySet()) {
 				if (!changedProps.contains(entry.getKey().toString())) {
-					propsNotNull.put(entry.getKey().toString(), entry.getValue());
+					propsConverted.put(entry.getKey().toString(), entry.getValue());
 				}
 			}
 
-			Map<String, Object> propsFinal = propsNotNull;
+			Map<String, Object> propsFinal = propsConverted;
 
 			for (PropertiesSetInterceptor i : PropertiesInterceptorFactory.getPropertiesSetInterceptors()) {
 				try {
@@ -702,7 +721,17 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					HashMap::putAll
 			);
 			nodeService.setProperties(nodeRef, propsStore);
-
+			// do in transaction to disable behaviour
+			// otherwise interceptors might be called multiple times -> the final update props is enough!
+			// to it AFTER set properties so the values can be sent as NULL-Values into setProperties to be read by interceptors
+			serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+				policyBehaviourFilter.disableBehaviour(nodeRef);
+				for(QName prop : propsNull){
+					nodeService.removeProperty(nodeRef, prop);
+				}
+				policyBehaviourFilter.enableBehaviour(nodeRef);
+				return null;
+			});
 		} catch (Exception e) {
 			// this occurs sometimes in workspace
 			// it seems it is an alfresco bug:
@@ -1155,7 +1184,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	@Override
-	public String publishCopy(String nodeId, HandleMode handleMode) throws Throwable {
+	public String publishCopy(String nodeId, HandleParam handleParam) throws Throwable {
 		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY);
 		if(PermissionServiceFactory.getLocalService().hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE,
 						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
@@ -1188,6 +1217,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				NodeRef newNode;
 				try {
 					newNode = copyNode(nodeId, container, true);
+					OnCopyIOPolicy.removeCopiedUsages(nodeService, newNode);
 				} catch (Throwable t) {
 					throw new RuntimeException(t);
 				}
@@ -1213,8 +1243,28 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					setPermissions(newNode.getId(), CCConstants.AUTHORITY_GROUP_EVERYONE,
 							new String[]{CCConstants.PERMISSION_CONSUMER, CCConstants.PERMISSION_CC_PUBLISH},
 							true);
-					if(handleMode != null) {
-						createHandle(newNode, currentCopies, handleMode);
+					if(handleParam != null) {
+						ApplicationContext eduAppContext = ApplicationContextFactory.getApplicationContext();
+						if(handleParam.handleService != null){
+							try{
+								eduAppContext.getBean(FeatureInfoHandleService.class);
+								createHandle(newNode, currentCopies,
+										HandleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.handle),
+										handleParam.handleService );
+							}catch (NoSuchBeanDefinitionException e){
+								logger.error("handle service not enabled");
+							}
+						}
+						if(handleParam.doiService != null){
+							try{
+								eduAppContext.getBean(FeatureInfoDoiService.class);
+								createHandle(newNode, currentCopies,
+										HandleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.doi),
+										handleParam.doiService );
+							}catch (NoSuchBeanDefinitionException e){
+								logger.error("doi service not enabled");
+							}
+						}
 					}
 
 					policyBehaviourFilter.enableBehaviour(newNode);
@@ -1227,15 +1277,13 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 
 	@Override
-	public void createHandle(NodeRef nodeRef, List<String> publishedCopies, HandleMode handleMode) throws Exception {
+	public void createHandle(NodeRef nodeRef, List<String> publishedCopies, HandleService handleService, HandleMode handleMode) throws Exception {
 		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE);
-		HandleService handleService = null;
 		try {
-			handleService = new HandleService();
 			/**
 			 * test handleservice to prevent property handleid isset but can not be pushed to handleservice cause of configration problems
 			 */
-			handleService.handleServiceAvailable();
+			if(!handleService.available()) throw new Exception("handleservice unavailable");
 		} catch (Exception e) {
 			// DEBUG ONLY
 			//handle = "test/" + Math.random();
@@ -1245,9 +1293,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		// fetch the last given handle from the currently existing copies
 		if(handleMode.equals(HandleMode.update) && publishedCopies.size() > 0 ){
 			Set<String> handles = publishedCopies.stream().filter((c) ->
-					getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID) != null
+					getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, handleService.getHandleIdProperty()) != null
 			).map((c) ->
-					getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID)
+					getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, handleService.getHandleIdProperty())
 			).distinct().collect(Collectors.toSet());
 			if(handles.size() != 1){
 				throw new IllegalStateException("Multiple handles found but handleMode " + handleMode + " was requested");
@@ -1255,48 +1303,51 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			currentHandle = handles.iterator().next();
 		}
 
+		String generated = null;
 		String handle = null;
 
 		Map<QName, Serializable> publishedProps = new HashMap<QName, Serializable>();
 
-		if(handleMode.equals(HandleMode.distinct)) {
-			try {
-				handle = handleService.generateHandle();
+		try {
+			if (handleMode.equals(HandleMode.distinct)) {
+				try {
+					generated = handleService.generateId();
+					handle = generated;
 
-			} catch (Exception e) {
-				logger.error("sql error while creating handle id", e);
-				// DEBUG ONLY
-				//handle = "test/" + Math.random();
-				throw new RuntimeException("Handle generation throwed an error: " + e.getMessage(), e);
+				} catch (Exception e) {
+					logger.error("sql error while creating handle id", e);
+					// DEBUG ONLY
+					//handle = "test/" + Math.random();
+					throw new RuntimeException("Handle generation throwed an error: " + e.getMessage(), e);
+				}
+			} else {
+				if (currentHandle == null) {
+					throw new IllegalArgumentException("Handle Mode " + handleMode + " requested but no handle assigned yet");
+				}
+				handle = currentHandle;
 			}
-		} else {
-			if(currentHandle == null){
-				throw new IllegalArgumentException("Handle Mode " + handleMode + " requested but no handle assigned yet");
+
+
+			publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_DATE), new Date());
+
+			if (handle != null) {
+				publishedProps.put(QName.createQName(handleService.getHandleIdProperty()), handle);
 			}
-			handle = currentHandle;
-		}
 
-
-		publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_DATE), new Date());
-
-		if (handle != null) {
-			publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID), handle);
-		}
-
-		if (!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED))) {
-			nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED), publishedProps);
-		} else {
-			for (Map.Entry<QName, Serializable> entry : publishedProps.entrySet()) {
-				nodeService.setProperty(nodeRef, entry.getKey(), entry.getValue());
+			if (!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED))) {
+				nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED), publishedProps);
+			} else {
+				for (Map.Entry<QName, Serializable> entry : publishedProps.entrySet()) {
+					nodeService.setProperty(nodeRef, entry.getKey(), entry.getValue());
+				}
 			}
-		}
 
-		/**
-		 * create version for the published node
-		 * NO: NOT NEEDED ANYMORE!
-		 * The version is implicitly correct because a copied node has exact ONE version!
-		 *
-		 */
+			/**
+			 * create version for the published node
+			 * NO: NOT NEEDED ANYMORE!
+			 * The version is implicitly correct because a copied node has exact ONE version!
+			 *
+			 */
 				/*
 				Map<QName, Serializable> props = nodeService.getProperties(nodeRef);
 				props.put(QName.createQName(CCConstants.CCM_PROP_IO_VERSION_COMMENT), NODE_PUBLISHED);
@@ -1306,16 +1357,23 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					// TODO Auto-generated catch block
 					logger.error(e1.getMessage(), e1);
 				}*/
-		if (handle != null) {
-			String contentLink = URLTool.getNgRenderNodeUrl(nodeRef.getId(), null, false);
-			if (handleMode.equals(HandleMode.distinct)) {
-				logger.info("Create handle " + handle + ", " + contentLink);
-				handleService.createHandle(handle, handleService.getDefautValues(contentLink));
-			} else if (handleMode.equals(HandleMode.update)) {
-				logger.info("Update handle " + handle + ", " + contentLink);
-				handleService.updateHandle(handle, handleService.getDefautValues(contentLink));
+			if (handle != null) {
+				String contentLink = URLHelper.getNgRenderNodeUrl(nodeRef.getId(), null, false);
+				Map<QName, Serializable> properties = nodeService.getProperties(nodeRef);
+				if (handleMode.equals(HandleMode.distinct)) {
+					logger.info("Create handle " + handle + ", " + contentLink);
+					handleService.create(handle, properties);
+				} else if (handleMode.equals(HandleMode.update)) {
+					logger.info("Update handle " + handle + ", " + contentLink);
+					handleService.update(handle, properties);
+				}
 			}
-
+		}catch (Exception e){
+			//cleanup draft
+			if(generated != null){
+				handleService.delete(generated);
+			}
+			throw e;
 		}
 
 	}
@@ -1340,7 +1398,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 	@Override
 	public String getPreviewUrl(String storeProtocol, String storeId, String nodeId, String version) {
-		String previewURL = URLTool.getBaseUrl(true);
+		String previewURL = URLHelper.getBaseUrl(true);
 		previewURL += "/preview?nodeId="+nodeId+"&storeProtocol="+storeProtocol+"&storeId="+storeId+"&dontcache="+System.currentTimeMillis();
 		if(version!=null){
 			previewURL +="&version="+version;

@@ -100,6 +100,7 @@ import org.edu_sharing.repository.server.tools.cache.Cache;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.server.tools.cache.UserCache;
 import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
+import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
@@ -878,7 +879,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		boolean isSubOfContent = serviceRegistry.getDictionaryService().isSubClass(QName.createQName(nodeType), QName.createQName(CCConstants.CM_TYPE_CONTENT));
 
 		logger.debug("setting external URL");
-		String contentUrl = URLTool.getNgRenderNodeUrl(nodeRef.getId(),null);
+		String contentUrl = URLHelper.getNgRenderNodeUrl(nodeRef.getId(),null);
 
 		contentUrl = URLTool.addOAuthAccessToken(contentUrl);
 		propsCopy.put(CCConstants.CONTENTURL, contentUrl);
@@ -1353,7 +1354,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				version = (String) properties.get(CCConstants.CM_PROP_VERSIONABLELABEL);
 
 			//String permaLink = URLTool.getBaseUrl() + "/node/" + nodeRef.getId();
-			String permaLink = URLTool.getNgComponentsUrl()+"render/" + nodeRef.getId();
+			String permaLink = URLHelper.getNgComponentsUrl()+"render/" + nodeRef.getId();
 			permaLink = (version != null) ? permaLink + "/" + version : permaLink;
 			properties.put(CCConstants.VIRT_PROP_PERMALINK, permaLink);
 		}
@@ -3640,7 +3641,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 				props.put(CCConstants.ALFRESCO_MIMETYPE, getAlfrescoMimetype(version.getFrozenStateNodeRef()));
 				// contenturl
-				String contentUrl = URLTool.getNgRenderNodeUrl(nodeId,version.getVersionLabel());
+				String contentUrl = URLHelper.getNgRenderNodeUrl(nodeId,version.getVersionLabel());
 				contentUrl = URLTool.addOAuthAccessToken(contentUrl);
 				
 				props.put(CCConstants.CONTENTURL, contentUrl);

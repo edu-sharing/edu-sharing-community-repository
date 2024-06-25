@@ -5,21 +5,18 @@ import {
     WORKFLOW_STATUS_UNCHECKED,
     WorkflowDefinition,
 } from 'ngx-edu-sharing-ui';
-import { Observable, forkJoin } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
     Authority,
     ConfigurationService,
     DialogButton,
-    Group,
     Node,
-    Permission,
     RestConnectorService,
     RestConstants,
     RestHelper,
     RestIamService,
     RestNodeService,
-    UserSimple,
     WorkflowEntry,
 } from '../../../../core-module/core.module';
 import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
@@ -259,7 +256,9 @@ export class WorkflowDialogComponent {
     }
 
     private updateButtons() {
-        const save = new DialogButton('SAVE', { color: 'primary' }, () => this.saveWorkflow());
+        const save = new DialogButton('WORKSPACE.WORKFLOW.SAVE', { color: 'primary' }, () =>
+            this.saveWorkflow(),
+        );
         save.disabled = !this.hasChanges();
         const buttons = [
             new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
@@ -306,6 +305,7 @@ export class WorkflowDialogComponent {
             messageParameters: {
                 user: new AuthorityNamePipe(this.translate).transform(receiver, null),
             },
+            messageMode: 'html',
             buttons: [
                 { label: 'CANCEL', config: { color: 'standard' } },
                 { label: 'WORKSPACE.WORKFLOW.PROCEED', config: { color: 'primary' } },

@@ -48,6 +48,12 @@
       },
       "About": {
         "properties": {
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/FeatureInfo"
+            },
+            "type": "array"
+          },
           "lastCacheUpdate": {
             "format": "int64",
             "type": "integer"
@@ -940,6 +946,14 @@
         },
         "type": "object"
       },
+      "ConfigTutorial": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "ConfigUpload": {
         "properties": {
           "postDialog": {
@@ -1365,6 +1379,18 @@
         ],
         "type": "object"
       },
+      "FeatureInfo": {
+        "properties": {
+          "id": {
+            "enum": [
+              "handleService",
+              "doiService"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "FeedbackData": {
         "properties": {
           "authority": {
@@ -1643,6 +1669,25 @@
         "properties": {
           "enabled": {
             "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "HandleParam": {
+        "properties": {
+          "doiService": {
+            "enum": [
+              "distinct",
+              "update"
+            ],
+            "type": "string"
+          },
+          "handleService": {
+            "enum": [
+              "distinct",
+              "update"
+            ],
+            "type": "string"
           }
         },
         "type": "object"
@@ -6491,6 +6536,9 @@
           },
           "themeColors": {
             "$ref": "#/components/schemas/ConfigThemeColors"
+          },
+          "tutorial": {
+            "$ref": "#/components/schemas/ConfigTutorial"
           },
           "upload": {
             "$ref": "#/components/schemas/ConfigUpload"
@@ -27974,6 +28022,16 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HandleParam"
+              }
+            }
+          },
+          "description": "handle parameter, if a handle and/or doi should be created. Skip this parameter if you don't want a handle or doi,"
+        },
         "responses": {
           "200": {
             "content": {

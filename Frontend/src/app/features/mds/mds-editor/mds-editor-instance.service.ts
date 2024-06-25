@@ -1183,9 +1183,15 @@ export class MdsEditorInstanceService implements OnDestroy {
             !widget.definition.values &&
             widget.getInitialValues().jointValues
         ) {
-            const mdsValueList = await widget.getValuesForKeys(
+            let mdsValueList = (await widget.getValuesForKeys(
                 widget.getInitialValues().jointValues,
-            );
+            )) || { values: [] };
+            if (widget.getInitialValues().individualValues) {
+                mdsValueList.values = mdsValueList.values.concat(
+                    (await widget.getValuesForKeys(widget.getInitialValues().individualValues))
+                        ?.values,
+                );
+            }
             if (mdsValueList) {
                 widget.setInitialDisplayValues(mdsValueList);
             }
