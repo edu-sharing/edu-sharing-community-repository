@@ -256,7 +256,9 @@ export class WorkflowDialogComponent {
     }
 
     private updateButtons() {
-        const save = new DialogButton('SAVE', { color: 'primary' }, () => this.saveWorkflow());
+        const save = new DialogButton('WORKSPACE.WORKFLOW.SAVE', { color: 'primary' }, () =>
+            this.saveWorkflow(),
+        );
         save.disabled = !this.hasChanges();
         const buttons = [
             new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
