@@ -715,7 +715,7 @@ public class NodeDao {
             /**
              * call getProperties on demand
              */
-            if (nodeRef.getProperties() == null || nodeRef.getProperties().size() == 0) {
+            if (nodeRef.getProperties() == null || nodeRef.getProperties().isEmpty()) {
                 this.nodeProps = this.nodeService.getProperties(this.storeProtocol, this.storeId, this.nodeId);
 
             } else {

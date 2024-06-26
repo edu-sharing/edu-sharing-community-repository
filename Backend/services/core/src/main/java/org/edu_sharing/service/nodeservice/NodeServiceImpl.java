@@ -45,6 +45,7 @@ import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.tools.URLHelper;
+import org.edu_sharing.service.handleservicedoi.DOIService;
 import org.edu_sharing.service.handleservicedoi.FeatureInfoDoiService;
 import org.edu_sharing.service.handleservice.FeatureInfoHandleService;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
@@ -1362,16 +1363,21 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				Map<QName, Serializable> properties = nodeService.getProperties(nodeRef);
 				if (handleMode.equals(HandleMode.distinct)) {
 					logger.info("Create handle " + handle + ", " + contentLink);
-					handleService.create(handle, properties);
+					handle = handleService.create(handle, nodeRef.getId(), properties);
+					if(handleService instanceof DOIService) {
+						properties.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_DOI_ID), handle);
+					} else {
+						properties.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID), handle);
+					}
 				} else if (handleMode.equals(HandleMode.update)) {
 					logger.info("Update handle " + handle + ", " + contentLink);
-					handleService.update(handle, properties);
+					handleService.update(handle, nodeRef.getId(), properties);
 				}
 			}
 		}catch (Exception e){
 			//cleanup draft
 			if(generated != null){
-				handleService.delete(generated);
+				handleService.delete(generated, nodeRef.getId());
 			}
 			throw e;
 		}
