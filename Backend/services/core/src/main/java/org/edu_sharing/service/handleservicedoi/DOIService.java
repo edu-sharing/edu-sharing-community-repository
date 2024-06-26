@@ -32,10 +32,11 @@ public class DOIService implements HandleService {
 
     /**
      * if you want a custom mapping, register this as a bean
-     * @Bean DOIProperyMappingCustom implements DOIPropertyMapping
+     * @Service
+     * class DOIProperyMappingCustom implements DOIService.DOIPropertyMapping {
      */
     interface DOIPropertyMapping {
-        DOI getCustomMapping(DOI doi, String nodeId, Map<QName, Serializable> properties);
+        DOI getCustomMapping(DOI doi, String nodeId, Map<QName, Serializable> properties) throws DOIServiceMissingAttributeException;
     }
 
     Logger logger = Logger.getLogger(DOIService.class);
@@ -217,8 +218,10 @@ public class DOIService implements HandleService {
 
         //url
         doi.getData().getAttributes().setUrl(getContentLink(properties));
-
-        return customMapping.map(m -> m.getCustomMapping(doi, nodeId, properties)).orElse(doi);
+        if(customMapping.isPresent()) {
+            return customMapping.get().getCustomMapping(doi, nodeId, properties);
+        }
+        return doi;
     }
 
     private HttpHeaders getHttpHeaders() {
