@@ -1,6 +1,7 @@
 package org.edu_sharing.service.nodeservice;
 
 import com.typesafe.config.Config;
+import lombok.Setter;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.policy.BehaviourFilter;
@@ -81,6 +82,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	protected NodeService nodeService = null;
 	protected NodeService nodeServiceAlfresco = null;
 	protected VersionService versionService;
+	@Setter
+	protected HandleServiceFactory handleServiceFactory;
 
 	Logger logger = Logger.getLogger(NodeServiceImpl.class);
 
@@ -1250,7 +1253,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 							try{
 								eduAppContext.getBean(FeatureInfoHandleService.class);
 								createHandle(newNode, currentCopies,
-										HandleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.handle),
+										handleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.handle),
 										handleParam.handleService );
 							}catch (NoSuchBeanDefinitionException e){
 								logger.error("handle service not enabled");
@@ -1260,7 +1263,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 							try{
 								eduAppContext.getBean(FeatureInfoDoiService.class);
 								createHandle(newNode, currentCopies,
-										HandleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.doi),
+										handleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.doi),
 										handleParam.doiService );
 							}catch (NoSuchBeanDefinitionException e){
 								logger.error("doi service not enabled");

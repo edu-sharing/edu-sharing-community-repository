@@ -392,7 +392,7 @@ public class MetadataWidget extends MetadataTranslatable{
 	}
 	public Map<String, Collection<MetadataKey.MetadataKeyRelated>> getValuespaceMappingByRelation(MetadataKey.MetadataKeyRelated.Relation relation) {
 		Map<String, Collection<MetadataKey.MetadataKeyRelated>> map=new HashMap<>();
-		for(MetadataKey value : values){
+ 		for(MetadataKey value : values){
 			map.put(value.getKey(), value.getRelated().stream().filter(r -> r.getRelation().equals(relation)).collect(Collectors.toList()));
 		}
 		return map;

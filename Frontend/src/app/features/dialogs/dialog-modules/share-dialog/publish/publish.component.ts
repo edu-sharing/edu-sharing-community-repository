@@ -27,7 +27,7 @@ import { RestHelper } from '../../../../../core-module/rest/rest-helper';
 import { RestConnectorService } from '../../../../../core-module/rest/services/rest-connector.service';
 import { RestNodeService } from '../../../../../core-module/rest/services/rest-node.service';
 import { HandleState, NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
-import { Toast } from '../../../../../core-ui-module/toast';
+import { Toast, ToastType } from '../../../../../core-ui-module/toast';
 import { UIHelper } from '../../../../../core-ui-module/ui-helper';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
 import {
@@ -35,7 +35,7 @@ import {
     MdsEditorInstanceService,
 } from '../../../../mds/mds-editor/mds-editor-instance.service';
 import { DialogsService } from '../../../dialogs.service';
-import { OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
+import { MdsHelperService, OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
 import { YES_OR_NO } from '../../generic-dialog/generic-dialog-data';
 
 class PublishedNode extends Node {
@@ -70,7 +70,7 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
     handleInitialState: HandleState = {};
     isCopy: boolean;
     handleMode: 'distinct' | 'update' = 'distinct';
-    republish: 'update' | 'new' | false = false;
+    republish: 'update' | 'new' | 'disabled' = 'disabled';
     private publishedVersions: Node[] = [];
     allPublishedVersions: PublishedNode[];
     mdsCompletion: CompletionStatusEntry;
@@ -272,6 +272,7 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
                         observer.complete();
                     },
                     (error) => {
+                        this.handleError(error);
                         observer.error(error);
                         observer.complete();
                     },
@@ -289,6 +290,7 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
                             observer.complete();
                         },
                         (error) => {
+                            this.handleError(error);
                             observer.error(error);
                             observer.complete();
                         },
@@ -366,8 +368,8 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
 
     setRepublish() {
         this.handleActive = {
-            handleService: this.republish !== false && this.handlePermission,
-            doiService: this.republish !== false && this.handlePermission,
+            handleService: this.republish !== 'disabled' && this.handlePermission,
+            doiService: this.republish !== 'disabled' && this.handlePermission,
         };
         this.updatePublishedVersions();
     }
@@ -381,6 +383,13 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
                             !v.status && v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID],
                     )
                     .map((v) => v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID][0]),
+            ).size === 1 ||
+            new Set(
+                this.allPublishedVersions
+                    .filter(
+                        (v) => !v.status && v.properties[RestConstants.CCM_PROP_PUBLISHED_DOI_ID],
+                    )
+                    .map((v) => v.properties[RestConstants.CCM_PROP_PUBLISHED_DOI_ID][0]),
             ).size === 1
         );
     }
@@ -426,6 +435,30 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
             doiService: true,
             handleService: true,
         };
+    }
+
+    private handleError(error: any) {
+        if (UIHelper.errorContains(error, 'DOIServiceMissingAttributeException')) {
+            // do not trigger global error
+            error.preventDefault();
+            const id = error.error.details.property;
+            const widget = this.mdsService.getPrimaryWidget(id);
+            this.toast.show({
+                type: 'error',
+                subtype: ToastType.ErrorSpecific,
+                message: this.translate.instant('WORKSPACE.SHARE.DOI_MISSING_ATTRIBUTE', {
+                    key: widget?.definition?.caption || id,
+                }),
+                action: {
+                    label: this.translate.instant('WORKSPACE.SHARE.DOI_METADATA'),
+                    callback: () => {
+                        this.openMetadata();
+                    },
+                },
+            });
+            return true;
+        }
+        return false;
     }
 }
 export enum ShareMode {

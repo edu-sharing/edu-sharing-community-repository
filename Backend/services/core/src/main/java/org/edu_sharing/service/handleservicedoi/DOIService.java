@@ -1,5 +1,6 @@
 package org.edu_sharing.service.handleservicedoi;
 
+import com.google.gson.Gson;
 import com.typesafe.config.Config;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -18,12 +19,24 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.Serializable;
 import java.util.*;
 
+@Service
 public class DOIService implements HandleService {
+
+    public static final String APICITE_PREFIX = "http://api.datacite.org/";
+
+    /**
+     * if you want a custom mapping, register this as a bean
+     * @Bean DOIProperyMappingCustom implements DOIPropertyMapping
+     */
+    interface DOIPropertyMapping {
+        DOI getCustomMapping(DOI doi, String nodeId, Map<QName, Serializable> properties);
+    }
 
     Logger logger = Logger.getLogger(DOIService.class);
 
@@ -34,9 +47,13 @@ public class DOIService implements HandleService {
     String password;
     boolean enabled = false;
 
+    private final Optional<DOIPropertyMapping> customMapping;
+
     RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 
-    public DOIService() throws HandleServiceNotConfiguredException {
+    public DOIService(Optional<DOIPropertyMapping> customMapping) throws HandleServiceNotConfiguredException {
+        this.customMapping = customMapping;
+
         Config config = LightbendConfigLoader.get().getConfig("repository.doiservice");
         baseUrl = config.getString("baseUrl");
         accountId = config.getString("accountId");
@@ -80,6 +97,9 @@ public class DOIService implements HandleService {
         DOI doi = mapForPublishing(nodeId, properties);
         HttpEntity<DOI> entity = new HttpEntity<>(doi,getHttpHeaders());
         ResponseEntity<DOI> doiResponseEntity = template.exchange(baseUrl+"/dois/"+handleId, HttpMethod.PUT, entity, DOI.class);
+        try {
+            logger.info("Create doi:" + new Gson().toJson(doi));
+        }catch(Throwable ignored) {}
         if(!doiResponseEntity.getStatusCode().is2xxSuccessful()){
             throw new DOIServiceException("update id:" + handleId + " failed. api returned: " + doiResponseEntity.getStatusCode());
         }
@@ -184,11 +204,11 @@ public class DOIService implements HandleService {
         //learning resourcetype
         List<String> lrts = (List<String>) properties.get(QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE));
         Data.Types lrt;
-        if(lrts == null || lrts.size() == 0){
+        if(lrts == null || lrts.isEmpty()){
             lrt = Data.Types.builder().resourceTypeGeneral("Other").build();
             // throw new DOIServiceMissingAttributeException(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE), "resourceTypeGeneral");
         } else {
-            String mapping = getMapping(nodeId,CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE),lrts.get(0));
+            String mapping = getMapping(nodeId,CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE),lrts);
             if(mapping == null) mapping = "Other";
             lrt = Data.Types.builder().resourceTypeGeneral(mapping).build();
         }
@@ -197,7 +217,8 @@ public class DOIService implements HandleService {
 
         //url
         doi.getData().getAttributes().setUrl(getContentLink(properties));
-        return doi;
+
+        return customMapping.map(m -> m.getCustomMapping(doi, nodeId, properties)).orElse(doi);
     }
 
     private HttpHeaders getHttpHeaders() {
@@ -213,14 +234,18 @@ public class DOIService implements HandleService {
         return "Basic " + Base64.getEncoder().encodeToString(valueToEncode.getBytes());
     }
 
-    public String getMapping(String nodeId, String mdsWidgetId, String key){
+    public String getMapping(String nodeId, String mdsWidgetId, List<String> key){
         try {
             MetadataWidget widget = MetadataHelper.getMetadataset(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId)).findWidget(mdsWidgetId);
-            Map<String, Collection<MetadataKey.MetadataKeyRelated>> valuespaceMappingByRelation = widget.getValuespaceMappingByRelation(MetadataKey.MetadataKeyRelated.Relation.closeMatch);
-            Collection<MetadataKey.MetadataKeyRelated> metadataKeyRelateds = valuespaceMappingByRelation.get(key);
-            if(metadataKeyRelateds != null && !metadataKeyRelateds.isEmpty()){
-               return metadataKeyRelateds.iterator().next().getKey();
+            Map<String, Collection<MetadataKey.MetadataKeyRelated>> valuespaceMappingByRelation = widget.getValuespaceMappingByRelation(MetadataKey.MetadataKeyRelated.Relation.relatedMatch);
+            // try to find any key with relation and map it
+            for (String k : key) {
+                Optional<MetadataKey.MetadataKeyRelated> metadataKeyRelates = valuespaceMappingByRelation.get(k).stream().filter(r -> r.getKey().startsWith(APICITE_PREFIX)).findFirst();
+                if(metadataKeyRelates.isPresent()){
+                    return metadataKeyRelates.get().getKey().substring(APICITE_PREFIX.length());
+                }
             }
+
         }catch (Exception e){
             logger.warn(e.getMessage(),e);
         }
