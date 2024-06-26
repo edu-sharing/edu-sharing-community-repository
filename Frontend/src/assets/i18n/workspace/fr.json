@@ -143,6 +143,8 @@
       "NO_FUZZY": "Saisir l'adresse e-mail complète pour ajouter des utilisateurs",
       "DOI": "Fournir le DOI",
       "DOI_INFO": "Le DOI (Digital Object Identifier) est un identifiant standardisé pour l'identification unique et globale du matériel récupéré.",
+      "HANDLE": "Fournir le handle",
+      "HANDLE_INFO": "Le handle est un identifiant standardisé pour l'identification unique et globale du matériel récupéré.",
       "PUBLISHING_WARNING_TITLE": "Publier un élément ?",
       "PUBLISHING_WARNING_MESSAGE": "Si vous continuez, l'élément actuel sera partagé avec tous les utilisateurs du système et sera accessible à tous.\n\nÊtes-vous sûr de vouloir publier cet élément ?",
       "ERROR_INVALID_TYPE_COMBINATION": "les éléments de types différents ne peuvent pas être partagés en masse",

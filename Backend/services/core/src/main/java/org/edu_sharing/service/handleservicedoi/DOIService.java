@@ -1,18 +1,15 @@
 package org.edu_sharing.service.handleservicedoi;
 
 import com.typesafe.config.Config;
-import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.metadataset.v2.MetadataKey;
-import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
-import org.edu_sharing.repository.server.jobs.quartz.MigrateMetadataValuespaceJob;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.handleservice.HandleService;
 import org.edu_sharing.service.handleservice.HandleServiceNotConfiguredException;
 import org.edu_sharing.service.handleservicedoi.model.DOI;
@@ -25,7 +22,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class DOIService implements HandleService {
 
@@ -73,32 +69,32 @@ public class DOIService implements HandleService {
     }
 
     @Override
-    public String create(String id, Map<QName, Serializable> properties) throws Exception {
-        return update(id,properties);
+    public String create(String handleId, String nodeId, Map<QName, Serializable> properties) throws Exception {
+        return update(handleId, nodeId,properties);
     }
 
 
     @Override
-    public String update(String id, Map<QName, Serializable> properties) throws Exception {
-        logger.debug("Updating DOI: " + id);
-        DOI doi = mapForPublishing(properties);
+    public String update(String handleId, String nodeId, Map<QName, Serializable> properties) throws Exception {
+        logger.debug("Updating DOI: " + handleId);
+        DOI doi = mapForPublishing(nodeId, properties);
         HttpEntity<DOI> entity = new HttpEntity<>(doi,getHttpHeaders());
-        ResponseEntity<DOI> doiResponseEntity = template.exchange(baseUrl+"/dois/"+id, HttpMethod.PUT, entity, DOI.class);
+        ResponseEntity<DOI> doiResponseEntity = template.exchange(baseUrl+"/dois/"+handleId, HttpMethod.PUT, entity, DOI.class);
         if(!doiResponseEntity.getStatusCode().is2xxSuccessful()){
-            throw new DOIServiceException("update id:" + id + " failed. api returned: " + doiResponseEntity.getStatusCode());
+            throw new DOIServiceException("update id:" + handleId + " failed. api returned: " + doiResponseEntity.getStatusCode());
         }
         return doiResponseEntity.getBody().getData().getId();
     }
 
     @Override
-    public String delete(String id) throws Exception {
+    public String delete(String handleId, String nodeId) throws Exception {
         //only works for drafts
         HttpEntity<Void> entity = new HttpEntity<>(getHttpHeaders());
-        ResponseEntity<Void> doiResponseEntity = template.exchange(baseUrl+"/dois/"+id, HttpMethod.DELETE, entity,Void.class);
+        ResponseEntity<Void> doiResponseEntity = template.exchange(baseUrl+"/dois/"+handleId, HttpMethod.DELETE, entity,Void.class);
         if(!doiResponseEntity.getStatusCode().is2xxSuccessful()){
-            throw new DOIServiceException("delete id:" + id + " failed. api returned: " + doiResponseEntity.getStatusCode());
+            throw new DOIServiceException("delete id:" + handleId + " failed. api returned: " + doiResponseEntity.getStatusCode());
         }
-        return id;
+        return handleId;
     }
 
 
@@ -128,7 +124,7 @@ public class DOIService implements HandleService {
         return CCConstants.CCM_PROP_PUBLISHED_DOI_ID;
     }
 
-    private DOI mapForPublishing(Map<QName, Serializable> properties) throws Exception {
+    private DOI mapForPublishing(String nodeId, Map<QName, Serializable> properties) throws Exception {
         DOI doi = DOI.builder()
                 .data(Data.builder()
                         .type("dois")
@@ -187,14 +183,16 @@ public class DOIService implements HandleService {
 
         //learning resourcetype
         List<String> lrts = (List<String>) properties.get(QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE));
+        Data.Types lrt;
         if(lrts == null || lrts.size() == 0){
-            throw new DOIServiceMissingAttributeException(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER), "resourceTypeGeneral");
+            lrt = Data.Types.builder().resourceTypeGeneral("Other").build();
+            // throw new DOIServiceMissingAttributeException(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE), "resourceTypeGeneral");
+        } else {
+            String mapping = getMapping(nodeId,CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE),lrts.get(0));
+            if(mapping == null) mapping = "Other";
+            lrt = Data.Types.builder().resourceTypeGeneral(mapping).build();
         }
-
-        String mapping = getMapping(properties,CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER),lrts.get(0));
-        if(mapping == null) mapping = "Other";
-        Data.Types t = Data.Types.builder().resourceTypeGeneral(mapping).build();
-        doi.getData().getAttributes().setTypes(t);
+        doi.getData().getAttributes().setTypes(lrt);
 
 
         //url
@@ -215,21 +213,16 @@ public class DOIService implements HandleService {
         return "Basic " + Base64.getEncoder().encodeToString(valueToEncode.getBytes());
     }
 
-    public String getMapping(Map<QName,Serializable> properties, String mdsWidgetId, String key){
+    public String getMapping(String nodeId, String mdsWidgetId, String key){
         try {
-            String mdsSet = (String)properties.get(QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
-            if(mdsSet==null || mdsSet.isEmpty())
-                mdsSet=CCConstants.metadatasetdefault_id;
-
-            MetadataSet mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(),mdsSet);
-            MetadataWidget widget = mds.findWidget(mdsWidgetId);
+            MetadataWidget widget = MetadataHelper.getMetadataset(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId)).findWidget(mdsWidgetId);
             Map<String, Collection<MetadataKey.MetadataKeyRelated>> valuespaceMappingByRelation = widget.getValuespaceMappingByRelation(MetadataKey.MetadataKeyRelated.Relation.closeMatch);
             Collection<MetadataKey.MetadataKeyRelated> metadataKeyRelateds = valuespaceMappingByRelation.get(key);
-            if(metadataKeyRelateds != null && metadataKeyRelateds.size() > 0){
+            if(metadataKeyRelateds != null && !metadataKeyRelateds.isEmpty()){
                return metadataKeyRelateds.iterator().next().getKey();
             }
         }catch (Exception e){
-            logger.debug(e.getMessage(),e);
+            logger.warn(e.getMessage(),e);
         }
         return null;
     }

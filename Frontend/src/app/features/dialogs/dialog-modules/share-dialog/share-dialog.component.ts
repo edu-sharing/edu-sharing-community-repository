@@ -8,9 +8,9 @@ import {
     ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { UIConstants } from 'ngx-edu-sharing-ui';
+import { UIAnimation, UIConstants } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { Observable, Observer, forkJoin as observableForkJoin } from 'rxjs';
+import { forkJoin as observableForkJoin, Observable, Observer } from 'rxjs';
 import {
     CollectionUsage,
     ConfigurationService,
@@ -33,7 +33,7 @@ import {
     UsageList,
 } from '../../../../core-module/core.module';
 import { Helper } from '../../../../core-module/rest/helper';
-import { Toast } from '../../../../core-ui-module/toast';
+import { Toast, ToastType } from '../../../../core-ui-module/toast';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { CARD_DIALOG_DATA, CardDialogConfig } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
@@ -42,7 +42,6 @@ import { DialogsService } from '../../dialogs.service';
 import { ShareDialogPublishComponent } from './publish/publish.component';
 import { ShareDialogData, ShareDialogResult } from './share-dialog-data';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-share-dialog',
@@ -624,7 +623,33 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                                 this.handlePermissionsPerNode(observer, n, permissions, inherit);
                             },
                             (error) => {
-                                this.toast.error(error);
+                                if (
+                                    UIHelper.errorContains(
+                                        error,
+                                        'DOIServiceMissingAttributeException',
+                                    )
+                                ) {
+                                    this.toast.show({
+                                        type: 'error',
+                                        subtype: ToastType.ErrorSpecific,
+                                        message: this.translate.instant(
+                                            'WORKSPACE.SHARE.DOI_MISSING_ATTRIBUTE',
+                                            {
+                                                key: error.error.details.property,
+                                            },
+                                        ),
+                                        action: {
+                                            label: this.translate.instant(
+                                                'WORKSPACE.SHARE.DOI_METADATA',
+                                            ),
+                                            callback: () => {
+                                                this.publishComponent.openMetadata();
+                                            },
+                                        },
+                                    });
+                                } else {
+                                    this.toast.error(error);
+                                }
                                 this.dialogRef.patchState({ isLoading: false });
                             },
                         );

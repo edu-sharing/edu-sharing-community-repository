@@ -61,17 +61,17 @@ public class HandleServiceImpl implements HandleService{
 	}
 
 	@Override
-	public String create(String id, Map<QName, Serializable> properties) throws Exception {
-		return createHandle(id, getDefautValues(getContentLink(properties)));
+	public String create(String handleId, String nodeId, Map<QName, Serializable> properties) throws Exception {
+		return createHandle(handleId, getDefautValues(getContentLink(properties)));
 	}
 
 	@Override
-	public String update(String id, Map<QName, Serializable> properties) throws Exception {
-		return updateHandle(id, getDefautValues(getContentLink(properties)));
+	public String update(String handleId, String nodeId, Map<QName, Serializable> properties) throws Exception {
+		return updateHandle(handleId, getDefautValues(getContentLink(properties)));
 	}
 
 	@Override
-	public String delete(String id) throws Exception {
+	public String delete(String handleId, String nodeId) throws Exception {
 		//not implemented
 		return "";
 	}
