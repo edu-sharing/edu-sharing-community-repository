@@ -164,6 +164,16 @@
       </properties>
     </type>
 
+    <type name="ccm:context">
+      <title>edu-sharing context configuration object</title>
+      <parent>cm:cmobject</parent>
+      <properties>
+        <property name="ccm:context_config">
+          <type>d:text</type>
+          <mandatory>true</mandatory>
+        </property>
+      </properties>
+    </type>
 
     <type name="ccm:io">
       <title>Campus Content IO</title>
