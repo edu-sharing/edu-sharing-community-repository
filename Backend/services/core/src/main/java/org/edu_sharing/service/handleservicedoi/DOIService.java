@@ -56,11 +56,13 @@ public class DOIService implements HandleService {
         this.customMapping = customMapping;
 
         Config config = LightbendConfigLoader.get().getConfig("repository.doiservice");
-        baseUrl = config.getString("baseUrl");
-        accountId = config.getString("accountId");
-        prefix = config.getString("prefix");
-        password = config.getString("password");
         enabled = config.getBoolean("enabled");
+        if(enabled) {
+            baseUrl = config.getString("baseUrl");
+            accountId = config.getString("accountId");
+            prefix = config.getString("prefix");
+            password = config.getString("password");
+        }
     }
 
     @Override
