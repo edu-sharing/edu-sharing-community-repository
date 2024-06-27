@@ -838,5 +838,64 @@
   "collectionNew_storeChanges": "speichern",
   "collectionNew_placeholderTitle": "Titel Ihrer Sammlung",
   "collectionNew_placeholderDescription": "Worum geht es in Ihrer Sammlung?",
-  "Konto": "Nutzer{{GENDER_SEPARATOR}}in"
+  "Konto": "Nutzer{{GENDER_SEPARATOR}}in",
+  "LTITOOL": {
+    "REGISTER": "Registrierung starten",
+    "DYNAMIC_URL": "Dynamisches Registrierungswerkzeug url",
+    "DATA": {
+      "redirectionUrls": "Umleitungsurln",
+      "targetLinkUri": "Ziel-Link Url",
+      "clientName": "Name des Werkzeugs",
+      "keysetUrl": "Schlüsselsatz Url",
+      "loginInitiationUrl": "Anmeldung Initiierung (oidc) Url"
+    },
+    "MANUAL_INFO": "Wenn Ihr LTI-kompatibles Tool die dynamische Registrierung nicht unterstützt oder wenn sie nicht funktioniert, können Sie die manuelle Registrierung verwenden.\n\nNachdem Sie auf \"Speichern\" geklickt haben, wird eine Verbindung mit den angegebenen Daten vorbereitet.",
+    "HEADER": "LTI-Werkzeug-Registrierung",
+    "DYNAMIC_INFO": "Mit Hilfe der dynamischen LTI-Registrierung können LTI-Tools einfach mit edu-sharing verbunden werden.\n Bestimmen Sie die URL für die dynamische Registrierung des Tools und geben Sie diese in das Feld \"URL des Tools für die dynamische Registrierung\" ein. Mit einem Klick auf \"Registrierung starten\" wird das externe Tool automatisch mit edu-sharing verbunden."
+  },
+  "GLOBAL_CONFIG": {
+    "SERVER_CONFIG_HINT": "Hier können Sie Konfigurationswerte überschreiben. Diese Änderungen gelten für den aktuellen Server und werden nicht durch Updates überschrieben. Sie haben die höchste Priorität. ACHTUNG! Im Clusterbetrieb gelten diese Parameter nur für den aktuellen Clusterserver!",
+    "SERVER_CONFIG_TITLE": "Server-Konfigurationsdatei (überschreiben)",
+    "DEPLOYMENT_CONFIG_TITLE": "Konfigurationsdatei für den Einsatz",
+    "DEPLOYMENT_CONFIG_HINT": "Diese Datei wurde von der Bereitstellung definiert und kann Daten ändern, die von der Vorlage abweichen. Diese Datei kann nur durch die Bereitstellung geändert werden."
+  },
+  "PLUGINS": {
+    "PLUGIN_DETAILS": {
+      "Alfresco Share Services AMP": {
+        "DESCRIPTION": "Dieses Alfresco-Modul bietet die Alfresco Share-Schnittstellen"
+      },
+      "edu_sharing-community-repository-backend-alfresco-module": {
+        "DESCRIPTION": "Das Kernmodul von edu-sharing. Es erweitert das Basissystem um edu-sharing APIs und Schnittstellen sowie weitere Funktionalitäten"
+      },
+      "edu_sharing-enterprise-repository-plugin-transform-backend-alfresco-module": {
+        "DESCRIPTION": "Dieses Plugin trennt die Transformationsfunktionen (Screenshot- und Volltextgenerierung von Dokumenten über LibreOffice) vom Repository-Server und ermöglicht eine bessere, stabilere Verteilung der Arbeitslast"
+      },
+      "alfresco-trashcan-cleaner project": {
+        "DESCRIPTION": "Der Mülleimer-Reiniger löscht regelmäßig alte Inhalte aus den Papierkörben aller Nutzer"
+      },
+      "edu_sharing-community-repository-plugin-elastic-backend-alfresco-module": {
+        "DESCRIPTION": "Das Elasticsearch-Modul wandelt die Objekte inklusive Statistiken und Metadaten in eine spezielle Elasticsearch-Indexstruktur um und ermöglicht effiziente und sehr detaillierte Suchabfragen"
+      },
+      "edu_sharing-projects-community-repository-backend-alfresco-module": {
+        "DESCRIPTION": "Dieses Modul kann projektspezifische Anpassungen enthalten"
+      }
+    }
+  },
+  "JOBS": {
+    "PARAMETERS": "Job-Parameter",
+    "APPLY_TEMPLATE": "Als Vorlage einfügen"
+  },
+  "APPLICATIONS": {
+    "HOMEAPP": {
+      "import_metadataset": "Metadatensatz, der für importierte Objekte aus dieser Quelle verwendet wird"
+    }
+  },
+  "FRONTPAGE": {
+    "TOTAL_COUNT_LARGER_HINT": "Wenn die Gesamtzahl der Elemente größer ist als die der angezeigten Elemente, wird die Anzahl der angezeigten Elemente immer zufällig aus diesem Pool ausgewählt"
+  },
+  "BROWSER": {
+    "LUCENE_TEMPLATE_MEMORY": {
+      "DEFAULT_TEMPLATE_OVERRIDE": "Standardvorlagen dürfen nicht überschrieben werden"
+    }
+  }
 }

@@ -752,7 +752,8 @@
     "NO_MATCHING_VALUES": "Keine passenden Werte",
     "NO_ARBITRARY_VALUES_NOTICE": "Für dieses Feld können Werte nicht frei gewählt werden. Bitte wählen Sie Werte aus der Liste.",
     "DELETE_KEY_NOTICE": "Löschen mit Entf-Taste",
-    "SHOW_EXTENDED": "Erweitere Infos anzeigen"
+    "SHOW_EXTENDED": "Erweitere Infos anzeigen",
+    "OPEN_CLOSE_EXTENDED": "Ansicht öffnen/schließen"
   },
   "FEEDBACK": {
     "TITLE": "Feedback zum Material geben",
@@ -1365,5 +1366,40 @@
     "RELOAD_NOTICE_TITLE": "Seite muss neugeladen werden",
     "RELOAD_NOTICE": "Beim Laden von wichtigen Informationen ist etwas schief gegangen. Bitte laden Sie die Seite neu.",
     "RELOAD_BUTTON_LABEL": "Seite neu laden"
+<<<<<<< Updated upstream
+=======
+  },
+  "ACCESSIBILITY": {
+    "LASTMODIFIED": "Datum der letzten Änderung",
+    "AUTHOR": "Autor",
+    "SOURCE": "Quelle",
+    "TITLE": "Erreichbarkeit",
+    "SUBTITLE": "Zugänglichkeitsoptionen",
+    "ENTRY_MESSAGE": "Um den persönlichen Bedürfnissen gerecht zu werden, können einige Einstellungen für die Nutzung unserer Anwendung unten vorgenommen werden.",
+    "TOAST_TITLE": "Statusmeldungen",
+    "TOAST_MESSAGE": "Statusmeldungen zeigen an, ob das System korrekt funktioniert. So können Sie beispielsweise sehen, ob ein Inhalt oder Änderungen korrekt gespeichert wurden.",
+    "TOAST_TYPE": {
+      "IMPORTANT": "Nur wichtige Nachrichten anzeigen.",
+      "ALL": "Alle Nachrichten anzeigen."
+    },
+    "TOAST_DURATION_SECONDS": "{{Sekunden}} Sekunden",
+    "TOAST_DURATION_INFINITE": "Verstecken Sie sich nicht.",
+    "TOAST_DURATION_INFINITE_INFO": "Statusmeldungen werden nicht automatisch ausgeblendet und müssen manuell geschlossen werden.",
+    "TOAST_DURATION_TITLE": "Anzeigezeit",
+    "TOAST_DURATION_MESSAGE": "Statusmeldungen verschwinden automatisch nach einer bestimmten Zeit oder können manuell durch Anklicken geschlossen werden.",
+    "DISMISS_TOAST": "Ausblenden",
+    "INDICATOR_ICONS_TITLE": "Bedeutungsvolle Symbole",
+    "INDICATOR_ICONS_MESSAGE": "Vermitteln Sie Inhalte mit Hilfe von Symbolen. Die Bedeutung eines Symbols wird angezeigt, wenn der Mauszeiger über das Symbol bewegt wird. Dies ist jedoch nicht möglich, wenn Sie nur die Tastatur verwenden.",
+    "INDICATOR_ICONS_OPTION": {
+      "ICONS": "Symbole anzeigen",
+      "TEXT_ONLY": "Nur Text anzeigen"
+    },
+    "CONTRAST_MODE_TITLE": "Kontrast-Modus",
+    "CONTRAST_MODE_MESSAGE": "Im Kontrastmodus sind die Elemente auf der Seite deutlicher voneinander zu unterscheiden.",
+    "CONTRAST_MODE_OPTION": {
+      "CONTRAST": "Verbesserter Kontrast",
+      "STANDARD": "Standard-Kontrast"
+    }
+>>>>>>> Stashed changes
   }
 }
