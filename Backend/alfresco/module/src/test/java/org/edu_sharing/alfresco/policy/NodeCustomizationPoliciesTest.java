@@ -38,7 +38,15 @@ class NodeCustomizationPoliciesTest {
             NodeCustomizationPolicies.verifyMimetype(
                     contentReader,
                     filename,
-                    allowList,false);
+                    allowList,
+                    false);
+            /*
+            NodeCustomizationPolicies.verifyMimetype(
+                    contentReader,
+                    null,
+                    allowList,
+                    false);
+             */
             HashMap<String, List<String>> allowListWrongMimetype = new HashMap<String, List<String>>() {{
                 put("test/sample", Collections.singletonList(mimetype.split("/")[1]));
             }};

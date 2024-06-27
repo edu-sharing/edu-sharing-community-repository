@@ -314,7 +314,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 					logger.info("will not verifyMimetypeEnabled for copy");
 				}else {
 					String filename = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
-					verifyMimetype(reader, filename, getMimetypeAllowList());
+					verifyMimetypeAllReaders(nodeRef, filename, getMimetypeAllowList(), LightbendConfigLoader.get().getBoolean("security.fileManagement.mimetypeVerification.allowUnknownMimetypes"));
 				}
 			}
 
@@ -374,14 +374,22 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	private static boolean verifyMimetypeEnabled() {
 		return LightbendConfigLoader.get().getBoolean("security.fileManagement.mimetypeVerification.enabled");
 	}
-
-	static void verifyMimetype(ContentReader reader, String filename, Map<String, List<String>> allowList) throws NodeMimetypeUnknownValidationException {
-		verifyMimetype(reader,filename,allowList,LightbendConfigLoader.get().getBoolean("security.fileManagement.mimetypeVerification.allowUnknownMimetypes"));
+	private void verifyMimetypeAllReaders(NodeRef nodeRef, String filename, Map<String, List<String>> allowList, boolean allowUnknownMimetypes) throws NodeMimetypeUnknownValidationException {
+		verifyMimetype(contentService.getReader(nodeRef, ContentModel.PROP_CONTENT), filename, allowList, allowUnknownMimetypes);
+		for (ContentReader contentReader : Arrays.asList(
+				contentService.getReader(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW)),
+				contentService.getReader(nodeRef, QName.createQName(CCConstants.CCM_PROP_MAP_ICON))
+		)) {
+			// we don't have a filename for these reader
+			verifyMimetype(contentReader, null, allowList, allowUnknownMimetypes);
+		}
 	}
-
 	static void verifyMimetype(ContentReader reader, String filename, Map<String, List<String>> allowList, boolean allowUnknownMimetypes) throws NodeMimetypeUnknownValidationException {
 		// String reportedMimeType = reader.getMimetype();
 		try {
+			if(reader ==  null) {
+				return;
+			}
 			TikaConfig config = TikaConfig.getDefaultConfig();
 			Detector detector = config.getDetector();
 			TikaInputStream stream = TikaInputStream.get(reader.getContentInputStream());
@@ -396,10 +404,17 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 				throw new NodeMimetypeValidationException(detectedMimeType);
 			}
 			List<String> fileExtensions = allowList.get(detectedMimeType);
-			String extension = FilenameUtils.getExtension(filename);
-			if(!(fileExtensions == null || fileExtensions.contains("*") || fileExtensions.stream().anyMatch(e -> e.equalsIgnoreCase(extension)))) {
-				logger.warn("Found no allowed file extension for given mimetype: " + detectedMimeType);
-				throw new NodeFileExtensionValidationException(fileExtensions, extension);
+			if(filename == null) {
+				if (fileExtensions == null) {
+					logger.warn("Found no allowed file extension for given mimetype: " + detectedMimeType);
+					throw new NodeFileExtensionValidationException(fileExtensions, "[NOT_AVAILABLE]");
+				}
+			} else {
+				String extension = FilenameUtils.getExtension(filename);
+				if (!(fileExtensions == null || fileExtensions.contains("*") || fileExtensions.stream().anyMatch(e -> e.equalsIgnoreCase(extension)))) {
+					logger.warn("Found no allowed file extension for given mimetype: " + detectedMimeType);
+					throw new NodeFileExtensionValidationException(fileExtensions, extension);
+				}
 			}
 		} catch (IOException e) {
 			logger.warn("Tika mime type detection failed", e);
@@ -570,7 +585,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 						ContentReader reader = contentService.getReader(nodeRef, ContentModel.PROP_CONTENT);
 						if(reader != null && reader.exists()) {
 							try {
-								verifyMimetype(reader, nameAfter, getMimetypeAllowList());
+								verifyMimetype(reader, nameAfter, getMimetypeAllowList(), LightbendConfigLoader.get().getBoolean("security.fileManagement.mimetypeVerification.allowUnknownMimetypes"));
 							}catch(NodeMimetypeValidationException ignored) {
 								// we ignore this since the node is now already uploaded. we only want to throw the
 								// @NodeFileExtensionValidationException
