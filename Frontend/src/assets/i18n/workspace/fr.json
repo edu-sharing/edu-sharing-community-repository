@@ -60,12 +60,8 @@
       "VIRUS": "Virus détecté. Le fichier a été supprimé.",
       "VIRUS_SCAN_FAILED": "Erreur de vérification du fichier. Veuillez réessayer.",
       "MIMETYPE_VERIFICATION": "Le contenu du fichier n'était pas autorisé ou n'a pas pu être vérifié. Le fichier a été supprimé.",
-<<<<<<< Updated upstream
-      "FILETYPE_VERIFICATION": "L'extension du fichier n'a pas pu être vérifiée. Le fichier a été supprimé."
-=======
       "FILETYPE_VERIFICATION": "L'extension du fichier n'a pas pu être vérifiée. Le fichier a été supprimé.",
       "FILE_SIZE_EXCEEDED": "Dépassement de la taille maximale autorisée (taille du fichier : {{taille réelle}}, maximum autorisé : {{taille maximale}})"
->>>>>>> Stashed changes
     },
     "ADD_FOLDER_TITLE": "Ajouter un nouveau dossier",
     "ADD_FOLDER_METADATASET": "Métadonnées du dossier",

@@ -427,9 +427,6 @@
     "TOAST_DURATION_INFINITE_INFO": "I messaggi di stato non vengono nascosti automaticamente e devono essere chiusi manualmente.",
     "TOAST_DURATION_TITLE": "visualizzazione dell'ora",
     "TOAST_DURATION_MESSAGE": "I messaggi di stato scompaiono automaticamente dopo un determinato periodo di tempo o possono essere chiusi manualmente facendo clic.",
-<<<<<<< Updated upstream
-    "DISMISS_TOAST": "Nascondere"
-=======
     "DISMISS_TOAST": "Nascondere",
     "INDICATOR_ICONS_TITLE": "Simboli significativi",
     "INDICATOR_ICONS_MESSAGE": "Comunicare i contenuti utilizzando i simboli. Il significato di un simbolo viene visualizzato quando si sposta il puntatore del mouse sul simbolo stesso. Tuttavia, questo non è possibile quando si utilizza solo la tastiera.",
@@ -443,7 +440,6 @@
       "CONTRAST": "Miglioramento del contrasto",
       "STANDARD": "Contrasto standard"
     }
->>>>>>> Stashed changes
   },
   "AUTHORITY_TYPE_GROUP": "Gruppo",
   "AUTHORITY_TYPE_ORG": "Organizzazione",
@@ -696,9 +692,6 @@
     "INDETERMINATE_NOTICE": "Fare clic sul chip per aggiungere il valore \"{{ value }}\" a tutti gli elementi, oppure rimuoverlo per eliminarlo da tutti gli elementi.",
     "SHOW_OPTIONS_BUTTON": "Mostra le opzioni",
     "FILTER_FOR": "Filtro per \"{{value}}\" ({{count}} elementi corrispondenti)",
-<<<<<<< Updated upstream
-    "FILTER_TREE": "Filtro..."
-=======
     "FILTER_TREE": "Filtro...",
     "OPEN_CLOSE_EXTENDED": "Vista aperta/chiusa",
     "FILTER_FACET": "Filtro...",
@@ -712,7 +705,6 @@
     "ERROR_PREVIEW": "Non è stato possibile sostituire l'immagine di anteprima. Provare con un altro file immagine",
     "SUGGEST_VALUE_SENT": "Il suggerimento è stato inviato ed è in fase di revisione da parte della redazione. Il suggerimento apparirà solo quando sarà stato attivato dalla redazione. Grazie!",
     "SUGGEST_VALUE_LABEL": "Suggerisci un nuovo valore"
->>>>>>> Stashed changes
   },
   "SIMPLE_EDIT": {
     "TITLE": "Modifica rapida",

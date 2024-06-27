@@ -264,10 +264,6 @@
       "VIEW_MATERIAL": "Accès",
       "VIEW_MATERIAL_EMBEDDED": "Emboîtements",
       "DOWNLOAD_MATERIAL": "Téléchargements",
-<<<<<<< Updated upstream
-      "VIEW_MATERIAL_PLAY_MEDIA": "Lectures"
-    }
-=======
       "VIEW_MATERIAL_PLAY_MEDIA": "Lectures",
       "VIEW_COLLECTION": "Vues de la collection",
       "OPEN_EXTERNAL_LINK": "Vues des liens externes"
@@ -281,7 +277,6 @@
     "ccm:educationalintendedenduserrole": "Groupe cible",
     "ccm:eaf_sequence_title": "Titre de la séquence",
     "ccm:collection_ordered_position": "Tri manuel"
->>>>>>> Stashed changes
   },
   "COOKIE_INFO": {
     "ACCEPT": " Accepter",
@@ -432,9 +427,6 @@
     "TOAST_DURATION_INFINITE_INFO": "Les messages d'état ne sont pas automatiquement masqués et doivent être fermés manuellement.",
     "TOAST_DURATION_TITLE": "afficher l'heure",
     "TOAST_DURATION_MESSAGE": "Les messages d'état disparaissent automatiquement au bout d'un certain temps ou peuvent être fermés manuellement en cliquant.",
-<<<<<<< Updated upstream
-    "DISMISS_TOAST": "Cacher"
-=======
     "DISMISS_TOAST": "Cacher",
     "INDICATOR_ICONS_TITLE": "Symboles significatifs",
     "INDICATOR_ICONS_MESSAGE": "Communiquer le contenu à l'aide de symboles. La signification d'un symbole est affichée lorsque le pointeur de la souris est déplacé sur le symbole. Toutefois, cela n'est pas possible lorsque l'on utilise uniquement le clavier.",
@@ -448,7 +440,6 @@
       "CONTRAST": "Amélioration du contraste",
       "STANDARD": "Contraste standard"
     }
->>>>>>> Stashed changes
   },
   "AUTHORITY_TYPE_GROUP": "Groupe",
   "AUTHORITY_TYPE_ORG": "Organisation",
@@ -486,12 +477,8 @@
   "PROFILE_SETTINGS": {
     "SHOW_EMAIL_LABEL": "Adresse e-mail publique",
     "SHOW_EMAIL": "L'adresse e-mail est affichée",
-<<<<<<< Updated upstream
-    "HIDE_EMAIL": "L'adresse e-mail est cachée"
-=======
     "HIDE_EMAIL": "L'adresse e-mail est cachée",
     "SHOW_EMAIL_TOOLTIP": "Contrôle si les autres utilisateurs peuvent voir l'adresse électronique, par exemple dans la boîte de dialogue d'invitation ou lors de l'accès au profil."
->>>>>>> Stashed changes
   },
   "CONNECTOR": {
     "ONLY_OFFICE": {
@@ -568,12 +555,8 @@
       "CC_0": "Vous pouvez copier, modifier, distribuer et exécuter l'œuvre, même à des fins commerciales, sans demander d'autorisation.",
       "COPYRIGHT_FREE": "L'œuvre est accessible gratuitement.<br />Utilisation et attribution selon les règles légales généralement applicables.",
       "COPYRIGHT_LICENSE": "L'œuvre ne peut être utilisée que par le groupe d'utilisateur-trices sous licence, conformément aux conditions stipulées dans le contrat de licence.<br />La transmission à des tiers est interdite.<br />L'attribution est conforme aux pratiques généralement applicables.",
-<<<<<<< Updated upstream
-      "SCHULFUNK": "Offre à accès restreint et à durée limitée pour les radios scolaires, conformément à l'article 47 de la loi allemande sur les droits d'auteur et les droits voisins (UrhG).<br />La transmission à des tiers est interdite.<br />Attribution conformément aux pratiques généralement applicables."
-=======
       "SCHULFUNK": "Offre à accès restreint et à durée limitée pour les radios scolaires, conformément à l'article 47 de la loi allemande sur les droits d'auteur et les droits voisins (UrhG).<br />La transmission à des tiers est interdite.<br />Attribution conformément aux pratiques généralement applicables.",
       "UNTERRICHTS_UND_LEHRMEDIEN": "(1) Les producteurs de collections de médias pour l'enseignement peuvent reproduire, distribuer ou mettre à la disposition du public jusqu'à 10 pour cent d'une œuvre publiée pour de telles collections.<br />(2) L'article 60a (2) et (3) phrase 1 s'applique en conséquence.<br />(3) Aux fins de la présente loi, ʻcollections de médias pour l'enseignementʼ signifie des collections qui rassemblent un nombre significatif d'auteurs et qui sont adaptées, prévues et étiquetées en conséquence à des fins exclusives d'illustration non commerciale dans l'enseignement dans les établissements d'enseignement (article 60a).<br />source : https://www.gesetze-im-internet.de/englisch_urhg/englisch_urhg.html#p0475"
->>>>>>> Stashed changes
     },
     "GROUPS": {
       "NONE": "Pas de licence choisie",
@@ -606,9 +589,6 @@
   },
   "DIALOG": {
     "COLLECTION_SHARE_PUBLIC": "Ajouter une ressource à la collection ?",
-<<<<<<< Updated upstream
-    "COLLECTION_SHARE_PUBLIC_INFO": "En ajoutant cette ressource à la collection \"{{collection}}\", tous ceux qui ont accès à cette collection peuvent y accéder."
-=======
     "COLLECTION_SHARE_PUBLIC_INFO": "En ajoutant cette ressource à la collection \"{{collection}}\", tous ceux qui ont accès à cette collection peuvent y accéder.",
     "SAVING": "Sauvegarder...",
     "SAVED": "Modifications enregistrées",
@@ -617,7 +597,6 @@
     "CONFIRM_DISCARD_MESSAGE": "Fermer le dialogue sans enregistrer les modifications ?",
     "COLLECTION_PROPSE": "Soumettre une proposition ?",
     "COLLECTION_PROPSE_INFO": "Vous ne disposez pas de droits suffisants sur la collection \"{{collection}}\". Toutefois, vous pouvez soumettre le matériel en tant que proposition. Souhaitez-vous poursuivre ?"
->>>>>>> Stashed changes
   },
   "OPTIONS": {
     "SHOW_ALL_OPTIONS": "Plus d'actions",
@@ -713,9 +692,6 @@
     "INDETERMINATE_NOTICE": "Cliquez sur la puce pour ajouter la valeur \"{{ value }}\" à tous les éléments, ou retirez-la pour la supprimer de tous les éléments.",
     "SHOW_OPTIONS_BUTTON": "Afficher les options",
     "FILTER_FOR": "Filtre pour \"{{value}}\" ({{count}} élément(s) correspondant(s))",
-<<<<<<< Updated upstream
-    "FILTER_TREE": "Filtre..."
-=======
     "FILTER_TREE": "Filtre...",
     "OPEN_CLOSE_EXTENDED": "Vue ouverte/fermée",
     "FILTER_FACET": "Filtre...",
@@ -729,7 +705,6 @@
     "ERROR_PREVIEW": "L'image de prévisualisation n'a pas pu être remplacée. Veuillez essayer un autre fichier image",
     "SUGGEST_VALUE_SENT": "La suggestion a été soumise et est en cours d'examen par l'équipe éditoriale. La suggestion n'apparaîtra que lorsqu'elle aura été activée par l'équipe éditoriale. Nous vous remercions de votre attention.",
     "SUGGEST_VALUE_LABEL": "Proposer une nouvelle valeur"
->>>>>>> Stashed changes
   },
   "SIMPLE_EDIT": {
     "TITLE": "Édition rapide",
@@ -839,15 +814,11 @@
     "Zip": "Code postal",
     "City": "Ville",
     "Region": "Canton/État/Région",
-<<<<<<< Updated upstream
-    "Country": "Pays"
-=======
     "Country": "Pays",
     "X-GND-URI": "GND-URI",
     "X-Wikidata": "Entrée Wikidata",
     "X-ORCID": "ORCID",
     "X-ROR": "ROR (Registre des organisations de recherche)"
->>>>>>> Stashed changes
   },
   "ICON_LABELS": {
     "more_vert": "Options",
@@ -1163,12 +1134,8 @@
     "COLLECTIONS": "collections"
   },
   "SKIP_LINKS": {
-<<<<<<< Updated upstream
-    "MAIN_CONTENT": "Aller au contenu principal"
-=======
     "MAIN_CONTENT": "Aller au contenu principal",
     "ACCESSIBILITY_SETTINGS": "Paramètres d'accessibilité"
->>>>>>> Stashed changes
   },
   "REPOSITORIES": {
     "de_fwu": "FWU",
