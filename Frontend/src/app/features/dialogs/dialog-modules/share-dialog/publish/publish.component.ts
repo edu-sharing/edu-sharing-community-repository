@@ -432,8 +432,8 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
 
     setHandlesActive() {
         this.handleActive = {
-            doiService: true,
-            handleService: true,
+            doiService: this.hasFeature('doiService'),
+            handleService: this.hasFeature('handleService'),
         };
     }
 
