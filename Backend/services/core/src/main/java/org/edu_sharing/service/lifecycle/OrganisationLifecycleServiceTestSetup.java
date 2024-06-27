@@ -52,17 +52,15 @@ public class OrganisationLifecycleServiceTestSetup {
     List<NodeRef> persons = new ArrayList<>();
     String orgAuthorityName;
 
-    public OrganisationLifecycleServiceTestSetup(){
 
-        AuthenticationUtil.runAsSystem(() -> {
-            testSetup();
-            return null;
-        });
-
+    public String createTestSetup() {
+        String orgAuthorityName = AuthenticationUtil.runAsSystem(this::testSetup);
         testSetupPersons();
+        return orgAuthorityName;
     }
 
-    private void testSetup(){
+
+    private String testSetup(){
         try {
             orgAuthorityName = "GROUP_" + organisationService.createOrganization("testSchool", "Test School");
 
@@ -79,6 +77,7 @@ public class OrganisationLifecycleServiceTestSetup {
                 String organisationAdminGroup = organisationService.getOrganisationAdminGroup(orgAuthorityName);
                 authorityService.addAuthority(organisationAdminGroup, (String)personProps.get(ContentModel.PROP_USERNAME));
             }
+            return orgAuthorityName;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
