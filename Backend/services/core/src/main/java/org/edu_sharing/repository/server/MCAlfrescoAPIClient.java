@@ -74,6 +74,7 @@ import org.alfresco.service.transaction.TransactionService;
 import org.alfresco.util.ISO8601DateFormat;
 import org.alfresco.util.ISO9075;
 import org.alfresco.util.Pair;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryparser.classic.QueryParser;
@@ -3493,9 +3494,9 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				(String) nodeService.getProperty(
 						new NodeRef(storeRef, nodeId),
 						QName.createQName(CCConstants.CM_NAME));
-
-		nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(CCConstants.CM_NAME), UUID.randomUUID().toString());
-		nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(CCConstants.CM_NAME), UUID.randomUUID().toString());
+		String extension = FilenameUtils.getExtension(originalName);
+		// keep the filename so that a possible mimetype verification is valid
+		nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(CCConstants.CM_NAME), UUID.randomUUID().toString() + "." + extension);
 		try {
 			nodeService.moveNode(
 					new NodeRef(storeRef, nodeId),
