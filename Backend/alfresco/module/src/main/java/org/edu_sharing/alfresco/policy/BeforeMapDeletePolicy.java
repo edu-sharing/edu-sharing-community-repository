@@ -9,6 +9,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.AuthorityService;
+import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
@@ -42,14 +43,15 @@ public class BeforeMapDeletePolicy implements BeforeDeleteNodePolicy {
 		if(mapType != null && (mapType.equals(CCConstants.CCM_VALUE_MAP_TYPE_DOCUMENTS) 
 				|| mapType.equals(CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP) 
 				|| mapType.equals(CCConstants.CCM_VALUE_MAP_TYPE_FAVORITE))){
-			
-			ChildAssociationRef childAssocRef = nodeService.getPrimaryParent(nodeRef);
-			NodeRef currentPersonNodeRef = personService.getPerson(authenticationService.getCurrentUserName());
-			NodeRef homeFolderNodeRef = (NodeRef)nodeService.getProperty(currentPersonNodeRef, ContentModel.PROP_HOMEFOLDER);
-			if( homeFolderNodeRef.equals(childAssocRef.getParentRef()) && !new Helper(authorityService).isAdmin(authenticationService.getCurrentUserName()) ){
-				throw new SystemFolderDeleteDeniedException("you are not allowed to remove this folder!");
+			try {
+				ChildAssociationRef childAssocRef = nodeService.getPrimaryParent(nodeRef);
+				NodeRef currentPersonNodeRef = personService.getPerson(authenticationService.getCurrentUserName(), false);
+				NodeRef homeFolderNodeRef = (NodeRef) nodeService.getProperty(currentPersonNodeRef, ContentModel.PROP_HOMEFOLDER);
+				if (homeFolderNodeRef.equals(childAssocRef.getParentRef()) && !new Helper(authorityService).isAdmin(authenticationService.getCurrentUserName())) {
+					throw new SystemFolderDeleteDeniedException("you are not allowed to remove this folder!");
+				}
+			}catch (NoSuchPersonException ignore) {
 			}
-			
 		}
 	}
 	
