@@ -18,6 +18,7 @@ export {
     MdsSortDefault,
     MdsValue,
     MdsView,
+    FeatureInfo,
     MdsWidget,
     MdsWidgetCondition,
     MetadataSetInfo,

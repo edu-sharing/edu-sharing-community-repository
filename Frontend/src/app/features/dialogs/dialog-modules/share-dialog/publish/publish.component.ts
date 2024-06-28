@@ -11,15 +11,11 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { About, AboutService, NodeService, HandleParam } from 'ngx-edu-sharing-api';
+import { About, AboutService, HandleParam, NodeService, FeatureInfo } from 'ngx-edu-sharing-api';
 import { Observable, Observer, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { BridgeService } from '../../../../../core-bridge-module/bridge.service';
-import {
-    ConfigurationService,
-    DialogButton,
-    UIConstants,
-} from '../../../../../core-module/core.module';
+import { ConfigurationService, UIConstants } from '../../../../../core-module/core.module';
 import { Node, Permission } from '../../../../../core-module/rest/data-object';
 import { Helper } from '../../../../../core-module/rest/helper';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
@@ -29,13 +25,12 @@ import { RestNodeService } from '../../../../../core-module/rest/services/rest-n
 import { HandleState, NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
 import { Toast, ToastType } from '../../../../../core-ui-module/toast';
 import { UIHelper } from '../../../../../core-ui-module/ui-helper';
-import { MainNavService } from '../../../../../main/navigation/main-nav.service';
 import {
     CompletionStatusEntry,
     MdsEditorInstanceService,
 } from '../../../../mds/mds-editor/mds-editor-instance.service';
 import { DialogsService } from '../../../dialogs.service';
-import { MdsHelperService, OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
+import { OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
 import { YES_OR_NO } from '../../generic-dialog/generic-dialog-data';
 
 class PublishedNode extends Node {
@@ -368,8 +363,14 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
 
     setRepublish() {
         this.handleActive = {
-            handleService: this.republish !== 'disabled' && this.handlePermission,
-            doiService: this.republish !== 'disabled' && this.handlePermission,
+            handleService:
+                this.republish !== 'disabled' &&
+                this.handlePermission &&
+                this.hasFeature('handleService'),
+            doiService:
+                this.republish !== 'disabled' &&
+                this.handlePermission &&
+                this.hasFeature('doiService'),
         };
         this.updatePublishedVersions();
     }
@@ -409,7 +410,7 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
         );
     }
 
-    hasFeature(id: string) {
+    hasFeature(id: 'handleService' | 'doiService') {
         return this.about.features?.filter((f) => f.id === id).length > 0;
     }
 
