@@ -1,28 +1,32 @@
 package org.edu_sharing.service.handleservice;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.log4j.Logger;
 import org.edu_sharing.service.handleservicedoi.DOIService;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Service;
 
+@Service
+@RequiredArgsConstructor
 public class HandleServiceFactory {
+    public enum IMPLEMENTATION {
+        /**
+         * handle.net service implementation
+         */
+        handle,
+        /**
+         * doi datacite implementation
+         */
+        doi
+    }
+    private final HandleServiceImpl handleService;
+    private final DOIService doiService;
 
-    Logger logger = Logger.getLogger(HandleServiceFactory.class);
-
-    public enum IMPLEMENTATION {handle,doi};
-
-    public static HandleService instance(IMPLEMENTATION type) throws HandleServiceNotConfiguredException{
-        if(type  == IMPLEMENTATION.doi){
-            return new DOIService();
+    public HandleService instance(IMPLEMENTATION type) throws HandleServiceNotConfiguredException{
+        if(type == IMPLEMENTATION.doi){
+            return doiService;
         } else {
-            return new HandleServiceImpl();
+            return handleService;
         }
     }
-
-    public static HandleService instance() throws HandleServiceNotConfiguredException{
-        try{ return instance(IMPLEMENTATION.handle); }catch (HandleServiceNotConfiguredException e){}
-        try{ return instance(IMPLEMENTATION.doi); }catch (HandleServiceNotConfiguredException e){}
-
-        throw new HandleServiceNotConfiguredException();
-    }
-
-
 }

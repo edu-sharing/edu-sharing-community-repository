@@ -1,33 +1,45 @@
 package org.edu_sharing.service.handleservicedoi;
 
+import com.google.gson.Gson;
 import com.typesafe.config.Config;
-import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.metadataset.v2.MetadataKey;
-import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
-import org.edu_sharing.repository.server.jobs.quartz.MigrateMetadataValuespaceJob;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.handleservice.HandleService;
 import org.edu_sharing.service.handleservice.HandleServiceNotConfiguredException;
 import org.edu_sharing.service.handleservicedoi.model.DOI;
 import org.edu_sharing.service.handleservicedoi.model.Data;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.VCardConverter;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
 
+@Service
 public class DOIService implements HandleService {
+
+    public static final String APICITE_PREFIX = "http://api.datacite.org/";
+
+    /**
+     * if you want a custom mapping, register this as a bean
+     * @Service
+     * class DOIProperyMappingCustom implements DOIService.DOIPropertyMapping {
+     * You might call getBasicMapping from the DOIService
+     */
+    interface DOIPropertyMapping {
+        DOI getCustomMapping(DOIService doiService, String nodeId, Map<QName, Serializable> properties) throws DOIServiceMissingAttributeException;
+    }
 
     Logger logger = Logger.getLogger(DOIService.class);
 
@@ -38,15 +50,21 @@ public class DOIService implements HandleService {
     String password;
     boolean enabled = false;
 
+    private final Optional<DOIPropertyMapping> customMapping;
+
     RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 
-    public DOIService() throws HandleServiceNotConfiguredException {
+    public DOIService(Optional<DOIPropertyMapping> customMapping) throws HandleServiceNotConfiguredException {
+        this.customMapping = customMapping;
+
         Config config = LightbendConfigLoader.get().getConfig("repository.doiservice");
-        baseUrl = config.getString("baseUrl");
-        accountId = config.getString("accountId");
-        prefix = config.getString("prefix");
-        password = config.getString("password");
         enabled = config.getBoolean("enabled");
+        if(enabled) {
+            baseUrl = config.getString("baseUrl");
+            accountId = config.getString("accountId");
+            prefix = config.getString("prefix");
+            password = config.getString("password");
+        }
     }
 
     @Override
@@ -73,32 +91,35 @@ public class DOIService implements HandleService {
     }
 
     @Override
-    public String create(String id, Map<QName, Serializable> properties) throws Exception {
-        return update(id,properties);
+    public String create(String handleId, String nodeId, Map<QName, Serializable> properties) throws Exception {
+        return update(handleId, nodeId,properties);
     }
 
 
     @Override
-    public String update(String id, Map<QName, Serializable> properties) throws Exception {
-        logger.debug("Updating DOI: " + id);
-        DOI doi = mapForPublishing(properties);
+    public String update(String handleId, String nodeId, Map<QName, Serializable> properties) throws Exception {
+        logger.debug("Updating DOI: " + handleId);
+        DOI doi = mapForPublishing(nodeId, properties);
         HttpEntity<DOI> entity = new HttpEntity<>(doi,getHttpHeaders());
-        ResponseEntity<DOI> doiResponseEntity = template.exchange(baseUrl+"/dois/"+id, HttpMethod.PUT, entity, DOI.class);
+        ResponseEntity<DOI> doiResponseEntity = template.exchange(baseUrl+"/dois/"+handleId, HttpMethod.PUT, entity, DOI.class);
+        try {
+            logger.info("Create doi:" + new Gson().toJson(doi));
+        }catch(Throwable ignored) {}
         if(!doiResponseEntity.getStatusCode().is2xxSuccessful()){
-            throw new DOIServiceException("update id:" + id + " failed. api returned: " + doiResponseEntity.getStatusCode());
+            throw new DOIServiceException("update id:" + handleId + " failed. api returned: " + doiResponseEntity.getStatusCode());
         }
         return doiResponseEntity.getBody().getData().getId();
     }
 
     @Override
-    public String delete(String id) throws Exception {
+    public String delete(String handleId, String nodeId) throws Exception {
         //only works for drafts
         HttpEntity<Void> entity = new HttpEntity<>(getHttpHeaders());
-        ResponseEntity<Void> doiResponseEntity = template.exchange(baseUrl+"/dois/"+id, HttpMethod.DELETE, entity,Void.class);
+        ResponseEntity<Void> doiResponseEntity = template.exchange(baseUrl+"/dois/"+handleId, HttpMethod.DELETE, entity,Void.class);
         if(!doiResponseEntity.getStatusCode().is2xxSuccessful()){
-            throw new DOIServiceException("delete id:" + id + " failed. api returned: " + doiResponseEntity.getStatusCode());
+            throw new DOIServiceException("delete id:" + handleId + " failed. api returned: " + doiResponseEntity.getStatusCode());
         }
-        return id;
+        return handleId;
     }
 
 
@@ -128,7 +149,16 @@ public class DOIService implements HandleService {
         return CCConstants.CCM_PROP_PUBLISHED_DOI_ID;
     }
 
-    private DOI mapForPublishing(Map<QName, Serializable> properties) throws Exception {
+    private DOI mapForPublishing(String nodeId, Map<QName, Serializable> properties) throws Exception {
+        if(customMapping.isPresent()) {
+            return customMapping.get().getCustomMapping(this, nodeId, properties);
+        } else {
+            return getBasicMapping(nodeId, properties, true);
+        }
+    }
+
+    @NotNull
+    public DOI getBasicMapping(String nodeId, Map<QName, Serializable> properties, boolean failOnMissing) throws Exception {
         DOI doi = DOI.builder()
                 .data(Data.builder()
                         .type("dois")
@@ -145,7 +175,7 @@ public class DOIService implements HandleService {
         List<String> author = (List<String>) properties.get(QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR));
         List<String> authorFreetext = (List<String>) properties.get(QName.createQName(CCConstants.CCM_PROP_AUTHOR_FREETEXT));
         if(author == null || author.isEmpty()){
-            if(authorFreetext == null || authorFreetext.isEmpty()){
+            if((authorFreetext == null || authorFreetext.isEmpty()) && failOnMissing){
                 throw new DOIServiceMissingAttributeException(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR),"Creator");
             }
         }
@@ -162,39 +192,48 @@ public class DOIService implements HandleService {
         //title
         String title = (String) properties.get(QName.createQName(CCConstants.LOM_PROP_GENERAL_TITLE));
 
-        if(StringUtils.isEmpty(title)){
+        if(StringUtils.isEmpty(title) && failOnMissing){
             throw new DOIServiceMissingAttributeException(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_TITLE),"Title");
         }
         doi.getData().getAttributes().getTitles().add(Data.Title.builder().title(title).build());
 
         //publisher
-        List<String> publisherList = (List<String>)properties.get(QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER));
+        List<String> publisherList = (List<String>) properties.get(QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER));
         String publisher;
-        if(publisherList == null || publisherList.isEmpty()){
-            throw new DOIServiceMissingAttributeException(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER),"Publisher");
-        }else publisher = publisherList.get(0);
-        doi.getData().getAttributes().setPublisher(VCardConverter.getNameForVCardString(publisher));
+        if((publisherList == null || publisherList.isEmpty())){
+            if(failOnMissing) {
+                throw new DOIServiceMissingAttributeException(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER), "Publisher");
+            }
+        } else {
+            publisher = publisherList.get(0);
+            doi.getData().getAttributes().setPublisher(VCardConverter.getNameForVCardString(publisher));
+        }
 
         //published year
         Date d = (Date) properties.get(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_DATE));
         if(d == null){
-            throw new DOIServiceMissingAttributeException(CCConstants.getValidLocalName(CCConstants.CCM_PROP_PUBLISHED_DATE),"PublicationYear");
+            if(failOnMissing) {
+                throw new DOIServiceMissingAttributeException(CCConstants.getValidLocalName(CCConstants.CCM_PROP_PUBLISHED_DATE), "PublicationYear");
+            }
+        } else {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(d);
+            doi.getData().getAttributes().setPublicationYear(calendar.get(Calendar.YEAR));
         }
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(d);
-        doi.getData().getAttributes().setPublicationYear(calendar.get(Calendar.YEAR));
 
 
         //learning resourcetype
         List<String> lrts = (List<String>) properties.get(QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE));
-        if(lrts == null || lrts.size() == 0){
-            throw new DOIServiceMissingAttributeException(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER), "resourceTypeGeneral");
+        Data.Types lrt;
+        if(lrts == null || lrts.isEmpty()){
+            lrt = Data.Types.builder().resourceTypeGeneral("Other").build();
+            // throw new DOIServiceMissingAttributeException(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE), "resourceTypeGeneral");
+        } else {
+            String mapping = getMapping(nodeId,CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE),lrts);
+            if(mapping == null) mapping = "Other";
+            lrt = Data.Types.builder().resourceTypeGeneral(mapping).build();
         }
-
-        String mapping = getMapping(properties,CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER),lrts.get(0));
-        if(mapping == null) mapping = "Other";
-        Data.Types t = Data.Types.builder().resourceTypeGeneral(mapping).build();
-        doi.getData().getAttributes().setTypes(t);
+        doi.getData().getAttributes().setTypes(lrt);
 
 
         //url
@@ -215,21 +254,20 @@ public class DOIService implements HandleService {
         return "Basic " + Base64.getEncoder().encodeToString(valueToEncode.getBytes());
     }
 
-    public String getMapping(Map<QName,Serializable> properties, String mdsWidgetId, String key){
+    public String getMapping(String nodeId, String mdsWidgetId, List<String> key){
         try {
-            String mdsSet = (String)properties.get(QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
-            if(mdsSet==null || mdsSet.isEmpty())
-                mdsSet=CCConstants.metadatasetdefault_id;
-
-            MetadataSet mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(),mdsSet);
-            MetadataWidget widget = mds.findWidget(mdsWidgetId);
-            Map<String, Collection<MetadataKey.MetadataKeyRelated>> valuespaceMappingByRelation = widget.getValuespaceMappingByRelation(MetadataKey.MetadataKeyRelated.Relation.closeMatch);
-            Collection<MetadataKey.MetadataKeyRelated> metadataKeyRelateds = valuespaceMappingByRelation.get(key);
-            if(metadataKeyRelateds != null && metadataKeyRelateds.size() > 0){
-               return metadataKeyRelateds.iterator().next().getKey();
+            MetadataWidget widget = MetadataHelper.getMetadataset(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId)).findWidget(mdsWidgetId);
+            Map<String, Collection<MetadataKey.MetadataKeyRelated>> valuespaceMappingByRelation = widget.getValuespaceMappingByRelation(MetadataKey.MetadataKeyRelated.Relation.relatedMatch);
+            // try to find any key with relation and map it
+            for (String k : key) {
+                Optional<MetadataKey.MetadataKeyRelated> metadataKeyRelates = valuespaceMappingByRelation.get(k).stream().filter(r -> r.getKey().startsWith(APICITE_PREFIX)).findFirst();
+                if(metadataKeyRelates.isPresent()){
+                    return metadataKeyRelates.get().getKey().substring(APICITE_PREFIX.length());
+                }
             }
+
         }catch (Exception e){
-            logger.debug(e.getMessage(),e);
+            logger.warn(e.getMessage(),e);
         }
         return null;
     }
