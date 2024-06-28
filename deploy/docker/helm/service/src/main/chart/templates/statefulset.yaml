@@ -122,7 +122,7 @@ spec:
         {{- end }}
         {{- with .Values.config.override.config.application.settings }}
         - name: file-sec
-          mountPath: /opt/bitnami/tomcat/shared/classes/config/default/edu-sharing.override.conf
+          mountPath: /opt/bitnami/tomcat/shared/classes/config/defaults/edu-sharing.override.conf
           subPath: config-application-settings
         {{- end }}
         {{- with .Values.config.override.logging.application }}
