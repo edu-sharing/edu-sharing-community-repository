@@ -87,20 +87,22 @@ public class HandleServiceImpl implements HandleService{
 
 	public HandleServiceImpl() throws HandleServiceNotConfiguredException{
 		config = LightbendConfigLoader.get().getConfig("repository.handleservice");
-		try {
-			handleServerPrefix = config.getString("prefix");
-			handleServerRepoId = config.getString("repoid");
-			privkeyPath = config.getString("privkey");
-			/**
-			 * config dir: must be writeable
-			 */
-			String configDir = config.getString("configDir");
-			if(configDir != null){
-				System.setProperty("net.handle.configDir", configDir);
+		if(config.hasPath("repoid")) {
+			try {
+				handleServerPrefix = config.getString("prefix");
+				handleServerRepoId = config.getString("repoid");
+				privkeyPath = config.getString("privkey");
+				/**
+				 * config dir: must be writeable
+				 */
+				String configDir = config.getString("configDir");
+				if (configDir != null) {
+					System.setProperty("net.handle.configDir", configDir);
+				}
+				id = "0.NA/" + handleServerPrefix;
+			} catch (Throwable t) {
+				log.error("Could not initialize handle service properly cause of error in config, please check config for \"repository.handleservice\"", t);
 			}
-			id = "0.NA/"+handleServerPrefix;
-		}catch(Throwable t) {
-			log.error("Could not initialize handle service properly cause of error in config, please check config for \"repository.handleservice\"", t);
 		}
 	}
 	
