@@ -15,11 +15,11 @@ public interface HandleService {
 
     public String generateId() throws Exception;
 
-    public String create(String id, Map<QName, Serializable> properties) throws Exception;
+    public String create(String handleId, String nodeId, Map<QName, Serializable> properties) throws Exception;
 
-    public String update(String id, Map<QName, Serializable> properties) throws Exception;
+    public String update(String handleId, String nodeId, Map<QName, Serializable> properties) throws Exception;
 
-    public String delete(String id) throws Exception;
+    public String delete(String handleId, String nodeId) throws Exception;
 
 
     public default String getContentLink(Map<QName, Serializable> properties) throws Exception{
