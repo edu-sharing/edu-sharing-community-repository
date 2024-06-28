@@ -683,7 +683,8 @@ public class NodeDao {
 
     private int getCommentCount() {
         if (nodeProps.containsKey(CCConstants.VIRT_PROP_COMMENTCOUNT)) {
-            return (int) nodeProps.get(CCConstants.VIRT_PROP_COMMENTCOUNT);
+            Object count = nodeProps.get(CCConstants.VIRT_PROP_COMMENTCOUNT);
+            return (count instanceof Integer) ? (int) count : Integer.parseInt((String) count);
         }
         return 0;
     }
@@ -793,8 +794,10 @@ public class NodeDao {
                         HashMap<String, Object> nodePropsReplace = nodeServiceRemote.getPropertiesDynamic(
                                 null, null, (String) this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
                         nodePropsReplace.remove(CCConstants.SYS_PROP_NODE_UID);
+                        nodePropsReplace.remove(CCConstants.SYS_PROP_NODE_DBID);
                         nodePropsReplace.remove(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID);
                         nodePropsReplace.remove(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID);
+                        nodePropsReplace.remove(CCConstants.CCM_PROP_IO_ORIGINAL);
                         this.nodeProps.putAll(nodePropsReplace);
                     } catch (Throwable t) {
                         logger.warn("Error while fetching properties for node id " + getId() + ": Node is a remote node and calling remote " + (String) this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID) + " failed", t);
