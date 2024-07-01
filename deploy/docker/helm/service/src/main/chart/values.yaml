@@ -286,10 +286,9 @@ config:
         ## @param config.hazelcast.heartbeat.interval.seconds Set hazelcast heartbeat interval in seconds
         seconds: 5
     max:
-      no:
-        heartbeat:
-          ## @param config.hazelcast.max.no.heartbeat.seconds Set hazelcast max missing heartbeats in seconds
-          seconds: 15
+      heartbeat:
+        ## @param config.hazelcast.max.heartbeat.seconds Set hazelcast max missing heartbeats in seconds
+        seconds: 15
     phiaccrual:
       failuredetector:
         min:
