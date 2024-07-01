@@ -619,6 +619,15 @@ init:
       ## @param init.permission.image.tag Set init container image tag
       tag: "${docker.edu_sharing.community.common.minideb.tag}"
 
+    ## @param init.permission.startupProbe Optional specs for startupProbe
+    startupProbe:
+
+    ## @param init.permission.livenessProbe Optional specs for livenessProbe
+    livenessProbe:
+
+    ## @param init.permission.readinessProbe Optional specs for readinessProbe
+    readinessProbe:
+
     resources:
 
       limits:
@@ -717,6 +726,15 @@ sidecar:
 
     ## @param sidecar.proxyMetrics.relabelings Set proxyMetrics sidecar relabelings
     relabelings: []
+
+    ## @param sidecar.proxyMetrics.startupProbe Optional specs for startupProbe
+    startupProbe:
+
+    ## @param sidecar.proxyMetrics.livenessProbe Optional specs for livenessProbe
+    livenessProbe:
+
+    ## @param sidecar.proxyMetrics.readinessProbe Optional specs for readinessProbe
+    readinessProbe:
 
     resources:
 
