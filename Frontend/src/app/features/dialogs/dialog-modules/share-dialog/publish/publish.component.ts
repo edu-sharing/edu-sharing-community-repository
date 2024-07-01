@@ -11,15 +11,11 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { About, AboutService, NodeService, HandleParam } from 'ngx-edu-sharing-api';
+import { About, AboutService, HandleParam, NodeService, FeatureInfo } from 'ngx-edu-sharing-api';
 import { Observable, Observer, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { BridgeService } from '../../../../../core-bridge-module/bridge.service';
-import {
-    ConfigurationService,
-    DialogButton,
-    UIConstants,
-} from '../../../../../core-module/core.module';
+import { ConfigurationService, UIConstants } from '../../../../../core-module/core.module';
 import { Node, Permission } from '../../../../../core-module/rest/data-object';
 import { Helper } from '../../../../../core-module/rest/helper';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
@@ -27,9 +23,8 @@ import { RestHelper } from '../../../../../core-module/rest/rest-helper';
 import { RestConnectorService } from '../../../../../core-module/rest/services/rest-connector.service';
 import { RestNodeService } from '../../../../../core-module/rest/services/rest-node.service';
 import { HandleState, NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
-import { Toast } from '../../../../../core-ui-module/toast';
+import { Toast, ToastType } from '../../../../../core-ui-module/toast';
 import { UIHelper } from '../../../../../core-ui-module/ui-helper';
-import { MainNavService } from '../../../../../main/navigation/main-nav.service';
 import {
     CompletionStatusEntry,
     MdsEditorInstanceService,
@@ -70,7 +65,7 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
     handleInitialState: HandleState = {};
     isCopy: boolean;
     handleMode: 'distinct' | 'update' = 'distinct';
-    republish: 'update' | 'new' | false = false;
+    republish: 'update' | 'new' | 'disabled' = 'disabled';
     private publishedVersions: Node[] = [];
     allPublishedVersions: PublishedNode[];
     mdsCompletion: CompletionStatusEntry;
@@ -272,6 +267,7 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
                         observer.complete();
                     },
                     (error) => {
+                        this.handleError(error);
                         observer.error(error);
                         observer.complete();
                     },
@@ -289,6 +285,7 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
                             observer.complete();
                         },
                         (error) => {
+                            this.handleError(error);
                             observer.error(error);
                             observer.complete();
                         },
@@ -366,8 +363,14 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
 
     setRepublish() {
         this.handleActive = {
-            handleService: this.republish !== false && this.handlePermission,
-            doiService: this.republish !== false && this.handlePermission,
+            handleService:
+                this.republish !== 'disabled' &&
+                this.handlePermission &&
+                this.hasFeature('handleService'),
+            doiService:
+                this.republish !== 'disabled' &&
+                this.handlePermission &&
+                this.hasFeature('doiService'),
         };
         this.updatePublishedVersions();
     }
@@ -381,6 +384,13 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
                             !v.status && v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID],
                     )
                     .map((v) => v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID][0]),
+            ).size === 1 ||
+            new Set(
+                this.allPublishedVersions
+                    .filter(
+                        (v) => !v.status && v.properties[RestConstants.CCM_PROP_PUBLISHED_DOI_ID],
+                    )
+                    .map((v) => v.properties[RestConstants.CCM_PROP_PUBLISHED_DOI_ID][0]),
             ).size === 1
         );
     }
@@ -400,7 +410,7 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
         );
     }
 
-    hasFeature(id: string) {
+    hasFeature(id: 'handleService' | 'doiService') {
         return this.about.features?.filter((f) => f.id === id).length > 0;
     }
 
@@ -423,9 +433,33 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
 
     setHandlesActive() {
         this.handleActive = {
-            doiService: true,
-            handleService: true,
+            doiService: this.hasFeature('doiService'),
+            handleService: this.hasFeature('handleService'),
         };
+    }
+
+    private handleError(error: any) {
+        if (UIHelper.errorContains(error, 'DOIServiceMissingAttributeException')) {
+            // do not trigger global error
+            error.preventDefault();
+            const id = error.error.details.property;
+            const widget = this.mdsService.getPrimaryWidget(id);
+            this.toast.show({
+                type: 'error',
+                subtype: ToastType.ErrorSpecific,
+                message: this.translate.instant('WORKSPACE.SHARE.DOI_MISSING_ATTRIBUTE', {
+                    key: widget?.definition?.caption || id,
+                }),
+                action: {
+                    label: this.translate.instant('WORKSPACE.SHARE.DOI_METADATA'),
+                    callback: () => {
+                        this.openMetadata();
+                    },
+                },
+            });
+            return true;
+        }
+        return false;
     }
 }
 export enum ShareMode {

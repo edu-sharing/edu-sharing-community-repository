@@ -18,13 +18,13 @@
         <img
           *ngIf="!edit && user.profile.avatar"
           class="blurred-image"
-          [src]="user.profile.avatar + '&crop=true&width=400&height=400'"
+          [src]="user.profile.avatar + avatarCache + '&crop=true&width=400&height=400'"
           alt=""
         />
         <img
           *ngIf="edit && !avatarFile && userEdit.profile.avatar"
           class="blurred-image"
-          [src]="user.profile.avatar + '&crop=true&width=400&height=400'"
+          [src]="user.profile.avatar + avatarCache + '&crop=true&width=400&height=400'"
           alt=""
         />
         <img *ngIf="edit && avatarFile" class="blurred-image" [src]="avatarImage" alt="" />

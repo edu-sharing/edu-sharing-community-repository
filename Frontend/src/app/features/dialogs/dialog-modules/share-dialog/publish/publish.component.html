@@ -114,7 +114,7 @@
             [disabled]="!copyAllowed()"
             (ngModelChange)="setRepublish()"
           >
-            <mat-radio-button [disabled]="!isCopy" [value]="false">
+            <mat-radio-button [disabled]="!isCopy" [value]="'disabled'">
               <es-multi-line-label>
                 <ng-container slot="label">
                   {{ 'WORKSPACE.SHARE.PUBLISH.NO_REPUBLISH' | translate }}

@@ -623,31 +623,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                                 this.handlePermissionsPerNode(observer, n, permissions, inherit);
                             },
                             (error) => {
-                                if (
-                                    UIHelper.errorContains(
-                                        error,
-                                        'DOIServiceMissingAttributeException',
-                                    )
-                                ) {
-                                    this.toast.show({
-                                        type: 'error',
-                                        subtype: ToastType.ErrorSpecific,
-                                        message: this.translate.instant(
-                                            'WORKSPACE.SHARE.DOI_MISSING_ATTRIBUTE',
-                                            {
-                                                key: error.error.details.property,
-                                            },
-                                        ),
-                                        action: {
-                                            label: this.translate.instant(
-                                                'WORKSPACE.SHARE.DOI_METADATA',
-                                            ),
-                                            callback: () => {
-                                                this.publishComponent.openMetadata();
-                                            },
-                                        },
-                                    });
-                                } else {
+                                if (!error.defaultPrevented) {
                                     this.toast.error(error);
                                 }
                                 this.dialogRef.patchState({ isLoading: false });

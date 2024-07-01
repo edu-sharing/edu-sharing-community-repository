@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.util.Map;
 
 import com.typesafe.config.Config;
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -29,7 +30,10 @@ import net.handle.hdllib.PublicKeyAuthenticationInfo;
 import net.handle.hdllib.Resolver;
 import net.handle.hdllib.Util;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.springframework.stereotype.Service;
 
+@Service
+@Slf4j
 public class HandleServiceImpl implements HandleService{
 
 	private final Config config;
@@ -83,19 +87,23 @@ public class HandleServiceImpl implements HandleService{
 
 	public HandleServiceImpl() throws HandleServiceNotConfiguredException{
 		config = LightbendConfigLoader.get().getConfig("repository.handleservice");
-
-		handleServerPrefix = config.getString("prefix");
-		handleServerRepoId = config.getString("repoid");
-		privkeyPath = config.getString("privkey");
-		/**
-		 * config dir: must be writeable
-		 */
-		String configDir = config.getString("configDir");
-		if(configDir != null){
-			System.setProperty("net.handle.configDir", configDir);
+		if(config.hasPath("repoid")) {
+			try {
+				handleServerPrefix = config.getString("prefix");
+				handleServerRepoId = config.getString("repoid");
+				privkeyPath = config.getString("privkey");
+				/**
+				 * config dir: must be writeable
+				 */
+				String configDir = config.getString("configDir");
+				if (configDir != null) {
+					System.setProperty("net.handle.configDir", configDir);
+				}
+				id = "0.NA/" + handleServerPrefix;
+			} catch (Throwable t) {
+				log.error("Could not initialize handle service properly cause of error in config, please check config for \"repository.handleservice\"", t);
+			}
 		}
-		id = "0.NA/"+handleServerPrefix;
-
 	}
 	
 	
