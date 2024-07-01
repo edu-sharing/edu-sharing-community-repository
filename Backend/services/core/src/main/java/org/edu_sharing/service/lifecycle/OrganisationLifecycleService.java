@@ -15,7 +15,6 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceImpl;
 import org.edu_sharing.service.collection.CollectionServiceConfig;
-import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.spring.ApplicationContextFactory;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
@@ -52,7 +51,7 @@ public class OrganisationLifecycleService {
     PersonService personService = serviceRegistry.getPersonService();
     NodeService nodeService = serviceRegistry.getNodeService();
 
-    OrganisationDeleteProtocolService protocolService = null;
+    OrganisationDeleteProtocolService protocolService;
 
     String organisation;
 
@@ -64,7 +63,7 @@ public class OrganisationLifecycleService {
     }
 
 
-    public void deleteOrganisation() {
+    public boolean deleteOrganisation() {
         String authorityName = organisationService.getAuthorityName(this.organisation );
 
         logger.info("starting for organisation:" + authorityName);
@@ -74,53 +73,51 @@ public class OrganisationLifecycleService {
                 throw new Exception("authority does not exists " + authorityName);
             }
 
-            deleteOrganisationWithContext(this.organisation , authorityName);
-
+            return deleteOrganisationWithContext(this.organisation , authorityName);
         }catch(Throwable e){
             logger.error(e.getMessage(),e);
             protocolService.protocolError(this.organisation, this.organisation, e.getMessage() );
+            return false;
         }finally {
             protocolService.writeProtocolToAlfrescoNode(OrganisationDeleteProtocolServiceCSV.MIMETYPE);
             protocolService.cleanUp();
         }
     }
 
-    private void deleteOrganisationWithContext(String orga, String authorityName) {
+    private boolean deleteOrganisationWithContext(String orga, String authorityName) {
         Set<String> users = authorityService.getContainedAuthorities(AuthorityType.USER, authorityName, true);
 
         for (String user : users) {
             try {
                 PersonDeleteResult personDeleteResult = deleteUser(authorityName, user);
-                if (!checkNodes(authorityName, user, CCConstants.CCM_TYPE_IO,null)) return;
-                if (!checkNodes(authorityName, user, CCConstants.CCM_TYPE_IO,CCConstants.CCM_VALUE_SCOPE_SAFE)) return;
-                if (!checkNodes(authorityName, user, CCConstants.CCM_TYPE_MAP,null)) return;
-                if (!checkNodes(authorityName, user, CCConstants.CCM_TYPE_MAP,CCConstants.CCM_VALUE_SCOPE_SAFE)) return;
+                if (!checkNodes(authorityName, user, CCConstants.CCM_TYPE_IO,null)) return true;
+                if (!checkNodes(authorityName, user, CCConstants.CCM_TYPE_IO,CCConstants.CCM_VALUE_SCOPE_SAFE)) return true;
+                if (!checkNodes(authorityName, user, CCConstants.CCM_TYPE_MAP,null)) return true;
+                if (!checkNodes(authorityName, user, CCConstants.CCM_TYPE_MAP,CCConstants.CCM_VALUE_SCOPE_SAFE)) return true;
                 protocolService.protocolPerson(orga, personDeleteResult);
             } catch (RuntimeException e) {
                 logger.error(e.getMessage(),e);
                 protocolService.protocolError(orga, user, e.getMessage());
                 //skip for fixing problem by hand
-                return;
+                return false;
             }catch(Throwable e){
                 logger.error(e.getMessage(),e);
                 protocolService.protocolError(orga, user, e.getMessage());
-                return;
+                return false;
             }
         }
 
-        /**
+        /*
          * check if still users exist, also in subgroups (which is not edu-sharing default)
          */
         users = authorityService.getContainedAuthorities(AuthorityType.USER, authorityName, false);
-        if(users != null && users.size() > 0){
-            String userFailed = users.stream().collect(Collectors.joining(","));
+        if(users != null && !users.isEmpty()){
+            String userFailed = String.join(",", users);
             String message = "the following users could not be deleted:" +userFailed;
             logger.error(message);
             protocolService.protocolError(orga,orga,message);
-            return;
+            return false;
         }
-
-
 
         //delete safe org and subgroups
         String authorityNameSafe = authorityName + "_safe";
@@ -129,11 +126,12 @@ public class OrganisationLifecycleService {
 
         //delete org and subgroups
         deleteOrganisationGroup(orga, authorityName);
+        return true;
     }
 
     private boolean checkNodes(String authorityName, String user, String type, String scope) {
         List<NodeRef> allNodeRefs = personLifecycleService.getAllNodeRefs(user, type, scope);
-        if(allNodeRefs != null && allNodeRefs.size() > 0){
+        if(allNodeRefs != null && !allNodeRefs.isEmpty()){
             if(CCConstants.CCM_TYPE_MAP.equals(type)) {
 
                 //ignore folders of shared area, which will not be deleted by personlifecycleservice, but removed when org is deleted
@@ -146,7 +144,7 @@ public class OrganisationLifecycleService {
                         .collect(Collectors.toList());
 
                 //ignore collection path folders, that need to stay there cause it can be that another user saved an collection there
-                if(allNodeRefs.size() > 0){
+                if(!allNodeRefs.isEmpty()){
                     allNodeRefs = allNodeRefs.stream().filter(nodeRef ->
                             !(
                                     !nodeService.hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION))
@@ -156,7 +154,7 @@ public class OrganisationLifecycleService {
                 }
 
                 //ignore intermediate folders for safe home
-                if(allNodeRefs.size() > 0 && CCConstants.CCM_VALUE_SCOPE_SAFE.equals(scope)){
+                if(!allNodeRefs.isEmpty() && CCConstants.CCM_VALUE_SCOPE_SAFE.equals(scope)){
                     NodeRef safeHomerFolderRoot = ((ScopeUserHomeServiceImpl) ScopeUserHomeServiceFactory.getScopeUserHomeService()).getRootNodeRef(scope);
                     allNodeRefs = allNodeRefs.stream()
                             .filter(nodeRef -> !safeHomerFolderRoot.equals(nodeService.getPrimaryParent(nodeRef).getParentRef()))
@@ -164,9 +162,9 @@ public class OrganisationLifecycleService {
                 }
             }
 
-            if(allNodeRefs.size() > 0) {
+            if(!allNodeRefs.isEmpty()) {
                 String message = "the following nodes(type=" + type + ") for " + user + " scope:" + scope + " could not be deleted:" + allNodeRefs.stream()
-                        .map(r -> r.toString())
+                        .map(NodeRef::toString)
                         .collect(Collectors.joining(","));
                 logger.error(message);
                 protocolService.protocolError(authorityName, user, message);
@@ -216,7 +214,7 @@ public class OrganisationLifecycleService {
         protocolService.protocolSubGroups(orga,result,scope);
 
         Set<String> containedAuthoritiesRemained = authorityService.getContainedAuthorities(AuthorityType.GROUP, authorityName, false);
-        if(containedAuthoritiesRemained != null && containedAuthoritiesRemained.size() > 0){
+        if(containedAuthoritiesRemained != null && !containedAuthoritiesRemained.isEmpty()){
             throw new RuntimeException("the following subgroups of "+ authorityName + " could not be deleted:"
                     + String.join(",", containedAuthoritiesRemained));
         }
@@ -231,7 +229,7 @@ public class OrganisationLifecycleService {
         NodeRef nodeRef = personService.getPerson(userName);
         nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS), PersonLifecycleService.PersonStatus.todelete.name());
 
-        return personLifecycleService.deletePersons(Arrays.asList(userName), getPersonDeleteOptions()).results.get(0);
+        return personLifecycleService.deletePersons(Collections.singletonList(userName), getPersonDeleteOptions()).results.get(0);
     }
 
     private void checkAuthorityOnlyExistsInOneOrg(String orgAuthorityName, String authority) {
@@ -248,7 +246,7 @@ public class OrganisationLifecycleService {
         orgMemberships = orgMemberships.stream()
                 .filter(a -> (!a.equals(orgAuthorityName) && !a.equals(orgAuthorityNameSafe)))
                 .collect(Collectors.toList());
-        if(orgMemberships.size() > 0){
+        if(!orgMemberships.isEmpty()){
             throw new RuntimeException("authority " + authority + " is member of more than one organisation");
         }
     }

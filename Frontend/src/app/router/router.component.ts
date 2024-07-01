@@ -213,7 +213,9 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
                 !loginInfo.isValidLogin &&
                 !(
                     router.url.startsWith('/' + UIConstants.ROUTER_PREFIX + 'login') ||
-                    router.url.startsWith('/' + UIConstants.ROUTER_PREFIX + 'register')
+                    router.url.startsWith('/' + UIConstants.ROUTER_PREFIX + 'register') ||
+                    // public link sharing
+                    router.url.startsWith('/' + UIConstants.ROUTER_PREFIX + 'sharing')
                 )
             ) {
                 RestHelper.goToLogin(router, this.configuration);
