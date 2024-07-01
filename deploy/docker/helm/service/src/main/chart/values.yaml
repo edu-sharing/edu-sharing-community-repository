@@ -508,12 +508,16 @@ persistence:
             storage: 5Gi
 
     safe:
+      ## @param persistence.share.safe.enabled Enable safe data share
       enabled: false
+      ## @param persistence.share.safe.create Create safe data share
       create: true
       spec:
+        ## @param persistence.share.safe.spec.accessModes Set access modes for persistent safe share
         accessModes: [ "ReadWriteMany" ]
         resources:
           requests:
+            ## @param persistence.share.safe.spec.resources.requests.storage Set storage request for persistent safe share
             storage: 5Gi
 
 ########################################################################################################################
