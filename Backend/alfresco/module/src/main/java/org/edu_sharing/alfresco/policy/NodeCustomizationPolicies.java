@@ -286,10 +286,10 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			logger.debug("will do the resourceinfo. noderef:"+nodeRef);
 			Action resourceInfoAction = actionService.createAction(CCConstants.ACTION_NAME_RESOURCEINFO);
 			actionService.executeAction(resourceInfoAction, nodeRef, true, false);
-
 			logger.debug("lockStatus:"+lockStatus);
-			if(newContent
-					&& (LockStatus.NO_LOCK.equals(lockStatus) || LockStatus.LOCK_EXPIRED.equals(lockStatus))
+			// new content seems to be false even when the binary has new data, so we trigger the preview
+			if(/*newContent */
+					(LockStatus.NO_LOCK.equals(lockStatus) || LockStatus.LOCK_EXPIRED.equals(lockStatus))
 					&& (reader!=null) && (reader.getContentData()!=null) && reader.getContentData().getSize() > 0){
 
 				new ThumbnailHandling().thumbnailHandling(nodeRef);
