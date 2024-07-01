@@ -50,7 +50,7 @@
     "NO_SUB_NODES": "Plus d'éléments",
     "NO_NODES_IN_FOLDER": "Ce dossier est vide.",
     "UPLOAD_TITLE": "Télécharger",
-    "UPLOAD_SUBTITLE": "{{progress}}/{total}} traité",
+    "UPLOAD_SUBTITLE": "{{progress}}/{{total}} traité",
     "UPLOAD_REMAINING": "{{time}} gauche",
     "UPLOAD_FINISHING": "Presque terminé...",
     "UPLOAD_ERROR": {
