@@ -1839,14 +1839,16 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
     public String createNode(StoreRef store, String parentID, String nodeTypeString, String childAssociation, Map<String, Object> _props) {
 
-        String name = (String) _props.get(CCConstants.CM_NAME);
-        _props.put(CCConstants.CM_NAME, CharMatcher.javaIsoControl().removeFrom(name));
-        Map<QName, Serializable> properties = transformPropMap(_props);
+        Map<String, Object> props = new HashMap<>(_props);
+
+        String name = (String) props.get(CCConstants.CM_NAME);
+        props.put(CCConstants.CM_NAME, CharMatcher.javaIsoControl().removeFrom(name));
+        Map<QName, Serializable> properties = transformPropMap(props);
 
         NodeRef parentNodeRef = new NodeRef(store, parentID);
         QName nodeType = QName.createQName(nodeTypeString);
 
-        String assocName = (String) _props.get(CCConstants.CM_NAME);
+        String assocName = (String) props.get(CCConstants.CM_NAME);
         if (assocName == null) {
             assocName = "defaultAssociationName";
         } else {
@@ -1873,9 +1875,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
     public void updateNode(StoreRef store, String nodeId, Map<String, Object> _props) {
 
         try {
-            String name = (String) _props.get(CCConstants.CM_NAME);
-            _props.put(CCConstants.CM_NAME, CharMatcher.javaIsoControl().removeFrom(name));
-            Map<QName, Serializable> props = transformPropMap(_props);
+            Map<String, Object> props = new HashMap<>(_props);
+            String name = (String) props.get(CCConstants.CM_NAME);
+            props.put(CCConstants.CM_NAME, CharMatcher.javaIsoControl().removeFrom(name));
+            Map<QName, Serializable> properties = transformPropMap(_props);
             NodeRef nodeRef = new NodeRef(store, nodeId);
 
             // don't do this cause it's slow:
