@@ -65,7 +65,7 @@
     },
     "ADD_FOLDER_TITLE": "Ajouter un nouveau dossier",
     "ADD_FOLDER_METADATASET": "Métadonnées du dossier",
-    "FOLDER_PLACEHOLDER": "Nom de famille",
+    "FOLDER_PLACEHOLDER": "Nom du dossier",
     "DELETE_TITLE_SINGLE": "Supprimer un élément ?",
     "DELETE_TITLE_PUBLISHED_COPY": "Dépublier ?",
     "DELETE_TITLE_COLLECTION": "Supprimer la collection ?",
