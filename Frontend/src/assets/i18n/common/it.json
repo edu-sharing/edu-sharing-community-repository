@@ -435,7 +435,8 @@
       "employee": "dipendente",
       "extern": "utente esterno",
       "system": "conto di sistema",
-      "function": "funzione conto"
+      "function": "funzione conto",
+      "guest": "ospite"
     }
   },
   "PROFILE_SETTINGS": {

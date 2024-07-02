@@ -981,6 +981,8 @@ public class CCConstants {
 
 	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_SYSTEM = "system";
 
+	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_GUEST = "guest";
+
 	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_FUNCTION = "function";
 
 	/**
