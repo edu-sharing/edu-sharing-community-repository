@@ -26,10 +26,7 @@ import org.alfresco.service.cmr.rendition.RenditionService;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.search.CategoryService;
 import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.security.AuthenticationService;
-import org.alfresco.service.cmr.security.AuthorityService;
-import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.cmr.security.PersonService;
+import org.alfresco.service.cmr.security.*;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.cmr.tagging.TaggingService;
 import org.alfresco.service.cmr.version.VersionService;
@@ -109,7 +106,7 @@ public class AlfrescoBeanConfig {
 
     @Primary
     @Bean(name = "AuthenticationService")
-    public AuthenticationService authenticationService() {
+    public MutableAuthenticationService authenticationService() {
         return serviceRegistry.getAuthenticationService();
     }
 
@@ -308,5 +305,4 @@ public class AlfrescoBeanConfig {
     public ModuleService moduleServiceWithoutSecurity() {
         return serviceRegistry.getModuleService();
     }
-
 }
