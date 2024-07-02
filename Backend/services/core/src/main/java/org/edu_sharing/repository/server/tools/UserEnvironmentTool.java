@@ -155,10 +155,10 @@ public class UserEnvironmentTool {
         Map<String, Object> edu_SharingSystemFolderUpdate = mcBaseClient.getChild(systemFolderId, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_CONTEXT);
 
         if (edu_SharingSystemFolderUpdate == null) {
-            Map<String, Object> i18nTitle = Map.of(
+            Map<String, Object> i18nTitle = new HashMap<>(Map.of(
                     "de_DE", I18nServer.getTranslationDefaultResourcebundle(CCConstants.I18n_SYSTEMFOLDER_CONTEXT, "de_DE"),
                     "en_EN", I18nServer.getTranslationDefaultResourcebundle(CCConstants.I18n_SYSTEMFOLDER_CONTEXT, "en_EN"),
-                    "en_US", I18nServer.getTranslationDefaultResourcebundle(CCConstants.I18n_SYSTEMFOLDER_CONTEXT, "en_US"));
+                    "en_US", I18nServer.getTranslationDefaultResourcebundle(CCConstants.I18n_SYSTEMFOLDER_CONTEXT, "en_US")));
 
             Map<String, Object> newEdu_SharingSysMapProps = Map.of(
                     CCConstants.CM_NAME, I18nServer.getTranslationDefaultResourcebundle(CCConstants.I18n_SYSTEMFOLDER_CONTEXT),
