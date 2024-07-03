@@ -52,6 +52,11 @@
       </list>
     </property>
   </bean>
+	<bean id="trackingServiceImpl" class="org.edu_sharing.service.tracking.TrackingServiceImpl">
+		<property name="nodeService">
+			<ref bean="nodeServiceImpl" />
+		</property>
+	</bean>
   <bean id="trackingServiceInterceptor" class="org.edu_sharing.service.tracking.TrackingServiceInterceptor"
         init-method="init"/>
 
