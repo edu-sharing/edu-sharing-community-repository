@@ -5,7 +5,6 @@ import com.typesafe.config.ConfigBeanFactory;
 import com.typesafe.config.ConfigObject;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityService;
@@ -44,31 +43,24 @@ public class GuestServiceImpl implements GuestService, ApplicationListener<Refre
     @Override
     public GuestConfig getDefaultConfig() {
         Config rootConfig = LightbendConfigLoader.get();
-
         Config config = rootConfig.getConfig(REPOSITORY_GUEST_CONFIG_PATH);
-        if (config == null) {
-            return null;
-        }
-
         return ConfigBeanFactory.create(config, GuestConfig.class);
     }
 
     @Override
     public GuestConfig getConfig(String context) {
         Config rootConfig = LightbendConfigLoader.get();
-
-        Config config = null;
-        if (StringUtils.isNotBlank(context)) {
-            String contextConfigPath = getContextConfigPath(context);
-            if (rootConfig.hasPath(contextConfigPath)) {
-                config = rootConfig.getConfig(contextConfigPath);
-            }
+        if (StringUtils.isBlank(context)) {
+            return getDefaultConfig();
         }
 
-        if (config == null) {
-            return null;
+        String contextConfigPath = getContextConfigPath(context);
+        if (!rootConfig.hasPath(contextConfigPath)) {
+            return getDefaultConfig();
         }
 
+        Config defaultConfig = rootConfig.getConfig(REPOSITORY_GUEST_CONFIG_PATH);
+        Config config = rootConfig.getConfig(contextConfigPath).withFallback(defaultConfig);
         return ConfigBeanFactory.create(config, GuestConfig.class);
     }
 
@@ -78,12 +70,15 @@ public class GuestServiceImpl implements GuestService, ApplicationListener<Refre
         guestConfigs.add(getDefaultConfig());
 
         Config rootConfig = LightbendConfigLoader.get();
+        Config defaultConfig = rootConfig.getConfig(REPOSITORY_GUEST_CONFIG_PATH);
+
         if (rootConfig.hasPath(REPOSITORY_CONTEXT_CONFIG_PATH)) {
             ConfigObject contextObject = rootConfig.getObject(REPOSITORY_CONTEXT_CONFIG_PATH);
             Config contextConfig = contextObject.toConfig();
             contextObject.keySet().stream()
                     .map(x -> String.join(".", x.contains(".") ? String.format("\"%s\"", x) : x, REPOSITORY_GUEST_CONFIG_PATH))
                     .map(contextConfig::getConfig)
+                    .map(x->x.withFallback(defaultConfig))
                     .map(config -> ConfigBeanFactory.create(config, GuestConfig.class))
                     .forEach(guestConfigs::add);
         }
@@ -120,12 +115,7 @@ public class GuestServiceImpl implements GuestService, ApplicationListener<Refre
     @Override
     public GuestConfig getCurrentGuestConfig() {
         String currentContext = NodeCustomizationPolicies.getEduSharingContext();
-        GuestConfig guestConfig = getConfig(currentContext);
-        if (guestConfig == null || !guestConfig.isEnabled()) {
-            guestConfig = getDefaultConfig();
-        }
-
-        return guestConfig;
+        return getConfig(currentContext);
     }
 
 
@@ -152,12 +142,18 @@ public class GuestServiceImpl implements GuestService, ApplicationListener<Refre
 
     @Override
     public NodeRef createOrUpdateGuest(GuestConfig guestConfig) {
-        return retryingTransactionHelper.doInTransaction(() -> AuthenticationUtil.runAsSystem(() -> {
+
+        if (StringUtils.isBlank(guestConfig.getUsername()) || StringUtils.isBlank(guestConfig.getPassword())) {
+            return null;
+        }
+
+        return retryingTransactionHelper.doInTransaction(() -> {
             NodeRef guestRef = personService.getPersonOrNull(guestConfig.getUsername());
             if (guestRef == null) {
                 Map<QName, Serializable> properties = new HashMap<>(Map.of(
                         ContentModel.PROP_USERNAME, guestConfig.getUsername(),
                         ContentModel.PROP_FIRSTNAME, guestConfig.getUsername(),
+                        ContentModel.PROP_LASTNAME, guestConfig.getUsername(),
                         QName.createQName(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION), CCConstants.CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_GUEST));
 
                 authenticationService.createAuthentication(guestConfig.getUsername(), guestConfig.getPassword().toCharArray());
@@ -181,6 +177,6 @@ public class GuestServiceImpl implements GuestService, ApplicationListener<Refre
             toRemove.forEach(x -> authorityService.removeAuthority(x, guestConfig.getUsername()));
             toCreate.forEach(x -> authorityService.addAuthority(x, guestConfig.getUsername()));
             return guestRef;
-        }));
+        });
     }
 }
