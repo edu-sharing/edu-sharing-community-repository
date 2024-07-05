@@ -153,8 +153,12 @@
       "PUBLISH_ACTIVE_COLLECTION": "The collection is made publicly available on the Internet",
       "PUBLISH_ACTIVE_DIRECTORY": "All documents of this folder are made publicly available on the Internet",
       "NO_FUZZY": "Enter the full e-mail address to add users",
+      "HANDLE": "Provide with Handle",
+      "HANDLE_INFO": "A handle is a standardized ID for unique global identification and retrieved material",
       "DOI": "Provide with DOI",
       "DOI_INFO": "DOI (Digital Object Identifier) is a standardized ID for unique global identification and retrieved material",
+      "DOI_MISSING_ATTRIBUTE": "In order to publish this material as a DOI the following field is required: {{key}}",
+      "DOI_METADATA": "Open metadata",
       "PUBLISHING_WARNING_TITLE": "Publish element?",
       "PUBLISHING_WARNING_MESSAGE": "If you continue, the current element will be shared with all users of the system and can be accessed by everyone.\n\nAre you sure you want to publish this element?",
       "ERROR_INVALID_TYPE_COMBINATION": "elements of different types can't be shared in bulk",
@@ -367,6 +371,7 @@
       "NOBODY": "<not assigned>",
       "OLD_STATUS": "old status",
       "NEW_STATUS": "new status",
+      "INFO_MESSAGE": "Please note that the choosen person/group will need to get full access to this material in the process in order to change and and update the material and workflow.",
       "HISTORY": "workflow activities",
       "NO_COMMENT": "Please enter a comment for workflow activity.",
       "NO_RECEIVER": "Please enter a receiver for workflow activity.",
@@ -374,6 +379,7 @@
       "USER_NO_PERMISSION": "Missing permissions",
       "USER_NO_PERMISSION_INFO": "The user/group in charge '{{user}}' has currently no permission to access this document / these documents. Do you want to grant them coordinator permissions?\n\nCoordinators may edit the material and grant additional users access.",
       "PROCEED": "Yes, grant permissions",
+      "SAVE": "Save",
       "BULK_WORKFLOWS_EXIST": "Some of the selected documents already have an active workflow. Please edit these documents separately."
     },
     "CONTRIBUTOR": {
