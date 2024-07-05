@@ -56,9 +56,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.HasPermissionsWork;
 import org.edu_sharing.alfresco.fixes.VirtualEduGroupFolderTool;
-import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.connector.ConnectorService;
+import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataKey;
@@ -126,6 +126,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
     private final PersonService personService;
 
     private final DictionaryService dictionaryService;
+    private final GuestService guestService;
 
     org.edu_sharing.alfresco.service.AuthorityService eduAuthorityService;
 
@@ -219,6 +220,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         personService = serviceRegistry.getPersonService();
 
         dictionaryService = serviceRegistry.getDictionaryService();
+        guestService = applicationContext.getBean(GuestService.class);
 
         eduAuthorityService = (org.edu_sharing.alfresco.service.AuthorityService) applicationContext.getBean("eduAuthorityService");
 
@@ -2820,7 +2822,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
     public Map<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId, String[] permissions) {
         ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
-        boolean guest = GuestCagePolicy.getGuestUsers().contains(AuthenticationUtil.getFullyAuthenticatedUser());
+        boolean guest = guestService.isGuestUser(AuthenticationUtil.getFullyAuthenticatedUser());
         PermissionService permissionService = serviceRegistry.getPermissionService();
         Map<String, Boolean> result = new HashMap<>();
         NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);

@@ -27,10 +27,7 @@
  */
 package org.edu_sharing.repository.server;
 
-import java.io.File;
-
 import jakarta.servlet.ServletContextEvent;
-
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.chemistry.opencmis.server.impl.CmisRepositoryContextListener;
@@ -55,6 +52,8 @@ import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.spring.context.EduSharingContextInitializer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.ContextLoaderListener;
+
+import java.io.File;
 
 public class MCAlfrescoManager extends ContextLoaderListener {
 
@@ -114,6 +113,7 @@ public class MCAlfrescoManager extends ContextLoaderListener {
 			}catch(Throwable t) {
 				logger.error("init of config groups failed: " + t.getMessage(), t);
 			}
+
 			//init ToolPermisssions
 			ToolPermissionServiceFactory.getInstance().init();
 

@@ -34,6 +34,7 @@ import org.alfresco.service.cmr.workflow.WorkflowService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.transaction.TransactionService;
 import org.edu_sharing.alfresco.policy.HomeFolderTool;
+import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationContext;
@@ -304,5 +305,10 @@ public class AlfrescoBeanConfig {
     @Bean(name = "moduleService")
     public ModuleService moduleServiceWithoutSecurity() {
         return serviceRegistry.getModuleService();
+    }
+
+    @Bean
+    public GuestService guestService(){
+        return applicationContext.getBean(GuestService.class);
     }
 }

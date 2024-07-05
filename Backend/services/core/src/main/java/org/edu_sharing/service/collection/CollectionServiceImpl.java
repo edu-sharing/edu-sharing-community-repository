@@ -1,11 +1,5 @@
 package org.edu_sharing.service.collection;
 
-import java.io.InputStream;
-import java.io.Serializable;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.search.impl.solr.ESSearchParameters;
@@ -19,11 +13,13 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.cmr.thumbnail.ThumbnailService;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
+import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.metadataset.v2.MetadataSet;
@@ -36,8 +32,10 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
-import org.edu_sharing.alfresco.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.tools.*;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.I18nServer;
+import org.edu_sharing.repository.server.tools.ImageTool;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
@@ -63,7 +61,6 @@ import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
@@ -71,6 +68,12 @@ import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.context.ApplicationContext;
+
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 
 public class CollectionServiceImpl implements CollectionService {
@@ -119,14 +122,13 @@ public class CollectionServiceImpl implements CollectionService {
 
             this.authTool = RepoFactory.getAuthenticationToolInstance(appId);
 
-			String guestUn = ApplicationInfoList.getHomeRepository().getGuest_username();
+            GuestService guestService = applicationContext.getBean(GuestService.class);
 
             //fix for running in runas user mode
             if ((AuthenticationUtil.isRunAsUserTheSystemUser()
                     || "admin".equals(AuthenticationUtil.getRunAsUser()))
 					|| Context.getCurrentInstance().getCurrentInstance() == null
-					|| (guestUn != null
-					&& guestUn.equals(AuthenticationUtil.getFullyAuthenticatedUser()) )) {
+					|| (guestService.isGuestUser(AuthenticationUtil.getFullyAuthenticatedUser()) )) {
                 logger.debug("starting in runas user mode");
                 this.authInfo = new HashMap<>();
                 this.authInfo.put(CCConstants.AUTH_USERNAME, AuthenticationUtil.getRunAsUser());

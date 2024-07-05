@@ -5,12 +5,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.service.guest.GuestConfig;
+import org.edu_sharing.alfresco.service.guest.GuestService;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.NgServlet;
 import org.edu_sharing.repository.server.RepoFactory;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LocaleValidator;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
@@ -21,7 +23,6 @@ import org.springframework.context.ApplicationContext;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,15 +39,16 @@ public class AuthenticationFilter implements jakarta.servlet.Filter {
 	Logger log = Logger.getLogger(AuthenticationFilter.class);
 	
 	TokenService tokenService;
+	private GuestService guestService;
 
 	List<String> unprotectedPaths = Arrays.asList("components/sharing");
-	
+
 	@Override
 	public void init(FilterConfig arg0) throws ServletException {
-		ApplicationContext eduApplicationContext = 
-				org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
+		ApplicationContext eduApplicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
 
 		tokenService = (TokenService) eduApplicationContext.getBean("oauthTokenService");
+		guestService = AlfAppContextGate.getApplicationContext().getBean(GuestService.class);
 		
 	}
 	
@@ -72,7 +74,7 @@ public class AuthenticationFilter implements jakarta.servlet.Filter {
 
 		//find out if we have to do the guest login
 	  	String user = httpReq.getParameter("user");
-	  	if(user != null && user.equals("guest")){
+	  	if(user != null &&guestService.isGuestUser(user)){
 	  		boolean guestAuthenticated = authenticateByGuest(httpReq);
 	  		if(guestAuthenticated){
 	  			chain.doFilter(req,res);
@@ -262,20 +264,19 @@ public class AuthenticationFilter implements jakarta.servlet.Filter {
 	}
 
 	private boolean authenticateByGuest(HttpServletRequest req) {
-		ApplicationInfo repHomeInfo = ApplicationInfoList.getRepositoryInfo(CCConstants.REPOSITORY_FILE_HOME);
-		String guestUn = repHomeInfo.getGuest_username();
-		String guestPw = repHomeInfo.getGuest_password();
-		if(guestUn == null || guestPw == null){
+
+		GuestConfig guestConfig = guestService.getCurrentGuestConfig();
+		if(guestConfig == null || !guestConfig.isEnabled()){
 			log.info("guest login not allowed");
 			return false;
 		}
 		try{
 			AuthenticationTool authTool = RepoFactory.getAuthenticationToolInstance(null);
-			Map<String,String> result = authTool.createNewSession(guestUn, guestPw);
+			Map<String,String> result = authTool.createNewSession(guestConfig.getUsername(), guestConfig.getPassword());
 			
 			//save ticket in session
 			HttpSession session = req.getSession();
-			authTool.storeAuthInfoInSession(guestUn, result.get(CCConstants.AUTH_TICKET), CCConstants.AUTH_TYPE_DEFAULT,session);
+			authTool.storeAuthInfoInSession(guestConfig.getUsername(), result.get(CCConstants.AUTH_TICKET), CCConstants.AUTH_TYPE_DEFAULT,session);
 			return true;
 		}catch(Throwable e){
 			log.error(e.getMessage(), e);

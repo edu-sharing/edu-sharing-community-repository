@@ -1,9 +1,6 @@
 package org.edu_sharing.service.permission;
 
-import java.io.Serializable;
-import java.util.*;
-import java.util.stream.Collectors;
-
+import com.google.gson.Gson;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.search.impl.solr.SolrJSONResultSet;
@@ -19,29 +16,27 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.security.*;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.security.*;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.edu_sharing.alfresco.policy.GuestCagePolicy;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.EduSharingCustomPermissionService;
 import org.edu_sharing.alfresco.service.OrganisationService;
+import org.edu_sharing.alfresco.service.guest.GuestService;
+import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
-import org.edu_sharing.repository.client.rpc.ACE;
-import org.edu_sharing.repository.client.rpc.ACL;
-import org.edu_sharing.repository.client.rpc.Authority;
-import org.edu_sharing.repository.client.rpc.Group;
-import org.edu_sharing.repository.client.rpc.Notify;
-import org.edu_sharing.repository.client.rpc.Result;
-import org.edu_sharing.repository.client.rpc.User;
+import org.edu_sharing.repository.client.rpc.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.tools.*;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.PropertiesHelper;
+import org.edu_sharing.repository.server.tools.StringTool;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
@@ -50,14 +45,16 @@ import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
 import org.edu_sharing.service.oai.OAIExporterService;
-import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
-import com.google.gson.Gson;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -81,6 +78,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	AuthorityService authorityService = serviceRegistry.getAuthorityService();
 	BehaviourFilter policyBehaviourFilter = (BehaviourFilter)applicationContext.getBean("policyBehaviourFilter");
 	MCAlfrescoAPIClient repoClient = new MCAlfrescoAPIClient();
+	private GuestService guestService = applicationContext.getBean(GuestService.class);
 	Logger logger = Logger.getLogger(PermissionServiceImpl.class);
 	private PermissionService permissionService;
 
@@ -952,7 +950,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	private void filterGuestAuthority(StringBuffer searchQuery) {
-		for(String guest : GuestCagePolicy.getGuestUsers()){
+		for(String guest : guestService.getAllGuestAuthorities()){
 			searchQuery.append(" AND NOT @cm\\:userName:\""+ QueryParser.escape(guest)+"\"");
 		}
 	}
@@ -1491,7 +1489,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	@Override
 	public Map<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId,
 			String[] permissions) {
-		boolean guest = GuestCagePolicy.getGuestUsers().contains(AuthenticationUtil.getFullyAuthenticatedUser());
+		boolean guest = guestService.isGuestUser(AuthenticationUtil.getFullyAuthenticatedUser());
 		PermissionService permissionService = serviceRegistry.getPermissionService();
 		Map<String, Boolean> result = new HashMap<>();
 		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);

@@ -1,0 +1,186 @@
+package org.edu_sharing.alfresco.service.guest;
+
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigBeanFactory;
+import com.typesafe.config.ConfigObject;
+import lombok.extern.slf4j.Slf4j;
+import org.alfresco.model.ContentModel;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.security.AuthorityService;
+import org.alfresco.service.cmr.security.MutableAuthenticationService;
+import org.alfresco.service.cmr.security.PersonService;
+import org.alfresco.service.namespace.QName;
+import org.apache.commons.lang3.StringUtils;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.spring.scope.refresh.RefreshScopeRefreshedEvent;
+import org.springframework.context.ApplicationListener;
+
+import java.io.Serializable;
+import java.util.*;
+
+@Slf4j
+public class GuestServiceImpl implements GuestService, ApplicationListener<RefreshScopeRefreshedEvent> {
+
+    public static final String REPOSITORY_GUEST_CONFIG_PATH = "repository.guest";
+    public static final String REPOSITORY_CONTEXT_CONFIG_PATH = "repository.context";
+
+    private final PersonService personService;
+    private final MutableAuthenticationService authenticationService;
+    private final AuthorityService authorityService;
+    private final RetryingTransactionHelper retryingTransactionHelper;
+
+
+    public GuestServiceImpl(PersonService personService, MutableAuthenticationService authenticationService, AuthorityService authorityService, RetryingTransactionHelper retryingTransactionHelper) {
+        this.personService = personService;
+        this.authenticationService = authenticationService;
+        this.authorityService = authorityService;
+        this.retryingTransactionHelper = retryingTransactionHelper;
+    }
+
+    @Override
+    public GuestConfig getDefaultConfig() {
+        Config rootConfig = LightbendConfigLoader.get();
+
+        Config config = rootConfig.getConfig(REPOSITORY_GUEST_CONFIG_PATH);
+        if (config == null) {
+            return null;
+        }
+
+        return ConfigBeanFactory.create(config, GuestConfig.class);
+    }
+
+    @Override
+    public GuestConfig getConfig(String context) {
+        Config rootConfig = LightbendConfigLoader.get();
+
+        Config config = null;
+        if (StringUtils.isNotBlank(context)) {
+            String contextConfigPath = getContextConfigPath(context);
+            if (rootConfig.hasPath(contextConfigPath)) {
+                config = rootConfig.getConfig(contextConfigPath);
+            }
+        }
+
+        if (config == null) {
+            return null;
+        }
+
+        return ConfigBeanFactory.create(config, GuestConfig.class);
+    }
+
+    @Override
+    public List<GuestConfig> getAllGuestConfigs() {
+        List<GuestConfig> guestConfigs = new ArrayList<>();
+        guestConfigs.add(getDefaultConfig());
+
+        Config rootConfig = LightbendConfigLoader.get();
+        if (rootConfig.hasPath(REPOSITORY_CONTEXT_CONFIG_PATH)) {
+            ConfigObject contextObject = rootConfig.getObject(REPOSITORY_CONTEXT_CONFIG_PATH);
+            Config contextConfig = contextObject.toConfig();
+            contextObject.keySet().stream()
+                    .map(x -> String.join(".", x.contains(".") ? String.format("\"%s\"", x) : x, REPOSITORY_GUEST_CONFIG_PATH))
+                    .map(contextConfig::getConfig)
+                    .map(config -> ConfigBeanFactory.create(config, GuestConfig.class))
+                    .forEach(guestConfigs::add);
+        }
+
+        return guestConfigs;
+    }
+
+
+    @Override
+    public boolean isGuestUser(String authority) {
+        return getAllGuestAuthorities().contains(authority);
+    }
+
+    private static String getContextConfigPath(String context) {
+        return String.join(".", REPOSITORY_CONTEXT_CONFIG_PATH, context, REPOSITORY_GUEST_CONFIG_PATH);
+    }
+
+    // TODO cache ?
+    @Override
+    public Set<String> getAllGuestAuthorities() {
+        Set<String> guests = new HashSet<>();
+        guests.add("guest");
+        guests.add("edu_proxy");
+        Optional.ofNullable(getDefaultConfig()).map(GuestConfig::getUsername).ifPresent(guests::add);
+        getAllGuestConfigs()
+                .stream()
+                .map(GuestConfig::getUsername)
+                .filter(StringUtils::isNotBlank)
+                .forEach(guests::add);
+
+        return guests;
+    }
+
+    @Override
+    public GuestConfig getCurrentGuestConfig() {
+        String currentContext = NodeCustomizationPolicies.getEduSharingContext();
+        GuestConfig guestConfig = getConfig(currentContext);
+        if (guestConfig == null || !guestConfig.isEnabled()) {
+            guestConfig = getDefaultConfig();
+        }
+
+        return guestConfig;
+    }
+
+
+    @Override
+    public void onApplicationEvent(RefreshScopeRefreshedEvent event) {
+        if (!event.isCaller()) {
+            return;
+        }
+
+
+        createOrUpdateAllGuestUsers();
+    }
+
+    @Override
+    public void createOrUpdateAllGuestUsers() {
+        getAllGuestConfigs().forEach(x -> {
+            try {
+                createOrUpdateGuest(x);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+        });
+    }
+
+    @Override
+    public NodeRef createOrUpdateGuest(GuestConfig guestConfig) {
+        return retryingTransactionHelper.doInTransaction(() -> AuthenticationUtil.runAsSystem(() -> {
+            NodeRef guestRef = personService.getPersonOrNull(guestConfig.getUsername());
+            if (guestRef == null) {
+                Map<QName, Serializable> properties = new HashMap<>(Map.of(
+                        ContentModel.PROP_USERNAME, guestConfig.getUsername(),
+                        ContentModel.PROP_FIRSTNAME, guestConfig.getUsername(),
+                        QName.createQName(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION), CCConstants.CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_GUEST));
+
+                authenticationService.createAuthentication(guestConfig.getUsername(), guestConfig.getPassword().toCharArray());
+                guestRef = personService.createPerson(properties);
+            } else {
+                authenticationService.setAuthentication(guestConfig.getUsername(), guestConfig.getPassword().toCharArray());
+            }
+
+            Set<String> currentMemberships = new HashSet<>(authorityService.getAuthoritiesForUser(guestConfig.getUsername()));
+
+
+            Set<String> toRemove = new HashSet<>(currentMemberships);
+            toRemove.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
+            guestConfig.getGroups().forEach(toRemove::remove);
+
+
+            Set<String> toCreate = new HashSet<>(guestConfig.getGroups());
+            toCreate.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
+            toCreate.removeAll(currentMemberships);
+
+            toRemove.forEach(x -> authorityService.removeAuthority(x, guestConfig.getUsername()));
+            toCreate.forEach(x -> authorityService.addAuthority(x, guestConfig.getUsername()));
+            return guestRef;
+        }));
+    }
+}

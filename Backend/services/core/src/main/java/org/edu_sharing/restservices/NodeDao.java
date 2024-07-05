@@ -13,6 +13,8 @@ import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.service.guest.GuestConfig;
+import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -54,7 +56,7 @@ import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.*;
 import org.edu_sharing.service.notification.NotificationService;
 import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
-import org.edu_sharing.service.permission.HandleMode;
+import org.edu_sharing.service.permission.HandleParam;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.rating.RatingDetails;
@@ -84,8 +86,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import org.edu_sharing.service.permission.HandleParam;
 
 public class NodeDao {
     private static Logger logger = Logger.getLogger(NodeDao.class);
@@ -534,7 +534,7 @@ public class NodeDao {
     AuthorityService authorityService;
     CollectionService collectionService;
     CommentService commentService;
-
+    GuestService guestService;
     final Filter filter;
 
     private org.edu_sharing.service.permission.PermissionService permissionService;
@@ -710,6 +710,7 @@ public class NodeDao {
             this.storeId = nodeRef.getStoreId();
 
             this.nodeService = NodeServiceFactory.getNodeService(repoDao.getId());
+            this.guestService = AlfAppContextGate.getApplicationContext().getBean(GuestService.class);
             this.permissionService = PermissionServiceFactory.getPermissionService(repoDao.getId());
             try {
                 this.authorityService = AuthorityServiceFactory.getAuthorityService(repoDao.getId());
@@ -848,17 +849,18 @@ public class NodeDao {
         if (nodeRef != null && nodeRef.getPublic() != null) {
             this.isPublic = nodeRef.getPublic();
         } else {
-            if(!StringUtils.isBlank(ApplicationInfoList.getHomeRepository().getGuest_username())) {
+            GuestConfig guestConfig = guestService.getCurrentGuestConfig();
+            if(guestConfig != null && guestConfig.isEnabled()) {
                 this.isPublic = usedPermissionService.hasPermission(
                         storeProtocol,
                         storeId,
                         nodeId,
-                        ApplicationInfoList.getHomeRepository().getGuest_username(),
+                        guestConfig.getUsername(),
                         CCConstants.PERMISSION_READ_ALL
                 );
             }
         }
-        if (nodeRef != null && nodeRef.getPermissions() != null && nodeRef.getPermissions().size() > 0) {
+        if (nodeRef != null && nodeRef.getPermissions() != null && !nodeRef.getPermissions().isEmpty()) {
             this.hasPermissions = nodeRef.getPermissions();
         } else {
             this.hasPermissions = usedPermissionService.hasAllPermissions(storeProtocol, storeId, nodeId, DAO_PERMISSIONS);

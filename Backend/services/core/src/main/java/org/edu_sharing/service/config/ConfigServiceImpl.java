@@ -280,6 +280,10 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
 
     private void overrideValues(Values values, Values override) throws
             IllegalArgumentException, IllegalAccessException {
+        if(override == null){
+            return;
+        }
+
         Class<?> c = override.getClass();
         Field[] fields = c.getDeclaredFields();
         for (Field field : fields) {

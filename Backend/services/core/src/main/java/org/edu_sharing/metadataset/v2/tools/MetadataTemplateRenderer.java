@@ -10,8 +10,9 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.service.guest.GuestService;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
@@ -62,6 +63,8 @@ public class MetadataTemplateRenderer {
 	private Map<String, String[]> properties;
 	private static Logger logger=Logger.getLogger(MetadataTemplateRenderer.class);
 
+	private final GuestService guestService;
+
 	public MetadataTemplateRenderer(MetadataSet mds, NodeRef nodeRef, String userName, String type, List<String> aspects, Map<String, Object> properties) {
 		this.mds = mds;
 		this.nodeRef = nodeRef;
@@ -77,6 +80,7 @@ public class MetadataTemplateRenderer {
 		this.properties = cleanupTextMultivalueProperties(
 				propertiesNative, renderingMode.equals(RenderingMode.HTML)
 		);
+		guestService = AlfAppContextGate.getApplicationContext().getBean(GuestService.class);
 	}
 
 	public Map<String, String[]> getProcessedProperties(){
@@ -448,7 +452,7 @@ public class MetadataTemplateRenderer {
 					+" "+PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_DELETE));
 			if(
 					ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_MATERIAL_FEEDBACK) &&
-							!GuestCagePolicy.getGuestUsers().contains(userName) &&
+							!guestService.isGuestUser(userName) &&
 							PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeRef.getId(),CCConstants.PERMISSION_FEEDBACK) &&
 							!PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeRef.getId(),CCConstants.PERMISSION_DELETE)
 			){

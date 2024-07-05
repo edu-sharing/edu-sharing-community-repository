@@ -35,6 +35,8 @@ import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.service.guest.GuestConfig;
+import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
@@ -98,7 +100,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
     PermissionModel permissionModel = (PermissionModel) alfApplicationContext.getBean("permissionsModelDAO");
-
+    GuestService guestService = alfApplicationContext.getBean(GuestService.class);
     public static int MAX_RESPONSE_ENTITY_SIZE = -1;
 
     public static HttpHost[] getConfiguredHosts() {
@@ -987,7 +989,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         Map<String, Boolean> permissions = new HashMap<>();
         permissions.put(CCConstants.PERMISSION_READ, true);
-        String guestUser = ApplicationInfoList.getHomeRepository().getGuest_username();
+        GuestConfig guestConfig = guestService.getCurrentGuestConfig();
         long millis = System.currentTimeMillis();
         eduNodeRef.setPublic(false);
         Map<String, List<String>> permissionsElastic = (Map) sourceAsMap.get("permissions");
@@ -996,7 +998,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             if ("read".equals(entry.getKey())) {
                 continue;
             }
-            if (!eduNodeRef.getPublic() && guestUser != null && entry.getValue().contains(CCConstants.AUTHORITY_GROUP_EVERYONE)) {
+            if (!eduNodeRef.getPublic() && guestConfig != null && guestConfig.isEnabled() && entry.getValue().contains(CCConstants.AUTHORITY_GROUP_EVERYONE)) {
                 PermissionReference pr = permissionModel.getPermissionReference(null, entry.getKey());
                 Set<PermissionReference> granteePermissions = permissionModel.getGranteePermissions(pr);
                 eduNodeRef.setPublic(granteePermissions.stream().anyMatch(p -> p.getName().equals(CCConstants.PERMISSION_READ_ALL)));
