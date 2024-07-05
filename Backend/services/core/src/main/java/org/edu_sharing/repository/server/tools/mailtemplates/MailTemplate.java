@@ -225,7 +225,9 @@ public class MailTemplate {
 
 	public static void applyNodePropertiesToMap(String prefix, Map<String, Object> properties, Map<String, String> map) {
 		properties.forEach((key, value) -> map.put(prefix + CCConstants.getValidLocalName(key), value instanceof Collection ?
-				StringUtils.join((Collection)value, ", ") : value == null ? "" : value.toString()));
+				StringUtils.join((Collection)value, ", ") : value == null ? "" :
+						StringUtils.join(ValueTool.getMultivalue(value.toString()), ", ")
+				));
 	}
 
 	public static class UserMail {
