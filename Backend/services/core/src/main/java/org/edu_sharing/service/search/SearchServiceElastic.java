@@ -1,10 +1,7 @@
 package org.edu_sharing.service.search;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch._types.ElasticsearchException;
-import co.elastic.clients.elasticsearch._types.SortOrder;
-import co.elastic.clients.elasticsearch._types.SuggestMode;
-import co.elastic.clients.elasticsearch._types.Time;
+import co.elastic.clients.elasticsearch._types.*;
 import co.elastic.clients.elasticsearch._types.aggregations.*;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
@@ -307,6 +304,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         NestedAggregate nested = aggregation.getValue().nested();
                         StringTermsAggregate sterms = nested.aggregations().values().stream().findFirst().get().sterms();
                         facetsResult.add(getFacet(aggregation.getKey(), sterms, definition));
+                    } else if(aggregation.getValue().isMultiTerms()) {
+                        Aggregation definition = aggregations.get(a.getKey());
+                        MultiTermsAggregate multiTerm = aggregation.getValue().multiTerms();
+                        facetsResult.add(getMultitermFacet(aggregation.getKey(), multiTerm, definition));
                     }
                 }
             } else {
@@ -321,6 +322,29 @@ public class SearchServiceElastic extends SearchServiceImpl {
         searchResultNodeRef.setNodeCount(0);
 
         return searchResultNodeRef;
+    }
+
+    private NodeSearch.Facet getMultitermFacet(String name, MultiTermsAggregate mta, Aggregation definition) {
+        NodeSearch.Facet facet = new NodeSearch.Facet();
+        facet.setProperty(name);
+        List<NodeSearch.Facet.Value> values = new ArrayList<>();
+        facet.setValues(values);
+
+        for (MultiTermsBucket b : mta.buckets().array()) {
+            for (FieldValue fv : b.key()) {
+                long count = b.docCount();
+                NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
+                // skip duplicate entries
+                if(values.stream().anyMatch(v -> v.getValue().equals(fv.stringValue()))) {
+                    continue;
+                }
+                value.setValue(fv.stringValue());
+                value.setCount((int) count);
+                values.add(value);
+            }
+        }
+        facet.setSumOtherDocCount(mta.sumOtherDocCount());
+        return facet;
     }
 
     /**
