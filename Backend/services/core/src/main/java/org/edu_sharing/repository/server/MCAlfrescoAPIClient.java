@@ -1965,18 +1965,12 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         TransactionService transactionService = serviceRegistry.getTransactionService();
         return transactionService.getRetryingTransactionHelper().doInTransaction(callback, false);
     }
-
-    /**
-     * @param store
-     * @param nodeID
-     * @param content
-     * @param mimetype
-     * @param _encoding
-     * @param property
-     * @throws Exception
-     */
     public void writeContent(final StoreRef store, final String nodeID, final InputStream content, final String mimetype, String _encoding,
                              final String property) throws Exception {
+        writeContent(store,nodeID, content,mimetype, _encoding,property, null);
+    }
+    public void writeContent(final StoreRef store, final String nodeID, final InputStream content, final String mimetype, String _encoding,
+                             final String property, final Runnable onComplete) throws Exception {
 
         final String encoding = (_encoding == null) ? "UTF-8" : _encoding;
         log.debug("called nodeID:" + nodeID + " store:" + store + " mimetype:" + mimetype + " property:" + property);
@@ -1995,6 +1989,9 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                                 ", URL:" + contentWriter.getContentData().getContentUrl() +
                                 ", MimeType:" + contentWriter.getContentData().getMimetype() + "" +
                                 ", ContentData ToString:" + contentWriter.getContentData().toString());
+                        if(onComplete != null) {
+                            onComplete.run();
+                        }
                     }
                 });
 
