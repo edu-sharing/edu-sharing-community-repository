@@ -27,8 +27,8 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      initContainers:
       {{- if (default .Values.global.cluster.storage.share.permission .Values.persistence.share.permission) }}
+      initContainers:
       - name: {{ include "edusharing_common_lib.names.name" . }}-init-permission
         image: {{ include "edusharing_common_lib.images.common" . }}{{ .Values.init.permission.image.name }}:{{ .Values.init.permission.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
