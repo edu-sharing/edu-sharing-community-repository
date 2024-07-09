@@ -56,6 +56,9 @@ public class ESSingleLogoutProfileImpl extends org.springframework.security.saml
 
     @Override
     public boolean processLogoutRequest(SAMLMessageContext context, SAMLCredential credential) throws SAMLException {
+        if(credential == null){
+            return true;
+        }
         if(credential.getAuthenticationAssertion() != null) {
             return super.processLogoutRequest(context, credential);
         }
