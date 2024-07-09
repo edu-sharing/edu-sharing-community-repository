@@ -5,6 +5,9 @@ import com.typesafe.config.ConfigBeanFactory;
 import com.typesafe.config.ConfigObject;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
+import org.alfresco.query.PagingRequest;
+import org.alfresco.query.PagingResults;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityService;
@@ -78,7 +81,7 @@ public class GuestServiceImpl implements GuestService, ApplicationListener<Refre
             contextObject.keySet().stream()
                     .map(x -> String.join(".", x.contains(".") ? String.format("\"%s\"", x) : x, REPOSITORY_GUEST_CONFIG_PATH))
                     .map(contextConfig::getConfig)
-                    .map(x->x.withFallback(defaultConfig))
+                    .map(x -> x.withFallback(defaultConfig))
                     .map(config -> ConfigBeanFactory.create(config, GuestConfig.class))
                     .forEach(guestConfigs::add);
         }
@@ -100,8 +103,8 @@ public class GuestServiceImpl implements GuestService, ApplicationListener<Refre
     @Override
     public Set<String> getAllGuestAuthorities() {
         Set<String> guests = new HashSet<>();
-        guests.add("guest");
-        guests.add("edu_proxy");
+        guests.add("guest"); // alf internal guest user
+        guests.add(CCConstants.PROXY_USER); // proxy user used for e.g. lti
         Optional.ofNullable(getDefaultConfig()).map(GuestConfig::getUsername).ifPresent(guests::add);
         getAllGuestConfigs()
                 .stream()
@@ -147,7 +150,7 @@ public class GuestServiceImpl implements GuestService, ApplicationListener<Refre
             return null;
         }
 
-        return retryingTransactionHelper.doInTransaction(() -> {
+        return retryingTransactionHelper.doInTransaction(() -> AuthenticationUtil.runAsSystem(() -> {
             NodeRef guestRef = personService.getPersonOrNull(guestConfig.getUsername());
             if (guestRef == null) {
                 Map<QName, Serializable> properties = new HashMap<>(Map.of(
@@ -177,6 +180,39 @@ public class GuestServiceImpl implements GuestService, ApplicationListener<Refre
             toRemove.forEach(x -> authorityService.removeAuthority(x, guestConfig.getUsername()));
             toCreate.forEach(x -> authorityService.addAuthority(x, guestConfig.getUsername()));
             return guestRef;
-        });
+        }));
+    }
+
+    @Override
+    public void deleteUnusedGuests() {
+        QName affiliationGuestProp = QName.createQName(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION);
+
+        Set<String> allGuestAuthorities = getAllGuestAuthorities();
+
+        String queryExecutionId = null;
+        List<String> personsToDelete = new ArrayList<>();
+        PagingResults<PersonService.PersonInfo> searchResult;
+        do {
+            searchResult = personService.getPeople(CCConstants.CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_GUEST, List.of(affiliationGuestProp), null, new PagingRequest(100, queryExecutionId));
+            queryExecutionId = searchResult.getQueryExecutionId();
+
+            for (PersonService.PersonInfo person : searchResult.getPage()) {
+                if (allGuestAuthorities.contains(person.getUserName())) {
+                    continue;
+                }
+                personsToDelete.add(person.getUserName());
+            }
+        } while (searchResult.hasMoreItems());
+
+        for(String person : personsToDelete) {
+            try {
+                retryingTransactionHelper.doInTransaction(() -> AuthenticationUtil.runAsSystem(() -> {
+                    personService.deletePerson(person);
+                    return null;
+                }));
+            }catch (Exception e) {
+                log.error("Could not delete guest user: {}", e.getMessage(), e);
+            }
+        }
     }
 }
