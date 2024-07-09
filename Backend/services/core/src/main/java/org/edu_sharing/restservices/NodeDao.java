@@ -852,13 +852,17 @@ public class NodeDao {
             this.isPublic = nodeRef.getPublic();
         } else {
             if(!StringUtils.isBlank(ApplicationInfoList.getHomeRepository().getGuest_username())) {
-                this.isPublic = usedPermissionService.hasPermission(
-                        storeProtocol,
-                        storeId,
-                        nodeId,
-                        ApplicationInfoList.getHomeRepository().getGuest_username(),
-                        CCConstants.PERMISSION_READ_ALL
-                );
+                try {
+                    this.isPublic = usedPermissionService.hasPermission(
+                            storeProtocol,
+                            storeId,
+                            nodeId,
+                            ApplicationInfoList.getHomeRepository().getGuest_username(),
+                            CCConstants.PERMISSION_READ_ALL
+                    );
+                }catch(Throwable t) {
+                    logger.info("Unexpected error while resolving isPublic for node " + nodeId, t);
+                }
             }
         }
         if (nodeRef != null && nodeRef.getPermissions() != null && nodeRef.getPermissions().size() > 0) {
