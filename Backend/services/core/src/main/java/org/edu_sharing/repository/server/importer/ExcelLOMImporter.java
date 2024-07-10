@@ -386,6 +386,7 @@ public class ExcelLOMImporter {
 			excelAlfMap.put("educationalTypicalAgeRange", CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGE);
 			excelAlfMap.put("lifeCycleContributerAuthor", CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR);
 			excelAlfMap.put("lifeCycleContributerPublisher", CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER);
+			excelAlfMap.put("lifeCycleContributerSubjectMatterExpert", CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SUBJECT_MATTER_EXPERT);
 			excelAlfMap.put("metadataContributerProvider", CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_PROVIDER);
 			excelAlfMap.put("metadataContributerCreator", CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR);
 			excelAlfMap.put("technicalFormat", CCConstants.LOM_PROP_TECHNICAL_FORMAT);
