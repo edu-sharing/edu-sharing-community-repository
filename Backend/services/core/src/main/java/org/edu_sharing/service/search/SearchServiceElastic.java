@@ -488,7 +488,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
 
 
-            // logger.info("query: "+searchSourceBuilder.toString());
+            logger.debug("query: "+searchSourceBuilder.toString());
             try {
                 SearchResponse searchResponse = LogTime.log("Searching elastic", () -> client.search(searchRequest, getRequestOptions()));
 
