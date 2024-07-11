@@ -408,6 +408,7 @@ public class ExcelLOMImporter {
 			excelAlfMap.put("licenseValid",CCConstants.CCM_PROP_IO_LICENSE_VALID);
 			excelAlfMap.put("originUniversity",CCConstants.CCM_PROP_IO_UNIVERSITY);
 			excelAlfMap.put("metadataset",CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
+			excelAlfMap.put("authorFreetext",CCConstants.CCM_PROP_AUTHOR_FREETEXT);
 			excelAlfMap.put("oeh_widgets","{" + CCConstants.NAMESPACE_CCM+"}oeh_widgets");
 		}
 		return excelAlfMap;
