@@ -58,6 +58,7 @@
   *ngIf="resetPassword"
   title="{{ 'PERMISSIONS.MENU_RESET_PASSWORD' | translate }}"
   subtitle="{{ resetPassword | authorityName }}"
+  width="small"
   height="auto"
   [isCancelable]="true"
   [buttons]="resetPasswordButtons"
@@ -66,6 +67,7 @@
   <div class="card-content-padding card-reset-password">
     <es-input-password
       #passwordRef
+      label="{{ 'PERMISSIONS.NEW_PASSWORD' | translate }}"
       [(value)]="newPassword"
       [displayStrength]="true"
     ></es-input-password>
