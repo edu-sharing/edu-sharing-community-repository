@@ -45,6 +45,8 @@ import org.edu_sharing.service.authentication.AuthenticationExceptionMessages;
 import org.edu_sharing.service.authentication.EduAuthentication;
 import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.toolpermission.ToolPermissionService;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.URLDecoder;
@@ -139,7 +141,7 @@ public class ShibbolethServlet extends HttpServlet {
 		}
 
 		try {
-
+			Objects.requireNonNull(ToolPermissionServiceFactory.getInstance()).invalidateSessionCache();
 			logger.info("no valid authinfo found in session. doing the repository shib auth");
 
 			logger.info("req.getCharacterEncoding():"+req.getCharacterEncoding());
