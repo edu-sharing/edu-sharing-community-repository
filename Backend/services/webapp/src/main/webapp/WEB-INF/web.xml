@@ -483,20 +483,6 @@
 		<url-pattern>/cas</url-pattern>
 	</filter-mapping>
 	-->
-
-<servlet>
-    <servlet-name>dispatcher</servlet-name>
-    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-    <init-param>
-        <param-name>contextClass</param-name>
-        <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
-    </init-param>
-    <init-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>org.edu_sharing.spring.SpringConfigRoot</param-value>
-    </init-param>
-    <load-on-startup>1</load-on-startup>
-</servlet>
     
 <servlet>
         <servlet-name>FolderTemplateServlet</servlet-name>
@@ -671,11 +657,6 @@
         <servlet-name>GraphQL</servlet-name>
         <servlet-class>org.edu_sharing.graphql.web.GraphQLServlet</servlet-class>
     </servlet>
-
-    <servlet-mapping>
-        <servlet-name>dispatcher</servlet-name>
-        <url-pattern>/spring/*</url-pattern>
-    </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>GraphQL</servlet-name>
