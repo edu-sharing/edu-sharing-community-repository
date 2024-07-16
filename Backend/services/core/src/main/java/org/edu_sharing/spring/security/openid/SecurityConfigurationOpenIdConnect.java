@@ -31,10 +31,12 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-@Profile("openidEnabled")
+@Profile(SecurityConfigurationOpenIdConnect.PROFILE_ID)
 @EnableWebSecurity()
 @Configuration
 public class SecurityConfigurationOpenIdConnect {
+
+    public static final String PROFILE_ID = "openidEnabled";
 
     Config config = LightbendConfigLoader.get();
 
@@ -68,6 +70,7 @@ public class SecurityConfigurationOpenIdConnect {
                 )
 
                 .oauth2Login(login -> login
+                        .loginPage("/sso")
                         .failureHandler(new CustomErrorHandler())
                         .successHandler(eduAuthSuccsessHandler)
                         .authorizationEndpoint(ae -> ae.authorizationRequestResolver(silentLoginAuthorizationRequestResolver)))

@@ -563,6 +563,11 @@
                 <param-value>false</param-value>
         </init-param>
     </servlet>
+
+    <servlet>
+        <servlet-name>SSORegistrationsDispatcherServlet</servlet-name>
+        <servlet-class>org.edu_sharing.spring.security.openid.SSORegistrationsDispatcherServlet</servlet-class>
+    </servlet>
      <servlet>
         <servlet-name>CAS</servlet-name>
         <servlet-class>org.edu_sharing.repository.server.authentication.CASServlet</servlet-class> 
@@ -683,6 +688,10 @@
     </servlet-mapping>
 
     <!-- servlet mapping -->
+    <servlet-mapping>
+        <servlet-name>SSORegistrationsDispatcherServlet</servlet-name>
+        <url-pattern>/sso</url-pattern>
+    </servlet-mapping>
  <servlet-mapping> 
         <servlet-name>FolderTemplateServlet</servlet-name>
         <url-pattern>/eduservlet/foldertemplate</url-pattern>
