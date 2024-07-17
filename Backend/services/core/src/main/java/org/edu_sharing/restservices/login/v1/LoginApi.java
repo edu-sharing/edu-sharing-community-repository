@@ -94,7 +94,7 @@ public class LoginApi {
 
 	@GET
 	@Path("/validateSSOSession")
-	@Operation(summary = "Validates the Basic Auth Credentials and check if the session is a logged in user", description = "Use the Basic auth header field to transfer the credentials")
+	@Operation(summary = "Validates if an provider (idp) session exists.", description = "If no provider session exists an 401 with 'login required' message is delivered. If true the current Login Object is shown.")
 
 	@ApiResponses(
 			value = {

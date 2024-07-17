@@ -12607,6 +12607,28 @@
         ]
       }
     },
+    "/authentication/v1/validateSSOSession": {
+      "get": {
+        "description": "If no provider session exists an 401 with 'login required' message is delivered. If true the current Login Object is shown.",
+        "operationId": "login2",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Login"
+                }
+              }
+            },
+            "description": "OK."
+          }
+        },
+        "summary": "Validates if an provider (idp) session exists.",
+        "tags": [
+          "AUTHENTICATION v1"
+        ]
+      }
+    },
     "/authentication/v1/validateSession": {
       "get": {
         "description": "Use the Basic auth header field to transfer the credentials",
