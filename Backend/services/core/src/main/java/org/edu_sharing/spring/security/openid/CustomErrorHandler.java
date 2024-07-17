@@ -1,4 +1,4 @@
-package org.edu_sharing.spring.security;
+package org.edu_sharing.spring.security.openid;
 
 import com.google.gson.Gson;
 import jakarta.servlet.ServletException;

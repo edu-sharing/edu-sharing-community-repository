@@ -7,7 +7,6 @@ import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.config.ConfigServiceFactory;
-import org.edu_sharing.spring.security.CustomErrorHandler;
 import org.edu_sharing.spring.security.basic.CSRFConfig;
 import org.edu_sharing.spring.security.basic.EduAuthSuccsessHandler;
 import org.edu_sharing.spring.security.basic.EduWebSecurityCustomizer;
