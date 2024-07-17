@@ -1,8 +1,10 @@
 package org.edu_sharing.spring.security.openid;
 
 import com.typesafe.config.Config;
+import io.opentelemetry.api.internal.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -10,6 +12,7 @@ import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.spring.security.basic.CSRFConfig;
 import org.edu_sharing.spring.security.basic.EduAuthSuccsessHandler;
 import org.edu_sharing.spring.security.basic.EduWebSecurityCustomizer;
+import org.edu_sharing.spring.security.openid.config.OpenIdConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,14 +33,19 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Profile(SecurityConfigurationOpenIdConnect.PROFILE_ID)
 @EnableWebSecurity()
 @Configuration
 public class SecurityConfigurationOpenIdConnect {
 
+    Logger logger = Logger.getLogger(SecurityConfigurationOpenIdConnect.class);
+
     public static final String PROFILE_ID = "openidEnabled";
 
-    Config config = LightbendConfigLoader.get();
+    public static final String DEFAULT_REGISTRATION_ID = "OPENID_DEFAULT";
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
@@ -49,6 +57,9 @@ public class SecurityConfigurationOpenIdConnect {
 
     @Autowired
     EduAuthSuccsessHandler eduAuthSuccsessHandler;
+
+    @Autowired
+    OpenIdConfigService configService;
 
     @Bean
     SecurityFilterChain app(HttpSecurity http) throws Exception {
@@ -89,7 +100,7 @@ public class SecurityConfigurationOpenIdConnect {
 
     private LogoutSuccessHandler oidcLogoutSuccessHandler() {
         OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler =
-                new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository()){
+                new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository(configService)){
                     @Override
                     protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
 
@@ -127,13 +138,16 @@ public class SecurityConfigurationOpenIdConnect {
     }
 
     @Bean
-    ClientRegistrationRepository clientRegistrationRepository() {
-        ClientRegistration clientRegistration = ClientRegistrations
-                .fromIssuerLocation(config.getString("security.sso.openIdConnect.issuer"))
-                .clientId(config.getString("security.sso.openIdConnect.clientId"))
-                .clientSecret(config.getString("security.sso.openIdConnect.secret"))
+    ClientRegistrationRepository clientRegistrationRepository(OpenIdConfigService configService) {
+        logger.info("starting oidc registration");
+        List<ClientRegistration> registrations = new ArrayList<>();
+        configService.getAllConfigs().forEach(config -> registrations.add(ClientRegistrations
+                .fromIssuerLocation(config.getIssuer())
+                .clientId(config.getClientId())
+                .clientSecret(config.getSecret())
                 .scope("openid")
-                .build();
-        return new InMemoryClientRegistrationRepository(clientRegistration);
+                .registrationId(StringUtils.isNullOrEmpty(config.getContextId()) ? DEFAULT_REGISTRATION_ID : config.getContextId())
+                .build()));
+        return new InMemoryClientRegistrationRepository(registrations);
     }
 }

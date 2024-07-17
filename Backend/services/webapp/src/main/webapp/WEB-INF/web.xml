@@ -233,6 +233,10 @@
         <filter-name>Edu Context Management Filter</filter-name>
         <url-pattern>/oauth2/*</url-pattern>
     </filter-mapping>
+    <filter-mapping>
+        <filter-name>Edu Context Management Filter</filter-name>
+        <url-pattern>/sso/*</url-pattern>
+    </filter-mapping>
    <filter-mapping>
 	      <filter-name>Edu Context Management Filter</filter-name>
 	      <url-pattern>/index.html</url-pattern>
