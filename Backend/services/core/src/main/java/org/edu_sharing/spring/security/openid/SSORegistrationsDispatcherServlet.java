@@ -1,10 +1,10 @@
 package org.edu_sharing.spring.security.openid;
 
-import io.opentelemetry.api.internal.StringUtils;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -24,7 +24,7 @@ public class SSORegistrationsDispatcherServlet extends HttpServlet {
                 ApplicationContextFactory.getApplicationContext().getBean("clientRegistrationRepository");
 
         String registrationId = NodeCustomizationPolicies.getEduSharingContext();
-        if(StringUtils.isNullOrEmpty(registrationId) || registrationId.equals(CCConstants.EDUCONTEXT_DEFAULT)){
+        if(StringUtils.isEmpty(registrationId) || registrationId.equals(CCConstants.EDUCONTEXT_DEFAULT)){
             registrationId = SecurityConfigurationOpenIdConnect.DEFAULT_REGISTRATION_ID;
         }
 
