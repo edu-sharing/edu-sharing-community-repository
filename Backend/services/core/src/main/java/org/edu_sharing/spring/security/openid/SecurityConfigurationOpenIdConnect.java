@@ -80,6 +80,8 @@ public class SecurityConfigurationOpenIdConnect {
                 )
 
                 .oauth2Login(login -> login
+                        //redirect to login page with angular does fallback to default domain, so request attributes not longer available
+                        //so it's not useabe in angular dev mode at the moment
                         .loginPage("/sso")
                         .failureHandler(new CustomErrorHandler())
                         .successHandler(eduAuthSuccsessHandler)
@@ -91,7 +93,7 @@ public class SecurityConfigurationOpenIdConnect {
                 //backchannel logout
                 .oidcLogout((logout) -> logout
                         .backChannel((bcLogout) -> bcLogout.logoutUri(ApplicationInfoList.getHomeRepository().getBaseUrl() + "/edu-sharing/logout"))
-                );
+                ).headers(h -> h.frameOptions(f -> f.disable()));
 
         CSRFConfig.config(http);
 
