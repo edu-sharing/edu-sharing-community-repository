@@ -25,8 +25,6 @@ public class SilentLoginAuthorizationRequestResolver implements OAuth2Authorizat
 
     private String silentLoginPath = DEFAULT_SILENT_LOGIN_PATH;
 
-    private static SilentLoginAuthorizationRequestResolver instance;
-
     public SilentLoginAuthorizationRequestResolver(ClientRegistrationRepository clientRegistration) {
         this.defaultAuthorizationRequestResolver = new DefaultOAuth2AuthorizationRequestResolver(
                 clientRegistration, "/oauth2/authorization");
