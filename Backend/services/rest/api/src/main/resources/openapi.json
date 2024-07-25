@@ -945,6 +945,23 @@
       "ConfigRemoteRocketchat": {
         "type": "object"
       },
+      "ConfigReportProblem": {
+        "properties": {
+          "toolPermissions": {
+            "items": {
+              "type": "string",
+              "xml": {
+                "name": "toolPermission"
+              }
+            },
+            "type": "array",
+            "xml": {
+              "name": "toolPermission"
+            }
+          }
+        },
+        "type": "object"
+      },
       "ConfigThemeColor": {
         "properties": {
           "value": {
@@ -6630,6 +6647,9 @@
           },
           "rendering": {
             "$ref": "#/components/schemas/Rendering"
+          },
+          "reportProblem": {
+            "$ref": "#/components/schemas/ConfigReportProblem"
           },
           "searchGroupResults": {
             "type": "boolean"
@@ -12610,7 +12630,7 @@
     "/authentication/v1/validateSSOSession": {
       "get": {
         "description": "If no provider session exists an 401 with 'login required' message is delivered. If true the current Login Object is shown.",
-        "operationId": "login2",
+        "operationId": "validateSSOSession",
         "responses": {
           "200": {
             "content": {

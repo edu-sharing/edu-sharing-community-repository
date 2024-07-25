@@ -101,7 +101,7 @@ public class LoginApi {
 					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Login.class))),
 			})
 
-	public Response login2(@Context HttpServletRequest req) {
+	public Response validateSSOSession(@Context HttpServletRequest req) {
 		return this.login(req);
 	}
     
