@@ -53,13 +53,13 @@ public class SecurityConfigurationOpenIdConnect {
     }
 
     @Autowired
-    SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver;
-
-    @Autowired
     EduAuthSuccsessHandler eduAuthSuccsessHandler;
 
     @Autowired
     OpenIdConfigService configService;
+
+    @Autowired
+    SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver;
 
     @Bean
     SecurityFilterChain app(HttpSecurity http) throws Exception {
@@ -151,5 +151,11 @@ public class SecurityConfigurationOpenIdConnect {
                 .registrationId(StringUtils.isNullOrEmpty(config.getContextId()) ? DEFAULT_REGISTRATION_ID : config.getContextId())
                 .build()));
         return new InMemoryClientRegistrationRepository(registrations);
+    }
+
+    @Bean
+    SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver(ClientRegistrationRepository clientRegistrationRepository){
+        logger.info("starting init silentLoginAuthorizationRequestResolver");
+        return new SilentLoginAuthorizationRequestResolver(clientRegistrationRepository);
     }
 }

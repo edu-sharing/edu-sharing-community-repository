@@ -17,8 +17,6 @@ import java.util.Map;
  * adds an prompt=none to authorization request if request matches configured path
  * https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest
  */
-@Profile("openidEnabled")
-@Component
 public class SilentLoginAuthorizationRequestResolver implements OAuth2AuthorizationRequestResolver {
 
     OAuth2AuthorizationRequestResolver defaultAuthorizationRequestResolver;
