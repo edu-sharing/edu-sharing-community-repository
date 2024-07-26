@@ -1866,7 +1866,7 @@ public class NodeDao {
      * @param (String) userName  of Person,
      * @return true || false
      */
-    private boolean checkUserHasPermissionToSeeMail(String userName) {
+    public boolean checkUserHasPermissionToSeeMail(String userName) {
         try {
             if (LightbendConfigCache.getBoolean("repository.privacy.filterMetadataEmail") &&
                     (access == null || !access.contains(CCConstants.PERMISSION_WRITE))) {

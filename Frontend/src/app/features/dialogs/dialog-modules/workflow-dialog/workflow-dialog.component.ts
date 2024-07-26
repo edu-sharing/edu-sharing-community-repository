@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ViewChild } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
     LocalEventsService,
@@ -26,6 +26,8 @@ import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { DialogsService } from '../../dialogs.service';
 import { WorkflowDialogData, WorkflowDialogResult } from './workflow-dialog-data';
+import { MatSelect } from '@angular/material/select';
+import { AuthoritySearchInputComponent } from '../../../../shared/components/authority-search-input/authority-search-input.component';
 
 type WorkflowReceiver = Authority;
 
@@ -35,6 +37,9 @@ type WorkflowReceiver = Authority;
     styleUrls: ['./workflow-dialog.component.scss'],
 })
 export class WorkflowDialogComponent {
+    @ViewChild('statusSelect') statusSelectRef: MatSelect;
+    @ViewChild(AuthoritySearchInputComponent)
+    authoritySearchInputComponentRef: AuthoritySearchInputComponent;
     readonly TYPE_EDITORIAL = RestConstants.GROUP_TYPE_EDITORIAL;
 
     comment: string;
@@ -70,6 +75,7 @@ export class WorkflowDialogComponent {
             if (receiver) {
                 try {
                     this.receivers = [(await this.iam.getGroup(receiver).toPromise()).group];
+                    this.statusSelectRef.focus();
                 } catch (e) {
                     toast.clientConfigError('workflow.defaultReceiver', 'group not found');
                 }
@@ -178,6 +184,9 @@ export class WorkflowDialogComponent {
             }
             if (!this.receivers || (this.receivers.length === 1 && !this.receivers[0])) {
                 this.receivers = [];
+                this.authoritySearchInputComponentRef.inputElement.nativeElement.focus();
+            } else {
+                this.statusSelectRef.focus();
             }
             ({ current: this.status, initial: this.initialStatus } =
                 this.nodeHelper.getWorkflowStatus(this.nodes[0], true));
