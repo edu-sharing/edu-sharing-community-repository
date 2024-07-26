@@ -488,6 +488,9 @@ persistence:
     config:
       ## @param persistence.share.config.create Create persistent share
       create: true
+      type: |
+        persistentVolumeClaim:
+          claimName: {{ include "edusharing_repository_service.pvc.share.config" . }}
       spec:
         ## @param persistence.share.config.spec.accessModes Set access modes for persistent share
         accessModes: [ "ReadWriteMany" ]
@@ -498,6 +501,9 @@ persistence:
     data:
       ## @param persistence.share.data.create Create persistent data share
       create: true
+      type: |
+        persistentVolumeClaim:
+          claimName: {{ include "edusharing_repository_service.pvc.share.data" . }}
       spec:
         ## @param persistence.share.data.spec.accessModes Set access modes for persistent data share
         accessModes: [ "ReadWriteMany" ]
@@ -511,6 +517,9 @@ persistence:
       enabled: false
       ## @param persistence.share.safe.create Create safe data share
       create: true
+      type: |
+        persistentVolumeClaim:
+          claimName: {{ include "edusharing_repository_service.pvc.share.safe" . }}
       spec:
         ## @param persistence.share.safe.spec.accessModes Set access modes for persistent safe share
         accessModes: [ "ReadWriteMany" ]
