@@ -233,6 +233,9 @@ config:
 
   connector:
 
+    ## @param config.connector.accesslog Enable access log
+    accesslog: false
+
     external:
       ## @param config.connector.external.threads Set external connector threads
       threads: 200
