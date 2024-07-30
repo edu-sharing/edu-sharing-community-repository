@@ -90,10 +90,10 @@ public class OrganisationLifecycleService {
         for (String user : users) {
             try {
                 PersonDeleteResult personDeleteResult = deleteUser(authorityName, user);
-                if (!checkNodes(authorityName, user, CCConstants.CCM_TYPE_IO,null)) return true;
-                if (!checkNodes(authorityName, user, CCConstants.CCM_TYPE_IO,CCConstants.CCM_VALUE_SCOPE_SAFE)) return true;
-                if (!checkNodes(authorityName, user, CCConstants.CCM_TYPE_MAP,null)) return true;
-                if (!checkNodes(authorityName, user, CCConstants.CCM_TYPE_MAP,CCConstants.CCM_VALUE_SCOPE_SAFE)) return true;
+                if (!checkNodes(authorityName, user, CCConstants.CCM_TYPE_IO,null)) return false;
+                if (!checkNodes(authorityName, user, CCConstants.CCM_TYPE_IO,CCConstants.CCM_VALUE_SCOPE_SAFE)) return false;
+                if (!checkNodes(authorityName, user, CCConstants.CCM_TYPE_MAP,null)) return false;
+                if (!checkNodes(authorityName, user, CCConstants.CCM_TYPE_MAP,CCConstants.CCM_VALUE_SCOPE_SAFE)) return false;
                 protocolService.protocolPerson(orga, personDeleteResult);
             } catch (RuntimeException e) {
                 logger.error(e.getMessage(),e);
@@ -135,13 +135,23 @@ public class OrganisationLifecycleService {
             if(CCConstants.CCM_TYPE_MAP.equals(type)) {
 
                 //ignore folders of shared area, which will not be deleted by personlifecycleservice, but removed when org is deleted
-                Map<QName, Serializable> orgProps = organisationService.getOrganisation(organisationService.getCleanName(authorityName + ((scope != null) ? "_" + scope : "")));
-                NodeRef orgHomeFolderRef = (NodeRef) orgProps.get(QName.createQName(OrganisationService.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
-                String orgHomeFolderPath = nodeService.getPath(orgHomeFolderRef).toPrefixString(serviceRegistry.getNamespaceService());
-                allNodeRefs = allNodeRefs.stream().filter(nodeRef -> !nodeService.getPath(nodeRef)
-                                .toPrefixString(serviceRegistry.getNamespaceService())
-                                .contains(orgHomeFolderPath))
-                        .collect(Collectors.toList());
+                String fullOrgName = authorityName + ((scope != null) ? "_" + scope : "");
+                Map<QName, Serializable> orgProps = organisationService.getOrganisation(organisationService.getCleanName(fullOrgName));
+                if(orgProps == null){
+                    if(CCConstants.CCM_VALUE_SCOPE_SAFE.equals(scope)){
+                        logger.info("no safe org found:"+fullOrgName);
+                    }else{
+                        logger.error("no org found:"+fullOrgName);
+                    }
+                }else{
+                    NodeRef orgHomeFolderRef = (NodeRef) orgProps.get(QName.createQName(OrganisationService.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
+                    String orgHomeFolderPath = nodeService.getPath(orgHomeFolderRef).toPrefixString(serviceRegistry.getNamespaceService());
+                    allNodeRefs = allNodeRefs.stream().filter(nodeRef -> !nodeService.getPath(nodeRef)
+                                    .toPrefixString(serviceRegistry.getNamespaceService())
+                                    .contains(orgHomeFolderPath))
+                            .collect(Collectors.toList());
+                }
+
 
                 //ignore collection path folders, that need to stay there cause it can be that another user saved an collection there
                 if(!allNodeRefs.isEmpty()){
