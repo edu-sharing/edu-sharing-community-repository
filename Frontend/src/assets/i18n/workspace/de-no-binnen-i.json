@@ -22,9 +22,9 @@
     },
 
     "CONTRIBUTOR": {
+      "ADD_TITLE": "Neue beteiligte Person angeben",
       "TYPE": {
         "AUTHOR": "Autorin/Autor",
-        "ADD_TITLE": "Neue beteiligte Person angeben",
         "PUBLISHER": "Herausgeberschaft",
         "INITIATOR": "Auftrag",
         "GRAPHICAL_DESIGNER": "Grafik",
