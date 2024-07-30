@@ -10,6 +10,7 @@ import { ApiConfiguration } from './api/api-configuration';
 export class ApiRequestConfiguration {
     private authForNextRequest: string | null = null;
     private locale: string | null = null;
+    private language: string | null = null;
 
     /** Emits each time, an API request is performed. */
     readonly apiRequest = new EventEmitter<void>();
@@ -18,6 +19,13 @@ export class ApiRequestConfiguration {
 
     setLocale(locale: string): void {
         this.locale = locale;
+    }
+
+    /**
+     * internal edu sharing language code, might be "de", "en" or something like "de-formal"
+     */
+    setLanguage(language: string): void {
+        this.language = language;
     }
 
     setBasicAuthForNextRequest(auth: { username: string; password: string }): void {
@@ -38,6 +46,9 @@ export class ApiRequestConfiguration {
         headers['X-Client-Trace-Id'] = this.generateTraceId();
         if (this.locale) {
             headers.locale = this.locale;
+        }
+        if (this.language) {
+            headers['X-Edu-Sharing-Language'] = this.language;
         }
         if (this.authForNextRequest) {
             headers.Authorization = this.authForNextRequest;

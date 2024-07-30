@@ -22,12 +22,17 @@ public class I18nAngular {
     }
 
     public static JSONObject getLanguageStrings() throws Exception{
-        String language=new AuthenticationToolAPI().getCurrentLanguage();
+        String language=new AuthenticationToolAPI().getCurrentAngularLanguage();
         ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
         File[] dirs = new File(context.getRealPath("/assets/i18n/")).listFiles(File::isDirectory);
         JSONObject result=new JSONObject();
         for(File dir : dirs) {
             File i18n = new File(dir, language + ".json");
+            // fallback to the base language
+            if(language.startsWith("de-") && !i18n.exists()) {
+                // ignore missing files
+                continue;
+            }
             String json = FileUtils.readFileToString(i18n,"UTF-8");
             JSONObject jsonObject = new JSONObject(json);
             try {
