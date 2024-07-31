@@ -310,6 +310,8 @@ config:
     appid: local
     ## @param config.home.cookieAttributes Set home cookie attributes
     cookieAttributes: ""
+    ## @param config.home.customHtmlHeaders Set home custom_html_headers attributes
+    customHtmlHeaders: ""
 
   jvm:
     ram:

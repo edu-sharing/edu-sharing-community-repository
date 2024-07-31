@@ -65,6 +65,7 @@ data:
   REPOSITORY_SERVICE_HOME_APPID: {{ .Values.config.home.appid | quote }}
   REPOSITORY_SERVICE_HOME_AUTH: {{ if or .Values.config.oidc.enabled .Values.config.saml.enabled }}"shibboleth"{{ else }}""{{ end }}
   REPOSITORY_SERVICE_HOME_COOKIE_ATTRIBUTES: {{ .Values.config.home.cookieAttributes | quote }}
+  REPOSITORY_SERVICE_HOME_CUSTOM_HTML_HEADERS: {{ .Values.config.home.customHtmlHeaders | quote }}
   REPOSITORY_SERVICE_ALLOW_ORIGIN: "{{- join "," .Values.config.http.server.allowOrigin}}"
   REPOSITORY_SERVICE_HOST_EXTERNAL: {{ .Values.ingress.hosts | first | quote }}
   REPOSITORY_SERVICE_HOST_INTERNAL: {{ printf "%s.%s.svc.%s" (include "edusharing_common_lib.names.name" .) .Release.Namespace .Values.global.cluster.domain | quote }}
