@@ -36,6 +36,8 @@ my_home_auth_external_login_providers_url="${REPOSITORY_SERVICE_HOME_AUTH_EXTERN
 my_home_auth_external_login_provider_target_url="${REPOSITORY_SERVICE_HOME_AUTH_EXTERNAL_LOGIN_PROVIDER_TARGET_URL:-}"
 my_home_provider="${REPOSITORY_SERVICE_HOME_PROVIDER:-}"
 my_home_cookie_attr="${REPOSITORY_SERVICE_HOME_COOKIE_ATTRIBUTES:-}"
+my_home_custom_html_headers="${REPOSITORY_SERVICE_HOME_CUSTOM_HTML_HEADERS:-}"
+
 my_allow_origin="${REPOSITORY_SERVICE_ALLOW_ORIGIN:-}"
 if [[ ! -z "$my_allow_origin" ]]; then
   my_allow_origin=",${my_allow_origin}"
@@ -453,6 +455,18 @@ xmlstarlet ed -L \
 		-s '/properties' -t elem -n "entry" -v "${my_home_cookie_attr}" \
 		--var entry '$prev' \
 		-i '$entry' -t attr -n "key" -v "cookie_attributes" \
+		${homeProp}
+}
+
+xmlstarlet ed -L \
+  -d '/properties/entry[@key="custom_html_headers"]' \
+  ${homeProp}
+
+[[ -n "${my_home_custom_html_headers}" ]] && {
+	xmlstarlet ed -L \
+		-s '/properties' -t elem -n "entry" -v "${my_home_custom_html_headers}" \
+		--var entry '$prev' \
+		-i '$entry' -t attr -n "key" -v "custom_html_headers" \
 		${homeProp}
 }
 
