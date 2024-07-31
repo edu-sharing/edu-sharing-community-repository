@@ -14,6 +14,14 @@ import java.util.Map;
 public class CustomErrorHandler implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+        try {
+            if(SilentLoginModeRedirect.processError(request,response)){
+                return;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
 

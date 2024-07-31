@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
@@ -33,6 +34,7 @@ import org.edu_sharing.restservices.shared.UserProfileAppAuth;
 import org.edu_sharing.service.authentication.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.spring.security.openid.SilentLoginModeRedirect;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Arrays;
@@ -101,8 +103,17 @@ public class LoginApi {
 					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Login.class))),
 			})
 
-	public Response validateSSOSession(@Context HttpServletRequest req) {
-		return this.login(req);
+	public Response validateSSOSession(@Context HttpServletRequest req, @Context HttpServletResponse resp) {
+
+        try {
+            if(SilentLoginModeRedirect.processSuccess(req,resp)){
+                return Response.ok().build();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return this.login(req);
 	}
     
     
