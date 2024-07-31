@@ -58,7 +58,7 @@
     "@angular/platform-browser-dynamic": "^16.2.6",
     "@angular/router": "^16.2.6",
     "@ngx-translate/core": "^14.0.0",
-    "@tinymce/tinymce-angular": "^8.0.1",
+    "@tinymce/tinymce-angular": "^7.0.0",
     "tinymce": "^7.2.1",
     "tinymce-i18n": "^23.9.11",
     "angular-material-css-vars": "^5.0.2",
