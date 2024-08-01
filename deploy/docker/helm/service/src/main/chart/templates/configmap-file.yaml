@@ -63,6 +63,10 @@ data:
       }
     }
 
+    sub vcl_pipe {
+      set bereq.http.Connection = "close";
+    }
+
     sub vcl_hit {
       if (obj.ttl >= 0s) {
         return (deliver);
@@ -86,6 +90,9 @@ data:
         set beresp.http.cache-control = "{{ .Values.proxy.config.cache.control }}, max-age={{ .Values.proxy.config.cache.ttl }}";
         {{- end }}
         return (deliver);
+      } else {
+        set beresp.ttl = 0s;
+        set beresp.http.Connection = "close";
       }
     }
 
