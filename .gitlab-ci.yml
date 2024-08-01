@@ -19,6 +19,7 @@ default:
       command: [ "dockerd-entrypoint.sh" ]
 
 stages:
+  - lint
   - test
   - deploy
 
