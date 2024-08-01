@@ -6603,6 +6603,9 @@
           "loginProvidersUrl": {
             "type": "string"
           },
+          "loginSilentMode": {
+            "type": "string"
+          },
           "loginUrl": {
             "type": "string"
           },
