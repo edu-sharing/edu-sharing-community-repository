@@ -11,6 +11,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 
 import java.io.IOException;
 
@@ -30,9 +31,14 @@ public class SSORegistrationsDispatcherServlet extends HttpServlet {
 
         ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId(registrationId);
         if(clientRegistration == null){
-            String message = "Client registration not found:" + registrationId;
-            logger.error(message);
-            throw new ServletException(message);
+            String message = "Client registration not found:" + registrationId +". check lightbend context config.";
+            logger.warn(message);
+
+            InMemoryClientRegistrationRepository cr = ((InMemoryClientRegistrationRepository)clientRegistrationRepository);
+            if(cr.iterator() != null && cr.iterator().hasNext()){
+                clientRegistration = cr.iterator().next();
+                logger.warn("using fallback: "+clientRegistration.getRegistrationId());
+            }else throw new ServletException(message);
         }
 
         String redirectPath = "/edu-sharing/oauth2/authorization/" + clientRegistration.getRegistrationId();
