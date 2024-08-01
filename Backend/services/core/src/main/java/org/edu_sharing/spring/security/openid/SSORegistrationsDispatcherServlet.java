@@ -30,7 +30,7 @@ public class SSORegistrationsDispatcherServlet extends HttpServlet {
 
         ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId(registrationId);
         if(clientRegistration == null){
-            String message = "Client registration not found";
+            String message = "Client registration not found:" + registrationId;
             logger.error(message);
             throw new ServletException(message);
         }
