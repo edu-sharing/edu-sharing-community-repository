@@ -139,6 +139,9 @@ service:
 
 ingress:
 
+  ## @param ingress.enabled Enable ingress
+  enabled: true
+
   annotations:
     ## @param ingress.annotations.kubernetes.io/ingress.class Set kubernetes ingress class name
     kubernetes.io/ingress.class: nginx
