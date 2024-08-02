@@ -11,7 +11,7 @@ public class Values implements Serializable {
 	@XmlElement public String loginProvidersUrl;
 	@XmlElement public String loginProviderTargetUrl;
 	//none,iframe,redirect
-	@XmlElement public String loginSilentMode;
+	@XmlElement public LoginSilentMode loginSilentMode;
 	@XmlElement public Register register;
 	@XmlElement public String recoverPasswordUrl;
 	@XmlElement	public String imprintUrl;

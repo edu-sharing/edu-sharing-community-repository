@@ -4,13 +4,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.HttpMethod;
 import org.edu_sharing.alfresco.service.config.model.Config;
+import org.edu_sharing.alfresco.service.config.model.LoginSilentMode;
 import org.edu_sharing.repository.server.authentication.AuthenticationFilter;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 
 public class SilentLoginModeRedirect {
-    public static String MODE_REDIRECT = "redirect";
-    public static String MODE_IFRAME = "iframe";
-
     public static String SESS_ATT_SILENT_LOGIN_TARGET = "SILENT_LOGIN_TARGET";
     public static String SESS_ATT_SILENT_LOGIN_RESULT = "SILENT_LOGIN_RESULT";
 
@@ -71,7 +69,7 @@ public class SilentLoginModeRedirect {
         }
 
         Config config = ConfigServiceFactory.getCurrentConfig();
-        if(config!=null && !SilentLoginModeRedirect.MODE_REDIRECT.equals(config.values.loginSilentMode)){
+        if(config!=null && !LoginSilentMode.redirect.equals(config.values.loginSilentMode)){
             return false;
         }
 
