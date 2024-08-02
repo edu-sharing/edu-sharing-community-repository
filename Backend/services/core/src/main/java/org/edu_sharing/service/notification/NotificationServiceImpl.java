@@ -124,7 +124,7 @@ public class NotificationServiceImpl implements NotificationService {
                 MailTemplate.addContentLinks(ApplicationInfoList.getHomeRepository(), nodeId, replace, "link");
                 replace.put("status", I18nAngular.getTranslationAngular("common", "WORKFLOW." + status));
                 receiverMail.applyToMap("", replace);
-                MailTemplate.applyNodePropertiesToMap("nodeId.", nodeProperties, replace);
+                MailTemplate.applyNodePropertiesToMap("node.", nodeProperties, replace);
 
                 String template = "invited_workflow";
                 MailTemplate.sendMail(sender.getFullName(), sender.getEmail(), receiverMail.getEmail(), template, replace);

@@ -35,6 +35,7 @@ my_home_auth_external_logout_redirect_url="${REPOSITORY_SERVICE_HOME_AUTH_EXTERN
 my_home_auth_external_login_providers_url="${REPOSITORY_SERVICE_HOME_AUTH_EXTERNAL_LOGIN_PROVIDERS_URL:-}"
 my_home_auth_external_login_provider_target_url="${REPOSITORY_SERVICE_HOME_AUTH_EXTERNAL_LOGIN_PROVIDER_TARGET_URL:-}"
 my_home_provider="${REPOSITORY_SERVICE_HOME_PROVIDER:-}"
+my_home_url_dynamic="${REPOSITORY_SERVICE_HOME_URL_DYNAMIC:-}"
 my_home_cookie_attr="${REPOSITORY_SERVICE_HOME_COOKIE_ATTRIBUTES:-}"
 my_allow_origin="${REPOSITORY_SERVICE_ALLOW_ORIGIN:-}"
 if [[ ! -z "$my_allow_origin" ]]; then
@@ -552,6 +553,15 @@ xmlstarlet ed -L \
 		-i '$entry' -t attr -n "key" -v "remote_provider" \
 		${homeProp}
 }
+
+[[ -n "${my_home_url_dynamic}" ]] && {
+	xmlstarlet ed -L \
+		-s '/properties' -t elem -n "entry" -v "${my_home_url_dynamic}" \
+		--var entry '$prev' \
+		-i '$entry' -t attr -n "key" -v "url_dynamic" \
+		${homeProp}
+}
+
 
 [[ $(hocon -f ${eduSConf} get "repository.mail.from" 2>/dev/null) ]] && {
   hocon -f ${eduSConf} unset "repository.mail.from"
