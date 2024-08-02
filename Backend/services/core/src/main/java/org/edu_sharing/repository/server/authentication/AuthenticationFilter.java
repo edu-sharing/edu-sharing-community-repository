@@ -257,21 +257,25 @@ public class AuthenticationFilter implements jakarta.servlet.Filter {
     }
 
 	public static boolean redirectToDefaultLocation(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException {
-		URL url = new URL(req.getRequestURL().toString()+(StringUtils.isBlank(req.getQueryString()) ? "" : "?"+req.getQueryString()));
+		URL url = new URL(req.getRequestURL().toString());
 		if(url.getPath().equals(CallSourceHelper.WEBAPP_BASE_PATH + "/")) {
 			// navigate to default location
             try {
-				String defaultLocation = ConfigServiceFactory.getCurrentConfig(req).getValue("defaultLocation", null);
-				if(defaultLocation != null) {
-					if (defaultLocation.contains("://")) {
-						resp.sendRedirect(defaultLocation);
-					} else {
-						resp.sendRedirect(CallSourceHelper.WEBAPP_BASE_PATH + "/components/" + defaultLocation);
-					}
-					return true;
+				String defaultLocation = ConfigServiceFactory.getCurrentConfig(req).getValue("defaultLocation", "login");
+				if (defaultLocation.contains("://")) {
+					resp.sendRedirect(defaultLocation);
+				} else {
+					resp.sendRedirect(CallSourceHelper.WEBAPP_BASE_PATH + "/components/" + defaultLocation);
 				}
+				return true;
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                Logger.getLogger(AuthenticationFilter.class).error(e);
+                try {
+                    resp.sendRedirect(CallSourceHelper.WEBAPP_BASE_PATH + "/components/login");
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+
             }
 
 		}
