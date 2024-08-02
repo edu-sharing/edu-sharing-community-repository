@@ -49,6 +49,7 @@ public class Values implements Serializable {
 	@XmlElement	public Integer itemsPerRequest;
 	@XmlElement	public Rendering rendering;
 	@XmlElement	public SessionExpiredDialog sessionExpiredDialog;
+	@XmlElement	public String defaultLocation;
 	@XmlElement	public String loginDefaultLocation;
 	@XmlElement	public Boolean searchGroupResults;
 	@XmlElement	public Mainnav mainnav;

@@ -6530,6 +6530,9 @@
             },
             "type": "array"
           },
+          "defaultLocation": {
+            "type": "string"
+          },
           "defaultPassword": {
             "type": "string"
           },
