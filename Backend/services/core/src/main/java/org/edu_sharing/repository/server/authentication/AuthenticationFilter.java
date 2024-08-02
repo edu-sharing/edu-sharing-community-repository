@@ -74,7 +74,7 @@ public class AuthenticationFilter implements jakarta.servlet.Filter {
 
 		AuthenticationFilter.handleLocale(false, httpReq.getParameter("locale"), httpReq, httpRes);
 		// when on root entry point
-		if (redirectToDefaultLocation(req, res)) return;
+		if (redirectToDefaultLocation(httpReq, httpRes)) return;
 		//find out if we have to do the guest login
 	  	String user = httpReq.getParameter("user");
 	  	if(user != null && user.equals("guest")){
