@@ -138,11 +138,12 @@ public class OrganisationLifecycleService {
                 String fullOrgName = authorityName + ((scope != null) ? "_" + scope : "");
                 Map<QName, Serializable> orgProps = organisationService.getOrganisation(organisationService.getCleanName(fullOrgName));
                 if(orgProps == null){
+                    String message = "no  org found:"+fullOrgName;
                     if(CCConstants.CCM_VALUE_SCOPE_SAFE.equals(scope)){
-                        logger.info("no safe org found:"+fullOrgName);
-                    }else{
-                        logger.error("no org found:"+fullOrgName);
+                        message = "no safe org found:"+fullOrgName;
                     }
+                    logger.info(message);
+                    protocolService.protocolError(authorityName, user, message);
                 }else{
                     NodeRef orgHomeFolderRef = (NodeRef) orgProps.get(QName.createQName(OrganisationService.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
                     String orgHomeFolderPath = nodeService.getPath(orgHomeFolderRef).toPrefixString(serviceRegistry.getNamespaceService());
@@ -191,6 +192,13 @@ public class OrganisationLifecycleService {
 
             //delete org folders @TDOD: check why personlifecycle service does not remove folders, can be a perfomance issue for large folder structures
             Map<QName, Serializable> orgProps = organisationService.getOrganisation(organisationService.getCleanName(authorityName));
+            if(orgProps == null){
+                String message = "this group is no organiation:"+authorityName+"."+" if it formerly was an edugroup you have to manually delete groupfolder and group";
+                logger.error(message);
+                protocolService.protocolError(orga,authorityName,message);
+                //don't throw here cause it wouldn be easy to fix this for customer
+                return;
+            }
 
             NodeRef orgFolder = (NodeRef) orgProps.get(QName.createQName(OrganisationService.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
             if (nodeService.exists(orgFolder)) {
