@@ -142,8 +142,6 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS),
 					QName.createQName(originalName), copyChildren);
 
-			OnCopyIOPolicy.removeCopiedUsages(nodeService, copyNodeRef);
-
 			int renameCounter = 1;
 			while(true) {
 				try {
@@ -715,6 +713,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					(m,entry)-> m.put(QName.createQName(entry.getKey()), (Serializable) entry.getValue()),
 					HashMap::putAll
 			);
+
+			// check that no interceptor has set a previously null variable
+			propsNull.removeIf(prop -> propsStore.get(prop) != null);
+
 			nodeService.setProperties(nodeRef, propsStore);
 			// do in transaction to disable behaviour
 			// otherwise interceptors might be called multiple times -> the final update props is enough!
@@ -1217,6 +1219,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				NodeRef newNode;
 				try {
 					newNode = copyNode(nodeId, container, true);
+					OnCopyIOPolicy.removeCopiedUsages(nodeService, newNode);
 				} catch (Throwable t) {
 					throw new RuntimeException(t);
 				}

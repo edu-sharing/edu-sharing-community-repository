@@ -61,7 +61,7 @@ public class MetadataReader {
     public static Collection<MetadataWidget> getWidgetsByNode(NodeRef node, String locale) throws Exception {
         ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
         ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-        String mdsSet = serviceRegistry.getNodeService().getProperty(node, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET)).toString();
+        String mdsSet = (String) serviceRegistry.getNodeService().getProperty(node, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
         if (mdsSet == null || mdsSet.isEmpty()) {
             mdsSet = CCConstants.metadatasetdefault_id;
         }
