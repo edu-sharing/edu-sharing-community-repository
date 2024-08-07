@@ -50,7 +50,7 @@ data:
         return (synth(200, "OK"));
       }
 
-      if (req.method == "POST" || req.method == "PUT" || req.method == "DELETE" || req.url ~ "/rest/") {
+      if (req.method == "POST" || req.method == "PUT" || req.method == "DELETE" || req.url ~ "/rest/" || req.url ~ "/webdav/") {
         return (pass);
       }
 
