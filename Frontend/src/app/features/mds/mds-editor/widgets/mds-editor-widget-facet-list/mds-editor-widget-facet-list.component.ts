@@ -29,6 +29,7 @@ export class MdsEditorWidgetFacetListComponent
 {
     @ViewChild(MdsEditorWidgetContainerComponent) containerRef: MdsEditorWidgetContainerComponent;
     readonly MAX_FACET_COUNT = 50;
+    readonly MAX_FACET_INITIAL_COUNT = 5;
     readonly valueType: ValueType = ValueType.MultiValue;
     /** Available facet values being updated from `mdsEditorInstance.suggestions$`. */
     readonly facetAggregationSubject = new BehaviorSubject<FacetAggregation>(null);
@@ -40,6 +41,7 @@ export class MdsEditorWidgetFacetListComponent
 
     /** Whether we are currently loading more facets. */
     isLoading = false;
+    showMore = false;
     /** IDs of selected values. Updated through user interaction. */
     private values: string[];
     private readonly destroyed$ = new Subject<void>();
@@ -75,6 +77,7 @@ export class MdsEditorWidgetFacetListComponent
         this.values = this.widget.getInitialValues().jointValues;
         this.registerFacetValuesSubject();
         this.registerFormControls();
+
         this.widget.setValueExternal.subscribe((values) => {
             const valuesMapped = this.facetValuesFiltered.map(
                 ({ value }) => !!values?.includes(value),
@@ -95,6 +98,7 @@ export class MdsEditorWidgetFacetListComponent
 
     onLoadMore(): void {
         this.isLoading = true;
+        this.showMore = true;
         this.search
             .loadMoreFacets(this.widget.definition.id, 10)
             .pipe(finalize(() => (this.isLoading = false)))
@@ -112,13 +116,34 @@ export class MdsEditorWidgetFacetListComponent
                 tap((result) => this.isInitState$.next(result === null)),
                 // load all facets if filter mode is active
                 switchMap((facet) =>
-                    this.filter.value && facet.hasMore
+                    (this.filter.value || this.showMore) && facet.hasMore
                         ? this.search.loadMoreFacets(
                               this.widget.definition.id,
                               RestConstants.COUNT_UNLIMITED,
                           )
                         : of(facet),
                 ),
+                switchMap((facet) => {
+                    if (this.showMore || this.filter.value || !facet) {
+                        return of(facet);
+                    }
+                    const data = facet as FacetAggregation;
+                    if (data.values.length > this.MAX_FACET_INITIAL_COUNT) {
+                        const originalData = data.values;
+                        data.values = data.values.slice(0, this.MAX_FACET_INITIAL_COUNT);
+                        // add previously selected facets
+                        this.values.forEach((v) => {
+                            if (
+                                !data.values.find((d) => d.value === v) &&
+                                originalData.find((d) => d.value === v)
+                            ) {
+                                data.values.push(originalData.find((d) => d.value === v));
+                            }
+                        });
+                        data.hasMore = true;
+                    }
+                    return of(data);
+                }),
             )
             .subscribe((facetAggregation) =>
                 facetAggregation ? this.facetAggregationSubject.next(facetAggregation) : null,
@@ -136,6 +161,7 @@ export class MdsEditorWidgetFacetListComponent
                 }
                 this.formArray = this.generateFormArray(facetValues.values);
                 this.updateFilteredValues();
+
                 // expand collapsed field if a value is active/selected
                 if (
                     this.containerRef?.expandedState$.value === 'collapsed' &&
