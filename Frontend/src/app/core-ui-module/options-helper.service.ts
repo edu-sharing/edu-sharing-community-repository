@@ -747,7 +747,12 @@ export class OptionsHelperService implements OnDestroy {
         addNodeToLTIPlatform.permissionsRightMode = NodesRightMode.Original;
         addNodeToLTIPlatform.showAsAction = true;
         addNodeToLTIPlatform.showAlways = true;
-        addNodeToLTIPlatform.constrains = [Constrain.Files, Constrain.User, Constrain.LTIMode];
+        addNodeToLTIPlatform.constrains = [
+            Constrain.NoBulk,
+            Constrain.Files,
+            Constrain.User,
+            Constrain.LTIMode,
+        ];
         addNodeToLTIPlatform.group = DefaultGroups.Primary;
         addNodeToLTIPlatform.priority = 11;
         addNodeToLTIPlatform.permissions = [RestConstants.ACCESS_CC_PUBLISH];
