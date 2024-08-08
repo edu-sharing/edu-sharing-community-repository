@@ -494,16 +494,7 @@ xmlstarlet ed -L \
 		${homeProp}
 }
 
-xmlstarlet ed -L \
-  -d '/properties/entry[@key="allowed_authentication_types"]' \
-  ${homeProp}
-
 [[ -n "${my_home_auth}" ]] && {
-	xmlstarlet ed -L \
-		-s '/properties' -t elem -n "entry" -v "${my_home_auth}" \
-		--var entry '$prev' \
-		-i '$entry' -t attr -n "key" -v "allowed_authentication_types" \
-		${homeProp}
 
 	if [[ "${my_home_auth_external}" == "true" ]] ; then
      xmlstarlet ed -L \
