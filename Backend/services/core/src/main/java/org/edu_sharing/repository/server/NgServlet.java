@@ -143,7 +143,7 @@ public class NgServlet extends HttpServlet {
 				return addToHead(data, html);
 			}
 		}catch(Throwable t){
-			logger.error("Failed to load node license for attaching to head:",t);
+			logger.warn("Failed to load node license for attaching to head:",t);
 		}
 		return html;	}
 
