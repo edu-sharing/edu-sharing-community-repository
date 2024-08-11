@@ -16,6 +16,7 @@ import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
+import { Helper } from '../../../../../core-module/rest/helper';
 
 @Component({
     selector: 'es-mds-editor-widget-facet-list',
@@ -100,7 +101,7 @@ export class MdsEditorWidgetFacetListComponent
         this.isLoading = true;
         this.showMore = true;
         this.search
-            .loadMoreFacets(this.widget.definition.id, 10)
+            .loadMoreFacets(this.widget.definition.id, RestConstants.COUNT_UNLIMITED)
             .pipe(finalize(() => (this.isLoading = false)))
             .subscribe();
     }
@@ -115,18 +116,21 @@ export class MdsEditorWidgetFacetListComponent
                 takeUntil(this.destroyed$),
                 tap((result) => this.isInitState$.next(result === null)),
                 // load all facets if filter mode is active
-                switchMap((facet) =>
-                    (this.filter.value || this.showMore) && facet.hasMore
+                switchMap((facet) => {
+                    return (this.filter.value || this.showMore) && facet.hasMore
                         ? this.search.loadMoreFacets(
                               this.widget.definition.id,
                               RestConstants.COUNT_UNLIMITED,
                           )
-                        : of(facet),
-                ),
+                        : of(facet);
+                }),
                 switchMap((facet) => {
                     if (this.showMore || this.filter.value || !facet) {
                         return of(facet);
                     }
+                    // Depp copy cause the object will be modified in this component
+                    // and this will break if the component is loaded twice (i.e. in mobile context)
+                    facet = Helper.deepCopy(facet);
                     const data = facet as FacetAggregation;
                     if (data.values.length > this.MAX_FACET_INITIAL_COUNT) {
                         const originalData = data.values;
