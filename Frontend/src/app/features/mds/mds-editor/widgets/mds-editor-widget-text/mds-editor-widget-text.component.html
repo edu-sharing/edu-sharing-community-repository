@@ -37,6 +37,7 @@
   [widget]="widget"
   [label]="false"
   [wrapInFormField]="false"
+  [showBottomCaption]="false"
   [valueType]="valueType"
 >
   <mat-form-field class="mat-form-textarea" [hideRequiredMarker]="true">
@@ -63,12 +64,12 @@
       (blur)="blur()"
       (keydown.enter)="submit()"
     ></textarea>
-    <mat-hint [hidden]="!widget.definition.bottomCaption">
-      {{ widget.definition.bottomCaption }}
-    </mat-hint>
-    <mat-error [hidden]="!formControl.errors?.required">
-      <ng-container *ngTemplateOutlet="error"></ng-container>
-    </mat-error>
+    <mat-hint [hidden]="!widget.definition.bottomCaption">{{
+      widget.definition.bottomCaption
+    }}</mat-hint>
+    <mat-error [hidden]="!formControl.errors?.required"
+      ><ng-container *ngTemplateOutlet="error"></ng-container
+    ></mat-error>
   </mat-form-field>
 </es-mds-editor-widget-container>
 <ng-template #error>
