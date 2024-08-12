@@ -11,8 +11,9 @@ public class MetadataWidget extends MetadataTranslatable{
 
 	private Map<String, MetadataKey> valuesAsMapCache;
 	private String configuration;
+	private ValuespaceMerge valuespaceMerge = ValuespaceMerge.separate;
 
-    public enum Required{
+	public enum Required{
 		mandatory,
 		mandatoryForPublish,
 		recommended,
@@ -35,6 +36,16 @@ public class MetadataWidget extends MetadataTranslatable{
 		disabled,
 		auto,
 		always
+	}
+	public enum ValuespaceMerge {
+		/**
+		 * all valuespaces are presented as an invidual tree on the main level (default)
+		 */
+		separate,
+		/**
+		 * all valuespaces are merged into one list/tree
+		 */
+		merge,
 	}
 	public enum TextEscapingPolicy{
 		// no escaping, strongly discouraged since it can allow XSS vulnerabilities if the data comes from untrusted sources
@@ -396,5 +407,13 @@ public class MetadataWidget extends MetadataTranslatable{
 			map.put(value.getKey(), value.getRelated().stream().filter(r -> r.getRelation().equals(relation)).collect(Collectors.toList()));
 		}
 		return map;
+	}
+
+	public void setValuespaceCombineStrategy(ValuespaceMerge valuespaceMerge) {
+		this.valuespaceMerge = valuespaceMerge;
+	}
+
+	public ValuespaceMerge getValuespaceMerge() {
+		return valuespaceMerge;
 	}
 }

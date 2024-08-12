@@ -545,6 +545,9 @@ public class MetadataReader {
 									type == null ? null : ValuespaceInfo.ValuespaceType.valueOf(type.getNodeValue())
 					));
 				}
+                if(name.equals("valuespaceCombineStrategy")) {
+                    widget.setValuespaceCombineStrategy(MetadataWidget.ValuespaceMerge.valueOf(value));
+                }
                 if (name.equals("values"))
                     widget.setValues(getValues(data.getChildNodes(), valuespaceI18n, valuespaceI18nPrefix));
                 if (name.equals("subwidgets"))
@@ -552,17 +555,24 @@ public class MetadataReader {
             }
 			if(valuespaces.size() > 1) {
 				List<MetadataKey> keys = new ArrayList<>();
-				for (ValuespaceInfo v : valuespaces) {
-					ValuespaceData values = getValuespace(v, widget, valuespaceI18n, valuespaceI18nPrefix);
-					if(values.getTitle() == null) {
-						throw new IllegalArgumentException("Multiple valuespace entries are not supported by the given provider used for your vocabularies");
-					}
-					values.getEntries().stream().filter(e -> e.getParent() == null).forEach(e -> {
-						e.setParent(values.getTitle().getKey());
-					});
-					keys.add(values.getTitle());
-					keys.addAll(values.getEntries());
-				}
+                if(widget.getValuespaceMerge().equals(MetadataWidget.ValuespaceMerge.separate)) {
+                    for (ValuespaceInfo v : valuespaces) {
+                        ValuespaceData values = getValuespace(v, widget, valuespaceI18n, valuespaceI18nPrefix);
+                        if (values.getTitle() == null) {
+                            throw new IllegalArgumentException("Multiple valuespace entries are not supported by the given provider used for your vocabularies");
+                        }
+                        values.getEntries().stream().filter(e -> e.getParent() == null).forEach(e -> {
+                            e.setParent(values.getTitle().getKey());
+                        });
+                        keys.add(values.getTitle());
+                        keys.addAll(values.getEntries());
+                    }
+                } else {
+                    for (ValuespaceInfo v : valuespaces) {
+                        ValuespaceData values = getValuespace(v, widget, valuespaceI18n, valuespaceI18nPrefix);
+                        keys.addAll(values.getEntries());
+                    }
+                }
 				widget.setValues(keys);
 			} else if (valuespaces.size() == 1) {
 				widget.setValues(getValuespace(valuespaces.get(0),widget,valuespaceI18n,valuespaceI18nPrefix).getEntries());
