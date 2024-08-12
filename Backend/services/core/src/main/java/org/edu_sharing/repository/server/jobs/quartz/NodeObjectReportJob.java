@@ -209,7 +209,7 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
             if(!aspectFilters.isEmpty()) {
                 try {
                     String[] apsects = nodeService.getAspects(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), entry.getNode());
-                    if (Arrays.stream(apsects).noneMatch(x -> aspectFilters.contains(x))) {
+                    if (Arrays.stream(apsects).map(CCConstants::getValidLocalName).noneMatch(x -> aspectFilters.contains(x))) {
                         continue;
                     }
                 }catch (InvalidNodeRefException e){
