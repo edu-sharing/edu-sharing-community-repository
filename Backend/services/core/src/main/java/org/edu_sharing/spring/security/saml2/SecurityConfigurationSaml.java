@@ -225,9 +225,13 @@ public class SecurityConfigurationSaml {
      */
     String getRelyingPartyId(RelyingPartyRegistration.Builder b){
         try {
-            URI uri = new URI(b.build().getAssertingPartyDetails().getEntityId());
+            String entityId = b.build().getAssertingPartyDetails().getEntityId();
+            if(!entityId.startsWith("http://") && !entityId.startsWith("https://")) {
+                entityId = "http://" + entityId;
+            }
+            URI uri = new URI(entityId);
             String host = uri.getHost();
-            return host;
+            return host != null ? host : uri.toString();
         } catch (URISyntaxException e) {
             return UUID.randomUUID().toString();
         }

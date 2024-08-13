@@ -175,7 +175,9 @@ public class RenderingServiceImpl implements RenderingService{
 		long time=System.currentTimeMillis();
 		NodeService nodeService = NodeServiceFactory.getNodeService(appInfo.getAppId());
 		RenderingServiceData data=new RenderingServiceData();
-		data.setEditors(getAvailableEditors(nodeId, nodeVersion, user));
+		if(appInfo.ishomeNode()) {
+			data.setEditors(getAvailableEditors(nodeId, nodeVersion, user));
+		}
 		RepositoryDao repoDao = RepositoryDao.getRepository(this.appInfo.getAppId());
 		NodeDao nodeDao = NodeDao.getNodeWithVersion(repoDao, nodeId, nodeVersion);
 

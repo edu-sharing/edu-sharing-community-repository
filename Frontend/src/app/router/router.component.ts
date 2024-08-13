@@ -211,6 +211,9 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
                 !(
                     router.url.startsWith('/' + UIConstants.ROUTER_PREFIX + 'login') ||
                     router.url.startsWith('/' + UIConstants.ROUTER_PREFIX + 'register') ||
+                    router.url.startsWith('/' + UIConstants.ROUTER_PREFIX + 'error') ||
+                    router.url.startsWith('/' + UIConstants.ROUTER_PREFIX + 'message') ||
+                    router.url.startsWith('/' + 'shibboleth') ||
                     // public link sharing
                     router.url.startsWith('/' + UIConstants.ROUTER_PREFIX + 'sharing')
                 )
