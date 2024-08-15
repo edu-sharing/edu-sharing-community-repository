@@ -3496,7 +3496,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 						QName.createQName(CCConstants.CM_NAME));
 		String extension = FilenameUtils.getExtension(originalName);
 		// keep the filename so that a possible mimetype verification is valid
-		nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(CCConstants.CM_NAME), UUID.randomUUID().toString() + "." + extension);
+		nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(CCConstants.CM_NAME), UUID.randomUUID().toString() +(StringUtils.isEmpty(extension) ? "" : ("." + extension)));
 		try {
 			nodeService.moveNode(
 					new NodeRef(storeRef, nodeId),
