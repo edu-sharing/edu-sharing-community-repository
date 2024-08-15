@@ -31,7 +31,7 @@ export class TranslationsService {
         private ref: ApplicationRef,
         @Optional() private appService: AppService,
     ) {
-        this.sessionStorage.observe('language').subscribe((lang) => {
+        this.sessionStorage?.observe('language').subscribe((lang) => {
             // language has changed, i.e. user has different preference
             if (this.translate.currentLang && this.translate.currentLang !== lang) {
                 this.initialize().subscribe(() => {
