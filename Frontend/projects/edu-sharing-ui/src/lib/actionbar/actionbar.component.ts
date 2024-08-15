@@ -6,6 +6,7 @@ import { UIConstants } from '../util/ui-constants';
 import { OptionItem } from '../types/option-item';
 import { UIService } from '../services/ui.service';
 import { Helper } from '../util/helper';
+import { MatTooltip, TooltipPosition } from '@angular/material/tooltip';
 
 @Component({
     selector: 'es-actionbar',
@@ -59,6 +60,12 @@ export class ActionbarComponent implements OnChanges {
      * Should disabled ("greyed out") options be shown or hidden?
      */
     @Input() showDisabled = true;
+
+    /**
+     * the position of the mat tooltips
+     */
+    @Input() tooltipPosition: TooltipPosition = 'below';
+
     /**
      * Set the options, see @OptionItem
      */
@@ -66,7 +73,6 @@ export class ActionbarComponent implements OnChanges {
         this.optionsIn = options;
         this.prepareOptions(options);
     }
-
     optionsIn: OptionItem[] = [];
     optionsAlways: OptionItem[] = [];
     optionsMenu: OptionItem[] = [];

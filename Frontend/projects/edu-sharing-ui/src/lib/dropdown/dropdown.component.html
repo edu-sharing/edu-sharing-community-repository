@@ -14,9 +14,10 @@
           class="mat-menu-item collection-item-{{
             option.name | replaceChars : { search: '.', replace: '-' }
           }}"
-          matTooltip="{{ option | optionTooltip }}"
+          matTooltip="{{ option | optionTooltip | async }}"
           matTooltipPosition="right"
           matTooltipTouchGestures="off"
+          [attr.aria-label]="option.ariaLabel || option.name | translate"
           [class.mat-menu-item-separate]="option.isSeparate || isNewGroup(i)"
           [class.mat-menu-item-selected]="option.isSelected"
           [disabled]="!option.isEnabled"

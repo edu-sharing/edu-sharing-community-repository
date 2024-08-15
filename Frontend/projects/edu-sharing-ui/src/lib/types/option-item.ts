@@ -49,6 +49,11 @@ export class OptionItem {
      */
     public onlyMobile = false;
     /**
+     * custom aria-label
+     * @type {string}
+     */
+    public ariaLabel = '';
+    /**
      * If true, only displayed on a desktop device (based on the navigator agent)
      * @type {boolean}
      */
