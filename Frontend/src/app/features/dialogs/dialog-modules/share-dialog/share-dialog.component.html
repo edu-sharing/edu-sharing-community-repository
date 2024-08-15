@@ -21,6 +21,7 @@
         <es-authority-search-input
           [globalSearchAllowed]="globalAllowed"
           (onChooseAuthority)="addSuggestion($event)"
+          [minSuggestionLength]="minSuggestionLength"
         ></es-authority-search-input>
         <div class="hintNoFuzzy" *ngIf="globalSearch && !fuzzyAllowed">
           {{ 'WORKSPACE.SHARE.NO_FUZZY' | translate }}
