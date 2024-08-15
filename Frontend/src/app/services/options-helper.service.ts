@@ -261,6 +261,13 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         return true;
     }
 
+    /**
+     * get all available default options
+     * usefull for duplicating specific options for custom use cases
+     */
+    async getDefaultOptions(data: OptionData) {
+        return this.prepareOptions(this.mainNavService.getDialogs(), null, null, data);
+    }
     async getAvailableOptions(
         target: Target,
         objects: Node[],
@@ -717,7 +724,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         addNodeToCollection.constrains = [Constrain.Files, Constrain.User, Constrain.NoScope];
         addNodeToCollection.customShowCallback = async (nodes) => {
             addNodeToCollection.name =
-                data.scope === Scope.CollectionsReferences
+                data?.scope === Scope.CollectionsReferences
                     ? 'OPTIONS.COLLECTION_OTHER'
                     : 'OPTIONS.COLLECTION';
             return this.nodeHelper.referenceOriginalExists(nodes ? nodes[0] : null);
@@ -1348,7 +1355,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                     break;
             }
         });
-        setDisplayType(components.list?.getDisplayType(), false);
+        setDisplayType(components?.list?.getDisplayType(), false);
         toggleViewType.scopes = [Scope.WorkspaceList, Scope.Search, Scope.CollectionsReferences];
         toggleViewType.constrains = [Constrain.NoSelection];
         toggleViewType.group = DefaultGroups.Toggles;
@@ -1459,7 +1466,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         options.push(toggleViewType);
         options.push(metadataSidebar);
 
-        if (data.postPrepareOptions) {
+        if (data?.postPrepareOptions) {
             data.postPrepareOptions(options, objects);
         }
         return options;
