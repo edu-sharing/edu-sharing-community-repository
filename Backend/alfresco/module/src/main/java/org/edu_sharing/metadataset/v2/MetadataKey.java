@@ -44,6 +44,8 @@ public class MetadataKey extends MetadataTranslatable {
     @JacksonXmlProperty(isAttribute = true)
     private String description;
     @JacksonXmlProperty(isAttribute = true)
+    private String abbreviation;
+    @JacksonXmlProperty(isAttribute = true)
     private String parent;
     @JacksonXmlProperty(isAttribute = true)
     private String locale;

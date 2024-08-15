@@ -636,10 +636,11 @@ public class MetadataReader {
         for (int i = 0; i < keysNode.getLength(); i++) {
             Node keyNode = keysNode.item(i);
             NamedNodeMap attributes = keyNode.getAttributes();
-            String cap = null;
-            String description = null;
+            String cap = null, abbreviation = null, description = null;
             if (attributes != null && attributes.getNamedItem("cap") != null)
                 cap = attributes.getNamedItem("cap").getTextContent();
+            if (attributes != null && attributes.getNamedItem("abbreviation") != null)
+                abbreviation = attributes.getNamedItem("abbreviation").getTextContent();
             if (attributes != null && attributes.getNamedItem("description") != null)
                 description = attributes.getNamedItem("description").getTextContent();
             if (cap == null) cap = "";
@@ -663,6 +664,7 @@ public class MetadataReader {
                             : cap,
                     fallback));
             key.setDescription(getTranslation(key, description));
+            key.setAbbreviation(getTranslation(key, abbreviation));
             keys.add(key);
         }
         return keys;
