@@ -2,12 +2,9 @@ package org.edu_sharing.restservices;
 
 import java.io.InputStream;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import com.google.gson.Gson;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.AssociationRef;
-import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
@@ -199,7 +196,7 @@ public class CollectionDao {
 			this.collectionId = collectionId;
 			this.nodeDao=NodeDao.getNode(repoDao, collectionId);
 
-			this.collection = unmarshalling(repoDao.getId(), collectionClient.get(nodeDao.getNodeRef(), nodeDao.fetchCounts));
+			this.collection = unmarshalling(repoDao.getId(), collectionClient.get(nodeDao.getNodeRef(), nodeDao.fetchCounts, nodeDao.resolveUsernames, nodeDao.readPermissionsQuery));
 			this.baseClient = repoDao.getBaseClient();
 
 		} catch (Exception e) {
@@ -216,7 +213,7 @@ public class CollectionDao {
 			this.repoDao = repoDao;
 			this.collectionId = collectionId;
 			this.nodeDao=nodeDao;
-			this.collection = unmarshalling(repoDao.getId(), collectionClient.get(nodeDao.getNodeRef(), nodeDao.fetchCounts));
+			this.collection = unmarshalling(repoDao.getId(), collectionClient.get(nodeDao.getNodeRef(), nodeDao.fetchCounts, nodeDao.resolveUsernames, nodeDao.readPermissionsQuery));
 			this.baseClient = repoDao.getBaseClient();
 			this.access = node.getAccess();//baseClient.hasAllPermissions(collectionId, PERMISSIONS);
 			this.preview= node.getPreview();

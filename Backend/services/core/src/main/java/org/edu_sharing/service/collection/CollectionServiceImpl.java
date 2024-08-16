@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.search.impl.solr.ESSearchParameters;
@@ -19,7 +20,6 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.cmr.thumbnail.ThumbnailService;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryparser.classic.QueryParser;
@@ -683,7 +683,7 @@ public class CollectionServiceImpl implements CollectionService {
         return collection;
     }
 
-    protected void addCollectionCountProperties(NodeRef nodeRef, Collection collection) {
+    protected void addCollectionCountProperties(NodeRef nodeRef, Collection collection, BoolQuery readPermissionsQuery) {
         String path = serviceRegistry.getNodeService().getPath(nodeRef).toPrefixString(serviceRegistry.getNamespaceService());
         SearchParameters params = new ESSearchParameters();
         params.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
@@ -697,32 +697,33 @@ public class CollectionServiceImpl implements CollectionService {
     }
 
     @Override
-	public Collection get(org.edu_sharing.service.model.NodeRef nodeRef, boolean fetchCounts) {
+	public Collection get(org.edu_sharing.service.model.NodeRef nodeRef, boolean fetchCounts, boolean resolveUsernames, BoolQuery readPermissionsQuery) {
         try {
 			Map<String,Object> props = nodeRef.getProperties() == null ? nodeService.getProperties(nodeRef.getStoreProtocol(),nodeRef.getStoreId(),nodeRef.getNodeId()) : nodeRef.getProperties();
-			throwIfNotACollection(nodeRef.getStoreProtocol(),nodeRef.getStoreId(),nodeRef.getNodeId());
+			throwIfNotACollection(nodeRef);
 
             Collection collection = asCollection(props);
 
             // using solr to count all underlying refs recursive
             if (fetchCounts) {
-				addCollectionCountProperties(new NodeRef(new StoreRef(nodeRef.getStoreProtocol(), nodeRef.getStoreId()), nodeRef.getNodeId()), collection);
+				addCollectionCountProperties(new NodeRef(new StoreRef(nodeRef.getStoreProtocol(), nodeRef.getStoreId()), nodeRef.getNodeId()), collection, readPermissionsQuery);
             }
             //collection.setChildReferencesCount(client.getChildAssociationByType(storeProtocol,storeId,collectionId, CCConstants.CCM_TYPE_IO).size());
             //collection.setChildCollectionsCount(client.getChildAssociationByType(storeProtocol,storeId,collectionId, CCConstants.CCM_TYPE_MAP).size());
 
-			User owner = client.getOwner(nodeRef.getStoreId(),nodeRef.getStoreProtocol(),nodeRef.getNodeId());
+            if(resolveUsernames) {
+                User owner = client.getOwner(nodeRef.getStoreId(), nodeRef.getStoreProtocol(), nodeRef.getNodeId());
 
-            String currentUser = client.getAuthenticationInfo().get(CCConstants.AUTH_USERNAME);
-            if (!currentUser.equals(owner.getUsername()) && !client.isAdmin(currentUser)) {
-                //leave out username
-                owner.setUsername(null);
-                owner.setEmail(null);
-                owner.setNodeId(null);
+                String currentUser = client.getAuthenticationInfo().get(CCConstants.AUTH_USERNAME);
+                if (!currentUser.equals(owner.getUsername()) && !client.isAdmin(currentUser)) {
+                    //leave out username
+                    owner.setUsername(null);
+                    owner.setEmail(null);
+                    owner.setNodeId(null);
+                }
+                collection.setFromUser(currentUser.equals(owner.getUsername()));
+                collection.setOwner(owner);
             }
-            collection.setFromUser(currentUser.equals(owner.getUsername()));
-
-            collection.setOwner(owner);
 
             String parentId = (String) props.get(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID);
             AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
@@ -1007,11 +1008,18 @@ public class CollectionServiceImpl implements CollectionService {
     }
 
     private void throwIfNotACollection(String storeProtocol, String storeId, String collection) {
-        String[] aspects = nodeService.getAspects(storeProtocol, storeId, collection);
-        if (!Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_COLLECTION)) {
+        if (!nodeService.hasAspect(storeProtocol, storeId, collection, CCConstants.CCM_ASPECT_COLLECTION)) {
             throw new IllegalArgumentException("Node " + collection + " is not a collection (Aspect " + CCConstants.CCM_ASPECT_COLLECTION + " not found)");
         }
-
+    }
+    private void throwIfNotACollection(org.edu_sharing.service.model.NodeRef nodeRef) {
+        if(nodeRef.getAspects() != null && !nodeRef.getAspects().isEmpty()) {
+            if(!nodeRef.getAspects().contains(CCConstants.CCM_ASPECT_COLLECTION)) {
+                throw new IllegalArgumentException("Node " + nodeRef.getNodeId() + " is not a collection (Aspect " + CCConstants.CCM_ASPECT_COLLECTION + " not found)");
+            }
+        } else {
+            throwIfNotACollection(nodeRef.getStoreProtocol(), nodeRef.getStoreId(), nodeRef.getNodeId());
+        }
     }
 
     @Override

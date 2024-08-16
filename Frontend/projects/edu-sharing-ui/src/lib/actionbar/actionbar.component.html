@@ -19,8 +19,9 @@
       color="primary"
       [disabled]="!option.isEnabled"
       [class.display-none]="!option.isEnabled && !showDisabled"
-      matTooltip="{{ option | optionTooltip }}"
-      [attr.aria-label]="option.name | translate"
+      matTooltip="{{ option | optionTooltip | async }}"
+      [matTooltipPosition]="tooltipPosition"
+      [attr.aria-label]="option.ariaLabel || option.name | translate"
       (click)="click(option)"
     >
       <i [esIcon]="option.icon"></i>
@@ -34,8 +35,9 @@
       color="primary"
       [disabled]="!option.isEnabled"
       [class.display-none]="!option.isEnabled && !showDisabled"
-      matTooltip="{{ option | optionTooltip }}"
-      [attr.aria-label]="option.name | translate"
+      matTooltip="{{ option | optionTooltip | async }}"
+      [matTooltipPosition]="tooltipPosition"
+      [attr.aria-label]="option.ariaLabel || option.name | translate"
       (click)="click(option)"
     >
       <i [esIcon]="option.icon"></i>
@@ -64,7 +66,7 @@
       *ngFor="let option of optionsToggle"
       mat-icon-button
       matTooltip="{{ option.name | translate }}"
-      [attr.aria-label]="option.name | translate"
+      [attr.aria-label]="option.ariaLabel || option.name | translate"
       (click)="click(option)"
       [class.disabled]="!option.isEnabled"
       attr.data-test="toggle-{{ option.name }}"

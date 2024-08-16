@@ -412,6 +412,10 @@ body {
 i.mat-icon {
     height: 1em;
     width: 1em;
+    > .svg-icons {
+        width: 20px;
+        height: 20px;
+    }
 }
 button {
     &.mat-mdc-button,

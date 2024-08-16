@@ -176,10 +176,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
         sr.setNodeCount(total);
         JSONArray hitsList = hits.getJSONArray("hits");
         Set<String> authorities = getUserAuthorities();
+        boolean isAdmin = AuthorityServiceHelper.isAdmin();
         String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
         for (int i = 0; i < hitsList.length(); i++) {
             Map hit = new ObjectMapper().readValue(hitsList.getJSONObject(i).getJSONObject("_source").toString(), Map.class);
-            data.add(transformSearchHit(authorities, user, hit, false));
+            data.add(transformSearchHit(isAdmin, authorities, user, hit, false));
         }
         return sr;
     }
@@ -380,7 +381,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         Set<String> authorities = getUserAuthorities();
         String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
-
+        boolean isAdmin = AuthorityServiceHelper.isAdmin();
 
         SearchResultNodeRef sr = new SearchResultNodeRef();
         List<NodeRef> data = new ArrayList<>();
@@ -428,7 +429,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
                 HitsMetadata<Map> hits = searchResponse.hits();
                 for (Hit<Map> hit : hits.hits()) {
-                    data.add(transformSearchHit(authorities, user, hit.source(), searchToken.isResolveCollections()));
+                    data.add(transformSearchHit(isAdmin, authorities, user, hit.source(), searchToken.isResolveCollections()));
                 }
                 if (hits.hits().isEmpty()) {
                     break;
@@ -569,8 +570,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 logger.info("result count: " + hits.total());
 
                 long millisPerm = System.currentTimeMillis();
+                boolean isAdmin = AuthorityServiceHelper.isAdmin();
                 for (Hit<Map> hit : hits.hits()) {
-                    data.add(transformSearchHit(authorities, user, hit.source(), searchToken.isResolveCollections()));
+                    data.add(transformSearchHit(isAdmin, authorities, user, hit.source(), searchToken.isResolveCollections()));
                 }
                 logger.info("permission stuff took:" + (System.currentTimeMillis() - millisPerm));
 
@@ -862,16 +864,15 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return false;
     }
 
-    public NodeRef transformSearchHit(Set<String> authorities, String user, Map hit, boolean resolveCollections) {
+    public NodeRef transformSearchHit(boolean isAdmin, Set<String> authorities, String user, Map hit, boolean resolveCollections) {
         try {
-            return this.transform(NodeRefImpl.class, authorities, user, hit, resolveCollections);
+            return this.transform(NodeRefImpl.class, isAdmin, authorities, user, hit, resolveCollections);
         } catch (IllegalAccessException | InstantiationException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private <T extends NodeRefImpl> T transform(Class<T> clazz, Set<String> authorities, String user, Map<String, Object> sourceAsMap, boolean resolveCollections) throws IllegalAccessException, InstantiationException {
-        boolean isAdmin = AuthorityServiceHelper.isAdmin();
+    private <T extends NodeRefImpl> T transform(Class<T> clazz, boolean isAdmin, Set<String> authorities, String user, Map<String, Object> sourceAsMap, boolean resolveCollections) throws IllegalAccessException, InstantiationException {
         Map<String, MetadataSet> mdsCache = new HashMap<>();
         String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
 
@@ -930,7 +931,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 if (i18nProps != null) {
                     List<String> displayNames = (List<String>) i18nProps.get(entry.getKey());
                     if (displayNames != null) {
-                        props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(displayNames, CCConstants.MULTIVALUE_SEPARATOR));
+                        props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.DISPLAYNAME_SUFFIX, String.join(CCConstants.MULTIVALUE_SEPARATOR, displayNames));
                     }
                 }
             } else {
@@ -1123,7 +1124,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         }
                     }
                     if (hasPermission) {
-                        CollectionRefImpl transform = transform(CollectionRefImpl.class, authorities, user, collection, false);
+                        CollectionRefImpl transform = transform(CollectionRefImpl.class, isAdmin, authorities, user, collection, false);
                         if (isProposal) {
                             transform.setRelationType(CollectionRef.RelationType.Proposal);
                         }
@@ -1135,7 +1136,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         if (isProposal && sourceAsMap.containsKey("original")) {
             eduNodeRef.getRelations().put(
                     NodeRefImpl.Relation.Original,
-                    transform(NodeRefImpl.class, authorities, user, (Map) sourceAsMap.get("original"), false)
+                    transform(NodeRefImpl.class, isAdmin, authorities, user, (Map) sourceAsMap.get("original"), false)
             );
         }
         if (eduNodeRef instanceof CollectionRefImpl) {
@@ -1149,7 +1150,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 } else {
                     collectionRef.setRelationType(CollectionRef.RelationType.Usage);
                 }
-                collectionRef.setRelationNode(transform(NodeRefImpl.class, authorities, user, relation, false));
+                collectionRef.setRelationNode(transform(NodeRefImpl.class, isAdmin, authorities, user, relation, false));
             }
         }
         long permMillisSingle = (System.currentTimeMillis() - millis);
@@ -1376,9 +1377,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
         logger.info("query: " + JsonpUtils.toJsonString(searchRequest, new JacksonJsonpMapper()));
         HitsMetadata<Map> hits = searchResponse.hits();
         logger.info("result count: " + hits.total().value());
+        boolean isAdmin = AuthorityServiceHelper.isAdmin();
 
         for (Hit<Map> hit : hits.hits()) {
-            data.add(transformSearchHit(getUserAuthorities(), AuthenticationUtil.getFullyAuthenticatedUser(), hit.source(), true));
+            data.add(transformSearchHit(isAdmin, getUserAuthorities(), AuthenticationUtil.getFullyAuthenticatedUser(), hit.source(), true));
         }
         sr.setStartIDX(0);
         sr.setNodeCount((int) hits.total().value());
@@ -1494,8 +1496,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
         HitsMetadata<Map> hits = searchResponse.hits();
         Set<String> authorities = getUserAuthorities();
         String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
+        boolean isAdmin = AuthorityServiceHelper.isAdmin();
         SearchResultNodeRef sr = new SearchResultNodeRef();
-        sr.setData(hits.hits().stream().map(h -> transformSearchHit(authorities, user, h.source(), false)).collect(Collectors.toList()));
+        sr.setData(hits.hits().stream().map(h -> transformSearchHit(isAdmin, authorities, user, h.source(), false)).collect(Collectors.toList()));
         sr.setStartIDX(skipCount);
         sr.setNodeCount((int) hits.total().value());
         return sr;
