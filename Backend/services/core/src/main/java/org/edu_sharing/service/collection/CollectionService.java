@@ -1,7 +1,6 @@
 package org.edu_sharing.service.collection;
 
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
 
 import org.alfresco.service.cmr.repository.AssociationRef;
@@ -65,7 +64,7 @@ public interface CollectionService {
 	
 	public List<NodeRef> getChildren(String parentId, String scope, SortDefinition sortDefinition,List<String> filter);
 
-	public Collection get(org.edu_sharing.service.model.NodeRef collection, boolean fetchCounts);
+	public Collection get(org.edu_sharing.service.model.NodeRef collection, boolean fetchCounts, boolean resolveUsernames);
 
 	void removePreviewImage(String collectionId) throws Exception;
 
