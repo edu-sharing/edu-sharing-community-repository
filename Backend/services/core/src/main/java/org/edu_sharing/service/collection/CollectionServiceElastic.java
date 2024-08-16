@@ -9,6 +9,7 @@ import co.elastic.clients.json.JsonData;
 import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.spring.ApplicationContextFactory;
@@ -90,9 +91,11 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
         List<CollectionProposalInfo.CollectionProposalData> dataList = new ArrayList<>();
         Set<String> authorities = searchServiceElastic.getUserAuthorities();
         String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
+        boolean isAdmin = AuthorityServiceHelper.isAdmin();
+
         for (Hit<Map> hit : result.hits().hits()) {
             CollectionProposalInfo.CollectionProposalData data = new CollectionProposalInfo.CollectionProposalData();
-            data.setNodeRef(searchServiceElastic.transformSearchHit(authorities, user, hit.source(), false));
+            data.setNodeRef(searchServiceElastic.transformSearchHit(isAdmin, authorities, user, hit.source(), false));
             for (Object v : hit.fields().get("proposals").to(List.class)) {
                 Map al = (Map) v;
                 for (Object e : al.entrySet()) {
