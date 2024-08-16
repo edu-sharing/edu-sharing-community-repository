@@ -30,7 +30,8 @@ public class SilentLoginModeRedirect {
 
         request.getSession().setAttribute(SESS_ATT_SILENT_LOGIN_TARGET, (request.getContextPath()
                         + request.getServletPath()
-                        + (request.getPathInfo() != null ? request.getPathInfo() : ""))
+                        + (request.getPathInfo() != null ? request.getPathInfo() : "")
+                        + (request.getQueryString() != null ? ("?"+ request.getQueryString()) : ""))
         );
         response.sendRedirect(request.getContextPath() + SilentLoginAuthorizationRequestResolver.DEFAULT_SILENT_LOGIN_PATH);
         return true;
