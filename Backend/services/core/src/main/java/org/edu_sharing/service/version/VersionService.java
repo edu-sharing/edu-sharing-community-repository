@@ -11,12 +11,15 @@ import org.edu_sharing.restservices.about.v1.model.Services;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.rendering.RenderingServiceFactory;
 import org.edu_sharing.service.rendering.RenderingVersionInfo;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Map;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -98,12 +101,10 @@ public class VersionService {
         });
     }
 
-    public static enum Type {
+    public enum Type {
         REPOSITORY,
         RENDERSERVICE
     }
-
-    private static String VERSION_FILE = "version.json";
 
     public static String getVersionNoException(Type type) {
         try {
@@ -150,18 +151,24 @@ public class VersionService {
     }
 
     private static String getRepositoryVersion() throws Exception {
-        RepositoryVersionInfo.Version version = getRepositoryVersionInfo().version;
+        RepositoryVersionInfo.Version version = getRepositoryVersionInfo().get("project").version;
         return version.major + "." + version.minor;
     }
 
-    public static RepositoryVersionInfo getRepositoryVersionInfo() throws IOException {
-        return
-                new Gson().fromJson(
-                        String.join(
-                                "",
-                                IOUtils.readLines(VersionService.class.getClassLoader().getResourceAsStream("version.json"))
-                        ),
-                        RepositoryVersionInfo.class
-                );
+    public static Map<String, RepositoryVersionInfo> getRepositoryVersionInfo() throws IOException {
+
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        List<Resource> resources = new ArrayList<>(List.of(resolver.getResources("config/defaults/*-version.json")));
+        resources.addAll(List.of(resolver.getResources("config/plugins/**/version.json")));
+
+        Map<String, RepositoryVersionInfo> versions = new LinkedHashMap<>();
+        for (Resource resource : resources) {
+            try(InputStream is = resource.getInputStream()) {
+                RepositoryVersionInfo versionInfo = new Gson().fromJson(IOUtils.toString(is, StandardCharsets.UTF_8), RepositoryVersionInfo.class);
+                versions.put(versionInfo.repository, versionInfo);
+            }
+        }
+
+        return versions;
     }
 }

@@ -130,5 +130,5 @@ public interface AdminService {
 
 	Collection<PluginStatus> getPlugins();
 
-    RepositoryVersionInfo getVersion();
+    Map<String, RepositoryVersionInfo> getVersions();
 }
