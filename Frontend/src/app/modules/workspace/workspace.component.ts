@@ -326,9 +326,9 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
 
     handleDrop(event: { target: DropTarget; source: DropSource<Node> }) {
         if (event.source.mode === 'copy') {
-            this.copyNode(event.target, event.source.element);
+            this.copyNode(event.target, event.source.element?.slice());
         } else {
-            this.moveNode(event.target, event.source.element);
+            this.moveNode(event.target, event.source.element?.slice());
         }
         /*
         this.dialogTitle="WORKSPACE.DRAG_DROP_TITLE";

@@ -34,7 +34,13 @@ public class ApiApplication extends ResourceConfig {
         ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
         scanner.addIncludeFilter(new AnnotationTypeFilter(ApiService.class));
         Set<BeanDefinition> annotated = scanner.findCandidateComponents("org.edu_sharing.restservices");
-        SERVICES = annotated.stream().map(BeanDefinition::getClass).collect(Collectors.toSet());
+        SERVICES = annotated.stream().map(BeanDefinition::getBeanClassName).map(x-> {
+            try {
+                return Class.forName(x);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }).collect(Collectors.toSet());
 
         ClassPathScanningCandidateComponentProvider exceptionScanner = new ClassPathScanningCandidateComponentProvider(false);
         exceptionScanner.addIncludeFilter(new org.springframework.core.type.filter.AssignableTypeFilter(ExceptionMapper.class));
