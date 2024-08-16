@@ -73,6 +73,11 @@ export class ActionbarComponent implements OnChanges {
         this.optionsIn = options;
         this.prepareOptions(options);
     }
+
+    /**
+     * breakpoint width at which point the mobile display count is used
+     */
+    @Input() mobileBreakpoint = UIConstants.MOBILE_WIDTH;
     optionsIn: OptionItem[] = [];
     optionsAlways: OptionItem[] = [];
     optionsMenu: OptionItem[] = [];
@@ -108,7 +113,7 @@ export class ActionbarComponent implements OnChanges {
     }
 
     public getNumberOptions() {
-        if (window.innerWidth < UIConstants.MOBILE_WIDTH) {
+        if (window.innerWidth < this.mobileBreakpoint) {
             return this.numberOfAlwaysVisibleOptionsMobile;
         }
         return this.numberOfAlwaysVisibleOptions;
