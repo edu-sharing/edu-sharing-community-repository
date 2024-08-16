@@ -2,6 +2,7 @@ package org.edu_sharing.service.collection;
 
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
@@ -34,7 +35,7 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
     }
 
     @Override
-    protected void addCollectionCountProperties(NodeRef nodeRef, Collection collection) {
+    protected void addCollectionCountProperties(NodeRef nodeRef, Collection collection, BoolQuery readPermissionsQuery) {
         try {
             SearchRequest searchRequest = SearchRequest.of(req -> req
                     .index(SearchServiceElastic.WORKSPACE_INDEX)
@@ -42,7 +43,7 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
                     .aggregations("type", agg -> agg.terms(t -> t.field("type")))
                     .query(q -> q
                             .bool(b -> b
-                                    .must(m -> m.bool(searchServiceElastic::getReadPermissionsQuery))
+                                    .must(m -> readPermissionsQuery != null ? m.bool(readPermissionsQuery) : m.bool(searchServiceElastic::getReadPermissionsQuery))
                                     .must(m -> m.match(match -> match.field("nodeRef.storeRef.protocol").query("workspace")))
                                     .must(m -> m.wildcard(w -> w.field("fullpath").wildcard("*/" + nodeRef.getId() + "*")))
                                     .mustNot(m -> m.match(match -> match.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT)))))));

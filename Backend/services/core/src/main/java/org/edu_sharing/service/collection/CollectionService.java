@@ -3,6 +3,7 @@ package org.edu_sharing.service.collection;
 import java.io.InputStream;
 import java.util.List;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.lang3.NotImplementedException;
@@ -64,7 +65,7 @@ public interface CollectionService {
 	
 	public List<NodeRef> getChildren(String parentId, String scope, SortDefinition sortDefinition,List<String> filter);
 
-	public Collection get(org.edu_sharing.service.model.NodeRef collection, boolean fetchCounts, boolean resolveUsernames);
+	public Collection get(org.edu_sharing.service.model.NodeRef collection, boolean fetchCounts, boolean resolveUsernames, BoolQuery readPermissionsQuery);
 
 	void removePreviewImage(String collectionId) throws Exception;
 

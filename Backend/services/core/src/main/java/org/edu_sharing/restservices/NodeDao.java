@@ -1,5 +1,6 @@
 package org.edu_sharing.restservices;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.core.util.Json;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -54,7 +55,6 @@ import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.*;
 import org.edu_sharing.service.notification.NotificationService;
 import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
-import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.rating.RatingDetails;
@@ -131,6 +131,10 @@ public class NodeDao {
 
     private static ThreadLocal<Boolean> isGlobalAdmin = new ThreadLocal<>();
     private boolean isPublic;
+    /**
+     * temporary variable to reduce rebuilds for query in search context + collections
+     */
+    BoolQuery readPermissionsQuery;
 
     private NodeDao(org.alfresco.service.cmr.repository.NodeRef nodeRef) throws Throwable {
         this.nodeId = nodeRef.getId();
@@ -353,7 +357,12 @@ public class NodeDao {
         SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getId());
         Map<String, String[]> criteriasMap = MetadataSearchHelper.convertCriterias(criterias);
         try {
-            NodeSearch result = transform(repoDao, searchService.search(mdsDao.getMds(), query, criteriasMap, token), filter, transform);
+            BoolQuery readPermissionsQuery = null;
+            if(searchService instanceof SearchServiceElastic) {
+                // improve performance by caching the relatively expensive query
+                readPermissionsQuery = ((SearchServiceElastic)SearchServiceFactory.getSearchService(repoDao.getId())).getReadPermissionsQuery(new BoolQuery.Builder()).build();
+            }
+            NodeSearch result = transform(repoDao, searchService.search(mdsDao.getMds(), query, criteriasMap, token), filter, transform, readPermissionsQuery);
             if (result.getCount() == 0) {
                 // try to search for ignorable properties to be null
                 List<String> removed;
@@ -445,9 +454,11 @@ public class NodeDao {
     public static NodeSearch transform(RepositoryDao repoDao, SearchResultNodeRef search) {
         return transform(repoDao, search, null, null);
     }
-
     public static NodeSearch transform(RepositoryDao repoDao, SearchResultNodeRef search, Filter filter, Function<NodeDao, NodeDao> transform) {
+        return transform(repoDao, search, filter, transform ,null);
+    }
 
+    public static NodeSearch transform(RepositoryDao repoDao, SearchResultNodeRef search, Filter filter, Function<NodeDao, NodeDao> transform, BoolQuery readPermissionsQuery) {
         NodeSearch result = new NodeSearch();
 
         List<NodeRef> data = new ArrayList<>();
@@ -473,6 +484,7 @@ public class NodeDao {
 
                 try {
                     NodeDao nodeDao = new NodeDao(repoDao, nodeRef, filter);
+                    nodeDao.readPermissionsQuery = readPermissionsQuery;
                     if (transform != null) {
                         nodeDao = transform.apply(nodeDao);
                     }
