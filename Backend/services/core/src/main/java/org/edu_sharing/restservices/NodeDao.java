@@ -147,6 +147,10 @@ public class NodeDao {
         isCollectionHomePath = false; // TODO do we need to resolve this here?
     }
 
+    public String getVersion() {
+        return version;
+    }
+
     public static NodeStatsEntry.NodeStats getStats(NodeDao node) throws DAOException {
         if(!node.isFromRemoteRepository()) {
             if(!node.access.contains(PermissionService.CHANGE_PERMISSIONS)) {
