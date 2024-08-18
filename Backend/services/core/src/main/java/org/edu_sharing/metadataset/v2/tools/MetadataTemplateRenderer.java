@@ -86,8 +86,7 @@ public class MetadataTemplateRenderer {
 		HashMap<String, String[]> propsConverted = new HashMap<>();
 		for(String key : props.keySet()){
 			String keyLocal= CCConstants.getValidLocalName(key);
-
-			if(props.get(key) == null) continue;
+			if(keyLocal == null || props.get(key) == null) continue;
 
 			String[] values=ValueTool.getMultivalue(props.get(key).toString());
 			propsConverted.put(keyLocal, values);
