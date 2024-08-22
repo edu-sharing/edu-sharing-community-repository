@@ -2074,15 +2074,21 @@ public class NodeDao {
 
     private NodeVersionRef transformVersion(String versionLabel) {
 
-        String[] versionTokens = versionLabel.split("\\.");
+        try {
+            String[] versionTokens = versionLabel.split("\\.");
 
-        NodeVersionRef version = new NodeVersionRef();
-        version.setNode(getRef());
-        version.setMajor(Integer.parseInt(versionTokens[0]));
-        version.setMinor(Integer.parseInt(versionTokens[1]));
-        version.setMinor(Integer.parseInt(versionTokens[1]));
-
-        return version;
+            NodeVersionRef version = new NodeVersionRef();
+            version.setNode(getRef());
+            version.setMajor(Integer.parseInt(versionTokens[0]));
+            version.setMinor(Integer.parseInt(versionTokens[1]));
+            version.setMinor(Integer.parseInt(versionTokens[1]));
+            return version;
+        } catch(Throwable e) {
+            logger.warn("Could not parse version for node " + nodeId, e);
+            NodeVersionRef version = new NodeVersionRef();
+            version.setNode(getRef());
+            return version;
+        }
     }
 
     public Map<String, Object> getNativeProperties() {

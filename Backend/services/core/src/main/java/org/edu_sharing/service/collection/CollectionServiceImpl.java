@@ -283,9 +283,9 @@ public class CollectionServiceImpl implements CollectionService {
                 client.setProperty(refId, CCConstants.LOM_PROP_TECHNICAL_SIZE, (String) props.get(CCConstants.LOM_PROP_TECHNICAL_SIZE));
 
                 // run setUsage as admin because the user may not has cc_publish on the original node (but on the ref)
-                new Usage2Service().setUsageInternal(appInfo.getAppId(),
+                new Usage2Service().setUsageInternal(ApplicationInfoList.getHomeRepository().getAppId(),
                         authInfo.get(CCConstants.AUTH_USERNAME),
-                        appInfo.getAppId(),
+                        ApplicationInfoList.getHomeRepository().getAppId(),
                         collectionId,
                         originalNodeId, null, null, null, -1, versLabel, refId, null);
 

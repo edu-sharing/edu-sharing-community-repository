@@ -7,16 +7,19 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.repository.server.SecurityHeadersFilter;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.spring.security.basic.CSRFConfig;
 import org.edu_sharing.spring.security.basic.EduAuthSuccsessHandler;
 import org.edu_sharing.spring.security.basic.EduWebSecurityCustomizer;
+import org.edu_sharing.spring.security.basic.HeadersConfig;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.config.annotation.ObjectPostProcessor;
@@ -104,6 +107,7 @@ public class SecurityConfigurationSaml {
                 .saml2Metadata(withDefaults());
 
         CSRFConfig.config(http);
+        HeadersConfig.config(http);
 
         return http.build();
     }
@@ -225,9 +229,13 @@ public class SecurityConfigurationSaml {
      */
     String getRelyingPartyId(RelyingPartyRegistration.Builder b){
         try {
-            URI uri = new URI(b.build().getAssertingPartyDetails().getEntityId());
+            String entityId = b.build().getAssertingPartyDetails().getEntityId();
+            if(!entityId.startsWith("http://") && !entityId.startsWith("https://")) {
+                entityId = "http://" + entityId;
+            }
+            URI uri = new URI(entityId);
             String host = uri.getHost();
-            return host;
+            return host != null ? host : uri.toString();
         } catch (URISyntaxException e) {
             return UUID.randomUUID().toString();
         }

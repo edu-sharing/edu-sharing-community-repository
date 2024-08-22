@@ -27,10 +27,6 @@
     "TAB": {
       "USER": "Nutzende Person"
     },
-    "DELETE": {
-      "MAIN_HEADING": "Nutzende Person & Daten löschen",
-      "RECEIVER": "Nutzende Person suchen..."
-    },
 
     "TOOLPERMISSIONS": {
       "EVERYONE_ALLOWED": "Ausgangswert für alle Nutzenden",
@@ -38,6 +34,8 @@
     },
 
     "DELETE": {
+      "MAIN_HEADING": "Nutzende Person & Daten löschen",
+      "RECEIVER": "Nutzende Person suchen...",
       "CONFIRM": {
         "USERS": "Die Aktion wird für alle folgenden Nutzenden und deren gespeicherte Daten angewandt:",
         "RECEIVER_CAPTION": "Die gewählte Person wird als erstellende Person in der Daten & Sammlungen angezeigt"

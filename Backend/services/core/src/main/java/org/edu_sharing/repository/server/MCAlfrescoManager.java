@@ -100,6 +100,11 @@ public class MCAlfrescoManager extends ContextLoaderListener {
 			}catch(Throwable t) {
 				logger.error("init of config groups failed: " + t.getMessage(), t);
 			}
+			try {
+				InitHelper.initPersons();
+			}catch(Throwable t) {
+				logger.error("init of config persons failed: " + t.getMessage(), t);
+			}
 			//init ToolPermisssions
 			ToolPermissionServiceFactory.getInstance().init();
 

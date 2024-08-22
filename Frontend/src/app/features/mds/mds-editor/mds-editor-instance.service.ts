@@ -262,7 +262,10 @@ export class MdsEditorInstanceService implements OnDestroy {
             }
             // Set initial values, so the initial completion status is calculated correctly.
             this.value$.next([...this.initialValues.jointValues]);
-            if (this.mdsEditorInstanceService.getIsBulk(nodes)) {
+            if (
+                this.mdsEditorInstanceService.getIsBulk(nodes) &&
+                this.bulkMode.value !== 'replace'
+            ) {
                 this.bulkMode.next('no-change');
             }
             this.initialValuesSubject.next(this.initialValues);
