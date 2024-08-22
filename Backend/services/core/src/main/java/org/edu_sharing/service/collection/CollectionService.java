@@ -7,7 +7,6 @@ import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.lang3.NotImplementedException;
-import org.edu_sharing.generated.repository.backend.services.rest.client.model.Node;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
@@ -65,6 +64,8 @@ public interface CollectionService {
 	
 
 	public List<org.edu_sharing.service.model.NodeRef> getChildren(String parentId, String scope, SortDefinition sortDefinition, List<String> filter);
+
+	List<org.edu_sharing.service.model.NodeRef> getRecentForCurrentUser() throws Throwable;
 
 	public SearchResultNodeRef getRoot(String scope, SortDefinition sortDefinition, int skipCount, int maxItems) throws Throwable;
 

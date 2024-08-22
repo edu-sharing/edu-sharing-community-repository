@@ -141,7 +141,54 @@ public class CollectionDao {
 				parentNode = NodeDao.getNode(repoDao, parentId);
 				parentNode.fetchCounts = false;
 			}
-			if(ROOT.equals(parentId)) {
+			if(!ROOT.equals(parentId) || SearchScope.RECENT.equals(scope)) {
+					List<Node> result = new ArrayList<>();
+					List<org.edu_sharing.service.model.NodeRef> children;
+					if(SearchScope.RECENT.equals(scope)) {
+						children = repoDao.getCollectionClient().getRecentForCurrentUser();
+					} else {
+						children =
+								repoDao.getCollectionClient().getChildren(
+										ROOT.equals(parentId) ? null : parentId,
+										scope != null ? scope.toString() : null, sortDefinition, filter);
+					}
+
+					//NodeDao.convertAlfrescoNodeRef(repoDao,children)
+					NodeEntries sorted = NodeDao.convertToRest(repoDao,
+							Filter.createShowAllFilter(),
+							NodeDao.convertEduNodeRef(repoDao, children),
+							skipCount,
+							maxItems,
+							(dao) -> {
+								dao.fetchCounts = fetchCounts;
+								return dao;
+							});
+					Pagination pagination = sorted.getPagination();
+					for (Node child : sorted.getNodes()) {
+
+						String nodeType = child.getType();
+
+						if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_MAP).equals(nodeType)) {
+
+							// it's a collection
+							result.add(child);
+
+						} else if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO).equals(nodeType)) {
+
+							// it's a reference
+							try {
+								result.add((CollectionReference) child);
+							} catch (ClassCastException e) {
+								logger.error("Collection " + parentId + " contains a non-ref object: " + child.getRef().getId() + ". Please clean up the collection", e);
+							}
+						}
+					}
+					CollectionBaseEntries obj = new CollectionBaseEntries();
+					obj.setEntries(result);
+					obj.setPagination(pagination);
+					return obj;
+
+			} else {
 				SearchResultNodeRef searchResult = repoDao.getCollectionClient().getRoot(
 						scope != null ? scope.toString() : null, sortDefinition, skipCount, maxItems
 				);
@@ -155,48 +202,6 @@ public class CollectionDao {
 				CollectionBaseEntries obj = new CollectionBaseEntries();
 				obj.setEntries(transformed.getNodes());
 				obj.setPagination(new Pagination(searchResult));
-				return obj;
-			} else {
-				List<Node> result = new ArrayList<>();
-				List<org.edu_sharing.service.model.NodeRef> children =
-						repoDao.getCollectionClient().getChildren(
-								ROOT.equals(parentId) ? null : parentId,
-								scope != null ? scope.toString() : null, sortDefinition, filter);
-
-
-				//NodeDao.convertAlfrescoNodeRef(repoDao,children)
-				NodeEntries sorted = NodeDao.convertToRest(repoDao,
-						Filter.createShowAllFilter(),
-						NodeDao.convertEduNodeRef(repoDao, children),
-						skipCount,
-						maxItems,
-						(dao) -> {
-							dao.fetchCounts = fetchCounts;
-							return dao;
-						});
-				Pagination pagination = sorted.getPagination();
-				for (Node child : sorted.getNodes()) {
-
-					String nodeType = child.getType();
-
-					if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_MAP).equals(nodeType)) {
-
-						// it's a collection
-						result.add(child);
-
-					} else if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO).equals(nodeType)) {
-
-						// it's a reference
-						try {
-							result.add((CollectionReference) child);
-						} catch (ClassCastException e) {
-							logger.error("Collection " + parentId + " contains a non-ref object: " + child.getRef().getId() + ". Please clean up the collection", e);
-						}
-					}
-				}
-				CollectionBaseEntries obj = new CollectionBaseEntries();
-				obj.setEntries(result);
-				obj.setPagination(pagination);
 				return obj;
 			}
 		}catch(Throwable e){

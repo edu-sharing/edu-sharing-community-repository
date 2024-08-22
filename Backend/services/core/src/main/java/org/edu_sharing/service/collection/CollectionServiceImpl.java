@@ -1,6 +1,5 @@
 package org.edu_sharing.service.collection;
 
-import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -775,15 +774,13 @@ public class CollectionServiceImpl implements CollectionService {
         });
     }
     @Override
+    public List<org.edu_sharing.service.model.NodeRef> getRecentForCurrentUser() throws Throwable {
+        return permissionService.getRecentProperty(CCConstants.CCM_PROP_PERSON_RECENT_COLLECTIONS).stream().map(
+                ref -> new NodeRefImpl(ref.getId())
+        ).collect(Collectors.toList());
+    }
+    @Override
     public SearchResultNodeRef getRoot(String scope, SortDefinition sortDefinition, int skipCount, int maxItems) throws Throwable {
-        if(SearchScope.valueOf(scope).equals(SearchScope.RECENT)) {
-            List<org.edu_sharing.service.model.NodeRef> recent = permissionService.getRecentProperty(CCConstants.CCM_PROP_PERSON_RECENT_COLLECTIONS).
-                    stream().map(id -> new NodeRefImpl(id.getId())).collect(Collectors.toList());
-            SearchResultNodeRef result = new SearchResultNodeRef();
-            result.setData(recent);
-            result.setNodeCount(result.getNodeCount());
-
-        }
         return searchChildren(scope, sortDefinition, skipCount, maxItems);
     }
 
