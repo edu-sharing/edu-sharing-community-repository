@@ -360,7 +360,7 @@ public class NodeDao {
             BoolQuery readPermissionsQuery = null;
             if(searchService instanceof SearchServiceElastic) {
                 // improve performance by caching the relatively expensive query
-                readPermissionsQuery = ((SearchServiceElastic)SearchServiceFactory.getSearchService(repoDao.getId())).getReadPermissionsQuery(new BoolQuery.Builder()).build();
+                readPermissionsQuery = ((SearchServiceElastic)searchService).getReadPermissionsQuery(new BoolQuery.Builder()).build();
             }
             NodeSearch result = transform(repoDao, searchService.search(mdsDao.getMds(), query, criteriasMap, token), filter, transform, readPermissionsQuery);
             if (result.getCount() == 0) {
@@ -2545,7 +2545,9 @@ public class NodeDao {
         }
         return converted;
     }
-
+    public static List<NodeRef> convertEduNodeRef(RepositoryDao repoDao, List<org.edu_sharing.service.model.NodeRef> refs) {
+        return refs.stream().map(ref -> new NodeRef(repoDao, ref.getNodeId())).collect(Collectors.toList());
+    }
     public void reportNode(String reason, String userEmail, String userComment) throws DAOException {
         try {
             String type = nodeService.getType(nodeId);
