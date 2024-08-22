@@ -13,7 +13,20 @@ import org.edu_sharing.service.rendering.RenderingServiceFactory;
 import org.edu_sharing.service.rendering.RenderingVersionInfo;
 import org.edu_sharing.spring.scope.refresh.RefreshScopeRefreshedEvent;
 import org.springframework.context.ApplicationListener;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class VersionService implements ApplicationListener<RefreshScopeRefreshedEvent> {
@@ -144,7 +157,7 @@ public class VersionService implements ApplicationListener<RefreshScopeRefreshed
         return null;
     }
 	private String getRepositoryVersion() throws Exception{
-		RepositoryVersionInfo.Version version = getRepositoryVersionInfo().version;
+		RepositoryVersionInfo.Version version = getRepositoryVersionInfo().get("project").version;
         return version.major + "." + version.minor;
     }
 
