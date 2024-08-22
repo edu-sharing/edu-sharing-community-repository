@@ -553,38 +553,6 @@ public class AdminApi {
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
 	}
 
-	@POST
-	@Path("/cache/refreshEduGroupCache")
-
-	@Operation(summary = "Refresh the Edu Group Cache", description = "Refresh the Edu Group Cache.")
-
-	@ApiResponses(value = {
-			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-	    })
-	public Response refreshEduGroupCache(
-            @Parameter(description = "keep existing", schema = @Schema(defaultValue="false")) @QueryParam("keepExisting") Boolean keepExisting,
-            @Context HttpServletRequest req){
-		try {
-            AdminServiceFactory.getInstance().refreshEduGroupCache(keepExisting);
-	    	return Response.ok().build();
-		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
-		}
-	}
-
-	@OPTIONS
-	@Path("/cache/refreshEduGroupCache")
-	@Hidden
-
-	public Response options4() {
-
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-	}
 
 	@POST
 	@Path("/cache/removeCacheEntry")

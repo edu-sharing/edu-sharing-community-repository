@@ -53,7 +53,6 @@ import org.edu_sharing.repository.server.jobs.quartz.*;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.CacheManagerFactory;
-import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.repository.server.update.PrintWriterLogAppender;
 import org.edu_sharing.repository.server.update.UpdaterService;
@@ -668,15 +667,6 @@ public class AdminServiceImpl implements AdminService {
             loggerConfig.removeAppender(appender.getName());
             context.updateLoggers();
             ThreadContext.remove("logThreadId");
-        }
-    }
-
-    @Override
-    public void refreshEduGroupCache(boolean keepExisting) {
-        if (keepExisting) {
-            EduGroupCache.refreshByKeepExisting();
-        } else {
-            EduGroupCache.refresh();
         }
     }
 

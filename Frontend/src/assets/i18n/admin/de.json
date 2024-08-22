@@ -305,8 +305,6 @@
     "TOOLKIT": {
       "REFRESH_APP": "App Info neu laden",
       "REFRESH_APP_INFO": "Metadaten und Application-Info neu laden",
-      "REFRESH_EDU_GROUP_CACHE": "Edu-Gruppen-Cache aktualisieren",
-      "EDU_GROUP_CACHE_REFRESHED": "Edu-Gruppen-Cache aktualisiert",
       "APP_INFO_REFRESHED": "Aktualisieren der Anwendungsinformationen abgeschlossen",
       "CACHE": "Cache Verwaltung",
       "CACHE_INFO": "Cache Info abrufen",

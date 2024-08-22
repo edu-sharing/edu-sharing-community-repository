@@ -112,8 +112,6 @@ public interface AdminService {
     void setToolpermissions(String authority,
                             Map<String, ToolPermission.Status> toolpermissions) throws Throwable;
 
-	void refreshEduGroupCache(boolean keepExisting);
-
     void testMail(String receiver, String template);
 
     String importOaiXml(InputStream xml, String recordHandlerClassName, String binaryHandlerClassName) throws Exception;

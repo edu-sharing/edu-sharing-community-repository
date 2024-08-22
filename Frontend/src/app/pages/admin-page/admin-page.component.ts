@@ -602,19 +602,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             },
         );
     }
-    public refreshEduGroupCache() {
-        this.globalProgress = true;
-        this.admin.refreshEduGroupCache().subscribe(
-            () => {
-                this.globalProgress = false;
-                this.toast.toast('ADMIN.TOOLKIT.EDU_GROUP_CACHE_REFRESHED');
-            },
-            (error: any) => {
-                this.globalProgress = false;
-                this.toast.error(error);
-            },
-        );
-    }
+
     public refreshCache(sticky: boolean) {
         this.globalProgress = true;
         this.admin

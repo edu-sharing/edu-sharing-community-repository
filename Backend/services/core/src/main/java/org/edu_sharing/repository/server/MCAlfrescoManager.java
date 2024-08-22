@@ -27,10 +27,7 @@
  */
 package org.edu_sharing.repository.server;
 
-import java.io.File;
-
 import jakarta.servlet.ServletContextEvent;
-
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.chemistry.opencmis.server.impl.CmisRepositoryContextListener;
@@ -44,7 +41,6 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.InitHelper;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
-import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
 import org.edu_sharing.repository.server.tracking.TrackingService;
 import org.edu_sharing.repository.server.tracking.TrackingService.TrackingBufferFactory;
 import org.edu_sharing.repository.server.tracking.buffer.FileRingBuffer;
@@ -55,6 +51,8 @@ import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.spring.context.EduSharingContextInitializer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.ContextLoaderListener;
+
+import java.io.File;
 
 public class MCAlfrescoManager extends ContextLoaderListener {
 
@@ -87,18 +85,6 @@ public class MCAlfrescoManager extends ContextLoaderListener {
 
 			super.setContextInitializers(new EduSharingContextInitializer());
 			super.contextInitialized(servletContextEvent);
-			logger.info("load edu groups");
-			
-			/**
-			 * only refresh when size is null, to prevent that all clusternodes try to clear and fill again, so in best case only the first cluster node fill's this 
-			 */
-			if(EduGroupCache.getKeys().size() == 0){
-				logger.info("starting filling edugroup cache");
-				EduGroupCache.refresh();
-			}else{
-				logger.info("edugroup cache has "+EduGroupCache.getKeys().size() +" entries, getting(got) cache entries by another cluster node");
-			}
-
 
 
 			//init the system folders so that are created with a admin
