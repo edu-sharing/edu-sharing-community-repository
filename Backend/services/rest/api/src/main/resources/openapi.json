@@ -4810,23 +4810,6 @@
         },
         "type": "object"
       },
-      "RepositoryVersionInfo": {
-        "properties": {
-          "build": {
-            "$ref": "#/components/schemas/VersionBuild"
-          },
-          "git": {
-            "$ref": "#/components/schemas/VersionGit"
-          },
-          "maven": {
-            "$ref": "#/components/schemas/VersionMaven"
-          },
-          "version": {
-            "$ref": "#/components/schemas/Version"
-          }
-        },
-        "type": "object"
-      },
       "RestoreResult": {
         "properties": {
           "archiveNodeId": {
@@ -6593,95 +6576,6 @@
               "type": "string"
             },
             "type": "object"
-          }
-        },
-        "type": "object"
-      },
-      "Version": {
-        "properties": {
-          "build": {
-            "type": "string"
-          },
-          "full": {
-            "type": "string"
-          },
-          "major": {
-            "type": "string"
-          },
-          "minor": {
-            "type": "string"
-          },
-          "patch": {
-            "type": "string"
-          },
-          "qualifier": {
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "VersionBuild": {
-        "properties": {
-          "timestamp": {
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "VersionGit": {
-        "properties": {
-          "branch": {
-            "type": "string"
-          },
-          "commit": {
-            "$ref": "#/components/schemas/VersionGitCommit"
-          }
-        },
-        "type": "object"
-      },
-      "VersionGitCommit": {
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "timestamp": {
-            "$ref": "#/components/schemas/VersionTimestamp"
-          }
-        },
-        "type": "object"
-      },
-      "VersionMaven": {
-        "properties": {
-          "bom": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "type": "object"
-          },
-          "project": {
-            "$ref": "#/components/schemas/VersionProject"
-          }
-        },
-        "type": "object"
-      },
-      "VersionProject": {
-        "properties": {
-          "artifactId": {
-            "type": "string"
-          },
-          "groupId": {
-            "type": "string"
-          },
-          "version": {
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "VersionTimestamp": {
-        "properties": {
-          "datetime": {
-            "type": "string"
           }
         },
         "type": "object"
@@ -11731,7 +11625,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RepositoryVersionInfo"
+                  "type": "string"
                 }
               }
             },
