@@ -102,13 +102,14 @@ public class AdminApi {
 		}
 	}
 
+
 	@GET
 	@Path("/version")
 
 	@Operation(summary = "get detailed version information", description="detailed information about the running system version")
 
 	@ApiResponses(value = {
-			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = RepositoryVersionInfo.class))),
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Map.class))),
 			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -117,7 +118,7 @@ public class AdminApi {
 	})
 	public Response getVersion(@Context HttpServletRequest req){
 		try {
-			RepositoryVersionInfo result = AdminServiceFactory.getInstance().getVersion();
+			Map<String, RepositoryVersionInfo> result = AdminServiceFactory.getInstance().getVersions();
 			return Response.ok().entity(result).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
