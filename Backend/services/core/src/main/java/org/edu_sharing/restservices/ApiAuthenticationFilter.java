@@ -220,7 +220,7 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
             httpResp.flushBuffer();
             return;
         }
-        if (pathInfo != null && (pathInfo.equals("/openapi.json")) {
+        if (pathInfo != null && pathInfo.equals("/openapi.json")) {
             String openApiAccess = accessConfig.getString("openapi");
             if (openApiAccess.equalsIgnoreCase("admin") && !AuthorityServiceHelper.isAdmin() || openApiAccess.equalsIgnoreCase("disabled")) {
                 httpResp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
