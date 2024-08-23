@@ -319,15 +319,7 @@ public interface MCAlfrescoClient {
 	 */
 	public void moveNode(String newParentId, String childAssocType, String nodeId) throws Exception;
 	
-	
 
-	/**
-	 * 
-	 * @param nodeId: the nodeId from which to start to travers through parents until a homefolder of an edugroup is found
-	 * @return
-	 */
-	public Group getEduGroupContextOfNode(String nodeId);
-	
 	
 	/**
 	 * create a shadow user in the remote repository if he is not already there

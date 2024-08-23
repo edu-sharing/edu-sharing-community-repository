@@ -114,7 +114,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     public static BoolQuery getFilesSharedToMeQuery(MetadataQueries queries, SharedToMeType type) {
         String username = AuthenticationUtil.getFullyAuthenticatedUser();
         Set<String> memberships = getAllMemberships(username);
-        String basequery = queries.findQuery("sharedToMe").getBasequery().get(null);
+        String basequery = queries.findQuery("sharedToMe").getPrimaryBasequery();
 
         BoolQuery.Builder builder = QueryBuilders.bool()
                 .must(b -> b.bool(b2 -> b2.mustNot(
@@ -150,7 +150,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     public static BoolQuery getFilesSharedByMeQuery(MetadataQueries queries) {
         String username = AuthenticationUtil.getFullyAuthenticatedUser();
-        String basequery = queries.findQuery("sharedByMe").getBasequery().get(null);
+        String basequery = queries.findQuery("sharedByMe").getPrimaryBasequery();
         BoolQuery.Builder builder = QueryBuilders.bool()
                 .must(b -> b.bool(b2 -> b2.must(
                         b3 -> b3.match(m -> m.field("properties.ccm:ph_users.keyword").query(username))
@@ -1454,7 +1454,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         builder.mustNot(b -> b.match(m -> m.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))));
         builder.must(getContentTypeQuery(contentType));
         MetadataQueries queries = MetadataHelper.getLocalDefaultMetadataset().getQueries(MetadataReader.QUERY_SYNTAX_DSL);
-        String basequery = queries.findQuery("workflowReceive").getBasequery().get(null);
+        String basequery = queries.findQuery("workflowReceive").getPrimaryBasequery();
         if(StringUtils.isNotBlank(basequery)) {
             builder.must(b -> b.wrapper(new ReadableWrapperQueryBuilder(basequery).build()));
         }

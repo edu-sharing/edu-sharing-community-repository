@@ -477,6 +477,8 @@ public class CCConstants {
 
 	public final static String CCM_ASPECT_EDUGROUP = "{http://www.campuscontent.de/model/1.0}edugroup";
 
+	public final static String CCM_ASPECT_EDUGROUP_FOLDER = "{http://www.campuscontent.de/model/1.0}edugroup_folder";
+
 	public final static String CCM_ASPECT_MAP_REF = "{http://www.campuscontent.de/model/1.0}map_ref";
 
 	public final static String CCM_ASPECT_GROUPEXTENSION = "{http://www.campuscontent.de/model/1.0}groupExtension";
@@ -519,6 +521,8 @@ public class CCConstants {
     public final static String CCM_PROP_SERVICE_NODE_DATA = "{http://www.campuscontent.de/model/1.0}service_node_data";
 
     public final static String CCM_PROP_EDUGROUP_EDU_HOMEDIR = "{http://www.campuscontent.de/model/1.0}edu_homedir";
+
+	public final static String CCM_PROP_EDUGROUP_FOLDER_ORGANISATION = "{http://www.campuscontent.de/model/1.0}edu_organisation";
 
 	public final static String CCM_ASPECT_SHARES = "{http://www.campuscontent.de/model/1.0}shares";
 

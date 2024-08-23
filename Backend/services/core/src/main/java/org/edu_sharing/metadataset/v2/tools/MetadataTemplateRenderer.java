@@ -86,8 +86,7 @@ public class MetadataTemplateRenderer {
 		Map<String, String[]> propsConverted = new HashMap<>();
 		for(String key : props.keySet()){
 			String keyLocal= CCConstants.getValidLocalName(key);
-
-			if(props.get(key) == null) continue;
+			if(keyLocal == null || props.get(key) == null) continue;
 
 			String[] values=ValueTool.getMultivalue(props.get(key).toString());
 			propsConverted.put(keyLocal, values);
@@ -448,7 +447,6 @@ public class MetadataTemplateRenderer {
 					+" "+PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_DELETE));
 			if(
 					ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_MATERIAL_FEEDBACK) &&
-							!GuestCagePolicy.getGuestUsers().contains(userName) &&
 							PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeRef.getId(),CCConstants.PERMISSION_FEEDBACK) &&
 							!PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeRef.getId(),CCConstants.PERMISSION_DELETE)
 			){

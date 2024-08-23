@@ -9,16 +9,19 @@ import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.json.JsonData;
 import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.edu_sharing.metadataset.v2.MetadataSet;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
+import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceElastic;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.spring.ApplicationContextFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class CollectionServiceElastic extends CollectionServiceImpl {
 
@@ -118,6 +121,33 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
     @Override
     public void proposeForCollection(String collectionId, String originalNodeId, String sourceRepositoryId) throws DuplicateNodeException, Throwable {
         super.proposeForCollection(collectionId, originalNodeId, sourceRepositoryId);
+    }
+
+    @Override
+    protected SearchResultNodeRef searchChildren(String scope, SortDefinition sortDefinition, int skipCount, int maxItems) throws Throwable {
+
+        MetadataSet mds = MetadataHelper.getMetadataset(appInfo, CCConstants.metadatasetdefault_id);
+
+        String queryId = getQueryForScope(scope);
+        /**
+         * @TODO owner + inherit off -> node will be found even if search is done in edu-group context
+         */
+
+        List<org.edu_sharing.service.model.NodeRef> returnVal = new ArrayList<>();
+        SearchToken token = new SearchToken();
+        token.setContentType(SearchService.ContentType.COLLECTIONS);
+        token.setSortDefinition(sortDefinition);
+        token.setFrom(skipCount);
+        token.setMaxResult(maxItems);
+        SearchResultNodeRef nodeRefs = SearchServiceFactory.getLocalService().search(mds, queryId, Collections.emptyMap(), token);
+        for (org.edu_sharing.service.model.NodeRef nodeRef : nodeRefs.getData()) {
+            if (isSubCollection(nodeRef)) {
+                continue;
+            }
+            returnVal.add(nodeRef);
+        }
+        nodeRefs.setData(returnVal);
+        return nodeRefs;
     }
 }
 

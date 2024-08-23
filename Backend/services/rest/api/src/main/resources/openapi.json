@@ -4899,23 +4899,6 @@
         },
         "type": "object"
       },
-      "RepositoryVersionInfo": {
-        "properties": {
-          "build": {
-            "$ref": "#/components/schemas/VersionBuild"
-          },
-          "git": {
-            "$ref": "#/components/schemas/VersionGit"
-          },
-          "maven": {
-            "$ref": "#/components/schemas/VersionMaven"
-          },
-          "version": {
-            "$ref": "#/components/schemas/Version"
-          }
-        },
-        "type": "object"
-      },
       "RestoreResult": {
         "properties": {
           "archiveNodeId": {
@@ -6759,95 +6742,6 @@
         },
         "type": "object"
       },
-      "Version": {
-        "properties": {
-          "build": {
-            "type": "string"
-          },
-          "full": {
-            "type": "string"
-          },
-          "major": {
-            "type": "string"
-          },
-          "minor": {
-            "type": "string"
-          },
-          "patch": {
-            "type": "string"
-          },
-          "qualifier": {
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "VersionBuild": {
-        "properties": {
-          "timestamp": {
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "VersionGit": {
-        "properties": {
-          "branch": {
-            "type": "string"
-          },
-          "commit": {
-            "$ref": "#/components/schemas/VersionGitCommit"
-          }
-        },
-        "type": "object"
-      },
-      "VersionGitCommit": {
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "timestamp": {
-            "$ref": "#/components/schemas/VersionTimestamp"
-          }
-        },
-        "type": "object"
-      },
-      "VersionMaven": {
-        "properties": {
-          "bom": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "type": "object"
-          },
-          "project": {
-            "$ref": "#/components/schemas/VersionProject"
-          }
-        },
-        "type": "object"
-      },
-      "VersionProject": {
-        "properties": {
-          "artifactId": {
-            "type": "string"
-          },
-          "groupId": {
-            "type": "string"
-          },
-          "version": {
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "VersionTimestamp": {
-        "properties": {
-          "datetime": {
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
       "WebsiteInformation": {
         "properties": {
           "description": {
@@ -8019,85 +7913,6 @@
           }
         },
         "summary": "clear cache",
-        "tags": [
-          "ADMIN v1"
-        ]
-      }
-    },
-    "/admin/v1/cache/refreshEduGroupCache": {
-      "post": {
-        "description": "Refresh the Edu Group Cache.",
-        "operationId": "refreshEduGroupCache",
-        "parameters": [
-          {
-            "description": "keep existing",
-            "in": "query",
-            "name": "keepExisting",
-            "schema": {
-              "default": false,
-              "type": "boolean"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "OK."
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Preconditions are not present."
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Authorization failed."
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Session user has insufficient rights to perform this operation."
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Ressources are not found."
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Fatal error occured."
-          }
-        },
-        "summary": "Refresh the Edu Group Cache",
         "tags": [
           "ADMIN v1"
         ]
@@ -11893,7 +11708,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RepositoryVersionInfo"
+                  "type": "string"
                 }
               }
             },
@@ -18104,6 +17919,24 @@
             "name": "password",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "description": "returnResult, if true the created person object will be returned.",
+            "in": "query",
+            "name": "returnResult",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "setupHomeDir, if true the created persons homedir will be setup with the default folders.",
+            "in": "query",
+            "name": "setupHomeDir",
+            "schema": {
+              "default": true,
+              "type": "boolean"
             }
           }
         ],

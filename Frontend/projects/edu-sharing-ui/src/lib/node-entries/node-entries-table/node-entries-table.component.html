@@ -157,10 +157,6 @@
             attribute: column
           })
         "
-        esCheckTextOverflow
-        #text="esCheckTextOverflow"
-        [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
-        matTooltipTouchGestures="off"
       ></es-list-base>
       <ng-container *ngIf="first">
         <div class="childobjects" *ngIf="node.properties?.['virtual:childobjectcount'] > 0">

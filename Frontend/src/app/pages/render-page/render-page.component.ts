@@ -776,7 +776,7 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
             params.mds = this.getMdsId();
             params.sidenav = true;
             params.repo = this.repository;
-            params.parameters = JSON.stringify(data);
+            params.filters = JSON.stringify(data);
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], { queryParams: params });
         });
     }

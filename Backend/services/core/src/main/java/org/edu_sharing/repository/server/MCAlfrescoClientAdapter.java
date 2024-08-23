@@ -162,11 +162,6 @@ public class MCAlfrescoClientAdapter extends MCAlfrescoBaseClient {
 	}
 
 	@Override
-	public Group getEduGroupContextOfNode(String nodeId) {
-		return null;
-	}
-
-	@Override
 	public Map<String, String> checkAndCreateShadowUser(String username, String email, String repId)
 			throws Exception {
 		return null;

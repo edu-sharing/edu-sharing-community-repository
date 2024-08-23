@@ -67,17 +67,7 @@ public class NodeFrontpage {
             sortDefinition.addSortDefinitionEntry(
                     new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION),true),0);
 
-            Collection<org.alfresco.service.cmr.repository.NodeRef> alfNodeRef = CollectionServiceFactory.getLocalService().getChildren(config.collection, null,sortDefinition, Collections.singletonList("files"));
-            Collection<NodeRef> result = new ArrayList<>();
-            alfNodeRef.stream().forEach((n)->{
-                NodeRef nodeRef = new NodeRefImpl();
-                nodeRef.setNodeId(n.getId());
-                nodeRef.setStoreId(n.getStoreRef().getIdentifier());
-                nodeRef.setStoreProtocol(n.getStoreRef().getProtocol());
-                result.add(nodeRef);
-            });
-
-            return result;
+            return CollectionServiceFactory.getLocalService().getChildren(config.collection, null,sortDefinition, Collections.singletonList("files"));
         }
 
         BoolQuery.Builder query = new BoolQuery.Builder()

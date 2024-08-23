@@ -41,7 +41,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
         BoolQuery.Builder result = new BoolQuery.Builder();
         if(asFilter == null || (asFilter == query.getBasequeryAsFilter())) {
-            String baseQuery = replaceCommonQueryVariables(query.getBasequery().get(null));
+            String baseQuery = replaceCommonQueryVariables(query.getPrimaryBasequery());
             String baseQueryConditional = replaceCommonQueryVariables(query.findBasequery(parameters == null ? null : parameters.keySet()));
 
             if(Objects.equals(baseQuery,baseQueryConditional)) {

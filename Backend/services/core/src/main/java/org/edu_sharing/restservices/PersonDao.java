@@ -97,7 +97,7 @@ public class PersonDao {
 		}
 		return true;
 	}
-	public static PersonDao createPerson(RepositoryDao repoDao, String userName,String password, UserProfileEdit profile) throws DAOException {
+	public static PersonDao createPerson(RepositoryDao repoDao, String userName,String password, UserProfileEdit profile, boolean returnResult) throws DAOException {
 
 		try {
 
@@ -114,10 +114,13 @@ public class PersonDao {
 				userInfo.put(CCConstants.PROP_USERNAME, userName);
 
 				AuthorityServiceFactory.getAuthorityService(repoDao.getId()).createOrUpdateUser(userInfo);
-				PersonDao result=new PersonDao(repoDao, userName);
-				if(password!=null)
-					result.changePassword(null,password);
-				return result;
+				if(returnResult){
+					PersonDao result=new PersonDao(repoDao, userName);
+					if(password!=null)
+						result.changePassword(null,password);
+					return result;
+				}else return null;
+
 			}
 
 		} catch (Exception e) {
