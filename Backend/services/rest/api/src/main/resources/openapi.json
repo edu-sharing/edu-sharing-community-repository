@@ -17920,6 +17920,24 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "description": "returnResult, if true the created person object will be returned.",
+            "in": "query",
+            "name": "returnResult",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "setupHomeDir, if true the created persons homedir will be setup with the default folders.",
+            "in": "query",
+            "name": "setupHomeDir",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
           }
         ],
         "requestBody": {
