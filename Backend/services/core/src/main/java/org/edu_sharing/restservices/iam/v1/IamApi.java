@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.policy.OnUpdatePersonPropertiesPolicy;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -434,12 +435,24 @@ public class IamApi  {
     		@Parameter(description = "username",required=true) @PathParam("person") String person,
     	    @Parameter(description = "profile" ,required=true ) UserProfileEdit profile,
     	    @Parameter(description = "Password, leave empty if you don't want to set any" ,required=false )@QueryParam("password") String password,
+			@Parameter(description = "returnResult, if true the created person object will be returned.", required=false ,schema = @Schema(defaultValue="true") ) @QueryParam("returnResult") boolean returnResult,
+			@Parameter(description = "setupHomeDir, if true the created persons homedir will be setup with the default folders.", required=false ,schema = @Schema(defaultValue="true") ) @QueryParam("setupHomeDir") boolean setupHomeDir,
     		@Context HttpServletRequest req) {
 
     	try {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	User result = PersonDao.createPerson(repoDao, person,password, profile).asPerson();
+			if(!setupHomeDir){
+				OnUpdatePersonPropertiesPolicy.constructPersonFolders.set(false);
+			}
+			PersonDao personDao = PersonDao.createPerson(repoDao, person, password, profile,returnResult);
+			User result;
+			if(personDao == null){
+				result = new User();
+				result.setUserName(person);
+			}else{
+				result = personDao.asPerson();
+			}
 	    	
 	    	return Response.status(Response.Status.OK).entity(result).build();
 	    	
@@ -462,7 +475,9 @@ public class IamApi  {
     		
     		logger.error(t.getMessage(), t);
     		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
-    	}
+    	}finally {
+			OnUpdatePersonPropertiesPolicy.constructPersonFolders.set(null);
+		}
     }
 
     @PUT
