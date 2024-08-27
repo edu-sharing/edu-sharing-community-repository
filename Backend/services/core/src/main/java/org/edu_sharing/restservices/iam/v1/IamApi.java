@@ -435,8 +435,8 @@ public class IamApi  {
     		@Parameter(description = "username",required=true) @PathParam("person") String person,
     	    @Parameter(description = "profile" ,required=true ) UserProfileEdit profile,
     	    @Parameter(description = "Password, leave empty if you don't want to set any" ,required=false )@QueryParam("password") String password,
-			@Parameter(description = "returnResult, if true the created person object will be returned.", required=false ,schema = @Schema(defaultValue="true") ) @QueryParam("returnResult") @DefaultValue("true") boolean returnResult,
-			@Parameter(description = "setupHomeDir, if true the created persons homedir will be setup with the default folders.", required=false ,schema = @Schema(defaultValue="true") ) @QueryParam("setupHomeDir") @DefaultValue("true") boolean setupHomeDir,
+			@Parameter(description = "returnResult, if true the created person object will be returned.", required=false) @QueryParam("returnResult") @DefaultValue("true") boolean returnResult,
+			@Parameter(description = "setupHomeDir, if true the created persons homedir will be setup with the default folders.", required=false) @QueryParam("setupHomeDir") @DefaultValue("true") boolean setupHomeDir,
     		@Context HttpServletRequest req) {
 
     	try {
