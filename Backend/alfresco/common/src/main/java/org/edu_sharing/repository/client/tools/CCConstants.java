@@ -2243,6 +2243,9 @@ public class CCConstants {
 	public static final String VERSION_COMMENT_BULK_UPDATE_RESYNC = "BULK_UPDATE_RESYNC";
 	public static final String VERSION_COMMENT_REMOTE_OBJECT_INIT = "REMOTE_OBJECT_INIT";
 
+	public static final String ELASTICSEARCH_SYNONYMSET_PREFIX = "es-synonym-set";
+	public static final String ELASTICSEARCH_ANALYZER_PREFIX = "synonyms";
+
 	/**
 	 * Methos that set all the Properties for ProfileSettings
 	 * @return (List) list of all properties we want to be in ProfileSettings
