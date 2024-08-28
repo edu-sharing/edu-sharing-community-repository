@@ -120,8 +120,10 @@ public class RenderingServiceImpl implements RenderingService{
 			return new RenderingDetails(getDetails(renderingServiceUrl, data), data);
 		}catch(Throwable t) {
 			logger.warn(t.getMessage(),t);
-			return new RenderingDetails(RenderingErrorServlet.errorToHTML(null,
-					new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,t.getMessage(),RenderingException.I18N.unknown,t)), null);
+			RenderingException exception = new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t.getMessage(), RenderingException.I18N.unknown, t);
+			RenderingDetails details = new RenderingDetails(RenderingErrorServlet.errorToHTML(null, exception), null);
+			details.setException(exception);
+			return details;
 			/*
 			String repository=VersionService.getVersionNoException(VersionService.Type.REPOSITORY);
 			String rs=VersionService.getVersionNoException(VersionService.Type.RENDERSERVICE);
