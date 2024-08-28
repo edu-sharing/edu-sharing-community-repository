@@ -65,7 +65,7 @@ public class SecurityHeadersFilter implements Filter {
         Map<String, String> headerList = new java.util.HashMap<>(Map.of("X-XSS-Protection", headers.getString("X-XSS-Protection"),
                 "X-Frame-Options", headers.getString("X-Frame-Options"),
                 "Content-Security-Policy", joined.toString()));
-        for(String entry: List.of("X-Content-Type-Options", "Referrer-Policy")) {
+        for(String entry: List.of("Referrer-Policy")) {
             if (headers.hasPath(entry) && headers.getString(entry) != null) {
                 headerList.put(entry, headers.getString(entry));
             }
