@@ -1,5 +1,6 @@
 package org.edu_sharing.service.permission;
 
+import com.google.gson.Gson;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.search.impl.solr.SolrJSONResultSet;
@@ -53,6 +54,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;

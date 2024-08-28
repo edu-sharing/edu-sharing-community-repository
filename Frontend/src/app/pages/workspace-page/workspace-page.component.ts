@@ -70,7 +70,6 @@ import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcru
 import { WorkspaceExplorerComponent } from './explorer/explorer.component';
 import { WorkspaceTreeComponent } from './tree/tree.component';
 import { canDragDrop, canDropOnNode } from './workspace-utils';
-import { RecycleMainComponent } from '../node-list/recycle/recycle.component';
 import { WorkspaceService } from './workspace.service';
 import { ThemeService } from '../../services/theme.service';
 import { RecycleMainComponent } from './recycle/recycle.component';
