@@ -880,6 +880,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		 */
 		boolean hasToolPermission = toolPermission
 				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH);
+		boolean hasFuzzyToolPermission = toolPermission
+				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
+
 		if (globalContext) {
 
 			if (!hasToolPermission) {
@@ -896,7 +899,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			 * nothing
 			 */
 			if (eduGroupAuthorityNames.size() == 0) {
-				if (!hasToolPermission) {
+				if (!hasToolPermission || !hasFuzzyToolPermission) {
 					return null;
 				}
 				return getFindUsersSearchString(query, searchFields, true);
@@ -1050,6 +1053,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		}
 		boolean hasToolPermission = skipTpCheck || toolPermission
 				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH);
+		boolean hasFuzzyToolPermission = skipTpCheck || toolPermission
+				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
 
 		if (globalContext) {
 			if (!hasToolPermission) {
@@ -1065,7 +1070,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			 * nothing
 			 */
 			if (eduGroupAuthorityNames.size() == 0) {
-				if (!hasToolPermission) {
+				if (!hasToolPermission || !hasFuzzyToolPermission) {
 					return null;
 				}
 			}
