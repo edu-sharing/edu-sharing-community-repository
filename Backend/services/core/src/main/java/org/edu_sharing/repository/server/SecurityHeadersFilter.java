@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 
 public class SecurityHeadersFilter implements Filter {
@@ -61,9 +62,15 @@ public class SecurityHeadersFilter implements Filter {
                         e.getValue().unwrapped().toString().replace("{{ngCspNonce}}", ngCspNonceVal)
                 ).append("; ")
         );
-        return Map.of("X-XSS-Protection",headers.getString("X-XSS-Protection"),
-                "X-Frame-Options",headers.getString("X-Frame-Options"),
-                "Content-Security-Policy",joined.toString());
+        Map<String, String> headerList = new java.util.HashMap<>(Map.of("X-XSS-Protection", headers.getString("X-XSS-Protection"),
+                "X-Frame-Options", headers.getString("X-Frame-Options"),
+                "Content-Security-Policy", joined.toString()));
+        for(String entry: List.of("Referrer-Policy")) {
+            if (headers.hasPath(entry) && headers.getString(entry) != null) {
+                headerList.put(entry, headers.getString(entry));
+            }
+        }
+        return headerList;
     }
 
     @Override

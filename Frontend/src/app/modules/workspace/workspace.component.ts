@@ -38,8 +38,6 @@ import {
     RestConnectorsService,
     RestConstants,
     RestHelper,
-    RestIamService,
-    RestMdsService,
     RestNodeService,
     RestToolService,
     SessionStorageService,
@@ -62,8 +60,8 @@ import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcru
 import { WorkspaceExplorerComponent } from './explorer/explorer.component';
 import { WorkspaceTreeComponent } from './tree/tree.component';
 import { canDragDrop, canDropOnNode } from './workspace-utils';
-import { UserService } from 'ngx-edu-sharing-api';
-import { mapVCard } from '../../core-module/rest/services/rest-iam.service';
+import { HOME_REPOSITORY, MdsDefinition, MdsService, UserService } from 'ngx-edu-sharing-api';
+import { mapVCard, RestIamService } from '../../core-module/rest/services/rest-iam.service';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { RecycleMainComponent } from '../node-list/recycle/recycle.component';
 
@@ -185,7 +183,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         private toolService: RestToolService,
         private session: SessionStorageService,
         private iam: RestIamService,
-        private mds: RestMdsService,
+        private mds: MdsService,
         private node: RestNodeService,
         private ui: UIService,
         private event: FrameEventsService,
@@ -746,10 +744,13 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             this.node.getNodeMetadata(id).subscribe(
                 (data: NodeWrapper) => {
                     this.mds
-                        .getSet(
-                            data.node.metadataset ? data.node.metadataset : RestConstants.DEFAULT,
-                        )
-                        .subscribe((mds: any) => {
+                        .getMetadataSet({
+                            repository: HOME_REPOSITORY,
+                            metadataSet: data.node.metadataset
+                                ? data.node.metadataset
+                                : RestConstants.DEFAULT,
+                        })
+                        .subscribe((mds: MdsDefinition) => {
                             if (mds.create) {
                                 this.allowBinary = !mds.create.onlyMetadata;
                                 if (!this.allowBinary) {
