@@ -549,6 +549,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
 
     private async showNodeInCurrentFolder(id: string) {
         // TODO: Consider moving this to `NodeDataSource`.
+        await UIHelper.waitForComponent(this.ngZone, this, 'explorer').pipe(first()).toPromise();
         const visibleNodes = await this.explorer.dataSource
             .connect()
             .pipe(first((data) => data?.length > 1))
