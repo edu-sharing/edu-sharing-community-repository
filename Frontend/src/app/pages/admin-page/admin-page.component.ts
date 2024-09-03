@@ -56,7 +56,7 @@ import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { AuthoritySearchMode } from '../../shared/components/authority-search-input/authority-search-input.component';
 import { WorkspaceExplorerComponent } from '../workspace-page/explorer/explorer.component';
-import {delay, filter, repeat, switchMap, takeUntil, tap} from "rxjs/operators";
+import { delay, filter, repeat, switchMap, takeUntil, tap } from 'rxjs/operators';
 
 type LuceneData = {
     mode: 'NODEREF' | 'SOLR' | 'ELASTIC';
@@ -1402,12 +1402,15 @@ export class AdminPageComponent implements OnInit, OnDestroy {
                 this.availableJobs = jobs;
                 this.prepareJobClasses();
             });
-            this.admin.getJobs().pipe(
-                tap((jobs) => this.reloadJobStatus(jobs)),
-                delay(5000),
-                repeat(),
-                takeUntil(this.destroyed$),
-            ).subscribe((_) => {})
+            this.admin
+                .getJobs()
+                .pipe(
+                    tap((jobs) => this.reloadJobStatus(jobs)),
+                    delay(5000),
+                    repeat(),
+                    takeUntil(this.destroyed$),
+                )
+                .subscribe((_) => {});
             this.admin.getOAIClasses().subscribe((classes: string[]) => {
                 this.oaiClasses = classes;
                 this.storage.get('admin_oai').subscribe((data: any) => {
