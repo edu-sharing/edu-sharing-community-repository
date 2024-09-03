@@ -503,6 +503,7 @@ export class DialogsService {
             title: 'MDS.TITLE',
             ...(await this.cardDialogUtils.configForNodes(data.nodes)),
             minWidth: 600,
+            maxWidth: 900,
             minHeight: 700,
             contentPadding: 0,
             data,
@@ -519,6 +520,7 @@ export class DialogsService {
         return this.cardDialog.open(MdsEditorDialogComponent, {
             title: 'MDS.TITLE',
             minWidth: 600,
+            maxWidth: 900,
             minHeight: 700,
             contentPadding: 0,
             data,

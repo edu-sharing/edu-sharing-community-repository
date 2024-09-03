@@ -1,11 +1,6 @@
 package org.edu_sharing.service.permission;
 
-import java.io.Serializable;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import jakarta.servlet.ServletContext;
-
+import com.google.gson.Gson;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.search.impl.solr.SolrJSONResultSet;
@@ -21,33 +16,28 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.security.*;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.security.*;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
-import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.service.EduSharingCustomPermissionService;
 import org.edu_sharing.alfresco.service.OrganisationService;
+import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
-import org.edu_sharing.repository.client.rpc.ACE;
-import org.edu_sharing.repository.client.rpc.ACL;
-import org.edu_sharing.repository.client.rpc.Authority;
-import org.edu_sharing.repository.client.rpc.Group;
-import org.edu_sharing.repository.client.rpc.Notify;
-import org.edu_sharing.repository.client.rpc.Result;
-import org.edu_sharing.repository.client.rpc.User;
+import org.edu_sharing.repository.client.rpc.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.alfresco.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.tools.*;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.PropertiesHelper;
+import org.edu_sharing.repository.server.tools.StringTool;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
-import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
@@ -55,25 +45,26 @@ import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
 import org.edu_sharing.service.oai.OAIExporterService;
-import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
-import org.springframework.beans.BeanInstantiationException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Service;
 
-import com.google.gson.Gson;
+import java.io.Serializable;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
+@Service(value = "permissionServiceImpl")
 public class PermissionServiceImpl implements org.edu_sharing.service.permission.PermissionService {
-
 
 	public static final String NODE_PUBLISHED = "NODE_PUBLISHED";
 	// the maximal number of "notify" entries in the PH_HISTORY field that are serialized
 	private static final int MAX_NOTIFY_HISTORY_LENGTH = 100;
-	private EduSharingCustomPermissionService customPermissionService;
+	private EduSharingCustomPermissionService customPermissionService = null;
 	private ShareService shareService = null;
 	private NodeService nodeService = null;
 	private PersonService personService;
@@ -90,30 +81,28 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	Logger logger = Logger.getLogger(PermissionServiceImpl.class);
 	private PermissionService permissionService;
 
-	public PermissionServiceImpl(ToolPermissionService toolPermission, org.edu_sharing.service.nodeservice.NodeService eduNodeService) {
+	public PermissionServiceImpl(
+			ToolPermissionService toolPermissionService,
+			org.edu_sharing.service.nodeservice.NodeService nodeService,
+		    Optional<EduSharingCustomPermissionService> customPermissionService
+	) {
 		appInfo = ApplicationInfoList.getHomeRepository();
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext
 				.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
-		this.eduNodeService=eduNodeService;
-		this.toolPermission=toolPermission;
-		nodeService = serviceRegistry.getNodeService();
+		this.eduNodeService=nodeService;
+		this.toolPermission=toolPermissionService;
+		this.customPermissionService=customPermissionService.orElse(null);
+		this.nodeService = serviceRegistry.getNodeService();
 		shareService = new ShareServiceImpl(this);
 		permissionService = serviceRegistry.getPermissionService();
-		if(applicationContext.containsBean("customPermissionService")) {
-			customPermissionService = (EduSharingCustomPermissionService) applicationContext.getBean("customPermissionService");
-		}
 		personService = serviceRegistry.getPersonService();
-	}
-	
-	public PermissionServiceImpl(boolean test) {
-		
 	}
 
 	/**
 	 * @TODO Thread safe / blocking for multiple users
-	 * 
+	 *
 	 * @param nodeId
 	 * @param aces
 	 * @param inheritPermissions
@@ -122,7 +111,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	 * @param sendCopy
 	 */
 	public void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermissions, String mailText, Boolean sendMail,
-			Boolean sendCopy) throws Throwable {
+							   Boolean sendCopy) throws Throwable {
 
 		NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 		ACL currentACL = repoClient.getPermissions(nodeId);
@@ -588,7 +577,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	/**
 	 * true if this node is in a shared context ("My shared files"), false if it's
 	 * in users home
-	 * 
+	 *
 	 * @param nodeId
 	 * @return
 	 * @throws Throwable
@@ -826,35 +815,35 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		StringBuffer subQuery=new StringBuffer();
 
 		if (fuzzyUserSearch) {
-				if (query != null) {
-					for (String token : StringTool.getPhrases(query)) {
+			if (query != null) {
+				for (String token : StringTool.getPhrases(query)) {
 
-						boolean isPhrase = token.startsWith("\"") && token.endsWith("\"");
+					boolean isPhrase = token.startsWith("\"") && token.endsWith("\"");
 
-						if (isPhrase) {
+					if (isPhrase) {
 
-							token = (token.length() > 2) ? token.substring(1, token.length() - 1) : "";
+						token = (token.length() > 2) ? token.substring(1, token.length() - 1) : "";
 
-						} else {
+					} else {
 
-							if (!(token.startsWith("*") || token.startsWith("?"))) {
-								token = "*" + token;
-							}
-
-							if (!(token.endsWith("*") || token.endsWith("?"))) {
-								token = token + "*";
-							}
+						if (!(token.startsWith("*") || token.startsWith("?"))) {
+							token = "*" + token;
 						}
-						StringBuffer fieldQuery=new StringBuffer();
-						for(Map.Entry<String, Double> field : searchFields.entrySet()) {
-							if(fieldQuery.length()>0) {
-								fieldQuery.append(" OR ");
-							}
-							fieldQuery.append("@cm\\:").append(field.getKey()).append(":").append("\"").append(token).append("\"^").append(field.getValue());
+
+						if (!(token.endsWith("*") || token.endsWith("?"))) {
+							token = token + "*";
 						}
-						subQuery.append(subQuery.length() > 0 ? " AND " : "").append("(").append(fieldQuery).append(")");
 					}
+					StringBuffer fieldQuery=new StringBuffer();
+					for(Map.Entry<String, Double> field : searchFields.entrySet()) {
+						if(fieldQuery.length()>0) {
+							fieldQuery.append(" OR ");
+						}
+						fieldQuery.append("@cm\\:").append(field.getKey()).append(":").append("\"").append(token).append("\"^").append(field.getValue());
+					}
+					subQuery.append(subQuery.length() > 0 ? " AND " : "").append("(").append(fieldQuery).append(")");
 				}
+			}
 		} else {
 
 			// when no fuzzy search remove "*" from searchstring and remove all params
@@ -891,6 +880,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		 */
 		boolean hasToolPermission = toolPermission
 				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH);
+		boolean hasFuzzyToolPermission = toolPermission
+				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
+
 		if (globalContext) {
 
 			if (!hasToolPermission) {
@@ -900,14 +892,14 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 		}else{
 
-			List<String> eduGroupAuthorityNames = organisationService.getMyOrganisations(true);
+			List<String> eduGroupAuthorityNames = getOrganizationsOfUser();
 
 			/**
 			 * if there are no edugroups you you are not allowed to search global return
 			 * nothing
 			 */
 			if (eduGroupAuthorityNames.size() == 0) {
-				if (!hasToolPermission) {
+				if (!hasToolPermission || !hasFuzzyToolPermission) {
 					return null;
 				}
 				return getFindUsersSearchString(query, searchFields, true);
@@ -957,6 +949,14 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		return searchQuery;
 	}
 
+	private List<String> getOrganizationsOfUser() {
+		List<String> eduGroupAuthorityNames = organisationService.getMyOrganisations(true);
+		if(customPermissionService != null) {
+			return customPermissionService.getLocalOrganizations(eduGroupAuthorityNames);
+		}
+		return eduGroupAuthorityNames;
+	}
+
 	private void filterGuestAuthority(StringBuffer searchQuery) {
 		for(String guest : GuestCagePolicy.getGuestUsers()){
 			searchQuery.append(" AND NOT @cm\\:userName:\""+ QueryParser.escape(guest)+"\"");
@@ -967,41 +967,41 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext, boolean skipTpCheck) {
 		boolean fuzzyGroupSearch = skipTpCheck || !globalContext || ToolPermissionServiceFactory.getInstance()
 				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
-		
+
 		StringBuffer searchQuery = new StringBuffer("TYPE:cm\\:authorityContainer AND NOT @ccm\\:scopetype:system");
 
 		searchWord = searchWord != null ? searchWord.trim() : "";
-	
+
 		StringBuffer subQuery = new StringBuffer();
-		
+
 		if(fuzzyGroupSearch) {
 			if (("*").equals(searchWord)) {
 				searchWord = "";
 			}
 			if (searchWord.length() > 0) {
-	
-	
+
+
 				for (String token : StringTool.getPhrases(searchWord)) {
-	
+
 					boolean isPhrase = token.startsWith("\"") && token.endsWith("\"");
-	
+
 					if (isPhrase) {
-	
+
 						token = (token.length() > 2) ? token.substring(1, token.length() - 1) : "";
-	
+
 					} else {
-	
+
 						if (!(token.startsWith("*") || token.startsWith("?"))) {
 							token = "*" + token;
 						}
-	
+
 						if (!(token.endsWith("*") || token.endsWith("?"))) {
 							token = token + "*";
 						}
 					}
-	
+
 					if (token.length() > 0) {
-	
+
 						boolean furtherToken = (subQuery.length() > 0);
 						//subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityName:").append("\"")
 						//		.append(token).append("\"").append(" OR @cm\\:authorityDisplayName:").append("\"")
@@ -1010,7 +1010,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 								.append("@cm\\:authorityDisplayName:")
 								.append("\"").append(QueryParser.escape(token)).append("\"").
 								// boost groups so that they'll appear before users
-								append("^10 OR ")
+										append("^10 OR ")
 								.append("@ccm\\:groupEmail:")
 								.append("\"").append(QueryParser.escape(token)).append("\"");
 						// allow global admins to find groups based on authority name (e.g. default system groups)
@@ -1020,9 +1020,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 									.append("\"").append(QueryParser.escape(token)).append("\"");
 						}
 						subQuery.append(")");
-	
+
 					}
-				}	
+				}
 			}
 		}
 		else {
@@ -1053,6 +1053,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		}
 		boolean hasToolPermission = skipTpCheck || toolPermission
 				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH);
+		boolean hasFuzzyToolPermission = skipTpCheck || toolPermission
+				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
 
 		if (globalContext) {
 			if (!hasToolPermission) {
@@ -1061,14 +1063,14 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			addGlobalAuthoritySearchQuery(searchQuery);
 		} else {
 
-			List<String> eduGroupAuthorityNames = organisationService.getMyOrganisations(true);
+			List<String> eduGroupAuthorityNames = getOrganizationsOfUser();
 
 			/**
 			 * if there are no edugroups you you are not allowed to search global return
 			 * nothing
 			 */
 			if (eduGroupAuthorityNames.size() == 0) {
-				if (!hasToolPermission) {
+				if (!hasToolPermission || !hasFuzzyToolPermission) {
 					return null;
 				}
 			}
@@ -1163,7 +1165,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 	@Override
 	public Result<List<Authority>> findAuthorities(String searchWord, boolean globalContext, int from,
-			int nrOfResults) {
+												   int nrOfResults) {
 
 		// fields to search in - not using username
 
@@ -1457,7 +1459,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			 * remove users that are in ph_users but never added an permission.
 			 * i.e. only did "change permission", "remove permission"
 			 */
-		    boolean hasShares = Arrays.stream(shareService.getShares(nodeRef.getId()))
+			boolean hasShares = Arrays.stream(shareService.getShares(nodeRef.getId()))
 					.anyMatch(x->x.getExpiryDate() >= new Date().getTime());
 
 			if(!hasShares) {
@@ -1496,14 +1498,14 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 	@Override
 	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId,
-			String[] permissions) {
+													  String[] permissions) {
 		boolean guest = GuestCagePolicy.getGuestUsers().contains(AuthenticationUtil.getFullyAuthenticatedUser());
 		PermissionService permissionService = serviceRegistry.getPermissionService();
 		HashMap<String, Boolean> result = new HashMap<String, Boolean>();
 		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);
 		if (permissions != null && permissions.length > 0) {
 			for (String permission : permissions) {
-					AccessStatus accessStatus = permissionService.hasPermission(nodeRef, permission);
+				AccessStatus accessStatus = permissionService.hasPermission(nodeRef, permission);
 				// Guest only has read permissions, no modify permissions
 				if(guest && !Arrays.asList(GUEST_PERMISSIONS).contains(permission)){
 					accessStatus=AccessStatus.DENIED;
@@ -1590,5 +1592,5 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public void setToolPermission(ToolPermissionService toolPermission) {
 		this.toolPermission = toolPermission;
 	}
-	
+
 }

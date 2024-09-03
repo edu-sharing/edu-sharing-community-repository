@@ -24,6 +24,7 @@ import { MatChip, MatChipOption, MatChipRow } from '@angular/material/chips';
 import { UIService } from '../../../../../core-module/rest/services/ui.service';
 import { MatButton } from '@angular/material/button';
 import { UIHelper } from '../../../../../core-ui-module/ui-helper';
+import { MdsService } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-mds-editor-widget-tree',
@@ -109,6 +110,8 @@ export class MdsEditorWidgetTreeComponent
             (await this.widget.getInitalValuesAsync()).individualValues,
         );
         this.chipsControl.valueChanges.subscribe((values: DisplayValue[]) => {
+            // temporary hack if you want to apply all
+            // this.setValue(values.map((value) => value.key).concat(MdsService.unfoldTreeChilds(values.map((value) => value.key), this.widget.definition)));
             this.setValue(values.map((value) => value.key));
         });
         this.indeterminateValues$.subscribe((indeterminateValues) =>
