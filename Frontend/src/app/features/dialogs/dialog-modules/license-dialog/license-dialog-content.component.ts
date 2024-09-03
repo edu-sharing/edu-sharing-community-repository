@@ -364,7 +364,7 @@ export class LicenseDialogContentComponent implements OnInit {
     private loadConfig() {
         this.config.get('allowedLicenses').subscribe((data: string[]) => {
             if (!data) {
-                this.licenseMainTypes = ALL_LICENSE_TYPES;
+                this.licenseMainTypes = ALL_LICENSE_TYPES.slice();
                 this.allowedLicenses = null;
             } else {
                 this.licenseMainTypes = [];

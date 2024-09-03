@@ -1150,6 +1150,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         deleteNode.priority = 10;
 
         const unblockNode = new OptionItem('OPTIONS.UNBLOCK_IMPORT', 'sync', async (object) => {
+            const objects = await this.getObjectsAsync(object, data, true);
             const dialogRef = await this.dialogs.openGenericDialog({
                 title: 'WORKSPACE.UNBLOCK_TITLE',
                 message: 'WORKSPACE.UNBLOCK_MESSAGE',
@@ -1157,16 +1158,12 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             });
             dialogRef.afterClosed().subscribe((response) => {
                 if (response === 'OK') {
-                    this.unblockImportedNodes(this.getObjects(object, data));
+                    this.unblockImportedNodes(objects);
                 }
             });
         });
         unblockNode.elementType = [ElementType.NodeBlockedImport];
-        unblockNode.constrains = [
-            Constrain.HomeRepository,
-            Constrain.NoCollectionReference,
-            Constrain.User,
-        ];
+        unblockNode.constrains = [Constrain.HomeRepository, Constrain.User];
         unblockNode.permissions = [RestConstants.PERMISSION_DELETE];
         unblockNode.permissionsMode = HideMode.Hide;
         unblockNode.group = DefaultGroups.Edit;
