@@ -86,6 +86,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         'Comment',
         'Feedback',
         'Deny',
+        'Embed',
     ];
     readonly PERMISSIONS_FORCES = [
         ['Read', ['ConsumerMetadata']],
@@ -97,6 +98,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         ['Comment', ['Consumer']],
         ['Feedback', ['Consumer']],
         ['Rate', ['Consumer']],
+        ['Embed', ['Consumer']],
         ['Write', ['Editor']],
         ['DeleteChildren', ['Delete']],
         ['DeleteNode', ['Delete']],

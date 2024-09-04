@@ -1748,6 +1748,7 @@ public class CCConstants {
 	public final static String PERMISSION_READ_ALL = "ReadAll";
 
 	public final static String PERMISSION_DOWNLOAD_CONTENT = "DownloadContent";
+	public final static String PERMISSION_EMBED = "Embed";
 	public final static String PERMISSION_READ_PREVIEW = "ReadPreview";
 
 	public final static String PERMISSION_COMMENT = "Comment";
