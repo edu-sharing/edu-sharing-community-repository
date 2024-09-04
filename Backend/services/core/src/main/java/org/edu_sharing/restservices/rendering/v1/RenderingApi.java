@@ -11,12 +11,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
+import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tracking.TrackingTool;
-import org.edu_sharing.restservices.ApiService;
-import org.edu_sharing.restservices.RenderingDao;
-import org.edu_sharing.restservices.RepositoryDao;
+import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.rendering.v1.model.RenderingDetailsEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.service.rendering.RenderingDetails;
@@ -109,6 +108,14 @@ public class RenderingApi {
 				return Response.status(Response.Status.OK).entity(entity).build();
 			} else {
 				RenderingDetails detailsSnippet = new RenderingDao(repoDao).getDetails(node, nodeVersion, displayMode, parameters);
+				if(detailsSnippet.getException() != null) {
+					if(detailsSnippet.getException().getNested() != null)  {
+						DAOException mapped = DAOException.mapping(detailsSnippet.getException().getNested());
+						if(mapped instanceof DAOMissingException) {
+							throw mapped;
+						}
+					}
+				}
 				if (repoDao.isHomeRepo()) {
 					NodeTrackingDetails details = (NodeTrackingDetails) org.edu_sharing.alfresco.repository.server.authentication.
 							Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.SESSION_RENDERING_DETAILS);
