@@ -63,7 +63,7 @@ public class RenderingServiceImpl implements RenderingService{
 	ApplicationInfo appInfo;
 
 	Map<String,String> authInfo;
-	
+
 
 	static Logger logger = Logger.getLogger(RenderingServiceImpl.class);
 	private ApplicationInfo setAppId(String appId) {
@@ -117,11 +117,13 @@ public class RenderingServiceImpl implements RenderingService{
 			options.displayMode = displayMode;
 			options.parameters = parameters;
 			RenderingServiceData data = getData(appInfo, nodeId, nodeVersion, AuthenticationUtil.getFullyAuthenticatedUser(), options);
-            return new RenderingDetails(getDetails(renderingServiceUrl, data), data);
+			RenderingDetails details = new RenderingDetails(getDetails(renderingServiceUrl, data));
+			details.setRenderingServiceData(data);
+			return details;
 		}catch(Throwable t) {
 			logger.warn(t.getMessage(),t);
 			RenderingException exception = new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t.getMessage(), RenderingException.I18N.unknown, t);
-			RenderingDetails details = new RenderingDetails(RenderingErrorServlet.errorToHTML(null, exception), null);
+			RenderingDetails details = new RenderingDetails(RenderingErrorServlet.errorToHTML(null, exception));
 			details.setException(exception);
 			return details;
 			/*
