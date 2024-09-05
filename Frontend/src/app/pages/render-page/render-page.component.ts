@@ -410,7 +410,7 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
         );
         download.elementType = OptionsHelperService.DownloadElementTypes;
         // use callback since isEnabled gets ignored
-        download.customEnabledCallback = (nodes) => {
+        download.customEnabledCallback = async (nodes) => {
             return (
                 this._node.downloadUrl != null &&
                 (!this._node.properties[RestConstants.CCM_PROP_IO_WWWURL] ||
@@ -642,7 +642,7 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
     setDownloadUrl(url: string) {
         console.info('url from rendering', url);
         if (this.downloadButton != null) {
-            this.downloadButton.customEnabledCallback = () => url != null;
+            this.downloadButton.customEnabledCallback = async () => url != null;
         }
 
         this.downloadUrl = url;

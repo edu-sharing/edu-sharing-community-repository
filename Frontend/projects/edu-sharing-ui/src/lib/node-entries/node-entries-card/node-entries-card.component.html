@@ -14,8 +14,8 @@
   [style.background-color]="isCollection ? node.collection.color : null"
   [class.dynamic-single-click]="entriesService.singleClickHint === 'dynamic'"
   [class.selected]="entriesService.selection.isSelected(node)"
-  (contextmenu)="openContextmenu($event)"
-  (keydown.ContextMenu)="openContextmenu($event)"
+  (contextmenu)="openContextmenu($event, node)"
+  (keydown.ContextMenu)="openContextmenu($event, node)"
 >
   <div
     *ngIf="templatesService.overlay"

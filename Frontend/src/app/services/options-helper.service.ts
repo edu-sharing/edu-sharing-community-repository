@@ -21,6 +21,7 @@ import {
     TemporaryStorageService,
 } from 'ngx-edu-sharing-ui';
 import {
+    BehaviorSubject,
     forkJoin,
     forkJoin as observableForkJoin,
     fromEvent,
@@ -85,6 +86,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     private subscriptions: Subscription[] = [];
     private queryParams: Params;
     private destroyed = new Subject<void>();
+    enabledCache: { [key in string]: { [key in string]: BehaviorSubject<boolean> } } = {};
 
     constructor(
         private bridge: BridgeService,
@@ -239,10 +241,11 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         }
         if (components.actionbar) {
             components.actionbar.options = this.globalOptions;
+            components.actionbar.invalidate();
         }
     }
 
-    private isOptionEnabled(option: OptionItem, objects: Node[] | any) {
+    private async isOptionEnabled(option: OptionItem, objects: Node[] | any) {
         if (
             option.permissionsMode === HideMode.Disable &&
             option.permissions &&
@@ -256,7 +259,23 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             }
         }
         if (option.customEnabledCallback) {
-            return option.customEnabledCallback(objects);
+            if (!this.enabledCache[option.name]) {
+                this.enabledCache[option.name] = {};
+            }
+            if (this.enabledCache[option.name]?.[objects[0]?.ref?.id] !== undefined) {
+                return await this.enabledCache[option.name][objects[0]?.ref?.id]
+                    .pipe(
+                        filter((f) => f !== null),
+                        first(),
+                    )
+                    .toPromise();
+            }
+            this.enabledCache[option.name][objects[0]?.ref?.id] = new BehaviorSubject<boolean>(
+                null,
+            );
+            const status = await option.customEnabledCallback(objects);
+            this.enabledCache[option.name][objects[0]?.ref?.id].next(status);
+            return status;
         }
         return true;
     }
@@ -344,12 +363,11 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             ),
         );
         options = options.filter((o, i) => showState[i]);
-        options.forEach(
-            (o) =>
-                (o.isEnabled = o.enabledCallback(
-                    target === Target.List && objects && objects[0] ? objects[0] : null,
-                )),
-        );
+        options = options.map((o) => {
+            // disable them because the callback will later decide the state
+            o.isEnabled = o.customEnabledCallback == null;
+            return o;
+        });
         return options;
     }
 
@@ -605,20 +623,21 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         ];
         openOriginalNode.toolpermissions = [RestConstants.TOOLPERMISSION_WORKSPACE];
         openOriginalNode.scopes = [Scope.CollectionsReferences, Scope.Search, Scope.Render];
-        openOriginalNode.customEnabledCallback = (nodes) => {
+        openOriginalNode.customEnabledCallback = async (nodes: Node[]) => {
             if (nodes && nodes.length === 1) {
-                openOriginalNode.customEnabledCallback = null;
-                let nodeId = RestHelper.removeSpacesStoreRef(
-                    nodes[0].properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL][0],
-                );
-                this.nodeService.getNodeMetadata(nodeId).subscribe(
-                    () => {
-                        openOriginalNode.isEnabled = true;
-                    },
-                    () => {
-                        openOriginalNode.isEnabled = false;
-                    },
-                );
+                return new Promise<boolean>((resolve) => {
+                    const nodeId = RestHelper.removeSpacesStoreRef(
+                        nodes[0].properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL][0],
+                    );
+                    this.nodeService.getNodeMetadata(nodeId).subscribe(
+                        () => {
+                            resolve(true);
+                        },
+                        () => {
+                            resolve(false);
+                        },
+                    );
+                });
             }
             return false;
         };
@@ -637,21 +656,22 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         ];
         openParentNode.toolpermissions = [RestConstants.TOOLPERMISSION_WORKSPACE];
         openParentNode.scopes = [Scope.CollectionsReferences, Scope.Search, Scope.Render];
-        openParentNode.customEnabledCallback = (nodes) => {
+        openParentNode.customEnabledCallback = async (nodes: Node[]) => {
             if (nodes && nodes.length === 1) {
-                openParentNode.customEnabledCallback = null;
-                let nodeId = nodes[0].ref.id;
-                if (nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1) {
-                    nodeId = nodes[0].properties[RestConstants.CCM_PROP_IO_ORIGINAL][0];
-                }
-                this.nodeService.getNodeParents(nodeId, false, []).subscribe(
-                    () => {
-                        openParentNode.isEnabled = true;
-                    },
-                    (error) => {
-                        openParentNode.isEnabled = false;
-                    },
-                );
+                return new Promise<boolean>((resolve) => {
+                    let nodeId = nodes[0].ref.id;
+                    if (nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1) {
+                        nodeId = nodes[0].properties[RestConstants.CCM_PROP_IO_ORIGINAL][0];
+                    }
+                    this.nodeService.getNodeParents(nodeId, false, []).subscribe(
+                        () => {
+                            resolve(true);
+                        },
+                        (error) => {
+                            resolve(false);
+                        },
+                    );
+                });
             }
             return false;
         };
@@ -749,7 +769,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         addNodeToLTIPlatform.group = DefaultGroups.Primary;
         addNodeToLTIPlatform.priority = 11;
         addNodeToLTIPlatform.permissions = [RestConstants.ACCESS_CC_PUBLISH];
-        addNodeToLTIPlatform.customEnabledCallback = (nodes: Node[]) => {
+        addNodeToLTIPlatform.customEnabledCallback = async (nodes: Node[]) => {
             const ltiSession = this.connectors.getRestConnector().getCurrentLogin().ltiSession;
             if (!ltiSession) {
                 return false;
@@ -812,7 +832,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             Constrain.User,
         ];
         createNodeVariant.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES];
-        createNodeVariant.customEnabledCallback = (nodes) => {
+        createNodeVariant.customEnabledCallback = async (nodes) => {
             if (nodes) {
                 // do not show variant if it's a licensed material and user doesn't has change permission rights
                 return (
@@ -951,7 +971,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         downloadNode.group = DefaultGroups.View;
         // downloadNode.key = 'D';
         downloadNode.priority = 40;
-        downloadNode.customEnabledCallback = (nodes) => {
+        downloadNode.customEnabledCallback = async (nodes) => {
             if (!nodes) {
                 return false;
             }
@@ -1093,7 +1113,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             this.cutCopyNode(data, node, true),
         );
         // do not allow copy of map links if tp is missing
-        copyNodes.customEnabledCallback = (node) =>
+        copyNodes.customEnabledCallback = async (node) =>
             node.every((n) => !n.aspects?.includes(RestConstants.CCM_ASPECT_COLLECTION)) &&
             (node?.some((n) => this.getTypeSingle(n) === ElementType.MapRef)
                 ? this.connector.hasToolPermissionInstant(
@@ -1561,9 +1581,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 const list = NodeHelperService.getActionbarNodes(objects, object);
                 return await this.isOptionAvailable(o, list, data);
             };
-            o.enabledCallback = (object) => {
+            o.enabledCallback = async (object) => {
                 const list = NodeHelperService.getActionbarNodes(objects, object);
-                return this.isOptionEnabled(o, list);
+                return await this.isOptionEnabled(o, list);
             };
         });
     }
