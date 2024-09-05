@@ -151,7 +151,12 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         });
     }
 
-    pasteNode(components: OptionsHelperComponents, data: OptionData, nodes: Node[] = []) {
+    pasteNode(
+        components: OptionsHelperComponents,
+        data: OptionData,
+        addVirtualNodes = true,
+        nodes: Node[] = [],
+    ) {
         const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
         if (!this.canAddObjects(data)) {
             return;
@@ -170,7 +175,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 ),
             };
             this.bridge.showTemporaryMessage(MessageType.info, 'WORKSPACE.TOAST.PASTE', info);
-            this.addVirtualObjects(components, nodes);
+            if (addVirtualNodes) {
+                this.addVirtualObjects(components, nodes);
+            }
             return;
         }
         this.bridge.showProgressSpinner();
@@ -179,7 +186,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         if (clip.copy) {
             this.nodeService.copyNode(target, source).subscribe(
                 (nodeData: NodeWrapper) =>
-                    this.pasteNode(components, data, nodes.concat(nodeData.node)),
+                    this.pasteNode(components, data, addVirtualNodes, nodes.concat(nodeData.node)),
                 (error: any) => {
                     console.log(error);
                     if (error.error?.error?.indexOf('DAORestrictedAccessException') !== -1) {
@@ -193,7 +200,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         } else {
             this.nodeService.moveNode(target, source).subscribe(
                 (nodeData: NodeWrapper) =>
-                    this.pasteNode(components, data, nodes.concat(nodeData.node)),
+                    this.pasteNode(components, data, true, nodes.concat(nodeData.node)),
                 (error: any) => {
                     this.nodeHelper.handleNodeError(clip.nodes[nodes.length].name, error);
                     this.bridge.closeModalDialog();
@@ -1152,6 +1159,35 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         };
         pasteNodes.group = DefaultGroups.FileOperations;
 
+        const pasteNodeIntoFolder = new OptionItem('OPTIONS.PASTE', 'content_paste', (node) =>
+            this.pasteNode(
+                components,
+                {
+                    parent: this.getObjects(node, data)[0],
+                    scope: null,
+                },
+                false,
+            ),
+        );
+        pasteNodeIntoFolder.elementType = [ElementType.Node];
+        pasteNodeIntoFolder.constrains = [
+            Constrain.ClipboardContent,
+            Constrain.Directory,
+            Constrain.NoBulk,
+            Constrain.AddObjects,
+            Constrain.User,
+        ];
+        pasteNodeIntoFolder.toolpermissions = [
+            RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS,
+            RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,
+        ];
+        pasteNodes.scopes = [Scope.WorkspaceList];
+        pasteNodes.keyboardShortcut = {
+            keyCode: 'KeyV',
+            modifiers: ['Ctrl/Cmd'],
+        };
+        pasteNodeIntoFolder.group = DefaultGroups.Primary;
+
         const deleteNode = new OptionItem('OPTIONS.DELETE', 'delete', (object) => {
             void this.dialogs.openDeleteNodesDialog({ nodes: this.getObjects(object, data) });
         });
@@ -1475,6 +1511,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         options.push(cutNodes);
         options.push(copyNodes);
         options.push(pasteNodes);
+        options.push(pasteNodeIntoFolder);
         options.push(deleteNode);
         options.push(unpublishNode);
         options.push(unblockNode);

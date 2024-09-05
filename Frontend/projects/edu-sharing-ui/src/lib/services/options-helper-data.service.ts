@@ -181,6 +181,6 @@ export class OptionsHelperDataService implements OnDestroy {
     }
 
     pasteNode(nodes: Node[] = []) {
-        this.optionsHelperService.pasteNode(this.components, this.data, nodes);
+        this.optionsHelperService.pasteNode(this.components, this.data, true, nodes);
     }
 }
