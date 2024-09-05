@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
@@ -24,6 +25,7 @@ import org.edu_sharing.restservices.organization.v1.model.GroupSignupDetails;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
+import org.edu_sharing.service.password.ValidPassword;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
@@ -434,7 +436,7 @@ public class IamApi  {
     		@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
     		@Parameter(description = "username",required=true) @PathParam("person") String person,
     	    @Parameter(description = "profile" ,required=true ) UserProfileEdit profile,
-    	    @Parameter(description = "Password, leave empty if you don't want to set any" ,required=false )@QueryParam("password") String password,
+    	    @Parameter(description = "Password, leave empty if you don't want to set any" ,required=false )@QueryParam("password") @ValidPassword String password,
 			@Parameter(description = "returnResult, if true the created person object will be returned.", required=false) @QueryParam("returnResult") @DefaultValue("true") boolean returnResult,
 			@Parameter(description = "setupHomeDir, if true the created persons homedir will be setup with the default folders.", required=false) @QueryParam("setupHomeDir") @DefaultValue("true") boolean setupHomeDir,
     		@Context HttpServletRequest req) {
@@ -703,7 +705,7 @@ public class IamApi  {
     public Response changeUserPassword(
     		@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
     		@Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue="-me-" )) @PathParam("person") String person,
-    	    @Parameter(description = "credential" ,required=true ) UserCredential credential,
+    	    @Parameter(description = "credential" ,required=true ) @Valid UserCredential credential,
     		@Context HttpServletRequest req) {
 
     	try {
