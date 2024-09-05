@@ -126,6 +126,7 @@ export class AppComponent implements OnInit, DoCheck, AfterViewInit {
     }
 
     ngOnInit(): void {
+        this.elementRef.nativeElement.removeAttribute('ng-version');
         this.translations
             .initialize()
             .pipe(
