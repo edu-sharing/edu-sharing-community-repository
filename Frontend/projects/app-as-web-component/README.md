@@ -29,7 +29,7 @@ For testing, you can proxy requests to the URL given in the file `.env` by setti
 
 ```json
   "dependencies": {
-    "ngx-edu-sharing-app-as-web-component": "^0.1.0"
+    "ngx-edu-sharing-app-as-web-component": "^9.1.0"
   },
 ```
 

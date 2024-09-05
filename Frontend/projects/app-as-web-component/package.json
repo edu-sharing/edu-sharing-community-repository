@@ -1,6 +1,6 @@
 {
   "name": "ngx-edu-sharing-app-as-web-component",
-  "version": "0.1.3",
+  "version": "9.1.0",
   "license": "GNU GPL v2",
 
   "description": "Full edu-sharing app to use for integration of any edu-sharing view",
