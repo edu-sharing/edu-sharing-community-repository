@@ -196,7 +196,6 @@ export class AppComponent implements OnInit, DoCheck, AfterViewInit {
             const route = window.location.pathname.substring(
                 this.injector.get(PlatformLocation).getBaseHrefFromDOM()?.length ?? 0,
             );
-            console.log('route:' + route);
             if (
                 !loginInfo.isValidLogin &&
                 !(
