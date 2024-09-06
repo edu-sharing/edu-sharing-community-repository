@@ -117,9 +117,7 @@ public class RenderingServiceImpl implements RenderingService{
 			options.displayMode = displayMode;
 			options.parameters = parameters;
 			RenderingServiceData data = getData(appInfo, nodeId, nodeVersion, AuthenticationUtil.getFullyAuthenticatedUser(), options);
-			RenderingDetails details = new RenderingDetails(getDetails(renderingServiceUrl, data));
-			details.setRenderingServiceData(data);
-			return details;
+            return new RenderingDetails(getDetails(renderingServiceUrl, data), data);
 		}catch(Throwable t) {
 			logger.warn(t.getMessage(),t);
 			RenderingException exception = new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t.getMessage(), RenderingException.I18N.unknown, t);
