@@ -2710,13 +2710,9 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
     public void setUserPassword(String userName, String newPassword) {
 
         MutableAuthenticationService authenticationService = serviceRegistry.getAuthenticationService();
-
         if (authenticationService.isAuthenticationMutable(userName)) {
-
             authenticationService.setAuthentication(userName, newPassword.toCharArray());
-
         } else {
-
             authenticationService.createAuthentication(userName, newPassword.toCharArray());
         }
     }
@@ -2724,11 +2720,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
     public void updateUserPassword(String userName, String oldPassword, String newPassword) {
 
         MutableAuthenticationService authenticationService = serviceRegistry.getAuthenticationService();
-
         if (authenticationService.isAuthenticationMutable(userName)) {
-
             authenticationService.updateAuthentication(userName, oldPassword.toCharArray(), newPassword.toCharArray());
-
         }
     }
 
