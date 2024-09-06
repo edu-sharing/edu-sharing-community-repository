@@ -98,7 +98,7 @@ public class RenderingServiceImpl implements RenderingService{
 
 	@Override
 	public RenderingDetails getDetails(String nodeId,String nodeVersion,String displayMode,Map<String,String> parameters) throws InsufficientPermissionException, Exception{
-		
+
 		if(!this.permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.PERMISSION_READ)){
 			throw new InsufficientPermissionException("no read permission");
 		}
@@ -117,7 +117,9 @@ public class RenderingServiceImpl implements RenderingService{
 			options.displayMode = displayMode;
 			options.parameters = parameters;
 			RenderingServiceData data = getData(appInfo, nodeId, nodeVersion, AuthenticationUtil.getFullyAuthenticatedUser(), options);
-			return new RenderingDetails(getDetails(renderingServiceUrl, data), data);
+			RenderingDetails details = new RenderingDetails(getDetails(renderingServiceUrl, data));
+			details.setRenderingServiceData(data);
+			return details;
 		}catch(Throwable t) {
 			logger.warn(t.getMessage(),t);
 			RenderingException exception = new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t.getMessage(), RenderingException.I18N.unknown, t);
@@ -140,7 +142,7 @@ public class RenderingServiceImpl implements RenderingService{
 			}
 			*/
 		}
-	
+
 	}
 
 	@Override

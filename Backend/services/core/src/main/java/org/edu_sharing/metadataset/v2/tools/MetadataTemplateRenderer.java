@@ -380,7 +380,7 @@ public class MetadataTemplateRenderer {
 									}
 								}
 								if (persistentIdUrl != null && !persistentIdUrl.isEmpty()) {
-									widgetHtml.append("<br><a href=\"").append(persistentIdUrl)
+									widgetHtml.append("<a href=\"").append(persistentIdUrl)
 											.append("\" target=\"blank\">")
 											.append(MetadataHelper.getTranslation("vcard_link_persistent_id"))
 											.append("</a>");
