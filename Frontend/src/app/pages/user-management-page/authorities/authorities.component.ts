@@ -772,6 +772,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 editStore.profile.vcard = this.edit.profile.vcard.copy();
             }
             editStore.profile.sizeQuota *= 1024 * 1024;
+            if (this.passwordRef.passwordStrength === 'weak') {
+                this.toast.error(null, 'PERMISSIONS.ERROR_PASSWORD_TO_WEAK');
+                this.toast.closeProgressSpinner();
+                return;
+            }
             this.toast.showProgressSpinner();
             if (this.editId == null) {
                 const name = this.editDetails.authorityName;
@@ -790,12 +795,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                             );
                         } else {
                             this.toast.toast('PERMISSIONS.USER_CREATED');
-                            //this.refresh();
                             this.addVirtualEntry(user);
                         }
                     },
                     (error: any) => {
-                        this.toast.error(error);
+                        this.handleError(error);
                         this.toast.closeProgressSpinner();
                     },
                 );
@@ -1230,9 +1234,13 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     }
 
     private handleError(error: any) {
-        if (error.status == RestConstants.DUPLICATE_NODE_RESPONSE)
+        if (error.status == RestConstants.DUPLICATE_NODE_RESPONSE) {
             this.toast.error(null, 'PERMISSIONS.USER_EXISTS_IN_GROUP');
-        else this.toast.error(error);
+        } else if (error?.error?.details?.PasswordPolicyViolation) {
+            this.toast.error(null, 'PERMISSIONS.ERROR_PASSWORD_POLICY_NOT_MATCHED', {
+                cause: error?.error?.details?.PasswordPolicyViolation[0]?.cause,
+            });
+        } else this.toast.error(error);
     }
 
     @HostListener('document:keydown', ['$event'])
@@ -1407,7 +1415,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 },
                 (error) => {
                     this.toast.closeProgressSpinner();
-                    this.toast.error(error);
+                    this.handleError(error);
                 },
             );
     }
