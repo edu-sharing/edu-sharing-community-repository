@@ -602,7 +602,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			return result;
 		} else if (_value instanceof List && ((List) _value).size() == 0) {
 			// cause empty list toString returns "[]"
-			return "";
+			return null;
 		} else if (_value instanceof String) {
 			return (String) _value;
 		} else if (_value instanceof Number) {
