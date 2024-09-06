@@ -692,7 +692,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         this.addToList = this.nodeMemberAdd.getSelection().selected;
         this.addMembers = null;
 
-        this.addToSingle(() => this.refresh());
+        this.addToSingle(() => {
+            if (this.org && this._mode === 'USER') {
+                this.refresh();
+            }
+        });
     }
     private checkOrgExists(orgName: string) {
         this.organization
@@ -719,7 +723,8 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                             this.edit = null;
                             this.iam.editGroup(result.authorityName, profile).subscribe(
                                 () => {
-                                    setTimeout(() => this.checkOrgExists(name), 2000);
+                                    this.addVirtualEntry(result);
+                                    this.toast.closeProgressSpinner();
                                 },
                                 (error) => {
                                     this.toast.error(error);
@@ -737,11 +742,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                     this.iam
                         .createGroup(name, this.edit.profile, this.org ? this.org.groupName : '')
                         .subscribe(
-                            () => {
+                            (group) => {
                                 this.edit = null;
                                 this.toast.closeProgressSpinner();
                                 this.toast.toast('PERMISSIONS.GROUP_CREATED');
-                                this.refresh();
+                                this.addVirtualEntry(group);
                             },
                             (error: any) => {
                                 this.toast.error(error);
@@ -755,6 +760,8 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 () => {
                     this.edit = null;
                     this.toast.toast('PERMISSIONS.GROUP_EDITED');
+                    // this.addVirtualEntry(this.edit as Group)
+                    // a full refresh is required since the backend does only return void and not the edited object
                     this.refresh();
                 },
                 (error: any) => this.toast.error(error),
@@ -770,20 +777,21 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 const name = this.editDetails.authorityName;
                 const password = this.editDetails.password;
                 this.iam.createUser(name, password, editStore.profile).subscribe(
-                    () => {
+                    (user) => {
                         this.edit = null;
                         this.toast.closeProgressSpinner();
                         if (this.org) {
                             this.iam.addGroupMember(this.org.authorityName, name).subscribe(
                                 () => {
                                     this.toast.toast('PERMISSIONS.USER_CREATED');
-                                    this.refresh();
+                                    this.addVirtualEntry(user);
                                 },
                                 (error: any) => this.toast.error(error),
                             );
                         } else {
                             this.toast.toast('PERMISSIONS.USER_CREATED');
-                            this.refresh();
+                            //this.refresh();
+                            this.addVirtualEntry(user);
                         }
                     },
                     (error: any) => {
@@ -1485,5 +1493,9 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             subtype: ToastType.InfoData,
             html: true,
         });
+    }
+
+    private addVirtualEntry(entry: GenericAuthority | Group) {
+        this.nodeEntries.addVirtualNodes([entry]);
     }
 }
