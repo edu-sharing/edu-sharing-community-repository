@@ -259,7 +259,7 @@ public class PersonDao {
 	public void changePassword(String oldPassword, String newPassword) throws DAOException {
 
 		try {
-			if(Objects.equals(userInfo.get(CCConstants.getValidGlobalName("cm:essotype")), "shibboleth")){
+			if(Objects.equals(userInfo.get(CCConstants.getValidGlobalName("cm:esssotype")), "shibboleth")){
 				throw new AccessDeniedException("It's not allowed to change password of external managed users. Please contact your system administrator.");
 			}
 
