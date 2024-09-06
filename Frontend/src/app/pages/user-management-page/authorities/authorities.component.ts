@@ -757,12 +757,12 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 return;
             }
             this.iam.editGroup(this.editId, this.edit.profile).subscribe(
-                () => {
+                async () => {
                     this.edit = null;
                     this.toast.toast('PERMISSIONS.GROUP_EDITED');
-                    // this.addVirtualEntry(this.edit as Group)
-                    // a full refresh is required since the backend does only return void and not the edited object
-                    this.refresh();
+                    this.addVirtualEntry(
+                        (await this.iam.getGroup(this.editId).toPromise()).group as Group,
+                    );
                 },
                 (error: any) => this.toast.error(error),
             );
@@ -801,11 +801,14 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 );
             } else {
                 this.iam.editUser(this.editId, editStore.profile).subscribe(
-                    () => {
+                    async () => {
                         this.edit = null;
                         this.toast.toast('PERMISSIONS.USER_EDITED');
-                        this.refresh();
                         this.toast.closeProgressSpinner();
+                        this.addVirtualEntry(
+                            (await this.iam.getUser(this.editId).toPromise())
+                                .person as unknown as User,
+                        );
                     },
                     (error: any) => {
                         this.toast.error(error);
