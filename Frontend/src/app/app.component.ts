@@ -196,11 +196,17 @@ export class AppComponent implements OnInit, DoCheck, AfterViewInit {
             const route = window.location.pathname.substring(
                 this.injector.get(PlatformLocation).getBaseHrefFromDOM()?.length ?? 0,
             );
+            console.log('route:' + route);
             if (
                 !loginInfo.isValidLogin &&
                 !(
                     route.startsWith(UIConstants.ROUTER_PREFIX + 'login') ||
-                    route.startsWith(UIConstants.ROUTER_PREFIX + 'register')
+                    route.startsWith(UIConstants.ROUTER_PREFIX + 'register') ||
+                    route.startsWith(UIConstants.ROUTER_PREFIX + 'error') ||
+                    route.startsWith(UIConstants.ROUTER_PREFIX + 'message') ||
+                    // public link sharing
+                    route.startsWith(UIConstants.ROUTER_PREFIX + 'sharing') ||
+                    route.startsWith('shibboleth')
                 )
             ) {
                 RestHelper.goToLogin(this.injector.get(Router), this.configuration);
