@@ -2,6 +2,7 @@ package org.edu_sharing.service.password;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import org.apache.commons.lang.StringUtils;
 import org.edu_sharing.service.util.ViolationUtils;
 import org.passay.*;
 import org.passay.PasswordValidator;
@@ -54,8 +55,6 @@ public class PasswordConstraintValidator implements ConstraintValidator<ValidPas
             rules.add(new IllegalSequenceRule(EnglishSequenceData.Numerical, settings.getMaxLengthOfNumericalSequence(), false));
 //            rules.add(new IllegalSequenceRule(GermanSequenceData.DEQwertz, 5, false)); // has lib internal issues
         }
-
-
 
         PasswordValidator validator = new PasswordValidator(rules);
         RuleResult result = validator.validate(new PasswordData(password));
