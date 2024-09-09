@@ -62,14 +62,13 @@ public class GuestFilter implements jakarta.servlet.Filter {
             HttpSession session = httpRequest.getSession(true);
             Map<String, String> authentication = authTool.validateAuthentication(session);
 
-            String guestFilterdisabled = req.getParameter(CCConstants.REQUEST_PARAM_DISABLE_GUESTFILTER);
+            String guestFilterDisabled = req.getParameter(CCConstants.REQUEST_PARAM_DISABLE_GUESTFILTER);
             String guestFilterHeader = ((HttpServletRequest) req).getHeader("DisableGuest");
-            if (guestFilterHeader != null && new Boolean(guestFilterHeader)) {
+            if (Boolean.parseBoolean(guestFilterHeader)) {
                 logger.info("Guest Filter disabled via header");
-            } else if (authentication == null && !new Boolean(guestFilterdisabled)) {
+            } else if (authentication == null && !Boolean.parseBoolean(guestFilterDisabled)) {
 
                 GuestConfig currentGuestConfig = guestService.getCurrentGuestConfig();
-
                 if (currentGuestConfig != null) {
                     if (!currentGuestConfig.isEnabled()) {
                         logger.debug("guest filter disabled for context " + ConfigServiceFactory.getCurrentDomain());
@@ -78,7 +77,7 @@ public class GuestFilter implements jakarta.servlet.Filter {
 						if(SilentLoginModeRedirect.process(httpRequest, httpresponse)){
 							return;
 						}
-						Map<String, String> authInfoGuest = authTool.createNewSession(currentGuestConfig.getUsername(), currentGuestConfig.getPassword());
+						Map<String, String> authInfoGuest = authTool.createNewSession(currentGuestConfig.getUsername());
                         authTool.storeAuthInfoInSession(authInfoGuest.get(CCConstants.AUTH_USERNAME), authInfoGuest.get(CCConstants.AUTH_TICKET), CCConstants.AUTH_TYPE_DEFAULT, session);
 
                         // prewarm tp session cache

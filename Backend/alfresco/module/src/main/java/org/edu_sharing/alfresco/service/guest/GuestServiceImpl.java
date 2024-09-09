@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.KeyTool;
 import org.edu_sharing.spring.scope.refresh.RefreshScopeRefreshedEvent;
 import org.springframework.context.ApplicationListener;
 
@@ -146,12 +147,14 @@ public class GuestServiceImpl implements GuestService, ApplicationListener<Refre
     @Override
     public NodeRef createOrUpdateGuest(GuestConfig guestConfig) {
 
-        if (StringUtils.isBlank(guestConfig.getUsername()) || StringUtils.isBlank(guestConfig.getPassword())) {
+        if (StringUtils.isBlank(guestConfig.getUsername())) {
             return null;
         }
 
         return retryingTransactionHelper.doInTransaction(() -> AuthenticationUtil.runAsSystem(() -> {
             NodeRef guestRef = personService.getPersonOrNull(guestConfig.getUsername());
+            String password = new KeyTool().getRandomPassword();
+
             if (guestRef == null) {
                 Map<QName, Serializable> properties = new HashMap<>(Map.of(
                         ContentModel.PROP_USERNAME, guestConfig.getUsername(),
@@ -159,10 +162,10 @@ public class GuestServiceImpl implements GuestService, ApplicationListener<Refre
                         ContentModel.PROP_LASTNAME, guestConfig.getUsername(),
                         QName.createQName(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION), CCConstants.CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_GUEST));
 
-                authenticationService.createAuthentication(guestConfig.getUsername(), guestConfig.getPassword().toCharArray());
+                authenticationService.createAuthentication(guestConfig.getUsername(), password.toCharArray());
                 guestRef = personService.createPerson(properties);
             } else {
-                authenticationService.setAuthentication(guestConfig.getUsername(), guestConfig.getPassword().toCharArray());
+                authenticationService.setAuthentication(guestConfig.getUsername(), password.toCharArray());
             }
 
             Set<String> currentMemberships = new HashSet<>(authorityService.getAuthoritiesForUser(guestConfig.getUsername()));

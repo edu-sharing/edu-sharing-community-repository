@@ -1,5 +1,6 @@
 package org.edu_sharing.alfresco.service.guest;
 
+import com.typesafe.config.Optional;
 import lombok.Data;
 
 import java.util.List;
@@ -8,6 +9,5 @@ import java.util.List;
 public class GuestConfig {
     private boolean enabled;
     private String username;
-    private String password;
     private List<String> groups;
 }
