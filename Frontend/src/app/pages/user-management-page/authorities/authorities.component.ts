@@ -771,8 +771,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             if (this.edit.profile?.vcard) {
                 editStore.profile.vcard = this.edit.profile.vcard.copy();
             }
+            const password = this.editDetails.password?.trim();
             editStore.profile.sizeQuota *= 1024 * 1024;
-            if (this.passwordRef.passwordStrength === 'weak') {
+            // we allow fully empty password since this means the backend will not create an authentication
+            // useful for system managed users like i.e. guests
+            if (password && this.passwordRef.passwordStrength === 'weak') {
                 this.toast.error(null, 'PERMISSIONS.ERROR_PASSWORD_TO_WEAK');
                 this.toast.closeProgressSpinner();
                 return;
@@ -780,7 +783,6 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             this.toast.showProgressSpinner();
             if (this.editId == null) {
                 const name = this.editDetails.authorityName;
-                const password = this.editDetails.password;
                 this.iam.createUser(name, password, editStore.profile).subscribe(
                     (user) => {
                         this.edit = null;
