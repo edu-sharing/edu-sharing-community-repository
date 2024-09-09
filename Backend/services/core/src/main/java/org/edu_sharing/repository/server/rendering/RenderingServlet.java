@@ -59,7 +59,7 @@ public class RenderingServlet extends HttpServlet {
             resp.getWriter().write("<body class= \"eduservlet-render-body\">");
             String response;
             try {
-                response = renderingService.getDetails(node_id, version,DEFAULT_DISPLAY_MODE, params);
+                response = renderingService.getDetails(node_id, version,DEFAULT_DISPLAY_MODE, params).getDetails();
                 response = response.replace("{{{LMS_INLINE_HELPER_SCRIPT}}}", URLHelper.getNgRenderNodeUrl(node_id,version)+"?");
                 TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node_id), null, TrackingService.EventType.VIEW_MATERIAL_EMBEDDED);
             } catch (Throwable t) {

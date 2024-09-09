@@ -34,6 +34,12 @@ public class MetadataKey extends MetadataTranslatable {
 	private String icon;
     private String description;
     private String parent;
+    /**
+     * Hint if the given key shall be removed. Use in conjunction with @MetadataWidget.ValuespaceMerge
+     */
+    @Getter
+    @Setter
+    private Boolean delete = false;
     private String locale;
     /**
      * List of other keys this child is a precedor of
@@ -54,4 +60,6 @@ public class MetadataKey extends MetadataTranslatable {
     public void addRelated(MetadataKeyRelated related) {
         this.related.add(related);
     }
+
+
 }

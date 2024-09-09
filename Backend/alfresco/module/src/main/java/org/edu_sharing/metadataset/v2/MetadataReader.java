@@ -571,6 +571,8 @@ public class MetadataReader {
                     for (ValuespaceInfo v : valuespaces) {
                         ValuespaceData values = getValuespace(v, widget, valuespaceI18n, valuespaceI18nPrefix);
                         keys.addAll(values.getEntries());
+                        // remove keys which have the delete flag attached
+                        values.getEntries().stream().filter(MetadataKey::getDelete).forEach(k -> keys.removeIf(k2 -> Objects.equals(k2.getKey(), k.getKey())));
                     }
                 }
 				widget.setValues(keys);
@@ -661,6 +663,8 @@ public class MetadataReader {
             key.setI18nPrefix(valuespaceI18nPrefix);
             if (attributes != null && attributes.getNamedItem("parent") != null)
                 key.setParent(attributes.getNamedItem("parent").getTextContent());
+            if (attributes != null && attributes.getNamedItem("delete") != null)
+                key.setDelete(attributes.getNamedItem("delete").getTextContent().equalsIgnoreCase("true"));
             if (attributes != null && attributes.getNamedItem("icon") != null)
                 key.setIcon(attributes.getNamedItem("icon").getTextContent());
             if (attributes != null && attributes.getNamedItem("url") != null)

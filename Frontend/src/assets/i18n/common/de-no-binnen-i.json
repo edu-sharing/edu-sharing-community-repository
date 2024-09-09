@@ -8,7 +8,7 @@
   "NODE": {
     "ccm:lifecyclecontributer_publisher": "Herausgeberschaft",
     "ccm:lifecyclecontributer_authorFN": "Autorin/Autor",
-    "ccm:author_freetext": "Weitere Angaben zur Urheberschaft"
+    "ccm:author_freetext": "Weitere, ergänzende Angaben zur Urheberschaft und zu Nutzungsrechten"
   },
   "USER": {
     "PRIMARY_AFFILIATION": {

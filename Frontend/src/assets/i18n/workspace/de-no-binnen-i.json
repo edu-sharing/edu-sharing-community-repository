@@ -1,6 +1,7 @@
 {
   "WORKSPACE": {
     "SHARE": {
+      "GROUP_OWNER": "Eigentum",
       "TYPE_VIEWER": "Leserechte",
       "TYPE_VIEWER_DESCRIPTION": "Person darf sehen",
       "TYPE_COWORKER": "Mitarbeit",
@@ -24,28 +25,26 @@
         "CC_BY_INFO": "Andere dürfen Bearbeitungen des Materials teilen, solange sie die Urheberschaft nennen",
         "CC_BY_SA_INFO": "Andere dürfen Bearbeitungen des Materials teilen, solange sie die Urheberschaft nennen und es auch selbst unter denselben Bedingungen weitergeben"
       }
-    }
-  },
-
-  "WORKFLOW": {
-    "RECEIVERS": "Nutzende Person/Redaktionsgruppe"
-  },
-
-  "CONTRIBUTOR": {
-    "ADD_TITLE": "Neue beteiligte Person angeben",
-    "SCOPE": "Tätigkeit",
-    "TYPE": {
-      "AUTHOR": "Autorin/Autor",
-      "PUBLISHER": "Herausgeberschaft",
-      "INITIATOR": "Auftrag",
-      "GRAPHICAL_DESIGNER": "Grafik",
-      "CONTENT_PROVIDER": "Inhaltlicher Beitrag",
-      "TECHNICAL_VALIDATOR": "Technik-Validation",
-      "TECHNICAL_IMPLEMENTER": "Technische Umsetzung",
-      "EDUCATIONAL_VALIDATOR": "Bildungsvalidation",
-      "SCRIPT_WRITER": "Scriptwriting",
-      "CREATOR": "Erstellung",
-      "PROVIDER": "Herausgeberschaft"
+    },
+    "CONTRIBUTOR": {
+      "ADD_TITLE": "Neue beteiligte Person angeben",
+      "SCOPE": "Tätigkeit",
+      "TYPE": {
+        "AUTHOR": "Autorin/Autor",
+        "PUBLISHER": "Herausgeberschaft",
+        "INITIATOR": "Auftrag",
+        "GRAPHICAL_DESIGNER": "Grafik",
+        "CONTENT_PROVIDER": "Inhaltlicher Beitrag",
+        "TECHNICAL_VALIDATOR": "Technik-Validation",
+        "TECHNICAL_IMPLEMENTER": "Technische Umsetzung",
+        "EDUCATIONAL_VALIDATOR": "Bildungsvalidation",
+        "SCRIPT_WRITER": "Scriptwriting",
+        "CREATOR": "Erstellung",
+        "PROVIDER": "Herausgeberschaft"
+      }
+    },
+    "WORKFLOW": {
+      "RECEIVERS": "Nutzende Person/Redaktionsgruppe"
     }
   }
 }
