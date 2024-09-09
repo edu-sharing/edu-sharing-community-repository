@@ -64,6 +64,7 @@ import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { DELETE_OR_CANCEL } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
+import { InputPasswordComponent } from '../../../shared/components/input-password/input-password.component';
 
 @Component({
     selector: 'es-permissions-authorities',
@@ -87,6 +88,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         columns: [],
     };
     @ViewChild('actionbar') actionbar: ActionbarComponent;
+    @ViewChild('passwordRef') passwordRef: InputPasswordComponent;
     @ViewChild('actionbarMember') actionbarMember: ActionbarComponent;
     @ViewChild('actionbarSignup') actionbarSignup: ActionbarComponent;
     @ViewChild('mainList') nodeEntries: NodeEntriesWrapperComponent<GenericAuthority>;
@@ -137,8 +139,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     signupButtons: DialogButton[];
     signupListButtons: DialogButton[];
     editStatus: User;
+    resetPassword: User;
+    newPassword = '';
     editStatusNotify = true;
     editStatusButtons: DialogButton[];
+    resetPasswordButtons: DialogButton[];
     groupSignup: Organization;
     groupSignupListNode: Organization;
     groupSignupListShown = false;
@@ -574,6 +579,15 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             personStatus.elementType = [ElementType.Person];
             personStatus.group = DefaultGroups.Edit;
             options.push(personStatus);
+            const personPassword = new OptionItem(
+                'PERMISSIONS.MENU_RESET_PASSWORD',
+                'lock',
+                (data: any) => this.resetPersonPassword(this.getList(data)[0]),
+            );
+            personPassword.constrains = [Constrain.NoBulk, Constrain.Admin];
+            personPassword.elementType = [ElementType.Person];
+            personPassword.group = DefaultGroups.Edit;
+            options.push(personPassword);
             if (this.org) {
                 const excludePerson = new OptionItem(
                     'PERMISSIONS.MENU_EXCLUDE',
@@ -678,7 +692,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         this.addToList = this.nodeMemberAdd.getSelection().selected;
         this.addMembers = null;
 
-        this.addToSingle(() => this.refresh());
+        this.addToSingle(() => {
+            if (this.org && this._mode === 'USER') {
+                this.refresh();
+            }
+        });
     }
     private checkOrgExists(orgName: string) {
         this.organization
@@ -705,7 +723,8 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                             this.edit = null;
                             this.iam.editGroup(result.authorityName, profile).subscribe(
                                 () => {
-                                    setTimeout(() => this.checkOrgExists(name), 2000);
+                                    this.addVirtualEntry(result);
+                                    this.toast.closeProgressSpinner();
                                 },
                                 (error) => {
                                     this.toast.error(error);
@@ -723,11 +742,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                     this.iam
                         .createGroup(name, this.edit.profile, this.org ? this.org.groupName : '')
                         .subscribe(
-                            () => {
+                            (group) => {
                                 this.edit = null;
                                 this.toast.closeProgressSpinner();
                                 this.toast.toast('PERMISSIONS.GROUP_CREATED');
-                                this.refresh();
+                                this.addVirtualEntry(group);
                             },
                             (error: any) => {
                                 this.toast.error(error);
@@ -738,10 +757,12 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 return;
             }
             this.iam.editGroup(this.editId, this.edit.profile).subscribe(
-                () => {
+                async () => {
                     this.edit = null;
                     this.toast.toast('PERMISSIONS.GROUP_EDITED');
-                    this.refresh();
+                    this.addVirtualEntry(
+                        (await this.iam.getGroup(this.editId).toPromise()).group as Group,
+                    );
                 },
                 (error: any) => this.toast.error(error),
             );
@@ -750,40 +771,50 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             if (this.edit.profile?.vcard) {
                 editStore.profile.vcard = this.edit.profile.vcard.copy();
             }
+            const password = this.editDetails.password?.trim() || null;
             editStore.profile.sizeQuota *= 1024 * 1024;
+            // we allow fully empty password since this means the backend will not create an authentication
+            // useful for system managed users like i.e. guests
+            if (this.passwordRef.passwordStrength === 'weak') {
+                this.toast.error(null, 'PERMISSIONS.ERROR_PASSWORD_TO_WEAK');
+                this.toast.closeProgressSpinner();
+                return;
+            }
             this.toast.showProgressSpinner();
             if (this.editId == null) {
                 const name = this.editDetails.authorityName;
-                const password = this.editDetails.password;
                 this.iam.createUser(name, password, editStore.profile).subscribe(
-                    () => {
+                    (user) => {
                         this.edit = null;
                         this.toast.closeProgressSpinner();
                         if (this.org) {
                             this.iam.addGroupMember(this.org.authorityName, name).subscribe(
                                 () => {
                                     this.toast.toast('PERMISSIONS.USER_CREATED');
-                                    this.refresh();
+                                    this.addVirtualEntry(user);
                                 },
                                 (error: any) => this.toast.error(error),
                             );
                         } else {
                             this.toast.toast('PERMISSIONS.USER_CREATED');
-                            this.refresh();
+                            this.addVirtualEntry(user);
                         }
                     },
                     (error: any) => {
-                        this.toast.error(error);
+                        this.handleError(error);
                         this.toast.closeProgressSpinner();
                     },
                 );
             } else {
                 this.iam.editUser(this.editId, editStore.profile).subscribe(
-                    () => {
+                    async () => {
                         this.edit = null;
                         this.toast.toast('PERMISSIONS.USER_EDITED');
-                        this.refresh();
                         this.toast.closeProgressSpinner();
+                        this.addVirtualEntry(
+                            (await this.iam.getUser(this.editId).toPromise())
+                                .person as unknown as User,
+                        );
                     },
                     (error: any) => {
                         this.toast.error(error);
@@ -1205,9 +1236,13 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     }
 
     private handleError(error: any) {
-        if (error.status == RestConstants.DUPLICATE_NODE_RESPONSE)
+        if (error.status == RestConstants.DUPLICATE_NODE_RESPONSE) {
             this.toast.error(null, 'PERMISSIONS.USER_EXISTS_IN_GROUP');
-        else this.toast.error(error);
+        } else if (error?.error?.details?.PasswordPolicyViolation) {
+            this.toast.error(null, 'PERMISSIONS.ERROR_PASSWORD_POLICY_NOT_MATCHED', {
+                cause: error?.error?.details?.PasswordPolicyViolation[0]?.cause,
+            });
+        } else this.toast.error(error);
     }
 
     @HostListener('document:keydown', ['$event'])
@@ -1310,6 +1345,12 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             }),
             new DialogButton('SAVE', { color: 'primary' }, () => this.savePersonStatus()),
         ];
+        this.resetPasswordButtons = [
+            new DialogButton('CANCEL', { color: 'standard' }, () => {
+                this.editStatus = null;
+            }),
+            new DialogButton('SAVE', { color: 'primary' }, () => this.savePersonPassword()),
+        ];
         this.signupButtons = DialogButton.getSaveCancel(
             () => (this.groupSignupDetails = null),
             () => this.saveGroupSignup(),
@@ -1324,6 +1365,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     }
     private setPersonStatus(data: User) {
         this.editStatus = data;
+        this.updateButtons();
+    }
+    private resetPersonPassword(data: User) {
+        this.resetPassword = data;
+        this.newPassword = '';
         this.updateButtons();
     }
 
@@ -1346,7 +1392,35 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 },
             );
     }
-
+    private savePersonPassword() {
+        if (!this.newPassword || this.passwordRef.passwordStrength === 'weak') {
+            this.toast.error(null, 'PERMISSIONS.ERROR_PASSWORD_TO_WEAK');
+            return;
+        }
+        this.toast.showProgressSpinner();
+        this.iam
+            .setCredentials(
+                {
+                    newPassword: this.newPassword,
+                },
+                this.resetPassword.authorityName,
+            )
+            .subscribe(
+                () => {
+                    this.toast.closeProgressSpinner();
+                    this.resetPassword = null;
+                    this.toast.show({
+                        message: 'PERMISSIONS.TOAST_PASSWORD_RESET',
+                        type: 'info',
+                        subtype: ToastType.InfoAction,
+                    });
+                },
+                (error) => {
+                    this.toast.closeProgressSpinner();
+                    this.handleError(error);
+                },
+            );
+    }
     saveGroupSignup() {
         this.toast.showProgressSpinner();
         if (this.groupSignupDetails.signupMethod === 'disabled') {
@@ -1432,5 +1506,9 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             subtype: ToastType.InfoData,
             html: true,
         });
+    }
+
+    private addVirtualEntry(entry: GenericAuthority | Group) {
+        this.nodeEntries.addVirtualNodes([entry]);
     }
 }

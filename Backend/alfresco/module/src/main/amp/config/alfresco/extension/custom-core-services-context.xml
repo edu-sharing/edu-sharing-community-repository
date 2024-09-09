@@ -354,6 +354,9 @@
         <property name="authorityService">
         	<ref bean="authorityService" />
         </property>
+          <property name="nodeService">
+              <ref bean="nodeService" />
+          </property>
    	 </bean>
 
    	 <bean id="beforeMoveSharedFolderPolicy" class="org.edu_sharing.alfresco.policy.BeforeMoveSharedFolderPolicy" init-method="init">
@@ -387,24 +390,6 @@
             <ref bean="nodeService" />
         </property>
     </bean>
-
-   	  <bean id="beforeEduGroupDeletePolicy" class="org.edu_sharing.alfresco.policy.BeforeEduGroupDeletePolicy" init-method="init">
-   	  <property name="policyComponent">
-            <ref bean="policyComponent"/>
-        </property>
-         <property name="nodeService">
-            <ref bean="nodeService" />
-        </property>
-   	 </bean>
-
-   	 <bean id="onAddRemoveEduGroupAspectPolicy" class="org.edu_sharing.alfresco.policy.OnAddRemoveEduGroupAspectPolicy" init-method="init">
-   	  <property name="policyComponent">
-            <ref bean="policyComponent"/>
-        </property>
-         <property name="nodeService">
-            <ref bean="nodeService" />
-        </property>
-   	 </bean>
 
     <bean id="onAddIOChildObjectAspect" class="org.edu_sharing.alfresco.policy.OnAddIOChildObjectAspect" init-method="init">
         <property name="policyComponent">
@@ -777,6 +762,11 @@
      	<property name="authorityService">
         		<ref bean="AuthorityService" />
         </property>
+
+         <property name="authorityServiceInsecure">
+             <ref bean="authorityService" />
+         </property>
+
         <property name="nodeService">
     	    		<ref bean="NodeService" />
     		</property>

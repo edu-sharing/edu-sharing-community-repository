@@ -35,6 +35,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * 
@@ -124,9 +125,12 @@ public class SSOAuthorityMapper {
 
 	List<String> additionalAttributes = new ArrayList<>();
 
+	Map<String,String> requiredAttributes;
+
 	public void init(){
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-		
+        ApplicationContext eduApplicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
+
 		this.serviceRegistry = (ServiceRegistry) applicationContext.getBean("ServiceRegistry");
 		this.authorityService = serviceRegistry.getAuthorityService();
 		this.personService = serviceRegistry.getPersonService();
@@ -136,6 +140,7 @@ public class SSOAuthorityMapper {
 		this.organisationService = (OrganisationService)applicationContext.getBean("eduOrganisationService");
 		this.nodeService = serviceRegistry.getNodeService();
 		this.guestService = applicationContext.getBean(GuestService.class);
+		this.requiredAttributes = eduApplicationContext.containsBean ("personDataRequired") ? (Map<String,String>)eduApplicationContext.getBean("personDataRequired") : null;
 	}
 
 	public static String mapAdminAuthority(String authority,String appid){
@@ -212,6 +217,25 @@ public class SSOAuthorityMapper {
 		if (ssoType == null) {
 			logErrorParams(PARAM_SSO_TYPE, ssoAttributes);
 			throw new AuthenticationException(AuthenticationExceptionMessages.MISSING_PARAM);
+		}
+
+
+		if(requiredAttributes != null && requiredAttributes.size() > 0){
+
+			requiredAttributes.keySet().stream().forEach(r -> {
+				String value = ssoAttributes.get(r);
+				if(value == null)
+					throw new AuthenticationException(AuthenticationExceptionMessages.MISSING_PARAM);
+				try {
+					if (!value.matches(requiredAttributes.get(r))) {
+						logger.debug("required attribute " + r + " " + value +" not matches " +requiredAttributes.get(r)  );
+						throw new AuthenticationException(AuthenticationExceptionMessages.SSO_REQ_ATT_NOT_MATCHES);
+					}
+				}catch (PatternSyntaxException e){
+					logger.error("wrong required attribute pattern for:" + r + " pattern:"+requiredAttributes.get(r)+". " + e.getMessage());
+					throw new AuthenticationException(AuthenticationExceptionMessages.SSO_REQ_ATT_PATTERN_SYNTAX);
+				}
+			});
 		}
 
 		String appId = ssoAttributes.get(PARAM_APP_ID);

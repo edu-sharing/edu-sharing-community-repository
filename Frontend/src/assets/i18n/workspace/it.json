@@ -50,7 +50,7 @@
     "NO_SUB_NODES": "Niente più elementi",
     "NO_NODES_IN_FOLDER": "Questa cartella è vuota.",
     "UPLOAD_TITLE": "Caricare",
-    "UPLOAD_SUBTITLE": "{{progress}}/{total}} elaborato",
+    "UPLOAD_SUBTITLE": "{{progress}}/{{total}} elaborato",
     "UPLOAD_REMAINING": "{{time}} sinistra",
     "UPLOAD_FINISHING": "Quasi finito...",
     "UPLOAD_ERROR": {
@@ -156,7 +156,6 @@
         "ADDITIONAL_PERMISSIONS_INFO": "Definire le autorizzazioni che verranno concesse indirettamente, se presenti.",
         "PERMISSION": {
           "ReadAll": "Visualizza (Anteprima dell'immagine, visualizzazione dei metadati e dei contenuti)",
-          "Print": "Stampa (solo per i file pdf)",
           "DownloadContent": "Scaricare"
         }
       },

@@ -32,13 +32,13 @@ import org.edu_sharing.repository.client.tools.StringTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
+import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.importer.ExcelLOMImporter;
 import org.edu_sharing.repository.server.importer.collections.CollectionImporter;
 import org.edu_sharing.repository.server.jobs.quartz.*;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.CacheManagerFactory;
-import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.repository.server.update.PrintWriterLogAppender;
 import org.edu_sharing.repository.server.update.UpdaterService;
@@ -672,15 +672,6 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public void refreshEduGroupCache(boolean keepExisting) {
-        if (keepExisting) {
-            EduGroupCache.refreshByKeepExisting();
-        } else {
-            EduGroupCache.refresh();
-        }
-    }
-
-    @Override
     public void testMail(String receiver, String template) {
         try {
             Map<String, String> dummy = new HashMap<>();
@@ -1134,7 +1125,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public RepositoryVersionInfo getVersion() {
+    public Map<String, RepositoryVersionInfo> getVersions() {
         try {
             return versionService.getRepositoryVersionInfo();
         } catch (IOException e) {

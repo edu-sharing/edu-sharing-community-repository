@@ -17,7 +17,13 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ConfigService, NetworkService, ProposalNode } from 'ngx-edu-sharing-api';
+import {
+    ConfigService,
+    MdsDefinition,
+    MdsService,
+    NetworkService,
+    ProposalNode,
+} from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     DefaultGroups,
@@ -37,7 +43,7 @@ import {
     UIAnimation,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { filter, first, skipWhile, takeUntil } from 'rxjs/operators';
 import { AppComponent } from '../../app.component';
 import {
@@ -46,7 +52,6 @@ import {
     EventListener,
     FrameEventsService,
     LoginResult,
-    Mds,
     Node,
     NodeList,
     RestConnectorService,
@@ -54,7 +59,6 @@ import {
     RestConstants,
     RestHelper,
     RestIamService,
-    RestMdsService,
     RestNetworkService,
     RestNodeService,
     RestSearchService,
@@ -101,7 +105,7 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
         private connector: RestConnectorService,
         private connectors: RestConnectorsService,
         private iam: RestIamService,
-        private mdsApi: RestMdsService,
+        private mdsService: MdsService,
         private nodeApi: RestNodeService,
         private searchApi: RestSearchService,
         private toolService: RestToolService,
@@ -232,7 +236,7 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
     canScrollRight = false;
     private queryParams: Params;
     public similarNodes = new NodeDataSource<Node>();
-    mds: Mds;
+    mds = new BehaviorSubject<MdsDefinition>(null);
     isDestroyed = false;
     private readonly destroyed$ = new Subject<void>();
 
@@ -406,7 +410,7 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
         );
         download.elementType = OptionsHelperService.DownloadElementTypes;
         // use callback since isEnabled gets ignored
-        download.customEnabledCallback = (nodes) => {
+        download.customEnabledCallback = async (nodes) => {
             return (
                 this._node.downloadUrl != null &&
                 (!this._node.properties[RestConstants.CCM_PROP_IO_WWWURL] ||
@@ -475,34 +479,37 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
                                 );
                         }
                         this.isOpenable = this.connectors.connectorSupportsEdit(this._node) != null;
-                        const finish = (set: Mds = null) => {
+                        this.mds.pipe(filter((set) => !!set)).subscribe((set) => {
                             this.similarNodeColumns = MdsHelperService.getColumns(
                                 this.translate,
                                 set,
                                 'search',
                             );
-                            this.mds = set;
+                            console.log(this.mds.value);
+                            this.linkSearchableWidgets();
+                        });
+                        this.mdsService
+                            .getMetadataSet({
+                                repository: this.repository,
+                                metadataSet: this.getMdsId(),
+                            })
+                            .subscribe((mds) => {
+                                this.mds.next(mds);
+                            });
+                        const finish = () => {
                             const nodeRenderContent = jQuery('#nodeRenderContent');
                             nodeRenderContent.html(data.detailsSnippet);
                             this.moveInnerStyleToHead(nodeRenderContent);
                             this.postprocessHtml();
                             this.handleProposal();
                             this.renderHelper.doAll(this._node);
-                            this.linkSearchableWidgets();
                             this.loadNode();
                             this.loadSimilarNodes();
+                            this.linkSearchableWidgets();
                             this.isLoading = false;
                         };
                         this.getSequence(() => {
-                            this.mdsApi.getSet(this.getMdsId(), this.repository).subscribe(
-                                (set) => {
-                                    finish(set);
-                                },
-                                (error) => {
-                                    console.warn('mds fetch error', error);
-                                    finish();
-                                },
-                            );
+                            finish();
                         });
                     }
                     this.isLoading = false;
@@ -635,7 +642,7 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
     setDownloadUrl(url: string) {
         console.info('url from rendering', url);
         if (this.downloadButton != null) {
-            this.downloadButton.customEnabledCallback = () => url != null;
+            this.downloadButton.customEnabledCallback = async () => url != null;
         }
 
         this.downloadUrl = url;
@@ -739,7 +746,7 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
 
     private linkSearchableWidgets() {
         try {
-            this.mds.widgets
+            this.mds.value?.widgets
                 .filter((w: any) => w.isSearchable)
                 .forEach((w: any) => {
                     try {
@@ -776,7 +783,7 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
             params.mds = this.getMdsId();
             params.sidenav = true;
             params.repo = this.repository;
-            params.parameters = JSON.stringify(data);
+            params.filters = JSON.stringify(data);
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], { queryParams: params });
         });
     }

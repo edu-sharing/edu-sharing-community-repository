@@ -34,6 +34,7 @@ import org.alfresco.service.cmr.workflow.WorkflowService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.transaction.TransactionService;
 import org.edu_sharing.alfresco.policy.HomeFolderTool;
+import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -267,9 +268,9 @@ public class AlfrescoBeanConfig {
         return serviceRegistry.getWorkflowService();
     }
 
-  @Bean(name="WebDavAuthenticationFilter")
-  @ConditionalOnMissingBean(name = "WebDavAuthenticationFilter")
-  public DependencyInjectedFilter webDavAuthenticationFilter(){ return applicationContext.getBean("WebDavAuthenticationFilter", DependencyInjectedFilter.class); }
+    @Bean(name="WebDavAuthenticationFilter")
+    @ConditionalOnMissingBean(name = "WebDavAuthenticationFilter")
+    public DependencyInjectedFilter webDavAuthenticationFilter(){ return applicationContext.getBean("WebDavAuthenticationFilter", DependencyInjectedFilter.class); }
 
     @Bean
     public NodeService alfrescoDefaultDbNodeService() {
@@ -306,6 +307,9 @@ public class AlfrescoBeanConfig {
     public ModuleService moduleServiceWithoutSecurity() {
         return serviceRegistry.getModuleService();
     }
+
+    @Bean(name = "organisationService")
+    public OrganisationService organisationService() {return (OrganisationService)applicationContext.getBean("eduOrganisationService");}
 
     @Bean
     public GuestService guestService(){

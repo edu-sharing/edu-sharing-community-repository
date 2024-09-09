@@ -1,5 +1,6 @@
 package org.edu_sharing.restservices;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.core.util.Json;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -101,7 +102,6 @@ public class NodeDao {
             org.alfresco.service.cmr.security.PermissionService.DELETE,
             CCConstants.PERMISSION_COMMENT,
             CCConstants.PERMISSION_DOWNLOAD_CONTENT,
-            CCConstants.PERMISSION_PRINT,
             CCConstants.PERMISSION_FEEDBACK,
             CCConstants.PERMISSION_CC_PUBLISH,
             CCConstants.PERMISSION_READ_ALL
@@ -132,6 +132,10 @@ public class NodeDao {
 
     private static ThreadLocal<Boolean> isGlobalAdmin = new ThreadLocal<>();
     private boolean isPublic;
+    /**
+     * temporary variable to reduce rebuilds for query in search context + collections
+     */
+    BoolQuery readPermissionsQuery;
 
     private NodeDao(org.alfresco.service.cmr.repository.NodeRef nodeRef) throws Throwable {
         this.nodeId = nodeRef.getId();
@@ -146,6 +150,10 @@ public class NodeDao {
         previewData = null;
         ownerUsername = null;
         isCollectionHomePath = false; // TODO do we need to resolve this here?
+    }
+
+    public String getVersion() {
+        return version;
     }
 
     public static NodeStatsEntry.NodeStats getStats(NodeDao node) throws DAOException {
@@ -350,7 +358,12 @@ public class NodeDao {
         SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getId());
         Map<String, String[]> criteriasMap = MetadataSearchHelper.convertCriterias(criterias);
         try {
-            NodeSearch result = transform(repoDao, searchService.search(mdsDao.getMds(), query, criteriasMap, token), filter, transform);
+            BoolQuery readPermissionsQuery = null;
+            if(searchService instanceof SearchServiceElastic) {
+                // improve performance by caching the relatively expensive query
+                readPermissionsQuery = ((SearchServiceElastic)searchService).getReadPermissionsQuery(new BoolQuery.Builder()).build();
+            }
+            NodeSearch result = transform(repoDao, searchService.search(mdsDao.getMds(), query, criteriasMap, token), filter, transform, readPermissionsQuery);
             if (result.getCount() == 0) {
                 // try to search for ignorable properties to be null
                 List<String> removed;
@@ -442,9 +455,11 @@ public class NodeDao {
     public static NodeSearch transform(RepositoryDao repoDao, SearchResultNodeRef search) {
         return transform(repoDao, search, null, null);
     }
-
     public static NodeSearch transform(RepositoryDao repoDao, SearchResultNodeRef search, Filter filter, Function<NodeDao, NodeDao> transform) {
+        return transform(repoDao, search, filter, transform ,null);
+    }
 
+    public static NodeSearch transform(RepositoryDao repoDao, SearchResultNodeRef search, Filter filter, Function<NodeDao, NodeDao> transform, BoolQuery readPermissionsQuery) {
         NodeSearch result = new NodeSearch();
 
         List<NodeRef> data = new ArrayList<>();
@@ -470,6 +485,7 @@ public class NodeDao {
 
                 try {
                     NodeDao nodeDao = new NodeDao(repoDao, nodeRef, filter);
+                    nodeDao.readPermissionsQuery = readPermissionsQuery;
                     if (transform != null) {
                         nodeDao = transform.apply(nodeDao);
                     }
@@ -854,13 +870,17 @@ public class NodeDao {
         } else {
             GuestConfig guestConfig = guestService.getCurrentGuestConfig();
             if(guestConfig != null && guestConfig.isEnabled()) {
-                this.isPublic = usedPermissionService.hasPermission(
-                        storeProtocol,
-                        storeId,
-                        nodeId,
+                try {
+                    this.isPublic = usedPermissionService.hasPermission(
+                            storeProtocol,
+                            storeId,
+                            nodeId,
                         guestConfig.getUsername(),
-                        CCConstants.PERMISSION_READ_ALL
-                );
+                            CCConstants.PERMISSION_READ_ALL
+                    );
+                }catch(Throwable t) {
+                    logger.info("Unexpected error while resolving isPublic for node " + nodeId, t);
+                }
             }
         }
         if (nodeRef != null && nodeRef.getPermissions() != null && !nodeRef.getPermissions().isEmpty()) {
@@ -1864,7 +1884,7 @@ public class NodeDao {
      * @param (String) userName  of Person,
      * @return true || false
      */
-    private boolean checkUserHasPermissionToSeeMail(String userName) {
+    public boolean checkUserHasPermissionToSeeMail(String userName) {
         try {
             if (LightbendConfigCache.getBoolean("repository.privacy.filterMetadataEmail") &&
                     (access == null || !access.contains(CCConstants.PERMISSION_WRITE))) {
@@ -2057,15 +2077,21 @@ public class NodeDao {
 
     private NodeVersionRef transformVersion(String versionLabel) {
 
-        String[] versionTokens = versionLabel.split("\\.");
+        try {
+            String[] versionTokens = versionLabel.split("\\.");
 
-        NodeVersionRef version = new NodeVersionRef();
-        version.setNode(getRef());
-        version.setMajor(Integer.parseInt(versionTokens[0]));
-        version.setMinor(Integer.parseInt(versionTokens[1]));
-        version.setMinor(Integer.parseInt(versionTokens[1]));
-
-        return version;
+            NodeVersionRef version = new NodeVersionRef();
+            version.setNode(getRef());
+            version.setMajor(Integer.parseInt(versionTokens[0]));
+            version.setMinor(Integer.parseInt(versionTokens[1]));
+            version.setMinor(Integer.parseInt(versionTokens[1]));
+            return version;
+        } catch(Throwable e) {
+            logger.warn("Could not parse version for node " + nodeId, e);
+            NodeVersionRef version = new NodeVersionRef();
+            version.setNode(getRef());
+            return version;
+        }
     }
 
     public Map<String, Object> getNativeProperties() {
@@ -2522,7 +2548,9 @@ public class NodeDao {
         }
         return converted;
     }
-
+    public static List<NodeRef> convertEduNodeRef(RepositoryDao repoDao, List<org.edu_sharing.service.model.NodeRef> refs) {
+        return refs.stream().map(ref -> new NodeRef(repoDao, ref.getNodeId())).collect(Collectors.toList());
+    }
     public void reportNode(String reason, String userEmail, String userComment) throws DAOException {
         try {
             String type = nodeService.getType(nodeId);

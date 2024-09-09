@@ -41,7 +41,6 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.InitHelper;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
-import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
 import org.edu_sharing.repository.server.tracking.TrackingService;
 import org.edu_sharing.repository.server.tracking.TrackingService.TrackingBufferFactory;
 import org.edu_sharing.repository.server.tracking.buffer.FileRingBuffer;
@@ -86,18 +85,6 @@ public class MCAlfrescoManager extends ContextLoaderListener {
 
 			super.setContextInitializers(new EduSharingContextInitializer());
 			super.contextInitialized(servletContextEvent);
-			logger.info("load edu groups");
-			
-			/**
-			 * only refresh when size is null, to prevent that all clusternodes try to clear and fill again, so in best case only the first cluster node fill's this 
-			 */
-			if(EduGroupCache.getKeys().size() == 0){
-				logger.info("starting filling edugroup cache");
-				EduGroupCache.refresh();
-			}else{
-				logger.info("edugroup cache has "+EduGroupCache.getKeys().size() +" entries, getting(got) cache entries by another cluster node");
-			}
-
 
 
 			//init the system folders so that are created with a admin
@@ -113,7 +100,11 @@ public class MCAlfrescoManager extends ContextLoaderListener {
 			}catch(Throwable t) {
 				logger.error("init of config groups failed: " + t.getMessage(), t);
 			}
-
+			try {
+				InitHelper.initPersons();
+			}catch(Throwable t) {
+				logger.error("init of config persons failed: " + t.getMessage(), t);
+			}
 			//init ToolPermisssions
 			ToolPermissionServiceFactory.getInstance().init();
 

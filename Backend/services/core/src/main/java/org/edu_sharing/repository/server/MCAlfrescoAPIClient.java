@@ -586,7 +586,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
             return result == null ? null : result.toString();
         } else if (_value instanceof List && ((List) _value).isEmpty()) {
             // cause empty list toString returns "[]"
-            return "";
+			return null;
         } else if (_value instanceof String) {
             return (String) _value;
         } else if (_value instanceof Number) {
@@ -1903,6 +1903,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
     public void writeContent(final StoreRef store, final String nodeID, final InputStream content, final String mimetype, String _encoding,
                              final String property) throws Exception {
+        writeContent(store,nodeID, content,mimetype, _encoding,property, null);
+    }
+    public void writeContent(final StoreRef store, final String nodeID, final InputStream content, final String mimetype, String _encoding,
+                             final String property, final Runnable onComplete) throws Exception {
 
         final String encoding = (_encoding == null) ? "UTF-8" : _encoding;
         log.debug("called nodeID:" + nodeID + " store:" + store + " mimetype:" + mimetype + " property:" + property);
@@ -1917,6 +1921,9 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                         ", URL:" + contentWriter.getContentData().getContentUrl() +
                         ", MimeType:" + contentWriter.getContentData().getMimetype() + "" +
                         ", ContentData ToString:" + contentWriter.getContentData().toString());
+                        if(onComplete != null) {
+                            onComplete.run();
+                        }
             });
 
             String finalMimeType = mimetype;
@@ -2613,13 +2620,9 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
     public void setUserPassword(String userName, String newPassword) {
 
         MutableAuthenticationService authenticationService = serviceRegistry.getAuthenticationService();
-
         if (authenticationService.isAuthenticationMutable(userName)) {
-
             authenticationService.setAuthentication(userName, newPassword.toCharArray());
-
         } else {
-
             authenticationService.createAuthentication(userName, newPassword.toCharArray());
         }
     }
@@ -2627,11 +2630,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
     public void updateUserPassword(String userName, String oldPassword, String newPassword) {
 
         MutableAuthenticationService authenticationService = serviceRegistry.getAuthenticationService();
-
         if (authenticationService.isAuthenticationMutable(userName)) {
-
             authenticationService.updateAuthentication(userName, oldPassword.toCharArray(), newPassword.toCharArray());
-
         }
     }
 
@@ -3279,7 +3279,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                         QName.createQName(CCConstants.CM_NAME));
 		String extension = FilenameUtils.getExtension(originalName);
 		// keep the filename so that a possible mimetype verification is valid
-		nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(CCConstants.CM_NAME), UUID.randomUUID().toString() + "." + extension);
+		nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(CCConstants.CM_NAME), UUID.randomUUID().toString() +(StringUtils.isEmpty(extension) ? "" : ("." + extension)));
         try {
             nodeService.moveNode(
                     new NodeRef(storeRef, nodeId),
@@ -3333,71 +3333,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                 QName.createQName(assocName), copyChildren);
 
         return copyNodeRef.getId();
-    }
-
-    /**
-     * walk through all parents until you find a folder that is used as
-     * edugrouphomedir of a edugroup return the Group
-     *
-     */
-    public Group getEduGroupContextOfNode(String nodeId) {
-
-        NodeRef result = null;
-
-        NodeRef nodeRef = new NodeRef(storeRef, nodeId);
-        QName nodeType = null;
-        QName mapType = QName.createQName(CCConstants.CCM_TYPE_MAP);
-
-        Collection<NodeRef> eduGroupNodeRefs = new VirtualEduGroupFolderTool(serviceRegistry, nodeService).getEduGroupNodeRefs();
-
-        // nodeRefEduGroupFolder , noderefEduGroup
-        Map<NodeRef, NodeRef> eduGroupEduGroupFolderMap = new HashMap<>();
-        for (NodeRef eduGroupNodeRef : eduGroupNodeRefs) {
-            eduGroupEduGroupFolderMap.put((NodeRef) nodeService.getProperty(eduGroupNodeRef, QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR)),
-                    eduGroupNodeRef);
-        }
-
-        Group group = null;
-        try {
-            do {
-                ChildAssociationRef parentAssocRef = nodeService.getPrimaryParent(nodeRef);
-                nodeRef = (parentAssocRef == null) ? null : parentAssocRef.getParentRef();
-                if (nodeRef != null) {
-                    nodeType = nodeService.getType(nodeRef);
-                }
-
-                NodeRef groupNodeRef = eduGroupEduGroupFolderMap.get(nodeRef);
-                if ((groupNodeRef != null)) {
-                    result = groupNodeRef;
-
-                }
-
-            } while (nodeRef != null && mapType.equals(nodeType) && result == null);
-
-            if (result != null) {
-                group = new Group();
-                String authorityName = (String) nodeService.getProperty(result, ContentModel.PROP_AUTHORITY_NAME);
-                group.setName(authorityName);
-                group.setDisplayName((String) nodeService.getProperty(result, ContentModel.PROP_AUTHORITY_DISPLAY_NAME));
-                group.setRepositoryId(appInfo.getAppId());
-                group.setNodeId(result.getId());
-                group.setAuthorityType(AuthorityType.getAuthorityType(group.getName()).name());
-                group.setScope((String) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_SCOPE_TYPE)));
-                NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(authorityName);
-                if (authorityNodeRef != null) {
-                    String groupType = (String) nodeService.getProperty(authorityNodeRef, QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE));
-                    if (groupType != null) {
-                        group.setGroupType(groupType);
-                    }
-                }
-            }
-        } catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
-            // maybe while doing nodeService.getPrimaryParent(nodeRef); and
-            // landing in an folder where i have no read permissions
-            log.debug(e.getMessage());
-        }
-
-        return group;
     }
 
     public Map<String, String> checkAndCreateShadowUser(String username, String email, String repId) throws Exception {
@@ -3832,35 +3767,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         } catch (AlfrescoRuntimeException e) {
             throw (Exception) e.getCause();
         }
-    }
-
-    public void unbindEduGroupFolder(String groupName, String folderId) throws Exception {
-
-        serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-
-                (RetryingTransactionCallback<Void>) () -> {
-                    if (isAdmin()) {
-
-                        AuthorityService authorityService = serviceRegistry.getAuthorityService();
-                        NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(PermissionService.GROUP_PREFIX + groupName);
-
-                        if (authorityNodeRef == null) {
-                            return null;
-                        }
-
-                        NodeService nodeService = serviceRegistry.getNodeService();
-                        NodeRef folderNodeRef = new NodeRef(storeRef, folderId);
-
-                        if (!nodeService.exists(folderNodeRef)) {
-                            return null;
-                        }
-
-                        EduGroupTool.processEduGroupMicroCommand("COMMAND REMOVE " + authorityNodeRef + " " + folderNodeRef);
-                    }
-
-                    return null;
-                }, false);
-
     }
 
     public InputStream getContent(String nodeId) {

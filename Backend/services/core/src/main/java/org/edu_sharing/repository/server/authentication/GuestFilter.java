@@ -1,5 +1,8 @@
 package org.edu_sharing.repository.server.authentication;
 
+import java.io.IOException;
+import java.util.Map;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -15,8 +18,10 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.edu_sharing.spring.security.openid.SilentLoginModeRedirect;
 
 import java.io.IOException;
 import java.util.Map;
@@ -68,8 +73,12 @@ public class GuestFilter implements jakarta.servlet.Filter {
                 if (currentGuestConfig != null) {
                     if (!currentGuestConfig.isEnabled()) {
                         logger.debug("guest filter disabled for context " + ConfigServiceFactory.getCurrentDomain());
-                    } else {
-                        Map<String, String> authInfoGuest = authTool.createNewSession(currentGuestConfig.getUsername(), currentGuestConfig.getPassword());
+					}
+					else {
+						if(SilentLoginModeRedirect.process(httpRequest, httpresponse)){
+							return;
+						}
+						Map<String, String> authInfoGuest = authTool.createNewSession(currentGuestConfig.getUsername(), currentGuestConfig.getPassword());
                         authTool.storeAuthInfoInSession(authInfoGuest.get(CCConstants.AUTH_USERNAME), authInfoGuest.get(CCConstants.AUTH_TICKET), CCConstants.AUTH_TYPE_DEFAULT, session);
 
                         // prewarm tp session cache
@@ -78,6 +87,12 @@ public class GuestFilter implements jakarta.servlet.Filter {
                 } else {
                     logger.debug("no guest defined");
                 }
+			}else if(authentication != null){
+				if(AuthorityServiceFactory.getLocalService().isGuest()){
+					if(SilentLoginModeRedirect.process(httpRequest, httpresponse)){
+						return;
+					}
+				}
             }
         } catch (Throwable e) {
             logger.info("guest credentials seem to be wrong, check your app-info: " + e.getMessage());

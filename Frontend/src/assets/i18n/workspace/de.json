@@ -168,7 +168,6 @@
         "ADDITIONAL_PERMISSIONS_INFO": "Legen Sie fest, ob und falls ja, welche Berechtigungen für dieses Material indirekt über Sammlungen weitergegeben werden dürfen",
         "PERMISSION": {
           "ReadAll": "Betrachten (Vorschaubild, Metadaten & Inhaltsanzeige)",
-          "Print": "Drucken (nur für PDF-Dateien)",
           "DownloadContent": "Herunterladen"
         }
       },
@@ -348,7 +347,8 @@
       "PASSWORD": "Passwortschutz",
       "PASSWORD_INFO": "Dieser Link wird mit einem Passwort geschützt",
       "PASSWORD_PLACEHOLDER": "Passwort angeben...",
-      "PASSWORD_PLACEHOLDER_EDIT": "Passwort ist schon gesetzt",
+      "PASSWORD_PLACEHOLDER_EDIT": "Passwort bereits gesetzt",
+      "PASSWORD_EDIT_HINT": "Durch Eingabe in das Feld wird ein neues Passwort gesetzt",
       "DISABLED": "Linkfreigabe ist deaktiviert",
       "LINK": "Link zum Objekt",
       "ACTIVATE": "Linkfreigabe aktivieren",

@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
-import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -63,7 +62,6 @@ public class MetadataTemplateRenderer {
 	private Map<String, String[]> properties;
 	private static Logger logger=Logger.getLogger(MetadataTemplateRenderer.class);
 
-	private final GuestService guestService;
 
 	public MetadataTemplateRenderer(MetadataSet mds, NodeRef nodeRef, String userName, String type, List<String> aspects, Map<String, Object> properties) {
 		this.mds = mds;
@@ -80,7 +78,6 @@ public class MetadataTemplateRenderer {
 		this.properties = cleanupTextMultivalueProperties(
 				propertiesNative, renderingMode.equals(RenderingMode.HTML)
 		);
-		guestService = AlfAppContextGate.getApplicationContext().getBean(GuestService.class);
 	}
 
 	public Map<String, String[]> getProcessedProperties(){
@@ -90,8 +87,7 @@ public class MetadataTemplateRenderer {
 		Map<String, String[]> propsConverted = new HashMap<>();
 		for(String key : props.keySet()){
 			String keyLocal= CCConstants.getValidLocalName(key);
-
-			if(props.get(key) == null) continue;
+			if(keyLocal == null || props.get(key) == null) continue;
 
 			String[] values=ValueTool.getMultivalue(props.get(key).toString());
 			propsConverted.put(keyLocal, values);
@@ -385,7 +381,7 @@ public class MetadataTemplateRenderer {
 									}
 								}
 								if (persistentIdUrl != null && !persistentIdUrl.isEmpty()) {
-									widgetHtml.append("<br><a href=\"").append(persistentIdUrl)
+									widgetHtml.append("<a href=\"").append(persistentIdUrl)
 											.append("\" target=\"blank\">")
 											.append(MetadataHelper.getTranslation("vcard_link_persistent_id"))
 											.append("</a>");
@@ -452,7 +448,6 @@ public class MetadataTemplateRenderer {
 					+" "+PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_DELETE));
 			if(
 					ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_MATERIAL_FEEDBACK) &&
-							!guestService.isGuestUser(userName) &&
 							PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeRef.getId(),CCConstants.PERMISSION_FEEDBACK) &&
 							!PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeRef.getId(),CCConstants.PERMISSION_DELETE)
 			){

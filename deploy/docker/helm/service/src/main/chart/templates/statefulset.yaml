@@ -27,8 +27,8 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      initContainers:
       {{- if (default .Values.global.cluster.storage.share.permission .Values.persistence.share.permission) }}
+      initContainers:
       - name: {{ include "edusharing_common_lib.names.name" . }}-init-permission
         image: {{ include "edusharing_common_lib.images.common" . }}{{ .Values.init.permission.image.name }}:{{ .Values.init.permission.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
@@ -60,6 +60,44 @@ spec:
         {{- if .Values.persistence.share.safe.enabled }}
         - name: share-safe
           mountPath: /opt/alfresco/alf_safe
+        {{- end }}
+        {{- with .Values.init.permission.startupProbe }}
+        startupProbe:
+          exec:
+            command:
+              - "/bin/sh"
+              - "-c"
+              - "echo startupProbe > /dev/null"
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.init.permission.livenessProbe }}
+        livenessProbe:
+          exec:
+            command:
+              - "/bin/sh"
+              - "-c"
+              - "echo livenessProbe > /dev/null"
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.init.permission.readinessProbe }}
+        readinessProbe:
+          exec:
+            command:
+              - "/bin/sh"
+              - "-c"
+              - "echo readinessProbe > /dev/null"
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          timeoutSeconds: {{ .timeoutSeconds }}
         {{- end }}
         {{- with .Values.init.permission.resources }}
         resources: {{ toYaml . | nindent 10 }}
@@ -311,6 +349,44 @@ spec:
             subPath: proxy-config
           - name: temp-proxy
             mountPath: /var/lib/varnish
+        {{- with .Values.sidecar.proxyMetrics.startupProbe }}
+        startupProbe:
+          exec:
+            command:
+              - "/bin/sh"
+              - "-c"
+              - "echo startupProbe > /dev/null"
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.sidecar.proxyMetrics.livenessProbe }}
+        livenessProbe:
+          exec:
+            command:
+              - "/bin/sh"
+              - "-c"
+              - "echo livenessProbe > /dev/null"
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.sidecar.proxyMetrics.readinessProbe }}
+        readinessProbe:
+          exec:
+            command:
+              - "/bin/sh"
+              - "-c"
+              - "echo readinessProbe > /dev/null"
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
         {{- with .Values.sidecar.proxyMetrics.resources }}
         resources: {{ toYaml . | nindent 10 }}
         {{- end }}
@@ -355,15 +431,12 @@ spec:
       {{- end }}
       volumes:
       - name: share-config
-        persistentVolumeClaim:
-          claimName: {{ include "edusharing_repository_service.pvc.share.config" . }}
+        {{ tpl .Values.persistence.share.config.type . | nindent 8 }}
       - name: share-data
-        persistentVolumeClaim:
-          claimName: {{ include "edusharing_repository_service.pvc.share.data" . }}
+        {{ tpl .Values.persistence.share.data.type . | nindent 8 }}
       {{- if .Values.persistence.share.safe.enabled }}
       - name: share-safe
-        persistentVolumeClaim:
-          claimName: {{ include "edusharing_repository_service.pvc.share.safe" . }}
+        {{ tpl .Values.persistence.share.safe.type . | nindent 8 }}
       {{- end }}
       - name: file
         configMap:

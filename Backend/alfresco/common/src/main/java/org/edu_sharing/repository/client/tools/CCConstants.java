@@ -479,6 +479,8 @@ public class CCConstants {
 
 	public final static String CCM_ASPECT_EDUGROUP = "{http://www.campuscontent.de/model/1.0}edugroup";
 
+	public final static String CCM_ASPECT_EDUGROUP_FOLDER = "{http://www.campuscontent.de/model/1.0}edugroup_folder";
+
 	public final static String CCM_ASPECT_MAP_REF = "{http://www.campuscontent.de/model/1.0}map_ref";
 
 	public final static String CCM_ASPECT_GROUPEXTENSION = "{http://www.campuscontent.de/model/1.0}groupExtension";
@@ -521,6 +523,8 @@ public class CCConstants {
     public final static String CCM_PROP_SERVICE_NODE_DATA = "{http://www.campuscontent.de/model/1.0}service_node_data";
 
     public final static String CCM_PROP_EDUGROUP_EDU_HOMEDIR = "{http://www.campuscontent.de/model/1.0}edu_homedir";
+
+	public final static String CCM_PROP_EDUGROUP_FOLDER_ORGANISATION = "{http://www.campuscontent.de/model/1.0}edu_organisation";
 
 	public final static String CCM_ASPECT_SHARES = "{http://www.campuscontent.de/model/1.0}shares";
 
@@ -1249,7 +1253,6 @@ public class CCConstants {
 	 * currently allowed values in this field:
 	 * CCConstants.PERMISSION_READ_ALL
 	 * CCConstants.PERMISSION_DOWNLOAD_CONTENT
-	 * CCConstants.PERMISSION_PRINT
 	 */
 	public final static String CCM_PROP_RESTRICTED_ACCESS_PERMISSIONS ="{http://www.campuscontent.de/model/1.0}restricted_access_permissions";
 
@@ -1755,7 +1758,7 @@ public class CCConstants {
 	public final static String PERMISSION_READ_ALL = "ReadAll";
 
 	public final static String PERMISSION_DOWNLOAD_CONTENT = "DownloadContent";
-	public final static String PERMISSION_PRINT = "Print";
+	public final static String PERMISSION_EMBED = "Embed";
 	public final static String PERMISSION_READ_PREVIEW = "ReadPreview";
 
 	public final static String PERMISSION_COMMENT = "Comment";
@@ -1977,7 +1980,6 @@ public class CCConstants {
 			permission.add(PERMISSION_READ_PREVIEW);
 			permission.add(PERMISSION_READ_ALL);
 			permission.add(PERMISSION_DOWNLOAD_CONTENT);
-			permission.add(PERMISSION_PRINT);
 			permission.add(PERMISSION_COMMENT);
 			permission.add(PERMISSION_FEEDBACK);
 			permission.add(PERMISSION_RATE);
@@ -2251,6 +2253,9 @@ public class CCConstants {
 	public static final String VERSION_COMMENT_BULK_MIGRATION = "BULK_MIGRATION";
 	public static final String VERSION_COMMENT_BULK_UPDATE_RESYNC = "BULK_UPDATE_RESYNC";
 	public static final String VERSION_COMMENT_REMOTE_OBJECT_INIT = "REMOTE_OBJECT_INIT";
+
+	public static final String ELASTICSEARCH_SYNONYMSET_PREFIX = "es-synonym-set";
+	public static final String ELASTICSEARCH_ANALYZER_PREFIX = "synonyms";
 
 	/**
 	 * Methos that set all the Properties for ProfileSettings

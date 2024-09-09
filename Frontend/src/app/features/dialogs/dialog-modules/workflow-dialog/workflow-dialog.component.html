@@ -12,6 +12,7 @@
       ></es-authority-search-input>
       <mat-form-field class="status-select">
         <mat-select
+          #statusSelect
           [value]="status"
           (valueChange)="setStatus($event)"
           [style.--status-color]="status.color"

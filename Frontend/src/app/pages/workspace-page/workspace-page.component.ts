@@ -2,7 +2,13 @@ import { trigger } from '@angular/animations';
 import { Component, HostListener, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ConfigService, UserService } from 'ngx-edu-sharing-api';
+import {
+    ConfigService,
+    HOME_REPOSITORY,
+    MdsDefinition,
+    MdsService,
+    UserService,
+} from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     AppContainerService,
@@ -41,19 +47,16 @@ import {
     RestConnectorsService,
     RestConstants,
     RestHelper,
-    RestIamService,
-    RestMdsService,
     RestNodeService,
     RestToolService,
     SessionStorageService,
     UIService,
 } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
-import { mapVCard } from '../../core-module/rest/services/rest-iam.service';
+import { mapVCard, RestIamService } from '../../core-module/rest/services/rest-iam.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config';
 import { OK } from '../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
-import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import {
@@ -70,6 +73,7 @@ import { canDragDrop, canDropOnNode } from './workspace-utils';
 import { WorkspaceService } from './workspace.service';
 import { ThemeService } from '../../services/theme.service';
 import { RecycleMainComponent } from './recycle/recycle.component';
+import { DialogsService } from 'src/app/features/dialogs/dialogs.service';
 
 @Component({
     selector: 'es-workspace-page',
@@ -188,7 +192,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         private loadingScreen: LoadingScreenService,
         private localEvents: LocalEventsService,
         private mainNavService: MainNavService,
-        private mds: RestMdsService,
+        private mds: MdsService,
         private ngZone: NgZone,
         private node: RestNodeService,
         private nodeHelper: NodeHelperService,
@@ -332,9 +336,9 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
 
     handleDrop(event: { target: DropTarget; source: DropSource<Node> }) {
         if (event.source.mode === 'copy') {
-            this.copyNode(event.target, event.source.element);
+            this.copyNode(event.target, event.source.element?.slice());
         } else {
-            this.moveNode(event.target, event.source.element);
+            this.moveNode(event.target, event.source.element?.slice());
         }
         /*
         this.dialogTitle="WORKSPACE.DRAG_DROP_TITLE";
@@ -565,6 +569,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
 
     private async showNodeInCurrentFolder(id: string) {
         // TODO: Consider moving this to `NodeDataSource`.
+        await UIHelper.waitForComponent(this.ngZone, this, 'explorer').pipe(first()).toPromise();
         const visibleNodes = await this.explorer.dataSource
             .connect()
             .pipe(first((data) => data?.length > 1))
@@ -751,10 +756,13 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
             this.node.getNodeMetadata(id).subscribe(
                 (data: NodeWrapper) => {
                     this.mds
-                        .getSet(
-                            data.node.metadataset ? data.node.metadataset : RestConstants.DEFAULT,
-                        )
-                        .subscribe((mds: any) => {
+                        .getMetadataSet({
+                            repository: HOME_REPOSITORY,
+                            metadataSet: data.node.metadataset
+                                ? data.node.metadataset
+                                : RestConstants.DEFAULT,
+                        })
+                        .subscribe((mds: MdsDefinition) => {
                             if (mds.create) {
                                 this.allowBinary = !mds.create.onlyMetadata;
                                 if (!this.allowBinary) {
