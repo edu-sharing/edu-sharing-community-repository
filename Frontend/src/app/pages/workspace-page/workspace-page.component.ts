@@ -334,11 +334,30 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         );
     }
 
-    handleDrop(event: { target: DropTarget; source: DropSource<Node> }) {
-        if (event.source.mode === 'copy') {
-            this.copyNode(event.target, event.source.element?.slice());
-        } else {
-            this.moveNode(event.target, event.source.element?.slice());
+    async handleDrop(event: { target: DropTarget; source: DropSource<Node> }) {
+        if (event.source.mode === 'copy' || event.source.mode === 'move') {
+            let parent: Node;
+            try {
+                parent = (
+                    await this.node
+                        .getNodeMetadata(event.source.element?.[0]?.parent.id, [RestConstants.ALL])
+                        .toPromise()
+                ).node;
+            } catch (e) {
+                console.info(e);
+            }
+            const dialogRef = await this.dialogs.openCopyMoveDialog(
+                parent,
+                event.source,
+                event.target,
+            );
+            dialogRef.afterClosed().subscribe((result) => {
+                if (result === 'WORKSPACE.COPY_MOVE.MOVE') {
+                    this.moveNode(event.target, event.source.element?.slice());
+                } else if (result === 'WORKSPACE.COPY_MOVE.COPY') {
+                    this.copyNode(event.target, event.source.element?.slice());
+                }
+            });
         }
         /*
         this.dialogTitle="WORKSPACE.DRAG_DROP_TITLE";
