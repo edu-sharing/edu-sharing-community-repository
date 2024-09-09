@@ -771,7 +771,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             if (this.edit.profile?.vcard) {
                 editStore.profile.vcard = this.edit.profile.vcard.copy();
             }
-            const password = this.editDetails.password?.trim();
+            const password = this.editDetails.password?.trim() || null;
             editStore.profile.sizeQuota *= 1024 * 1024;
             // we allow fully empty password since this means the backend will not create an authentication
             // useful for system managed users like i.e. guests
