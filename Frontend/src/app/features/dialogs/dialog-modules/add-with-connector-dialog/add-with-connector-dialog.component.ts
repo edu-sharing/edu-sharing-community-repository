@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ViewChild } from '@angular/core';
 import { Connector } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -9,6 +9,8 @@ import {
     AddWithConnectorDialogData,
     AddWithConnectorDialogResult,
 } from './add-with-connector-dialog-data';
+import { MdsEditorComponent } from '../../../mds/mds-editor/mds-editor.component';
+import { MdsEditorWrapperComponent } from '../../../mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 
 @Component({
     selector: 'es-add-with-connector-dialog',
@@ -16,6 +18,7 @@ import {
     styleUrls: ['./add-with-connector-dialog.component.scss'],
 })
 export class AddWithConnectorDialogComponent {
+    @ViewChild(MdsEditorWrapperComponent) mdsEditorRef: MdsEditorWrapperComponent;
     readonly connector = this.processConnector(this.data.connector);
     private nameSubject = new BehaviorSubject<string>(this.data.name ?? '');
     get name(): string {
@@ -38,7 +41,9 @@ export class AddWithConnectorDialogComponent {
     }
 
     private create() {
-        if (!this.name.trim()) {
+        if (this.connector.mdsGroup && !this.mdsEditorRef.mdsEditorInstance.getCanSave()) {
+            return;
+        } else if (!this.name.trim()) {
             return;
         }
         this.dialogRef.close({ name: this.name, type: this.getType() });
@@ -66,6 +71,9 @@ export class AddWithConnectorDialogComponent {
         this.nameSubject
             .pipe(first((name) => !!name))
             .subscribe(() => this.dialogRef.patchConfig({ closable: Closable.Standard }));
+        this.mdsEditorRef?.mdsEditorInstance
+            .observeCanSave()
+            .subscribe((can) => (createButton.disabled = !can));
     }
 
     getType() {

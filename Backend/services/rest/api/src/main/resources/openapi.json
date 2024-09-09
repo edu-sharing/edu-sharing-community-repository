@@ -1070,6 +1070,9 @@
           "id": {
             "type": "string"
           },
+          "mdsGroup": {
+            "type": "string"
+          },
           "onlyDesktop": {
             "type": "boolean"
           },
@@ -1121,6 +1124,12 @@
       "ConnectorList": {
         "properties": {
           "connectors": {
+            "items": {
+              "$ref": "#/components/schemas/Connector"
+            },
+            "type": "array"
+          },
+          "simpleConnectors": {
             "items": {
               "$ref": "#/components/schemas/Connector"
             },

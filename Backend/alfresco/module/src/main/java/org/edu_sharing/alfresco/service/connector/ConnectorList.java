@@ -1,17 +1,13 @@
 package org.edu_sharing.alfresco.service.connector;
 
+import lombok.Data;
+
 import java.io.Serializable;
 import java.util.List;
 
+@Data
 public class ConnectorList implements Serializable {
 
 	List<Connector> connectors;
-		
-	public List<Connector> getConnectors() {
-		return connectors;
-	}
-	
-	public void setConnectors(List<Connector> connectors) {
-		this.connectors = connectors;
-	}
+	List<SimpleConnector> simpleConnectors;
 }

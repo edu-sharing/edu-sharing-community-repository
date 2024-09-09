@@ -137,7 +137,9 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             .observeConnectorList()
             .pipe(takeUntil(this.destroyed))
             .subscribe((list) => {
-                this.connectorList = this.connectors.filterConnectors(list?.connectors);
+                this.connectorList = this.connectors
+                    .filterConnectors(list?.connectors)
+                    .concat(this.connectors.filterConnectors(list?.simpleConnectors));
                 this.updateOptions();
             });
         this.connector.isLoggedIn(false).subscribe((login) => {
