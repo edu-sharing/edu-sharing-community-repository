@@ -42,7 +42,7 @@ public class OpenIdConfigService {
         Config defaultConfig = rootConfig.getConfig(REPOSITORY_OPENID_CONFIG_PATH);
         Config config = rootConfig.getConfig(contextConfigPath).withFallback(defaultConfig);
 
-        return ConfigBeanFactory.create(config, OpenIdConfig.class);
+        return createConfig(context, config);
     }
 
     public List<OpenIdConfig> getAllConfigs(){
@@ -54,15 +54,22 @@ public class OpenIdConfigService {
         if (rootConfig.hasPath(REPOSITORY_CONTEXT_CONFIG_PATH)) {
             ConfigObject contextObject = rootConfig.getObject(REPOSITORY_CONTEXT_CONFIG_PATH);
             Config contextConfig = contextObject.toConfig();
-            contextObject.keySet().stream()
-                    .map(x->String.join(".", x.contains(".") ? String.format("\"%s\"", x) : x, REPOSITORY_OPENID_CONFIG_PATH))
-                    .filter(contextConfig::hasPath)
-                    .map(contextConfig::getConfig)
-                    .map(x->x.withFallback(defaultConfig))
-                    .map(config -> ConfigBeanFactory.create(config, OpenIdConfig.class))
-                    .forEach(configs::add);
+
+            for(String contextId: contextObject.keySet()) {
+                String configPath = String.join(".", contextId.contains(".") ? String.format("\"%s\"", contextId) : contextId, REPOSITORY_OPENID_CONFIG_PATH);
+                Config openIdConfig = contextConfig.hasPath(configPath)
+                        ? contextConfig.getConfig(configPath).withFallback(defaultConfig)
+                        : defaultConfig;
+                configs.add(createConfig(contextId, openIdConfig));
+            }
         }
         return configs;
+    }
+
+    private OpenIdConfig createConfig(String contextId, Config config) {
+        OpenIdConfig openIdConfig = ConfigBeanFactory.create(config, OpenIdConfig.class);
+        openIdConfig.setContextId(contextId);
+        return openIdConfig;
     }
 
     private static String getContextConfigPath(String context, String subPath) {
