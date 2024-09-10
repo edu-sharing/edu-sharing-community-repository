@@ -303,7 +303,7 @@ public class AuthenticationFilter implements jakarta.servlet.Filter {
 		}
 		try{
 			AuthenticationTool authTool = RepoFactory.getAuthenticationToolInstance(null);
-			Map<String,String> result = authTool.createNewSession(guestConfig.getUsername(), guestConfig.getPassword());
+			Map<String,String> result = authTool.createNewSession(guestConfig.getUsername());
 			
 			//save ticket in session
 			HttpSession session = req.getSession();
