@@ -1756,14 +1756,6 @@
         },
         "type": "object"
       },
-      "Guest": {
-        "properties": {
-          "enabled": {
-            "type": "boolean"
-          }
-        },
-        "type": "object"
-      },
       "HandleParam": {
         "properties": {
           "doiService": {
@@ -6562,9 +6554,6 @@
           },
           "frontpage": {
             "$ref": "#/components/schemas/ConfigFrontpage"
-          },
-          "guest": {
-            "$ref": "#/components/schemas/Guest"
           },
           "helpMenuOptions": {
             "items": {
