@@ -81,6 +81,7 @@ public class GuestServiceImpl implements GuestService, ApplicationListener<Refre
             Config contextConfig = contextObject.toConfig();
             contextObject.keySet().stream()
                     .map(x -> String.join(".", x.contains(".") ? String.format("\"%s\"", x) : x, REPOSITORY_GUEST_CONFIG_PATH))
+                    .filter(contextConfig::hasPath)
                     .map(contextConfig::getConfig)
                     .map(x -> x.withFallback(defaultConfig))
                     .map(config -> ConfigBeanFactory.create(config, GuestConfig.class))
