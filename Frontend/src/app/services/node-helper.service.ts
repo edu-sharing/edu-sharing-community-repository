@@ -621,7 +621,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
     }
 
     propertiesFromConnector(event: any) {
-        const name = event.name + '.' + event.type.filetype;
+        const name = event.name + (event.type.filetype ? '.' + event.type.filetype : '');
         const prop = RestHelper.createNameProperty(name);
         prop[RestConstants.LOM_PROP_TECHNICAL_FORMAT] = [event.type.mimetype];
         if (event.type.mimetype == 'application/zip') {

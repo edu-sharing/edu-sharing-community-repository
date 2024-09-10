@@ -7,16 +7,24 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.RequestBuilder;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.connector.Connector;
 import org.edu_sharing.alfresco.service.connector.ConnectorFileType;
 import org.edu_sharing.alfresco.service.connector.ConnectorService;
+import org.edu_sharing.alfresco.service.connector.SimpleConnector;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
@@ -38,15 +46,19 @@ import org.springframework.context.ApplicationContext;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 public class ConnectorServlet extends HttpServlet  {
 
 	private static Logger logger = Logger.getLogger(ConnectorServlet.class);
-	
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String connectorId = req.getParameter("connectorId");
@@ -93,13 +105,14 @@ public class ConnectorServlet extends HttpServlet  {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,e.getMessage());
 			return;
 		}
-		
+
 		Connector connector = null;
 		if(connectorId != null) {
-			for(Connector con : ConnectorServiceFactory.getConnectorList().getConnectors()){
-				if(con.getId().equals(connectorId)){
-					connector = con;
-				}
+			connector = ConnectorServiceFactory.getConnectorList().getConnectors().stream().filter(c -> c.getId().equals(connectorId)).findAny().orElse(null);
+			Optional<SimpleConnector> simpleConnector = ConnectorServiceFactory.getConnectorList().getSimpleConnectors().stream().filter(c -> c.getId().equals(connectorId)).findAny();
+			if(simpleConnector.isPresent()) {
+				handleSimpleConnector(req, resp, simpleConnector.orElse(null), nodeRefOriginal);
+				return;
 			}
 			if(connector == null){
 				logger.error("no valid connector");
@@ -204,6 +217,35 @@ public class ConnectorServlet extends HttpServlet  {
 
 
 
+	}
+
+	private void handleSimpleConnector(HttpServletRequest req, HttpServletResponse resp, SimpleConnector simpleConnector, NodeRef nodeRefOriginal) throws UnsupportedEncodingException {
+		RequestBuilder builder = null;
+		String url = replaceSimpleConnectorAttributes(req, simpleConnector.getApi().getUrl(), (data) -> URLEncoder.encode(StringUtils.join(data)));
+		if(simpleConnector.getApi().getMethod().equals(SimpleConnector.SimpleConnectorApi.Method.Post)) {
+			HttpPost post = new HttpPost(url);
+			if(simpleConnector.getApi().getBodyType() == null) {
+
+			} else if(simpleConnector.getApi().getBodyType().equals(SimpleConnector.SimpleConnectorApi.BodyType.Form)) {
+				List<? extends NameValuePair> data = simpleConnector.getApi().getBody().entrySet().stream().map((e) -> new BasicNameValuePair(e.getKey(), replaceSimpleConnectorAttributes(req, e.getValue().toString(), StringUtils::join))).collect(Collectors.toList());
+				post.setEntity(new UrlEncodedFormEntity(data));
+			}
+			builder = RequestBuilder.copy(post);
+		}
+		String result = new HttpQueryTool().query(builder);
+	}
+
+	private interface Formatter {
+		String format(String[] value);
+	}
+	private String replaceSimpleConnectorAttributes(HttpServletRequest req, String strToReplace, Formatter format) {
+        for (Iterator<String> it = req.getParameterNames().asIterator(); it.hasNext(); ) {
+            String parameter = it.next();
+			strToReplace = strToReplace.replace("{{" + parameter + "}}", format.format(req.getParameterValues(parameter)));
+        }
+		// replace other, unkown attributes with empty value
+		strToReplace = strToReplace.replaceAll("\\{\\{.*}}", "");
+		return strToReplace;
 	}
 
 	public void pushToConnector(JSONObject jsonObject, ApplicationInfo connectorAppInfo, HttpServletResponse resp) throws Exception{

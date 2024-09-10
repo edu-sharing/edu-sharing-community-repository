@@ -24,9 +24,9 @@
   *ngIf="connector.mdsGroup"
   editorMode="form"
   [groupId]="connector.mdsGroup"
-  [currentValues]="{}"
+  [currentValues]="data.data || {}"
   [embedded]="true"
 ></es-mds-editor-wrapper>
-<div class="name" *ngIf="name.trim()">
+<div class="name" *ngIf="name.trim() && !connector.mdsGroup">
   {{ 'CONNECTOR.' + connector.id + '.FILENAME' | translate }}: {{ name }}.{{ getType().filetype }}
 </div>
