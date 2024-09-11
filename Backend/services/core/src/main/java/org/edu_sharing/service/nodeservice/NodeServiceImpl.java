@@ -455,7 +455,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return childAssocList;
 	}
 
-	public Map<String, Map<String, Object>> getChildrenByType(StoreRef store, String nodeId, String type) {
+	@Override
+	public Map<String, Map<String, Object>> getChildrenPropsByType(StoreRef store, String nodeId, String type) {
 		Map<String, Map<String, Object>> result = new HashMap<>();
 		List<ChildAssociationRef> childAssocList = getChildrenAssocsByType(store,nodeId,type);
 		for (ChildAssociationRef child : childAssocList) {

@@ -41,7 +41,11 @@
   [showBottomCaption]="false"
   [valueType]="valueType"
 >
-  <mat-form-field class="mat-form-textarea" [hideRequiredMarker]="true">
+  <mat-form-field
+    class="mat-form-textarea"
+    [hideRequiredMarker]="true"
+    [floatLabel]="widget.definition.placeholder ? 'always' : 'auto'"
+  >
     <mat-label>
       {{ widget.definition.caption }}
       <!-- We use our own required marker to show it even on disabled controls for bulk editing.

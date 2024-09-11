@@ -77,7 +77,7 @@ import java.util.stream.Collectors;
 public class AdminApi {
 	static Map<String, String[]> XML_FILTER = new HashMap<>();
 	static {
-		XML_FILTER.put(AdminServiceFactory.HOME_APPLICATION_PROPERTIES, new String[] { "private_key", "password" });
+		XML_FILTER.put(CCConstants.REPOSITORY_FILE_HOME, new String[] { "private_key", "password" });
 	}
 
 	private static Logger logger = Logger.getLogger(AdminApi.class);

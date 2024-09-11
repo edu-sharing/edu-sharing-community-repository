@@ -570,7 +570,8 @@
       "employee": "Mitarbeiter",
       "extern": "Externe nutzende Person",
       "system": "Systemaccount",
-      "function": "Funktionsaccount"
+      "function": "Funktionsaccount",
+      "guest": "Gast"
     }
   },
   "PROFILE_SETTINGS": {

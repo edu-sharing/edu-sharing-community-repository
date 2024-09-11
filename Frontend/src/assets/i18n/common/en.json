@@ -484,7 +484,8 @@
       "employee": "employee",
       "extern": "external user",
       "system": "system account",
-      "function": "function account"
+      "function": "function account",
+      "guest": "guest"
     }
   },
   "PROFILE_SETTINGS": {

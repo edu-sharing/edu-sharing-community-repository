@@ -14,6 +14,7 @@
     "SAFE_SEARCH": "Safe durchsuchen...",
     "ALL_FILES": "Alle Dateien",
     "MY_FILES": "Meine Inhalte",
+    "COLLECTION_HOME": "Hauptebene",
     "ADD": "Neu",
     "ADD_OBJECT_LTI": "Als LTI-Ressource einbinden",
     "ADD_CAMERA": "Bild aufnehmen",
@@ -492,6 +493,13 @@
       "PERMISSIONS": "Sie haben im aktuellen Ordner keine Rechte, Elemente hinzuzufügen.",
       "VIRTUAL": "Sie befinden sich in einem Ordner, wo das Ablegen von Elementen nicht möglich ist.",
       "GENERAL": "Navigieren Sie in einen anderen Ordner und fügen Sie die Elemente dort hinzu."
+    },
+    "COPY_MOVE": {
+      "TITLE": "Element(e) verschieben/kopieren",
+      "MESSAGE_SINGLE": "Möchten Sie das Element \"{{element}}\" von \"{{source}}\" nach \"{{target}}\" verschieben/kopieren?",
+      "MESSAGE_MULTIPLE": "Möchten Sie {{count}} Elemente von \"{{source}}\" nach \"{{target}}\" verschieben/kopieren?",
+      "MOVE": "Verschieben",
+      "COPY": "Kopieren"
     },
     "TOAST": {
       "FOLDER_ADDED": "Ordner wurde erstellt",

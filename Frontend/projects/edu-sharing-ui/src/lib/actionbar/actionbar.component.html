@@ -1,6 +1,6 @@
 <es-dropdown
   #dropdownRef
-  [options]="optionsMenu"
+  [options]="optionsMenu$ | async"
   [showDisabled]="showDisabled"
   [position]="dropdownPosition"
 ></es-dropdown>

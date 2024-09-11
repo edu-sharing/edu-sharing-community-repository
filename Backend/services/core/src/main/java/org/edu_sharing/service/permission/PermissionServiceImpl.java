@@ -23,9 +23,9 @@ import org.alfresco.util.ISO9075;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
-import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.service.EduSharingCustomPermissionService;
 import org.edu_sharing.alfresco.service.OrganisationService;
+import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -53,8 +53,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
-import java.util.*;
 import java.util.Collection;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -79,6 +79,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	AuthorityService authorityService = serviceRegistry.getAuthorityService();
 	BehaviourFilter policyBehaviourFilter = (BehaviourFilter)applicationContext.getBean("policyBehaviourFilter");
 	MCAlfrescoAPIClient repoClient = new MCAlfrescoAPIClient();
+	private GuestService guestService = applicationContext.getBean(GuestService.class);
 	Logger logger = Logger.getLogger(PermissionServiceImpl.class);
 	private PermissionService permissionService;
 
@@ -959,7 +960,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	private void filterGuestAuthority(StringBuffer searchQuery) {
-		for(String guest : GuestCagePolicy.getGuestUsers()){
+		for(String guest : guestService.getAllGuestAuthorities()){
 			searchQuery.append(" AND NOT @cm\\:userName:\""+ QueryParser.escape(guest)+"\"");
 		}
 	}
@@ -1500,7 +1501,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	@Override
 	public Map<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId,
 													  String[] permissions) {
-		boolean guest = GuestCagePolicy.getGuestUsers().contains(AuthenticationUtil.getFullyAuthenticatedUser());
+		boolean guest = guestService.isGuestUser(AuthenticationUtil.getFullyAuthenticatedUser());
 		PermissionService permissionService = serviceRegistry.getPermissionService();
 		Map<String, Boolean> result = new HashMap<>();
 		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);

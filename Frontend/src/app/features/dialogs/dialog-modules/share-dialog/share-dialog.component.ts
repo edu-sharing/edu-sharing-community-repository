@@ -81,6 +81,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         'Coordinator',
         'ReadPermissions',
         'ChangePermissions',
+        'ESChildManager',
         'CCPublish',
         'Relation',
         'Comment',

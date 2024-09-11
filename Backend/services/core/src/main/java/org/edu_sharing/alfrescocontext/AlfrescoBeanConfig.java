@@ -26,10 +26,7 @@ import org.alfresco.service.cmr.rendition.RenditionService;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.search.CategoryService;
 import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.security.AuthenticationService;
-import org.alfresco.service.cmr.security.AuthorityService;
-import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.cmr.security.PersonService;
+import org.alfresco.service.cmr.security.*;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.cmr.tagging.TaggingService;
 import org.alfresco.service.cmr.version.VersionService;
@@ -38,6 +35,7 @@ import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.transaction.TransactionService;
 import org.edu_sharing.alfresco.policy.HomeFolderTool;
 import org.edu_sharing.alfresco.service.OrganisationService;
+import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationContext;
@@ -110,7 +108,7 @@ public class AlfrescoBeanConfig {
 
     @Primary
     @Bean(name = "AuthenticationService")
-    public AuthenticationService authenticationService() {
+    public MutableAuthenticationService authenticationService() {
         return serviceRegistry.getAuthenticationService();
     }
 
@@ -313,4 +311,8 @@ public class AlfrescoBeanConfig {
     @Bean(name = "organisationService")
     public OrganisationService organisationService() {return (OrganisationService)applicationContext.getBean("eduOrganisationService");}
 
+    @Bean
+    public GuestService guestService(){
+        return applicationContext.getBean(GuestService.class);
+    }
 }

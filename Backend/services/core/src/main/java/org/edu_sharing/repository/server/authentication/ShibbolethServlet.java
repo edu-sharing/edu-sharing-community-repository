@@ -264,11 +264,7 @@ public class ShibbolethServlet extends HttpServlet {
 			message = "SSO_UNKNOWN_ERROR";
 		}
 		message = URLEncoder.encode(message.trim());
-		resp.sendRedirect(
-		req.getScheme() +"://"
-				+ req.getServerName()
-				+":"+ req.getServerPort()
-				+ "/edu-sharing/components/error/"+message+"/"+message
+		resp.sendRedirect("/edu-sharing/components/error/"+message+"/"+message
 				);
 	}
 

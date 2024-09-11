@@ -2,16 +2,10 @@ package org.edu_sharing.alfresco.lightbend;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import com.typesafe.config.ConfigParseOptions;
-import com.typesafe.config.ConfigRenderOptions;
 import org.alfresco.repo.cache.SimpleCache;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
-
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 public class LightbendConfigLoader {
     // we use a non-serializable Config as value because this is a local cache and not distributed

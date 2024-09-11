@@ -10,6 +10,7 @@ import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.edu_sharing.alfresco.RestrictedAccessException;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.EduGroup;
@@ -258,17 +259,15 @@ public class PersonDao {
 	public void changePassword(String oldPassword, String newPassword) throws DAOException {
 
 		try {
-
-			if (oldPassword == null) {
-
-				((MCAlfrescoAPIClient)this.baseClient).setUserPassword(getUserName(), newPassword);
-
-			} else {
-
-				((MCAlfrescoAPIClient)this.baseClient).updateUserPassword(getUserName(), oldPassword, newPassword);
-
+			if(Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")){
+				throw new AccessDeniedException("It's not allowed to change password of external managed users. Please contact your system administrator.");
 			}
 
+			if (oldPassword == null) {
+				((MCAlfrescoAPIClient)this.baseClient).setUserPassword(getUserName(), newPassword);
+			} else {
+				((MCAlfrescoAPIClient)this.baseClient).updateUserPassword(getUserName(), oldPassword, newPassword);
+			}
 		} catch (Throwable t) {
 
 			throw DAOException.mapping(t);

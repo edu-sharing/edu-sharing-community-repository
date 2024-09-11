@@ -14,10 +14,12 @@ import org.alfresco.service.cmr.security.MutableAuthenticationService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.OrganisationService;
+import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -64,6 +66,7 @@ public class SSOAuthorityMapper {
 	OrganisationService organisationService;
 	
 	NodeService nodeService;
+	GuestService guestService;
 
 	Logger logger = Logger.getLogger(SSOAuthorityMapper.class);
 	
@@ -126,7 +129,8 @@ public class SSOAuthorityMapper {
 
 	public void init(){
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-		
+        ApplicationContext eduApplicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
+
 		this.serviceRegistry = (ServiceRegistry) applicationContext.getBean("ServiceRegistry");
 		this.authorityService = serviceRegistry.getAuthorityService();
 		this.personService = serviceRegistry.getPersonService();
@@ -135,8 +139,8 @@ public class SSOAuthorityMapper {
 		//this.authenticationDao = (MutableAuthenticationDao)applicationContext.getBean("authenticationDao");
 		this.organisationService = (OrganisationService)applicationContext.getBean("eduOrganisationService");
 		this.nodeService = serviceRegistry.getNodeService();
-		ApplicationContext eduApplicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
-		requiredAttributes = eduApplicationContext.containsBean ("personDataRequired") ? (Map<String,String>)eduApplicationContext.getBean("personDataRequired") : null;
+		this.guestService = applicationContext.getBean(GuestService.class);
+		this.requiredAttributes = eduApplicationContext.containsBean ("personDataRequired") ? (Map<String,String>)eduApplicationContext.getBean("personDataRequired") : null;
 	}
 
 	public static String mapAdminAuthority(String authority,String appid){
@@ -199,13 +203,13 @@ public class SSOAuthorityMapper {
 		}
 
 		String tmpUserName = ssoAttributes.get(getSSOUsernameProp());
-		if (tmpUserName == null || tmpUserName.trim().equals("")) {
+		if (StringUtils.isBlank(tmpUserName)) {
 			logErrorParams("userName", ssoAttributes);
 			throw new AuthenticationException(AuthenticationExceptionMessages.MISSING_PARAM);
 		}
 
 		//guest does not exsist in user store but exsist as a person, so user will not be found and trying to create person -> user already exsists
-		if(tmpUserName.equals("guest")){
+		if(guestService.isGuestUser(tmpUserName)){
 			return tmpUserName;
 		}
 

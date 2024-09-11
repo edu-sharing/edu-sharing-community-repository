@@ -236,6 +236,8 @@ public class CCConstants {
 
 	public final static String CCM_TYPE_SYSUPDATE = "{http://www.campuscontent.de/model/1.0}sysupdate";
 
+	public final static String CCM_TYPE_CONTEXT = "{http://www.campuscontent.de/model/1.0}context";
+
 	public final static String CCM_TYPE_MAPRELATION = "{http://www.campuscontent.de/model/1.0}maprelation";
 
 	public final static String CCM_TYPE_REMOTEOBJECT = "{http://www.campuscontent.de/model/1.0}remoteobject";
@@ -863,6 +865,8 @@ public class CCConstants {
 	public final static String CCM_PROP_SYSUPDATE_ID = "{http://www.campuscontent.de/model/1.0}sysupdate_id";
 	public final static String CCM_PROP_SYSUPDATE_DATE = "{http://www.campuscontent.de/model/1.0}sysupdate_date";
 
+	public final static String CCM_PROP_CONTEXT_CONFIG = "{http://www.campuscontent.de/model/1.0}context_config";
+
 	public final static String CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR = "{http://www.campuscontent.de/model/1.0}edu_homedir";
 
 	public final static String CCM_PROP_NOTIFY_EVENT = "{http://www.campuscontent.de/model/1.0}notify_event";
@@ -980,6 +984,8 @@ public class CCConstants {
 	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_EXTERN = "extern";
 
 	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_SYSTEM = "system";
+
+	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_GUEST = "guest";
 
 	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_FUNCTION = "function";
 
@@ -1366,6 +1372,8 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_UPDATE = "EDUSYSTEM_UPDATE";
 
+	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_CONTEXT = "EDUSYSTEM_CONTEXT";
+
 	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_NOTIFY = "EDUSYSTEM_NOTIFY";
 
 	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TEMPLATE = "EDUSYSTEM_TEMPLATE";
@@ -1594,6 +1602,8 @@ public class CCConstants {
 	public final static String I18n_SYSTEMFOLDER_BASE = "systemfolder_base";
 
 	public final static String I18n_SYSTEMFOLDER_UPDATE = "systemfolder_update";
+
+	public final static String I18n_SYSTEMFOLDER_CONTEXT = "systemfolder_context";
 
 	public final static String I18n_SYSTEMFOLDER_CONFIG = "systemfolder_config";
 

@@ -32,6 +32,8 @@ import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.service.guest.GuestConfig;
+import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
@@ -95,7 +97,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
     PermissionModel permissionModel = (PermissionModel) alfApplicationContext.getBean("permissionsModelDAO");
-
+    GuestService guestService = alfApplicationContext.getBean(GuestService.class);
     public static int MAX_RESPONSE_ENTITY_SIZE = -1;
 
     public static HttpHost[] getConfiguredHosts() {
@@ -305,6 +307,19 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         .aggregations(aggregations)
                 , Map.class));
 
+        List<NodeSearch.Facet> facetsResult = getFacets(aggregations, resp);
+
+        SearchResultNodeRef searchResultNodeRef = new SearchResultNodeRef();
+        searchResultNodeRef.setData(new ArrayList<>());
+        searchResultNodeRef.setFacets(facetsResult);
+        searchResultNodeRef.setStartIDX(searchToken.getFrom());
+        searchResultNodeRef.setNodeCount(0);
+
+        return searchResultNodeRef;
+    }
+
+    @NotNull
+    private List<NodeSearch.Facet> getFacets(Map<String, Aggregation> aggregations, SearchResponse<Map> resp) {
         List<NodeSearch.Facet> facetsResult = new ArrayList<>();
         for (Map.Entry<String, Aggregate> a : resp.aggregations().entrySet()) {
             if (a.getValue().isFilter()) {
@@ -329,14 +344,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 logger.error("non supported aggregation " + a.getKey());
             }
         }
-
-        SearchResultNodeRef searchResultNodeRef = new SearchResultNodeRef();
-        searchResultNodeRef.setData(new ArrayList<>());
-        searchResultNodeRef.setFacets(facetsResult);
-        searchResultNodeRef.setStartIDX(searchToken.getFrom());
-        searchResultNodeRef.setNodeCount(0);
-
-        return searchResultNodeRef;
+        return facetsResult;
     }
 
     private NodeSearch.Facet getMultitermFacet(String name, MultiTermsAggregate mta, Aggregation definition) {
@@ -495,10 +503,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     .source(src -> src.filter(filter -> filter.excludes(appendDefaultExcludes(searchToken.getExcludes()))));
 
             SearchResponse<Map> searchResponseAggregations = null;
+            Map<String, Aggregation> aggregations;
             if (searchToken.getFacets() != null) {
                 Set<MetadataQueryParameter> excludeOwnFacets = MetadataElasticSearchHelper.getExcludeOwnFacets(queryData, criterias, searchToken.getFacets());
                 if (!excludeOwnFacets.isEmpty()) {
-                    Map<String, Aggregation> aggregations = MetadataElasticSearchHelper.getAggregations(
+                    aggregations = MetadataElasticSearchHelper.getAggregations(
                             mds,
                             queryData,
                             criterias,
@@ -516,14 +525,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     logger.info("query aggs: " + JsonpUtils.toJsonString(searchSourceAggs, new JacksonJsonpMapper()));
                     searchResponseAggregations = LogTime.log("Searching elastic for facets", () -> client.search(searchSourceAggs, Map.class));
                 } else {
-                    for (String facet : searchToken.getFacets()) {
+                    aggregations = MetadataElasticSearchHelper.getAggregations(mds, queryData, searchToken.getParameters(), searchToken.getFacets(), Collections.emptySet(), queryBuilderGlobalConditions._toQuery(), searchToken);
+                    for (Map.Entry<String, Aggregation> agg : aggregations.entrySet()) {
                         // we use a higher facet limit since the facets will be filtered for the containing string!
-                        searchRequestBuilder.aggregations(facet, b -> b.terms(t -> t
-                                .field("properties." + facet + ".keyword")
-                                .size(searchToken.getFacetLimit() * MetadataElasticSearchHelper.FACET_LIMIT_MULTIPLIER)
-                                .minDocCount(searchToken.getFacetsMinCount())));
+                        searchRequestBuilder.aggregations(agg.getKey(), agg.getValue());
                     }
                 }
+            } else {
+                aggregations = null;
             }
 
             if (searchToken.isReturnSuggestion()) {
@@ -576,86 +585,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 }
                 logger.info("permission stuff took:" + (System.currentTimeMillis() - millisPerm));
 
-                List<NodeSearch.Facet> facetsResult = new ArrayList<>();
-                List<NodeSearch.Facet> facetsResultSelected = new ArrayList<>();
 
                 Long total = null;
-
-                Map<String, Aggregate> aggregations = new HashMap<>();
-                if (searchResponseAggregations != null) {
-                    aggregations.putAll(searchResponseAggregations.aggregations());
-                }
-                if (searchResponse.aggregations() != null) aggregations.putAll(searchResponse.aggregations());
-
-                for (Map.Entry<String, Aggregate> a : aggregations.entrySet()) {
-                    if (a.getValue().isSterms()) {
-                        facetsResult.add(getFacet(a.getKey(), a.getValue().sterms(), null));
-                    } else if (a.getValue()._kind().equals(Aggregate.Kind.Cardinality)) {
-                        if (a.getKey().equals("original_count")) {
-                            total = a.getValue().cardinality().value();
-                        } else {
-                            logger.error("unknown cardinality aggregation");
-                        }
-
-                    } else if (a.getValue().isFilter()) {
-                        FilterAggregate filter = a.getValue().filter();
-                        for (Map.Entry<String, Aggregate> aggregationEntry : filter.aggregations().entrySet()) {
-                            if (aggregationEntry.getValue().isSterms()) {
-                                if (a.getKey().endsWith("_selected")) {
-                                    if (a.getValue().isFilter()) {
-                                        Map<String, Aggregate> agg = a.getValue().filter().aggregations();
-                                        facetsResultSelected.add(getFacet(a.getKey(), agg.entrySet().iterator().next().getValue().sterms(), null));
-                                    } else {
-                                        facetsResultSelected.add(getFacet(a.getKey(), a.getValue().sterms(), null));
-                                    }
-                                } else {
-                                    if (a.getValue().isFilter()) {
-                                        Map<String, Aggregate> agg = a.getValue().filter().aggregations();
-                                        facetsResult.add(getFacet(a.getKey(), agg.entrySet().iterator().next().getValue().sterms(), null));
-                                    } else {
-                                        facetsResult.add(getFacet(a.getKey(), a.getValue().sterms(), null));
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        logger.error("non supported aggreagtion " + a.getKey());
-                    }
-                }
-                // add selected when missing
-                if (searchToken.getFacets() != null && !searchToken.getFacets().isEmpty()) {
-                    for (String facet : searchToken.getFacets()) {
-                        if (!criterias.containsKey(facet)) {
-                            continue;
-                        }
-                        for (String value : criterias.get(facet)) {
-                            Optional<NodeSearch.Facet> facetResult = facetsResult.stream()
-                                    .filter(f -> f.getProperty().equals(facet)).findFirst();
-                            Optional<NodeSearch.Facet> selected = facetsResultSelected
-                                    .stream()
-                                    .filter(f ->
-                                            f.getProperty().equals(facet))
-                                    .findFirst();
-                            if (selected.isPresent()) {
-                                if (facetResult.isPresent()) {
-                                    if (facetResult.get().getValues().stream().noneMatch(v -> v.getValue().equals(value))) {
-                                        if (selected.get().getValues().stream().anyMatch(v -> value.equals(v.getValue()))) {
-                                            facetResult.get().getValues().add(selected.get().getValues().stream()
-                                                    .filter(v -> value.equals(v.getValue()))
-                                                    .findFirst()
-                                                    .get()
-                                            );
-                                        }
-                                    }
-                                } else {
-                                    if (selected.get().getValues().stream().anyMatch(v -> value.equals(v.getValue()))) {
-                                        facetsResult.add(selected.get());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
 
                 if (!searchResponse.suggest().isEmpty()) {
                     List<co.elastic.clients.elasticsearch.core.search.Suggestion<Map>> phraseSuggestion = searchResponse.suggest().get("ngsearchword");
@@ -683,6 +614,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     total = Optional.of(hits).map(HitsMetadata::total).map(TotalHits::value).orElse(0L);
                 }
 
+                List<NodeSearch.Facet> facetsResult = getFacets(aggregations, searchResponse);
                 sr.setFacets(facetsResult);
                 sr.setStartIDX(searchToken.getFrom());
                 sr.setNodeCount((int) total.longValue());
@@ -1012,7 +944,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         Map<String, Boolean> permissions = new HashMap<>();
         permissions.put(CCConstants.PERMISSION_READ, true);
-        String guestUser = ApplicationInfoList.getHomeRepository().getGuest_username();
+        GuestConfig guestConfig = guestService.getCurrentGuestConfig();
         long millis = System.currentTimeMillis();
         eduNodeRef.setPublic(false);
         Map<String, List<String>> permissionsElastic = (Map) sourceAsMap.get("permissions");
@@ -1021,7 +953,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             if ("read".equals(entry.getKey())) {
                 continue;
             }
-            if (!eduNodeRef.getPublic() && guestUser != null && entry.getValue().contains(CCConstants.AUTHORITY_GROUP_EVERYONE)) {
+            if (!eduNodeRef.getPublic() && guestConfig != null && guestConfig.isEnabled() && entry.getValue().contains(CCConstants.AUTHORITY_GROUP_EVERYONE)) {
                 PermissionReference pr = permissionModel.getPermissionReference(null, entry.getKey());
                 Set<PermissionReference> granteePermissions = permissionModel.getGranteePermissions(pr);
                 eduNodeRef.setPublic(granteePermissions.stream().anyMatch(p -> p.getName().equals(CCConstants.PERMISSION_READ_ALL)));

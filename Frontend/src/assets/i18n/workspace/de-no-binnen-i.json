@@ -1,6 +1,7 @@
 {
   "WORKSPACE": {
     "SHARE": {
+      "GROUP_OWNER": "Eigentum",
       "TYPE_VIEWER": "Leserechte",
       "TYPE_VIEWER_DESCRIPTION": "Person darf sehen",
       "TYPE_COWORKER": "Mitarbeit",

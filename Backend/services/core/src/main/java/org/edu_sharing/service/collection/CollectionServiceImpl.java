@@ -19,6 +19,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -123,14 +124,13 @@ public class CollectionServiceImpl implements CollectionService {
 
             this.authTool = RepoFactory.getAuthenticationToolInstance(appId);
 
-			String guestUn = ApplicationInfoList.getHomeRepository().getGuest_username();
+            GuestService guestService = applicationContext.getBean(GuestService.class);
 
             //fix for running in runas user mode
             if ((AuthenticationUtil.isRunAsUserTheSystemUser()
                     || "admin".equals(AuthenticationUtil.getRunAsUser()))
 					|| Context.getCurrentInstance().getCurrentInstance() == null
-					|| (guestUn != null
-					&& guestUn.equals(AuthenticationUtil.getFullyAuthenticatedUser()) )) {
+					|| (guestService.isGuestUser(AuthenticationUtil.getFullyAuthenticatedUser()) )) {
                 logger.debug("starting in runas user mode");
                 this.authInfo = new HashMap<>();
                 this.authInfo.put(CCConstants.AUTH_USERNAME, AuthenticationUtil.getRunAsUser());

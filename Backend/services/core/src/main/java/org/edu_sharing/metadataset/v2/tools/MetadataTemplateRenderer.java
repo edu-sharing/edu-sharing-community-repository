@@ -10,8 +10,8 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
@@ -61,6 +61,7 @@ public class MetadataTemplateRenderer {
 	private MetadataSet mds;
 	private Map<String, String[]> properties;
 	private static Logger logger=Logger.getLogger(MetadataTemplateRenderer.class);
+
 
 	public MetadataTemplateRenderer(MetadataSet mds, NodeRef nodeRef, String userName, String type, List<String> aspects, Map<String, Object> properties) {
 		this.mds = mds;
@@ -380,7 +381,7 @@ public class MetadataTemplateRenderer {
 									}
 								}
 								if (persistentIdUrl != null && !persistentIdUrl.isEmpty()) {
-									widgetHtml.append("<br><a href=\"").append(persistentIdUrl)
+									widgetHtml.append("<a href=\"").append(persistentIdUrl)
 											.append("\" target=\"blank\">")
 											.append(MetadataHelper.getTranslation("vcard_link_persistent_id"))
 											.append("</a>");

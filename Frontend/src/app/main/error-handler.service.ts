@@ -23,8 +23,7 @@ export class ErrorHandlerService {
     }
 
     async handleError(error: ApiErrorResponse, req: HttpRequest<unknown>) {
-        // console.log('handleError', error, req);
-        if (error?.error?.type === 'abort') {
+        if (error?.error?.type === 'abort' || (!!(window as any).safari && error.status === 0)) {
             // this might cause by explicit abort and a redirect
             // do nothing to prevent firefox from showing a temporary message i.e. on login sso redirect
             console.warn('Explicitly aborted, do not displaying a message', error);
@@ -43,6 +42,7 @@ export class ErrorHandlerService {
                 await this.injector.get(CordovaService).handleAppReAuthentication(true);
             }
         } else {
+            console.warn('handleError has triggered', error);
             this.toast.error(error);
         }
     }
