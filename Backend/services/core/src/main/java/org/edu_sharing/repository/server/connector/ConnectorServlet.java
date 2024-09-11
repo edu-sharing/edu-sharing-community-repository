@@ -1,5 +1,6 @@
 package org.edu_sharing.repository.server.connector;
 
+import com.google.common.collect.ImmutableList;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,7 +11,6 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
@@ -18,6 +18,7 @@ import org.edu_sharing.alfresco.service.connector.Connector;
 import org.edu_sharing.alfresco.service.connector.ConnectorFileType;
 import org.edu_sharing.alfresco.service.connector.ConnectorService;
 import org.edu_sharing.alfresco.service.connector.SimpleConnector;
+import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -48,10 +49,7 @@ import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -111,7 +109,7 @@ public class ConnectorServlet extends HttpServlet  {
 			connector = ConnectorServiceFactory.getConnectorList().getConnectors().stream().filter(c -> c.getId().equals(connectorId)).findAny().orElse(null);
 			Optional<SimpleConnector> simpleConnector = ConnectorServiceFactory.getConnectorList().getSimpleConnectors().stream().filter(c -> c.getId().equals(connectorId)).findAny();
 			if(simpleConnector.isPresent()) {
-				handleSimpleConnector(req, resp, simpleConnector.orElse(null), nodeRefOriginal);
+				handleSimpleConnector(convertParameters(req), simpleConnector.orElse(null), nodeRefOriginal);
 				return;
 			}
 			if(connector == null){
@@ -219,30 +217,54 @@ public class ConnectorServlet extends HttpServlet  {
 
 	}
 
-	private void handleSimpleConnector(HttpServletRequest req, HttpServletResponse resp, SimpleConnector simpleConnector, NodeRef nodeRefOriginal) throws UnsupportedEncodingException {
+	private Map<String, String[]> convertParameters(HttpServletRequest req) {
+		HashMap<String, String[]> converted = new HashMap<>();
+		ImmutableList.of(req.getParameterNames().asIterator()).forEach(key -> converted.put(key.toString(), req.getParameterValues(key.toString())));
+		return converted;
+	}
+
+	String handleSimpleConnector(Map<String, String[]> requestParameters, SimpleConnector simpleConnector, NodeRef nodeRefOriginal) throws UnsupportedEncodingException {
 		RequestBuilder builder = null;
-		String url = replaceSimpleConnectorAttributes(req, simpleConnector.getApi().getUrl(), (data) -> URLEncoder.encode(StringUtils.join(data)));
+		String url = replaceSimpleConnectorAttributes(requestParameters, simpleConnector.getApi().getUrl(), (data) -> URLEncoder.encode(StringUtils.join(data)));
 		if(simpleConnector.getApi().getMethod().equals(SimpleConnector.SimpleConnectorApi.Method.Post)) {
-			HttpPost post = new HttpPost(url);
+			builder = RequestBuilder.post(url);
+			if(simpleConnector.getApi().getAuthentication() != null && simpleConnector.getApi().getAuthentication().getType() != null) {
+				RequestBuilder builderAuth = null;
+				SimpleConnector.SimpleConnectorAuthentication authentication = simpleConnector.getApi().getAuthentication();
+				if (SimpleConnector.SimpleConnectorApi.Method.Post.equals(authentication.getMethod())) {
+					builderAuth = RequestBuilder.post(authentication.getUrl());
+					if (SimpleConnector.SimpleConnectorApi.BodyType.Form.equals(authentication.getBodyType())) {
+						List<? extends NameValuePair> data = authentication.getBody().entrySet().stream().map((e) -> new BasicNameValuePair(e.getKey(), replaceSimpleConnectorAttributes(requestParameters, e.getValue().toString(), StringUtils::join))).collect(Collectors.toList());
+						builderAuth.setEntity(new UrlEncodedFormEntity(data));
+						builderAuth.setHeader("Content-Type", "application/x-www-form-urlencoded");
+					}
+					// builder.setHeader()
+				}
+				String auth = new HttpQueryTool().query(builderAuth);
+				JSONObject authJson = new JSONObject(auth);
+				builder.setHeader("Authorization", "Bearer " + authJson.get("access_token"));
+            }
 			if(simpleConnector.getApi().getBodyType() == null) {
 
 			} else if(simpleConnector.getApi().getBodyType().equals(SimpleConnector.SimpleConnectorApi.BodyType.Form)) {
-				List<? extends NameValuePair> data = simpleConnector.getApi().getBody().entrySet().stream().map((e) -> new BasicNameValuePair(e.getKey(), replaceSimpleConnectorAttributes(req, e.getValue().toString(), StringUtils::join))).collect(Collectors.toList());
-				post.setEntity(new UrlEncodedFormEntity(data));
+				List<? extends NameValuePair> data = simpleConnector.getApi().getBody().entrySet().stream().map((e) -> new BasicNameValuePair(e.getKey(), replaceSimpleConnectorAttributes(requestParameters, e.getValue().toString(), StringUtils::join))).collect(Collectors.toList());
+				builder.setEntity(new UrlEncodedFormEntity(data));
+				builder.setHeader("Content-Type", "application/x-www-form-urlencoded");
 			}
-			builder = RequestBuilder.copy(post);
 		}
 		String result = new HttpQueryTool().query(builder);
+		return result;
 	}
 
 	private interface Formatter {
 		String format(String[] value);
 	}
-	private String replaceSimpleConnectorAttributes(HttpServletRequest req, String strToReplace, Formatter format) {
-        for (Iterator<String> it = req.getParameterNames().asIterator(); it.hasNext(); ) {
-            String parameter = it.next();
-			strToReplace = strToReplace.replace("{{" + parameter + "}}", format.format(req.getParameterValues(parameter)));
+	private String replaceSimpleConnectorAttributes(Map<String, String[]> requestParameters, String strToReplace, Formatter format) {
+        for (Map.Entry<String, String[]> parameter: requestParameters.entrySet()) {
+			strToReplace = strToReplace.replace("{{" + parameter.getKey() + "}}", format.format(parameter.getValue()));
         }
+		// allow global variables that are also allowed for queries
+		strToReplace = MetadataSearchHelper.replaceCommonQueryVariables(strToReplace);
 		// replace other, unkown attributes with empty value
 		strToReplace = strToReplace.replaceAll("\\{\\{.*}}", "");
 		return strToReplace;

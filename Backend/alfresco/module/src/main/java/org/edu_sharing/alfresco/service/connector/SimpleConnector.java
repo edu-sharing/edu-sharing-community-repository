@@ -31,6 +31,7 @@ public class SimpleConnector implements Serializable {
 	public static class SimpleConnectorApi {
 		private Method method;
 		private String url;
+		@Optional private SimpleConnectorAuthentication authentication;
 		@Optional private BodyType bodyType;
 		private Map<String, Object> body;
 		public enum Method {
@@ -38,6 +39,18 @@ public class SimpleConnector implements Serializable {
 		}
 		public enum BodyType {
 			Form,
+		}
+	}
+	@Data
+	public static class SimpleConnectorAuthentication {
+		AuthenticationType type;
+		@Optional private String url;
+		private SimpleConnectorApi.Method method;
+		@Optional private SimpleConnectorApi.BodyType bodyType;
+		@Optional private Map<String, Object> body;
+
+		public enum AuthenticationType {
+			OAuth
 		}
 	}
 }
