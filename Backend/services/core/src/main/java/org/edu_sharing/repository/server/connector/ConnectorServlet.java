@@ -112,7 +112,9 @@ public class ConnectorServlet extends HttpServlet  {
 			connector = ConnectorServiceFactory.getConnectorList().getConnectors().stream().filter(c -> c.getId().equals(connectorId)).findAny().orElse(null);
 			Optional<SimpleConnector> simpleConnector = ConnectorServiceFactory.getConnectorList().getSimpleConnectors().stream().filter(c -> c.getId().equals(connectorId)).findAny();
 			if(simpleConnector.isPresent()) {
-				handleSimpleConnector(convertParameters(req), simpleConnector.orElse(null), nodeRefOriginal);
+				JSONObject result = handleSimpleConnector(convertParameters(req), simpleConnector.orElse(null), nodeRefOriginal);
+
+				// @TODO: redirect resp to the generated element/uri
 				return;
 			}
 			if(connector == null){
@@ -226,7 +228,7 @@ public class ConnectorServlet extends HttpServlet  {
 		return converted;
 	}
 
-	String handleSimpleConnector(Map<String, String[]> requestParameters, SimpleConnector simpleConnector, NodeRef nodeRefOriginal) throws UnsupportedEncodingException {
+	JSONObject handleSimpleConnector(Map<String, String[]> requestParameters, SimpleConnector simpleConnector, NodeRef nodeRefOriginal) throws UnsupportedEncodingException {
 		RequestBuilder builder = null;
 		String url = replaceSimpleConnectorAttributes(requestParameters, simpleConnector.getApi().getUrl(), (data) -> URLEncoder.encode(StringUtils.join(data)));
 		if(simpleConnector.getApi().getMethod().equals(SimpleConnector.SimpleConnectorApi.Method.Post)) {
@@ -250,13 +252,15 @@ public class ConnectorServlet extends HttpServlet  {
 			if(simpleConnector.getApi().getBodyType() == null) {
 
 			} else if(simpleConnector.getApi().getBodyType().equals(SimpleConnector.SimpleConnectorApi.BodyType.Form)) {
-				List<? extends NameValuePair> data = simpleConnector.getApi().getBody().entrySet().stream().map((e) -> new BasicNameValuePair(e.getKey(), replaceSimpleConnectorAttributes(requestParameters, e.getValue().toString(), StringUtils::join))).collect(Collectors.toList());
+				List<? extends NameValuePair> data = simpleConnector.getApi().getBody().entrySet().stream()
+						.map((e) -> new BasicNameValuePair(e.getKey(), replaceSimpleConnectorAttributes(requestParameters, e.getValue().toString(), StringUtils::join)))
+						.filter(f -> StringUtils.isNotBlank(f.getValue()))
+						.collect(Collectors.toList());
 				builder.setEntity(new UrlEncodedFormEntity(data));
 				builder.setHeader("Content-Type", "application/x-www-form-urlencoded");
 			}
 		}
-		String result = new HttpQueryTool().query(builder);
-		return result;
+		return new JSONObject(new HttpQueryTool().query(builder));
 	}
 
 	private interface Formatter {
