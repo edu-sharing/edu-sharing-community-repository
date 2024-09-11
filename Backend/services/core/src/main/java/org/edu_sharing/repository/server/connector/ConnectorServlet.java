@@ -1,6 +1,5 @@
 package org.edu_sharing.repository.server.connector;
 
-import com.google.common.collect.ImmutableList;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -49,7 +49,10 @@ import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -219,7 +222,7 @@ public class ConnectorServlet extends HttpServlet  {
 
 	private Map<String, String[]> convertParameters(HttpServletRequest req) {
 		HashMap<String, String[]> converted = new HashMap<>();
-		ImmutableList.of(req.getParameterNames().asIterator()).forEach(key -> converted.put(key.toString(), req.getParameterValues(key.toString())));
+		IteratorUtils.toList(req.getParameterNames().asIterator()).forEach(key -> converted.put(key.toString(), req.getParameterValues(key.toString())));
 		return converted;
 	}
 
