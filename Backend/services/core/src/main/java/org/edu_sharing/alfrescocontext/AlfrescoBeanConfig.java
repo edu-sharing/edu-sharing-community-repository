@@ -26,13 +26,17 @@ import org.alfresco.service.cmr.rendition.RenditionService;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.search.CategoryService;
 import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.security.*;
+import org.alfresco.service.cmr.security.AuthorityService;
+import org.alfresco.service.cmr.security.MutableAuthenticationService;
+import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.cmr.tagging.TaggingService;
 import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.cmr.workflow.WorkflowService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.transaction.TransactionService;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.policy.HomeFolderTool;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.service.guest.GuestService;
@@ -66,8 +70,8 @@ public class AlfrescoBeanConfig {
 
     @Primary
     @Bean
-  public SearchTrackingComponent solrTrackingComponent() {
-    return applicationContext.getBean(SearchTrackingComponent.class);
+    public SearchTrackingComponent solrTrackingComponent() {
+        return applicationContext.getBean(SearchTrackingComponent.class);
     }
 
     @Primary
@@ -268,9 +272,11 @@ public class AlfrescoBeanConfig {
         return serviceRegistry.getWorkflowService();
     }
 
-    @Bean(name="WebDavAuthenticationFilter")
+    @Bean(name = "WebDavAuthenticationFilter")
     @ConditionalOnMissingBean(name = "WebDavAuthenticationFilter")
-    public DependencyInjectedFilter webDavAuthenticationFilter(){ return applicationContext.getBean("WebDavAuthenticationFilter", DependencyInjectedFilter.class); }
+    public DependencyInjectedFilter webDavAuthenticationFilter() {
+        return applicationContext.getBean("WebDavAuthenticationFilter", DependencyInjectedFilter.class);
+    }
 
     @Bean
     public NodeService alfrescoDefaultDbNodeService() {
@@ -294,12 +300,12 @@ public class AlfrescoBeanConfig {
 
     @Bean
     @Scope("prototype")
-    public HomeFolderTool homeFolderTool(){
+    public HomeFolderTool homeFolderTool() {
         return new HomeFolderTool(serviceRegistry);
     }
 
     @Bean
-    public AuthenticationComponent authenticationComponent()  {
+    public AuthenticationComponent authenticationComponent() {
         return applicationContext.getBean("authenticationComponent", AuthenticationComponent.class);
     }
 
@@ -309,10 +315,17 @@ public class AlfrescoBeanConfig {
     }
 
     @Bean(name = "organisationService")
-    public OrganisationService organisationService() {return (OrganisationService)applicationContext.getBean("eduOrganisationService");}
+    public OrganisationService organisationService() {
+        return (OrganisationService) applicationContext.getBean("eduOrganisationService");
+    }
 
     @Bean
-    public GuestService guestService(){
+    public GuestService guestService() {
         return applicationContext.getBean(GuestService.class);
+    }
+
+    @Bean
+    public LightbendConfigLoader lightbendConfigLoader() {
+        return applicationContext.getBean(LightbendConfigLoader.class);
     }
 }
