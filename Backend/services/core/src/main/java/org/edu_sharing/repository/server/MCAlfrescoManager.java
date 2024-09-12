@@ -67,7 +67,7 @@ public class MCAlfrescoManager extends ContextLoaderListener {
 
             //init the system folders so that are created with a admin
             UserEnvironmentTool uet = new UserEnvironmentTool(appInfo.getUsername());
-            uet.getEdu_SharingTemplateFolder();
+            uet.createAllSystemFolders();
 
             // init the esuid for admin
             createESUIDAdmin();
