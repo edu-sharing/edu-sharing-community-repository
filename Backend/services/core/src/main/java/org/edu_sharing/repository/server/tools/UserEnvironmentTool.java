@@ -30,6 +30,22 @@ public class UserEnvironmentTool {
         this(AuthenticationUtil.getFullyAuthenticatedUser());
     }
 
+    public void createAllSystemFolders() {
+        AuthenticationUtil.runAsSystem(() -> {
+            getEdu_SharingSystemFolderBase();
+            getEdu_SharingSystemFolderUpdate();
+            getEdu_SharingConfigFolder();
+            getEdu_SharingContextFolder();
+            getEdu_SharingMediacenterFolder();
+            getEdu_SharingReportsFolder();
+            getEdu_SharingNotifyFolder();
+            getEdu_SharingServiceFolder();
+            getEdu_SharingTemplateFolder();
+            getEdu_SharingValuespaceFolder();
+            return null;
+        });
+    }
+
     /**
      * use this for running this class in an runAs context
      *
@@ -119,7 +135,7 @@ public class UserEnvironmentTool {
     }
 
     public String getEdu_SharingSystemFolderUpdate() throws Exception {
-        if (!mcBaseClient.isAdmin()) {
+        if (!mcBaseClient.isAdmin() && !AuthenticationUtil.isRunAsUserTheSystemUser()) {
             throw new Exception("Admin group required");
         }
 
@@ -145,32 +161,6 @@ public class UserEnvironmentTool {
         }
         return result;
     }
-
-    public String getEdu_SharingSystemFolderContext() throws Exception {
-        if (!mcBaseClient.isAdmin() && !AuthenticationUtil.isRunAsUserTheSystemUser()) {
-            throw new Exception("Admin group required");
-        }
-
-        String systemFolderId = getEdu_SharingSystemFolderBase();
-        Map<String, Object> edu_SharingSystemFolderUpdate = mcBaseClient.getChild(systemFolderId, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_CONTEXT);
-
-        if (edu_SharingSystemFolderUpdate == null) {
-            Map<String, Object> i18nTitle = new HashMap<>(Map.of(
-                    "de_DE", I18nServer.getTranslationDefaultResourcebundle(CCConstants.I18n_SYSTEMFOLDER_CONTEXT, "de_DE"),
-                    "en_EN", I18nServer.getTranslationDefaultResourcebundle(CCConstants.I18n_SYSTEMFOLDER_CONTEXT, "en_EN"),
-                    "en_US", I18nServer.getTranslationDefaultResourcebundle(CCConstants.I18n_SYSTEMFOLDER_CONTEXT, "en_US")));
-
-            Map<String, Object> newEdu_SharingSysMapProps = Map.of(
-                    CCConstants.CM_NAME, I18nServer.getTranslationDefaultResourcebundle(CCConstants.I18n_SYSTEMFOLDER_CONTEXT),
-                    CCConstants.CM_PROP_C_TITLE, i18nTitle,
-                    CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_CONTEXT);
-
-            return mcBaseClient.createNode(systemFolderId, CCConstants.CCM_TYPE_MAP, newEdu_SharingSysMapProps);
-        }
-
-        return (String) edu_SharingSystemFolderUpdate.get(CCConstants.SYS_PROP_NODE_UID);
-    }
-
 
     public String getEdu_SharingNotifyFolder() throws Exception {
         String systemFolderId = getEdu_SharingSystemFolderBase();
@@ -200,6 +190,10 @@ public class UserEnvironmentTool {
             result = edu_SharingSystemFolderNotify.getId();
         }
         return result;
+    }
+
+    public String getEdu_SharingContextFolder() throws Exception {
+        return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_SERVICE, CCConstants.I18n_SYSTEMFOLDER_CONTEXT);
     }
 
     public String getEdu_SharingConfigFolder() throws Exception {

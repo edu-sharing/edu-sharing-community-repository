@@ -12,7 +12,7 @@
   [class.actionbar-round]="appearance === 'round'"
   [class.actionbar-icon-button]="appearance === 'icon-button'"
 >
-  <ng-container *ngFor="let option of optionsAlways; let i = index">
+  <ng-container *ngFor="let option of optionsAlways$ | async; let i = index">
     <button
       *ngIf="shouldHighlight(i, option)"
       mat-flat-button
@@ -60,7 +60,7 @@
   <div
     *ngIf="optionsToggle.length"
     class="actionToggle"
-    [class.actionToggleDivider]="optionsAlways.length"
+    [class.actionToggleDivider]="(optionsAlways$ | async).length"
   >
     <button
       *ngFor="let option of optionsToggle"
