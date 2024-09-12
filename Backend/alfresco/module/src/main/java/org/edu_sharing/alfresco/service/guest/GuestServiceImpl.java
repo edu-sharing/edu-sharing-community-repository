@@ -20,13 +20,13 @@ import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.KeyTool;
 import org.edu_sharing.spring.scope.refresh.RefreshScopeRefreshedEvent;
-import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.EventListener;
 
 import java.io.Serializable;
 import java.util.*;
 
 @Slf4j
-public class GuestServiceImpl implements GuestService, ApplicationListener<RefreshScopeRefreshedEvent> {
+public class GuestServiceImpl implements GuestService {
 
     public static final String REPOSITORY_GUEST_CONFIG_PATH = "repository.guest";
     public static final String REPOSITORY_CONTEXT_CONFIG_PATH = "repository.context";
@@ -35,25 +35,39 @@ public class GuestServiceImpl implements GuestService, ApplicationListener<Refre
     private final MutableAuthenticationService authenticationService;
     private final AuthorityService authorityService;
     private final RetryingTransactionHelper retryingTransactionHelper;
+    private final LightbendConfigLoader configLoader;
 
-
-    public GuestServiceImpl(PersonService personService, MutableAuthenticationService authenticationService, AuthorityService authorityService, RetryingTransactionHelper retryingTransactionHelper) {
+    public GuestServiceImpl(PersonService personService, MutableAuthenticationService authenticationService, AuthorityService authorityService, RetryingTransactionHelper retryingTransactionHelper, LightbendConfigLoader configLoader) {
         this.personService = personService;
         this.authenticationService = authenticationService;
         this.authorityService = authorityService;
         this.retryingTransactionHelper = retryingTransactionHelper;
+        this.configLoader = configLoader;
+    }
+
+    @Override
+    public void init(){
+        createOrUpdateAllGuestUsers();
+    }
+
+    @EventListener
+    public void onConfigurationChanged(RefreshScopeRefreshedEvent event) {
+        if (!event.isCaller()) {
+            return;
+        }
+        createOrUpdateAllGuestUsers();
     }
 
     @Override
     public GuestConfig getDefaultConfig() {
-        Config rootConfig = LightbendConfigLoader.get();
+        Config rootConfig = configLoader.getConfig();
         Config config = rootConfig.getConfig(REPOSITORY_GUEST_CONFIG_PATH);
         return ConfigBeanFactory.create(config, GuestConfig.class);
     }
 
     @Override
     public GuestConfig getConfig(String context) {
-        Config rootConfig = LightbendConfigLoader.get();
+        Config rootConfig = configLoader.getConfig();
         if (StringUtils.isBlank(context)) {
             return getDefaultConfig();
         }
@@ -73,7 +87,7 @@ public class GuestServiceImpl implements GuestService, ApplicationListener<Refre
         List<GuestConfig> guestConfigs = new ArrayList<>();
         guestConfigs.add(getDefaultConfig());
 
-        Config rootConfig = LightbendConfigLoader.get();
+        Config rootConfig = configLoader.getConfig();
         Config defaultConfig = rootConfig.getConfig(REPOSITORY_GUEST_CONFIG_PATH);
 
         if (rootConfig.hasPath(REPOSITORY_CONTEXT_CONFIG_PATH)) {
@@ -121,17 +135,6 @@ public class GuestServiceImpl implements GuestService, ApplicationListener<Refre
         return getConfig(currentContext);
     }
 
-
-    @Override
-    public void onApplicationEvent(RefreshScopeRefreshedEvent event) {
-        if (!event.isCaller()) {
-            return;
-        }
-
-
-        createOrUpdateAllGuestUsers();
-    }
-
     @Override
     public void createOrUpdateAllGuestUsers() {
         getAllGuestConfigs().forEach(x -> {
@@ -153,16 +156,18 @@ public class GuestServiceImpl implements GuestService, ApplicationListener<Refre
         return retryingTransactionHelper.doInTransaction(() -> AuthenticationUtil.runAsSystem(() -> {
             NodeRef guestRef = personService.getPersonOrNull(guestConfig.getUsername());
             String password = new KeyTool().getRandomPassword();
-
+//
             if (guestRef == null) {
                 Map<QName, Serializable> properties = new HashMap<>(Map.of(
                         ContentModel.PROP_USERNAME, guestConfig.getUsername(),
                         ContentModel.PROP_FIRSTNAME, guestConfig.getUsername(),
                         ContentModel.PROP_LASTNAME, guestConfig.getUsername(),
                         QName.createQName(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION), CCConstants.CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_GUEST));
-
-                authenticationService.createAuthentication(guestConfig.getUsername(), password.toCharArray());
                 guestRef = personService.createPerson(properties);
+            }
+
+            if(!authenticationService.getAuthenticationEnabled(guestConfig.getUsername())) {
+                authenticationService.createAuthentication(guestConfig.getUsername(), password.toCharArray());
             } else {
                 authenticationService.setAuthentication(guestConfig.getUsername(), password.toCharArray());
             }

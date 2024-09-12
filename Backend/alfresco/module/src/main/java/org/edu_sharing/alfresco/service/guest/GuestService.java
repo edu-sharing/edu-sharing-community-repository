@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 public interface GuestService {
+    void init();
+
     GuestConfig getDefaultConfig();
 
     GuestConfig getConfig(String context);
