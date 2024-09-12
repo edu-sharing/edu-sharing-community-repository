@@ -245,6 +245,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 components,
                 data,
             );
+            components.dropdown.ngOnChanges();
         }
         if (components.actionbar) {
             components.actionbar.options = this.globalOptions;
