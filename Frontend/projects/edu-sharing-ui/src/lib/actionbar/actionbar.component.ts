@@ -81,7 +81,7 @@ export class ActionbarComponent implements OnChanges {
      */
     @Input() mobileBreakpoint = UIConstants.MOBILE_WIDTH;
     optionsIn: OptionItem[] = [];
-    optionsAlways: OptionItem[] = [];
+    optionsAlways$ = new BehaviorSubject<OptionItem[]>([]);
     optionsMenu$ = new BehaviorSubject<OptionItem[]>([]);
     optionsToggle: OptionItem[] = [];
 
@@ -90,25 +90,31 @@ export class ActionbarComponent implements OnChanges {
     private prepareOptions(options: OptionItem[]) {
         options = this.uiService.filterValidOptions(Helper.deepCopyArray(options));
         if (options == null) {
-            this.optionsAlways = [];
+            this.optionsAlways$.next([]);
             this.optionsMenu$.next([]);
             return;
         }
         this.optionsToggle = this.uiService.filterToggleOptions(options, true);
-        this.optionsAlways = this.getActionOptions(
-            this.uiService.filterToggleOptions(options, false),
-        ).slice(0, this.getNumberOptions());
-        if (!this.optionsAlways.length) {
-            this.optionsAlways = this.uiService
-                .filterToggleOptions(options, false)
-                .slice(0, this.getNumberOptions());
+        this.optionsAlways$.next(
+            this.getActionOptions(this.uiService.filterToggleOptions(options, false)).slice(
+                0,
+                this.getNumberOptions(),
+            ),
+        );
+        if (!this.optionsAlways$.value.length) {
+            this.optionsAlways$.next(
+                this.uiService
+                    .filterToggleOptions(options, false)
+                    .slice(0, this.getNumberOptions()),
+            );
         }
         this.optionsMenu$.next(
             this.hideActionOptions(
                 this.uiService.filterToggleOptions(options, false),
-                this.optionsAlways,
+                this.optionsAlways$.value,
             ),
         );
+        this.uiService.updateOptionEnabledState(this.optionsAlways$);
         this.uiService.updateOptionEnabledState(this.optionsMenu$);
         // may causes weird looking
         /*if(this.optionsMenu.length<2) {
@@ -178,7 +184,7 @@ export class ActionbarComponent implements OnChanges {
             case 'first':
                 return optionIndex === 0;
             case 'last':
-                return optionIndex === this.optionsAlways.length - 1;
+                return optionIndex === this.optionsAlways$.value.length - 1;
             case 'manual':
                 return option.isPrimary;
         }
