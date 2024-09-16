@@ -103,7 +103,6 @@ repository_database_jdbc="jdbc:${repository_database_prot}://${repository_databa
 repository_search_solr_host="${REPOSITORY_SEARCH_SOLR_HOST:-repository-search-solr}"
 repository_search_solr_port="${REPOSITORY_SEARCH_SOLR_PORT:-8080}"
 
-repository_transform_enabled="${REPOSITORY_TRANSFORM_ENABLED:-"true"}"
 repository_transform_host="${REPOSITORY_TRANSFORM_HOST:-}"
 repository_transform_port="${REPOSITORY_TRANSFORM_PORT:-}"
 repository_transform_aio_host="${REPOSITORY_TRANSFORM_AIO_HOST:-}"
@@ -379,8 +378,8 @@ grep -q '^[#]*\s*alfresco-pdf-renderer\.root=' "${alfProps}" || echo "alfresco-p
 sed -i -r 's|^[#]*\s*alfresco-pdf-renderer\.exe=.*|alfresco-pdf-renderer.exe=${alfresco-pdf-renderer.root}/alfresco-pdf-renderer|' "${alfProps}"
 grep -q '^[#]*\s*alfresco-pdf-renderer\.exe=' "${alfProps}" || echo 'alfresco-pdf-renderer.exe=${alfresco-pdf-renderer.root}/alfresco-pdf-renderer' >>"${alfProps}"
 
-sed -i -r 's|^[#]*\s*ooo\.enabled=.*|ooo.enabled='"${repository_transform_enabled}"'|' "${alfProps}"
-grep -q '^[#]*\s*ooo\.enabled=' "${alfProps}" || echo "ooo.enabled=${repository_transform_enabled}" >>"${alfProps}"
+sed -i -r 's|^[#]*\s*local\.transform\.pipeline\.config\.dir=.*|local.transform.pipeline.config.dir='"$ALF_HOME/tomcat/shared/classes/config/default/transform/pipelines|" "${alfProps}"
+grep -q '^[#]*\s*local\.transform\.pipeline\.config\.dir=' "${alfProps}" || echo "local.transform.pipeline.config.dir=$ALF_HOME/tomcat/shared/classes/config/default/transform/pipelines" >>"${alfProps}"
 
 sed -i -r 's|^[#]*\s*ooo\.exe=.*|ooo.exe=|' "${alfProps}"
 grep -q '^[#]*\s*ooo\.exe=' "${alfProps}" || echo "ooo.exe=" >>"${alfProps}"
