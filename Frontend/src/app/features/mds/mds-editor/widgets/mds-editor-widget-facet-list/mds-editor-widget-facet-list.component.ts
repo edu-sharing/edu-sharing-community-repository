@@ -72,8 +72,8 @@ export class MdsEditorWidgetFacetListComponent
     }
 
     async ngOnInit() {
-        this.values = (await this.widget.getInitalValuesAsync())?.jointValues || [];
         this.registerFacetValuesSubject();
+        this.values = (await this.widget.getInitalValuesAsync())?.jointValues || [];
         this.registerFormControls();
         this.widget.setValueExternal.subscribe((values) => {
             const valuesMapped = this.facetValuesFiltered.map(
