@@ -1,3 +1,4 @@
+
 package org.edu_sharing.alfresco.policy;
 
 import org.alfresco.repo.node.NodeServicePolicies;

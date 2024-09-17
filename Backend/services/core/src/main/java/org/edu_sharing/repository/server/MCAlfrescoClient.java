@@ -27,17 +27,13 @@
  */
 package org.edu_sharing.repository.server;
 
+import org.edu_sharing.repository.client.rpc.*;
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import org.edu_sharing.repository.client.rpc.EduGroup;
-import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
-import org.edu_sharing.repository.client.rpc.Group;
-import org.edu_sharing.repository.client.rpc.SearchResult;
-import org.edu_sharing.repository.client.rpc.Share;
-import org.edu_sharing.repository.client.rpc.User;
 
 
 /**
@@ -197,18 +193,8 @@ public interface MCAlfrescoClient {
 	 */
 	public Map<String, Map<String,Object>> getParents(String nodeID, boolean primary) throws Throwable;
 	
-	
-	
-	/**
-	 * get permissions for a node. 
-	 * @param nodeId
-	 * @return ACL that contains of the ACE List and the Information if permissions where inherited
-	 * @throws Exception
-	 */
-	public org.edu_sharing.repository.client.rpc.ACL getPermissions(String nodeId) throws Exception;
-		
-	
-	
+
+
 	/**
 	 * 
 	 * 

@@ -172,6 +172,16 @@
           "DownloadContent": "Herunterladen"
         }
       },
+      "TIMEBASED": {
+        "TOOLTIP": "Zeitgesteuerte Berechtigung konfigurieren",
+        "INVALID_STATE": "Diese zeitgesteuerte Berechtigung wird von einer anderen, dauerhaften Berechtigung überschrieben und hat keine Auswirkung",
+        "INVALID_STATE_TITLE": "Ungültige Einstellungen erkannt",
+        "INVALID_STATE_DETAILS": "Es existieren zeitgesteuerte Berechtigungen, welche durch dauerhafte Berechtigungen ersetzt werden. Ändern Sie die Berechtigungsstufe der zeitgesteueren Berechtigung oder löschen Sie diese, damit die Werte gespeichert werden können.",
+        "FROM_CHECKBOX": "Start-Zeitpunkt festlegen",
+        "TO_CHECKBOX": "End-Zeitpunkt festlegen",
+        "DATE_LABEL": "Datum",
+        "TIME_LABEL": "Uhrzeit"
+      },
       "PUBLISH": {
         "OPEN_VERSION": "Version anzeigen",
         "NO_LICENSE": "Das aktuelle Material hat keine zugewiesene Lizenz. Freigegebene Materialien sollten eine eindeutige Lizenz besitzen, damit festgelegt ist, ob und wie das Material weiterverwendet werden darf",
