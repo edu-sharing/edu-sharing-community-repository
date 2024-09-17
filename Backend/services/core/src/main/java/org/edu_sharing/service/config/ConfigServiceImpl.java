@@ -10,6 +10,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.config.model.*;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -106,6 +107,9 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
 
     @Override
     public Context getContext(String domain) throws Exception {
+        if(StringUtils.isBlank(domain)) {
+            return null;
+        }
         buildContextCache();
         return contextCache.get(domain);
     }
