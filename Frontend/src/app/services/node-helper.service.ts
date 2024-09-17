@@ -43,6 +43,7 @@ import { SessionStorageService } from '../core-module/rest/services/session-stor
 import { map } from 'rxjs/operators';
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
 import {
+    Ace,
     ApiHelpersService,
     ConfigService,
     HOME_REPOSITORY,
@@ -597,7 +598,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
      * @param {Permissions} permissions
      * @returns {boolean}
      */
-    getHandleStates(node: Node, permissions: Permission[]) {
+    getHandleStates(node: Node, permissions: Ace[]) {
         const states: HandleState = {};
         if (
             node.aspects.indexOf(RestConstants.CCM_ASPECT_PUBLISHED) != -1 &&

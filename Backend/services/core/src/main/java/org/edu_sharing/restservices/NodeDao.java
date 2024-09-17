@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.core.util.Json;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -46,6 +47,7 @@ import org.edu_sharing.restservices.shared.NodeSearch.Facet.Value;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.comment.CommentService;
@@ -73,6 +75,7 @@ import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
@@ -136,6 +139,7 @@ public class NodeDao {
      * temporary variable to reduce rebuilds for query in search context + collections
      */
     BoolQuery readPermissionsQuery;
+    private Set<TimedPermissionAuthority> authPerm;
 
     private NodeDao(org.alfresco.service.cmr.repository.NodeRef nodeRef) throws Throwable {
         this.nodeId = nodeRef.getId();
@@ -157,8 +161,8 @@ public class NodeDao {
     }
 
     public static NodeStatsEntry.NodeStats getStats(NodeDao node) throws DAOException {
-        if(!node.isFromRemoteRepository()) {
-            if(!node.access.contains(PermissionService.CHANGE_PERMISSIONS)) {
+        if (!node.isFromRemoteRepository()) {
+            if (!node.access.contains(PermissionService.CHANGE_PERMISSIONS)) {
                 throw new DAORestrictedAccessException(new SecurityException("Requires " + PermissionService.CHANGE_PERMISSIONS), node.getId());
             }
             try {
@@ -175,7 +179,7 @@ public class NodeDao {
     }
 
     public org.edu_sharing.service.model.NodeRef getNodeRef() {
-        if(this.nodeRef != null) {
+        if (this.nodeRef != null) {
             return this.nodeRef;
         }
         return new org.edu_sharing.service.model.NodeRefImpl(repoDao.getId(), storeProtocol, storeId, nodeId);
@@ -359,9 +363,9 @@ public class NodeDao {
         Map<String, String[]> criteriasMap = MetadataSearchHelper.convertCriterias(criterias);
         try {
             BoolQuery readPermissionsQuery = null;
-            if(searchService instanceof SearchServiceElastic) {
+            if (searchService instanceof SearchServiceElastic) {
                 // improve performance by caching the relatively expensive query
-                readPermissionsQuery = ((SearchServiceElastic)searchService).getReadPermissionsQuery(new BoolQuery.Builder()).build();
+                readPermissionsQuery = ((SearchServiceElastic) searchService).getReadPermissionsQuery(new BoolQuery.Builder()).build();
             }
             NodeSearch result = transform(repoDao, searchService.search(mdsDao.getMds(), query, criteriasMap, token), filter, transform, readPermissionsQuery);
             if (result.getCount() == 0) {
@@ -455,8 +459,9 @@ public class NodeDao {
     public static NodeSearch transform(RepositoryDao repoDao, SearchResultNodeRef search) {
         return transform(repoDao, search, null, null);
     }
+
     public static NodeSearch transform(RepositoryDao repoDao, SearchResultNodeRef search, Filter filter, Function<NodeDao, NodeDao> transform) {
-        return transform(repoDao, search, filter, transform ,null);
+        return transform(repoDao, search, filter, transform, null);
     }
 
     public static NodeSearch transform(RepositoryDao repoDao, SearchResultNodeRef search, Filter filter, Function<NodeDao, NodeDao> transform, BoolQuery readPermissionsQuery) {
@@ -878,7 +883,7 @@ public class NodeDao {
                         guestConfig.getUsername(),
                             CCConstants.PERMISSION_READ_ALL
                     );
-                }catch(Throwable t) {
+                } catch (Throwable t) {
                     logger.info("Unexpected error while resolving isPublic for node " + nodeId, t);
                 }
             }
@@ -1211,7 +1216,7 @@ public class NodeDao {
             }
             props.put(CCConstants.CCM_PROP_IO_CREATE_VERSION, new String[]{new Boolean(version).toString()});
             nodeService.updateNode(nodeId, props);
-            nodeService.writeContent(storeRef, nodeId, result.getInputStream(), result.getMediaType().toString(),null,
+            nodeService.writeContent(storeRef, nodeId, result.getInputStream(), result.getMediaType().toString(), null,
                     isDirectory() ? CCConstants.CCM_PROP_MAP_ICON : CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
             PreviewCache.purgeCache(nodeId);
             return new NodeDao(repoDao, nodeId);
@@ -1410,11 +1415,11 @@ public class NodeDao {
 
     private java.util.Collection<String> getEffectiveAccess(CollectionReference reference, List<String> restrictedPermissions) {
         Set<String> result = new HashSet<>();
-        if(reference.getAccessOriginal() != null) {
+        if (reference.getAccessOriginal() != null) {
             result.addAll(reference.getAccessOriginal());
         }
-        if(reference.isOriginalRestrictedAccess()) {
-            if(restrictedPermissions != null) {
+        if (reference.isOriginalRestrictedAccess()) {
+            if (restrictedPermissions != null) {
                 result.addAll(restrictedPermissions.stream()
                         .map(PermissionServiceHelper::getAllIncludingPermissions)
                         .flatMap(java.util.Collection::stream)
@@ -1547,7 +1552,7 @@ public class NodeDao {
         Content content = new Content();
         content.setUrl(getContentUrl());
         // skip hash + version for search cause of performance penalties
-        if(Arrays.asList(CallSourceHelper.CallSource.Search, CallSourceHelper.CallSource.Sitemap).contains(CallSourceHelper.getCallSource())) {
+        if (Arrays.asList(CallSourceHelper.CallSource.Search, CallSourceHelper.CallSource.Sitemap).contains(CallSourceHelper.getCallSource())) {
             return content;
         }
         content.setVersion(getContentVersion(data));
@@ -1589,6 +1594,25 @@ public class NodeDao {
         }
     }
 
+    public org.edu_sharing.repository.client.rpc.ACL getRawPermissions() throws DAOException {
+        if (!AuthorityServiceHelper.isAdmin()) {
+            throw new AccessDeniedException("admin role required.");
+        }
+        try {
+            org.edu_sharing.repository.client.rpc.ACL permissions = null;
+            try {
+                permissions = permissionService.getPermissions(nodeId);
+            } catch (org.alfresco.repo.security.permissions.AccessDeniedException accessDenied) {
+                //than you don't have the permission no ask for
+                return null;
+            }
+
+            return permissions;
+        } catch (Throwable t) {
+            throw DAOException.mapping(t);
+        }
+    }
+
     public NodePermissions getPermissions() throws DAOException {
 
         try {
@@ -1620,7 +1644,7 @@ public class NodeDao {
 
             if (aces != null) {
 
-                Map<Authority, List<String>> authPerm = new HashMap<>();
+                Set<TimedPermissionAuthority> authPerm = new HashSet<>();
                 Map<Authority, List<String>> authPermInherited = new HashMap<>();
                 for (org.edu_sharing.repository.client.rpc.ACE ace : aces) {
 
@@ -1650,22 +1674,32 @@ public class NodeDao {
                             authPermInherited.put(authority, tmpPerms);
 
                         } else {
-                            List<String> tmpPerms = authPerm.get(authority);
-                            if (tmpPerms == null) {
-                                tmpPerms = new ArrayList<>();
-                            }
+                            TimedPermissionAuthority timedPermission = new TimedPermissionAuthority(authority, ace.getFrom(), ace.getTo(), new ArrayList<>(Collections.singleton(ace.getPermission())));
+                            Optional<TimedPermissionAuthority> existingAuthority = authPerm.stream().filter(a -> a.equalsIgnorePermissions(timedPermission)).findAny();
+                            Optional<TimedPermissionAuthority> existingPermission = authPerm.stream().filter(a -> a.equalsIgnoreFromTo(timedPermission)).findAny();
                             // do not duplicate existing permissions
-                            if (!tmpPerms.contains(ace.getPermission()))
-                                tmpPerms.add(ace.getPermission());
-                            authPerm.put(authority, tmpPerms);
+                            if (existingAuthority.isPresent() && !existingAuthority.get().getPermissions().contains(ace.getPermission())) {
+                                existingAuthority.get().getPermissions().add(ace.getPermission());
+                            } else if (existingPermission.isPresent()) {
+                                if (timedPermission.isTimed()) {
+                                    authPerm.remove(existingPermission.get());
+                                    authPerm.add(timedPermission);
+                                }
+                            } else {
+                                authPerm.add(timedPermission);
+                            }
+
+
                         }
                     }
                 }
 
-                for (Map.Entry<Authority, List<String>> entry : authPerm.entrySet()) {
-                    ACE ace = getACEAsSystem(entry.getKey());
-                    ace.setPermissions(entry.getValue());
-                    ace.setEditable(entry.getKey().isEditable());
+                for (TimedPermissionAuthority entry : authPerm) {
+                    ACE ace = getACEAsSystem(entry.getAuthority());
+                    ace.setPermissions(entry.getPermissions());
+                    ace.setFrom(entry.getFrom());
+                    ace.setTo(entry.getTo());
+                    ace.setEditable(entry.getAuthority().isEditable());
                     result.getLocalPermissions().getPermissions().add(ace);
                 }
 
@@ -1686,7 +1720,7 @@ public class NodeDao {
 
     }
 
-    private ACE getACEAsSystem(Authority key){
+    private ACE getACEAsSystem(Authority key) {
         return AuthenticationUtil.runAsSystem(new RunAsWork<ACE>() {
 
             @Override
@@ -1716,25 +1750,7 @@ public class NodeDao {
     public void setPermissions(ACL permissions, String mailText, Boolean sendMail, Boolean sendCopy) throws DAOException {
 
         try {
-
-            List<org.edu_sharing.repository.client.rpc.ACE> aces = new ArrayList<org.edu_sharing.repository.client.rpc.ACE>();
-
-            for (ACE permission : permissions.getPermissions()) {
-
-                for (String tmpPerm : permission.getPermissions()) {
-                    org.edu_sharing.repository.client.rpc.ACE ace = new org.edu_sharing.repository.client.rpc.ACE();
-
-                    ace.setAccessStatus("acepted");
-
-                    ace.setAuthority(permission.getAuthority().getAuthorityName());
-                    ace.setAuthorityType(permission.getAuthority().getAuthorityType().name());
-
-                    ace.setPermission(tmpPerm);
-
-                    aces.add(ace);
-                }
-            }
-
+            List<org.edu_sharing.repository.client.rpc.ACE> aces = getAceList(permissions);
             org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(repoDao.getId());
             permissionService.setPermissions(
                     nodeId,
@@ -1748,6 +1764,28 @@ public class NodeDao {
 
             throw DAOException.mapping(t);
         }
+    }
+
+    private static @NotNull List<org.edu_sharing.repository.client.rpc.ACE> getAceList(ACL permissions) {
+        List<org.edu_sharing.repository.client.rpc.ACE> aces = new ArrayList<>();
+        for (ACE permission : permissions.getPermissions()) {
+
+            for (String tmpPerm : permission.getPermissions()) {
+                org.edu_sharing.repository.client.rpc.ACE ace = new org.edu_sharing.repository.client.rpc.ACE();
+
+                ace.setAccessStatus("accepted");
+
+                ace.setAuthority(permission.getAuthority().getAuthorityName());
+                ace.setAuthorityType(permission.getAuthority().getAuthorityType().name());
+
+                ace.setFrom(permission.getFrom());
+                ace.setTo(permission.getTo());
+
+                ace.setPermission(tmpPerm);
+                aces.add(ace);
+            }
+        }
+        return aces;
     }
 
     private Map<String, String[]> transformProperties(
@@ -1835,16 +1873,16 @@ public class NodeDao {
     public Person getCreatedBy() {
 
         Person ref = new Person();
-        if(nodeProps.get(CCConstants.NODECREATOR_FIRSTNAME) != null && nodeProps.get(CCConstants.NODECREATOR_LASTNAME) != null) {
+        if (nodeProps.get(CCConstants.NODECREATOR_FIRSTNAME) != null && nodeProps.get(CCConstants.NODECREATOR_LASTNAME) != null) {
             ref.setFirstName((String) nodeProps
                     .get(CCConstants.NODECREATOR_FIRSTNAME));
             ref.setLastName((String) nodeProps
                     .get(CCConstants.NODECREATOR_LASTNAME));
             if (resolveUsernames && this.checkUserHasPermissionToSeeMail((String) nodeProps.get(CCConstants.CM_PROP_C_CREATOR)))
                 ref.setMailbox((String) nodeProps.get(CCConstants.NODECREATOR_EMAIL));
-        } else if(resolveUsernames && authorityService != null) {
+        } else if (resolveUsernames && authorityService != null) {
             User user = authorityService.getUser((String) nodeProps.get(CCConstants.CM_PROP_C_CREATOR));
-            if(user != null) {
+            if (user != null) {
                 ref.setFirstName(user.getGivenName());
                 ref.setLastName(user.getSurname());
                 if (this.checkUserHasPermissionToSeeMail((String) nodeProps.get(CCConstants.CM_PROP_C_CREATOR)))
@@ -1855,7 +1893,7 @@ public class NodeDao {
     }
 
     private Person getOwner() {
-        if(resolveUsernames) {
+        if (resolveUsernames) {
             User owner = null;
             if (ownerUsername != null && !ownerUsername.trim().equals("")) {
                 if (authorityService != null) {
@@ -1953,16 +1991,16 @@ public class NodeDao {
     private Person getModifiedBy() {
 
         Person ref = new Person();
-        if(nodeProps.get(CCConstants.NODEMODIFIER_FIRSTNAME) != null && nodeProps.get(CCConstants.NODEMODIFIER_LASTNAME) != null) {
+        if (nodeProps.get(CCConstants.NODEMODIFIER_FIRSTNAME) != null && nodeProps.get(CCConstants.NODEMODIFIER_LASTNAME) != null) {
             ref.setFirstName((String) nodeProps
                     .get(CCConstants.NODEMODIFIER_FIRSTNAME));
             ref.setLastName((String) nodeProps
                     .get(CCConstants.NODEMODIFIER_LASTNAME));
             if (resolveUsernames && this.checkUserHasPermissionToSeeMail((String) nodeProps.get(CCConstants.CM_PROP_C_MODIFIER)))
                 ref.setMailbox((String) nodeProps.get(CCConstants.NODEMODIFIER_EMAIL));
-        } else if(resolveUsernames && authorityService != null) {
+        } else if (resolveUsernames && authorityService != null) {
             User user = authorityService.getUser((String) nodeProps.get(CCConstants.CM_PROP_C_MODIFIER));
-            if(user != null) {
+            if (user != null) {
                 ref.setFirstName(user.getGivenName());
                 ref.setLastName(user.getSurname());
                 if (this.checkUserHasPermissionToSeeMail((String) nodeProps.get(CCConstants.CM_PROP_C_MODIFIER)))
@@ -2000,14 +2038,14 @@ public class NodeDao {
 
     private RatingDetails getRating() {
         try {
-            if(access.contains(CCConstants.PERMISSION_RATE_READ)) {
+            if (access.contains(CCConstants.PERMISSION_RATE_READ)) {
                 // skip permission checks, this can be useful if the user might have indirect access via collection
                 return AuthenticationUtil.runAsSystem(() -> RatingServiceFactory.getRatingService(repoDao.getId()).getAccumulatedRatings(getNodeRef(), null));
             } else {
                 return RatingServiceFactory.getRatingService(repoDao.getId()).getAccumulatedRatings(getNodeRef(), null);
             }
         } catch (Throwable t) {
-            if(t.getCause() instanceof InsufficientPermissionException) {
+            if (t.getCause() instanceof InsufficientPermissionException) {
                 // ignored
                 return null;
             }
@@ -2086,7 +2124,7 @@ public class NodeDao {
             version.setMinor(Integer.parseInt(versionTokens[1]));
             version.setMinor(Integer.parseInt(versionTokens[1]));
             return version;
-        } catch(Throwable e) {
+        } catch (Throwable e) {
             logger.warn("Could not parse version for node " + nodeId, e);
             NodeVersionRef version = new NodeVersionRef();
             version.setNode(getRef());
@@ -2171,7 +2209,7 @@ public class NodeDao {
                 if (json.has("comment"))
                     history.setComment(json.getString("comment"));
                 try {
-                    history.setEditor(new PersonDao(repoDao,json.getString("editor")).asPersonSimple(false));
+                    history.setEditor(new PersonDao(repoDao, json.getString("editor")).asPersonSimple(false));
                 } catch (Throwable t) {
                     // The user may has no permission or entry deleted
                     history.setEditor(new UserSimple());
@@ -2183,9 +2221,9 @@ public class NodeDao {
                     try {
                         String authority = arr.getString(i);
                         if (authority.startsWith(PermissionService.GROUP_PREFIX)) {
-                            list[i]=new GroupDao(repoDao, authority).asGroup(false);
+                            list[i] = new GroupDao(repoDao, authority).asGroup(false);
                         } else {
-                            list[i]=new PersonDao(repoDao,authority).asPersonSimple(false);
+                            list[i] = new PersonDao(repoDao, authority).asPersonSimple(false);
                         }
                     } catch (Throwable t) {
                         // The user may has no permission or entry deleted
@@ -2196,9 +2234,9 @@ public class NodeDao {
                 history.setReceiver(list);
                 history.setStatus(json.getString("status"));
                 Object time = json.get("time");
-                if(time instanceof String) {
+                if (time instanceof String) {
                     history.setTime(Long.parseLong((String) time));
-                } else if(time instanceof Long) {
+                } else if (time instanceof Long) {
                     history.setTime((Long) time);
                 } else {
                     logger.info("Can not cast time: " + time + ":" + json.toString());
@@ -2307,10 +2345,10 @@ public class NodeDao {
     }
 
     private Preview getPreview() {
-        if(previewData != null){
+        if (previewData != null) {
             return new Preview(getStoreProtocol(),
                     getStoreIdentifier(),
-                    remoteId!=null ? remoteId : getRef().getId(),
+                    remoteId != null ? remoteId : getRef().getId(),
                     previewData
             );
         }
@@ -2548,9 +2586,11 @@ public class NodeDao {
         }
         return converted;
     }
+
     public static List<NodeRef> convertEduNodeRef(RepositoryDao repoDao, List<org.edu_sharing.service.model.NodeRef> refs) {
         return refs.stream().map(ref -> new NodeRef(repoDao, ref.getNodeId())).collect(Collectors.toList());
     }
+
     public void reportNode(String reason, String userEmail, String userComment) throws DAOException {
         try {
             String type = nodeService.getType(nodeId);
