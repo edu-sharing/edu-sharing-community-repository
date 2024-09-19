@@ -23,7 +23,6 @@ import org.alfresco.service.cmr.security.*;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.EduSharingCustomPermissionService;
@@ -57,8 +56,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.*;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -88,7 +87,6 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
     BehaviourFilter policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
     MCAlfrescoAPIClient repoClient = new MCAlfrescoAPIClient();
 	private GuestService guestService = applicationContext.getBean(GuestService.class);
-	Logger logger = Logger.getLogger(PermissionServiceImpl.class);
     private PermissionService permissionService;
 
     public PermissionServiceImpl(
@@ -145,7 +143,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 
         Set<ACE> activeTimedAces = new HashSet<>(); // set of timed aces which should be active
-        Set<ACE> timedAcesToSave = new HashSet<>(); // set of timed aces which need to be stored in db
+        Set<ACE> inactiveAces = new HashSet<>(); // set of timed aces which need to be stored in db
 
 
         /**
@@ -157,16 +155,19 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
             ACE ace = iteratorNew.next();
             boolean remove = false;
 
-            if ((ace.getFrom() != null && ace.getFrom() > now) || (ace.getTo() != null && ace.getTo() > now)) {
-                timedAcesToSave.add(ace);
+            // future aces
+            if ((ace.getFrom() != null && ace.getFrom() > now) && (ace.getTo() == null || ace.getTo() > now)) {
+                inactiveAces.add(ace);
+                remove = true;
             }
 
+            // aces wich should be activated right now
             if ((ace.getFrom() != null || ace.getTo() != null) && (ace.getFrom() == null || ace.getFrom() < now) && (ace.getTo() == null || ace.getTo() > now)) {
                 activeTimedAces.add(ace);
             }
 
-            // flag to remove expired or future aces from acesNew
-            if((ace.getFrom() != null && ace.getFrom() > now) || ace.getTo() != null && ace.getTo() < now){
+            // flag to remove expired aces from acesNew
+            if(ace.getTo() != null && ace.getTo() <= now){
                 remove = true;
             }
 
@@ -198,7 +199,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
                 continue;
             }
 
-            if (!acesToUpdate.contains(aceOld) && !acesNotChanged.contains(aceOld) && !timedAcesToSave.contains(aceOld)) {
+            if (!acesToUpdate.contains(aceOld) && !acesNotChanged.contains(aceOld) && !inactiveAces.contains(aceOld)) {
                 acesToRemove.add(aceOld);
             }
         }
@@ -239,11 +240,15 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
             createNotify = true;
         }
 
-        if (!timedAcesToSave.isEmpty()) {
-            for (ACE ace : timedAcesToSave) {
-                TimedPermission permission = createTimedPermission(nodeId, ace);
-                timedPermissionMapper.save(permission);
-            }
+
+        for (ACE ace : inactiveAces) {
+            TimedPermission permission = createTimedPermission(nodeId, ace, false);
+            timedPermissionMapper.save(permission);
+        }
+
+        for (ACE ace : activeTimedAces) {
+            TimedPermission permission = createTimedPermission(nodeId, ace, true);
+            timedPermissionMapper.save(permission);
         }
 
         if (createNotify) {
@@ -650,17 +655,24 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
         long now = new Date().getTime();
 
         // TODO timed permissions
-        Set<ACE> timedAces = new HashSet<>();
+        Set<ACE> inactiveAces = new HashSet<>();
+        Set<ACE> activeTimedAces = new HashSet<>();
         while (newAcesIterator.hasNext()) {
-            ACE newAce = newAcesIterator.next();
+            ACE ace = newAcesIterator.next();
             boolean remove = false;
-            if (newAce.getFrom() != null && newAce.getFrom() > now) {
-                timedAces.add(newAce);
+            // future aces
+            if ((ace.getFrom() != null && ace.getFrom() > now) && (ace.getTo() == null || ace.getTo() > now)) {
+                inactiveAces.add(ace);
                 remove = true;
             }
 
-            if (newAce.getTo() != null && newAce.getTo() > now) {
-                timedAces.add(newAce);
+            // aces wich should be activated right now
+            if ((ace.getFrom() != null || ace.getTo() != null) && (ace.getFrom() == null || ace.getFrom() <= now) && (ace.getTo() == null || ace.getTo() > now)) {
+                activeTimedAces.add(ace);
+            }
+
+            // flag to remove expired aces from acesNew
+            if(ace.getTo() != null && ace.getTo() <= now){
                 remove = true;
             }
 
@@ -694,8 +706,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
                             permissionsService.setPermission(nodeRef, ace.getAuthority(), permission, true);
                         }
                     }
-
-                    timedAces.forEach(x -> timedPermissionMapper.save(createTimedPermission(nodeId, x)));
+                    inactiveAces.forEach(x -> timedPermissionMapper.save(createTimedPermission(nodeId, x, false)));
+                    activeTimedAces.forEach(x -> timedPermissionMapper.save(createTimedPermission(nodeId, x, true)));
 
                     return null;
                 }, false);
@@ -771,7 +783,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
                     }
 
                     timedAcesToRemove.forEach(x -> {
-                        TimedPermission permission = createTimedPermission(nodeId, x);
+                        TimedPermission permission = createTimedPermission(nodeId, x, false);
                         timedPermissionMapper.delete(permission);
                     });
 
@@ -779,7 +791,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
                 }, false);
     }
 
-    private TimedPermission createTimedPermission(String nodeId, ACE ace) {
+    private TimedPermission createTimedPermission(String nodeId, ACE ace, boolean activated) {
         TimedPermission permission = new TimedPermission();
         permission.setNode_id(nodeId);
         if (ace.getTo() != null) {
@@ -790,6 +802,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
         }
         permission.setAuthority(ace.getAuthority());
         permission.setPermission(ace.getPermission());
+        permission.setActivated(activated);
         return permission;
     }
 

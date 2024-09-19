@@ -5,9 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections.ListUtils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * An Authority + from + to permission timing
@@ -23,7 +22,7 @@ public class TimedPermissionAuthority {
     private Long from, to;
     @Getter
     @Setter
-    private ArrayList<String> permissions;
+    private Set<String> permissions;
     public boolean isTimed(){
         return from != null || to != null;
     }
@@ -62,6 +61,7 @@ public class TimedPermissionAuthority {
 
     public boolean equalsIgnoreFromTo(TimedPermissionAuthority that) {
         return authority.equals(that.authority) &&
-                ListUtils.isEqualList(permissions, that.permissions);
+                (permissions.containsAll(that.permissions) || that.permissions.containsAll(permissions));
+//                ListUtils.isEqualList(permissions, that.permissions);
     }
 }

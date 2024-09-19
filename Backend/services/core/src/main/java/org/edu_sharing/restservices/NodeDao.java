@@ -1616,12 +1616,9 @@ public class NodeDao {
     public NodePermissions getPermissions() throws DAOException {
 
         try {
-
-            org.edu_sharing.repository.client.rpc.ACL permissions = null;
+            org.edu_sharing.repository.client.rpc.ACL permissions;
             try {
-
                 permissions = permissionService.getPermissions(nodeId);
-
             } catch (org.alfresco.repo.security.permissions.AccessDeniedException accessDenied) {
                 //than you don't have the permission no ask for
                 return null;
@@ -1631,72 +1628,63 @@ public class NodeDao {
                 return null;
             }
 
-            NodePermissions result = new NodePermissions();
-
             ACL local = new ACL();
             local.setInherited(permissions.isInherited());
             local.setPermissions(new ArrayList<>());
 
+            NodePermissions result = new NodePermissions();
             result.setLocalPermissions(local);
             result.setInheritedPermissions(new ArrayList<>());
 
             org.edu_sharing.repository.client.rpc.ACE[] aces = permissions.getAces();
 
-            if (aces != null) {
+            if (aces == null) {
+                return result;
+            }
 
-                Set<TimedPermissionAuthority> authPerm = new HashSet<>();
-                Map<Authority, List<String>> authPermInherited = new HashMap<>();
-                for (org.edu_sharing.repository.client.rpc.ACE ace : aces) {
+            Set<TimedPermissionAuthority> authPerm = new HashSet<>();
+            Map<Authority, List<String>> authPermInherited = new HashMap<>();
+            for (org.edu_sharing.repository.client.rpc.ACE ace : aces) {
 
-                    if ("acepted".equals(ace.getAccessStatus())) {
+                if (!"acepted".equals(ace.getAccessStatus())) {
+                    continue;
+                }
 
-                        Authority authority = (Authority.Type.valueOf(ace.getAuthorityType()) == Authority.Type.GROUP) ? new Group() : new Authority();
-                        if (authority instanceof Group) {
-                            Group g = (Group) authority;
-                            g.setProfile(new GroupProfile());
-                            g.getProfile().setGroupType(ace.getGroup().getGroupType());
-                            authority.setEditable(ace.getGroup().isEditable());
-                        } else if (ace.getUser() != null) {
-                            authority.setEditable(ace.getUser().isEditable());
+                Authority authority = (Authority.Type.valueOf(ace.getAuthorityType()) == Authority.Type.GROUP) ? new Group(ace) : new Authority(ace);
+                if (ace.isInherited()) {
+                    List<String> tmpPerms = authPermInherited.get(authority);
+                    if (tmpPerms == null) {
+                        tmpPerms = new ArrayList<>();
+                    }
+                    // do not duplicate existing permissions
+                    if (!tmpPerms.contains(ace.getPermission())) {
+                        tmpPerms.add(ace.getPermission());
+                    }
+                    authPermInherited.put(authority, tmpPerms);
+                } else {
+                    TimedPermissionAuthority timedPermission = new TimedPermissionAuthority(authority, ace.getFrom(), ace.getTo(), new HashSet<>(Collections.singleton(ace.getPermission())));
+                    Optional<TimedPermissionAuthority> existingAuthority = authPerm.stream().filter(a -> a.equalsIgnorePermissions(timedPermission)).findAny();
+                    Optional<TimedPermissionAuthority> existingPermission = authPerm.stream().filter(a -> a.equalsIgnoreFromTo(timedPermission)).findAny();
+                    // do not duplicate existing permissions
+                    if (existingAuthority.isPresent() && !existingAuthority.get().getPermissions().contains(ace.getPermission())) {
+                        existingAuthority.get().getPermissions().add(ace.getPermission());
+                    } else if (existingPermission.isPresent()) {
+                        if (timedPermission.isTimed()) {
+                            existingPermission.get().setFrom(timedPermission.getFrom());
+                            existingPermission.get().setTo(timedPermission.getTo());
                         }
-                        authority.setAuthorityName(ace.getAuthority());
-                        authority.setAuthorityType(Authority.Type.valueOf(ace.getAuthorityType()));
-
-                        if (ace.isInherited()) {
-
-                            List<String> tmpPerms = authPermInherited.get(authority);
-                            if (tmpPerms == null) {
-                                tmpPerms = new ArrayList<>();
-                            }
-                            // do not duplicate existing permissions
-                            if (!tmpPerms.contains(ace.getPermission()))
-                                tmpPerms.add(ace.getPermission());
-                            authPermInherited.put(authority, tmpPerms);
-
-                        } else {
-                            TimedPermissionAuthority timedPermission = new TimedPermissionAuthority(authority, ace.getFrom(), ace.getTo(), new ArrayList<>(Collections.singleton(ace.getPermission())));
-                            Optional<TimedPermissionAuthority> existingAuthority = authPerm.stream().filter(a -> a.equalsIgnorePermissions(timedPermission)).findAny();
-                            Optional<TimedPermissionAuthority> existingPermission = authPerm.stream().filter(a -> a.equalsIgnoreFromTo(timedPermission)).findAny();
-                            // do not duplicate existing permissions
-                            if (existingAuthority.isPresent() && !existingAuthority.get().getPermissions().contains(ace.getPermission())) {
-                                existingAuthority.get().getPermissions().add(ace.getPermission());
-                            } else if (existingPermission.isPresent()) {
-                                if (timedPermission.isTimed()) {
-                                    authPerm.remove(existingPermission.get());
-                                    authPerm.add(timedPermission);
-                                }
-                            } else {
-                                authPerm.add(timedPermission);
-                            }
-
-
-                        }
+                    } else {
+                        authPerm.add(timedPermission);
                     }
                 }
 
+            }
+
+
+
                 for (TimedPermissionAuthority entry : authPerm) {
                     ACE ace = getACEAsSystem(entry.getAuthority());
-                    ace.setPermissions(entry.getPermissions());
+                    ace.setPermissions(new ArrayList<>(entry.getPermissions()));
                     ace.setFrom(entry.getFrom());
                     ace.setTo(entry.getTo());
                     ace.setEditable(entry.getAuthority().isEditable());
@@ -1709,7 +1697,7 @@ public class NodeDao {
                     result.getInheritedPermissions().add(ace);
                 }
 
-            }
+
 
             return result;
 
