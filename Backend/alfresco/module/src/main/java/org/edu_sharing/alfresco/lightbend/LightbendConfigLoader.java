@@ -61,6 +61,7 @@ public class LightbendConfigLoader {
         }
         String base = getConfigFileLocation(BASE_FILE, PropertiesHelper.Config.PathPrefix.DEFAULTS);
         String custom = getConfigFileLocation(CUSTOM_FILE, PropertiesHelper.Config.PathPrefix.DEFAULTS);
+        String overrideDefaults = getConfigFileLocation(OVERRIDE_FILE, PropertiesHelper.Config.PathPrefix.DEFAULTS);
         String deploymentCluster = getConfigFileLocation(DEPLOYMENT_FILE, PropertiesHelper.Config.PathPrefix.CLUSTER);
         String overrideCluster = getConfigFileLocation(OVERRIDE_FILE, PropertiesHelper.Config.PathPrefix.CLUSTER);
         String deploymentNode = getConfigFileLocation(DEPLOYMENT_FILE, PropertiesHelper.Config.PathPrefix.NODE);
@@ -69,6 +70,7 @@ public class LightbendConfigLoader {
                 .withFallback(ConfigFactory.parseResourcesAnySyntax(deploymentNode))
                 .withFallback(ConfigFactory.parseResourcesAnySyntax(overrideCluster))
                 .withFallback(ConfigFactory.parseResourcesAnySyntax(deploymentCluster))
+                .withFallback(ConfigFactory.parseResourcesAnySyntax(overrideDefaults))
                 .withFallback(ConfigFactory.parseResourcesAnySyntax(custom))
                 .withFallback(ConfigFactory.parseResourcesAnySyntax(base))
                 .resolve();
