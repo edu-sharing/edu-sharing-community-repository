@@ -2053,8 +2053,8 @@ public class NodeDao {
         //if(isLink())
         //	return null;
 
-        // no download url if user can not access the content
-        if (!access.contains(CCConstants.PERMISSION_READ_ALL))
+        // no download url if user can not access the content anyways
+        if (!access.contains(CCConstants.PERMISSION_READ_ALL) || !access.contains(CCConstants.PERMISSION_DOWNLOAD_CONTENT))
             return null;
         return (String) nodeProps.get(CCConstants.DOWNLOADURL);
     }
