@@ -1,6 +1,6 @@
 {
   "name": "ngx-edu-sharing-ui",
-  "version": "9.1.2",
+  "version": "9.1.3",
   "license": "GNU GPL v2",
   "description": "Angular components for Edu-Sharing UX parts",
   "scripts": {
