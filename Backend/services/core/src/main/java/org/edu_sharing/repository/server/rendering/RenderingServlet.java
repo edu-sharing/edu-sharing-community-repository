@@ -47,6 +47,8 @@ public class RenderingServlet extends HttpServlet {
 
             resp.getWriter().write("<html>");
             resp.getWriter().write("<head>");
+            // hack for renderer
+            resp.getWriter().write("<es-app ngCspNonce=\"" + SecurityHeadersFilter.ngCspNonce.get() + "\"></es-app>");
             resp.getWriter().write("<style nonce=\"" +SecurityHeadersFilter.ngCspNonce.get() + "\">");
             resp.getWriter().write("body,html{margin:0; padding:0;}");
             try {
