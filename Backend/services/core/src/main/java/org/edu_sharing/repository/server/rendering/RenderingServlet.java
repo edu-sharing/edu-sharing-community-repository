@@ -47,6 +47,8 @@ public class RenderingServlet extends HttpServlet {
 
             resp.getWriter().write("<html>");
             resp.getWriter().write("<head>");
+            // hack for renderer
+            resp.getWriter().write("<es-app ngCspNonce=\"" + SecurityHeadersFilter.ngCspNonce.get() + "\"></es-app>");
             resp.getWriter().write("<style nonce=\"" +SecurityHeadersFilter.ngCspNonce.get() + "\">");
             resp.getWriter().write("body,html{margin:0; padding:0;}");
             try {
@@ -71,6 +73,8 @@ public class RenderingServlet extends HttpServlet {
                 }
                 response = renderingService.getDetails(node_id, version,DEFAULT_DISPLAY_MODE, params).getDetails();
                 response = response.replace("{{{LMS_INLINE_HELPER_SCRIPT}}}", URLHelper.getNgRenderNodeUrl(node_id,version)+"?");
+                // add nonce to render styles
+                response = response.replace("<style", "<style nonce=\"" +SecurityHeadersFilter.ngCspNonce.get() + "\"");
                 TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node_id), null, TrackingService.EventType.VIEW_MATERIAL_EMBEDDED);
             } catch (Throwable t) {
                 RenderingException exception = RenderingException.fromThrowable(t);
