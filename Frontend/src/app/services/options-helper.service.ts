@@ -245,7 +245,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         }
         if (components.actionbar) {
             components.actionbar.options = this.globalOptions;
-            console.log('invalidate');
             components.actionbar.invalidate();
         }
     }

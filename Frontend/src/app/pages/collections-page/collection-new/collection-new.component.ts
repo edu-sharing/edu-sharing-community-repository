@@ -16,6 +16,7 @@ import {
     ActionbarComponent,
     ColorHelper,
     DefaultGroups,
+    ElementType,
     InteractionType,
     ListItem,
     NodeDataSource,
@@ -1015,10 +1016,12 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
             scope: Scope.CollectionsCollection,
             customOptions: {
                 useDefaultOptions: false,
-                addOptions: imageOptions,
+                addOptions: imageOptions.map((i) => {
+                    i.elementType = [ElementType.Unknown];
+                    return i;
+                }),
             },
         });
-        console.log(imageOptions);
         await this.optionsHelperDataService.refreshComponents();
     }
 }
