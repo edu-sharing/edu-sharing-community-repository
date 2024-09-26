@@ -500,6 +500,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                             queryBuilderGlobalConditions._toQuery(),
                             searchToken);
 
+                    // remove duplicate facet entries
+                    excludedOwnAggregations.entrySet().removeIf(e -> e.getKey().endsWith(MetadataElasticSearchHelper.FACET_SELECTED_POSTFIX));
+
                     SearchRequest searchSourceAggs = SearchRequest.of(req -> req
                             .index(WORKSPACE_INDEX)
                             .from(0)
