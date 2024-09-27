@@ -505,6 +505,17 @@
       <defaultvalue>#888888</defaultvalue>
       <type>color</type>
     </widget>
+    <widget>
+      <id>curriculum_editable</id>
+      <caption>Zugriffsrechte</caption>
+      <bottomCaption>Welche Zugriffsrechte sollen Personen auf das Kanban erhalten, für die dieses Objekt in edu-sharing freigegeben wird. (Dieser Wert kann später im Curriculum für das Objekt geändert werden)</bottomCaption>
+      <defaultvalue>read</defaultvalue>
+      <type>singleoption</type>
+      <values>
+        <entry cap="nur Leserechte">read</entry>
+        <entry cap="Lese- und Bearbeitungsrechte">write</entry>
+      </values>
+    </widget>
   </widgets>
   <templates>
     <template>
@@ -846,6 +857,7 @@
 				<curriculum_title>
 				<curriculum_description>
 				<curriculum_color>
+				<curriculum_editable>
 				]]></html>
     </template>
   </templates>

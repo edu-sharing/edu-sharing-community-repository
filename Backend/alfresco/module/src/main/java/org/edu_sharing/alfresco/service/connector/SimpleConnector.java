@@ -1,7 +1,10 @@
 package org.edu_sharing.alfresco.service.connector;
 
 import com.typesafe.config.Optional;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.List;
@@ -12,7 +15,21 @@ import java.util.Map;
  */
 @Data
 public class SimpleConnector implements Serializable {
-	
+	@Data
+	@AllArgsConstructor
+	public static class ConnectorRequest {
+		Map<String, String[]> requestParameters;
+		SimpleConnector simpleConnector;
+		NodeRef nodeRefOriginal;
+	}
+	public interface PostRequestHandler {
+		/**
+		 * handle the request and return the properties that should be added to the node
+		 * @param request
+		 * @param result
+		 */
+		Map<String, Serializable> handleRequest(ConnectorRequest request, JSONObject result);
+	}
 	private String id;
 
 	private String icon;
@@ -31,6 +48,10 @@ public class SimpleConnector implements Serializable {
 	public static class SimpleConnectorApi {
 		private Method method;
 		private String url;
+		/**
+		 * Java class implementing PostRequestHandler
+		 */
+		private String postRequestHandler;
 		@Optional private SimpleConnectorAuthentication authentication;
 		@Optional private BodyType bodyType;
 		private Map<String, Object> body;

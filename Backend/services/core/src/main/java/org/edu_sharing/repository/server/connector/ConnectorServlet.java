@@ -14,6 +14,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.action.RessourceInfoExecuter;
 import org.edu_sharing.alfresco.service.connector.Connector;
 import org.edu_sharing.alfresco.service.connector.ConnectorFileType;
 import org.edu_sharing.alfresco.service.connector.ConnectorService;
@@ -41,12 +42,14 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -112,8 +115,9 @@ public class ConnectorServlet extends HttpServlet  {
 			connector = ConnectorServiceFactory.getConnectorList().getConnectors().stream().filter(c -> c.getId().equals(connectorId)).findAny().orElse(null);
 			Optional<SimpleConnector> simpleConnector = ConnectorServiceFactory.getConnectorList().getSimpleConnectors().stream().filter(c -> c.getId().equals(connectorId)).findAny();
 			if(simpleConnector.isPresent()) {
-				JSONObject result = handleSimpleConnector(convertParameters(req), simpleConnector.orElse(null), nodeRefOriginal);
-
+				HashMap<String, Serializable> properties = handleSimpleConnector(convertParameters(req), simpleConnector.orElse(null), nodeRefOriginal);
+				NodeServiceFactory.getLocalService().updateNodeNative(nodeRefOriginal.getId(), properties);
+				resp.sendRedirect((String) properties.get(CCConstants.CCM_PROP_IO_WWWURL));
 				// @TODO: redirect resp to the generated element/uri
 				return;
 			}
@@ -228,7 +232,7 @@ public class ConnectorServlet extends HttpServlet  {
 		return converted;
 	}
 
-	JSONObject handleSimpleConnector(Map<String, String[]> requestParameters, SimpleConnector simpleConnector, NodeRef nodeRefOriginal) throws UnsupportedEncodingException {
+	HashMap<String, Serializable> handleSimpleConnector(Map<String, String[]> requestParameters, SimpleConnector simpleConnector, NodeRef nodeRefOriginal) throws UnsupportedEncodingException {
 		RequestBuilder builder = null;
 		String url = replaceSimpleConnectorAttributes(requestParameters, simpleConnector.getApi().getUrl(), (data) -> URLEncoder.encode(StringUtils.join(data)));
 		if(simpleConnector.getApi().getMethod().equals(SimpleConnector.SimpleConnectorApi.Method.Post)) {
@@ -246,8 +250,12 @@ public class ConnectorServlet extends HttpServlet  {
 					// builder.setHeader()
 				}
 				String auth = new HttpQueryTool().query(builderAuth);
-				JSONObject authJson = new JSONObject(auth);
-				builder.setHeader("Authorization", "Bearer " + authJson.get("access_token"));
+				try {
+					JSONObject authJson = new JSONObject(auth);
+					builder.setHeader("Authorization", "Bearer " + authJson.get("access_token"));
+				}catch(JSONException e) {
+					throw new IllegalArgumentException("Wrong json data received: " + auth, e);
+				}
             }
 			if(simpleConnector.getApi().getBodyType() == null) {
 
@@ -260,7 +268,23 @@ public class ConnectorServlet extends HttpServlet  {
 				builder.setHeader("Content-Type", "application/x-www-form-urlencoded");
 			}
 		}
-		return new JSONObject(new HttpQueryTool().query(builder));
+		JSONObject result = new JSONObject(new HttpQueryTool().query(builder));
+		HashMap<String, Serializable> properties = new HashMap<String, Serializable>();
+		properties.put(CCConstants.CCM_PROP_CCRESSOURCETYPE, RessourceInfoExecuter.CCM_RESSOURCETYPE_CONNECTOR);
+		properties.put(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE, simpleConnector.getId());
+		if(StringUtils.isNotEmpty(simpleConnector.getApi().getPostRequestHandler())) {
+			SimpleConnector.ConnectorRequest request = new SimpleConnector.ConnectorRequest(
+					requestParameters, simpleConnector, nodeRefOriginal
+			);
+            try {
+                properties.putAll(
+					((SimpleConnector.PostRequestHandler)Class.forName(simpleConnector.getApi().getPostRequestHandler()).getDeclaredConstructor().newInstance()).handleRequest(request, result)
+				);
+            } catch (Throwable t) {
+				throw new RuntimeException("Error for postRequestHandler", t);
+			}
+        }
+		return properties;
 	}
 
 	private interface Formatter {
