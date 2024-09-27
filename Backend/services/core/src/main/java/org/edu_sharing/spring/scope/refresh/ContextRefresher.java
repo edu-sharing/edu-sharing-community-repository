@@ -20,12 +20,6 @@ package org.edu_sharing.spring.scope.refresh;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.edu_sharing.lightbend.LightbendConfigHelper;
-import org.edu_sharing.metadataset.v2.MetadataReader;
-import org.edu_sharing.repository.server.RepoFactory;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
-import org.edu_sharing.service.provider.ProviderHelper;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -46,13 +40,6 @@ public class ContextRefresher {
      * @param isCaller true if this event was called by the same cluster instance otherwise false
      */
     public synchronized void refresh(boolean isCaller) {
-        RepoFactory.refresh();
-        ApplicationInfoList.refresh();
-        LightbendConfigHelper.refresh();
-        MetadataReader.refresh();
-        PropertiesInterceptorFactory.refresh();
-        ProviderHelper.clearCache();
-
         this.scope.refreshAll(isCaller);
     }
 }

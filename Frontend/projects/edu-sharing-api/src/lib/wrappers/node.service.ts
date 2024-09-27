@@ -7,6 +7,7 @@ import {
     Node,
     NodeEntries,
     NodePermissions,
+    NodePermissionsGet,
     NodeVersion,
     NodeVersionEntries,
     NodeVersionRefEntries,
@@ -382,6 +383,17 @@ export class NodeService {
         });
     }
 
+    getPermissions(
+        id: string,
+        { repository = HOME_REPOSITORY } = {},
+    ): Observable<NodePermissionsGet> {
+        return this.nodeV1
+            .getPermission({
+                node: id,
+                repository,
+            })
+            .pipe(map((n) => n.permissions));
+    }
     setPermissions(
         id: string,
         permissions: NodePermissions,

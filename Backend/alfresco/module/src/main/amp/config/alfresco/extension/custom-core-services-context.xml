@@ -866,10 +866,15 @@
     </bean>
 
 
+  <bean id="lightbendConfigLoader" class="org.edu_sharing.alfresco.lightbend.LightbendConfigLoader">
+    <constructor-arg name="configCache" ref="eduSharingLightBendConfigCache"/>
+  </bean>
+
   <bean id="guestService" class="org.edu_sharing.alfresco.service.guest.GuestServiceImpl">
     <constructor-arg name="personService" ref="personService"/>
     <constructor-arg name="authenticationService" ref="authenticationService"/>
     <constructor-arg name="authorityService" ref="authorityService"/>
+    <constructor-arg name="configLoader" ref="lightbendConfigLoader"/>
   </bean>
 
 </beans>

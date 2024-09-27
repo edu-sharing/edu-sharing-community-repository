@@ -58,7 +58,7 @@ import java.util.stream.Collectors;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
-@Profile("samlEnabled")
+@Profile(SecurityConfigurationSaml.PROFILE_ID)
 @EnableWebSecurity()
 @Configuration
 public class SecurityConfigurationSaml {
@@ -66,6 +66,8 @@ public class SecurityConfigurationSaml {
     Config config = LightbendConfigLoader.get();
 
     Logger logger = Logger.getLogger(SecurityConfigurationSaml.class);
+
+    public static final String PROFILE_ID = "samlEnabled";
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {

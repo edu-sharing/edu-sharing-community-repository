@@ -74,6 +74,9 @@
       "CLUSTER_OVERRIDE_CONFIG_HINT": "Override-Konfiguration für alle Cluster-Knoten",
       "NODE_OVERRIDE_CONFIG_TITLE": "Node-Override",
       "NODE_OVERRIDE_CONFIG_HINT": "Override-Konfiguration für den aktuellen Cluster-Knoten (IP-Adresse überprüfen!)",
+      "DEFAULTS_OVERRIDE_CONFIG_TITLE": "Helm Config override",
+      "DEFAULTS_OVERRIDE_CONFIG_HINT": "Values configured via helm deployment override",
+
       "SIZE": "Editor-Größe",
       "SIZE_MEDIUM": "Normal",
       "SIZE_LARGE": "Groß",

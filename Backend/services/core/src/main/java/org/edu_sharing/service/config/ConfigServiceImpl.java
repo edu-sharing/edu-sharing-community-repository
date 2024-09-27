@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.config.model.*;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -37,10 +39,9 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
+@Slf4j
 @Service
 public class ConfigServiceImpl implements ConfigService, ApplicationListener<RefreshScopeRefreshedEvent> {
-    private static Logger logger = Logger.getLogger(ConfigServiceImpl.class);
     private static String CACHE_KEY = "CLIENT_CONFIG";
     // we use a non-serializable Config as value because this is a local cache and not distributed
     private static SimpleCache<String, Config> configCache = AlfAppContextGate.getApplicationContext().getBean("eduSharingConfigCache", SimpleCache.class);
@@ -52,6 +53,7 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
     private final NodeService nodeService;
     private final PermissionService permissionService;
     private final UserEnvironmentTool userEnvironmentTool;
+    private final RetryingTransactionHelper retryingTransactionHelper;
 
     static {
         Unmarshaller jaxbUnmarshaller1;
@@ -60,15 +62,16 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
             jaxbUnmarshaller1 = jaxbContext.createUnmarshaller();
         } catch (JAXBException e) {
             jaxbUnmarshaller1 = null;
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
         jaxbUnmarshaller = jaxbUnmarshaller1;
     }
 
-    public ConfigServiceImpl(NodeService nodeService, PermissionService permissionService, UserEnvironmentToolFactory userEnvironmentToolFactory) {
+    public ConfigServiceImpl(NodeService nodeService, PermissionService permissionService, UserEnvironmentToolFactory userEnvironmentToolFactory, RetryingTransactionHelper retryingTransactionHelper) {
         this.nodeService = nodeService;
         this.permissionService = permissionService;
         this.userEnvironmentTool = userEnvironmentToolFactory.createUserEnvironmentTool();
+        this.retryingTransactionHelper = retryingTransactionHelper;
     }
 
     @Override
@@ -97,13 +100,16 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
 
     @Override
     public void deleteContext(String id) throws Exception {
-        String eduSharingSystemFolderContext = userEnvironmentTool.getEdu_SharingSystemFolderContext();
+        String eduSharingSystemFolderContext = userEnvironmentTool.getEdu_SharingContextFolder();
         nodeService.removeNode(id, eduSharingSystemFolderContext, false);
         ContextRefreshUtils.refreshContext();
     }
 
     @Override
     public Context getContext(String domain) throws Exception {
+        if(StringUtils.isBlank(domain)) {
+            return null;
+        }
         buildContextCache();
         return contextCache.get(domain);
     }
@@ -134,7 +140,7 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
             }
 
             AuthenticationUtil.runAsSystem(() -> {
-                String eduSharingSystemFolderContext = userEnvironmentTool.getEdu_SharingSystemFolderContext();
+                String eduSharingSystemFolderContext = userEnvironmentTool.getEdu_SharingContextFolder();
                 Map<String, Map<String, Object>> dynamicContextObjects = nodeService.getChildrenPropsByType(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, eduSharingSystemFolderContext, CCConstants.CCM_TYPE_CONTEXT);
                 dynamicContextObjects
                         .values()
@@ -151,19 +157,21 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
 
     @Override
     public Context createOrUpdateContext(Context context) {
-        try {
-            if (context.id == null || !nodeService.exists(context.id)) {
-                String eduSharingSystemFolderContext = userEnvironmentTool.getEdu_SharingSystemFolderContext();
-                context.id = nodeService.createNode(eduSharingSystemFolderContext, CCConstants.CCM_TYPE_CONTEXT, Map.of());
-            }
+        return AuthenticationUtil.runAsSystem(() -> {
+            try {
+                if (context.id == null || !nodeService.exists(context.id)) {
+                    String eduSharingSystemFolderContext = userEnvironmentTool.getEdu_SharingContextFolder();
+                    context.id = nodeService.createNode(eduSharingSystemFolderContext, CCConstants.CCM_TYPE_CONTEXT, Map.of());
+                }
 
-            nodeService.setProperty(context.id, CCConstants.CCM_PROP_CONTEXT_CONFIG, objectMapper.writeValueAsString(context), true);
-        } catch (Throwable e) {
-            logger.error(e.getMessage(), e);
-            throw new RuntimeException(e);
-        }
-        ContextRefreshUtils.refreshContext();
-        return context;
+                nodeService.setProperty(context.id, CCConstants.CCM_PROP_CONTEXT_CONFIG, objectMapper.writeValueAsString(context), true);
+            } catch (Throwable e) {
+                log.error(e.getMessage(), e);
+                throw new RuntimeException(e);
+            }
+            ContextRefreshUtils.refreshContext();
+            return context;
+        });
     }
 
     @Override
@@ -196,7 +204,7 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
         if (!AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
             throw new NotAnAdminException();
         }
-        String folder = new UserEnvironmentTool().getEdu_SharingConfigFolder();
+        String folder = userEnvironmentTool.getEdu_SharingConfigFolder();
         String nodeId;
         try {
             NodeRef child = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, folder, CCConstants.CCM_TYPE_CONFIGOBJECT, CCConstants.CM_NAME, key);
@@ -230,7 +238,7 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
     public DynamicConfig getDynamicValue(String key) throws Throwable {
         String folder = AuthenticationUtil.runAsSystem(() -> {
             try {
-                return new UserEnvironmentTool().getEdu_SharingConfigFolder();
+                return userEnvironmentTool.getEdu_SharingConfigFolder();
             } catch (Throwable throwable) {
                 return null;
             }
@@ -256,9 +264,7 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
 
     private void overrideList(List<KeyValuePair> list, List<KeyValuePair> override) {
         for (KeyValuePair obj : override) {
-            if (list.contains(obj)) {
-                list.remove(obj);
-            }
+            list.remove(obj);
             list.add(obj);
         }
     }
@@ -280,7 +286,7 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
 
     private void overrideValues(Values values, Values override) throws
             IllegalArgumentException, IllegalAccessException {
-        if(override == null){
+        if (override == null) {
             return;
         }
 
@@ -299,7 +305,7 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
         try {
             getConfig();
         } catch (Exception e) {
-            logger.error("error refreshing client config: " + e.getMessage(), e);
+            log.error("error refreshing client config: " + e.getMessage(), e);
         }
     }
 

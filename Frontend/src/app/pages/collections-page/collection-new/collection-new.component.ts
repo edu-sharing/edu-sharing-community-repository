@@ -13,15 +13,19 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 
 import {
+    ActionbarComponent,
     ColorHelper,
     DefaultGroups,
+    ElementType,
     InteractionType,
     ListItem,
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
     OptionItem,
+    OptionsHelperDataService,
     PreferredColor,
+    Scope,
     TranslationsService,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
@@ -35,10 +39,8 @@ import {
     FrameEventsService,
     IamGroups,
     IamUser,
-    LocalPermissions,
     Node,
     NodeRef,
-    Permission,
     RestCollectionService,
     RestConnectorService,
     RestConstants,
@@ -52,7 +54,7 @@ import {
     User,
 } from '../../../core-module/core.module';
 import { Toast } from '../../../services/toast';
-import { ConfigService, Group } from 'ngx-edu-sharing-api';
+import { Ace, Acl, ConfigService, Group, NodeService } from 'ngx-edu-sharing-api';
 import { TranslateService } from '@ngx-translate/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
@@ -67,6 +69,8 @@ import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-
 import { Values } from '../../../features/mds/types/types';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { ShareDialogResult } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog-data';
+import { ExtendedAcl } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog.component';
+import { OptionsHelperService } from '../../../services/options-helper.service';
 
 type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITORIAL_GROUPS';
 
@@ -75,10 +79,12 @@ type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITO
     selector: 'es-collection-new',
     templateUrl: 'collection-new.component.html',
     styleUrls: ['collection-new.component.scss'],
+    providers: [OptionsHelperService, OptionsHelperDataService],
 })
 export class CollectionNewComponent implements EventListener, OnInit, OnDestroy {
     @ViewChild('mds') mds: MdsEditorWrapperComponent;
     @ViewChild('organizations') organizationsRef: NodeEntriesWrapperComponent<Group>;
+    @ViewChild('imageActionbar') imageActionbar: ActionbarComponent;
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     public hasCustomScope: boolean;
@@ -103,7 +109,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     public properties: Values = {};
     user: User;
     public mainnav = true;
-    permissions: LocalPermissions = null;
+    permissions: ExtendedAcl = null;
     public canInvite: boolean;
     public shareToAll: boolean;
     public createEditorial = false;
@@ -135,7 +141,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     public newCollectionStep: Step = this.STEP_NEW;
     availableSteps: Step[];
     private parentCollection: EduData.Node;
-    private originalPermissions: LocalPermissions;
+    private originalPermissions: Acl;
     private permissionsInfo: ShareDialogResult;
     private destroyed = new Subject<void>();
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
@@ -146,7 +152,6 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     authorFreetext = false;
     authorFreetextAllowed = false;
     mdsSet: string;
-    imageOptions: OptionItem[];
     imageWindow: Window;
     editorialGroupsSelected: Group[] = [];
 
@@ -162,7 +167,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     setCollection(collection: EduData.Node) {
         return new Observable<void>((observer) => {
             const id = collection.ref.id;
-            this.nodeService.getNodePermissions(id).subscribe((perm: EduData.NodePermissions) => {
+            this.nodeApi.getPermissions(id).subscribe((perm) => {
                 this.mdsSet = collection.metadataset;
                 this.canInvite =
                     this.canInvite &&
@@ -170,16 +175,15 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
                         collection,
                         RestConstants.ACCESS_CHANGE_PERMISSIONS,
                     );
-                this.editorialPublic = perm.permissions.localPermissions?.permissions?.some(
-                    (p: Permission) =>
-                        p.authority?.authorityName === RestConstants.AUTHORITY_EVERYONE,
+                this.editorialPublic = perm.localPermissions?.permissions?.some(
+                    (p) => p.authority?.authorityName === RestConstants.AUTHORITY_EVERYONE,
                 );
                 this.editId = id;
                 this.currentCollection = collection;
                 // cleanup irrelevant data
                 this.currentCollection.rating = null;
                 this.authorFreetext = this.currentCollection.collection.authorFreetext != null;
-                this.originalPermissions = perm.permissions.localPermissions;
+                this.originalPermissions = perm.localPermissions;
                 this.properties = collection.properties;
                 this.newCollectionType = this.getTypeForCollection(this.currentCollection);
                 this.hasCustomScope = false;
@@ -219,6 +223,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     constructor(
         private collectionService: RestCollectionService,
         private nodeService: RestNodeService,
+        private nodeApi: NodeService,
         private connector: RestConnectorService,
         private nodeHelper: NodeHelperService,
         private uiService: UIService,
@@ -236,6 +241,8 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         private sanitizer: DomSanitizer,
         private configLegacy: ConfigurationService,
         private configService: ConfigService,
+        private optionsHelper: OptionsHelperService,
+        private optionsHelperDataService: OptionsHelperDataService,
         private ref: ApplicationRef,
         private translations: TranslationsService,
         private translationService: TranslateService,
@@ -434,7 +441,10 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     }
     async editPermissions(): Promise<void> {
         if (this.permissions == null && !this.editId) {
-            this.permissions = new LocalPermissions();
+            this.permissions = {
+                inherited: false,
+                permissions: [],
+            } as ExtendedAcl;
         }
         let nodes: Node[] | string[];
         if (this.editId) {
@@ -767,7 +777,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
                 this.save4(collection);
                 return;
             }
-            this.permissions = this.getEditorialGroupPermissions();
+            this.permissions = this.getEditorialGroupPermissions() as ExtendedAcl;
         }
         if (
             (this.newCollectionType == RestConstants.COLLECTIONSCOPE_CUSTOM ||
@@ -778,16 +788,15 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
             if (this.originalPermissions && this.originalPermissions.inherited) {
             }
             let permissions = RestHelper.copyAndCleanPermissions(
-                this.permissions.permissions,
+                this.permissions.permissions as Ace[],
                 this.originalPermissions ? this.originalPermissions.inherited : false,
             );
-            this.nodeService
-                .setNodePermissions(
-                    collection.ref.id,
-                    permissions,
-                    this.permissionsInfo ? this.permissionsInfo.notify : false,
-                    this.permissionsInfo ? this.permissionsInfo.notifyMessage : null,
-                )
+            this.nodeApi
+                .setPermissions(collection.ref.id, permissions, {
+                    sendMail: this.permissionsInfo ? this.permissionsInfo.notify : false,
+                    mailText: this.permissionsInfo ? this.permissionsInfo.notifyMessage : null,
+                    sendCopy: false,
+                })
                 .subscribe(
                     () => {
                         this.save4(collection);
@@ -829,26 +838,28 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     }
 
     private getEditorialGroupPermissions() {
-        const permissions = new LocalPermissions();
-        permissions.permissions = [];
+        const permissions = {
+            inherited: false,
+            permissions: [],
+        } as Acl;
         if (this.editorialPublic) {
             const pub = RestHelper.getAllAuthoritiesPermission();
             pub.permissions = [RestConstants.PERMISSION_CONSUMER];
             permissions.permissions.push(pub);
         }
         for (const group of this.editorialGroupsSelected) {
-            const perm = new Permission();
-            perm.authority = {
-                authorityName: group.authorityName,
-                authorityType: group.authorityType,
-            };
-            perm.permissions = [RestConstants.PERMISSION_COORDINATOR];
-            permissions.permissions.push(perm);
+            permissions.permissions.push({
+                authority: {
+                    authorityName: group.authorityName,
+                    authorityType: group.authorityType,
+                },
+                permissions: [RestConstants.PERMISSION_COORDINATOR],
+            });
         }
         return permissions;
     }
 
-    private getEditoralGroups(permissions: Permission[]) {
+    private getEditoralGroups(permissions: Ace[]) {
         let list: Group[] = [];
         for (let perm of permissions) {
             for (let group of this.editorialGroups.getData()) {
@@ -940,6 +951,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
                 this.goToNextStep(),
             ),
         ];
+        setTimeout(() => this.updateImageOptions());
     }
 
     switchToAuthorFreetext() {
@@ -966,8 +978,8 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         this.currentCollection.collection.authorFreetext = null;
     }
 
-    updateImageOptions() {
-        this.imageOptions = [
+    async updateImageOptions() {
+        const imageOptions = [
             new OptionItem('COLLECTIONS.NEW.IMAGE.SEARCH', 'search', () => {
                 this.imageWindow = UIHelper.openSearchWithReurl(
                     this.platformLocation,
@@ -988,16 +1000,28 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
                 this.imageFileRef.nativeElement.click(),
             ),
         ];
-        this.imageOptions[0].group = DefaultGroups.Edit;
-        this.imageOptions[1].group = DefaultGroups.Edit;
+        imageOptions[0].group = DefaultGroups.Edit;
+        imageOptions[1].group = DefaultGroups.Edit;
         if (
             this.imageData ||
             (this.currentCollection.preview && !this.currentCollection.preview.isIcon)
         ) {
-            this.imageOptions.push(
+            imageOptions.push(
                 new OptionItem('COLLECTIONS.NEW.IMAGE.DELETE', 'delete', () => this.deleteImage()),
             );
-            this.imageOptions[2].group = DefaultGroups.Delete;
+            imageOptions[2].group = DefaultGroups.Delete;
         }
+        this.optionsHelperDataService.initComponents(this.imageActionbar);
+        this.optionsHelperDataService.setData({
+            scope: Scope.CollectionsCollection,
+            customOptions: {
+                useDefaultOptions: false,
+                addOptions: imageOptions.map((i) => {
+                    i.elementType = [ElementType.Unknown];
+                    return i;
+                }),
+            },
+        });
+        await this.optionsHelperDataService.refreshComponents();
     }
 }
