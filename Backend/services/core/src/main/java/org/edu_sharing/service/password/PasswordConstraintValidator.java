@@ -34,6 +34,10 @@ public class PasswordConstraintValidator implements ConstraintValidator<ValidPas
 
     @Override
     public boolean isValid(String password, ConstraintValidatorContext constraintValidatorContext) {
+        if(StringUtils.isBlank(password)) {
+            return true;
+        }
+
         List<Rule> rules = new ArrayList<>(List.of(
                 new LengthRule(settings.getMinLength(), settings.getMaxLength()),
                 new CharacterRule(EnglishCharacterData.UpperCase, settings.getNumberOfLowerCaseCharacters()),
