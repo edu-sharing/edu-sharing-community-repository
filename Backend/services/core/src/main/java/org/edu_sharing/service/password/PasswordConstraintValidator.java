@@ -8,6 +8,8 @@ import org.passay.*;
 import org.passay.PasswordValidator;
 import org.passay.dictionary.ArrayWordList;
 import org.passay.dictionary.WordListDictionary;
+import org.passay.dictionary.sort.QuickSort;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -18,11 +20,11 @@ public class PasswordConstraintValidator implements ConstraintValidator<ValidPas
     public static final String PASSWORD_POLICY_VIOLATION = "PasswordPolicyViolation";
 
     //    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    private final PasswordPolicySettings settings;
+    private final BeanFactory beanFactory;
 
     @Autowired
-    public PasswordConstraintValidator(PasswordPolicySettings settings) {
-        this.settings = settings;
+    public PasswordConstraintValidator(BeanFactory beanFactory) {
+        this.beanFactory = beanFactory;
     }
 
 
@@ -38,6 +40,7 @@ public class PasswordConstraintValidator implements ConstraintValidator<ValidPas
             return true;
         }
 
+        PasswordPolicySettings settings = beanFactory.getBean(PasswordPolicySettings.class);
         List<Rule> rules = new ArrayList<>(List.of(
                 new LengthRule(settings.getMinLength(), settings.getMaxLength()),
                 new CharacterRule(EnglishCharacterData.UpperCase, settings.getNumberOfLowerCaseCharacters()),
