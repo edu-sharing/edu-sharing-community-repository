@@ -19,15 +19,12 @@ public class PasswordConstraintValidator implements ConstraintValidator<ValidPas
 
     public static final String PASSWORD_POLICY_VIOLATION = "PasswordPolicyViolation";
 
-    //    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     private final BeanFactory beanFactory;
 
     @Autowired
     public PasswordConstraintValidator(BeanFactory beanFactory) {
         this.beanFactory = beanFactory;
     }
-
-
 
     @Override
     public void initialize(ValidPassword constraintAnnotation) {
