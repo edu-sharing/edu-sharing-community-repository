@@ -39,8 +39,9 @@ public class MetadataReader {
     private static final String DEFAULT_QUERY_SYNTAX = MetadataReader.QUERY_SYNTAX_LUCENE;
     public static final String QUERY_SYNTAX_LUCENE = "lucene";
     public static final String QUERY_SYNTAX_DSL = "dsl";
-    private static Logger logger = Logger.getLogger(MetadataReader.class);
-    private static SimpleCache<String, MetadataSet> mdsCache = (SimpleCache<String, MetadataSet>) AlfAppContextGate.getApplicationContext().getBean("eduSharingMdsCache");
+    public static final String NONE = "none";
+    @SuppressWarnings("unchecked")
+    private static final SimpleCache<String, MetadataSet> mdsCache = (SimpleCache<String, MetadataSet>) AlfAppContextGate.getApplicationContext().getBean("eduSharingMdsCache");
     XPathFactory pfactory = XPathFactory.newInstance();
     XPath xpath = pfactory.newXPath();
     private final Document doc;
@@ -992,7 +993,11 @@ public class MetadataReader {
         return bundle;
     }
 
-    public static String getTranslation(String i18n, String key, String fallback, String locale) {
+    public static String getTranslation(String i18n, @NonNull String key, String fallback, String locale) {
+        if (NONE.equals(locale)) {
+            return key;
+        }
+
         String defaultValue = key;
         if (fallback != null) {
             defaultValue = fallback;
