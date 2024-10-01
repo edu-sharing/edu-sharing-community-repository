@@ -36,6 +36,9 @@ import java.util.stream.Collectors;
 public class MetadataReader {
 
     public static final String GENDER_SEPARATOR = "*";
+    public static final String SUGGESTION_SOURCE_SEARCH = "Search";
+    public static final String SUGGESTION_SOURCE_MDS = "Mds";
+    public static final String SUGGESTION_SOURCE_SQL = "Sql";
     private static final String DEFAULT_QUERY_SYNTAX = MetadataReader.QUERY_SYNTAX_LUCENE;
     public static final String QUERY_SYNTAX_LUCENE = "lucene";
     public static final String QUERY_SYNTAX_DSL = "dsl";
