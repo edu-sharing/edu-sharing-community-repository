@@ -3,19 +3,8 @@
     "baseUrl": "./",
     "noImplicitAny": true,
     "noImplicitReturns": true,
+    // paths are handled inside the tsconfig.*.json
     "paths": {
-      "ngx-edu-sharing-api": [
-        "dist/edu-sharing-api/edu-sharing-api",
-        "dist/edu-sharing-api"
-      ],
-      "ngx-edu-sharing-graphql": [
-        "dist/edu-sharing-graphql/edu-sharing-graphql",
-        "dist/edu-sharing-graphql"
-      ],
-      "ngx-edu-sharing-ui": [
-        "dist/edu-sharing-ui/edu-sharing-ui",
-        "dist/edu-sharing-ui"
-      ],
       // Prevent imports from `projects` directory.
       //
       // Don't directly import modules from `projects`, but instead build project modules

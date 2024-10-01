@@ -173,6 +173,17 @@
           "DownloadContent": "Download"
         }
       },
+      "TIMEBASED": {
+        "TOOLTIP": "Configure time-based permission",
+        "INVALID_STATE": "This time-based permission if overriden by an equal or higher permission without a time restriction",
+        "INVALID_STATE_TITLE": "Invalid configuration detected",
+        "INVALID_STATE_DETAILS": "There are time-based permissions which are overriden by persistend permissions. Change the time-based permissions to a higher permission level or remove them.",
+        "FROM_CHECKBOX": "Set start date",
+        "TO_CHECKBOX": "Set end date",
+        "DATE_LABEL": "Date",
+        "TIME_LABEL": "Time",
+        "INVALID_DATE": "Invalid date"
+      },
       "PUBLISH": {
         "OPEN_VERSION": "Show version",
         "NO_LICENSE": "The current material does not have an assigned license. Shared materials should have a proper license to specify whether and how the material may be reused.",

@@ -413,6 +413,7 @@
     "tool_object": "LTI tool",
     "file-csv": "CSV file",
     "file-serlo": "Serlo file",
+    "file-curriculum": "kanban board",
     "file-geogebra": "Geogebra file"
   },
   "PERMISSION_TYPE": {

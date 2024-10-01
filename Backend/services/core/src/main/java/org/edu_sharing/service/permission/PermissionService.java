@@ -14,7 +14,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.InsufficientPermissionException;
 
 public interface PermissionService {
-	public static final String[] GUEST_PERMISSIONS = new String[]{ org.alfresco.service.cmr.security.PermissionService.READ,CCConstants.PERMISSION_READ_PREVIEW,CCConstants.PERMISSION_READ_ALL, CCConstants.PERMISSION_FEEDBACK};
+	public static final String[] GUEST_PERMISSIONS = new String[]{ org.alfresco.service.cmr.security.PermissionService.READ,CCConstants.PERMISSION_READ_PREVIEW,CCConstants.PERMISSION_READ_ALL, CCConstants.PERMISSION_DOWNLOAD_CONTENT, CCConstants.PERMISSION_FEEDBACK};
 	/**
 	 * adds permissions to the current ACL
 	 * @param _nodeId
@@ -69,8 +69,6 @@ public interface PermissionService {
 	 void removePermissions(String nodeId, ACE[] aces) throws Exception;
 
     void removeAllPermissions(String nodeId) throws Exception;
-
-     void removePermissions(String nodeId, String authority, String[] _permissions) throws Exception;
 
     StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext, boolean skipTpCheck);
 

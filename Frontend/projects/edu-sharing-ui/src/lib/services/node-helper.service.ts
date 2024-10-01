@@ -103,7 +103,7 @@ export class NodeHelperService {
         if (icon == 'none' && !useNoneAsFallback) return null;
         const result =
             this.apiHelpersService.getServerUrl() + '/../ccimages/licenses/' + icon + '.svg';
-        return this.repoUrlService.withCurrentOrigin(result);
+        return result;
     }
     /**
      * Return a translated name of a license name for a node

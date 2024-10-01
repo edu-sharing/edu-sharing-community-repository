@@ -771,11 +771,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             if (this.edit.profile?.vcard) {
                 editStore.profile.vcard = this.edit.profile.vcard.copy();
             }
-            const password = this.editDetails.password?.trim() || null;
+            const password = this.editDetails?.password?.trim() || null;
             editStore.profile.sizeQuota *= 1024 * 1024;
             // we allow fully empty password since this means the backend will not create an authentication
             // useful for system managed users like i.e. guests
-            if (this.passwordRef.passwordStrength === 'weak') {
+            if (this.passwordRef?.passwordStrength === 'weak' && password) {
                 this.toast.error(null, 'PERMISSIONS.ERROR_PASSWORD_TO_WEAK');
                 this.toast.closeProgressSpinner();
                 return;
@@ -1393,7 +1393,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             );
     }
     private savePersonPassword() {
-        if (!this.newPassword || this.passwordRef.passwordStrength === 'weak') {
+        if (!this.newPassword || this.passwordRef?.passwordStrength === 'weak') {
             this.toast.error(null, 'PERMISSIONS.ERROR_PASSWORD_TO_WEAK');
             return;
         }

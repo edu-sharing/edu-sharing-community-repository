@@ -43,6 +43,7 @@ import { SessionStorageService } from '../core-module/rest/services/session-stor
 import { map } from 'rxjs/operators';
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
 import {
+    Ace,
     ApiHelpersService,
     ConfigService,
     HOME_REPOSITORY,
@@ -597,7 +598,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
      * @param {Permissions} permissions
      * @returns {boolean}
      */
-    getHandleStates(node: Node, permissions: Permission[]) {
+    getHandleStates(node: Node, permissions: Ace[]) {
         const states: HandleState = {};
         if (
             node.aspects.indexOf(RestConstants.CCM_ASPECT_PUBLISHED) != -1 &&
@@ -621,7 +622,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
     }
 
     propertiesFromConnector(event: any) {
-        const name = event.name + '.' + event.type.filetype;
+        const name = event.name + (event.type.filetype ? '.' + event.type.filetype : '');
         const prop = RestHelper.createNameProperty(name);
         prop[RestConstants.LOM_PROP_TECHNICAL_FORMAT] = [event.type.mimetype];
         if (event.type.mimetype == 'application/zip') {

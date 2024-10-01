@@ -36,6 +36,7 @@ import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.cmr.workflow.WorkflowService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.transaction.TransactionService;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.policy.HomeFolderTool;
 import org.edu_sharing.alfresco.service.OrganisationService;
@@ -327,5 +328,9 @@ public class AlfrescoBeanConfig {
     @Bean
     public LightbendConfigLoader lightbendConfigLoader() {
         return applicationContext.getBean(LightbendConfigLoader.class);
+    }
+    @Bean
+    public SqlSessionFactory sqlSessionFactoryBean(){
+        return applicationContext.getBean("repoSqlSessionFactory", SqlSessionFactory.class);
     }
 }

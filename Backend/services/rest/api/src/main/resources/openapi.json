@@ -9,6 +9,10 @@
           "editable": {
             "type": "boolean"
           },
+          "from": {
+            "format": "int64",
+            "type": "integer"
+          },
           "group": {
             "$ref": "#/components/schemas/GroupProfile"
           },
@@ -17,6 +21,10 @@
               "type": "string"
             },
             "type": "array"
+          },
+          "to": {
+            "format": "int64",
+            "type": "integer"
           },
           "user": {
             "$ref": "#/components/schemas/UserProfile"
@@ -1070,6 +1078,9 @@
           "id": {
             "type": "string"
           },
+          "mdsGroup": {
+            "type": "string"
+          },
           "onlyDesktop": {
             "type": "boolean"
           },
@@ -1121,6 +1132,12 @@
       "ConnectorList": {
         "properties": {
           "connectors": {
+            "items": {
+              "$ref": "#/components/schemas/Connector"
+            },
+            "type": "array"
+          },
+          "simpleConnectors": {
             "items": {
               "$ref": "#/components/schemas/Connector"
             },
@@ -27724,6 +27741,99 @@
           }
         },
         "summary": "Set local permissions of node.",
+        "tags": [
+          "NODE v1"
+        ]
+      }
+    },
+    "/node/v1/nodes/{repository}/{node}/permissions/raw": {
+      "get": {
+        "description": "Get all permission of node (not grouped, requires admin).",
+        "operationId": "getRawPermission",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of node",
+            "in": "path",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ACL"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Get all permission of node (not grouped, requires admin).",
         "tags": [
           "NODE v1"
         ]
