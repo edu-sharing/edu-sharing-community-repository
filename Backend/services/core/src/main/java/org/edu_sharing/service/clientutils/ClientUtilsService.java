@@ -63,8 +63,8 @@ public class ClientUtilsService {
 			boolean validDomain = DomainValidator.getInstance(false).isValid(domain);
 			if(!validDomain){
 				defaultHandling(url, info);
-			return info;
-		}
+				return info;
+			}
 
 			new URL(url);
 			HttpQueryTool httpQuery = new HttpQueryTool();
@@ -142,6 +142,7 @@ public class ClientUtilsService {
 					}
 				}
 			}
+			addDuplicateNodes(url, info);
 			return info;
 		} catch (Throwable e) {
 			logger.info(e.getMessage());
