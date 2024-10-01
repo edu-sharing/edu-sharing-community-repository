@@ -87,6 +87,9 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
                 event.target as HTMLElement
             ).getBoundingClientRect());
         }
+        this.openDropdown(node, () => this.menuTrigger.openMenu());
+    }
+    openDropdown(node: T, onDone: () => void = null) {
         if (!this.entriesService.selection.selected.includes(this.node)) {
             this.entriesService.selection.clear();
             this.entriesService.selection.select(this.node);
@@ -96,7 +99,9 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
             this.dropdown.callbackObject = node;
             this.dropdown.ngOnChanges();
             if (this.dropdown.canShowDropdown()) {
-                this.menuTrigger.openMenu();
+                if (onDone) {
+                    onDone();
+                }
             } else {
                 this.toast.toast('NO_AVAILABLE_OPTIONS');
             }
@@ -108,11 +113,7 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
     }
 
     async openMenu(node: T) {
-        this.entriesService.selection.clear();
-        this.entriesService.selection.select(node);
-        this.entriesService.selection.clickSource = ClickSource.Dropdown;
-        await this.applicationRef.tick();
-        this.dropdown.menu.focusFirstItem();
+        this.openDropdown(node);
     }
 
     async ngOnInit() {

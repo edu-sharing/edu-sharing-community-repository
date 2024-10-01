@@ -180,7 +180,8 @@
         "FROM_CHECKBOX": "Start-Zeitpunkt festlegen",
         "TO_CHECKBOX": "End-Zeitpunkt festlegen",
         "DATE_LABEL": "Datum",
-        "TIME_LABEL": "Uhrzeit"
+        "TIME_LABEL": "Uhrzeit",
+        "INVALID_DATE": "Ungültiges Datum"
       },
       "PUBLISH": {
         "OPEN_VERSION": "Version anzeigen",

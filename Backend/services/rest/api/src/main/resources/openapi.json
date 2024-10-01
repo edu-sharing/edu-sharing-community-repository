@@ -1078,6 +1078,9 @@
           "id": {
             "type": "string"
           },
+          "mdsGroup": {
+            "type": "string"
+          },
           "onlyDesktop": {
             "type": "boolean"
           },
@@ -1129,6 +1132,12 @@
       "ConnectorList": {
         "properties": {
           "connectors": {
+            "items": {
+              "$ref": "#/components/schemas/Connector"
+            },
+            "type": "array"
+          },
+          "simpleConnectors": {
             "items": {
               "$ref": "#/components/schemas/Connector"
             },
@@ -27739,7 +27748,7 @@
     },
     "/node/v1/nodes/{repository}/{node}/permissions/raw": {
       "get": {
-        "description": "Get all permission of node (not grouped).",
+        "description": "Get all permission of node (not grouped, requires admin).",
         "operationId": "getRawPermission",
         "parameters": [
           {
@@ -27824,7 +27833,7 @@
             "description": "Fatal error occured."
           }
         },
-        "summary": "Get all permission of node (not grouped).",
+        "summary": "Get all permission of node (not grouped, requires admin).",
         "tags": [
           "NODE v1"
         ]

@@ -181,7 +181,8 @@
         "FROM_CHECKBOX": "Set start date",
         "TO_CHECKBOX": "Set end date",
         "DATE_LABEL": "Date",
-        "TIME_LABEL": "Time"
+        "TIME_LABEL": "Time",
+        "INVALID_DATE": "Invalid date"
       },
       "PUBLISH": {
         "OPEN_VERSION": "Show version",

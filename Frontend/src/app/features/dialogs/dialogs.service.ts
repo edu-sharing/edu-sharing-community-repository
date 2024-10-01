@@ -645,7 +645,8 @@ export class DialogsService {
             './dialog-modules/add-with-connector-dialog/add-with-connector-dialog.module'
         );
         return this.cardDialog.open(AddWithConnectorDialogComponent, {
-            width: 600,
+            width: 400,
+            maxWidth: 600,
             data,
             closable: Closable.Casual,
         });
