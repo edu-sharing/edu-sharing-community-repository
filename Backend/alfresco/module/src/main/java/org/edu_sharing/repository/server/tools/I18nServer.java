@@ -27,18 +27,19 @@
  */
 package org.edu_sharing.repository.server.tools;
 
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.ResourceBundle;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 
 public class I18nServer {
-	
+
+	public static final String NONE = "none";
 	private static Log logger = LogFactory.getLog(I18nServer.class);
 	
 	public static final String defaultResourceBundle = PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PathPrefix.DEFAULTS_METADATASETS + "/i18n/mds";
@@ -90,6 +91,10 @@ public class I18nServer {
 	 * @return
 	 */
 	private static String getTranslation(String key, String locale, String resourceBoundle){
+		if(NONE.equals(locale)){
+			return key;
+		}
+
 		String language = null;
 		String country = null;
 		if(locale != null){
