@@ -34,7 +34,7 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { BridgeService } from '../../services/bridge.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { ConfigService } from 'ngx-edu-sharing-api';
-import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
+import { OptionsHelperService } from '../../services/options-helper.service';
 
 @Component({
     selector: 'es-sharing-page',
