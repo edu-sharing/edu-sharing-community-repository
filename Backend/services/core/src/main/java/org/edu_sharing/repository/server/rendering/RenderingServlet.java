@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SecurityHeadersFilter;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -71,7 +72,7 @@ public class RenderingServlet extends HttpServlet {
                         CCConstants.PERMISSION_EMBED)){
                      throw new AccessDeniedException(CCConstants.PERMISSION_EMBED);
                 }
-                response = renderingService.getDetails(node_id, version,DEFAULT_DISPLAY_MODE, params).getDetails();
+                response = renderingService.getDetails(ApplicationInfoList.getHomeRepository().getAppId(), node_id, version,DEFAULT_DISPLAY_MODE, params).getDetails();
                 response = response.replace("{{{LMS_INLINE_HELPER_SCRIPT}}}", URLHelper.getNgRenderNodeUrl(node_id,version)+"?");
                 // add nonce to render styles
                 response = response.replace("<style", "<style nonce=\"" +SecurityHeadersFilter.ngCspNonce.get() + "\"");

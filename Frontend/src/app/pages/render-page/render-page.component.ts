@@ -466,19 +466,25 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
                         console.error(data);
                         this.toast.error(null, 'RENDERSERVICE_API_ERROR');
                     } else {
-                        this._node = data.node;
-                        this._fromHomeRepository = await this.networkService
-                            .isFromHomeRepository(this._node)
-                            .pipe(first())
-                            .toPromise();
-                        if (this._fromHomeRepository) {
-                            this.nodeApi
-                                .getNodeParents(this._nodeId)
-                                .subscribe((nodes) =>
-                                    this.breadcrumbsService.setNodePath(nodes.nodes.reverse()),
-                                );
+                        try {
+                            this._node = data.node;
+                            this._fromHomeRepository = await this.networkService
+                                .isFromHomeRepository(this._node)
+                                .pipe(first())
+                                .toPromise();
+                            if (this._fromHomeRepository) {
+                                this.nodeApi
+                                    .getNodeParents(this._nodeId)
+                                    .subscribe((nodes) =>
+                                        this.breadcrumbsService.setNodePath(nodes.nodes.reverse()),
+                                    );
+                            }
+                            this.isOpenable =
+                                this.connectors.connectorSupportsEdit(this._node) != null;
+                        } catch (e) {
+                            console.error('error post-processing rendering node', data.node, e);
+                            this.toast.error(e);
                         }
-                        this.isOpenable = this.connectors.connectorSupportsEdit(this._node) != null;
                         this.mds.pipe(filter((set) => !!set)).subscribe((set) => {
                             this.similarNodeColumns = MdsHelperService.getColumns(
                                 this.translate,

@@ -34,6 +34,7 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { BridgeService } from '../../services/bridge.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { ConfigService } from 'ngx-edu-sharing-api';
+import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
 
 @Component({
     selector: 'es-sharing-page',
@@ -66,6 +67,7 @@ export class SharingPageComponent {
         private route: ActivatedRoute,
         private connector: RestConnectorService,
         private nodeService: RestNodeService,
+        private optionsHelper: OptionsHelperService,
         private sharingService: RestSharingService,
         private bridge: BridgeService,
         private nodeHelperService: NodeHelperService,
@@ -78,13 +80,18 @@ export class SharingPageComponent {
         this.columns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
         this.columns.push(new ListItem('NODE', RestConstants.SIZE));
         const download = new OptionItem('SHARING.DOWNLOAD', 'cloud_download', (node: Node) =>
-            this.download(node),
+            this.download(
+                this.optionsHelper.getObjects(node, this.nodeEntries.optionsHelper.getData()),
+            ),
         );
         download.elementType = [ElementType.Node];
         download.group = DefaultGroups.Primary;
         download.showAsAction = true;
         const open = new OptionItem('SHARING.OPEN', 'open_in_new', (node: Node) => {
-            console.log(node);
+            node = this.optionsHelper.getObjects(
+                node,
+                this.nodeEntries.optionsHelper.getData(),
+            )?.[0];
             UIHelper.openUrl(
                 node.properties[RestConstants.CCM_PROP_IO_WWWURL][0],
                 this.bridge,
@@ -139,7 +146,8 @@ export class SharingPageComponent {
                 this.loadChildren();
             });
     }
-    download(child: Node = null) {
+    download(children: Node[] = null) {
+        console.log(children);
         const node = this.params.nodeId;
         const token = this.params.token;
         let url =
@@ -150,12 +158,13 @@ export class SharingPageComponent {
             encodeURIComponent(this.passwordInput) +
             '&nodeId=' +
             encodeURIComponent(node);
-        if (child == null && this.sharingInfo.node.isDirectory) {
+        if (!children?.length && this.sharingInfo.node.isDirectory) {
             const ids = RestHelper.getNodeIds(this.nodesDataSource.getData()).join(',');
             url += '&childIds=' + encodeURIComponent(ids);
         } else {
-            if (child != null) {
-                url += '&childIds=' + encodeURIComponent(child.ref.id);
+            if (children != null) {
+                const ids = RestHelper.getNodeIds(children).join(',');
+                url += '&childIds=' + encodeURIComponent(ids);
             }
         }
         window.open(url);
