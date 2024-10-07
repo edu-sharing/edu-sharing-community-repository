@@ -118,6 +118,11 @@
         mat-form-field {
             width: 100%;
         }
+
+        es-user-quota {
+            display: flex;
+            padding-top: 10px;
+        }
         .folder-path {
             display: flex;
             flex-direction: column;

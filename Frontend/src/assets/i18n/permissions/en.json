@@ -30,6 +30,7 @@
     "MENU_EXCLUDE": "Exclude",
     "MENU_REMOVE_MEMBERSHIP": "Remove from group(s)",
     "MENU_STATUS": "Set status",
+    "USER_QUOTA_HINT": "If no value is set no restriction will apply",
     "ORG_HOME_FOLDER_LABEL": "Location of Org-Folder",
     "ORG_HOME_FOLDER_MAIN": "System",
     "SEARCH_GROUP": "Search for groups...",
