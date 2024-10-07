@@ -133,11 +133,9 @@ public class CCConstants {
 	public final static String AUTH_HEADER_EDU_TICKET = "EDU-TICKET";
 
 	/**
-	 * access on a node validated by lms
+	 * access on nodes that was validated by lms
 	 */
-	public final static String AUTH_SINGLE_USE_NODEID = "AUTH_SINGLE_USE_NODEID";
-
-	public final static String AUTH_SINGLE_USE_TIMESTAMP = "AUTH_SINGLE_USE_TIMESTAMP";
+	public final static String AUTH_SINGLE_USE_NODEIDS = "AUTH_SINGLE_USE_NODEIDS";
 
 	public final static String REPOSITORY_ID = "REPOSITORY_ID";
 
