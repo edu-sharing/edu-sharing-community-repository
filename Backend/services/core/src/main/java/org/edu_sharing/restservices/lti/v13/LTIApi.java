@@ -60,6 +60,7 @@ import java.net.*;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
+import org.edu_sharing.restservices.lti.v13.model.LoginRequestFactory;
 
 @Path("/lti/v13")
 @Consumes({ "text/html" })
@@ -150,7 +151,7 @@ public class LTIApi {
          *  justed fixed compile problems
          */
         // get data from request
-        final LoginRequest loginRequest = null;//LoginRequestFactory.from(req);
+        final LoginRequest loginRequest = LoginRequestFactory.from(req);
         if (this.logger.isInfoEnabled()) {
             this.logger.info("OIDC launch received with " + loginRequest.toString());
         }
