@@ -943,10 +943,16 @@ public class SearchServiceImpl implements SearchService {
 			finalQuery=findUsersQuery.toString();
 		}
 		else if(type.equals(AuthorityType.GROUP)) {
+			if(customProperties!=null){
+				for(Map.Entry<String, String> entry : customProperties.entrySet()){
+					findGroupsQuery.append(" AND @"+entry.getKey().replace(":", "\\:")+":\""+QueryParser.escape(entry.getValue())+"\"");
+				}
+			}
 			if(findGroupsQuery==null)
 				finalQuery="";
 			else
 					finalQuery = findGroupsQuery.toString();
+
 		}
 		else {
 			throw new IllegalArgumentException("Unsupported authority type "+type);
