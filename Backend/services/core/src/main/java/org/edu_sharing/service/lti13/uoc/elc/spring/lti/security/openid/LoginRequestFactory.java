@@ -1,4 +1,4 @@
-package org.edu_sharing.restservices.lti.v13.model;
+package org.edu_sharing.service.lti13.uoc.elc.spring.lti.security.openid;
 
 import edu.uoc.elc.lti.tool.oidc.LoginRequest;
 import jakarta.servlet.http.HttpServletRequest;

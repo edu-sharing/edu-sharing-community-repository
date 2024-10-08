@@ -323,6 +323,10 @@
       <artifactId>spring-security-config</artifactId>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>edu.uoc.elc.lti</groupId>
+      <artifactId>spring-boot-lti-advantage</artifactId>
+    </dependency>
   </dependencies>
 
 </project>

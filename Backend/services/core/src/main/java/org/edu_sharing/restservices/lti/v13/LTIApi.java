@@ -60,7 +60,7 @@ import java.net.*;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
-import org.edu_sharing.restservices.lti.v13.model.LoginRequestFactory;
+import org.edu_sharing.service.lti13.uoc.elc.spring.lti.security.openid.LoginRequestFactory;
 
 @Path("/lti/v13")
 @Consumes({ "text/html" })
