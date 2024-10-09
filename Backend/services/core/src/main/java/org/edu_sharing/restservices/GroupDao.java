@@ -34,6 +34,7 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.springframework.context.ApplicationContext;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -66,9 +67,7 @@ public class GroupDao {
             if (result != null) {
                 // permission check was done already, so run as system to allow org admin to set properties
                 AuthenticationUtil.runAsSystem(() -> {
-                    groupDao.setGroupEmail(profile);
-                    groupDao.setGroupType(profile);
-                    groupDao.setScopeType(profile);
+                    groupDao.applyProfile(profile);
                     return null;
                 });
             }
@@ -76,6 +75,15 @@ public class GroupDao {
             return GroupDao.getGroup(repoDao, result);
         } catch (Exception e) {
             throw DAOException.mapping(e);
+        }
+    }
+
+    void applyProfile(GroupProfile profile) {
+        setGroupEmail(profile);
+        setGroupType(profile);
+        setScopeType(profile);
+        if(profile.getCustomAttributes() != null && !profile.getCustomAttributes().isEmpty()) {
+            authorityService.setCustomAttributes(authorityName, profile.getCustomAttributes());
         }
     }
 
@@ -173,9 +181,7 @@ public class GroupDao {
                 @Override
                 public Void doWork() throws Exception {
                     ((MCAlfrescoAPIClient) repoDao.getBaseClient()).createOrUpdateGroup(groupName, profile.getDisplayName());
-                    setGroupType(profile);
-                    setGroupEmail(profile);
-                    setScopeType(profile);
+                    applyProfile(profile);
 
                     // rename admin group
                     renameSubGroup(profile, org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP, org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX);
@@ -323,12 +329,17 @@ public class GroupDao {
         profile.setGroupType(getGroupType());
         profile.setScopeType(getScopeType());
         profile.setGroupEmail(getGoupEmail());
+        profile.setCustomAttributes(getCustomAttributes());
         data.setProfile(profile);
         data.setProperties(getProperties());
         data.setAspects(getAspects());
         data.setSignupMethod(getSignupMethod(ref));
 
         return data;
+    }
+
+    private Map<String, Serializable> getCustomAttributes() {
+        return authorityService.getCustomAttributes(authorityName);
     }
 
     public static GroupSignupMethod getSignupMethod(NodeRef ref) {
