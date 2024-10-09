@@ -182,7 +182,6 @@ export class RenderHelperService {
 
     private getCollectionsContainingNode(node: Node): Observable<Node[]> {
         let id = this.getOriginalId(node);
-        console.log(node);
         // a childobject can never be in a collection, but its parent may
         if (node.aspects?.includes(RestConstants.CCM_ASPECT_IO_CHILDOBJECT)) {
             id = node.parent?.id;
