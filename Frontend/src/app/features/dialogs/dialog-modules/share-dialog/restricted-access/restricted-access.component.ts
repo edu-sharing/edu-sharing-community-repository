@@ -19,12 +19,8 @@ export class ShareDialogRestrictedAccessComponent implements OnInit, OnChanges {
         this.RESTRICTED_ACCESS_PERMISSIONS.forEach((perm) => {
             this.restrictedAccessPermissions[perm] = permissions.includes(perm);
         });
-        // remove print option if not a pdf file
-        if (this.node.mediatype !== 'file-pdf') {
-            delete this.restrictedAccessPermissions['Print'];
-        }
     }
-    readonly RESTRICTED_ACCESS_PERMISSIONS = ['ReadAll', 'DownloadContent', 'Print'];
+    readonly RESTRICTED_ACCESS_PERMISSIONS = ['ReadAll', 'DownloadContent'];
     @Input() node: Node;
     restrictedAccess: boolean;
     restrictedAccessPermissions: { [key in string]: boolean };
