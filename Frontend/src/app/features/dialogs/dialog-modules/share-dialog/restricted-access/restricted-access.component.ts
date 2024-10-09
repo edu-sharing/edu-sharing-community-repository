@@ -12,7 +12,7 @@ export class ShareDialogRestrictedAccessComponent implements OnInit, OnChanges {
     constructor(private nodeService: NodeService) {}
     ngOnChanges(changes: SimpleChanges): void {
         this.restrictedAccess =
-            this.node.properties[RestConstants.CCM_PROP_RESTRICTED_ACCESS]?.[0] || false;
+            this.node.properties[RestConstants.CCM_PROP_RESTRICTED_ACCESS]?.[0] === 'true' || false;
         this.restrictedAccessPermissions = {};
         const permissions =
             this.node.properties[RestConstants.CCM_PROP_RESTRICTED_ACCESS_PERMISSIONS] || [];
