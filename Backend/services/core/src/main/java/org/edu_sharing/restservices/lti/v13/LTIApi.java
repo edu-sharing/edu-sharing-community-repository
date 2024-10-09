@@ -52,6 +52,7 @@ import org.edu_sharing.service.lti13.registration.DynamicRegistrationToken;
 import org.edu_sharing.service.lti13.registration.DynamicRegistrationTokens;
 import org.edu_sharing.service.lti13.registration.RegistrationService;
 import org.edu_sharing.service.lti13.uoc.Config;
+import org.edu_sharing.service.lti13.uoc.elc.spring.lti.security.openid.HttpSessionOIDCLaunchSession;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
@@ -145,11 +146,7 @@ public class LTIApi {
         RepoTools repoTools = new RepoTools();
         ApplicationInfo platform = repoTools.getApplicationInfo(iss, clientId, ltiDeploymentId);
         Tool tool = Config.getTool(platform, req,true);
-        /**
-         * @TODO
-         *  jakarta/javax lib problem
-         *  justed fixed compile problems
-         */
+
         // get data from request
         final LoginRequest loginRequest = LoginRequestFactory.from(req);
         if (this.logger.isInfoEnabled()) {
@@ -301,7 +298,7 @@ public class LTIApi {
          *  jakarta/javax lib problem
          *  justed fixed compile problems
          */
-        String sessionNonce = null;//new HttpSessionOIDCLaunchSession(req).getNonce();
+        String sessionNonce = new HttpSessionOIDCLaunchSession(req).getNonce();
         if(!nonce.equals(sessionNonce)){
             logger.error("nonce:"+nonce+ " sessionNonce:"+sessionNonce +". maybe jsessionid is not the same for login_initiation and launch url. ");
             throw new IllegalStateException("nonce is invalid");
