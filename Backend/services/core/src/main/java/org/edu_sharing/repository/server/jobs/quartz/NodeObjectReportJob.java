@@ -8,6 +8,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
@@ -60,6 +61,15 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
         accumulated
     }
 
+    public enum ReportType {
+        @JobFieldDescription(description = "The job will generate a monthly report (only on 1st of January, April, July and October)")
+        Monthly,
+        @JobFieldDescription(description = "The job will generate a quaternary report (only on 1st of January, April, July and October)")
+        Quarterly,
+        @JobFieldDescription(description = "The job will generate a yearly report (only on 1st of January)")
+        Yearly,
+    }
+
     //TODO default systemfolder/reports
     @JobFieldDescription(description = "Used to group reports under this folder name")
     private String reportName;
@@ -82,8 +92,8 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
     @JobFieldDescription(description = "use a custom date (month) to run the job for. Note: The job will run the month BEFORE the given date!", sampleValue = "YYYY-MM-DD")
     private Date customDate = null;
 
-    @JobFieldDescription(description = "When set to true, the job will generate a yearly report")
-    private boolean generateYearly = false;
+    @JobFieldDescription(description = "Defines the reporting period", sampleValue = "Monthly")
+    private ReportType type;
 
     @JobFieldDescription(description = "List of properties to include in the export file. First value is the property, second value (only for vcard) is the vcard field id", sampleValue = "[\"cclom:title\"],[\"ccm:lifecyclecontributer_publisher\"],[\"ccm:lifecyclecontributer_publisher\", \"X-ES-LOM-CONTRIBUTE-DATE\"],[\"sys:node-uuid\"]")
     private List<List<String>> columns = List.of(
@@ -124,9 +134,21 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
         }
         to = to.minusDays(1);
 
-        LocalDate from = generateYearly
-                ? to.minusYears(1).minusMonths(1).plusDays(1)
-                : to.minusMonths(1).plusDays(1);
+        LocalDate from;
+        switch (type) {
+            case Monthly:
+                from = to.minusMonths(1).plusDays(1);
+                break;
+            case Yearly:
+                from = to.minusYears(1).minusMonths(1).plusDays(1);
+                break;
+            case Quarterly:
+                from = to.minusMonths(3).plusDays(1);
+                break;
+            default:
+                throw new NotImplementedException(type.name());
+        }
+
         String nodeId = null;
         try {
             List<StatisticEntryNode> nodeStatisics = trackingService.getNodeStatisics(
@@ -170,14 +192,27 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
     }
 
     private String generateFilename(LocalDate from, LocalDate to) {
-        StringBuilder stringBuilder = new StringBuilder(filename);
+        StringBuilder sb = new StringBuilder(filename);
         if (appendDate) {
-            String datePattern = from.getMonth() == to.getMonth() ? "yyyy-MM" : "yyyy";
-            stringBuilder.append("_");
-            stringBuilder.append(from.format(DateTimeFormatter.ofPattern(datePattern)));
+            sb.append("_");
+            switch (type) {
+                case Yearly:
+                    sb.append(from.format(DateTimeFormatter.ofPattern(("yyyy"))));
+                    break;
+                case Quarterly:
+                    sb.append(from.format(DateTimeFormatter.ofPattern(("yyyy"))));
+                    sb.append("-Q");
+                    sb.append(to.getMonthValue()/3);
+                    break;
+                case Monthly:
+                    sb.append(from.format(DateTimeFormatter.ofPattern(("yyyy-MM"))));
+                    break;
+                default:
+                    throw new NotImplementedException(type.name());
+            }
         }
-        stringBuilder.append(".csv");
-        return stringBuilder.toString();
+        sb.append(".csv");
+        return sb.toString();
     }
 
 
@@ -206,13 +241,13 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
                 return;
             }
 
-            if(!aspectFilters.isEmpty()) {
+            if (!aspectFilters.isEmpty()) {
                 try {
                     String[] apsects = nodeService.getAspects(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), entry.getNode());
                     if (Arrays.stream(apsects).map(CCConstants::getValidLocalName).noneMatch(x -> aspectFilters.contains(x))) {
                         continue;
                     }
-                }catch (InvalidNodeRefException e){
+                } catch (InvalidNodeRefException e) {
                     log.warn("Node {} does not exist", entry.getNode());
                     continue;
                 }

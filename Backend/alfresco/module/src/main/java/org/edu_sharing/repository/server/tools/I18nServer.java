@@ -18,6 +18,8 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 @Slf4j
 public class I18nServer {
 
+    public static final String NONE = "none";
+
     public static final String defaultResourceBundle = PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PathPrefix.DEFAULTS_METADATASETS + "/i18n/mds";
 	private static final Map<String, String> permViewMapper = new HashMap<>() {{
         put(CCConstants.PERMISSION_READ, "dialog_inviteusers_perm_read");
@@ -90,6 +92,10 @@ public class I18nServer {
      * @return
      */
     private static String getTranslation(String key, String locale, String resourceBoundle) {
+        if(NONE.equals(locale)){
+            return key;
+        }
+
         String language = null;
         String country = null;
         if (locale != null) {

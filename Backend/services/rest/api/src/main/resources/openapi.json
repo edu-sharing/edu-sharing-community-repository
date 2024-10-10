@@ -1742,6 +1742,12 @@
       },
       "GroupProfile": {
         "properties": {
+          "customAttributes": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
           "displayName": {
             "type": "string"
           },
@@ -4533,6 +4539,12 @@
       },
       "Profile": {
         "properties": {
+          "customAttributes": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
           "displayName": {
             "type": "string"
           },
