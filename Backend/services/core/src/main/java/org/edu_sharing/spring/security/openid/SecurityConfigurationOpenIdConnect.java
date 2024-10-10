@@ -37,6 +37,8 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 @Profile("openidEnabled")
 @EnableWebSecurity()
@@ -124,11 +126,18 @@ public class SecurityConfigurationOpenIdConnect {
 
     @Bean
     ClientRegistrationRepository clientRegistrationRepository() {
+        List<String> scopes = new ArrayList<>();
+        if(config.hasPath("security.sso.openIdConnect.scopes")){
+            scopes.addAll(config.getStringList("security.sso.openIdConnect.scopes"));
+        }else{
+            scopes.add("openid");
+        }
+
         ClientRegistration clientRegistration = ClientRegistrations
                 .fromIssuerLocation(config.getString("security.sso.openIdConnect.issuer"))
                 .clientId(config.getString("security.sso.openIdConnect.clientId"))
                 .clientSecret(config.getString("security.sso.openIdConnect.secret"))
-                .scope("openid")
+                .scope(scopes)
                 .build();
         return new InMemoryClientRegistrationRepository(clientRegistration);
     }
