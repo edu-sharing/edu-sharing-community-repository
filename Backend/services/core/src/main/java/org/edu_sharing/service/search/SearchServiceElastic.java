@@ -81,7 +81,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SearchServiceElastic extends SearchServiceImpl {
-    public static final String WORKSPACE_INDEX = "workspace_9.0";
+    public static final String WORKSPACE_INDEX = "workspace_9.1";
     static RestClient restClient;
     static ElasticsearchClient client;
 
