@@ -1419,16 +1419,8 @@ public class NodeDao {
         if (reference.getAccessOriginal() != null) {
             result.addAll(reference.getAccessOriginal());
         }
-        if (reference.isOriginalRestrictedAccess()) {
-            if (restrictedPermissions != null) {
-                result.addAll(restrictedPermissions.stream()
-                        .map(PermissionServiceHelper::getAllIncludingPermissions)
-                        .flatMap(java.util.Collection::stream)
-                        .collect(Collectors.toSet()));
-            }
-        } else {
-            result.addAll(CCConstants.getUsagePermissions());
-        }
+        boolean restrictedAccess = reference.isOriginalRestrictedAccess();
+        result.addAll(PermissionServiceHelper.getEffectivePermissions(restrictedPermissions, restrictedAccess));
         return result;
     }
 
@@ -1468,7 +1460,10 @@ public class NodeDao {
         data.setProperties(getProperties());
 
         data.setAccess(access);
-
+        if (Objects.equals(CallSourceHelper.CallSource.Render, CallSourceHelper.getCallSource())) {
+            List<String> permissions = org.edu_sharing.service.nodeservice.NodeServiceInterceptor.getIndirectPermissions(getId(), List.of(DAO_PERMISSIONS));
+            data.setAccessEffective(permissions);
+        }
         data.setPublic(isPublic);
 
         data.setMimetype(getMimetype());
