@@ -54,7 +54,6 @@ import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.*;
 import org.edu_sharing.service.notification.NotificationService;
 import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
-import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.rating.RatingDetails;
@@ -887,11 +886,8 @@ public class NodeDao {
     ) throws DAOException {
 
         NodeEntries result = new NodeEntries();
-        List<NodeRef> slice = new ArrayList<>();
+        List<NodeRef> slice = children.subList(skipCount, Math.min(children.size(), skipCount + maxItems));
 
-        for (int i = skipCount; i < Math.min(children.size(), (long) skipCount + maxItems); i++) {
-            slice.add(children.get(i));
-        }
         List<Node> nodes = convertToRest(repoDao, slice, propFilter, transform);
         int removedNodes = slice.size() - nodes.size();
         Pagination pagination = new Pagination();
