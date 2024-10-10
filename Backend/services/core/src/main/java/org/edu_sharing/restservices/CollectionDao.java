@@ -86,7 +86,7 @@ public class CollectionDao {
 				throw new IllegalArgumentException("Invalid parameter for parentId");
 			}
 
-			return getCollectionsChildren(repoDao, parentId, null, false, filter, Arrays.asList(new String[]{"files"}), sortDefinition, skipCount, maxItems);
+			return getCollectionsChildren(repoDao, parentId, null, false, filter, List.of("files"), sortDefinition, skipCount, maxItems);
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
 		}
@@ -127,7 +127,7 @@ public class CollectionDao {
 
 	public static CollectionBaseEntries getCollectionsSubcollections(RepositoryDao repoDao, String parentId, SearchScope scope, boolean fetchCounts, Filter filter, SortDefinition sortDefinition, int skipCount, int maxItems)	throws DAOException {
 		try {
-			return getCollectionsChildren(repoDao, parentId, scope, fetchCounts, filter, Arrays.asList(new String[]{"folders"}), sortDefinition, skipCount, maxItems);
+			return getCollectionsChildren(repoDao, parentId, scope, fetchCounts, filter, List.of("folders"), sortDefinition, skipCount, maxItems);
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
 		}
@@ -174,6 +174,8 @@ public class CollectionDao {
 					}catch(ClassCastException e) {
 						logger.error("Collection "+parentId+" contains a non-ref object: "+child.getRef().getId()+". Please clean up the collection", e);
 					}
+				}else{
+					logger.warn("Unhandled Type: " + nodeType);
 				}
 			}
 			CollectionBaseEntries obj = new CollectionBaseEntries();
