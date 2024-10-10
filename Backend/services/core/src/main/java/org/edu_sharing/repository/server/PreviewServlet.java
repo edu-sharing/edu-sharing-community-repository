@@ -182,7 +182,7 @@ public class PreviewServlet extends HttpServlet {
 
 					validateScope(req, props);
 					// we need to check permissions and allow or deny access by using the READ_PREVIEW permission
-					validatePermissions(storeRef,inNodeId);
+					validatePermissions(storeRef, nodeId);
 
 					if (!nodeType.equals(CCConstants.CCM_TYPE_IO)
 							&& !nodeType.equals(CCConstants.CCM_TYPE_MAP)
