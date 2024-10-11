@@ -24,7 +24,11 @@ mat-tab-group {
     // Use `margin-top` instead of `top` to not create a negative position offset at the bottom of
     // the container, which could be overlapped by a custom footer.
     min-height: calc(100vh - var(--mainnavHeight));
-
+    .collections-right {
+        // fix breadcrumbs overflow
+        max-width: calc(100vw - $sidenavWidth);
+        overflow-x: hidden;
+    }
     &.collectionsContainerTabs {
         min-height: calc(100vh - (var(--mainnavHeight) + 48px));
     }

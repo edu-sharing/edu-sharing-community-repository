@@ -1317,7 +1317,13 @@
       </basequery>
     </query>
     <query join="AND" id="workflowReceive">
-      <basequery/>
+      <basequery>
+        {"bool":{
+        "must":[
+        {"term":{"nodeRef.storeRef.protocol":"workspace"}}
+        ]
+        }}
+      </basequery>
     </query>
     <query join="AND" id="workspace">
       <property name="ngsearchword">

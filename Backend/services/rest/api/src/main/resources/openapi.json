@@ -2387,7 +2387,13 @@
           "destroySession": {
             "type": "boolean"
           },
+          "localUrl": {
+            "type": "string"
+          },
           "next": {
+            "type": "string"
+          },
+          "ssoUrl": {
             "type": "string"
           },
           "url": {
