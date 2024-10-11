@@ -81,7 +81,15 @@ public class FactualTermDisplayUpdater {
         for(String k : keys){
             List<? extends Suggestion> suggestions = MetadataSearchHelper.getSuggestions(appId, mds, "ngsearch",
                     CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD), k, null);
+            if(suggestions == null || suggestions.size() == 0){
+                logger.info("no caption value found for key: " + k +" nodeRef:"+nodeRef);
+                continue;
+            }
             displays.add(suggestions.get(0).getDisplayString());
+        }
+        if(displays.size() == 0){
+            logger.info("no caption values found nodeRef:" + nodeRef);
+            return;
         }
         logger.info("updateing;"+ nodeRef +";"+ key);
         serviceRegistry.getRetryingTransactionHelper().doInTransaction(()->{
