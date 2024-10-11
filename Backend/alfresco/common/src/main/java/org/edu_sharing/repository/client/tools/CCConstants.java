@@ -2140,6 +2140,10 @@ public class CCConstants {
 	 * @return
 	 */
 	public static String getValidGlobalName(String value){
+		if(value == null){
+			return null;
+		}
+
 		for(Map.Entry<String,String> entry: getNameSpaceMap().entrySet()){
 			if(value.startsWith(entry.getValue())){
 				return "{" + entry.getKey() + "}" + value.substring(entry.getValue().length() + 1);
