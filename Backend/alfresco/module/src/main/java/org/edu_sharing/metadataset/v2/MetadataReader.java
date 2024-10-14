@@ -722,12 +722,13 @@ public class MetadataReader {
                     Node child = keyNode.getChildNodes().item(j);
                     if(child.getNodeName().equals("value") || child.getNodeName().equals("#text")) {
                         key.setKey(child.getTextContent());
-                    } else if(child.getNodeName().equals("relation")) {
-                        MetadataKey.MetadataKeyRelated.Relation relation = MetadataKey.MetadataKeyRelated.Relation.relatedMatch;
+                    } if(child.getNodeName().equals("relation")) {
+                        MetadataKey.MetadataKeyRelated related = new MetadataKey.MetadataKeyRelated(MetadataKey.MetadataKeyRelated.Relation.relatedMatch);
                         if(child.getAttributes() != null && child.getAttributes().getNamedItem("type") != null) {
-                            relation = MetadataKey.MetadataKeyRelated.Relation.valueOf(child.getAttributes().getNamedItem("type").getTextContent());
+                            related.setRelation(MetadataKey.MetadataKeyRelated.Relation.valueOf(child.getAttributes().getNamedItem("type").getTextContent()));
+                        } else if(child.getNodeName().equals("target")) {
+                            related.setTarget(child.getTextContent());
                         }
-                        MetadataKey.MetadataKeyRelated related = new MetadataKey.MetadataKeyRelated(relation);
                         related.setKey(child.getTextContent());
                         key.addRelated(related);
                     }
