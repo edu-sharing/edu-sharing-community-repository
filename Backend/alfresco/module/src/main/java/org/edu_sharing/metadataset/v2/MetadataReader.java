@@ -715,13 +715,32 @@ public class MetadataReader {
             if (description == null) {
                 description = "";
             }
+            MetadataKey key = new MetadataKey();
+            // relation mode
+            if (keyNode.getChildNodes().getLength() > 0) {
+                for (int j = 0; j < keyNode.getChildNodes().getLength(); j++) {
+                    Node child = keyNode.getChildNodes().item(j);
+                    if(child.getNodeName().equals("value") || child.getNodeName().equals("#text")) {
+                        key.setKey(child.getTextContent());
+                    } else if(child.getNodeName().equals("relation")) {
+                        MetadataKey.MetadataKeyRelated.Relation relation = MetadataKey.MetadataKeyRelated.Relation.relatedMatch;
+                        if(child.getAttributes() != null && child.getAttributes().getNamedItem("type") != null) {
+                            relation = MetadataKey.MetadataKeyRelated.Relation.valueOf(child.getAttributes().getNamedItem("type").getTextContent());
+                        }
+                        MetadataKey.MetadataKeyRelated related = new MetadataKey.MetadataKeyRelated(relation);
+                        related.setKey(child.getTextContent());
+                        key.addRelated(related);
+                    }
+                }
 
-            if (StringUtils.isBlank(keyNode.getTextContent()) && StringUtils.isBlank(cap)) {
+            } else {
+                key.setKey(keyNode.getTextContent());
+            }
+            if (StringUtils.isBlank(key.getKey()) && StringUtils.isBlank(cap)) {
                 continue;
             }
 
-            MetadataKey key = new MetadataKey();
-            key.setKey(keyNode.getTextContent());
+
             key.setI18n(valuespaceI18n);
             key.setI18nPrefix(valuespaceI18nPrefix);
             if (attributes != null && attributes.getNamedItem("parent") != null) {
