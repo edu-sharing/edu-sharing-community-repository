@@ -140,7 +140,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
                         continue;
                     }
                 }
-                if (node.accessOriginal && node.accessOriginal.indexOf(right) !== -1) {
+                if (node.accessEffective && node.accessEffective.indexOf(right) !== -1) {
                     continue;
                 }
                 if (RestConstants.IMPLICIT_COLLECTION_PERMISSIONS.indexOf(right) === -1) {
