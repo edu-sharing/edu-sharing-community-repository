@@ -51,7 +51,6 @@ export class ShareDialogChooseDateComponent implements OnInit, OnChanges {
             date.setMinutes(0);
             date.setSeconds(0);
             date.setMilliseconds(0);
-            console.log(this.from, date.getTime());
             this.from = date.getTime();
         }
         this.timeControl.setValue(
@@ -62,7 +61,6 @@ export class ShareDialogChooseDateComponent implements OnInit, OnChanges {
 
     updateDate(event: MatDatepickerInputEvent<Date, any>) {
         const currentDate = new Date(this.dateTime);
-        console.log(event.value?.getTime(), this.from, this.to);
         if (
             !event.value ||
             (this.from && event.value?.getTime() < this.from) ||
