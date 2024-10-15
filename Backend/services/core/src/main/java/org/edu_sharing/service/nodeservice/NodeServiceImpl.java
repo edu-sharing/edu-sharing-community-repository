@@ -721,13 +721,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					logger.warn("Error while calling interceptor " + i.getClass().getName() + ": " + e.toString());
 				}
 			}
-			Map<QName, Serializable> propsStore = propsFinal.entrySet().stream().
-					filter(e -> e.getValue() != null).
-					collect(
-					HashMap::new,
-					(m,entry)-> m.put(QName.createQName(entry.getKey()), (Serializable) entry.getValue()),
-					HashMap::putAll
-			);
+			HashMap<QName, Serializable> propsStore = convertToFinalProperties(nodeRef, propsFinal);
 			nodeService.setProperties(nodeRef, propsStore);
 			// do in transaction to disable behaviour
 			// otherwise interceptors might be called multiple times -> the final update props is enough!
@@ -747,6 +741,16 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			logger.error("Thats maybe an alfreco bug: https://issues.alfresco.com/jira/browse/ETHREEOH-2461", e);
 		}
 
+	}
+
+	public static HashMap<QName, Serializable> convertToFinalProperties(NodeRef nodeRef, Map<String, Object> propsFinal) {
+		return propsFinal.entrySet().stream().
+				filter(e -> e.getValue() != null).
+				collect(
+				HashMap::new,
+				(m,entry)-> m.put(QName.createQName(entry.getKey()), (Serializable) entry.getValue()),
+				HashMap::putAll
+		);
 	}
 
 	Map<QName, Serializable> transformPropMap(Map<String, ?> map) {
