@@ -222,31 +222,32 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			assocName = QName.createValidLocalName(assocName);
 		}
 		assocName = "{" + CCConstants.NAMESPACE_CCM + "}" + assocName;
-		Map<String, Object> propsConverted = new HashMap<>();
-		propsConverted.putAll(_props);
-		for (PropertiesSetInterceptor i : PropertiesInterceptorFactory.getPropertiesSetInterceptors()) {
-			try {
-				propsConverted = i.beforeSetProperties(
-						PropertiesInterceptorFactory.getPropertiesContext(
-								null,
-								propsConverted,
-								Collections.emptyList(),
-								null, null
-						)
-				);
-			} catch (Throwable e) {
-				logger.warn("Error while calling interceptor " + i.getClass().getName() + ": " + e.toString());
-			}
-		}
+        Map<String, Object> propsConverted = new HashMap<>(_props);
+		propsConverted = runSetInterceptors(null, propsConverted, PropertiesInterceptorFactory.getPropertiesSetInterceptors().stream().filter(i -> i.getInterceptorTiming().equals(PropertiesSetInterceptor.SetInterceptorTiming.BeforeAlfrescoInterceptors)).collect(Collectors.toList()));
 		Map<QName, Serializable> properties = transformPropMap(propsConverted);
 
 
 		ChildAssociationRef childRef = nodeService.createNode(parentNodeRef, QName.createQName(childAssociation), QName.createQName(assocName), nodeType,
 				properties);
+		runNodePropertiesAfterInterceptors(childRef.getChildRef());
+
 		if(childAssociation.equals(CCConstants.CCM_ASSOC_CHILDIO)){
 			new RepositoryCache().remove(parentID);
 		}
 		return childRef.getChildRef().getId();
+	}
+
+	private void runNodePropertiesAfterInterceptors(NodeRef nodeRef) {
+		try {
+			List<? extends PropertiesSetInterceptor> afterInterceptors = PropertiesInterceptorFactory.getPropertiesSetInterceptors().stream().filter(i -> i.getInterceptorTiming().equals(PropertiesSetInterceptor.SetInterceptorTiming.AfterAlfrescoInterceptors)).collect(Collectors.toList());
+			if(!afterInterceptors.isEmpty()) {
+				Map<String, Object> storedProperties = getProperties(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId());
+				storedProperties = runSetInterceptors(nodeRef, storedProperties, afterInterceptors);
+				nodeService.setProperties(nodeRef, transformPropMap(storedProperties));
+			}
+		} catch (Throwable e) {
+			logger.warn("Could not run after interceptors", e);
+		}
 	}
 
 	@Override
@@ -711,18 +712,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 			Map<String, Object> propsFinal = propsConverted;
 
-			for (PropertiesSetInterceptor i : PropertiesInterceptorFactory.getPropertiesSetInterceptors()) {
-				try {
-					propsFinal = i.beforeSetProperties(PropertiesInterceptorFactory.getPropertiesContext(
-							nodeRef,
-							propsFinal,
-							Arrays.asList(getAspects(store.getProtocol(), store.getIdentifier(), nodeId)), null, null));
-				} catch (Throwable e) {
-					logger.warn("Error while calling interceptor " + i.getClass().getName() + ": " + e.toString());
-				}
-			}
+			propsFinal = runSetInterceptors(nodeRef, propsFinal, PropertiesInterceptorFactory.getPropertiesSetInterceptors().stream().filter(i -> i.getInterceptorTiming().equals(PropertiesSetInterceptor.SetInterceptorTiming.BeforeAlfrescoInterceptors)).collect(Collectors.toList()));
 			HashMap<QName, Serializable> propsStore = convertToFinalProperties(nodeRef, propsFinal);
 			nodeService.setProperties(nodeRef, propsStore);
+			runNodePropertiesAfterInterceptors(nodeRef);
 			// do in transaction to disable behaviour
 			// otherwise interceptors might be called multiple times -> the final update props is enough!
 			// to it AFTER set properties so the values can be sent as NULL-Values into setProperties to be read by interceptors
@@ -741,6 +734,20 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			logger.error("Thats maybe an alfreco bug: https://issues.alfresco.com/jira/browse/ETHREEOH-2461", e);
 		}
 
+	}
+
+	private Map<String, Object> runSetInterceptors(NodeRef nodeRef, Map<String, Object> propsFinal, List<? extends PropertiesSetInterceptor> interceptors) {
+		for (PropertiesSetInterceptor i : interceptors) {
+			try {
+				propsFinal = i.beforeSetProperties(PropertiesInterceptorFactory.getPropertiesContext(
+						nodeRef,
+						propsFinal,
+						nodeRef == null ? Collections.emptyList() : Arrays.asList(getAspects(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId())), null, null));
+			} catch (Throwable e) {
+				logger.warn("Error while calling interceptor " + i.getClass().getName() + ": " + e.toString());
+			}
+		}
+		return propsFinal;
 	}
 
 	public static HashMap<QName, Serializable> convertToFinalProperties(NodeRef nodeRef, Map<String, Object> propsFinal) {
