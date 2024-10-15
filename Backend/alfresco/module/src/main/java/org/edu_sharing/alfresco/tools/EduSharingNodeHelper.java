@@ -39,10 +39,13 @@ public class EduSharingNodeHelper {
 	 * @return true if the node should be filtered out
 	 */
 	public static boolean shouldFilter(NodeRef node, List<String> filter) {
+
     	try {
 	        // filter nodes for link inivitation and usages
 	        if (filter == null) {
 				filter = new ArrayList<>();
+			}else {
+				filter = new ArrayList<>(filter);
 			}
 
 	        if (filter.contains("special")) {
