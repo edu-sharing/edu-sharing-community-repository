@@ -241,9 +241,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		try {
 			List<? extends PropertiesSetInterceptor> afterInterceptors = PropertiesInterceptorFactory.getPropertiesSetInterceptors().stream().filter(i -> i.getInterceptorTiming().equals(PropertiesSetInterceptor.SetInterceptorTiming.AfterAlfrescoInterceptors)).collect(Collectors.toList());
 			if(!afterInterceptors.isEmpty()) {
-				Map<String, Object> storedProperties = getProperties(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId());
+				Map<String, Object> storedProperties = nodeService.getProperties(nodeRef).entrySet().stream()
+                    .collect(HashMap::new, (m,v)-> m.put(v.getKey().toString(), v.getValue()), HashMap::putAll);
 				storedProperties = runSetInterceptors(nodeRef, storedProperties, afterInterceptors);
-				nodeService.setProperties(nodeRef, transformPropMap(storedProperties));
+				nodeService.setProperties(nodeRef, convertToFinalProperties(nodeRef, storedProperties));
 			}
 		} catch (Throwable e) {
 			logger.warn("Could not run after interceptors", e);
