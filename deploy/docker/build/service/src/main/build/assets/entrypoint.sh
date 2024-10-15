@@ -7,9 +7,6 @@ set -eu
 my_admin_pass="${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
 my_admin_pass_md4="$(printf '%s' "$my_admin_pass" | iconv -t utf16le | openssl md4 -provider legacy | awk '{ print $2 }')"
 
-my_guest_user="${REPOSITORY_SERVICE_GUEST_USER:-}"
-my_guest_pass="${REPOSITORY_SERVICE_GUEST_PASS:-}"
-
 my_bind="${REPOSITORY_SERVICE_BIND:-"0.0.0.0"}"
 
 my_prot_external="${REPOSITORY_SERVICE_PROT_EXTERNAL:-http}"
@@ -474,30 +471,6 @@ xmlstarlet ed -L \
     -s '/properties' -t elem -n "entry" -v "${my_home_custom_html_headers}" \
     --var entry '$prev' \
     -i '$entry' -t attr -n "key" -v "custom_html_headers" \
-    ${homeProp}
-}
-
-xmlstarlet ed -L \
-  -d '/properties/entry[@key="guest_username"]' \
-  ${homeProp}
-
-[[ -n "${my_guest_user}" ]] && {
-  xmlstarlet ed -L \
-    -s '/properties' -t elem -n "entry" -v "${my_guest_user}" \
-    --var entry '$prev' \
-    -i '$entry' -t attr -n "key" -v "guest_username" \
-    ${homeProp}
-}
-
-xmlstarlet ed -L \
-  -d '/properties/entry[@key="guest_password"]' \
-  ${homeProp}
-
-[[ -n "${my_guest_pass}" ]] && {
-  xmlstarlet ed -L \
-    -s '/properties' -t elem -n "entry" -v "${my_guest_pass}" \
-    --var entry '$prev' \
-    -i '$entry' -t attr -n "key" -v "guest_password" \
     ${homeProp}
 }
 
