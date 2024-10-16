@@ -227,7 +227,9 @@
     "CHILDREN": "Children",
     "CHILDREN_NONE": "Dieses Element besitzt keine Child Objekte",
     "CUSTOM_PROPERTY_NAME": "Eigene Property eingeben",
-    "CUSTOM_PROPERTY_VALUE": "Wert für Property eingeben"
+    "CUSTOM_PROPERTY_VALUE": "Wert für Property eingeben",
+    "CONTEXT_ACTIONS": "Aktionen für diesen Element-Typ",
+    "ALL_ACTIONS": "Alle Aktionen (ggf. nicht mit diesen Typ kompatibel!)"
   },
   "SIDEBAR": {
     "WORKSPACE": "Workspace",
