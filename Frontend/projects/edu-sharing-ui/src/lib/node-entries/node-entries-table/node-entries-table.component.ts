@@ -45,6 +45,7 @@ import { Toast } from '../../services/abstract/toast.service';
 import { DropdownComponent } from '../../dropdown/dropdown.component';
 import { NodeDataSourceRemote } from '../node-data-source-remote';
 import { TranslationsService } from '../../translations/translations.service';
+import { NodeHelperService } from '../../services/node-helper.service';
 
 @Component({
     selector: 'es-node-entries-table',
@@ -90,6 +91,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         private applicationRef: ApplicationRef,
         private toast: Toast,
         private translations: TranslationsService,
+        private nodeHelperService: NodeHelperService,
         private changeDetectorRef: ChangeDetectorRef,
         public ui: UIService,
         private ngZone: NgZone,
@@ -328,6 +330,9 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     }
 
     isBlocked(node: Node) {
-        return node.properties?.[RestConstants.CCM_PROP_IMPORT_BLOCKED]?.[0] === 'true';
+        return (
+            node.properties?.[RestConstants.CCM_PROP_IMPORT_BLOCKED]?.[0] === 'true' ||
+            this.nodeHelperService.isNodeRevoked(node)
+        );
     }
 }

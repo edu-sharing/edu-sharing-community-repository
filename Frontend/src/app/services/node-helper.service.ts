@@ -713,13 +713,6 @@ export class NodeHelperService extends NodeHelperServiceBase {
     }
 
     /**
-     * Returns true if this node is a copy of another node, just used as a publish target.
-     */
-    isNodePublishedCopy(o: Node): boolean {
-        return !!o.properties?.[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]?.[0];
-    }
-
-    /**
      * Returns the full URL to a node, including the server origin and base href.
      */
     getNodeUrl(node: UniversalNode, queryParams?: Params): string {

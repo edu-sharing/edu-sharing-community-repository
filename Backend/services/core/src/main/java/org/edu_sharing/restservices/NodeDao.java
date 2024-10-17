@@ -36,14 +36,12 @@ import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.collection.v1.model.CollectionReference;
 import org.edu_sharing.restservices.collection.v1.model.CollectionRelationReference;
-import org.edu_sharing.restservices.node.v1.model.NodeEntries;
-import org.edu_sharing.restservices.node.v1.model.NodeShare;
-import org.edu_sharing.restservices.node.v1.model.NotifyEntry;
-import org.edu_sharing.restservices.node.v1.model.WorkflowHistory;
+import org.edu_sharing.restservices.node.v1.model.*;
 import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.shared.NodeSearch.Facet;
 import org.edu_sharing.restservices.shared.NodeSearch.Facet.Value;
+import org.edu_sharing.restservices.shared.SearchResult;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
@@ -230,6 +228,15 @@ public class NodeDao {
 
             return changeProperties(props);
         } catch (Throwable t) {
+            throw DAOException.mapping(t);
+        }
+    }
+
+    public NodeDao revokeNode(RevokeDetails details) {
+        try {
+            NodeServiceFactory.getLocalService().revokeNode(storeProtocol, storeId, getId(), details);
+            return getNode(repoDao, getId(), filter);
+        } catch(Throwable t) {
             throw DAOException.mapping(t);
         }
     }
@@ -2580,13 +2587,13 @@ public class NodeDao {
         return refs.stream().map(ref -> new NodeRef(repoDao, ref.getNodeId())).collect(Collectors.toList());
     }
 
-    public void reportNode(String reason, String userEmail, String userComment) throws DAOException {
+    public void reportNode(NotificationService.NotifyMode mode, String reason, String userEmail, String userComment) throws DAOException {
         try {
             String type = nodeService.getType(nodeId);
             Map<String, Object> properties = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
             List<String> aspects = Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
             NotificationServiceFactoryUtility.getLocalService()
-                    .notifyNodeIssue(nodeId, reason, type, aspects, properties, userEmail, userComment);
+                    .notifyNodeIssue(nodeId, mode, reason, type, aspects, properties, userEmail, userComment);
         } catch (Throwable t) {
             throw DAOException.mapping(t);
         }

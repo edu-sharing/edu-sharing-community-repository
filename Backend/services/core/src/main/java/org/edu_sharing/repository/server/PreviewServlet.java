@@ -633,7 +633,7 @@ public class PreviewServlet extends HttpServlet {
 				ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef,
 						QName.createQName(contentProp));
 
-				if(reader == null){
+				if(reader == null || reader.getSize() == 0){
 					return false;
 				}
 

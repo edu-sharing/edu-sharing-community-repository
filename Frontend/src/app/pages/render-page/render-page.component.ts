@@ -78,6 +78,7 @@ import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcru
 import { CardComponent } from '../../shared/components/card/card.component';
 import { RenderHelperService } from './render-helper.service';
 import { CardDialogService } from '../../features/dialogs/card-dialog/card-dialog.service';
+import { DialogsService } from '../../features/dialogs/dialogs.service';
 
 @Component({
     selector: 'es-render-page',
@@ -89,6 +90,7 @@ import { CardDialogService } from '../../features/dialogs/card-dialog/card-dialo
 export class RenderPageComponent implements EventListener, OnInit, OnDestroy, AfterViewInit {
     readonly DisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
+    specialTemplate: 'revoked' | null;
     @Input() set node(node: Node | string) {
         const id = (node as Node).ref ? (node as Node).ref.id : (node as string);
         jQuery('#nodeRenderContent').html('');
@@ -112,6 +114,7 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
         private cardServcie: CardService,
         viewContainerRef: ViewContainerRef,
         private cardDialogService: CardDialogService,
+        private dialogsService: DialogsService,
         private frame: FrameEventsService,
         private toast: Toast,
         private configLegacy: ConfigurationService,
@@ -451,6 +454,7 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
             showDownloadAdvice: !this.isOpenable,
         };
         this._node = null;
+        this.specialTemplate = null;
         this.isBuildingPage = true;
         // we only fetching versions for the primary parent (child objects don't have versions)
         this.nodeApi
@@ -499,10 +503,11 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
                                 repository: this.repository,
                                 metadataSet: this.getMdsId(),
                             })
-                            .subscribe((mds) => {
+                            .subscribe((mds: MdsDefinition) => {
                                 this.mds.next(mds);
                             });
                         const finish = () => {
+                            this.isLoading = false;
                             const nodeRenderContent = jQuery('#nodeRenderContent');
                             nodeRenderContent.html(data.detailsSnippet);
                             this.moveInnerStyleToHead(nodeRenderContent);
@@ -512,7 +517,14 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
                             this.loadNode();
                             this.loadSimilarNodes();
                             this.linkSearchableWidgets();
-                            this.isLoading = false;
+                            this.specialTemplate = null;
+                            if (this.nodeHelper.isNodeRevoked(this._node)) {
+                                this.specialTemplate = 'revoked';
+                                const element = document.getElementsByClassName(
+                                    'edusharing_rendering_content_wrapper',
+                                )?.[0];
+                                element.parentElement?.removeChild(element);
+                            }
                         };
                         this.getSequence(() => {
                             finish();
@@ -868,5 +880,13 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
         style.attr(styleAttr, '');
         jQuery(document.head).append(style);
         this.destroyed$.subscribe(() => style.remove());
+    }
+
+    reportRevokeFeedback() {
+        this.dialogsService.openNodeReportDialog({
+            node: this._node,
+            mode: 'REVOKE_FEEDBACK',
+            showOptions: false,
+        });
     }
 }
