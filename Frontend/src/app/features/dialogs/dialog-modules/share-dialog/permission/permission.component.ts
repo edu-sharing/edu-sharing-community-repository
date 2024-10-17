@@ -86,7 +86,8 @@ export class ShareDialogPermissionComponent implements OnInit {
     }
 
     saveTimebased() {
-        this._permission = Helper.deepCopy(this.timebased);
+        this._permission.from = this.timebased.from;
+        this._permission.to = this.timebased.to;
         this.timebasedOpen = false;
     }
 }
