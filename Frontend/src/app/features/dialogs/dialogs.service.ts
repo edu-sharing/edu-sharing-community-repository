@@ -131,6 +131,10 @@ import { NotificationDialogComponent } from '../../main/navigation/top-bar/notif
 import { CardComponent } from '../../shared/components/card/card.component';
 import { Node } from 'ngx-edu-sharing-api';
 import { DropSource, DropTarget, NodeRoot, NodeTitlePipe } from 'ngx-edu-sharing-ui';
+import {
+    RevocationDialogData,
+    RevocationDialogResult,
+} from './dialog-modules/revocation-dialog/revocation-dialog-data';
 
 @Injectable({
     providedIn: 'root',
@@ -234,7 +238,7 @@ export class DialogsService {
             './dialog-modules/node-report-dialog/node-report-dialog.module'
         );
         return this.cardDialog.open(NodeReportDialogComponent, {
-            title: 'NODE_REPORT.TITLE',
+            title: data.mode === 'NODE_REPORT' ? 'NODE_REPORT.TITLE' : 'REVOKE_FEEDBACK.TITLE',
             ...(await this.cardDialogUtils.configForNode(data.node)),
             data,
         });
@@ -325,6 +329,25 @@ export class DialogsService {
             title: 'WORKSPACE.ADD_FOLDER_TITLE',
             ...(await this.cardDialogUtils.configForNode(data.parent)),
             avatar: { kind: 'image', url: this.restConnector.getThemeMimeIconSvg('folder.svg') },
+            width: 600,
+            data,
+        });
+    }
+
+    /**
+     * revocation dialog
+     * if this is called with an already revoked node, it will only offer edit functionality
+     * otherwise, it will revoke the published copy
+     */
+    async openRevocationDialog(
+        data: RevocationDialogData,
+    ): Promise<CardDialogRef<RevocationDialogData, RevocationDialogResult>> {
+        const { RevocationDialogComponent } = await import(
+            './dialog-modules/revocation-dialog/revocation-dialog.component'
+        );
+        return this.cardDialog.open(RevocationDialogComponent, {
+            title: 'WORKSPACE.REVOCATION.TITLE',
+            ...(await this.cardDialogUtils.configForNode(data.node)),
             width: 600,
             data,
         });
