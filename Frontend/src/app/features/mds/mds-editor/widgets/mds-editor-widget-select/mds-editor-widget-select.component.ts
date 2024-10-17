@@ -51,9 +51,9 @@ export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implemen
             );
         } else {
             // skip first because the init state will cause a trigger
-            this.formControl.valueChanges
-                .pipe(skip(1))
-                .subscribe((value) => this.setValue(value ? [value.id] : [null]));
+            this.formControl.valueChanges.subscribe((value) =>
+                this.setValue(value ? [value.id] : [null]),
+            );
         }
         this.registerValueChanges(this.formControl);
     }

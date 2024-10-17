@@ -194,6 +194,9 @@ section {
     }
     .collectionsContainer {
         grid-template-columns: auto;
+        .collections-right {
+            max-width: unset;
+        }
     }
     .card-image-icon-container {
         margin-top: 20px;
