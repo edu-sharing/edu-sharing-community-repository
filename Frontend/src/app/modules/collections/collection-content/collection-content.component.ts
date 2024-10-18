@@ -291,7 +291,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                             : refMode) || RestConstants.CM_MODIFIED_DATE) as any;
                         this.sortReferences.direction =
                             this.sortReferences.active ===
-                            RestConstants.COLLECTION_ORDER_MODE_CUSTOM
+                            RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
                                 ? 'asc'
                                 : refAscending
                                 ? 'asc'

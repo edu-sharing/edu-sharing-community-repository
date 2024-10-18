@@ -672,12 +672,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 ? getPermissionsQuery("permissions.read",new HashSet<>(authorityScope))
                 : getReadPermissionsQuery();
         queryBuilderGlobalConditions = queryBuilderGlobalConditions.must(QueryBuilders.matchQuery("nodeRef.storeRef.protocol", "workspace"));
-        if(permissions != null){
+        if(permissions != null && !permissions.isEmpty()){
             BoolQueryBuilder permissionsFilter = QueryBuilders.boolQuery().must(queryBuilderGlobalConditions);
             String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
             permissionsFilter.should(QueryBuilders.matchQuery("owner", user));
+            permissionsFilter.minimumShouldMatch(1);
             for(String permission : permissions){
-                permissionsFilter.should(getPermissionsQuery("permissions." + permission));
+                permissionsFilter.should(getPermissionsQuery("permissions." + permission + ".keyword"));
                 // queryBuilderGlobalConditions = QueryBuilders.boolQuery().must(queryBuilderGlobalConditions).must(getPermissionsQuery("permissions." + permission));
             }
             queryBuilderGlobalConditions = permissionsFilter;
