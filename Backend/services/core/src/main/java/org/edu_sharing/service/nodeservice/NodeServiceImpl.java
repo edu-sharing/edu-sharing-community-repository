@@ -29,6 +29,7 @@ import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.policy.OnCopyIOPolicy;
+import org.edu_sharing.restservices.node.v1.model.RevokeDetails;
 import org.edu_sharing.service.handleservice.HandleService;
 import org.edu_sharing.service.handleservice.HandleServiceFactory;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
@@ -49,6 +50,8 @@ import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.service.handleservicedoi.DOIService;
 import org.edu_sharing.service.handleservicedoi.FeatureInfoDoiService;
 import org.edu_sharing.service.handleservice.FeatureInfoHandleService;
+import org.edu_sharing.service.nodeservice.annotation.NodeManipulation;
+import org.edu_sharing.service.nodeservice.annotation.NodeOriginal;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.service.permission.HandleParam;
@@ -1203,6 +1206,51 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			return null;
 		});
 	}
+	public void revokeNode(String storeProtocol, String storeId, String nodeId, RevokeDetails details) throws Throwable {
+		if(!getType(storeProtocol, storeId, nodeId).equals(CCConstants.CCM_TYPE_IO)) {
+			throw new IllegalArgumentException("Only allowed for elements of type " + CCConstants.CCM_TYPE_IO);
+		}
+		if(hasAspect(storeProtocol, storeId, nodeId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
+			nodeId = getProperty(storeProtocol, storeId, nodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
+		}
+		if(!hasAspect(storeProtocol, storeId, nodeId, CCConstants.CCM_ASPECT_PUBLISHED)) {
+			throw new IllegalArgumentException("Only allowed for elements with aspect " + CCConstants.CCM_ASPECT_PUBLISHED);
+		}
+		String finalNodeId = nodeId;
+		serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+			removeContent(new NodeRef(new StoreRef(storeProtocol, storeId), finalNodeId), CCConstants.CM_PROP_CONTENT);
+			removeContent(new NodeRef(new StoreRef(storeProtocol, storeId), finalNodeId), CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
+			// remove childs like childobjects or preview images
+			for (ChildAssociationRef child : getChildAssocs(new NodeRef(new StoreRef(storeProtocol, storeId), finalNodeId))) {
+				removeNode(child.getChildRef().getId(), finalNodeId, false);
+			}
+			Map<String, Serializable> props = new HashMap<>();
+			props.put(CCConstants.CCM_PROP_IO_CREATE_VERSION, false);
+			if (getProperty(storeProtocol, storeId, finalNodeId, CCConstants.CCM_PROP_IO_REVOKED_DATE) == null) {
+				props.put(CCConstants.CCM_PROP_IO_REVOKED_DATE, new Date());
+			}
+			props.put(CCConstants.CCM_PROP_IO_REVOKED_REASON, details.getReason());
+			updateNodeNative(finalNodeId, props);
+			return null;
+		});
+		try{
+			ApplicationContext eduAppContext = ApplicationContextFactory.getApplicationContext();
+			eduAppContext.getBean(FeatureInfoDoiService.class);
+			handleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.doi).updateState(nodeId, "register");
+		}catch (NoSuchBeanDefinitionException e){
+			logger.info("doi service not enabled");
+		}
+}
+
+	private void removeContent(NodeRef nodeRef, String contentProperty) {
+		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
+			ContentWriter writer = serviceRegistry.getContentService().getWriter(nodeRef, QName.createQName(contentProperty), true);
+			writer.putContent("");
+			// writer.setMimetype(null);
+			return null;
+		});
+	}
+
 
 	@Override
 	public String publishCopy(String nodeId, HandleParam handleParam) throws Throwable {

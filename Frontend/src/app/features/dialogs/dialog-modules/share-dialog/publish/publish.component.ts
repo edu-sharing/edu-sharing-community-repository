@@ -473,6 +473,10 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
         }
         return false;
     }
+
+    isRevoked(v: PublishedNode) {
+        return this.nodeHelper.isNodeRevoked(v);
+    }
 }
 export enum ShareMode {
     Direct = 'direct',

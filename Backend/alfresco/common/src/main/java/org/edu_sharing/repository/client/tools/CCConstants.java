@@ -838,6 +838,9 @@ public class CCConstants {
 
 	public final static String CCM_PROP_IO_PUBLISHED_DATE = "{http://www.campuscontent.de/model/1.0}published_date";
 
+	public final static String CCM_PROP_IO_REVOKED_DATE = "{http://www.campuscontent.de/model/1.0}revoked_date";
+	public final static String CCM_PROP_IO_REVOKED_REASON = "{http://www.campuscontent.de/model/1.0}revoked_reason";
+
 	public final static String CCM_PROP_IO_PUBLISHED_MODE = "{http://www.campuscontent.de/model/1.0}published_mode";
 
 	public final static String CCM_PROP_IO_PUBLISHED_ORIGINAL = "{http://www.campuscontent.de/model/1.0}published_original";
@@ -846,6 +849,7 @@ public class CCConstants {
 	 * published
 	 */
 	public final static String CCM_ASPECT_PUBLISHED = "{http://www.campuscontent.de/model/1.0}published";
+	public final static String CCM_ASPECT_REVOKED = "{http://www.campuscontent.de/model/1.0}revoked";
 
 	public final static String CCM_PROP_PUBLISHED_DATE = "{http://www.campuscontent.de/model/1.0}published_date";
 

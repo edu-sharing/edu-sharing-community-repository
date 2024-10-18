@@ -65,7 +65,22 @@ public class PermissionServiceHelper {
 		return permissionModel.getGranteePermissions(pr).stream().map(PermissionReference::getName).collect(Collectors.toUnmodifiableSet());
 	}
 
-    public void validatePermissionOrThrow(String nodeId, String permissionName) {
+	public static Set<String> getEffectivePermissions(List<String> restrictedPermissions, boolean restrictedAccess) {
+		Set<String> result = new HashSet<>();
+		if (restrictedAccess) {
+			if (restrictedPermissions != null) {
+				result.addAll(restrictedPermissions.stream()
+						.map(PermissionServiceHelper::getAllIncludingPermissions)
+						.flatMap(Collection::stream)
+						.collect(Collectors.toSet()));
+			}
+		} else {
+			result.addAll(CCConstants.getUsagePermissions());
+		}
+		return result;
+	}
+
+	public void validatePermissionOrThrow(String nodeId, String permissionName) {
 		if(!permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,permissionName))
 			throw new PermissionException(nodeId,permissionName);
 	}

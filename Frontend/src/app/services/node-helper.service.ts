@@ -127,15 +127,20 @@ export class NodeHelperService extends NodeHelperServiceBase {
         if (nodes == null) return true;
         for (const node of nodes) {
             let currentMode = mode;
-            // if this is not a collection ref -> force local mode
+            // if no access effective present and not a collection ref. use the local data
             if (
-                node.aspects &&
-                node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) === -1
+                !node.aspects?.includes(RestConstants.CCM_ASPECT_IO_REFERENCE) &&
+                !node.accessEffective?.length
             ) {
                 currentMode = NodesRightMode.Local;
             }
             if (currentMode === NodesRightMode.Effective) {
-                if (node.accessOriginal && node.accessOriginal.indexOf(right) !== -1) {
+                if (!node.aspects?.includes(RestConstants.CCM_ASPECT_IO_REFERENCE)) {
+                    if (node.accessEffective && node.accessEffective.indexOf(right) !== -1) {
+                        continue;
+                    }
+                }
+                if (node.accessEffective && node.accessEffective.indexOf(right) !== -1) {
                     continue;
                 }
                 if (RestConstants.IMPLICIT_COLLECTION_PERMISSIONS.indexOf(right) === -1) {
@@ -710,13 +715,6 @@ export class NodeHelperService extends NodeHelperServiceBase {
             return 'http://' + link;
         }
         return link;
-    }
-
-    /**
-     * Returns true if this node is a copy of another node, just used as a publish target.
-     */
-    isNodePublishedCopy(o: Node): boolean {
-        return !!o.properties?.[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]?.[0];
     }
 
     /**

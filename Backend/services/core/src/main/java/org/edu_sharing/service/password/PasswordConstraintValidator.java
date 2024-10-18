@@ -44,12 +44,15 @@ public class PasswordConstraintValidator implements ConstraintValidator<ValidPas
                 new CharacterRule(EnglishCharacterData.LowerCase, settings.getNumberOfUpperCaseCharacters()),
 //                new CharacterRule(GermanCharacterData.UpperCase, 1), // has lib internal issues
 //                new CharacterRule(GermanCharacterData.LowerCase, 1), // has lib  internal issues
-                new CharacterRule(EnglishCharacterData.Digit, settings.getNumberOfDigitCharacters()),
-                new CharacterRule(EnglishCharacterData.Special, settings.getNumberOfSpecialCharacters()),
                 new DictionarySubstringRule(new WordListDictionary(new ArrayWordList(settings.getIllegalSubstrings().toArray(new String[0]), true, new QuickSort()))),
                 new DictionaryRule(new WordListDictionary(new ArrayWordList(settings.getIllegalPasswords().toArray(new String[0]), true,new QuickSort()))),
                 new WhitespaceRule()));
-
+        if(settings.getNumberOfDigitCharacters() > 0) {
+            rules.add(new CharacterRule(EnglishCharacterData.Digit, settings.getNumberOfDigitCharacters()));
+        }
+        if(settings.getNumberOfSpecialCharacters() > 0) {
+            rules.add(new CharacterRule(EnglishCharacterData.Special, settings.getNumberOfSpecialCharacters()));
+        }
         if(settings.getMaxLengthOfAlphabeticSequence() >= 0) {
             rules.add(new IllegalSequenceRule(EnglishSequenceData.Alphabetical, settings.getMaxLengthOfAlphabeticSequence(), false));
 //            rules.add(new IllegalSequenceRule(GermanSequenceData.Alphabetical, 5, false)); // has lib internal issues
