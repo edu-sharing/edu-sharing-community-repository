@@ -3223,6 +3223,12 @@
             },
             "type": "array"
           },
+          "accessEffective": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "aspects": {
             "items": {
               "type": "string"
@@ -3356,6 +3362,12 @@
       "NodeCollectionProposalCount": {
         "properties": {
           "access": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "accessEffective": {
             "items": {
               "type": "string"
             },

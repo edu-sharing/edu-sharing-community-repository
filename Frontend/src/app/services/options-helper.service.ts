@@ -67,6 +67,7 @@ import { forkJoinWithErrors } from '../util/rxjs/forkJoinWithErrors';
 import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
 import { Toast } from './toast';
 import { UIHelper } from '../core-ui-module/ui-helper';
+import { GlobalOptionsService } from './global-options.service';
 
 @Injectable()
 export class OptionsHelperService extends OptionsHelperServiceAbstract implements OnDestroy {
@@ -92,6 +93,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         private bridge: BridgeService,
         private collectionService: RestCollectionService,
         private configService: ConfigurationService,
+        private globalOptionsService: GlobalOptionsService,
         private connector: RestConnectorService,
         private connectors: RestConnectorsService,
         private dialogs: DialogsService,
@@ -1545,6 +1547,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
 
         if (data?.postPrepareOptions) {
             data.postPrepareOptions(options, objects);
+        }
+        if (this.globalOptionsService.postPrepareOptions) {
+            this.globalOptionsService.postPrepareOptions(options, objects);
         }
         return options;
     }
