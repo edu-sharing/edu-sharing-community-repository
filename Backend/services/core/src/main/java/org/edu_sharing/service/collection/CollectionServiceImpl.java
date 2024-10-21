@@ -629,9 +629,6 @@ public class CollectionServiceImpl implements CollectionService {
 
     public Map<String, Object> asProps(Collection collection) {
         Map<String, Object> props = new HashMap<>();
-        if (collection.getNodeId() != null) {
-            props.put(CCConstants.SYS_PROP_NODE_UID, collection.getNodeId());
-        }
         props.put(CCConstants.CM_PROP_TITLE, collection.getTitle());
         props.put(CCConstants.CM_NAME, NodeServiceHelper.cleanupCmName(collection.getTitle()));
         props.put(CCConstants.CM_PROP_DESCRIPTION, collection.getDescription());
