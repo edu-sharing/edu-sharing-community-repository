@@ -1497,6 +1497,7 @@
         "must_not":[
         {"term":{"aspects":"ccm:metadataPresettingTemplate"}},
         {"term":{"aspects":"ccm:io_childobject"}},
+        {"term":{"aspects":"ccm:revoked"}},
         {"wildcard":{"properties.cm:name.keyword":"._*"}},
         {"term":{"aspects":"ccm:collection_io_reference"}},
         {"wildcard":{"properties.cm:name.keyword":".DS_Store*"}},

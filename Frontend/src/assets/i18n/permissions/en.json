@@ -98,7 +98,10 @@
       "MEDIA_CENTER": "media center",
       "MEDIA_CENTER_PROXY": "proxy group (media center)",
       "MEDIACENTER_ADMINISTRATORS": "administrators (media center)",
-      "ORG_ADMINISTRATORS": "administrators"
+      "ORG_ADMINISTRATORS": "administrators",
+      "CLASS": "class",
+      "WORKING_GROUP": "working group",
+      "LESSON": "lesson"
     },
     "SCOPE_TYPE": {
       "null": "Local / Default visibility",

@@ -2161,7 +2161,18 @@
         </property>
       </properties>
     </aspect>
-
+    <!-- revoked published node -->
+    <aspect name="ccm:revoked">
+      <title>revoked aspect</title>
+      <properties>
+        <property name="ccm:revoked_date">
+          <type>d:datetime</type>
+        </property>
+        <property name="ccm:revoked_reason">
+          <type>d:text</type>
+        </property>
+      </properties>
+    </aspect>
     <aspect name="ccm:permission_history">
       <title>permissionHistory</title>
       <properties>

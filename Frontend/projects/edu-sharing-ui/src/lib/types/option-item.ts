@@ -199,6 +199,7 @@ export enum ElementType {
     NodeChild, // Child object
     MapRef, // Map ref (link to another map)
     NodePublishedCopy,
+    NodeRevoked, // revoked copy / revoked published node
     NodeBlockedImport, // node with property ccm:importblocked == true
     NodeProposal, // node proposal for a collection
     Person,

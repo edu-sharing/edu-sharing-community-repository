@@ -107,6 +107,12 @@
     "CHOOSE_LOCATION_TITLE": "Location",
     "CHOOSE_LOCATION_DESCRIPTION": "Choose a directory for storage",
     "TREE_MORE_ITEMS": "+ {{count}} more folders",
+    "REVOCATION": {
+      "TITLE": "Revoke object",
+      "REASON": "Reason for revocation",
+      "REVOKE": "Revoke",
+      "DETAILS": "This will unpublish the given element. Only a notice page with metadata will remain. In case this element is a series object, all children will be removed as well. Please note that this action can not be undone."
+    },
     "SHARE": {
       "TITLE": "Manage Sharing",
       "NO_PERMISSIONS": "No explicit permissions have been stipulated for this object yet.",
@@ -215,6 +221,7 @@
         "NO_PUBLISH_COPY_PERMISSION": "You do not have permission to publish a copy.",
         "VERSION_COMMENT": "Version comment",
         "VERSION_NUMBER": "Version number",
+        "REVOKED": "This publication has been revoked",
         "VERSION_DATE": "Date of publication",
         "VERSION_DATE_ABSOLUTE": "Publicated",
         "DOI_DISTINCT": "Create new handle",

@@ -98,7 +98,10 @@
       "MEDIA_CENTER": "Medienzentrum",
       "MEDIA_CENTER_PROXY": "Proxy-Gruppe (Medienzentrum)",
       "MEDIACENTER_ADMINISTRATORS": "Administrationsgruppe (Medienzentrum)",
-      "ORG_ADMINISTRATORS": "Administrationsgruppe"
+      "ORG_ADMINISTRATORS": "Administrationsgruppe",
+      "CLASS": "Klasse",
+      "WORKING_GROUP": "Arbeitsgruppe",
+      "LESSON": "Unterricht"
     },
     "SCOPE_TYPE": {
       "null": "Lokal / Normale Sichtbarkeit",

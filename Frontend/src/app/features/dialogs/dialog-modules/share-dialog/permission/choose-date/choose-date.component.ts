@@ -45,6 +45,14 @@ export class ShareDialogChooseDateComponent implements OnInit, OnChanges {
         });
     }
     ngOnChanges(changes: SimpleChanges): void {
+        if (this.from) {
+            const date = new Date(this.from);
+            date.setHours(0);
+            date.setMinutes(0);
+            date.setSeconds(0);
+            date.setMilliseconds(0);
+            this.from = date.getTime();
+        }
         this.timeControl.setValue(
             new DatePipe('en').transform(this.toDate(this.dateTime), 'HH:mm'),
         );

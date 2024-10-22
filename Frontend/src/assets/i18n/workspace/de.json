@@ -106,6 +106,12 @@
     "CHOOSE_LOCATION_TITLE": "Speicherort",
     "CHOOSE_LOCATION_DESCRIPTION": "Einen Ordner für die Ablage wählen",
     "TREE_MORE_ITEMS": "+ {{count}} weitere Ordner",
+    "REVOCATION": {
+      "TITLE": "Veröffentlichung zurückziehen",
+      "REASON": "Begründung angeben",
+      "REVOKE": "Objekt zurückziehen",
+      "DETAILS": "Hierdurch wird die Veröffentlichung dieses Elements aufgehoben. Es verbleibt lediglich eine Hinweis-Seite mit den Metadaten. Sollte das Element Serien-Elemente besitzen, werden diese ebenfalls entfernt. Bitte beachten Sie, dass dieser Vorgang nicht rückgängig gemacht werden kann."
+    },
     "SHARE": {
       "TITLE": "Freigaben verwalten",
       "NO_PERMISSIONS": "Noch keine expliziten Berechtigungen an diesem Element",
@@ -214,6 +220,7 @@
         "NO_PUBLISH_COPY_PERMISSION": "Sie besitzen keine Berechtigung, eine Kopie zu veröffentlichen",
         "VERSION_COMMENT": "Versionskommentar",
         "VERSION_NUMBER": "Versionsnummer",
+        "REVOKED": "Diese Veröffentlichung wurde zurückgezogen",
         "VERSION_DATE": "Zeitpunkt der Veröffentlichung",
         "VERSION_DATE_ABSOLUTE": "Veröffentlicht am",
         "DOI_DISTINCT": "Neuen Handle erzeugen",

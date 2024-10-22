@@ -8,12 +8,8 @@
   <div
     class="card-collection-image-container"
     [class.card-collection-icon-container]="!hasNonIconPreview()"
-    style="width: 100%"
   >
-    <div
-      *ngIf="!hasNonIconPreview()"
-      style="width: 250px; height: 200px; margin-left: auto; margin-right: auto"
-    >
+    <div *ngIf="!hasNonIconPreview()" class="card-collection-image-icon-wrapper">
       <div class="card-image-icon-container">
         <div
           class="card-image-icon-circle"
@@ -61,11 +57,7 @@
         [dropdownPosition]="'right'"
       ></es-actionbar>
     </div>
-    <h1
-      esTitle
-      class="collection-new-preview-headline collections-header-texttop"
-      style="overflow: hidden"
-    >
+    <h1 esTitle class="collection-new-preview-headline collections-header-texttop">
       {{ collection?.title }}
     </h1>
 

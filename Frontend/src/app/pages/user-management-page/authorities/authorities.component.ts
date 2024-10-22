@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { GenericAuthority, Group, User } from 'ngx-edu-sharing-api';
+import { GenericAuthority, Group, User, GroupProfile, UserProfileEdit } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     Constrain,
@@ -106,7 +106,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         elementType?: ElementType[];
         folderPath?: Node[];
         group?: DefaultGroups;
-        profile: any;
+        profile: GroupProfile | UserProfileEdit | any;
         quota?: any;
         priority?: number;
     };
@@ -756,6 +756,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 }
                 return;
             }
+            delete (this.edit.profile as GroupProfile).customAttributes;
             this.iam.editGroup(this.editId, this.edit.profile).subscribe(
                 async () => {
                     this.edit = null;

@@ -126,6 +126,8 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
             CCConstants.CCM_PROP_SERVICE_NODE_DATA,
             CCConstants.CCM_PROP_IO_REF_VIDEO_VTT,
             CCConstants.CCM_PROP_MAP_REF_TARGET,
+            CCConstants.CCM_PROP_IO_REVOKED_DATE,
+            CCConstants.CCM_PROP_IO_REVOKED_REASON,
             CCConstants.CCM_PROP_RESTRICTED_ACCESS,
             CCConstants.CCM_PROP_RESTRICTED_ACCESS_PERMISSIONS,
     };
@@ -743,7 +745,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
         return p.toString();
     }
 
-    private static boolean isEmpty(Serializable p) {
+    public static boolean isPropertyEmpty(Serializable p) {
         if (p == null) {
             return true;
         } else if (p instanceof List) {
@@ -764,7 +766,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
         if (Objects.equals(p1, p2)) {
             return true;
         }
-        if (isEmpty(p1) && isEmpty(p2)) {
+        if (isPropertyEmpty(p1) && isPropertyEmpty(p2)) {
             return true;
         }
         if (p1 instanceof List && p2 instanceof List && ((List) p1).size() == ((List) p2).size()) {
