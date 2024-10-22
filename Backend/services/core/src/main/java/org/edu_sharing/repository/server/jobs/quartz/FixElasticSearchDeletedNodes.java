@@ -2,7 +2,7 @@ package org.edu_sharing.repository.server.jobs.quartz;
 
 import co.elastic.clients.elasticsearch._types.Result;
 import co.elastic.clients.elasticsearch._types.Time;
-import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.query_dsl.*;
 import co.elastic.clients.elasticsearch.core.*;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.core.search.HitsMetadata;
@@ -14,11 +14,13 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.search.ReadableWrapperQueryBuilder;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -36,7 +38,7 @@ public class FixElasticSearchDeletedNodes extends AbstractJob{
     @JobFieldDescription(description = "if false (default) no changes will be done.")
     boolean execute;
 
-    @JobFieldDescription(description = "query that delivers a result of nodes that have to be checked. optional. if not set all nodes will be searched.",sampleValue = "{\"query\":\"{\\\"term\\\":{\\\"type\\\":\\\"ccm:io\\\"}}\"}")
+    @JobFieldDescription(description = "query that delivers a result of nodes that have to be checked. optional. if not set all nodes will be searched.",sampleValue = "{\"term\":{\"type\":\"ccm:io\"}}")
     String query;
 
     SearchServiceElastic searchServiceElastic = new SearchServiceElastic(ApplicationInfoList.getHomeRepository().getAppId());
@@ -50,21 +52,24 @@ public class FixElasticSearchDeletedNodes extends AbstractJob{
     NodeService nodeService = serviceRegistry.getNodeService();
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        execute = Boolean.parseBoolean( (String) jobExecutionContext.getJobDetail().getJobDataMap().get("execute"));
+        execute = (Boolean)jobExecutionContext.getJobDetail().getJobDataMap().get("execute");
         query =  (String)jobExecutionContext.getJobDetail().getJobDataMap().get("query");
+        query = StringEscapeUtils.unescapeJson(query);
+        logger.info("query:"  + query);
 
-            AuthenticationUtil.runAsSystem(()->{
-                try {
-                    ObjectBuilder<Query> queryBuilder = (query == null) ? new Query.Builder().matchAll(x -> x) : new Query.Builder().wrapper(wrapper -> wrapper.query(query));
-                    search(queryBuilder, new DeletedNodesHandler());
-                } catch (IOException e) {
-                    logger.error(e.getMessage(),e);
-                }
-                return null;
-            });
+        AuthenticationUtil.runAsSystem(()->{
+            try {
+                Query elQuery = (query == null) ? new Query.Builder().bool(new BoolQuery.Builder().must(q -> q.matchAll(all -> all)).build()).build() : new Query.Builder().wrapper(new ReadableWrapperQueryBuilder(query).build()).build();
+
+                search(elQuery, new DeletedNodesHandler());
+            } catch (IOException e) {
+                logger.error(e.getMessage(),e);
+            }
+            return null;
+        });
     }
 
-    private void search(ObjectBuilder<Query> queryBuilder, SearchResultHandler searchResultHandler) throws IOException{
+    private void search(Query query, SearchResultHandler searchResultHandler) throws IOException{
         logger.info("search with handler: "+searchResultHandler.getClass().getName());
 
         Time scroll = Time.of(time->time.time("4h"));
@@ -72,7 +77,7 @@ public class FixElasticSearchDeletedNodes extends AbstractJob{
         int page = 0;
         do{
             if(response == null) {
-                response = search(SearchServiceElastic.WORKSPACE_INDEX, queryBuilder, scroll);
+                response = search(SearchServiceElastic.WORKSPACE_INDEX, query, scroll);
             }else {
                 response = scroll(scroll,response.scrollId());
             }
@@ -92,12 +97,13 @@ public class FixElasticSearchDeletedNodes extends AbstractJob{
 
 
 
-    private SearchResponse<Map>  search(String index, ObjectBuilder<Query> queryBuilder, Time scroll) throws IOException {
+    private SearchResponse<Map>  search(String index, Query query, Time scroll) throws IOException {
         return searchServiceElastic.searchNative(SearchRequest.of(req->req
                 .index(index)
                 .size(pageSize)
                 .source(src->src.filter(filter->filter.excludes("preview")))
-                .scroll(scroll)));
+                .scroll(scroll)
+                .query(query)));
     }
 
     private ScrollResponse<Map> scroll(Time scroll, String scrollId) throws IOException {
@@ -162,7 +168,7 @@ public class FixElasticSearchDeletedNodes extends AbstractJob{
     private void syncNestedCollections(String dbid) throws IOException {
         ObjectBuilder<Query> ioCollectionQuery = new Query.Builder().term(term -> term.field("collections.dbid").value(dbid));
 
-        search(ioCollectionQuery, searchHit -> {
+        search(ioCollectionQuery.build(), searchHit -> {
             List<Map<String, Object>> collections = (List<Map<String, Object>>) searchHit.source().get("collections");
 
             /**
