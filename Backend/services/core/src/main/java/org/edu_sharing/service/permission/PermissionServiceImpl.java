@@ -1108,7 +1108,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
             }
 
             if (!token.isEmpty()) {
-                subQuery.append("=@cm:authorityDisplayName:").append("\"").append(token).append("\"");
+                subQuery.append(LightbendConfigLoader.get().getString("repository.search.groups.nonFuzzyField")).append(":\"").append(token).append("\"");
             }
 
             // if not fuzzy and no value for email return empty result
