@@ -514,6 +514,13 @@
       "VIRTUAL": "You're inside a folder where inserting elements is not possible.",
       "GENERAL": "Navigate to a different folder and create your elements there."
     },
+    "COPY_MOVE": {
+      "TITLE": "Move/copy element(s)",
+      "MESSAGE_SINGLE": "Do you want to move/copy \"{{element}}\" from \"{{source}}\" to \"{{target}}\"?",
+      "MESSAGE_MULTIPLE": "Do you want to move/copy {{count}} elements from \"{{source}}\" to \"{{target}}\"?",
+      "MOVE": "Move",
+      "COPY": "Copy"
+    },
     "TOAST": {
       "FOLDER_ADDED": "Folder added",
       "NODE_EXISTS_IN_COLLECTION": "The collection already contains the element {{name}}",
