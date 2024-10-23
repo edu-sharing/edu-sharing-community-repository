@@ -44,10 +44,12 @@ public class PermissionServiceHelper {
 		}
 
     public static HashSet<String> getExplicitAuthoritiesFromACL(ACL acl) {
-        return Arrays.stream(acl.getAces()).
-                filter((ace) -> !ace.isInherited()).
-                map(ACE::getAuthority).
-                collect(Collectors.toCollection(HashSet::new));
+        return Arrays.stream(acl.getAces())
+				.filter((ace) -> !ace.isInherited())
+				.filter((ace -> ace.getFrom() == null))
+				.filter((ace -> ace.getTo() == null))
+				.map(ACE::getAuthority)
+				.collect(Collectors.toCollection(HashSet::new));
     }
 
 	public static Boolean isNodePublic(NodeRef nodeRef) {
