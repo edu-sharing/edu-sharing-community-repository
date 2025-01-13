@@ -959,6 +959,10 @@
               [ngModelOptions]="{ standalone: true }"
               id="dslQuery"
             ></es-code-editor>
+            <mat-form-field class="dsl-index">
+              <mat-label>Elastic Index</mat-label>
+              <input matInput placeholder="workspace_9.1" value="" [(ngModel)]="lucene.index" />
+            </mat-form-field>
           </div>
         </div>
         <div *ngIf="lucene.mode === 'SOLR'" class="inputGroupGrow">

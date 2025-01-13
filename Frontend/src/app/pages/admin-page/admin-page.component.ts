@@ -69,6 +69,7 @@ type LuceneData = {
     authorities?: Authority[];
     outputMode?: 'view' | 'export';
     exportFormat?: 'json' | 'csv';
+    index?: string;
 };
 
 type Job = {
@@ -344,7 +345,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
                     },
                 );
         } else if (this.lucene.mode === 'ELASTIC') {
-            this.admin.searchElastic(this.lucene.query).subscribe(
+            this.admin.searchElastic(this.lucene.query, this.lucene.index).subscribe(
                 (data) => {
                     this.globalProgress = false;
                     this.elasticResponse = data;

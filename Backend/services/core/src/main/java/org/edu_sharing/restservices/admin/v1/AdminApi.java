@@ -1168,6 +1168,7 @@ public class AdminApi {
 
 	public Response searchByElasticDSL(
 			@Parameter(description = "dsl query (json encoded)", schema = @Schema(defaultValue="")) @QueryParam("dsl") String dsl,
+			@Parameter(description = "index", schema = @Schema(defaultValue="")) @QueryParam("index") String index,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -1175,7 +1176,7 @@ public class AdminApi {
 			//check that there is an admin
 			AdminServiceFactory.getInstance();
 			SearchServiceElastic elastic = new SearchServiceElastic(ApplicationInfoList.getHomeRepository().getAppId());
-			SearchResultNodeRefElastic search = elastic.searchDSL(dsl);
+			SearchResultNodeRefElastic search = elastic.searchDSL(dsl,index);
 			RepositoryDao repoDao = RepositoryDao.getHomeRepository();
 			List<Node> data = new ArrayList<>();
 			for (org.edu_sharing.service.model.NodeRef ref : search.getData()) {
