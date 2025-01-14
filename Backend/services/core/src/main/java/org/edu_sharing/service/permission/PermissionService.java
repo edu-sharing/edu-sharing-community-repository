@@ -106,4 +106,8 @@ public interface PermissionService {
 
 
 	List<String> getExplicitPermissionsForAuthority(String nodeId, String authorityId) throws InsufficientPermissionException;
+
+	boolean isAdminOrSystem();
+
+	List<String> getOrganizationsOfUser();
 }

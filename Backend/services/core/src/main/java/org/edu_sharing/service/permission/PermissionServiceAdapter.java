@@ -167,4 +167,14 @@ public class PermissionServiceAdapter implements PermissionService {
 	public ArrayList<NodeRef> getRecentProperty(String property) {
 		return null;
 	}
+
+	@Override
+	public boolean isAdminOrSystem() {
+		return false;
+	}
+
+	@Override
+	public List<String> getOrganizationsOfUser() {
+		return List.of();
+	}
 }

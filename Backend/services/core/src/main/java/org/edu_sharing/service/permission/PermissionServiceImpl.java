@@ -1084,7 +1084,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
         return searchQuery;
     }
 
-    private List<String> getOrganizationsOfUser() {
+    public List<String> getOrganizationsOfUser() {
         List<String> eduGroupAuthorityNames = organisationService.getMyOrganisations(true);
         if (customPermissionService != null) {
             return customPermissionService.getLocalOrganizations(eduGroupAuthorityNames);
@@ -1781,7 +1781,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
     }
 
 
-    private boolean isAdminOrSystem() {
+    public boolean isAdminOrSystem() {
         return Arrays.asList(AuthenticationUtil.SYSTEM_USER_NAME, ApplicationInfoList.getHomeRepository().getUsername()).contains(AuthenticationUtil.getFullyAuthenticatedUser()) || AuthenticationUtil.isRunAsUserTheSystemUser() || AuthorityServiceHelper.isAdmin();
     }
 

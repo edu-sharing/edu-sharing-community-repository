@@ -8,6 +8,8 @@ import org.alfresco.service.cmr.security.MutableAuthenticationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.service.permission.PermissionService;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.junit.jupiter.api.AfterEach;
@@ -31,6 +33,7 @@ class SearchServiceElasticTest {
     private MockedConstruction<MCAlfrescoAPIClient> mcAlfrescoApiClientMockedStatic;
     private MockedStatic<ToolPermissionServiceFactory> toolPermissionServiceMockedStatic;
     private ToolPermissionService toolPermissionService;
+    private PermissionService permissionService;
     private ServiceRegistry serviceRegistry;
     private MutableAuthenticationService authenticationService;
     private AuthorityService authorityService;
@@ -38,9 +41,12 @@ class SearchServiceElasticTest {
 
     @BeforeEach() void beforeEach() {
         toolPermissionService = Mockito.mock(ToolPermissionService.class);
+        permissionService = Mockito.mock(PermissionService.class);
         serviceRegistry = Mockito.mock(ServiceRegistry.class);
         authenticationService = Mockito.mock(MutableAuthenticationService.class);
         when(authenticationService.getCurrentUserName()).thenReturn("tester");
+        MockedStatic<PermissionServiceFactory> permissionServiceFactoryMockedStatic = Mockito.mockStatic(PermissionServiceFactory.class);
+        permissionServiceFactoryMockedStatic.when(() -> PermissionServiceFactory.getLocalService()).thenReturn(permissionService);
         authorityService = Mockito.mock(AuthorityService.class);
         when(authorityService.getAuthorities()).thenReturn(new HashSet<>(Set.of("test_group1", "test_group2")));
         when(serviceRegistry.getAuthenticationService()).thenReturn(authenticationService);
