@@ -952,6 +952,11 @@
             ></textarea>
           </mat-form-field>
           <div *ngIf="lucene.mode === 'ELASTIC'" class="dsl-query">
+            <mat-form-field class="dsl-index">
+              <mat-label>Elastic Index</mat-label>
+              <input matInput placeholder="workspace_9.1" value="" [(ngModel)]="lucene.index" />
+            </mat-form-field>
+
             <label for="dslQuery">{{ 'ADMIN.BROWSER.DSL_QUERY' | translate }}</label>
             <es-code-editor
               [options]="dslCodeOptions"
@@ -959,10 +964,6 @@
               [ngModelOptions]="{ standalone: true }"
               id="dslQuery"
             ></es-code-editor>
-            <mat-form-field class="dsl-index">
-              <mat-label>Elastic Index</mat-label>
-              <input matInput placeholder="workspace_9.1" value="" [(ngModel)]="lucene.index" />
-            </mat-form-field>
           </div>
         </div>
         <div *ngIf="lucene.mode === 'SOLR'" class="inputGroupGrow">
