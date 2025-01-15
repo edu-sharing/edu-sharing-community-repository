@@ -23,8 +23,11 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.PermissionReference;
 import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AuthorityType;
+import org.alfresco.service.namespace.QName;
+import org.alfresco.service.namespace.RegexQNamePattern;
 import org.alfresco.util.ISO9075;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -92,9 +95,27 @@ public class SearchServiceElastic extends SearchServiceImpl {
     public static final String WORKSPACE_INDEX = "workspace_9.1";
     static RestClient restClient;
     static ElasticsearchClient client;
+    static String rootHomeId;
+    static String sysSystemNodeId;
+    static String sysAuthoritiesNodeId;
 
     public SearchServiceElastic(String applicationId) {
         super(applicationId);
+        if(SearchServiceElastic.sysSystemNodeId == null || SearchServiceElastic.sysAuthoritiesNodeId == null) {
+            org.alfresco.service.cmr.repository.NodeRef rootHome = repositoryHelper.getRootHome();
+            rootHomeId = rootHome.getId();
+            NodeService nodeService = serviceRegistry.getNodeService();
+            sysSystemNodeId = nodeService.getChildAssocs(
+                    rootHome,
+                    ContentModel.ASSOC_CHILDREN,
+                    QName.createQName(ContentModel.ASSOC_CHILDREN.getNamespaceURI(),"system")
+            ).get(0).getChildRef().getId();
+            sysAuthoritiesNodeId = nodeService.getChildAssocs(
+                    new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,sysSystemNodeId),
+                    ContentModel.ASSOC_CHILDREN,
+                    QName.createQName(ContentModel.ASSOC_CHILDREN.getNamespaceURI(),"authorities")
+            ).get(0).getChildRef().getId();
+        }
     }
 
     Logger logger = Logger.getLogger(SearchServiceElastic.class);
@@ -1779,8 +1800,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
     private void addAuthorityFullPathQuery(String authorityName, BoolQuery.Builder groupPathQuery) {
         org.alfresco.service.cmr.repository.NodeRef authorityNodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(authorityName);
         // /sys:system/sys:authorities/cm:GROUP_testGruppe/*
-        org.alfresco.service.cmr.repository.NodeRef rootHome = repositoryHelper.getRootHome();
-        groupPathQuery.should(s -> s.wildcard(w -> w.field("fullpath").value("*/*/"+authorityNodeRef.getId()+"/*")));
+        //groupPathQuery.should(s -> s.wildcard(w -> w.field("fullpath").value("*/*/"+authorityNodeRef.getId()+"/*")));
+        groupPathQuery.should(s -> s.wildcard(w -> w
+                .field("fullpaths")
+                .value(rootHomeId+"/"+sysSystemNodeId+"/"+sysAuthoritiesNodeId + "/"+authorityNodeRef.getId()+"*")
+        ));
     }
 
     private void filterGuestAuthority(BoolQuery.Builder searchQuery) {
@@ -1834,11 +1858,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         String ftoken = token;
                         BoolQuery.Builder fieldQuery = QueryBuilders.bool().minimumShouldMatch("1");
                         fieldQuery.should(s -> s.wildcard(w -> w
-                                .field("properties.authorityDisplayName")
+                                .field("properties.cm:authorityDisplayName")
                                 .value(StringUtils.strip(ftoken, "*"))
                                 .boost((float)10.0)
                         )).should(s -> s.wildcard(w -> w
-                                .field("properties.authorityDisplayName")
+                                .field("properties.cm:authorityDisplayName")
                                 .value(ftoken)
                         )).should(s -> s.wildcard(w -> w
                                 .field("properties.ccm:groupEmail")
