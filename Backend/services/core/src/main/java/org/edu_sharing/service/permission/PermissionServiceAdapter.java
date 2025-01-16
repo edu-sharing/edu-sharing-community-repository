@@ -66,32 +66,6 @@ public class PermissionServiceAdapter implements PermissionService {
 	}
 
 	@Override
-	public StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext, boolean skipTpCheck) {
-		return null;
-	}
-
-	@Override
-	public Result<List<User>> findUsers(String query, Map<String, Double> searchFields, boolean globalContext, int from, int nrOfResults) {
-		return null;
-	}
-
-	@Override
-	public StringBuffer getFindUsersSearchString(String query, Map<String, Double> searchFields, boolean globalContext) {
-		return null;
-	}
-
-	@Override
-	public Result<List<Authority>> findAuthorities(String searchWord, boolean globalContext, int from,
-			int nrOfResults) {
-		return null;
-	}
-
-	@Override
-	public Result<List<Group>> findGroups(String searchWord, boolean globalContext, int from, int nrOfResults) {
-		return null;
-	}
-
-	@Override
 	public void addUserToSharedList(String user, NodeRef nodeRef) {
 
 	}

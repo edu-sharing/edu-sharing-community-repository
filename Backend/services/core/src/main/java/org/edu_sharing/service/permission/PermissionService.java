@@ -71,16 +71,6 @@ public interface PermissionService {
 
     void removeAllPermissions(String nodeId) throws Exception;
 
-    StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext, boolean skipTpCheck);
-
-     Result<List<User>> findUsers(String query, Map<String, Double> searchFields, boolean globalContext, int from, int nrOfResults);
-
-	StringBuffer getFindUsersSearchString(String query, Map<String, Double> searchFields, boolean globalContext);
-
-	 Result<List<Authority>> findAuthorities(String searchWord, boolean globalContext, int from, int nrOfResults);
-
-	 Result<List<Group>> findGroups(String searchWord, boolean globalContext, int from, int nrOfResults);
-
     void addUserToSharedList(String user, NodeRef nodeRef);
 
 	void cleanUpSharedList(NodeRef nodeRef);
