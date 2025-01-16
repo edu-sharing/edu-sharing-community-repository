@@ -81,6 +81,11 @@ public class NodeRefImpl implements NodeRef {
 	public NodeRefImpl(String nodeId){
 		this.nodeId = nodeId;
 	}
+	public NodeRefImpl(org.alfresco.service.cmr.repository.NodeRef nodeRef){
+		this.nodeId = nodeRef.getId();
+		this.storeId = nodeRef.getStoreRef().getIdentifier();
+		this.storeProtocol = nodeRef.getStoreRef().getProtocol();
+	}
 	public NodeRefImpl(String repositoryId, String storeProtocol, String storeId, String nodeId){
 		this.repositoryId = repositoryId;
 		this.storeId = storeId;

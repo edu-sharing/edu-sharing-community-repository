@@ -25,10 +25,9 @@ import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.namespace.QName;
-import org.alfresco.service.namespace.RegexQNamePattern;
-import org.alfresco.util.ISO9075;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
@@ -36,7 +35,6 @@ import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
-import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.service.guest.GuestConfig;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
@@ -47,7 +45,6 @@ import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
-import org.edu_sharing.repository.client.rpc.Authority;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -67,6 +64,7 @@ import org.edu_sharing.service.model.CollectionRef;
 import org.edu_sharing.service.model.CollectionRefImpl;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.model.NodeRefImpl;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.PropertiesGetInterceptor;
 import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.permission.PermissionService;
@@ -450,15 +448,6 @@ public class SearchServiceElastic extends SearchServiceImpl {
         checkClient();
         MetadataQuery queryData = mds.findQuery(query, MetadataReader.QUERY_SYNTAX_DSL);
 
-        Set<String> authorities = getUserAuthorities();
-        String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
-        boolean isAdmin = AuthorityServiceHelper.isAdmin();
-
-        SearchResultNodeRef sr = new SearchResultNodeRef();
-        List<NodeRef> data = new ArrayList<>();
-        sr.setData(data);
-
-
         BoolQuery.Builder metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criterias, true);
         BoolQuery.Builder metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criterias, false);
         BoolQuery.Builder queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData);
@@ -482,6 +471,16 @@ public class SearchServiceElastic extends SearchServiceImpl {
             searchToken.getSortDefinition().applyToSearchSourceBuilder(searchRequest);
         }
 
+        return fetchAllFromRequest(searchToken, searchRequest);
+    }
+
+    private @NotNull List<NodeRef> fetchAllFromRequest(SearchToken searchToken, SearchRequest.Builder searchRequest) throws IOException {
+        SearchResultNodeRef sr = new SearchResultNodeRef();
+        List<NodeRef> data = new ArrayList<>();
+        sr.setData(data);
+        Set<String> authorities = getUserAuthorities();
+        String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
+        boolean isAdmin = AuthorityServiceHelper.isAdmin();
         try {
             String scrollId = null;
             while (true) {
@@ -1958,5 +1957,73 @@ public class SearchServiceElastic extends SearchServiceImpl {
         //logger.info("findGroups: " + searchQuery);
 
         return searchQuery;
+    }
+
+    /**
+     *
+     * @param membershipsOnly (only for admin/system) when true, behave like regular users and show only groups
+     *                        false will show all mz of the system
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public List<NodeRef> getAllMediacenters(boolean membershipsOnly) throws Exception {
+
+
+        Set<String> memberships = serviceRegistry.getAuthorityService().getAuthorities();
+        boolean isSystemUser = AuthenticationUtil.isRunAsUserTheSystemUser();
+        boolean isAdmin = ((memberships != null && memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
+                || "admin".equals(AuthenticationUtil.getFullAuthentication().getName())
+                || isSystemUser) ? true : false;
+
+
+        if(isAdmin && !membershipsOnly) {
+            BoolQuery.Builder finalQuery = QueryBuilders.bool()
+                    .must(must -> must
+                            .match(match -> match
+                                    .field("nodeRef.storeRef.protocol")
+                                    .query("workspace")))
+                    .must(must -> must
+                            .match(match -> match
+                                    .field("properties.ccm:groupType.keyword")
+                                    .query(org.edu_sharing.alfresco.service.AuthorityService.MEDIA_CENTER_GROUP_TYPE)));
+
+            SortDefinition sort = new SortDefinition();
+            sort.addSortDefinitionEntry(new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME),true));
+            return this.searchAllByQuery(
+                    finalQuery.build(),
+                    sort,
+                    AUTHORITIES_INDEX);
+        }else {
+            List<NodeRef> result = new ArrayList<>();
+            for(String memberShip : memberships) {
+                org.alfresco.service.cmr.repository.NodeRef nodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(memberShip);
+                if(nodeRef != null && serviceRegistry.getNodeService().hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_MEDIACENTER))) {
+                    NodeRef ref = new NodeRefImpl(nodeRef);
+                    ref.setProperties(new HashMap<>() {{
+                        put(CCConstants.CM_PROP_AUTHORITY_NAME, memberShip);
+                    }});
+                    result.add(ref);
+                }
+            }
+            return result;
+        }
+
+    }
+
+    private List<NodeRef> searchAllByQuery(QueryVariant query, SortDefinition sortDefinition, String index) throws IOException {
+        checkClient();
+        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder().index(index)
+                .query(query._toQuery())
+                .scroll(Time.of(time -> time.time("60s")))
+                .trackTotalHits(new TrackHits.Builder().enabled(true).build())
+                .source(src -> src
+                        .filter(filter -> filter.excludes(appendDefaultExcludes(new ArrayList<>())))
+                );
+        if (sortDefinition != null) {
+            sortDefinition.applyToSearchSourceBuilder(searchRequestBuilder);
+        }
+        SearchToken token = new SearchToken();
+        return fetchAllFromRequest(token, searchRequestBuilder);
     }
 }

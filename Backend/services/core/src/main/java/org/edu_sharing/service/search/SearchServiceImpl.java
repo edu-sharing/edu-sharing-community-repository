@@ -141,35 +141,8 @@ public class SearchServiceImpl implements SearchService {
 	 * @throws Exception
 	 */
 	@Override
-	public List<String> getAllMediacenters(boolean membershipsOnly) throws Exception {
-
-
-		Set<String> memberships = serviceRegistry.getAuthorityService().getAuthorities();
-		boolean isSystemUser = AuthenticationUtil.isRunAsUserTheSystemUser();
-		boolean isAdmin = ((memberships != null && memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
-				|| "admin".equals(AuthenticationUtil.getFullAuthentication().getName())
-				|| isSystemUser) ? true : false;
-
-		if(isAdmin && !membershipsOnly) {
-			SearchParameters parameters = new SearchParameters();
-			parameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
-			parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-			parameters.addAllAttribute(org.edu_sharing.alfresco.service.AuthorityService.MEDIA_CENTER_GROUP_TYPE);
-			parameters.addSort(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME,true);
-			parameters.setQuery("@ccm\\:groupType:\"" + org.edu_sharing.alfresco.service.AuthorityService.MEDIA_CENTER_GROUP_TYPE + "\"");
-			return SearchServiceHelper.queryAll(parameters,0).stream().map((ref) ->
-					NodeServiceFactory.getNodeService(applicationId).getProperty(ref.getStoreRef().getProtocol(), ref.getStoreRef().getIdentifier(), ref.getId(), CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME)
-			).collect(Collectors.toList());
-		}else {
-			List<String> result = new ArrayList<>();
-			for(String memberShip : memberships) {
-				NodeRef nodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(memberShip);
-				if(nodeRef != null && serviceRegistry.getNodeService().hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_MEDIACENTER))) {
-					result.add(memberShip);
-				}
-			}
-			return result;
-		}
+	public List<org.edu_sharing.service.model.NodeRef> getAllMediacenters(boolean membershipsOnly) throws Exception {
+		throw new NotImplementedException("getAllMediacenters not supported for solr");
 	}
 	@Override
 	public SearchResultNodeRef getRelevantNodes(int skipCount, int maxItems) throws Throwable {
