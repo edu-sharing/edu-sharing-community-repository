@@ -522,68 +522,6 @@ public class SearchServiceImpl implements SearchService {
 		}
 	}
 
-	private SearchResult<String> searchAuthoritiesSolr(String pattern, int skipCount, int maxValues,
-			SortDefinition sort, AuthorityType authorityType,boolean globalContext,Map<String,String> customProperties) throws Throwable {
-		List<String> result = new ArrayList<>();
-		NodeService nodeService = serviceRegistry.getNodeService();
-		SearchToken token = new SearchToken();
-		String query = "TYPE:cm\\:";
-		if (authorityType.equals(AuthorityType.USER))
-			query += "person";
-		else
-			query += "authorityContainer";
-		if(customProperties!=null){
-			for(Entry<String, String> entry : customProperties.entrySet()){
-				query+=" AND @"+entry.getKey().replace(":", "\\:")+":\""+QueryParser.escape(entry.getValue())+"\"";
-			}
-		}
-		query += " AND (@cm\\:authorityName:\"*" + QueryParser.escape(pattern) + "*\" "+
-				 "OR @cm\\:userName:\"*" + QueryParser.escape(pattern) + "*\" "+
-				 "OR @cm\\:firstName:\"*" + QueryParser.escape(pattern) + "*\" "+
-				 "OR @cm\\:lastName:\"*" + QueryParser.escape(pattern) + "*\" "+
-				 "OR @cm\\:email:\"*" + QueryParser.escape(pattern) + "*\")";
-
-		if(globalContext){
-			checkGlobalSearchPermission();
-		}
-		else{
-			List<EduGroup> organisations = getAllOrganizations(true).getData();
-			if (organisations != null && organisations.size() > 0) {
-				query += " AND (";
-	
-				int i = 0;
-				for (EduGroup entry : organisations) {
-					if (i > 0)
-						query += " OR ";
-					String ref = StoreRef.STORE_REF_WORKSPACE_SPACESSTORE + "/" + entry.getGroupId();
-					// query+="PARENT:"+QueryParser.escape(ref);
-					query += "PATH:\""
-							+ QueryParser.escape("sys:system/sys:authorities/cm:" + ISO9075.encode(entry.getGroupname()))
-							+ "//.\"";
-					query += " OR ID:" + QueryParser.escape(ref);
-					i++;
-				}
-				query += ")";
-			}
-		}
-		token.setLuceneString(query);
-		token.setFrom(skipCount);
-		token.setMaxResult(maxValues);
-		token.setSortDefinition(sort);
-		token.setContentType(ContentType.ALL);
-		token.disableSearchCriterias();
-		SearchResultNodeRef data = search(token,false);
-		
-		for(org.edu_sharing.service.model.NodeRef enr : data.getData()){
-			
-			NodeRef entry = new NodeRef(new StoreRef(enr.getStoreProtocol(),enr.getStoreId()),enr.getNodeId());
-			String name=(String) nodeService.getProperty(entry, ContentModel.PROP_AUTHORITY_NAME);
-			if(name==null)
-				name=(String)nodeService.getProperty(entry, ContentModel.PROP_USERNAME);
-			result.add(name);
-		}
-		return new SearchResult<String>(result, skipCount, data.getNodeCount());
-	}
 	@Override
 	public SearchResultNodeRef search(MetadataSet mds, String query, Map<String,String[]> criterias,
 									  SearchToken searchToken) throws Throwable {
