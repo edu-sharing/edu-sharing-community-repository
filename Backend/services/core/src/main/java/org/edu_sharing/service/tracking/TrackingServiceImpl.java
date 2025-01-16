@@ -264,19 +264,19 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
     }
 
     @NotNull
-    private static Object[] getAuthorityMediacenters() throws Exception {
+    private static String[] getAuthorityMediacenters() throws Exception {
         if (ContextManagementFilter.accessTool.get() == null || ContextManagementFilter.accessTool.get().getUserId() == null) {
             // use the fully authenticated user since the current runAs user might be system
             HttpSession session = getSession();
-            Object[] result;
+            String[] result;
             if (session != null) {
-                result = (Object[]) session.getAttribute(SESSION_AUTHORITY_MEDIACENTERS);
+                result = (String[]) session.getAttribute(SESSION_AUTHORITY_MEDIACENTERS);
                 if (result != null) {
                     return result;
                 }
             }
             result = AuthenticationUtil.runAs(
-                    () -> SearchServiceFactory.getLocalService().getAllMediacenters(true).toArray(),
+                    () -> SearchServiceFactory.getLocalService().getAllMediacenters(true).toArray(String[]::new),
                     AuthenticationUtil.getFullyAuthenticatedUser()
             );
             if (session != null) {
@@ -285,7 +285,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
             return result;
         } else {
             return AuthenticationUtil.runAs(
-                    () -> SearchServiceFactory.getLocalService().getAllMediacenters(true).toArray(),
+                    () -> SearchServiceFactory.getLocalService().getAllMediacenters(true).toArray(String[]::new),
                     ContextManagementFilter.accessTool.get().getUserId()
             );
         }

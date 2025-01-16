@@ -1023,6 +1023,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
 
         T eduNodeRef = clazz.newInstance();
+        eduNodeRef.setOrigin(NodeRef.Origin.Elasticsearch);
         eduNodeRef.setRepositoryId(ApplicationInfoList.getHomeRepository().getAppId());
         ;
         eduNodeRef.setStoreProtocol(protocol);
@@ -1967,7 +1968,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
      * @throws Exception
      */
     @Override
-    public List<NodeRef> getAllMediacenters(boolean membershipsOnly) throws Exception {
+    public List<NodeRef> getAllMediacentersNodeRef(boolean membershipsOnly) throws Exception {
 
 
         Set<String> memberships = serviceRegistry.getAuthorityService().getAuthorities();
@@ -1995,18 +1996,18 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     sort,
                     AUTHORITIES_INDEX);
         }else {
-            List<NodeRef> result = new ArrayList<>();
-            for(String memberShip : memberships) {
-                org.alfresco.service.cmr.repository.NodeRef nodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(memberShip);
+            assert memberships != null;
+            return memberships.stream().map(m -> {
+                org.alfresco.service.cmr.repository.NodeRef nodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(m);
                 if(nodeRef != null && serviceRegistry.getNodeService().hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_MEDIACENTER))) {
                     NodeRef ref = new NodeRefImpl(nodeRef);
                     ref.setProperties(new HashMap<>() {{
-                        put(CCConstants.CM_PROP_AUTHORITY_NAME, memberShip);
+                        put(CCConstants.CM_PROP_AUTHORITY_NAME, m);
                     }});
-                    result.add(ref);
+                    return ref;
                 }
-            }
-            return result;
+                return null;
+            }).filter(Objects::nonNull).collect(Collectors.toList());
         }
 
     }

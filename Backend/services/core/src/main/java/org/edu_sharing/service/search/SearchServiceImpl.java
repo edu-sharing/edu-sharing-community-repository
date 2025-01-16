@@ -141,7 +141,7 @@ public class SearchServiceImpl implements SearchService {
 	 * @throws Exception
 	 */
 	@Override
-	public List<org.edu_sharing.service.model.NodeRef> getAllMediacenters(boolean membershipsOnly) throws Exception {
+	public List<org.edu_sharing.service.model.NodeRef> getAllMediacentersNodeRef(boolean membershipsOnly) throws Exception {
 		throw new NotImplementedException("getAllMediacenters not supported for solr");
 	}
 	@Override

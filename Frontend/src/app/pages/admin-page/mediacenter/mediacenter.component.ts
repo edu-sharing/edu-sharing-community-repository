@@ -1,6 +1,6 @@
 import { Component, EventEmitter, NgZone, Output, ViewChild } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { Group, MediacenterService, Node } from 'ngx-edu-sharing-api';
+import { Group, HOME_REPOSITORY, MediacenterService, Mediacenter, Node } from 'ngx-edu-sharing-api';
 import {
     DefaultGroups,
     ElementType,
@@ -16,7 +16,6 @@ import {
     VCard,
 } from 'ngx-edu-sharing-ui';
 import {
-    Mediacenter,
     RequestObject,
     RestConnectorService,
     RestMdsService,
@@ -36,6 +35,7 @@ import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-
 import { Values } from '../../../features/mds/types/types';
 import { AuthoritySearchMode } from '../../../shared/components/authority-search-input/authority-search-input.component';
 import { OptionsHelperService } from '../../../services/options-helper.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
     selector: 'es-admin-mediacenter',
@@ -162,19 +162,29 @@ export class AdminMediacenterComponent {
         });
     }
 
-    setMediacenter(mediacenter: any) {
-        this.currentMediacenter = mediacenter;
-        this.currentMediacenterCopy = Helper.deepCopy(mediacenter);
-        this.mediacenterGroups.reset();
-        this.mediacenterGroups.isLoading = true;
+    async setMediacenter(mediacenter: Mediacenter) {
+        try {
+            // store the pointer for the select box
+            this.currentMediacenter = mediacenter;
+            mediacenter = (await firstValueFrom(
+                this.mediacenterService.getMediacenter({
+                    repository: HOME_REPOSITORY,
+                    mediacenter: mediacenter.authorityName,
+                }),
+            )) as Mediacenter;
+            this.currentMediacenterCopy = Helper.deepCopy(mediacenter);
+            this.mediacenterGroups.reset();
+            this.mediacenterGroups.isLoading = true;
 
-        this.resetMediacenterNodes();
+            this.resetMediacenterNodes();
+        } catch (e) {
+            this.toast.error(e);
+        }
 
         if (mediacenter) {
             this.mediacenterServiceLegacy
                 .getManagedGroups(mediacenter.authorityName)
                 .subscribe((groups) => {
-                    console.log(groups);
                     this.mediacenterGroups.setData(groups as Group[]);
                     this.mediacenterGroups.isLoading = false;
                 });

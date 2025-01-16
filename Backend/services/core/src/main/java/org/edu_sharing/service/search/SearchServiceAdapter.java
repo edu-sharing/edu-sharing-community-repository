@@ -14,7 +14,7 @@ import java.util.*;
 public class SearchServiceAdapter implements SearchService {
 
     @Override
-	public List<NodeRef> getAllMediacenters(boolean membershipsOnly) throws Exception {
+	public List<NodeRef> getAllMediacentersNodeRef(boolean membershipsOnly) {
         return null;
     }
 	@Override
@@ -54,7 +54,7 @@ public class SearchServiceAdapter implements SearchService {
 	}
 
 	@Override
-	public SearchResultNodeRef getRelevantNodes(int skipCount, int maxItems) throws Throwable {
+	public SearchResultNodeRef getRelevantNodes(int skipCount, int maxItems) {
 		return null;
 	}
 
@@ -104,7 +104,7 @@ public class SearchServiceAdapter implements SearchService {
 	}
 
 	@Override
-	public Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) throws IOException {
+	public Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) {
 		return new HashSet<>();
 	}
 

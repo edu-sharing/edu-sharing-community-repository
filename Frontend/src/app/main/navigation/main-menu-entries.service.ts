@@ -18,7 +18,7 @@ import {
 import { OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { ConfigEntry } from '../../services/node-helper.service';
-import { AuthenticationService, LoginInfo } from 'ngx-edu-sharing-api';
+import { AuthenticationService, LoginInfo, Mediacenter } from 'ngx-edu-sharing-api';
 
 type Target = { type: 'path'; path: string } | { type: 'url'; url: string; openInNew: boolean };
 
@@ -59,7 +59,7 @@ export class MainMenuEntriesService {
     // Conditionally initialized on update.
     private hasAccessToSafeScope: boolean;
     private organizations: OrganizationOrganizations;
-    private mediaCenters: { administrationAccess: boolean }[];
+    private mediaCenters: Mediacenter[];
 
     private readonly defaultEntryDefinitions: EntryDefinition[] = [
         {

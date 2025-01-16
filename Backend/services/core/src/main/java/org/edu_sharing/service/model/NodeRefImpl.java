@@ -2,12 +2,18 @@ package org.edu_sharing.service.model;
 
 import java.util.*;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.shared.Contributor;
 
 public class NodeRefImpl implements NodeRef {
 
 	String repositoryId;
+
+	@Getter
+	@Setter
+	private Origin origin;
 
 	List<CollectionRef> usedInCollections = new ArrayList<>();
 

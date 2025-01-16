@@ -25,7 +25,6 @@ import * as EduData from '../../core-module/core.module';
 import {
     ConfigurationService,
     DialogButton,
-    Mediacenter,
     Node,
     NodeRef,
     RestCollectionService,
@@ -50,6 +49,7 @@ import {
     GlobalCollectionsPageService,
     GlobalCollectionsPageServiceInternal,
 } from './global-collections-page.service';
+import { Mediacenter } from 'ngx-edu-sharing-api';
 
 // component class
 @Component({

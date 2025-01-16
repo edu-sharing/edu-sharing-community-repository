@@ -25,6 +25,7 @@ import org.edu_sharing.service.permission.PermissionException;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.alfresco.RestrictedAccessException;
+import org.edu_sharing.service.search.SearchResultNodeRefElastic;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.springframework.context.ApplicationContext;
 
@@ -184,6 +185,22 @@ public class NodeServiceHelper {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		return serviceRegistry.getNodeService().getProperty(nodeRef,QName.createQName(key));
+	}
+
+	/**
+	 * returns the requested property
+	 * if the given ref is a elastic ref, it will be directly returned
+	 * otherwise, getPropertyNative will be called
+	 * @param nodeRef
+	 * @param key
+	 * @return
+	 */
+	public static Serializable getPropertyFromNodeRef(org.edu_sharing.service.model.NodeRef nodeRef, String key){
+		if(org.edu_sharing.service.model.NodeRef.Origin.Elasticsearch.equals(nodeRef.getOrigin())) {
+			return (Serializable) nodeRef.getProperties().get(key);
+		} else {
+			return getPropertyNative(nodeRef.asAlfrescoNodeRef(), key);
+		}
 	}
 	public static String getType(NodeRef nodeRef){
 		return NodeServiceFactory.getLocalService().getType(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());

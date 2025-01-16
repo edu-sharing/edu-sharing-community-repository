@@ -1,5 +1,6 @@
 package org.edu_sharing.service.model;
 
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.restservices.shared.Contributor;
 
 import java.util.HashMap;
@@ -9,7 +10,14 @@ import java.util.Map;
 public interface NodeRef {
 
     String getOwner();
+    default org.alfresco.service.cmr.repository.NodeRef asAlfrescoNodeRef() {
+		return new org.alfresco.service.cmr.repository.NodeRef(new StoreRef(
+				getStoreProtocol(), getStoreId()
+		), getNodeId());
+	}
 
+	Origin getOrigin();
+	void setOrigin(Origin origin);
 	void setOwner(String owner);
 
 	Map<NodeRefImpl.Relation, NodeRef> getRelations();
@@ -69,4 +77,11 @@ public interface NodeRef {
 
 	 List<CollectionRef> getUsedInCollections();
 
+	/**
+	 * origin this ref was fetched from
+	 */
+	enum Origin {
+		Alfresco,
+		Elasticsearch,
+	}
 }
