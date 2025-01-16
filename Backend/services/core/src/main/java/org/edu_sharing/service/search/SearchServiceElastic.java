@@ -93,6 +93,7 @@ import java.util.stream.Stream;
 
 public class SearchServiceElastic extends SearchServiceImpl {
     public static final String WORKSPACE_INDEX = "workspace_9.1";
+    public static final String AUTHORITIES_INDEX = "authorities_9.1";
     static RestClient restClient;
     static ElasticsearchClient client;
     static String rootHomeId;
@@ -1600,7 +1601,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         try {
 
 
-            SearchResultNodeRef searchResultNodeRef = this.searchByQuery(finalQuery.build(), from, nrOfResults, null, "authorities_9.1");
+            SearchResultNodeRef searchResultNodeRef = this.searchByQuery(finalQuery.build(), from, nrOfResults, null, AUTHORITIES_INDEX);
 
             searchResultNodeRef.getData().stream().forEach(c -> {
                 String authorityName = (String)c.getProperties().get(CCConstants.CM_PROP_AUTHORITY_NAME);
