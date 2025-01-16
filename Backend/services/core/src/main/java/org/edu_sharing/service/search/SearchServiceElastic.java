@@ -554,7 +554,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
             BoolQuery metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criterias, true).build();
             BoolQuery metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criterias, false).build();
-            BoolQuery queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData).build();
+            StoreRef storeRef = (searchToken.getStoreName() != null && searchToken.getStoreProtocol() != null) ? new StoreRef(searchToken.getStoreProtocol(),searchToken.getStoreName()) : null;
+            BoolQuery queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, storeRef).build();
 
             // add collapse builder
             // CollapseBuilder collapseBuilder = new CollapseBuilder("properties.ccm:original");
@@ -753,7 +754,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
      * @return
      */
     BoolQuery.Builder getGlobalConditions(List<String> authorityScope, List<String> permissions, MetadataQuery query) {
+        return getGlobalConditions(authorityScope, permissions, query, null);
+    }
 
+    BoolQuery.Builder getGlobalConditions(List<String> authorityScope, List<String> permissions, MetadataQuery query, StoreRef storeRef) {
+
+        String storeRefProtocol = (storeRef == null) ? "workspace" : storeRef.getProtocol();
         Function<BoolQuery.Builder, BoolQuery.Builder> queryGlobalConditionsFactory = (builder) ->
                 ((authorityScope != null && !authorityScope.isEmpty())
                         ? getPermissionsQuery(builder, "permissions.read", new HashSet<>(authorityScope))
@@ -761,7 +767,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         .must(must -> must
                                 .match(match -> match
                                         .field("nodeRef.storeRef.protocol")
-                                        .query("workspace")));
+                                        .query(storeRefProtocol)));
 
 
         BoolQuery.Builder queryBuilderGlobalConditions = queryGlobalConditionsFactory.apply(QueryBuilders.bool());

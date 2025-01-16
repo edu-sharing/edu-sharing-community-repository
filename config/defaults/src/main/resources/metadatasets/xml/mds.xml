@@ -1442,6 +1442,29 @@
         <mandatory>false</mandatory>
       </property>
     </query>
+    <query join="AND" id="archive" applyBasequery="false">
+      <property name="ngsearchword">
+        <statement>
+        {
+            "bool": {
+              "must":[
+              {"term":{"aspects":"sys:archived"}}
+              ],
+              "should":[
+              {"wildcard":{"properties.cm:name.keyword": {"value": "*${valueRaw}*", "case_insensitive": false}}},
+              {"wildcard":{"properties.cclom:title.keyword": {"value": "*${valueRaw}*", "case_insensitive": false}}}
+              ],
+              "minimum_should_match": 1
+            }
+          }
+        </statement>
+      </property>
+      <property name="user">
+        <statement>
+          {"term":{"properties.sys:archivedBy.keyword":"${value}"}}
+        </statement>
+      </property>
+    </query>
     <query join="AND" id="collections">
       <basequery propertyNull="ngsearchword">
         {"bool":{
