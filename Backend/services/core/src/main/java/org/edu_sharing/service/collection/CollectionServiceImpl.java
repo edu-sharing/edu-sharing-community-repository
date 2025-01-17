@@ -68,6 +68,7 @@ import org.edu_sharing.spring.ApplicationContextFactory;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.context.ApplicationContext;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
@@ -948,11 +949,13 @@ public class CollectionServiceImpl implements CollectionService {
      */
     @Override
     public void setPinned(String[] collections) {
-        SearchToken searchToken = new SearchToken();
-        searchToken.setContentType(ContentType.COLLECTIONS);
-        searchToken.setLuceneString("ASPECT:" + QueryParser.escape(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION_PINNED)));
-        searchToken.setMaxResult(Integer.MAX_VALUE);
-        List<org.edu_sharing.service.model.NodeRef> currentPinned = searchService.search(searchToken).getData();
+        List<org.edu_sharing.service.model.NodeRef> currentPinned = null;
+        try {
+            currentPinned = searchService.getAllPinnedCollections();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         for (org.edu_sharing.service.model.NodeRef pinned : currentPinned) {
             nodeService.removeAspect(pinned.getNodeId(), CCConstants.CCM_ASPECT_COLLECTION_PINNED);
             nodeService.removeProperty(pinned.getStoreProtocol(), pinned.getStoreId(), pinned.getNodeId(), CCConstants.CCM_PROP_COLLECTION_PINNED_STATUS);

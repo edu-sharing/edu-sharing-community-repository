@@ -112,4 +112,9 @@ public class SearchServiceAdapter implements SearchService {
 	public SearchResultNodeRef getMetadata(List<String> nodeIds) throws IOException {
 		return null;
 	}
+
+	@Override
+	public List<NodeRef> getAllPinnedCollections() throws IOException {
+		return List.of();
+	}
 }

@@ -823,4 +823,9 @@ public class SearchServiceImpl implements SearchService {
 	public SearchResultNodeRef getMetadata(List<String> nodeIds) throws IOException {
 		throw new NotImplementedException("getMetadata not supported via Solr");
 	}
+
+	@Override
+	public List<org.edu_sharing.service.model.NodeRef> getAllPinnedCollections() throws IOException {
+		throw new NotImplementedException("getAllPinnedCollections not supported via Solr");
+	}
 }

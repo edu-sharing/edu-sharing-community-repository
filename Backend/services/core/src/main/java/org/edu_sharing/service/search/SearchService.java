@@ -92,4 +92,6 @@ public interface SearchService {
 	Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind kind) throws IOException;
 
 	SearchResultNodeRef getMetadata(List<String> nodeIds) throws IOException;
+
+	List<NodeRef> getAllPinnedCollections() throws IOException;
 }

@@ -2033,4 +2033,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
         SearchToken token = new SearchToken();
         return fetchAllFromRequest(token, searchRequestBuilder);
     }
+
+    public List<NodeRef> getAllPinnedCollections() throws IOException {
+        TermQuery.Builder b = QueryBuilders.term();
+        b.field("aspects").value(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION_PINNED));
+
+        return searchAllByQuery(b.build(),null,WORKSPACE_INDEX);
+    }
 }
