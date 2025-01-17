@@ -626,4 +626,9 @@ public class SearchServiceImpl implements SearchService {
 	public List<org.edu_sharing.service.model.NodeRef> getReferenceObjects(String nodeId) throws IOException {
 		throw new NotImplementedException("getReferenceObjects not supported via Solr");
 	}
+
+	@Override
+	public SearchResultNodeRef searchByProperty(SearchToken searchToken, CombineMode combineMode, List<String> properties, List<String> value, List<String> comparator) throws IOException {
+		throw new NotImplementedException("searchByProperty not supported via Solr");
+	}
 }

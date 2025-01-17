@@ -96,4 +96,6 @@ public interface SearchService {
 	List<NodeRef> getAllPinnedCollections() throws IOException;
 
 	List<org.edu_sharing.service.model.NodeRef> getReferenceObjects(String nodeId) throws IOException;
+
+	SearchResultNodeRef searchByProperty(SearchToken searchToken, SearchService.CombineMode combineMode, List<String> properties, List<String> value, List<String> comparator) throws IOException;
 }

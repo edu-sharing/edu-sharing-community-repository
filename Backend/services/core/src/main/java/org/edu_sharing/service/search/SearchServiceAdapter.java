@@ -122,4 +122,9 @@ public class SearchServiceAdapter implements SearchService {
 	public List<NodeRef> getReferenceObjects(String nodeId) throws IOException {
 		return List.of();
 	}
+
+	@Override
+	public SearchResultNodeRef searchByProperty(SearchToken searchToken, CombineMode combineMode, List<String> properties, List<String> value, List<String> comparator) throws IOException {
+		return null;
+	}
 }

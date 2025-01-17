@@ -14,6 +14,13 @@ import co.elastic.clients.transport.rest_client.RestClientOptions;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Response;
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.vcard.VCard;
 import net.sourceforge.cardme.vcard.types.ExtendedType;
@@ -58,6 +65,7 @@ import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.StringTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.tools.URLHelper;
+import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.shared.Contributor;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.restservices.shared.NodeSearch;
@@ -104,19 +112,19 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     public SearchServiceElastic(String applicationId) {
         super(applicationId);
-        if(SearchServiceElastic.sysSystemNodeId == null || SearchServiceElastic.sysAuthoritiesNodeId == null) {
+        if (SearchServiceElastic.sysSystemNodeId == null || SearchServiceElastic.sysAuthoritiesNodeId == null) {
             org.alfresco.service.cmr.repository.NodeRef rootHome = repositoryHelper.getRootHome();
             rootHomeId = rootHome.getId();
             NodeService nodeService = serviceRegistry.getNodeService();
             sysSystemNodeId = nodeService.getChildAssocs(
                     rootHome,
                     ContentModel.ASSOC_CHILDREN,
-                    QName.createQName(ContentModel.ASSOC_CHILDREN.getNamespaceURI(),"system")
+                    QName.createQName(ContentModel.ASSOC_CHILDREN.getNamespaceURI(), "system")
             ).get(0).getChildRef().getId();
             sysAuthoritiesNodeId = nodeService.getChildAssocs(
-                    new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,sysSystemNodeId),
+                    new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, sysSystemNodeId),
                     ContentModel.ASSOC_CHILDREN,
-                    QName.createQName(ContentModel.ASSOC_CHILDREN.getNamespaceURI(),"authorities")
+                    QName.createQName(ContentModel.ASSOC_CHILDREN.getNamespaceURI(), "authorities")
             ).get(0).getChildRef().getId();
         }
     }
@@ -159,7 +167,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                 b3 -> b3.match(m -> m.field("properties.cm:creator.keyword").query(username))
                         )
                 ));
-        if(StringUtils.isNotBlank(basequery)) {
+        if (StringUtils.isNotBlank(basequery)) {
             builder.must(b -> b.wrapper(new ReadableWrapperQueryBuilder(basequery).build()));
         }
 
@@ -191,14 +199,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 .must(b -> b.bool(b2 -> b2.must(
                         b3 -> b3.match(m -> m.field("properties.ccm:ph_users.keyword").query(username))
                 )));
-        if(StringUtils.isNotBlank(basequery)) {
+        if (StringUtils.isNotBlank(basequery)) {
             builder.must(b -> b.wrapper(new ReadableWrapperQueryBuilder(basequery).build()));
         }
         return builder.build();
     }
 
     public SearchResultNodeRefElastic searchDSL(String dsl, String index) throws Throwable {
-        if(index == null || index.trim().isEmpty()){
+        if (index == null || index.trim().isEmpty()) {
             index = WORKSPACE_INDEX;
         }
         checkClient();
@@ -247,6 +255,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
         return audienceQueryBuilder;
     }
+
     public BoolQuery.Builder getCollectionPermissionsQuery(BoolQuery.Builder builder) {
         if (AuthorityServiceHelper.isAdmin() || AuthenticationUtil.isRunAsUserTheSystemUser()) {
             return new BoolQuery.Builder().must(q -> q.matchAll(all -> all));
@@ -255,8 +264,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
         String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
         CollectionPermissionQueries collectionPermissionQueries = getCollectionPermissionQueries(user);
         return new BoolQuery.Builder().minimumShouldMatch("1")
-                .should(q -> q.nested(nested->nested.path("collections").query(nq->nq.bool(collectionPermissionQueries.collectionPermissions))))
-                .should(q -> q.nested(nested->nested.path("collections").query(nq->nq.bool(collectionPermissionQueries.proposalPermissions))));
+                .should(q -> q.nested(nested -> nested.path("collections").query(nq -> nq.bool(collectionPermissionQueries.collectionPermissions))))
+                .should(q -> q.nested(nested -> nested.path("collections").query(nq -> nq.bool(collectionPermissionQueries.proposalPermissions))));
     }
 
     public BoolQuery.Builder getReadPermissionsQuery(BoolQuery.Builder builder) {
@@ -281,8 +290,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                         .mustNot(m -> m.term(t -> t.field("properties.ccm:restricted_access.keyword").value(true)))
                                         .must(m -> m.bool(subPermission -> subPermission
                                                 .minimumShouldMatch("1")
-                                                .should(q -> q.nested(nested->nested.path("collections").query(nq->nq.bool(collectionPermissionQueries.collectionPermissions))))
-                                                .should(q -> q.nested(nested->nested.path("collections").query(nq->nq.bool(collectionPermissionQueries.proposalPermissions))))
+                                                .should(q -> q.nested(nested -> nested.path("collections").query(nq -> nq.bool(collectionPermissionQueries.collectionPermissions))))
+                                                .should(q -> q.nested(nested -> nested.path("collections").query(nq -> nq.bool(collectionPermissionQueries.proposalPermissions))))
                                         )))
                                 ).should(bs -> bs.bool(bb -> bb
                                         // restricted access is "true" BUT "ReadAll" is given -> so behave like it would be false
@@ -290,8 +299,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                         .must(m -> m.term(t -> t.field("properties.ccm:restricted_access_permissions.keyword").value(CCConstants.PERMISSION_READ_ALL)))
                                         .must(m -> m.bool(subPermission -> subPermission
                                                 .minimumShouldMatch("1")
-                                                .should(q -> q.nested(nested->nested.path("collections").query(nq->nq.bool(collectionPermissionQueries.collectionPermissions))))
-                                                .should(q -> q.nested(nested->nested.path("collections").query(nq->nq.bool(collectionPermissionQueries.proposalPermissions))))
+                                                .should(q -> q.nested(nested -> nested.path("collections").query(nq -> nq.bool(collectionPermissionQueries.collectionPermissions))))
+                                                .should(q -> q.nested(nested -> nested.path("collections").query(nq -> nq.bool(collectionPermissionQueries.proposalPermissions))))
                                         )))
                                 )
                         ));
@@ -399,7 +408,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         NestedAggregate nested = aggregation.getValue().nested();
                         StringTermsAggregate sterms = nested.aggregations().values().stream().findFirst().get().sterms();
                         facetsResult.add(getFacet(aggregation.getKey(), sterms, definition));
-                    } else if(aggregation.getValue().isMultiTerms()) {
+                    } else if (aggregation.getValue().isMultiTerms()) {
                         Aggregation definition = aggregations.get(a.getKey());
                         MultiTermsAggregate multiTerm = aggregation.getValue().multiTerms();
                         facetsResult.add(getMultitermFacet(aggregation.getKey(), multiTerm, definition));
@@ -423,7 +432,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 long count = b.docCount();
                 NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
                 // skip duplicate entries
-                if(values.stream().anyMatch(v -> v.getValue().equals(fv.stringValue()))) {
+                if (values.stream().anyMatch(v -> v.getValue().equals(fv.stringValue()))) {
                     continue;
                 }
                 value.setValue(fv.stringValue());
@@ -463,13 +472,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         .filter(filter -> filter.excludes(appendDefaultExcludes(searchToken.getExcludes())))
                 )
                 .size(100)
-                .query(q->q
-                        .bool(b->b
-                                .filter(filter->filter
-                                        .bool(fb->fb
-                                                .must(fq->fq.bool(metadataQueryBuilderFilter.build()))
-                                                .must(fq->fq.bool(queryBuilderGlobalConditions.build()))))
-                                .must(must->must.bool(metadataQueryBuilderAsQuery.build()))));
+                .query(q -> q
+                        .bool(b -> b
+                                .filter(filter -> filter
+                                        .bool(fb -> fb
+                                                .must(fq -> fq.bool(metadataQueryBuilderFilter.build()))
+                                                .must(fq -> fq.bool(queryBuilderGlobalConditions.build()))))
+                                .must(must -> must.bool(metadataQueryBuilderAsQuery.build()))));
 
         if (searchToken.getSortDefinition() != null) {
             searchToken.getSortDefinition().applyToSearchSourceBuilder(searchRequest);
@@ -519,11 +528,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return data;
     }
 
-    private List<String> appendDefaultExcludes(List<String> excludes){
-        if(excludes == null) excludes = new ArrayList<>();
+    private List<String> appendDefaultExcludes(List<String> excludes) {
+        if (excludes == null) excludes = new ArrayList<>();
         else excludes = new ArrayList<>(excludes);
 
-        if(!excludes.contains("content.fulltext")){
+        if (!excludes.contains("content.fulltext")) {
             excludes.add("content.fulltext");
         }
         return excludes;
@@ -542,7 +551,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             return super.search(mds, query, criteria, searchToken);
         }
         Set<String> authorities;
-        if(searchToken.getAuthorityScope() != null && !searchToken.getAuthorityScope().isEmpty()) {
+        if (searchToken.getAuthorityScope() != null && !searchToken.getAuthorityScope().isEmpty()) {
             logger.debug("Searching elastic with authority scope: " + StringUtils.join(searchToken.getAuthorityScope()));
             authorities = new HashSet<>(searchToken.getAuthorityScope());
         } else {
@@ -558,7 +567,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
             BoolQuery metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria, true).build();
             BoolQuery metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria, false).build();
-            StoreRef storeRef = (searchToken.getStoreName() != null && searchToken.getStoreProtocol() != null) ? new StoreRef(searchToken.getStoreProtocol(),searchToken.getStoreName()) : null;
+            StoreRef storeRef = (searchToken.getStoreName() != null && searchToken.getStoreProtocol() != null) ? new StoreRef(searchToken.getStoreProtocol(), searchToken.getStoreName()) : null;
             BoolQuery queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, storeRef).build();
 
             // add collapse builder
@@ -691,7 +700,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 if (total == null) {
                     total = Optional.of(hits).map(HitsMetadata::total).map(TotalHits::value).orElse(0L);
                 }
-                if(facetsResult == null) {
+                if (facetsResult == null) {
                     facetsResult = getFacets(aggregations, searchResponse);
                 }
                 sr.setFacets(facetsResult);
@@ -728,7 +737,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     long count = b.docCount();
                     NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
                     // skip duplicate entries
-                    if(values.stream().anyMatch(v -> v.getValue().equals(k))) {
+                    if (values.stream().anyMatch(v -> v.getValue().equals(k))) {
                         continue;
                     }
                     value.setValue(k);
@@ -861,6 +870,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     /**
      * returns true if the user has the given permission on the node via indirect access inside a collection
+     *
      * @return
      */
     private List<String> hasCollectionPermissionsOnNode(String nodeId, List<String> permissions) {
@@ -869,15 +879,15 @@ public class SearchServiceElastic extends SearchServiceImpl {
             // fetch the node
             SearchResponse<Map> searchResult = client
                     .withTransportOptions(this::getRequestOptions)
-                    .search(request->request
+                    .search(request -> request
                             .index(WORKSPACE_INDEX)
                             .size(1)
-                            .trackTotalHits(t->t.count(2))
-                            .query(query->query
-                                    .bool(bool->bool
+                            .trackTotalHits(t -> t.count(2))
+                            .query(query -> query
+                                    .bool(bool -> bool
                                             .must(must -> must.bool(this::getCollectionPermissionsQuery))
-                                            .must(must -> must.term(term->term.field("properties.sys:node-uuid").value(nodeId))))), Map.class);
-            if(searchResult.hits().total().value() == 1) {
+                                            .must(must -> must.term(term -> term.field("properties.sys:node-uuid").value(nodeId))))), Map.class);
+            if (searchResult.hits().total().value() == 1) {
                 // check & handle restricted access
                 Map data = (Map) searchResult.hits().hits().get(0).source().get("properties");
                 String restrictedAccess = (String) data.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_RESTRICTED_ACCESS));
@@ -1356,11 +1366,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     logger.error("ping failed, close failed:" + e.getMessage() + " creating new");
                 }
             }
-            if(MAX_RESPONSE_ENTITY_SIZE == -1){
-                if(LightbendConfigLoader.get().hasPath("elasticsearch.max_response_entity_size")){
+            if (MAX_RESPONSE_ENTITY_SIZE == -1) {
+                if (LightbendConfigLoader.get().hasPath("elasticsearch.max_response_entity_size")) {
                     MAX_RESPONSE_ENTITY_SIZE = LightbendConfigLoader.get().getInt("elasticsearch.max_response_entity_size");
-                }
-                else{
+                } else {
                     //100 MB
                     MAX_RESPONSE_ENTITY_SIZE = 100 * 1048576;
                 }
@@ -1465,6 +1474,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 );
         return searchByQuery(query.build(), skipCount, maxItems, sortDefinition);
     }
+
     @Override
     public SearchResultNodeRef getFilesSharedToMe(SharedToMeType type, SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception {
         BoolQuery.Builder query = QueryBuilders.bool()
@@ -1477,7 +1487,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     @Override
-    public SearchResultNodeRef getWorkflowReceive(String user, SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception{
+    public SearchResultNodeRef getWorkflowReceive(String user, SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception {
         BoolQuery.Builder builder = QueryBuilders.bool();
         builder.minimumShouldMatch("1");
         getAllMemberships(user).forEach(authority -> builder.should(b -> b.match(m -> m.field(
@@ -1488,14 +1498,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
         builder.must(getContentTypeQuery(contentType));
         MetadataQueries queries = MetadataHelper.getLocalDefaultMetadataset().getQueries(MetadataReader.QUERY_SYNTAX_DSL);
         String basequery = queries.findQuery("workflowReceive").getPrimaryBasequery();
-        if(StringUtils.isNotBlank(basequery)) {
+        if (StringUtils.isNotBlank(basequery)) {
             builder.must(b -> b.wrapper(new ReadableWrapperQueryBuilder(basequery).build()));
         }
         return searchByQuery(builder.build(), skipCount, maxItems, sortDefinition);
     }
 
     private Query getContentTypeQuery(ContentType contentType) {
-        if(contentType == null || contentType.equals(ContentType.ALL)) {
+        if (contentType == null || contentType.equals(ContentType.ALL)) {
             return QueryBuilders.matchAll().build()._toQuery();
         }
         SearchToken token = new SearchToken();
@@ -1514,6 +1524,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     private SearchResultNodeRef searchByQuery(QueryVariant query, int skipCount, int maxItems, SortDefinition sortDefinition) throws IOException {
         return searchByQuery(query, skipCount, maxItems, sortDefinition, WORKSPACE_INDEX);
     }
+
     private SearchResultNodeRef searchByQuery(QueryVariant query, int skipCount, int maxItems, SortDefinition sortDefinition, String index) throws IOException {
         checkClient();
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder().index(index);
@@ -1541,13 +1552,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     @Override
-    public SearchResult<String> findAuthorities(AuthorityType type, String searchWord, boolean globalContext, int from, int nrOfResults, SortDefinition sort, Map<String,String> customProperties) throws Exception {
+    public SearchResult<String> findAuthorities(AuthorityType type, String searchWord, boolean globalContext, int from, int nrOfResults, SortDefinition sort, Map<String, String> customProperties) throws Exception {
         String signupMethod = customProperties == null ? null : customProperties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD));
         boolean searchingSignupGroups = ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_SIGNUP_GROUP) &&
                 AuthorityType.GROUP.equals(type) &&
                 signupMethod != null &&
                 !signupMethod.isEmpty();
-        if(globalContext && !searchingSignupGroups) {
+        if (globalContext && !searchingSignupGroups) {
             checkGlobalSearchPermission();
         }
 
@@ -1555,19 +1566,19 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         //org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(null);
 
-        BoolQuery.Builder findUsersQuery = getFindUsersSearch(searchWord,AuthorityServiceHelper.getDefaultAuthoritySearchFields(), globalContext);
+        BoolQuery.Builder findUsersQuery = getFindUsersSearch(searchWord, AuthorityServiceHelper.getDefaultAuthoritySearchFields(), globalContext);
         // we're skipping TP checks when the search requested signup groups -> it's possible to see them even without GLOBAL_AUTHORITY_SEARCH permissions
         //StringBuffer findGroupsQuery = permissionService.getFindGroupsSearchString(searchWord, globalContext, searchingSignupGroups);
-        BoolQuery.Builder findGroupsQuery = getFindGroupsSearch(searchWord,globalContext,searchingSignupGroups);
+        BoolQuery.Builder findGroupsQuery = getFindGroupsSearch(searchWord, globalContext, searchingSignupGroups);
 
-        if(findUsersQuery == null && findGroupsQuery == null) {
+        if (findUsersQuery == null && findGroupsQuery == null) {
             return new SearchResult<String>(new ArrayList<>(), 0, 0);
         }
 
         /**
          * don't find groups of scopes when no scope is provided
          */
-        if (NodeServiceInterceptor.getEduSharingScope() == null && findGroupsQuery!=null) {
+        if (NodeServiceInterceptor.getEduSharingScope() == null && findGroupsQuery != null) {
 
             /**
              * groups arent initialized with eduscope aspect and eduscopename
@@ -1577,27 +1588,27 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
 
         BoolQuery.Builder finalQuery = QueryBuilders.bool().minimumShouldMatch("1");
-        if(type==null) {
-            if(findUsersQuery!=null)
+        if (type == null) {
+            if (findUsersQuery != null)
                 finalQuery.should(s -> s.bool(findUsersQuery.build()));
-            if(findGroupsQuery!=null) {
+            if (findGroupsQuery != null) {
                 finalQuery.should(s -> s.bool(findGroupsQuery.build()));
             }
-        }else if(type.equals(AuthorityType.USER)) {
-            finalQuery=findUsersQuery;
-        }else if(type.equals(AuthorityType.GROUP)) {
-            if(findGroupsQuery!=null)
-                finalQuery=findGroupsQuery;
-        }else {
-            throw new IllegalArgumentException("Unsupported authority type "+type);
+        } else if (type.equals(AuthorityType.USER)) {
+            finalQuery = findUsersQuery;
+        } else if (type.equals(AuthorityType.GROUP)) {
+            if (findGroupsQuery != null)
+                finalQuery = findGroupsQuery;
+        } else {
+            throw new IllegalArgumentException("Unsupported authority type " + type);
         }
-        if(!finalQuery.hasClauses())
+        if (!finalQuery.hasClauses())
             return new SearchResult<String>();
 
-        if(customProperties != null){
-            for(Map.Entry<String, String> entry : customProperties.entrySet()){
+        if (customProperties != null) {
+            for (Map.Entry<String, String> entry : customProperties.entrySet()) {
                 finalQuery.must(m -> m.term(t -> t
-                        .field("properties."+entry.getKey())
+                        .field("properties." + entry.getKey())
                         .value(entry.getValue())
                 ));
             }
@@ -1614,9 +1625,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchResultNodeRef searchResultNodeRef = this.searchByQuery(finalQuery.build(), from, nrOfResults, null, AUTHORITIES_INDEX);
 
             searchResultNodeRef.getData().stream().forEach(c -> {
-                String authorityName = (String)c.getProperties().get(CCConstants.CM_PROP_AUTHORITY_NAME);
+                String authorityName = (String) c.getProperties().get(CCConstants.CM_PROP_AUTHORITY_NAME);
                 if (authorityName == null) {
-                    authorityName = (String)c.getProperties().get(CCConstants.CM_PROP_PERSON_USERNAME);
+                    authorityName = (String) c.getProperties().get(CCConstants.CM_PROP_PERSON_USERNAME);
                 }
                 result.add(authorityName);
             });
@@ -1627,7 +1638,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
 
-    BoolQuery.Builder getFindUsersSearch(String query, Map<String, Double> searchFields, boolean globalContext){
+    BoolQuery.Builder getFindUsersSearch(String query, Map<String, Double> searchFields, boolean globalContext) {
         ToolPermissionService toolPermissionService = ToolPermissionServiceFactory.getInstance();
         boolean fuzzyUserSearch = !globalContext || toolPermissionService
                 .hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
@@ -1666,7 +1677,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                             fieldQuery.should(s -> s.wildcard(w -> w
                                     .field("properties.cm:" + field.getKey())
                                     .value(StringUtils.strip(fToken, "*"))
-                                    .boost(field.getValue().floatValue())) );
+                                    .boost(field.getValue().floatValue())));
                         }
                     }
                     subQuery.must(m -> m.bool(fieldQuery.build()));
@@ -1759,7 +1770,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         if (!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")
                 && !AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
             String personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
-            searchQuery.must(m ->m.term(t -> t.field("properties.cm:espersonstatus.keyword").value(personActiveStatus)));
+            searchQuery.must(m -> m.term(t -> t.field("properties.cm:espersonstatus.keyword").value(personActiveStatus)));
         }
 
         /**
@@ -1814,7 +1825,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         //groupPathQuery.should(s -> s.wildcard(w -> w.field("fullpath").value("*/*/"+authorityNodeRef.getId()+"/*")));
         groupPathQuery.should(s -> s.wildcard(w -> w
                 .field("fullpaths")
-                .value(rootHomeId+"/"+sysSystemNodeId+"/"+sysAuthoritiesNodeId + "/"+authorityNodeRef.getId()+"*")
+                .value(rootHomeId + "/" + sysSystemNodeId + "/" + sysAuthoritiesNodeId + "/" + authorityNodeRef.getId() + "*")
         ));
     }
 
@@ -1871,7 +1882,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         fieldQuery.should(s -> s.wildcard(w -> w
                                 .field("properties.cm:authorityDisplayName")
                                 .value(StringUtils.strip(ftoken, "*"))
-                                .boost((float)10.0)
+                                .boost((float) 10.0)
                         )).should(s -> s.wildcard(w -> w
                                 .field("properties.cm:authorityDisplayName")
                                 .value(ftoken)
@@ -1904,10 +1915,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
             if (!token.isEmpty()) {
                 String nonFuzzyField = LightbendConfigLoader.get().getString("repository.search.groups.nonFuzzyField");
-                if(nonFuzzyField.startsWith("=@")){
-                    nonFuzzyField = nonFuzzyField.replace("=@","");
+                if (nonFuzzyField.startsWith("=@")) {
+                    nonFuzzyField = nonFuzzyField.replace("=@", "");
                 }
-                String fnonFuzzyField = "properties."+nonFuzzyField;
+                String fnonFuzzyField = "properties." + nonFuzzyField;
                 String ftoken = token;
                 subQuery.must(m -> m.wildcard(w -> w.
                         field(fnonFuzzyField)
@@ -1971,7 +1982,6 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     /**
-     *
      * @param membershipsOnly (only for admin/system) when true, behave like regular users and show only groups
      *                        false will show all mz of the system
      * @return
@@ -1988,7 +1998,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 || isSystemUser) ? true : false;
 
 
-        if(isAdmin && !membershipsOnly) {
+        if (isAdmin && !membershipsOnly) {
             BoolQuery.Builder finalQuery = QueryBuilders.bool()
                     .must(must -> must
                             .match(match -> match
@@ -2000,16 +2010,16 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                     .query(org.edu_sharing.alfresco.service.AuthorityService.MEDIA_CENTER_GROUP_TYPE)));
 
             SortDefinition sort = new SortDefinition();
-            sort.addSortDefinitionEntry(new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME),true));
+            sort.addSortDefinitionEntry(new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME), true));
             return this.searchAllByQuery(
                     finalQuery.build(),
                     sort,
                     AUTHORITIES_INDEX);
-        }else {
+        } else {
             assert memberships != null;
             return memberships.stream().map(m -> {
                 org.alfresco.service.cmr.repository.NodeRef nodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(m);
-                if(nodeRef != null && serviceRegistry.getNodeService().hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_MEDIACENTER))) {
+                if (nodeRef != null && serviceRegistry.getNodeService().hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_MEDIACENTER))) {
                     NodeRef ref = new NodeRefImpl(nodeRef);
                     ref.setProperties(new HashMap<>() {{
                         put(CCConstants.CM_PROP_AUTHORITY_NAME, m);
@@ -2042,7 +2052,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         BoolQuery.Builder b = QueryBuilders.bool();
         b.must(m -> m.term(t -> t.field("aspects").value(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION_PINNED))));
         b.must(m -> m.term(t -> t.field("nodeRef.storeRef.protocol").value("workspace")));
-        return searchAllByQuery(b.build(),null,WORKSPACE_INDEX);
+        return searchAllByQuery(b.build(), null, WORKSPACE_INDEX);
     }
 
     @Override
@@ -2054,17 +2064,18 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 t -> t.field("aspects").value("ccm:collection_io_reference"))
         ).must(m -> m.term(
                 t -> t.field("properties.ccm:original").value(nodeId)
-        )).mustNot(mn ->mn.term(
+        )).mustNot(mn -> mn.term(
                 t -> t.field("properties.sys:node-uuid").value(nodeId)
         ));
         globalConditions.must(m -> m.bool(b.build()));
-        return searchAllByQuery(globalConditions.build(),null,WORKSPACE_INDEX);
+        return searchAllByQuery(globalConditions.build(), null, WORKSPACE_INDEX);
     }
+
     @Override
     public SearchResultNodeRef getRelevantNodes(int skipCount, int maxItems) throws Throwable {
         MetadataSet mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id);
         Map<String, String[]> criteria = SearchRelevancyTool.getCriteria();
-        if(criteria.isEmpty()) {
+        if (criteria.isEmpty()) {
             return new SearchResultNodeRefElastic();
         }
         SearchToken token = new SearchToken();
@@ -2110,13 +2121,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                     ));
 
                     //only search organisations the curren user is in,except: its adminuser and onlyMemberShips == true
-                    if(onlyMemberShips) {
+                    if (onlyMemberShips) {
                         BoolQuery.Builder memberQuery = QueryBuilders.bool().minimumShouldMatch("1");
-                        if(memberships != null && memberships.size() > 0) {
-                            for(String membershib : memberships) {
+                        if (memberships != null && memberships.size() > 0) {
+                            for (String membershib : memberships) {
                                 org.alfresco.service.cmr.repository.NodeRef authorityNodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(membershib);
-                                if(authorityNodeRef != null) {
-                                    if(serviceRegistry.getNodeService().hasAspect(authorityNodeRef,
+                                if (authorityNodeRef != null) {
+                                    if (serviceRegistry.getNodeService().hasAspect(authorityNodeRef,
                                             QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP))) {
                                         memberQuery.should(should -> should
                                                 .match(match -> match
@@ -2128,10 +2139,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                     }
                                 }
                             }
+
                             finalQuery.must(must -> must.bool(memberQuery.build()));
 
                         }
-                    } else if(!isAdmin) {
+                    } else if (!isAdmin) {
                         // seems not necessary since we filter by user groups anyway
                         // + this will also hide any groups in the user manager for org admins
                         // additionalQuery.append(" AND NOT ISNULL:\"ccm:group_signup_method\"");
@@ -2196,6 +2208,64 @@ public class SearchServiceElastic extends SearchServiceImpl {
             });
         } catch (Throwable t) {
             throw t;
+        }
+    }
+
+    public SearchResultNodeRef searchByProperty(
+            SearchToken searchToken,
+            SearchService.CombineMode combineMode,
+            List<String> properties,
+            List<String> value,
+            List<String> comparator) throws IOException {
+
+        BoolQuery.Builder b = QueryBuilders.bool();
+        for(int i = 0; i < properties.size(); i++){
+            int finalI = i;
+            String comp = "=";
+            if (comparator != null)
+                comp = comparator.get(i);
+
+            QueryVariant query;
+            if (comp.equals("<=")) {
+                RangeQuery.Builder r = QueryBuilders.range();
+                r.number(n -> n.field("properties." + properties.get(finalI)).from(Double.MIN_VALUE).to(Double.valueOf(value.get(finalI))));
+                query = r.build();
+            }else if (comp.equals(">=")) {
+                RangeQuery.Builder r = QueryBuilders.range();
+                r.number(n -> n.field("properties." + properties.get(finalI)).from(Double.valueOf(value.get(finalI))).to(Double.MAX_VALUE));
+                query = r.build();
+            }else{
+                TermQuery.Builder t = QueryBuilders.term();
+                t.field("properties." + properties.get(finalI)).value(value.get(finalI));
+                query = t.build();
+            }
+
+            if(CombineMode.AND.equals(combineMode)){
+                if(query instanceof RangeQuery){
+                    b.must(m -> m.range((RangeQuery)query));
+                }else if(query instanceof TermQuery){
+                    b.must(m -> m.term((TermQuery)query));
+                }
+            }else{
+                if(query instanceof RangeQuery){
+                    b.should(m -> m.range((RangeQuery)query));
+                }else if(query instanceof TermQuery){
+                    b.should(m -> m.term((TermQuery)query));
+                }
+            }
+        }
+        BoolQuery.Builder globalConditions = getGlobalConditions(null, null, null, null);
+        globalConditions.must(m -> m.bool(b.build()));
+
+        if(searchToken.getMaxResult() > 10000){
+            List<NodeRef> nodeRefs = searchAllByQuery(globalConditions.build(), searchToken.getSortDefinition(), WORKSPACE_INDEX);
+            SearchResultNodeRef sr = new SearchResultNodeRef();
+            sr.setData(nodeRefs);
+            sr.setStartIDX(0);
+            sr.setNodeCount(nodeRefs.size());
+            return sr;
+        }else {
+            return searchByQuery(globalConditions.build(), searchToken.getFrom(), searchToken.getMaxResult(), searchToken.getSortDefinition());
         }
     }
 }
