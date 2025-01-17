@@ -94,4 +94,6 @@ public interface SearchService {
 	SearchResultNodeRef getMetadata(List<String> nodeIds) throws IOException;
 
 	List<NodeRef> getAllPinnedCollections() throws IOException;
+
+	List<org.edu_sharing.service.model.NodeRef> getReferenceObjects(String nodeId) throws IOException;
 }

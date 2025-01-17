@@ -117,4 +117,9 @@ public class SearchServiceAdapter implements SearchService {
 	public List<NodeRef> getAllPinnedCollections() throws IOException {
 		return List.of();
 	}
+
+	@Override
+	public List<NodeRef> getReferenceObjects(String nodeId) throws IOException {
+		return List.of();
+	}
 }

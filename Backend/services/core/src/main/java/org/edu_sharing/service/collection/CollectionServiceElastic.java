@@ -9,6 +9,7 @@ import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.json.JsonData;
 import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -156,6 +157,22 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
         }
         nodeRefs.setData(returnVal);
         return nodeRefs;
+    }
+
+    /**
+     * Get all reference objects for a given node
+     * Uses solr
+     *
+     * @param nodeId
+     * @return
+     */
+    @Override
+    public List<org.edu_sharing.service.model.NodeRef> getReferenceObjects(String nodeId) {
+        SearchToken token = new SearchToken();
+        token.setMaxResult(Integer.MAX_VALUE);
+        token.setContentType(SearchService.ContentType.ALL);
+        token.setLuceneString("ASPECT:\"ccm:collection_io_reference\" AND @ccm\\:original:" + QueryParser.escape(nodeId) + " AND NOT @sys\\:node-uuid:" + QueryParser.escape(nodeId));
+        return SearchServiceFactory.getSearchService(appInfo.getAppId()).search(token).getData();
     }
 }
 

@@ -33,6 +33,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.guest.GuestConfig;
@@ -2035,9 +2036,25 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     public List<NodeRef> getAllPinnedCollections() throws IOException {
-        TermQuery.Builder b = QueryBuilders.term();
-        b.field("aspects").value(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION_PINNED));
-
+        BoolQuery.Builder b = QueryBuilders.bool();
+        b.must(m -> m.term(t -> t.field("aspects").value(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION_PINNED))));
+        b.must(m -> m.term(t -> t.field("nodeRef.storeRef.protocol").value("workspace")));
         return searchAllByQuery(b.build(),null,WORKSPACE_INDEX);
+    }
+
+    @Override
+    public List<NodeRef> getReferenceObjects(String nodeId) throws IOException {
+        //"ASPECT:\"ccm:collection_io_reference\" AND @ccm\\:original:" + QueryParser.escape(nodeId) + " AND NOT @sys\\:node-uuid:" + QueryParser.escape(nodeId)
+        BoolQuery.Builder globalConditions = getGlobalConditions(null, null, null);
+        BoolQuery.Builder b = QueryBuilders.bool();
+        b.must(m -> m.term(
+                t -> t.field("aspects").value("ccm:collection_io_reference"))
+        ).must(m -> m.term(
+                t -> t.field("properties.ccm:original").value(nodeId)
+        )).mustNot(mn ->mn.term(
+                t -> t.field("properties.sys:node-uuid").value(nodeId)
+        ));
+        globalConditions.must(m -> m.bool(b.build()));
+        return searchAllByQuery(globalConditions.build(),null,WORKSPACE_INDEX);
     }
 }

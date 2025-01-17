@@ -828,4 +828,9 @@ public class SearchServiceImpl implements SearchService {
 	public List<org.edu_sharing.service.model.NodeRef> getAllPinnedCollections() throws IOException {
 		throw new NotImplementedException("getAllPinnedCollections not supported via Solr");
 	}
+
+	@Override
+	public List<org.edu_sharing.service.model.NodeRef> getReferenceObjects(String nodeId) throws IOException {
+		throw new NotImplementedException("getReferenceObjects not supported via Solr");
+	}
 }
