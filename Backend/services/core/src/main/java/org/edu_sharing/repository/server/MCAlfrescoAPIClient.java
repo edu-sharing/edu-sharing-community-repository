@@ -2753,7 +2753,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                     eduGroup.setGroupId((String) entry.getValue().get(CCConstants.SYS_PROP_NODE_UID));
                     eduGroup.setGroupname((String) entry.getValue().get(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
                     eduGroup.setGroupDisplayName((String) entry.getValue().get(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME));
-                    eduGroup.setFolderPath(getPath((String) folderProps.get(CCConstants.SYS_PROP_NODE_UID)));
                     result.add(eduGroup);
                 }
             } catch (AccessDeniedException ignored) {

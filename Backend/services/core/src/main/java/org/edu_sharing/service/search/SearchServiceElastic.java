@@ -25,6 +25,9 @@ import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.ResultSet;
+import org.alfresco.service.cmr.search.ResultSetRow;
+import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.StringUtils;
@@ -45,6 +48,7 @@ import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
+import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -64,6 +68,7 @@ import org.edu_sharing.service.model.CollectionRef;
 import org.edu_sharing.service.model.CollectionRefImpl;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.model.NodeRefImpl;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.PropertiesGetInterceptor;
 import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.permission.PermissionService;
@@ -2066,5 +2071,131 @@ public class SearchServiceElastic extends SearchServiceImpl {
         token.setFrom(skipCount);
         token.setMaxResult(maxItems);
         return this.search(mds, "stream_relevant", criteria, token);
+    }
+
+
+    @Override
+    public SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort, boolean scoped, boolean onlyMemberShips)
+            throws Exception {
+        try {
+            String searchPattern = pattern == null ? "" : pattern;
+
+
+            Set<String> memberships = serviceRegistry.getAuthorityService().getAuthorities();
+            boolean isAdmin = ((memberships != null && memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
+                    || "admin".equals(AuthenticationUtil.getFullAuthentication().getName())) ? true : false;
+
+            return AuthenticationUtil.runAsSystem(() -> {
+                try {
+                    BoolQuery.Builder finalQuery = QueryBuilders.bool()
+                            .minimumShouldMatch("1")
+                            .should(should -> should
+                                    .wildcard(wildcard -> wildcard
+                                            .caseInsensitive(true)
+                                            .field("properties.cm:authorityName.keyword")
+                                            .value("*" + searchPattern + "*")))
+                            .should(should -> should
+                                    .wildcard(wildcard -> wildcard
+                                            .caseInsensitive(true)
+                                            .field("properties.cm:authorityDisplayName.keyword")
+                                            .value("*" + searchPattern + "*")))
+                            .must(must -> must
+                                    .match(match -> match
+                                            .field("nodeRef.storeRef.protocol")
+                                            .query("workspace")))
+                            .must(must -> must
+                                    .wildcard(exists -> exists
+                                            .field("properties.ccm:edu_homedir.keyword")
+                                            .value("workspace://*")
+                                    ));
+
+                    //only search organisations the curren user is in,except: its adminuser and onlyMemberShips == true
+                    if(onlyMemberShips) {
+                        BoolQuery.Builder memberQuery = QueryBuilders.bool().minimumShouldMatch("1");
+                        if(memberships != null && memberships.size() > 0) {
+                            for(String membershib : memberships) {
+                                org.alfresco.service.cmr.repository.NodeRef authorityNodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(membershib);
+                                if(authorityNodeRef != null) {
+                                    if(serviceRegistry.getNodeService().hasAspect(authorityNodeRef,
+                                            QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP))) {
+                                        memberQuery.should(should -> should
+                                                .match(match -> match
+                                                        .field("properties.cm:authorityName.keyword")
+                                                        .query(membershib)
+                                                )
+                                        );
+
+                                    }
+                                }
+                            }
+                            finalQuery.must(must -> must.bool(memberQuery.build()));
+
+                        }
+                    } else if(!isAdmin) {
+                        // seems not necessary since we filter by user groups anyway
+                        // + this will also hide any groups in the user manager for org admins
+                        // additionalQuery.append(" AND NOT ISNULL:\"ccm:group_signup_method\"");
+                    }
+
+                    SearchResultNodeRef eduGroups = this.searchByQuery(
+                            finalQuery.build(),
+                            skipCount,
+                            maxValues,
+                            sort,
+                            AUTHORITIES_INDEX);
+                    // do in transaction for better performance of getProperty
+                    return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+                        List<EduGroup> result = new ArrayList<>();
+                        for (NodeRef row : eduGroups.getData()) {
+                            Map<String, Object> entry = row.getProperties();
+                            String nodeRef = (String) entry.get(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
+                            // when a group folder relation is removed the noderef can be null cause of async solr refresh
+                            if (nodeRef != null) {
+                                String nodeId = nodeRef.replace("workspace://SpacesStore/", "");
+                                org.alfresco.service.cmr.repository.NodeRef folderRef = new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+                                EduGroup eduGroup = new EduGroup();
+                                eduGroup.setGroupId((String) entry.get(CCConstants.SYS_PROP_NODE_UID));
+                                eduGroup.setGroupname((String) entry.get(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
+                                eduGroup.setGroupDisplayName(
+                                        (String) entry.get(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME));
+
+                                eduGroup.setGroupDisplayName(
+                                        (String) entry.get(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME));
+
+                                eduGroup.setFolderId(nodeId);
+                                eduGroup.setFolderName(NodeServiceHelper.getProperty(folderRef, CCConstants.CM_NAME));
+                                eduGroup.setScope(NodeServiceHelper.getProperty(folderRef, CCConstants.CCM_PROP_EDUSCOPE_NAME));
+                                boolean add = false;
+                                assert memberships != null;
+                                for (String group : memberships) {
+                                    if (group.equals(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)
+                                            || group.equals(eduGroup.getGroupname())) {
+                                        add = true;
+                                        break;
+                                    }
+                                }
+                                if (scoped) {
+                                    String currentScope = NodeServiceInterceptor.getEduSharingScope();
+                                    if (eduGroup.getScope() == null && currentScope != null)
+                                        add = false;
+                                    if (eduGroup.getScope() != null && !eduGroup.getScope().equals(currentScope))
+                                        add = false;
+                                }
+                                if (add) {
+                                    result.add(eduGroup);
+                                }
+                            }
+                        }
+                        int count = result.size();
+                        return new SearchResult<>(result, skipCount, count);
+                    });
+
+                } catch (Throwable t) {
+                    throw new Exception(t);
+                }
+            });
+        } catch (Throwable t) {
+            throw t;
+        }
     }
 }

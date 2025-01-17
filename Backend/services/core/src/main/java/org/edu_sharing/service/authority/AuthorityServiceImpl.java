@@ -284,8 +284,6 @@ public EduGroup getEduGroup(String authority){
 					(String) groupProps.get(QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME)));
 			eduGroup.setGroupDisplayName(
 					(String) groupProps.get(QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME)));
-			eduGroup.setFolderPath(nodeService.getPath(nodeRefEduGroupHomeDir)
-					.toPrefixString(serviceRegistry.getNamespaceService()));
 			eduGroup.setScope((String) groupProps.get(QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME)));
 			
 			return eduGroup;
