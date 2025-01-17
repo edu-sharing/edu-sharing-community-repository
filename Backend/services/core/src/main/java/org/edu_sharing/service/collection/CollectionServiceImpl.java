@@ -1043,8 +1043,12 @@ public class CollectionServiceImpl implements CollectionService {
     @Override
     public List<org.edu_sharing.service.model.NodeRef> getReferenceObjects(String nodeId) {
         try {
+            UUID.fromString(nodeId);
             return SearchServiceFactory.getSearchService(appInfo.getAppId()).getReferenceObjects(nodeId);
-        } catch (IOException e) {
+        } catch (IllegalArgumentException e) {
+            logger.warn("nodeId " + nodeId +" is no valid uuid");
+            return Collections.emptyList();
+        }catch (IOException e) {
             logger.warn(e.getMessage() + ". while fetching reference objects");
             return Collections.emptyList();
         }
