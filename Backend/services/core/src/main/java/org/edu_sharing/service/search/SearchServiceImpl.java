@@ -146,15 +146,7 @@ public class SearchServiceImpl implements SearchService {
 	}
 	@Override
 	public SearchResultNodeRef getRelevantNodes(int skipCount, int maxItems) throws Throwable {
-		String query=SearchRelevancyTool.getLuceneQuery();
-		if(query.isEmpty()){
-			return new SearchResultNodeRef();
-		}
-		SearchToken token = new SearchToken();
-		token.setLuceneString(query);
-		token.setFrom(skipCount);
-		token.setMaxResult(maxItems);
-		return search(token);
+		throw new NotImplementedException("getRelevantNodes not supported for solr");
 	}
 
 	@Override

@@ -25,7 +25,6 @@ import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.StringUtils;
@@ -65,7 +64,6 @@ import org.edu_sharing.service.model.CollectionRef;
 import org.edu_sharing.service.model.CollectionRefImpl;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.model.NodeRefImpl;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.PropertiesGetInterceptor;
 import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.permission.PermissionService;
@@ -527,7 +525,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     @Override
-    public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criterias,
+    public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criteria,
                                       SearchToken searchToken) throws Throwable {
 
         checkClient();
@@ -536,7 +534,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             queryData = mds.findQuery(query, MetadataReader.QUERY_SYNTAX_DSL);
         } catch (IllegalArgumentException e) {
             logger.info("Query " + query + " is not defined within dsl language, switching to lucene...");
-            return super.search(mds, query, criterias, searchToken);
+            return super.search(mds, query, criteria, searchToken);
         }
         Set<String> authorities;
         if(searchToken.getAuthorityScope() != null && !searchToken.getAuthorityScope().isEmpty()) {
@@ -553,8 +551,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
         sr.setData(data);
         try {
 
-            BoolQuery metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criterias, true).build();
-            BoolQuery metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criterias, false).build();
+            BoolQuery metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria, true).build();
+            BoolQuery metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria, false).build();
             StoreRef storeRef = (searchToken.getStoreName() != null && searchToken.getStoreProtocol() != null) ? new StoreRef(searchToken.getStoreProtocol(),searchToken.getStoreName()) : null;
             BoolQuery queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, storeRef).build();
 
@@ -575,12 +573,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchResponse<Map> searchResponseAggregations = null;
             Map<String, Aggregation> aggregations;
             if (searchToken.getFacets() != null) {
-                Set<MetadataQueryParameter> excludeOwnFacets = MetadataElasticSearchHelper.getExcludeOwnFacets(queryData, criterias, searchToken.getFacets());
+                Set<MetadataQueryParameter> excludeOwnFacets = MetadataElasticSearchHelper.getExcludeOwnFacets(queryData, criteria, searchToken.getFacets());
                 if (!excludeOwnFacets.isEmpty()) {
                     Map<String, Aggregation> excludedOwnAggregations = MetadataElasticSearchHelper.getAggregations(
                             mds,
                             queryData,
-                            criterias,
+                            criteria,
                             searchToken.getFacets(),
                             excludeOwnFacets,
                             queryBuilderGlobalConditions._toQuery(),
@@ -611,7 +609,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             }
 
             if (searchToken.isReturnSuggestion()) {
-                String[] ngsearches = criterias.get("ngsearchword");
+                String[] ngsearches = criteria.get("ngsearchword");
                 if (ngsearches != null) {
                     searchRequestBuilder.suggest(suggest -> suggest
                             .text(ngsearches[0])
@@ -2056,5 +2054,17 @@ public class SearchServiceElastic extends SearchServiceImpl {
         ));
         globalConditions.must(m -> m.bool(b.build()));
         return searchAllByQuery(globalConditions.build(),null,WORKSPACE_INDEX);
+    }
+    @Override
+    public SearchResultNodeRef getRelevantNodes(int skipCount, int maxItems) throws Throwable {
+        MetadataSet mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id);
+        Map<String, String[]> criteria = SearchRelevancyTool.getCriteria();
+        if(criteria.isEmpty()) {
+            return new SearchResultNodeRefElastic();
+        }
+        SearchToken token = new SearchToken();
+        token.setFrom(skipCount);
+        token.setMaxResult(maxItems);
+        return this.search(mds, "stream_relevant", criteria, token);
     }
 }

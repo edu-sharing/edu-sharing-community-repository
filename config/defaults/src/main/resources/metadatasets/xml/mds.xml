@@ -1360,6 +1360,16 @@
         }
       </basequery>
     </query>
+    <query join="AND" id="stream_relevant">
+      <property name="ccm:taxonid">
+        <multiple>true</multiple>
+        <multiplejoin>OR</multiplejoin>
+      </property>
+      <property name="cclom:general_keyword">
+        <multiple>true</multiple>
+        <multiplejoin>OR</multiplejoin>
+      </property>
+    </query>
     <query join="AND" id="collections_scope_public">
       <basequery>
         {"bool":

@@ -4,16 +4,24 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.SortOptions;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.Time;
-import co.elastic.clients.elasticsearch._types.aggregations.*;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.MultiBucketBase;
+import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
+import co.elastic.clients.elasticsearch._types.aggregations.ValueType;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.ChildScoreMode;
-import co.elastic.clients.elasticsearch.core.*;
+import co.elastic.clients.elasticsearch.core.GetResponse;
+import co.elastic.clients.elasticsearch.core.IndexResponse;
+import co.elastic.clients.elasticsearch.core.ScrollResponse;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.core.search.ResponseBody;
 import co.elastic.clients.json.JsonData;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
+import co.elastic.clients.transport.endpoints.BooleanResponse;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -22,15 +30,16 @@ import org.edu_sharing.service.stream.model.ContentEntry.Audience.STATUS;
 import org.edu_sharing.service.stream.model.ScoreResult;
 import org.edu_sharing.service.stream.model.StreamSearchRequest;
 import org.edu_sharing.service.stream.model.StreamSearchResult;
-import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 
 import java.io.IOException;
-import java.io.StringReader;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
+@Slf4j
 public class StreamServiceElasticsearchImpl implements StreamService {
 
 	public StreamServiceElasticsearchImpl() {
@@ -40,30 +49,27 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 
 		RestClient restClient = RestClient.builder(SearchServiceElastic.getConfiguredHosts()).build();
 		ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
-		client= new ElasticsearchClient(transport);
-
+		client=  new ElasticsearchClient(transport);
 		try {
-			String mapping = "{\n"+
-				"\"properties\": {\n"+
-					"\"created\": { \"type\": \"date\" },\n"+
-					"\"modified\": { \"type\": \"date\" },\n"+
-					"\"title\": { \"type\": \"keyword\" },\n"+
-					"\"description\": { \"type\": \"text\" },\n"+
-					"\"priority\": { \"type\": \"integer\" },\n"+
-					"\"audience\": { \"type\": \"nested\" },\n"+
-					"\"properties\": {\n"+
-						"\"authority\": { \"type\": \"keyword\" },\n"+
-						"\"status\": { \"type\": \"keyword\" }\n"+
-					"}\n"+
-				"}\n"+
-			"}";
-			client.indices().create(req->req
-					.index(INDEX_NAME)
-					.mappings(m->m.withJson(new StringReader(mapping))));
-
-		}catch(Exception e) {
-			// index already exists
-			// throw new RuntimeException("Elastic search init failed",e);
+			BooleanResponse exists = client.indices().exists(e -> e.index(INDEX_NAME));
+			if (!exists.value()) {
+				client.indices().create(req -> req
+						.index(INDEX_NAME)
+						.mappings(m ->
+								m.properties("created", p -> p.date(t -> t))
+										.properties("modified", p -> p.date(t -> t))
+										.properties("title", p -> p.keyword(t -> t))
+										.properties("description", p -> p.keyword(t -> t))
+										.properties("priority", p -> p.integer(t -> t))
+										.properties("audience", p -> p.nested(
+												n -> n
+														.properties("authority", p2 -> p2.keyword(t -> t))
+														.properties("status", p2 -> p2.keyword(t -> t))
+										))
+						));
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Elastic search init failed",e);
 		}
 	}
 	private static String INDEX_NAME="entry_index22";
@@ -81,8 +87,8 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 	@Override
 	public void updateEntry(ContentEntry entry) throws Exception {
 		client.update(req->req
-				.index(INDEX_NAME)
-				.doc(entry)
+						.index(INDEX_NAME)
+						.doc(entry)
 				, Map.class);
 	}
 
@@ -162,11 +168,11 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 	@Override
 	public ScoreResult getScoreByAuthority(String authority,ContentEntry.Audience.STATUS status) throws Exception {
 		SearchResponse<Map> searchResult = client.search(req->req
-				.index(INDEX_NAME)
+						.index(INDEX_NAME)
 						.size(0)
 						.aggregations("score", Aggregation.of(agg->agg.sum(sum->sum.field("score"))))
 						.query(query->query.bool(bool->getAuthorityQuery(bool, Collections.singletonList(authority),status)))
-		,Map.class);
+				,Map.class);
 		ScoreResult result=new ScoreResult();
 		result.score=(long)searchResult.aggregations().get("score").sum().value();
 		return result;
@@ -196,10 +202,10 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		);
 
 		client.update(req->req
-                        .index(INDEX_NAME)
-                        .id(id)
+						.index(INDEX_NAME)
+						.id(id)
 						.script(scp->scp.source(script).params("audience", JsonData.of(audience)))
-                , Map.class);
+				, Map.class);
 	}
 	@Override
 	public StreamSearchResult search(StreamSearchRequest request) throws Exception {
@@ -221,10 +227,10 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		}
 
 		SearchResponse<ContentEntry> searchResult = client.search(req-> {
-			req.index(INDEX_NAME)
-					.size(request.size)
-					.from(request.offset)
-					.query(q -> q.bool(query.build()));
+					req.index(INDEX_NAME)
+							.size(request.size)
+							.from(request.offset)
+							.query(q -> q.bool(query.build()));
 
 					if(request.sortDefinition!=null && request.sortDefinition.hasContent()){
 						for(SortDefinition.SortDefinitionEntry sort : request.sortDefinition.getSortDefinitionEntries()){
@@ -235,15 +241,20 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 						req.sort(SortOptions.of(opt->opt.field(field->field.field("priority").order(SortOrder.Desc))));
 						req.sort(SortOptions.of(opt->opt.field(field->field.field("created").order(SortOrder.Desc))));
 					}
-			return req;
-		}
+					return req;
+				}
 				, ContentEntry.class);
 		return responseToStreamResult(searchResult);
 	}
 	private static StreamSearchResult responseToStreamResult(ResponseBody<ContentEntry> searchResult) {
 		StreamSearchResult result=new StreamSearchResult();
 		result.scrollId=searchResult.scrollId();
-		result.results=searchResult.hits().hits().stream().map(Hit::source).collect(Collectors.toList());
+		result.results=searchResult.hits().hits().stream().map(e -> {
+			ContentEntry entry = e.source();
+            assert entry != null;
+            entry.id = e.id();
+			return entry;
+		}).collect(Collectors.toList());
 		result.total=searchResult.hits().total() != null ? searchResult.hits().total().value() : 0;
 		return result;
 	}
@@ -251,10 +262,10 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 	@Override
 	public Map<String, Number> getTopValues(String property) throws Exception {
 		List<StringTermsBucket> buckets = client.search(req -> req
-						.index(INDEX_NAME)
-						.size(0)
-						.aggregations("agg", agg -> agg.terms(term -> term.field("properties." + property + ".keyword").valueType(ValueType.String.toString())))
-				, Map.class)
+								.index(INDEX_NAME)
+								.size(0)
+								.aggregations("agg", agg -> agg.terms(term -> term.field("properties." + property + ".keyword").valueType(ValueType.String.toString())))
+						, Map.class)
 				.aggregations()
 				.get("agg")
 				.sterms()
@@ -262,6 +273,6 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 				.array();
 
 
-        return buckets.stream().collect(Collectors.toMap(x->x.key().stringValue(), MultiBucketBase::docCount));
+		return buckets.stream().collect(Collectors.toMap(x->x.key().stringValue(), MultiBucketBase::docCount));
 	}
 }

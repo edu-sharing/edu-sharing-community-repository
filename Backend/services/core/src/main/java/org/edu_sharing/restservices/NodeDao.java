@@ -466,7 +466,7 @@ public class NodeDao {
     }
 
     public static NodeSearch transform(RepositoryDao repoDao, SearchResultNodeRef search) {
-        return transform(repoDao, search, null, null);
+        return transform(repoDao, search, Filter.createShowAllFilter(), null);
     }
 
     public static NodeSearch transform(RepositoryDao repoDao, SearchResultNodeRef search, Filter filter, Function<NodeDao, NodeDao> transform) {

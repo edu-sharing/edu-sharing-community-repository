@@ -219,7 +219,7 @@ export class StreamPageComponent implements OnInit, AfterViewInit, OnDestroy {
         });
     }
 
-    seen(id: any) {
+    seen(id: string) {
         this.updateStatus(id, STREAM_STATUS.READ).subscribe((data) =>
             this.getStreamDataByStatus(STREAM_STATUS.OPEN),
         );
