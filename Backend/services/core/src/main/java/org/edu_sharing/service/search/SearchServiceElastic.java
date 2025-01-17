@@ -2139,7 +2139,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                     }
                                 }
                             }
-
+                            if(!memberQuery.hasClauses()){
+                                return new SearchResult<EduGroup>();
+                            }
                             finalQuery.must(must -> must.bool(memberQuery.build()));
 
                         }
