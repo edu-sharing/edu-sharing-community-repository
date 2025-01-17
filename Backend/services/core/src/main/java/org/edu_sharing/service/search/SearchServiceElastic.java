@@ -2230,11 +2230,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
             QueryVariant query;
             if (comp.equals("<=")) {
                 RangeQuery.Builder r = QueryBuilders.range();
-                r.number(n -> n.field("properties." + properties.get(finalI)).from(Double.MIN_VALUE).to(Double.valueOf(value.get(finalI))));
+                r.number(n -> n.field("properties." + properties.get(finalI)+".number").to(Double.valueOf(value.get(finalI))));
                 query = r.build();
             }else if (comp.equals(">=")) {
                 RangeQuery.Builder r = QueryBuilders.range();
-                r.number(n -> n.field("properties." + properties.get(finalI)).from(Double.valueOf(value.get(finalI))).to(Double.MAX_VALUE));
+                r.number(n -> n.field("properties." + properties.get(finalI)+".number").from(Double.valueOf(value.get(finalI))));
                 query = r.build();
             }else{
                 TermQuery.Builder t = QueryBuilders.term();
