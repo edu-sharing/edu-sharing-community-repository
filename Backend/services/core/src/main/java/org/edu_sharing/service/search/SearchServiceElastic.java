@@ -568,7 +568,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             BoolQuery metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria, true).build();
             BoolQuery metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria, false).build();
             StoreRef storeRef = (searchToken.getStoreName() != null && searchToken.getStoreProtocol() != null) ? new StoreRef(searchToken.getStoreProtocol(), searchToken.getStoreName()) : null;
-            BoolQuery queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, storeRef).build();
+            BoolQuery queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, storeRef,true).build();
 
             // add collapse builder
             // CollapseBuilder collapseBuilder = new CollapseBuilder("properties.ccm:original");
@@ -767,10 +767,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
      * @return
      */
     BoolQuery.Builder getGlobalConditions(List<String> authorityScope, List<String> permissions, MetadataQuery query) {
-        return getGlobalConditions(authorityScope, permissions, query, null);
+        return getGlobalConditions(authorityScope, permissions, query, null, true);
     }
 
-    BoolQuery.Builder getGlobalConditions(List<String> authorityScope, List<String> permissions, MetadataQuery query, StoreRef storeRef) {
+    BoolQuery.Builder getGlobalConditions(List<String> authorityScope, List<String> permissions, MetadataQuery query, StoreRef storeRef, boolean scoped) {
 
         String storeRefProtocol = (storeRef == null) ? "workspace" : storeRef.getProtocol();
         Function<BoolQuery.Builder, BoolQuery.Builder> queryGlobalConditionsFactory = (builder) ->
@@ -794,10 +794,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
             queryBuilderGlobalConditions = permissionsFilter;
         }
 
-        if (NodeServiceInterceptor.getEduSharingScope() == null) {
-            queryBuilderGlobalConditions.mustNot(mustNot -> mustNot.exists(exist -> exist.field("properties.ccm:eduscopename")));
-        } else {
-            queryBuilderGlobalConditions.must(must -> must.term(term -> term.field("properties.ccm:eduscopename.keyword").value(NodeServiceInterceptor.getEduSharingScope())));
+        if(scoped){
+            if (NodeServiceInterceptor.getEduSharingScope() == null) {
+                queryBuilderGlobalConditions.mustNot(mustNot -> mustNot.exists(exist -> exist.field("properties.ccm:eduscopename")));
+            } else {
+                queryBuilderGlobalConditions.must(must -> must.term(term -> term.field("properties.ccm:eduscopename.keyword").value(NodeServiceInterceptor.getEduSharingScope())));
+            }
         }
         // mds specialFilter processing on per-query basis
         if (query != null) {
@@ -2256,7 +2258,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 }
             }
         }
-        BoolQuery.Builder globalConditions = getGlobalConditions(null, null, null, null);
+        BoolQuery.Builder globalConditions = getGlobalConditions(null, null, null, null,true);
         globalConditions.must(m -> m.bool(b.build()));
 
         if(searchToken.getMaxResult() > 10000){
@@ -2268,6 +2270,21 @@ public class SearchServiceElastic extends SearchServiceImpl {
             return sr;
         }else {
             return searchByQuery(globalConditions.build(), searchToken.getFrom(), searchToken.getMaxResult(), searchToken.getSortDefinition());
+        }
+    }
+
+    @Override
+    public SearchResultNodeRef search(SearchToken searchToken, boolean scoped) {
+        if(searchToken.getElasticQuery() == null && searchToken.getLuceneString() != null){
+            return super.search(searchToken,scoped);
+        }
+        try {
+
+            BoolQuery.Builder globalConditions = getGlobalConditions(searchToken.getAuthorityScope(), null, null,null,scoped);
+            globalConditions.must(searchToken.getElasticQuery()._toQuery());
+            return searchByQuery(globalConditions.build(), searchToken.getFrom(), searchToken.getMaxResult(), searchToken.getSortDefinition());
+        }catch (IOException e){
+            throw new RuntimeException(e);
         }
     }
 }

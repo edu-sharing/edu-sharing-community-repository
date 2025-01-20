@@ -3,6 +3,7 @@ package org.edu_sharing.repository.server.jobs.quartz;
 import java.util.Arrays;
 import java.util.Set;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
@@ -27,43 +28,43 @@ public class MigrationJobAuthorityStats extends AbstractJob {
 
 	@Override
 	public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-		
+
 		RunAsWork<Void> runAs = new RunAsWork<Void>() {
 			@Override
 			public Void doWork() throws Exception {
-					
+
 				try {
 					RepositoryDao repoDao = RepositoryDao.getRepository("-home-");
-		
+
 					Set<String> authorities = serviceRegistry.getAuthorityService()
 							.getAllAuthoritiesInZone(AuthorityService.ZONE_APP_DEFAULT, AuthorityType.GROUP);
 					logger.info(";authorities:" + authorities.size());
 					for (String authority : authorities) {
 						String authorityDN = serviceRegistry.getAuthorityService().getAuthorityDisplayName(authority);
-						
+
 						SearchToken token = new SearchToken();
 						token.setFrom(0);
 						token.setMaxResult(10);
 						token.setContentType(ContentType.ALL);
-						token.setLuceneString("@cm\\:name:\"*\"");
+						token.setElasticQuery(QueryBuilders.matchAll().build());
 						token.disableSearchCriterias();
 						token.setAuthorityScope(Arrays.asList(new String[] { authority }));
 						NodeSearch search = NodeDao.search(repoDao, token, false);
 						logger.info(";found "+ search.getCount() +";" + authority + ";" + authorityDN);
-						
+
 					}
 				} catch (Throwable e) {
 					logger.error(e.getMessage(), e);
 				}
-			
-			
-			return null;
-				
+
+
+				return null;
+
 			}
-			
-			
+
+
 		};
-		
+
 		AuthenticationUtil.runAs(runAs,"admin");
 	}
 
