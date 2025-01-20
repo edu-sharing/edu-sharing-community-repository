@@ -1035,7 +1035,6 @@ public class CollectionServiceImpl implements CollectionService {
 
     /**
      * Get all reference objects for a given node
-     * Uses solr
      *
      * @param nodeId
      * @return
