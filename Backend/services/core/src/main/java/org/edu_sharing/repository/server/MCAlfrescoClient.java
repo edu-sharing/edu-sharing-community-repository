@@ -76,18 +76,6 @@ public interface MCAlfrescoClient {
 	public Map<String, Map<String, Object>> search(String luceneString) throws Throwable;
 	
 	/**
-	 * 
-	 * search for nodes with a lucene string
-	 * 
-	 * @param luceneString
-	 * @param eduGroupContext if true only the eduGroups of the current users will be send as authority to check read permissions
-	 * @return
-	 * @throws Throwable
-	 */
-	public Map<String, Map<String, Object>> search(String luceneString, ContextSearchMode mode) throws Throwable;
-
-	
-	/**
 	 * get all children of a given parentId
 	 * 
 	 * @param parentID

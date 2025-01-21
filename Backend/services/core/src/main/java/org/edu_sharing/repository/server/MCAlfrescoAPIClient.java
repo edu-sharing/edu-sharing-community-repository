@@ -453,54 +453,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         return sr;
     }
 
-    @Override
-    public Map<String, Map<String, Object>> search(String luceneString, ContextSearchMode mode)
-            throws Throwable {
-        Map<String, Map<String, Object>> result = new HashMap<>();
-        SearchParameters token = new SearchParameters();
-        token.setQuery(luceneString);
-        List<NodeRef> nodeRefs = searchNodeRefs(token, mode);
-        for (NodeRef nodeRef : nodeRefs) {
-            try {
-                Map<String, Object> props = getProperties(nodeRef.getId());
-                result.put(nodeRef.getId(), props);
-            } catch (AccessDeniedException e) {
-                log.error("found node but can not access node properties:" + nodeRef.getId());
-            }
-        }
-        return result;
-    }
-
-    public List<NodeRef> searchNodeRefs(SearchParameters token, ContextSearchMode mode) {
-        Set<String> authorities = null;
-        if (mode.equals(ContextSearchMode.UserAndGroups)) {
-            authorities = new HashSet<>(authorityService.getAuthorities());
-            authorities.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
-            // remove the admin role, otherwise may results in inconsistent results
-            authorities.remove(CCConstants.AUTHORITY_ROLE_ADMINISTRATOR);
-            authorities.add(AuthenticationUtil.getFullyAuthenticatedUser());
-        } else if (mode.equals(ContextSearchMode.Public)) {
-            authorities = new HashSet<>();
-            authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);
-        }
-        SearchParameters essp = new SearchParameters();
-
-        if (authorities != null) {
-            essp = new ESSearchParameters();
-            ((ESSearchParameters) essp).setAuthorities(authorities.toArray(new String[0]));
-        }
-        essp.setQuery(token.getQuery());
-        for (SearchParameters.SortDefinition sort : token.getSortDefinitions()) {
-            essp.addSort(sort);
-        }
-        essp.setLanguage(SearchService.LANGUAGE_LUCENE);
-        essp.addStore(storeRef);
-        for (SearchParameters.SortDefinition def : token.getSortDefinitions()) {
-            essp.addSort(def);
-        }
-        return searchService.query(essp).getNodeRefs();
-    }
-
     public String formatData(String type, String key, Object value, String metadataSetId) {
         String returnValue = null;
         if (key != null && value != null) {
