@@ -2666,31 +2666,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         return map;
     }
 
-    public ArrayList<EduGroup> getEduGroups() throws Throwable {
-
-        ArrayList<EduGroup> result = new ArrayList<>();
-        Map<String, Map<String, Object>> edugroups = search("@ccm\\:edu_homedir:\"workspace://*\"");
-        for (Map.Entry<String, Map<String, Object>> entry : edugroups.entrySet()) {
-            String nodeRef = (String) entry.getValue().get(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
-            //when a group folder relation is removed the noderef can be null cause of async solr refresh
-            try {
-                if (nodeRef != null) {
-                    String nodeId = nodeRef.replace("workspace://SpacesStore/", "");
-                    Map<String, Object> folderProps = getProperties(nodeId);
-                    EduGroup eduGroup = new EduGroup();
-                    eduGroup.setFolderId((String) folderProps.get(CCConstants.SYS_PROP_NODE_UID));
-                    eduGroup.setFolderName((String) folderProps.get(CCConstants.CM_NAME));
-                    eduGroup.setGroupId((String) entry.getValue().get(CCConstants.SYS_PROP_NODE_UID));
-                    eduGroup.setGroupname((String) entry.getValue().get(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
-                    eduGroup.setGroupDisplayName((String) entry.getValue().get(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME));
-                    result.add(eduGroup);
-                }
-            } catch (AccessDeniedException ignored) {
-            }
-        }
-        return result;
-    }
-
     public String getFavoritesFolder() throws Throwable {
 
         String userName = this.authenticationInfo.get(CCConstants.AUTH_USERNAME);

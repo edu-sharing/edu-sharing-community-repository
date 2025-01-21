@@ -290,11 +290,6 @@ public class MCAlfrescoClientAdapter extends MCAlfrescoBaseClient {
 	}
 
 	@Override
-	public ArrayList<EduGroup> getEduGroups() throws Throwable {
-		return null;
-	}
-
-	@Override
 	public User getOwner(String storeId, String storeProtocol, String nodeId) {
 		return null;
 	}

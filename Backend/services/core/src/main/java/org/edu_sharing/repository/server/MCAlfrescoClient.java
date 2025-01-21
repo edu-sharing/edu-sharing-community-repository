@@ -474,8 +474,7 @@ public interface MCAlfrescoClient {
 	public Map<String, Map<String, Object>> getChildren(String parentID, String[] permissionsOnChild) throws Throwable;
 
 	public void removeGlobalAspectFromGroup(String groupNodeId) throws Exception;
-	
-	public ArrayList<EduGroup> getEduGroups() throws Throwable;
+
 	public User getOwner(String storeId,String storeProtocol,String nodeId);
 	
 	public SearchResult search(String luceneString, String storeProtocol, String storeName, int from, int maxResult) throws Throwable;
