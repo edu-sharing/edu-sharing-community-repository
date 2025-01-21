@@ -1019,9 +1019,9 @@ public class AdminServiceImpl implements AdminService {
 
     public void exportLom(String filterQuery, String targetDir, boolean subobjectHandler) throws Exception {
         Map<String, Object> paramsMap = new HashMap<>();
-        paramsMap.put(ExporterJob.PARAM_LUCENE_FILTER, filterQuery);
-        paramsMap.put(ExporterJob.PARAM_OUTPUT_DIR, targetDir);
-        paramsMap.put(ExporterJob.PARAM_WITH_SUBOBJECTS, Boolean.toString(subobjectHandler));
+        paramsMap.put("elasticQuery", filterQuery);
+        paramsMap.put("outputDir", targetDir);
+        paramsMap.put("withSubObjects", Boolean.toString(subobjectHandler));
         paramsMap.put(JobHandler.AUTH_INFO_KEY, getAuthInfo());
         ImmediateJobListener jobListener = JobHandler.getInstance().startJob(ExporterJob.class, paramsMap);
         if (jobListener.isVetoed()) {

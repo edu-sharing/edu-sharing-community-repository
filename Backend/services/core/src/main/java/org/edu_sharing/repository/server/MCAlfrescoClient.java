@@ -85,16 +85,6 @@ public interface MCAlfrescoClient {
 	 * @throws Throwable
 	 */
 	public Map<String, Map<String, Object>> search(String luceneString, ContextSearchMode mode) throws Throwable;
-	
-	/**
-	 * search for nodeId's with a lucene string
-	 * @param luceneString
-	 * @return Array of nodeId's
-	 * @throws Exception
-	 */
-	public String[] searchNodeIds(String luceneString) throws Exception;
-	
-	public String[] searchNodeIds(String luceneString, int limit) throws Exception;
 
 	
 	/**

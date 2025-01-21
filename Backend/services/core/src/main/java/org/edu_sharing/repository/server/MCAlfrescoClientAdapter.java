@@ -32,16 +32,6 @@ public class MCAlfrescoClientAdapter extends MCAlfrescoBaseClient {
 	}
 
 	@Override
-	public String[] searchNodeIds(String luceneString) throws Exception {
-		return null;
-	}
-
-	@Override
-	public String[] searchNodeIds(String luceneString, int limit) throws Exception {
-		return null;
-	}
-
-	@Override
 	public Map<String, Map<String, Object>> getChildren(String parentID) throws Throwable {
 		return null;
 	}

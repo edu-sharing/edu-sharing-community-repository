@@ -1,80 +1,77 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
-import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Base64;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.alfresco.repo.node.MLPropertyInterceptor;
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.exporter.OAILOMExporter;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.exporter.OAILOMWithSubobjectsExporter;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
+import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.oai.OAIExporterFactory;
+import org.edu_sharing.service.search.SearchService;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchToken;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-public class ExporterJob extends AbstractJob {
+@JobDescription(description = "OAI Export for nodes as file")
+public class ExporterJob extends AbstractJobMapAnnotationParams{
 
-	public static final String PARAM_LUCENE_FILTER = "lucenefilter";
 
-	public static final String PARAM_OUTPUT_DIR = "outputdir";
-	
-	public static final String PARAM_WITH_SUBOBJECTS = "withsubobjects";
 
 	Log logger = LogFactory.getLog(ExporterJob.class);
 
+	@JobFieldDescription(description = "elastic query to fetch the nodes that shall be processed.")
+	private String elasticQuery;
+
+	@JobFieldDescription(description = "directory where oai files should be saved")
+	private String outputDir;
+
+	@JobFieldDescription(description = "if subobjects should be used")
+	private boolean withSubObjects;
+
+
 	@Override
-	public void execute(JobExecutionContext context) throws JobExecutionException {
+	protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+		if (elasticQuery != null && outputDir != null) {
+			AuthenticationUtil.runAsSystem(() -> {
+				try {
+					SearchService localService = SearchServiceFactory.getLocalService();
 
-		Map jobDataMap = context.getJobDetail().getJobDataMap();
-		String luceneFilter = (String) jobDataMap.get(PARAM_LUCENE_FILTER);
-		String outputdir = (String) jobDataMap.get(PARAM_OUTPUT_DIR);
-		
-		Boolean withSubObjects = Boolean.valueOf((String) jobDataMap.get(PARAM_WITH_SUBOBJECTS));
+					SearchToken searchToken = new SearchToken();
+					searchToken.setFrom(0);
+					searchToken.setMaxResult(Integer.MAX_VALUE);
+					searchToken.setElasticQuery(QueryBuilders.wrapper().query(new String(Base64.getEncoder().encode(elasticQuery.getBytes()))).build());
 
-		if (luceneFilter != null && outputdir != null) {
-
-			try {
-			
-				ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
-				
-				Map<String, String> authInfo = new AuthenticationToolAPI().createNewSession(appInfo.getUsername(), appInfo.getPassword());
-				MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient(authInfo);
-				String[] nodeIds = apiClient.searchNodeIds(luceneFilter);
-
-				if (nodeIds != null) {
-					logger.info("found " + nodeIds.length + " to export with " + PARAM_LUCENE_FILTER + ": " + luceneFilter);
-
-					for (String nodeId : nodeIds) {
-
-						if(withSubObjects){
-							new OAILOMWithSubobjectsExporter(nodeId).export(outputdir);
-						}else{
-							OAIExporterFactory.getOAILOMExporter().export(outputdir,nodeId);
+					SearchResultNodeRef search = localService.search(searchToken);
+					if(search != null) {
+						logger.info("found " + search.getData().size() + " to export with " + elasticQuery);
+						for(NodeRef nodeRef : search.getData()){
+							String nodeId = nodeRef.getNodeId();
+							if(withSubObjects){
+								new OAILOMWithSubobjectsExporter(nodeId).export(outputDir);
+							}else{
+								OAIExporterFactory.getOAILOMExporter().export(outputDir,nodeId);
+							}
 						}
+					}else{
+						logger.info("found nothing with: " + elasticQuery);
 					}
 
-				}else{
-					logger.info("found nothing with " + PARAM_LUCENE_FILTER + ": " + luceneFilter);
+				} catch (ParserConfigurationException e) {
+					logger.error(e.getMessage(), e);
+				} catch(Throwable e){
+					logger.error(e.getMessage(), e);
 				}
-			} catch (ParserConfigurationException e) {
-				logger.error(e.getMessage(), e);
-			} catch (FileNotFoundException e) {
-				logger.error(e.getMessage(), e);
-			}catch(Throwable e){
-				logger.error(e.getMessage(), e);
-			}
-
-			
-
+				return null;
+			});
 		}
-
 	}
 
 	@Override

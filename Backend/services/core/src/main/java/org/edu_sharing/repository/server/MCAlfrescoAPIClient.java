@@ -501,28 +501,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         return searchService.query(essp).getNodeRefs();
     }
 
-
-    public String[] searchNodeIds(String luceneString) {
-        return searchNodeIds(luceneString, -1);
-    }
-
-    public String[] searchNodeIds(String luceneString, int limit) {
-        SearchParameters searchParameters = new SearchParameters();
-        searchParameters.addStore(storeRef);
-        searchParameters.setLanguage(SearchService.LANGUAGE_LUCENE);
-        searchParameters.setQuery(luceneString);
-        if (limit > -1) {
-            searchParameters.setLimit(limit);
-        }
-        ResultSet resultSet = searchService.query(searchParameters);
-
-        ArrayList<String> result = new ArrayList<>();
-        for (NodeRef nodeRef : resultSet.getNodeRefs()) {
-            result.add(nodeRef.getId());
-        }
-        return result.toArray(new String[0]);
-    }
-
     public String formatData(String type, String key, Object value, String metadataSetId) {
         String returnValue = null;
         if (key != null && value != null) {
