@@ -1512,13 +1512,15 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     private SearchResultNodeRef searchByQuery(QueryVariant query, int skipCount, int maxItems, SortDefinition sortDefinition) throws IOException {
-        if((maxItems - skipCount) > 10000){
-            return  searchAllByQuery(query, sortDefinition, WORKSPACE_INDEX);
-        }
-        return searchByQuery(query, skipCount, maxItems, sortDefinition, WORKSPACE_INDEX);
+        return searchByQuery(query, skipCount, maxItems, sortDefinition, null);
     }
 
     private SearchResultNodeRef searchByQuery(QueryVariant query, int skipCount, int maxItems, SortDefinition sortDefinition, String index) throws IOException {
+        if(index == null) index = WORKSPACE_INDEX;
+
+        if((maxItems - skipCount) > 10000){
+            return  searchAllByQuery(query, sortDefinition, index);
+        }
         checkClient();
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder().index(index);
         searchRequestBuilder.query(query._toQuery());
@@ -2273,7 +2275,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
             BoolQuery.Builder globalConditions = getGlobalConditions(searchToken.getAuthorityScope(), null, null,null,scoped);
             globalConditions.must(searchToken.getElasticQuery()._toQuery());
-            return searchByQuery(globalConditions.build(), searchToken.getFrom(), searchToken.getMaxResult(), searchToken.getSortDefinition());
+            return searchByQuery(globalConditions.build(), searchToken.getFrom(), searchToken.getMaxResult(), searchToken.getSortDefinition(),searchToken.getElasticIndex());
         }catch (IOException e){
             throw new RuntimeException(e);
         }

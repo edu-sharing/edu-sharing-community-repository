@@ -29,6 +29,10 @@ public class SearchToken implements Serializable {
 	@Getter
 	@Setter
 	QueryVariant elasticQuery;
+
+	@Getter
+	@Setter
+	String elasticIndex;
 	
 	@Setter
 	List<String> facets =null;
