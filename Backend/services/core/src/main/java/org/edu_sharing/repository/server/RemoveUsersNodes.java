@@ -44,10 +44,13 @@ import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchToken;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 
 /**
@@ -69,6 +72,7 @@ public class RemoveUsersNodes extends HttpServlet{
 		
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+		NodeService nodeService = serviceRegistry.getNodeService();
 		logger.info("authenticate");
 		try{
 			
@@ -87,24 +91,35 @@ public class RemoveUsersNodes extends HttpServlet{
 					return;
 				}
 
-				String searchString = "@cm\\:creator:" + guestUserName;
-				SearchService searchService = serviceRegistry.getSearchService();
-				NodeService nodeService = serviceRegistry.getNodeService();
-				ResultSet resultSet = searchService.query(storeRef, SearchService.LANGUAGE_LUCENE, searchString);
-				for (NodeRef nodeRef : resultSet.getNodeRefs()) {
-					if (nodeService.exists(nodeRef)) {
-						String nodeType = nodeService.getType(nodeRef).toString();
-						logger.info("removing Object " + nodeRef.getId() + " Type:" + nodeType);
-						nodeService.deleteNode(nodeRef);
-					}
-				}
+				org.edu_sharing.service.search.SearchService localService = SearchServiceFactory.getLocalService();
+				SearchToken token = new SearchToken();
+				token.setFrom(0);
+				//force searchAll
+				token.setMaxResult(Integer.MAX_VALUE);
+                try {
+					SearchResultNodeRef searchResultNodeRef = localService.searchByProperty(token,
+							org.edu_sharing.service.search.SearchService.CombineMode.AND,
+							List.of(CCConstants.CM_PROP_C_CREATOR),
+							List.of(guestUserName),
+							null);
+					searchResultNodeRef.getData().forEach(n -> {
+						NodeRef nodeRef = n.asAlfrescoNodeRef();
+						if (nodeService.exists(nodeRef)) {
+							String nodeType = nodeService.getType(nodeRef).toString();
+							logger.info("removing Object " + nodeRef.getId() + " Type:" + nodeType);
+							nodeService.deleteNode(nodeRef);
+						}
+					});
+				} catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
 			});
 			
 		}catch(AuthenticationException e){
 			e.printStackTrace();
 			out.print("Authentication failed!!!");
 		}catch(Throwable e){
-			logger.error("Ein Fehler",e);
+			logger.error(e.getMessage(),e);
 			out.println(e.getMessage());
 		}
 	}
