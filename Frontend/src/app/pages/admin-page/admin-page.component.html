@@ -966,14 +966,27 @@
             ></es-code-editor>
           </div>
         </div>
-        <div *ngIf="lucene.mode === 'SOLR' || lucene.mode === 'ELASTIC'" class="inputGroupGrow">
+        <div
+          class="inputGroupGrow"
+          *ngIf="lucene.mode === 'ELASTIC' && lucene.outputMode === 'view'"
+        >
+          <mat-label>raw elastic mode:</mat-label>
+          <mat-checkbox [(ngModel)]="lucene.elasticRaw" name="elasticRawMode"></mat-checkbox>
+        </div>
+        <div
+          *ngIf="lucene.mode === 'SOLR' || (lucene.mode === 'ELASTIC' && !lucene.elasticRaw)"
+          class="inputGroupGrow"
+        >
           <div class="info">{{ 'ADMIN.BROWSER.STORE' | translate }}</div>
           <mat-radio-group [(ngModel)]="lucene.store">
             <mat-radio-button name="solrStore" value="Workspace">Workspace</mat-radio-button>
             <mat-radio-button name="solrStore" value="Archive">Archive</mat-radio-button>
           </mat-radio-group>
         </div>
-        <div class="inputGroupGrow" *ngIf="lucene.mode === 'SOLR' || lucene.mode === 'ELASTIC'">
+        <div
+          class="inputGroupGrow"
+          *ngIf="lucene.mode === 'SOLR' || (lucene.mode === 'ELASTIC' && !lucene.elasticRaw)"
+        >
           <div class="info">{{ 'ADMIN.BROWSER.OUTPUT_MODE' | translate }}</div>
           <mat-radio-group [(ngModel)]="lucene.outputMode">
             <mat-radio-button name="solrMode" value="view">{{
@@ -983,13 +996,6 @@
               'ADMIN.BROWSER.OUTPUT_MODE_EXPORT' | translate
             }}</mat-radio-button>
           </mat-radio-group>
-        </div>
-        <div
-          class="inputGroupGrow"
-          *ngIf="lucene.mode === 'ELASTIC' && lucene.outputMode === 'view'"
-        >
-          <mat-label>raw elastic mode:</mat-label>
-          <mat-checkbox [(ngModel)]="lucene.elasticRaw" name="elasticRawMode"></mat-checkbox>
         </div>
 
         <ng-container *ngIf="lucene.outputMode === 'export'">
