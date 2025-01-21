@@ -14,13 +14,6 @@ import co.elastic.clients.transport.rest_client.RestClientOptions;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.Response;
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.vcard.VCard;
 import net.sourceforge.cardme.vcard.types.ExtendedType;
@@ -32,9 +25,6 @@ import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.ResultSetRow;
-import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.StringUtils;
@@ -42,7 +32,6 @@ import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.guest.GuestConfig;
@@ -65,7 +54,6 @@ import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.StringTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.tools.URLHelper;
-import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.shared.Contributor;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.restservices.shared.NodeSearch;
@@ -1524,6 +1512,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     private SearchResultNodeRef searchByQuery(QueryVariant query, int skipCount, int maxItems, SortDefinition sortDefinition) throws IOException {
+        if((maxItems - skipCount) > 10000){
+            return  searchAllByQuery(query, sortDefinition, WORKSPACE_INDEX);
+        }
         return searchByQuery(query, skipCount, maxItems, sortDefinition, WORKSPACE_INDEX);
     }
 
@@ -2016,7 +2007,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             return this.searchAllByQuery(
                     finalQuery.build(),
                     sort,
-                    AUTHORITIES_INDEX);
+                    AUTHORITIES_INDEX).getData();
         } else {
             assert memberships != null;
             return memberships.stream().map(m -> {
@@ -2034,7 +2025,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     }
 
-    private List<NodeRef> searchAllByQuery(QueryVariant query, SortDefinition sortDefinition, String index) throws IOException {
+    private SearchResultNodeRef searchAllByQuery(QueryVariant query, SortDefinition sortDefinition, String index) throws IOException {
         checkClient();
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder().index(index)
                 .query(query._toQuery())
@@ -2047,14 +2038,19 @@ public class SearchServiceElastic extends SearchServiceImpl {
             sortDefinition.applyToSearchSourceBuilder(searchRequestBuilder);
         }
         SearchToken token = new SearchToken();
-        return fetchAllFromRequest(token, searchRequestBuilder);
+        List<NodeRef> nodeRefs = fetchAllFromRequest(token, searchRequestBuilder);
+        SearchResultNodeRef sr = new SearchResultNodeRef();
+        sr.setData(nodeRefs);
+        sr.setStartIDX(0);
+        sr.setNodeCount(nodeRefs.size());
+        return sr;
     }
 
     public List<NodeRef> getAllPinnedCollections() throws IOException {
         BoolQuery.Builder b = QueryBuilders.bool();
         b.must(m -> m.term(t -> t.field("aspects").value(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION_PINNED))));
         b.must(m -> m.term(t -> t.field("nodeRef.storeRef.protocol").value("workspace")));
-        return searchAllByQuery(b.build(), null, WORKSPACE_INDEX);
+        return searchAllByQuery(b.build(), null, WORKSPACE_INDEX).getData();
     }
 
     @Override
@@ -2070,7 +2066,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 t -> t.field("properties.sys:node-uuid").value(nodeId)
         ));
         globalConditions.must(m -> m.bool(b.build()));
-        return searchAllByQuery(globalConditions.build(), null, WORKSPACE_INDEX);
+        return searchAllByQuery(globalConditions.build(), null, WORKSPACE_INDEX).getData();
     }
 
     @Override
@@ -2261,13 +2257,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
         BoolQuery.Builder globalConditions = getGlobalConditions(null, null, null, null,true);
         globalConditions.must(m -> m.bool(b.build()));
 
-        if(searchToken.getMaxResult() > 10000){
-            List<NodeRef> nodeRefs = searchAllByQuery(globalConditions.build(), searchToken.getSortDefinition(), WORKSPACE_INDEX);
-            SearchResultNodeRef sr = new SearchResultNodeRef();
-            sr.setData(nodeRefs);
-            sr.setStartIDX(0);
-            sr.setNodeCount(nodeRefs.size());
-            return sr;
+        if((searchToken.getMaxResult() - searchToken.getFrom()) > 10000){
+            return  searchAllByQuery(globalConditions.build(), searchToken.getSortDefinition(), WORKSPACE_INDEX);
         }else {
             return searchByQuery(globalConditions.build(), searchToken.getFrom(), searchToken.getMaxResult(), searchToken.getSortDefinition());
         }
