@@ -70,6 +70,7 @@ type LuceneData = {
     outputMode?: 'view' | 'export';
     exportFormat?: 'json' | 'csv';
     index?: string;
+    elasticRaw: boolean;
 };
 
 type Job = {
@@ -196,6 +197,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         offset: 0,
         count: 100,
         outputMode: 'view',
+        elasticRaw: false,
     };
     public oaiSave = true;
     public repositoryVersion: string;
@@ -331,7 +333,10 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             propertyFilter: [RestConstants.ALL],
         };
         this.globalProgress = true;
-        if (this.lucene.mode === 'SOLR') {
+        if (
+            this.lucene.mode === 'SOLR' ||
+            (this.lucene.mode === 'ELASTIC' && !this.lucene.elasticRaw)
+        ) {
             this.admin
                 .searchLucene(this.lucene.query, this.lucene.store, authorities, request)
                 .subscribe(
@@ -344,7 +349,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
                         this.toast.error(error);
                     },
                 );
-        } else if (this.lucene.mode === 'ELASTIC') {
+        } else if (this.lucene.mode === 'ELASTIC' && this.lucene.elasticRaw) {
             this.admin.searchElastic(this.lucene.query, this.lucene.index).subscribe(
                 (data) => {
                     this.globalProgress = false;

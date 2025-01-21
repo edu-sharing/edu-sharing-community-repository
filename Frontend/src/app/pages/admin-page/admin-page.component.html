@@ -966,14 +966,14 @@
             ></es-code-editor>
           </div>
         </div>
-        <div *ngIf="lucene.mode === 'SOLR'" class="inputGroupGrow">
+        <div *ngIf="lucene.mode === 'SOLR' || lucene.mode === 'ELASTIC'" class="inputGroupGrow">
           <div class="info">{{ 'ADMIN.BROWSER.STORE' | translate }}</div>
           <mat-radio-group [(ngModel)]="lucene.store">
             <mat-radio-button name="solrStore" value="Workspace">Workspace</mat-radio-button>
             <mat-radio-button name="solrStore" value="Archive">Archive</mat-radio-button>
           </mat-radio-group>
         </div>
-        <div class="inputGroupGrow" *ngIf="lucene.mode === 'SOLR'">
+        <div class="inputGroupGrow" *ngIf="lucene.mode === 'SOLR' || lucene.mode === 'ELASTIC'">
           <div class="info">{{ 'ADMIN.BROWSER.OUTPUT_MODE' | translate }}</div>
           <mat-radio-group [(ngModel)]="lucene.outputMode">
             <mat-radio-button name="solrMode" value="view">{{
@@ -984,6 +984,14 @@
             }}</mat-radio-button>
           </mat-radio-group>
         </div>
+        <div
+          class="inputGroupGrow"
+          *ngIf="lucene.mode === 'ELASTIC' && lucene.outputMode === 'view'"
+        >
+          <mat-label>raw elastic mode:</mat-label>
+          <mat-checkbox [(ngModel)]="lucene.elasticRaw" name="elasticRawMode"></mat-checkbox>
+        </div>
+
         <ng-container *ngIf="lucene.outputMode === 'export'">
           <div class="inputGroupGrow">
             <mat-form-field>
@@ -1020,7 +1028,9 @@
             </div>
           </div>
         </ng-container>
-        <ng-container *ngIf="lucene.mode === 'SOLR'">
+        <ng-container
+          *ngIf="lucene.mode === 'SOLR' || (lucene.mode === 'ELASTIC' && !lucene.elasticRaw)"
+        >
           <div class="inputGroupGrow">
             <div class="info">{{ 'ADMIN.BROWSER.LUCENE_AUTHORITIES' | translate }}</div>
             <es-authority-search-input
@@ -1047,7 +1057,9 @@
           </div>
         </ng-container>
         <div class="inputGroupGrow lucenePaging" *ngIf="lucene.outputMode === 'view'">
-          <ng-container *ngIf="lucene.mode === 'SOLR'">
+          <ng-container
+            *ngIf="(lucene.mode === 'SOLR' || lucene.mode === 'ELASTIC') && !lucene.elasticRaw"
+          >
             <mat-form-field>
               <mat-label>{{ 'ADMIN.BROWSER.LUCENE_OFFSET' | translate }}</mat-label>
               <input matInput type="number" name="luceneOffset" [(ngModel)]="lucene.offset" />
