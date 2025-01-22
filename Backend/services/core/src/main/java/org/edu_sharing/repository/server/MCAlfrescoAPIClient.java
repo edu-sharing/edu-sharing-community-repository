@@ -3287,39 +3287,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         return nodeService.getType(new NodeRef(storeRef, nodeId)).toString();
     }
 
-    private NodeRef getAuthority(String name) {
-        SearchParameters sp = new SearchParameters();
-
-        sp.addStore(storeRef);
-        sp.setLanguage("lucene");
-        sp.setQuery("+TYPE:\""
-                + ContentModel.TYPE_AUTHORITY_CONTAINER
-                + "\""
-                + " +@"
-                + QueryParser.escape("{" + ContentModel.PROP_AUTHORITY_NAME.getNamespaceURI() + "}"
-                + ISO9075.encode(ContentModel.PROP_AUTHORITY_NAME.getLocalName())) + ":\"" + name + "\"");
-        ResultSet rs = null;
-        try {
-            rs = searchService.query(sp);
-            if (rs.length() == 0) {
-                return null;
-            } else {
-                for (ResultSetRow row : rs) {
-                    String test = DefaultTypeConverter.INSTANCE.convert(String.class,
-                            nodeService.getProperty(row.getNodeRef(), ContentModel.PROP_AUTHORITY_NAME));
-                    if (test.equals(name)) {
-                        return row.getNodeRef();
-                    }
-                }
-            }
-            return null;
-        } finally {
-            if (rs != null) {
-                rs.close();
-            }
-        }
-    }
-
     private String getAuthorityName(String groupNodeId) {
         return DefaultTypeConverter.INSTANCE.convert(String.class,
                 nodeService.getProperty(new NodeRef(storeRef, groupNodeId), ContentModel.PROP_AUTHORITY_NAME));
