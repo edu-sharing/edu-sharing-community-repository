@@ -55,15 +55,6 @@ public interface MCAlfrescoClient {
 	 * @throws Throwable
 	 */
 	public Map<String, Map<String, Object>> getBaskets() throws Throwable;
-
-	/**
-	 * search for nodes with a lucene string
-	 * 
-	 * @param luceneString a lucene String
-	 * @return nested Map with nodeId's and propeties
-	 * @throws Throwable
-	 */
-	public Map<String, Map<String, Object>> search(String luceneString) throws Throwable;
 	
 	/**
 	 * get all children of a given parentId

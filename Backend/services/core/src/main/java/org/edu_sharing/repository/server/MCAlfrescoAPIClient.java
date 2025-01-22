@@ -397,10 +397,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
     }
 
-    public Map<String, Map<String, Object>> search(String luceneString) throws Throwable {
-        return this.search(luceneString, storeRef.getProtocol(), storeRef.getIdentifier(), 0, 10000).getData();
-    }
-
     public SearchResult search(String luceneString, String storeProtocol, String storeName, int from, int maxResult) throws Throwable {
 
         StoreRef storeRef = new StoreRef(storeProtocol, storeName);

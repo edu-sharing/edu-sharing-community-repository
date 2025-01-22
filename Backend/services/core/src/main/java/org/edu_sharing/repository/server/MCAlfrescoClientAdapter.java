@@ -16,11 +16,6 @@ public class MCAlfrescoClientAdapter extends MCAlfrescoBaseClient {
 	}
 
 	@Override
-	public Map<String, Map<String, Object>> search(String luceneString) throws Throwable {
-		return null;
-	}
-
-	@Override
 	public Map<String, Map<String, Object>> getChildren(String parentID) throws Throwable {
 		return null;
 	}
