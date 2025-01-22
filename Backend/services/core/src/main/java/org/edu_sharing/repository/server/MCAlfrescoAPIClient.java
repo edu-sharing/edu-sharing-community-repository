@@ -3287,10 +3287,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         return nodeService.getType(new NodeRef(storeRef, nodeId)).toString();
     }
 
-    private String getAuthorityName(String groupNodeId) {
-        return DefaultTypeConverter.INSTANCE.convert(String.class,
-                nodeService.getProperty(new NodeRef(storeRef, groupNodeId), ContentModel.PROP_AUTHORITY_NAME));
-    }
 
     private void buildUpProperties(Map<String, Object> properties) {
 
