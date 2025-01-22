@@ -457,9 +457,7 @@ public interface MCAlfrescoClient {
 	public void removeGlobalAspectFromGroup(String groupNodeId) throws Exception;
 
 	public User getOwner(String storeId,String storeProtocol,String nodeId);
-	
-	public SearchResult search(String luceneString, String storeProtocol, String storeName, int from, int maxResult) throws Throwable;
-	
+
 	public void removeNode(String storeProtocol, String storeId, String nodeId);
 	
 	public Map<String, Object> getProperties(String storeId, String storeProtocol, String nodeId) throws Throwable;

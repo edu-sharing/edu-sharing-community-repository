@@ -397,39 +397,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
     }
 
-    public SearchResult search(String luceneString, String storeProtocol, String storeName, int from, int maxResult) throws Throwable {
-
-        StoreRef storeRef = new StoreRef(storeProtocol, storeName);
-        Map<String, Map<String, Object>> result = new LinkedHashMap<>();
-
-
-        SearchParameters searchParameters = new SearchParameters();
-        searchParameters.addStore(storeRef);
-
-        searchParameters.setLanguage(SearchService.LANGUAGE_LUCENE);
-
-        searchParameters.setQuery(luceneString);
-
-        searchParameters.setSkipCount(from);
-        searchParameters.setMaxItems(maxResult);
-
-        ResultSet resultSet = searchService.query(searchParameters);
-
-        List<NodeRef> nodeRefs = resultSet.getNodeRefs();
-        for (NodeRef nodeRef : nodeRefs) {
-            Map<String, Object> props = getProperties(new NodeRef(storeRef, nodeRef.getId()));
-            result.put(nodeRef.getId(), props);
-        }
-
-        SearchResult sr = new SearchResult();
-        sr.setData(result);
-        sr.setStartIDX(from);
-        sr.setNodeCount(maxResult);
-        sr.setNodeCount((int) resultSet.getNumberFound());
-
-        return sr;
-    }
-
     public String formatData(String type, String key, Object value, String metadataSetId) {
         String returnValue = null;
         if (key != null && value != null) {

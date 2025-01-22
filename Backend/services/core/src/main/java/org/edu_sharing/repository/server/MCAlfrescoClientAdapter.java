@@ -285,12 +285,6 @@ public class MCAlfrescoClientAdapter extends MCAlfrescoBaseClient {
 	}
 
 	@Override
-	public SearchResult search(String luceneString, String storeProtocol, String storeName, int from, int maxResult)
-			throws Throwable {
-		return null;
-	}
-
-	@Override
 	public void removeNode(String storeProtocol, String storeId, String nodeId) {
 	}
 
