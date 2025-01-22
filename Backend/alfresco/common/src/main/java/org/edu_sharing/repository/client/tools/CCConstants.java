@@ -189,6 +189,15 @@ public class CCConstants {
 
 	public final static String NAMESPACE_EXIF = "http://www.alfresco.org/model/exif/1.0";
 
+	///{http://www.alfresco.org/model/application/1.0}company_home/{http://www.alfresco.org/model/site/1.0}sites/{http://www.alfresco.org/model/content/1.0}surf-config/{http://www.alfresco.org/model/content/1.0}components/{http://www.alfresco.org/model/content/1.0}page.title.user_x007e_admin_x007e_dashboard.xml
+	public final static String NAMESPACE_APP = "http://www.alfresco.org/model/application/1.0";
+
+	public final static String NAMESPACE_SITE = "http://www.alfresco.org/model/site/1.0";
+
+	public final static String NAMESPACE_SHORT_APP = "app";
+
+	public final static String NAMESPACE_SHORT_SITE = "st";
+
 	public final static String NAMESPACE_SHORT_CCM = "ccm";
 
 	public final static String NAMESPACE_SHORT_LOM = "cclom";
@@ -2151,7 +2160,9 @@ public class CCConstants {
 			NAMESPACE_LOM, NAMESPACE_SHORT_LOM,
 			NAMESPACE_SYS,  NAMESPACE_SHORT_SYS,
 			NAMESPACE_VIRTUAL, NAMESPACE_SHORT_VIRTUAL,
-			NAMESPACE_EXIF, NAMESPACE_SHORT_EXIF
+			NAMESPACE_EXIF, NAMESPACE_SHORT_EXIF,
+			NAMESPACE_APP, NAMESPACE_SHORT_APP,
+			NAMESPACE_SITE, NAMESPACE_SHORT_SITE
 	);
 
     /**

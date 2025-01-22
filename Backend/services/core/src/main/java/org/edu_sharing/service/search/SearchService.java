@@ -98,4 +98,6 @@ public interface SearchService {
 	List<org.edu_sharing.service.model.NodeRef> getReferenceObjects(String nodeId) throws IOException;
 
 	SearchResultNodeRef searchByProperty(SearchToken searchToken, SearchService.CombineMode combineMode, List<String> properties, List<String> value, List<String> comparator) throws IOException;
+
+	SearchResultNodeRef searchByDisplayPath(String path, String index) throws IOException;
 }

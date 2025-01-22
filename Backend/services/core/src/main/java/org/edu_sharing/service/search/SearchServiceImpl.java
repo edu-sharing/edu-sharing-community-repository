@@ -631,4 +631,9 @@ public class SearchServiceImpl implements SearchService {
 	public SearchResultNodeRef searchByProperty(SearchToken searchToken, CombineMode combineMode, List<String> properties, List<String> value, List<String> comparator) throws IOException {
 		throw new NotImplementedException("searchByProperty not supported via Solr");
 	}
+
+	@Override
+	public SearchResultNodeRef searchByDisplayPath(String path, String index) throws IOException {
+		throw new NotImplementedException("searchByDisplayPath not supported via Solr");
+	}
 }

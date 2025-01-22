@@ -55,17 +55,7 @@ public interface MCAlfrescoClient {
 	 * @throws Throwable
 	 */
 	public Map<String, Map<String, Object>> getBaskets() throws Throwable;
-	
-	/**
-	 * search for nodes with a lucene string, filtered by type 
-	 * 
-	 * @param luceneString a lucene String
-	 * @param type the given type
-	 * @return nested Map with nodeId's and nodes
-	 * @throws Exception
-	 */
-	public Map<String,Map<String,Object>> search(String luceneString, String type) throws Exception;
-	
+
 	/**
 	 * search for nodes with a lucene string
 	 * 

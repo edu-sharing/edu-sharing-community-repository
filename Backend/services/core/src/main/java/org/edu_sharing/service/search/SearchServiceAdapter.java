@@ -127,4 +127,9 @@ public class SearchServiceAdapter implements SearchService {
 	public SearchResultNodeRef searchByProperty(SearchToken searchToken, CombineMode combineMode, List<String> properties, List<String> value, List<String> comparator) throws IOException {
 		return null;
 	}
+
+	@Override
+	public SearchResultNodeRef searchByDisplayPath(String path, String index) throws IOException {
+		return null;
+	}
 }

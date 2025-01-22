@@ -397,25 +397,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
     }
 
-    public Map<String, Map<String, Object>> search(String luceneString, String type) throws Exception {
-
-        String queryString = "TYPE:\"" + type + "\"";
-        if (StringUtils.isNotBlank(luceneString)) {
-            queryString = queryString + " AND " + luceneString;
-        }
-
-        Map<String, Map<String, Object>> result = new HashMap<>();
-        ResultSet resultSet = searchService.query(storeRef, SearchService.LANGUAGE_LUCENE, queryString);
-
-        List<NodeRef> nodeRefs = resultSet.getNodeRefs();
-        for (NodeRef nodeRef : nodeRefs) {
-            Map<String, Object> props = getPropertiesSimple(nodeRef.getId());
-            result.put(nodeRef.getId(), props);
-        }
-        return result;
-    }
-
-
     public Map<String, Map<String, Object>> search(String luceneString) throws Throwable {
         return this.search(luceneString, storeRef.getProtocol(), storeRef.getIdentifier(), 0, 10000).getData();
     }

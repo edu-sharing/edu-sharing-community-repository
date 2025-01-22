@@ -2280,4 +2280,15 @@ public class SearchServiceElastic extends SearchServiceImpl {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public SearchResultNodeRef searchByDisplayPath(String path, String index) throws IOException {
+        BoolQuery.Builder globalConditions = getGlobalConditions(null, null, null, null,true);
+        globalConditions.must(m -> m.wildcard(QueryBuilders.wildcard()
+                .field("fulldisplaypath")
+                .value(path)
+                .build()
+        ));
+        return searchAllByQuery(globalConditions.build(),null,index);
+    }
 }
