@@ -110,4 +110,6 @@ public interface AuthorityService {
 	 * @param customAttributes
 	 */
 	void setCustomAttributes(String authorityName, Map<String, Serializable> customAttributes);
+
+	String[] searchGroupNames(String pattern) throws Exception;
 }
