@@ -1,29 +1,24 @@
 package org.edu_sharing.service.statistic;
 
-import java.util.*;
-
-import org.alfresco.repo.search.impl.solr.ESSearchParameters;
-import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.SearchParameters;
-import org.alfresco.service.cmr.search.SearchParameters.FieldFacet;
-import org.alfresco.service.cmr.search.SearchParameters.FieldFacetMethod;
-import org.alfresco.service.cmr.search.SearchParameters.FieldFacetSort;
-import org.alfresco.util.Pair;
-import org.apache.lucene.queryparser.classic.QueryParser;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.MetadataReader;
-import org.edu_sharing.metadataset.v2.MetadataSet;
-import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
-import org.edu_sharing.repository.client.rpc.SearchResult;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.RepoFactory;
-import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.search.SearchService;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchToken;
 import org.springframework.context.ApplicationContext;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class StatisticServiceImpl implements StatisticService {
 
@@ -51,43 +46,48 @@ public class StatisticServiceImpl implements StatisticService {
 
 	@Override
 	public Statistics get(String context, List<String> properties, Filter filter) throws Throwable {
-			String query = "";
+		BoolQuery.Builder query = QueryBuilders.bool();
 
-			if (context != null) {
+		if (context != null) {
 
-				if (context.equals("-root-")) {
-					context = client.getHomeFolderID((String) client.getAuthenticationInfo().get(CCConstants.AUTH_USERNAME));
-				}
-				
-				String pathParent = (context != null) ? client.getPath(context) : "";
-
-				query = "PATH:\""+pathParent+"//.\"";
+			if (context.equals("-root-")) {
+				context = client.getHomeFolderID((String) client.getAuthenticationInfo().get(CCConstants.AUTH_USERNAME));
 			}
 
-			for (FilterEntry entry : filter.getEntries()) {
-				for (String val : entry.getValues()) {
-					
-					String prop = entry.getProperty();
-					String shortProp = CCConstants.getValidLocalName(prop);
-					if(shortProp != null) prop = shortProp;
-					
-					prop = "@" + prop.replaceFirst(":", "\\\\:");
-					query += (query.length() > 0) ? " AND " : "";
-					query += prop + ":\"" + val + "\"";
-				}
+			String pathParent = (context != null) ? client.getPath(context) : "";
+			query.must(m -> m.wildcard(QueryBuilders.wildcard()
+					.field("fulldisplaypath")
+					.value(pathParent.replaceFirst("/","")+"*")
+					.build()
+			));
+
+		}
+
+		for (FilterEntry entry : filter.getEntries()) {
+			for (String val : entry.getValues()) {
+
+				String prop = entry.getProperty();
+				String shortProp = CCConstants.getValidLocalName(prop);
+
+				query.must(m -> m.term(t -> t.field(shortProp).value(val)));
 			}
+		}
 
-			SearchResult result = this.client.searchSolr(query, 0, 0, properties, 1, -1);
-			Map<String, Map<String, Integer>> facettes = result.getCountedProps();
+		SearchService localService = SearchServiceFactory.getLocalService();
+		SearchToken searchToken = new SearchToken();
+		searchToken.setFrom(0);
+		searchToken.setMaxResult(0);
+		searchToken.setElasticQuery(query.build());
+		searchToken.setFacets(properties);
+		SearchResultNodeRef search = localService.search(searchToken);
 
-			Statistics stats = new Statistics();
-			for (Map.Entry<String, Map<String, Integer>> entry : facettes.entrySet()) {
-				StatisticEntry statEntry = new StatisticEntry();
-				statEntry.setProperty(entry.getKey());
-				statEntry.setStatistic(entry.getValue());
-				stats.getEntries().add(statEntry);
-			}
-			return stats;
-
+		Statistics stats = new Statistics();
+		search.getFacets().stream().forEach(f -> {
+			StatisticEntry statEntry = new StatisticEntry();
+			statEntry.setProperty(f.getProperty());
+			statEntry.setStatistic(f.getValues().stream().collect(Collectors.toMap(v -> v.getValue(),v->v.getCount())));
+			stats.getEntries().add(statEntry);
+		});
+		return stats;
 	}
 }

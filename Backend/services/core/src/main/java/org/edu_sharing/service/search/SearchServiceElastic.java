@@ -381,7 +381,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     @NotNull
-    private List<NodeSearch.Facet> getFacets(Map<String, Aggregation> aggregations, SearchResponse<Map> resp) {
+    private List<NodeSearch.Facet> getFacets(Map<String, Aggregation> aggregations,  ResponseBody<Map> resp) {
         List<NodeSearch.Facet> facetsResult = new ArrayList<>();
         for (Map.Entry<String, Aggregate> a : resp.aggregations().entrySet()) {
             if (a.getValue().isFilter()) {
@@ -402,7 +402,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         facetsResult.add(getMultitermFacet(aggregation.getKey(), multiTerm, definition));
                     }
                 }
-            } else {
+            }else if(a.getValue().isSterms()){
+                if (a.getValue().isSterms()) {
+                    Aggregation definition = aggregations.get(a.getKey());
+                    StringTermsAggregate sterms = a.getValue().sterms();
+                    facetsResult.add(getFacet(a.getKey(), sterms, definition));
+                }
+            }else {
                 logger.error("non supported aggregation " + a.getKey());
             }
         }
@@ -472,10 +478,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
             searchToken.getSortDefinition().applyToSearchSourceBuilder(searchRequest);
         }
 
-        return fetchAllFromRequest(searchToken, searchRequest);
+        return fetchAllFromRequest(searchToken, searchRequest,null).getData();
     }
 
-    private @NotNull List<NodeRef> fetchAllFromRequest(SearchToken searchToken, SearchRequest.Builder searchRequest) throws IOException {
+    private @NotNull SearchResultNodeRef fetchAllFromRequest(SearchToken searchToken, SearchRequest.Builder searchRequest,Map<String,Aggregation> aggregations) throws IOException {
         SearchResultNodeRef sr = new SearchResultNodeRef();
         List<NodeRef> data = new ArrayList<>();
         sr.setData(data);
@@ -490,6 +496,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     searchResponse = client
                             .withTransportOptions(this::getRequestOptions)
                             .search(searchRequest.build(), Map.class);
+                    if(aggregations != null) {
+                        sr.setFacets(getFacets(aggregations,searchResponse));
+                    }
                 } else {
                     final String usedScrollId = scrollId;
                     searchResponse = client
@@ -513,7 +522,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
             throw e;
         }
         logger.info("result count: " + data.size());
-        return data;
+        sr.setStartIDX(0);
+        sr.setNodeCount(data.size());
+        return sr;
     }
 
     private List<String> appendDefaultExcludes(List<String> excludes) {
@@ -1512,14 +1523,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     private SearchResultNodeRef searchByQuery(QueryVariant query, int skipCount, int maxItems, SortDefinition sortDefinition) throws IOException {
-        return searchByQuery(query, skipCount, maxItems, sortDefinition, null);
+        return searchByQuery(query, skipCount, maxItems, sortDefinition, null,null);
     }
 
-    private SearchResultNodeRef searchByQuery(QueryVariant query, int skipCount, int maxItems, SortDefinition sortDefinition, String index) throws IOException {
+    private SearchResultNodeRef searchByQuery(QueryVariant query, int skipCount, int maxItems, SortDefinition sortDefinition, String index, Map<String,Aggregation> aggregations) throws IOException {
         if(index == null) index = WORKSPACE_INDEX;
 
         if((maxItems - skipCount) > 10000){
-            return  searchAllByQuery(query, sortDefinition, index);
+            return  searchAllByQuery(query, sortDefinition, index,aggregations);
         }
         checkClient();
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder().index(index);
@@ -1530,6 +1541,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
         searchRequestBuilder.source(src -> src
                 .filter(filter -> filter.excludes(appendDefaultExcludes(new ArrayList<>())))
         );
+        if(aggregations != null){
+            searchRequestBuilder.aggregations(aggregations);
+        }
         if (sortDefinition != null) {
             sortDefinition.applyToSearchSourceBuilder(searchRequestBuilder);
         }
@@ -1543,6 +1557,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
         sr.setData(hits.hits().stream().map(h -> transformSearchHit(isAdmin, authorities, user, h.source(), false)).collect(Collectors.toList()));
         sr.setStartIDX(skipCount);
         sr.setNodeCount((int) hits.total().value());
+
+        if(aggregations != null){
+            sr.setFacets(getFacets(aggregations,searchResponse));
+        }
+
         return sr;
     }
 
@@ -1617,7 +1636,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         try {
 
 
-            SearchResultNodeRef searchResultNodeRef = this.searchByQuery(finalQuery.build(), from, nrOfResults, null, AUTHORITIES_INDEX);
+            SearchResultNodeRef searchResultNodeRef = this.searchByQuery(finalQuery.build(), from, nrOfResults, null, AUTHORITIES_INDEX,null);
 
             searchResultNodeRef.getData().stream().forEach(c -> {
                 String authorityName = (String) c.getProperties().get(CCConstants.CM_PROP_AUTHORITY_NAME);
@@ -2009,7 +2028,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             return this.searchAllByQuery(
                     finalQuery.build(),
                     sort,
-                    AUTHORITIES_INDEX).getData();
+                    AUTHORITIES_INDEX,null).getData();
         } else {
             assert memberships != null;
             return memberships.stream().map(m -> {
@@ -2027,7 +2046,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     }
 
-    private SearchResultNodeRef searchAllByQuery(QueryVariant query, SortDefinition sortDefinition, String index) throws IOException {
+    private SearchResultNodeRef searchAllByQuery(QueryVariant query, SortDefinition sortDefinition, String index, Map<String,Aggregation> aggregations) throws IOException {
         checkClient();
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder().index(index)
                 .query(query._toQuery())
@@ -2036,15 +2055,15 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 .source(src -> src
                         .filter(filter -> filter.excludes(appendDefaultExcludes(new ArrayList<>())))
                 );
+        if(aggregations != null){
+            searchRequestBuilder.aggregations(aggregations);
+        }
         if (sortDefinition != null) {
             sortDefinition.applyToSearchSourceBuilder(searchRequestBuilder);
         }
         SearchToken token = new SearchToken();
-        List<NodeRef> nodeRefs = fetchAllFromRequest(token, searchRequestBuilder);
-        SearchResultNodeRef sr = new SearchResultNodeRef();
-        sr.setData(nodeRefs);
-        sr.setStartIDX(0);
-        sr.setNodeCount(nodeRefs.size());
+        SearchResultNodeRef sr  = fetchAllFromRequest(token, searchRequestBuilder,aggregations);
+
         return sr;
     }
 
@@ -2052,7 +2071,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         BoolQuery.Builder b = QueryBuilders.bool();
         b.must(m -> m.term(t -> t.field("aspects").value(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION_PINNED))));
         b.must(m -> m.term(t -> t.field("nodeRef.storeRef.protocol").value("workspace")));
-        return searchAllByQuery(b.build(), null, WORKSPACE_INDEX).getData();
+        return searchAllByQuery(b.build(), null, WORKSPACE_INDEX,null).getData();
     }
 
     @Override
@@ -2068,7 +2087,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 t -> t.field("properties.sys:node-uuid").value(nodeId)
         ));
         globalConditions.must(m -> m.bool(b.build()));
-        return searchAllByQuery(globalConditions.build(), null, WORKSPACE_INDEX).getData();
+        return searchAllByQuery(globalConditions.build(), null, WORKSPACE_INDEX,null).getData();
     }
 
     @Override
@@ -2156,7 +2175,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                             skipCount,
                             maxValues,
                             sort,
-                            AUTHORITIES_INDEX);
+                            AUTHORITIES_INDEX,null);
                     // do in transaction for better performance of getProperty
                     return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
                         List<EduGroup> result = new ArrayList<>();
@@ -2260,7 +2279,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         globalConditions.must(m -> m.bool(b.build()));
 
         if((searchToken.getMaxResult() - searchToken.getFrom()) > 10000){
-            return  searchAllByQuery(globalConditions.build(), searchToken.getSortDefinition(), WORKSPACE_INDEX);
+            return  searchAllByQuery(globalConditions.build(), searchToken.getSortDefinition(), WORKSPACE_INDEX,null);
         }else {
             return searchByQuery(globalConditions.build(), searchToken.getFrom(), searchToken.getMaxResult(), searchToken.getSortDefinition());
         }
@@ -2275,7 +2294,20 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
             BoolQuery.Builder globalConditions = getGlobalConditions(searchToken.getAuthorityScope(), null, null,null,scoped);
             globalConditions.must(searchToken.getElasticQuery()._toQuery());
-            return searchByQuery(globalConditions.build(), searchToken.getFrom(), searchToken.getMaxResult(), searchToken.getSortDefinition(),searchToken.getElasticIndex());
+
+            Map<String,Aggregation> aggregations = null;
+            if(searchToken.getFacets() != null && !searchToken.getFacets().isEmpty()){
+                aggregations = searchToken.getFacets()
+                        .stream()
+                        .collect(Collectors.toMap(s -> s,s ->
+                                AggregationBuilders.terms()
+                                        .field((MetadataElasticSearchHelper.nonKeywordFacets.contains(s)) ? "properties."+s : "properties."+s+".keyword")
+                                        .size(searchToken.getFacetLimit())
+                                        .minDocCount(searchToken.getFacetsMinCount())
+                                        .build()._toAggregation()));
+
+            }
+            return searchByQuery(globalConditions.build(), searchToken.getFrom(), searchToken.getMaxResult(), searchToken.getSortDefinition(),searchToken.getElasticIndex(),aggregations);
         }catch (IOException e){
             throw new RuntimeException(e);
         }
@@ -2289,6 +2321,6 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 .value(path)
                 .build()
         ));
-        return searchAllByQuery(globalConditions.build(),null,index);
+        return searchAllByQuery(globalConditions.build(),null,index,null);
     }
 }
