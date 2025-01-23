@@ -4,6 +4,7 @@ import lombok.NonNull;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.metadataset.v2.MetadataSet;
+import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
@@ -60,19 +61,21 @@ public class StatisticDao {
 			String mdsProp = group;
 			StatisticsGlobal.StatisticsGroup overall = new StatisticsGlobal.StatisticsGroup();
 			MetadataSet mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id);
+			MetadataWidget mdsLicenseWidget = mds.findWidget("license");
+
 			SearchResultNodeRef srOverall = search(Map.of(), facets, mds);
 			overall.count = (srOverall.getNodeCount());
 			overall.subGroups = getFacets(srOverall,subGroup);
 			statistics.setOverall(overall);
 			List<StatisticsGlobal.StatisticsKeyGroup> groups = new ArrayList<>();
 			statistics.setGroups(groups);
-			List.of("OPEN", "OER", "CC_BY_OPEN", "CC_BY_RESTRICTED", "CC_BY_ALL", "COPYRIGHT_OTHERS")
+			mdsLicenseWidget.getValues().stream().map(v -> v.getKey()).collect(Collectors.toList())
 					.forEach(v -> {
 						SearchResultNodeRef srGroup = search(Map.of(mdsProp, new String[]{v}), facets, mds);
 						if (srGroup.getNodeCount() > 0) {
 							StatisticsGlobal.StatisticsKeyGroup g = new StatisticsGlobal.StatisticsKeyGroup();
 							g.key = v;
-							g.displayName = mds.findWidget("license").getValues().stream().filter(vs -> vs.getKey().equals(v)).findFirst().map(m -> m.getCaption()).orElse(v);//I18nAngular.getTranslationAngular("common", "LICENSE." + v);
+							g.displayName = mdsLicenseWidget.getValues().stream().filter(vs -> vs.getKey().equals(v)).findFirst().map(m -> m.getCaption()).orElse(v);//I18nAngular.getTranslationAngular("common", "LICENSE." + v);
 							g.count = srGroup.getNodeCount();
 							g.subGroups = getFacets(srGroup,subGroup);
 							groups.add(g);
