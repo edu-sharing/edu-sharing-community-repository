@@ -258,11 +258,6 @@ public class MCAlfrescoClientAdapter extends MCAlfrescoBaseClient {
 	public void removeUserDefinedPreview(String nodeId) {
 	}
 
-	@Override
-	public SearchResult searchSolr(String query, int startIdx, int nrOfresults, List<String> facets,
-			int facetsMinCount, int facetsLimit) throws Throwable {
-		return null;
-	}
 
 	@Override
 	public String guessMimetype(String filename) {

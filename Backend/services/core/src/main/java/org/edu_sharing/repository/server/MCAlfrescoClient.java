@@ -447,8 +447,6 @@ public interface MCAlfrescoClient {
 	public void setUserDefinedPreview(String nodeId, byte[] content, String fileName);
 	
 	public void removeUserDefinedPreview(String nodeId);
-	
-	public SearchResult searchSolr(String query, int startIdx,int nrOfresults, List<String> facettes, int facettesMinCount, int facettesLimit) throws Throwable ;
 
 	public String guessMimetype(String filename);
 	
