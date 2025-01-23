@@ -46,19 +46,6 @@ public class StatisticServiceImpl implements StatisticService {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
-	
-	@Override
-	public long countForQuery(String mdsId,String queryId,String type,String customLucene) throws Throwable {
-		String lucene = getLucene(mdsId,queryId,type,customLucene);
-		SearchParameters searchParameters = new ESSearchParameters();
-		searchParameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
-		searchParameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-		searchParameters.setQuery(lucene);
-		searchParameters.setSkipCount(0);
-		searchParameters.setMaxItems(0);
-		ResultSet result = searchService.query(searchParameters);
-		return result.getNumberFound();
-	}
 
 	
 
@@ -102,47 +89,5 @@ public class StatisticServiceImpl implements StatisticService {
 			}
 			return stats;
 
-	}
-	private String getLucene(String mdsId, String queryId, String type, String customLucene) throws Exception {
-		MetadataSet set = MetadataHelper.getMetadataset(appInfo, mdsId);
-		String lucene=set.getQueries(MetadataReader.QUERY_SYNTAX_LUCENE).findBasequery(null);
-		String basequery=set.findQuery(queryId, MetadataReader.QUERY_SYNTAX_LUCENE).findBasequery(null);
-		if(basequery!=null && !basequery.trim().isEmpty()) {
-			lucene+=" AND ("+basequery+")";
-		}
-		lucene+=" AND TYPE:\""+ QueryParser.escape(type)+"\"";
-		if(customLucene!=null)
-			lucene+=" AND ("+customLucene+")";
-		return lucene;
-	}
-	@Override
-	public List<Map<String, Integer>> countFacetsForQuery(String mdsId, String queryId, String type, String customLucene,
-                                                          Collection<String> facets) throws Throwable {
-		String lucene=getLucene(mdsId,queryId,type,customLucene);
-		SearchParameters searchParameters = new ESSearchParameters();
-		for(String field : facets) {
-			FieldFacet facette = new FieldFacet(field);
-			facette.setMinCount(1);
-			facette.setMethod(FieldFacetMethod.ENUM);
-			facette.setSort(FieldFacetSort.COUNT);
-			searchParameters.addFieldFacet(facette);
-		}
-		searchParameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
-		searchParameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-		searchParameters.setQuery(lucene);
-		searchParameters.setSkipCount(0);
-		searchParameters.setMaxItems(0);
-		ResultSet result = searchService.query(searchParameters);
-		List<Map<String, Integer>> list=new ArrayList<Map<String, Integer>>();
-		for(String field : facets) {
-			List<Pair<String, Integer>> data = result.getFieldFacet(field);
-			Map<String, Integer> map = new HashMap<>();
-			for(Pair<String, Integer> d : data) {
-				if(d.getSecond()>0)
-					map.put(d.getFirst(), d.getSecond());
-			}
-			list.add(map);
-		}
-		return list;
 	}
 }
