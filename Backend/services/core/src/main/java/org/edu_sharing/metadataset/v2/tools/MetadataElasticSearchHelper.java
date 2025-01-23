@@ -279,9 +279,13 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                 .must(must->must.bool(qbFilter.build()))
                     .must(must->must.bool(qbNoFilter.build()))
                     .must(globalConditions);
-
+            //@TODO make more generic or fix in elastic model
+            List<String> nonKeywordFacets = List.of("cclom:format");
             List<MetadataQueryParameter.MetadataQueryFacet> fieldName = Collections.singletonList(
-                    new MetadataQueryParameter.MetadataQueryFacet("properties." + facet+".keyword", null)
+                    new MetadataQueryParameter.MetadataQueryFacet(
+                            (nonKeywordFacets.contains(facet)
+                                    ? "properties." + facet
+                                    : "properties." + facet+".keyword"), null)
             );
             MetadataQueryParameter parameter = query.findParameterByName(facet);
             if(parameter != null && parameter.getFacets() != null) {
