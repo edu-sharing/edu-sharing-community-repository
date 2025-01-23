@@ -94,26 +94,6 @@ public class StatisticDao {
         return user;
     }
 
-    private static String getGroupProperty(String group) {
-        if(group==null || group.trim().isEmpty()){
-            group="license";
-        }
-        if(group.equals("license")){
-            return CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY;
-        }
-        return CCConstants.getValidGlobalName(group);
-    }
-
-    private static Collection<String> getPrimaryGroup(String group) {
-	    if(group==null || group.trim().isEmpty()){
-            group="license";
-        }
-        if(group.equals("license")){
-            return CCConstants.getAllLicenseKeys();
-        }
-        throw new IllegalArgumentException("Unsupported groupe type: "+group);
-    }
-
 	private static List<StatisticsGlobal.StatisticsGroup.StatisticsSubGroup> getFacets(SearchResultNodeRef sr, List<String> facetsInput){
 		List<StatisticsGlobal.StatisticsGroup.StatisticsSubGroup> facets = new ArrayList<>();
 		List<NodeSearch.Facet> facetsRs = sr.getFacets();
@@ -150,34 +130,8 @@ public class StatisticDao {
 		}
 		return facets;
 	}
-	private static String escapeProperty(String property) {
-		return "@"+CCConstants.getValidLocalName(property).replace(":","\\:");
-	}
-	private static String getQuery(String property, List<String> values) {
-		String lucene="";
-		for(String value : values) {
-			if(!lucene.isEmpty())
-				lucene+=" OR ";
-			lucene+=property + ":\"" + value + "\"";
-		}
-		return lucene;
-	}
-	public static int countElements(String lucene) throws Throwable {
-		StatisticService statisticService = StatisticServiceFactory
-				.getStatisticService(ApplicationInfoList.getHomeRepository().getAppId());
-		return (int)statisticService.countForQuery(CCConstants.metadatasetdefault_id, MetadataSet.DEFAULT_CLIENT_QUERY,CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO), lucene);
-	}
-	public static List<Map<String,Integer>> countFacets(String lucene, Collection<String> facets) throws Throwable {
-		StatisticService statisticService = StatisticServiceFactory
-				.getStatisticService(ApplicationInfoList.getHomeRepository().getAppId());
-		return statisticService.countFacetsForQuery(CCConstants.metadatasetdefault_id, MetadataSet.DEFAULT_CLIENT_QUERY,CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO), lucene,facets);
-	}
-	public static int countUser(String lucene) throws Throwable {
-		// does not work at the moment because of scoped search service and permissions
-		StatisticService statisticService = StatisticServiceFactory
-				.getStatisticService(ApplicationInfoList.getHomeRepository().getAppId());
-		return (int)statisticService.countForQuery(CCConstants.metadatasetdefault_id, MetadataSet.DEFAULT_CLIENT_QUERY,"cm:person", lucene);
-	}
+
+
 	public Statistics get(String context, List<String> properties, Filter filter) throws DAOException {
 
 		try {
