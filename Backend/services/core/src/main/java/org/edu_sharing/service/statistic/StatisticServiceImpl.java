@@ -18,6 +18,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class StatisticServiceImpl implements StatisticService {
@@ -67,9 +68,9 @@ public class StatisticServiceImpl implements StatisticService {
 			for (String val : entry.getValues()) {
 
 				String prop = entry.getProperty();
-				String shortProp = CCConstants.getValidLocalName(prop);
+				String shortProp = Objects.requireNonNullElse(CCConstants.getValidLocalName(prop), prop);
 
-				query.must(m -> m.term(t -> t.field(shortProp).value(val)));
+				query.must(m -> m.term(t -> t.field("properties." + shortProp).value(val)));
 			}
 		}
 
