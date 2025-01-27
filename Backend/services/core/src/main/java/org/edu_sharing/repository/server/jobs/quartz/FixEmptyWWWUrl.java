@@ -1,89 +1,86 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Map;
-
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
-import org.alfresco.repo.version.VersionModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.SearchParameters;
-import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.version.VersionType;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchToken;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
-public class FixEmptyWWWUrl extends AbstractJob {
+import java.util.Date;
+
+@JobDescription(description = "removes ccm:wwwurl property from nodes when value is an empty string")
+public class FixEmptyWWWUrl extends AbstractJobMapAnnotationParams{
 	
 	Logger logger = Logger.getLogger(FixEmptyWWWUrl.class);
 	
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-	SearchService searchService = serviceRegistry.getSearchService();
+
 	NodeService nodeService = serviceRegistry.getNodeService();
-	
-	private static final int PAGE_SIZE = 100;
-	
+
+	org.edu_sharing.service.search.SearchService searchService = SearchServiceFactory.getLocalService();
+
 	BehaviourFilter policyBehaviourFilter = (BehaviourFilter)applicationContext.getBean("policyBehaviourFilter");
-	
-	boolean perisistentMode = false;
-	
-	public static final String PARAM_PERSIST = "PERSIST";
+
+	@JobFieldDescription(description = "if false job just logs which nodes are found and would be updated")
+	boolean persistentMode = true;
 	
 	int counter = 0;
-	
+
 	@Override
-	public void execute(JobExecutionContext context) throws JobExecutionException {
-		String persist = (String)context.getJobDetail().getJobDataMap().get(PARAM_PERSIST);
-		perisistentMode = new Boolean(persist);
+	protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
 		AuthenticationUtil.RunAsWork<Void> runAs = new AuthenticationUtil.RunAsWork<Void>() {
 			@Override
 			public Void doWork() throws Exception {
-				execute(0);
+				process();
 				return null;
 			}
 		};
 		AuthenticationUtil.runAsSystem(runAs);
 		logger.info("counter: " + counter);
 	}
+
 	
-	private void execute(int page){
-		logger.info("page:" + page);
-		SearchParameters sp = new SearchParameters();
-		sp.setLanguage(SearchService.LANGUAGE_LUCENE);
-		sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
-		sp.setSkipCount(page);
-		sp.setMaxItems(PAGE_SIZE);
-		
-		sp.setQuery("ISNOTNULL:\"ccm:wwwurl\"");
-		
-		logger.info("query:" + sp.getQuery());
-		ResultSet resultSet = searchService.query(sp);
-		
-		for(NodeRef nodeRef : resultSet.getNodeRefs()) {
-			
+	private void process(){
+
+		SearchToken searchToken = new SearchToken();
+		searchToken.setFrom(0);
+		searchToken.setMaxResult(Integer.MAX_VALUE);
+		searchToken.setElasticQuery(QueryBuilders.bool()
+						.must(m -> m.exists(e -> e.field("properties.ccm:wwwurl")))
+						.must(m -> m.term(t -> t.field("properties.ccm:wwwurl.keyword").value("")))
+				.build());
+
+		SearchResultNodeRef search = searchService.search(searchToken);
+		logger.info("found: " + search.getNodeCount());
+		search.getData().forEach(n -> {
+			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, n.getNodeId());
 			String wwwurl = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
 			String name = (String)nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
 			Date created = (Date)nodeService.getProperty(nodeRef, ContentModel.PROP_CREATED);
 			if(wwwurl != null && wwwurl.trim().equals("")) {
 				logger.info("removing empty property wwwurl for:" + name + " from:" + created );
-				
+
 				serviceRegistry.getRetryingTransactionHelper().doInTransaction(new RetryingTransactionCallback<Void>() {
 					@Override
 					public Void execute() throws Throwable {
-						if(perisistentMode) {
+						if(persistentMode) {
 							policyBehaviourFilter.disableBehaviour(nodeRef);
 							nodeService.removeProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
 							policyBehaviourFilter.enableBehaviour(nodeRef);
@@ -93,11 +90,7 @@ public class FixEmptyWWWUrl extends AbstractJob {
 					}
 				});
 			}
-		}
-		
-		if(resultSet.hasMore()) {
-			execute(page + PAGE_SIZE);
-		}
+		});
 	}
 	
 	@Override
