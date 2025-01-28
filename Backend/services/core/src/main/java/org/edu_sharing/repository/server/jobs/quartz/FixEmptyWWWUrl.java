@@ -39,7 +39,7 @@ public class FixEmptyWWWUrl extends AbstractJobMapAnnotationParams{
 	BehaviourFilter policyBehaviourFilter = (BehaviourFilter)applicationContext.getBean("policyBehaviourFilter");
 
 	@JobFieldDescription(description = "if false job just logs which nodes are found and would be updated")
-	boolean persistentMode = true;
+	boolean persistentMode = false;
 	
 	int counter = 0;
 
