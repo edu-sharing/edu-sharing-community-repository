@@ -31,7 +31,6 @@ import {
     AuthorityProfile,
     CollectionReference,
     DeepLinkResponse,
-    Repository,
     User,
 } from '../core-module/rest/data-object';
 import { RestConstants } from '../core-module/rest/rest-constants';
@@ -49,6 +48,7 @@ import {
     HOME_REPOSITORY,
     NetworkService,
     Node,
+    Repository,
     TrackingV1Service,
 } from 'ngx-edu-sharing-api';
 import { DialogsService } from '../features/dialogs/dialogs.service';
@@ -283,6 +283,9 @@ export class NodeHelperService extends NodeHelperServiceBase {
      * @returns {string}
      */
     public getUserDisplayName(user: AuthorityProfile | User) {
+        if (!user.profile) {
+            return user.authorityName.trim();
+        }
         return (user.profile.firstName + ' ' + user.profile.lastName).trim();
     }
     isSavedSearchObject(node: Node) {

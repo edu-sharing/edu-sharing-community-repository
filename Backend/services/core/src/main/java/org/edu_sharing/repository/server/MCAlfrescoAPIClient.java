@@ -57,7 +57,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.HasPermissionsWork;
-import org.edu_sharing.alfresco.fixes.VirtualEduGroupFolderTool;
+import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.connector.ConnectorService;
 import org.edu_sharing.alfresco.service.guest.GuestService;
@@ -102,8 +102,8 @@ import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.*;
+import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -1853,7 +1853,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
             // this occurs sometimes in workspace
             // it seems it is an alfresco bug:
             // https://issues.alfresco.com/jira/browse/ETHREEOH-2461
-            log.error("Thats maybe an alfreco bug: https://issues.alfresco.com/jira/browse/ETHREEOH-2461", e);
+            log.error("Thats maybe an alfreco bug: https://issues.alfresco.com/jira/browse/ETHREEOH-2461, node id: " + nodeId, e);
         }
 
     }
@@ -2140,9 +2140,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
     @Override
     public String getHomeFolderID(String username) throws Exception {
-
         if (NodeServiceInterceptor.getEduSharingScope() == null || StringUtils.isBlank(NodeServiceInterceptor.getEduSharingScope())) {
-            NodeRef person = serviceRegistry.getPersonService().getPerson(username, false);
+            NodeRef person = serviceRegistry.getPersonService().getPersonOrNull(username);
             if (person != null) {
                 NodeRef homfolder = (NodeRef) nodeService.getProperty(person, QName.createQName(CCConstants.CM_PROP_PERSON_HOME_FOLDER));
                 return (homfolder != null) ? homfolder.getId() : null;
@@ -2165,11 +2164,14 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         VersionService versionService = serviceRegistry.getVersionService();
         NodeRef nodeRef = new NodeRef(storeRef, nodeId);
         Map<String, Serializable> transFormedProps = transformQNameKeyToString(nodeService.getProperties(nodeRef));
-        if (versionService.getVersionHistory(nodeRef) == null) {
+        VersionHistory history = versionService.getVersionHistory(nodeRef);
+        if (history == null) {
 
             // see https://issues.alfresco.com/jira/browse/ALF-12815
             // alfresco-4.0.d fix version should start with 1.0 not with 0.1
             transFormedProps.put(VersionModel.PROP_VERSION_TYPE, VersionType.MAJOR);
+        } else {
+            NodeCustomizationPolicies.repairNodeVersion(nodeService, history, transFormedProps, nodeRef);
         }
         versionService.createVersion(nodeRef, transFormedProps);
 

@@ -30,7 +30,7 @@ import { UserPresentableError } from '../../../../features/mds/mds-editor/mds-ed
 import { MdsEditorInstanceService } from '../../../../features/mds/mds-editor/mds-editor-instance.service';
 import { ViewInstanceService } from '../../../../features/mds/mds-editor/mds-editor-view/view-instance.service';
 import { MdsEditorWidgetAuthorComponent } from '../../../../features/mds/mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
-import { NodeService, MdsWidget, MdsValue, Acl } from 'ngx-edu-sharing-api';
+import { Acl, MdsWidget, NodeService } from 'ngx-edu-sharing-api';
 import { trigger } from '@angular/animations';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { MdsWidgetValue } from '../../../mds/types/types';
@@ -179,7 +179,7 @@ export class LicenseDialogContentComponent implements OnInit {
             }
         } else {
             // if no version is selected select 4.0 by default
-            if (!this.ccVersion) this.ccVersion = '4.0';
+            if (!['2.0', '3.0', '4.0'].includes(this.ccVersion)) this.ccVersion = '4.0';
         }
         this._primaryType = primaryType;
         this.updateCanSave();
@@ -614,7 +614,7 @@ export class LicenseDialogContentComponent implements OnInit {
     }
 
     getLicenseUrlVersion(type: string) {
-        return this.nodeHelper.getLicenseUrlByString(type, this.ccVersion, this.ccCountry);
+        return this.nodeHelper.getLicenseUrlByString(type, this.ccVersion || '4.0', this.ccCountry);
     }
 
     getLicenseIcon() {
@@ -767,6 +767,7 @@ export class LicenseDialogContentComponent implements OnInit {
             if (this.ccProfileUrl) {
                 prop[RestConstants.CCM_PROP_LICENSE_PROFILE_URL] = [this.ccProfileUrl];
             }
+
             if (this.ccVersion) {
                 prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION] = [this.ccVersion];
                 // make sure v4.0 has no locale

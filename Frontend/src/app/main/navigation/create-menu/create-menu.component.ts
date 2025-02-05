@@ -22,10 +22,10 @@ import {
     Scope,
     Target,
     UIAnimation,
+    VirtualNode,
 } from 'ngx-edu-sharing-ui';
-import { Observable, Subject } from 'rxjs';
-import { delay, takeUntil } from 'rxjs/operators';
-import { BridgeService } from '../../../services/bridge.service';
+import { combineLatest, Observable, Subject } from 'rxjs';
+import { delay, map, startWith, takeUntil } from 'rxjs/operators';
 import {
     Connector,
     Filetype,
@@ -56,6 +56,8 @@ import { PasteService } from '../../../services/paste.service';
 import { UploadDialogService } from '../../../services/upload-dialog.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
 import { MainNavConfig, MainNavService } from '../main-nav.service';
+import { CardDialogService } from '../../../features/dialogs/card-dialog/card-dialog.service';
+import { BridgeService } from '../../../services/bridge.service';
 
 @Component({
     selector: 'es-create-menu',
@@ -113,6 +115,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     constructor(
         public bridge: BridgeService,
         private cardService: CardService,
+        private cardDialogService: CardDialogService,
         private connector: RestConnectorService,
         private connectorApi: ConnectorService,
         private mainNavService: MainNavService,
@@ -149,7 +152,13 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             if (login.statusCode === RestConstants.STATUS_CODE_OK) {
             }
         });
-        this.cardHasOpenModals$ = this.cardService.hasOpenModals.pipe(delay(0));
+        this.cardHasOpenModals$ = combineLatest([
+            this.cardService.hasOpenModals,
+            this.cardDialogService.openDialogs$.pipe(startWith([])),
+        ]).pipe(
+            delay(0),
+            map(([a, b]) => a || b?.length > 0),
+        );
         this.mainNavService
             .observeMainNavConfig()
             .pipe(takeUntil(this.destroyed))
@@ -501,10 +510,6 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
 
     private async createConnector(connector: Connector, event: AddWithConnectorDialogResult) {
         const prop = this.nodeHelper.propertiesFromConnector(event);
-        let win: any;
-        if (!this.bridge.isRunningCordova()) {
-            win = window.open('');
-        }
         this.nodeService
             .createNode((await this.getParent()).ref.id, RestConstants.CCM_TYPE_IO, [], prop, false)
             .subscribe(
@@ -512,14 +517,16 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                     this.editConnector(
                         data.node,
                         event.type as Filetype,
-                        win,
+                        event.window,
                         event.data,
                         connector,
                     );
-                    this.onCreate.emit([data.node]);
+                    const node: VirtualNode = { ...data.node, virtual: true };
+                    node.observe = true;
+                    this.onCreate.emit([node]);
                 },
                 (error: any) => {
-                    win.close();
+                    event.window?.close();
                     if (
                         this.nodeHelper.handleNodeError(event.name, error) ===
                         RestConstants.DUPLICATE_NODE_RESPONSE

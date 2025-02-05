@@ -9,6 +9,7 @@ import {
     DefaultGroups,
     ElementType,
     HideMode,
+    ListEventInterface,
     LocalEventsService,
     NodeEntriesDisplayType,
     NodesRightMode,
@@ -68,6 +69,7 @@ import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
 import { Toast } from './toast';
 import { UIHelper } from '../core-ui-module/ui-helper';
 import { GlobalOptionsService } from './global-options.service';
+import { SelectionModel } from '@angular/cdk/collections';
 
 @Injectable()
 export class OptionsHelperService extends OptionsHelperServiceAbstract implements OnDestroy {
@@ -378,7 +380,10 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     }
 
     private async isOptionAvailable(option: OptionItem, objects: Node[] | any[], data: OptionData) {
-        if (!this.getType(objects).every((t) => option.elementType.includes(t))) {
+        if (
+            option.elementType?.length > 0 &&
+            !this.getType(objects).every((t) => option.elementType.includes(t))
+        ) {
             // console.log('types not matching', objects, this.getType(objects), option);
             return false;
         }
@@ -728,6 +733,10 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         editConnectorNode.customShowCallback = async (nodes) => {
             let n = nodes ? nodes[0] : null;
             if (n?.aspects?.includes('ccm:ltitool_node')) {
+                return true;
+            }
+            // simple connector node;
+            if (n?.properties?.[RestConstants.CCM_PROP_CCRESSOURCETYPE]?.[0] === 'connector') {
                 return true;
             }
             return (
@@ -1096,7 +1105,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         cutNodes.elementType = [ElementType.Node, ElementType.SavedSearch, ElementType.MapRef];
         cutNodes.constrains = [Constrain.HomeRepository, Constrain.User];
         cutNodes.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
-        cutNodes.permissions = [RestConstants.ACCESS_WRITE];
+        cutNodes.permissions = [RestConstants.ACCESS_DELETE];
         cutNodes.permissionsMode = HideMode.Disable;
         cutNodes.keyboardShortcut = {
             keyCode: 'KeyX',
@@ -1269,6 +1278,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             node = this.getObjects(node, data)[0];
             this.dialogs.openNodeEmbedDialog({ node });
         });
+        embedNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         embedNode.constrains = [Constrain.NoBulk, Constrain.HomeRepository];
         embedNode.scopes = [Scope.Render];
         embedNode.group = DefaultGroups.View;
@@ -1454,6 +1464,41 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         metadataSidebar.constrains = [Constrain.NoBulk];
         metadataSidebar.group = DefaultGroups.Toggles;
         metadataSidebar.isToggle = true;
+        const registerSelectionChange = (list: ListEventInterface<any>) => {
+            const updateVisibility = () => {
+                toggleSelection.isToggleVisible =
+                    list?.getDisplayType() !== NodeEntriesDisplayType.Table;
+            };
+            const updateSelectionState = (selection: SelectionModel<any>) => {
+                if (selection?.isEmpty()) {
+                    toggleSelection.name = 'OPTIONS.SELECT_ALL';
+                    toggleSelection.icon = 'select_all';
+                } else {
+                    toggleSelection.name = 'OPTIONS.DESELECT';
+                    toggleSelection.icon = 'deselect';
+                }
+            };
+            list?.getSelection()
+                .changed.pipe(map((s) => s.source))
+                .subscribe(updateSelectionState);
+            list?.onDisplayTypeChange().subscribe(updateVisibility);
+            updateSelectionState(list?.getSelection());
+            updateVisibility();
+        };
+        const toggleSelection = new OptionItem('', '', () => {
+            if (components.list?.getSelection()?.isEmpty()) {
+                components.list?.selectAll();
+            } else {
+                components.list?.getSelection().clear();
+            }
+        });
+        registerSelectionChange(components?.list);
+        toggleSelection.scopes = [Scope.WorkspaceList, Scope.Search, Scope.CollectionsReferences];
+        toggleSelection.group = DefaultGroups.Toggles;
+        toggleSelection.elementType = [];
+        toggleSelection.priority = 10;
+        toggleSelection.isToggle = true;
+        toggleSelection.togglePosition = 'before';
 
         options.push(applyNode);
         options.push(debugNode);
@@ -1499,6 +1544,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         options.push(removeNodeRef);
         options.push(reportNode);
         options.push(toggleViewType);
+        options.push(toggleSelection);
         options.push(metadataSidebar);
 
         if (data?.postPrepareOptions) {
@@ -1574,7 +1620,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         connectorType: Connector = null,
     ) {
         const ltiTool = await this.ltiPlatformService.toolForNode(node);
-        if (node.aspects?.includes('ccm:ltitool_node') || ltiTool) {
+        if (node.properties[RestConstants.CCM_PROP_CCRESSOURCETYPE]?.[0] === 'connector') {
+            UIHelper.openWindow(win, node.properties[RestConstants.CCM_PROP_IO_WWWURL]?.[0]);
+        } else if (node.aspects?.includes('ccm:ltitool_node') || ltiTool) {
             UIHelper.openLTIResourceLink(win, node);
         } else {
             UIHelper.openConnector(
@@ -1800,6 +1848,10 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         data: OptionData,
         objects: Node[] | any[],
     ) {
+        // allow all options in debug scope
+        if (data.scope === Scope.DebugShowAll) {
+            return null;
+        }
         if (constrains.indexOf(Constrain.NoCollectionReference) !== -1) {
             if (
                 objects.some((o) => o.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1)
