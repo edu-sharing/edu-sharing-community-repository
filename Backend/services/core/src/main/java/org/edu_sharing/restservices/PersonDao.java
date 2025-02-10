@@ -6,19 +6,15 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.edu_sharing.alfresco.RestrictedAccessException;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.client.tools.I18nAngular;
-import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
@@ -26,9 +22,7 @@ import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.EduSharingLockHelper;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.ImageTool;
-import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.cache.PersonCache;
-import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.restservices.iam.v1.model.GroupEntries;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.NotAnAdminException;
@@ -223,7 +217,7 @@ public class PersonDao {
 		newUserInfo.put(CCConstants.PROP_USER_LASTNAME, profile.getLastName());
 		newUserInfo.put(CCConstants.PROP_USER_EMAIL, profile.getEmail());
         newUserInfo.put(CCConstants.CM_PROP_PERSON_ABOUT, profile.getAbout());
-        newUserInfo.put(CCConstants.CM_PROP_PERSON_SKILLS, profile.getSkills());
+		newUserInfo.put(CCConstants.CM_PROP_PERSON_SKILLS, profile.getSkills() != null ? new ArrayList<>(Arrays.asList(profile.getSkills())) : null);
         newUserInfo.put(CCConstants.CM_PROP_PERSON_VCARD, profile.getVCard());
 		if(AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
 			newUserInfo.put(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION, profile.getPrimaryAffiliation());
@@ -253,7 +247,7 @@ public class PersonDao {
     		result.add(new GroupDao(repoDao,member).asGroup());
     	}
     	GroupEntries response = new GroupEntries();
-    	response.setList(result);
+    	response.setGroups(result);
     	response.setPagination(new Pagination(search));
     	return response;
 	}
@@ -347,7 +341,7 @@ public class PersonDao {
 
 	private Map<String, String[]> getProperties() {
 		Map<String, Serializable> properties = userInfo;
-		if (!(getProfileSettings().getShowEmail() || isCurrentUserOrAdmin())) // email must be showed only if is admin, or if email ragards to user login
+		if (!(getProfileSettings().isShowEmail() || isCurrentUserOrAdmin())) // email must be showed only if is admin, or if email ragards to user login
 			properties.replace(CCConstants.CM_PROP_PERSON_EMAIL, null);
 
 		return NodeServiceHelper.getPropertiesMultivalue(NodeServiceHelper.transformLongToShortProperties(properties));
@@ -373,7 +367,7 @@ public class PersonDao {
     	profile.setLastName(getLastName());
 		// Admin user can see all email even if they are not showed
 		// hide only for non admin user and if showEmail is false
-		if (getProfileSettings().getShowEmail() || isCurrentUserOrAdmin()) {
+		if (getProfileSettings().isShowEmail() || isCurrentUserOrAdmin()) {
 			profile.setEmail(getEmail());
 		} else {
 			profile.setEmail("");
@@ -383,7 +377,7 @@ public class PersonDao {
     	profile.setAbout(getAbout());
     	profile.setSkills(getSkills());
     	profile.setVCard(getVCard());
-    	profile.setType(getType());
+    	profile.setTypes(getType());
     	return profile;
 	}
 
@@ -518,7 +512,7 @@ public class PersonDao {
 	public UserRender asPersonRender() {
 		org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
 		UserRender data = new UserRender();
-		data.setIsGuest(authorityService.isGuest());
+		data.setGuest(authorityService.isGuest());
 		data.setAuthorityName(getAuthorityName());
 		data.setAuthorityType(Authority.Type.USER);
 		data.setUserName(getUserName());
@@ -588,7 +582,11 @@ public class PersonDao {
 	}
 
 	public String[] getSkills() {
-		return (String[])this.userInfo.get(CCConstants.CM_PROP_PERSON_SKILLS);
+		List<String> skills = (List<String>)this.userInfo.get(CCConstants.CM_PROP_PERSON_SKILLS);
+		if(skills != null){
+			return skills.toArray(new String[0]);
+		}
+		return null;
 	}
 	public String getHomeFolder() {
 		if(this.homeFolderId == null) {
@@ -634,7 +632,7 @@ public class PersonDao {
 	public void setProfileSettings(ProfileSettings profileSettings) throws Exception{
 		Map<String, Object> newUserInfo = new HashMap<>();
 		newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
-		newUserInfo.put(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL, profileSettings.getShowEmail());
+		newUserInfo.put(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL, profileSettings.isShowEmail());
 		((MCAlfrescoAPIClient)this.baseClient).updateUser(newUserInfo);
 	}
 

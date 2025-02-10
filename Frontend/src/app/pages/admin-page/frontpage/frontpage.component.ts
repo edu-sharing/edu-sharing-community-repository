@@ -4,6 +4,7 @@ import { TranslateService } from '@ngx-translate/core';
 import {
     InteractionType,
     ListItem,
+    MdsHelperService,
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
@@ -13,8 +14,7 @@ import {
     RestMdsService,
     RestNodeService,
 } from '../../../core-module/core.module';
-import { Node } from '../../../core-module/rest/data-object';
-import { MdsHelperService } from 'ngx-edu-sharing-ui';
+import { Node } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { ConfigurationService } from '../../../core-module/rest/services/configuration.service';
 import { RestAdminService } from '../../../core-module/rest/services/rest-admin.service';
@@ -34,7 +34,7 @@ export class AdminFrontpageComponent implements AfterViewInit {
 
     @ViewChild(NodeEntriesWrapperComponent) nodeEntries: NodeEntriesWrapperComponent<Node>;
 
-    @Output() onOpenNode = new EventEmitter();
+    @Output() openNode = new EventEmitter<Node>();
     previewLoading = true;
     config: any;
     modes = ['collection', 'rating', 'views', 'downloads'];
@@ -88,7 +88,7 @@ export class AdminFrontpageComponent implements AfterViewInit {
         this.adminService
             .getToolpermissions()
             .subscribe((toolpermissions) => (this.toolpermissions = Object.keys(toolpermissions)));
-        this.update();
+        void this.update();
     }
 
     ngAfterViewInit(): void {
@@ -101,7 +101,7 @@ export class AdminFrontpageComponent implements AfterViewInit {
         }
         this.toast.showProgressSpinner();
         this.adminService.updateRepositoryConfig(this.config).subscribe(() => {
-            this.update();
+            void this.update();
             this.toast.toast('ADMIN.FRONTPAGE.SAVED');
         });
     }
@@ -175,8 +175,8 @@ export class AdminFrontpageComponent implements AfterViewInit {
                 },
             );
     }
-    openNode(node: any) {
-        this.onOpenNode.emit(node.node);
+    doOpenNode(node: { node: Node }) {
+        this.openNode.emit(node.node);
     }
 
     setCollection(collection: Node) {

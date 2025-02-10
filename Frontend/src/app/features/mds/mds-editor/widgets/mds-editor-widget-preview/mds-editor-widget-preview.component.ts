@@ -5,7 +5,7 @@ import { RepoUrlService } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, forkJoin, forkJoin as observableForkJoin, of } from 'rxjs';
 import { catchError, map, take, takeWhile } from 'rxjs/operators';
-import { Node } from '../../../../../core-module/rest/data-object';
+import { Node } from 'ngx-edu-sharing-api';
 import { RestNodeService } from '../../../../../core-module/rest/services/rest-node.service';
 import { Toast } from '../../../../../services/toast';
 import { Constraints, NativeWidgetComponent } from '../../../types/types';
@@ -46,7 +46,7 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent {
                         this.node.preview.url + '&crop=true&width=400&height=300&dontcache=:cache';
                 }
                 if (nodes?.length === 1) {
-                    this.updateSrc();
+                    void this.updateSrc();
                     // we need to reload the image since we don't know if the image (e.g. video file) is still being processed
                     rxjs.interval(5000)
                         .pipe(
@@ -61,7 +61,7 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent {
     setPreview(event: Event): void {
         this.file = (event.target as HTMLInputElement).files[0];
         this.delete = false;
-        this.updateSrc();
+        void this.updateSrc();
     }
 
     async updateSrc() {

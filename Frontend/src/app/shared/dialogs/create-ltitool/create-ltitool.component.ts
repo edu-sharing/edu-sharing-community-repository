@@ -1,21 +1,7 @@
-import {
-    ApplicationRef,
-    Component,
-    EventEmitter,
-    Input,
-    NgZone,
-    OnInit,
-    Output,
-} from '@angular/core';
-import { LtiPlatformService, Tool } from 'ngx-edu-sharing-api';
+import { Component, EventEmitter, Input, NgZone, OnInit, Output } from '@angular/core';
+import { LtiPlatformService, Node, Tool } from 'ngx-edu-sharing-api';
 import { DialogButton } from '../../../util/dialog-button';
-import {
-    Node,
-    NodeWrapper,
-    RestConstants,
-    RestHelper,
-    RestNodeService,
-} from '../../../core-module/core.module';
+import { RestNodeService } from '../../../core-module/core.module';
 import { NodeHelperService } from '../../../services/node-helper.service';
 
 @Component({
@@ -27,8 +13,8 @@ export class CreateLtitoolComponent implements OnInit {
     public _tool: Tool;
     public _parent: Node;
     buttons: DialogButton[];
-    @Output() onCancel = new EventEmitter();
-    @Output() onCreate = new EventEmitter();
+    @Output() cancel = new EventEmitter();
+    @Output() create = new EventEmitter();
     public _name = '';
     nodes: Node[] = [];
 
@@ -39,8 +25,8 @@ export class CreateLtitoolComponent implements OnInit {
         private ltiPlatformService: LtiPlatformService,
     ) {
         this.buttons = [
-            new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
-            new DialogButton('CREATE', { color: 'primary' }, () => this.create()),
+            new DialogButton('CANCEL', { color: 'standard' }, () => this.doCancel()),
+            new DialogButton('CREATE', { color: 'primary' }, () => this.doCreate()),
         ];
         (window as any)['angularComponentReference'] = {
             component: this,
@@ -75,12 +61,12 @@ export class CreateLtitoolComponent implements OnInit {
         this._parent = parent;
     }
 
-    public cancel() {
-        this.onCancel.emit({ nodes: this.nodes });
+    public doCancel() {
+        this.cancel.emit({ nodes: this.nodes });
     }
 
-    public create() {
-        this.onCreate.emit({ nodes: this.nodes, name: this._name });
+    public doCreate() {
+        this.create.emit({ nodes: this.nodes, name: this._name });
     }
 
     public openDeepLinkFlow() {
@@ -102,10 +88,10 @@ export class CreateLtitoolComponent implements OnInit {
 
         let idx = 0;
         nodeIds.forEach((nodeId) => {
-            let node = new Node();
-            node.ref.id = nodeId;
-            node.name = titles[idx];
-            this.nodes[idx] = node;
+            let node = (this.nodes[idx] = {
+                ref: { id: nodeId },
+                name: titles[idx],
+            } as Node);
             idx++;
         });
         console.log(this.nodes);

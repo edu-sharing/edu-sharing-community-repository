@@ -13,7 +13,14 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { GenericAuthority, Group, User, GroupProfile, UserProfileEdit } from 'ngx-edu-sharing-api';
+import {
+    GenericAuthority,
+    Group,
+    GroupProfile,
+    Node,
+    User,
+    UserProfileEdit,
+} from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     Constrain,
@@ -44,7 +51,6 @@ import {
     IamAuthorities,
     IamGroups,
     IamUsers,
-    Node,
     NodeList,
     Organization,
     OrganizationOrganizations,
@@ -111,7 +117,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         priority?: number;
     };
     editDetails: any;
-    editId: string;
+    editId: string = null;
     public columns: ListItem[] = [];
     public addMemberColumns: ListItem[] = [];
     public editGroupColumns: ListItem[] = [];
@@ -150,7 +156,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     groupSignupList = new NodeDataSource<User>();
     groupSignupDetails: GroupSignupDetails;
     private _org: Organization;
-    @Output() onDeselectOrg = new EventEmitter();
+    @Output() deselectOrg = new EventEmitter<void>();
 
     @Input() set searchQuery(searchQuery: string) {
         this._searchQuery = searchQuery;
@@ -172,7 +178,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     }
 
     @Input() embedded = false;
-    @Output() onSelection = new EventEmitter<GenericAuthority[]>();
+    @Output() selection = new EventEmitter<GenericAuthority[]>();
     @Output() setTab = new EventEmitter<number>();
     public editMembers: GenericAuthority | 'ALL';
     memberList = new NodeDataSource<GenericAuthority>();
@@ -328,7 +334,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     ) {
         this.isAdmin = this.connector.getCurrentLogin()?.isAdmin;
         this.organization.getOrganizations().subscribe((data: OrganizationOrganizations) => {
-            this.updateOptions();
+            void this.updateOptions();
             this.updateButtons();
         });
     }
@@ -340,7 +346,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 // do not fire in org mode since this loses selection on tab switch
                 filter(() => this._mode !== 'ORG'),
             )
-            .subscribe((selection) => this.onSelection.emit(selection.source.selected));
+            .subscribe((selection) => this.selection.emit(selection.source.selected));
     }
 
     async ngOnChanges(changes: SimpleChanges) {
@@ -717,7 +723,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     }
     private saveEdits() {
         if (this._mode == 'GROUP' || this._mode == 'ORG') {
-            if (this.editId == null) {
+            if (this.editId === null) {
                 const name = this.edit.profile.displayName;
                 const profile = this.edit.profile;
                 if (this._mode == 'ORG') {
@@ -860,7 +866,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             .getOrganizations(query, false)
             .subscribe((orgs: OrganizationOrganizations) => {
                 this.orgs = orgs;
-                this.updateOptions();
+                void this.updateOptions();
             });
         if (this._mode === 'ORG') {
             // as non-admin, search only own orgs since these are the once with access
@@ -871,7 +877,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                         orgs.organizations.filter((o) => o.administrationAccess),
                     );
                     this.dataSource.isLoading = false;
-                    this.updateOptions();
+                    void this.updateOptions();
                 });
         } /*
     else if(this._mode=='USER'){
@@ -955,7 +961,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     private openEditGroups(data: User) {
         const list = this.getList(data);
         this.editGroups = list[0];
-        this.initMembersList();
+        void this.initMembersList();
         this.manageMemberSearch = '';
         this.memberList.reset();
         this.searchMembers();
@@ -1110,7 +1116,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             const list = this.getList(data);
             this.addMembers = list[0];
         }
-        this.initMembersList();
+        void this.initMembersList();
         this.manageMemberSearch = '';
         this.searchMembers();
     }
@@ -1120,7 +1126,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             const list = this.getList(data);
             this.editMembers = list[0];
         }
-        this.initMembersList();
+        void this.initMembersList();
         this.manageMemberSearch = '';
         this.searchMembers();
     }
@@ -1285,8 +1291,8 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             },
         );
     }
-    deselectOrg() {
-        this.onDeselectOrg.emit();
+    doDeselectOrg() {
+        this.deselectOrg.emit();
         setTimeout(() => this.refresh());
     }
     setOrgTab() {
@@ -1453,7 +1459,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         if (this._mode === 'ORG') {
             if (!this.nodeEntries.getSelection().isEmpty() && event.element === this._org) {
                 this._org = null;
-                this.onSelection.emit(null);
+                this.selection.emit(null);
                 this.nodeEntries.getSelection().clear();
                 return;
             }
@@ -1462,7 +1468,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         console.log(event, this._mode);
         this.nodeEntries.getSelection().clear();
         this.nodeEntries.getSelection().select(event.element);
-        this.onSelection.emit(this.nodeEntries.getSelection().selected);
+        this.selection.emit(this.nodeEntries.getSelection().selected);
     }
 
     private updateColumns() {

@@ -11,9 +11,9 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { Ace, LoginInfo } from 'ngx-edu-sharing-api';
+import { Ace, LoginInfo, Node } from 'ngx-edu-sharing-api';
 import { ListItem, OPEN_URL_MODE, UIConstants } from 'ngx-edu-sharing-ui';
-import { Observable, Observer, forkJoin as observableForkJoin, of } from 'rxjs';
+import { forkJoin as observableForkJoin, Observable, Observer, of } from 'rxjs';
 import { catchError, first, take } from 'rxjs/operators';
 import { BridgeService } from '../services/bridge.service';
 import {
@@ -21,11 +21,8 @@ import {
     Connector,
     Filetype,
     MdsInfo,
-    Node,
     NodeLock,
-    NodeWrapper,
     ParentList,
-    Permission,
 } from '../core-module/rest/data-object';
 import { Helper } from '../core-module/rest/helper';
 import { RestConstants } from '../core-module/rest/rest-constants';
@@ -60,7 +57,7 @@ export class UIHelper {
                 queryParams[key] = data[key];
             }
             queryParams[name] = value;
-            router.navigate([], { queryParams: queryParams });
+            void router.navigate([], { queryParams: queryParams });
         });
     }
 
@@ -186,7 +183,7 @@ export class UIHelper {
 
     static routeToSearchNode(router: Router, reurl: string, node: Node) {
         let converted = UIHelper.convertSearchParameters(node);
-        router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
+        void router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
             queryParams: {
                 query: converted.query,
                 reurl: reurl,
@@ -198,7 +195,7 @@ export class UIHelper {
     }
 
     public static goToNode(router: Router, node: Node) {
-        router.navigate([UIConstants.ROUTER_PREFIX, 'render', node.ref.id]);
+        void router.navigate([UIConstants.ROUTER_PREFIX, 'render', node.ref.id]);
     }
 
     public static goToCollection(
@@ -208,13 +205,13 @@ export class UIHelper {
         extras: NavigationExtras = {},
     ) {
         if (mode === 'new' || mode === 'edit') {
-            router.navigate(
+            void router.navigate(
                 [UIConstants.ROUTER_PREFIX, 'collections', 'collection', mode, node.ref.id],
                 extras,
             );
         } else {
             extras.queryParams = { id: node.ref.id };
-            router.navigate([UIConstants.ROUTER_PREFIX, 'collections'], extras);
+            void router.navigate([UIConstants.ROUTER_PREFIX, 'collections'], extras);
         }
     }
 
@@ -294,7 +291,7 @@ export class UIHelper {
         extras: NavigationExtras = {},
     ) {
         extras.queryParams = { id: folder };
-        router.navigate(
+        void router.navigate(
             [
                 UIConstants.ROUTER_PREFIX +
                     'workspace/' +
@@ -306,7 +303,7 @@ export class UIHelper {
 
     static convertSearchParameters(node: Node) {
         let parameters = JSON.parse(
-            node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS],
+            node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS]?.[0],
         );
         let result: any = { parameters: {}, query: null };
         for (let parameter of parameters) {
@@ -416,7 +413,7 @@ export class UIHelper {
                     .pipe(catchError((error) => of({ error, node }))),
             ),
         ).subscribe(async (results) => {
-            const success: NodeWrapper[] = results.filter((r) => !(r as any).error);
+            const success: { node: Node }[] = results.filter((r) => !(r as any).error);
             const failed: { node: Node; error: any }[] = results.filter(
                 (r) => !!(r as any).error,
             ) as { node: Node; error: any }[];
@@ -563,8 +560,14 @@ export class UIHelper {
             },
         );
     }
+    static openWindow(w: Window, url: string) {
+        if (w == null) {
+            w = window.open('');
+        }
+        w.location.href = url;
+    }
 
-    static openLTIResourceLink(w: any, node: Node) {
+    static openLTIResourceLink(w: Window, node: Node) {
         //let w = window.open('');
         if (w == null) {
             console.log('window is null');

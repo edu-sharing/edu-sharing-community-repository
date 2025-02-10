@@ -38,7 +38,8 @@
                 "input": "node_modules/tinymce-i18n/langs5",
                 "output": "/tinymce/langs/"
               },
-              { "glob": "**/*", "input": "node_modules/ng2-pdfjs-viewer/pdfjs", "output": "/assets/pdfjs" }
+              { "glob": "**/*", "input": "node_modules/ng2-pdfjs-viewer/pdfjs", "output": "/assets/pdfjs" },
+              { "glob": "**/*", "input": "node_modules/ngx-rendering-service-lib/assets", "output": "/" }
             ],
             "styles": [
               "src/app/core-ui-module/styles/core-base.scss",
@@ -532,17 +533,6 @@
             }
           },
           "defaultConfiguration": "production"
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
-            "tsConfig": "projects/rendering-service-web-component/tsconfig.spec.json",
-            "karmaConfig": "projects/rendering-service-web-component/karma.conf.js"
-          }
         },
         "lint": {
           "builder": "@angular-eslint/builder:lint",

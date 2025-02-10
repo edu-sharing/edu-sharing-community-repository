@@ -76,11 +76,26 @@ export class TranslationsService {
                             if (supportedLanguages.indexOf(params.locale) !== -1) {
                                 selectedLanguage = params.locale;
                             } else if (params.locale) {
-                                console.warn(
-                                    `Url requested language ${params.locale}, ` +
-                                        'but it was not found or is not configured in the allowed languages: ' +
-                                        supportedLanguages,
-                                );
+                                if (params.locale === 'de') {
+                                    const deVariants = supportedLanguages.filter((l) =>
+                                        l.startsWith('de-'),
+                                    );
+                                    if (deVariants?.length === 1) {
+                                        selectedLanguage = deVariants[0];
+                                    } else {
+                                        console.warn(
+                                            `Url requested language ${params.locale}, ` +
+                                                'but ambiguous variants are present: ' +
+                                                supportedLanguages,
+                                        );
+                                    }
+                                } else {
+                                    console.warn(
+                                        `Url requested language ${params.locale}, ` +
+                                            'but it was not found or is not configured in the allowed languages: ' +
+                                            supportedLanguages,
+                                    );
+                                }
                             }
                             return {
                                 supportedLanguages,
@@ -144,7 +159,7 @@ export class TranslationsService {
                 // Set fallback language
                 tap(({ supportedLanguages, selectedLanguage, useStored }) => {
                     if (!useStored) {
-                        this.storage.set('language', selectedLanguage);
+                        void this.storage.set('language', selectedLanguage);
                     }
                     if (selectedLanguage === 'none') {
                         this.translate.setDefaultLang('none');

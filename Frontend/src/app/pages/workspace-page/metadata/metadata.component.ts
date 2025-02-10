@@ -9,7 +9,13 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ConfigService, NodeService, NodeVersion, NodeVersionEntries } from 'ngx-edu-sharing-api';
+import {
+    ConfigService,
+    Node,
+    NodeService,
+    NodeVersion,
+    NodeVersionEntries,
+} from 'ngx-edu-sharing-api';
 import {
     DurationHelper,
     FormatDatePipe,
@@ -26,7 +32,6 @@ import { distinctUntilChanged, filter } from 'rxjs/operators';
 import {
     ConfigurationHelper,
     IamUser,
-    Node,
     NodePermissions,
     Permission,
     RestConstants,
@@ -48,8 +53,8 @@ import {
     ChartType,
     LinearScale,
     PointElement,
-    Tooltip,
     Title,
+    Tooltip,
 } from 'chart.js';
 
 Chart.register(BarController, BarElement, CategoryScale, PointElement, Tooltip, LinearScale, Title);
@@ -83,11 +88,11 @@ export class WorkspaceMetadataComponent implements OnInit {
         this.nodeSubject.next(node);
     }
 
-    @Output() onEditMetadata = new EventEmitter();
-    @Output() onDownload = new EventEmitter();
-    @Output() onDisplay = new EventEmitter();
-    @Output() onClose = new EventEmitter();
-    @Output() onRestore = new EventEmitter();
+    @Output() editMetadata = new EventEmitter();
+    @Output() download = new EventEmitter();
+    @Output() display = new EventEmitter<Node>();
+    @Output() closeMetadata = new EventEmitter<void>();
+    @Output() restore = new EventEmitter();
 
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
@@ -258,13 +263,13 @@ export class WorkspaceMetadataComponent implements OnInit {
         return prop[0] == version.version.major + '.' + version.version.minor;
     }
 
-    display(version: string = null) {
-        this.nodeObject.version = version;
-        this.onDisplay.emit(this.nodeObject);
+    doDisplay(version: string = null) {
+        this.nodeObject.content.version = version;
+        this.display.emit(this.nodeObject);
     }
 
     displayNode(node: Node) {
-        this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id]);
+        void this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id]);
     }
 
     displayCollection(collection: Node) {
@@ -276,8 +281,8 @@ export class WorkspaceMetadataComponent implements OnInit {
     }
 
     displayVersion(version: NodeVersion) {
-        if (this.isCurrentVersion(version)) this.display();
-        else this.display(version.version.major + '.' + version.version.minor);
+        if (this.isCurrentVersion(version)) this.doDisplay();
+        else this.doDisplay(version.version.major + '.' + version.version.minor);
     }
 
     private format(node: Node): any {
@@ -328,16 +333,16 @@ export class WorkspaceMetadataComponent implements OnInit {
         return data;
     }
 
-    close() {
-        this.onClose.emit();
+    doClose() {
+        this.closeMetadata.emit();
     }
 
     edit() {
-        this.onEditMetadata.emit(this.nodeObject);
+        this.editMetadata.emit(this.nodeObject);
     }
 
     restoreVersion(restore: NodeVersion) {
-        this.onRestore.emit({ version: restore, node: this.nodeObject });
+        this.restore.emit({ version: restore, node: this.nodeObject });
     }
 
     canRevert() {

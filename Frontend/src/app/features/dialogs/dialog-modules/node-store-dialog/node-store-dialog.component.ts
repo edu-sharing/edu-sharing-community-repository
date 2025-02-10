@@ -5,6 +5,7 @@ import {
     ActionbarComponent,
     CustomOptions,
     DefaultGroups,
+    ElementType,
     InteractionType,
     ListItem,
     ListItemSort,
@@ -100,7 +101,7 @@ export class SearchNodeStoreDialogComponent implements OnInit, AfterViewInit, On
     }
 
     openNode(node: Node) {
-        this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id], {
+        void this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id], {
             state: {
                 nodes: this.list.getData(),
                 scope: 'node-store',
@@ -120,6 +121,12 @@ export class SearchNodeStoreDialogComponent implements OnInit, AfterViewInit, On
         const remove = new OptionItem('SEARCH.NODE_STORE.REMOVE_ITEM', 'delete', () => {
             this.deleteSelection();
         });
+        remove.elementType = [
+            ElementType.Node,
+            ElementType.NodeBlockedImport,
+            ElementType.NodePublishedCopy,
+            ElementType.SavedSearch,
+        ];
         remove.group = DefaultGroups.FileOperations;
         return [remove];
     }

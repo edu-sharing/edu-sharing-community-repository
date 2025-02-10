@@ -27,6 +27,7 @@ import { AuthenticationService } from './authentication.service';
 @Injectable({ providedIn: 'root' })
 export class SessionStorageService {
     static readonly KEY_WORKSPACE_SORT = 'workspace_sort';
+    static readonly KEY_ROOT_COLLECTIONS = 'collections_root';
 
     private readonly localStorage = new BrowserStorage(localStorage);
     private readonly sessionStorage = new BrowserStorage(sessionStorage);
@@ -145,7 +146,7 @@ export class SessionStorageService {
             return this.setToUserProfile(values);
         } else {
             for (const [key, value] of Object.entries(values)) {
-                this.set(key, value, store);
+                void this.set(key, value, store);
             }
         }
     }

@@ -2,7 +2,7 @@ import { trigger } from '@angular/animations';
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router, RoutesRecognized } from '@angular/router';
 import * as moment from 'moment';
-import { StreamEntry, StreamV1Service } from 'ngx-edu-sharing-api';
+import { Node, StreamEntry, StreamV1Service } from 'ngx-edu-sharing-api';
 import {
     CustomOptions,
     DefaultGroups,
@@ -24,8 +24,6 @@ import {
     ConnectorList,
     Filetype,
     FrameEventsService,
-    Node,
-    NodeWrapper,
     RequestObject,
     RestCollectionService,
     RestConnectorService,
@@ -310,11 +308,14 @@ export class StreamPageComponent implements OnInit, AfterViewInit, OnDestroy {
             o.group = DefaultGroups.Primary;
             return o;
         });
-        this.updateOptions(this.streams?.[0]);
+        void this.updateOptions(this.streams?.[0]);
     }
 
     goToOption(option: string) {
-        this.router.navigate(['./'], { queryParams: { mode: option }, relativeTo: this.route });
+        void this.router.navigate(['./'], {
+            queryParams: { mode: option },
+            relativeTo: this.route,
+        });
     }
 
     getStreamDataByStatus(streamStatus: any) {
@@ -359,9 +360,9 @@ export class StreamPageComponent implements OnInit, AfterViewInit, OnDestroy {
         if (node.nodes) {
             this.seen(node.id);
             document.cookie = 'jumpToScrollPosition=' + window.pageYOffset;
-            this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.nodes[0].ref.id]);
+            void this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.nodes[0].ref.id]);
         } else {
-            this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id]);
+            void this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id]);
         }
     }
 
@@ -411,15 +412,11 @@ export class StreamPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private createConnector(connector: Connector, event: AddWithConnectorDialogResult) {
         const prop = this.nodeHelper.propertiesFromConnector(event);
-        let win: any;
-        if (!this.cordova.isRunningCordova()) {
-            win = window.open('');
-        }
         this.nodeService
             .createNode(RestConstants.INBOX, RestConstants.CCM_TYPE_IO, [], prop, false)
             .subscribe(
-                (data: NodeWrapper) => {
-                    this.editConnector(data.node, event.type as Filetype, win, connector);
+                (data) => {
+                    this.editConnector(data.node, event.type as Filetype, event.window, connector);
                     UIHelper.goToWorkspaceFolder(
                         this.nodeService,
                         this.router,
@@ -428,7 +425,7 @@ export class StreamPageComponent implements OnInit, AfterViewInit, OnDestroy {
                     );
                 },
                 (error: any) => {
-                    win.close();
+                    event.window?.close();
                     if (
                         this.nodeHelper.handleNodeError(event.name, error) ==
                         RestConstants.DUPLICATE_NODE_RESPONSE

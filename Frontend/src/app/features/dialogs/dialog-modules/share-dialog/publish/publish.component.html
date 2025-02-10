@@ -66,7 +66,7 @@
   <es-info-message mode="warning" *ngIf="inherited">
     {{ 'WORKSPACE.SHARE.PUBLISH.INHERITED' | translate }}
     <div>
-      <button mat-button color="primary" (click)="onDisableInherit.emit()">
+      <button mat-button color="primary" (click)="disableInherit.emit()">
         <i esIcon="arrow_forward"></i> {{ 'WORKSPACE.SHARE.PUBLISH.DISABLE_INHERIT' | translate }}
       </button>
     </div>
@@ -256,7 +256,7 @@
         <div>
           <div class="version-date">
             <label>{{ 'WORKSPACE.SHARE.PUBLISH.VERSION_DATE' | translate }}</label>
-            {{ v.properties['ccm:published_date_LONG'][0] | formatDate }}
+            {{ v.properties['ccm:published_date_LONG']?.[0] | formatDate }}
           </div>
         </div>
       </div>

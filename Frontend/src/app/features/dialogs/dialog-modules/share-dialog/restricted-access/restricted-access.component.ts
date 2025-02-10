@@ -1,6 +1,5 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
-import { NodeService } from 'ngx-edu-sharing-api';
-import { Node } from '../../../../../core-module/rest/data-object';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Node, NodeService } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 
 @Component({
@@ -8,7 +7,7 @@ import { RestConstants } from '../../../../../core-module/rest/rest-constants';
     templateUrl: 'restricted-access.component.html',
     styleUrls: ['restricted-access.component.scss'],
 })
-export class ShareDialogRestrictedAccessComponent implements OnInit, OnChanges {
+export class ShareDialogRestrictedAccessComponent implements OnChanges {
     constructor(private nodeService: NodeService) {}
     ngOnChanges(changes: SimpleChanges): void {
         this.restrictedAccess =
@@ -24,7 +23,6 @@ export class ShareDialogRestrictedAccessComponent implements OnInit, OnChanges {
     @Input() node: Node;
     restrictedAccess: boolean;
     restrictedAccessPermissions: { [key in string]: boolean };
-    ngOnInit(): void {}
 
     async save() {
         const properties = {

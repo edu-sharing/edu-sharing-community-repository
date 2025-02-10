@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -52,6 +53,7 @@ import org.edu_sharing.service.lti13.registration.DynamicRegistrationToken;
 import org.edu_sharing.service.lti13.registration.DynamicRegistrationTokens;
 import org.edu_sharing.service.lti13.registration.RegistrationService;
 import org.edu_sharing.service.lti13.uoc.Config;
+import org.edu_sharing.service.lti13.uoc.elc.spring.lti.security.openid.HttpSessionOIDCLaunchSession;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -61,6 +63,7 @@ import java.net.*;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
+import org.edu_sharing.service.lti13.uoc.elc.spring.lti.security.openid.LoginRequestFactory;
 
 @Path("/lti/v13")
 @Consumes({ "text/html" })
@@ -79,6 +82,7 @@ public class LTIApi {
     RegistrationService registrationService;
 
     @POST
+    @SecurityRequirements
     @Path("/oidc/login_initiations")
     @Operation(summary = "lti authentication process preparation.", description = "preflight phase. prepares lti authentication process. checks it issuer is valid")
     @Consumes({"application/x-www-form-urlencoded"})
@@ -113,6 +117,7 @@ public class LTIApi {
     }
 
     @GET
+    @SecurityRequirements
     @Path("/oidc/login_initiations")
     @Operation(summary = "lti authentication process preparation.", description = "preflight phase. prepares lti authentication process. checks it issuer is valid")
     @Consumes({"application/x-www-form-urlencoded"})
@@ -150,13 +155,9 @@ public class LTIApi {
         RepoTools repoTools = new RepoTools();
         ApplicationInfo platform = repoTools.getApplicationInfo(iss, clientId, ltiDeploymentId);
         Tool tool = Config.getTool(platform, req,true);
-        /**
-         * @TODO
-         *  jakarta/javax lib problem
-         *  justed fixed compile problems
-         */
+
         // get data from request
-        final LoginRequest loginRequest = null;//LoginRequestFactory.from(req);
+        final LoginRequest loginRequest = LoginRequestFactory.from(req);
         if (this.logger.isInfoEnabled()) {
             this.logger.info("OIDC launch received with " + loginRequest.toString());
         }
@@ -222,6 +223,7 @@ public class LTIApi {
 
 
     @POST
+    @SecurityRequirements
     @Path("/" + LTIConstants.LTI_TOOL_REDIRECTURL_PATH  )
     @Operation(summary = "lti tool redirect.", description = "lti tool redirect")
 
@@ -248,6 +250,7 @@ public class LTIApi {
     }
 
     @POST
+    @SecurityRequirements
     @Path("/" + LTIConstants.LTI_TOOL_REDIRECTURL_PATH +"/{nodeId}"  )
     @Operation(summary = "lti tool resource link target.", description = "used by some platforms for direct (without oidc login_init) launch requests")
 
@@ -306,7 +309,7 @@ public class LTIApi {
          *  jakarta/javax lib problem
          *  justed fixed compile problems
          */
-        String sessionNonce = null;//new HttpSessionOIDCLaunchSession(req).getNonce();
+        String sessionNonce = new HttpSessionOIDCLaunchSession(req).getNonce();
         if(!nonce.equals(sessionNonce)){
             logger.error("nonce:"+nonce+ " sessionNonce:"+sessionNonce +". maybe jsessionid is not the same for login_initiation and launch url. ");
             throw new IllegalStateException("nonce is invalid");
@@ -533,6 +536,7 @@ public class LTIApi {
      */
     @GET
     @Path("/jwks")
+    @SecurityRequirements
     @Operation(summary = "LTI - returns repository JSON Web Key Sets")
     @Consumes({ "application/json" })
     @Produces({"application/json"})
@@ -571,6 +575,7 @@ public class LTIApi {
     }
 
     @GET
+    @SecurityRequirements
     @Path("/registration/dynamic/{token}")
     @Operation(summary = "LTI Dynamic Registration - Initiate registration")
     @Consumes({ "text/html" })

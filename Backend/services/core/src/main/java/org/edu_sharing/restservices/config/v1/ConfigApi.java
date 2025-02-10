@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
@@ -39,6 +40,7 @@ public class ConfigApi {
 
     @GET
     @Path("/values")
+    @SecurityRequirements
     @Operation(summary = "get repository config values", description = "Current is the actual (context-based) active config. Global is the default global config if no context is active (may be identical to the current)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Config.class))),
@@ -54,7 +56,7 @@ public class ConfigApi {
             ConfigService configService = ConfigServiceFactory.getConfigService();
             config.setGlobal(configService.getConfig().values);
             try {
-                Context context = configService.getContext(ConfigServiceFactory.getCurrentDomain());
+                Context context = configService.getContextByDomain(ConfigServiceFactory.getCurrentDomain());
                 if (context != null) {
                     config.setContextId(context.id);
                     config.setCurrent(configService.getConfigByContext(context).values);
@@ -74,6 +76,7 @@ public class ConfigApi {
     }
 
     @GET
+    @SecurityRequirements
     @Path("/context/")
     @Operation(summary = "get all available repository context objects", description = "Retrieves all available context objects")
     @ApiResponses(value = {
@@ -139,10 +142,11 @@ public class ConfigApi {
 
 
     @GET
+    @SecurityRequirements
     @Path("/language/defaults")
     @Operation(summary = "get all inital language strings for angular")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Map.class))),
+            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Object.class))),
             @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -159,6 +163,7 @@ public class ConfigApi {
     }
 
     @GET
+    @SecurityRequirements
     @Path("/language")
     @Operation(summary = "get override strings for the current language", description = "Language strings")
     @ApiResponses(value = {
@@ -190,6 +195,7 @@ public class ConfigApi {
     }
 
     @GET
+    @SecurityRequirements
     @Path("/variables")
     @Operation(summary = "get global config variables", description = "global config variables")
     @ApiResponses(value = {
@@ -220,6 +226,7 @@ public class ConfigApi {
     }
 
     @GET
+    @SecurityRequirements
     @Path("/dynamic/{key}")
     @Operation(summary = "Get a config entry (appropriate rights for the entry are required)")
     @ApiResponses(value = {

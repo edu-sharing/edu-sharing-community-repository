@@ -11,23 +11,11 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import {
-    About,
-    AboutService,
-    HandleParam,
-    NodeService,
-    FeatureInfo,
-    Ace,
-} from 'ngx-edu-sharing-api';
+import { About, AboutService, Ace, HandleParam, Node, NodeService } from 'ngx-edu-sharing-api';
 import { Observable, Observer, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { BridgeService } from '../../../../../services/bridge.service';
-import {
-    ConfigurationService,
-    DialogButton,
-    UIConstants,
-} from '../../../../../core-module/core.module';
-import { Node, Permission } from '../../../../../core-module/rest/data-object';
+import { ConfigurationService, UIConstants } from '../../../../../core-module/core.module';
 import { Helper } from '../../../../../core-module/rest/helper';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { RestHelper } from '../../../../../core-module/rest/rest-helper';
@@ -45,9 +33,9 @@ import { OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
 import { YES_OR_NO } from '../../generic-dialog/generic-dialog-data';
 import { ExtendedAce } from '../share-dialog.component';
 
-class PublishedNode extends Node {
+type PublishedNode = Node & {
     status?: 'new' | 'update' | null; // flag if this node is manually added later and didn't came from the repo
-}
+};
 
 @Component({
     selector: 'es-share-dialog-publish',
@@ -61,8 +49,8 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
     @Input() inherited: boolean;
     @Input() isAuthorEmpty: boolean;
     @Input() isLicenseEmpty: boolean;
-    @Output() onDisableInherit = new EventEmitter<void>();
-    @Output() onInitCompleted = new EventEmitter<void>();
+    @Output() disableInherit = new EventEmitter<void>();
+    @Output() initCompleted = new EventEmitter<void>();
     @ViewChild('shareModeCopyRef') shareModeCopyRef: any;
     @ViewChild('shareModeDirectRef') shareModeDirectRef: any;
     handlePermission: boolean;
@@ -141,8 +129,8 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
                 ).node;
             }
             this.refresh();
-            this.onInitCompleted.emit();
-            this.onInitCompleted.complete();
+            this.initCompleted.emit();
+            this.initCompleted.complete();
         }
     }
 
@@ -226,7 +214,7 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
             direct: this.shareModeDirect,
         };
         if (this.node.ref?.id) {
-            this.mdsService.initWithNodes([this.node]);
+            void this.mdsService.initWithNodes([this.node]);
         }
         this.updatePublishedVersions();
     }
@@ -470,7 +458,7 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
                 action: {
                     label: this.translate.instant('WORKSPACE.SHARE.DOI_METADATA'),
                     callback: () => {
-                        this.openMetadata();
+                        void this.openMetadata();
                     },
                 },
             });

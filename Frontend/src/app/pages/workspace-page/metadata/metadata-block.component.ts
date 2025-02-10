@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import {
     ConfigurationHelper,
-    Node,
     NodePermissions,
     Permission,
     RestConnectorService,
@@ -9,9 +8,9 @@ import {
     RestNodeService,
 } from '../../../core-module/core.module';
 import { TranslateService } from '@ngx-translate/core';
+import { ConfigService, Node } from 'ngx-edu-sharing-api';
 import { DurationHelper, FormatDatePipe, NodeImageSizePipe, VCard } from 'ngx-edu-sharing-ui';
 import { NodeHelperService } from '../../../services/node-helper.service';
-import { ConfigService } from 'ngx-edu-sharing-api';
 
 // Charts.js
 declare var Chart: any;
@@ -23,10 +22,10 @@ declare var Chart: any;
 })
 export class WorkspaceMetadataBlockComponent {
     @Input() set node(node: Node) {
-        this.load(node);
+        void this.load(node);
     }
-    @Output() onEditMetadata = new EventEmitter();
-    @Output() onDisplay = new EventEmitter();
+    @Output() editMetadata = new EventEmitter();
+    @Output() display = new EventEmitter();
     permissions: any;
     data: any;
     _node: Node;
@@ -55,7 +54,7 @@ export class WorkspaceMetadataBlockComponent {
         );
         data.createDate = new FormatDatePipe(this.translate).transform(node.createdAt);
         data.duration = DurationHelper.getDurationFormatted(
-            node.properties[RestConstants.LOM_PROP_TECHNICAL_DURATION],
+            node.properties[RestConstants.LOM_PROP_TECHNICAL_DURATION]?.[0],
         );
         data.author = this.toVCards(
             node.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR],

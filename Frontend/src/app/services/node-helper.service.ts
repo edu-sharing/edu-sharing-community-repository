@@ -283,6 +283,9 @@ export class NodeHelperService extends NodeHelperServiceBase {
      * @returns {string}
      */
     public getUserDisplayName(user: AuthorityProfile | User) {
+        if (!user.profile) {
+            return user.authorityName.trim();
+        }
         return (user.profile.firstName + ' ' + user.profile.lastName).trim();
     }
     isSavedSearchObject(node: Node) {
@@ -442,7 +445,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
      */
     addNodeToLms(node: Node, reurl: string) {
         this.storage.set(TemporaryStorageService.APPLY_TO_LMS_PARAMETER_NODE, node);
-        this.router.navigate(
+        void this.router.navigate(
             [UIConstants.ROUTER_PREFIX + 'apply-to-lms', node.ref.repo, node.ref.id],
             { queryParams: { reurl } },
         );
@@ -527,7 +530,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
             buttons[0].callback = () => dialog.close();
             buttons[1].callback = () => {
                 if (dialog.config.data.state) {
-                    this.sessionStorage
+                    void this.sessionStorage
                         .set(
                             SessionStorageService.KEY_WORKSPACE_SAFE_DOWNLOAD_CONFIRM,
                             true,
@@ -535,7 +538,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
                         )
                         .then(() => {});
                 }
-                this.downloadNodes(nodes, fileName, true);
+                void this.downloadNodes(nodes, fileName, true);
                 dialog.close();
             };
             return;

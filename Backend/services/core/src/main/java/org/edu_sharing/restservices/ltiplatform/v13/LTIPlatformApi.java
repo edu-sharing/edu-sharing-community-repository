@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
@@ -289,7 +290,7 @@ public class LTIPlatformApi {
              * @TODO build id_token and send it to redirect_uri
              */
 
-            Map<String,String> formParams = new HashMap<>();
+            Map<String, String> formParams = new HashMap<>();
             formParams.put("id_token", jwt);
             formParams.put("state", state);
             return Response.ok(ApiTool.getHTML(redirect_uri, formParams)).build();
@@ -415,6 +416,7 @@ public class LTIPlatformApi {
 
 
     @GET
+    @SecurityRequirements
     @Path("/openid-configuration")
     @Operation(summary = "LTIPlatform openid configuration")
     @Consumes({"*/*"})
@@ -435,6 +437,7 @@ public class LTIPlatformApi {
 
 
     @POST
+    @SecurityRequirements
     @Path("/openid-registration")
 
     @Operation(summary = "registration endpoint the tool uses to register at platform.", description = "tool registration")
@@ -685,14 +688,16 @@ public class LTIPlatformApi {
                                                             @Context HttpServletRequest req) {
         try {
 
-            if (jwt != null) {
-                Jws<Claims> claimsJws = LTIJWTUtil.validateJWT(jwt, ApplicationInfoList.getHomeRepository());
-                String jwtNodeId = (String) claimsJws.getBody().get(CCConstants.NODEID);
-                if (jwtNodeId == null) {
-                    throw new Exception("nodeId not found in validated jwt");
-                }
-                if (!jwtNodeId.equals(nodeId)) {
-                    throw new Exception("wrong nodeId found in validated jwt");
+            if (jwt != null || org.edu_sharing.alfresco.repository.server.authentication.Context.getCurrentInstance().isSingleUseNodeId(nodeId)) {
+                if (jwt != null) {
+                    Jws<Claims> claimsJws = LTIJWTUtil.validateJWT(jwt, ApplicationInfoList.getHomeRepository());
+                    String jwtNodeId = (String) claimsJws.getBody().get(CCConstants.NODEID);
+                    if (jwtNodeId == null) {
+                        throw new Exception("nodeId not found in validated jwt");
+                    }
+                    if (!jwtNodeId.equals(nodeId)) {
+                        throw new Exception("wrong nodeId found in validated jwt");
+                    }
                 }
                 return AuthenticationUtil.runAsSystem(() -> generateLoginInitationResouceLinkRaw(nodeId, editMode, version, launchPresentation, req));
             } else {
@@ -1060,6 +1065,7 @@ public class LTIPlatformApi {
 
     @POST
     @Path("/content")
+    @SecurityRequirements
     @Consumes({"multipart/form-data"})
     @Produces({"application/json"})
 

@@ -1,7 +1,8 @@
 import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
 import { Params, QueryParamsHandling } from '@angular/router';
 import { CanDrop, DragData, DropSource, NodesDragDropService } from 'ngx-edu-sharing-ui';
-import { Node, RestNodeService } from '../../../core-module/core.module';
+import { Node } from 'ngx-edu-sharing-api';
+import { RestNodeService } from '../../../core-module/core.module';
 
 import { BreadcrumbsService } from './breadcrumbs.service';
 
@@ -76,11 +77,11 @@ export class BreadcrumbsComponent {
      *
      * Passes the index **starting at 1** of the clicked breadcrumb, or 0 for the root element.
      */
-    @Output() onClick = new EventEmitter<number>();
+    @Output() clickBreadcrumb = new EventEmitter<number>();
     /**
      * Called when an item is dropped on the breadcrumbs.
      */
-    @Output() onDrop = new EventEmitter<{ target: Node | 'HOME'; source: DropSource<Node> }>();
+    @Output() dropElement = new EventEmitter<{ target: Node | 'HOME'; source: DropSource<Node> }>();
 
     readonly HOME = 'HOME' as 'HOME';
     nodes: Node[] = [];
@@ -102,7 +103,7 @@ export class BreadcrumbsComponent {
     }
 
     openBreadcrumb(position: number) {
-        this.onClick.emit(position);
+        this.clickBreadcrumb.emit(position);
     }
 
     private addSearch() {
@@ -112,9 +113,10 @@ export class BreadcrumbsComponent {
             this.nodes[this.nodes.length - 1].type === 'SEARCH'
         );
         if (this._searchQuery) {
-            const search = new Node();
-            search.name = `'${this._searchQuery}'`;
-            search.type = 'SEARCH';
+            const search = {
+                name: `'${this._searchQuery}'`,
+                type: 'SEARCH',
+            } as Node;
             if (add) {
                 this.nodes.splice(this.nodes.length, 0, search);
             } else {
@@ -126,7 +128,7 @@ export class BreadcrumbsComponent {
     }
 
     onDropped(dragData: DragData<'HOME' | Node>) {
-        this.onDrop.emit({
+        this.dropElement.emit({
             target: dragData.target,
             source: {
                 element: dragData.draggedNodes,

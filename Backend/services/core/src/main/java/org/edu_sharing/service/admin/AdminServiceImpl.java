@@ -473,7 +473,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Map<String, String> addApplication(String appMetadataUrl) throws Exception {
+    public ApplicationInfo addApplication(String appMetadataUrl) throws Exception {
 
         HttpQueryTool httpQuery = new HttpQueryTool();
         String httpQueryResult = httpQuery.query(appMetadataUrl);
@@ -486,7 +486,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Map<String, String> addApplicationFromStream(InputStream is) throws Exception {
+    public ApplicationInfo addApplicationFromStream(InputStream is) throws Exception {
 
         Properties props = new SortedProperties();
         props.loadFromXML(is);
@@ -499,7 +499,7 @@ public class AdminServiceImpl implements AdminService {
         return storeProperties(appId, props);
     }
 
-    public Map<String, String> addApplication(Map<String, String> properties) throws Exception {
+    public ApplicationInfo addApplication(Map<String, String> properties) throws Exception {
         if (properties == null) {
             throw new Exception("no properties provided");
         }
@@ -538,9 +538,9 @@ public class AdminServiceImpl implements AdminService {
         return storeProperties(appId, props);
     }
 
-    private Map<String, String> storeProperties(String appId, Properties props) throws Exception {
+    private ApplicationInfo storeProperties(String appId, Properties props) throws Exception {
         String fileNamePart = appId.replaceAll("[/:]", "");
-        String filename = "app-" + fileNamePart + ".properties.xml";
+        final String filename = "app-" + fileNamePart + ".properties.xml";
 
         //check if appID already exists
 //        if (ApplicationInfoList.getApplicationInfos().containsKey(appId)) {
@@ -608,12 +608,7 @@ public class AdminServiceImpl implements AdminService {
         }
 
         ContextRefreshUtils.refreshContext();
-
-        Map<String, String> result = new HashMap<>();
-        for (Object key : props.keySet()) {
-            result.put((String) key, props.getProperty((String) key));
-        }
-        return result;
+        return new ApplicationInfo(filename);
     }
 
     @Override
@@ -1031,11 +1026,11 @@ public class AdminServiceImpl implements AdminService {
         ContextRefreshUtils.refreshContext();
     }
 
-    public void exportLom(String filterQuery, String targetDir, boolean subobjectHandler) throws Exception {
+    public void exportLom(String filterQuery, String targetDir, String format) throws Exception {
         Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("elasticQuery", filterQuery);
         paramsMap.put("outputDir", targetDir);
-        paramsMap.put("withSubObjects", Boolean.toString(subobjectHandler));
+        paramsMap.put("format", format);
         paramsMap.put(JobHandler.AUTH_INFO_KEY, getAuthInfo());
         ImmediateJobListener jobListener = JobHandler.getInstance().startJob(ExporterJob.class, paramsMap);
         if (jobListener.isVetoed()) {
@@ -1133,7 +1128,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Object getLightbendConfig() {
+    public Map<String, Object> getLightbendConfig() {
         return LightbendConfigLoader.get().root().unwrapped();
     }
 
@@ -1147,7 +1142,24 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public Map<String, RepositoryVersionInfo> getVersions() {
         try {
-            return versionService.getRepositoryVersionInfo();
+            Map<String, RepositoryVersionInfo> result = new HashMap<>(versionService.getRepositoryVersionInfo());
+            try {
+                RepositoryVersionInfo renderingVersionInfo = new RepositoryVersionInfo();
+                String renderserviceVersion = versionService.getRenderserviceVersion();
+                if(StringUtils.isNotBlank(renderserviceVersion)) {
+                    renderingVersionInfo.version = new RepositoryVersionInfo.Version();
+                    String[] versionInfos = renderserviceVersion.split("\\.");
+                    renderingVersionInfo.version.major = versionInfos[0];
+                    renderingVersionInfo.version.minor = versionInfos[1];
+                    renderingVersionInfo.version.patch = versionInfos[2];
+                    renderingVersionInfo.version.full = renderserviceVersion;
+                    renderingVersionInfo.repository="service-rendering-service";
+                    result.put(renderingVersionInfo.repository,renderingVersionInfo);
+                }
+            } catch (Exception e) {
+                logger.warn(e.getMessage(), e);
+            }
+            return result;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

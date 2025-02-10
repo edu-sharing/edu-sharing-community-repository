@@ -16,9 +16,7 @@ import {
     ConfigurationService,
     DialogButton,
     LoginResult,
-    Node,
     NodeShare,
-    NodeWrapper,
     Permission,
     RestCollectionService,
     RestConnectorService,
@@ -40,7 +38,7 @@ import { DialogsService } from '../../dialogs.service';
 import { ShareDialogPublishComponent } from './publish/publish.component';
 import { ShareDialogData, ShareDialogResult } from './share-dialog-data';
 import { trigger } from '@angular/animations';
-import { Ace, Acl, AuthenticationService, Authority, NodeService } from 'ngx-edu-sharing-api';
+import { Ace, Acl, AuthenticationService, Authority, Node, NodeService } from 'ngx-edu-sharing-api';
 import { ShareDialogRestrictedAccessComponent } from './restricted-access/restricted-access.component';
 
 export type ExtendedAcl = {
@@ -373,7 +371,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
             if (this._nodes[0].ref.id) {
                 this.nodeApiLegacy
                     .getNodeMetadata(this._nodes[0].ref.id, [RestConstants.ALL])
-                    .subscribe((data: NodeWrapper) => {
+                    .subscribe((data) => {
                         let authority = data.node.properties[RestConstants.CM_CREATOR][0];
                         let user = data.node.createdBy;
 
@@ -742,7 +740,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                     : RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH,
             )
             .subscribe((has: boolean) => (this.globalAllowed = has));
-        this.authenticationService
+        void this.authenticationService
             .hasToolpermission(
                 this.isSafe
                     ? this.isSharedScope
@@ -753,13 +751,13 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                     : RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH,
             )
             .then((has: boolean) => (this.globalAllowed = has));
-        this.authenticationService
+        void this.authenticationService
             .hasToolpermission(RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY)
             .then((has: boolean) => (this.fuzzyAllowed = has));
-        this.authenticationService
+        void this.authenticationService
             .hasToolpermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES)
             .then((has: boolean) => (this.publishPermission = has));
-        this.authenticationService
+        void this.authenticationService
             .hasToolpermission(RestConstants.TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS)
             .then((has: boolean) => (this.restrictedAccessPermission = has));
     }

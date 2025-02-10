@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { TranslateService } from '@ngx-translate/core';
@@ -22,7 +22,7 @@ import { CardDialogService } from '../../../../dialogs/card-dialog/card-dialog.s
         },
     ],
 })
-export class MdsEditorWidgetTinyMCE extends MdsEditorWidgetBase implements OnInit, AfterViewInit {
+export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase implements AfterViewInit {
     @ViewChild(EditorComponent) editorComponent: EditorComponent;
     @ViewChild(MdsEditorWidgetContainerComponent)
     containerComponent: MdsEditorWidgetContainerComponent;
@@ -57,7 +57,6 @@ export class MdsEditorWidgetTinyMCE extends MdsEditorWidgetBase implements OnIni
     ) {
         super(mdsEditorInstance, translate);
     }
-    ngOnInit(): void {}
 
     onIndeterminateChange(isIndeterminate: boolean): void {
         this.setIndeterminateValues(isIndeterminate);
@@ -86,24 +85,27 @@ export class MdsEditorWidgetTinyMCE extends MdsEditorWidgetBase implements OnIni
         this._html = (await this.widget.getInitalValuesAsync()).jointValues[0];
         (this.editorConfigDefault as any).base_url =
             this.platformLocation.getBaseHrefFromDOM() + 'tinymce/';
-        if (this.widget.definition.configuration) {
-            this.editorConfig = {
-                ...this.editorConfigDefault,
-                ...JSON.parse(this.widget.definition.configuration),
-            };
-        } else {
-            this.editorConfig = this.editorConfigDefault;
-        }
         // dirty workaround for tinyMCE
         setTimeout(() => {
-            this.editorComponent.editor.mode.set(
-                this.dummyControl.disabled ? 'readonly' : 'design',
-            );
-            this.dummyControl.registerOnDisabledChange((isDisabled) =>
-                this.editorComponent.editor.mode.set(isDisabled ? 'readonly' : 'design'),
-            );
-            // we need to disable the focus trap cause otherwise any overlay dialogs (i.e. insert link) of tinymce will break
-            this.cardService.getFocusTraps().forEach((f) => f._disable());
+            if (this.widget.definition.configuration) {
+                this.editorConfig = {
+                    ...this.editorConfigDefault,
+                    ...JSON.parse(this.widget.definition.configuration),
+                };
+                console.log(this.editorConfig);
+            } else {
+                this.editorConfig = this.editorConfigDefault;
+            }
+            setTimeout(() => {
+                this.editorComponent.editor.mode.set(
+                    this.dummyControl.disabled ? 'readonly' : 'design',
+                );
+                this.dummyControl.registerOnDisabledChange((isDisabled) =>
+                    this.editorComponent.editor.mode.set(isDisabled ? 'readonly' : 'design'),
+                );
+                // we need to disable the focus trap cause otherwise any overlay dialogs (i.e. insert link) of tinymce will break
+                this.cardService.getFocusTraps().forEach((f) => f._disable());
+            });
         });
     }
 }

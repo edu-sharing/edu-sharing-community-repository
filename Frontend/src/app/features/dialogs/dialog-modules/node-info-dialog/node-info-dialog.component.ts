@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { Ace, Acl, ConfigService, NodeServiceUnwrapped, Person } from 'ngx-edu-sharing-api';
+import { ConfigService, Node, NodeServiceUnwrapped } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     OptionsHelperDataService,
@@ -11,12 +11,9 @@ import {
 import { forkJoin } from 'rxjs';
 import {
     ConfigurationHelper,
-    Node,
     NodeList,
-    Permissions,
     RestConstants,
     RestNodeService,
-    UserProfile,
 } from '../../../../core-module/core.module';
 import { Toast } from '../../../../services/toast';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
@@ -49,7 +46,8 @@ type RawPermissions = {
  * A node info dialog (useful primary for admin stuff)
  */
 export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
-    @ViewChild(ActionbarComponent) actionbarComponent: ActionbarComponent;
+    @ViewChild('contextActionbar') contextActionbarComponent: ActionbarComponent;
+    @ViewChild('allActionbar') allActionbarComponent: ActionbarComponent;
     _nodes: Node[];
     _children: Node[];
     _permissions: RawPermissions;
@@ -76,9 +74,7 @@ export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
     ) {}
 
     async ngAfterViewInit() {
-        console.log(this.actionbarComponent);
-        await this.optionsHelperDataService.initComponents(this.actionbarComponent);
-        this.optionsHelperDataService.refreshComponents();
+        void this.updateOptions();
     }
 
     ngOnInit(): void {
@@ -149,12 +145,7 @@ export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
                     });
             }
         }
-        console.log(this.actionbarComponent);
-        this.optionsHelperDataService.setData({
-            scope: Scope.Admin,
-            activeObjects: this._nodes,
-            selectedObjects: this._nodes,
-        });
+        void this.updateOptions();
     }
 
     openNodes(nodes: Node[]) {
@@ -163,7 +154,7 @@ export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
         this.setNodes(nodes);
     }
     openNodeWorkspace(node: Node) {
-        this.router.navigate([UIConstants.ROUTER_PREFIX, 'workspace'], {
+        void this.router.navigate([UIConstants.ROUTER_PREFIX, 'workspace'], {
             queryParams: { id: node.parent.id, file: node.ref.id },
         });
         this.dialogRef.close();
@@ -243,5 +234,23 @@ export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
     copyNodeIdToClipboard(node: Node) {
         UIHelper.copyToClipboard(node.ref.id);
         this.toast.toast('ADMIN.APPLICATIONS.COPIED_CLIPBOARD');
+    }
+
+    private async updateOptions() {
+        this.optionsHelperDataService.setData({
+            scope: Scope.Admin,
+            activeObjects: this._nodes,
+            selectedObjects: this._nodes,
+        });
+        await this.optionsHelperDataService.initComponents(this.contextActionbarComponent);
+        this.optionsHelperDataService.refreshComponents();
+
+        this.optionsHelperDataService.setData({
+            scope: Scope.DebugShowAll,
+            activeObjects: this._nodes,
+            selectedObjects: this._nodes,
+        });
+        await this.optionsHelperDataService.initComponents(this.allActionbarComponent);
+        this.optionsHelperDataService.refreshComponents();
     }
 }

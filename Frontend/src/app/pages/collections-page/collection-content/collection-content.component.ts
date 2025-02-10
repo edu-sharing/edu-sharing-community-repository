@@ -19,6 +19,8 @@ import {
     MdsService,
     Node,
     ProposalNode,
+    SessionStorageService,
+    Store,
 } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
@@ -31,6 +33,7 @@ import {
     ListItem,
     ListItemSort,
     ListSortConfig,
+    MdsHelperService,
     NodeClickEvent,
     NodeDataSource,
     NodeEntriesDisplayType,
@@ -39,8 +42,9 @@ import {
     OptionsHelperDataService,
     Scope,
     UIConstants,
+    VirtualNode,
 } from 'ngx-edu-sharing-ui';
-import { Subject, forkJoin as observableForkJoin, forkJoin } from 'rxjs';
+import { forkJoin, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import * as EduData from '../../../core-module/core.module';
 import {
@@ -51,7 +55,6 @@ import {
     Permission,
 } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
-import { MdsHelperService } from 'ngx-edu-sharing-ui';
 import { RequestObject } from '../../../core-module/rest/request-object';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
@@ -111,6 +114,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     @ContentChild('empty') emptyRef: TemplateRef<unknown>;
     @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
     @ViewChild('listReferences') listReferences: ListEventInterface<CollectionReference>;
+    @ViewChild('listCollections') listCollections: ListEventInterface<Node>;
 
     private mainNavUpdateTrigger = new Subject<void>();
     sortCollectionColumns: ListItemSort[] = [
@@ -152,13 +156,13 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     addMaterialSearchOptionItem = new OptionItem('OPTIONS.SEARCH_OBJECT', 'redo', () => {
         UIHelper.getCommonParameters(this.route).subscribe((params) => {
             params.addToCollection = this.collection.ref.id;
-            this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
+            void this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
                 queryParams: params,
             });
         });
     });
     addMaterialBinaryOptionItem = new OptionItem('OPTIONS.ADD_OBJECT', 'cloud_upload', () => {
-        this.mainNavService.getMainNav().topBar.createMenu.openUploadSelect();
+        void this.mainNavService.getMainNav().topBar.createMenu.openUploadSelect();
     });
     dataSourceCollections = new NodeDataSource<Node>();
     dataSourceReferences = new NodeDataSource<CollectionReference>();
@@ -175,6 +179,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         private bridge: BridgeService,
         private collectionService: RestCollectionService,
         private configurationService: ConfigService,
+        private sessionStorageService: SessionStorageService,
         private dialogs: DialogsService,
         private infobar: InfobarService,
         private loadingScreen: LoadingScreenService,
@@ -198,7 +203,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.collectionsColumns.push(new ListItem('COLLECTION', 'info'));
         this.collectionsColumns.push(new ListItem('COLLECTION', 'scope'));
 
-        this.mainNavService.getDialogs().onEvent.subscribe((event: ManagementEvent) => {
+        this.mainNavService.getDialogs().eventTriggered.subscribe((event: ManagementEvent) => {
             if (event.event === ManagementEventType.AddCollectionNodes) {
                 if (event.data.collection.ref.id === this.collection.ref.id) {
                     this.listReferences.addVirtualNodes(event.data.references);
@@ -329,7 +334,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
     onCreateCollection() {
         UIHelper.getCommonParameters(this.route).subscribe((params) => {
-            this.router.navigate(
+            void this.router.navigate(
                 [
                     UIConstants.ROUTER_PREFIX + 'collections/collection',
                     'new',
@@ -565,7 +570,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 .getNodeMetadata(event.element.ref.id)
                 .subscribe((data: NodeWrapper) => {
                     this.contentNode = data.node;
-                    this.router.navigate([
+                    void this.router.navigate([
                         UIConstants.ROUTER_PREFIX + 'render',
                         event.element.ref.id,
                     ]);
@@ -667,7 +672,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 this.collection.ref.repo,
             )
             .subscribe(
-                (collection) => {
+                async (collection) => {
                     // transfere sub collections and content
                     this.dataSourceCollections.setData(
                         collection.collections,
@@ -675,6 +680,22 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                     );
                     this.dataSourceCollections.isLoading = false;
                     if (this.isRootLevel) {
+                        if (this.scope === RestConstants.COLLECTIONSCOPE_MY) {
+                            this.listCollections.addVirtualNodes(
+                                (
+                                    await this.sessionStorageService
+                                        .get(
+                                            SessionStorageService.KEY_ROOT_COLLECTIONS,
+                                            [],
+                                            Store.Session,
+                                        )
+                                        .toPromise()
+                                ).map((n: VirtualNode) => {
+                                    n.override = false;
+                                    return n;
+                                }),
+                            );
+                        }
                         this.finishCollectionLoading();
                         return;
                     }
@@ -710,7 +731,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             this.sortReferences.customSortingInProgress =
                 this.sortReferences.active === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION;
         }
-        this.toggleReferencesOrder();
+        void this.toggleReferencesOrder();
         if (this.sortReferences.customSortingInProgress) {
             await this.loadMoreReferences({
                 reset: true,
@@ -796,7 +817,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     private finishCollectionLoading(callback?: () => void) {
-        this.mainNavService.getMainNav()?.refreshBanner();
+        void this.mainNavService.getMainNav()?.refreshBanner();
 
         // Cannot trivially reference the add button for the tutorial with
         // current implementation of generic options.

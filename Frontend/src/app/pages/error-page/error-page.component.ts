@@ -41,10 +41,15 @@ export class ErrorPageComponent {
             this.message = 'MESSAGES.INVALID';
             this.messageDetail = 'MESSAGES.DETAILS.INVALID';
         }
+
+        // custom message without translation
+        if (data.message === 'OTHER') {
+            this.messageDetail = data.text;
+        }
     }
 
     public openSearch() {
-        this.router.navigate([UIConstants.ROUTER_PREFIX + 'search']);
+        void this.router.navigate([UIConstants.ROUTER_PREFIX + 'search']);
     }
     public closeWindow() {
         window.close();

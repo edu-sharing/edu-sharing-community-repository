@@ -7,6 +7,7 @@ import {
     InteractionType,
     ListItem,
     ListSortConfig,
+    MdsHelperService,
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
@@ -20,11 +21,9 @@ import {
     RestConnectorService,
     RestMdsService,
     RestMediacenterService,
-    RestSearchService,
 } from '../../../core-module/core.module';
 import { CsvHelper } from '../../../core-module/csv.helper';
 import { Helper } from '../../../core-module/rest/helper';
-import { MdsHelperService } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { Toast } from '../../../services/toast';
@@ -51,7 +50,7 @@ export class AdminMediacenterComponent {
     @ViewChild('mediacenterMds') mediacenterMds: MdsEditorWrapperComponent;
     @ViewChild('nodeEntriesTable') nodeEntriesTable: NodeEntriesWrapperComponent<Node>;
     @ViewChild('groupEntriesTable') groupEntriesTable: NodeEntriesWrapperComponent<Node>;
-    @Output() onOpenNode = new EventEmitter<Node>();
+    @Output() openNode = new EventEmitter<Node>();
     // @TODO: declare the mediacenter type when it is finalized in backend
     mediacenters: any[];
     // original link to mediacenter object (contained in mediacenters[])
@@ -294,7 +293,7 @@ export class AdminMediacenterComponent {
                 (result) => {
                     RestHelper.waitForResult(
                         () => this.mediacenterServiceLegacy.getMediacenters(),
-                        (list: Mediacenter[]) => {
+                        (list) => {
                             return (
                                 list.filter((r) => r.authorityName === result.authorityName)
                                     .length === 1
@@ -492,7 +491,7 @@ export class AdminMediacenterComponent {
     setMediacenterNodesSort(sort: ListSortConfig) {
         this.mediacenterNodesSort = sort;
         this.resetMediacenterNodes();
-        this.loadMediacenterNodes();
+        void this.loadMediacenterNodes();
     }
 
     private resetMediacenterNodes() {

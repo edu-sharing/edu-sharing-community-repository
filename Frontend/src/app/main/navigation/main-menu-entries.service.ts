@@ -7,6 +7,7 @@ import { BridgeService } from '../../services/bridge.service';
 import {
     ConfigurationService,
     FrameEventsService,
+    Mediacenter,
     OrganizationOrganizations,
     RestConnectorService,
     RestConstants,
@@ -255,7 +256,7 @@ export class MainMenuEntriesService {
             isSeparate: !!customEntryDefinition.isSeperate,
             isCustom: true,
             open: () => {
-                this.openEntry(entry, target);
+                void this.openEntry(entry, target);
             },
         };
         return entry;
@@ -301,7 +302,7 @@ export class MainMenuEntriesService {
                         const split = p.split('=');
                         params[split[0]] = split[1];
                     });
-                this.router.navigate([UIConstants.ROUTER_PREFIX + path], {
+                void this.router.navigate([UIConstants.ROUTER_PREFIX + path], {
                     queryParams: params,
                 });
                 break;

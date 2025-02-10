@@ -71,7 +71,7 @@ export class AuthoritySearchInputComponent {
     @Input() placeholder = 'WORKSPACE.INVITE_FIELD';
     @Input() hint = '';
 
-    @Output() onChooseAuthority = new EventEmitter<Authority | any>();
+    @Output() chooseAuthority = new EventEmitter<Authority | any>();
 
     input = new UntypedFormControl('');
     suggestionGroups$: Observable<SuggestionResult>;
@@ -102,14 +102,14 @@ export class AuthoritySearchInputComponent {
     }
 
     addSuggestion(data: any) {
-        this.onChooseAuthority.emit(data.originalObject);
+        this.chooseAuthority.emit(data.originalObject);
     }
 
     addAny(data: string) {
         const authority = new Authority();
         authority.authorityName = data;
         authority.authorityType = RestConstants.AUTHORITY_TYPE_UNKNOWN;
-        this.onChooseAuthority.emit(authority);
+        this.chooseAuthority.emit(authority);
     }
 
     onSubmit() {
@@ -195,6 +195,7 @@ export class AuthoritySearchInputComponent {
                             label: 'WORKSPACE.INVITE_GLOBAL_RESULTS',
                             values: this.convertData(authorities),
                         })),
+                        catchError(() => of({ values: [] } as SuggestionGroup)),
                     ),
             );
         }
@@ -299,11 +300,11 @@ export class AuthoritySearchInputComponent {
     ): SuggestItem[] {
         const result: SuggestItem[] = [];
         for (const user of authorities) {
-            const group = (user.profile as GroupProfile).displayName != null;
+            const group = (user.profile as GroupProfile)?.displayName != null;
             const item = new SuggestItem(
                 user.authorityName,
                 group
-                    ? (user.profile as GroupProfile).displayName
+                    ? (user.profile as GroupProfile)?.displayName
                     : this.nodeHelper.getUserDisplayName(user as AuthorityProfile),
                 group ? 'group' : 'person',
                 '',

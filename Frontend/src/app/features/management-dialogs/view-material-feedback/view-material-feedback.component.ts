@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { DialogButton, Node, RestConstants } from '../../../core-module/core.module';
+import { DialogButton, RestConstants } from '../../../core-module/core.module';
 import { Toast } from '../../../services/toast';
-import { FeedbackData, FeedbackV1Service } from 'ngx-edu-sharing-api';
+import { FeedbackData, FeedbackV1Service, Node } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-view-material-feedback',
@@ -12,16 +12,16 @@ export class ViewMaterialFeedbackComponent {
     @Input()
     set node(node: Node) {
         this._node = node;
-        this.fetch();
+        void this.fetch();
     }
-    @Output() onClose = new EventEmitter<void>();
+    @Output() closeFeedback = new EventEmitter<void>();
     _node: Node;
     feedbacks: FeedbackData[];
     feedbackViewButtons: DialogButton[];
     constructor(private feedbackService: FeedbackV1Service, private toast: Toast) {
         this.feedbackViewButtons = DialogButton.getSingleButton(
             'CLOSE',
-            () => this.onClose.emit(),
+            () => this.closeFeedback.emit(),
             'standard',
         );
     }
@@ -40,7 +40,7 @@ export class ViewMaterialFeedbackComponent {
                 })
                 .toPromise();
         } catch (e) {
-            this.onClose.emit();
+            this.closeFeedback.emit();
         }
         this.toast.closeProgressSpinner();
     }

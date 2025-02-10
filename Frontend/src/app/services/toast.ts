@@ -25,6 +25,7 @@ import { DialogsService } from '../features/dialogs/dialogs.service';
 import { ToastMessageComponent } from '../main/toast-message/toast-message.component';
 import { GlobalProgressComponent } from '../shared/components/global-progress/global-progress.component';
 import { BridgeService } from './bridge.service';
+import { UIHelper } from '../core-ui-module/ui-helper';
 
 interface CustomAction {
     link: {
@@ -176,7 +177,7 @@ export class Toast extends ToastAbstract implements OnDestroy {
         }
         this.lastToastMessage = message;
         this.lastToastMessageTime = Date.now();
-        this.showToast({
+        void this.showToast({
             message,
             type: 'info',
             toastMessage,
@@ -242,7 +243,7 @@ export class Toast extends ToastAbstract implements OnDestroy {
             toastMessage.subtype =
                 message === 'COMMON_API_ERROR' ? ToastType.ErrorGeneric : ToastType.ErrorSpecific;
         }
-        this.showToast({
+        void this.showToast({
             message,
             type: 'error',
             toastMessage,
@@ -254,7 +255,7 @@ export class Toast extends ToastAbstract implements OnDestroy {
     }
 
     goToLogin() {
-        this.router.navigate([UIConstants.ROUTER_PREFIX + 'login'], {
+        void this.router.navigate([UIConstants.ROUTER_PREFIX + 'login'], {
             queryParams: { next: window.location },
         });
     }
@@ -343,7 +344,17 @@ export class Toast extends ToastAbstract implements OnDestroy {
                 label: this.translate.instant('DETAILS'),
                 callback: () =>
                     this.dialogs.openGenericDialog({
-                        title: dialogTitle,
+                        title: this.translate.instant(dialogTitle, translationParameters),
+                        buttons: [
+                            {
+                                label: 'WORKSPACE.SHARE_LINK.COPY_CLIPBOARD',
+                                config: { color: 'standard', position: 'opposite' },
+                                callback: async () => {
+                                    UIHelper.copyToClipboard(dialogMessage);
+                                    return false;
+                                },
+                            },
+                        ],
                         message: dialogMessage,
                         messageParameters: translationParameters,
                     }),

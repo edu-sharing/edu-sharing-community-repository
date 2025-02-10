@@ -19,7 +19,6 @@ import {
 } from 'ngx-edu-sharing-ui';
 import {
     ConfigurationHelper,
-    Node,
     Person,
     RestConnectorService,
     RestConstants,
@@ -33,7 +32,7 @@ import { Helper } from '../../core-module/rest/helper';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { BridgeService } from '../../services/bridge.service';
 import { NodeHelperService } from '../../services/node-helper.service';
-import { ConfigService } from 'ngx-edu-sharing-api';
+import { ConfigService, Node } from 'ngx-edu-sharing-api';
 import { OptionsHelperService } from '../../services/options-helper.service';
 
 @Component({
@@ -113,7 +112,7 @@ export class SharingPageComponent {
                         this.loading = false;
                         this.sharingInfo = result;
                         if (result.expired) {
-                            this.router.navigate([
+                            void this.router.navigate([
                                 UIConstants.ROUTER_PREFIX,
                                 'messages',
                                 'share_expired',
@@ -124,7 +123,7 @@ export class SharingPageComponent {
                     },
                     (error) => {
                         console.warn(error);
-                        this.router.navigate([
+                        void this.router.navigate([
                             UIConstants.ROUTER_PREFIX,
                             'messages',
                             'share_expired',
