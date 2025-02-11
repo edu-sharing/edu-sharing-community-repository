@@ -5,8 +5,10 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
@@ -23,10 +25,13 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.MimeTypes;
 import org.edu_sharing.repository.client.tools.StringTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 import org.edu_sharing.service.clientutils.ClientUtilsService;
 import org.edu_sharing.service.clientutils.WebsiteInformation;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchToken;
 
 
 public class ExcelLOMImporter {
@@ -294,37 +299,44 @@ public class ExcelLOMImporter {
 			String targetCollection = collectionsForNode.stream().skip(collectionsForNode.size() -1).findFirst().get();
 			logger.info("collections for node " + String.join("/",collectionsForNode) +" p:"+parentCollection +" c:"+targetCollection);
 
-			SearchParameters searchParameters = new SearchParameters();
-			searchParameters.setLanguage(SearchService.LANGUAGE_LUCENE);
-			searchParameters.setQuery("ASPECT:\"ccm:collection\" AND @cm\\:name:\"" + targetCollection + "\"");
-			searchParameters.setSkipCount(0);
-			searchParameters.setLimit(10);
-			searchParameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+			SearchToken searchToken = new SearchToken();
+			searchToken.setFrom(0);
+			searchToken.setMaxResult(Integer.MAX_VALUE);
+			searchToken.setElasticQuery(
+					QueryBuilders.bool()
+							.must(m -> m.term(t ->  t.field("aspects").value("ccm:collection")))
+							.must(m -> m.wildcard(w -> w.field("properties.cm:name").wildcard(targetCollection)))
+							.build());
 
-			ResultSet rs = serviceRegistry.getSearchService().query(searchParameters);
+			SearchResultNodeRef search = SearchServiceFactory.getLocalService().search(searchToken);
+
 
 			//check if there is a parent
-			NodeRef pathMatchesNodeRef = null;
+			AtomicReference<NodeRef> pathMatchesNodeRef = new AtomicReference();
+
 			LinkedHashSet<String> pathsMatch = new LinkedHashSet<>();
-			for(NodeRef nodeRef : rs.getNodeRefs()){
+
+			search.getData().stream().forEach(n -> {
+				NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, n.getNodeId());
 				Path path = serviceRegistry.getNodeService().getPath(nodeRef);
 				String displayPath = path.toDisplayPath(serviceRegistry.getNodeService(),serviceRegistry.getPermissionService());
 				logger.info("checking path for parent collection;\"" + parentCollection + "\";path:"+displayPath +"/"+nodeService.getProperty(nodeRef,ContentModel.PROP_NAME));
 				if(displayPath.contains(parentCollection)){
 					pathsMatch.add(displayPath);
-					pathMatchesNodeRef = nodeRef;
+					pathMatchesNodeRef.set(nodeRef);
 				}
-			}
+			});
+
 
 			if(pathsMatch.size() > 1){
 				logger.error("more than one path matches;"+nodeName +";"+newNode.getChildRef()+";" + String.join(";",pathsMatch));
 			}else if(pathsMatch.size() == 0){
 				logger.error("no path matches;"+nodeName +";"+newNode.getChildRef());
 			}else{
-				logger.info("adding;" + nodeName +";"+newNode.getChildRef() +";TO;" + pathsMatch.iterator().next() +"/"+nodeService.getProperty(pathMatchesNodeRef,ContentModel.PROP_NAME));
+				logger.info("adding;" + nodeName +";"+newNode.getChildRef() +";TO;" + pathsMatch.iterator().next() +"/"+nodeService.getProperty(pathMatchesNodeRef.get(),ContentModel.PROP_NAME));
 				try {
 					if(addToCollection) {
-						CollectionServiceFactory.getLocalService().addToCollection(pathMatchesNodeRef.getId(), newNode.getChildRef().getId(), null, false);
+						CollectionServiceFactory.getLocalService().addToCollection(pathMatchesNodeRef.get().getId(), newNode.getChildRef().getId(), null, false);
 					}
 				} catch (Throwable throwable) {
 
@@ -332,7 +344,7 @@ public class ExcelLOMImporter {
 				}
 			}
 		}else{
-			this.logger.info("addToCollections expects two collection to be defined in excelsheet;" + wwwUrl);
+			this.logger.warn("addToCollections expects two collection to be defined in excelsheet;" + wwwUrl);
 		}
 	}
 
