@@ -7,7 +7,6 @@ import { BridgeService } from '../../services/bridge.service';
 import {
     ConfigurationService,
     FrameEventsService,
-    Mediacenter,
     OrganizationOrganizations,
     RestConnectorService,
     RestConstants,

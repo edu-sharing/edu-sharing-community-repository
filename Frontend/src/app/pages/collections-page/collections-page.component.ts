@@ -21,12 +21,11 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { combineLatest, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
-import { Node } from 'ngx-edu-sharing-api';
+import { Mediacenter, Node } from 'ngx-edu-sharing-api';
 import * as EduData from '../../core-module/core.module';
 import {
     ConfigurationService,
     DialogButton,
-    Mediacenter,
     NodeRef,
     RestCollectionService,
     RestConnectorService,

@@ -1,29 +1,26 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import io.gdcc.xoai.dataprovider.model.Item;
 import io.gdcc.xoai.dataprovider.model.MetadataFormat;
 import io.gdcc.xoai.xml.XmlWriter;
 import lombok.extern.slf4j.Slf4j;
-import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.alfresco.repo.node.MLPropertyInterceptor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.exporter.OAILOMExporter;
-import org.edu_sharing.repository.server.exporter.OAILOMWithSubobjectsExporter;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.service.oai.OAIExporterFactory;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
+import org.edu_sharing.service.model.NodeRef;
+import org.edu_sharing.service.oai.core.EduMetadataFormatRegistry;
+import org.edu_sharing.service.oai.core.EduSharingItemRepository;
+import org.edu_sharing.service.search.SearchService;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchToken;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.io.FileOutputStream;
+import java.util.Base64;
 
 
 @Slf4j
@@ -71,7 +68,7 @@ public class ExporterJob extends AbstractJobMapAnnotationParams{
                     log.info("found " + search.getData().size() + " to export with " + elasticQuery);
                     for(NodeRef nodeRef : search.getData()){
                         String nodeId = nodeRef.getNodeId();
-                        try(FileOutputStream os = new FileOutputStream(outputDirectory + "/" + nodeId + ".xml")) {
+                        try(FileOutputStream os = new FileOutputStream(outputDir+ "/" + nodeId + ".xml")) {
                             Item item = eduSharingItemRepository.getItem(nodeId, formatWriter);
                             try (XmlWriter writer = new XmlWriter(os)) {
                                 item.getMetadata().write(writer);
