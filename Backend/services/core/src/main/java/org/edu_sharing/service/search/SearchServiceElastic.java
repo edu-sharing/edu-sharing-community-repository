@@ -2295,8 +2295,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
             return super.search(searchToken,scoped);
         }
         try {
-
-            BoolQuery.Builder globalConditions = getGlobalConditions(searchToken.getAuthorityScope(), null, null,null,scoped);
+            StoreRef storeRef = (searchToken.getStoreProtocol() != null && searchToken.getStoreName() != null)
+                    ? new StoreRef(searchToken.getStoreProtocol(),searchToken.getStoreName())
+                    : null;
+            BoolQuery.Builder globalConditions = getGlobalConditions(searchToken.getAuthorityScope(), null, null,storeRef,scoped);
             globalConditions.must(searchToken.getElasticQuery()._toQuery());
 
             Map<String,Aggregation> aggregations = null;
