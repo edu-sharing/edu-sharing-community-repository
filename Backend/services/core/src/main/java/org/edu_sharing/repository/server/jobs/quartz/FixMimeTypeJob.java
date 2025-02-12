@@ -1,92 +1,83 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.SearchParameters;
-import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchToken;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-/**
- * {"LUCENE_QUERY":"@cm\\:edu_metadataset:\"mds_oeh\" AND ISNOTNULL:\"ccm:wwwurl\" AND -ASPECT:\"ccm:collection_io_reference\" AND PARENT:\"workspace://SpacesStore/b462fb4f-824b-47df-917c-3890f7e136da\"","MIME_TYPE":"text/plain","EXECUTE":"true"}
- */
-public class FixMimeTypeJob extends AbstractJob {
+@JobDescription(description = "resets mimetype to a given value for nodes matching elastic query")
+public class FixMimeTypeJob extends AbstractJobMapAnnotationParams {
 
-    public static final String PARAM_LUCENE_QUERY = "LUCENE_QUERY";
-    public static final String PARAM_MIMETYPE = "MIME_TYPE";
-    public static final String PARAM_EXECUTE = "EXECUTE";
+    @JobFieldDescription(description = "node filter", sampleValue = "{\"term\": {\"properties.cclom:format\":\"text/xml\"}}")
+    String filter;
+
+    @JobFieldDescription(description = "new mimetype for the nodes")
+    String mimeType;
+
+    @JobFieldDescription(description = "if false job runs in protocol mode")
+    Boolean execute;
 
     Logger logger = Logger.getLogger(FixMimeTypeJob.class);
 
     ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
     ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-    SearchService searchService = serviceRegistry.getSearchService();
     NodeService nodeService = serviceRegistry.getNodeService();
     ContentService contentService = serviceRegistry.getContentService();
 
-    private static final int PAGE_SIZE = 1000;
     BehaviourFilter policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
 
 
     @Override
-    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        String luceneQuery = (String) jobExecutionContext.getJobDetail().getJobDataMap().get(PARAM_LUCENE_QUERY);
-        String mimeType = (String) jobExecutionContext.getJobDetail().getJobDataMap().get(PARAM_MIMETYPE);
+    public void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
 
-        if (luceneQuery == null || luceneQuery.trim().equals("")) {
-            logger.error("missing " + PARAM_LUCENE_QUERY);
+        if (filter == null || filter.trim().equals("")) {
+            logger.error("missing " + filter);
             return;
         }
 
         if (mimeType == null || mimeType.trim().equals("")) {
-            logger.error("missing " + PARAM_MIMETYPE);
+            logger.error("missing " + mimeType);
             return;
         }
 
-        Boolean execute = new Boolean((String) jobExecutionContext.getJobDetail().getJobDataMap().get(PARAM_EXECUTE));
+        if(execute == null){
+            execute = Boolean.FALSE;
+        }
 
         AuthenticationUtil.runAsSystem(()->{
-            Set<NodeRef> collect = new HashSet<>();
-            execute(0,luceneQuery, collect);
+            SearchToken searchToken = new SearchToken();
+            searchToken.setFrom(0);
+            searchToken.setMaxResult(Integer.MAX_VALUE);
+            searchToken.setElasticQuery(QueryBuilders.wrapper().query(new String(Base64.getEncoder().encode(filter.getBytes()))).build());
+            org.edu_sharing.service.search.SearchService searchService = SearchServiceFactory.getLocalService();
+            SearchResultNodeRef search = searchService.search(searchToken);
+            Set<NodeRef> collect = search.getData().stream()
+                    .map(n -> new NodeRef(new StoreRef(n.getStoreProtocol(),n.getStoreId()),n.getNodeId()))
+                    .collect(Collectors.toSet());
             fix(collect,execute,mimeType);
             return null;
         });
 
     }
 
-    private void execute(int page, String query, Set<NodeRef> collect) {
-        logger.info("page:" + page);
-        SearchParameters sp = new SearchParameters();
-        sp.setLanguage(SearchService.LANGUAGE_LUCENE);
-        sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
-        sp.setSkipCount(page);
-        sp.setMaxItems(PAGE_SIZE);
-
-        sp.setQuery(query);
-
-        logger.info("query:" + sp.getQuery());
-        ResultSet resultSet = searchService.query(sp);
-
-        for (NodeRef nodeRef : resultSet.getNodeRefs()) {
-            collect.add(nodeRef);
-        }
-        if(resultSet.hasMore()) {
-            execute(page + PAGE_SIZE,query,collect);
-        }
-    }
 
     public void fix(Set<NodeRef> nodeRefs, boolean execute, String mimeType){
         logger.info("fixing:" + nodeRefs.size());
