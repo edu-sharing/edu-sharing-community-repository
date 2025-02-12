@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -18,6 +19,10 @@ import org.alfresco.service.cmr.search.SearchService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SortDefinition;
 import org.springframework.context.ApplicationContext;
 
 public class TrashcanCleanerSolr {
@@ -35,10 +40,16 @@ public class TrashcanCleanerSolr {
 	private static final int PAGE_SIZE = 100;
 	
 	List<NodeRef> list = new ArrayList<>();
+
+	SimpleDateFormat dateFormater = new SimpleDateFormat("yyyy-MM-dd");
+
+	Boolean execute;
 	
-	public TrashcanCleanerSolr(long timeToKeep, int batchCount) {
+	public TrashcanCleanerSolr(long timeToKeep, int batchCount, Boolean execute) {
 		this.to = new Date(System.currentTimeMillis() - timeToKeep);
 		this.batchCount = batchCount;
+		this.execute = execute;
+		if(this.execute == null) this.execute = Boolean.TRUE;
 	}
 	
 	public void exeute() {
@@ -47,45 +58,37 @@ public class TrashcanCleanerSolr {
 		logger.info("collected " + list.size() +" nodes to delete");
 		for(NodeRef nodeRef : list) {
 			logger.info("deleteing from archive:" + nodeRef +"  " + nodeService.getProperty(nodeRef, ContentModel.PROP_NAME) + " " + nodeService.getProperty(nodeRef, ContentModel.PROP_ARCHIVED_DATE));
-			nodeService.deleteNode(nodeRef);
+			if(this.execute){
+				nodeService.deleteNode(nodeRef);
+			}
 		}
 	}
 	
 	private void execute(int page) {
-		logger.info("page:" + page);
-		SearchParameters sp = new SearchParameters();
-		sp.setLanguage(SearchService.LANGUAGE_LUCENE);
-		sp.addStore(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE);
-		sp.setSkipCount(page);
-		int maxItems = (PAGE_SIZE > batchCount) ? batchCount : PAGE_SIZE;
-		sp.setMaxItems(maxItems);
-		sp.addSort("@" + ContentModel.PROP_ARCHIVED_DATE.toString(), true);
-		
-		/**
-		 * searchParameters.addSort("@" + CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME, true);
-		searchParameters.addSort("@" + CCConstants.PROP_USER_FIRSTNAME, true);
-		 */
-		
-		SimpleDateFormat dateFormater = new SimpleDateFormat("yyyy-MM-dd");
-		sp.setQuery("(TYPE:\"ccm:io\" OR TYPE:\"ccm:map\") AND @sys\\:archivedDate:[MIN TO \"" + dateFormater.format(this.to)+ "\"]");
-		
-		logger.info("query:" + sp.getQuery());
-		ResultSet resultSet = searchService.query(sp);
-		
-		
-		logger.info("page " + page + " from " + resultSet.getNumberFound() + "  rs size:" + resultSet.getNodeRefs().size());
-		
-		for(NodeRef nodeRef : resultSet.getNodeRefs()) {
+
+		SearchToken searchToken = new SearchToken();
+		searchToken.setFrom(page);
+		searchToken.setMaxResult(batchCount);
+		searchToken.setSortDefinition(new SortDefinition(List.of(ContentModel.PROP_ARCHIVED_DATE.toString()),List.of(true)));
+		searchToken.setStoreProtocol(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE.getProtocol());
+		searchToken.setStoreName(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE.getIdentifier());
+		searchToken.setElasticQuery(QueryBuilders.bool()
+				.should(s -> s.term(t -> t.field("type").value("ccm:io")))
+				.should(s -> s.term(t -> t.field("type").value("ccm:map")))
+				.must(m -> m.range(r -> r.term(t -> t.field("properties.sys:archivedDate.date")
+						.lte(dateFormater.format(this.to))))).build());
+
+		org.edu_sharing.service.search.SearchService localService = SearchServiceFactory.getLocalService();
+		SearchResultNodeRef search = localService.search(searchToken);
+		search.getData().forEach(n -> {
+			NodeRef nodeRef = new NodeRef(new StoreRef(n.getStoreProtocol(),n.getStoreId()),n.getNodeId());
 			if(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE.equals(nodeRef.getStoreRef())) {
+				logger.info("adding:" + nodeRef + " " + nodeService.getProperty(nodeRef, ContentModel.PROP_NAME) + " " + nodeService.getProperty(nodeRef, ContentModel.PROP_ARCHIVED_DATE));
 				list.add(nodeRef);
 			}else {
 				logger.error("wrong store: " + nodeRef);
 			}
-		}
-		
-		if(resultSet.hasMore() && (page < (this.batchCount) && this.batchCount > PAGE_SIZE)) {
-			execute(page + PAGE_SIZE);
-		}
+		});
 	}
 	
 }
