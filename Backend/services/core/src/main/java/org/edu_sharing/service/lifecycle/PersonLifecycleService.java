@@ -912,24 +912,6 @@ public class PersonLifecycleService {
 		return false;
 	}
 
-	public void deleteCollections(String userName) {
-
-		SearchParameters sp = new SearchParameters();
-		//sp.setQuery("ASPECT:\"ccm:collection\" AND @ccm\\:collectionlevel0:true AND OWNER:\""+userName+"\"");
-		sp.setQuery("ASPECT:\"ccm:collection\" AND OWNER:\""+userName+"\"");
-		sp.setSkipCount(0);
-		sp.setMaxItems(-1);
-		sp.addStore(MCAlfrescoAPIClient.storeRef);
-		sp.setLanguage(SearchService.LANGUAGE_LUCENE);
-		ResultSet rs = searchService.query(sp);
-		for(NodeRef nodeRef : rs.getNodeRefs()) {
-			String collection = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_NAME));
-			logger.info("deleteing collection:" + collection);
-			nodeService.addAspect(nodeRef, ContentModel.ASPECT_TEMPORARY, null);
-			nodeService.deleteNode(nodeRef);
-		}
-	}
-
 	private NodeRef getHomeFolder(NodeRef personNodeRef) {
 		return (NodeRef)nodeService.getProperty(personNodeRef,
 				QName.createQName(CCConstants.CM_PROP_PERSON_HOME_FOLDER));
