@@ -69,7 +69,7 @@ public class TrashcanCleanerSolr {
 		SearchToken searchToken = new SearchToken();
 		searchToken.setFrom(page);
 		searchToken.setMaxResult(batchCount);
-		searchToken.setSortDefinition(new SortDefinition(List.of(ContentModel.PROP_ARCHIVED_DATE.toString()),List.of(true)));
+		searchToken.setSortDefinition(new SortDefinition(List.of(CCConstants.getValidLocalName(ContentModel.PROP_ARCHIVED_DATE.toString())),List.of(true)));
 		searchToken.setStoreProtocol(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE.getProtocol());
 		searchToken.setStoreName(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE.getIdentifier());
 		searchToken.setElasticQuery(QueryBuilders.bool()

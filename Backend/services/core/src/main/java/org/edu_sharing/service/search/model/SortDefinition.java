@@ -146,7 +146,7 @@ public class SortDefinition implements Serializable {
 				} else if(Arrays.asList("cm:created", "cm:modified").contains(sortDefintionEntry.getProperty())) {
 					// use numeric
 					addSuffix = "number";
-				} else if(List.of("ccm:replicationsourcetimestamp").contains(sortDefintionEntry.getProperty())) {
+				} else if(List.of("ccm:replicationsourcetimestamp","sys:archivedDate").contains(sortDefintionEntry.getProperty())) {
 					// use date
 					addSuffix = "date";
 				} else if(List.of("cclom:title").contains(sortDefintionEntry.getProperty())) {
