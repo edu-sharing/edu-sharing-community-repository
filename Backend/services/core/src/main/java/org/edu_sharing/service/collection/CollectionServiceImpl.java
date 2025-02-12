@@ -683,16 +683,7 @@ public class CollectionServiceImpl implements CollectionService {
     }
 
     protected void addCollectionCountProperties(NodeRef nodeRef, Collection collection, BoolQuery readPermissionsQuery) {
-        String path = serviceRegistry.getNodeService().getPath(nodeRef).toPrefixString(serviceRegistry.getNamespaceService());
-        SearchParameters params = new ESSearchParameters();
-        params.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
-        params.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-        params.setMaxItems(0);
-
-        params.setQuery("TYPE:" + QueryParser.escape(CCConstants.CCM_TYPE_IO) + " AND NOT ASPECT:" + QueryParser.escape(CCConstants.CCM_ASPECT_IO_CHILDOBJECT) + " AND PATH:\"" + QueryParser.escape(path) + "//*\"");
-        collection.setChildReferencesCount((int) serviceRegistry.getSearchService().query(params).getNumberFound());
-        params.setQuery("TYPE:" + QueryParser.escape(CCConstants.CCM_TYPE_MAP) + " AND PATH:\"" + QueryParser.escape(path) + "//*\"");
-        collection.setChildCollectionsCount((int) serviceRegistry.getSearchService().query(params).getNumberFound());
+        throw new RuntimeException("solr not longer supported");
     }
 
     @Override
