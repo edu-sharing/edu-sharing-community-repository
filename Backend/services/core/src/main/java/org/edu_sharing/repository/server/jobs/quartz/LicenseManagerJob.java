@@ -50,7 +50,7 @@ public class LicenseManagerJob extends AbstractJob{
         runner.setThreaded(false);
         runner.setTransaction(NodeRunner.TransactionMode.Local);
         runner.setKeepModifiedDate(true);
-        runner.setLucene("ISNOTNULL:\"ccm:license_to\"");
+        runner.setElastic("{\"exists\":{\"field\":\"properties.ccm:license_to\"}}");
         int count=runner.run();
     }
 }

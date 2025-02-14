@@ -40,9 +40,6 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
-import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.nodeservice.*;
 import org.edu_sharing.service.util.CSVTool;
 import org.quartz.JobExecutionContext;
@@ -74,8 +71,8 @@ public class BulkEditNodesJob extends AbstractJob{
 	private org.alfresco.service.cmr.repository.NodeService nodeService;
 	@JobFieldDescription(description = "folder id to start from")
 	private String startFolder;
-	@JobFieldDescription(description = "Lucene query to fetch the nodes that shall be processed. When used, the 'startFolder' parameter is ignored")
-	private String lucene;
+	@JobFieldDescription(description = "Elastic query to fetch the nodes that shall be processed. When used, the 'startFolder' parameter is ignored")
+	private String elastic;
 	@JobFieldDescription(description = "Mode to use")
 	private Mode mode;
 	@JobFieldDescription(description = "property to modify, e.g. cm:name", sampleValue = "cm:name")
@@ -176,7 +173,7 @@ public class BulkEditNodesJob extends AbstractJob{
 			searchToken = prepareParam(context, "searchToken", false);
 		}
 
-		lucene = prepareParam(context, "lucene", false);
+		elastic = prepareParam(context, "lucene", false);
 
 		startFolder = prepareParam(context, "startFolder", true);
 		archive = prepareParam(context, "archive", false);
@@ -358,12 +355,12 @@ public class BulkEditNodesJob extends AbstractJob{
 		runner.setThreaded(false);
 		runner.setRecurseMode(recurseMode);
 		runner.setStartFolder(startFolder);
-		runner.setLucene(lucene);
+		runner.setElastic(elastic);
 		runner.setKeepModifiedDate(true);
 		runner.setTransaction(NodeRunner.TransactionMode.Local);
 		if(new Boolean(archive)){
 			runner.setStartFolderStore(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE);
-			runner.setLuceneStore(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE);
+			runner.setElasticStore(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE);
 		}
 		if(new Boolean(versionStore)){
 			runner.setStartFolderStore(new StoreRef("workspace","version2Store"));
@@ -372,7 +369,7 @@ public class BulkEditNodesJob extends AbstractJob{
 						() -> nodeService.getRootNode(new StoreRef("workspace","version2Store")).getId())
 				);
 			}
-			if(lucene != null && !lucene.trim().isEmpty()) throw new IllegalArgumentException("lucene can not be used with version store");
+			if(elastic != null && !elastic.trim().isEmpty()) throw new IllegalArgumentException("lucene can not be used with version store");
 		}
 		int count=runner.run();
 		logger.info("Processed "+count+" nodes");

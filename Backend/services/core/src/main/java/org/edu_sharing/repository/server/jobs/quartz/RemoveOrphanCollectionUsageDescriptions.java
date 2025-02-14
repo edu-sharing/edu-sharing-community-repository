@@ -27,7 +27,6 @@
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -41,19 +40,13 @@ import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
-import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
-import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @JobDescription(description = "Remove orphan usages pointing to non-existing collection references")
 public class RemoveOrphanCollectionUsageDescriptions extends AbstractJobMapAnnotationParams{
@@ -121,7 +114,7 @@ public class RemoveOrphanCollectionUsageDescriptions extends AbstractJobMapAnnot
 		});
 		runner.setTypes(Collections.singletonList(CCConstants.CCM_TYPE_USAGE));
 		runner.setRunAsSystem(true);
-		runner.setLucene("TYPE:\"ccm:usage\"");
+		runner.setElastic("{\"term\":{\"type\":\"ccm:usage\"}}");
 		runner.setThreaded(false);
 		runner.setKeepModifiedDate(true);
 		runner.setTransaction(NodeRunner.TransactionMode.Local);

@@ -27,8 +27,8 @@ public class BulkEditPermissionsJob extends AbstractJobMapAnnotationParams{
 
 	@JobFieldDescription(description = "folder id to start from")
 	private String startFolder;
-	@JobFieldDescription(description = "Lucene query to fetch the nodes that shall be processed. When used, the 'startFolder' parameter is ignored")
-	private String lucene;
+	@JobFieldDescription(description = "Elastic query to fetch the nodes that shall be processed. When used, the 'startFolder' parameter is ignored")
+	private String elastic;
 
 	@JobFieldDescription(description = "Mode to use")
 	private Mode mode;
@@ -117,7 +117,7 @@ public class BulkEditPermissionsJob extends AbstractJobMapAnnotationParams{
 		runner.setRunAsSystem(true);
 		runner.setThreaded(false);
 		runner.setStartFolder(startFolder);
-		runner.setLucene(lucene);
+		runner.setElastic(elastic);
 		runner.setKeepModifiedDate(true);
 		runner.setTransaction(NodeRunner.TransactionMode.LocalRetrying);
 		int count=runner.run();

@@ -31,26 +31,20 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.namespace.QName;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.xpath.operations.Bool;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
-import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -75,8 +69,8 @@ public class BulkDeleteNodesJob extends AbstractJob{
 
 	@JobFieldDescription(description = "folder id to start from")
 	private String startFolder;
-	@JobFieldDescription(description = "Lucene query to fetch the nodes that shall be processed. When used, the 'startFolder' parameter is ignored")
-	private String lucene;
+	@JobFieldDescription(description = "elastic query to fetch the nodes that shall be processed. When used, the 'startFolder' parameter is ignored")
+	private String elastic;
 	@JobFieldDescription(description = "move to recycle (false will immediately remove)")
 	private boolean recycle;
 	@JobFieldDescription(description = "Force delete (for broken nodes)")
@@ -101,7 +95,7 @@ public class BulkDeleteNodesJob extends AbstractJob{
 		nodeService = serviceRegistry.getNodeService();
 		nodeServiceEdu = NodeServiceFactory.getLocalService();
 
-		lucene = (String) context.getJobDetail().getJobDataMap().get("lucene");
+		elastic = (String) context.getJobDetail().getJobDataMap().get("lucene");
 		startFolder = (String) context.getJobDetail().getJobDataMap().get("startFolder");
 		if(startFolder==null || startFolder.isEmpty()){
 			throw new IllegalArgumentException("Missing required parameter 'startFolder'");
@@ -166,7 +160,7 @@ public class BulkDeleteNodesJob extends AbstractJob{
 		runner.setRunAsSystem(true);
 		runner.setThreaded(threaded);
 		runner.setStartFolder(startFolder);
-		runner.setLucene(lucene);
+		runner.setElastic(elastic);
 		runner.setKeepModifiedDate(true);
 		runner.setTransaction(NodeRunner.TransactionMode.LocalRetrying);
 		int count=runner.run();
@@ -174,7 +168,7 @@ public class BulkDeleteNodesJob extends AbstractJob{
 			return;
 		}
 		AuthenticationUtil.runAsSystem(() -> {
-			if(lucene == null || lucene.isEmpty()) {
+			if(elastic == null || elastic.isEmpty()) {
 				nodeServiceEdu.removeNode(startFolder, null, recycle);
 			}
 

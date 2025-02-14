@@ -124,11 +124,11 @@ public class NodeRunner {
 
     @Getter
     @Setter
-    private String lucene = null;
+    private String elastic = null;
 
     @Getter
     @Setter
-    private StoreRef luceneStore = StoreRef.STORE_REF_WORKSPACE_SPACESSTORE;
+    private StoreRef elasticStore = StoreRef.STORE_REF_WORKSPACE_SPACESSTORE;
     /**
      * custom nodes list to iterate over
      */
@@ -161,17 +161,17 @@ public class NodeRunner {
 
             if(nodesList != null) {
                 nodes = new ArrayList<>(nodesList);
-            } else if(StringUtils.isBlank(lucene)) {
+            } else if(StringUtils.isBlank(elastic)) {
                 if (runAsSystem)
                     nodes = AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenRecursive(startFolderStore, startFolder, types, recurseMode));
                 else
                     nodes = nodeService.getChildrenRecursive(startFolderStore, startFolder, types, recurseMode);
             }else{
-                log.info("collection nodes by lucene: {}", lucene);
+                log.info("collection nodes by elastic: {}", elastic);
                 if (runAsSystem)
-                    nodes = AuthenticationUtil.runAsSystem(() -> new NodeCollectorLucene(lucene, luceneStore).getNodes());
+                    nodes = AuthenticationUtil.runAsSystem(() -> new NodeCollectorElastic(elastic, elasticStore).getNodes());
                 else
-                    nodes = new NodeCollectorLucene(lucene, luceneStore).getNodes();
+                    nodes = new NodeCollectorElastic(elastic, elasticStore).getNodes();
             }
             Predicate<? super NodeRef> callFilter = (ref) -> {
                 if (filter == null)

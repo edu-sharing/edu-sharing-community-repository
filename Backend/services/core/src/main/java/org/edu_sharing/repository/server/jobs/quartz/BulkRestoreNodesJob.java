@@ -27,31 +27,17 @@
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
-import org.edu_sharing.service.admin.AdminServiceImpl;
 import org.edu_sharing.service.archive.ArchiveService;
 import org.edu_sharing.service.archive.ArchiveServiceFactory;
-import org.edu_sharing.service.nodeservice.NodeService;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.springframework.context.ApplicationContext;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Batch edit property for multiple nodes
@@ -71,8 +57,8 @@ public class BulkRestoreNodesJob extends AbstractJob{
 
 	@JobFieldDescription(description = "Folder id in which the nodes shall be recovered")
 	private String targetFolder;
-	@JobFieldDescription(description = "Lucene query to fetch the nodes that shall be processed.")
-	private String lucene;
+	@JobFieldDescription(description = "Elastic query to fetch the nodes that shall be processed.")
+	private String elastic;
 
 
 	private ArchiveService archiveService;
@@ -83,8 +69,8 @@ public class BulkRestoreNodesJob extends AbstractJob{
 
 		archiveService = ArchiveServiceFactory.getLocalService();
 
-		lucene = (String) context.getJobDetail().getJobDataMap().get("lucene");
-		if(lucene==null || lucene.isEmpty()){
+		elastic = (String) context.getJobDetail().getJobDataMap().get("lucene");
+		if(elastic ==null || elastic.isEmpty()){
 			throw new IllegalArgumentException("Missing required parameter 'lucene'");
 		}
 		targetFolder = (String) context.getJobDetail().getJobDataMap().get("targetFolder");
@@ -102,8 +88,8 @@ public class BulkRestoreNodesJob extends AbstractJob{
 		});
 		runner.setRunAsSystem(true);
 		runner.setThreaded(false);
-		runner.setLucene(lucene);
-		runner.setLuceneStore(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE);
+		runner.setElastic(elastic);
+		runner.setElasticStore(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE);
 		runner.setKeepModifiedDate(true);
 		runner.setTransaction(NodeRunner.TransactionMode.LocalRetrying);
 		int count=runner.run();

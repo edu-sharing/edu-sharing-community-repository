@@ -16,7 +16,6 @@ import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
-import org.edu_sharing.service.handleservice.HandleServiceImpl;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -63,7 +62,7 @@ public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationPara
 		runner.setTask(this::migrate);
 		runner.setRunAsSystem(true);
 		runner.setThreaded(false);
-		runner.setLucene("ISNOTNULL:\"ccm:published_handle_id\" AND ISNULL:\"ccm:published_original\" AND NOT ASPECT:\"ccm:collection_io_reference\"");
+		runner.setElastic("{\"bool\":{\"must\":[{\"exists\":{\"field\":\"properties.ccm:published_handle_id\"}}],\"must_not\":[{\"exists\":{\"field\":\"properties.ccm:published_original\"}},{\"term\":{\"aspects\":\"ccm:collection_io_reference\"}}]}}");
 		runner.setKeepModifiedDate(false);
 		runner.setTransaction(NodeRunner.TransactionMode.None);
 		int count=runner.run();
