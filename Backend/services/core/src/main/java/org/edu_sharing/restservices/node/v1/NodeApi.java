@@ -33,6 +33,7 @@ import org.edu_sharing.service.clientutils.ClientUtilsService;
 import org.edu_sharing.service.clientutils.WebsiteInformation;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.editlock.LockedException;
+import org.edu_sharing.service.github.GitHubService;
 import org.edu_sharing.service.nodeservice.AssocInfo;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.notification.NotificationService;
@@ -46,13 +47,12 @@ import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.share.ShareService;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Path("/node/v1")
@@ -62,7 +62,11 @@ import java.util.stream.Collectors;
 @Produces({"application/json"})
 public class NodeApi  {
 
-	
+	public static final String CCM_RESSOURCETYPE_BINDER = "binder";
+
+	@Autowired
+	private GitHubService gitHubService;
+
 	private static Logger logger = Logger.getLogger(NodeApi.class);
 	  @GET
 	    @Path("/nodes/{repository}/{node}/workflow")
@@ -395,6 +399,59 @@ public class NodeApi  {
     	}
 
     }
+
+	@GET
+	@Path("/nodes/{repository}/{node}/metadata/secured")
+
+	@Operation(summary = "Get signed metadata of node.", description = "Get metadata of node. The content is signed and includes jwt for permissions")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SignedNodeEntry.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+			})
+
+	public Response getMetadataSigned(
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-")) ) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Context HttpServletRequest req) {
+
+		try {
+			RepoProxy.RemoteRepoDetails remote = RepoProxyFactory.getRepoProxy().myTurn(repository, node);
+			if(remote != null) {
+				return RepoProxyFactory.getRepoProxy().getMetadata(remote.getRepository(), remote.getNodeId(), propertyFilter, req);
+			}
+			Filter filter = new Filter(propertyFilter);
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			node=NodeDao.mapNodeConstants(repoDao,node);
+
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
+
+			Base64.Encoder encoder = Base64.getEncoder();
+			SignedNode signedNode = nodeDao.getSignedNode();
+
+			String encodedSignedNode = encoder.encodeToString(signedNode.getNode().getBytes());
+			String encodedSignature = encoder.encodeToString(signedNode.getSignature().getBytes());
+
+			SignedNodeEntry response = new SignedNodeEntry();
+			response.setNode(nodeDao.asNode());
+			response.setJwt(nodeDao.getJWT());
+			response.setSignedNode(encodedSignedNode);
+			response.setSignature(encodedSignature);
+
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
 
 
     @GET
@@ -1313,8 +1370,16 @@ public class NodeApi  {
 
 	public void resolveURLTitle(HashMap<String, String[]> properties) {
 		String[] url=(String[])properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_WWWURL));
+
 		if(url==null)
 			return;
+
+		List<String> gitHubUrls = Arrays.stream(url).filter(x->x.contains("github.com")).collect(Collectors.toList());
+
+		if (gitHubUrls.stream().anyMatch(gitHubService::checkForJupyterNotebooks)) {
+			properties.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_CCRESSOURCETYPE), new String[]{CCM_RESSOURCETYPE_BINDER});
+		}
+
 		// Don't resolve url if name is already given by client
 		if(properties.get(CCConstants.getValidLocalName(CCConstants.CM_NAME))!=null) {
 			properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME),

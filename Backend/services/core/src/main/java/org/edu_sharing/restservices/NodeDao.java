@@ -33,6 +33,7 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.repository.server.tools.security.JwtTokenUtil;
+import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.collection.v1.model.CollectionReference;
 import org.edu_sharing.restservices.collection.v1.model.CollectionRelationReference;
@@ -81,6 +82,7 @@ import org.springframework.context.ApplicationContext;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
@@ -255,6 +257,22 @@ public class NodeDao {
         try {
             NodeServiceFactory.getLocalService().revokeNode(storeProtocol, storeId, getId(), details);
             return getNode(repoDao, getId(), filter);
+        } catch (Throwable t) {
+            throw DAOException.mapping(t);
+        }
+    }
+
+    public SignedNode getSignedNode() {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Node node = asNode();
+            String serializedNode = objectMapper.writeValueAsString(node);
+
+            Signing signing = new Signing();
+            PrivateKey privateKey = signing.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
+            byte[] signedNodeData = signing.sign(privateKey, serializedNode, CCConstants.SECURITY_SIGN_ALGORITHM);
+
+            return new SignedNode(serializedNode, new String(signedNodeData));
         } catch (Throwable t) {
             throw DAOException.mapping(t);
         }
