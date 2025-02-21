@@ -1589,6 +1589,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                     item.properties &&
                     (!item.properties[RestConstants.CCM_PROP_IO_WWWURL] ||
                         !RestNetworkService.isFromHomeRepo(item)) &&
+                    (item.accessEffective || item.access)?.includes(
+                        RestConstants.PERMISSION_DOWNLOAD_CONTENT,
+                    ) &&
                     this.nodeHelper.referenceOriginalExists(item)
                 ) {
                     // bulk upload is not supported for remote nodes
