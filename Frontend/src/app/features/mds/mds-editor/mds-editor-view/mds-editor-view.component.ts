@@ -260,6 +260,12 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     private injectMissingWidgetWarning(widgetName: string, element: Element): void {
         // Property names are no valid names for autonomous custom elements as by the W3C
         // specification.
+        console.warn(
+            'Widget definition missing in MDS',
+            widgetName,
+            this.mdsEditorInstance.mdsId,
+            this.mdsEditorInstance.widgets.value.map((w) => w.definition),
+        );
         element = replaceElementWithDiv(element);
         UIHelper.injectAngularComponent(
             this.factoryResolver,
