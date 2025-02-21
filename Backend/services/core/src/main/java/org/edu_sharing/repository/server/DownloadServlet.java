@@ -5,6 +5,7 @@ import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.SneakyThrows;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -51,7 +52,8 @@ public class DownloadServlet extends HttpServlet {
 	private static PermissionChecking permissionChecking;
 	static Logger logger = Logger.getLogger(DownloadServlet.class);
 
-	@Override
+	@SneakyThrows
+    @Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		if(permissionChecking == null) {
@@ -235,7 +237,7 @@ public class DownloadServlet extends HttpServlet {
 		return null;
 	}
 
-	public static void downloadZip(HttpServletResponse resp, String[] nodeIds, String parentNodeId, String token, String password, String zipName) throws IOException {
+	public static void downloadZip(HttpServletResponse resp, String[] nodeIds, String parentNodeId, String token, String password, String zipName) throws Exception {
 		if(zipName==null || zipName.isEmpty())
 			zipName="Download.zip";
 
@@ -359,6 +361,7 @@ public class DownloadServlet extends HttpServlet {
 		}
 		catch(Throwable t){
 			t.printStackTrace();
+			throw t;
 		}
 	}
 
