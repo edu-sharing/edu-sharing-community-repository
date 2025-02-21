@@ -752,7 +752,13 @@ public class PreviewServlet extends HttpServlet {
 		 */
 		NodeRef previewProps = nodeService.getChild(storeRef, nodeId, CCConstants.CM_TYPE_THUMBNAIL, CCConstants.CM_NAME,
 				CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
-		if (previewProps != null) {
+		InputStream generatedIs = null;
+		try{
+			generatedIs = nodeService.getContent(previewProps.getStoreRef().getProtocol(),previewProps.getStoreRef().getIdentifier(),previewProps.getId(),null,CCConstants.CM_PROP_CONTENT);
+		} catch (Throwable e) {
+
+		}
+		if (previewProps != null && generatedIs != null) {
 			String url = NodeServiceHelper.getPreview(new NodeRef(storeRef, nodeId)).getUrl();
 			return new PreviewDetail(url, PreviewDetail.TYPE_GENERATED, false);
 		}
