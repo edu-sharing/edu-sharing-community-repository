@@ -217,9 +217,21 @@ export class NodeHelperService {
         }
         let data: { routerLink: string; queryParams: Params } = null;
         if (this.isNodeCollection(node)) {
+            const scope = node.collection?.scope;
+            const type = node.collection?.type;
+            const queryParams: Params = {
+                id: node.ref.id,
+            };
+            if (type === RestConstants.COLLECTIONTYPE_EDITORIAL) {
+                queryParams.scope = RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL;
+            } else if (type === RestConstants.COLLECTIONTYPE_MEDIA_CENTER) {
+                queryParams.scope = RestConstants.COLLECTIONSCOPE_TYPE_MEDIA_CENTER;
+            } else if (scope === RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC) {
+                queryParams.scope = RestConstants.COLLECTIONSCOPE_ALL;
+            }
             data = {
                 routerLink: UIConstants.ROUTER_PREFIX + 'collections',
-                queryParams: { id: node.ref.id },
+                queryParams,
             };
         } else {
             if (node.isDirectory) {
