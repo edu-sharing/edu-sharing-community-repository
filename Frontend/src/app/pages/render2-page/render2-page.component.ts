@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, Input, signal } from '@angular/core';
 import { OptionsHelperDataService } from 'ngx-edu-sharing-ui';
 import { ActivatedRoute } from '@angular/router';
 import { combineLatest } from 'rxjs';
@@ -15,7 +15,7 @@ import { RenderWrapperModule } from './render-wrapper-component/render-wrapper.m
     providers: [OptionsHelperDataService],
 })
 export class Render2PageComponent {
-    nodeId = signal<string>(null);
+    @Input() nodeId = signal<string>(null);
     constructor(private route: ActivatedRoute, private mainNav: MainNavService) {
         this.mainNav.setMainNavConfig({
             show: true,

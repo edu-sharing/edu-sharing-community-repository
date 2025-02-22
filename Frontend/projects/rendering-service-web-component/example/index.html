@@ -17,22 +17,9 @@
         //  EDU_SHARING_API_URL: 'http://repository.127.0.0.1.nip.io:8100/edu-sharing/rest',
       };
     </script>
-    <script src="vendor/render-component/runtime.js" type="module"></script>
-    <script src="vendor/render-component/polyfills.js" type="module"></script>
-    <script src="vendor/render-component/main.js" type="module"></script>
+    <script src="vendor/main.js" type="module"></script>
     <!-- Only for dev builds. Could also set `vendorChunk: false` in `angular.json` to omit
     altogether. -->
-    <link rel="stylesheet" href="vendor/render-component/styles.css" />
-    <script>
-      function onSubmit(event) {
-        event.preventDefault();
-        const data = new FormData(event.target);
-        const searchString = data.get('searchString');
-        console.log('submit', searchString);
-        const eduSharingApp = document.getElementsByTagName('edu-sharing-app')[0];
-        eduSharingApp.setAttribute('search-string', searchString);
-      }
-    </script>
     <style>
       body {
         padding: 100px;

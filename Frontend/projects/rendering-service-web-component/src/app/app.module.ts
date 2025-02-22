@@ -11,7 +11,6 @@ import { provideHttpClient } from '@angular/common/http';
 @NgModule({
     declarations: [AppComponent],
     imports: [BrowserModule, RenderWrapperModule],
-    // bootstrap: [AppComponent],
     providers: [
         provideHttpClient(),
         {
@@ -21,7 +20,6 @@ import { provideHttpClient } from '@angular/common/http';
         { provide: ASSETS_BASE_PATH, useValue: 'vendor/edu-sharing/' },
     ],
 })
-// export class AppModule {}
 export class AppModule implements DoBootstrap {
     constructor(injector: Injector) {
         const embeddedApp = createCustomElement(AppComponent, { injector });

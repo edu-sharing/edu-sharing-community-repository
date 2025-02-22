@@ -1,8 +1,10 @@
 import {
     Component,
+    Inject,
     Injector,
     Input,
     OnChanges,
+    Optional,
     signal,
     SimpleChanges,
     ViewChild,
@@ -40,6 +42,7 @@ export class RenderWrapperComponent implements OnChanges {
         private translations: TranslationsService,
         private injector: Injector,
         private optionsHelper: OptionsHelperDataService,
+        @Optional() @Inject('MdsModule') private MdsModule: any,
     ) {
         this.translations.waitForInit().subscribe(() => {});
         this.optionsHelper.registerGlobalKeyboardShortcuts();

@@ -18,11 +18,12 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "ngx-build-plus:browser",
           "options": {
             "deployUrl": "vendor/edu-sharing/",
             "outputHashing": "none",
             "outputPath": "../../dist/rendering-service-web-component",
+            "singleBundle": true,
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -59,7 +60,16 @@
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.prod.ts"
                 }
-              ]
+              ],
+              "aot": true,
+              "buildOptimizer": true,
+              "optimization": true,
+              "sourceMap": false,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "keepPolyfills": false,
+              "keepStyles": false
             },
             "development": {
               "buildOptimizer": false,
