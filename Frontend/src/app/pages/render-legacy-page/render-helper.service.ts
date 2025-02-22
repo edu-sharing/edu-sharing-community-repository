@@ -4,7 +4,7 @@ import {
     Injectable,
     ViewContainerRef,
 } from '@angular/core';
-import { NetworkService } from 'ngx-edu-sharing-api';
+import { NetworkService, Node } from 'ngx-edu-sharing-api';
 import {
     ListItem,
     NodeDataSource,
@@ -17,7 +17,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { EventType, Node } from '../../core-module/rest/data-object';
+import { EventType } from '../../core-module/rest/data-object';
 import { RestConstants } from '../../core-module/rest/rest-constants';
 import { RestTrackingService } from '../../core-module/rest/services/rest-tracking.service';
 import { RestUsageService } from '../../core-module/rest/services/rest-usage.service';
@@ -204,7 +204,7 @@ export class RenderHelperService {
 
     private getOriginalId(node: Node): string {
         if (RenderHelperService.isCollectionRef(node)) {
-            return node.properties[RestConstants.CCM_PROP_IO_ORIGINAL];
+            return node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]?.[0];
         } else {
             return node.ref.id;
         }

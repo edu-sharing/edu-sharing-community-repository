@@ -16,11 +16,14 @@ import { YES_OR_NO } from '../../../features/dialogs/dialog-modules/generic-dial
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { NetworkService, Node } from 'ngx-edu-sharing-api';
 import { first } from 'rxjs/operators';
+import { SharedModule } from '../../../shared/shared.module';
 
 @Component({
     selector: 'es-comments-list',
     templateUrl: 'comments-list.component.html',
     styleUrls: ['comments-list.component.scss'],
+    standalone: true,
+    imports: [SharedModule],
     animations: [
         trigger('fade', UIAnimation.fade()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),

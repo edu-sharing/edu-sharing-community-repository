@@ -2,7 +2,7 @@ import { catchError, filter, first, map, tap } from 'rxjs/operators';
 import { trigger } from '@angular/animations';
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
-import { Options } from 'ngx-slider-v2';
+import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
 import { of, ReplaySubject } from 'rxjs';
 import { BridgeService } from '../../../services/bridge.service';
 import { RestCollectionService, RestConnectorService } from '../../../core-module/core.module';
@@ -14,6 +14,7 @@ import { Toast } from '../../../services/toast';
 import { DurationPipe } from './duration.pipe';
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
+import { SharedModule } from '../../../shared/shared.module';
 
 interface VideoControlsValues {
     startTime: number;
@@ -26,6 +27,8 @@ interface VideoControlsValues {
     templateUrl: 'video-controls.component.html',
     styleUrls: ['video-controls.component.scss'],
     animations: [trigger('fromRight', UIAnimation.fromRight())],
+    standalone: true,
+    imports: [DurationPipe, SharedModule, NgxSliderModule],
 })
 export class VideoControlsComponent implements OnInit, OnDestroy {
     @Input() node: Node;

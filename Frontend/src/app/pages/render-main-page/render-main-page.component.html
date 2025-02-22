@@ -1,0 +1,15 @@
+@defer (when renderer === 'legacy'){
+<es-render-legacy-page></es-render-legacy-page>
+} @loading {
+<ng-container *ngTemplateOutlet="loading"></ng-container>
+} @defer (when renderer === 'render2'){
+<es-render2-page></es-render2-page>
+} @loading {
+<ng-container *ngTemplateOutlet="loading"></ng-container>
+}
+
+<ng-template #loading>
+  <div class="loading">
+    <es-spinner></es-spinner>
+  </div>
+</ng-template>

@@ -23,6 +23,7 @@ import {
     MdsDefinition,
     MdsService,
     NetworkService,
+    Node,
     ProposalNode,
 } from 'ngx-edu-sharing-api';
 import {
@@ -52,7 +53,6 @@ import {
     EventListener,
     FrameEventsService,
     LoginResult,
-    Node,
     NodeList,
     RestConnectorService,
     RestConnectorsService,
@@ -82,11 +82,14 @@ import { MdsWidgetComponent } from '../../features/mds/mds-viewer/widget/mds-wid
 import { MdsEditorInstanceService } from '../../features/mds/mds-editor/mds-editor-instance.service';
 import { ViewInstanceService } from '../../features/mds/mds-editor/mds-editor-view/view-instance.service';
 import { RouterHelper } from '../../util/router.helper';
+import { SharedModule } from '../../shared/shared.module';
 
 @Component({
-    selector: 'es-render-page',
-    templateUrl: 'render-page.component.html',
-    styleUrls: ['render-page.component.scss'],
+    selector: 'es-render-legacy-page',
+    templateUrl: 'render-legacy-page.component.html',
+    styleUrls: ['render-legacy-page.component.scss'],
+    standalone: true,
+    imports: [SharedModule],
     providers: [
         OptionsHelperDataService,
         RenderHelperService,
@@ -95,7 +98,7 @@ import { RouterHelper } from '../../util/router.helper';
     ],
     animations: [trigger('fadeFast', UIAnimation.fade(UIAnimation.ANIMATION_TIME_FAST))],
 })
-export class RenderPageComponent implements EventListener, OnInit, OnDestroy, AfterViewInit {
+export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestroy, AfterViewInit {
     readonly DisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     specialTemplate: 'revoked' | null;
@@ -451,7 +454,7 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
         download.showAsAction = true;
         if (this.isCollectionRef()) {
             this.nodeApi
-                .getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL])
+                .getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]?.[0])
                 .subscribe(
                     (node) => {
                         this.addDownloadButton(download);
@@ -632,7 +635,7 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
         this.optionsHelper.setData({
             scope: Scope.Render,
             activeObjects: [this._node],
-            parent: new Node(this._node.parent.id),
+            parent: { ref: { id: this._node.parent.id } },
             allObjects: this.list,
             customOptions: {
                 useDefaultOptions: true,
@@ -846,9 +849,9 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
                     .getNodeMetadata(this.queryParams.proposal, [RestConstants.ALL])
                     .toPromise()
             ).node;
-            (this._node as ProposalNode).proposalCollection = new Node(
-                this.queryParams.proposalCollection,
-            );
+            (this._node as ProposalNode).proposalCollection = {
+                ref: { id: this.queryParams.proposalCollection },
+            } as Node;
             // access is granted when we can fetch the node
             (this._node as ProposalNode).accessible = true;
             this.optionsHelper.refreshComponents();

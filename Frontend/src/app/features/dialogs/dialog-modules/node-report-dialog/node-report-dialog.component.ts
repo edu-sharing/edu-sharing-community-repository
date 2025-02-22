@@ -11,24 +11,18 @@ import {
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { filter, first, take } from 'rxjs/operators';
-import {
-    DialogButton,
-    LoginResult,
-    Node,
-    RestConnectorService,
-    RestIamService,
-    RestNodeService,
-} from '../../../../core-module/core.module';
+import { DialogButton } from '../../../../core-module/core.module';
 import { Toast } from '../../../../services/toast';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
-import { UIAnimation } from 'ngx-edu-sharing-ui';
 import {
     AuthenticationService,
     HOME_REPOSITORY,
+    Node,
     NodeServiceUnwrapped,
     UserService,
 } from 'ngx-edu-sharing-api';
+import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { forkJoin } from 'rxjs';
 
 export interface NodeReportDialogData {
