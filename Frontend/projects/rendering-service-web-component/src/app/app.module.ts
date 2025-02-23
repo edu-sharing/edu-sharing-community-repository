@@ -1,24 +1,24 @@
-import { LocationStrategy } from '@angular/common';
-import { MockLocationStrategy } from '@angular/common/testing';
 import { ApplicationRef, DoBootstrap, Injector, NgModule } from '@angular/core';
 import { createCustomElement } from '@angular/elements';
-import { ASSETS_BASE_PATH } from 'ngx-edu-sharing-ui';
 import { AppComponent } from './app.component';
-import { RenderWrapperModule } from '../../../../src/app/pages/render2-page/render-wrapper-component/render-wrapper.module';
 import { BrowserModule } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
+import { EduSharingApiModule } from 'ngx-edu-sharing-api';
+import { EduSharingUiModule, TranslationsModule } from 'ngx-edu-sharing-ui';
+import { RenderComponent, RenderingServiceLibModule } from 'ngx-rendering-service-lib';
+import { environment } from '../environments/environment';
 
 @NgModule({
     declarations: [AppComponent],
-    imports: [BrowserModule, RenderWrapperModule],
-    providers: [
-        provideHttpClient(),
-        {
-            provide: LocationStrategy,
-            useClass: MockLocationStrategy,
-        },
-        { provide: ASSETS_BASE_PATH, useValue: 'vendor/edu-sharing/' },
+    imports: [
+        BrowserModule,
+        EduSharingApiModule.forRoot({ rootUrl: environment.eduSharingApiUrl }),
+        EduSharingUiModule.forRoot({ production: environment.production, isEmbedded: true }),
+        RenderComponent,
+        TranslationsModule,
+        RenderingServiceLibModule,
     ],
+    providers: [provideHttpClient()],
 })
 export class AppModule implements DoBootstrap {
     constructor(injector: Injector) {

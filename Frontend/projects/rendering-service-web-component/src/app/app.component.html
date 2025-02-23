@@ -1,2 +1,1 @@
-TEST
-<es-render-wrapper-component [nodeId]="nodeId"></es-render-wrapper-component>
+<rs-root *ngIf="request() && node()" [node]="node()" [request]="request()"></rs-root>

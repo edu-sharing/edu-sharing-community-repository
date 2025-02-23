@@ -514,22 +514,47 @@
       }
     },
     "rendering-service": {
-      "projectType": "library",
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        },
+        "@schematics/angular:application": {
+          "strict": true
+        }
+      },
       "root": "projects/rendering-service-web-component",
       "sourceRoot": "projects/rendering-service-web-component/src",
-      "prefix": "lib",
+      "prefix": "edu",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular-devkit/build-angular:browser-esbuild",
           "options": {
-            "project": "projects/rendering-service-web-component/ng-package.json"
+            "deployUrl": "vendor/edu-sharing/",
+            "outputHashing": "none",
+            "outputPath": "dist/rendering-service-web-component",
+            "index": "projects/rendering-service-web-component/src/index.html",
+            "main": "projects/rendering-service-web-component/src/main.ts",
+            "polyfills": "projects/rendering-service-web-component/src/polyfills.ts",
+            "tsConfig": "projects/rendering-service-web-component/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+            ],
+            "styles": [
+            ],
+            "scripts": [
+            ]
           },
           "configurations": {
             "production": {
-              "tsConfig": "projects/rendering-service-web-component/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/rendering-service-web-component/tsconfig.lib.json"
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
             }
           },
           "defaultConfiguration": "production"

@@ -1,30 +1,34 @@
-import {
-    Component,
-    Inject,
-    Injector,
-    Input,
-    OnChanges,
-    Optional,
-    signal,
-    SimpleChanges,
-    ViewChild,
-} from '@angular/core';
-import { AboutService, Node, NodeService, NodeServiceUnwrapped } from 'ngx-edu-sharing-api';
+import { Component, Input, OnChanges, signal, SimpleChanges, ViewChild } from '@angular/core';
+import { Node } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
+    EduSharingUiModule,
     OptionsHelperDataService,
-    Scope,
+    RenderHelperService,
+    TranslationsModule,
     TranslationsService,
 } from 'ngx-edu-sharing-ui';
-import { RenderDataRequestWithToken, RSApiConfiguration } from 'ngx-rendering-service-api';
-import { firstValueFrom } from 'rxjs';
-import { RestConstants } from '../../../core-module/rest/rest-constants';
-import { environment } from '../../../../environments/environment';
+import { RenderDataRequestWithToken } from 'ngx-rendering-service-api';
+import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { RenderComponent, RenderingServiceLibModule } from 'ngx-rendering-service-lib';
+import { MdsModule } from '../../../features/mds/mds.module';
 
 @Component({
     selector: 'es-render-wrapper-component',
     templateUrl: 'render-wrapper.component.html',
     styleUrls: ['render-wrapper.component.scss'],
+    standalone: true,
+    imports: [
+        CommonModule,
+        EduSharingUiModule,
+        MatButtonModule,
+        RenderComponent,
+        TranslationsModule,
+        RenderingServiceLibModule,
+        MdsModule,
+    ],
+    // required for optional mds module
     providers: [OptionsHelperDataService],
 })
 export class RenderWrapperComponent implements OnChanges {
@@ -36,13 +40,9 @@ export class RenderWrapperComponent implements OnChanges {
     request = signal<RenderDataRequestWithToken>(null);
 
     constructor(
-        private nodeApi: NodeService,
-        private nodeApiUnwrapped: NodeServiceUnwrapped,
-        private aboutService: AboutService,
+        private renderHelperService: RenderHelperService,
         private translations: TranslationsService,
-        private injector: Injector,
         private optionsHelper: OptionsHelperDataService,
-        @Optional() @Inject('MdsModule') private MdsModule: any,
     ) {
         this.translations.waitForInit().subscribe(() => {});
         this.optionsHelper.registerGlobalKeyboardShortcuts();
@@ -115,69 +115,12 @@ export class RenderWrapperComponent implements OnChanges {
 
     async ngOnChanges(changes: SimpleChanges) {
         if (changes.nodeId) {
-            const about = await firstValueFrom(this.aboutService.getAbout());
-            if (!about.renderingService2) {
-                console.error('no rendering service 2 url was configured. Will not continue.');
-                return;
-            }
-            console.log(about.renderingService2?.url);
-            if (environment.production) {
-                this.injector.get(RSApiConfiguration).rootUrl = about.renderingService2.url.replace(
-                    /\/$/g,
-                    '',
-                );
-            } else {
-                this.injector.get(RSApiConfiguration).rootUrl = '/rendering2';
-            }
-            console.log(this.injector.get(RSApiConfiguration));
-            this.node.set(await firstValueFrom(this.nodeApi.getNode(changes.nodeId.currentValue)));
-            const token = await (
-                (await firstValueFrom(
-                    this.nodeApiUnwrapped.getJwt({
-                        repository: this.node().ref.repo,
-                        node: this.node().ref.id,
-                    }),
-                )) as unknown as Blob
-            ).text();
-            //const token = 'tst';
-            console.log(token, this.node());
-            const resourceType =
-                this.node().properties[RestConstants.CCM_PROP_CCRESSOURCETYPE] === undefined
-                    ? ''
-                    : this.node().properties[RestConstants.CCM_PROP_CCRESSOURCETYPE][0] ?? '';
-            this.request.set({
-                nodeId: this.node().ref.id,
-                size: parseInt(this.node().size),
-                hash: this.node().content.hash,
-                mimeType: this.node().mimetype ?? '',
-                type: this.node().mediatype,
-                repoId: this.node().ref.repo,
-                version: this.node().content.version,
-                resourceType: resourceType,
-                url: this.node().properties?.['ccm:wwwurl']?.[0] || '',
-                // the replication source flag can be set in order to trigger special treatments
-                // in the backend. For example, it can be used for sodix paid media in order to
-                // fetch two instead of one url. This logic has to be implemented
-                replicationSourceFlag: false,
-                token: token,
-            });
-            this.optionsHelper.setData({
-                scope: Scope.Render,
-                activeObjects: [this.node()],
-                parent: {
-                    ref: {
-                        id: this.node().parent.id,
-                    },
-                },
-                customOptions: {
-                    useDefaultOptions: true,
-                },
-                postPrepareOptions: (options, objects) => {
-                    if (this.version && this.version !== RestConstants.NODE_VERSION_CURRENT) {
-                        options.filter((o) => o.name === 'OPTIONS.OPEN')[0].isEnabled = false;
-                    }
-                },
-            });
+            const data = await this.renderHelperService.getRenderData(
+                changes.nodeId.currentValue,
+                this.version,
+            );
+            this.node.set(data.node);
+            this.request.set(data.request);
             await this.optionsHelper.initComponents(this.actionbar);
             this.optionsHelper.refreshComponents();
         }

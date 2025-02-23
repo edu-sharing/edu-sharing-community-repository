@@ -4,14 +4,14 @@ import { ActivatedRoute } from '@angular/router';
 import { combineLatest } from 'rxjs';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { CommonModule } from '@angular/common';
-import { RenderWrapperModule } from './render-wrapper-component/render-wrapper.module';
+import { RenderWrapperComponent } from './render-wrapper-component/render-wrapper.component';
 
 @Component({
     selector: 'es-render2-page',
     templateUrl: 'render2-page.component.html',
     styleUrls: ['render2-page.component.scss'],
     standalone: true,
-    imports: [CommonModule, RenderWrapperModule],
+    imports: [CommonModule, RenderWrapperComponent],
     providers: [OptionsHelperDataService],
 })
 export class Render2PageComponent {
