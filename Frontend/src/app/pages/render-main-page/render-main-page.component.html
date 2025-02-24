@@ -1,8 +1,8 @@
-@defer (when renderer === 'legacy'){
+@defer (when renderer() === 'legacy'){
 <es-render-legacy-page></es-render-legacy-page>
 } @loading {
 <ng-container *ngTemplateOutlet="loading"></ng-container>
-} @defer (when renderer === 'render2'){
+} @defer (when renderer() === 'render2'){
 <es-render2-page></es-render2-page>
 } @loading {
 <ng-container *ngTemplateOutlet="loading"></ng-container>

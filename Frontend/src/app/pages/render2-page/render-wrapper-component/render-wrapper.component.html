@@ -5,20 +5,25 @@
       <span class="back-caption">{{ 'BACK' | translate }}</span>
     </button>
   </div>
-  <h2 *ngIf="node()">
-    {{ node() | nodeTitle }}
+  <h2 *ngIf="data()?.node">
+    {{ data().node | nodeTitle }}
   </h2>
   <es-actionbar
     [numberOfAlwaysVisibleOptions]="1"
     [numberOfAlwaysVisibleOptionsMobile]="0"
   ></es-actionbar>
 </div>
-<rs-root *ngIf="request() && node()" [node]="node()" [request]="request()"></rs-root>
+<es-info-message mode="error" *ngIf="data()?.error">{{ data().error | translate }}</es-info-message>
+<rs-root
+  *ngIf="data()?.request && data()?.node"
+  [node]="data().node"
+  [request]="data().request"
+></rs-root>
 <es-mds-editor-wrapper
-  *ngIf="node()"
+  *ngIf="data()?.node"
   [embedded]="true"
   [editorMode]="'viewer'"
   [groupId]="'io_render'"
-  [nodes]="[node()]"
+  [nodes]="[data().node]"
 >
 </es-mds-editor-wrapper>

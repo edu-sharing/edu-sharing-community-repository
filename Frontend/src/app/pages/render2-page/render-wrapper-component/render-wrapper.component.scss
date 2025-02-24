@@ -39,6 +39,11 @@ rs-root {
         }
     }
 }
+:host > es-info-message {
+    display: flex;
+    justify-content: center;
+    padding: 20px 20%;
+}
 .render-before {
     display: flex;
     justify-content: space-between;

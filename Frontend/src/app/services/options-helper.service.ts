@@ -219,7 +219,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
      * refresh all bound components with available menu options
      */
     async refreshComponents(components: OptionsHelperComponents, data: OptionData) {
-        if (data == null) {
+        if (data == null || components == null) {
             // console.info('options helper refresh called but no data previously bound');
             return;
         }

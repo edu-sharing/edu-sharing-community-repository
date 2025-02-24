@@ -837,6 +837,9 @@
       "DATE": "Date of revocation",
       "REASON": "Reason for revocation",
       "FEEDBACK": "Contact editorial team"
+    },
+    "ERROR": {
+      "RS2_NOT_CONFIGURED": "The rendering service 2 is currently not connected to this repository"
     }
   },
   "TOAST": {

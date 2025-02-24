@@ -1,18 +1,17 @@
 import { Component, Input, OnChanges, signal, SimpleChanges, ViewChild } from '@angular/core';
-import { Node } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
+    CombinedRenderData,
     EduSharingUiModule,
     OptionsHelperDataService,
     RenderHelperService,
-    TranslationsModule,
     TranslationsService,
 } from 'ngx-edu-sharing-ui';
-import { RenderDataRequestWithToken } from 'ngx-rendering-service-api';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { RenderComponent, RenderingServiceLibModule } from 'ngx-rendering-service-lib';
 import { MdsModule } from '../../../features/mds/mds.module';
+import { SharedModule } from '../../../shared/shared.module';
 
 @Component({
     selector: 'es-render-wrapper-component',
@@ -24,20 +23,19 @@ import { MdsModule } from '../../../features/mds/mds.module';
         EduSharingUiModule,
         MatButtonModule,
         RenderComponent,
-        TranslationsModule,
+        SharedModule,
         RenderingServiceLibModule,
         MdsModule,
     ],
     // required for optional mds module
-    providers: [OptionsHelperDataService],
+    providers: [OptionsHelperDataService, RenderHelperService],
 })
 export class RenderWrapperComponent implements OnChanges {
     @ViewChild(ActionbarComponent) actionbar: ActionbarComponent;
     @Input() nodeId: string;
     @Input() version: string;
 
-    node = signal<Node>(null);
-    request = signal<RenderDataRequestWithToken>(null);
+    data = signal<CombinedRenderData>(null);
 
     constructor(
         private renderHelperService: RenderHelperService,
@@ -86,7 +84,7 @@ export class RenderWrapperComponent implements OnChanges {
             repoId: '',
         });*/
         // url module
-        this.request.set(undefined);
+        this.data.set(undefined);
         /*
         combineLatest([this.route.params, this.route.queryParams]).subscribe(
             ([params, queryParams]) => {
@@ -119,10 +117,11 @@ export class RenderWrapperComponent implements OnChanges {
                 changes.nodeId.currentValue,
                 this.version,
             );
-            this.node.set(data.node);
-            this.request.set(data.request);
-            await this.optionsHelper.initComponents(this.actionbar);
-            this.optionsHelper.refreshComponents();
+            setTimeout(async () => {
+                await this.optionsHelper.initComponents(this.actionbar);
+                await this.optionsHelper.refreshComponents();
+            });
+            this.data.set(data);
         }
     }
 

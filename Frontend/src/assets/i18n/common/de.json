@@ -878,6 +878,9 @@
       "DATE": "Datum der Löschung",
       "REASON": "Begründung der Löschung",
       "FEEDBACK": "Redaktion kontaktieren"
+    },
+    "ERROR": {
+      "RS2_NOT_CONFIGURED": "Der Rendering-Service 2 ist derzeit nicht am Repository angeschlossen."
     }
   },
   "TOAST": {

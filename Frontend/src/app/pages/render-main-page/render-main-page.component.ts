@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, signal } from '@angular/core';
 import { AboutService } from 'ngx-edu-sharing-api';
 import { firstValueFrom } from 'rxjs';
 import { SpinnerComponent } from 'ngx-edu-sharing-ui';
@@ -18,7 +18,7 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
     imports: [CommonModule, RenderLegacyPageComponent, Render2PageComponent, SpinnerComponent],
 })
 export class RenderMainPageComponent implements AfterViewInit {
-    renderer: 'legacy' | 'render2' = null;
+    renderer = signal<'legacy' | 'render2'>(null);
     private queryParams: Params;
     constructor(private about: AboutService, private route: ActivatedRoute) {
         this.route.queryParams.subscribe((params) => (this.queryParams = params));
@@ -27,17 +27,19 @@ export class RenderMainPageComponent implements AfterViewInit {
     async ngAfterViewInit() {
         try {
             if (this.queryParams.renderer) {
-                this.renderer = this.queryParams.renderer;
+                this.renderer.set(this.queryParams.renderer);
                 return;
             }
-            this.renderer = (await firstValueFrom(this.about.getAbout())).plugins?.find(
-                (f) => f.id === 'rendering-service-2',
-            )
-                ? 'render2'
-                : 'legacy';
+            this.renderer.set(
+                (await firstValueFrom(this.about.getAbout())).plugins?.find(
+                    (f) => f.id === 'rendering-service-2',
+                )
+                    ? 'render2'
+                    : 'legacy',
+            );
         } catch (e) {
             console.warn(e);
-            this.renderer = 'legacy';
+            this.renderer.set('legacy');
         }
     }
 }
