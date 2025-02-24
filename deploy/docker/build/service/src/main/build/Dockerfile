@@ -5,6 +5,11 @@ FROM ${docker.from.edu_sharing.community.common.alfresco.repository}
 USER root
 
 RUN set -eux \
+    && apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+        dnsutils
+
+RUN set -eux \
     && mkdir -p alf_safe \
     && mkdir -p tomcat/shared/classes/config/defaults \
     && mkdir -p tomcat/shared/classes/config/cluster/applications \

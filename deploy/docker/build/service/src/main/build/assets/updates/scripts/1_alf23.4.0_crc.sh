@@ -1,6 +1,19 @@
 #!/bin/bash
 set -e  # Exit script if any command fails
 
+if [[ -n "$KUBERNETES_SERVICE_HOST" ]]; then
+    echo "Running inside a Kubernetes pod"
+    NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+    SERVICE_NAME="edusharing-repository-service-headless.$NAMESPACE.svc.cluster.local"
+    REPO_COUNT=$(nslookup "$SERVICE_NAME" | grep "$SERVICE_NAME" | wc -l)
+    if [ "$REPO_COUNT" -gt "1" ]; then
+      echo "can not run update. more than one repository started"
+      exit 1
+    fi
+else
+    echo "Not running inside a Kubernetes pod"
+fi
+
 
 source ./bin/updates/scripts/helper/base.sh
 
