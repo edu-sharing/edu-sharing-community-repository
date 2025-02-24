@@ -40,6 +40,7 @@ RUN set -eux \
 ########################################################################################################################
 
 COPY --chown=worker:worker assets/entrypoint.sh assets/reinstall.sh assets/libcheck.sh bin/
+COPY assets/updates bin/updates
 RUN set -eux \
 	&& find bin -type f -name '*.sh' -exec chmod +x {} \;
 

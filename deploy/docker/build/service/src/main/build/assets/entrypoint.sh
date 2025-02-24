@@ -148,6 +148,9 @@ until PGPASSWORD="${repository_database_pass}" \
   sleep 3
 done
 
+echo "executing updates ..."
+./bin/updates/updates.sh
+
 # jodconverter
 [[ -n "${repository_transform_host}" && -n "${repository_transform_port}" ]] && {
   until wait-for-it "${repository_transform_host}:${repository_transform_port}" -t 3; do sleep 1; done
