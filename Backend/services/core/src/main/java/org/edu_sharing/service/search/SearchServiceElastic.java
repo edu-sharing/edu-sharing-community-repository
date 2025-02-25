@@ -583,7 +583,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                             .text(ngsearches[0])
                             .suggesters("ngsearchword", s -> s
                                     .phrase(p -> p
-                                            .text("properties.cclom:title.trigram")
+                                            .field("properties.cclom:title.trigram")
                                             .gramSize(3)
                                             .confidence(0.9)
                                             .highlight(high -> high.preTag("<em>").postTag("</em>"))

@@ -10,6 +10,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.LRMITool;
@@ -18,6 +19,10 @@ import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Node;
+import org.edu_sharing.service.search.SearchService;
+import org.edu_sharing.service.search.SearchServiceElastic;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchToken;
 import org.htmlparser.NodeFilter;
 import org.htmlparser.Parser;
 import org.htmlparser.Tag;
@@ -139,6 +144,7 @@ public class ClientUtilsService {
 					}
 				}
 			}
+			defaultHandling(url, info);
 			return info;
 		} catch (Throwable e) {
 			logger.info(e.getMessage());
@@ -148,13 +154,20 @@ public class ClientUtilsService {
 	}
 
 	private static void addDuplicateNodes(String url, WebsiteInformation info) throws DAOException {
-		// check via cmis for simple duplicates
-		Map<String, Object> filters = new HashMap<>();
-		filters.put(CCConstants.CCM_PROP_IO_WWWURL, url);
-		Set<NodeRef> nodes = new HashSet<>(CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO,
-				filters
-		));
-		if(info.getRawContent() != null) {
+		SearchService searchService = SearchServiceFactory.getLocalService();
+		if(!(searchService instanceof SearchServiceElastic)) {
+			return;
+		}
+        try {
+			SearchToken token = new SearchToken();
+			token.setMaxResult(10);
+			HashSet<org.edu_sharing.service.model.NodeRef> nodes = new HashSet<>(searchService.search(MetadataHelper.getLocalDefaultMetadataset(), "link_duplicates", new HashMap<>() {{
+				put("url", new String[]{url});
+				put("title", new String[]{info.getTitle()});
+				put("description", new String[]{info.getDescription()});
+				put("keywords", info.getKeywords());
+			}}, token).getData());
+        if(info.getRawContent() != null) {
 			Config duplicate = LightbendConfigLoader.get().getConfig("repository.communication.duplicate");
 			try {
 				if (duplicate != null) {
@@ -171,7 +184,7 @@ public class ClientUtilsService {
 						for (int i = 0; i < result.length(); i++) {
 							JSONArray entry = result.getJSONArray(0);
 							String uuid = entry.getString(0);
-							nodes.add(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, uuid));
+							nodes.add(new org.edu_sharing.service.model.NodeRefImpl(uuid));
 						}
 					}
 				}
@@ -182,11 +195,14 @@ public class ClientUtilsService {
 		}
 		List<Node> converted = NodeDao.convertToRest(
 				RepositoryDao.getHomeRepository(),
-				NodeDao.convertAlfrescoNodeRef(nodes),
+				NodeDao.convertEduNodeRef(RepositoryDao.getHomeRepository(), new ArrayList<>(nodes)),
 				Filter.createShowAllFilter(),
 				null
 		);
 		info.getDuplicateNodes().addAll(converted);
+		} catch (Throwable e) {
+			logger.info(e.getMessage());
+		}
 	}
 
 	private static void defaultHandling(String url, WebsiteInformation info) {

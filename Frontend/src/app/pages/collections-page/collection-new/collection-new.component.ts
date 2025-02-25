@@ -694,7 +694,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
             if (this.newCollectionStep == this.STEP_EDITORIAL_GROUPS) {
                 setTimeout(() => {
                     this.editorialGroupsSelected = this.getEditoralGroups(
-                        this.originalPermissions.permissions,
+                        this.originalPermissions?.permissions || [],
                     );
                     this.organizationsRef.getSelection().select(...this.editorialGroupsSelected);
                     this.organizationsRef
