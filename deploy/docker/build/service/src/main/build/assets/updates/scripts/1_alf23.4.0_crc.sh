@@ -23,6 +23,14 @@ repository_database_pass="${REPOSITORY_DATABASE_PASS:-repository}"
 repository_database_port="${REPOSITORY_DATABASE_PORT:-5432}"
 repository_database_user="${REPOSITORY_DATABASE_USER:-repository}"
 
+if check_table_exists "$repository_database_user" "$repository_database_pass" "$repository_database_host" "$repository_database_port" "$repository_database_name" "alf_node_properties"; then
+    echo "Table exists. Proceed with the next steps."
+else
+    echo "Initial alfresco install. skipping update"
+    exit 0
+fi
+
+
 VERSION=$(get_alfresco_version "$repository_database_user" "$repository_database_pass" "$repository_database_host" "$repository_database_port" "$repository_database_name")
 
 if [[ $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then

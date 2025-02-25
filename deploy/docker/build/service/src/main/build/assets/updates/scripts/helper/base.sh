@@ -70,3 +70,27 @@ get_alfresco_version() {
     # Output the full version
     echo "$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION"
 }
+
+#!/bin/bash
+
+# Function to check if a table exists in a PostgreSQL database
+check_table_exists() {
+    local DB_USER="$1"
+    local DB_PASS="$2"
+    local DB_HOST="$3"
+    local DB_PORT="$4"
+    local DB_NAME="$5"
+    local TABLE_NAME="$6"
+
+    # Set the database password for psql
+    export PGPASSWORD="$DB_PASS"
+
+
+    # Option 3: Using \d command
+    psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -p "$DB_PORT" -c "\d $TABLE_NAME" 2>/dev/null
+    if [ $? -eq 0 ]; then
+        return 0
+    fi
+
+    return 1
+}
