@@ -17,13 +17,7 @@ fi
 
 source ./bin/updates/scripts/helper/base.sh
 
-DB_PASS=$(grep "^db.password=" /opt/alfresco/tomcat/shared/classes/config/cluster/alfresco-global.properties | cut -d '=' -f2)
-DB_USER=$(grep "^db.username=" /opt/alfresco/tomcat/shared/classes/config/cluster/alfresco-global.properties | cut -d '=' -f2)
-DB_NAME=$(grep "^db.name=" /opt/alfresco/tomcat/shared/classes/config/cluster/alfresco-global.properties | cut -d '=' -f2)
-DB_HOST=$(grep "^db.url=" /opt/alfresco/tomcat/shared/classes/config/cluster/alfresco-global.properties | grep -oP 'jdbc:\w+://\K[^:/]+')
-DB_PORT=$(grep "^db.url=" /opt/alfresco/tomcat/shared/classes/config/cluster/alfresco-global.properties | grep -oP 'jdbc:\w+://[^:]+:\K\d+')
-
-VERSION=$(get_alfresco_version "$DB_USER" "$DB_PASS" "$DB_HOST" "$DB_PORT" "$DB_NAME")
+VERSION=$(get_alfresco_version "$repository_database_user" "$repository_database_pass" "$repository_database_host" "$repository_database_port" "$repository_database_name")
 
 SQL_FILE="./bin/updates/scripts/sql/postgresql-mnt24815.sql"
 
