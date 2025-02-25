@@ -9,7 +9,9 @@ if [[ -n "$KUBERNETES_SERVICE_HOST" ]]; then
     NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
     SERVICE_NAME="edusharing-repository-service-headless.$NAMESPACE.svc.cluster.local"
     REPO_COUNT=$(nslookup "$SERVICE_NAME" | grep "$SERVICE_NAME" | wc -l)
-    if [ "$REPO_COUNT" -gt "1" ]; then
+    log $u "repos active: $REPO_COUNT"
+    # on startup dns would not recognize current repo so we check > 0 instead of one
+    if [ "$REPO_COUNT" -gt "0" ]; then
       log $u "can not run update. more than one repository started"
       exit 1
     fi
