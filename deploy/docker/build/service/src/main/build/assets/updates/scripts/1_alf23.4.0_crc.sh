@@ -17,12 +17,25 @@ fi
 
 source ./bin/updates/scripts/helper/base.sh
 
+repository_database_host="${REPOSITORY_DATABASE_HOST:-repository-database}"
+repository_database_name="${REPOSITORY_DATABASE_NAME:-repository}"
+repository_database_pass="${REPOSITORY_DATABASE_PASS:-repository}"
+repository_database_port="${REPOSITORY_DATABASE_PORT:-5432}"
+repository_database_user="${REPOSITORY_DATABASE_USER:-repository}"
+
 VERSION=$(get_alfresco_version "$repository_database_user" "$repository_database_pass" "$repository_database_host" "$repository_database_port" "$repository_database_name")
+
+if [[ $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "Version is valid $VERSION"
+else
+    echo "Invalid version format: $VERSION"
+    exit 1
+fi
 
 SQL_FILE="./bin/updates/scripts/sql/postgresql-mnt24815.sql"
 
 if [[ "$VERSION" == "23.4.0" ]]; then
-  echo "alfresco version must be fixed:$VERSION"
+  echo "Version must be fixed:$VERSION"
   export PGPASSWORD="$DB_PASS"
   psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST"  -p "$DB_PORT" -f "$SQL_FILE"
 
@@ -34,7 +47,7 @@ if [[ "$VERSION" == "23.4.0" ]]; then
   fi
 
 else
-  echo "alfresco version must not be fixed:$VERSION"
+  echo "Version must not be fixed:$VERSION"
 fi
 
 # success

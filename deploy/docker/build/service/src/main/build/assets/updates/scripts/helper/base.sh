@@ -32,18 +32,40 @@ get_alfresco_version() {
     # Set the database password for psql
     export PGPASSWORD="$DB_PASS"
 
+    if ! psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -p "$DB_PORT" -c "SELECT 1" >/dev/null 2>&1; then
+        echo "Error: Unable to connect to the database. Please check your credentials and connection details." >&2
+        exit 1
+    fi
+
     # Get the SYS_NODE_ID
-    local SYS_NODE_ID=$(psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -p "$DB_PORT" -t -A -c "$SELECT_SYS_NODE_ID")
+    local SYS_NODE_ID=$(psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -p "$DB_PORT" -t -A -c "$SELECT_SYS_NODE_ID" 2>/dev/null)
+    if [[ $? -ne 0 || -z "$SYS_NODE_ID" ]]; then
+        echo "Error: Failed to retrieve SYS_NODE_ID." >&2
+        exit 1
+    fi
+
 
     # Get version parts (Major, Minor, Patch)
     local SQL_QUERY=$(get_select_version_number "versionMajor" "$SYS_NODE_ID" "$SELECT_SYS_NS_ID")
-    local MAJOR_VERSION=$(psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -p "$DB_PORT" -t -A -c "$SQL_QUERY")
+    local MAJOR_VERSION=$(psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -p "$DB_PORT" -t -A -c "$SQL_QUERY" 2>/dev/null)
+    if [[ $? -ne 0 || -z "$MAJOR_VERSION" ]]; then
+        echo "Error: Failed to retrieve $MAJOR_VERSION." >&2
+        exit 1
+    fi
 
     SQL_QUERY=$(get_select_version_number "versionMinor" "$SYS_NODE_ID" "$SELECT_SYS_NS_ID")
-    local MINOR_VERSION=$(psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -p "$DB_PORT" -t -A -c "$SQL_QUERY")
+    local MINOR_VERSION=$(psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -p "$DB_PORT" -t -A -c "$SQL_QUERY" 2>/dev/null)
+    if [[ $? -ne 0 || -z "$MINOR_VERSION" ]]; then
+        echo "Error: Failed to retrieve $MINOR_VERSION." >&2
+        exit 1
+    fi
 
     SQL_QUERY=$(get_select_version_number "versionRevision" "$SYS_NODE_ID" "$SELECT_SYS_NS_ID")
-    local PATCH_VERSION=$(psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -p "$DB_PORT" -t -A -c "$SQL_QUERY")
+    local PATCH_VERSION=$(psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -p "$DB_PORT" -t -A -c "$SQL_QUERY" 2>/dev/null)
+    if [[ $? -ne 0 || -z "$PATCH_VERSION" ]]; then
+        echo "Error: Failed to retrieve $PATCH_VERSION." >&2
+        exit 1
+    fi
 
     # Output the full version
     echo "$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION"
