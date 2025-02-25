@@ -47,8 +47,8 @@ SQL_FILE="./bin/updates/scripts/sql/postgresql-mnt24815.sql"
 
 if [[ "$VERSION" == "23.4.0" ]]; then
   log $u "Version must be fixed:$VERSION"
-  export PGPASSWORD="$DB_PASS"
-  psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST"  -p "$DB_PORT" -f "$SQL_FILE"
+  export PGPASSWORD="$repository_database_pass"
+  psql -U "$repository_database_user" -d "$repository_database_name" -h "$repository_database_host"  -p "$repository_database_port" -f "$SQL_FILE"
 
   # Check if the command was successful
   if [ $? -eq 0 ]; then
