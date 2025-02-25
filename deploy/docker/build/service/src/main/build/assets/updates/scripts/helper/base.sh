@@ -85,12 +85,20 @@ check_table_exists() {
     # Set the database password for psql
     export PGPASSWORD="$DB_PASS"
 
+    # Use a direct query to check if the table exists in pg_tables
+    TABLE_EXISTS=$(psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -p "$DB_PORT" -t -A -c \
+    "SELECT EXISTS (SELECT 1 FROM pg_tables WHERE tablename = '$TABLE_NAME');")
 
-    # Option 3: Using \d command
-    psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -p "$DB_PORT" -c "\d $TABLE_NAME" 2>/dev/null
-    if [ $? -eq 0 ]; then
-        return 0
+    # Check the result of the query
+    if [ "$TABLE_EXISTS" == "t" ]; then
+        return 0  # Table exists
+    else
+        return 1  # Table does not exist
     fi
+}
 
-    return 1
+log() {
+  local updater="$1"
+  local msg="$2"
+  echo "$updater: $msg"
 }
