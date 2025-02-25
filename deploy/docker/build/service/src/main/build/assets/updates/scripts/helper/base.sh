@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e  # Exit script if any command fails
 
 # Function to build the SQL query for version selection
 get_select_version_number() {
