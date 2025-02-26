@@ -4,17 +4,19 @@ set -e  # Exit script if any command fails
 u="1_alf23.4.0_crc"
 source ./bin/updates/scripts/helper/base.sh
 
+repository_database_host="${REPOSITORY_DATABASE_HOST:-repository-database}"
+repository_database_name="${REPOSITORY_DATABASE_NAME:-repository}"
+repository_database_pass="${REPOSITORY_DATABASE_PASS:-repository}"
+repository_database_port="${REPOSITORY_DATABASE_PORT:-5432}"
+repository_database_user="${REPOSITORY_DATABASE_USER:-repository}"
+
 if [[ -n "$KUBERNETES_SERVICE_HOST" ]]; then
-    log $u "Running inside a Kubernetes pod"
-    NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
-    SERVICE_NAME="edusharing-repository-service-headless.$NAMESPACE.svc.cluster.local"
-    REPO_COUNT=$(nslookup "$SERVICE_NAME" | grep "$SERVICE_NAME" | wc -l)
-    log $u "repos active: $REPO_COUNT"
-    # on startup dns would not recognize current repo so we check > 0 instead of one
-    if [ "$REPO_COUNT" -gt "0" ]; then
-      log $u "can not run update. more than one repository started"
-      exit 1
-    fi
+  COUNT=$(check_db_connections "$repository_database_user" "$repository_database_pass" "$repository_database_host" "$repository_database_port" "$repository_database_name")
+  log $u "nr of jdbc connections: $COUNT"
+  if [ "$COUNT" -gt 0 ]; then
+     log $u "Postgres jdbc connections exist on database: $repository_database_name. please shutdown all repositories"
+     exit 1
+  fi
 else
     log $u "Not running inside a Kubernetes pod"
 fi
@@ -29,7 +31,7 @@ repository_database_port="${REPOSITORY_DATABASE_PORT:-5432}"
 repository_database_user="${REPOSITORY_DATABASE_USER:-repository}"
 
 if check_table_exists "$repository_database_user" "$repository_database_pass" "$repository_database_host" "$repository_database_port" "$repository_database_name" "alf_node_properties"; then
-    log $u "Table exists. Proceed with the next steps."
+    log $u "alfresco database scheme exists. Proceed with the next steps."
 else
     log $u "Initial alfresco install. skipping update"
     exit 0

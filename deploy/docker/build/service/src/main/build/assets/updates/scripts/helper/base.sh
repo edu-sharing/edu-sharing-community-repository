@@ -97,6 +97,24 @@ check_table_exists() {
     fi
 }
 
+check_db_connections() {
+      local DB_USER="$1"
+      local DB_PASS="$2"
+      local DB_HOST="$3"
+      local DB_PORT="$4"
+      local DB_NAME="$5"
+      # Set the database password for psql
+      export PGPASSWORD="$DB_PASS"
+
+      CONN_COUNT=$(psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -p "$DB_PORT" -t -A -c \
+          "select count(*) from pg_stat_activity  where pid <> pg_backend_pid() and datname='repository' and application_name like '%JDBC%';" 2>/dev/null)
+      if [[ $? -ne 0 || -z "$CONN_COUNT" ]]; then
+          echo "Error: Failed to retrieve $CONN_COUNT." >&2
+          exit 1
+      fi
+      echo $CONN_COUNT;
+}
+
 log() {
   local updater="$1"
   local msg="$2"
