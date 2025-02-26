@@ -11,12 +11,16 @@ repository_database_port="${REPOSITORY_DATABASE_PORT:-5432}"
 repository_database_user="${REPOSITORY_DATABASE_USER:-repository}"
 
 if [[ -n "$KUBERNETES_SERVICE_HOST" ]]; then
-  COUNT=$(check_db_connections "$repository_database_user" "$repository_database_pass" "$repository_database_host" "$repository_database_port" "$repository_database_name")
-  log $u "nr of jdbc connections: $COUNT"
-  if [ "$COUNT" -gt 0 ]; then
-     log $u "Postgres jdbc connections exist on database: $repository_database_name. please shutdown all repositories"
-     exit 1
-  fi
+    log $u "Running inside a Kubernetes pod"
+    NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+    SERVICE_NAME="edusharing-repository-service-headless.$NAMESPACE.svc.cluster.local"
+    REPO_COUNT=$(nslookup "$SERVICE_NAME" | grep -A2 "$SERVICE_NAME" | grep "Address" | grep -v $(hostname -i) | wc -l)
+    log $u "other repos active: $REPO_COUNT"
+    # on startup dns would not recognize current repo so we check > 0 instead of one
+    if [ "$REPO_COUNT" -gt "0" ]; then
+      log $u "can not run update. more than one repository started"
+      exit 1
+    fi
 else
     log $u "Not running inside a Kubernetes pod"
 fi
