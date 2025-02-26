@@ -44,71 +44,7 @@ export class RenderWrapperComponent implements OnChanges {
     ) {
         this.translations.waitForInit().subscribe(() => {});
         this.optionsHelper.registerGlobalKeyboardShortcuts();
-        /*this.dummyRequest.set({
-            nodeId: 'TEST_lviv.jpg',
-            size: -1,
-            type: 'file-image',
-            hash: '1',
-            mimeType: 'image/jpeg',
-            version: '1.0',
-            repoId: '',
-        });
-
-        this.request.set({
-            nodeId: 'TEST_4k.mp4',
-            size: -1,
-            type: 'file-video',
-            hash: '' + Math.random(),
-            mimeType: 'video/mpeg',
-            version: '1.0',
-            repoId: '',
-        });
-
-        this.request.set({
-            nodeId: 'TEST_portrait.pdf',
-            size: -1,
-            type: 'file-pdf',
-            hash: '' + Math.random(),
-            mimeType: 'application/pdf',
-            version: '1.0',
-            repoId: '',
-        });
-
-        /*this.dummyRequest.set({
-            nodeId: 'TEST_lorem_ipsum.odt',
-            size: -1,
-            type: 'file-word',
-            hash: '' + Math.random(),
-            mimeType: 'application/vnd.oasis.opendocument.text',
-            version: '1.0',
-            repoId: '',
-        });*/
-        // url module
         this.data.set(undefined);
-        /*
-        combineLatest([this.route.params, this.route.queryParams]).subscribe(
-            ([params, queryParams]) => {
-                this.nodeApi
-                    .getNode(params.node, {
-                        repository: queryParams.repo || HOME_REPOSITORY,
-                    })
-                    .subscribe((n) => {
-                        console.log(n);
-                        this.node.set(n);
-                        this.dummyRequest.set({
-                            nodeId: 'TEST_lviv.jpg',
-                            size: -1,
-                            type: 'file-image',
-                            hash: '1',
-                            mimeType: 'image/jpeg',
-                            version: '1.0',
-                            repoId: '',
-                        });
-
-                    });
-            },
-        );
-        */
     }
 
     async ngOnChanges(changes: SimpleChanges) {

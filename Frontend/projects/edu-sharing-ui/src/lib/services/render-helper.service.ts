@@ -3,10 +3,10 @@ import { firstValueFrom } from 'rxjs';
 import { RenderDataRequestWithToken, RSApiConfiguration } from 'ngx-rendering-service-api';
 import {
     AboutService,
-    NodeService,
     Node,
     NodeServiceUnwrapped,
     RestConstants,
+    UserService,
 } from 'ngx-edu-sharing-api';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
 import { OptionsHelperDataService } from './options-helper-data.service';
@@ -23,14 +23,21 @@ export class RenderHelperService {
         private injector: Injector,
         private aboutService: AboutService,
         private nodeApiUnwrapped: NodeServiceUnwrapped,
-        private nodeApi: NodeService,
         private configuration: EduSharingUiConfiguration,
+        private userService: UserService,
         @Optional() private optionsHelperDataService: OptionsHelperDataService,
     ) {}
 
     async getRenderData(nodeId: string, version: string = null): Promise<CombinedRenderData> {
         const about = await firstValueFrom(this.aboutService.getAbout());
-        const node = await firstValueFrom(this.nodeApi.getNode(nodeId));
+        const securedNode = await firstValueFrom(
+            this.nodeApiUnwrapped.getMetadataSigned({
+                repository: '-home-',
+                node: nodeId,
+            }),
+        );
+        const node = securedNode.node;
+        const user = await firstValueFrom(this.userService.observeCurrentUserInfo());
         console.log(this.injector.get(OptionsHelperDataService));
         this.optionsHelperDataService?.setData({
             scope: Scope.Render,
@@ -67,35 +74,20 @@ export class RenderHelperService {
             this.injector.get(RSApiConfiguration).rootUrl = '/rendering2';
         }
         console.log(this.injector.get(RSApiConfiguration));
-        const token = await (
-            (await firstValueFrom(
-                this.nodeApiUnwrapped.getJwt({
-                    repository: node.ref.repo,
-                    node: node.ref.id,
-                }),
-            )) as unknown as Blob
-        ).text();
-        //const token = 'tst';
+        const token = securedNode.jwt;
         console.log(token, node);
-        const resourceType =
-            node.properties[RestConstants.CCM_PROP_CCRESSOURCETYPE] === undefined
-                ? ''
-                : node.properties[RestConstants.CCM_PROP_CCRESSOURCETYPE][0] ?? '';
         const request = {
             nodeId: node.ref.id,
-            size: parseInt(node.size),
-            hash: node.content.hash,
-            mimeType: node.mimetype ?? '',
-            type: node.mediatype,
             repoId: node.ref.repo,
-            version: node.content.version,
-            resourceType: resourceType,
-            url: node.properties?.['ccm:wwwurl']?.[0] || '',
-            // the replication source flag can be set in order to trigger special treatments
-            // in the backend. For example, it can be used for sodix paid media in order to
-            // fetch two instead of one url. This logic has to be implemented
-            replicationSourceFlag: false,
+            securedNode: securedNode.signedNode,
+            signature: securedNode.signature,
             token: token,
+            userData: {
+                authorityName: user.user.person.authorityName,
+                firstName: user.user.person.profile.firstName,
+                surName: user.user.person.profile.lastName,
+                userEMail: user.user.person.profile.email,
+            },
         } as RenderDataRequestWithToken;
 
         return {

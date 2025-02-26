@@ -28,7 +28,8 @@ rs-root {
                 height: auto;
                 aspect-ratio: 16 / 9;
             }
-            &.module-IMAGE {
+            &.module-IMAGE,
+            &.module-DDB {
                 width: 70%;
                 max-height: 100%;
             }
