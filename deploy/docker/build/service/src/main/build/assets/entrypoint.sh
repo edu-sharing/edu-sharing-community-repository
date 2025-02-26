@@ -251,6 +251,14 @@ xmlstarlet ed -L \
     ${catSConf}
 }
 
+if ! xmlstarlet sel -t -v '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[@className="org.edu_sharing.catalina.valves.SemicolonPathTraversalValve"]/@className' "${catSConf}" | grep -q .; then
+    xmlstarlet ed -L \
+        -s '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t elem -n 'Valve' \
+        -i '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[last()]' -t attr -n "className" -v "org.edu_sharing.catalina.valves.SemicolonPathTraversalValve" \
+        "${catSConf}"
+fi
+
+
 xmlstarlet ed -L \
   -d '/Server/Service[@name="Catalina"]/Connector' \
   -s '/Server/Service[@name="Catalina"]' -t elem -n 'Connector' -v '' \
