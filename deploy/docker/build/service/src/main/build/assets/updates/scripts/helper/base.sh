@@ -49,21 +49,21 @@ get_alfresco_version() {
     local SQL_QUERY=$(get_select_version_number "versionMajor" "$SYS_NODE_ID" "$SELECT_SYS_NS_ID")
     local MAJOR_VERSION=$(psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -p "$DB_PORT" -t -A -c "$SQL_QUERY" 2>/dev/null)
     if [[ $? -ne 0 || -z "$MAJOR_VERSION" ]]; then
-        echo "Error: Failed to retrieve $MAJOR_VERSION." >&2
+        echo "Error: Failed to retrieve MAJOR_VERSION." >&2
         exit 1
     fi
 
     SQL_QUERY=$(get_select_version_number "versionMinor" "$SYS_NODE_ID" "$SELECT_SYS_NS_ID")
     local MINOR_VERSION=$(psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -p "$DB_PORT" -t -A -c "$SQL_QUERY" 2>/dev/null)
     if [[ $? -ne 0 || -z "$MINOR_VERSION" ]]; then
-        echo "Error: Failed to retrieve $MINOR_VERSION." >&2
+        echo "Error: Failed to retrieve MINOR_VERSION." >&2
         exit 1
     fi
 
     SQL_QUERY=$(get_select_version_number "versionRevision" "$SYS_NODE_ID" "$SELECT_SYS_NS_ID")
     local PATCH_VERSION=$(psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -p "$DB_PORT" -t -A -c "$SQL_QUERY" 2>/dev/null)
     if [[ $? -ne 0 || -z "$PATCH_VERSION" ]]; then
-        echo "Error: Failed to retrieve $PATCH_VERSION." >&2
+        echo "Error: Failed to retrieve PATCH_VERSION." >&2
         exit 1
     fi
 
@@ -106,13 +106,13 @@ check_db_connections() {
       # Set the database password for psql
       export PGPASSWORD="$DB_PASS"
 
-      CONN_COUNT=$(psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -p "$DB_PORT" -t -A -c \
-          "select count(*) from pg_stat_activity  where pid <> pg_backend_pid() and datname='repository' and application_name like '%JDBC%';" 2>/dev/null)
-      if [[ $? -ne 0 || -z "$CONN_COUNT" ]]; then
-          echo "Error: Failed to retrieve $CONN_COUNT." >&2
+      local COUNT=$(psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -p "$DB_PORT" -t -A -c \
+          "select count(*) from pg_stat_activity  where pid <> pg_backend_pid() and datname='$DB_NAME' and application_name like '%JDBC%';" 2>/dev/null)
+      if [[ $? -ne 0 || -z "$COUNT" ]]; then
+          echo "Error: Failed to retrieve db connection count." >&2
           exit 1
       fi
-      echo $CONN_COUNT;
+      echo $COUNT;
 }
 
 log() {
