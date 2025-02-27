@@ -44,8 +44,10 @@ import {
     UIAnimation,
 } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { filter, first, skipWhile, takeUntil } from 'rxjs/operators';
 import { AppComponent } from '../../app.component';
+import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
+import { debounceTime, filter, first, skipWhile, takeUntil } from 'rxjs/operators';
+import { OptionsHelperService } from 'src/app/core-ui-module/options-helper.service';
 import {
     ConfigurationHelper,
     ConfigurationService,
@@ -157,15 +159,20 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
             this.banner = ConfigurationHelper.getBanner(this.configService);
             this.connector.setRoute(this.route, this.router);
             this.networkServiceLegacy.prepareCache();
-            this.route.queryParams.subscribe((params: Params) => {
-                this.closeOnBack = params.closeOnBack === 'true';
-                this.editor = params.editor;
-                this.fromLogin = params.fromLogin === 'true' || params.redirectFromSSO === 'true';
-                this.repository = params.repo || params.repository || RestConstants.HOME_REPOSITORY;
-                this.queryParams = params;
-                const childobject = params.childobject_id ? params.childobject_id : null;
-                this.isChildobject = childobject != null;
-                this.route.params.subscribe((params: Params) => {
+            combineLatest([this.route.queryParams, this.route.params])
+                .pipe(debounceTime(10))
+                .subscribe(([queryParams, params]) => {
+                    this.closeOnBack = queryParams.closeOnBack === 'true';
+                    this.editor = queryParams.editor;
+                    this.fromLogin =
+                        queryParams.fromLogin === 'true' || queryParams.redirectFromSSO === 'true';
+                    this.repository =
+                        queryParams.repo || queryParams.repository || RestConstants.HOME_REPOSITORY;
+                    this.queryParams = queryParams;
+                    const childobject = queryParams.childobject_id
+                        ? queryParams.childobject_id
+                        : null;
+                    this.isChildobject = childobject != null;
                     if (params.node) {
                         this.isRoute = true;
                         const dataSource: NodeDataSource<Node> = this.temporaryStorageService.get(
@@ -183,15 +190,16 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
                             if (params.version) {
                                 this.version = params.version;
                             }
-                            if (childobject) {
-                                setTimeout(() => (this.node = childobject), 10);
-                            } else {
-                                setTimeout(() => (this.node = params.node), 10);
-                            }
+                            setTimeout(() => {
+                                if (childobject) {
+                                    this.node = childobject;
+                                } else {
+                                    this.node = params.node;
+                                }
+                            }, 10);
                         });
                     }
                 });
-            });
         });
         this.frame.broadcastEvent(FrameEventsService.EVENT_VIEW_OPENED, 'node-render');
     }
@@ -283,14 +291,14 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
         ) {
             return;
         }
-        if (event.code == 'ArrowLeft' && this.canSwitchBack()) {
-            this.switchPosition(this.getPosition() - 1);
+        if (event.code == 'ArrowLeft') {
+            this.switchPosition(-1, true);
             event.preventDefault();
             event.stopPropagation();
             return;
         }
-        if (event.code == 'ArrowRight' && this.canSwitchForward()) {
-            this.switchPosition(this.getPosition() + 1);
+        if (event.code == 'ArrowRight') {
+            this.switchPosition(+1, true);
             event.preventDefault();
             event.stopPropagation();
             return;
@@ -379,13 +387,45 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
         this.destroyed$.complete();
     }
 
-    public switchPosition(pos: number) {
-        // this.router.navigate([UIConstants.ROUTER_PREFIX+"render",this.list[pos].ref.id]);
+    public switchPosition(offset: number, useSequence = false) {
+        const pos = this.getPosition() + offset;
+        if (this.sequence?.nodes?.length > 1 && useSequence) {
+            if (this.getSequencePosition() === 0 && offset === -1) {
+                void this.router.navigate(['./'], {
+                    replaceUrl: true,
+                    relativeTo: this.route,
+                    queryParamsHandling: 'merge',
+                    queryParams: { childobject_id: null },
+                });
+                return;
+            }
+            const index = this.getSequencePosition() + offset;
+            if (index >= 0 && index < this.sequence.nodes.length) {
+                void this.router.navigate(['./'], {
+                    replaceUrl: true,
+                    relativeTo: this.route,
+                    queryParamsHandling: 'merge',
+                    queryParams: { childobject_id: this.sequence.nodes[index].ref.id },
+                });
+                return;
+            }
+        }
+        if ((offset > 0 && !this.canSwitchForward()) || (offset < 0 && !this.canSwitchBack())) {
+            return;
+        }
         this.isLoading = true;
         this.sequence = null;
-        this.node = this.list[pos];
-        // this.options=[];
+        void this.router.navigate([UIConstants.ROUTER_PREFIX, 'render', this.list[pos].ref.id], {
+            replaceUrl: true,
+            queryParamsHandling: 'merge',
+            queryParams: { childobject_id: null },
+        });
     }
+
+    private getSequencePosition() {
+        return this.sequence.nodes.findIndex((n) => n.ref.id === this._nodeId);
+    }
+
     public canSwitchBack() {
         return (
             this.list && this.getPosition() > 0 && !this.list[this.getPosition() - 1].isDirectory
@@ -561,7 +601,7 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
                     loadingTask.done();
                 },
                 (error) => {
-                    console.log(error.error.error);
+                    console.warn(error.error.error);
                     if (
                         error?.error?.error === 'org.edu_sharing.restservices.DAOMissingException'
                     ) {

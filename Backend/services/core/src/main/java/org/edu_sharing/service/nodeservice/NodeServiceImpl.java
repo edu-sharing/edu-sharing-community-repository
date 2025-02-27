@@ -743,6 +743,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
             propsFinal = runSetInterceptors(nodeRef, propsFinal, PropertiesInterceptorFactory.getPropertiesSetInterceptors().stream().filter(i -> i.getInterceptorTiming().equals(PropertiesSetInterceptor.SetInterceptorTiming.BeforeAlfrescoInterceptors)).collect(Collectors.toList()));
             HashMap<QName, Serializable> propsStore = convertToFinalProperties(nodeRef, propsFinal);
+            // check that no interceptor has set a previously null variable
+            propsNull.removeIf(prop -> propsStore.get(prop) != null);
+
             nodeService.setProperties(nodeRef, propsStore);
             runNodePropertiesAfterInterceptors(nodeRef);
             // do in transaction to disable behaviour

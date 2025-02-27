@@ -204,10 +204,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     public BoolQuery.Builder getPermissionsQuery(BoolQuery.Builder audienceQueryBuilder, String field, Set<String> authorities) {
-        audienceQueryBuilder.minimumShouldMatch("1");
+        BoolQuery.Builder bool = QueryBuilders.bool();
+        bool.minimumShouldMatch("1");
         for (String a : authorities) {
-            audienceQueryBuilder.should(should -> should.match(match -> match.field(field).query(a)));
+            bool.should(should -> should.match(match -> match.field(field).query(a)));
         }
+        audienceQueryBuilder.must(bool.build()._toQuery());
         return audienceQueryBuilder;
     }
     public BoolQuery.Builder getCollectionPermissionsQuery(BoolQuery.Builder builder) {

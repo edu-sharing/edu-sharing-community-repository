@@ -32,8 +32,8 @@
   <properties>
 
     <alfresco.pdf-renderer.version>1.2</alfresco.pdf-renderer.version>
-    <alfresco.platform.version>23.4.0</alfresco.platform.version>
-    <alfresco.share.version>23.4.0</alfresco.share.version>
+    <alfresco.platform.version>23.4.1</alfresco.platform.version>
+    <alfresco.share.version>23.4.1</alfresco.share.version>
     <alfresco.sdk.version>4.7.0</alfresco.sdk.version>
 
     <!-- release-1 -->
@@ -48,7 +48,7 @@
     <npm.args.build>run build</npm.args.build>
 
     <postgresql.jdbc.version>42.5.6</postgresql.jdbc.version>
-    <tomcat.version>10.1.17</tomcat.version>
+    <tomcat.version>10.1.35</tomcat.version>
     <jackson.version>2.17.2</jackson.version>
     <mongodb.version>5.1.0</mongodb.version>
     <spring.version>6.1.14</spring.version>
@@ -56,7 +56,7 @@
       do not update to 6.2.2 cause it breaks openidconnect backchannel logout
       https://github.com/spring-projects/spring-security/issues/14553
     -->
-    <spring-security.version>6.2.6</spring-security.version>
+    <spring-security.version>6.3.4</spring-security.version>
 
   </properties>
 
