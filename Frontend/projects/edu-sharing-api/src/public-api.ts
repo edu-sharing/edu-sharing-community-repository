@@ -48,5 +48,6 @@ export {
     SuggestionsV1Service,
     LtiPlatformV13Service,
     RatingV1Service,
+    RenderingV1Service,
     UsageV1Service,
 } from './lib/api/services';
