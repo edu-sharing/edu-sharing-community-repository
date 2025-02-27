@@ -869,7 +869,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         return permissions;
     }
 
-    private getEditoralGroups(permissions: Ace[]) {
+    private async getEditoralGroups(permissions: Ace[]) {
         let list: Group[] = [];
         for (let perm of permissions) {
             for (let group of await this.editorialGroups

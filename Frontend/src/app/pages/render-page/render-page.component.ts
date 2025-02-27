@@ -42,12 +42,11 @@ import {
     TemporaryStorageService,
     TranslationsService,
     UIAnimation,
+    UIConstants,
 } from 'ngx-edu-sharing-ui';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { AppComponent } from '../../app.component';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
+import { AppComponent } from '../../app.component';
 import { debounceTime, filter, first, skipWhile, takeUntil } from 'rxjs/operators';
-import { OptionsHelperService } from 'src/app/core-ui-module/options-helper.service';
 import {
     ConfigurationHelper,
     ConfigurationService,
