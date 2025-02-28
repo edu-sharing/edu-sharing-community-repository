@@ -393,7 +393,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
 
             if (parameters != null && parameters.get(facet) != null && parameters.get(facet).length > 0) {
-                List<MetadataQueryParameter.MetadataQueryFacetItem> facetDetails = query.findParameterByName(facet).getFacet().getItems();
+                List<MetadataQueryParameter.MetadataQueryFacetItem> facetDetails = metadataQueryFacet.map(MetadataQueryParameter.MetadataQueryFacet::getItems).orElse(null);
                 result.put(
                         facet + FACET_SELECTED_POSTFIX,
                         new Aggregation.Builder().filter(
