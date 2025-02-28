@@ -8,9 +8,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Getter
+@Setter
 public class MetadataQueryParameter implements Serializable {
 	// the used syntax, inherited by the group of queries
 	private final String syntax;
@@ -21,7 +24,9 @@ public class MetadataQueryParameter implements Serializable {
 	private boolean exactMatching = true;
 	private String multiplejoin;
 	private int ignorable;
-	private List<MetadataQueryFacet> facets;
+
+
+	private MetadataQueryFacet facet;
 	private String preprocessor;
 	private boolean mandatory = true;
 	//only DSL
@@ -32,21 +37,6 @@ public class MetadataQueryParameter implements Serializable {
 		this.mds = mds;
 	}
 
-	public String getSyntax() {
-		return syntax;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public Map<String, String> getStatements() {
-		return statements;
-	}
 	public String getStatement(String value) {
 		String statement=null;
 		if(statements!=null) {
@@ -90,80 +80,40 @@ public class MetadataQueryParameter implements Serializable {
 		return super.equals(obj);
 	}
 
-	public void setStatements(Map<String, String> statements) {
-		this.statements = statements;
-	}
 
-	public boolean isMultiple() {
-		return multiple;
-	}
-
-	public void setMultiple(boolean multiple) {
-		this.multiple = multiple;
-	}
-
-	public String getMultiplejoin() {
-		return multiplejoin;
-	}
-
-	public void setMultiplejoin(String multiplejoin) {
-		this.multiplejoin = multiplejoin;
-	}
-
-	public int getIgnorable() {
-		return ignorable;
-	}
-
-	public void setIgnorable(int ignorable) {
-		this.ignorable = ignorable;
-	}
-
-	public boolean isExactMatching() {
-		return exactMatching;
-	}
-
-	public void setExactMatching(boolean exactMatching) {
-		this.exactMatching = exactMatching;
-	}
-
-
-    public void setFacets(List<MetadataQueryFacet> facets) {
-        this.facets = facets;
-    }
-
-    public List<MetadataQueryFacet> getFacets() {
-        return facets;
-    }
-
-    public void setPreprocessor(String preprocessor) {
-        this.preprocessor = preprocessor;
-    }
-
-    public String getPreprocessor() {
-        return preprocessor;
-    }
-
-    public void setMandatory(boolean mandatory) {
-        this.mandatory = mandatory;
-    }
-
-    public boolean isMandatory() {
-        return mandatory;
-    }
-
-	public void setAsFilter(boolean asFilter) { this.asFilter = asFilter; }
-
-	public boolean isAsFilter() { return asFilter; }
-
-	public MetadataSet getMds() {
-		return mds;
-	}
 	@Getter
 	@Setter
 	@NoArgsConstructor
 	@AllArgsConstructor
 	public static class MetadataQueryFacet implements Serializable {
-		String value;
-		String nested;
+
+		private SortBy sortBy = SortBy.count;
+		private SortOrder sortOrder = SortOrder.desc;
+		/**
+		 * Limits the number of buckets returned out of the overall terms list.
+		 * This value overrides the request specification with a fixed limit.
+		 */
+		private Integer maxBucketSize = null;
+		private List<MetadataQueryFacetItem> items = new ArrayList<>();
+
+
+		public enum SortBy {
+			count,
+			caption,
+		}
+		public enum SortOrder {
+			asc,
+			desc,
+		}
+	}
+
+
+	@Getter
+	@Setter
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public static class MetadataQueryFacetItem implements Serializable {
+		private String value;
+		private String nested;
 	}
 }

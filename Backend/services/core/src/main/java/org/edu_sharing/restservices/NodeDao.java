@@ -533,21 +533,7 @@ public class NodeDao {
         }
         result.setCount(search.getNodeCount());
         result.setSkip(search.getStartIDX());
-
-
-        if (search.getFacets() != null) {
-            for (Facet facet : search.getFacets()) {
-                if (facet.getValues() != null) {
-                    Collections.sort(facet.getValues(), new Comparator<Value>() {
-                        @Override
-                        public int compare(Value o1, Value o2) {
-                            return o2.getCount().compareTo(o1.getCount());
-                        }
-                    });
-                }
-            }
-            result.setFacets(search.getFacets());
-        }
+        result.setFacets(search.getFacets());
 
         if (search.getSuggests() != null) {
             Collections.sort(search.getSuggests(), new Comparator<NodeSearch.Suggest>() {

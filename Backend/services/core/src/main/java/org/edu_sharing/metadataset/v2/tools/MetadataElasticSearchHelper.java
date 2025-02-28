@@ -21,6 +21,7 @@ import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SharedToMeType;
 
+import javax.swing.text.html.Option;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -287,16 +288,22 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                     .must(must -> must.bool(qbNoFilter.build()))
                     .must(globalConditions);
 
-            List<MetadataQueryParameter.MetadataQueryFacet> fieldName = Collections.singletonList(
-                    new MetadataQueryParameter.MetadataQueryFacet("properties." + facet + ".keyword", null)
+            List<MetadataQueryParameter.MetadataQueryFacetItem> fieldName = Collections.singletonList(
+                    new MetadataQueryParameter.MetadataQueryFacetItem("properties." + facet + ".keyword", null)
             );
+
             MetadataQueryParameter parameter = query.findParameterByName(facet);
-            if (parameter != null && parameter.getFacets() != null) {
-                if (parameter.getFacets().size() != 1) {
+
+            Optional<MetadataQueryParameter.MetadataQueryFacet> metadataQueryFacet = Optional.ofNullable(parameter)
+                    .map(MetadataQueryParameter::getFacet);
+
+            if (metadataQueryFacet.isPresent() && !metadataQueryFacet.get().getItems().isEmpty()) {
+                if (metadataQueryFacet.get().getItems().size() > 1) {
                     logger.warn("Using more than one facet parameter is not recommended when using elasticsearch");
                 }
-                fieldName = parameter.getFacets();
+                fieldName = metadataQueryFacet.get().getItems();
             }
+
             Query facetsSearchFilter = null;
             if (searchToken.getQueryString() != null && !searchToken.getQueryString().trim().isEmpty()) {
 
@@ -306,15 +313,15 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                     isi18nProp = true;
                 }
 
-                if (parameter != null && parameter.getFacets() != null) {
-                    if (parameter.getFacets().size() > 1) {
+                if (metadataQueryFacet.isPresent()) {
+                    if (metadataQueryFacet.get().getItems().size() > 1) {
                         BoolQuery.Builder facetQuery = new BoolQuery.Builder();
-                        for (MetadataQueryParameter.MetadataQueryFacet parameterFacet : parameter.getFacets()) {
-                            facetQuery.should(getFacetFilter(searchToken.getQueryString(), parameterFacet.getValue()));
+                        for (MetadataQueryParameter.MetadataQueryFacetItem parameterFacetItem : metadataQueryFacet.get().getItems()) {
+                            facetQuery.should(getFacetFilter(searchToken.getQueryString(), parameterFacetItem.getValue()));
                         }
                         facetsSearchFilter = Query.of(q -> q.bool(facetQuery.build()));
                     } else {
-                        facetsSearchFilter = getFacetFilter(searchToken.getQueryString(), parameter.getFacets().get(0).getValue());
+                        facetsSearchFilter = getFacetFilter(searchToken.getQueryString(), metadataQueryFacet.get().getItems().get(0).getValue());
                     }
                 } else if (isi18nProp) {
                     facetsSearchFilter = getFacetFilter(searchToken.getQueryString(), "i18n." + currentLocale + "." + facet, "collections.i18n." + currentLocale + "." + facet);
@@ -326,12 +333,11 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
             // https://discuss.elastic.co/t/sub-aggregation-in-new-java-api-client/313447
             Query bqbQuery = null;
             if (fieldName.size() == 1) {
-
                 Aggregation innerAggregation = AggregationBuilders.terms()
-                        .field(fieldName.get(0).getValue())
-                        .size(searchToken.getFacetLimit() * FACET_LIMIT_MULTIPLIER)
-                        .minDocCount(searchToken.getFacetsMinCount())
-                        .build()._toAggregation();
+                            .field(fieldName.get(0).getValue())
+                            .size(metadataQueryFacet.map(MetadataQueryParameter.MetadataQueryFacet::getMaxBucketSize).orElse(searchToken.getFacetLimit() * FACET_LIMIT_MULTIPLIER))
+                            .minDocCount(searchToken.getFacetsMinCount())
+                            .build()._toAggregation();
                 if (fieldName.get(0).getNested() != null) {
                     bqbQuery = fullFilterQuery.build()._toQuery();
                     String nestedName = fieldName.get(0).getNested();
@@ -375,7 +381,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                                         bqbQuery
                                 ).aggregations(facet, AggregationBuilders.multiTerms()
                                         .terms(fieldName.stream().map(f -> MultiTermLookup.of(t -> t.field(f.getValue()).missing(""))).collect(Collectors.toList()))
-                                        .size(searchToken.getFacetLimit() * FACET_LIMIT_MULTIPLIER)
+                                        .size(metadataQueryFacet.map(MetadataQueryParameter.MetadataQueryFacet::getMaxBucketSize).orElse(searchToken.getFacetLimit() * FACET_LIMIT_MULTIPLIER))
                                         .minDocCount((long) searchToken.getFacetsMinCount())
                                         .build()
                                         ._toAggregation()
@@ -385,8 +391,9 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                 );
             }
 
+
             if (parameters != null && parameters.get(facet) != null && parameters.get(facet).length > 0) {
-                List<MetadataQueryParameter.MetadataQueryFacet> facetDetails = query.findParameterByName(facet).getFacets();
+                List<MetadataQueryParameter.MetadataQueryFacetItem> facetDetails = query.findParameterByName(facet).getFacet().getItems();
                 result.put(
                         facet + FACET_SELECTED_POSTFIX,
                         new Aggregation.Builder().filter(

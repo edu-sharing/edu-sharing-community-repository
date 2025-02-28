@@ -972,7 +972,7 @@ public class SearchServiceImpl implements SearchService {
 			searchParameters.setQuery(luceneQuery);
 
 			String facetName = "@" + parameter.getName();
-			List<String> facets = parameter.getFacets() == null ? List.of(facetName) : parameter.getFacets().stream().map(MetadataQueryParameter.MetadataQueryFacet::getValue).collect(Collectors.toList());
+			List<String> facets = parameter.getFacet().getItems() == null ? List.of(facetName) : parameter.getFacet().getItems().stream().map(MetadataQueryParameter.MetadataQueryFacetItem::getValue).collect(Collectors.toList());
 			for(String facet : facets){
 				FieldFacet fieldFacet = new FieldFacet(facet);
 				fieldFacet.setLimit(100);
