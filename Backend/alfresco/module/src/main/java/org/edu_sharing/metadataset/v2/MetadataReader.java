@@ -290,10 +290,7 @@ public class MetadataReader {
                                 statements.put(key == null ? null : key.getTextContent(), value);
                                 break;
                             case "facets":
-                                List<MetadataQueryParameter.MetadataQueryFacet> facetsList = getMetadataQueryFacets(data);
-                                if (!facetsList.isEmpty()) {
-                                    parameter.setFacets(facetsList);
-                                }
+                                parameter.setFacet(getMetadataQueryFacet(data));
                                 break;
                             case "ignorable":
                                 parameter.setIgnorable(Integer.parseInt(value));
@@ -329,23 +326,44 @@ public class MetadataReader {
         return result;
     }
 
-    private static List<MetadataQueryParameter.MetadataQueryFacet> getMetadataQueryFacets(Node data) {
+    private static MetadataQueryParameter.MetadataQueryFacet getMetadataQueryFacet(Node data) {
         NodeList facets = data.getChildNodes();
-        List<MetadataQueryParameter.MetadataQueryFacet> facetsList = new ArrayList<>();
+        Optional<NamedNodeMap> attributes = Optional.of(data)
+                .map(Node::getAttributes);
+
+        MetadataQueryParameter.MetadataQueryFacet.SortBy sortBy = attributes
+                .map(x->x.getNamedItem("sortBy"))
+                .map(Node::getNodeValue)
+                .map(MetadataQueryParameter.MetadataQueryFacet.SortBy::valueOf)
+                .orElse(MetadataQueryParameter.MetadataQueryFacet.SortBy.count);
+
+        MetadataQueryParameter.MetadataQueryFacet.SortOrder sortOrder = attributes
+                .map(x->x.getNamedItem("sortOrder"))
+                .map(Node::getNodeValue)
+                .map(MetadataQueryParameter.MetadataQueryFacet.SortOrder::valueOf)
+                .orElse(MetadataQueryParameter.MetadataQueryFacet.SortOrder.desc);
+
+        Integer maxBucketSize = attributes
+                .map(x->x.getNamedItem("maxBucketSize"))
+                .map(Node::getNodeValue)
+                .map(Integer::valueOf)
+                .orElse(null);
+
+        List<MetadataQueryParameter.MetadataQueryFacetItem> metadataQueryFacetItemList = new ArrayList<>();
         for (int l = 0; l < facets.getLength(); l++) {
             String facetName = facets.item(l).getNodeName();
             String facetValue = facets.item(l).getTextContent();
             if (facetName.equals("facet")) {
-                MetadataQueryParameter.MetadataQueryFacet facet = new MetadataQueryParameter.MetadataQueryFacet();
-                facet.setValue(facetValue);
+                MetadataQueryParameter.MetadataQueryFacetItem metadataQueryFacetItem = new MetadataQueryParameter.MetadataQueryFacetItem();
+                metadataQueryFacetItem.setValue(facetValue);
                 NamedNodeMap att = facets.item(l).getAttributes();
                 if (att != null && att.getNamedItem("nested") != null) {
-                    facet.setNested(att.getNamedItem("nested").getTextContent());
+                    metadataQueryFacetItem.setNested(att.getNamedItem("nested").getTextContent());
                 }
-                facetsList.add(facet);
+                metadataQueryFacetItemList.add(metadataQueryFacetItem);
             }
         }
-        return facetsList;
+        return new MetadataQueryParameter.MetadataQueryFacet(sortBy, sortOrder, maxBucketSize,  metadataQueryFacetItemList);
     }
 
     private static InputStream getFile(String name, Filetype type) throws IOException {

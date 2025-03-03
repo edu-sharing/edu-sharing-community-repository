@@ -1,5 +1,6 @@
 package org.edu_sharing.metadataset.v2.tools;
 
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.AggregationBuilders;
 import co.elastic.clients.elasticsearch._types.aggregations.MultiTermLookup;
@@ -8,6 +9,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.json.JsonData;
 import co.elastic.clients.json.JsonpUtils;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
+import co.elastic.clients.util.NamedValue;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.*;
@@ -19,46 +21,47 @@ import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SharedToMeType;
 
+import javax.swing.text.html.Option;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class MetadataElasticSearchHelper extends MetadataSearchHelper {
     /**
-     *  the given count will be multiplied by this value since facets are filtered for the containing string afterwards and we need some overhead
+     * the given count will be multiplied by this value since facets are filtered for the containing string afterwards and we need some overhead
      */
     public static final int FACET_LIMIT_MULTIPLIER = 5;
     public static final String FACET_SELECTED_POSTFIX = "_selected";
     static Logger logger = Logger.getLogger(MetadataElasticSearchHelper.class);
     private static MetadataQueryPreprocessor preprocessor = new MetadataQueryPreprocessor(MetadataReader.QUERY_SYNTAX_DSL);
 
-    public static BoolQuery.Builder getElasticSearchQuery(SearchToken searchToken, MetadataQueries queries,MetadataQuery query, Map<String,String[]> parameters) throws IllegalArgumentException {
-        return getElasticSearchQuery(searchToken, queries,query,parameters,true);
+    public static BoolQuery.Builder getElasticSearchQuery(SearchToken searchToken, MetadataQueries queries, MetadataQuery query, Map<String, String[]> parameters) throws IllegalArgumentException {
+        return getElasticSearchQuery(searchToken, queries, query, parameters, true);
     }
 
-    public static BoolQuery.Builder getElasticSearchQuery(SearchToken searchToken, MetadataQueries queries,MetadataQuery query, Map<String,String[]> parameters, Boolean asFilter) throws IllegalArgumentException {
+    public static BoolQuery.Builder getElasticSearchQuery(SearchToken searchToken, MetadataQueries queries, MetadataQuery query, Map<String, String[]> parameters, Boolean asFilter) throws IllegalArgumentException {
 
 
         BoolQuery.Builder result = new BoolQuery.Builder();
-        if(asFilter == null || (asFilter == query.getBasequeryAsFilter())) {
+        if (asFilter == null || (asFilter == query.getBasequeryAsFilter())) {
             String baseQuery = replaceCommonQueryVariables(query.getPrimaryBasequery());
             String baseQueryConditional = replaceCommonQueryVariables(query.findBasequery(parameters == null ? null : parameters.keySet()));
 
-            if(Objects.equals(baseQuery,baseQueryConditional)) {
-                if(baseQuery != null) {
+            if (Objects.equals(baseQuery, baseQueryConditional)) {
+                if (baseQuery != null) {
                     result.must(must -> must.wrapper(new ReadableWrapperQueryBuilder(baseQuery).build()));
                 }
             } else {
-                result.must(must->must.wrapper(new ReadableWrapperQueryBuilder(baseQuery).build()))
-                        .must(must->must.wrapper(new ReadableWrapperQueryBuilder(baseQueryConditional).build()));
+                result.must(must -> must.wrapper(new ReadableWrapperQueryBuilder(baseQuery).build()))
+                        .must(must -> must.wrapper(new ReadableWrapperQueryBuilder(baseQueryConditional).build()));
             }
         }
 
-        if(parameters != null && parameters.isEmpty()) {
-            if(query.isApplyBasequery()){
+        if (parameters != null && parameters.isEmpty()) {
+            if (query.isApplyBasequery()) {
                 String baseQueryParam = queries.findBasequery(parameters.keySet());
-                if(!StringUtils.isEmpty(baseQueryParam)) {
-                    result.must(must->must.wrapper(new ReadableWrapperQueryBuilder(baseQueryParam).build()));
+                if (!StringUtils.isEmpty(baseQueryParam)) {
+                    result.must(must -> must.wrapper(new ReadableWrapperQueryBuilder(baseQueryParam).build()));
                 }
                 applyCondition(queries, result);
             }
@@ -79,69 +82,69 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                 continue;
             }
 
-            if(asFilter != null && parameter.isAsFilter() != asFilter){
+            if (asFilter != null && parameter.isAsFilter() != asFilter) {
                 continue;
             }
 
             Query queryBuilderParam = null;
-            if(query.isApplyBasequery()){
+            if (query.isApplyBasequery()) {
                 String baseQueryParam = queries.findBasequery(parameters.keySet());
-                if(!StringUtils.isEmpty(baseQueryParam)) {
-                    result.must(must->must.wrapper(new ReadableWrapperQueryBuilder(baseQueryParam).build()));
+                if (!StringUtils.isEmpty(baseQueryParam)) {
+                    result.must(must -> must.wrapper(new ReadableWrapperQueryBuilder(baseQueryParam).build()));
                 }
                 applyCondition(queries, result);
             }
 
             applyCondition(query, result);
             BoolQuery sharedFilesSearch;
-            if(query.getId().equals("workspace") && parameter.getName().equals("parent") && parameter.getPreprocessor().equals("node_path")) {
+            if (query.getId().equals("workspace") && parameter.getName().equals("parent") && parameter.getPreprocessor().equals("node_path")) {
                 sharedFilesSearch = handleSharedFilesSearch(queries, values);
             } else {
                 sharedFilesSearch = null;
             }
-            if(sharedFilesSearch != null) {
-                queryBuilderParam = Query.of(q-> q.bool(sharedFilesSearch));
+            if (sharedFilesSearch != null) {
+                queryBuilderParam = Query.of(q -> q.bool(sharedFilesSearch));
             } else if (parameter.isMultiple()) {
 
                 String multipleJoin = parameter.getMultiplejoin();
                 BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
                 if (multipleJoin.equals("AND")) {
-                    for(String value : values){
-                        boolQueryBuilder.must(must->must.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatmentForValue(parameter,value)), parameter).build()));
+                    for (String value : values) {
+                        boolQueryBuilder.must(must -> must.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatmentForValue(parameter, value)), parameter).build()));
                     }
                 } else {
-                    for(String value : values){
-                        boolQueryBuilder.should(should->should.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatmentForValue(parameter,value)), parameter).build()));
+                    for (String value : values) {
+                        boolQueryBuilder.should(should -> should.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatmentForValue(parameter, value)), parameter).build()));
                     }
                 }
 
-                queryBuilderParam = Query.of(q->q.bool(boolQueryBuilder.build()));
-            }else{
-                if(values.length>1){
-                    throw new InvalidParameterException("Trying to search for multiple values of a non-multivalue field "+parameter.getName());
+                queryBuilderParam = Query.of(q -> q.bool(boolQueryBuilder.build()));
+            } else {
+                if (values.length > 1) {
+                    throw new InvalidParameterException("Trying to search for multiple values of a non-multivalue field " + parameter.getName());
                 }
 
-                queryBuilderParam = Query.of(q->q.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatmentForValue(parameter,values[0])), parameter).build()));
+                queryBuilderParam = Query.of(q -> q.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatmentForValue(parameter, values[0])), parameter).build()));
             }
 
-            if(query.getJoin().equals("AND")){
+            if (query.getJoin().equals("AND")) {
                 result.must(queryBuilderParam);
-            }else{
+            } else {
                 result.should(queryBuilderParam);
             }
 
         }
 
-        if(asFilter
+        if (asFilter
                 && searchToken != null
                 && searchToken.getSearchCriterias() != null
                 && searchToken.getSearchCriterias().getContentkind() != null
-                && searchToken.getSearchCriterias().getContentkind().length > 0){
+                && searchToken.getSearchCriterias().getContentkind().length > 0) {
 
-            result.filter( filter->filter.bool(criteriasBool->{
+            result.filter(filter -> filter.bool(criteriasBool -> {
                 Arrays.stream(searchToken.getSearchCriterias().getContentkind())
-                        .forEach((content) -> criteriasBool.should(should->should
-                                .match(match->match
+                        .forEach((content) -> criteriasBool.should(should -> should
+                                .match(match -> match
                                         .field("type")
                                         .query(CCConstants.getValidLocalName(content)))));
                 return criteriasBool;
@@ -152,19 +155,19 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
     }
 
     private static BoolQuery handleSharedFilesSearch(MetadataQueries queries, String[] values) {
-        if(values[0].startsWith("-to_me_shared_files")){
+        if (values[0].startsWith("-to_me_shared_files")) {
             try {
-                if("-to_me_shared_files_personal-".equals(values[0]) ){
+                if ("-to_me_shared_files_personal-".equals(values[0])) {
                     return SearchServiceElastic.getFilesSharedToMeQuery(queries, SharedToMeType.Private);
-                }else if("-to_me_shared_files-".equals(values[0])){
+                } else if ("-to_me_shared_files-".equals(values[0])) {
                     return SearchServiceElastic.getFilesSharedToMeQuery(queries, SharedToMeType.All);
-                }else{
-                    logger.error("unknown SharedToMeType:"+values[0]);
+                } else {
+                    logger.error("unknown SharedToMeType:" + values[0]);
                 }
             } catch (Exception e) {
-                logger.error(e.getMessage(),e);
+                logger.error(e.getMessage(), e);
             }
-        } else if(values[0].startsWith("-my_shared_files")) {
+        } else if (values[0].startsWith("-my_shared_files")) {
             try {
                 return SearchServiceElastic.getFilesSharedByMeQuery(queries);
             } catch (Exception e) {
@@ -175,23 +178,24 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
     }
 
     private static BoolQuery.Builder applyCondition(MetadataQueryBase query, BoolQuery.Builder result) {
-        for(MetadataQueryCondition condition : query.getConditions()){
+        for (MetadataQueryCondition condition : query.getConditions()) {
             boolean conditionState = MetadataHelper.checkConditionTrue(condition.getCondition());
-            if(conditionState && condition.getQueryTrue()!=null) {
+            if (conditionState && condition.getQueryTrue() != null) {
                 String conditionString = condition.getQueryTrue();
                 conditionString = replaceCommonQueryVariables(conditionString);
                 final String condString = conditionString;
-                result.must(must->must.wrapper(new ReadableWrapperQueryBuilder(condString).build()));
+                result.must(must -> must.wrapper(new ReadableWrapperQueryBuilder(condString).build()));
             }
-            if(!conditionState && condition.getQueryFalse()!=null) {
+            if (!conditionState && condition.getQueryFalse() != null) {
                 String conditionString = condition.getQueryFalse();
                 conditionString = replaceCommonQueryVariables(conditionString);
                 final String condString = conditionString;
-                result.must(must->must.wrapper(new ReadableWrapperQueryBuilder(condString).build()));
+                result.must(must -> must.wrapper(new ReadableWrapperQueryBuilder(condString).build()));
             }
         }
         return result;
     }
+
     private static String getStatmentForValue(MetadataQueryParameter parameter, String value) {
         if (value == null && parameter.isMandatory()) {
             throw new java.lang.IllegalArgumentException("null value for mandatory parameter " + parameter.getName() + " given, null values are not allowed if mandatory is set to true");
@@ -208,14 +212,14 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
         if (value.startsWith("\"") && value.endsWith("\"") || parameter.isExactMatching()) {
             // clear value's '"'
-            if(value.startsWith("\"") && value.endsWith("\"")) {
+            if (value.startsWith("\"") && value.endsWith("\"")) {
                 value = value.substring(1, value.length() - 1);
             }
             //String statement = parameter.getStatement(value).replace("${value}", QueryParser.escape(value));
             String statement = QueryUtils.replacerFromSyntax(parameter.getSyntax()).replaceString(
                     parameter.getStatement(value),
                     "${value}", value);
-            statement = QueryUtils.replacerFromSyntax(parameter.getSyntax(),true).replaceString(
+            statement = QueryUtils.replacerFromSyntax(parameter.getSyntax(), true).replaceString(
                     statement,
                     "${valueRaw}", value);
             return statement;
@@ -224,36 +228,38 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         String[] words = value.split(" ");
         final BoolQuery.Builder boolQuery = new BoolQuery.Builder();
         for (String word : words) {
-            if(word.length() == 1 && !Character.isLetterOrDigit(word.charAt(0))) {
+            if (word.length() == 1 && !Character.isLetterOrDigit(word.charAt(0))) {
                 continue;
             }
             //String statement = parameter.getStatement(value).replace("${value}", QueryParser.escape(word));
             String statement = QueryUtils.replacerFromSyntax(parameter.getSyntax()).replaceString(
                     parameter.getStatement(word),
                     "${value}", word);
-            statement = QueryUtils.replacerFromSyntax(parameter.getSyntax(),true).replaceString(
+            statement = QueryUtils.replacerFromSyntax(parameter.getSyntax(), true).replaceString(
                     statement,
                     "${valueRaw}", word);
 
             final String finStatement = statement;
-            boolQuery.must(must->must.wrapper(new ReadableWrapperQueryBuilder(finStatement).build()));
+            boolQuery.must(must -> must.wrapper(new ReadableWrapperQueryBuilder(finStatement).build()));
 
         }
-        return JsonpUtils.toJsonString(Query.of(q->q.bool(boolQuery.build())), new JacksonJsonpMapper());
+        return JsonpUtils.toJsonString(Query.of(q -> q.bool(boolQuery.build())), new JacksonJsonpMapper());
     }
 
-    public static Set<MetadataQueryParameter> getExcludeOwnFacets(MetadataQuery query, Map<String,String[]> parameters, List<String> facets){
+    public static Set<MetadataQueryParameter> getExcludeOwnFacets(MetadataQuery query, Map<String, String[]> parameters, List<String> facets) {
         Set<MetadataQueryParameter> excludeOwn = new HashSet<>();
         for (String name : facets) {
             MetadataQueryParameter parameter = query.findParameterByName(name);
-            if(parameter == null) continue;
-            if((parameter.getMultiplejoin() != null && parameter.getMultiplejoin().equals("OR"))) excludeOwn.add(parameter);
+            if (parameter == null) continue;
+            if ((parameter.getMultiplejoin() != null && parameter.getMultiplejoin().equals("OR")))
+                excludeOwn.add(parameter);
         }
         return excludeOwn;
     }
 
     /**
      * returns FilterAggregations to be used in a separate call
+     *
      * @param mds
      * @param query
      * @param parameters
@@ -264,7 +270,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
      * @return
      * @throws IllegalArgumentException
      */
-    public static Map<String, Aggregation> getAggregations(MetadataSet mds, MetadataQuery query, Map<String,String[]> parameters, List<String> facets, Set<MetadataQueryParameter> excludeOwn, Query globalConditions, SearchToken searchToken) throws IllegalArgumentException {
+    public static Map<String, Aggregation> getAggregations(MetadataSet mds, MetadataQuery query, Map<String, String[]> parameters, List<String> facets, Set<MetadataQueryParameter> excludeOwn, Query globalConditions, SearchToken searchToken) throws IllegalArgumentException {
         MetadataQueries queries = mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL);
         Map<String, Aggregation> result = new HashMap<>();
         String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
@@ -277,77 +283,83 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
             BoolQuery.Builder qbFilter = getElasticSearchQuery(searchToken, queries, query, tmp, true);
             BoolQuery.Builder qbNoFilter = getElasticSearchQuery(searchToken, queries, query, tmp, false);
-            BoolQuery.Builder  fullFilterQuery = new BoolQuery.Builder()
-                .must(must->must.bool(qbFilter.build()))
-                    .must(must->must.bool(qbNoFilter.build()))
+            BoolQuery.Builder fullFilterQuery = new BoolQuery.Builder()
+                    .must(must -> must.bool(qbFilter.build()))
+                    .must(must -> must.bool(qbNoFilter.build()))
                     .must(globalConditions);
 
-            List<MetadataQueryParameter.MetadataQueryFacet> fieldName = Collections.singletonList(
-                    new MetadataQueryParameter.MetadataQueryFacet("properties." + facet+".keyword", null)
+            List<MetadataQueryParameter.MetadataQueryFacetItem> fieldName = Collections.singletonList(
+                    new MetadataQueryParameter.MetadataQueryFacetItem("properties." + facet + ".keyword", null)
             );
+
             MetadataQueryParameter parameter = query.findParameterByName(facet);
-            if(parameter != null && parameter.getFacets() != null) {
-                if(parameter.getFacets().size() != 1) {
+
+            Optional<MetadataQueryParameter.MetadataQueryFacet> metadataQueryFacet = Optional.ofNullable(parameter)
+                    .map(MetadataQueryParameter::getFacet);
+
+            if (metadataQueryFacet.isPresent() && !metadataQueryFacet.get().getItems().isEmpty()) {
+                if (metadataQueryFacet.get().getItems().size() > 1) {
                     logger.warn("Using more than one facet parameter is not recommended when using elasticsearch");
                 }
-                fieldName = parameter.getFacets();
+                fieldName = metadataQueryFacet.get().getItems();
             }
+
             Query facetsSearchFilter = null;
-            if(searchToken.getQueryString() != null && !searchToken.getQueryString().trim().isEmpty()){
+            if (searchToken.getQueryString() != null && !searchToken.getQueryString().trim().isEmpty()) {
 
                 boolean isi18nProp = false;
                 MetadataWidget mdw = mds.findWidget(facet);
-                if(mdw != null && new MdsWidget(mdw).isHasValues()){
+                if (mdw != null && new MdsWidget(mdw).isHasValues()) {
                     isi18nProp = true;
                 }
 
-                if(parameter != null && parameter.getFacets() != null) {
-                    if(parameter.getFacets().size() > 1) {
+                if (metadataQueryFacet.isPresent()) {
+                    if (metadataQueryFacet.get().getItems().size() > 1) {
                         BoolQuery.Builder facetQuery = new BoolQuery.Builder();
-                        for (MetadataQueryParameter.MetadataQueryFacet parameterFacet : parameter.getFacets()) {
-                            facetQuery.should(getFacetFilter(searchToken.getQueryString(), parameterFacet.getValue()));
+                        for (MetadataQueryParameter.MetadataQueryFacetItem parameterFacetItem : metadataQueryFacet.get().getItems()) {
+                            facetQuery.should(getFacetFilter(searchToken.getQueryString(), parameterFacetItem.getValue()));
                         }
-                        facetsSearchFilter = Query.of(q->q.bool(facetQuery.build()));
+                        facetsSearchFilter = Query.of(q -> q.bool(facetQuery.build()));
                     } else {
-                        facetsSearchFilter = getFacetFilter(searchToken.getQueryString(),parameter.getFacets().get(0).getValue());
+                        facetsSearchFilter = getFacetFilter(searchToken.getQueryString(), metadataQueryFacet.get().getItems().get(0).getValue());
                     }
-                } else if(isi18nProp){
-                    facetsSearchFilter = getFacetFilter(searchToken.getQueryString(),"i18n."+currentLocale+"."+facet, "collections.i18n."+currentLocale+"."+facet);
-                }else{
-                    facetsSearchFilter = getFacetFilter(searchToken.getQueryString(),"properties."+facet, "properties."+facet+".keyword");
+                } else if (isi18nProp) {
+                    facetsSearchFilter = getFacetFilter(searchToken.getQueryString(), "i18n." + currentLocale + "." + facet, "collections.i18n." + currentLocale + "." + facet);
+                } else {
+                    facetsSearchFilter = getFacetFilter(searchToken.getQueryString(), "properties." + facet, "properties." + facet + ".keyword");
                 }
             }
 
             // https://discuss.elastic.co/t/sub-aggregation-in-new-java-api-client/313447
             Query bqbQuery = null;
-            if(fieldName.size() == 1) {
+            if (fieldName.size() == 1) {
                 Aggregation innerAggregation = AggregationBuilders.terms()
-                        .field(fieldName.get(0).getValue())
-                        .size(searchToken.getFacetLimit() * FACET_LIMIT_MULTIPLIER)
-                        .minDocCount(searchToken.getFacetsMinCount())
-                        .build()._toAggregation();
-                if(fieldName.get(0).getNested() != null) {
+                            .field(fieldName.get(0).getValue())
+                            .size(metadataQueryFacet.map(MetadataQueryParameter.MetadataQueryFacet::getMaxBucketSize).orElse(searchToken.getFacetLimit() * FACET_LIMIT_MULTIPLIER))
+                            .minDocCount(searchToken.getFacetsMinCount())
+                            .build()._toAggregation();
+                if (fieldName.get(0).getNested() != null) {
                     bqbQuery = fullFilterQuery.build()._toQuery();
                     String nestedName = fieldName.get(0).getNested();
                     Query finalFacetsSearchFilter = facetsSearchFilter;
                     Query finalBqbQuery = bqbQuery;
-                    result.put(facet,new Aggregation.Builder().filter(
-                            f -> f.bool(b -> b.must(finalBqbQuery).must(
-                                    m -> m.nested(n -> {
-                                        n.path(nestedName);
-                                        if(finalFacetsSearchFilter != null) {
-                                            n.query(finalFacetsSearchFilter);
-                                        }
-                                        return n;
-                                    }))
-                            ))
+                    result.put(facet, new Aggregation.Builder().filter(
+                                    f -> f.bool(b -> b.must(finalBqbQuery).must(
+                                            m -> m.nested(n -> {
+                                                n.path(nestedName);
+                                                if (finalFacetsSearchFilter != null) {
+                                                    n.query(finalFacetsSearchFilter);
+                                                }
+                                                return n;
+                                            }))
+                                    ))
                             .aggregations(facet, new Aggregation.Builder().nested(n -> n.path(nestedName)).aggregations(
-                                    facet + "_nested", innerAggregation
+                                            facet + "_nested", innerAggregation
                                     ).build()
                             ).build()
                     );
                 } else {
-                    if(facetsSearchFilter != null) {
+                    if (facetsSearchFilter != null) {
                         fullFilterQuery.must(facetsSearchFilter);
                     }
                     bqbQuery = fullFilterQuery.build()._toQuery();
@@ -359,7 +371,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                     );
                 }
             } else {
-                if(facetsSearchFilter != null) {
+                if (facetsSearchFilter != null) {
                     fullFilterQuery.must(facetsSearchFilter);
                 }
                 bqbQuery = fullFilterQuery.build()._toQuery();
@@ -368,8 +380,8 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                         new Aggregation.Builder().filter(
                                         bqbQuery
                                 ).aggregations(facet, AggregationBuilders.multiTerms()
-                                        .terms(fieldName.stream().map(f -> MultiTermLookup.of(t->t.field(f.getValue()).missing(""))).collect(Collectors.toList()))
-                                        .size(searchToken.getFacetLimit() * FACET_LIMIT_MULTIPLIER)
+                                        .terms(fieldName.stream().map(f -> MultiTermLookup.of(t -> t.field(f.getValue()).missing(""))).collect(Collectors.toList()))
+                                        .size(metadataQueryFacet.map(MetadataQueryParameter.MetadataQueryFacet::getMaxBucketSize).orElse(searchToken.getFacetLimit() * FACET_LIMIT_MULTIPLIER))
                                         .minDocCount((long) searchToken.getFacetsMinCount())
                                         .build()
                                         ._toAggregation()
@@ -379,18 +391,19 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                 );
             }
 
-            if(parameters != null && parameters.get(facet) != null && parameters.get(facet).length > 0) {
-                List<MetadataQueryParameter.MetadataQueryFacet> facetDetails = query.findParameterByName(facet).getFacets();
+
+            if (parameters != null && parameters.get(facet) != null && parameters.get(facet).length > 0) {
+                List<MetadataQueryParameter.MetadataQueryFacetItem> facetDetails = metadataQueryFacet.map(MetadataQueryParameter.MetadataQueryFacet::getItems).orElse(null);
                 result.put(
                         facet + FACET_SELECTED_POSTFIX,
                         new Aggregation.Builder().filter(
                                 bqbQuery
-                        ).aggregations(facet, agg->agg
-                                .terms(term->term
-                                .field(facetDetails == null || facetDetails.isEmpty() ? "properties." + facet + ".keyword" : facetDetails.get(0).getValue())
-                                .size(parameters.get(facet).length)
-                                .minDocCount(1)
-                                .include(ti->ti.terms(Arrays.asList(parameters.get(facet)))))
+                        ).aggregations(facet, agg -> agg
+                                .terms(term -> term
+                                        .field(facetDetails == null || facetDetails.isEmpty() ? "properties." + facet + ".keyword" : facetDetails.get(0).getValue())
+                                        .size(parameters.get(facet).length)
+                                        .minDocCount(1)
+                                        .include(ti -> ti.terms(Arrays.asList(parameters.get(facet)))))
                         ).build()
                 );
 
@@ -402,7 +415,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
     }
 
     private static Query getFacetFilter(String queryString, String... fieldName) throws IllegalArgumentException {
-        return Query.of(q->q.bool(bool-> {
+        return Query.of(q -> q.bool(bool -> {
             bool.minimumShouldMatch("1");
             Arrays.stream(fieldName).forEach(
                     field -> {

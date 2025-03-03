@@ -79,6 +79,7 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { ShareDialogResult } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog-data';
 import { ExtendedAcl } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog.component';
 import { OptionsHelperService } from '../../../services/options-helper.service';
+import { filter, first } from 'rxjs/operators';
 
 type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITORIAL_GROUPS';
 
@@ -692,8 +693,8 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
                 this.mds?.loadMds(true);
             });
             if (this.newCollectionStep == this.STEP_EDITORIAL_GROUPS) {
-                setTimeout(() => {
-                    this.editorialGroupsSelected = this.getEditoralGroups(
+                setTimeout(async () => {
+                    this.editorialGroupsSelected = await this.getEditoralGroups(
                         this.originalPermissions?.permissions || [],
                     );
                     this.organizationsRef.getSelection().select(...this.editorialGroupsSelected);
@@ -868,10 +869,16 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         return permissions;
     }
 
-    private getEditoralGroups(permissions: Ace[]) {
+    private async getEditoralGroups(permissions: Ace[]) {
         let list: Group[] = [];
         for (let perm of permissions) {
-            for (let group of this.editorialGroups.getData()) {
+            for (let group of await this.editorialGroups
+                .connect()
+                .pipe(
+                    filter((g) => g?.length > 0),
+                    first(),
+                )
+                .toPromise()) {
                 if (group.authorityName == perm.authority.authorityName) {
                     list.push(group);
                 }
