@@ -9,8 +9,11 @@ import { RenderDataRequestWithToken } from 'ngx-rendering-service-api';
     styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnChanges {
-    @Input() node_id: string;
-    @Input() version: string;
+    @Input() encodedNode: string;
+    @Input() signature: string;
+    @Input() jwt: string;
+    @Input() renderUrl: string;
+    @Input() encodedUser: string;
 
     node = signal<Node>(null);
     request = signal<RenderDataRequestWithToken>(null);
@@ -19,9 +22,12 @@ export class AppComponent implements OnChanges {
 
     async ngOnChanges(changes: SimpleChanges) {
         if (changes.node_id) {
-            const data = await this.renderHelperService.getRenderData(
-                changes.node_id.currentValue,
-                changes.version?.currentValue,
+            const data = await this.renderHelperService.getRenderDataForLms(
+                this.encodedNode,
+                this.signature,
+                this.jwt,
+                this.renderUrl,
+                this.encodedUser,
             );
             this.node.set(data.node);
             this.request.set(data.request);

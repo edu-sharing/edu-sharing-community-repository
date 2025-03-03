@@ -95,4 +95,35 @@ export class RenderHelperService {
             request,
         };
     }
+
+    async getRenderDataForLms(
+        encodedNode: string,
+        signature: string,
+        jwt: string,
+        renderUrl: string,
+        encodedUser: string,
+    ): Promise<CombinedRenderData> {
+        this.injector.get(RSApiConfiguration).rootUrl = renderUrl;
+        const decodedNodeString = atob(encodedNode);
+        const node = JSON.parse(decodedNodeString) as Node;
+        const userData = JSON.parse(atob(encodedUser));
+        const request = {
+            nodeId: node.ref.id,
+            repoId: node.ref.repo,
+            securedNode: encodedNode,
+            signature: signature,
+            token: jwt,
+            userData: {
+                authorityName: userData.authorityName ?? '',
+                firstName: userData.firstName ?? '',
+                surName: userData.lastName ?? '',
+                userEMail: userData.email ?? '',
+            },
+        } as RenderDataRequestWithToken;
+
+        return {
+            node,
+            request,
+        };
+    }
 }
