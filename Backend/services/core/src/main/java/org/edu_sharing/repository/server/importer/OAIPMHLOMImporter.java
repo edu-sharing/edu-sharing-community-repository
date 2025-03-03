@@ -594,7 +594,9 @@ public class OAIPMHLOMImporter implements Importer{
 	public String startImport(byte[] xml) throws Throwable {
 		Document xmlRecord = stringToXML(new String(xml));
 		Node main = xmlRecord.getFirstChild();
-		if(!main.getNodeName().equals("metadata")){
+		if(xmlRecord.getFirstChild().getNodeName().equals("OAI-PMH")){
+			return handleRecordInternal(null,getRecordNodeFromDoc(xmlRecord));
+		}else if(!main.getNodeName().equals("metadata")){
 			Document newDoc = factory.newDocumentBuilder().newDocument();
 			Node metadata = newDoc.appendChild(newDoc.createElement("metadata"));
 			metadata.appendChild(newDoc.adoptNode(main));
