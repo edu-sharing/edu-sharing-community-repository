@@ -148,6 +148,9 @@ until PGPASSWORD="${repository_database_pass}" \
   sleep 3
 done
 
+echo "executing updates ..."
+./bin/updates/updates.sh
+
 # jodconverter
 [[ -n "${repository_transform_host}" && -n "${repository_transform_port}" ]] && {
   until wait-for-it "${repository_transform_host}:${repository_transform_port}" -t 3; do sleep 1; done
@@ -247,6 +250,14 @@ xmlstarlet ed -L \
     -i '$valve' -t attr -n "pattern" -v "%h %l %u %t &quot;%r&quot; %s %b" \
     ${catSConf}
 }
+
+if ! xmlstarlet sel -t -v '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[@className="org.edu_sharing.catalina.valves.SemicolonPathTraversalValve"]/@className' "${catSConf}" | grep -q .; then
+    xmlstarlet ed -L \
+        -s '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t elem -n 'Valve' \
+        -i '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[last()]' -t attr -n "className" -v "org.edu_sharing.catalina.valves.SemicolonPathTraversalValve" \
+        "${catSConf}"
+fi
+
 
 xmlstarlet ed -L \
   -d '/Server/Service[@name="Catalina"]/Connector' \
