@@ -382,6 +382,7 @@ public class ToolPermissionBaseService {
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_MAP_LINK);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_SIGNUP_GROUP);
+        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_BAPI);
 
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS);
 

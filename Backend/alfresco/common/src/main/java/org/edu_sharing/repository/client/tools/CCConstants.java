@@ -967,6 +967,8 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_TOOLPERMISSION_SIGNUP_GROUP = "TOOLPERMISSION_SIGNUP_GROUP";
 
+	public final static String CCM_VALUE_TOOLPERMISSION_BAPI = "TOOLPERMISSION_BAPI";
+
 	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_TEACHER = "teacher";
 
 	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_STUDENT = "student";
