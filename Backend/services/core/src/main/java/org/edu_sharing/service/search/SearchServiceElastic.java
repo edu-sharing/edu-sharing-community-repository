@@ -448,7 +448,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 if (lhsMetadataKey == null || rhsMetadataKey == null) {
                     return 0;
                 }
-                return lhsMetadataKey.getCaption().compareTo(rhsMetadataKey.getCaption()) * order;
+                return lhsMetadataKey.getCaption().compareToIgnoreCase(rhsMetadataKey.getCaption()) * order;
             });
         } else if(metadataQueryFacet.getSortOrder() == MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc) {
             values.sort(Comparator.comparing(NodeSearch.Facet.Value::getCount));
