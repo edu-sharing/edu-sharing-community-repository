@@ -440,7 +440,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
 
         if (metadataQueryFacet.getSortBy() == MetadataQueryParameter.MetadataQueryFacet.SortBy.caption) {
-            int order = metadataQueryFacet.getSortOrder() == MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc ? -1 : 1;
+            int order = metadataQueryFacet.getSortOrder() == MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc ? 1 : -1;
 
             values.sort((lhs, rhs) -> {
                 MetadataKey lhsMetadataKey = valuesAsMap.get(lhs.getValue());
