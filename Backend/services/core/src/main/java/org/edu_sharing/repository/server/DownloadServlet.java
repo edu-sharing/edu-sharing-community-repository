@@ -93,7 +93,13 @@ public class DownloadServlet extends HttpServlet {
 					!NodeServiceHelper.downloadAllowed(nodeId) &&
 					!(
 							ContextManagementFilter.accessTool.get() != null &&
-									ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getType())
+									(
+											ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getType()) ||
+											(
+													ApplicationInfo.TYPE_LMS.equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getType()) &&
+													"curriculum".equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getSubtype())
+											)
+									)
 					)
 			) {
 				logger.info("Download forbidden for node " + nodeId);

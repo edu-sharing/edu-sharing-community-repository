@@ -440,7 +440,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
 
         if (metadataQueryFacet.getSortBy() == MetadataQueryParameter.MetadataQueryFacet.SortBy.caption) {
-            int order = metadataQueryFacet.getSortOrder() == MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc ? -1 : 1;
+            int order = metadataQueryFacet.getSortOrder() == MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc ? 1 : -1;
 
             values.sort((lhs, rhs) -> {
                 MetadataKey lhsMetadataKey = valuesAsMap.get(lhs.getValue());
@@ -448,7 +448,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 if (lhsMetadataKey == null || rhsMetadataKey == null) {
                     return 0;
                 }
-                return lhsMetadataKey.getCaption().compareTo(rhsMetadataKey.getCaption()) * order;
+                return lhsMetadataKey.getCaption().compareToIgnoreCase(rhsMetadataKey.getCaption()) * order;
             });
         } else if(metadataQueryFacet.getSortOrder() == MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc) {
             values.sort(Comparator.comparing(NodeSearch.Facet.Value::getCount));
