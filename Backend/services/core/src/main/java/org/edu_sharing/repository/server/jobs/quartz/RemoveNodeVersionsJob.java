@@ -32,6 +32,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+/**
+ * when a version history entry is removed the node is deleted in alf_node, but a new node with type_qname_id targeting
+ * to alf_qname local_nome "deleted" is created. for this node there is one entry in alf_node_properties which is
+ * keeping the original dbid from the version entry. this job helps reducing entries in alf_node properties.
+ */
 @JobDescription(description = "Removes versions of node which are not referenced")
 public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
 
