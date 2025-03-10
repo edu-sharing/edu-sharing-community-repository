@@ -230,7 +230,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 .build();
 
 
-        return getPermissionsQuery(builder, "permissions.read")
+        return new BoolQuery.Builder()
+                .minimumShouldMatch("1")
+                .should(getPermissionsQuery(builder, "permissions.read").build()._toQuery())
                 .should(q -> q.match(m -> m.field("owner").query(user)))
                 .should(audienceQueryBuilderCollections -> audienceQueryBuilderCollections
                         .bool(b -> b
