@@ -236,8 +236,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
         // @TODO: FIX after DESP-840
         CollectionPermissionQueries collectionPermissionQueries = getCollectionPermissionQueries(user);
 
-
-        return getPermissionsQuery(builder, "permissions.read")
+        return new BoolQuery.Builder()
+                .minimumShouldMatch("1")
+                .should(getPermissionsQuery(builder, "permissions.read").build()._toQuery())
                 .should(q -> q.match(m -> m.field("owner").query(user)))
                 .should(audienceQueryBuilderCollections -> audienceQueryBuilderCollections
                         .bool(b -> b
@@ -260,7 +261,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                                 .should(q -> q.nested(nested -> nested.path("collections").query(nq -> nq.bool(collectionPermissionQueries.proposalPermissions))))
                                         )))
                                 )
-                        ));
+                        )
+        );
     }
 
     @NotNull
