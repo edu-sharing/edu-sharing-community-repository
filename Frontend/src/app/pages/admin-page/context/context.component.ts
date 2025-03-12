@@ -66,7 +66,7 @@ export class AdminContextComponent implements OnInit {
             console.log(api);
             this.spec = api;
         });
-        this.reload();
+        void this.reload();
     }
 
     async createContext() {

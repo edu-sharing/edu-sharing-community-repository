@@ -1038,7 +1038,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
             );
             imageOptions[2].group = DefaultGroups.Delete;
         }
-        this.optionsHelperDataService.initComponents(this.imageActionbar);
+        void this.optionsHelperDataService.initComponents(this.imageActionbar);
         this.optionsHelperDataService.setData({
             scope: Scope.CollectionsCollection,
             customOptions: {

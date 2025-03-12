@@ -839,7 +839,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         }
         setTimeout(() => {
             this.setOptionsCollection();
-            this.listReferences?.initOptionsGenerator({
+            void this.listReferences?.initOptionsGenerator({
                 actionbar: this.actionbarReferences,
                 parent: this.collection,
             });
@@ -885,8 +885,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             scope: Scope.CollectionsCollection,
             activeObjects: [this.collection],
         });
-        this.optionsService.initComponents(this.getInfobar()?.actionbar, this.listReferences);
-        this.optionsService.refreshComponents();
+        void this.optionsService.initComponents(this.getInfobar()?.actionbar, this.listReferences);
+        void this.optionsService.refreshComponents();
     }
 
     async toggleCollectionsOrder() {

@@ -151,7 +151,7 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
         (window as any).nodeRenderComponentRef = { component: this, zone: _ngZone };
         (window as any).ngRender = {
             setDownloadUrl: (url: string) => {
-                this.setDownloadUrl(url);
+                void this.setDownloadUrl(url);
             },
         };
         this.frame.addListener(this, this.destroyed$);
@@ -691,7 +691,7 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
             },
         });
         await this.optionsHelper.initComponents(this.actionbar);
-        this.optionsHelper.refreshComponents();
+        void this.optionsHelper.refreshComponents();
         this.postprocessHtml();
         this.isBuildingPage = false;
         void void this.handleQueryAction();
@@ -733,7 +733,7 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
     async setDownloadUrl(url: string) {
         console.info('url from rendering', url);
         this.downloadUrl = url;
-        this.optionsHelper.refreshComponents();
+        void this.optionsHelper.refreshComponents();
     }
 
     private getSequence(onFinish: () => void) {
@@ -893,7 +893,7 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
             } as Node;
             // access is granted when we can fetch the node
             (this._node as ProposalNode).accessible = true;
-            this.optionsHelper.refreshComponents();
+            void this.optionsHelper.refreshComponents();
         }
     }
 

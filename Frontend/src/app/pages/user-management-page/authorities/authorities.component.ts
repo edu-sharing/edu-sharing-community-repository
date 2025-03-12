@@ -1069,7 +1069,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     private refresh() {
         this.dataSource.reset();
         this.nodeEntries.getSelection().clear();
-        this.optionsHelperService.refreshComponents();
+        void this.optionsHelperService.refreshComponents();
         this.loadAuthorities();
     }
 
@@ -1125,7 +1125,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                                 );
                                 return false;
                             }
-                            this.startExclude(data, true);
+                            void this.startExclude(data, true);
                             return true;
                         },
                     },

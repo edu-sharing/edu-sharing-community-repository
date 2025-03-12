@@ -478,7 +478,7 @@ export class StreamPageComponent implements OnInit, AfterViewInit, OnDestroy {
             activeObjects: strm?.nodes,
             selectedObjects: strm?.nodes,
         });
-        this.optionsHelper.refreshComponents();
+        void this.optionsHelper.refreshComponents();
         this.currentStreamObject = strm;
         this.options = await this.optionsHelper.getAvailableOptions(
             Target.ListDropdown,

@@ -139,7 +139,7 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
 
     ngAfterViewInit(): void {
         void this.refresh();
-        this.list.initOptionsGenerator({
+        void this.list.initOptionsGenerator({
             actionbar: this.actionbar,
             customOptions: this.options,
         });

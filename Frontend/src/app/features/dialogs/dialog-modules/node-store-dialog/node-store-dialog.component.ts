@@ -71,7 +71,7 @@ export class SearchNodeStoreDialogComponent implements OnInit, AfterViewInit, On
     }
 
     ngAfterViewInit(): void {
-        this.nodeEntries.initOptionsGenerator({
+        void this.nodeEntries.initOptionsGenerator({
             actionbar: this.actionBar,
             customOptions: this.options,
         });
