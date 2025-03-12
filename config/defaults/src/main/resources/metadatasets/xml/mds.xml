@@ -1656,6 +1656,24 @@
         <statement>{"term":{"properties.ccm:mediacenterId.keyword": "${valueRaw}"}}</statement>
       </property>
     </query>
+    <!-- search for duplicate elements in the upload dialog -->
+    <query join="AND" id="link_duplicates">
+      <basequery>{"term":{"type":"ccm:io"}}</basequery>
+      <property name="url">
+        <statement>{"match":{"properties.ccm:wwwurl.keyword": "${valueRaw}"}}</statement>
+      </property>
+      <property name="title">
+        <statement>{"term":{"type":"ccm:io"}}</statement>
+      </property>
+      <property name="description">
+        <statement>{"term":{"type":"ccm:io"}}</statement>
+      </property>
+      <property name="keywords">
+        <multiple>true</multiple>
+        <multiplejoin>AND</multiplejoin>
+        <statement>{"term":{"type":"ccm:io"}}</statement>
+      </property>
+    </query>
     <query join="AND" id="search_relation_query">
       <basequery>{"term":{"type":"ccm:io"}}</basequery>
       <specialFilter>exclude_system_folder</specialFilter>

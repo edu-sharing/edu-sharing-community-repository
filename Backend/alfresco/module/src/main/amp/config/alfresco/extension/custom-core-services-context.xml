@@ -669,7 +669,7 @@
         </property>
     </bean>
 
-    <bean id="localTransformClient" class="org.edu_sharing.alfresco.transformer.EduLocalTransformClient">
+    <bean id="localTransformClient" class="org.edu_sharing.alfresco.transformer.EduLocalTransformClient" init-method="init">
         <property name="localTransformServiceRegistry" ref="localTransformServiceRegistry" />
         <property name="transactionService" ref="transactionService" />
         <property name="contentService" ref="contentService" />
@@ -677,6 +677,9 @@
         <property name="directAccessUrlEnabled" value="${local.transform.directAccessUrl.enabled}"/>
         <property name="nodeService">
             <ref bean="nodeService" />
+        </property>
+        <property name="lightbendConfigLoader">
+            <ref bean="lightbendConfigLoader"/>
         </property>
     </bean>
 

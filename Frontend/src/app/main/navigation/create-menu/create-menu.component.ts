@@ -17,6 +17,7 @@ import {
     DefaultGroups,
     DropdownComponent,
     ElementType,
+    LocalEventsService,
     OptionItem,
     OptionsHelperDataService,
     Scope,
@@ -24,9 +25,8 @@ import {
     UIAnimation,
     VirtualNode,
 } from 'ngx-edu-sharing-ui';
-import { Observable, Subject } from 'rxjs';
-import { delay, takeUntil } from 'rxjs/operators';
-import { BridgeService } from '../../../services/bridge.service';
+import { combineLatest, Observable, Subject } from 'rxjs';
+import { delay, map, startWith, takeUntil } from 'rxjs/operators';
 import {
     Connector,
     Filetype,
@@ -55,6 +55,8 @@ import { PasteService } from '../../../services/paste.service';
 import { UploadDialogService } from '../../../services/upload-dialog.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
 import { MainNavConfig, MainNavService } from '../main-nav.service';
+import { CardDialogService } from '../../../features/dialogs/card-dialog/card-dialog.service';
+import { BridgeService } from '../../../services/bridge.service';
 
 @Component({
     selector: 'es-create-menu',
@@ -112,6 +114,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     constructor(
         public bridge: BridgeService,
         private cardService: CardService,
+        private cardDialogService: CardDialogService,
         private connector: RestConnectorService,
         private connectorApi: ConnectorService,
         private mainNavService: MainNavService,
@@ -122,6 +125,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         private iamService: RestIamService,
         private ltiPlatformService: LtiPlatformService, //private paste: PasteService,
         private nodeHelper: NodeHelperService,
+        private localEventsService: LocalEventsService,
         private nodeService: RestNodeService,
         private optionsService: OptionsHelperDataService,
         private paste: PasteService,
@@ -148,7 +152,13 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             if (login.statusCode === RestConstants.STATUS_CODE_OK) {
             }
         });
-        this.cardHasOpenModals$ = this.cardService.hasOpenModals.pipe(delay(0));
+        this.cardHasOpenModals$ = combineLatest([
+            this.cardService.hasOpenModals,
+            this.cardDialogService.openDialogs$.pipe(startWith([])),
+        ]).pipe(
+            delay(0),
+            map(([a, b]) => a || b?.length > 0),
+        );
         this.mainNavService
             .observeMainNavConfig()
             .pipe(takeUntil(this.destroyed))
@@ -340,6 +350,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             chooseParent: this.showPicker,
         });
         if (nodes && Array.isArray(nodes)) {
+            this.localEventsService.nodesCreated.emit(nodes);
             this.createElement.emit(nodes);
         }
     }

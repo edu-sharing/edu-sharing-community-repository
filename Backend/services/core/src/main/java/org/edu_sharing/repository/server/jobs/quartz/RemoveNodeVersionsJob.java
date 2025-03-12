@@ -14,6 +14,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.usage.Usage;
@@ -31,6 +32,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+/**
+ * when a version history entry is removed the node is deleted in alf_node, but a new node with type_qname_id targeting
+ * to alf_qname local_nome "deleted" is created. for this node there is one entry in alf_node_properties which is
+ * keeping the original dbid from the version entry. this job helps reducing entries in alf_node properties.
+ */
 @JobDescription(description = "Removes versions of node which are not referenced")
 public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
 
@@ -73,6 +79,7 @@ public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
 
     @Override
     public void executeInternal(JobExecutionContext jobExecutionContext) {
+        List<NodeRef> nodeRefs = new ArrayList<>();
         NodeRunner runner = new NodeRunner();
         runner.setThreaded(true);
         runner.setRunAsSystem(true);
@@ -84,11 +91,20 @@ public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
             runner.setStartFolder(startFolder);
         }
 
-        runner.setTask(this::handleNode);
+        runner.setTask(n -> nodeRefs.add(n));
         runner.run();
+
+        nodeRefs.forEach(n -> {
+            AuthenticationUtil.runAsSystem(() -> {
+                handleNode(n);
+                return null;
+            });
+        });
+
     }
 
     public void handleNode(@NotNull NodeRef node) {
+        String replicationSourceId = nodeService.getProperty(node.getStoreRef().getProtocol(),node.getStoreRef().getIdentifier(),node.getId(),CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID);
         long timeSpan = StringUtils.isNotBlank(olderThan)
                 ? Duration.parse(olderThan).toMillis()
                 : -1;
@@ -119,7 +135,10 @@ public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
                 .filter(version -> usages.stream().noneMatch(x-> Objects.equals(x.getUsageVersion(), version.getVersionLabel())))
                 .collect(Collectors.toList());
 
-        versionsToDelete.forEach(version -> versionService.deleteVersion(node, version));
+        versionsToDelete.forEach(version -> {
+            logger.info("deleteing version node:"+node + " replicationSourceId:" +replicationSourceId+ " versionLabel:" + version.getVersionLabel());
+            versionService.deleteVersion(node, version);
+        });
     }
 
     @Override

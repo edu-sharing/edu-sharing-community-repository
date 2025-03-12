@@ -52,10 +52,11 @@ class MetadataElasticSearchHelperTest {
         queries = new MetadataQueries();
         queries.setQueries(Collections.singletonList(query));
         mds = new MetadataSet();
-        mds.setQueries(new HashMap<>(){{
+        mds.setQueries(new HashMap<>() {{
             put(MetadataReader.QUERY_SYNTAX_DSL, queries);
         }});
     }
+
     @AfterEach
     void afterEach() {
         authenticationUtilMockedStatic.close();
@@ -75,7 +76,7 @@ class MetadataElasticSearchHelperTest {
         token.setContentType(SearchService.ContentType.FILES);
         result = MetadataElasticSearchHelper.getElasticSearchQuery(token, queries, query, Collections.emptyMap());
         String expected = "{\"bool\":{\"filter\":[{\"bool\":{\"should\":[{\"match\":{\"type\":{\"query\":\"ccm:io\"}}}]}}],\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}}]}}";
-        SearchServiceElasticTestUtils.assertQuery(expected,result);
+        SearchServiceElasticTestUtils.assertQuery(expected, result);
     }
 
 
@@ -83,7 +84,7 @@ class MetadataElasticSearchHelperTest {
     void getElasticSearchQueryMultipleParameter() {
         SearchToken token = new SearchToken();
         List<MetadataQueryParameter> parameters = new ArrayList<>();
-        MetadataQueryParameter parameter = new MetadataQueryParameter(query.getSyntax());
+        MetadataQueryParameter parameter = new MetadataQueryParameter(query.getSyntax(), null);
         parameter.setMultiple(true);
         parameter.setMultiplejoin("AND");
         parameter.setName("parameter");
@@ -112,7 +113,7 @@ class MetadataElasticSearchHelperTest {
 
 
         // 2 Parameters AND combined
-        MetadataQueryParameter parameter2 = new MetadataQueryParameter(query.getSyntax());
+        MetadataQueryParameter parameter2 = new MetadataQueryParameter(query.getSyntax(), null);
         parameter2.setMultiple(true);
         parameter2.setMultiplejoin("AND");
         parameter2.setName("parameter2");
@@ -138,10 +139,11 @@ class MetadataElasticSearchHelperTest {
         )
         ;
     }
+
     @Test
     void getAggregations() {
         SearchToken token = new SearchToken();
-        MetadataQueryParameter parameter = new MetadataQueryParameter(query.getSyntax());
+        MetadataQueryParameter parameter = new MetadataQueryParameter(query.getSyntax(), null);
         parameter.setName("test_facet");
 
         query.setParameters(Collections.singletonList(parameter));
@@ -160,7 +162,7 @@ class MetadataElasticSearchHelperTest {
         );
 
         // 2 facets
-        MetadataQueryParameter parameter2 = new MetadataQueryParameter(query.getSyntax());
+        MetadataQueryParameter parameter2 = new MetadataQueryParameter(query.getSyntax(), null);
         parameter2.setName("test_facet2");
         query.setParameters(Arrays.asList(parameter, parameter2));
 
@@ -185,11 +187,14 @@ class MetadataElasticSearchHelperTest {
         );
 
         // multi term facet
-        parameter.setFacets(
+        parameter.setFacet(new MetadataQueryParameter.MetadataQueryFacet(
+                MetadataQueryParameter.MetadataQueryFacet.SortBy.count,
+                MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc,
+                null,
                 Arrays.asList(
-                        new MetadataQueryParameter.MetadataQueryFacet("facet1", null),
-                        new MetadataQueryParameter.MetadataQueryFacet("facet2", null)
-                )
+                        new MetadataQueryParameter.MetadataQueryFacetItem("facet1", null),
+                        new MetadataQueryParameter.MetadataQueryFacetItem("facet2", null)
+                ))
         );
         query.setParameters(Collections.singletonList(parameter));
 
@@ -214,7 +219,7 @@ class MetadataElasticSearchHelperTest {
     void getAggregationsSearchToken() {
         SearchToken token = new SearchToken();
         token.setQueryString("A B C");
-        MetadataQueryParameter parameter = new MetadataQueryParameter(query.getSyntax());
+        MetadataQueryParameter parameter = new MetadataQueryParameter(query.getSyntax(), null);
         parameter.setName("test_facet");
         MetadataWidget widget = new MetadataWidget();
         widget.setId("test_facet");
@@ -262,11 +267,14 @@ class MetadataElasticSearchHelperTest {
         );
 
         // multi term facet
-        parameter.setFacets(
+        parameter.setFacet(new MetadataQueryParameter.MetadataQueryFacet(
+                MetadataQueryParameter.MetadataQueryFacet.SortBy.count,
+                MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc,
+                null,
                 Arrays.asList(
-                        new MetadataQueryParameter.MetadataQueryFacet("facet1", null),
-                        new MetadataQueryParameter.MetadataQueryFacet("facet2", null)
-                )
+                        new MetadataQueryParameter.MetadataQueryFacetItem("facet1", null),
+                        new MetadataQueryParameter.MetadataQueryFacetItem("facet2", null)
+                ))
         );
         query.setParameters(Collections.singletonList(parameter));
 
@@ -286,10 +294,13 @@ class MetadataElasticSearchHelperTest {
         );
 
         // nested facet
-        parameter.setFacets(
+        parameter.setFacet(new MetadataQueryParameter.MetadataQueryFacet(
+                MetadataQueryParameter.MetadataQueryFacet.SortBy.count,
+                MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc,
+                null,
                 Arrays.asList(
-                        new MetadataQueryParameter.MetadataQueryFacet("contributor.displayname.keyword", "contributor")
-                )
+                        new MetadataQueryParameter.MetadataQueryFacetItem("contributor.displayname.keyword", "contributor")
+                ))
         );
         query.setParameters(Collections.singletonList(parameter));
 

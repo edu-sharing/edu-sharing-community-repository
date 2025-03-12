@@ -1,12 +1,5 @@
 package org.edu_sharing.repository.server.importer;
 
-import java.io.InputStream;
-import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
-import java.util.stream.Stream;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
@@ -27,6 +20,13 @@ import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 import org.edu_sharing.service.clientutils.ClientUtilsService;
 import org.edu_sharing.service.clientutils.WebsiteInformation;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
+
+import java.io.InputStream;
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+import java.util.stream.Stream;
 
 
 public class ExcelLOMImporter {
@@ -94,10 +94,10 @@ public class ExcelLOMImporter {
 				try{
 					currentLevelObjects = apiClient.getChildren(parentFolder);
 				}catch(Throwable e){
-					e.printStackTrace();
+					logger.error(e.getMessage(),e);
 				}
 				
-				if(IdxColumnMap.size() > 0){
+				if(!IdxColumnMap.isEmpty()){
 					//we got the headers
 					Map<QName,Serializable> toSafe = new HashMap<>();
 					
@@ -129,15 +129,14 @@ public class ExcelLOMImporter {
 						String value = cell.getStringCellValue();
 						if(value == null) continue;
 						value = value.trim();
-						if(value.equals("")) continue;
+						if(value.isEmpty()) continue;
 						
 						if(columnName != null){
 							alfrescoProperty = getExcelAlfMap().get(columnName);
 						}
 						
 						if(alfrescoProperty != null){
-							if(alfrescoProperty != null && 
-									alfrescoProperty.equals(CCConstants.CM_PROP_CONTENT)){
+							if(alfrescoProperty.equals(CCConstants.CM_PROP_CONTENT)){
 								contentUrl = value;
 							}else{
 								PropertyDefinition propDef = dictionaryService.getProperty(QName.createQName(alfrescoProperty));
@@ -145,8 +144,8 @@ public class ExcelLOMImporter {
 								if(propDef != null) {
 									if(propDef.isMultiValued() && !alfrescoProperty.contains("contributer")){
 										ArrayList<String> multival = new ArrayList<>();
-										
-										//String[] vals = value.split(",");   StringTool.escape(CCConstants.MULTIVALUE_SEPARATOR)
+
+                                        //String[] vals = value.split(",");   StringTool.escape(CCConstants.MULTIVALUE_SEPARATOR)
 										String[] vals = value.split(StringTool.escape(CCConstants.MULTIVALUE_SEPARATOR));
 										multival.addAll(Arrays.asList(vals));
 										
@@ -169,20 +168,20 @@ public class ExcelLOMImporter {
 					String nodeName = addName(toSafe, wwwUrl);
 					addThumbnail(toSafe, wwwUrl);
 
-					if(toSafe.size() > 0 && nodeName != null && !nodeName.trim().equals("")){
+					if(!toSafe.isEmpty() && nodeName != null && !nodeName.trim().isEmpty()){
 						
 						//check for valid thumbnail url
 						boolean createNode = true;
 						String thumbUrl = (String)toSafe.get(qnameThumbnail);
 
-						if((thumbUrl == null || !thumbUrl.startsWith("http")) && (contentUrl == null || contentUrl.trim().equals(""))) {
+						if((thumbUrl == null || !thumbUrl.startsWith("http")) && (contentUrl == null || contentUrl.trim().isEmpty())) {
 							logger.error("invalid thumbnail url:" + thumbUrl +" for:" +toSafe.get(QName.createQName(CCConstants.CM_NAME))+" will not safe object");
 							createNode = false;
 						}
 						if(createNode) {
 							ChildAssociationRef newNode = nodeService.createNode(new NodeRef(MCAlfrescoAPIClient.storeRef,parentFolder),QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS), QName.createQName(nodeName),  QName.createQName(CCConstants.CCM_TYPE_IO),toSafe);
 							
-							if(contentUrl != null && !contentUrl.trim().equals("")){
+							if(contentUrl != null && !contentUrl.trim().isEmpty()){
 								String mimetype = MimeTypes.guessMimetype(contentUrl);
 								try {
 									InputStream inputStream = new URL(contentUrl).openConnection().getInputStream();
@@ -288,10 +287,12 @@ public class ExcelLOMImporter {
 	private void addToCollections(ChildAssociationRef newNode, LinkedHashSet<String> collectionsForNode, Boolean addToCollection){
 		String wwwUrl = (String)serviceRegistry.getNodeService().getProperty(newNode.getChildRef(),QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
 		String nodeName = (String)serviceRegistry.getNodeService().getProperty(newNode.getChildRef(), ContentModel.PROP_NAME);
-		if(collectionsForNode != null && collectionsForNode.size() > 1){
+		if(collectionsForNode != null && !collectionsForNode.isEmpty()){
 
 			String parentCollection = collectionsForNode.stream().findFirst().get();
-			String targetCollection = collectionsForNode.stream().skip(collectionsForNode.size() -1).findFirst().get();
+			String targetCollection = (collectionsForNode.size() == 1)
+					? parentCollection
+					: collectionsForNode.stream().skip(collectionsForNode.size() -1).findFirst().get();
 			logger.info("collections for node " + String.join("/",collectionsForNode) +" p:"+parentCollection +" c:"+targetCollection);
 
 			SearchParameters searchParameters = new SearchParameters();
@@ -306,22 +307,25 @@ public class ExcelLOMImporter {
 			//check if there is a parent
 			NodeRef pathMatchesNodeRef = null;
 			LinkedHashSet<String> pathsMatch = new LinkedHashSet<>();
-			for(NodeRef nodeRef : rs.getNodeRefs()){
-				Path path = serviceRegistry.getNodeService().getPath(nodeRef);
+			for(NodeRef targetCollectionNodeRef : rs.getNodeRefs()){
+
+				Path path = serviceRegistry.getNodeService().getPath(targetCollectionNodeRef);
 				String displayPath = path.toDisplayPath(serviceRegistry.getNodeService(),serviceRegistry.getPermissionService());
-				logger.info("checking path for parent collection;\"" + parentCollection + "\";path:"+displayPath +"/"+nodeService.getProperty(nodeRef,ContentModel.PROP_NAME));
-				if(displayPath.contains(parentCollection)){
+				String targetCollectionName = (String)nodeService.getProperty(targetCollectionNodeRef,ContentModel.PROP_NAME);
+				displayPath += "/"+targetCollectionName;
+				logger.info("checking path for parent collection;\"" + parentCollection + "\";path:"+displayPath);
+				if(displayPath.contains(parentCollection) && displayPath.endsWith(targetCollection)){
 					pathsMatch.add(displayPath);
-					pathMatchesNodeRef = nodeRef;
+					pathMatchesNodeRef = targetCollectionNodeRef;
 				}
 			}
 
 			if(pathsMatch.size() > 1){
 				logger.error("more than one path matches;"+nodeName +";"+newNode.getChildRef()+";" + String.join(";",pathsMatch));
-			}else if(pathsMatch.size() == 0){
+			}else if(pathsMatch.isEmpty()){
 				logger.error("no path matches;"+nodeName +";"+newNode.getChildRef());
 			}else{
-				logger.info("adding;" + nodeName +";"+newNode.getChildRef() +";TO;" + pathsMatch.iterator().next() +"/"+nodeService.getProperty(pathMatchesNodeRef,ContentModel.PROP_NAME));
+				logger.info("adding;" + nodeName +";"+newNode.getChildRef() +";TO;" + pathsMatch.iterator().next());
 				try {
 					if(addToCollection) {
 						CollectionServiceFactory.getLocalService().addToCollection(pathMatchesNodeRef.getId(), newNode.getChildRef().getId(), null, false);
@@ -332,7 +336,7 @@ public class ExcelLOMImporter {
 				}
 			}
 		}else{
-			this.logger.info("addToCollections expects two collection to be defined in excelsheet;" + wwwUrl);
+			this.logger.info("addToCollections expects minimum one collection to be defined in excelsheet;" + wwwUrl);
 		}
 	}
 
@@ -354,10 +358,9 @@ public class ExcelLOMImporter {
 
 				URL url = new URL(wwwUrl);
 				String queryString = url.getQuery();
-				String id = Stream.of(queryString.split("&")).map(kv -> kv.split("=")).filter(kv -> "v".equalsIgnoreCase(kv[0])).map(kv -> kv[1])
+                return Stream.of(queryString.split("&")).map(kv -> kv.split("=")).filter(kv -> "v".equalsIgnoreCase(kv[0])).map(kv -> kv[1])
 						.findFirst()
 						.orElse("");
-				return id;
 			}else{
 				return null;
 			}
@@ -385,6 +388,7 @@ public class ExcelLOMImporter {
 			excelAlfMap.put("educationalTypicalAgeRange", CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGE);
 			excelAlfMap.put("lifeCycleContributerAuthor", CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR);
 			excelAlfMap.put("lifeCycleContributerPublisher", CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER);
+			excelAlfMap.put("lifeCycleContributerSubjectMatterExpert", CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SUBJECT_MATTER_EXPERT);
 			excelAlfMap.put("metadataContributerProvider", CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_PROVIDER);
 			excelAlfMap.put("metadataContributerCreator", CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR);
 			excelAlfMap.put("technicalFormat", CCConstants.LOM_PROP_TECHNICAL_FORMAT);
@@ -406,6 +410,7 @@ public class ExcelLOMImporter {
 			excelAlfMap.put("licenseValid",CCConstants.CCM_PROP_IO_LICENSE_VALID);
 			excelAlfMap.put("originUniversity",CCConstants.CCM_PROP_IO_UNIVERSITY);
 			excelAlfMap.put("metadataset",CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
+			excelAlfMap.put("authorFreetext",CCConstants.CCM_PROP_AUTHOR_FREETEXT);
 			excelAlfMap.put("oeh_widgets","{" + CCConstants.NAMESPACE_CCM+"}oeh_widgets");
 		}
 		return excelAlfMap;

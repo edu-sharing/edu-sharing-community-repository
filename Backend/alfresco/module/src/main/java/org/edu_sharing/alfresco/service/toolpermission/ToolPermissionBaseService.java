@@ -185,7 +185,7 @@ public class ToolPermissionBaseService {
     public List<String> getAllAvailableToolPermissions(){
         return getAllAvailableToolPermissions(false);
     }
-    public List<String> getAllAvailableToolPermissions(boolean renew){
+    private List<String> getAllAvailableToolPermissions(boolean renew){
         List<String> allowed=new ArrayList<>();
         for(String permission : this.getAllToolPermissions(renew)){
             if(hasToolPermission(permission, renew))

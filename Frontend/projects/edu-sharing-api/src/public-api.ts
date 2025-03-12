@@ -39,11 +39,15 @@ export * from './lib/rest-constants';
 // to not expose these API calls here, but instead provide a wrapper that keeps track of calls.
 export {
     MdsV1Service,
+    AdminV1Service,
+    ConfigV1Service,
     StreamV1Service,
     ClientutilsV1Service,
     TrackingV1Service,
     NotificationV1Service,
     FeedbackV1Service,
+    IamV1Service,
+    OrganizationV1Service,
     NodeV1Service as NodeServiceUnwrapped,
     SuggestionsV1Service,
     LtiPlatformV13Service,

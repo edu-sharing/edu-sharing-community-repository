@@ -697,7 +697,9 @@
     "EMBED": "Embed",
     "OPEN_ORIGINAL_NODE": "Open original",
     "COLLECTION_PROPOSAL_DECLINE": "Decline proposal",
-    "RELATIONS": "Manage relations"
+    "RELATIONS": "Manage relations",
+    "SELECT_ALL": "Select all",
+    "DESELECT": "Deselect all"
   },
   "NO_SIZE": "-",
   "VERSION_COMMENT": "Version comment",
@@ -747,7 +749,14 @@
     "NO_MATCHING_VALUES": "No matching values",
     "ERROR_PREVIEW": "Preview image could not be replaced. Please try another image file",
     "SUGGEST_VALUE_SENT": "The suggestion has been submitted and is being reviewed by the editorial team. The suggestion will only appear once it has been activated by the editorial team. Thank you!",
-    "SUGGEST_VALUE_LABEL": "Suggest new value"
+    "SUGGEST_VALUE_LABEL": "Suggest new value",
+    "SUGGESTIONS": {
+      "LIST_TITLE": "Suggestions for this field",
+      "TYPE_AI": "AI",
+      "TYPE_USER": "User",
+      "APPLY": "Accept",
+      "DECLINE": "Decline"
+    }
   },
   "SIMPLE_EDIT": {
     "TITLE": "Quick Edit",

@@ -129,7 +129,6 @@ public class MetadataPresettingPolicy implements
 	}
 
 	private void inheritMetadata(NodeRef targetRef,NodeRef parentRef) {
-		logger.info("Starting inherit metadata for "+targetRef+" inside folder "+parentRef);
 		if (ContentModel.TYPE_CONTENT.equals(nodeService.getType(targetRef))) {
 			nodeService.setType(targetRef, CONTENT_TYPE);
 		}
@@ -137,6 +136,8 @@ public class MetadataPresettingPolicy implements
 		if (!CONTENT_TYPE.equals(nodeService.getType(targetRef))) {
 			return;
 		}
+		logger.info("Starting inherit metadata for "+targetRef+" inside folder "+parentRef);
+
 		Boolean status = (Boolean) nodeService.getProperty(parentRef, QName.createQName(CCConstants.CCM_PROP_METADATA_PRESETTING_STATUS));
 		if (nodeService.hasAspect(parentRef, ASPECT_TYPE) && status!=null && status) {
 			// assoc is a good idea but will always get lost when a node is moved to recycle

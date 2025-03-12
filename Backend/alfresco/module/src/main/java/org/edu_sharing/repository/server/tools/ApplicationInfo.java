@@ -115,6 +115,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	public static final String KEY_PRIVATE_KEY = "private_key";
 
 	public static final String KEY_CERTIFICATE = "certificate";
+
+	public static final String KEY_KEYSTORE_PW = "keystore_pw";
 	
 	public static final String KEY_MESSAGE_OFFSET_MILLISECONDS = "message_offset_ms";
 	public static final String KEY_MESSAGE_SEND_OFFSET_MILLISECONDS = "message_send_offset_ms";
@@ -432,6 +434,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	private String cookieAttributes;
 	private Map<CacheKey, Serializable> cache = new HashMap<>();
 
+	private String keyStorePassword;
+
 	public ApplicationInfo(String _appFile) throws Exception{
 		if(_appFile == null) throw new Exception("Application Filename was null!");
 		appFileName = _appFile;
@@ -568,6 +572,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		if(cmNameRegex != null && !cmNameRegex.trim().equals("")) {
 			validatorRegexCMName = cmNameRegex;
 		}
+
+		keyStorePassword = properties.getProperty(KEY_KEYSTORE_PW);
 
 		ltiClientId = properties.getProperty(KEY_LTI_CLIENT_ID);
 		ltiIss = properties.getProperty(KEY_LTI_ISS);
@@ -1140,5 +1146,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	public String getCertificate() {
 		return certificate;
+	}
+
+	public String getKeyStorePassword() {
+		return keyStorePassword;
 	}
 }

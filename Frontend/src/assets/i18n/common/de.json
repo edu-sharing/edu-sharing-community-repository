@@ -726,7 +726,9 @@
     "METADATA_SIDEBAR": "Materialinformationen",
     "ACCESSIBILITY": "Barrierefreiheit",
     "LTI": "In LTI Plattform übernehmen",
-    "RELATIONS": "Beziehungen verwalten"
+    "RELATIONS": "Beziehungen verwalten",
+    "SELECT_ALL": "Alle auswählen",
+    "DESELECT": "Alle abwählen"
   },
   "LTI": {
     "REGISTERED": {
@@ -781,7 +783,14 @@
     "NO_MATCHING_VALUES": "Keine passenden Werte",
     "NO_ARBITRARY_VALUES_NOTICE": "Für dieses Feld können Werte nicht frei gewählt werden. Bitte wählen Sie Werte aus der Liste.",
     "DELETE_KEY_NOTICE": "Löschen mit Entf-Taste",
-    "SHOW_EXTENDED": "Erweitere Infos anzeigen"
+    "SHOW_EXTENDED": "Erweitere Infos anzeigen",
+    "SUGGESTIONS": {
+      "LIST_TITLE": "Vorschläge für dieses Feld",
+      "TYPE_AI": "KI",
+      "TYPE_USER": "Person",
+      "APPLY": "Annehmen",
+      "DECLINE": "Ablehnen"
+    }
   },
   "FEEDBACK": {
     "TITLE": "Feedback zum Material geben",

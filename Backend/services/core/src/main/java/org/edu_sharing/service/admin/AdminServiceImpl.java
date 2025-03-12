@@ -625,13 +625,13 @@ public class AdminServiceImpl implements AdminService {
                 .peek((r) -> {
                     try {
                         Protocol protocol = ApplicationContextFactory.getApplicationContext().getBean(Protocol.class);
-                        Map<String, Object> entry = protocol.getSysUpdateEntry(r.getId());
-                        String date = (String) entry.get(CCConstants.CCM_PROP_SYSUPDATE_DATE);
-                        r.setExecutedAt(Long.parseLong(date));
+                        NodeRef entry = protocol.getSysUpdateEntry(r.getId());
+                        long date = ((Date) NodeServiceHelper.getPropertyNative(entry, CCConstants.CCM_PROP_SYSUPDATE_DATE)).getTime();
+                        r.setExecutedAt(date);
                     } catch (Throwable ignored) {
 
                     }
-                }).collect(Collectors.toList());
+                }).sorted(((a, b) -> Long.compare(b.getExecutedAt(), a.getExecutedAt()))).collect(Collectors.toList());
     }
 
     @Override
@@ -1102,6 +1102,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public void switchAuthentication(String authorityName) {
         HttpSession session = Context.getCurrentInstance().getRequest().getSession(true);
+        ToolPermissionServiceFactory.getInstance().invalidateSessionCache();
         //session.setMaxInactiveInterval(30);
         AuthenticationToolAPI authTool = new AuthenticationToolAPI();
         String ticket = authTool.setUser(authorityName);

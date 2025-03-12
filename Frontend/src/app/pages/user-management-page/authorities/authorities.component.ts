@@ -9,15 +9,20 @@ import {
     OnChanges,
     Output,
     SimpleChanges,
+    TemplateRef,
     ViewChild,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
+    Authority,
     GenericAuthority,
     Group,
     GroupProfile,
+    HOME_REPOSITORY,
     Node,
+    IamV1Service,
+    OrganizationV1Service,
     User,
     UserProfileEdit,
 } from 'ngx-edu-sharing-api';
@@ -71,6 +76,8 @@ import { DELETE_OR_CANCEL } from '../../../features/dialogs/dialog-modules/gener
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
 import { InputPasswordComponent } from '../../../shared/components/input-password/input-password.component';
+import { FormControl, FormGroup } from '@angular/forms';
+import { AuthoritySearchMode } from '../../../shared/components/authority-search-input/authority-search-input.component';
 
 @Component({
     selector: 'es-permissions-authorities',
@@ -87,12 +94,14 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     readonly DisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     readonly Scope = Scope;
+    readonly AuthoritySearchMode = AuthoritySearchMode;
     sortConfig: ListSortConfig = {
         allowed: true,
         active: null,
         direction: 'asc',
         columns: [],
     };
+    @ViewChild('exclude') excludeRef: TemplateRef<unknown>;
     @ViewChild('actionbar') actionbar: ActionbarComponent;
     @ViewChild('passwordRef') passwordRef: InputPasswordComponent;
     @ViewChild('actionbarMember') actionbarMember: ActionbarComponent;
@@ -101,6 +110,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     @ViewChild('memberAdd') nodeMemberAdd: NodeEntriesWrapperComponent<GenericAuthority>;
     @ViewChild('signupList') signupList: NodeEntriesWrapperComponent<GenericAuthority>;
     @ViewChild('addToComponent') addToComponent: PermissionsAuthoritiesComponent;
+    excludeForm = new FormGroup({
+        mode: new FormControl('none'),
+    });
+    excludeReceiver: Authority;
+    receiverIsMemberOfOrg: boolean;
     public GROUP_TYPES = RestConstants.VALID_GROUP_TYPES;
     public STATUS_TYPES = RestConstants.VALID_PERSON_STATUS_TYPES;
     public SCOPE_TYPES = RestConstants.VALID_SCOPE_TYPES;
@@ -138,6 +152,9 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         addOptions: [],
     };
     private addToList: any[];
+    /**
+     * is current user global admin
+     */
     isAdmin = false;
     embeddedQuery: string;
     editButtons: DialogButton[];
@@ -322,10 +339,12 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         private connector: RestConnectorService,
         private dialogs: DialogsService,
         private iam: RestIamService,
+        private iamService: IamV1Service,
         private node: RestNodeService,
         private nodeHelper: NodeHelperService,
         private optionsHelperService: OptionsHelperDataService,
         private organization: RestOrganizationService,
+        private organizationService: OrganizationV1Service,
         private ref: ApplicationRef,
         private router: Router,
         private toast: Toast,
@@ -437,7 +456,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 );
                 download.onlyDesktop = true;
                 download.elementType = [ElementType.Unknown];
-                download.group = DefaultGroups.Primary;
+                download.group = DefaultGroups.FileOperations;
                 download.priority = 10;
                 download.constrains = [Constrain.NoSelection];
                 options.push(download);
@@ -599,10 +618,8 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             personPassword.group = DefaultGroups.Edit;
             options.push(personPassword);
             if (this.org) {
-                const excludePerson = new OptionItem(
-                    'PERMISSIONS.MENU_EXCLUDE',
-                    'delete',
-                    (data: any) => this.startExclude(this.getList(data)),
+                const excludePerson = new OptionItem('PERMISSIONS.MENU_EXCLUDE', 'delete', (data) =>
+                    this.startExclude(this.getList(data)),
                 );
                 excludePerson.constrains = [Constrain.User];
                 excludePerson.elementType = [ElementType.Person];
@@ -1081,7 +1098,41 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             );
         }
     }
-    private startExclude(data: any, position = 0) {
+    private async startExclude(data: User[], start = false, position = 0) {
+        if (!start) {
+            await this.toast.openGenericDialog({
+                title: 'PERMISSIONS.EXCLUDE.TITLE',
+                contentTemplate: this.excludeRef,
+                minWidth: 600,
+                nodes: data as unknown as Node[],
+                buttons: [
+                    {
+                        label: 'CANCEL',
+                        config: { color: 'standard' },
+                        callback: async (ref) => true,
+                    },
+                    {
+                        label: 'PERMISSIONS.MENU_EXCLUDE',
+                        config: { color: 'primary' },
+                        callback: async (ref) => {
+                            if (
+                                this.excludeForm.get('mode').value === 'assign' &&
+                                !this.excludeReceiver
+                            ) {
+                                this.toast.error(
+                                    null,
+                                    'PERMISSIONS.EXCLUDE.ERROR_MISSING_RECEIVER',
+                                );
+                                return false;
+                            }
+                            this.startExclude(data, true);
+                            return true;
+                        },
+                    },
+                ],
+            });
+            return;
+        }
         this.closeDialog();
         if (position == data.length) {
             this.toast.closeProgressSpinner();
@@ -1090,10 +1141,23 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             return;
         }
         this.toast.showProgressSpinner();
-        this.organization.removeMember(this.org.groupName, data[position].authorityName).subscribe(
-            () => this.startExclude(data, position + 1),
-            (error: any) => this.toast.error(error),
-        );
+        this.organizationService
+            .removeFromOrganization({
+                repository: HOME_REPOSITORY,
+                organization: this.org.groupName,
+                member: data[position].authorityName,
+                body: {
+                    mode: this.excludeForm.get('mode').value as 'none' | 'assign',
+                    receiver: this.excludeReceiver?.authorityName,
+                },
+            })
+            .subscribe(
+                () => this.startExclude(data, true, position + 1),
+                (error: any) => {
+                    this.toast.error(error);
+                    this.closeDialog();
+                },
+            );
     }
     private createAuthority() {
         this.edit = { profile: {} };
@@ -1523,5 +1587,15 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
 
     private addVirtualEntry(entry: GenericAuthority | Group) {
         this.nodeEntries.addVirtualNodes([entry]);
+    }
+
+    async setExcludeReceiver(authority: Authority) {
+        this.excludeReceiver = authority;
+        this.receiverIsMemberOfOrg = true;
+        this.receiverIsMemberOfOrg = (
+            await this.iam
+                .getUserGroups(authority.authorityName, this.org.authorityName)
+                .toPromise()
+        ).groups.some((g) => g.authorityName === this.org.authorityName);
     }
 }
