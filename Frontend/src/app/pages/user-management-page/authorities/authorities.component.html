@@ -468,7 +468,7 @@
         label="{{ 'PERMISSIONS.EXCLUDE.ASSIGN_USER' | translate }}"
         placeholder="{{ 'PERMISSIONS.EXCLUDE.ASSIGN_USER_PLACEHOLDER' | translate }}"
         [showRecent]="false"
-        (onChooseAuthority)="setExcludeReceiver($event)"
+        (chooseAuthority)="setExcludeReceiver($event)"
       ></es-authority-search-input>
       <mat-chip-listbox>
         <mat-chip-option

@@ -43,6 +43,7 @@ import {
     TemporaryStorageService,
     TranslationsService,
     UIAnimation,
+    UIConstants,
 } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { AppComponent } from '../../app.component';
