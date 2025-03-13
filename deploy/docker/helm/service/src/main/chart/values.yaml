@@ -234,6 +234,10 @@ config:
       ## @param config.cluster.backup.read Set cluster backup as read
       read: false
 
+  alfresco:
+    share:
+      ## @param config.alfresco.share.enabled Enable the alfreso share webapp
+      enabled: false
   connector:
 
     ## @param config.connector.accesslog Enable access log
