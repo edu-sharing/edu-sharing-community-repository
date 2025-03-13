@@ -840,14 +840,7 @@ public class NodeApi  {
     }
     
     
-    @OPTIONS    
-    @Path("/nodes/{repository}/{node}/metadata")
-    @Hidden
 
-    public Response options01() {
-    	
-    	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET, POST, PUT").build();
-    }
     
     @DELETE
     @Path("/nodes/{repository}/{node}")    
@@ -914,15 +907,6 @@ public class NodeApi  {
     		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
     	}
 
-    }
-    
-    @OPTIONS    
-    @Path("/nodes/{repository}/{node}")
-    @Hidden
-
-    public Response options02() {
-    	
-    	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, DELETE").build();
     }
 
     @GET
@@ -1415,14 +1399,7 @@ public class NodeApi  {
 	    	properties.putAll(info.getLrmiProperties());
 		}
 	}
-	@OPTIONS    
-    @Path("/nodes/{repository}/{node}/children")
-    @Hidden
 
-    public Response options03() {
-    	
-    	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET, POST").build();
-    }
 	@POST
 	@Path("/nodes/{repository}/{node}/children/_fork")
 
@@ -1508,16 +1485,7 @@ public class NodeApi  {
     	}
 
     }
-    
-    @OPTIONS    
-    @Path("/nodes/{repository}/{node}/children/_copy")
-    @Hidden
 
-    public Response options04() {
-    	
-    	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
-    }
-    
     @POST
     @Path("/nodes/{repository}/{node}/children/_move")    
     
@@ -1558,15 +1526,7 @@ public class NodeApi  {
     	}
 
     }
-        
-    @OPTIONS    
-    @Path("/nodes/{repository}/{node}/children/_move")
-    @Hidden
 
-    public Response options05() {
-    	
-    	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
-    }
     @POST
     @Path("/nodes/{repository}/{node}/preview")
     @Consumes({ "multipart/form-data" })
@@ -1745,14 +1705,7 @@ public class NodeApi  {
     	}
 
     }
-	@OPTIONS    
-	@Path("/nodes/{repository}/{node}/content")
-    @Hidden
 
-	public Response options06() {
-
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
-	}
 
     @GET
     @Path("/nodes/{repository}/{node}/versions")    
@@ -1787,17 +1740,6 @@ public class NodeApi  {
     		return ErrorResponse.createResponse(t);
     	}
 	  }
-    
-    
-	@OPTIONS    
-	@Path("/nodes/{repository}/{node}/versions")
-    @Hidden
-
-	public Response options07() {
-		
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-	}
-
 
 	@GET
 	@Path("/nodes/{repository}/{node}/versions/metadata")
@@ -1875,18 +1817,8 @@ public class NodeApi  {
     	}
 
     }
-    
-    
-	@OPTIONS    
-	@Path("/nodes/{repository}/{node}/versions/{major}/{minor}/metadata")
-    @Hidden
 
-	public Response options08() {
-		
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-	}
-
-    @PUT
+	@PUT
     @Path("/nodes/{repository}/{node}/versions/{major}/{minor}/_revert")    
     
     @Operation(summary = "Revert to node version.", description = "Revert to node version.")
@@ -1925,16 +1857,6 @@ public class NodeApi  {
     	}
 
     }
-    
-    
-	@OPTIONS    
-	@Path("/nodes/{repository}/{node}/versions/{major}/{minor}/_revert")    
-	@Hidden
-
-	public Response options09() {
-		
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, PUT").build();
-	}
 
     @POST
     @Path("/nodes/{repository}")    
@@ -1997,16 +1919,6 @@ public class NodeApi  {
 
     }
 
-    
-	@OPTIONS    
-	@Path("/nodes/{repository}")
-    @Hidden
-
-	public Response options10() {
-		
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-	}
-    
 	@GET
     @Path("/nodes/{repository}/{node}/permissions/{user}")    
     
@@ -2201,16 +2113,7 @@ public class NodeApi  {
 
     }
     
-	@OPTIONS    
-	@Path("/nodes/{repository}/{node}/permissions")
-    @Hidden
 
-	public Response options11() {
-		
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET, @POST").build();
-	}
-		
-	
 	  @POST
 	    @Path("/nodes/{repository}/{node}/prepareUsage")    
 	    
@@ -2264,17 +2167,7 @@ public class NodeApi  {
 	    	}
 
 	    }
-	    
-		@OPTIONS    
-		@Path("/nodes/{repository}/{node}/prepareUsage")
-	    @Hidden
 
-		public Response options12() {
-			
-			return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET, @POST").build();
-		}
-		
-		
 		@POST
 	    @Path("/nodes/{repository}/{node}/owner")    
 	    

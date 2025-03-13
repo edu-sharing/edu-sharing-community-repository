@@ -308,17 +308,6 @@ public class CollectionApi {
 		}
 	}
 
-	@OPTIONS
-
-	@Path("/collections/{repository}/{collection}")
-
-	@Hidden
-
-	public Response options01() {
-
-		return Response.status(Response.Status.OK)
-				.header("Allow", "OPTIONS, GET, PUT, DELETE").build();
-	}
 
 	@GET
 	@Path("/collections/{repository}/{collection}/children/references")
@@ -531,18 +520,6 @@ public class CollectionApi {
     	}
 	}
 
-	@OPTIONS
-	
-	@Path("/collections/{repository}/{collection}/children")
-	
-	@Hidden
-	
-	public Response options02() {
-
-		return Response.status(Response.Status.OK)
-				.header("Allow", "OPTIONS, GET, POST").build();
-	}
-
 	@PUT
 	
 	@Path("/collections/{repository}/{collection}/references/{node}")
@@ -647,20 +624,6 @@ public class CollectionApi {
     	}
 	}
 
-	@OPTIONS
-	
-	@Path("/collections/{repository}/{collection}/references")
-	
-	@Hidden
-	
-	public Response options03() {
-
-		return Response.status(Response.Status.OK)
-				.header("Allow", "OPTIONS, PUT, DELETE").build();
-	}
-	
-	
-	
 	
 	@POST
 	@Path("/collections/{repository}/{collection}/icon")

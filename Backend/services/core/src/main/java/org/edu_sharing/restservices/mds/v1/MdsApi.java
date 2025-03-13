@@ -110,15 +110,6 @@ public class MdsApi {
 
 	}
 
-	@OPTIONS
-	@Path("/metadatasets/{repository}/{metadataset}")
-	@Hidden
-
-	public Response options2() {
-
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-	}
-
 
 	/**
 	 *

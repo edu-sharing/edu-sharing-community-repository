@@ -137,14 +137,6 @@ public class OrganizationApi  {
 
 	}
 
-    @OPTIONS    
-    @Path("/organizations/{repository}")
-    @Hidden
-
-    public Response options01() {
-    		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-    }
-    
     @PUT
     @Path("/organizations/{repository}/{organization}")
         
@@ -253,13 +245,6 @@ public class OrganizationApi  {
     	}  catch (Throwable t) {
     		return ErrorResponse.createResponse(t);
     	}
-    }
-    @OPTIONS    
-    @Path("/organizations/{repository}/{organization}")
-    @Hidden
-
-    public Response options02() {
-    		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, PUT, DELETE").build();
     }
 }
 

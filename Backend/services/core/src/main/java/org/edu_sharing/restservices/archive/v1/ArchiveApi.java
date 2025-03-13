@@ -66,16 +66,7 @@ public class ArchiveApi {
 		return search(repository,pattern,null,maxItems,skipCount,sortProperties,sortAscending,new Filter(propertyFilter));
 		
 	}
-	
-	@OPTIONS    
-	@Path("/search/{repository}/{pattern}")
-    @Hidden
 
-	public Response options() {
-		
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-	}
-	
 	@GET
 	@Path("/search/{repository}/{pattern}/{person}")
 	
@@ -103,16 +94,7 @@ public class ArchiveApi {
 		return search(repository, pattern, person, maxItems, skipCount,sortProperties,sortAscending, new Filter(propertyFilter));
 	}
 	
-	@OPTIONS    
-	@Path("/search/{repository}/{pattern}/{person}")
-    @Hidden
 
-	public Response options1() {
-		
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-	}
-	
-	
 	private Response search(String repository,
 			String pattern, 
 			String user,
@@ -187,16 +169,7 @@ public class ArchiveApi {
     		return ErrorResponse.createResponse(t);
     	}
 	}
-	
-	@OPTIONS    
-	@Path("/purge/{repository}/{archivedNodeId}")
-    @Hidden
 
-	public Response options2() {
-		
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, DELETE").build();
-	}
-	
 	@POST
 	@Path("/restore/{repository}")
 	
@@ -226,14 +199,4 @@ public class ArchiveApi {
     		return ErrorResponse.createResponse(t);
     	}
 	}
-	
-	@OPTIONS    
-	@Path("/restore/{repository}/{archivedNodeId}/{target}")
-    @Hidden
-
-	public Response options3() {
-		
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
-	}
-	
 }

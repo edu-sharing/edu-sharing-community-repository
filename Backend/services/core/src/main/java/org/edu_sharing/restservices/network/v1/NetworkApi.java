@@ -70,14 +70,6 @@ public class NetworkApi {
 
     }
 
-    @OPTIONS
-    @Path("/repositories")
-    @Hidden
-
-    public Response options() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-    }
     @GET
     @Path("/service")
     @Operation(summary = "Get own service.", description = "Get the servic entry from the current repository.")

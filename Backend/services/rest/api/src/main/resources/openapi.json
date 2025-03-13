@@ -4975,17 +4975,6 @@
           }
         }
       },
-      "options": {
-        "operationId": "options1",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
       "put": {
         "operationId": "addApplication_1",
         "parameters": [
@@ -5270,19 +5259,6 @@
         }
       }
     },
-    "/admin/v1/cacheInfo/{id}": {
-      "options": {
-        "operationId": "options5",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      }
-    },
     "/admin/v1/catalina": {
       "get": {
         "operationId": "getCatalinaOut",
@@ -5307,33 +5283,11 @@
             "description": "default response"
           }
         }
-      },
-      "options": {
-        "operationId": "options11",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
       }
     },
     "/admin/v1/clusterInfos": {
       "get": {
         "operationId": "getClusters",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
-      "options": {
-        "operationId": "options12",
         "responses": {
           "default": {
             "content": {
@@ -5530,33 +5484,11 @@
             "description": "default response"
           }
         }
-      },
-      "options": {
-        "operationId": "options13",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
       }
     },
     "/admin/v1/globalGroups": {
       "get": {
         "operationId": "getGlobalGroups",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
-      "options": {
-        "operationId": "options6",
         "responses": {
           "default": {
             "content": {
@@ -5672,17 +5604,6 @@
             }
           }
         ],
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
-      "options": {
-        "operationId": "options7",
         "responses": {
           "default": {
             "content": {
@@ -5822,17 +5743,6 @@
             "description": "default response"
           }
         }
-      },
-      "options": {
-        "operationId": "options8",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
       }
     },
     "/admin/v1/import/oai/xml": {
@@ -5879,17 +5789,6 @@
       }
     },
     "/admin/v1/import/refreshCache/{folder}": {
-      "options": {
-        "operationId": "options9",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
       "post": {
         "operationId": "refreshCache",
         "parameters": [
@@ -5909,19 +5808,6 @@
             }
           }
         ],
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      }
-    },
-    "/admin/v1/job": {
-      "options": {
-        "operationId": "options14",
         "responses": {
           "default": {
             "content": {
@@ -6211,17 +6097,6 @@
             "description": "default response"
           }
         }
-      },
-      "options": {
-        "operationId": "options03",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
       }
     },
     "/admin/v1/lucene/export": {
@@ -6387,31 +6262,9 @@
             "description": "default response"
           }
         }
-      },
-      "options": {
-        "operationId": "options10",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
       }
     },
     "/admin/v1/refreshAppInfo": {
-      "options": {
-        "operationId": "options",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
       "post": {
         "operationId": "refreshAppInfo",
         "responses": {
@@ -6504,31 +6357,9 @@
             "description": "default response"
           }
         }
-      },
-      "options": {
-        "operationId": "options2",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
       }
     },
     "/admin/v1/serverUpdate/run/{id}": {
-      "options": {
-        "operationId": "options3",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
       "post": {
         "operationId": "serverUpdateList_1",
         "parameters": [
@@ -6738,19 +6569,6 @@
         }
       }
     },
-    "/archive/v1/purge/{repository}/{archivedNodeId}": {
-      "options": {
-        "operationId": "options2_1",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      }
-    },
     "/archive/v1/restore/{repository}": {
       "post": {
         "operationId": "restore",
@@ -6781,19 +6599,6 @@
             }
           }
         ],
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      }
-    },
-    "/archive/v1/restore/{repository}/{archivedNodeId}/{target}": {
-      "options": {
-        "operationId": "options3_1",
         "responses": {
           "default": {
             "content": {
@@ -6879,17 +6684,6 @@
             "description": "default response"
           }
         }
-      },
-      "options": {
-        "operationId": "options_1",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
       }
     },
     "/archive/v1/search/{repository}/{pattern}/{person}": {
@@ -6967,30 +6761,6 @@
             }
           }
         ],
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
-      "options": {
-        "operationId": "options1_1",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      }
-    },
-    "/authentication/v1": {
-      "options": {
-        "operationId": "options_2",
         "responses": {
           "default": {
             "content": {
@@ -7440,17 +7210,6 @@
             "description": "default response"
           }
         }
-      },
-      "options": {
-        "operationId": "options01",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
       }
     },
     "/collection/v1/collections/{repository}/children/proposals/collections": {
@@ -7703,17 +7462,6 @@
           }
         }
       },
-      "options": {
-        "operationId": "options01_1",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
       "put": {
         "operationId": "updateCollection",
         "parameters": [
@@ -7754,17 +7502,6 @@
       }
     },
     "/collection/v1/collections/{repository}/{collection}/children": {
-      "options": {
-        "operationId": "options02",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
       "post": {
         "operationId": "createCollection",
         "parameters": [
@@ -8139,19 +7876,6 @@
             }
           }
         },
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      }
-    },
-    "/collection/v1/collections/{repository}/{collection}/references": {
-      "options": {
-        "operationId": "options03_1",
         "responses": {
           "default": {
             "content": {
@@ -8593,17 +8317,6 @@
             "description": "default response"
           }
         }
-      },
-      "options": {
-        "operationId": "options04",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
       }
     },
     "/feedback/v1/feedback/{repository}/{node}/add": {
@@ -8858,17 +8571,6 @@
             "description": "default response"
           }
         }
-      },
-      "options": {
-        "operationId": "options05",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
       }
     },
     "/iam/v1/groups/{repository}/{group}": {
@@ -8928,17 +8630,6 @@
             }
           }
         ],
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
-      "options": {
-        "operationId": "options06",
         "responses": {
           "default": {
             "content": {
@@ -9121,17 +8812,6 @@
           }
         }
       },
-      "options": {
-        "operationId": "options09",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
       "put": {
         "operationId": "addMembership",
         "parameters": [
@@ -9171,17 +8851,6 @@
       }
     },
     "/iam/v1/groups/{repository}/{group}/profile": {
-      "options": {
-        "operationId": "options07",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
       "put": {
         "operationId": "changeGroupProfile",
         "parameters": [
@@ -9528,17 +9197,6 @@
             "description": "default response"
           }
         }
-      },
-      "options": {
-        "operationId": "options01_2",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
       }
     },
     "/iam/v1/people/{repository}/{person}": {
@@ -9598,17 +9256,6 @@
             }
           }
         ],
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
-      "options": {
-        "operationId": "options02_1",
         "responses": {
           "default": {
             "content": {
@@ -9755,17 +9402,6 @@
       }
     },
     "/iam/v1/people/{repository}/{person}/credential": {
-      "options": {
-        "operationId": "options04_1",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
       "put": {
         "operationId": "changeUserPassword",
         "parameters": [
@@ -10110,17 +9746,6 @@
       }
     },
     "/iam/v1/people/{repository}/{person}/profile": {
-      "options": {
-        "operationId": "options03_2",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
       "put": {
         "operationId": "changeUserProfile",
         "parameters": [
@@ -10312,17 +9937,6 @@
       }
     },
     "/knowledge/v1/analyze/jobs": {
-      "options": {
-        "operationId": "options1_2",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
       "post": {
         "operationId": "runAnalyzingJob",
         "parameters": [
@@ -10364,17 +9978,6 @@
             }
           }
         ],
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
-      "options": {
-        "operationId": "options2_2",
         "responses": {
           "default": {
             "content": {
@@ -11339,17 +10942,6 @@
             "description": "default response"
           }
         }
-      },
-      "options": {
-        "operationId": "options2_3",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
       }
     },
     "/mds/v1/metadatasets/{repository}/{metadataset}/values": {
@@ -12013,17 +11605,6 @@
             "description": "default response"
           }
         }
-      },
-      "options": {
-        "operationId": "options_3",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
       }
     },
     "/network/v1/service": {
@@ -12114,17 +11695,6 @@
       }
     },
     "/node/v1/nodes/{repository}": {
-      "options": {
-        "operationId": "options10_1",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
       "post": {
         "operationId": "getNodes",
         "parameters": [
@@ -12252,17 +11822,6 @@
             }
           }
         ],
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
-      "options": {
-        "operationId": "options02_2",
         "responses": {
           "default": {
             "content": {
@@ -12504,17 +12063,6 @@
           }
         }
       },
-      "options": {
-        "operationId": "options03_3",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
       "post": {
         "operationId": "createChild",
         "parameters": [
@@ -12606,17 +12154,6 @@
       }
     },
     "/node/v1/nodes/{repository}/{node}/children/_copy": {
-      "options": {
-        "operationId": "options04_2",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
       "post": {
         "operationId": "createChildByCopying",
         "parameters": [
@@ -12707,17 +12244,6 @@
       }
     },
     "/node/v1/nodes/{repository}/{node}/children/_move": {
-      "options": {
-        "operationId": "options05_1",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
       "post": {
         "operationId": "createChildByMoving",
         "parameters": [
@@ -12756,17 +12282,6 @@
       }
     },
     "/node/v1/nodes/{repository}/{node}/content": {
-      "options": {
-        "operationId": "options06_1",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
       "post": {
         "operationId": "changeContent_1",
         "parameters": [
@@ -12994,17 +12509,6 @@
             }
           }
         ],
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
-      "options": {
-        "operationId": "options01_3",
         "responses": {
           "default": {
             "content": {
@@ -13419,17 +12923,6 @@
           }
         }
       },
-      "options": {
-        "operationId": "options11_1",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
       "post": {
         "operationId": "setPermission",
         "parameters": [
@@ -13592,17 +13085,6 @@
       }
     },
     "/node/v1/nodes/{repository}/{node}/prepareUsage": {
-      "options": {
-        "operationId": "options12_1",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
       "post": {
         "operationId": "prepareUsage",
         "parameters": [
@@ -14275,17 +13757,6 @@
             "description": "default response"
           }
         }
-      },
-      "options": {
-        "operationId": "options07_1",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
       }
     },
     "/node/v1/nodes/{repository}/{node}/versions/metadata": {
@@ -14330,17 +13801,6 @@
       }
     },
     "/node/v1/nodes/{repository}/{node}/versions/{major}/{minor}/_revert": {
-      "options": {
-        "operationId": "options09_1",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
       "put": {
         "operationId": "revertVersion",
         "parameters": [
@@ -14438,17 +13898,6 @@
             }
           }
         ],
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
-      "options": {
-        "operationId": "options08",
         "responses": {
           "default": {
             "content": {
@@ -14844,17 +14293,6 @@
             "description": "default response"
           }
         }
-      },
-      "options": {
-        "operationId": "options01_4",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
       }
     },
     "/organization/v1/organizations/{repository}/{organization}": {
@@ -14907,17 +14345,6 @@
             }
           }
         ],
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
-      "options": {
-        "operationId": "options02_3",
         "responses": {
           "default": {
             "content": {
@@ -15917,17 +15344,6 @@
             }
           }
         ],
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
-      "options": {
-        "operationId": "options02_4",
         "responses": {
           "default": {
             "content": {
@@ -17805,17 +17221,6 @@
             "description": "default response"
           }
         }
-      },
-      "options": {
-        "operationId": "options2_4",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
       }
     },
     "/usage/v1/usages/node/{nodeId}": {
@@ -17831,17 +17236,6 @@
             }
           }
         ],
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
-      "options": {
-        "operationId": "options3_2",
         "responses": {
           "default": {
             "content": {
@@ -17998,17 +17392,6 @@
             }
           }
         ],
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        }
-      },
-      "options": {
-        "operationId": "options1_3",
         "responses": {
           "default": {
             "content": {

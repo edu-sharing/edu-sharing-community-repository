@@ -224,14 +224,6 @@ public class AdminApi {
         }
     }
 
-    @OPTIONS
-    @Path("/refreshAppInfo")
-    @Hidden
-
-    public Response options() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
-    }
 
     @GET
     @Path("/applications")
@@ -493,14 +485,6 @@ public class AdminApi {
         }
     }
 
-    @OPTIONS
-    @Path("/applications")
-    @Hidden
-
-    public Response options1() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, PUT").build();
-    }
 
     @GET
     @Path("/serverUpdate/list")
@@ -523,14 +507,6 @@ public class AdminApi {
         }
     }
 
-    @OPTIONS
-    @Path("/serverUpdate/list")
-    @Hidden
-
-    public Response options2() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-    }
 
     @POST
     @Path("/serverUpdate/run/{id}")
@@ -555,15 +531,6 @@ public class AdminApi {
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
         }
-    }
-
-    @OPTIONS
-    @Path("/serverUpdate/run/{id}")
-    @Hidden
-
-    public Response options3() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
     }
 
 
@@ -681,15 +648,6 @@ public class AdminApi {
         }
     }
 
-    @OPTIONS
-    @Path("/cacheInfo/{id}")
-    @Hidden
-
-    public Response options5() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-    }
-
     @GET
     @Path("/globalGroups")
 
@@ -712,15 +670,6 @@ public class AdminApi {
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
         }
-    }
-
-    @OPTIONS
-    @Path("/globalGroups")
-    @Hidden
-
-    public Response options6() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
     }
 
     @POST
@@ -862,15 +811,6 @@ public class AdminApi {
         }
     }
 
-    @OPTIONS
-    @Path("/import/oai")
-    @Hidden
-
-    public Response options7() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST, DELETE").build();
-    }
-
     @GET
     @Path("/import/oai/classes")
 
@@ -891,15 +831,6 @@ public class AdminApi {
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
         }
-    }
-
-    @OPTIONS
-    @Path("/import/oai/classes")
-    @Hidden
-
-    public Response options8() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
     }
 
     @POST
@@ -923,15 +854,6 @@ public class AdminApi {
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
         }
-    }
-
-    @OPTIONS
-    @Path("/import/refreshCache/{folder}")
-    @Hidden
-
-    public Response options9() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
     }
 
     @DELETE
@@ -982,15 +904,6 @@ public class AdminApi {
         }
     }
 
-    @OPTIONS
-    @Path("/propertyToMds")
-    @Hidden
-
-    public Response options10() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-    }
-
     @GET
     @Path("/clusterInfo")
     @Operation(summary = "Get information about the Cluster", description = "Get information the Cluster")
@@ -1010,15 +923,6 @@ public class AdminApi {
         }
     }
 
-    @OPTIONS
-    @Path("/clusterInfo")
-    @Hidden
-
-    public Response options11() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-    }
-
     @GET
     @Path("/clusterInfos")
     @Operation(summary = "Get information about the Cluster", description = "Get information the Cluster")
@@ -1036,15 +940,6 @@ public class AdminApi {
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
         }
-    }
-
-    @OPTIONS
-    @Path("/clusterInfos")
-    @Hidden
-
-    public Response options12() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
     }
 
     @POST
@@ -1097,15 +992,6 @@ public class AdminApi {
         }
     }
 
-    @OPTIONS
-    @Path("/export/lom")
-    @Hidden
-
-    public Response options13() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-    }
-
     @POST
     @Path("/job/{jobClass}")
     @Operation(summary = "Start a Job.", description = "Start a Job.")
@@ -1155,15 +1041,6 @@ public class AdminApi {
             return ErrorResponse.createResponse(e);
         }
 
-    }
-
-    @OPTIONS
-    @Path("/job")
-    @Hidden
-
-    public Response options14() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
     }
 
     @GET
@@ -1284,15 +1161,6 @@ public class AdminApi {
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
         }
-    }
-
-    @OPTIONS
-    @Path("/lucene")
-    @Hidden
-
-    public Response options03() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
     }
 
     @GET

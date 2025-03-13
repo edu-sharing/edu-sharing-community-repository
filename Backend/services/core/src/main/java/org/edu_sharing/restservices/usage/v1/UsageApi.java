@@ -67,13 +67,6 @@ public class UsageApi {
 		}
 	}
 
-	@OPTIONS
-	@Path("/usages/{appId}")
-	@Hidden
-	public Response options1() {
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS,  GET").build();
-	}
-
 	@GET
 	@Path("/usages/course/{appId}/{courseId}")
 
@@ -105,14 +98,6 @@ public class UsageApi {
 		}
 	}
 
-	@OPTIONS
-	@Path("/usages/course/{appId}/{courseId}")
-	@Hidden
-	public Response options2() {
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS,  GET").build();
-	}
-	
-	
 	@GET
 	@Path("/usages/node/{nodeId}")
 
@@ -136,13 +121,6 @@ public class UsageApi {
 		}
 	}
 
-	@OPTIONS
-	@Path("/usages/node/{nodeId}")
-	@Hidden
-	public Response options3() {
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS,  GET").build();
-	}
-	
 	@GET
 	@Path("/usages/node/{nodeId}/collections")
 

@@ -113,16 +113,6 @@ public class IamApi {
         }
     }
 
-
-    @OPTIONS
-    @Path("/people/{repository}")
-    @Hidden
-
-    public Response options01() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-    }
-
     @GET
     @Path("/people/{repository}/{person}")
     @Operation(summary = "Get the user.", description = "Get the user. (Not all information are feteched for foreign profiles if current user is not an admin)")
@@ -575,15 +565,6 @@ public class IamApi {
         }
     }
 
-    @OPTIONS
-    @Path("/people/{repository}/{person}")
-    @Hidden
-
-    public Response options02() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET, POST, DELETE").build();
-    }
-
     @PUT
 
     @Path("/people/{repository}/{person}/profile")
@@ -684,15 +665,6 @@ public class IamApi {
         }
     }
 
-    @OPTIONS
-    @Path("/people/{repository}/{person}/profile")
-    @Hidden
-
-    public Response options03() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, PUT").build();
-    }
-
     @PUT
 
     @Path("/people/{repository}/{person}/credential")
@@ -744,15 +716,6 @@ public class IamApi {
             logger.error(t.getMessage(), t);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
         }
-    }
-
-    @OPTIONS
-    @Path("/people/{repository}/{person}/credential")
-    @Hidden
-
-    public Response options04() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, PUT").build();
     }
 
     @GET
@@ -823,16 +786,6 @@ public class IamApi {
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
         }
-    }
-
-
-    @OPTIONS
-    @Path("/groups/{repository}")
-    @Hidden
-
-    public Response options05() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
     }
 
     @GET
@@ -967,15 +920,6 @@ public class IamApi {
         }
     }
 
-    @OPTIONS
-    @Path("/groups/{repository}/{group}")
-    @Hidden
-
-    public Response options06() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET, POST, DELETE").build();
-    }
-
     @PUT
 
     @Path("/groups/{repository}/{group}/profile")
@@ -1009,15 +953,6 @@ public class IamApi {
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
         }
-    }
-
-    @OPTIONS
-    @Path("/groups/{repository}/{group}/profile")
-    @Hidden
-
-    public Response options07() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, PUT").build();
     }
 
     @POST
@@ -1402,15 +1337,6 @@ public class IamApi {
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
         }
-    }
-
-    @OPTIONS
-    @Path("/groups/{repository}/{group}/members/{member}")
-    @Hidden
-
-    public Response options09() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, PUT, DELETE").build();
     }
 
 

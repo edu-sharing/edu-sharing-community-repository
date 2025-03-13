@@ -236,13 +236,6 @@ public class LoginApi {
         }
     }
 
-    @OPTIONS
-    @Hidden
-    public Response options() {
-
-        return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-    }
-
     static List<String> disallowedProps = Arrays.asList(new String[]{CCConstants.CM_PROP_PERSON_SIZE_QUOTA});
 
 
