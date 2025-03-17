@@ -26,6 +26,10 @@ ul {
 }
 
 .checkboxes-group {
+    ul {
+        list-style-type: none;
+        padding-inline-start: 0;
+    }
     &:not(.vertical) {
         display: flex;
         flex-wrap: wrap;

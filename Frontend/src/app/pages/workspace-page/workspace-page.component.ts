@@ -724,7 +724,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
     }
 
     searchGlobal(query: string) {
-        this.routeTo(this.root, null, query);
+        this.routeTo('MY_FILES', null, query);
     }
 
     private openDirectoryFromRoute(params: any = null) {
@@ -759,7 +759,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
                     },
                     (error: any) => {
                         // no access to full path, try to "fake" current folder
-                        if (error.status === RestConstants.HTTP_FORBIDDEN) {
+                        if (error.status === RestConstants.HTTP_FORBIDDEN && this.currentFolder) {
                             this.path = [this.currentFolder];
                         } else {
                             this.path = [];

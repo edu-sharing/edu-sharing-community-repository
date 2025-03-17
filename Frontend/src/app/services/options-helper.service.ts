@@ -221,6 +221,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             // console.info('options helper refresh called but no data previously bound');
             return;
         }
+        this.enabledCache = {};
         if (this.subscriptions?.length) {
             this.subscriptions.forEach((s) => s.unsubscribe());
             this.subscriptions = [];
@@ -810,7 +811,12 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         addNodeToLTIPlatform.permissionsRightMode = NodesRightMode.Effective;
         addNodeToLTIPlatform.showAsAction = true;
         addNodeToLTIPlatform.showAlways = true;
-        addNodeToLTIPlatform.constrains = [Constrain.Files, Constrain.User, Constrain.LTIMode];
+        addNodeToLTIPlatform.constrains = [
+            Constrain.NoBulk,
+            Constrain.Files,
+            Constrain.User,
+            Constrain.LTIMode,
+        ];
         addNodeToLTIPlatform.group = DefaultGroups.Primary;
         addNodeToLTIPlatform.priority = 11;
         addNodeToLTIPlatform.permissions = [RestConstants.ACCESS_CC_PUBLISH];
@@ -1269,6 +1275,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             node = this.getObjects(node, data)[0];
             this.dialogs.openQrDialog({ node });
         });
+        qrCodeNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         qrCodeNode.constrains = [Constrain.NoBulk];
         qrCodeNode.scopes = [Scope.Render, Scope.CollectionsCollection];
         qrCodeNode.group = DefaultGroups.View;
@@ -1588,6 +1595,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                     item.properties &&
                     (!item.properties[RestConstants.CCM_PROP_IO_WWWURL] ||
                         !RestNetworkService.isFromHomeRepo(item)) &&
+                    (item.accessEffective || item.access)?.includes(
+                        RestConstants.PERMISSION_DOWNLOAD_CONTENT,
+                    ) &&
                     this.nodeHelper.referenceOriginalExists(item)
                 ) {
                     // bulk upload is not supported for remote nodes

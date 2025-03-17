@@ -28,7 +28,7 @@ export class DropdownComponent implements OnChanges {
      *
      * Can be null
      */
-    @Input() callbackObjects: Node[];
+    @Input() callbackObjects: Node[] = undefined;
 
     /**
      * Should disabled ("greyed out") options be shown or hidden?
@@ -48,7 +48,7 @@ export class DropdownComponent implements OnChanges {
     ngOnChanges(changes?: SimpleChanges): void {
         if (changes == null || changes?.options || changes?.callbackObjects) {
             this.options$.next(this.ui.filterValidOptions(Helper.deepCopyArray(this.options)));
-            if (this.callbackObjects) {
+            if (this.callbackObjects !== undefined) {
                 this.ui.updateOptionEnabledState(this.options$, this.callbackObjects);
             }
         }

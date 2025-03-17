@@ -34,7 +34,7 @@
     class="previous"
     *ngIf="canSwitchBack()"
     cdkMonitorElementFocus
-    (click)="switchPosition(getPosition() - 1)"
+    (click)="switchPosition(-1)"
   >
     <i esIcon="keyboard_arrow_left" [aria]="true"></i>
   </button>
@@ -42,7 +42,7 @@
     class="next"
     *ngIf="canSwitchForward()"
     cdkMonitorElementFocus
-    (click)="switchPosition(getPosition() + 1)"
+    (click)="switchPosition(+1)"
   >
     <i esIcon="keyboard_arrow_right" [aria]="true"></i>
   </button>

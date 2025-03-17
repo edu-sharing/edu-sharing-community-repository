@@ -911,6 +911,7 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE = "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE";
 
+	public final static String CCM_VALUE_TOOLPERMISSION_PREFIX = "TOOLPERMISSION_";
 	public final static String CCM_VALUE_TOOLPERMISSION_CONNECTOR_PREFIX = "TOOLPERMISSION_CONNECTOR_";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_REPOSITORY_PREFIX = "TOOLPERMISSION_REPOSITORY_";
@@ -2277,6 +2278,9 @@ public class CCConstants {
 
 	public static final String ELASTICSEARCH_SYNONYMSET_PREFIX = "es-synonym-set";
 	public static final String ELASTICSEARCH_ANALYZER_PREFIX = "synonyms";
+
+	public static final String EDU_PASSWORD_KEYSTORE_NAME = "edupasswords";
+	public static final String EDU_PASSWORD_USERNAMEHASH = "usernamehash";
 
 	/**
 	 * Methos that set all the Properties for ProfileSettings
