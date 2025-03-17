@@ -9,28 +9,33 @@ import { RenderDataRequestWithToken } from 'ngx-rendering-service-api';
     styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnChanges {
-    @Input() encodedNode: string;
+    @Input() encoded_node: string;
     @Input() signature: string;
     @Input() jwt: string;
-    @Input() renderUrl: string;
-    @Input() encodedUser: string;
+    @Input() render_url: string;
+    @Input() encoded_user: string;
+    @Input() service_worker_url: string;
 
     node = signal<Node>(null);
     request = signal<RenderDataRequestWithToken>(null);
+    serviceWorkerUrl = signal<string>(null);
 
     constructor(private renderHelperService: RenderHelperService) {}
 
     async ngOnChanges(changes: SimpleChanges) {
-        if (changes.node_id) {
+        console.log('Changes:');
+        console.log(changes);
+        if (changes.encoded_node) {
             const data = await this.renderHelperService.getRenderDataForLms(
-                this.encodedNode,
+                this.encoded_node,
                 this.signature,
                 this.jwt,
-                this.renderUrl,
-                this.encodedUser,
+                this.render_url,
+                this.encoded_user,
             );
             this.node.set(data.node);
             this.request.set(data.request);
+            this.serviceWorkerUrl.set(this.service_worker_url);
         }
     }
 }

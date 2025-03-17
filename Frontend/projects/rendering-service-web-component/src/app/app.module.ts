@@ -4,7 +4,7 @@ import { AppComponent } from './app.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { EduSharingApiModule } from 'ngx-edu-sharing-api';
-import { EduSharingUiModule, TranslationsModule } from 'ngx-edu-sharing-ui';
+import { EduSharingUiModule, TranslationsModule, RenderHelperService } from 'ngx-edu-sharing-ui';
 import { RenderComponent, RenderingServiceLibModule } from 'ngx-rendering-service-lib';
 import { environment } from '../environments/environment';
 
@@ -18,7 +18,7 @@ import { environment } from '../environments/environment';
         TranslationsModule,
         RenderingServiceLibModule,
     ],
-    providers: [provideHttpClient()],
+    providers: [provideHttpClient(), RenderHelperService],
 })
 export class AppModule implements DoBootstrap {
     constructor(injector: Injector) {

@@ -1,4 +1,9 @@
 {
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    }
+  ],
   "compilerOptions": {
     "baseUrl": "./",
     "noImplicitAny": true,

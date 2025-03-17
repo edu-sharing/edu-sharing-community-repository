@@ -43,6 +43,7 @@
     "src/app/extension"
   ],
   "dependencies": {
+    "@angular-builders/custom-webpack": "18.0.0",
     "@angular-slider/ngx-slider": "^18.0.0",
     "@angular/animations": "^18.2.12",
     "@angular/cdk": "^18.2.12",
@@ -72,8 +73,8 @@
     "ng2-pdfjs-viewer": "^18.0.0",
     "ngx-build-plus": "^18.0.0",
     "ngx-monaco-editor-v2": "^18.1.0",
-    "ngx-rendering-service-api": "^0.0.29",
-    "ngx-rendering-service-lib": "^0.0.49",
+    "ngx-rendering-service-api": "^0.0.31",
+    "ngx-rendering-service-lib": "^0.0.58",
     "rxjs": "^7.8.1",
     "tinymce": "^7.6.0",
     "tinymce-i18n": "^23.9.11",

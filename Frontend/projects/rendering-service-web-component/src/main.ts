@@ -5,7 +5,7 @@ import { AppModule } from './app/app.module';
 import { environment } from './environments/environment';
 
 import 'zone.js';
-
+/**
 if (environment.production) {
     enableProdMode();
 }
@@ -13,3 +13,11 @@ if (environment.production) {
 platformBrowserDynamic()
     .bootstrapModule(AppModule)
     .catch((err) => console.error(err));
+
+*/
+export function init() {
+    console.log('Howdy!');
+    platformBrowserDynamic()
+        .bootstrapModule(AppModule)
+        .catch((err) => console.error(err));
+}

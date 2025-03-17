@@ -4,6 +4,8 @@ module.exports = {
         runtimeChunk: false,
     },
     output: {
-        // filename: 'edu-sharing-render-component.js',
+        umdNamedDefine: true,
+        library: 'esrendering',
+        libraryTarget: 'amd',
     },
 };
