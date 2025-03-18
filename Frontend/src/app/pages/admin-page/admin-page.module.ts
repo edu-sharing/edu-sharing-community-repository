@@ -37,5 +37,6 @@ import { AdminContextComponent } from './context/context.component';
         MdsModule,
         MonacoEditorModule.forRoot({ baseUrl: './assets/monaco/min/vs/' }),
     ],
+    exports: [CodeEditorComponent],
 })
 export class AdminPageModule {}

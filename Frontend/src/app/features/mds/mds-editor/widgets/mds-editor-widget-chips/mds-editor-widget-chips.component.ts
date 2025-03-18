@@ -29,6 +29,7 @@ import {
     shareReplay,
     startWith,
     switchMap,
+    tap,
     throttleTime,
 } from 'rxjs/operators';
 import { Toast, ToastType } from '../../../../../services/toast';
@@ -364,7 +365,7 @@ export class MdsEditorWidgetChipsComponent
                         typeof value === 'string' || value === null,
                 ),
                 // Debounce user input, but pass on a cleared input field immediately.
-                debounce((value) => (value !== null ? timer(200) : EMPTY)),
+                debounce((value) => (value !== null ? timer(200) : timer(0))),
                 distinctUntilChanged(),
             ) as Observable<string | null>,
             this.chipsControl.valueChanges.pipe(

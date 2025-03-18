@@ -46,6 +46,7 @@ import { MdsEditorWidgetSuggestionChipsComponent } from '../widgets/mds-editor-w
 import { ViewInstanceService } from './view-instance.service';
 import { JumpMark, JumpMarksService } from '../../../../services/jump-marks.service';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
+import { MdsEditInterface } from '../mds-editor-single-widget/mds-editor-single-widget.component';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
@@ -77,7 +78,9 @@ type NativeWidgetClass = {
     ],
     providers: [ViewInstanceService],
 })
-export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
+export class MdsEditorViewComponent
+    implements OnInit, AfterViewInit, OnChanges, OnDestroy, MdsEditInterface
+{
     private static readonly nativeWidgets = NativeWidgets;
     private static readonly suggestionWidgetComponents: {
         [type in MdsWidgetType]?: Type<object>;
@@ -110,7 +113,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         private mdsEditorInstance: MdsEditorInstanceService,
         private ngZone: NgZone,
         private viewInstance: ViewInstanceService,
-        private injector: Injector,
+        public injector: Injector,
         @Optional() private jumpMarks: JumpMarksService,
     ) {
         this.isEmbedded = this.mdsEditorInstance.isEmbedded;
@@ -217,11 +220,17 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 if (widgets.length >= 1) {
                     // Possibly inject multiple widgets to allow dynamic switching via conditions.
                     for (const widget of widgets) {
-                        this.injectWidget(
+                        const widgetComponent = this.getWidgetComponent(
+                            widget,
+                            this.mdsEditorInstance.editorMode,
+                        );
+                        this.mdsEditorInstance.injectWidget(
                             widget,
                             element,
-                            this.mdsEditorInstance.editorMode,
+                            widgetComponent,
                             widgets.length === 1 ? 'replace' : 'append',
+                            this,
+                            this.container,
                         );
                     }
                     if (element.parentNode) {
@@ -328,65 +337,6 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         });
     }
 
-    /**
-     *
-     * @param widget
-     * @param element
-     * @param editorMode
-     * @param mode
-     * replace: Replace the given element
-     * append: Append it at the given elment, but do not delete the element
-     * @private
-     */
-    private injectWidget(
-        widget: Widget,
-        element: Element,
-        editorMode = this.mdsEditorInstance.editorMode,
-        mode: 'append' | 'replace' = 'replace',
-    ): {
-        htmlElement: HTMLElement;
-        instance: MdsEditorWidgetBase;
-    } {
-        return this.ngZone.runOutsideAngular<any>(() => {
-            element = replaceElementWithDiv(element, mode);
-            const htmlRef = this.container.nativeElement.querySelector(
-                widget.definition.id.replace(':', '\\:'),
-            );
-            const WidgetComponent = this.getWidgetComponent(widget, editorMode);
-            if (WidgetComponent === undefined) {
-                return UIHelper.injectAngularComponent(
-                    this.factoryResolver,
-                    this.containerRef,
-                    MdsEditorWidgetErrorComponent,
-                    element,
-                    {
-                        widgetName: widget.definition.caption,
-                        reason: `Widget for type ${widget.definition.type} is not implemented`,
-                    },
-                    { replace: false },
-                    this.injector,
-                ).instance;
-            } else if (WidgetComponent === null) {
-                return null;
-            }
-            return {
-                htmlElement: element,
-                instance: UIHelper.injectAngularComponent(
-                    this.factoryResolver,
-                    this.containerRef,
-                    WidgetComponent,
-                    element,
-                    {
-                        widget,
-                        view: this,
-                    },
-                    { replace: false },
-                    this.injector,
-                ).instance,
-            };
-        });
-    }
-
     private getWidgetComponent(widget: Widget, editorMode: EditorMode): Type<object> {
         if (this.overrideWidget) {
             return this.overrideWidget;
@@ -438,7 +388,15 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
             mdsWidgetComponent.widget.definition,
             this.view.id,
         );
-        const injected = this.injectWidget(widget, targetElement, 'nodes', 'replace');
+        const widgetComponent = this.getWidgetComponent(widget, 'nodes');
+        const injected = this.mdsEditorInstance.injectWidget(
+            widget,
+            targetElement,
+            widgetComponent,
+            'replace',
+            this,
+            this.container,
+        );
         widget.initWithNodes(this.mdsEditorInstance.nodes$.value);
         void this.mdsEditorInstance.fetchDisplayValues(widget);
         // timeout to wait for view inflation and set the focus
