@@ -291,8 +291,8 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                     .must(must -> must.bool(qbNoFilter.build()))
                     .must(globalConditions);
 
-            List<MetadataQueryParameter.MetadataQueryFacet> fieldName = Collections.singletonList(
-                    new MetadataQueryParameter.MetadataQueryFacet(
+            List<MetadataQueryParameter.MetadataQueryFacetItem> fieldName = Collections.singletonList(
+                    new MetadataQueryParameter.MetadataQueryFacetItem(
                             (nonKeywordFacets.contains(facet)
                                     ? "properties." + facet
                                     : "properties." + facet+".keyword"), null)

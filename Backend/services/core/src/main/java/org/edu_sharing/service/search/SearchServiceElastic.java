@@ -387,7 +387,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     @NotNull
-    private List<NodeSearch.Facet> getFacets(MetadataSet mds, MetadataQuery queryData, Map<String, Aggregation> aggregations, SearchResponse<Map> resp) {
+    private List<NodeSearch.Facet> getFacets(MetadataSet mds, MetadataQuery queryData, Map<String, Aggregation> aggregations, ResponseBody<Map> resp) {
         List<NodeSearch.Facet> facetsResult = new ArrayList<>();
         for (Map.Entry<String, Aggregate> a : resp.aggregations().entrySet()) {
             if (a.getValue().isFilter()) {
@@ -412,7 +412,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 if (a.getValue().isSterms()) {
                     Aggregation definition = aggregations.get(a.getKey());
                     StringTermsAggregate sterms = a.getValue().sterms();
-                    facetsResult.add(getFacet(a.getKey(), sterms, definition));
+                    facetsResult.add(getFacet(mds,queryData, a.getKey(), sterms, definition));
                 }
             }else {
                 logger.error("non supported aggregation " + a.getKey());
@@ -447,7 +447,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     private void setSumOtherDocCount(MetadataQuery queryData, String name, TermsAggregateBase<?> buckets, NodeSearch.Facet facet) {
-
+        if(queryData == null) return;
         facet.setSumOtherDocCount(buckets.sumOtherDocCount());
         MetadataQueryParameter metadataQueryParameter = queryData.findParameterByName(name);
         if (metadataQueryParameter == null) {
@@ -468,6 +468,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     private void sortFacetValues(MetadataSet mds, MetadataQuery queryData, String name, List<NodeSearch.Facet.Value> values) {
+        if(mds == null || queryData == null) return;
+
         MetadataWidget widget = mds.findWidget(name);
         Map<String, MetadataKey> valuesAsMap = widget.getValuesAsMap();
         MetadataQueryParameter metadataQueryParameter = queryData.findParameterByName(name);
@@ -536,10 +538,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
             searchToken.getSortDefinition().applyToSearchSourceBuilder(searchRequest);
         }
 
-        return fetchAllFromRequest(searchToken, searchRequest,null).getData();
+        return fetchAllFromRequest(mds,queryData,searchToken, searchRequest,null).getData();
     }
 
-    private @NotNull SearchResultNodeRef fetchAllFromRequest(SearchToken searchToken, SearchRequest.Builder searchRequest,Map<String,Aggregation> aggregations) throws IOException {
+    private @NotNull SearchResultNodeRef fetchAllFromRequest(MetadataSet mds, MetadataQuery queryData, SearchToken searchToken, SearchRequest.Builder searchRequest,Map<String,Aggregation> aggregations) throws IOException {
         SearchResultNodeRef sr = new SearchResultNodeRef();
         List<NodeRef> data = new ArrayList<>();
         sr.setData(data);
@@ -555,7 +557,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                             .withTransportOptions(this::getRequestOptions)
                             .search(searchRequest.build(), Map.class);
                     if(aggregations != null) {
-                        sr.setFacets(getFacets(aggregations,searchResponse));
+                        sr.setFacets(getFacets(mds,queryData,aggregations,searchResponse));
                     }
                 } else {
                     final String usedScrollId = scrollId;
@@ -1621,7 +1623,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         sr.setNodeCount((int) hits.total().value());
 
         if(aggregations != null){
-            sr.setFacets(getFacets(aggregations,searchResponse));
+            sr.setFacets(getFacets(null,null, aggregations,searchResponse));
         }
 
         return sr;
@@ -2124,7 +2126,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             sortDefinition.applyToSearchSourceBuilder(searchRequestBuilder);
         }
         SearchToken token = new SearchToken();
-        SearchResultNodeRef sr  = fetchAllFromRequest(token, searchRequestBuilder,aggregations);
+        SearchResultNodeRef sr  = fetchAllFromRequest(null,null,token, searchRequestBuilder,aggregations);
 
         return sr;
     }

@@ -329,7 +329,7 @@ public class ExcelLOMImporter {
 				NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, n.getNodeId());
 				Path path = serviceRegistry.getNodeService().getPath(nodeRef);
 				String displayPath = path.toDisplayPath(serviceRegistry.getNodeService(),serviceRegistry.getPermissionService());
-				String targetCollectionName = (String)nodeService.getProperty(targetCollectionNodeRef,ContentModel.PROP_NAME);
+				String targetCollectionName = (String)nodeService.getProperty(nodeRef,ContentModel.PROP_NAME);
 				displayPath += "/"+targetCollectionName;
 				logger.info("checking path for parent collection;\"" + parentCollection + "\";path:"+displayPath);
 				if(displayPath.contains(parentCollection) && displayPath.endsWith(targetCollection)){
