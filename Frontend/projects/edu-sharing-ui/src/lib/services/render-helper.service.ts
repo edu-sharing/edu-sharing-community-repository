@@ -34,6 +34,7 @@ export class RenderHelperService {
             this.nodeApiUnwrapped.getMetadataSigned({
                 repository: '-home-',
                 node: nodeId,
+                propertyFilter: ['-all-'],
             }),
         );
         const node = securedNode.node;
