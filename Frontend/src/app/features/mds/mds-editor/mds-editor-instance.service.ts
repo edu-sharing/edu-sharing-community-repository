@@ -1,4 +1,15 @@
-import { EventEmitter, Injectable, OnDestroy } from '@angular/core';
+import {
+    ApplicationRef,
+    ComponentFactoryResolver,
+    ElementRef,
+    EventEmitter,
+    Injectable,
+    Injector,
+    NgZone,
+    OnDestroy,
+    Type,
+    ViewContainerRef,
+} from '@angular/core';
 import {
     AboutService,
     AuthenticationService,
@@ -66,13 +77,20 @@ import {
     Values,
 } from '../types/types';
 import { MdsEditorCommonService } from './mds-editor-common.service';
-import { NativeWidgetComponent } from './mds-editor-view/mds-editor-view.component';
+import {
+    MdsEditorViewComponent,
+    NativeWidgetComponent,
+} from './mds-editor-view/mds-editor-view.component';
 import { parseAttributes } from './util/parse-attributes';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import { Helper } from '../../../core-module/rest/helper';
 import { MdsEditorWidgetCore } from './mds-editor-widget-core.directive';
 import { MdsWidgetTree } from './widgets/mds-editor-widget-tree/tree';
 import { SearchHelperService } from 'ngx-edu-sharing-ui';
+import { MdsEditorWidgetBase } from './widgets/mds-editor-widget-base';
+import { replaceElementWithDiv } from './util/replace-element-with-div';
+import { UIHelper } from '../../../core-ui-module/ui-helper';
+import { MdsEditorWidgetErrorComponent } from './widgets/mds-editor-widget-error/mds-editor-widget-error.component';
 
 export interface CompletionStatusField {
     widget: Widget;
@@ -362,6 +380,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
 
         async getSuggestedValues(searchString?: string): Promise<MdsWidgetValue[]> {
+            console.log('getSuggestedValues');
             if (this.definition.values) {
                 return this.getLocalSuggestedValues(searchString);
             } else {
@@ -723,6 +742,10 @@ export class MdsEditorInstanceService implements OnDestroy {
         private mdsEditorCommonService: MdsEditorCommonService,
         private mdsService: MdsService,
         private aboutService: AboutService,
+        private factoryResolver: ComponentFactoryResolver,
+        private injector: Injector,
+        private containerRef: ViewContainerRef,
+        private ngZone: NgZone,
         private restMdsService: RestMdsService,
         private configService: ConfigurationService,
         private authenticationService: AuthenticationService,
@@ -1552,6 +1575,9 @@ export class MdsEditorInstanceService implements OnDestroy {
     }
 
     private updateHasChanges(): void {
+        if (this.widgets.value === null) {
+            return;
+        }
         const someWidgetsHaveUserChanges = this.widgets.value.some(
             (widget) =>
                 widget.getHasChanged() && widget.getIsDirty() && widget.getStatus() !== 'DISABLED',
@@ -2031,6 +2057,60 @@ export class MdsEditorInstanceService implements OnDestroy {
     putWidgetState(widget: string, data: any) {
         this.state$.value.widgets[widget] = Helper.deepCopy(data);
         this.state$.next(this.state$.value);
+    }
+
+    /**
+     * replace: Replace the given element
+     * append: Append it at the given elment, but do not delete the element
+     */
+    public injectWidget(
+        widget: Widget,
+        element: Element,
+        widgetComponent: Type<Object>,
+        mode: 'append' | 'replace' = 'replace',
+        view?: MdsEditorViewComponent,
+        container?: ElementRef<HTMLDivElement>,
+    ): {
+        htmlElement: HTMLElement;
+        instance: MdsEditorWidgetBase;
+    } {
+        return this.ngZone.runOutsideAngular<any>(() => {
+            element = replaceElementWithDiv(element, mode);
+            const htmlRef = container?.nativeElement.querySelector(
+                widget.definition.id.replace(':', '\\:'),
+            );
+            if (widgetComponent === undefined) {
+                return UIHelper.injectAngularComponent(
+                    this.factoryResolver,
+                    this.containerRef,
+                    MdsEditorWidgetErrorComponent,
+                    element,
+                    {
+                        widgetName: widget.definition.caption,
+                        reason: `Widget for type ${widget.definition.type} is not implemented`,
+                    },
+                    { replace: false },
+                    view?.injector || this.injector,
+                ).instance;
+            } else if (widgetComponent === null) {
+                return null;
+            }
+            return {
+                htmlElement: element,
+                instance: UIHelper.injectAngularComponent(
+                    this.factoryResolver,
+                    this.containerRef,
+                    widgetComponent,
+                    element,
+                    {
+                        widget,
+                        view,
+                    },
+                    { replace: false },
+                    view?.injector || this.injector,
+                ).instance,
+            };
+        });
     }
 
     private registerLoginInfo() {

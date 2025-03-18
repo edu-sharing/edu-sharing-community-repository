@@ -10,12 +10,15 @@
   [matRippleDisabled]="true"
 >
   <div class="edit-wrapper">
-    <div *ngIf="!isEmpty() || !widget.definition.hideIfEmpty" class="widget-wrapper">
+    <div
+      *ngIf="!isEmpty() || !widget.definition.hideIfEmpty || isEditable()"
+      class="widget-wrapper"
+    >
       <div
         class="widget-label"
         [attr.role]="headingLevel ? 'heading' : null"
         [attr.aria-level]="headingLevel"
-        *ngIf="widget.definition.caption"
+        *ngIf="widget.definition.caption && showCaption"
       >
         {{ widget.definition.caption
         }}<span *ngIf="!headingLevel" class="cdk-visually-hidden">: </span>
@@ -23,7 +26,7 @@
       <div
         class="value-wrapper"
         [class.value-wrapper-edit]="isEditable()"
-        (click)="isEditable() ? view.injectEditField(this, editWrapper.children[0]) : null"
+        (click)="isEditable() ? startEdit($event) : null"
       >
         <div *ngIf="isEmpty()" class="widget-data widget-no-data widget-type-{{ basicType }}">
           -
