@@ -52,6 +52,7 @@ import { VirtualNode } from '../types/api-models';
 import { OptionsHelperDataService } from '../services/options-helper-data.service';
 import { UIService } from '../services/ui.service';
 import { switchMap, take, takeUntil } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
 
 @Component({
     selector: 'es-node-entries-wrapper',
@@ -86,6 +87,10 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Input() columns: ListItem[];
     @Input() configureColumns: boolean;
     @Input() checkbox = true;
+    /**
+     * emits when the user re-configures the columns
+     * should be used in order to save the new configuration
+     */
     @Output() columnsChange = new EventEmitter<ListItem[]>();
     @Input() globalOptions: OptionItem[];
     @Input() displayType = NodeEntriesDisplayType.Grid;
@@ -185,6 +190,12 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         if (this.primaryInstance) {
             this.optionsHelper.registerGlobalKeyboardShortcuts();
         }
+        this.entriesService.columnsSubject
+            .pipe(
+                takeUntil(this.destroyed),
+                filter((c) => c?.fromUser),
+            )
+            .subscribe((c) => this.columnsChange.emit(c.columns));
     }
 
     ngOnChanges(changes: { [key: string]: SimpleChange } = {}) {
@@ -194,7 +205,12 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.list = this;
         this.entriesService.dataSource = this.dataSource;
         this.entriesService.scope = this.scope;
-        this.entriesService.columns = this.columns;
+        if (changes.columns) {
+            this.entriesService.columnsSubject.next({
+                columns: this.columns,
+                fromUser: false,
+            });
+        }
         this.entriesService.configureColumns = this.configureColumns;
         this.entriesService.checkbox = this.checkbox;
         this.entriesService.displayType = this.displayType;
@@ -263,6 +279,10 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
 
     getDisplayType(): NodeEntriesDisplayType {
         return this.displayType;
+    }
+
+    onDisplayTypeChange() {
+        return this.displayTypeChange.asObservable();
     }
 
     setDisplayType(displayType: NodeEntriesDisplayType): void {
@@ -360,6 +380,9 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.ngOnChanges();
     }
 
+    selectAll() {
+        this.entriesService.selection.select(...this.entriesService.dataSource.getData());
+    }
     getSelection(): CustomSelectionModel<T> {
         return this.entriesService.selection;
     }

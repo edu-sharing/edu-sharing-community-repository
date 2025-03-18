@@ -437,7 +437,7 @@ public class NodeApi  {
 			SignedNode signedNode = nodeDao.getSignedNode();
 
 			String encodedSignedNode = encoder.encodeToString(signedNode.getNode().getBytes());
-			String encodedSignature = encoder.encodeToString(signedNode.getSignature().getBytes());
+			String encodedSignature = encoder.encodeToString(signedNode.getSignature());
 
 			SignedNodeEntry response = new SignedNodeEntry();
 			response.setNode(nodeDao.asNode());
@@ -840,14 +840,7 @@ public class NodeApi  {
     }
     
     
-    @OPTIONS    
-    @Path("/nodes/{repository}/{node}/metadata")
-    @Hidden
 
-    public Response options01() {
-    	
-    	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET, POST, PUT").build();
-    }
     
     @DELETE
     @Path("/nodes/{repository}/{node}")    
@@ -914,15 +907,6 @@ public class NodeApi  {
     		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
     	}
 
-    }
-    
-    @OPTIONS    
-    @Path("/nodes/{repository}/{node}")
-    @Hidden
-
-    public Response options02() {
-    	
-    	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, DELETE").build();
     }
 
     @GET
@@ -1300,8 +1284,9 @@ public class NodeApi  {
 	    @Parameter(description = "aspects of node" ) @QueryParam("aspects") List<String> aspects,
 	    @Parameter(description = "rename if the same node name exists", required = false, schema = @Schema(defaultValue="false")) @QueryParam("renameIfExists") Boolean renameIfExists,
 	    @Parameter(description = "comment, leave empty = no inital version", required=false ) @QueryParam("versionComment")  String versionComment,
-	    @Parameter(description = "properties, example: {\"{http://www.alfresco.org/model/content/1.0}name\": [\"test\"]}" , required=true ) HashMap<String, String[]> properties,	    
-	    @Parameter(description = "Association type, can be empty" , required=false ) @QueryParam("assocType") String assocType,
+	    @Parameter(description = "properties, example: {\"{http://www.alfresco.org/model/content/1.0}name\": [\"test\"]}" , required=true ) HashMap<String, String[]> properties,
+		@Parameter(description = "Association type, can be empty" , required=false ) @QueryParam("assocType") String assocType,
+		@Parameter(description = "accept only properties from the specific mds set" , required=false, schema = @Schema(defaultValue="true") ) @QueryParam("obeyMds") Boolean obeyMds,
 		@Context HttpServletRequest req) {
 
     	try {
@@ -1312,8 +1297,8 @@ public class NodeApi  {
 			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 	    	resolveURLTitle(properties);
 	    	NodeDao child = nodeDao.createChild(type, aspects, properties,
-	    			renameIfExists==null ? false : renameIfExists.booleanValue(),
-					assocType!=null && !assocType.trim().isEmpty() ? assocType : null);
+                    renameIfExists != null && renameIfExists,
+					assocType!=null && !assocType.trim().isEmpty() ? assocType : null, obeyMds == null || obeyMds);
 
 			if(versionComment!=null && !versionComment.isEmpty()){
 				child.createVersion(versionComment);
@@ -1414,14 +1399,7 @@ public class NodeApi  {
 	    	properties.putAll(info.getLrmiProperties());
 		}
 	}
-	@OPTIONS    
-    @Path("/nodes/{repository}/{node}/children")
-    @Hidden
 
-    public Response options03() {
-    	
-    	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET, POST").build();
-    }
 	@POST
 	@Path("/nodes/{repository}/{node}/children/_fork")
 
@@ -1507,16 +1485,7 @@ public class NodeApi  {
     	}
 
     }
-    
-    @OPTIONS    
-    @Path("/nodes/{repository}/{node}/children/_copy")
-    @Hidden
 
-    public Response options04() {
-    	
-    	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
-    }
-    
     @POST
     @Path("/nodes/{repository}/{node}/children/_move")    
     
@@ -1557,15 +1526,7 @@ public class NodeApi  {
     	}
 
     }
-        
-    @OPTIONS    
-    @Path("/nodes/{repository}/{node}/children/_move")
-    @Hidden
 
-    public Response options05() {
-    	
-    	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
-    }
     @POST
     @Path("/nodes/{repository}/{node}/preview")
     @Consumes({ "multipart/form-data" })
@@ -1744,14 +1705,7 @@ public class NodeApi  {
     	}
 
     }
-	@OPTIONS    
-	@Path("/nodes/{repository}/{node}/content")
-    @Hidden
 
-	public Response options06() {
-
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
-	}
 
     @GET
     @Path("/nodes/{repository}/{node}/versions")    
@@ -1786,17 +1740,6 @@ public class NodeApi  {
     		return ErrorResponse.createResponse(t);
     	}
 	  }
-    
-    
-	@OPTIONS    
-	@Path("/nodes/{repository}/{node}/versions")
-    @Hidden
-
-	public Response options07() {
-		
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-	}
-
 
 	@GET
 	@Path("/nodes/{repository}/{node}/versions/metadata")
@@ -1874,18 +1817,8 @@ public class NodeApi  {
     	}
 
     }
-    
-    
-	@OPTIONS    
-	@Path("/nodes/{repository}/{node}/versions/{major}/{minor}/metadata")
-    @Hidden
 
-	public Response options08() {
-		
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-	}
-
-    @PUT
+	@PUT
     @Path("/nodes/{repository}/{node}/versions/{major}/{minor}/_revert")    
     
     @Operation(summary = "Revert to node version.", description = "Revert to node version.")
@@ -1924,16 +1857,6 @@ public class NodeApi  {
     	}
 
     }
-    
-    
-	@OPTIONS    
-	@Path("/nodes/{repository}/{node}/versions/{major}/{minor}/_revert")    
-	@Hidden
-
-	public Response options09() {
-		
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, PUT").build();
-	}
 
     @POST
     @Path("/nodes/{repository}")    
@@ -1996,16 +1919,6 @@ public class NodeApi  {
 
     }
 
-    
-	@OPTIONS    
-	@Path("/nodes/{repository}")
-    @Hidden
-
-	public Response options10() {
-		
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-	}
-    
 	@GET
     @Path("/nodes/{repository}/{node}/permissions/{user}")    
     
@@ -2200,16 +2113,7 @@ public class NodeApi  {
 
     }
     
-	@OPTIONS    
-	@Path("/nodes/{repository}/{node}/permissions")
-    @Hidden
 
-	public Response options11() {
-		
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET, @POST").build();
-	}
-		
-	
 	  @POST
 	    @Path("/nodes/{repository}/{node}/prepareUsage")    
 	    
@@ -2263,17 +2167,7 @@ public class NodeApi  {
 	    	}
 
 	    }
-	    
-		@OPTIONS    
-		@Path("/nodes/{repository}/{node}/prepareUsage")
-	    @Hidden
 
-		public Response options12() {
-			
-			return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET, @POST").build();
-		}
-		
-		
 		@POST
 	    @Path("/nodes/{repository}/{node}/owner")    
 	    

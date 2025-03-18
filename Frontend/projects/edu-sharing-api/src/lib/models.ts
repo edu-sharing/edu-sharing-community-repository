@@ -13,6 +13,7 @@ export {
     ConnectorFileType,
     ConnectorList,
     CollectionReference,
+    Context,
     FeedbackData,
     Acl,
     Ace,

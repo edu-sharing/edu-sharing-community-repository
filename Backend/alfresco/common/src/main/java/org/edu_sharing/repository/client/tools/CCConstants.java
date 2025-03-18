@@ -920,6 +920,7 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE = "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE";
 
+	public final static String CCM_VALUE_TOOLPERMISSION_PREFIX = "TOOLPERMISSION_";
 	public final static String CCM_VALUE_TOOLPERMISSION_CONNECTOR_PREFIX = "TOOLPERMISSION_CONNECTOR_";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_REPOSITORY_PREFIX = "TOOLPERMISSION_REPOSITORY_";
@@ -975,6 +976,8 @@ public class CCConstants {
 	public final static String CCM_VALUE_TOOLPERMISSION_CREATE_MAP_LINK = "TOOLPERMISSION_CREATE_MAP_LINK";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_SIGNUP_GROUP = "TOOLPERMISSION_SIGNUP_GROUP";
+
+	public final static String CCM_VALUE_TOOLPERMISSION_BAPI = "TOOLPERMISSION_BAPI";
 
 	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_TEACHER = "teacher";
 
@@ -1220,6 +1223,7 @@ public class CCConstants {
 
 	public final static String CCM_PROP_CCRESSOURCETYPE ="{http://www.campuscontent.de/model/1.0}ccressourcetype";
 	public final static String CCM_PROP_CCRESSOURCESUBTYPE ="{http://www.campuscontent.de/model/1.0}ccresourcesubtype";
+	public final static String CCM_PROP_CCRESSOURCE_MAIN_ENTITY ="{http://www.campuscontent.de/model/1.0}ccressourcemainentity";
 
 	public final static String CCM_PROP_CCRESSOURCEVERSION ="{http://www.campuscontent.de/model/1.0}ccressourceversion";
 
@@ -2288,6 +2292,9 @@ public class CCConstants {
 
 	public static final String ELASTICSEARCH_SYNONYMSET_PREFIX = "es-synonym-set";
 	public static final String ELASTICSEARCH_ANALYZER_PREFIX = "synonyms";
+
+	public static final String EDU_PASSWORD_KEYSTORE_NAME = "edupasswords";
+	public static final String EDU_PASSWORD_USERNAMEHASH = "usernamehash";
 
 	/**
 	 * Methos that set all the Properties for ProfileSettings

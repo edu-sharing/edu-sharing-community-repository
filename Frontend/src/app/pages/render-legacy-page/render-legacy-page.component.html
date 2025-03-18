@@ -1,0 +1,146 @@
+<div
+  class="topBar fixed"
+  *ngIf="showTopBar && !mainNavService.getMainNav()?.topBar?.isSidenavOpen()"
+>
+  <div class="displayBar">
+    <div class="left">
+      <button mat-button title="{{ 'BACK' | translate }}" (click)="close()">
+        <i esIcon="keyboard_arrow_left"></i>
+        <span class="render-back">{{ 'BACK' | translate }}</span>
+      </button>
+    </div>
+    <div class="center">
+      <button
+        mat-button
+        *ngIf="_node"
+        (click)="showDetails()"
+        title="{{ 'GOTO' | translate }} {{ 'INFO' | translate }}"
+      >
+        <i esIcon="info_outline"></i> <span class="hidemobile">{{ 'INFO' | translate }}</span>
+      </button>
+    </div>
+    <div class="right">
+      <es-actionbar
+        #actionbar
+        [backgroundType]="'dark'"
+        [numberOfAlwaysVisibleOptions]="1"
+        [numberOfAlwaysVisibleOptionsMobile]="0"
+      ></es-actionbar>
+    </div>
+  </div>
+</div>
+<div *ngIf="getPosition() !== -1">
+  <button
+    class="previous"
+    *ngIf="canSwitchBack()"
+    cdkMonitorElementFocus
+    (click)="switchPosition(-1)"
+  >
+    <i esIcon="keyboard_arrow_left" [aria]="true"></i>
+  </button>
+  <button
+    class="next"
+    *ngIf="canSwitchForward()"
+    cdkMonitorElementFocus
+    (click)="switchPosition(+1)"
+  >
+    <i esIcon="keyboard_arrow_right" [aria]="true"></i>
+  </button>
+</div>
+<div>
+  <div id="nodeRenderContentWrapper">
+    <div *ngIf="specialTemplate !== null" class="specialTemplate">
+      <ng-container *ngIf="specialTemplate === 'revoked'">
+        <ng-container *ngTemplateOutlet="revoked"></ng-container>
+      </ng-container>
+    </div>
+    <div *ngIf="sequence" id="sequence" #sequencediv>
+      <div
+        class="wrapperouter clickable"
+        tabindex="0"
+        (click)="viewParent()"
+        (keyup.enter)="viewParent()"
+      >
+        <span class="itemTitle">{{ getNodeTitle(sequenceParent) }}</span>
+        <div class="wrapper" [class.selected]="_nodeId === sequenceParent.ref.id">
+          <img src="{{ sequenceParent.preview.url }}&crop=true&width=100&height=75" />
+        </div>
+      </div>
+      <div
+        *ngFor="let item of sequence.nodes; let i = index"
+        tabindex="0"
+        class="wrapperouter clickable"
+        (click)="viewChildobject(item, i)"
+        (keyup.enter)="viewChildobject(item, i)"
+      >
+        <span class="itemTitle">{{ getNodeTitle(item) }}</span>
+        <div class="wrapper" [class.selected]="_nodeId === item.ref.id">
+          <img src="{{ item.preview.url }}&crop=true&width=100&height=75" />
+        </div>
+      </div>
+    </div>
+    <div class="scroller left clickable" *ngIf="canScrollLeft" (click)="scroll('left')" id="left">
+      <i esIcon="keyboard_arrow_left" [aria]="true"></i>
+    </div>
+    <div
+      class="scroller right clickable"
+      *ngIf="canScrollRight"
+      (click)="scroll('right')"
+      id="right"
+    >
+      <i esIcon="keyboard_arrow_right" [aria]="true"></i>
+    </div>
+    <!-- Ideally, we would be be using the actual h1 headings for [esTitle], but since these are
+    injected by the rendering service, we use a completely hidden element here. -->
+    <h1 esTitle hidden class="display-none">{{ getNodeTitle(_node) }}</h1>
+    <div
+      id="nodeRenderContent"
+      [class.hide]="isLoading"
+      esTouchEvent
+      (ngSwipeRight)="canSwitchBack() ? switchPosition(getPosition() - 1) : null"
+      (ngSwipeLeft)="canSwitchForward() ? switchPosition(getPosition() + 1) : null"
+    ></div>
+    <div class="nodeRenderLoading" *ngIf="isLoading">
+      <es-spinner></es-spinner>
+    </div>
+
+    <div class="similarNodes" *ngIf="!similarNodes.isEmpty()">
+      <div class="caption">Ähnliche Objekte</div>
+      <es-node-entries-wrapper
+        [dataSource]="similarNodes"
+        [displayType]="DisplayType.Grid"
+        [columns]="similarNodeColumns"
+        [checkbox]="false"
+        [elementInteractionType]="InteractionType.DefaultActionLink"
+      >
+      </es-node-entries-wrapper>
+    </div>
+    <es-imprint-privacy [separator]="'/'"></es-imprint-privacy>
+  </div>
+</div>
+<ng-template #revoked>
+  <div class="revoked">
+    <h1 class="mat-heading-1">{{ _node | nodeTitle }}</h1>
+    <es-info-message mode="warning" class="details-message">{{
+      'RENDERING.REVOKED.DETAILS' | translate
+    }}</es-info-message>
+    <div class="details">
+      <div class="date">
+        <label for="revoked-date">{{ 'RENDERING.REVOKED.DATE' | translate }}:</label
+        ><span
+          id="revoked-date"
+          >{{ _node.properties['ccm:revoked_date_LONG']?.[0] | formatDate:{relative: false, time: false} }}</span
+        >
+      </div>
+      <div class="reason">
+        <label for="revoked-reason">{{ 'RENDERING.REVOKED.REASON' | translate }}:</label
+        ><span id="revoked-reason">{{ _node.properties['ccm:revoked_reason']?.join('') }}</span>
+      </div>
+    </div>
+    <div class="actions">
+      <button mat-button color="primary" (click)="reportRevokeFeedback()">
+        <i esIcon="arrow_forward"></i>{{ 'RENDERING.REVOKED.FEEDBACK' | translate }}
+      </button>
+    </div>
+  </div>
+</ng-template>

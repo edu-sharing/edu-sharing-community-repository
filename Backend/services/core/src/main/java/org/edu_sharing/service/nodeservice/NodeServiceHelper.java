@@ -444,7 +444,7 @@ public class NodeServiceHelper {
 			try{
 				lock.lock();
 				String key = path.toString();
-				result = cache.get(key);
+				result = cache.get(rootId + "_" + key);
 				//if a transaction fails and will be rollbacked an id for a node remains in cache that does not longer exists
 				if(result != null && !client.exists(result)){
 					cache.remove(result);
@@ -452,7 +452,7 @@ public class NodeServiceHelper {
 				}
 				if(result == null){
 					result = NodeTool.createOrGetNodeByName(rootId, items);
-					cache.put(key, result);
+					cache.put(rootId + "_" + key, result);
 				}
 			} catch(Throwable e) {
 				logger.error(e.getMessage(), e);

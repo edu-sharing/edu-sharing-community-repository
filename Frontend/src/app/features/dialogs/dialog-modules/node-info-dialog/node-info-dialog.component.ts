@@ -243,7 +243,7 @@ export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
             selectedObjects: this._nodes,
         });
         await this.optionsHelperDataService.initComponents(this.contextActionbarComponent);
-        this.optionsHelperDataService.refreshComponents();
+        void this.optionsHelperDataService.refreshComponents();
 
         this.optionsHelperDataService.setData({
             scope: Scope.DebugShowAll,
@@ -251,6 +251,6 @@ export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
             selectedObjects: this._nodes,
         });
         await this.optionsHelperDataService.initComponents(this.allActionbarComponent);
-        this.optionsHelperDataService.refreshComponents();
+        void this.optionsHelperDataService.refreshComponents();
     }
 }

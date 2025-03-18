@@ -89,8 +89,6 @@ $listCardSmallHeight: 100px !default;
 $listHeadingHeight: 36px !default;
 $cardPadding: 25px !default;
 $transitionNormal: var(--transitionNormal) !default;
-// prefer using var(--mobileStage)
-$mobileStage: 100px !default;
 $mobileHeight: 750px !default;
 $mobileHeightWithKeyboard: 550px !default;
 $mobileHeightLandscape: 400px !default;
@@ -104,7 +102,6 @@ $topBarMobileZIndex: 80 !default;
 $workspaceTopBarInputBackground: #eee !default;
 $workspaceTopBarInputText: $textMain !default;
 $mobileTabsZIndex: 110 !default;
-$mobileTabSwitchWidth: $mobileWidth + $mobileStage * 2 !default;
 $mobileTabNavHeight: 62px !default;
 $primaryFontFamily: 'open_sansregular' !default;
 $primaryFontSize: 10pt !default;

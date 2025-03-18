@@ -28,7 +28,8 @@ rs-root {
                 height: auto;
                 aspect-ratio: 16 / 9;
             }
-            &.module-IMAGE {
+            &.module-IMAGE,
+            &.module-DDB {
                 width: 70%;
                 max-height: 100%;
             }
@@ -38,6 +39,11 @@ rs-root {
             }
         }
     }
+}
+:host > es-info-message {
+    display: flex;
+    justify-content: center;
+    padding: 20px 20%;
 }
 .render-before {
     display: flex;

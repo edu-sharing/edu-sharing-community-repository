@@ -42,17 +42,9 @@ public class KnowledgeApi  {
     	return null;
     }
 
-    @OPTIONS    
-    @Path("/analyze/jobs")
-    @Hidden
-    public Response options1() {
-    	
-    	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
-    }
 
     @GET
     @Path("/analyze/jobs/{job}")
-    
     
     @Operation(summary = "Get analyzing job status.", description = "Get analyzing job status.")
     
@@ -70,14 +62,5 @@ public class KnowledgeApi  {
     	
         return null;
     }
-    
-    @OPTIONS    
-    @Path("/analyze/jobs/{job}")
-    @Hidden
-    public Response options2() {
-    	
-    	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-    }
-    
 }
 

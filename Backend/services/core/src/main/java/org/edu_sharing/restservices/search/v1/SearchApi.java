@@ -531,16 +531,6 @@ public class SearchApi {
 		}
 	}
 
-	@OPTIONS
-	@Path("/custom/{repository}")
-	@Hidden
-
-	public Response options02() {
-
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-	}
-
-
 	@GET
 	@Path("/queries/{repository}/contributor")
 	@Consumes({ "application/json" })

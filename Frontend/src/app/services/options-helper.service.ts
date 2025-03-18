@@ -14,6 +14,7 @@ import {
     DefaultGroups,
     ElementType,
     HideMode,
+    ListEventInterface,
     LocalEventsService,
     NodeEntriesDisplayType,
     NodesRightMode,
@@ -72,6 +73,7 @@ import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
 import { Toast } from './toast';
 import { UIHelper } from '../core-ui-module/ui-helper';
 import { GlobalOptionsService } from './global-options.service';
+import { SelectionModel } from '@angular/cdk/collections';
 
 @Injectable()
 export class OptionsHelperService extends OptionsHelperServiceAbstract implements OnDestroy {
@@ -219,10 +221,11 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
      * refresh all bound components with available menu options
      */
     async refreshComponents(components: OptionsHelperComponents, data: OptionData) {
-        if (data == null) {
+        if (data == null || components == null) {
             // console.info('options helper refresh called but no data previously bound');
             return;
         }
+        this.enabledCache = {};
         if (this.subscriptions?.length) {
             this.subscriptions.forEach((s) => s.unsubscribe());
             this.subscriptions = [];
@@ -382,7 +385,10 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     }
 
     private async isOptionAvailable(option: OptionItem, objects: Node[] | any[], data: OptionData) {
-        if (!this.getType(objects).every((t) => option.elementType.includes(t))) {
+        if (
+            option.elementType?.length > 0 &&
+            !this.getType(objects).every((t) => option.elementType.includes(t))
+        ) {
             // console.log('types not matching', objects, this.getType(objects), option);
             return false;
         }
@@ -809,7 +815,12 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         addNodeToLTIPlatform.permissionsRightMode = NodesRightMode.Effective;
         addNodeToLTIPlatform.showAsAction = true;
         addNodeToLTIPlatform.showAlways = true;
-        addNodeToLTIPlatform.constrains = [Constrain.Files, Constrain.User, Constrain.LTIMode];
+        addNodeToLTIPlatform.constrains = [
+            Constrain.NoBulk,
+            Constrain.Files,
+            Constrain.User,
+            Constrain.LTIMode,
+        ];
         addNodeToLTIPlatform.group = DefaultGroups.Primary;
         addNodeToLTIPlatform.priority = 11;
         addNodeToLTIPlatform.permissions = [RestConstants.ACCESS_CC_PUBLISH];
@@ -1104,7 +1115,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         cutNodes.elementType = [ElementType.Node, ElementType.SavedSearch, ElementType.MapRef];
         cutNodes.constrains = [Constrain.HomeRepository, Constrain.User];
         cutNodes.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
-        cutNodes.permissions = [RestConstants.ACCESS_WRITE];
+        cutNodes.permissions = [RestConstants.ACCESS_DELETE];
         cutNodes.permissionsMode = HideMode.Disable;
         cutNodes.keyboardShortcut = {
             keyCode: 'KeyX',
@@ -1268,6 +1279,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             node = this.getObjects(node, data)[0];
             void this.dialogs.openQrDialog({ node });
         });
+        qrCodeNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         qrCodeNode.constrains = [Constrain.NoBulk];
         qrCodeNode.scopes = [Scope.Render, Scope.CollectionsCollection];
         qrCodeNode.group = DefaultGroups.View;
@@ -1463,6 +1475,41 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         metadataSidebar.constrains = [Constrain.NoBulk];
         metadataSidebar.group = DefaultGroups.Toggles;
         metadataSidebar.isToggle = true;
+        const registerSelectionChange = (list: ListEventInterface<any>) => {
+            const updateVisibility = () => {
+                toggleSelection.isToggleVisible =
+                    list?.getDisplayType() !== NodeEntriesDisplayType.Table;
+            };
+            const updateSelectionState = (selection: SelectionModel<any>) => {
+                if (selection?.isEmpty()) {
+                    toggleSelection.name = 'OPTIONS.SELECT_ALL';
+                    toggleSelection.icon = 'select_all';
+                } else {
+                    toggleSelection.name = 'OPTIONS.DESELECT';
+                    toggleSelection.icon = 'deselect';
+                }
+            };
+            list?.getSelection()
+                .changed.pipe(map((s) => s.source))
+                .subscribe(updateSelectionState);
+            list?.onDisplayTypeChange().subscribe(updateVisibility);
+            updateSelectionState(list?.getSelection());
+            updateVisibility();
+        };
+        const toggleSelection = new OptionItem('', '', () => {
+            if (components.list?.getSelection()?.isEmpty()) {
+                components.list?.selectAll();
+            } else {
+                components.list?.getSelection().clear();
+            }
+        });
+        registerSelectionChange(components?.list);
+        toggleSelection.scopes = [Scope.WorkspaceList, Scope.Search, Scope.CollectionsReferences];
+        toggleSelection.group = DefaultGroups.Toggles;
+        toggleSelection.elementType = [];
+        toggleSelection.priority = 10;
+        toggleSelection.isToggle = true;
+        toggleSelection.togglePosition = 'before';
 
         options.push(applyNode);
         options.push(debugNode);
@@ -1508,6 +1555,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         options.push(removeNodeRef);
         options.push(reportNode);
         options.push(toggleViewType);
+        options.push(toggleSelection);
         options.push(metadataSidebar);
 
         if (data?.postPrepareOptions) {
@@ -1551,6 +1599,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                     item.properties &&
                     (!item.properties[RestConstants.CCM_PROP_IO_WWWURL] ||
                         !RestNetworkService.isFromHomeRepo(item)) &&
+                    (item.accessEffective || item.access)?.includes(
+                        RestConstants.PERMISSION_DOWNLOAD_CONTENT,
+                    ) &&
                     this.nodeHelper.referenceOriginalExists(item)
                 ) {
                     // bulk upload is not supported for remote nodes

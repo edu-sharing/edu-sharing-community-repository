@@ -514,22 +514,49 @@
       }
     },
     "rendering-service": {
-      "projectType": "library",
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        },
+        "@schematics/angular:application": {
+          "strict": true
+        }
+      },
       "root": "projects/rendering-service-web-component",
       "sourceRoot": "projects/rendering-service-web-component/src",
-      "prefix": "lib",
+      "prefix": "edu",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular-builders/custom-webpack:browser",
           "options": {
-            "project": "projects/rendering-service-web-component/ng-package.json"
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "node_modules/ngx-rendering-service-lib/assets",
+                "output": "assets/"
+              }
+            ],
+            "customWebpackConfig": {
+              "path": "projects/rendering-service-web-component/webpack.extra.js"
+            },
+            "deployUrl": "",
+            "outputHashing": "none",
+            "outputPath": "dist/rendering-service-web-component",
+            "index": "projects/rendering-service-web-component/src/index.html",
+            "main": "projects/rendering-service-web-component/src/main.ts",
+            "tsConfig": "projects/rendering-service-web-component/tsconfig.app.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "projects/rendering-service-web-component/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/rendering-service-web-component/tsconfig.lib.json"
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
             }
           },
           "defaultConfiguration": "production"

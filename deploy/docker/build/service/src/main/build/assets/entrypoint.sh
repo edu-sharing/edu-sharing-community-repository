@@ -4,6 +4,7 @@ set -eu
 
 ########################################################################################################################
 
+alfresco_share_enabled="${REPOSITORY_SERVICE_ALFRESCO_SHARE_ENABLED:-false}"
 my_admin_pass="${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
 my_admin_pass_md4="$(printf '%s' "$my_admin_pass" | iconv -t utf16le | openssl md4 -provider legacy | awk '{ print $2 }')"
 
@@ -146,6 +147,9 @@ until PGPASSWORD="${repository_database_pass}" \
   sleep 3
 done
 
+echo "executing updates ..."
+./bin/updates/updates.sh
+
 # jodconverter
 [[ -n "${repository_transform_host}" && -n "${repository_transform_port}" ]] && {
   until wait-for-it "${repository_transform_host}:${repository_transform_port}" -t 3; do sleep 1; done
@@ -248,6 +252,14 @@ xmlstarlet ed -L \
     -i '$valve' -t attr -n "pattern" -v "%h %l %u %t &quot;%r&quot; %s %b" \
     ${catSConf}
 }
+
+if ! xmlstarlet sel -t -v '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[@className="org.edu_sharing.catalina.valves.SemicolonPathTraversalValve"]/@className' "${catSConf}" | grep -q .; then
+    xmlstarlet ed -L \
+        -s '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t elem -n 'Valve' \
+        -i '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[last()]' -t attr -n "className" -v "org.edu_sharing.catalina.valves.SemicolonPathTraversalValve" \
+        "${catSConf}"
+fi
+
 
 xmlstarlet ed -L \
   -d '/Server/Service[@name="Catalina"]/Connector' \
@@ -434,6 +446,11 @@ xmlstarlet ed -L \
 
   cp ${catAlfLog} tomcat/webapps/alfresco/WEB-INF/classes/log4j2.properties
 
+}
+
+[[ "${alfresco_share_enabled}" == "false" ]] && {
+  echo "Alfresco share is disabled. Removing webapp"
+  rm -rf tomcat/webapps/share
 }
 
 ### edu-sharing ########################################################################################################

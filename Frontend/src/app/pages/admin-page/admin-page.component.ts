@@ -1,7 +1,7 @@
 import { trigger } from '@angular/animations';
 import { PlatformLocation } from '@angular/common';
 import { Component, ElementRef, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { AboutService, NetworkService, Node, Store } from 'ngx-edu-sharing-api';
 import {
@@ -91,6 +91,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     elasticResponse: NodeListElastic;
     cancelJobInfo: Job;
     private readonly destroyed$ = new Subject<void>();
+    private queryParams: Params;
 
     constructor(
         private about: AboutService,
@@ -218,6 +219,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     }[] = [];
     availableJobs: JobDescription[];
     excelFile: File;
+    excelAddToCollection: string;
     collectionsFile: File;
     uploadTempFile: File;
     uploadJobsFile: File;
@@ -442,17 +444,19 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             return;
         }
         this.globalProgress = true;
-        this.admin.importExcel(this.excelFile, this.parentNode.ref.id).subscribe(
-            (data: any) => {
-                this.toast.toast('ADMIN.IMPORT.EXCEL_IMPORTED', { rows: data.rows });
-                this.globalProgress = false;
-                this.excelFile = null;
-            },
-            (error: any) => {
-                this.toast.error(error);
-                this.globalProgress = false;
-            },
-        );
+        this.admin
+            .importExcel(this.excelFile, this.parentNode.ref.id, this.excelAddToCollection)
+            .subscribe(
+                (data: any) => {
+                    this.toast.toast('ADMIN.IMPORT.EXCEL_IMPORTED', { rows: data.rows });
+                    this.globalProgress = false;
+                    this.excelFile = null;
+                },
+                (error: any) => {
+                    this.toast.error(error);
+                    this.globalProgress = false;
+                },
+            );
     }
     public configApp(app: Application) {
         window.open(app.configUrl);
@@ -1291,6 +1295,10 @@ export class AdminPageComponent implements OnInit, OnDestroy {
                     icon: 'extension',
                 },
                 {
+                    id: 'CONTEXT',
+                    icon: 'public',
+                },
+                {
                     id: 'FRONTPAGE',
                     icon: 'home',
                 },
@@ -1375,7 +1383,8 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             )
             .forEach((s) => (s.visible = true));
 
-        this.route.queryParams.subscribe((data: any) => {
+        this.route.queryParams.subscribe((data: Params) => {
+            this.queryParams = data;
             if (data.mode) {
                 this.mode = data.mode;
                 if (this.getModeButton().factory) {
@@ -1388,7 +1397,9 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             } else this.setMode(this.buttons[0].id, true);
         });
         if (this.loginResult.isAdmin) {
-            void this.showWarningDialog();
+            if (this.queryParams?.skipWarning !== 'true') {
+                void this.showWarningDialog();
+            }
             this.admin.getServerUpdates().subscribe((data: ServerUpdate[]) => {
                 this.updates = data;
             });
@@ -1565,7 +1576,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
                 await this.admin
                     .switchAuthentication(this.authenticateAuthority.authorityName)
                     .toPromise();
-                UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.config, true);
+                window.location.href = UIHelper.getDefaultLocation(this.config);
             }
         });
     }

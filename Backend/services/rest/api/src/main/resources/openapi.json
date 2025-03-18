@@ -4877,6 +4877,23 @@
         ],
         "type": "object"
       },
+      "OrganizationUserDeprovisioning": {
+        "properties": {
+          "mode": {
+            "description": "Shall the user data within this organization be cleaned up",
+            "enum": [
+              "none",
+              "assign"
+            ],
+            "type": "string"
+          },
+          "receiver": {
+            "description": "Receiver authority if mode == assign",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Pageable": {
         "properties": {
           "offset": {
@@ -28456,6 +28473,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "description": "accept only properties from the specific mds set",
+            "in": "query",
+            "name": "obeyMds",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
           }
         ],
         "requestBody": {
@@ -34045,7 +34071,7 @@
     },
     "/organization/v1/organizations/{repository}/{organization}/member/{member}": {
       "delete": {
-        "description": "Remove member from organization.",
+        "description": "Remove member from organization. Requires at least admin permissions for the organization. For mode assign, full admin rights are required",
         "operationId": "removeFromOrganization",
         "parameters": [
           {
@@ -34077,6 +34103,16 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrganizationUserDeprovisioning"
+              }
+            }
+          },
+          "description": "deprovisioning details"
+        },
         "responses": {
           "200": {
             "content": {

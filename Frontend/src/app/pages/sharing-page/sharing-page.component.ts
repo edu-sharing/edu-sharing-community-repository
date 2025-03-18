@@ -192,7 +192,7 @@ export class SharingPageComponent {
                 this.nodesDataSource.setData(nodes.nodes);
                 this.nodesDataSource.isLoading = false;
                 setTimeout(() => {
-                    this.nodeEntries.initOptionsGenerator({
+                    void this.nodeEntries.initOptionsGenerator({
                         customOptions: this.options,
                     });
                 });

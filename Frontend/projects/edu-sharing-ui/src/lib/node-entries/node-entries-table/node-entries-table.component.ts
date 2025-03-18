@@ -217,7 +217,10 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
 
     private getVisibleDataColumns(): Observable<ListItem[]> {
         return rxjs
-            .combineLatest([this.maximumColumnsNumber$, this.entriesService.columnsSubject])
+            .combineLatest([
+                this.maximumColumnsNumber$,
+                this.entriesService.columnsSubject.pipe(map((c) => c?.columns)),
+            ])
             .pipe(
                 map(([maximumColumnsNumber, columns]) => {
                     return (columns ?? [])

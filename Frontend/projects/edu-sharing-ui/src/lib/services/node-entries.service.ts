@@ -96,12 +96,12 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
      *
      * Updated when loading configuration and through user interaction.
      */
-    columnsSubject = new BehaviorSubject<ListItem[]>(null);
+    columnsSubject = new BehaviorSubject<{ columns: ListItem[]; fromUser: boolean }>(null);
     get columns(): ListItem[] {
-        return this.columnsSubject.value;
+        return this.columnsSubject.value?.columns;
     }
-    set columns(value: ListItem[]) {
-        this.columnsSubject.next(value);
+    set columns(columns: ListItem[]) {
+        this.columnsSubject.next({ columns, fromUser: true });
     }
     configureColumns: boolean;
     displayType: NodeEntriesDisplayType;

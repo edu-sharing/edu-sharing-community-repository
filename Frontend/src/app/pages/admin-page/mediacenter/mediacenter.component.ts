@@ -77,13 +77,13 @@ export class AdminMediacenterComponent {
     }
     set currentTab(currentTab: number) {
         this._currentTab = currentTab;
-        this.nodeEntriesTable?.initOptionsGenerator({
+        void this.nodeEntriesTable?.initOptionsGenerator({
             customOptions: {
                 useDefaultOptions: true,
                 supportedOptions: ['OPTIONS.DEBUG', 'OPTIONS.DOWNLOAD'],
             },
         });
-        this.groupEntriesTable?.initOptionsGenerator({
+        void this.groupEntriesTable?.initOptionsGenerator({
             customOptions: {
                 useDefaultOptions: false,
             },
@@ -113,7 +113,7 @@ export class AdminMediacenterComponent {
             );
             remove.elementType = [ElementType.Group];
             remove.group = DefaultGroups.Delete;
-            this.groupEntriesTable?.initOptionsGenerator({
+            void this.groupEntriesTable?.initOptionsGenerator({
                 customOptions: {
                     useDefaultOptions: false,
                     addOptions: [remove],

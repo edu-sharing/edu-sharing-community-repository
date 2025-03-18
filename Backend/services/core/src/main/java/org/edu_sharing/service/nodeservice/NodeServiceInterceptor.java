@@ -11,21 +11,21 @@ import org.alfresco.service.namespace.QName;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.provider.ElasticSearchProvider;
 import org.edu_sharing.service.provider.Provider;
 import org.edu_sharing.service.provider.ProviderHelper;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.stream.StreamServiceFactory;
 import org.edu_sharing.service.stream.StreamServiceHelper;
-import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.springframework.context.ApplicationContext;
 
@@ -45,15 +45,17 @@ public class NodeServiceInterceptor implements MethodInterceptor {
     List<NodeServiceInterceptorPermissions> customizations;
 
 
-    public void init(){
-        
+    public void init() {
+
     }
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
-        String methodName=invocation.getMethod().getName();
-        int argumentId=-1;
-        if(methodName.equals("getProperty") ||
+
+        String methodName = invocation.getMethod().getName();
+
+        int argumentId = -1;
+        if (methodName.equals("getProperty") ||
                 methodName.equals("getContent") ||
                 methodName.equals("getContentHash") ||
                 methodName.equals("getContentMimetype") ||
@@ -63,55 +65,62 @@ public class NodeServiceInterceptor implements MethodInterceptor {
                 methodName.equals("getAspects") ||
                 methodName.equals("hasAspect") ||
                 methodName.equals("getOwner")) {
-            argumentId=2;
+            argumentId = 2;
         }
         if (methodName.equals("getChild")) {
-            argumentId=1;
+            argumentId = 1;
         }
-        if(methodName.equals("getChildrenChildAssociationRefAssoc") ||
+        if (methodName.equals("getChildrenChildAssociationRefAssoc") ||
                 methodName.equals("getChildrenChildAssociationRefType") ||
                 methodName.equals("getType") ||
                 methodName.equals("getPublishedCopies") ||
                 methodName.equals("getOriginalNode") ||
                 methodName.equals("getPrimaryParent") ||
-                methodName.equals("getVersionHistory")){
-            argumentId=0;
+                methodName.equals("getVersionHistory")) {
+            argumentId = 0;
         }
-        if(methodName.equals("writeContent")){
+        if (methodName.equals("writeContent")) {
             return checkIgnoreQuota(invocation);
         }
-        if(argumentId==-1)
+
+
+        if (argumentId == -1)
             return invocation.proceed();
+
+
         String nodeId = (String) invocation.getArguments()[argumentId];
-        if(Arrays.asList("getProperty", "getProperties").contains(methodName)) {
+        if (Arrays.asList("getProperty", "getProperties").contains(methodName)) {
             checkReadMetadataPermissions(nodeId, invocation);
         }
-        return handleInvocation(nodeId, invocation,true);
+
+
+        return handleInvocation(nodeId, invocation, true);
     }
 
     private void checkReadMetadataPermissions(String nodeId, MethodInvocation invocation) {
         try {
             NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
-            if(serviceRegistry.getNodeService().hasAspect(nodeRef, QName.createQName(
+            if (serviceRegistry.getNodeService().hasAspect(nodeRef, QName.createQName(
                     CCConstants.CCM_ASPECT_REMOTEREPOSITORY
             ))) {
                 String remoteId = (String) serviceRegistry.getNodeService().getProperty(nodeRef, QName.createQName(
                         CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID
                 ));
-                if(remoteId != null) {
+                if (remoteId != null) {
                     String tpId = CCConstants.CCM_VALUE_TOOLPERMISSION_REPOSITORY_PREFIX + remoteId;
                     ToolPermissionHelper.throwIfToolpermissionMissing(tpId);
                 }
             }
-        } catch(ToolPermissionException e) {
+        } catch (ToolPermissionException e) {
             throw e;
-        } catch(Throwable t) {
+        } catch (Throwable t) {
             logger.info("Unexpected error while verifying if object is remote object: " + t.getMessage());
         }
     }
 
     /**
      * When onlyOnError is set, make sure that the called method will not cause any side effects since it may be called twice
+     *
      * @param nodeId
      * @param invocation
      * @param onlyOnError
@@ -119,19 +128,17 @@ public class NodeServiceInterceptor implements MethodInterceptor {
      * @throws Throwable
      */
     public static Object handleInvocation(String nodeId, MethodInvocation invocation, boolean onlyOnError) throws Throwable {
-        if(onlyOnError){
-            try{
+        if (onlyOnError) {
+            try {
                 return invocation.proceed();
-            }
-            catch(AccessDeniedException|InsufficientPermissionException|AuthenticationCredentialsNotFoundException t)
-            {
+            } catch (AccessDeniedException | InsufficientPermissionException |
+                     AuthenticationCredentialsNotFoundException t) {
                 // catch exception, check
-                logger.debug("Method threw "+t.getMessage()+" for node "+nodeId+", will check signature");
-                return runAsSystem(nodeId,invocation);
+                logger.debug("Method threw " + t.getMessage() + " for node " + nodeId + ", will check signature");
+                return runAsSystem(nodeId, invocation);
             }
-        }
-        else{
-            return runAsSystem(nodeId,invocation);
+        } else {
+            return runAsSystem(nodeId, invocation);
         }
 
 
@@ -142,15 +149,15 @@ public class NodeServiceInterceptor implements MethodInterceptor {
      * and run the task accordingly
      */
     private static Object checkIgnoreQuota(MethodInvocation invocation) throws Throwable {
-        if(ContextManagementFilter.accessTool.get() != null &&
+        if (ContextManagementFilter.accessTool.get() != null &&
                 ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getType())
-        ){
+        ) {
             return ignoreQuota(() -> {
                 try {
                     return invocation.proceed();
                 } catch (Throwable t) {
-                    logger.error(t.getMessage(),t);
-                    return null;
+                    logger.error(t.getMessage(), t);
+                    throw new RuntimeException(t);
                 }
             });
         }
@@ -167,15 +174,15 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         RetryingTransactionHelper rth = serviceRegistry.getTransactionService().getRetryingTransactionHelper();
 
         return rth.doInTransaction(() -> {
-            Serializable quota= (Serializable) AuthorityServiceFactory.getLocalService().getAuthorityProperty(AuthenticationUtil.getFullyAuthenticatedUser(),CCConstants.CM_PROP_PERSON_SIZE_QUOTA);
-            AuthenticationUtil.runAsSystem(()-> {
+            Serializable quota = (Serializable) AuthorityServiceFactory.getLocalService().getAuthorityProperty(AuthenticationUtil.getFullyAuthenticatedUser(), CCConstants.CM_PROP_PERSON_SIZE_QUOTA);
+            AuthenticationUtil.runAsSystem(() -> {
                 AuthorityServiceFactory.getLocalService().setAuthorityProperty(AuthenticationUtil.getFullyAuthenticatedUser(), CCConstants.CM_PROP_PERSON_SIZE_QUOTA, null);
                 return null;
             });
 
-            T result=callable.call();
+            T result = callable.call();
 
-            AuthenticationUtil.runAsSystem(()-> {
+            AuthenticationUtil.runAsSystem(() -> {
                 AuthorityServiceFactory.getLocalService().setAuthorityProperty(AuthenticationUtil.getFullyAuthenticatedUser(), CCConstants.CM_PROP_PERSON_SIZE_QUOTA, quota);
                 return null;
             });
@@ -188,14 +195,14 @@ public class NodeServiceInterceptor implements MethodInterceptor {
      */
     public static List<String> getIndirectPermissions(String nodeId, List<String> permissions) {
         int i = 0;
-        while (nodeId!=null) {
+        while (nodeId != null) {
             List<String> result = getIndirectPermissions(nodeId, permissions, i);
-            if(!result.isEmpty()) {
+            if (!result.isEmpty()) {
                 return result;
             }
 
             // only one parent at the moment
-            if(i++ >= 1) {
+            if (i++ >= 1) {
                 break;
             }
             nodeId = fetchParentId(nodeId);
@@ -203,13 +210,13 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         return Collections.emptyList();
     }
 
-    private static Object runAsSystem(String nodeId,MethodInvocation invocation) throws Throwable {
+    private static Object runAsSystem(String nodeId, MethodInvocation invocation) throws Throwable {
         int i = 0;
-        while(nodeId!=null) {
+        while (nodeId != null) {
             if (
                     getIndirectPermissions(nodeId, Collections.singletonList(CCConstants.PERMISSION_READ), i).size() == 1
             ) {
-                logger.debug("Node "+nodeId+" -> will run as system");
+                logger.debug("Node " + nodeId + " -> will run as system");
                 return AuthenticationUtil.runAsSystem(() -> {
                     try {
                         return invocation.proceed();
@@ -220,7 +227,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
             }
 
             // only one parent at the moment
-            if(i++>=1) {
+            if (i++ >= 1) {
                 break;
             }
             // we'll check if any of the nodes in the parent hierarchy may has an usage -> so it is allowed as well
@@ -240,20 +247,20 @@ public class NodeServiceInterceptor implements MethodInterceptor {
     }
 
     private static List<String> getIndirectPermissions(String nodeId, List<String> permissions, int recursionDepth) {
-        if((hasSignature(nodeId) || hasUsage(nodeId)) ||
+        if ((hasSignature(nodeId) || hasUsage(nodeId)) ||
                 // direct permissions only valid for current node, NOT for parent!
                 (accessibleViaStream(nodeId) || accessableViaCustomization(nodeId, recursionDepth))
         ) {
             return permissions.stream().filter(p -> CCConstants.getUsagePermissions().contains(p)).collect(Collectors.toList());
         }
-        if(recursionDepth == 0) {
+        if (recursionDepth == 0) {
             return hasCollectionPermissions(nodeId, permissions);
         }
         return Collections.emptyList();
     }
 
     private static boolean accessableViaCustomization(String nodeId, int recursionDepth) {
-        for (NodeServiceInterceptorPermissions customization : PropertiesInterceptorFactory.getNodeServiceInterceptorPermissions()){
+        for (NodeServiceInterceptorPermissions customization : PropertiesInterceptorFactory.getNodeServiceInterceptorPermissions()) {
             if (customization.accessable(nodeId, recursionDepth)) return true;
         }
         return false;
@@ -262,14 +269,14 @@ public class NodeServiceInterceptor implements MethodInterceptor {
     private static boolean accessibleViaStream(String nodeId) {
         try {
             return StreamServiceHelper.canCurrentAuthorityAccessNode(StreamServiceFactory.getStreamService(), nodeId);
-        }catch(Throwable t){
+        } catch (Throwable t) {
             logger.warn(t.getMessage());
         }
         return false;
     }
 
     private static boolean hasSignature(String nodeId) {
-        if(Context.getCurrentInstance()==null)
+        if (Context.getCurrentInstance() == null)
             return false;
         return Context.getCurrentInstance().isSingleUseNodeId(nodeId);
     }
@@ -283,25 +290,25 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         return false;
     }
 
-    public static List<String> hasCollectionPermissions(String nodeId, List<String> permissions){
+    public static List<String> hasCollectionPermissions(String nodeId, List<String> permissions) {
         long test = System.currentTimeMillis();
         Provider providerByApp = ProviderHelper.getProviderByApp(ApplicationInfoList.getHomeRepository());
-        if(!(providerByApp instanceof ElasticSearchProvider)){
+        if (!(providerByApp instanceof ElasticSearchProvider)) {
             logger.debug("Skipping collection permission check cause no elastic provider present");
             return Collections.emptyList();
         }
-        if(
+        if (
                 !Arrays.asList(
                         CallSourceHelper.CallSource.Render, CallSourceHelper.CallSource.Preview,
                         CallSourceHelper.CallSource.Sitemap, CallSourceHelper.CallSource.ToolConnector,
                         CallSourceHelper.CallSource.RatingApi
                 ).contains(CallSourceHelper.getCallSource())
-        ){
+        ) {
             logger.debug("Skipping collection permission check for call source " + CallSourceHelper.getCallSource());
             return Collections.emptyList();
         }
-        List<String> result = ((SearchServiceElastic)providerByApp.getSearchService()).hasPermissions(nodeId, permissions);
-        logger.debug("collection permission check took:"+(System.currentTimeMillis() - test) +"ms");
+        List<String> result = ((SearchServiceElastic) providerByApp.getSearchService()).hasPermissions(nodeId, permissions);
+        logger.debug("collection permission check took:" + (System.currentTimeMillis() - test) + "ms");
         return result;
     }
 }

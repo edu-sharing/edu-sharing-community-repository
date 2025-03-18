@@ -33,7 +33,6 @@ import org.apache.http.HttpHost;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
-import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.guest.GuestConfig;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
@@ -46,6 +45,7 @@ import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
@@ -237,10 +237,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     public BoolQuery.Builder getPermissionsQuery(BoolQuery.Builder audienceQueryBuilder, String field, Set<String> authorities) {
-        audienceQueryBuilder.minimumShouldMatch("1");
+        BoolQuery.Builder bool = QueryBuilders.bool();
+        bool.minimumShouldMatch("1");
         for (String a : authorities) {
-            audienceQueryBuilder.should(should -> should.match(match -> match.field(field).query(a)));
+            bool.should(should -> should.match(match -> match.field(field).query(a)));
         }
+        audienceQueryBuilder.must(bool.build()._toQuery());
         return audienceQueryBuilder;
     }
 
@@ -267,8 +269,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
         // @TODO: FIX after DESP-840
         CollectionPermissionQueries collectionPermissionQueries = getCollectionPermissionQueries(user);
 
-
-        return getPermissionsQuery(builder, "permissions.read")
+        return new BoolQuery.Builder()
+                .minimumShouldMatch("1")
+                .should(getPermissionsQuery(builder, "permissions.read").build()._toQuery())
                 .should(q -> q.match(m -> m.field("owner").query(user)))
                 .should(audienceQueryBuilderCollections -> audienceQueryBuilderCollections
                         .bool(b -> b
@@ -291,13 +294,15 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                                 .should(q -> q.nested(nested -> nested.path("collections").query(nq -> nq.bool(collectionPermissionQueries.proposalPermissions))))
                                         )))
                                 )
-                        ));
+                        )
+        );
     }
 
     @NotNull
     private CollectionPermissionQueries getCollectionPermissionQueries(String user) {
         BoolQuery collectionPermissions = getPermissionsQuery(QueryBuilders.bool(), "collections.permissions.read")
                 .should(s -> s.match(m -> m.field("collections.owner").query(user)))
+                .must(must -> must.match(match -> match.field("collections.relation.type").query("ccm:usage")))
                 .build();
 
         BoolQuery proposalPermissions = getPermissionsQuery(QueryBuilders.bool(), "collections.permissions.Coordinator", getUserAuthorities().stream().filter(a -> !a.equals(CCConstants.AUTHORITY_GROUP_EVERYONE)).collect(Collectors.toSet()))
@@ -335,7 +340,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 globalConditions,
                 searchToken);
 
-        SearchResultNodeRef result = parseAggregations(searchToken, aggregations);
+        SearchResultNodeRef result = parseAggregations(mds, queryData, searchToken, aggregations);
         result.setFacets(result.getFacets().stream().map(facet -> {
             facet.setValues(facet.getValues().stream().filter(s -> {
                 // if one document has i.e. multiple keywords, they will be shown in the facet
@@ -360,8 +365,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     @NotNull
-    private SearchResultNodeRef parseAggregations(SearchToken searchToken, Map<String, Aggregation> aggregations) throws Exception {
+    private SearchResultNodeRef parseAggregations(MetadataSet mds, MetadataQuery queryData, SearchToken searchToken, Map<String, Aggregation> aggregations) throws Exception {
 //        logger.info("query aggs: "+searchSourceBuilderAggs.toString());
+        checkClient();
         SearchResponse<Map> resp = LogTime.log("Searching elastic for facets", () -> client.search(req -> req
                         .index(WORKSPACE_INDEX)
                         .from(0)
@@ -369,7 +375,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         .aggregations(aggregations)
                 , Map.class));
 
-        List<NodeSearch.Facet> facetsResult = getFacets(aggregations, resp);
+        List<NodeSearch.Facet> facetsResult = getFacets(mds, queryData, aggregations, resp);
 
         SearchResultNodeRef searchResultNodeRef = new SearchResultNodeRef();
         searchResultNodeRef.setData(new ArrayList<>());
@@ -381,7 +387,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     @NotNull
-    private List<NodeSearch.Facet> getFacets(Map<String, Aggregation> aggregations,  ResponseBody<Map> resp) {
+    private List<NodeSearch.Facet> getFacets(MetadataSet mds, MetadataQuery queryData, Map<String, Aggregation> aggregations, SearchResponse<Map> resp) {
         List<NodeSearch.Facet> facetsResult = new ArrayList<>();
         for (Map.Entry<String, Aggregate> a : resp.aggregations().entrySet()) {
             if (a.getValue().isFilter()) {
@@ -390,16 +396,16 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     if (aggregation.getValue().isSterms()) {
                         Aggregation definition = aggregations.get(a.getKey());
                         StringTermsAggregate sterms = aggregation.getValue().sterms();
-                        facetsResult.add(getFacet(aggregation.getKey(), sterms, definition));
+                        facetsResult.add(getFacet(mds, queryData, aggregation.getKey(), sterms, definition));
                     } else if (aggregation.getValue().isNested()) {
                         Aggregation definition = aggregations.get(a.getKey());
                         NestedAggregate nested = aggregation.getValue().nested();
                         StringTermsAggregate sterms = nested.aggregations().values().stream().findFirst().get().sterms();
-                        facetsResult.add(getFacet(aggregation.getKey(), sterms, definition));
+                        facetsResult.add(getFacet(mds, queryData, aggregation.getKey(), sterms, definition));
                     } else if (aggregation.getValue().isMultiTerms()) {
                         Aggregation definition = aggregations.get(a.getKey());
                         MultiTermsAggregate multiTerm = aggregation.getValue().multiTerms();
-                        facetsResult.add(getMultitermFacet(aggregation.getKey(), multiTerm, definition));
+                        facetsResult.add(getMultitermFacet(mds, queryData, aggregation.getKey(), multiTerm, definition));
                     }
                 }
             }else if(a.getValue().isSterms()){
@@ -415,7 +421,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return facetsResult;
     }
 
-    private NodeSearch.Facet getMultitermFacet(String name, MultiTermsAggregate mta, Aggregation definition) {
+    private NodeSearch.Facet getMultitermFacet(MetadataSet mds, MetadataQuery queryData, String name, MultiTermsAggregate mta, Aggregation definition) {
         NodeSearch.Facet facet = new NodeSearch.Facet();
         facet.setProperty(name);
         List<NodeSearch.Facet.Value> values = new ArrayList<>();
@@ -434,8 +440,60 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 values.add(value);
             }
         }
-        facet.setSumOtherDocCount(mta.sumOtherDocCount());
+
+        setSumOtherDocCount(queryData, name, mta, facet);
+        sortFacetValues(mds, queryData, name, values);
         return facet;
+    }
+
+    private void setSumOtherDocCount(MetadataQuery queryData, String name, TermsAggregateBase<?> buckets, NodeSearch.Facet facet) {
+
+        facet.setSumOtherDocCount(buckets.sumOtherDocCount());
+        MetadataQueryParameter metadataQueryParameter = queryData.findParameterByName(name);
+        if (metadataQueryParameter == null) {
+            return;
+        }
+
+        MetadataQueryParameter.MetadataQueryFacet metadataQueryFacet = metadataQueryParameter.getFacet();
+        if(metadataQueryFacet == null) {
+            return;
+        }
+
+        Integer maxBucketSize = metadataQueryFacet.getMaxBucketSize();
+        if(maxBucketSize == null) {
+            return;
+        }
+
+        facet.setSumOtherDocCount(0L);
+    }
+
+    private void sortFacetValues(MetadataSet mds, MetadataQuery queryData, String name, List<NodeSearch.Facet.Value> values) {
+        MetadataWidget widget = mds.findWidget(name);
+        Map<String, MetadataKey> valuesAsMap = widget.getValuesAsMap();
+        MetadataQueryParameter metadataQueryParameter = queryData.findParameterByName(name);
+        if (metadataQueryParameter == null) {
+            return;
+        }
+
+        MetadataQueryParameter.MetadataQueryFacet metadataQueryFacet = metadataQueryParameter.getFacet();
+        if (metadataQueryFacet == null) {
+            return;
+        }
+
+        if (metadataQueryFacet.getSortBy() == MetadataQueryParameter.MetadataQueryFacet.SortBy.caption) {
+            int order = metadataQueryFacet.getSortOrder() == MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc ? 1 : -1;
+
+            values.sort((lhs, rhs) -> {
+                MetadataKey lhsMetadataKey = valuesAsMap.get(lhs.getValue());
+                MetadataKey rhsMetadataKey = valuesAsMap.get(rhs.getValue());
+                if (lhsMetadataKey == null || rhsMetadataKey == null) {
+                    return 0;
+                }
+                return lhsMetadataKey.getCaption().compareToIgnoreCase(rhsMetadataKey.getCaption()) * order;
+            });
+        } else if(metadataQueryFacet.getSortOrder() == MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc) {
+            values.sort(Comparator.comparing(NodeSearch.Facet.Value::getCount));
+        }
     }
 
     /**
@@ -608,7 +666,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
                     logger.info("query aggs: " + JsonpUtils.toJsonString(searchSourceAggs, new JacksonJsonpMapper()));
                     searchResponseAggregations = LogTime.log("Searching elastic for facets", () -> client.search(searchSourceAggs, Map.class));
-                    facetsResult = getFacets(excludedOwnAggregations, searchResponseAggregations);
+                    facetsResult = getFacets(mds, queryData, excludedOwnAggregations, searchResponseAggregations);
                     aggregations = null;
                 } else {
                     aggregations = MetadataElasticSearchHelper.getAggregations(mds, queryData, searchToken.getParameters(), searchToken.getFacets(), Collections.emptySet(), queryBuilderGlobalConditions._toQuery(), searchToken);
@@ -628,7 +686,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                             .text(ngsearches[0])
                             .suggesters("ngsearchword", s -> s
                                     .phrase(p -> p
-                                            .text("properties.cclom:title.trigram")
+                                            .field("properties.cclom:title.trigram")
                                             .gramSize(3)
                                             .confidence(0.9)
                                             .highlight(high -> high.preTag("<em>").postTag("</em>"))
@@ -700,7 +758,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     total = Optional.of(hits).map(HitsMetadata::total).map(TotalHits::value).orElse(0L);
                 }
                 if (facetsResult == null) {
-                    facetsResult = getFacets(aggregations, searchResponse);
+                    facetsResult = getFacets(mds, queryData, aggregations, searchResponse);
                 }
                 sr.setFacets(facetsResult);
                 sr.setStartIDX(searchToken.getFrom());
@@ -722,12 +780,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return sr;
     }
 
-    private NodeSearch.Facet getFacet(String name, StringTermsAggregate pst, Aggregation builder) {
-
+    private NodeSearch.Facet getFacet(MetadataSet mds, MetadataQuery queryData, String name, StringTermsAggregate pst, Aggregation builder) {
         NodeSearch.Facet facet = new NodeSearch.Facet();
         facet.setProperty(name);
         List<NodeSearch.Facet.Value> values = new ArrayList<>();
         facet.setValues(values);
+//        widget.getValues().stream().filter(x->x.getIdentifiableValue().equals("efwef") )
 
         for (StringTermsBucket b : pst.buckets().array()) {
             if (builder != null && Aggregation.Kind.MultiTerms == builder._kind()) {
@@ -752,8 +810,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 values.add(value);
             }
         }
-
-        facet.setSumOtherDocCount(pst.sumOtherDocCount());
+        setSumOtherDocCount(queryData, name, pst, facet);
+        sortFacetValues(mds, queryData, name, values);
         return facet;
     }
 
@@ -1061,7 +1119,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         eduNodeRef.setPublic(false);
         Map<String, List<String>> permissionsElastic = (Map) sourceAsMap.get("permissions");
         String owner = (String) sourceAsMap.get("owner");
-        if(permissionsElastic != null) {
+        if (permissionsElastic != null) {
             for (Map.Entry<String, List<String>> entry : permissionsElastic.entrySet()) {
                 if ("read".equals(entry.getKey())) {
                     continue;
@@ -1331,7 +1389,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 collect(Collectors.toCollection(HashSet::new));
     }
 
-    //
+//
 //    public RestHighLevelClient getClient() throws IOException {
 //        checkClient();
 //        return client;

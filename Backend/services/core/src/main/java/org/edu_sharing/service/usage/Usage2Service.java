@@ -31,7 +31,9 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Service;
 
+@Service
 public class Usage2Service {
 
 
@@ -124,6 +126,10 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 			String nodeId,
 			Long from,
 			Long to) throws Exception {
+
+		if("-home-".equals(repositoryId)){
+			repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
+		}
 		 List<Usage> result = new ArrayList<>();
 		 
 		 for(Map.Entry<String, Map<String, Object>> entry : usageDao.getUsages(repositoryId, nodeId, from, to).entrySet()) {

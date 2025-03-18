@@ -198,6 +198,9 @@
     <div *ngIf="modeIsActive('FRONTPAGE')" class="content frontpage">
       <es-admin-frontpage (openNode)="openNodeRender($event)"></es-admin-frontpage>
     </div>
+    <div *ngIf="modeIsActive('CONTEXT')" class="content context">
+      <es-admin-context-editor></es-admin-context-editor>
+    </div>
     <div *ngIf="modeIsActive('GLOBAL_CONFIG')" class="content global-config">
       <es-admin-config></es-admin-config>
     </div>
@@ -435,6 +438,11 @@
           <div class="directory">
             <div *ngIf="parentNode">{{ parentNode.name }} ({{ parentNode.ref.id }})</div>
           </div>
+        </div>
+        <div class="inputGroup">
+          <mat-checkbox [(ngModel)]="excelAddToCollection">{{
+            'ADMIN.IMPORT.EXCEL_COLLECTION' | translate
+          }}</mat-checkbox>
         </div>
         <button mat-raised-button color="primary" (click)="importExcel()">
           {{ 'ADMIN.IMPORT.EXCEL_START' | translate }}

@@ -79,7 +79,7 @@ export class CollectionProposalsComponent implements OnChanges {
                     );
                     this.dataSourceCollectionProposals.isLoading = false;
                     setTimeout(() => {
-                        this.listProposals?.initOptionsGenerator({
+                        void this.listProposals?.initOptionsGenerator({
                             actionbar: this.actionbar,
                         });
                     });

@@ -32,6 +32,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+/**
+ * when a version history entry is removed the node is deleted in alf_node, but a new node with type_qname_id targeting
+ * to alf_qname local_nome "deleted" is created. for this node there is one entry in alf_node_properties which is
+ * keeping the original dbid from the version entry. this job helps reducing entries in alf_node properties.
+ */
 @JobDescription(description = "Removes versions of node which are not referenced")
 public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
 
@@ -60,11 +65,9 @@ public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
     @JobFieldDescription(description = "Folder id to start from")
     private  String startFolder;
 
-    @JobFieldDescription(description = "if true it removes the whole versionhistory ignoring keepAtLeast and removes cclom:version property")
-    private boolean forceAll = false;
-
+    @Autowired
     @Setter
-    private Usage2Service usage2Service = new Usage2Service();
+    private Usage2Service usage2Service;
 
     @Autowired
     @Setter
@@ -101,6 +104,7 @@ public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
     }
 
     public void handleNode(@NotNull NodeRef node) {
+        String replicationSourceId = nodeService.getProperty(node.getStoreRef().getProtocol(),node.getStoreRef().getIdentifier(),node.getId(),CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID);
         long timeSpan = StringUtils.isNotBlank(olderThan)
                 ? Duration.parse(olderThan).toMillis()
                 : -1;
@@ -115,16 +119,9 @@ public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
         Date refDate = new Date();
         final List<Usage> usages;
         try {
-            usages = usage2Service.getUsages(ApplicationInfoList.getHomeRepository().getAppId(), node.getId(), null, null);
+            usages = usage2Service.getUsages("-home-", node.getId(), null, null);
         } catch (Exception e) {
             logger.warn("node " + node + " is be skipped due to a usage request failure", e);
-            return;
-        }
-
-        if(forceAll){
-            logger.info("removing whole versionHistory");
-            versionService.deleteVersionHistory(node);
-            nodeService.removeProperty(node.getStoreRef().getProtocol(),node.getStoreRef().getIdentifier(),node.getId(),CCConstants.LOM_PROP_LIFECYCLE_VERSION);
             return;
         }
 
@@ -139,7 +136,7 @@ public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
                 .collect(Collectors.toList());
 
         versionsToDelete.forEach(version -> {
-            logger.info("deleteing version " + version.getVersionLabel());
+            logger.info("deleteing version node:"+node + " replicationSourceId:" +replicationSourceId+ " versionLabel:" + version.getVersionLabel());
             versionService.deleteVersion(node, version);
         });
     }

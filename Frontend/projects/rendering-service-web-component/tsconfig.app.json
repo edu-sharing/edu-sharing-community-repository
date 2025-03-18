@@ -2,12 +2,14 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../out-tsc/app",
-    "types": ["jquery"]
+    "types": [],
+    "moduleResolution": "node",
+    "module": "AMD",
+    "target": "ESNext",
+    "useDefineForClassFields": true
   },
   "files": [
     "src/main.ts",
-    "src/polyfills.ts"
   ],
   "include": [
     "src/**/*.d.ts"

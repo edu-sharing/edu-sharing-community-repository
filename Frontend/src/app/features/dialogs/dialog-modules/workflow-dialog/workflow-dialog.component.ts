@@ -1,6 +1,6 @@
 import { Component, Inject, ViewChild } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { NodeService } from 'ngx-edu-sharing-api';
+import { Node, NodeService } from 'ngx-edu-sharing-api';
 import {
     LocalEventsService,
     WORKFLOW_STATUS_UNCHECKED,
@@ -12,7 +12,6 @@ import {
     Authority,
     ConfigurationService,
     DialogButton,
-    Node,
     RestConnectorService,
     RestConstants,
     RestHelper,

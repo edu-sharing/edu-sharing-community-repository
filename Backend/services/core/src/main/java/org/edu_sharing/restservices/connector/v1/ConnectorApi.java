@@ -54,11 +54,4 @@ public class ConnectorApi {
 	    		return ErrorResponse.createResponse(t);
 	    	}
 	}
-
-	@OPTIONS    
-	@Path("/connectors/{repository}/list")
-    @Hidden
-	public Response options04() {
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-	}
 }

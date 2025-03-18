@@ -227,7 +227,13 @@ public class NodeDao {
                     .forEach(defaultProps::remove);
 
             for (String prop : defaultProps) {
-                if (!props.containsKey(prop) && CCConstants.getValidGlobalName(prop) != null) {
+                if (!props.containsKey(prop) && CCConstants.getValidGlobalName(prop) != null &&
+                    // protected publish props
+                    !Arrays.asList(
+                            CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL, CCConstants.CCM_PROP_IO_PUBLISHED_MODE,
+                            CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID, CCConstants.CCM_PROP_IO_PUBLISHED_DATE
+                    ).contains(CCConstants.getValidGlobalName(prop))
+                ) {
                     // delete removed properties
                     nodeService.removeProperty(getStoreProtocol(), getStoreIdentifier(), getId(), CCConstants.getValidGlobalName(prop));
                 }
@@ -272,7 +278,7 @@ public class NodeDao {
             PrivateKey privateKey = signing.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
             byte[] signedNodeData = signing.sign(privateKey, serializedNode, CCConstants.SECURITY_SIGN_ALGORITHM);
 
-            return new SignedNode(serializedNode, new String(signedNodeData));
+            return new SignedNode(serializedNode, signedNodeData);
         } catch (Throwable t) {
             throw DAOException.mapping(t);
         }
@@ -529,21 +535,7 @@ public class NodeDao {
         }
         result.setCount(search.getNodeCount());
         result.setSkip(search.getStartIDX());
-
-
-        if (search.getFacets() != null) {
-            for (Facet facet : search.getFacets()) {
-                if (facet.getValues() != null) {
-                    Collections.sort(facet.getValues(), new Comparator<Value>() {
-                        @Override
-                        public int compare(Value o1, Value o2) {
-                            return o2.getCount().compareTo(o1.getCount());
-                        }
-                    });
-                }
-            }
-            result.setFacets(search.getFacets());
-        }
+        result.setFacets(search.getFacets());
 
         if (search.getSuggests() != null) {
             Collections.sort(search.getSuggests(), new Comparator<NodeSearch.Suggest>() {
@@ -1023,22 +1015,22 @@ public class NodeDao {
 
     public NodeDao createChild(String type, List<String> aspects,
                                Map<String, String[]> properties, boolean renameIfExists) throws DAOException {
-        return this.createChild(type, aspects, properties, renameIfExists, null);
+        return this.createChild(type, aspects, properties, renameIfExists, null, true);
     }
 
     public NodeDao createChild(String type, List<String> aspects,
-                               Map<String, String[]> properties, boolean renameIfExists, String childAssoc) throws DAOException {
+                               Map<String, String[]> properties, boolean renameIfExists, String childAssoc, boolean obeyMds) throws DAOException {
 
         try {
-            NameSpaceTool<String> nameSpaceTool = new NameSpaceTool<String>();
-            type = nameSpaceTool.transformToLongQName(type);
-            if (childAssoc != null)
+            type = NameSpaceTool.transformToLongQName(type);
+            if (childAssoc != null) {
                 childAssoc = CCConstants.getValidGlobalName(childAssoc);
+            }
             Map<String, String[]> props = transformProperties(properties);
             String childId;
 
-            String originalNameArr[] = props.get(CCConstants.CM_NAME);
-            String originalName = (originalNameArr != null && originalNameArr.length > 0) ? originalNameArr[0] : null;
+            String[] originalNameArray = props.get(CCConstants.CM_NAME);
+            String originalName = (originalNameArray != null && originalNameArray.length > 0) ? originalNameArray[0] : null;
             if (originalName == null) throw new Exception("missing name");
 
             // escape invalid characters of the name
@@ -1048,7 +1040,7 @@ public class NodeDao {
             int i = 2;
             while (true) {
                 try {
-                    childId = this.nodeService.createNode(nodeId, type, props, childAssoc);
+                    childId = this.nodeService.createNode(nodeId, type, props, childAssoc, obeyMds);
                     break;
                 } catch (DuplicateChildNodeNameException e) {
                     if (renameIfExists) {
@@ -2743,7 +2735,7 @@ public class NodeDao {
     }
 
     private static void setPropertyInternal(NodeService nodeService, String nodeId, String property, Serializable value) {
-        if (value == null) {
+        if (value == null || (value instanceof java.util.Collection && ((java.util.Collection<?>) value).isEmpty())) {
             nodeService.removeProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, property);
         } else {
             nodeService.setProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, property, value, false);

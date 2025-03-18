@@ -59,6 +59,7 @@ export * from './services/options-helper-data.service';
 export * from './services/repo-url.service';
 export * from './services/temporary-storage.service';
 export * from './services/ui.service';
+export * from './services/render-helper.service';
 export * from './sort-dropdown/sort-dropdown.component';
 export * from './spinner/spinner.component';
 export * from './translations/fallback-translation-handler';

@@ -1,5 +1,8 @@
 package org.edu_sharing.alfresco.transformer;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.rendition2.LocalTransformClient;
 import org.alfresco.repo.rendition2.RenditionDefinition2;
 import org.alfresco.repo.rendition2.RenditionDefinition2Impl;
@@ -7,20 +10,22 @@ import org.alfresco.repo.rendition2.TransformDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 import static org.edu_sharing.alfresco.transformer.EduLocalTransformServiceRegistry.TRANSFORM_OPTION_RESOURCETYPE;
 
+@Slf4j
 public class EduLocalTransformClient extends LocalTransformClient {
 
-    private static Log logger = LogFactory.getLog(EduLocalTransformClient.class);
-
     NodeService nodeService;
+    @Getter
+    @Setter
+    private LightbendConfigLoader lightbendConfigLoader;
 
     @Override
     public void checkSupported(NodeRef sourceNodeRef, RenditionDefinition2 renditionDefinition, String sourceMimetype, long sourceSizeInBytes, String contentUrl) {
@@ -44,7 +49,7 @@ public class EduLocalTransformClient extends LocalTransformClient {
         String resourceType = (String)nodeService.getProperty(sourceNodeRef, QName.createQName(CCConstants.CCM_PROP_CCRESSOURCETYPE));
 
         if(resourceType != null && !resourceType.trim().isEmpty()){
-            logger.info("adding edu-sharing option resourceType:" + resourceType);
+            log.info("adding edu-sharing option resourceType:" + resourceType);
             Map<String,String> options = new HashMap<>(original.getTransformOptions());
             options.put(TRANSFORM_OPTION_RESOURCETYPE, resourceType);
 
@@ -60,5 +65,10 @@ public class EduLocalTransformClient extends LocalTransformClient {
         }else result = original;
 
         return result;
+    }
+
+    public void init() {
+        // use limited size thread pool to prevent db connection overflow
+        setExecutorService(Executors.newFixedThreadPool(lightbendConfigLoader.getConfig().getInt("repository.transformer.threadCount")));
     }
 }

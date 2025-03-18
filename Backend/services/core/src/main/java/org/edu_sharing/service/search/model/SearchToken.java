@@ -159,7 +159,7 @@ public class SearchToken implements Serializable {
 		if(this.query != null && facets != null) {
 			List<String> combined = new ArrayList<>();
 			this.facets.forEach((facet) -> {
-				List<String> sublist = this.query.findParameterByName(facet).getFacets().stream().map(MetadataQueryParameter.MetadataQueryFacet::getValue).collect(Collectors.toList());
+				List<String> sublist = this.query.findParameterByName(facet).getFacet().getItems().stream().map(MetadataQueryParameter.MetadataQueryFacetItem::getValue).collect(Collectors.toList());
 				if(sublist != null) {
 					combined.addAll(sublist);
 				} else {
@@ -178,9 +178,9 @@ public class SearchToken implements Serializable {
 	public Map<String, Map<String, Integer>> aggregateFacetes(Map<String, Map<String, Integer>> propsMap) {
 		Map<String, Map<String, Integer>> combined = new HashMap<>();
 		if(this.query != null && facets != null) {
-			List<MetadataQueryParameter> facetParams = this.query.getParameters().stream().filter((p) -> p.getFacets() != null).collect(Collectors.toList());
+			List<MetadataQueryParameter> facetParams = this.query.getParameters().stream().filter((p) -> p.getFacet().getItems() != null).collect(Collectors.toList());
 			for(Map.Entry<String, Map<String, Integer>> entry : propsMap.entrySet()) {
-				Optional<MetadataQueryParameter> param = facetParams.stream().filter((p) -> p.getFacets().contains(entry.getKey())).findFirst();
+				Optional<MetadataQueryParameter> param = facetParams.stream().filter((p) -> p.getFacet().getItems().contains(entry.getKey())).findFirst();
 				String key = entry.getKey();
 				if(param.isPresent()) {
 					key = param.get().getName();

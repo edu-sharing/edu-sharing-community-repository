@@ -613,7 +613,7 @@ export class LicenseDialogContentComponent implements OnInit {
     }
 
     getLicenseUrlVersion(type: string) {
-        return this.nodeHelper.getLicenseUrlByString(type, this.ccVersion, this.ccCountry);
+        return this.nodeHelper.getLicenseUrlByString(type, this.ccVersion || '4.0', this.ccCountry);
     }
 
     getLicenseIcon() {

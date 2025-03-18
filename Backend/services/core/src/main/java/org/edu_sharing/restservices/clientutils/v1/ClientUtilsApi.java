@@ -59,14 +59,5 @@ public class ClientUtilsApi  {
     	}
 
     }
-	@OPTIONS    
-    @Path("/getWebsiteInformation")
-    @Hidden
-
-	public Response options01() {
-		
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-	}
-    
 }
 

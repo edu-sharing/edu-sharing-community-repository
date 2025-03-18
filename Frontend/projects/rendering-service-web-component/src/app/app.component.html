@@ -1,1 +1,7 @@
-<es-render-wrapper-component [nodeId]="nodeId"></es-render-wrapper-component>
+<rs-root
+  *ngIf="request() && node() && serviceWorkerUrl()"
+  [node]="node()"
+  [request]="request()"
+  [serviceWorkerUrl]="serviceWorkerUrl()"
+>
+</rs-root>

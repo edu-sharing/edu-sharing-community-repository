@@ -133,7 +133,7 @@ public class OAIPMHLOMImporter implements Importer{
 		
 		//take identifiers list cause some of the sets don't work: XML-Verarbeitungsfehler: nicht wohlgeformt
 		String url = this.oai_base_url+"?verb=ListIdentifiers&metadataPrefix="+this.metadataPrefix;
-		String setUrl = url+"&set="+set;
+		String setUrl = set.equals("-none-") ? url :  url+"&set="+set;
 		if(this.from != null && this.until != null){
 			String fromString = OAIConst.DATE_FORMAT.format(this.from);
 			String untilString = OAIConst.DATE_FORMAT.format(this.until);
@@ -594,7 +594,9 @@ public class OAIPMHLOMImporter implements Importer{
 	public String startImport(byte[] xml) throws Throwable {
 		Document xmlRecord = stringToXML(new String(xml));
 		Node main = xmlRecord.getFirstChild();
-		if(!main.getNodeName().equals("metadata")){
+		if(xmlRecord.getFirstChild().getNodeName().equals("OAI-PMH")){
+			return handleRecordInternal(null,getRecordNodeFromDoc(xmlRecord));
+		}else if(!main.getNodeName().equals("metadata")){
 			Document newDoc = factory.newDocumentBuilder().newDocument();
 			Node metadata = newDoc.appendChild(newDoc.createElement("metadata"));
 			metadata.appendChild(newDoc.adoptNode(main));

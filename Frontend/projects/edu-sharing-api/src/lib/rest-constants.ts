@@ -120,6 +120,7 @@ export class RestConstants {
     public static CCM_PROP_CCRESSOURCESUBTYPE = 'ccm:ccresourcesubtype';
     public static CCM_PROP_CCRESSOURCEVERSION = 'ccm:ccressourceversion';
     public static CCM_PROP_PUBLISHED_ORIGINAL = 'ccm:published_original';
+    public static NODE_VERSION_CURRENT = '-1';
 
     public static AUTHORITY_NAME = 'authorityName';
     public static AUTHORITY_DISPLAYNAME = 'displayName';

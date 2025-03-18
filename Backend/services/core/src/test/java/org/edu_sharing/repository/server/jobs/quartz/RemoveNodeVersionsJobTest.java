@@ -161,6 +161,8 @@ class RemoveNodeVersionsJobTest {
         // when
         when(versionService.getVersionHistory(node)).thenReturn(versionHistory);
         when(versionHistory.getAllVersions()).thenReturn(versionCollection);
+        when(nodeService.getProperty(anyString(), anyString(), eq(node.getId()), eq(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)))
+                .thenReturn(null);
         when(nodeService.getProperty(anyString(), anyString(), eq(node.getId()), eq(CCConstants.LOM_PROP_LIFECYCLE_VERSION)))
                 .thenReturn(null);
 
@@ -185,6 +187,8 @@ class RemoveNodeVersionsJobTest {
         // when
         when(versionService.getVersionHistory(node)).thenReturn(versionHistory);
         when(versionHistory.getAllVersions()).thenReturn(versionCollection);
+        when(nodeService.getProperty(anyString(), anyString(), eq(node.getId()), eq(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)))
+                .thenReturn(null);
         when(nodeService.getProperty(anyString(), anyString(), eq(node.getId()), eq(CCConstants.LOM_PROP_LIFECYCLE_VERSION)))
                 .thenReturn(v2Label);
 
@@ -233,8 +237,12 @@ class RemoveNodeVersionsJobTest {
         // when
         when(versionService.getVersionHistory(node)).thenReturn(versionHistory);
         when(versionHistory.getAllVersions()).thenReturn(versionCollection);
+        when(nodeService.getProperty(anyString(), anyString(), eq(node.getId()), eq(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)))
+                .thenReturn(null);
         when(nodeService.getProperty(anyString(), anyString(), eq(node.getId()), eq(CCConstants.LOM_PROP_LIFECYCLE_VERSION)))
                 .thenReturn(null);
+
+
 
         underTest.setKeepAtLeast(2);
         underTest.handleNode(node);
@@ -258,6 +266,8 @@ class RemoveNodeVersionsJobTest {
         // when
         when(versionService.getVersionHistory(node)).thenReturn(versionHistory);
         when(versionHistory.getAllVersions()).thenReturn(versionCollection);
+        when(nodeService.getProperty(anyString(), anyString(), eq(node.getId()), eq(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)))
+                .thenReturn(null);
         when(nodeService.getProperty(anyString(), anyString(), eq(node.getId()), eq(CCConstants.LOM_PROP_LIFECYCLE_VERSION)))
                 .thenReturn(null);
 
@@ -278,6 +288,8 @@ class RemoveNodeVersionsJobTest {
         // when
         when(versionService.getVersionHistory(node)).thenReturn(versionHistory);
         when(versionHistory.getAllVersions()).thenReturn(versionCollection);
+        when(nodeService.getProperty(anyString(), anyString(), eq(node.getId()), eq(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)))
+                .thenReturn(null);
         when(nodeService.getProperty(anyString(), anyString(), eq(node.getId()), eq(CCConstants.LOM_PROP_LIFECYCLE_VERSION)))
                 .thenReturn(null);
 
@@ -303,6 +315,8 @@ class RemoveNodeVersionsJobTest {
         // when
         when(versionService.getVersionHistory(node)).thenReturn(versionHistory);
         when(versionHistory.getAllVersions()).thenReturn(versionCollection);
+        when(nodeService.getProperty(anyString(), anyString(), eq(node.getId()), eq(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)))
+                .thenReturn(null);
         when(nodeService.getProperty(anyString(), anyString(), eq(node.getId()), eq(CCConstants.LOM_PROP_LIFECYCLE_VERSION)))
                 .thenReturn(null);
 
