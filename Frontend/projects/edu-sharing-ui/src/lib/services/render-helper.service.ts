@@ -7,6 +7,8 @@ import {
     NodeServiceUnwrapped,
     RestConstants,
     UserService,
+    PROPERTY_FILTER_ALL,
+    HOME_REPOSITORY,
 } from 'ngx-edu-sharing-api';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
 import { OptionsHelperDataService } from './options-helper-data.service';
@@ -32,9 +34,9 @@ export class RenderHelperService {
         const about = await firstValueFrom(this.aboutService.getAbout());
         const securedNode = await firstValueFrom(
             this.nodeApiUnwrapped.getMetadataSigned({
-                repository: '-home-',
+                repository: HOME_REPOSITORY,
                 node: nodeId,
-                propertyFilter: ['-all-'],
+                propertyFilter: [PROPERTY_FILTER_ALL],
             }),
         );
         const node = securedNode.node;
