@@ -1783,7 +1783,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
                 if (!token.isEmpty()) {
                     String ftoken = token;
-                    subQuery.must(m -> m.match(ma -> ma.field("properties.cm:email").query(ftoken)));
+                    subQuery.must(m -> m.match(ma -> ma.field("properties.cm:email.keyword").query(ftoken)));
                 }
             }
 
