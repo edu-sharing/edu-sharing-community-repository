@@ -1748,14 +1748,16 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     for (Map.Entry<String, Double> field : searchFields.entrySet()) {
                         String fToken = token;
                         fieldQuery.should(s -> s.wildcard(w -> w
-                                .field("properties.cm:" + field.getKey())
-                                .value(fToken))
+                                .field("properties.cm:" + field.getKey()+".keyword")
+                                .value(fToken)
+                                .caseInsensitive(true))
                         );
                         if (field.getValue() > 1) {
                             fieldQuery.should(s -> s.wildcard(w -> w
-                                    .field("properties.cm:" + field.getKey())
+                                    .field("properties.cm:" + field.getKey()+".keyword")
                                     .value(StringUtils.strip(fToken, "*"))
-                                    .boost(field.getValue().floatValue())));
+                                    .boost(field.getValue().floatValue())
+                                    .caseInsensitive(true)));
                         }
                     }
                     subQuery.must(m -> m.bool(fieldQuery.build()));
@@ -1958,21 +1960,25 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         String ftoken = token;
                         BoolQuery.Builder fieldQuery = QueryBuilders.bool().minimumShouldMatch("1");
                         fieldQuery.should(s -> s.wildcard(w -> w
-                                .field("properties.cm:authorityDisplayName")
+                                .field("properties.cm:authorityDisplayName.keyword")
                                 .value(StringUtils.strip(ftoken, "*"))
                                 .boost((float) 10.0)
+                                .caseInsensitive(true)
                         )).should(s -> s.wildcard(w -> w
-                                .field("properties.cm:authorityDisplayName")
+                                .field("properties.cm:authorityDisplayName.keyword")
                                 .value(ftoken)
+                                .caseInsensitive(true)
                         )).should(s -> s.wildcard(w -> w
-                                .field("properties.ccm:groupEmail")
+                                .field("properties.ccm:groupEmail.keyword")
                                 .value(ftoken)
+                                .caseInsensitive(true)
                         ));
 
                         if (eduPermissionService.isAdminOrSystem()) {
                             fieldQuery.should(s -> s.wildcard(w -> w
-                                    .field("properties.cm:authorityName")
+                                    .field("properties.cm:authorityName.keyword")
                                     .value(ftoken)
+                                    .caseInsensitive(true)
                             ));
                         }
                         subQuery.must(f -> f.bool(fieldQuery.build()));
@@ -1996,11 +2002,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 if (nonFuzzyField.startsWith("=@")) {
                     nonFuzzyField = nonFuzzyField.replace("=@", "");
                 }
-                String fnonFuzzyField = "properties." + nonFuzzyField;
+                String fnonFuzzyField = "properties." + nonFuzzyField+".keyword";
                 String ftoken = token;
                 subQuery.must(m -> m.wildcard(w -> w.
                         field(fnonFuzzyField)
                         .value(ftoken)
+                        .caseInsensitive(true)
                 ));
             }
 
@@ -2049,8 +2056,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
         if (!eduPermissionService.isAdminOrSystem()) {
             searchQuery.mustNot(mn -> mn.bool(b -> b
-                    .should(s -> s.term(t -> t.field("properties.cm:authorityName").value(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)))
-                    .should(s -> s.term(t -> t.field("properties.cm:authorityName").value(CCConstants.AUTHORITY_GROUP_EMAIL_CONTRIBUTORS)))
+                    .should(s -> s.term(t -> t.field("properties.cm:authorityName.keyword").value(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)))
+                    .should(s -> s.term(t -> t.field("properties.cm:authorityName.keyword").value(CCConstants.AUTHORITY_GROUP_EMAIL_CONTRIBUTORS)))
             ));
         }
 
