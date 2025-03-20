@@ -480,7 +480,10 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy, Af
         download.customEnabledCallback = (nodes) => {
             return (
                 this._node.downloadUrl != null &&
-                (!this._node.properties[RestConstants.CCM_PROP_IO_WWWURL] ||
+                (!(
+                    this._node.properties[RestConstants.CCM_PROP_IO_WWWURL] &&
+                    !this._node.properties[RestConstants.VIRTUAL_PROP_LINK_DOWNLOAD_ALLOWED]
+                ) ||
                     !this._fromHomeRepository)
             );
         };

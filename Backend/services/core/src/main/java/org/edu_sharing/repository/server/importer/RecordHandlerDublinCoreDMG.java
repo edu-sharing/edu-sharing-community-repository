@@ -1,21 +1,19 @@
 package org.edu_sharing.repository.server.importer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.forms.VCardTool;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.client.tools.forms.VCardTool;
-import org.edu_sharing.repository.server.RepoFactory;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class RecordHandlerDublinCoreDMG implements RecordHandlerInterface {
 
@@ -182,17 +180,26 @@ public class RecordHandlerDublinCoreDMG implements RecordHandlerInterface {
 		
 		NodeList identifierList = (NodeList) xpath.evaluate("metadata/dc/identifier", nodeRecord, XPathConstants.NODESET);
 		String technicalLocation = null;
+		String downloadLocation = null;
 		for(int i = 0; i < identifierList.getLength(); i++){
 			Node identifierNode = identifierList.item(i);
 			String identifierElement = (String)xpath.evaluate(".", identifierNode, XPathConstants.STRING);
 			//if it's a protocol like http://
 			if(identifierElement.matches("[a-zA-Z]*://.*")){
-				technicalLocation = identifierElement;
+				if(i == 0) {
+					technicalLocation = identifierElement;
+				}else {
+					downloadLocation = identifierElement;
+				}
 			}
 		}
 		
-		if(technicalLocation != null && !technicalLocation.trim().equals("")){
-			toSafeMap.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, technicalLocation);
+		if(technicalLocation != null && !technicalLocation.trim().isEmpty()){
+			toSafeMap.put(CCConstants.CCM_PROP_IO_WWWURL, technicalLocation);
+		}
+
+		if(downloadLocation != null && !downloadLocation.trim().isEmpty()){
+			toSafeMap.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION,downloadLocation);
 		}
 		
 		String lomRights = (String) xpath.evaluate("metadata/dc/rights", nodeRecord, XPathConstants.STRING);
