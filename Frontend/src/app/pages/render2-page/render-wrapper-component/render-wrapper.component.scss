@@ -29,6 +29,10 @@ rs-root {
                 height: auto;
                 aspect-ratio: 16 / 9;
             }
+            &.module-VIDEO,
+            &.module-AUDIO {
+                width: 70%;
+            }
             &.module-IMAGE,
             &.module-DDB {
                 width: 70%;
