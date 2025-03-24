@@ -996,6 +996,9 @@ public class CCConstants {
 
 	public final static String VIRT_PROP_MEDIACENTERS = "{virtualproperty}mediacenters";
 
+	public final static String VIRT_PROP_LINK_DOWNLOAD_ALLOWED = "{virtualproperty}linkDownloadAllowed";
+
+
 	/**
 	 * says if this set of properties is from an remote repository that was linked in the local repo by an remoteobject
 	 * values are all that can be used in new Boolean(value)
