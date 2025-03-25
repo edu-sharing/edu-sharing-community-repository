@@ -838,11 +838,6 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
         PermissionService permissionsService = this.serviceRegistry.getPermissionService();
         NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
-        if (inheritPermission != null) {
-            log.info("setInheritParentPermissions " + inheritPermission);
-            permissionsService.setInheritParentPermissions(nodeRef, inheritPermission);
-        }
-
 
         String adminAuthority = getAdminAuthority(nodeRef);
 
@@ -857,6 +852,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
                 permissionsService.setPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), authority, permission, true);
 
             }
+        }
+
+        if (inheritPermission != null) {
+            log.info("setInheritParentPermissions " + inheritPermission);
+            permissionsService.setInheritParentPermissions(nodeRef, inheritPermission);
         }
 
     }
