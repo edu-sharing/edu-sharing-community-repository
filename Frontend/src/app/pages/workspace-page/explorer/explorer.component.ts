@@ -431,7 +431,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             return;
         }
         if (Helper.objectEquals(this.node$.value, current)) return;
-        this.dataSource.reset();
+        this.dataSource?.reset();
         this.node$.next(current);
         this.initOptions();
     }
