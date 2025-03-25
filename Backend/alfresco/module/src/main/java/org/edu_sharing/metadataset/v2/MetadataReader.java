@@ -796,8 +796,8 @@ public class MetadataReader {
                             ? key.getKey()
                             : cap,
                     fallback));
-            key.setDescription(getTranslation(key, description, key.getI18nPrefix() == null ? description : ""));
-            key.setAbbreviation(getTranslation(key, abbreviation, key.getI18nPrefix() == null ? abbreviation : ""));
+            key.setDescription(getTranslation(key, description, StringUtils.isEmpty(key.getI18nPrefix()) ? description : ""));
+            key.setAbbreviation(getTranslation(key, abbreviation, StringUtils.isEmpty(key.getI18nPrefix()) ? abbreviation : ""));
             keys.add(key);
         }
         return keys;
