@@ -996,6 +996,9 @@ public class CCConstants {
 
 	public final static String VIRT_PROP_MEDIACENTERS = "{virtualproperty}mediacenters";
 
+	public final static String VIRT_PROP_LINK_DOWNLOAD_ALLOWED = "{virtualproperty}linkDownloadAllowed";
+
+
 	/**
 	 * says if this set of properties is from an remote repository that was linked in the local repo by an remoteobject
 	 * values are all that can be used in new Boolean(value)
@@ -2248,6 +2251,9 @@ public class CCConstants {
 	 * group type representing a lesson group (unterricht)
 	 */
 	public static final String GROUP_TYPE_LESSON = "LESSON";
+	public static final String GROUP_TYPE_SCHOOL_NATIONAL = "SCHOOL_NATIONAL";
+	public static final String GROUP_TYPE_SCHOOL_MUNICIPAL = "SCHOOL_MUNICIPAL";
+	public static final String GROUP_TYPE_SCHOOL_PRIVATE = "SCHOOL_PRIVATE";
 
 	public static final String EDITORIAL_GROUP_TYPE = "EDITORIAL";
 	public static final String COLLECTIONTYPE_DEFAULT = "default";
