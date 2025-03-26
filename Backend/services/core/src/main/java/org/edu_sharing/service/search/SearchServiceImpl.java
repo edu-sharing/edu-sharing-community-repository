@@ -863,6 +863,11 @@ public class SearchServiceImpl implements SearchService {
 			}
 		}
 		else if(type.equals(AuthorityType.USER)) {
+			if(customProperties!=null){
+				for(Map.Entry<String, String> entry : customProperties.entrySet().stream().filter(k -> Objects.equals(CCConstants.getValidGlobalName(k.getKey()), CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)).collect(Collectors.toList())){
+					findUsersQuery.append(" AND @").append(entry.getKey().replace(":", "\\:")).append(":\"").append(QueryParser.escape(entry.getValue())).append("\"");
+				}
+			}
 			finalQuery=findUsersQuery.toString();
 		}
 		else if(type.equals(AuthorityType.GROUP)) {
