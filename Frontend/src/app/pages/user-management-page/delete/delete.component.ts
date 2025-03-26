@@ -2,6 +2,7 @@ import { AfterViewInit, ApplicationRef, Component, OnInit, ViewChild } from '@an
 import { TranslateService } from '@ngx-translate/core';
 import { User } from 'ngx-edu-sharing-api';
 import {
+    FetchEvent,
     InteractionType,
     ListItem,
     NodeDataSource,
@@ -13,6 +14,7 @@ import {
     DialogButton,
     Group,
     JobDescription,
+    RequestObject,
     RestAdminService,
     RestConstants,
     RestIamService,
@@ -147,8 +149,7 @@ export class PermissionsDeleteComponent implements OnInit, AfterViewInit {
 
     refresh() {
         this.usersDataSource.isLoading = true;
-        const request = { maxItems: RestConstants.COUNT_UNLIMITED };
-        this.iam.searchUsers('*', true, 'todelete', request).subscribe(
+        this.iam.searchUsers('*', true, 'todelete').subscribe(
             (users) => {
                 this.usersDataSource.setData(users.users as unknown as User[], users.pagination);
                 this.applicationRef.tick();
@@ -275,4 +276,22 @@ export class PermissionsDeleteComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit() {}
+
+    fetchMore(event: FetchEvent) {
+        const request: RequestObject = {
+            offset: this.usersDataSource.getData().length,
+        };
+        this.usersDataSource.isLoading = true;
+        this.iam.searchUsers('*', true, 'todelete', request).subscribe(
+            (users) => {
+                this.usersDataSource.appendData(users.users as unknown as User[]);
+                this.applicationRef.tick();
+                this.usersDataSource.isLoading = false;
+            },
+            (error) => {
+                this.toast.error(error);
+                this.usersDataSource.isLoading = false;
+            },
+        );
+    }
 }

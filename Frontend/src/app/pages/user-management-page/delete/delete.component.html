@@ -29,6 +29,7 @@
         [dataSource]="usersDataSource"
         [checkbox]="true"
         [elementInteractionType]="InteractionType.Emitter"
+        (fetchData)="fetchMore($event)"
       ></es-node-entries-wrapper>
     </div>
   </div>
