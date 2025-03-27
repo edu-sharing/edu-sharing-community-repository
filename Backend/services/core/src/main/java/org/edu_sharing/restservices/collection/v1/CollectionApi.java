@@ -13,6 +13,8 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.edu_sharing.metadataset.v2.MetadataSet;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.restservices.*;
@@ -38,9 +40,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @Path("/collection/v1")
 @Tag(name= "COLLECTION v1" )
@@ -197,13 +197,20 @@ public class CollectionApi {
 				return Response.status(Response.Status.NOT_FOUND).build();
 			}
 			SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getId());
+
+
+			MetadataSet mds = MdsDao.getMds(repoDao,CCConstants.metadatasetdefault_id).getMds();
 			SearchToken token = new SearchToken();
 			token.setContentType(ContentType.COLLECTIONS);
 			token.setFrom(skipCount != null ? skipCount : 0);
 			token.setMaxResult(maxItems != null ? maxItems : 500);
 			token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
-			token.setLuceneString("@cm\\:name:\"*" + QueryParser.escape(query) + "*\"");
-			SearchResultNodeRef result = searchService.search(token);
+			Map<String, String[]> parameters = new HashMap<>();
+			if(!query.trim().isEmpty())
+				parameters.put("ngsearchword",new String[]{query});
+
+			SearchResultNodeRef result = searchService.search(mds, "collections", parameters, token);
+
 			CollectionEntries response = new CollectionEntries();
 			List<Node> collections = new ArrayList<>();
 			for (NodeRef entry : AlfrescoDaoHelper.marshall(result.getData())) {

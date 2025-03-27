@@ -170,7 +170,7 @@ public class RepairBrockhausRemoteIosJob extends AbstractJob{
 		runner.setRunAsSystem(true);
 		runner.setThreaded(false);
 		runner.setKeepModifiedDate(true);
-		runner.setLucene("ASPECT:\"ccm:remoterepository\" AND @ccm\\:remoterepositorytype:\"BROCKHAUS\"");
+		runner.setElastic("{\"bool\":{\"must\":[{\"term\":{\"aspects\":\"ccm:remoterepository\"}},{\"term\":{\"properties.ccm:remoterepositorytype\":\"BROCKHAUS\"}}]}}");
 		runner.setTransaction(NodeRunner.TransactionMode.LocalRetrying);
 		int count=runner.run();
 		logger.info("Processed "+count+" nodes");

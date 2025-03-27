@@ -1,5 +1,7 @@
 package org.edu_sharing.restservices;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
@@ -409,27 +411,38 @@ public class PersonDao {
 
 			@Override
 			public UserStats doWork() throws Exception {
-				String luceneUser = "@cm\\:creator:\""+ QueryParser.escape(getAuthorityName())+"\"";
-				luceneUser += " AND NOT ASPECT:"+QueryParser.escape(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE));
-				luceneUser += " AND NOT ASPECT:"+QueryParser.escape(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT));
+				BoolQuery.Builder filesQuery = getUserStatsBaseQuery();
+				filesQuery.must(m -> m.term(t -> t.field("type").value("ccm:io")));
+
 				SearchToken token=new SearchToken();
 				token.setMaxResult(0);
-				token.setLuceneString(luceneUser);
-				token.setContentType(SearchService.ContentType.FILES);
-		    	SearchResultNodeRef result = searchService.search(token);
+				token.setElasticQuery(filesQuery.build());
+				SearchResultNodeRef result = searchService.search(token);
 		    	stats.setNodeCount(result.getNodeCount());
 
-		    	token.setLuceneString(luceneUser+" AND @ccm\\:commonlicense_key:\"CC_*\"");
-		    	result = searchService.search(token);
+				BoolQuery.Builder ccQuery = getUserStatsBaseQuery();
+				ccQuery.must(m -> m.term(t -> t.field("type").value("ccm:io")));
+				ccQuery.must(m -> m.wildcard(w -> w.field("properties.ccm:commonlicense_key.keyword").value("CC_*")));
+				token.setElasticQuery(ccQuery.build());
+				result = searchService.search(token);
 		    	stats.setNodeCountCC(result.getNodeCount());
 
-		    	token.setLuceneString(luceneUser);
-		    	token.setContentType(SearchService.ContentType.COLLECTIONS);
+		    	BoolQuery.Builder colQuery = getUserStatsBaseQuery();
+				colQuery.must(m -> m.term(t -> t.field("aspects").value("ccm:collection")));
+				token.setElasticQuery(colQuery.build());
 		    	result = searchService.search(token);
 		    	stats.setCollectionCount(result.getNodeCount());
 				return stats;
 			}
 		});
+	}
+
+	private BoolQuery.Builder getUserStatsBaseQuery() {
+		BoolQuery.Builder bool = QueryBuilders.bool();
+		bool.must(m -> m.term(t -> t.field("properties.cm:creator").value(getAuthorityName())));
+		bool.mustNot(mn -> mn.term(t -> t.field("aspects").value("ccm:collection_io_reference")));
+		bool.mustNot(mn -> mn.term(t -> t.field("aspects").value("ccm:io_childobject")));
+		return bool;
 	}
 
 	private org.alfresco.service.cmr.repository.NodeRef getAvatarNode() {

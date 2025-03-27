@@ -16,32 +16,6 @@ public class MCAlfrescoClientAdapter extends MCAlfrescoBaseClient {
 	}
 
 	@Override
-	public Map<String, Map<String, Object>> search(String luceneString, String type) throws Exception {
-		return null;
-	}
-
-	@Override
-	public Map<String, Map<String, Object>> search(String luceneString) throws Throwable {
-		return null;
-	}
-
-	@Override
-	public Map<String, Map<String, Object>> search(String luceneString, ContextSearchMode mode)
-			throws Throwable {
-		return null;
-	}
-
-	@Override
-	public String[] searchNodeIds(String luceneString) throws Exception {
-		return null;
-	}
-
-	@Override
-	public String[] searchNodeIds(String luceneString, int limit) throws Exception {
-		return null;
-	}
-
-	@Override
 	public Map<String, Map<String, Object>> getChildren(String parentID) throws Throwable {
 		return null;
 	}
@@ -284,11 +258,6 @@ public class MCAlfrescoClientAdapter extends MCAlfrescoBaseClient {
 	public void removeUserDefinedPreview(String nodeId) {
 	}
 
-	@Override
-	public SearchResult searchSolr(String query, int startIdx, int nrOfresults, List<String> facets,
-			int facetsMinCount, int facetsLimit) throws Throwable {
-		return null;
-	}
 
 	@Override
 	public String guessMimetype(String filename) {
@@ -306,18 +275,7 @@ public class MCAlfrescoClientAdapter extends MCAlfrescoBaseClient {
 	}
 
 	@Override
-	public ArrayList<EduGroup> getEduGroups() throws Throwable {
-		return null;
-	}
-
-	@Override
 	public User getOwner(String storeId, String storeProtocol, String nodeId) {
-		return null;
-	}
-
-	@Override
-	public SearchResult search(String luceneString, String storeProtocol, String storeName, int from, int maxResult)
-			throws Throwable {
 		return null;
 	}
 

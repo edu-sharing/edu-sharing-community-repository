@@ -480,24 +480,6 @@ public class NodeDao {
         }
     }
 
-    public static NodeSearch search(RepositoryDao repoDao, String query,
-                                    int startIdx, int nrOfresults, List<String> facets,
-                                    int facetsMinCount, int facetsLimit, Function<NodeDao, NodeDao> transform) throws DAOException {
-
-        try {
-
-            SearchResultNodeRef search = ((MCAlfrescoAPIClient) repoDao.getBaseClient()).searchSolrNodeRef(query,
-                    startIdx, nrOfresults, facets, facetsMinCount,
-                    facetsLimit);
-
-            return transform(repoDao, search);
-
-        } catch (Throwable t) {
-
-            throw DAOException.mapping(t);
-        }
-    }
-
     public static NodeSearch getMetadata(RepositoryDao repoDao, List<String> nodeIds, Filter filter) throws DAOException {
         SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getId());
         try {
@@ -508,7 +490,7 @@ public class NodeDao {
     }
 
     public static NodeSearch transform(RepositoryDao repoDao, SearchResultNodeRef search) {
-        return transform(repoDao, search, null, null);
+        return transform(repoDao, search, Filter.createShowAllFilter(), null);
     }
 
     public static NodeSearch transform(RepositoryDao repoDao, SearchResultNodeRef search, Filter filter, Function<NodeDao, NodeDao> transform) {

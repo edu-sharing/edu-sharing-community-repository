@@ -2,8 +2,11 @@ package org.edu_sharing.service.authority;
 
 import jakarta.transaction.UserTransaction;
 import org.alfresco.model.ContentModel;
+import org.alfresco.query.PagingRequest;
+import org.alfresco.query.PagingResults;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.repo.security.authority.AuthorityInfo;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.ServiceRegistry;
@@ -284,8 +287,6 @@ public EduGroup getEduGroup(String authority){
 					(String) groupProps.get(QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME)));
 			eduGroup.setGroupDisplayName(
 					(String) groupProps.get(QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME)));
-			eduGroup.setFolderPath(nodeService.getPath(nodeRefEduGroupHomeDir)
-					.toPrefixString(serviceRegistry.getNamespaceService()));
 			eduGroup.setScope((String) groupProps.get(QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME)));
 			
 			return eduGroup;
@@ -727,6 +728,33 @@ public EduGroup getEduGroup(String authority){
 		personService.createPerson(properties);
 		serviceRegistry.getAuthenticationService()
 				.createAuthentication(CCConstants.PROXY_USER,new KeyTool().getRandomPassword().toCharArray());
+	}
+
+	@Override
+	public String[] searchGroupNames(String pattern) throws Exception {
+
+		org.alfresco.service.cmr.security.AuthorityService authorityService = serviceRegistry.getAuthorityService();
+
+		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
+
+				() -> {
+					PagingResults<AuthorityInfo> groupReq =
+							authorityService.getAuthoritiesInfo(
+									AuthorityType.GROUP,
+									null,
+									pattern,
+									null,
+									true,
+									new PagingRequest(Integer.MAX_VALUE, null));
+
+					List<String> groupNames = new ArrayList<>();
+					for (AuthorityInfo groupInfo : groupReq.getPage()) {
+						groupNames.add(groupInfo.getAuthorityName());
+					}
+
+					return groupNames.toArray(new String[0]);
+				}, true);
+
 	}
 
 

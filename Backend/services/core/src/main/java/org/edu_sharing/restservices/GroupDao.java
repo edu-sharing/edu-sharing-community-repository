@@ -97,11 +97,11 @@ public class GroupDao {
 
     public static List<GroupDao> search(RepositoryDao repoDao, String pattern) throws DAOException {
 
+        AuthorityService authorityService = AuthorityServiceFactory.getAuthorityService(repoDao.getApplicationInfo().getAppId());
         try {
 
             List<GroupDao> resultset = new ArrayList<>();
-            for (String groupName : ((MCAlfrescoAPIClient) repoDao.getBaseClient()).searchGroupNames(pattern)) {
-
+            for (String groupName : authorityService.searchGroupNames(pattern)) {
                 resultset.add(new GroupDao(repoDao, groupName));
             }
 

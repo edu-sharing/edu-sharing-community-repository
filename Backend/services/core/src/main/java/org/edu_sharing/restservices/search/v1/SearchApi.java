@@ -18,6 +18,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.repository.server.NodeRefVersion;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.LRMITool;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
@@ -468,52 +469,21 @@ public class SearchApi {
 			if (comparator != null && property.size() != comparator.size()) {
 				throw new InvalidArgumentException("Number of properties must be equal to number of comparators");
 			}
-			String query = "";
-			for (int i = 0; i < property.size(); i++) {
-				String comp = "=";
-				if (comparator != null)
-					comp = comparator.get(i);
-				if (!query.isEmpty()) {
-					if (combineMode == null || combineMode.equals(CombineMode.AND)) {
-						query += " AND ";
-					} else {
-						query += " OR ";
-					}
-				}
-				query += "@" + property.get(i).replace(":", "\\:") + ":";
-				if (comp.equals("<=")) {
-					query += "[MIN TO ";
-				}
-				if (comp.equals(">=")) {
-					query += "[";
-				}
-				query += QueryParser.escape(value.get(i));
-				if (comp.equals("<=")) {
-					query += "]";
-				}
-				if (comp.equals(">=")) {
-					query += " TO MAX]";
-				}
-				query += "";
-			}
-			token.setLuceneString(query);
-			NodeSearch search = NodeDao.search(repoDao, token);
 
-			List<Node> data = new ArrayList<>();
-			for (NodeRef ref : search.getResult()) {
-				data.add(NodeDao.getNode(repoDao, ref.getId(),filter).asNode());
-			}
+			SearchService localService = SearchServiceFactory.getLocalService();
+			SearchResultNodeRef searchResultNodeRef = localService.searchByProperty(token, combineMode, property, value, comparator);
+
+			List<Node> data = NodeDao.transform(repoDao,searchResultNodeRef,filter,null).getNodes();
 
 			Pagination pagination = new Pagination();
-			pagination.setFrom(search.getSkip());
+			pagination.setFrom(searchResultNodeRef.getStartIDX());
 			pagination.setCount(data.size());
-			pagination.setTotal(search.getCount());
+			pagination.setTotal(searchResultNodeRef.getNodeCount());
 
 
 			SearchResultNode response = new SearchResultNode();
 			response.setNodes(data);
 			response.setPagination(pagination);
-			response.setFacets(search.getFacets());
 			return Response.status(Response.Status.OK).entity(response).build();
 
 		}  catch (Throwable t) {

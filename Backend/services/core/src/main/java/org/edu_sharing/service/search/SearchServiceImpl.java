@@ -141,171 +141,18 @@ public class SearchServiceImpl implements SearchService {
 	 * @throws Exception
 	 */
 	@Override
-	public List<String> getAllMediacenters(boolean membershipsOnly) throws Exception {
-
-
-		Set<String> memberships = serviceRegistry.getAuthorityService().getAuthorities();
-		boolean isSystemUser = AuthenticationUtil.isRunAsUserTheSystemUser();
-		boolean isAdmin = ((memberships != null && memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
-				|| "admin".equals(AuthenticationUtil.getFullAuthentication().getName())
-				|| isSystemUser) ? true : false;
-
-		if(isAdmin && !membershipsOnly) {
-			SearchParameters parameters = new SearchParameters();
-			parameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
-			parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-			parameters.addAllAttribute(org.edu_sharing.alfresco.service.AuthorityService.MEDIA_CENTER_GROUP_TYPE);
-			parameters.addSort(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME,true);
-			parameters.setQuery("@ccm\\:groupType:\"" + org.edu_sharing.alfresco.service.AuthorityService.MEDIA_CENTER_GROUP_TYPE + "\"");
-			return SearchServiceHelper.queryAll(parameters,0).stream().map((ref) ->
-					NodeServiceFactory.getNodeService(applicationId).getProperty(ref.getStoreRef().getProtocol(), ref.getStoreRef().getIdentifier(), ref.getId(), CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME)
-			).collect(Collectors.toList());
-		}else {
-			List<String> result = new ArrayList<>();
-			for(String memberShip : memberships) {
-				NodeRef nodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(memberShip);
-				if(nodeRef != null && serviceRegistry.getNodeService().hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_MEDIACENTER))) {
-					result.add(memberShip);
-				}
-			}
-			return result;
-		}
+	public List<org.edu_sharing.service.model.NodeRef> getAllMediacentersNodeRef(boolean membershipsOnly) throws Exception {
+		throw new NotImplementedException("getAllMediacenters not supported for solr");
 	}
 	@Override
 	public SearchResultNodeRef getRelevantNodes(int skipCount, int maxItems) throws Throwable {
-		String query=SearchRelevancyTool.getLuceneQuery();
-		if(query.isEmpty()){
-			return new SearchResultNodeRef();
-		}
-		SearchToken token = new SearchToken();
-		token.setLuceneString(query);
-		token.setFrom(skipCount);
-		token.setMaxResult(maxItems);
-		return search(token);
+		throw new NotImplementedException("getRelevantNodes not supported for solr");
 	}
 
 	@Override
 	public SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped, boolean onlyMemberShips)
 			throws Exception {
-		try {
-			
-			
-			Set<String> memberships = serviceRegistry.getAuthorityService().getAuthorities();
-			boolean isAdmin = ((memberships != null && memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) 
-					|| "admin".equals(AuthenticationUtil.getFullAuthentication().getName())) ? true : false;
-
-			return AuthenticationUtil.runAsSystem(new RunAsWork<SearchResult<EduGroup>>() {
-
-				@Override
-				public SearchResult<EduGroup> doWork() throws Exception {
-					try {
-						List<EduGroup> result = new ArrayList<>();
-						org.alfresco.service.cmr.search.SearchService searchService = serviceRegistry
-								.getSearchService();
-						SearchParameters parameters = new SearchParameters();
-						parameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
-						parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-						parameters.setSkipCount(skipCount);
-						parameters.setMaxItems(maxValues);
-						parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
-						if (sort != null)
-							sort.applyToSearchParameters(parameters);
-						String param = QueryParser.escape(pattern == null ? "" : pattern);
-						
-						//only search organisations the curren user is in,except: its adminuser and onlyMemberShips == true
-						StringBuilder additionalQuery=null;
-						if(onlyMemberShips) {
-							List<String> memberShibsOrg = new ArrayList<>();
-							if(memberships != null && memberships.size() > 0) {
-								for(String membershib : memberships) {
-									NodeRef authorityNodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(membershib);
-									if(authorityNodeRef != null) {
-										if(serviceRegistry.getNodeService().hasAspect(authorityNodeRef,
-												QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP))) {
-											memberShibsOrg.add(membershib);
-										}
-									}
-								}
-								if(memberShibsOrg.size() > 0) {
-									additionalQuery = new StringBuilder();
-									additionalQuery.append(" AND (");
-									int i = 0;
-									for(String membershibOrg : memberShibsOrg) {
-										if(i > 0) {
-											additionalQuery.append(" OR ");
-										}
-										additionalQuery.append("@cm\\:authorityName:\"" + QueryParser.escape(membershibOrg) + "\"");
-										i++;
-									}
-									additionalQuery.append(")");
-								}else {
-									return new SearchResult<EduGroup>();
-								}
-								
-							}
-						} else if(!isAdmin) {
-							additionalQuery = new StringBuilder();
-							// seems not necessary since we filter by user groups anyway
-							// + this will also hide any groups in the user manager for org admins
-							// additionalQuery.append(" AND NOT ISNULL:\"ccm:group_signup_method\"");
-						}
-						
-						parameters
-								.setQuery(
-										"(@cm\\:authorityName:\"*" + param + "*\"" + 
-										" OR @cm\\:authorityDisplayName:\"*" + param + "*\"" + 
-										") AND @ccm\\:edu_homedir:\"workspace://*\"" + 
-										((additionalQuery != null) ? " " + additionalQuery.toString() : "") );
-						logger.info("query:" +parameters.getQuery());
-						
-						ResultSet edugroups = searchService.query(parameters);
-
-						for (ResultSetRow row : edugroups) {
-							Map<String, Object> entry = apiClient.getProperties(row.getNodeRef().getId());
-							String nodeRef = (String) entry.get(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
-							// when a group folder relation is removed the noderef can be null cause of async solr refresh
-							if (nodeRef != null) {
-								String nodeId = nodeRef.replace("workspace://SpacesStore/", "");
-								Map<String, Object> folderProps = apiClient.getProperties(nodeId);
-								EduGroup eduGroup = new EduGroup();
-								eduGroup.setFolderId((String) folderProps.get(CCConstants.SYS_PROP_NODE_UID));
-								eduGroup.setFolderName((String) folderProps.get(CCConstants.CM_NAME));
-								eduGroup.setGroupId((String) entry.get(CCConstants.SYS_PROP_NODE_UID));
-								eduGroup.setGroupname((String) entry.get(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
-								eduGroup.setGroupDisplayName(
-										(String) entry.get(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME));
-								eduGroup.setFolderPath(
-										apiClient.getPath((String) folderProps.get(CCConstants.SYS_PROP_NODE_UID)));
-								eduGroup.setScope((String) folderProps.get(CCConstants.CCM_PROP_EDUSCOPE_NAME));
-								boolean add = false;
-								for (String group : memberships) {
-									if (group.equals(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)
-											|| group.equals(eduGroup.getGroupname())) {
-										add = true;
-										break;
-									}
-								}
-								if(scoped) {
-									String currentScope = NodeServiceInterceptor.getEduSharingScope();
-									if(eduGroup.getScope()==null && currentScope!=null)
-										add=false;
-									if(eduGroup.getScope()!=null && !eduGroup.getScope().equals(currentScope))
-										add=false;
-								}
-								if (add)
-									result.add(eduGroup);
-							}
-						}
-						int count = result.size();
-						return new SearchResult<EduGroup>(result, skipCount, count);
-					} catch (Throwable t) {
-						throw new Exception(t);
-					}
-				}
-			});
-		} catch (Throwable t) {
-			throw t;
-		}
+		throw new NotImplementedException("searchOrganizations not supported for solr");
 	}
 	
 	
@@ -549,68 +396,6 @@ public class SearchServiceImpl implements SearchService {
 		}
 	}
 
-	private SearchResult<String> searchAuthoritiesSolr(String pattern, int skipCount, int maxValues,
-			SortDefinition sort, AuthorityType authorityType,boolean globalContext,Map<String,String> customProperties) throws Throwable {
-		List<String> result = new ArrayList<>();
-		NodeService nodeService = serviceRegistry.getNodeService();
-		SearchToken token = new SearchToken();
-		String query = "TYPE:cm\\:";
-		if (authorityType.equals(AuthorityType.USER))
-			query += "person";
-		else
-			query += "authorityContainer";
-		if(customProperties!=null){
-			for(Entry<String, String> entry : customProperties.entrySet()){
-				query+=" AND @"+entry.getKey().replace(":", "\\:")+":\""+QueryParser.escape(entry.getValue())+"\"";
-			}
-		}
-		query += " AND (@cm\\:authorityName:\"*" + QueryParser.escape(pattern) + "*\" "+
-				 "OR @cm\\:userName:\"*" + QueryParser.escape(pattern) + "*\" "+
-				 "OR @cm\\:firstName:\"*" + QueryParser.escape(pattern) + "*\" "+
-				 "OR @cm\\:lastName:\"*" + QueryParser.escape(pattern) + "*\" "+
-				 "OR @cm\\:email:\"*" + QueryParser.escape(pattern) + "*\")";
-
-		if(globalContext){
-			checkGlobalSearchPermission();
-		}
-		else{
-			List<EduGroup> organisations = getAllOrganizations(true).getData();
-			if (organisations != null && organisations.size() > 0) {
-				query += " AND (";
-	
-				int i = 0;
-				for (EduGroup entry : organisations) {
-					if (i > 0)
-						query += " OR ";
-					String ref = StoreRef.STORE_REF_WORKSPACE_SPACESSTORE + "/" + entry.getGroupId();
-					// query+="PARENT:"+QueryParser.escape(ref);
-					query += "PATH:\""
-							+ QueryParser.escape("sys:system/sys:authorities/cm:" + ISO9075.encode(entry.getGroupname()))
-							+ "//.\"";
-					query += " OR ID:" + QueryParser.escape(ref);
-					i++;
-				}
-				query += ")";
-			}
-		}
-		token.setLuceneString(query);
-		token.setFrom(skipCount);
-		token.setMaxResult(maxValues);
-		token.setSortDefinition(sort);
-		token.setContentType(ContentType.ALL);
-		token.disableSearchCriterias();
-		SearchResultNodeRef data = search(token,false);
-		
-		for(org.edu_sharing.service.model.NodeRef enr : data.getData()){
-			
-			NodeRef entry = new NodeRef(new StoreRef(enr.getStoreProtocol(),enr.getStoreId()),enr.getNodeId());
-			String name=(String) nodeService.getProperty(entry, ContentModel.PROP_AUTHORITY_NAME);
-			if(name==null)
-				name=(String)nodeService.getProperty(entry, ContentModel.PROP_USERNAME);
-			result.add(name);
-		}
-		return new SearchResult<String>(result, skipCount, data.getNodeCount());
-	}
 	@Override
 	public SearchResultNodeRef search(MetadataSet mds, String query, Map<String,String[]> criterias,
 									  SearchToken searchToken) throws Throwable {
@@ -810,114 +595,7 @@ public class SearchServiceImpl implements SearchService {
 
 	@Override
 	public SearchResult<String> findAuthorities(AuthorityType type,String searchWord, boolean globalContext, int from, int nrOfResults,SortDefinition sort,Map<String,String> customProperties) throws Exception {
-		String signupMethod = customProperties == null ? null : customProperties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD));
-		boolean searchingSignupGroups = ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_SIGNUP_GROUP) &&
-										AuthorityType.GROUP.equals(type) &&
-										signupMethod != null &&
-										!signupMethod.isEmpty();
-		if(globalContext && !searchingSignupGroups) {
-			checkGlobalSearchPermission();
-		}
-
-		// fields to search in - also using username as admin (6.0 or later)
-
-		org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(null);
-
-		StringBuffer findUsersQuery =  permissionService.getFindUsersSearchString(searchWord,AuthorityServiceHelper.getDefaultAuthoritySearchFields(), globalContext);
-		// we're skipping TP checks when the search requested signup groups -> it's possible to see them even without GLOBAL_AUTHORITY_SEARCH permissions
-		StringBuffer findGroupsQuery = permissionService.getFindGroupsSearchString(searchWord, globalContext, searchingSignupGroups);
-		
-
-		if(findUsersQuery == null && findGroupsQuery == null) {
-			return new SearchResult<String>(new ArrayList<>(), 0, 0);
-		}
-		
-		/**
-		 * don't find groups of scopes when no scope is provided
-		 */
-		if (NodeServiceInterceptor.getEduSharingScope() == null && findGroupsQuery!=null) {
-
-			/**
-			 * groups arent initialized with eduscope aspect and eduscopename
-			 * null
-			 */
-			findGroupsQuery.append(" AND NOT @ccm\\:eduscopename:\"*\"");	
-			
-		}
-
-		String finalQuery = "";
-		if(type==null) {
-			finalQuery="";
-			if(findUsersQuery!=null)
-				finalQuery += "("+findUsersQuery+")";
-			if(findGroupsQuery!=null) {
-				if(findUsersQuery != null){
-					finalQuery += " OR ";
-				}
-				if(customProperties!=null){
-					for(Map.Entry<String, String> entry : customProperties.entrySet()){
-						findGroupsQuery.append(" AND @"+entry.getKey().replace(":", "\\:")+":\""+QueryParser.escape(entry.getValue())+"\"");
-					}
-				}
-				finalQuery += "(" + findGroupsQuery + ")";
-			}
-		}
-		else if(type.equals(AuthorityType.USER)) {
-			finalQuery=findUsersQuery.toString();
-		}
-		else if(type.equals(AuthorityType.GROUP)) {
-			if(customProperties!=null){
-				for(Map.Entry<String, String> entry : customProperties.entrySet()){
-					findGroupsQuery.append(" AND @"+entry.getKey().replace(":", "\\:")+":\""+QueryParser.escape(entry.getValue())+"\"");
-				}
-			}
-			if(findGroupsQuery==null)
-				finalQuery="";
-			else
-					finalQuery = findGroupsQuery.toString();
-
-		}
-		else {
-			throw new IllegalArgumentException("Unsupported authority type "+type);
-		}
-		if(finalQuery.isEmpty())
-			return new SearchResult<String>();
-
-		logger.debug("finalQuery:" + finalQuery);
-
-		List<Authority> data = new ArrayList<>();
-
-		SearchParameters searchParameters = new SearchParameters();
-		searchParameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
-
-		searchParameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_FTS_ALFRESCO);
-		searchParameters.setQuery(finalQuery.toString());
-		searchParameters.setSkipCount(from);
-		searchParameters.setMaxItems(nrOfResults);
-		if(sort==null || !sort.hasContent()) {
-			searchParameters.addSort("score", false);
-		}
-		else {
-			sort.applyToSearchParameters(searchParameters);
-		}
-		// dont use scopeed search service
-		org.alfresco.service.cmr.search.SearchService searchService = serviceRegistry.getSearchService();
-		ResultSet resultSet = searchService.query(searchParameters);
-
-		List<String> result = new ArrayList<>();
-		for (NodeRef nodeRef : resultSet.getNodeRefs()) {
-			String authorityName = (String) serviceRegistry.getNodeService().getProperty(nodeRef,
-					ContentModel.PROP_AUTHORITY_NAME);
-			if (authorityName == null) {
-				authorityName = (String) serviceRegistry.getNodeService().getProperty(nodeRef,
-						ContentModel.PROP_USERNAME);
-			}
-
-			result.add(authorityName);
-		}
-
-		return new SearchResult<String>(result, from, (int) resultSet.getNumberFound());
-
+		throw new NotImplementedException("findAuthorities not supported for solr");
 	}
 
 	private static String getLuceneSuggestionQuery(MetadataQueryParameter parameter,String value){
@@ -926,88 +604,7 @@ public class SearchServiceImpl implements SearchService {
 	}
 	@Override
 	public List<? extends Suggestion> getSuggestions(MetadataSet mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
-			List<Suggestion> result = new ArrayList<>();
-			ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-			org.alfresco.service.cmr.search.SearchService searchService = (org.alfresco.service.cmr.search.SearchService)applicationContext.getBean("scopedSearchService");
-
-			SearchParameters searchParameters = new SearchParameters();
-			searchParameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
-			searchParameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-
-			searchParameters.setSkipCount(0);
-			searchParameters.setMaxItems(1);
-			MetadataQueryParameter parameter = mds.findQuery(queryId, MetadataReader.QUERY_SYNTAX_LUCENE).findParameterByName(parameterId);
-			if(parameter == null){
-				logger.warn("no parameter found for queryId:"+queryId+ " parameterId:" + parameterId);
-				return result;
-			}
-			if(value == null){
-				logger.warn("value is null queryId:"+queryId+ " parameterId:" + parameterId);
-				return result;
-			}
-			String luceneQuery = "(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\"" +") AND ("+getLuceneSuggestionQuery(parameter, value)+")";
-			if(criterias != null && criterias.size() > 0 ) {
-
-				Map<String,String[]> criteriasMap=new HashMap<>();
-				for(MdsQueryCriteria criteria : criterias){
-					criteriasMap.put(criteria.getProperty(),criteria.getValues().toArray(new String[0]));
-				}
-				MetadataQueries queries = mds.getQueries(MetadataReader.QUERY_SYNTAX_LUCENE);
-				MetadataQuery queryObj = queries.findQuery(queryId).copy();
-				queryObj.setApplyBasequery(false);
-				queryObj.setBasequery(null);
-
-				SearchCriterias scParam = new SearchCriterias();
-				scParam.setRepositoryId(mds.getRepositoryId());
-				scParam.setMetadataSetId(mds.getId());
-				scParam.setMetadataSetQuery(queryId);
-				try {
-					luceneQuery = "(" + luceneQuery + ") AND " +  MetadataSearchHelper.getLuceneString(queries,queryObj,scParam, criteriasMap);
-					//System.out.println("MetadataSearchHelper lucenequery suggest:" +luceneQuery);
-				} catch (IllegalArgumentException e) {
-					logger.error(e.getMessage(), e);
-				}
-
-			}
-			searchParameters.setQuery(luceneQuery);
-
-			String facetName = "@" + parameter.getName();
-			List<String> facets = parameter.getFacet().getItems() == null ? List.of(facetName) : parameter.getFacet().getItems().stream().map(MetadataQueryParameter.MetadataQueryFacetItem::getValue).collect(Collectors.toList());
-			for(String facet : facets){
-				FieldFacet fieldFacet = new FieldFacet(facet);
-				fieldFacet.setLimit(100);
-				fieldFacet.setMinCount(1);
-				searchParameters.addFieldFacet(fieldFacet);
-			}
-
-			ResultSet rs = searchService.query(searchParameters);
-			Map<String, MetadataKey> captions = mds.findWidget(parameterId).getValuesAsMap();
-
-			for(String facet : facets) {
-				List<Pair<String, Integer>> facettPairs = rs.getFieldFacet(facet);
-
-				for (Pair<String, Integer> pair : facettPairs) {
-
-					//solr 4 bug: leave out zero values
-					if (pair.getSecond() == 0) {
-						continue;
-					}
-
-					String hit = pair.getFirst(); // new String(pair.getFirst().getBytes(), "UTF-8");
-
-					if (hit.toLowerCase().contains(value.toLowerCase())) {
-
-						Suggestion dto = new Suggestion();
-						dto.setKey(hit);
-						dto.setDisplayString(captions.containsKey(hit) ? captions.get(hit).getCaption() : null);
-
-						result.add(dto);
-					}
-				}
-			}
-			return result;
-
-
+		throw new NotImplementedException("getSuggestions not supported for solr");
 	}
 
 	@Override
@@ -1018,5 +615,25 @@ public class SearchServiceImpl implements SearchService {
 	@Override
 	public SearchResultNodeRef getMetadata(List<String> nodeIds) throws IOException {
 		throw new NotImplementedException("getMetadata not supported via Solr");
+	}
+
+	@Override
+	public List<org.edu_sharing.service.model.NodeRef> getAllPinnedCollections() throws IOException {
+		throw new NotImplementedException("getAllPinnedCollections not supported via Solr");
+	}
+
+	@Override
+	public List<org.edu_sharing.service.model.NodeRef> getReferenceObjects(String nodeId) throws IOException {
+		throw new NotImplementedException("getReferenceObjects not supported via Solr");
+	}
+
+	@Override
+	public SearchResultNodeRef searchByProperty(SearchToken searchToken, CombineMode combineMode, List<String> properties, List<String> value, List<String> comparator) throws IOException {
+		throw new NotImplementedException("searchByProperty not supported via Solr");
+	}
+
+	@Override
+	public SearchResultNodeRef searchByDisplayPath(String path, String index) throws IOException {
+		throw new NotImplementedException("searchByDisplayPath not supported via Solr");
 	}
 }

@@ -9,6 +9,7 @@ import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.json.JsonData;
 import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -23,6 +24,7 @@ import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.spring.ApplicationContextFactory;
 
+import java.io.IOException;
 import java.util.*;
 
 public class CollectionServiceElastic extends CollectionServiceImpl {

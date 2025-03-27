@@ -27,6 +27,8 @@
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
+import jakarta.transaction.UserTransaction;
 import org.alfresco.model.ContentModel;
 import org.alfresco.model.RenditionModel;
 import org.alfresco.repo.policy.BehaviourFilter;
@@ -38,8 +40,6 @@ import org.alfresco.service.cmr.action.ActionStatus;
 import org.alfresco.service.cmr.lock.LockService;
 import org.alfresco.service.cmr.lock.LockType;
 import org.alfresco.service.cmr.repository.*;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
@@ -47,20 +47,23 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.repository.server.tools.ActionObserver;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchToken;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
-import jakarta.transaction.UserTransaction;
+import java.util.Base64;
 import java.util.List;
 
 @JobDescription(description = "refresh the mimetype and preview for a given solr search filter")
-public class RefreshMimetypePreviewJob extends AbstractJob{
+public class RefreshMimetypePreviewJob extends AbstractJobMapAnnotationParams {
 	protected Logger logger = Logger.getLogger(RefreshMimetypePreviewJob.class);
-	@JobFieldDescription(description = "define a filter for files that will be refreshed for mimetype and preview", sampleValue = "@cclom\\:format:\"text/xml*\"")
+	@JobFieldDescription(description = "define a filter for files that will be refreshed for mimetype and preview", sampleValue = "{\"term\": {\"properties.cclom:format\":\"text/xml\"}}")
 	private String filter;
 
 	@JobFieldDescription(description = "if true only thumbail generation will be don's. mimetype fix will be skipped. default is false.")
@@ -81,7 +84,7 @@ public class RefreshMimetypePreviewJob extends AbstractJob{
 
 
 	@Override
-	public void execute(JobExecutionContext context) throws JobExecutionException {
+	public void executeInternal(JobExecutionContext context) throws JobExecutionException {
 		AuthenticationUtil.runAsSystem(() -> {
 			doWork(context);
 			return null;
@@ -92,7 +95,6 @@ public class RefreshMimetypePreviewJob extends AbstractJob{
 
 
 		try {
-			filter = context.getJobDetail().getJobDataMap().getString("filter");
 			logger.info("using filter:" + filter);
 
 			if (filter == null || filter.trim().equals("")) {
@@ -100,22 +102,22 @@ public class RefreshMimetypePreviewJob extends AbstractJob{
 				return;
 			}
 
-			skipMimeTypeFix = context.getJobDetail().getJobDataMap().getBoolean("skipMimeTypeFix");
 			if(skipMimeTypeFix == null) skipMimeTypeFix = false;
 			logger.info("using skipMimeTypeFix:" + skipMimeTypeFix);
 
-			cleanUpExistingThumbnail = context.getJobDetail().getJobDataMap().getBoolean("cleanUpExistingThumbnail");
 			if(cleanUpExistingThumbnail == null) cleanUpExistingThumbnail = false;
 			logger.info("using cleanUpExistingThumbnail:" + cleanUpExistingThumbnail);
 
 
-			SearchParameters sp = new SearchParameters();
-			sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
-			sp.setQuery(filter);
-			sp.setLanguage(SearchService.LANGUAGE_LUCENE);
-			ResultSet resultSet = searchService.query(sp);
-			logger.info("found:" + resultSet.length());
-			for (final NodeRef nodeRef : resultSet.getNodeRefs()) {
+			SearchToken searchToken = new SearchToken();
+			searchToken.setElasticQuery(QueryBuilders.wrapper().query(new String(Base64.getEncoder().encode(filter.getBytes()))).build());
+			searchToken.setFrom(0);
+			searchToken.setMaxResult(Integer.MAX_VALUE);
+			org.edu_sharing.service.search.SearchService localService = SearchServiceFactory.getLocalService();
+			SearchResultNodeRef search = localService.search(searchToken);
+			logger.info("found:" + search.getNodeCount());
+			search.getData().forEach(n -> {
+				NodeRef nodeRef = new NodeRef(new StoreRef(n.getStoreProtocol(),n.getStoreId()),n.getNodeId());
 				QName typeQName = nodeService.getType(nodeRef);
 				String type = typeQName.getLocalName();
 				String name = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
@@ -126,7 +128,7 @@ public class RefreshMimetypePreviewJob extends AbstractJob{
 
 					if(nodeService.getAspects(nodeRef).contains(QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
 						logger.warn("ignoring collection_io_reference:" + nodeRef);
-						continue;
+						return;
 					}
 
 					UserTransaction nonPropagatingUserTransaction = serviceRegistry.getTransactionService().getNonPropagatingUserTransaction();
@@ -141,13 +143,16 @@ public class RefreshMimetypePreviewJob extends AbstractJob{
 						}
 						nonPropagatingUserTransaction.commit();
 					}catch (Throwable e) {
-						nonPropagatingUserTransaction.rollback();
+						logger.error(e.getMessage(),e);
+						try {
+							nonPropagatingUserTransaction.rollback();
+						}catch (Exception e1) {
+							logger.error("error rolling back transaction", e1);
+						}
 					}
 
 				}
-
-			}
-
+			});
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -222,7 +227,7 @@ public class RefreshMimetypePreviewJob extends AbstractJob{
 		actionService.executeAction(thumbnailAction, nodeRef, true, false);
 
 		if(ActionStatus.Completed.equals(thumbnailAction.getExecutionStatus())){
-			logger.info("action was successfull. trigger io update for elastic trackr");
+			logger.info("action was successfull. trigger io update for elastic tracker");
 			String name = (String)nodeService.getProperty(nodeRef,ContentModel.PROP_NAME);
 			nodeService.setProperty(nodeRef,ContentModel.PROP_NAME,name);
 		}else{

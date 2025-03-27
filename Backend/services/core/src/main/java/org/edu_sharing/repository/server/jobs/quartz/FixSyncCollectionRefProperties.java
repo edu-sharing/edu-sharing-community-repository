@@ -49,7 +49,7 @@ public class FixSyncCollectionRefProperties extends AbstractJob{
         nr.setTransaction(NodeRunner.TransactionMode.Local);
         nr.setKeepModifiedDate(true);
         nr.setTypes(Arrays.asList(new String[] { CCConstants.CCM_TYPE_IO }));
-        nr.setLucene("TYPE:\"ccm:io\" AND ASPECT:\"ccm:collection_io_reference\"");
+        nr.setElastic("{\"bool\":{\"must\":[{\"term\":{\"type\":\"ccm:io\"}},{\"term\":{\"aspects\":\"ccm:collection_io_reference\"}}]}}");
         nr.run();
 
     }

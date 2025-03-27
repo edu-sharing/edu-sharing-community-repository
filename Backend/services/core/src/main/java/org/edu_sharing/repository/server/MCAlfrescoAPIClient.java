@@ -170,9 +170,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
     private static String alfrescoSearchSubsystem = null;
 
-    public static final String SEARCH_SUBSYSTEM_LUCENE = "lucene";
-    public static final String SEARCH_SUBSYSTEM_SOLR = "solr";
-
     /**
      * this constructor can be used when the authentication at alfresco services
      * was already done The AuthenticationInfo is taken from the current thread.
@@ -274,253 +271,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
             alfrescoSearchSubsystem = sACF.getCurrentSourceBeanName();
         }
 
-    }
-
-    public SearchResult searchSolr(String query, int startIdx, int nrOfresults, List<String> facettes, int facettesMinCount, int facettesLimit)
-            throws Throwable {
-
-        SearchResultNodeRef srnr = searchSolrNodeRef(query, startIdx, nrOfresults, facettes, facettesMinCount, facettesLimit);
-        SearchResult result = new SearchResult();
-        Map<String, Map<String, Integer>> countedProps = new HashMap<>();
-        if (srnr.getFacets() != null) {
-            for (NodeSearch.Facet f : srnr.getFacets()) {
-                Map<String, Integer> values = new HashMap<>();
-                for (NodeSearch.Facet.Value value : f.getValues()) {
-                    values.put(value.getValue(), value.getCount());
-                }
-                countedProps.put(f.getProperty(), values);
-            }
-        }
-        result.setCountedProps(countedProps);
-        result.setNodeCount(srnr.getNodeCount());
-        result.setStartIDX(startIdx);
-
-        Map<String, Map<String, Object>> returnVal = new LinkedHashMap<>();
-        List<org.edu_sharing.service.model.NodeRef> resultNodeRefs = srnr.getData();
-        for (org.edu_sharing.service.model.NodeRef nodeRefEdu : resultNodeRefs) {
-
-            NodeRef actNode = new NodeRef(new StoreRef(nodeRefEdu.getStoreProtocol(), nodeRefEdu.getStoreId()), nodeRefEdu.getNodeId());
-
-            Map<String, Object> properties = getProperties(actNode);
-            returnVal.put(actNode.getId(), properties);
-        }
-
-        result.setData(returnVal);
-        return result;
-    }
-
-    public SearchResultNodeRef searchSolrNodeRef(String query, int startIdx, int nrOfresults, List<String> facettes, int facettesMinCount, int facettesLimit)
-            throws Throwable {
-
-        SearchResultNodeRef searchResult = new SearchResultNodeRef();
-
-        SearchParameters searchParameters = new SearchParameters();
-        searchParameters.addStore(storeRef);
-
-        searchParameters.setLanguage(SearchService.LANGUAGE_LUCENE);
-        searchParameters.setQuery(query);
-
-        searchParameters.setSkipCount(startIdx);
-        searchParameters.setMaxItems(nrOfresults);
-
-        if (facettes != null && !facettes.isEmpty()) {
-            for (String facetteProp : facettes) {
-                String fieldFacette = "@" + facetteProp;
-                FieldFacet fieldFacet = new FieldFacet(fieldFacette);
-                fieldFacet.setLimit(facettesLimit);
-                //fieldFacet.setMinCount(facettesMinCount);
-
-                System.out.println("MONCOUT reset to one");
-                fieldFacet.setMinCount(1);
-                searchParameters.addFieldFacet(fieldFacet);
-            }
-        }
-
-        ResultSet resultSet = searchService.query(searchParameters);
-
-        long nrFound = resultSet.getNumberFound();
-
-        searchResult.setNodeCount((int) nrFound);
-
-        int startIDX = startIdx;
-
-        if (nrFound <= startIDX) {
-            startIDX = 0;
-        }
-        searchResult.setStartIDX(startIDX);
-
-        // do the facette
-        if (facettes != null && !facettes.isEmpty()) {
-            List<NodeSearch.Facet> facetsResult = new ArrayList<>();
-
-            for (String facetteProp : facettes) {
-                NodeSearch.Facet facet = new NodeSearch.Facet();
-                facet.setProperty(facetteProp);
-                facet.setValues(new ArrayList<>());
-                facetsResult.add(facet);
-
-                String fieldFacette = "@" + facetteProp;
-
-                List<Pair<String, Integer>> facettPairs = resultSet.getFieldFacet(fieldFacette);
-                Integer subStringCount = null;
-
-                // plain solr
-                log.info("found " + facettPairs.size() + " facette pairs for" + fieldFacette);
-                for (Pair<String, Integer> pair : facettPairs) {
-
-                    // value contains language information i.e. {de}
-                    String first = new String(pair.getFirst().replaceAll("\\{[a-z]*\\}", "").getBytes(), "UTF-8");
-                    // logger.info("pair.getFirst():"+first+" pair.getSecond():"+pair.getSecond());
-                    // why ever: no values will be counted to so filter them
-
-                    /**
-                     *solr4 problem: delivers facetes that have count 0 and should not occur in the searchresult
-                     *
-                     * http://stackoverflow.com/questions/10069868/getting-facet-count-0-in-solr
-                     * --> pair.getSecond() > 0
-                     */
-                    if (StringUtils.isNotBlank(first) && pair.getSecond() > 0) {
-                        NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
-                        value.setValue(first);
-                        value.setCount(pair.getSecond());
-                        facet.getValues().add(value);
-                    }
-                }
-
-            }
-            searchResult.setFacets(facetsResult);
-        }
-
-        searchResult.setData(AlfrescoDaoHelper.unmarshall(resultSet.getNodeRefs(), this.repId));
-        log.info("returns");
-        return searchResult;
-
-    }
-
-    public Map<String, Map<String, Object>> search(String luceneString, String type) throws Exception {
-
-        String queryString = "TYPE:\"" + type + "\"";
-        if (StringUtils.isNotBlank(luceneString)) {
-            queryString = queryString + " AND " + luceneString;
-        }
-
-        Map<String, Map<String, Object>> result = new HashMap<>();
-        ResultSet resultSet = searchService.query(storeRef, SearchService.LANGUAGE_LUCENE, queryString);
-
-        List<NodeRef> nodeRefs = resultSet.getNodeRefs();
-        for (NodeRef nodeRef : nodeRefs) {
-            Map<String, Object> props = getPropertiesSimple(nodeRef.getId());
-            result.put(nodeRef.getId(), props);
-        }
-        return result;
-    }
-
-
-    public Map<String, Map<String, Object>> search(String luceneString) throws Throwable {
-        return this.search(luceneString, storeRef.getProtocol(), storeRef.getIdentifier(), 0, 10000).getData();
-    }
-
-    public SearchResult search(String luceneString, String storeProtocol, String storeName, int from, int maxResult) throws Throwable {
-
-        StoreRef storeRef = new StoreRef(storeProtocol, storeName);
-        Map<String, Map<String, Object>> result = new LinkedHashMap<>();
-
-
-        SearchParameters searchParameters = new SearchParameters();
-        searchParameters.addStore(storeRef);
-
-        searchParameters.setLanguage(SearchService.LANGUAGE_LUCENE);
-
-        searchParameters.setQuery(luceneString);
-
-        searchParameters.setSkipCount(from);
-        searchParameters.setMaxItems(maxResult);
-
-        ResultSet resultSet = searchService.query(searchParameters);
-
-        List<NodeRef> nodeRefs = resultSet.getNodeRefs();
-        for (NodeRef nodeRef : nodeRefs) {
-            Map<String, Object> props = getProperties(new NodeRef(storeRef, nodeRef.getId()));
-            result.put(nodeRef.getId(), props);
-        }
-
-        SearchResult sr = new SearchResult();
-        sr.setData(result);
-        sr.setStartIDX(from);
-        sr.setNodeCount(maxResult);
-        sr.setNodeCount((int) resultSet.getNumberFound());
-
-        return sr;
-    }
-
-    @Override
-    public Map<String, Map<String, Object>> search(String luceneString, ContextSearchMode mode)
-            throws Throwable {
-        Map<String, Map<String, Object>> result = new HashMap<>();
-        SearchParameters token = new SearchParameters();
-        token.setQuery(luceneString);
-        List<NodeRef> nodeRefs = searchNodeRefs(token, mode);
-        for (NodeRef nodeRef : nodeRefs) {
-            try {
-                Map<String, Object> props = getProperties(nodeRef.getId());
-                result.put(nodeRef.getId(), props);
-            } catch (AccessDeniedException e) {
-                log.error("found node but can not access node properties:" + nodeRef.getId());
-            }
-        }
-        return result;
-    }
-
-    public List<NodeRef> searchNodeRefs(SearchParameters token, ContextSearchMode mode) {
-        Set<String> authorities = null;
-        if (mode.equals(ContextSearchMode.UserAndGroups)) {
-            authorities = new HashSet<>(authorityService.getAuthorities());
-            authorities.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
-            // remove the admin role, otherwise may results in inconsistent results
-            authorities.remove(CCConstants.AUTHORITY_ROLE_ADMINISTRATOR);
-            authorities.add(AuthenticationUtil.getFullyAuthenticatedUser());
-        } else if (mode.equals(ContextSearchMode.Public)) {
-            authorities = new HashSet<>();
-            authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);
-        }
-        SearchParameters essp = new SearchParameters();
-
-        if (authorities != null) {
-            essp = new ESSearchParameters();
-            ((ESSearchParameters) essp).setAuthorities(authorities.toArray(new String[0]));
-        }
-        essp.setQuery(token.getQuery());
-        for (SearchParameters.SortDefinition sort : token.getSortDefinitions()) {
-            essp.addSort(sort);
-        }
-        essp.setLanguage(SearchService.LANGUAGE_LUCENE);
-        essp.addStore(storeRef);
-        for (SearchParameters.SortDefinition def : token.getSortDefinitions()) {
-            essp.addSort(def);
-        }
-        return searchService.query(essp).getNodeRefs();
-    }
-
-
-    public String[] searchNodeIds(String luceneString) {
-        return searchNodeIds(luceneString, -1);
-    }
-
-    public String[] searchNodeIds(String luceneString, int limit) {
-        SearchParameters searchParameters = new SearchParameters();
-        searchParameters.addStore(storeRef);
-        searchParameters.setLanguage(SearchService.LANGUAGE_LUCENE);
-        searchParameters.setQuery(luceneString);
-        if (limit > -1) {
-            searchParameters.setLimit(limit);
-        }
-        ResultSet resultSet = searchService.query(searchParameters);
-
-        ArrayList<String> result = new ArrayList<>();
-        for (NodeRef nodeRef : resultSet.getNodeRefs()) {
-            result.add(nodeRef.getId());
-        }
-        return result.toArray(new String[0]);
     }
 
     public String formatData(String type, String key, Object value, String metadataSetId) {
@@ -689,37 +439,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         return result;
     }
 
-    public Map<String, Map<String, Object>> getChildrenRunAs(final String parentID, String runAs) throws Throwable {
-
-        final String repoAdmin = ApplicationInfoList.getHomeRepository().getUsername();
-
-        AuthenticationUtil.RunAsWork<Map<String, Map<String, Object>>> getChildrenWorker = () -> {
-
-            try {
-                return new MCAlfrescoAPIClient().getChildren(parentID);
-            } catch (Throwable e) {
-                log.error(e.getMessage(), e);
-                return null;
-            }
-
-        };
-
-        return AuthenticationUtil.runAs(getChildrenWorker, repoAdmin);
-    }
-
-    public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID) {
-        if (parentID == null) {
-
-            String startParentId = getRootNodeId();
-            if (StringUtils.isBlank(startParentId)) {
-                parentID = nodeService.getRootNode(storeRef).getId();
-            } else {
-                parentID = startParentId;
-            }
-        }
-        NodeRef parentNodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, parentID);
-        return nodeService.getChildAssocs(parentNodeRef);
-    }
 
     public Map<String, Map<String, Object>> getChildren(String parentID, String type) throws Throwable {
 
@@ -1419,24 +1138,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         }
     }
 
-    private String getMultiLangCleaned(String value) {
-
-        String result = value;
-
-        // edu-sharing properties multilang = true {de_DE=Realschule}
-        if (result.matches("\\{[a-z][a-z]_[A-Z][A-Z]=.*}")) {
-            String[] splitted = result.split("=");
-            result = splitted[1].replace("}", "");
-        }
-
-        if (result.matches("\\{default=.*}")) {
-            String[] splitted = result.split("=");
-            result = splitted[1].replace("}", "");
-        }
-
-        return result;
-    }
-
     /**
      * returns the simple alfresco properties without special handling
      */
@@ -1471,13 +1172,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         buildUpProperties(properties);
 
         return properties;
-    }
-
-    /**
-     * returns the simple alfresco Properties without special handling
-     */
-    public Map<String, Object> getPropertiesSimple(String nodeId) {
-        return getPropertiesSimple(storeRef, nodeId);
     }
 
     public String getRootNode(StoreRef store) {
@@ -1517,12 +1211,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
     public String getRepositoryRoot() throws Exception {
         return nodeService.getRootNode(storeRef).getId();
-    }
-
-    public List<ChildAssociationRef> getChildAssociationByType(String storeProtocol, String storeId, String nodeId, String type) {
-        Set<QName> set = new HashSet<>();
-        set.add(QName.createQName(type));
-        return nodeService.getChildAssocs(new NodeRef(new StoreRef(storeProtocol, storeId), nodeId), set);
     }
 
     public Map<String, Map<String, Object>> getChildrenByType(String nodeId, String type) {
@@ -1866,9 +1554,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         nodeService.createAssociation(new NodeRef(store, fromID), new NodeRef(store, toID), QName.createQName(association));
     }
 
-    public void createChildAssociation(String from, String to, String assocType, String assocName) {
-        nodeService.addChild(new NodeRef(storeRef, from), new NodeRef(storeRef, to), QName.createQName(assocType), QName.createQName(assocName));
-    }
 
     public void writeContent(String nodeID, byte[] content, String mimetype, String encoding, String property) throws Exception {
         this.writeContent(storeRef, nodeID, content, mimetype, encoding, property);
@@ -2130,14 +1815,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         return mlText;
     }
 
-    public Map<String, Serializable> transformPropMapToStringKeys(Map<String, Serializable> map) {
-        Map<String, Serializable> result = new HashMap<>();
-        for (Object key : map.keySet()) {
-            result.put((String) key, map.get(key));
-        }
-        return result;
-    }
-
     @Override
     public String getHomeFolderID(String username) throws Exception {
         if (NodeServiceInterceptor.getEduSharingScope() == null || StringUtils.isBlank(NodeServiceInterceptor.getEduSharingScope())) {
@@ -2305,29 +1982,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
     }
 
-    public String getEduGroupFolder(String groupName) throws Exception {
-
-        return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-
-                () -> {
-                    String key = groupName.startsWith(PermissionService.GROUP_PREFIX) ? groupName : PermissionService.GROUP_PREFIX + groupName;
-
-                    NodeRef nodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(key);
-
-                    if (nodeRef == null) {
-                        return null;
-                    }
-
-
-                    NodeRef folderRef = (NodeRef) serviceRegistry.getNodeService().getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
-
-                    return folderRef != null
-                            ? folderRef.getId()
-                            : null;
-                }, true);
-
-    }
-
     public void createOrUpdateGroup(String groupName, String displayName) throws Exception {
         createOrUpdateGroup(groupName, displayName, null, false);
     }
@@ -2343,113 +1997,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
 
                 () -> eduAuthorityService.createOrUpdateGroup(groupName, displayName, parentGroup, preventDuplicate), false);
-
-    }
-
-    public String[] getUserNames() throws Exception {
-
-        PersonService personService = serviceRegistry.getPersonService();
-
-        return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-
-                () -> {
-                    PagingResults<PersonInfo> peopleReq =
-                            personService.getPeople(
-                                    null,
-                                    null,
-                                    null,
-                                    new PagingRequest(Integer.MAX_VALUE, null));
-
-                    List<String> userNames = new ArrayList<>();
-                    for (PersonInfo personInfo : peopleReq.getPage()) {
-                        userNames.add(personInfo.getUserName());
-                    }
-
-                    return userNames.toArray(new String[0]);
-                }, true);
-    }
-
-    public String[] searchUserNames(String pattern) throws Exception {
-
-        PersonService personService = serviceRegistry.getPersonService();
-
-        return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-
-                () -> {
-                    List<QName> filters = new ArrayList<>();
-                    filters.add(ContentModel.PROP_FIRSTNAME);
-                    filters.add(ContentModel.PROP_LASTNAME);
-                    filters.add(ContentModel.PROP_EMAIL);
-
-                    PagingResults<PersonInfo> peopleReq =
-                            personService.getPeople(
-                                    pattern,
-                                    filters,
-                                    null,
-                                    new PagingRequest(Integer.MAX_VALUE, null));
-
-                    List<String> userNames = new ArrayList<>();
-                    for (PersonInfo personInfo : peopleReq.getPage()) {
-                        userNames.add(personInfo.getUserName());
-                    }
-
-                    return userNames.toArray(new String[0]);
-                }, true);
-
-    }
-
-    public String[] getGroupNames() {
-
-        AuthorityService authorityService = serviceRegistry.getAuthorityService();
-
-        return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-
-                () -> {
-                    PagingResults<String> groupReq =
-                            authorityService.getAuthorities(
-                                    AuthorityType.GROUP,
-                                    AuthorityService.ZONE_APP_DEFAULT,
-                                    null,
-                                    false,
-                                    false,
-                                    new PagingRequest(Integer.MAX_VALUE, null));
-
-                    List<String> groupNames = new ArrayList<>();
-                    for (String groupName : groupReq.getPage()) {
-                        if (groupName.startsWith(PermissionService.GROUP_PREFIX)) {
-                            groupName = groupName.substring(PermissionService.GROUP_PREFIX.length());
-                        }
-                        groupNames.add(groupName);
-                    }
-
-                    return groupNames.toArray(new String[0]);
-                }, true);
-
-    }
-
-    public String[] searchGroupNames(String pattern) throws Exception {
-
-        AuthorityService authorityService = serviceRegistry.getAuthorityService();
-
-        return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-
-                () -> {
-                    PagingResults<AuthorityInfo> groupReq =
-                            authorityService.getAuthoritiesInfo(
-                                    AuthorityType.GROUP,
-                                    null,
-                                    pattern,
-                                    null,
-                                    true,
-                                    new PagingRequest(Integer.MAX_VALUE, null));
-
-                    List<String> groupNames = new ArrayList<>();
-                    for (AuthorityInfo groupInfo : groupReq.getPage()) {
-                        groupNames.add(groupInfo.getAuthorityName());
-                    }
-
-                    return groupNames.toArray(new String[0]);
-                }, true);
 
     }
 
@@ -2498,79 +2045,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
             nodeService.addAspect(personService.getPerson(userName), QName.createQName(CCConstants.CCM_ASPECT_USER_EXTENSION), null);
     }
 
-    public void createOrUpdateUser(Map<String, String> userInfo) throws Exception {
-
-        String currentUser = AuthenticationUtil.getRunAsUser();
-
-        if (userInfo == null) {
-            throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_USERNAME);
-        }
-
-        String userName = userInfo.get(CCConstants.CM_PROP_PERSON_USERNAME);
-        String firstName = userInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
-        String lastName = userInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
-        String email = userInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
-
-        if (StringUtils.isBlank(userName)) {
-            throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_USERNAME);
-        }
-
-        if (StringUtils.isBlank(firstName)) {
-            throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_FIRSTNAME);
-        }
-
-        if (StringUtils.isBlank(lastName)) {
-            throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_LASTNAME);
-        }
-
-        if (StringUtils.isBlank(email)) {
-            throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_EMAIL);
-        }
-
-        if (!currentUser.equals(userName) && !isAdmin()) {
-            throw new AccessDeniedException("admin role required.");
-        }
-
-        PersonService personService = serviceRegistry.getPersonService();
-
-        serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-
-                (RetryingTransactionCallback<Void>) () -> {
-                    Throwable runAs = AuthenticationUtil.runAs(
-
-                            () -> {
-
-                                try {
-
-                                    if (personService.personExists(userName)) {
-
-                                        personService.setPersonProperties(userName, transformPropMap(userInfo));
-
-                                    } else {
-
-                                        personService.createPerson(transformPropMap(userInfo));
-                                    }
-                                    addUserExtensionAspect(userName);
-
-                                } catch (Throwable e) {
-                                    log.error(e.getMessage(), e);
-                                    return e;
-                                }
-
-                                return null;
-                            },
-                            ApplicationInfoList.getHomeRepository().getUsername());
-
-                    if (runAs != null) {
-                        throw runAs;
-                    }
-
-                    return null;
-                },
-                false);
-
-    }
-
     public void deleteUser(String userName) {
 
         PersonService personService = serviceRegistry.getPersonService();
@@ -2582,41 +2056,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
                     return null;
                 }, false);
-
-    }
-
-    public void deleteGroup(String groupName) {
-
-        AuthorityService authorityService = serviceRegistry.getAuthorityService();
-
-        serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-
-                (RetryingTransactionCallback<Void>) () -> {
-                    String key = PermissionService.GROUP_PREFIX + groupName;
-
-                    authorityService.deleteAuthority(key, true);
-
-                    return null;
-                }, false);
-    }
-
-    public void removeAllMemberships(String groupName) {
-
-        AuthorityService authorityService = serviceRegistry.getAuthorityService();
-
-        serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-
-                (RetryingTransactionCallback<Void>) () -> {
-                    String key = PermissionService.GROUP_PREFIX + groupName;
-
-                    for (String containedAuthority : authorityService.getContainedAuthorities(null, key, true)) {
-
-                        authorityService.removeAuthority(key, containedAuthority);
-                    }
-
-                    return null;
-                }, false);
-
 
     }
 
@@ -2736,32 +2175,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         final Map<String, Map<String, Object>> map = getChildren(folderId);
         log.debug("No GroupFolders ... returning map with size(" + map.size() + ").");
         return map;
-    }
-
-    public ArrayList<EduGroup> getEduGroups() throws Throwable {
-
-        ArrayList<EduGroup> result = new ArrayList<>();
-        Map<String, Map<String, Object>> edugroups = search("@ccm\\:edu_homedir:\"workspace://*\"");
-        for (Map.Entry<String, Map<String, Object>> entry : edugroups.entrySet()) {
-            String nodeRef = (String) entry.getValue().get(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
-            //when a group folder relation is removed the noderef can be null cause of async solr refresh
-            try {
-                if (nodeRef != null) {
-                    String nodeId = nodeRef.replace("workspace://SpacesStore/", "");
-                    Map<String, Object> folderProps = getProperties(nodeId);
-                    EduGroup eduGroup = new EduGroup();
-                    eduGroup.setFolderId((String) folderProps.get(CCConstants.SYS_PROP_NODE_UID));
-                    eduGroup.setFolderName((String) folderProps.get(CCConstants.CM_NAME));
-                    eduGroup.setGroupId((String) entry.getValue().get(CCConstants.SYS_PROP_NODE_UID));
-                    eduGroup.setGroupname((String) entry.getValue().get(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
-                    eduGroup.setGroupDisplayName((String) entry.getValue().get(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME));
-                    eduGroup.setFolderPath(getPath((String) folderProps.get(CCConstants.SYS_PROP_NODE_UID)));
-                    result.add(eduGroup);
-                }
-            } catch (AccessDeniedException ignored) {
-            }
-        }
-        return result;
     }
 
     public String getFavoritesFolder() throws Throwable {
@@ -3184,28 +2597,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         return false;
     }
 
-    /**
-     * returns admin authority if context is an edugroup
-     *
-     */
-    String getAdminAuthority(NodeRef nodeRef) {
-        String authorityAdministrator = null;
-        if (isSharedNode(nodeRef.getId())) {
-            Set<AccessPermission> allSetPermissions = serviceRegistry.getPermissionService().getAllSetPermissions(nodeRef);
-            for (AccessPermission ap : allSetPermissions) {
-                NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(ap.getAuthority());
-                if (authorityNodeRef != null) {
-                    String groupType = (String) nodeService.getProperty(authorityNodeRef, QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE));
-                    if (CCConstants.ADMINISTRATORS_GROUP_TYPE.equals(groupType)
-                            && ap.getPermission().equals(PermissionService.COORDINATOR)) {
-                        authorityAdministrator = ap.getAuthority();
-                    }
-                }
-            }
-        }
-        return authorityAdministrator;
-    }
-
     public void removeRelations(String parentID) throws Exception {
         NodeRef parentNodeRef = new NodeRef(storeRef, parentID);
         List<ChildAssociationRef> childAssocList = nodeService.getChildAssocs(parentNodeRef);
@@ -3323,17 +2714,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         String name = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
         NodeRef copyNodeRef = copyService.copyAndRename(nodeRef, new NodeRef(MCAlfrescoAPIClient.storeRef, toNodeId), QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS),
                 QName.createQName(name), copyChildren);
-
-        return copyNodeRef.getId();
-    }
-
-    public String copyNode(String nodeId, String toNodeId, String assocType, String assocName, boolean copyChildren) throws Exception {
-        NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId);
-
-        CopyService copyService = serviceRegistry.getCopyService();
-
-        NodeRef copyNodeRef = copyService.copy(nodeRef, new NodeRef(MCAlfrescoAPIClient.storeRef, toNodeId), QName.createQName(assocType),
-                QName.createQName(assocName), copyChildren);
 
         return copyNodeRef.getId();
     }
@@ -3507,14 +2887,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         return repositoryHelper.getCompanyHome().getId();
     }
 
-    public void endSession(String user, String ticket) {
-        serviceRegistry.getAuthenticationService().invalidateTicket(ticket);
-    }
-
-    public void endSession() {
-        serviceRegistry.getAuthenticationService().invalidateTicket(this.authenticationInfo.get(CCConstants.AUTH_TICKET));
-        serviceRegistry.getAuthenticationService().clearCurrentSecurityContext();
-    }
 
     @Override
     public boolean isSubOf(String type, String parentType) throws Throwable {
@@ -3525,43 +2897,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         return nodeService.getType(new NodeRef(storeRef, nodeId)).toString();
     }
 
-    private NodeRef getAuthority(String name) {
-        SearchParameters sp = new SearchParameters();
-
-        sp.addStore(storeRef);
-        sp.setLanguage("lucene");
-        sp.setQuery("+TYPE:\""
-                + ContentModel.TYPE_AUTHORITY_CONTAINER
-                + "\""
-                + " +@"
-                + QueryParser.escape("{" + ContentModel.PROP_AUTHORITY_NAME.getNamespaceURI() + "}"
-                + ISO9075.encode(ContentModel.PROP_AUTHORITY_NAME.getLocalName())) + ":\"" + name + "\"");
-        ResultSet rs = null;
-        try {
-            rs = searchService.query(sp);
-            if (rs.length() == 0) {
-                return null;
-            } else {
-                for (ResultSetRow row : rs) {
-                    String test = DefaultTypeConverter.INSTANCE.convert(String.class,
-                            nodeService.getProperty(row.getNodeRef(), ContentModel.PROP_AUTHORITY_NAME));
-                    if (test.equals(name)) {
-                        return row.getNodeRef();
-                    }
-                }
-            }
-            return null;
-        } finally {
-            if (rs != null) {
-                rs.close();
-            }
-        }
-    }
-
-    private String getAuthorityName(String groupNodeId) {
-        return DefaultTypeConverter.INSTANCE.convert(String.class,
-                nodeService.getProperty(new NodeRef(storeRef, groupNodeId), ContentModel.PROP_AUTHORITY_NAME));
-    }
 
     private void buildUpProperties(Map<String, Object> properties) {
 
@@ -3612,10 +2947,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         return this.nodeService.getType(new NodeRef(storeRef, nodeId)).toString();
     }
 
-    public GetPreviewResult getPreviewUrl(StoreRef storeRef, String nodeId) {
-        return getPreviewUrl(storeRef.getProtocol(), storeRef.getIdentifier(), nodeId);
-    }
-
     public String getUrl() {
         ApplicationInfo homeRep = ApplicationInfoList.getHomeRepository();
 
@@ -3635,34 +2966,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         return owner.equals(user);
     }
 
-    public String[] getMetadataSets() {
-        try {
-
-            File mdsDir = new File(MCAlfrescoAPIClient.class.getClassLoader().getResource("org/edu_sharing/metadataset").toURI());
-
-            final FilenameFilter filter = (dir, name) -> name.matches("metadataset_[a-zA-Z]*.xml");
-            String[] filesFound = mdsDir.list(filter);
-
-            if(filesFound == null){
-                return new String[0];
-            }
-
-            List<String> mdsNames = new ArrayList<>();
-            for (String mdsFile : filesFound) {
-                String name = mdsFile.replace("metadataset_", "");
-                name = mdsFile.replace(".xml", "");
-                mdsNames.add(name);
-            }
-
-            return mdsNames.toArray(new String[0]);
-        } catch (URISyntaxException e) {
-            log.error(e.getMessage(), e);
-        }
-
-        return null;
-
-    }
-
     @Override
     public void setOwner(String nodeId, String username) {
         serviceRegistry.getOwnableService().setOwner(new NodeRef(storeRef, nodeId), username);
@@ -3676,24 +2979,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
     public boolean exists(String nodeId) {
         return nodeService.exists(new NodeRef(storeRef, nodeId));
     }
-
-    /**
-     * returns hash of content, if node has no content -1
-     *
-     */
-    public int getContentHash(String nodeId, String property) {
-        return getContentHash(nodeId, property, storeRef.getProtocol(), storeRef.getIdentifier());
-    }
-
-    public int getContentHash(String nodeId, String property, String storeProtocol, String storeIdentifier) {
-        ContentReader reader = this.contentService.getReader(new NodeRef(new StoreRef(storeProtocol, storeIdentifier), nodeId), QName.createQName(property));
-        if (reader == null) {
-            return -1;
-        } else {
-            return reader.getContentData().hashCode();
-        }
-    }
-
 
     public String[] getAspects(String nodeId) {
         return getAspects(new NodeRef(storeRef, nodeId));
@@ -3710,45 +2995,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
             result.add(qname.toString());
         }
         return result.toArray(new String[0]);
-    }
-
-    public String findNodeByPath(String path) {
-
-        return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-
-                () -> {
-                    List<String> paths;
-                    if (path == null || path.isEmpty()) {
-                        paths = Collections.emptyList();
-
-                    } else {
-
-                        paths = new ArrayList<>();
-
-                        StringTokenizer token = new StringTokenizer(path, "/");
-                        while (token.hasMoreTokens()) {
-                            String s = token.nextToken().replaceAll("\\{[^}]*}", "");
-
-                            String[] t = s.split(":");
-                            if (t.length == 2) {
-                                s = t[1];
-                            }
-
-                            paths.add(s);
-                        }
-                    }
-
-                    NodeRef companyHome = repositoryHelper.getCompanyHome();
-
-                    if (!paths.isEmpty() && "company_home".equals(paths.get(0))) {
-
-                        paths.remove(0);
-                    }
-
-                    return serviceRegistry.getFileFolderService().
-                            resolveNamePath(companyHome, paths, true).getNodeRef().getId();
-                }, true);
-
     }
 
     public void bindEduGroupFolder(String groupName, String folderId) throws Exception {

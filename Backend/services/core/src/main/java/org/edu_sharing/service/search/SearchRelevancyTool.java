@@ -13,15 +13,22 @@ import org.edu_sharing.service.stream.StreamServiceFactory;
 import java.util.*;
 
 public class SearchRelevancyTool {
-
-    public static String getLuceneQuery() throws Exception {
+    public static Map<String, String[]> getCriteria() throws Exception {
         /**
          * property to look for successors
          */
         String property = StreamServiceFactory.getConfig().getString("relevancy.property");
-        if(property==null){
+        if (property == null) {
             throw new IllegalArgumentException("No property for relevancy specified");
         }
+        /*
+        // testing
+        if (true) {
+            return new HashMap<>() {{
+                put(property, new String[]{"abc", "def"});
+            }};
+        }
+         */
         /**
          * how many successors (depth) should be used
          * 1 means just the immediate successors, while 2 means immediate + all successor of the immediate sucessors, and so one
@@ -30,26 +37,26 @@ public class SearchRelevancyTool {
         /**
          * limit the amount of the facettes by the count of the last actions
          */
-        int lastActionsLimit =  StreamServiceFactory.getConfig().getInt("relevancy.actionLimit");
+        int lastActionsLimit = StreamServiceFactory.getConfig().getInt("relevancy.actionLimit");
 
 
         //throw new NotImplementedException("SearchRelevancyTool.getLuceneQuery is not implemented for this repository");
         MetadataSet mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id);
         // fetch all facettes for already viewed contents from xapi
-        List<String> facettes = XApiTool.getFacetsFromStore(AuthenticationUtil.getFullyAuthenticatedUser(), property,lastActionsLimit);
-        // propably nothing viewed or xapi store failed, return empty query
-        if(facettes==null)
-            return "";
+        List<String> facettes = XApiTool.getFacetsFromStore(AuthenticationUtil.getFullyAuthenticatedUser(), property, lastActionsLimit);
+        // probably nothing viewed or xapi store failed, return empty query
+        if (facettes == null)
+            return Collections.emptyMap();
         // get the valuespace from the property
         Map<String, MetadataKey> values = mds.findWidget(property).getValuesAsMap();
-        Set<String> valuesToQuery=new HashSet<>();
-        boolean hasPrecedes=values.entrySet().stream().anyMatch((e)->e.getValue().getPreceds()!=null);
-        if(!hasPrecedes){
-            throw new IllegalArgumentException("Specified "+property+" to use for relevancy, but the valuespace does not include any precedes relations");
+        Set<String> valuesToQuery = new HashSet<>();
+        boolean hasPrecedes = values.entrySet().stream().anyMatch((e) -> e.getValue().getPreceds() != null);
+        if (!hasPrecedes) {
+            throw new IllegalArgumentException("Specified " + property + " to use for relevancy, but the valuespace does not include any precedes relations");
         }
         // map all viewed facettes, find their succesors (by checking which other values this one preceds)
-        Set<String> searchPool=new HashSet<>(facettes);
-        for(int i=0;i<maxDepth;i++) {
+        Set<String> searchPool = new HashSet<>(facettes);
+        for (int i = 0; i < maxDepth; i++) {
             for (String key : new HashSet<>(searchPool)) {
                 MetadataKey mdsKey = values.get(key);
                 if (mdsKey != null && mdsKey.getPreceds() != null) {
@@ -60,23 +67,9 @@ public class SearchRelevancyTool {
             }
         }
         valuesToQuery.addAll(facettes);
-        StringBuilder luceneQuery = toLuceneQuery(property,valuesToQuery);
-        return luceneQuery.toString();
-    }
 
-    private static StringBuilder toLuceneQuery(String property,Collection<String> valuesToQuery) {
-        StringBuilder luceneQuery=new StringBuilder();
-        for(String value : valuesToQuery){
-            if(luceneQuery.length()>0){
-                luceneQuery.append(" OR ");
-            }
-            luceneQuery.
-                    append("@").
-                    append(QueryParser.escape(property)).
-                    append(":\"").
-                    append(QueryParser.escape(value)).
-                    append("\"");
-        }
-        return luceneQuery;
+        return new HashMap<>() {{
+            put(property, valuesToQuery.toArray(String[]::new));
+        }};
     }
 }

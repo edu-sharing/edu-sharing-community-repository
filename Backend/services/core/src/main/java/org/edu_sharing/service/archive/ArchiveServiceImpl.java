@@ -99,33 +99,15 @@ public class ArchiveServiceImpl implements ArchiveService  {
 		if(!authorityService.isGlobalAdmin()){
 			return search(searchWord,AuthenticationUtil.getFullyAuthenticatedUser(),from,maxResults,sortDefinition);
 		}
-		
-		try{
-
-			SearchToken searchToken = getSearchToken(searchWord,null, from, maxResults, sortDefinition);
-			
-			return this.searchService.search(searchToken);
-		}catch(Throwable e){
-			logger.error(e.getMessage(), e);
-			return null;
-		}
-		
+		return search(searchWord,null,from,maxResults,sortDefinition);
 	}
 
-	private SearchToken getSearchToken(String searchWord,String user, int from, int maxResults, SortDefinition sortDefinition) throws Exception {
+	private SearchToken getSearchToken(int from, int maxResults, SortDefinition sortDefinition) throws Exception {
 		SearchToken searchToken = new SearchToken();
 		searchToken.setFrom(from);
 		searchToken.setMaxResult(maxResults);
 		searchToken.setStoreName(MCAlfrescoAPIClient.archiveStoreRef.getIdentifier());
 		searchToken.setStoreProtocol(MCAlfrescoAPIClient.archiveStoreRef.getProtocol());
-		//searchToken.setQueryString("@cm\\:name:\""+QueryParser.escape(searchWord) + "*\""+" AND ASPECT:\"sys:archived\"");
-		MetadataQueries queries = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id).getQueries(MetadataReader.QUERY_SYNTAX_LUCENE);
-		Map<String, String[]> params=new HashMap<>();
-		params.put(MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA,new String[]{searchWord});
-		if(user!=null && !user.isEmpty()) {
-			params.put("user", new String[]{user});
-		}
-		searchToken.setMetadataQuery(queries,"archive",params);
 		searchToken.setSortDefinition(sortDefinition);
 		searchToken.setContentType(ContentType.FILES_AND_FOLDERS);
 		return searchToken;
@@ -134,8 +116,14 @@ public class ArchiveServiceImpl implements ArchiveService  {
 	@Override
 	public SearchResultNodeRef search(String searchWord, String user, int from, int maxResults, SortDefinition sortDefinition) {
 		try{
-			SearchToken searchToken = getSearchToken(searchWord,user,from,maxResults,sortDefinition);
-			return this.searchService.search(searchToken);
+			SearchToken searchToken = getSearchToken(from, maxResults, sortDefinition);
+			MetadataSet metadataset = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id);
+			Map<String, String[]> params=new HashMap<>();
+			params.put(MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA,new String[]{searchWord});
+			if(user!=null && !user.isEmpty()) {
+				params.put("user", new String[]{user});
+			}
+			return this.searchService.search(metadataset,"archive",params,searchToken);
 		}catch(Throwable e){
 			logger.error(e.getMessage(), e);
 			return null;

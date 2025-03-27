@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.service.archive.ArchiveService;
 import org.edu_sharing.service.archive.ArchiveServiceFactory;
@@ -23,7 +24,7 @@ public class ArchiveDao {
 			
 			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
 			
-			return NodeDao.transform(repoDao, archivService.search(query,startIdx,nrOfresults,sortDefinition));
+			return NodeDao.transform(repoDao, archivService.search(query,startIdx,nrOfresults,sortDefinition),Filter.createShowAllFilter(),null);
 		} catch (Throwable t) {
 			
 			throw DAOException.mapping(t);
@@ -47,9 +48,8 @@ public class ArchiveDao {
 			ArchiveService archivService = ArchiveServiceFactory.getArchiveService(repoDao.getId());
 			
 			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
-			
-			
-			return NodeDao.transform(repoDao, archivService.search(query, user, startIdx, nrOfresults,sortDefinition));
+
+			return NodeDao.transform(repoDao, archivService.search(query, user, startIdx, nrOfresults,sortDefinition), Filter.createShowAllFilter(),null);
 		} catch (Throwable t) {
 			
 			throw DAOException.mapping(t);

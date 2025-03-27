@@ -3,6 +3,8 @@ package org.edu_sharing.repository.server.jobs.quartz;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -11,11 +13,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-public class TrashcanCleanerSolrJob extends AbstractJob {
+@JobDescription(description = "job to cleanup archive")
+public class TrashcanCleanerSolrJob extends AbstractJobMapAnnotationParams {
 
-	public static final String PARAM_DAYS_TO_KEEP = "DAYS_TO_KEEP";
-	
-	public static final String PARAM_BATCH_COUNT = "BATCH_COUNT";
+	@JobFieldDescription(description = "nr of days to keep")
+	public Integer DAYS_TO_KEEP;
+
+	@JobFieldDescription(description = "batch count")
+	public Integer BATCH_COUNT;
+
+	@JobFieldDescription(description = "if false run in protocol mode")
+	Boolean execute = true;
 	
 	protected static final int DEFAULT_DAYS_TO_KEEP = -1;
 	protected static final int DEFAULT_DELETE_BATCH_COUNT = 1000;
@@ -23,16 +31,14 @@ public class TrashcanCleanerSolrJob extends AbstractJob {
 	Logger logger = Logger.getLogger(TrashcanCleanerJob.class);
 	
 	@Override
-	public void execute(JobExecutionContext context) throws JobExecutionException {
+	public void executeInternal(JobExecutionContext context) throws JobExecutionException {
 		
-		JobDataMap jobDataMap = context.getJobDetail().getJobDataMap();
-		
-		final int time = jobDataMap.containsKey(PARAM_DAYS_TO_KEEP)
-					? jobDataMap.getInt(PARAM_DAYS_TO_KEEP)
+		final int time = (DAYS_TO_KEEP != null)
+					? DAYS_TO_KEEP
 					: DEFAULT_DAYS_TO_KEEP;
 		
-		final int batch = jobDataMap.containsKey(PARAM_BATCH_COUNT)
-					? jobDataMap.getInt(PARAM_BATCH_COUNT)
+		final int batch = (BATCH_COUNT != null)
+					? BATCH_COUNT
 					: DEFAULT_DELETE_BATCH_COUNT;
 
 		
@@ -40,13 +46,11 @@ public class TrashcanCleanerSolrJob extends AbstractJob {
 			@Override
 			public Void doWork() throws Exception {
 				
-				new TrashcanCleanerSolr(TimeUnit.MILLISECONDS.convert(time, TimeUnit.DAYS),batch).exeute();
+				new TrashcanCleanerSolr(TimeUnit.MILLISECONDS.convert(time, TimeUnit.DAYS),batch, execute).exeute();
 				return null;
 			}
 		};
 		AuthenticationUtil.runAs(runAs, "admin");
-		//AuthenticationUtil.runAsSystem(runAs);
-		
 	}
 	
 	@Override

@@ -1,14 +1,12 @@
 package org.edu_sharing.service.mediacenter;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.SearchParameters;
-import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.AuthorityType;
@@ -22,6 +20,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.importer.PersistentHandlerEdusharing;
 import org.edu_sharing.repository.server.importer.RecordHandlerInterfaceBase;
 import org.edu_sharing.repository.server.jobs.helper.NodeHelper;
@@ -59,7 +58,6 @@ public class MediacenterServiceImpl implements MediacenterService {
     OrganisationService organisationService = (OrganisationService) applicationContext
             .getBean("eduOrganisationService");
     org.edu_sharing.service.authority.AuthorityService eduAuthorityService2 = AuthorityServiceFactory.getLocalService();
-    SearchService searchService = serviceregistry.getSearchService();
     PermissionService permissionService = serviceregistry.getPermissionService();
     BehaviourFilter policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
 
@@ -297,18 +295,20 @@ public class MediacenterServiceImpl implements MediacenterService {
                      * get existing mediacenters
                      */
                     {
-                        SearchParameters sp = new SearchParameters();
-                        sp.setQuery("ASPECT:\"ccm:mediacenter\"");
-                        sp.setLanguage(SearchService.LANGUAGE_LUCENE);
-                        sp.setSkipCount(0);
-                        sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
 
-                        ResultSet rs = searchService.query(sp);
-                        if (rs == null || rs.length() < 1) {
+                        SearchToken searchToken = new SearchToken();
+                        searchToken.setElasticIndex(SearchServiceElastic.AUTHORITIES_INDEX);
+                        searchToken.setFrom(0);
+                        searchToken.setElasticQuery(QueryBuilders.term().field("aspects").value("ccm:mediacenter").build());
+                        org.edu_sharing.service.search.SearchService searchService = SearchServiceFactory.getLocalService();
+                        SearchResultNodeRef result = searchService.search(searchToken);
+
+                        if (result.getNodeCount() < 1) {
                             logger.error("no mediacenters found");
                         } else {
                             Map<String, List<String>> existingMZsAndSchools = new HashMap<>();
-                            for (NodeRef mzNodeRef : rs.getNodeRefs()) {
+                            result.getData().forEach(n -> {
+                                NodeRef mzNodeRef = new NodeRef(new StoreRef(n.getStoreProtocol(),n.getStoreId()),n.getNodeId());
                                 String authorityName = (String) nodeService.getProperty(mzNodeRef, ContentModel.PROP_AUTHORITY_NAME);
                                 String mzId = authorityName.replace("GROUP_MEDIA_CENTER_", "");
                                 try {
@@ -342,7 +342,7 @@ public class MediacenterServiceImpl implements MediacenterService {
                                 } catch (NumberFormatException e) {
                                     logger.info("authorityName:" + authorityName + " mzId:" + mzId + " is no number");
                                 }
-                            }
+                            });
 
                             for (Map.Entry<String, List<String>> mzAndSchools : existingMZsAndSchools.entrySet()) {
                                 List<String> newSchools = newMZsAndSchools.get(mzAndSchools.getKey());
@@ -376,32 +376,36 @@ public class MediacenterServiceImpl implements MediacenterService {
                     String mzId = record.get(0);
                     String schoolId = record.get(1);
 
-                    SearchParameters sp = getSearchParameterMZ(mzId);
-                    ResultSet rs = searchService.query(sp);
 
-                    if (rs == null || rs.length() < 1) {
+                    SearchToken searchToken = new SearchToken();
+                    searchToken.setFrom(0);
+                    searchToken.setElasticIndex(SearchServiceElastic.AUTHORITIES_INDEX);
+                    searchToken.setElasticQuery(QueryBuilders.bool()
+                            .must(m -> m.term(t -> t.field("aspects").value("ccm:mediacenter")))
+                            .must(m -> m.term(t -> t.field("properties.ccm:mediacenterId").value(mzId))).build());
+                    searchToken.setMaxResult(1);
+                    org.edu_sharing.service.search.SearchService searchService = SearchServiceFactory.getLocalService();
+                    SearchResultNodeRef result = searchService.search(searchToken);
+                    if(result.getNodeCount() <1){
                         logger.error("no mediacenter found for " + mzId);
                         continue;
                     }
 
-                    NodeRef nodeRefAuthorityMediacenter = rs.getNodeRef(0);
+                    NodeRef nodeRefAuthorityMediacenter = result.getData().stream()
+                            .findFirst()
+                            .map(n -> new NodeRef(new StoreRef(n.getStoreProtocol(),n.getStoreId()),n.getNodeId()))
+                            .get();
+
 
                     String authorityNameSchool = "GROUP_ORG_" + schoolId;
 
-                    sp = new SearchParameters();
-                    sp.setQuery("@cm\\:authorityName:" + authorityNameSchool);
-                    sp.setMaxItems(1);
-                    sp.setLanguage(SearchService.LANGUAGE_LUCENE);
-                    sp.setSkipCount(0);
-                    sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
-                    rs = searchService.query(sp);
-                    if (rs == null || rs.length() < 1) {
+                    //check if school exists
+                    if(!authorityService.authorityExists(authorityNameSchool)){
                         logger.error("no school found for " + schoolId + " " + authorityNameSchool);
                         continue;
                     }
 
-                    String authorityNameMZ = (String) nodeService.getProperty(nodeRefAuthorityMediacenter,
-                            ContentModel.PROP_AUTHORITY_NAME);
+                    String authorityNameMZ = (String)nodeService.getProperty(nodeRefAuthorityMediacenter, ContentModel.PROP_AUTHORITY_NAME);
 
 
                     Set<String> mzContains = authorityService.getContainedAuthorities(AuthorityType.GROUP, authorityNameMZ, true);
@@ -436,16 +440,6 @@ public class MediacenterServiceImpl implements MediacenterService {
         }
 
         return result;
-    }
-
-    private SearchParameters getSearchParameterMZ(String mzId) {
-        SearchParameters sp = new SearchParameters();
-        sp.setQuery("ASPECT:\"ccm:mediacenter\" AND @ccm\\:mediacenterId:\"" + mzId + "\"");
-        sp.setMaxItems(1);
-        sp.setLanguage(SearchService.LANGUAGE_LUCENE);
-        sp.setSkipCount(0);
-        sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
-        return sp;
     }
 
     /**

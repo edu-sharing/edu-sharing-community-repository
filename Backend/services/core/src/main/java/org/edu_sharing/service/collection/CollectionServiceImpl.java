@@ -68,6 +68,7 @@ import org.edu_sharing.spring.ApplicationContextFactory;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.context.ApplicationContext;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
@@ -682,16 +683,7 @@ public class CollectionServiceImpl implements CollectionService {
     }
 
     protected void addCollectionCountProperties(NodeRef nodeRef, Collection collection, BoolQuery readPermissionsQuery) {
-        String path = serviceRegistry.getNodeService().getPath(nodeRef).toPrefixString(serviceRegistry.getNamespaceService());
-        SearchParameters params = new ESSearchParameters();
-        params.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
-        params.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-        params.setMaxItems(0);
-
-        params.setQuery("TYPE:" + QueryParser.escape(CCConstants.CCM_TYPE_IO) + " AND NOT ASPECT:" + QueryParser.escape(CCConstants.CCM_ASPECT_IO_CHILDOBJECT) + " AND PATH:\"" + QueryParser.escape(path) + "//*\"");
-        collection.setChildReferencesCount((int) serviceRegistry.getSearchService().query(params).getNumberFound());
-        params.setQuery("TYPE:" + QueryParser.escape(CCConstants.CCM_TYPE_MAP) + " AND PATH:\"" + QueryParser.escape(path) + "//*\"");
-        collection.setChildCollectionsCount((int) serviceRegistry.getSearchService().query(params).getNumberFound());
+        throw new RuntimeException("solr not longer supported");
     }
 
     @Override
@@ -948,11 +940,13 @@ public class CollectionServiceImpl implements CollectionService {
      */
     @Override
     public void setPinned(String[] collections) {
-        SearchToken searchToken = new SearchToken();
-        searchToken.setContentType(ContentType.COLLECTIONS);
-        searchToken.setLuceneString("ASPECT:" + QueryParser.escape(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION_PINNED)));
-        searchToken.setMaxResult(Integer.MAX_VALUE);
-        List<org.edu_sharing.service.model.NodeRef> currentPinned = searchService.search(searchToken).getData();
+        List<org.edu_sharing.service.model.NodeRef> currentPinned = null;
+        try {
+            currentPinned = searchService.getAllPinnedCollections();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         for (org.edu_sharing.service.model.NodeRef pinned : currentPinned) {
             nodeService.removeAspect(pinned.getNodeId(), CCConstants.CCM_ASPECT_COLLECTION_PINNED);
             nodeService.removeProperty(pinned.getStoreProtocol(), pinned.getStoreId(), pinned.getNodeId(), CCConstants.CCM_PROP_COLLECTION_PINNED_STATUS);
@@ -1032,18 +1026,22 @@ public class CollectionServiceImpl implements CollectionService {
 
     /**
      * Get all reference objects for a given node
-     * Uses solr
      *
      * @param nodeId
      * @return
      */
     @Override
     public List<org.edu_sharing.service.model.NodeRef> getReferenceObjects(String nodeId) {
-        SearchToken token = new SearchToken();
-        token.setMaxResult(Integer.MAX_VALUE);
-        token.setContentType(ContentType.ALL);
-        token.setLuceneString("ASPECT:\"ccm:collection_io_reference\" AND @ccm\\:original:" + QueryParser.escape(nodeId) + " AND NOT @sys\\:node-uuid:" + QueryParser.escape(nodeId));
-        return SearchServiceFactory.getSearchService(appInfo.getAppId()).search(token).getData();
+        try {
+            UUID.fromString(nodeId);
+            return SearchServiceFactory.getSearchService(appInfo.getAppId()).getReferenceObjects(nodeId);
+        } catch (IllegalArgumentException e) {
+            logger.warn("nodeId " + nodeId +" is no valid uuid");
+            return Collections.emptyList();
+        }catch (IOException e) {
+            logger.warn(e.getMessage() + ". while fetching reference objects");
+            return Collections.emptyList();
+        }
     }
 
     @Override

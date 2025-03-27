@@ -1,7 +1,10 @@
 package org.edu_sharing.restservices.admin.v1;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -65,10 +68,12 @@ import org.edu_sharing.service.version.RepositoryVersionInfo;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.FileWriter;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.io.Writer;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+
+import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -1058,6 +1063,7 @@ public class AdminApi {
 
     public Response searchByElasticDSL(
             @Parameter(description = "dsl query (json encoded)", schema = @Schema(defaultValue = "")) @QueryParam("dsl") String dsl,
+			@Parameter(description = "index", schema = @Schema(defaultValue="")) @QueryParam("index") String index,
             @Context HttpServletRequest req) {
 
         try {
@@ -1065,7 +1071,7 @@ public class AdminApi {
             //check that there is an admin
             AdminServiceFactory.getInstance();
             SearchServiceElastic elastic = new SearchServiceElastic(ApplicationInfoList.getHomeRepository().getAppId());
-            SearchResultNodeRefElastic search = elastic.searchDSL(dsl);
+			SearchResultNodeRefElastic search = elastic.searchDSL(dsl,index);
             RepositoryDao repoDao = RepositoryDao.getHomeRepository();
             List<Node> data = new ArrayList<>();
             for (org.edu_sharing.service.model.NodeRef ref : search.getData()) {
@@ -1130,7 +1136,7 @@ public class AdminApi {
             token.setFrom(skipCount != null ? skipCount : 0);
             token.setMaxResult(maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS);
             token.setContentType(ContentType.ALL);
-            token.setLuceneString(query);
+			setQuery(query,token);
             StoreRef storeRef = LuceneStore.Archive.equals(store) ? StoreRef.STORE_REF_ARCHIVE_SPACESSTORE : StoreRef.STORE_REF_WORKSPACE_SPACESSTORE;
             if (LuceneStore.Archive.equals(store)) {
                 token.setStoreName(storeRef.getIdentifier());
@@ -1205,7 +1211,7 @@ public class AdminApi {
                 token.setFrom(page);
                 token.setMaxResult(pageSize);
                 token.setContentType(ContentType.ALL);
-                token.setLuceneString(query);
+				setQuery(query, token);
                 token.disableSearchCriterias();
                 token.setAuthorityScope(authorityScope);
                 StoreRef storeRef = LuceneStore.Archive.equals(store) ? StoreRef.STORE_REF_ARCHIVE_SPACESSTORE : StoreRef.STORE_REF_WORKSPACE_SPACESSTORE;
@@ -1253,6 +1259,37 @@ public class AdminApi {
             return ErrorResponse.createResponse(t);
         }
     }
+
+	/**
+	 * checks if its an json string. if true its using json else solr.
+	 * @param query
+	 * @param token
+	 */
+	private static void setQuery(String query, SearchToken token) {
+		logger.info("query:" + query);
+		//check if its json
+		boolean elasticQuery;
+		try {
+			JsonParser.parseString(query);
+			elasticQuery =  true;
+		} catch (Exception e) {
+			elasticQuery =  false;
+		}
+		if(elasticQuery) {
+			logger.info("using elasticsearch");
+			query = query.replaceAll("\\s", "");
+			if (query.replaceAll("\\s", "").startsWith("{\"query\"")) {
+				JsonObject jsonObject = JsonParser.parseString(query).getAsJsonObject();
+				JsonObject queryObject = jsonObject.getAsJsonObject("query");
+				logger.info("removed surrounding \"query\": " + queryObject.toString());
+				query = queryObject.toString();
+			}
+			token.setElasticQuery(QueryBuilders.wrapper().query(new String(Base64.getEncoder().encode(query.getBytes()))).build());
+		}else{
+			logger.info("using solr");
+			token.setLuceneString(query);
+		}
+	}
 
 
     @PUT

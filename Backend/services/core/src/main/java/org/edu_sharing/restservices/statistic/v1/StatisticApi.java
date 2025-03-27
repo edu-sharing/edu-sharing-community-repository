@@ -26,6 +26,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +79,7 @@ public class StatisticApi {
                 @Parameter(description = "additional properties to build facets and count+sub-group values", required = false) @QueryParam("subGroup") List<String> subGroup) {
 
 	    	try {
-		    	StatisticsGlobal statistics=StatisticDao.getGlobal(group,subGroup);
+		    	StatisticsGlobal statistics=StatisticDao.getGlobal(group,(subGroup == null) ? new ArrayList<>() : subGroup);
 		    	return Response.status(Response.Status.OK).entity(statistics).build();
 		    	
 			} catch (Throwable t) {

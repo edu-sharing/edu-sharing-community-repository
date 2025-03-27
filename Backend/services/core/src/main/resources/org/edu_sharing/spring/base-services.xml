@@ -86,7 +86,7 @@
 
   <bean id="collectionServiceConfig" class="org.edu_sharing.service.collection.CollectionServiceConfig">
     <property name="pattern" value="yyyy/MM/dd/HH/mm/ss/SS"/>
-    <property name="path" value="/app:company_home/ccm:collections"/>
+    <property name="path" value="app:company_home/ccm:collections"/>
   </bean>
 
   <bean id="repoProxy" class="org.edu_sharing.service.repoproxy.RepoProxyDummyImpl">

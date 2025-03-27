@@ -363,6 +363,9 @@ body {
     &.mat-primary {
         color: $textOnPrimary !important;
     }
+    &.mat-warn {
+        color: $textOnPrimary !important;
+    }
 }
 .mat-mdc-button.mat-cancel {
     color: $textMediumLight;

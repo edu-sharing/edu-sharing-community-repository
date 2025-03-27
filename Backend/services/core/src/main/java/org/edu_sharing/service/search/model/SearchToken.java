@@ -1,5 +1,6 @@
 package org.edu_sharing.service.search.model;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryVariant;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.log4j.Logger;
@@ -24,6 +25,14 @@ public class SearchToken implements Serializable {
 	
 	@Setter
 	String luceneString;
+
+	@Getter
+	@Setter
+	QueryVariant elasticQuery;
+
+	@Getter
+	@Setter
+	String elasticIndex;
 	
 	@Setter
 	List<String> facets =null;

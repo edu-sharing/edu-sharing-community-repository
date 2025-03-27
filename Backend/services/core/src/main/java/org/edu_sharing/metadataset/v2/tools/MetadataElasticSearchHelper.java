@@ -35,6 +35,9 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
     static Logger logger = Logger.getLogger(MetadataElasticSearchHelper.class);
     private static MetadataQueryPreprocessor preprocessor = new MetadataQueryPreprocessor(MetadataReader.QUERY_SYNTAX_DSL);
 
+    //@TODO make more generic or fix in elastic model
+    public static final List<String> nonKeywordFacets = List.of("cclom:format");
+
     public static BoolQuery.Builder getElasticSearchQuery(SearchToken searchToken, MetadataQueries queries, MetadataQuery query, Map<String, String[]> parameters) throws IllegalArgumentException {
         return getElasticSearchQuery(searchToken, queries, query, parameters, true);
     }
@@ -289,7 +292,10 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                     .must(globalConditions);
 
             List<MetadataQueryParameter.MetadataQueryFacetItem> fieldName = Collections.singletonList(
-                    new MetadataQueryParameter.MetadataQueryFacetItem("properties." + facet + ".keyword", null)
+                    new MetadataQueryParameter.MetadataQueryFacetItem(
+                            (nonKeywordFacets.contains(facet)
+                                    ? "properties." + facet
+                                    : "properties." + facet+".keyword"), null)
             );
 
             MetadataQueryParameter parameter = query.findParameterByName(facet);

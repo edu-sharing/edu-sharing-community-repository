@@ -76,8 +76,8 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 	private List<MetadataKey.MetadataKeyRelated.Relation> relations;
 	@JobFieldDescription(description = "The mode to use (Merge = Merge any existing target field values with the mapping values, Replace = replace the target field values")
 	private Mode mode;
-	@JobFieldDescription(description = "Use solr/searchindex. This can improve performance significantly because it only fetches nodes with the sourceProperty set. Make sure your index is up to date")
-	private boolean viaSolr;
+	@JobFieldDescription(description = "Use searchindex. This can improve performance significantly because it only fetches nodes with the sourceProperty set. Make sure your index is up to date")
+	private boolean viaElastic;
 	@JobFieldDescription(description = "Only test and output, but do not modify/store the metadata")
 	private boolean testRun;
 	@JobFieldDescription(description = "Clear/remove the source field content after successful migration")
@@ -92,8 +92,8 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 		runner.setTransaction(NodeRunner.TransactionMode.Local);
 		runner.setKeepModifiedDate(true);
 		runner.setThreaded(false);
-		if(viaSolr) {
-			runner.setLucene("@" + QueryParser.escape(sourceProperty) + ":\"*\"");
+		if(viaElastic) {
+			runner.setElastic("{\"exists\":{\"field\":\"properties."+sourceProperty+"\"}}");
 		}
 		runner.setTypes(Arrays.stream(type.split(",")).map(String::trim).map(CCConstants::getValidGlobalName).collect(Collectors.toList()));
 

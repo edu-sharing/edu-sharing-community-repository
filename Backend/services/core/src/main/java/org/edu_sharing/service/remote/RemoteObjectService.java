@@ -161,7 +161,7 @@ public class RemoteObjectService {
     }
 
     public static synchronized String getOrCreateRemoteMetadataObject(String sourceRepositoryId, String originalNodeId) throws Throwable {
-        String ROOT_PATH = "/app:company_home/ccm:remote_ios";
+        String ROOT_PATH = "app:company_home/ccm:remote_ios";
         ApplicationInfo repInfo = ApplicationInfoList.getRepositoryInfoById(sourceRepositoryId);
         NodeService nsSourceRepo = NodeServiceFactory.getNodeService(sourceRepositoryId);
 		Map<String, Object> propsIn = nsSourceRepo.getPropertiesPersisting(null, null, originalNodeId);

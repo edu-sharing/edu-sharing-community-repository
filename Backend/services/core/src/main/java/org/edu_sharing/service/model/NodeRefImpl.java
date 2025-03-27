@@ -2,12 +2,18 @@ package org.edu_sharing.service.model;
 
 import java.util.*;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.shared.Contributor;
 
 public class NodeRefImpl implements NodeRef {
 
 	String repositoryId;
+
+	@Getter
+	@Setter
+	private Origin origin;
 
 	List<CollectionRef> usedInCollections = new ArrayList<>();
 
@@ -80,6 +86,11 @@ public class NodeRefImpl implements NodeRef {
 	}
 	public NodeRefImpl(String nodeId){
 		this.nodeId = nodeId;
+	}
+	public NodeRefImpl(org.alfresco.service.cmr.repository.NodeRef nodeRef){
+		this.nodeId = nodeRef.getId();
+		this.storeId = nodeRef.getStoreRef().getIdentifier();
+		this.storeProtocol = nodeRef.getStoreRef().getProtocol();
 	}
 	public NodeRefImpl(String repositoryId, String storeProtocol, String storeId, String nodeId){
 		this.repositoryId = repositoryId;

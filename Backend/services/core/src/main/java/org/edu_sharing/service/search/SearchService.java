@@ -4,18 +4,20 @@ package org.edu_sharing.service.search;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.rpc.EduGroup;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
-import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.search.model.*;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public interface SearchService {
-	public static enum ContentType{
+	enum ContentType{
 		FILES,
 		FOLDERS,
 		FILES_AND_FOLDERS,
@@ -23,13 +25,13 @@ public interface SearchService {
 		TOOLPERMISSIONS,
 		COLLECTION_PROPOSALS,
 		ALL
-	};
-	public static enum CombineMode{
+	}
+	enum CombineMode{
 		AND,
 		OR
 	};
 
-	public static enum ContributorKind {
+	enum ContributorKind {
 		PERSON,
 		ORGANIZATION
 	}
@@ -39,8 +41,11 @@ public interface SearchService {
 	default List<String> getAllMediacenters() throws Exception {
 		return getAllMediacenters(false);
 	}
+	default List<String> getAllMediacenters(boolean membershipsOnly) throws Exception {
+		return getAllMediacentersNodeRef(membershipsOnly).stream().map(ref -> ref.getProperties().get(CCConstants.CM_PROP_AUTHORITY_NAME).toString()).collect(Collectors.toList());
+	}
 
-	List<String> getAllMediacenters(boolean membershipsOnly) throws Exception;
+	List<NodeRef> getAllMediacentersNodeRef(boolean membershipsOnly) throws Exception;
 
 
 	SearchResultNodeRef getFilesSharedByMe(SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception;
@@ -67,15 +72,6 @@ public interface SearchService {
 
  	/**
       * find Authorities and Users plain solr
- 	 * @param user
-      * @param searchWord
-      * @param globalContext
-      * @param from
-      * @param nrOfResults
- 	 * @param customProperties
- 	 * @param sort
-      * @return
- 	 * @throws InsufficientPermissionException 
       */
 	SearchResult<String> findAuthorities(AuthorityType user, String searchWord, boolean globalContext, int from, int nrOfResults, SortDefinition sort, Map<String, String> customProperties) throws Exception;
 
@@ -87,13 +83,21 @@ public interface SearchService {
 
 	Map<ContentType,SearchToken> getLastSearchTokens() throws Throwable;
 	
-	public default List<? extends  Suggestion> getSuggestions(MetadataSet mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
+	default List<? extends  Suggestion> getSuggestions(MetadataSet mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
 		return null;	
 	}
 
 	SearchResultNodeRef searchFingerPrint(String nodeId);
 
-	public Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind kind) throws IOException;
+	Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind kind) throws IOException;
 
-	public SearchResultNodeRef getMetadata(List<String> nodeIds) throws IOException;
+	SearchResultNodeRef getMetadata(List<String> nodeIds) throws IOException;
+
+	List<NodeRef> getAllPinnedCollections() throws IOException;
+
+	List<org.edu_sharing.service.model.NodeRef> getReferenceObjects(String nodeId) throws IOException;
+
+	SearchResultNodeRef searchByProperty(SearchToken searchToken, SearchService.CombineMode combineMode, List<String> properties, List<String> value, List<String> comparator) throws IOException;
+
+	SearchResultNodeRef searchByDisplayPath(String path, String index) throws IOException;
 }

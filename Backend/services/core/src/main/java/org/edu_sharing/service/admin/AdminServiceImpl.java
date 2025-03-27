@@ -1,5 +1,6 @@
 package org.edu_sharing.service.admin;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import com.google.common.io.Files;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.alfresco.service.cmr.module.ModuleInstallState;
 import org.alfresco.service.cmr.module.ModuleService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.ReversedLinesFileReader;
@@ -30,9 +32,7 @@ import org.edu_sharing.repository.client.rpc.cache.CacheCluster;
 import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.StringTool;
-import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
+import org.edu_sharing.repository.server.*;
 import org.edu_sharing.repository.server.importer.ExcelLOMImporter;
 import org.edu_sharing.repository.server.importer.collections.CollectionImporter;
 import org.edu_sharing.repository.server.jobs.quartz.*;
@@ -61,6 +61,9 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.search.SearchServiceElastic;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.service.version.RepositoryVersionInfo;
@@ -101,6 +104,7 @@ public class AdminServiceImpl implements AdminService {
     private final VersionService versionService;
     private final ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
     private final ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+    private final SearchService searchService;
 
     //cause standard properties class does not save the values sorted
     static class SortedProperties extends Properties {
@@ -781,19 +785,30 @@ public class AdminServiceImpl implements AdminService {
 
         ArrayList<GlobalGroup> result = new ArrayList<>();
 
-        MCAlfrescoBaseClient mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
-        Map<String, Map<String, Object>> raw = mcAlfrescoBaseClient.search("TYPE:cm\\:authorityContainer AND @ccm\\:scopetype:\"global\"");
 
-        for (Map.Entry<String, Map<String, Object>> entry : raw.entrySet()) {
+        org.edu_sharing.service.search.SearchService service = SearchServiceFactory.getLocalService();
+
+        SearchToken searchToken = new SearchToken();
+        searchToken.setFrom(0);
+        searchToken.setMaxResult(Integer.MAX_VALUE);
+        searchToken.setElasticQuery(QueryBuilders.bool()
+                .must(m -> m.term(t -> t.field("type").value("cm:authorityContainer")))
+                .must(m -> m.term(t -> t.field("properties.ccm:scopetype.keyword").value("global")))
+                .build()
+        );
+        searchToken.setElasticIndex(SearchServiceElastic.AUTHORITIES_INDEX);
+
+        SearchResultNodeRef search = service.search(searchToken);
+        search.getData().stream().forEach(sr -> {
             GlobalGroup group = new GlobalGroup();
-            group.setName((String) entry.getValue().get(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
-            group.setDisplayName((String) entry.getValue().get(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME));
-            group.setNodeId((String) entry.getValue().get(CCConstants.SYS_PROP_NODE_UID));
+            group.setName((String)sr.getProperties().get(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
+            group.setDisplayName((String) sr.getProperties().get(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME));
+            group.setNodeId((String)sr.getProperties().get(CCConstants.SYS_PROP_NODE_UID));
             group.setAuthorityType(AuthorityType.getAuthorityType(group.getName()).name());
-            group.setScope((String) entry.getValue().get(CCConstants.CCM_PROP_SCOPE_TYPE));
-            group.setGroupType((String) entry.getValue().get(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE));
+            group.setScope((String) sr.getProperties().get(CCConstants.CCM_PROP_SCOPE_TYPE));
+            group.setGroupType((String) sr.getProperties().get(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE));
             result.add(group);
-        }
+        });
         return result;
     }
 
@@ -1013,9 +1028,9 @@ public class AdminServiceImpl implements AdminService {
 
     public void exportLom(String filterQuery, String targetDir, String format) throws Exception {
         Map<String, Object> paramsMap = new HashMap<>();
-        paramsMap.put(ExporterJob.PARAM_LUCENE_FILTER, filterQuery);
-        paramsMap.put(ExporterJob.PARAM_OUTPUT_DIR, targetDir);
-        paramsMap.put(ExporterJob.PARAM_FORMAT, format);
+        paramsMap.put("elasticQuery", filterQuery);
+        paramsMap.put("outputDir", targetDir);
+        paramsMap.put("format", format);
         paramsMap.put(JobHandler.AUTH_INFO_KEY, getAuthInfo());
         ImmediateJobListener jobListener = JobHandler.getInstance().startJob(ExporterJob.class, paramsMap);
         if (jobListener.isVetoed()) {

@@ -27,6 +27,7 @@ import org.edu_sharing.restservices.node.v1.model.SearchResult;
 import org.edu_sharing.restservices.search.v1.SearchApi;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
 import org.edu_sharing.restservices.shared.*;
+import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.edu_sharing.service.mediacenter.MediacenterServiceImpl;
@@ -86,39 +87,77 @@ public class MediacenterApi {
 		}
 
 	}
-    @POST
-    @Path("/mediacenter/{repository}/{mediacenter}")
 
-    @Operation(summary = "create new mediacenter in repository.", description = "admin rights are required.")
+	@GET
+	@Path("/mediacenter/{repository}/{mediacenter}")
 
-    @ApiResponses(
-    	value = {
-    		@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Mediacenter.class))),
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    	})
+	@Operation(summary = "get a single mediacenter in the repository.", description = "requires availability for the user"
+	)
 
-    public Response createMediacenter(
-        	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-    		@Parameter(description = "mediacenter name",required=true) @PathParam("mediacenter") String mediacenter,
-    		Mediacenter.Profile profile,
-    		@Context HttpServletRequest req) {
+	@ApiResponses(
+			value = {
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Mediacenter.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+			})
 
-    	try {
+	public Response getMediacenter(
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" ))
+			@PathParam("repository") String repository,
+			@PathParam("mediacenter") String mediacenter,
+			@Context HttpServletRequest req) {
 
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	Mediacenter group = MediacenterDao.create(repoDao,mediacenter,profile).asMediacenter();
-	    	return Response.status(Response.Status.OK).entity(group).build();
+		try {
 
-    	} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			MediacenterDao mz = MediacenterDao.get(repoDao, mediacenter);
+			if(!mz.isAvailableForCurrentUser()) {
+				throw DAOException.mapping(new InsufficientPermissionException("Mediacenter not available for user"));
+			}
+			return Response.status(Response.Status.OK).entity(mz.asMediacenter()).build();
 
-    }
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
+	@POST
+	@Path("/mediacenter/{repository}/{mediacenter}")
+
+	@Operation(summary = "create new mediacenter in repository.", description = "admin rights are required.")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Mediacenter.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+			})
+
+	public Response createMediacenter(
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = "mediacenter name",required=true) @PathParam("mediacenter") String mediacenter,
+			Mediacenter.Profile profile,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			Mediacenter group = MediacenterDao.create(repoDao,mediacenter,profile).asMediacenter();
+			return Response.status(Response.Status.OK).entity(group).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
 	@PUT
 	@Path("/mediacenter/{repository}/{mediacenter}")
 
@@ -185,8 +224,8 @@ public class MediacenterApi {
 		}
 
 	}
-	
-	
+
+
 	@POST
 	@Path("/mediacenter/{repository}/{mediacenter}/licenses")
 
@@ -205,18 +244,18 @@ public class MediacenterApi {
 
 	public Response getMediacenterLicensedNodes(
 			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-		    @Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue="10")) @QueryParam("maxItems") Integer maxItems,
-		    @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
-		    @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-		    @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-		    @Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-")) ) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue="10")) @QueryParam("maxItems") Integer maxItems,
+			@Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
+			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-")) ) @QueryParam("propertyFilter") List<String> propertyFilter,
 			@Parameter(description = "authorityName of the mediacenter that licenses nodes",required=true) @PathParam("mediacenter") String mediacenter,
 			@Parameter(description = "searchword of licensed nodes",required=true) @QueryParam("searchword") String searchword,
 			@Parameter(description = "search parameters", required = true) SearchParameters parameters,
 			@Context HttpServletRequest req) {
 
 		try {
-			
+
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			Filter filter= new Filter(propertyFilter);
 			SearchToken searchToken=new SearchToken();
@@ -271,20 +310,20 @@ public class MediacenterApi {
 				}
 			}
 
-	    	Pagination pagination = new Pagination();
-	    	pagination.setFrom(search.getSkip());
-	    	pagination.setCount(data.size());
-	    	pagination.setTotal(search.getCount());
-	    	
-	    	
-	    	SearchResult response = new SearchResult();
-	    	response.setNodes(data);
-	    	response.setPagination(pagination);	    	
-	    	response.setFacets(search.getFacets());
-	    	return Response.status(Response.Status.OK).entity(response).build();
+			Pagination pagination = new Pagination();
+			pagination.setFrom(search.getSkip());
+			pagination.setCount(data.size());
+			pagination.setTotal(search.getCount());
+
+
+			SearchResult response = new SearchResult();
+			response.setNodes(data);
+			response.setPagination(pagination);
+			response.setFacets(search.getFacets());
+			return Response.status(Response.Status.OK).entity(response).build();
 			//MediacenterDao dao = MediacenterDao.get(repoDao, mediacenter);
-	    	//List<Node> result = dao.getLicensedNodes();
-	    	//return Response.status(Response.Status.OK).entity(result).build();
+			//List<Node> result = dao.getLicensedNodes();
+			//return Response.status(Response.Status.OK).entity(result).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}
@@ -409,7 +448,7 @@ public class MediacenterApi {
 			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
 			@Parameter(description = "authorityName of the mediacenter that should manage the group",required=true) @PathParam("mediacenter") String authorityName,
 			@Context HttpServletRequest req
-			){
+	){
 		try {
 			RepositoryDao repoDao  = RepositoryDao.getRepository(repository);
 			MediacenterDao.delete(repoDao,authorityName);
@@ -454,7 +493,7 @@ public class MediacenterApi {
 		}
 
 	}
-	
+
 	@POST
 	@Path("/import/mediacenters")
 	@Consumes({ "multipart/form-data" })
@@ -467,7 +506,7 @@ public class MediacenterApi {
 			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response importMediacenters(@Parameter(description = "Mediacenters csv to import", schema = @Schema(type = "string", format = "binary"), required = true) @FormDataParam("mediacenters") InputStream is,
-			@Context HttpServletRequest req) {
+									   @Context HttpServletRequest req) {
 		try {
 
 			org.edu_sharing.service.authority.AuthorityService eduAuthorityService = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
@@ -497,7 +536,7 @@ public class MediacenterApi {
 			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response importOrganisations(@Parameter(description = "Organisations csv to import" ,schema = @Schema(type = "string", format = "binary"), required = true) @FormDataParam("organisations") InputStream is,
-									   @Context HttpServletRequest req) {
+										@Context HttpServletRequest req) {
 		try {
 
 			org.edu_sharing.service.authority.AuthorityService eduAuthorityService = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
@@ -525,8 +564,8 @@ public class MediacenterApi {
 			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response importMcOrgConnections(@Parameter(description = "Mediacenter Organisation Connection csv to import", schema = @Schema(type = "string", format = "binary"), required = true) @FormDataParam("mcOrgs") InputStream is,
-										@Parameter(description = "removeSchoolsFromMC" , schema = @Schema(defaultValue="false")) @QueryParam("removeSchoolsFromMC") boolean removeSchoolsFromMC,
-										@Context HttpServletRequest req) {
+										   @Parameter(description = "removeSchoolsFromMC" , schema = @Schema(defaultValue="false")) @QueryParam("removeSchoolsFromMC") boolean removeSchoolsFromMC,
+										   @Context HttpServletRequest req) {
 		try {
 
 			org.edu_sharing.service.authority.AuthorityService eduAuthorityService = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());

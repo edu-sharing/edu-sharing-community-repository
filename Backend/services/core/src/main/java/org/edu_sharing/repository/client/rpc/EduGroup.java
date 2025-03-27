@@ -52,15 +52,7 @@ public class EduGroup implements Serializable {
 	public void setFolderId(String folderId) {
 		this.folderId = folderId;
 	}
-	
-	public String getFolderPath() {
-		return folderPath;
-	}
-	
-	public void setFolderPath(String folderPath) {
-		this.folderPath = folderPath;
-	}
-	
+
 	public String getGroupDisplayName() {
 		return groupDisplayName;
 	}

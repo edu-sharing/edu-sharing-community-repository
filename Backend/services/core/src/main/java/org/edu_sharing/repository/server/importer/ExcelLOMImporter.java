@@ -1,5 +1,15 @@
 package org.edu_sharing.repository.server.importer;
 
+import java.io.InputStream;
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+import java.util.stream.Stream;
+import java.util.concurrent.atomic.AtomicReference;
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
+
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
@@ -16,10 +26,13 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.MimeTypes;
 import org.edu_sharing.repository.client.tools.StringTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 import org.edu_sharing.service.clientutils.ClientUtilsService;
 import org.edu_sharing.service.clientutils.WebsiteInformation;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchToken;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -295,40 +308,46 @@ public class ExcelLOMImporter {
 					: collectionsForNode.stream().skip(collectionsForNode.size() -1).findFirst().get();
 			logger.info("collections for node " + String.join("/",collectionsForNode) +" p:"+parentCollection +" c:"+targetCollection);
 
-			SearchParameters searchParameters = new SearchParameters();
-			searchParameters.setLanguage(SearchService.LANGUAGE_LUCENE);
-			searchParameters.setQuery("ASPECT:\"ccm:collection\" AND @cm\\:name:\"" + targetCollection + "\"");
-			searchParameters.setSkipCount(0);
-			searchParameters.setLimit(10);
-			searchParameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+			SearchToken searchToken = new SearchToken();
+			searchToken.setFrom(0);
+			searchToken.setMaxResult(Integer.MAX_VALUE);
+			searchToken.setElasticQuery(
+					QueryBuilders.bool()
+							.must(m -> m.term(t ->  t.field("aspects").value("ccm:collection")))
+							.must(m -> m.wildcard(w -> w.field("properties.cm:name").wildcard(targetCollection)))
+							.build());
 
-			ResultSet rs = serviceRegistry.getSearchService().query(searchParameters);
+			SearchResultNodeRef search = SearchServiceFactory.getLocalService().search(searchToken);
+
 
 			//check if there is a parent
-			NodeRef pathMatchesNodeRef = null;
-			LinkedHashSet<String> pathsMatch = new LinkedHashSet<>();
-			for(NodeRef targetCollectionNodeRef : rs.getNodeRefs()){
+			AtomicReference<NodeRef> pathMatchesNodeRef = new AtomicReference();
 
-				Path path = serviceRegistry.getNodeService().getPath(targetCollectionNodeRef);
+			LinkedHashSet<String> pathsMatch = new LinkedHashSet<>();
+
+			search.getData().stream().forEach(n -> {
+				NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, n.getNodeId());
+				Path path = serviceRegistry.getNodeService().getPath(nodeRef);
 				String displayPath = path.toDisplayPath(serviceRegistry.getNodeService(),serviceRegistry.getPermissionService());
-				String targetCollectionName = (String)nodeService.getProperty(targetCollectionNodeRef,ContentModel.PROP_NAME);
+				String targetCollectionName = (String)nodeService.getProperty(nodeRef,ContentModel.PROP_NAME);
 				displayPath += "/"+targetCollectionName;
 				logger.info("checking path for parent collection;\"" + parentCollection + "\";path:"+displayPath);
 				if(displayPath.contains(parentCollection) && displayPath.endsWith(targetCollection)){
 					pathsMatch.add(displayPath);
-					pathMatchesNodeRef = targetCollectionNodeRef;
+					pathMatchesNodeRef.set(nodeRef);
 				}
-			}
+			});
+
 
 			if(pathsMatch.size() > 1){
 				logger.error("more than one path matches;"+nodeName +";"+newNode.getChildRef()+";" + String.join(";",pathsMatch));
 			}else if(pathsMatch.isEmpty()){
 				logger.error("no path matches;"+nodeName +";"+newNode.getChildRef());
 			}else{
-				logger.info("adding;" + nodeName +";"+newNode.getChildRef() +";TO;" + pathsMatch.iterator().next());
+				logger.info("adding;" + nodeName +";"+newNode.getChildRef() +";TO;" + pathsMatch.iterator().next() +"/"+nodeService.getProperty(pathMatchesNodeRef.get(),ContentModel.PROP_NAME));
 				try {
 					if(addToCollection) {
-						CollectionServiceFactory.getLocalService().addToCollection(pathMatchesNodeRef.getId(), newNode.getChildRef().getId(), null, false);
+						CollectionServiceFactory.getLocalService().addToCollection(pathMatchesNodeRef.get().getId(), newNode.getChildRef().getId(), null, false);
 					}
 				} catch (Throwable throwable) {
 
@@ -336,7 +355,7 @@ public class ExcelLOMImporter {
 				}
 			}
 		}else{
-			this.logger.info("addToCollections expects minimum one collection to be defined in excelsheet;" + wwwUrl);
+			this.logger.warn("addToCollections expects two collection to be defined in excelsheet;" + wwwUrl);
 		}
 	}
 

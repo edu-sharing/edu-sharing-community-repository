@@ -5,6 +5,7 @@ import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.search.model.*;
 
 import java.io.IOException;
@@ -13,7 +14,7 @@ import java.util.*;
 public class SearchServiceAdapter implements SearchService {
 
     @Override
-	public List<String> getAllMediacenters(boolean membershipsOnly) throws Exception {
+	public List<NodeRef> getAllMediacentersNodeRef(boolean membershipsOnly) {
         return null;
     }
 	@Override
@@ -53,7 +54,7 @@ public class SearchServiceAdapter implements SearchService {
 	}
 
 	@Override
-	public SearchResultNodeRef getRelevantNodes(int skipCount, int maxItems) throws Throwable {
+	public SearchResultNodeRef getRelevantNodes(int skipCount, int maxItems) {
 		return null;
 	}
 
@@ -103,12 +104,32 @@ public class SearchServiceAdapter implements SearchService {
 	}
 
 	@Override
-	public Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) throws IOException {
+	public Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) {
 		return new HashSet<>();
 	}
 
 	@Override
 	public SearchResultNodeRef getMetadata(List<String> nodeIds) throws IOException {
+		return null;
+	}
+
+	@Override
+	public List<NodeRef> getAllPinnedCollections() throws IOException {
+		return List.of();
+	}
+
+	@Override
+	public List<NodeRef> getReferenceObjects(String nodeId) throws IOException {
+		return List.of();
+	}
+
+	@Override
+	public SearchResultNodeRef searchByProperty(SearchToken searchToken, CombineMode combineMode, List<String> properties, List<String> value, List<String> comparator) throws IOException {
+		return null;
+	}
+
+	@Override
+	public SearchResultNodeRef searchByDisplayPath(String path, String index) throws IOException {
 		return null;
 	}
 }

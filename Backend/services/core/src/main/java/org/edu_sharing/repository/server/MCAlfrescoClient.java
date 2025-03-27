@@ -57,47 +57,6 @@ public interface MCAlfrescoClient {
 	public Map<String, Map<String, Object>> getBaskets() throws Throwable;
 	
 	/**
-	 * search for nodes with a lucene string, filtered by type 
-	 * 
-	 * @param luceneString a lucene String
-	 * @param type the given type
-	 * @return nested Map with nodeId's and nodes
-	 * @throws Exception
-	 */
-	public Map<String,Map<String,Object>> search(String luceneString, String type) throws Exception;
-	
-	/**
-	 * search for nodes with a lucene string
-	 * 
-	 * @param luceneString a lucene String
-	 * @return nested Map with nodeId's and propeties
-	 * @throws Throwable
-	 */
-	public Map<String, Map<String, Object>> search(String luceneString) throws Throwable;
-	
-	/**
-	 * 
-	 * search for nodes with a lucene string
-	 * 
-	 * @param luceneString
-	 * @param eduGroupContext if true only the eduGroups of the current users will be send as authority to check read permissions
-	 * @return
-	 * @throws Throwable
-	 */
-	public Map<String, Map<String, Object>> search(String luceneString, ContextSearchMode mode) throws Throwable;
-	
-	/**
-	 * search for nodeId's with a lucene string
-	 * @param luceneString
-	 * @return Array of nodeId's
-	 * @throws Exception
-	 */
-	public String[] searchNodeIds(String luceneString) throws Exception;
-	
-	public String[] searchNodeIds(String luceneString, int limit) throws Exception;
-
-	
-	/**
 	 * get all children of a given parentId
 	 * 
 	 * @param parentID
@@ -488,20 +447,15 @@ public interface MCAlfrescoClient {
 	public void setUserDefinedPreview(String nodeId, byte[] content, String fileName);
 	
 	public void removeUserDefinedPreview(String nodeId);
-	
-	public SearchResult searchSolr(String query, int startIdx,int nrOfresults, List<String> facettes, int facettesMinCount, int facettesLimit) throws Throwable ;
 
 	public String guessMimetype(String filename);
 	
 	public Map<String, Map<String, Object>> getChildren(String parentID, String[] permissionsOnChild) throws Throwable;
 
 	public void removeGlobalAspectFromGroup(String groupNodeId) throws Exception;
-	
-	public ArrayList<EduGroup> getEduGroups() throws Throwable;
+
 	public User getOwner(String storeId,String storeProtocol,String nodeId);
-	
-	public SearchResult search(String luceneString, String storeProtocol, String storeName, int from, int maxResult) throws Throwable;
-	
+
 	public void removeNode(String storeProtocol, String storeId, String nodeId);
 	
 	public Map<String, Object> getProperties(String storeId, String storeProtocol, String nodeId) throws Throwable;

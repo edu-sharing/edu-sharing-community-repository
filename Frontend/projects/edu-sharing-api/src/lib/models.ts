@@ -1,6 +1,11 @@
 // Reexport API models that are exposed by wrappers.
 
 import { SearchV1Service } from './api/services/search-v-1.service';
+import {
+    GroupProfile,
+    Mediacenter as MediacenterApi,
+    MediacenterProfileExtension,
+} from './api/models';
 
 export {
     About,
@@ -33,7 +38,6 @@ export {
     Config,
     Values as ConfigValues,
     ConfigTutorial,
-    Mediacenter,
     NotificationConfig,
     Node,
     NodeEntries,
@@ -73,7 +77,11 @@ export {
 import { HttpErrorResponse } from '@angular/common/http';
 import { Acl, Group, MdsView, Organization, Person, User } from './api/models';
 import { SuggestionsV1Service } from './api/services/suggestions-v-1.service';
-
+export type Mediacenter = MediacenterApi & {
+    profile: GroupProfile & {
+        mediacenter: MediacenterProfileExtension;
+    };
+};
 export type SuggestionStatus = Parameters<SuggestionsV1Service['updateStatus']>[0]['status'];
 export type MdsViewRelation = MdsView['rel'];
 export type GenericAuthority = Organization | Group | User;
