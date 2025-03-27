@@ -90,8 +90,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SearchServiceElastic extends SearchServiceImpl {
-    public static final String WORKSPACE_INDEX = "workspace_9.1";
-    public static final String AUTHORITIES_INDEX = "authorities_9.1";
+    public static final String WORKSPACE_INDEX = "workspace_10.0";
+    public static final String AUTHORITIES_INDEX = "authorities_10.0";
     static RestClient restClient;
     static ElasticsearchClient client;
     static String rootHomeId;
