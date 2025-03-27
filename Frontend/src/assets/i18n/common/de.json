@@ -263,6 +263,11 @@
     "TOGGLE_ALL": "Alle / Nichts auswählen",
     "CONFIGURE_COLUMNS": "Spalten konfigurieren"
   },
+  "MAPTYPE": {
+    "IMAGES": "Bilder",
+    "USERDATAFOLDER": "Dokumente",
+    "INBOX": "Inbox"
+  },
   "NODE": {
     "cm:name": "Dateiname",
     "cm:title": "Titel",

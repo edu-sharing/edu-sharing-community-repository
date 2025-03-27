@@ -1,19 +1,31 @@
 import { PipeTransform, Pipe } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { Node } from 'ngx-edu-sharing-api';
+import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import { RestHelper } from '../util/rest-helper';
 import { NodeRoot } from '../node-entries/entries-model';
 
 @Pipe({ name: 'nodeTitle' })
 export class NodeTitlePipe implements PipeTransform {
-    transform(node: Node | NodeRoot | 'HOME', args: string[] = null): string {
-        if (!(node as Node).name) {
+    transform(node: Node | NodeRoot | 'HOME', args?: { type: 'name' | 'title' }): string {
+        if (!(node as Node)?.name) {
             if (node === 'HOME') {
                 return this.translate.instant('WORKSPACE.' + node);
             }
             return this.translate.instant('WORKSPACE.' + node);
         }
-        return RestHelper.getTitle(node as Node);
+        const value =
+            args?.type === 'name'
+                ? RestHelper.getName(node as Node)
+                : RestHelper.getTitle(node as Node);
+        if ((node as Node)?.properties?.[RestConstants.CCM_PROP_MAPTYPE]) {
+            return this.translate.instant(
+                'MAPTYPE.' + (node as Node)?.properties?.[RestConstants.CCM_PROP_MAPTYPE][0],
+                {
+                    fallback: value,
+                },
+            );
+        }
+        return value;
     }
     constructor(private translate: TranslateService) {}
 }
