@@ -58,7 +58,7 @@ public abstract class TrackingServiceDefault implements TrackingService{
         if(qname == null){
             return false;
         }
-        String value= nodeService.getProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),qname);
+        String value= AuthenticationUtil.runAsSystem(()-> nodeService.getProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),qname));
         if(value==null)
             value="0";
 
