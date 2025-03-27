@@ -22,6 +22,7 @@ import { MatRipple } from '@angular/material/core';
 import { filter, first, map } from 'rxjs/operators';
 import { MdsValue } from 'ngx-edu-sharing-api';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
+import { MdsEditInterface } from '../../mds-editor/mds-editor-single-widget/mds-editor-single-widget.component';
 
 @Component({
     selector: 'es-mds-widget',
@@ -48,7 +49,12 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
     readonly valueType = ValueType.String;
 
     @Input() widget: Widget;
-    @Input() view: MdsEditorViewComponent;
+    @Input() showCaption = true;
+    /**
+     * allow inline editing
+     */
+    @Input() inlineEditing: 'auto' | 'always' = 'auto';
+    @Input() view: MdsEditInterface;
 
     @ViewChild('editWrapper') editWrapper: ElementRef;
     @ViewChild(MatRipple) matRipple: MatRipple;
@@ -215,8 +221,10 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
         });
     }
 
-    async finishEdit(instance: MdsEditorWidgetBase) {
-        await this.mdsEditorInstance.saveWidgetValue(instance.widget);
+    async finishEdit(instance: MdsEditorWidgetBase, store = false) {
+        if (store) {
+            await this.mdsEditorInstance.saveWidgetValue(instance.widget);
+        }
         this.temporaryValue = instance.widget.getValue();
         this.value = this.getNodeValue();
         this.editWrapper.nativeElement.children[0].innerHTML = null;
@@ -224,6 +232,9 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
     }
 
     isEditable() {
+        if (this.inlineEditing === 'always') {
+            return this.supportsInlineEditing();
+        }
         const nodes = this.mdsEditorInstance.nodes$.value;
         return (
             this.mdsEditorInstance.editorMode === 'inline' &&
@@ -297,5 +308,10 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
         params.repo = this.mdsEditorInstance.nodes$.value?.[0].ref.repo;
         params.filters = JSON.stringify(mds);
         return params;
+    }
+
+    startEdit(event: MouseEvent) {
+        event.stopPropagation();
+        this.view.injectEditField(this, this.editWrapper.nativeElement.children[0]);
     }
 }

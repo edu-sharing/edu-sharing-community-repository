@@ -50,6 +50,7 @@ import { MdsWidgetComponent } from './mds-viewer/widget/mds-widget.component';
 import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
 import { MdsEditorWidgetChildobjectsComponent } from './mds-editor/widgets/mds-editor-widget-childobjects/mds-editor-widget-childobjects.component';
 import { LicenseAiPipe } from './mds-editor/widgets/mds-editor-widget-license/license-details/license-ai.pipe';
+import { MdsEditorSingleWidgetComponent } from './mds-editor/mds-editor-single-widget/mds-editor-single-widget.component';
 
 @NgModule({
     declarations: [
@@ -90,6 +91,7 @@ import { LicenseAiPipe } from './mds-editor/widgets/mds-editor-widget-license/li
         MdsEditorWidgetVCardComponent,
         MdsEditorWidgetVersionComponent,
         MdsEditorWrapperComponent,
+        MdsEditorSingleWidgetComponent,
         MdsViewerComponent,
         MdsWidgetComponent,
         RegisterFormFieldDirective,
@@ -105,6 +107,7 @@ import { LicenseAiPipe } from './mds-editor/widgets/mds-editor-widget-license/li
         MdsEditorWrapperComponent,
         MdsViewerComponent,
         MdsEditorCoreComponent,
+        MdsEditorSingleWidgetComponent,
         SearchFieldFacetsComponent,
     ],
 })

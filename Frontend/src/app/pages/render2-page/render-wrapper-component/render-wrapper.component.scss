@@ -11,6 +11,7 @@ rs-root {
     padding: 0;
     ::ng-deep {
         .module {
+            width: 100%;
             border: none;
             padding: 0;
             overflow-y: hidden;
@@ -27,6 +28,10 @@ rs-root {
                 width: 70%;
                 height: auto;
                 aspect-ratio: 16 / 9;
+            }
+            &.module-VIDEO,
+            &.module-AUDIO {
+                width: 70%;
             }
             &.module-IMAGE,
             &.module-DDB {

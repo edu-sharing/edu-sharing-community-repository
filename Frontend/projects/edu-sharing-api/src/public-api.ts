@@ -49,6 +49,7 @@ export {
     IamV1Service,
     OrganizationV1Service,
     NodeV1Service as NodeServiceUnwrapped,
+    CollectionV1Service as CollectionServiceUnwrapped,
     SuggestionsV1Service,
     LtiPlatformV13Service,
     RatingV1Service,

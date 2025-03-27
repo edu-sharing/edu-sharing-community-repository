@@ -5,6 +5,7 @@ import { MdsEditorWidgetCore } from '../mds-editor-widget-core.directive';
 import { SuggestionResponseDto, SuggestionStatus } from 'ngx-edu-sharing-api';
 import { DisplayValue } from './DisplayValues';
 import { AuthorityNamePipe } from '../../../../shared/pipes/authority-name.pipe';
+import { Event } from 'typedoc';
 
 export enum ValueType {
     String,
