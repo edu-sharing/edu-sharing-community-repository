@@ -46,6 +46,7 @@ import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
 
+@Deprecated
 public class RenderingProxy extends HttpServlet {
 
 
