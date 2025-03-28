@@ -101,7 +101,10 @@
       "ORG_ADMINISTRATORS": "Administrationsgruppe",
       "CLASS": "Klasse",
       "WORKING_GROUP": "Arbeitsgruppe",
-      "LESSON": "Unterricht"
+      "LESSON": "Unterricht",
+      "SCHOOL_NATIONAL": "Staatliche Schule",
+      "SCHOOL_MUNICIPAL": "Kommunale Schule",
+      "SCHOOL_PRIVATE": "Private Schule"
     },
     "SCOPE_TYPE": {
       "null": "Lokal / Normale Sichtbarkeit",

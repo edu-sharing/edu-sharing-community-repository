@@ -11,7 +11,14 @@ import java.util.List;
 import java.util.Map;
 
 public interface PermissionService {
-	public static final String[] GUEST_PERMISSIONS = new String[]{ org.alfresco.service.cmr.security.PermissionService.READ,CCConstants.PERMISSION_READ_PREVIEW,CCConstants.PERMISSION_READ_ALL, CCConstants.PERMISSION_DOWNLOAD_CONTENT, CCConstants.PERMISSION_FEEDBACK};
+	public static final String[] GUEST_PERMISSIONS = new String[]{
+			org.alfresco.service.cmr.security.PermissionService.READ,
+			CCConstants.PERMISSION_READ_PREVIEW,
+			CCConstants.PERMISSION_READ_ALL,
+			CCConstants.PERMISSION_DOWNLOAD_CONTENT,
+			CCConstants.PERMISSION_EMBED,
+			CCConstants.PERMISSION_FEEDBACK
+	};
 
 
 	void updateTimedPermissions();

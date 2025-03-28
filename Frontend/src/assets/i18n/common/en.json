@@ -243,6 +243,11 @@
     "nextPageLabel": "Next page",
     "previousPageLabel": "Previous page"
   },
+  "MAPTYPE": {
+    "IMAGES": "Images",
+    "USERDATAFOLDER": "Documents",
+    "INBOX": "Inbox"
+  },
   "NODE": {
     "cm:name": "filename",
     "cm:title": "title",

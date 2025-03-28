@@ -39,6 +39,8 @@ public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationPara
 
 	@JobFieldDescription(description = "Single node to migrate")
 	private String nodeId;
+	@JobFieldDescription(description = "Folder to migrate (if unset, a query for all relevant elements is processed)")
+	private String startFolder;
 	@JobFieldDescription(description = "nodes to explicitly exclude")
 	private List<String> ignoredNodeIds;
 	private NodeService nodeService;
@@ -65,7 +67,11 @@ public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationPara
 		runner.setTask(this::migrate);
 		runner.setRunAsSystem(true);
 		runner.setThreaded(false);
-		runner.setElastic("{\"bool\":{\"must\":[{\"exists\":{\"field\":\"properties.ccm:published_handle_id\"}}],\"must_not\":[{\"exists\":{\"field\":\"properties.ccm:published_original\"}},{\"term\":{\"aspects\":\"ccm:collection_io_reference\"}}]}}");
+		if(StringUtils.isBlank(startFolder)) {
+            runner.setElastic("{\"bool\":{\"minimum_should_match\":1,\"should\":[{\"exists\":{\"field\":\"properties.ccm:published_handle_id\"}},{\"exists\":{\"field\":\"properties.ccm:published_doi_id\"}}],\"must_not\":[{\"exists\":{\"field\":\"properties.ccm:published_original\"}},{\"term\":{\"aspects\":\"ccm:collection_io_reference\"}}]}}");
+		} else {
+			runner.setStartFolder(startFolder);
+		}
 		runner.setKeepModifiedDate(false);
 		runner.setTransaction(NodeRunner.TransactionMode.None);
 		int count=runner.run();
@@ -78,7 +84,8 @@ public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationPara
 			return;
 		}
 		Serializable handleId = NodeServiceHelper.getPropertyNative(ref, CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID);
-		if(handleId == null) {
+		Serializable doiId = NodeServiceHelper.getPropertyNative(ref, CCConstants.CCM_PROP_PUBLISHED_DOI_ID);
+		if(handleId == null && doiId == null) {
 			logger.warn("Can not migrate node " + ref + " since it has no handle id");
 			return;
 		}
@@ -121,9 +128,14 @@ public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationPara
 				NodeServiceHelper.setProperty(copy, CCConstants.CM_PROP_C_CREATED, NodeServiceHelper.getPropertyNative(ref, CCConstants.CM_PROP_C_CREATED), true);
 				NodeServiceHelper.setProperty(copy, CCConstants.CM_PROP_C_MODIFIED, NodeServiceHelper.getPropertyNative(ref, CCConstants.CM_PROP_C_MODIFIED), true);
 				// now, fake the current history of copies to the directly published element so its handle id gets the update
-				logger.info("Update old handle " + handleId + " from " + ref + " to " + copy);
-				nodeService.createHandle(copy, Collections.singletonList(ref.getId()), handleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.handle), HandleMode.update);
-
+				if(handleId != null) {
+					logger.info("Update old handle " + handleId + " from " + ref + " to " + copy);
+					nodeService.createHandle(copy, Collections.singletonList(ref.getId()), handleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.handle), HandleMode.update);
+				}
+				if(doiId != null) {
+					logger.info("Update old handle " + doiId + " from " + ref + " to " + copy);
+					nodeService.createHandle(copy, Collections.singletonList(ref.getId()), handleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.doi), HandleMode.update);
+				}
 				// copy the old publish date
 				if (finalDate != null) {
 					NodeServiceHelper.setProperty(copy, CCConstants.CCM_PROP_IO_PUBLISHED_DATE, finalDate, true);

@@ -485,7 +485,10 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
             return this.downloadUrl
                 ? true
                 : this._node.downloadUrl != null &&
-                      (!this._node.properties[RestConstants.CCM_PROP_IO_WWWURL] ||
+                      (!(
+                          this._node.properties[RestConstants.CCM_PROP_IO_WWWURL] &&
+                          !this._node.properties[RestConstants.VIRTUAL_PROP_LINK_DOWNLOAD_ALLOWED]
+                      ) ||
                           !this._fromHomeRepository);
         };
         download.group = DefaultGroups.View;

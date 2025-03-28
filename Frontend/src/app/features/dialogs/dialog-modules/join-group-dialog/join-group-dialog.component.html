@@ -9,7 +9,7 @@
         <input matInput type="search" formControlName="search" autofocus #searchControl />
       </mat-form-field>
     </form>
-    <div class="list">
+    <div class="list" *ngIf="!(!groupsLoading && !groups?.length)">
       <button
         *ngFor="let g of filteredGroups"
         mat-ripple

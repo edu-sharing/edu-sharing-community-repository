@@ -156,9 +156,14 @@
   >
     <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
     <ng-container *ngIf="['title', 'cm:title', 'cclom:title'].includes(item.name)">
-      {{ $any(getNode()).title || $any(getNode()).name }}
+      {{ $any(getNode()) | nodeTitle }}
     </ng-container>
-    <ng-container *ngIf="!['title', 'cm:title', 'cclom:title'].includes(item.name)">
+    <ng-container *ngIf="['name', 'cm:name'].includes(item.name)">
+      {{ $any(getNode()) | nodeTitle : { type: 'name' } }}
+    </ng-container>
+    <ng-container
+      *ngIf="!['name', 'cm:name', 'title', 'cm:title', 'cclom:title'].includes(item.name)"
+    >
       <ng-container
         *ngIf="DATE_FIELDS.indexOf(item.name) === -1 && VCARD_FIELDS.indexOf(item.name) === -1"
       >

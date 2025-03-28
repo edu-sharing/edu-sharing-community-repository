@@ -2,6 +2,7 @@ import {
     ComponentFactoryResolver,
     ComponentRef,
     Injectable,
+    SimpleChange,
     ViewContainerRef,
 } from '@angular/core';
 import { NetworkService, Node } from 'ngx-edu-sharing-api';
@@ -124,7 +125,9 @@ export class RenderHelperService {
                     data,
                     { delay: 250 },
                 );
-                entriesComponentRef.instance.ngOnChanges();
+                entriesComponentRef.instance.ngOnChanges({
+                    columns: new SimpleChange(undefined, data.columns, true),
+                });
             },
             (error) => {
                 removeCollectionsContainer();
