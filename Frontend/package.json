@@ -4,7 +4,7 @@
   "license": "GPL-3.0-or-later",
   "angular-cli": {},
   "scripts": {
-    "prestart": "npm run build:edu-sharing-api:dev  && npm run build:edu-sharing-ui",
+    "prestart": "npm run build:edu-sharing-api:dev && npm run build:edu-sharing-ui && npm run build:b-api",
     "start": "ng serve",
     "start-public": "npm run prestart && ng serve --host 0.0.0.0 --disable-host-check",
     "serve-dist": "node scripts/server.js",

@@ -302,7 +302,7 @@ export class AdminMediacenterComponent {
                         () => {
                             this.toast.closeProgressSpinner();
                             this.toast.toast('ADMIN.MEDIACENTER.CREATED', { name: id });
-                            this.setMediacenter(null);
+                            void this.setMediacenter(null);
                             this.refresh();
                         },
                     );
@@ -383,7 +383,7 @@ export class AdminMediacenterComponent {
                             this.toast.toast('ADMIN.MEDIACENTER.DELETED', {
                                 name: this.currentMediacenterCopy.profile.displayName,
                             });
-                            this.setMediacenter(null);
+                            void this.setMediacenter(null);
                             this.refresh();
                         },
                         (error: any) => {

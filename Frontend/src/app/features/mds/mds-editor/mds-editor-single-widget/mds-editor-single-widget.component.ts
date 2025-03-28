@@ -120,7 +120,7 @@ export class MdsEditorSingleWidgetComponent implements OnChanges, OnDestroy, Mds
             console.log('change', v);
             this.ngModelChange.emit(v)
         });*/
-        this.mdsEditorInstance.fetchDisplayValues(this.widget);
+        void this.mdsEditorInstance.fetchDisplayValues(this.widget);
         // timeout to wait for view inflation and set the focus
         await this.applicationRef.tick();
         setTimeout(() => {
@@ -128,7 +128,7 @@ export class MdsEditorSingleWidgetComponent implements OnChanges, OnDestroy, Mds
             injected.instance.onBlur.pipe(first()).subscribe(() => {
                 this.ngModelChange.emit(injected.instance.widget.getValue());
                 this.instanceExists = false;
-                mdsWidgetComponent.finishEdit(injected.instance, false);
+                void mdsWidgetComponent.finishEdit(injected.instance, false);
             });
         });
         return injected;

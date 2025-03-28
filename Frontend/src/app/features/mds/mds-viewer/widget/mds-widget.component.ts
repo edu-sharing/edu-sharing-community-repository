@@ -312,6 +312,6 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
 
     startEdit(event: MouseEvent) {
         event.stopPropagation();
-        this.view.injectEditField(this, this.editWrapper.nativeElement.children[0]);
+        void this.view.injectEditField(this, this.editWrapper.nativeElement.children[0]);
     }
 }
