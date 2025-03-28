@@ -54,6 +54,7 @@ public class Node implements Serializable {
 	private String iconURL;
 	private License license;
 	private boolean isDirectory;
+
 	private Collection collection;
 	private Person owner;
 	private int commentCount;
@@ -88,7 +89,7 @@ public class Node implements Serializable {
 	}
 
 	
-	@Schema(required = true, description = "")
+	@Schema(required = false, description = "")
 	@JsonProperty("collection")
 	public Collection getCollection() {
 		return collection;
@@ -252,7 +253,7 @@ public class Node implements Serializable {
 		this.downloadUrl = downloadUrl;
 	}
 	
-	@Schema(required = true, description = "")
+	@Schema(required = false, description = "")
 	@JsonProperty("downloadUrl")
 	public String getDownloadUrl() {
 		return downloadUrl;
