@@ -2284,5 +2284,14 @@
         </property>
       </properties>
     </aspect>
+
+    <aspect name="ccm:bapi">
+      <title>represents a configuration node for b-api service</title>
+      <properties>
+        <property name="ccm:bapi_config">
+          <type>d:text</type>
+        </property>
+      </properties>
+    </aspect>
   </aspects>
 </model>
