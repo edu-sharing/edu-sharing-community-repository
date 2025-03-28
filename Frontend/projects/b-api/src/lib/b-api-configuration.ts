@@ -7,7 +7,6 @@ export const B_API_CONFIG = new InjectionToken<BApiConfiguration>('B_API_CONFIG'
     providedIn: 'root',
 })
 export class BApiConfiguration extends ApiConfiguration {
-    token: string = '';
     static create(params: BApiConfigurationParams = {}): BApiConfiguration {
         return { ...new BApiConfiguration(), ...params };
     }

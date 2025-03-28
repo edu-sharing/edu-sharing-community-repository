@@ -3,6 +3,7 @@
 
 module.exports = function (config) {
     config.set({
+        failOnEmptyTestSuite: false,
         basePath: '',
         frameworks: ['jasmine', '@angular-devkit/build-angular'],
         plugins: [
