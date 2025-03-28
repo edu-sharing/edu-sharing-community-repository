@@ -17,6 +17,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +33,14 @@ public class BApiProxyService {
     private String guestUserApiKey;
 
     private final GuestService guestService;
+
+    private final List<String> ignoreHeader = List.of(
+            HttpHeaders.AUTHORIZATION,
+            HttpHeaders.COOKIE,
+            "JSESSIONID",
+            "accept-encoding",
+            "host"
+    );
 
     @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_BAPI)
     public Response forwardRequest(String path, String body, HttpHeaders headers, HttpMethod method) {
@@ -53,7 +62,7 @@ public class BApiProxyService {
 
         requestBuilder.method(method.name(), requestBody);
         headers.getRequestHeaders().forEach((key, values) -> {
-            if (key.equalsIgnoreCase(HttpHeaders.AUTHORIZATION) || key.equalsIgnoreCase(HttpHeaders.COOKIE) || key.equalsIgnoreCase("JSESSIONID")) {
+            if (ignoreHeader.stream().allMatch(key::equalsIgnoreCase)) {
                 return;
             }
             values.forEach(value -> requestBuilder.header(key, value));
