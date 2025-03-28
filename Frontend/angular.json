@@ -37,6 +37,7 @@
                 "glob": "**/*",
                 "input": "node_modules/tinymce-i18n/langs5",
                 "output": "/tinymce/langs/"
+
               },
               { "glob": "**/*", "input": "node_modules/ng2-pdfjs-viewer/pdfjs", "output": "/assets/pdfjs" },
               { "glob": "**/*", "input": "node_modules/ngx-rendering-service-lib/assets", "output": "/" }
@@ -215,6 +216,51 @@
         }
       }
     },
+    "b-api": {
+      "projectType": "library",
+      "root": "projects/b-api",
+      "sourceRoot": "projects/b-api/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/b-api/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/b-api/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/b-api/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "projects/b-api/tsconfig.spec.json",
+            "karmaConfig": "projects/b-api/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/b-api/**/*.ts",
+              "projects/b-api/**/*.html"
+            ],
+            "cache": true
+          }
+        }
+      }
+    },
+
     "embed": {
       "projectType": "application",
       "schematics": {
