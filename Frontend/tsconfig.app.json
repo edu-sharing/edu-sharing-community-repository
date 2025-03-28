@@ -7,7 +7,7 @@
         "dist/edu-sharing-api/edu-sharing-api",
         "dist/edu-sharing-api"
       ],
-      "ngx-b-api": [
+      "ngx-edu-sharing-b-api": [
         "dist/b-api/b-api",
         "dist/b-api"
       ],
