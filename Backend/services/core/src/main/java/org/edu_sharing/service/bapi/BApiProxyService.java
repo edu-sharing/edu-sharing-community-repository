@@ -2,11 +2,14 @@ package org.edu_sharing.service.bapi;
 
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
+import lombok.RequiredArgsConstructor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.commons.lang.StringUtils;
+import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.permission.annotation.Permission;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,16 +19,25 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 
 @Service
+@RequiredArgsConstructor
 public class BApiProxyService {
 
     @Value("${repository.bapi.uri:}")
     private String bapiUri;
 
-    @Value("${repository.bapi.apiKey:}")
-    private String apiKey;
+    @Value("${repository.bapi.authUserApiKey:}")
+    private String authUserApiKey;
 
-    @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_BAPI, requiresUser = true)
+    @Value("${repository.bapi.guestUserApiKey:}")
+    private String guestUserApiKey;
+
+    private final GuestService guestService;
+
+    @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_BAPI)
     public Response forwardRequest(String path, String body, HttpHeaders headers, HttpMethod method) {
+        String apiKey = guestService.isGuestUser(AuthenticationUtil.getFullyAuthenticatedUser()) ?
+                guestUserApiKey : authUserApiKey;
+
         if (StringUtils.isBlank(bapiUri) || StringUtils.isBlank(apiKey)) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
