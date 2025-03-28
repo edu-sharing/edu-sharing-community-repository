@@ -13,6 +13,7 @@
     "generate-api:generate-code": "ng-openapi-gen --input build/openapi.json --output src/lib/api",
     "generate-api:prettify-code": "prettier -w 'src/lib/api/**/*.ts' --end-of-line auto",
     "generate-api": "npm run generate-api:generate-code && npm run generate-api:prettify-code",
+    "update": "npm i && npm run generate-api",
     "fetch-api": "curl -L -o build/openapi.json https://b-api.staging.openeduhub.net/v3/api-docs/api",
     "publish": "ng build && cd ../../dist/b-api && npm publish"
   },
