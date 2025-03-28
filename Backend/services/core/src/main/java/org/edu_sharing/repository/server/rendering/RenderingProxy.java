@@ -92,6 +92,8 @@ public class RenderingProxy extends HttpServlet {
 		// will throw if the usage is invalid
 		Usage usage = validateUsage(req, nodeId, parentId, usernameDecrypted);
 
+		Context.getCurrentInstance().addSingleUseNode(nodeId);
+
 		try {
 			updateUserRemoteRoles(req);
 
@@ -371,6 +373,7 @@ public class RenderingProxy extends HttpServlet {
 		} catch (HttpException e) {
 			throw new RenderingException(e);
 		} catch (Throwable t) {
+			logger.error(t.getMessage(),t);
 			throw new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t.getMessage(),
 					RenderingException.I18N.unknown, t);
 		}
