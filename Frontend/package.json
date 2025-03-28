@@ -13,7 +13,7 @@
     "build:b-api": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build b-api",
     "build:edu-sharing-api:dev": "(cd projects/edu-sharing-api && npm run update-if-needed) && node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build edu-sharing-api --configuration development",
     "publish:edu-sharing-api": "npm run build:edu-sharing-api && cd dist/edu-sharing-api && npm publish",
-    "prebuild": "npm run build:edu-sharing-api && npm run build:edu-sharing-ui",
+    "prebuild": "npm run build:edu-sharing-api && npm run build:edu-sharing-ui && npm run build:b-api",
     "build": "node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build --configuration production --delete-output-path false --base-href /edu-sharing/",
     "copy-build-to-kubernetes": "kubectl  --kubeconfig=${npm_config_kubeconfig} --namespace=${npm_config_namespace} cp ./dist/. edusharing-repository-service-0:/opt/bitnami/tomcat/temp/0-edu-sharing/",
     "copy-build-to-docker": "docker container cp ./dist/. $(docker ps --filter name=^repository-service --quiet):/opt/bitnami/tomcat/temp/0-edu-sharing/",
