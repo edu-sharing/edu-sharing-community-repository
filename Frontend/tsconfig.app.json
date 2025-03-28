@@ -7,6 +7,10 @@
         "dist/edu-sharing-api/edu-sharing-api",
         "dist/edu-sharing-api"
       ],
+      "ngx-b-api": [
+        "dist/b-api/b-api",
+        "dist/b-api"
+      ],
       "ngx-edu-sharing-ui": [
         "projects/edu-sharing-ui/src/lib"
       ],
