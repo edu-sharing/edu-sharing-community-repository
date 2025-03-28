@@ -395,7 +395,8 @@ config:
         password: ""
         ## @param config.mail.server.smtp.authtype Set mail STMP server authtype
         authtype: ""
-
+  ## @param config.reverseProxy Set the Client IP Address and HTTP Host Information header used by default for the defined reverse proxy
+  reverseProxy: ""
   mongo:
     ## @param config.mongo.enabled Enable mongo DB
     enabled: false

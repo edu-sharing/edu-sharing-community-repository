@@ -88,6 +88,7 @@ data:
   REPOSITORY_SERVICE_HTTP_SERVER_CSP_SCRIPT: {{ .Values.config.http.server.csp.script | quote }}
   REPOSITORY_SERVICE_HTTP_SERVER_CSP_STYLE: {{ .Values.config.http.server.csp.style | quote }}
   REPOSITORY_SERVICE_HTTP_SERVER_SESSION_TIMEOUT: {{ .Values.config.http.server.session.timeout | quote }}
+  REPOSITORY_SERVICE_REVERSE_PROXY: {{ .Values.config.reverseProxy | quote }}
   REPOSITORY_SERVICE_MAIL_FROM: {{ .Values.config.mail.from | quote }}
   REPOSITORY_SERVICE_MAIL_ADDREPLYTO: {{ .Values.config.mail.addReplyTo | quote }}
   REPOSITORY_SERVICE_MAIL_REGISTER_RECEIVER: {{ .Values.config.mail.register.receiver | quote }}

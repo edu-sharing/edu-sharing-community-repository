@@ -65,6 +65,8 @@ my_http_client_proxy_proxypass="${REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYPASS
 my_http_client_proxy_proxyport="${REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYPORT:-}"
 my_http_client_proxy_proxyuser="${REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYUSER:-}"
 
+my_reverse_proxy="${REPOSITORY_SERVICE_REVERSE_PROXY:-}"
+
 my_http_server_csp_connect="${REPOSITORY_SERVICE_HTTP_SERVER_CSP_CONNECT:-}"
 my_http_server_csp_default="${REPOSITORY_SERVICE_HTTP_SERVER_CSP_DEFAULT:-}"
 my_http_server_csp_font="${REPOSITORY_SERVICE_HTTP_SERVER_CSP_FONT:-}"
@@ -568,6 +570,29 @@ xmlstarlet ed -L \
 		${homeProp}
 }
 
+if [[ -n ${my_reverse_proxy} ]]; then
+  if [[ ${my_reverse_proxy} == "nginx" ]]; then
+    hocon -f ${eduSConf} set "repository.request.proxyHeader.ip" 'x-real-ip'
+    hocon -f ${eduSConf} set "repository.request.proxyHeader.host" 'x-forwarded-host'
+  elif [[ ${my_reverse_proxy} == "apache2" ]]; then
+    hocon -f ${eduSConf} set "repository.request.proxyHeader.ip" 'X-Forwarded-For'
+    hocon -f ${eduSConf} set "repository.request.proxyHeader.host" 'X-Forwarded-Host'
+  else
+    [[ $(hocon -f ${eduSConf} get "repository.request.proxyHeader.ip" 2>/dev/null) ]] && {
+      hocon -f ${eduSConf} unset "repository.request.proxyHeader.ip"
+    }
+    [[ $(hocon -f ${eduSConf} get "repository.request.proxyHeader.host" 2>/dev/null) ]] && {
+      hocon -f ${eduSConf} unset "repository.request.proxyHeader.host"
+    }
+  fi
+else
+  [[ $(hocon -f ${eduSConf} get "repository.request.proxyHeader.ip" 2>/dev/null) ]] && {
+    hocon -f ${eduSConf} unset "repository.request.proxyHeader.ip"
+  }
+  [[ $(hocon -f ${eduSConf} get "repository.request.proxyHeader.host" 2>/dev/null) ]] && {
+    hocon -f ${eduSConf} unset "repository.request.proxyHeader.host"
+  }
+fi
 
 [[ $(hocon -f ${eduSConf} get "repository.mail.from" 2>/dev/null) ]] && {
   hocon -f ${eduSConf} unset "repository.mail.from"
