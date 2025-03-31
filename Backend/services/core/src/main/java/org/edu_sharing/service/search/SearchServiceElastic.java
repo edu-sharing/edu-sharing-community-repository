@@ -2182,8 +2182,15 @@ public class SearchServiceElastic extends SearchServiceImpl {
             String searchPattern = pattern == null ? "" : pattern;
 
 
-            Set<String> memberships = serviceRegistry.getAuthorityService().getAuthorities();
-            boolean isAdmin = ((memberships != null && memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
+            Set<String> memberships;
+            {
+                Set<String> m = serviceRegistry.getAuthorityService().getAuthorities();
+                if(m == null) {
+                    m = Collections.emptySet();
+                }
+                memberships = m;
+            }
+            boolean isAdmin = (memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)
                     || "admin".equals(AuthenticationUtil.getFullAuthentication().getName())) ? true : false;
 
             return AuthenticationUtil.runAsSystem(() -> {
@@ -2213,7 +2220,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     //only search organisations the curren user is in,except: its adminuser and onlyMemberShips == true
                     if (onlyMemberShips) {
                         BoolQuery.Builder memberQuery = QueryBuilders.bool().minimumShouldMatch("1");
-                        if (memberships != null && memberships.size() > 0) {
+                        if (!memberships.isEmpty()) {
                             for (String membershib : memberships) {
                                 org.alfresco.service.cmr.repository.NodeRef authorityNodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(membershib);
                                 if (authorityNodeRef != null) {
@@ -2274,7 +2281,6 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                     logger.warn("Exception while fetching edu organization folder for " + eduGroup.getGroupId() + "(folder: " + nodeId + ")", t);
                                 }
                                 boolean add = false;
-                                assert memberships != null;
                                 for (String group : memberships) {
                                     if (group.equals(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)
                                             || group.equals(eduGroup.getGroupname())) {
@@ -2294,7 +2300,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                 }
                             }
                         }
-                        int count = result.size();
+                        int count = memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS) ? eduGroups.getNodeCount() : result.size();
                         return new SearchResult<>(result, skipCount, count);
                     });
 
