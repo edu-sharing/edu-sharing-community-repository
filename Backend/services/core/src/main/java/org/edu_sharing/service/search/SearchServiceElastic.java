@@ -1686,7 +1686,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         if (customProperties != null) {
             for (Map.Entry<String, String> entry : customProperties.entrySet()) {
                 finalQuery.must(m -> m.term(t -> t
-                        .field("properties." + entry.getKey())
+                        .field("properties." + entry.getKey() + ".keyword")
                         .value(entry.getValue())
                 ));
             }
