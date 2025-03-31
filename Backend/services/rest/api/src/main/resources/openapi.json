@@ -781,10 +781,8 @@
         },
         "required": [
           "access",
-          "collection",
           "createdAt",
           "createdBy",
-          "downloadUrl",
           "name",
           "owner",
           "ref"
@@ -3358,10 +3356,8 @@
         },
         "required": [
           "access",
-          "collection",
           "createdAt",
           "createdBy",
-          "downloadUrl",
           "name",
           "owner",
           "ref"
@@ -3517,10 +3513,8 @@
         },
         "required": [
           "access",
-          "collection",
           "createdAt",
           "createdBy",
-          "downloadUrl",
           "name",
           "owner",
           "ref"
