@@ -1,5 +1,6 @@
 package org.edu_sharing.restservices.lti.v13;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
@@ -20,12 +21,13 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 
+@Slf4j
 public class ApiTool {
 
-    static Logger logger = Logger.getLogger(ApiTool.class);
+
 
     public static Response processError(HttpServletRequest req, Throwable e, String errorType){
-        if(e != null) logger.error(e.getMessage(),e);
+        if(e != null) log.error(e.getMessage(),e);
         try {
             return Response.seeOther(new URI(req.getScheme() +"://"
                             + req.getServerName()
