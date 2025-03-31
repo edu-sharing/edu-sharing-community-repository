@@ -9,7 +9,7 @@
     [isCancelable]="false"
     [priority]="-30"
     modal="auto"
-    [buttons]="buttons"
+    [buttons]="showProviders ? [] : buttons"
     [width]="showProviders ? 'xxlarge' : 'normal'"
     [height]="showProviders ? '' : 'large'"
     [attr.showProviders]="showProviders"
