@@ -2,7 +2,6 @@ package org.edu_sharing.restservices.shared;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -10,7 +9,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class User extends UserSimple {
 
-	@JsonProperty(required = true)
 	private NodeRef homeFolder = null;
 	private List<NodeRef> sharedFolders = new ArrayList<>();
 	private UserQuota quota;
