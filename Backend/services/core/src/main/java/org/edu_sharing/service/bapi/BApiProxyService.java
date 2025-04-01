@@ -62,11 +62,12 @@ public class BApiProxyService {
 
         requestBuilder.method(method.name(), requestBody);
         headers.getRequestHeaders().forEach((key, values) -> {
-            if (ignoreHeader.stream().allMatch(key::equalsIgnoreCase)) {
+            if (ignoreHeader.stream().anyMatch(key::equalsIgnoreCase)) {
                 return;
             }
             values.forEach(value -> requestBuilder.header(key, value));
         });
+
         requestBuilder.header("X-API-KEY", apiKey);
 
         try (okhttp3.Response response = okHttpClient.newCall(requestBuilder.build()).execute()) {
