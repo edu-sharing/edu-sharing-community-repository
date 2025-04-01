@@ -17,6 +17,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 
 @Service
@@ -31,6 +32,9 @@ public class BApiProxyService {
 
     @Value("${repository.bapi.guestUserApiKey:}")
     private String guestUserApiKey;
+
+    @Value("${repository.bapi.callTimeout:PT1m}")
+    private String callTimeout;
 
     private final GuestService guestService;
 
@@ -51,7 +55,9 @@ public class BApiProxyService {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        OkHttpClient okHttpClient = new OkHttpClient();
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .callTimeout(Duration.parse(callTimeout))
+                .build();
         Request.Builder requestBuilder = new Request.Builder();
         requestBuilder.url(bapiUri.concat(path));
 
