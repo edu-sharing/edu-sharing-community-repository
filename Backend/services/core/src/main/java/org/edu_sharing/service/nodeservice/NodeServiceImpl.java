@@ -759,6 +759,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 policyBehaviourFilter.enableBehaviour(nodeRef);
                 return null;
             });
+        } catch(DuplicateChildNodeNameException e){
+            throw e;
         } catch (Exception e) {
             // this occurs sometimes in workspace
             // it seems it is an alfresco bug:
