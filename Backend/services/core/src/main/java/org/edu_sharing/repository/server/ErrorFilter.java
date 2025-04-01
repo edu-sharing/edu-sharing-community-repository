@@ -28,11 +28,13 @@ public class ErrorFilter implements Filter {
 	public static class ErrorFilterException extends ServletException {
 		private String details;
 		@Getter
-        private int statusCode;
+		private int statusCode;
+
 		public ErrorFilterException(Throwable t) {
 			super(t);
 			this.statusCode = mapStatusCode(t);
 		}
+
 		public ErrorFilterException(int statusCode) {
 			super();
 			this.statusCode = statusCode;
@@ -45,13 +47,13 @@ public class ErrorFilter implements Filter {
 
 		private int mapStatusCode(Throwable t) {
 			DAOException dao = DAOException.mapping(t);
-			if(dao instanceof DAOValidationException) {
+			if (dao instanceof DAOValidationException) {
 				return HttpServletResponse.SC_BAD_REQUEST;
 			}
-			if(dao instanceof DAOSecurityException) {
+			if (dao instanceof DAOSecurityException) {
 				return HttpServletResponse.SC_FORBIDDEN;
 			}
-			if(dao instanceof DAOMissingException) {
+			if (dao instanceof DAOMissingException) {
 				return HttpServletResponse.SC_NOT_FOUND;
 			}
 			return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
@@ -79,32 +81,32 @@ public class ErrorFilter implements Filter {
 
 	@Override
 	public void init(FilterConfig config) throws ServletException {
-		this.context=config.getServletContext();
+		this.context = config.getServletContext();
 	}
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 		try {
 			chain.doFilter(req, res);
-		} catch(Throwable t) {
+		} catch (Throwable t) {
 			if (t instanceof RenderingException) {
-				logger.error(((RenderingException)t).getTechnicalDetail(), t);
+				logger.error(((RenderingException) t).getTechnicalDetail(), t);
 			} else {
 				logger.error(t.getMessage(), t);
 			}
 			int statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-			if(t instanceof ErrorFilterException) {
+			if (t instanceof ErrorFilterException) {
 				statusCode = ((ErrorFilterException) t).getStatusCode();
 			}
-			handleError((HttpServletRequest) req, (HttpServletResponse)res, t, statusCode);
+			handleError((HttpServletRequest) req, (HttpServletResponse) res, t, statusCode);
 		}
 	}
 
 	public static void handleError(HttpServletRequest req, HttpServletResponse resp, Throwable t, int statusCode) {
 		try {
-			if(t != null) {
+			if (t != null) {
 				boolean isAboutStatusCall = Optional.ofNullable(req.getQueryString())
-						.map(x->x.contains("timeoutSeconds"))
+						.map(x -> x.contains("timeoutSeconds"))
 						.orElse(false);
 
 				if (isAboutStatusCall) {
@@ -114,32 +116,42 @@ public class ErrorFilter implements Filter {
 				}
 			}
 			String accept = req.getHeader("accept");
-			if (! (accept!=null && accept.toLowerCase().contains("text/html"))) {
-				resp.reset();
+			if (!(accept != null && accept.toLowerCase().contains("text/html"))) {
+				try {
+					resp.reset();
+				} catch (Exception e) {
+					boolean isAboutStatusCall = Optional.ofNullable(req.getQueryString())
+							.map(x -> x.contains("timeoutSeconds"))
+							.orElse(false);
+					if (isAboutStatusCall) {
+						Logger.getLogger(ErrorFilter.class).debug(e.getMessage(), e);
+					} else {
+						Logger.getLogger(ErrorFilter.class).error(e.getMessage(), e);
+					}
+				}
 			}
 			ErrorResponse response = new ErrorResponse();
 			response.setError(statusCode + "");
 			if (Logger.getLogger(ErrorFilter.class).getEffectiveLevel().toInt() <= Level.INFO_INT) {
-				response.setMessage(t != null ? t.getMessage() : statusCode+"");
+				response.setMessage(t != null ? t.getMessage() : statusCode + "");
 			} else {
 				response.setMessage("LogLevel is > INFO");
 			}
 			resp.setStatus(statusCode);
-			if (accept!=null && accept.toLowerCase().contains("text/html")) {
+			if (accept != null && accept.toLowerCase().contains("text/html")) {
 				resp.setContentType("text/html");
 				resp.getWriter().print("<head><script nonce=\"" + SecurityHeadersFilter.ngCspNonce.get() + "\">window.location.href=\"" + URLTool.getNgErrorUrl(
-						(t instanceof ErrorFilterException) ? ((ErrorFilterException)t).getAngularServletMessage() :
-						statusCode + ""
+						(t instanceof ErrorFilterException) ? ((ErrorFilterException) t).getAngularServletMessage() :
+								statusCode + ""
 				) + "\";</script></head>");
-			} else if(accept!=null && accept.toLowerCase().contains("application/json")) {
+			} else if (accept != null && accept.toLowerCase().contains("application/json")) {
 				resp.setHeader("Content-Type", "application/json");
 				resp.getWriter().print(new Gson().toJson(response));
-			}
-			else {
+			} else {
 				resp.setHeader("Content-Type", "plain/text");
 				resp.getWriter().print(response.toString());
 			}
-		}catch(IOException e){
+		} catch (IOException e) {
 			Logger.getLogger(ErrorFilter.class).error("Fatal error delivering error to client", e);
 		}
 	}
