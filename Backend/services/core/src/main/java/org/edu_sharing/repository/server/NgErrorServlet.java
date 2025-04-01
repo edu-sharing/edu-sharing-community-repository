@@ -1,30 +1,34 @@
 package org.edu_sharing.repository.server;
 
-import com.google.gson.Gson;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.repository.client.tools.UrlTool;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.LRMITool;
-import org.edu_sharing.repository.server.tools.URLTool;
-import org.edu_sharing.restservices.shared.ErrorResponse;
-import org.json.JSONObject;
-import org.springframework.validation.Errors;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.File;
+
 import java.io.IOException;
-import java.net.URL;
 
 public class NgErrorServlet extends HttpServlet {
-	private static Logger logger = Logger.getLogger(NgErrorServlet.class);
+	private static final Logger logger = Logger.getLogger(NgErrorServlet.class);
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		handleRequest(req, resp);
+	}
+
+	@Override
+	protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		handleRequest(req, resp);
+	}
+
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		handleRequest(req, resp);
+	}
+
+	@Override
+	protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		handleRequest(req, resp);
 	}
 
