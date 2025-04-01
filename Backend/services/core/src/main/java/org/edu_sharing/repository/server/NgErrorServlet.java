@@ -28,12 +28,27 @@ public class NgErrorServlet extends HttpServlet {
 		handleRequest(req, resp);
 	}
 
+	@Override
+	protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		handleRequest(req, resp);
+	}
+
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		handleRequest(req, resp);
+	}
+
+	@Override
+	protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		handleRequest(req, resp);
+	}
+
 	private static void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		try {
 			Object errorMessage= req.getAttribute("jakarta.servlet.error.message");
 			Object errorCode= req.getAttribute("jakarta.servlet.error.status_code");
 			ErrorFilter.handleError(req, resp, new Throwable(
-					errorMessage.toString()),
+							errorMessage.toString()),
 					Integer.parseInt(errorCode.toString())
 			);
 		}catch(NullPointerException e) {
