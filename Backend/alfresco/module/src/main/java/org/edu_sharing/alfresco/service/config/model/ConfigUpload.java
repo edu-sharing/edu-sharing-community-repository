@@ -9,6 +9,7 @@ public class ConfigUpload implements Serializable {
 
     public enum ConfigUploadDialog {
         SimpleEdit,
-        Mds
+        Mds,
+        None
     }
 }

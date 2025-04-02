@@ -127,6 +127,9 @@ export class UploadDialogService {
             return this._openSimpleEditor(nodes);
         } else if (dialogType === DialogType.Mds) {
             return this._openMdsEditor(nodes);
+        } else if (dialogType === DialogType.None) {
+            await this._afterMetadataEditDone(nodes, nodes);
+            return nodes;
         } else {
             console.error('Invalid configuration for upload.postDialog: ' + dialogType);
             return null;

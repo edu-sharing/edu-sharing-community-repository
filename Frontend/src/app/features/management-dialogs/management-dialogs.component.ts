@@ -35,6 +35,7 @@ import { ErrorProcessingService } from './error.processing';
 export enum DialogType {
     SimpleEdit = 'SimpleEdit',
     Mds = 'Mds',
+    None = 'None',
 }
 export enum ManagementEventType {
     AddCollectionNodes,
