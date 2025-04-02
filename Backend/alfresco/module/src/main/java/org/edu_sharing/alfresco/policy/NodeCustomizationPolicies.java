@@ -683,7 +683,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
             Matcher matcher = pattern.matcher(wwwurl);
 
             if (matcher.find()) {
-                String github = "https://api.github.com/repos/" + matcher.group(1) + "/contents/?ref=main";
+                String github = "https://api.github.com/repos/" + matcher.group(1) + "/contents";
                 HttpClient client = new HttpClient();
                 GetMethod method = new GetMethod(github);
                 int statusCode = client.executeMethod(method);
