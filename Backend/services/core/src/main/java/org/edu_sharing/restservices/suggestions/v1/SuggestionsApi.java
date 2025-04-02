@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -32,13 +33,19 @@ import java.util.stream.Collectors;
 @Produces({"application/json"})
 public class SuggestionsApi {
 
+
     private static final Logger log = LoggerFactory.getLogger(SuggestionsApi.class);
     @Autowired
     private SuggestionServiceFactory suggestionServiceFactory;
 
     @POST
     @Path("/{repository}/{node}")
-    @Operation(summary = "Create suggestions")
+    @Operation(summary = "Create suggestions", description =
+            "Pass a list of suggestions for each property and value. For each entry, exactly one suggestion value is set for the respective property. If multiple suggestion values are defined for a property, they must be transmitted in separate entries for each value.\n" +
+                    "* propertyId: abbreviation of the property (e.g., cclom:general_description)\n" +
+                    "* value: suggestion value – corresponds to the data type of the property (string, long, double, boolean), always single-valued. Dates and times should always be provided in Unix timestamp format.\n" +
+                    "* description: notes for the editor explaining why this suggestion is a good fit.\n" +
+                    "* confidence: nominal value indicating how well the suggestion fits (value between 0-1).")
     @ApiResponse(responseCode = "200",
             description = "Store suggestions for the given node.",
             content = @Content(array = @ArraySchema(schema = @Schema(implementation = SuggestionResponseDTO.class))))
@@ -48,8 +55,8 @@ public class SuggestionsApi {
             @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
             @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
             @Parameter(description = "Type of the suggestion", required = true) @QueryParam("type") SuggestionType type,
-            @Parameter(description = "Version of the suggestion", required = true) @QueryParam("version") String version,
-            List<CreateSuggestionRequestDTO> suggestionsDto) {
+            @Parameter(description = "Version of the suggestion mainly used from services", required = true) @QueryParam("version") String version,
+            @Valid List<CreateSuggestionRequestDTO> suggestionsDto) {
         Mapper mapper = new Mapper(RepositoryDao.getRepository(repository));
         SuggestionService suggestionService = suggestionServiceFactory.getServiceByAppId(repository);
         List<Suggestion> suggestions = suggestionService.createSuggestion(node, type, version, suggestionsDto);
