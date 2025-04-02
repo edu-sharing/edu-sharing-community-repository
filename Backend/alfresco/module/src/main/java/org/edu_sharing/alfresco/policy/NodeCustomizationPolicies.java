@@ -688,12 +688,11 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
                 GetMethod method = new GetMethod(github);
                 int statusCode = client.executeMethod(method);
                 if(statusCode == 200) {
-                    JSONArray json = new JSONArray(method.getResponseBodyAsString());
                     Type listType = new TypeToken<List<Map<String, Object>>>() {}.getType();
                     List<Map<String, Object>> result = new Gson().fromJson(method.getResponseBodyAsString(), listType);
                     // check if the repo contains a jupyter notebook
                     if(result.stream().anyMatch(
-                            r -> r.getOrDefault("name", "").toString().endsWith(".ipynb")
+                            r -> r.getOrDefault("name", "").toString().toLowerCase().endsWith(".ipynb")
                     )) {
                         nodeService.setProperty(nodeRef, QName.createQName(RessourceInfoExecuter.CCM_PROP_IO_RESSOURCETYPE), RessourceInfoExecuter.CCM_RESSOURCETYPE_JUPYTER_BINDER);
                     }
