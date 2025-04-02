@@ -527,7 +527,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
                 if (params[key] === this.oldParams[key]) {
                     continue;
                 }
-                if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE) {
+                if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE || key === 'nodeStore') {
                     continue;
                 } else if (['page', 'pageSize'].includes(key)) {
                     // Handled by `NodeEntriesComponent`.
