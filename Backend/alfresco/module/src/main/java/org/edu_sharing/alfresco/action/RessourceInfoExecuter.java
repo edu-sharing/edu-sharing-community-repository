@@ -73,6 +73,8 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 	public static final String CCM_RESSOURCETYPE_GEOGEBRA = "geogebra";
 	public static final String CCM_RESSOURCETYPE_SERLO = "serlo";
 	public static final String CCM_RESSOURCETYPE_EDUHTML = "eduhtml";
+	// Jupyter Notebook
+	public static final String CCM_RESSOURCETYPE_JUPYTER_BINDER = "binder";
 
 	static ArchiveEntry goToFileInZip(ArchiveInputStream zip, String name) throws IOException {
 		while(true) {

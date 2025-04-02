@@ -1,5 +1,7 @@
 package org.edu_sharing.alfresco.policy;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.typesafe.config.Config;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.ContentServicePolicies.OnContentUpdatePolicy;
@@ -41,6 +43,7 @@ import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.mime.MediaType;
+import org.edu_sharing.alfresco.action.RessourceInfoExecuter;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.metadataset.v2.MetadataReader;
@@ -50,6 +53,7 @@ import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.quartz.Scheduler;
 import org.springframework.security.crypto.codec.Base64;
@@ -58,8 +62,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -653,16 +660,49 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
                 if ("wwwurl".equals(qName.getLocalName())) afterURL = "" + after.get(qName);
             if ((afterURL != null) && (!afterURL.equals(beforeURL))) {
 
-                logger.info("---> UPDATE/CREATE THUMBNAIL FOR LINK(" + afterURL + ") ON NODE(" + nodeRef.getId() + ")");
+                checkGithubData(nodeRef, afterURL);
 
                 String linktype = (String) after.get(QName.createQName(CCConstants.CCM_PROP_LINKTYPE));
                 // only generate if node has no thumb yet
                 if (linktype != null && linktype.equals(CCConstants.CCM_VALUE_LINK_LINKTYPE_USER_GENERATED) && !after.containsKey(QName.createQName(CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW))) {
+                    logger.info("---> UPDATE/CREATE THUMBNAIL FOR LINK(" + afterURL + ") ON NODE(" + nodeRef.getId() + ")");
                     generateWebsitePreview(nodeRef, afterURL);
                 }
             }
         }
 
+    }
+
+    /**
+     * resolve data from github if its a github url
+     * for jupyter notebook / binder
+     */
+    private void checkGithubData(NodeRef nodeRef, String wwwurl) {
+        try {
+            Pattern pattern = Pattern.compile("https?://github\\.com/(.+)");
+            Matcher matcher = pattern.matcher(wwwurl);
+
+            if (matcher.find()) {
+                String github = "https://api.github.com/repos/" + matcher.group(1) + "/contents/?ref=main";
+                HttpClient client = new HttpClient();
+                GetMethod method = new GetMethod(github);
+                int statusCode = client.executeMethod(method);
+                if(statusCode == 200) {
+                    JSONArray json = new JSONArray(method.getResponseBodyAsString());
+                    Type listType = new TypeToken<List<Map<String, Object>>>() {}.getType();
+                    List<Map<String, Object>> result = new Gson().fromJson(method.getResponseBodyAsString(), listType);
+                    // check if the repo contains a jupyter notebook
+                    if(result.stream().anyMatch(
+                            r -> r.getOrDefault("name", "").toString().endsWith(".ipynb")
+                    )) {
+                        nodeService.setProperty(nodeRef, QName.createQName(RessourceInfoExecuter.CCM_PROP_IO_RESSOURCETYPE), RessourceInfoExecuter.CCM_RESSOURCETYPE_JUPYTER_BINDER);
+                    }
+
+                }
+            }
+        } catch (Throwable e) {
+            logger.warn(e);
+        }
     }
 
     public static void syncCollectionRefProps(NodeRef nodeRef, NodeRef ref, Map<QName, Serializable> before, Map<QName, Serializable> after, boolean checkRefPropsForCustomization, NodeService nodeService) throws Exception {
