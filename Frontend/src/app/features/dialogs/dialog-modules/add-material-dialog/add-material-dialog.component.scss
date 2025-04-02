@@ -153,3 +153,21 @@ mat-form-field {
         flex-wrap: wrap;
     }
 }
+.file-selection {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background-color: var(--palette-primary-50);
+    > div {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 10px;
+        .name {
+            flex-grow: 1;
+        }
+        .size {
+            color: var(--textLight);
+        }
+    }
+}

@@ -8,7 +8,17 @@
 />
 
 <div *ngIf="!hideFileUpload" @openOverlay>
+  <div class="file-selection" *ngIf="selectedFiles.length" @openOverlay>
+    <div *ngFor="let file of selectedFiles">
+      <div class="name">{{ file.name }}</div>
+      <div class="size">{{ file.size | formatSize }}</div>
+      <button mat-icon-button color="primary">
+        <i esIcon="clear" (click)="removeFile(file)"></i>
+      </button>
+    </div>
+  </div>
   <div
+    *ngIf="!selectedFiles.length"
     class="dropArea"
     [class.dropActive]="isFileOver"
     esFileDrop
@@ -32,9 +42,11 @@
   <div class="quota" *ngIf="userQuota?.enabled">
     <es-user-quota [quota]="userQuota"></es-user-quota>
   </div>
-  <div class="separator-line uppercase">{{ 'WORKSPACE.SELECT_ORG' | translate }}</div>
+  <div class="separator-line uppercase" *ngIf="!selectedFiles.length">
+    {{ 'WORKSPACE.SELECT_ORG' | translate }}
+  </div>
 </div>
-<div class="link">
+<div class="link" *ngIf="!selectedFiles.length" @openOverlay>
   <div class="link-info">
     <mat-form-field>
       <mat-label>{{ 'WORKSPACE.SELECT_LINK' | translate }}</mat-label>
@@ -132,3 +144,11 @@
     </mat-checkbox>
   </div>
 </div>
+<ng-container *ngIf="dialogs.getCustomTemplateSlot(DialogTemplate.AddMaterialDialogBelow)">
+  <ng-container
+    *ngTemplateOutlet="
+      dialogs.getCustomTemplateSlot(DialogTemplate.AddMaterialDialogBelow);
+      context: { dialog: this }
+    "
+  ></ng-container>
+</ng-container>

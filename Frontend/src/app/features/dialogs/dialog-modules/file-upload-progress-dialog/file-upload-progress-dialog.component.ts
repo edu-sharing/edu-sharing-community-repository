@@ -166,7 +166,7 @@ export class FileUploadProgressDialogComponent implements OnInit {
             }
             return;
         }
-        const file = this.data.files.item(number);
+        const file = this.data.files[number];
         if (!file.type && !file.size) {
             setTimeout(() => {
                 this.progress[number].progress.progress = -1;

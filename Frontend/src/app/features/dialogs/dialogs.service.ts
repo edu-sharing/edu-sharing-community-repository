@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, TemplateRef } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { DialogButton, RestConnectorService } from '../../core-module/core.module';
 import { Closable } from './card-dialog/card-dialog-config';
@@ -138,11 +138,19 @@ import {
     CheckboxDialogData,
     CheckboxDialogResult,
 } from './dialog-modules/checkbox-dialog/checkbox-dialog-data';
+import { BehaviorSubject } from 'rxjs';
+import { TemplateSlot } from '../../main/navigation/main-nav.service';
+import { AddMaterialDialogComponent } from './dialog-modules/add-material-dialog/add-material-dialog.component';
 
+export enum DialogTemplate {
+    AddMaterialDialogBelow,
+}
 @Injectable({
     providedIn: 'root',
 })
 export class DialogsService {
+    private customTemplates: { [key in DialogTemplate]?: TemplateRef<any> } = {};
+
     get openDialogs() {
         return this.cardDialog.openDialogs;
     }
@@ -845,4 +853,21 @@ export class DialogsService {
             },
         });
     }
+    /**
+     * register a template to be used in the top bar instead of the default one
+     */
+    registerCustomTemplateSlot(slot: DialogTemplate, template: TemplateRef<any>) {
+        this.customTemplates[slot] = template;
+    }
+    getCustomTemplateSlot(slot: DialogTemplate) {
+        return this.customTemplates[slot];
+    }
 }
+/**
+ * Internal part of the `GlobalSearchPageService` for use within the search page component and
+ * services only.
+ */
+@Injectable({
+    providedIn: 'root',
+})
+export class GlobalCollectionsPageServiceInternal {}

@@ -17,10 +17,14 @@ export class AddMaterialDialogData {
      * Show the LTI option and support generation of LTI files
      */
     showLti: boolean;
+    /**
+     * Show the list of uploaded files and require confirmation (default false)
+     */
+    showFiles?: boolean;
 }
 
 export interface FileData {
-    files: FileList;
+    files: File[];
     parent: Node;
 }
 

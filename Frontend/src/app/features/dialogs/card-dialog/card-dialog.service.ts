@@ -3,7 +3,7 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal, ComponentType } from '@angular/cdk/portal';
 import { Injectable, Injector } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { filter, map, pairwise, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { DialogsService } from '../dialogs.service';
 import { CARD_DIALOG_DATA, CardDialogConfig } from './card-dialog-config';
@@ -16,6 +16,10 @@ const MOBILE_BACKGROUND_CLASS = 'card-dialog-pane-mobile-background';
 // export const CARD_DIALOG_STATE = new InjectionToken<CardDialogState>('CardDialogState');
 // export const CARD_DIALOG_OVERLAY_REF = new InjectionToken<CardDialogState>('CardDialogOverlayRef');
 
+export type BeforeDialogCallback = (
+    component: ComponentType<unknown>,
+    config?: CardDialogConfig<unknown>,
+) => CardDialogConfig<unknown>;
 /**
  * Provides cards for modal dialogs via overlays, similar to `MatDialog`.
  */
@@ -29,6 +33,8 @@ export class CardDialogService {
     // FIXME: Do we need this, or could we always use `openDialogsBeforeClosedSubject`?
     private readonly openDialogsSubject = new BehaviorSubject<readonly CardDialogRef[]>([]);
     private focusTraps: ConfigurableFocusTrap[] = [];
+
+    private beforeDialogCallbacks: BeforeDialogCallback[] = [];
     get openDialogs(): readonly CardDialogRef[] {
         return this.openDialogsSubject.value;
     }
@@ -36,6 +42,13 @@ export class CardDialogService {
         return this.openDialogsSubject;
     }
     private readonly viewModeSubject = new BehaviorSubject<ViewMode>('default');
+
+    /**
+     * triggered when a dialog is opened. The data is provided and can be altered
+     */
+    registerBeforeDialogCallback(callback: BeforeDialogCallback) {
+        this.beforeDialogCallbacks.push(callback);
+    }
 
     constructor(
         private injector: Injector,
@@ -46,6 +59,9 @@ export class CardDialogService {
     }
 
     open<T, D, R>(component: ComponentType<T>, config?: CardDialogConfig<D>): CardDialogRef<D, R> {
+        for (let beforeDialogCallback of this.beforeDialogCallbacks) {
+            config = beforeDialogCallback(component, config) as CardDialogConfig<D>;
+        }
         config = this.applyCardConfigDefaults(config);
         const overlayRef = this.createOverlay();
         const state = new CardDialogState();
@@ -58,6 +74,7 @@ export class CardDialogService {
             this.injector.get(DialogsService),
         );
         containerRef.instance.dialogRef = dialogRef;
+
         const contentInjector = Injector.create({
             parent: containerRef.injector,
             providers: [

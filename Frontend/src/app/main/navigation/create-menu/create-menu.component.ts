@@ -397,11 +397,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             );
     }
 
-    uploadFiles(files: FileList) {
-        this.onFileDrop(files);
-    }
-
-    onFileDrop(files: FileList) {
+    onFileDrop(fileList: FileList) {
         if (!this.allowed) {
             this.toast.error(null, 'WORKSPACE.TOAST.NOT_POSSIBLE_GENERAL');
             return;
@@ -414,10 +410,14 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             this.toast.toolpermissionError(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES);
             return;
         }
+        const files: File[] = [];
+        for (let file of fileList) {
+            files.push(file);
+        }
         void this.openUpload(files);
     }
 
-    private async openUpload(files: FileList): Promise<void> {
+    private async openUpload(files: File[]): Promise<void> {
         const nodes = await this.uploadDialog.uploadFilesAndCreateNodes({
             parent: await this.getParent(),
             files,
@@ -468,8 +468,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                     '.jpg';
                 const blob: any = Helper.base64toBlob(data, 'image/jpeg');
                 blob.name = name;
-                const fakeFileList = [blob] as unknown as FileList;
-                fakeFileList.item = (index: number) => blob;
+                const fakeFileList = [blob];
                 await this.openUpload(fakeFileList);
             },
             (error: any) => {

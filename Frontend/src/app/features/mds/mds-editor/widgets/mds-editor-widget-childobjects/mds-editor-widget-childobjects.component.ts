@@ -107,9 +107,9 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
         });
     }
 
-    private addFiles(files: FileList) {
+    private addFiles(files: File[]) {
         for (let i = 0; i < files.length; i++) {
-            const file = files.item(i);
+            const file = files[i];
             const child: Childobject = {
                 icon: RestHelper.guessMediatypeIconForFile(this.connector, file),
                 name: file.name,

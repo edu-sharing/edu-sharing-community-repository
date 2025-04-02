@@ -24,9 +24,10 @@ import { Toast } from '../../../../services/toast';
 import { BreadcrumbsService } from '../../../../shared/components/breadcrumbs/breadcrumbs.service';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
-import { DialogsService } from '../../dialogs.service';
+import { DialogTemplate, DialogsService } from '../../dialogs.service';
 import { AddMaterialDialogData, AddMaterialDialogResult } from './add-material-dialog-data';
 import { BehaviorSubject } from 'rxjs';
+import { TemplateSlot } from '../../../../main/navigation/main-nav.service';
 
 @Component({
     selector: 'es-add-material-dialog',
@@ -40,6 +41,7 @@ import { BehaviorSubject } from 'rxjs';
     providers: [BreadcrumbsService],
 })
 export class AddMaterialDialogComponent implements OnInit {
+    readonly DialogTemplate = DialogTemplate;
     @ViewChild('fileSelect') private file: ElementRef;
 
     private disabled = true;
@@ -58,6 +60,7 @@ export class AddMaterialDialogComponent implements OnInit {
     protected userQuota: UserQuota;
     protected websiteInformation: WebsiteInformation;
     protected hideFileUpload = false;
+    protected hideLink = false;
     protected isFileOver = false;
     protected loadingWebsiteInformation = false;
     protected columns = [
@@ -65,6 +68,7 @@ export class AddMaterialDialogComponent implements OnInit {
         new ListItem('NODE', RestConstants.CM_PROP_C_CREATED),
     ];
     protected parent$ = new BehaviorSubject<Node>(null);
+    selectedFiles: File[] = [];
 
     constructor(
         @Inject(CARD_DIALOG_DATA) public data: AddMaterialDialogData,
@@ -72,7 +76,7 @@ export class AddMaterialDialogComponent implements OnInit {
         private breadcrumbsService: BreadcrumbsService,
         private clientUtils: ClientutilsV1Service,
         private configService: ConfigurationService,
-        private dialogs: DialogsService,
+        public dialogs: DialogsService,
         private nodeService: RestNodeService,
         private storageService: SessionStorageService,
         private toast: Toast,
@@ -164,9 +168,18 @@ export class AddMaterialDialogComponent implements OnInit {
      * Closes the dialog and returns the given file list to the caller.
      */
     closeWithFiles(fileList: FileList) {
+        this.selectedFiles = [];
+        for (let file of fileList) {
+            this.selectedFiles.push(file);
+        }
+        if (this.data.showFiles === true) {
+            this.setState('');
+            this.updateHideFileUpload();
+            return;
+        }
         this.dialogRef.close({
             kind: 'file',
-            files: fileList,
+            files: this.selectedFiles,
             parent: this.parent$.value,
         });
     }
@@ -174,6 +187,12 @@ export class AddMaterialDialogComponent implements OnInit {
     setLink() {
         if (this.disabled) {
             // To nothing
+        } else if (this.selectedFiles.length) {
+            this.dialogRef.close({
+                kind: 'file',
+                files: this.selectedFiles,
+                parent: this.parent$.value,
+            });
         } else if (this.ltiActivated && (!this.ltiConsumerKey || !this.ltiSharedSecret)) {
             const params = {
                 link: {
@@ -206,7 +225,7 @@ export class AddMaterialDialogComponent implements OnInit {
 
     setState(link: string) {
         link = link.trim();
-        this.disabled = !link;
+        this.disabled = !link && !this.selectedFiles.length;
         this.updateButtons();
         this.dialogRef.patchConfig({ closable: Closable.Standard });
     }
@@ -233,9 +252,13 @@ export class AddMaterialDialogComponent implements OnInit {
 
     updateButtons() {
         const [okButton] = DialogButton.getOk(() => this.setLink());
-        okButton.disabled = this.disabled || (this.data.chooseParent && !this.parent$.value);
+        okButton.disabled = !this.canSave();
         const buttons = [...DialogButton.getCancel(() => this.cancel()), okButton];
         this.dialogRef.patchConfig({ buttons });
+    }
+
+    canSave() {
+        return !(this.disabled || (this.data.chooseParent && !this.parent$.value));
     }
 
     private getBreadcrumbs(node: Node) {
@@ -298,6 +321,14 @@ export class AddMaterialDialogComponent implements OnInit {
             await this.storageService.delete('defaultInboxFolder');
             this.toast.toast('TOAST.STORAGE_LOCATION_RESET');
         }
+    }
+
+    protected readonly TemplateSlot = TemplateSlot;
+    protected readonly DialogsService = DialogsService;
+
+    removeFile(file: File) {
+        this.selectedFiles.splice(this.selectedFiles.indexOf(file), 1);
+        this.setState('');
     }
 }
 
