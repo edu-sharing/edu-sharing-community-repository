@@ -1016,7 +1016,8 @@
           "postDialog": {
             "enum": [
               "SimpleEdit",
-              "Mds"
+              "Mds",
+              "None"
             ],
             "type": "string"
           }
