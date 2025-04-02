@@ -57,6 +57,9 @@ public class BApiProxyService {
 
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .callTimeout(Duration.parse(callTimeout))
+                .connectTimeout(Duration.parse(callTimeout))
+                .writeTimeout(Duration.parse(callTimeout))
+                .readTimeout(Duration.parse(callTimeout))
                 .build();
         Request.Builder requestBuilder = new Request.Builder();
         requestBuilder.url(bapiUri.concat(path));
