@@ -8503,8 +8503,7 @@
           }
         },
         "required": [
-          "authorityName",
-          "homeFolder"
+          "authorityName"
         ],
         "type": "object"
       },

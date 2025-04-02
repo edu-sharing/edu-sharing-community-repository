@@ -22,127 +22,133 @@ import java.util.Optional;
 
 
 public class ErrorFilter implements Filter {
-	/**
-	 * more specific error that can handle more details to be shown to the client
-	 */
-	public static class ErrorFilterException extends ServletException {
-		private String details;
-		@Getter
-        private int statusCode;
-		public ErrorFilterException(Throwable t) {
-			super(t);
-			this.statusCode = mapStatusCode(t);
-		}
-		public ErrorFilterException(int statusCode) {
-			super();
-			this.statusCode = statusCode;
-		}
+    /**
+     * more specific error that can handle more details to be shown to the client
+     */
+    public static class ErrorFilterException extends ServletException {
+        private String details;
+        @Getter
+        private final int statusCode;
 
-		public ErrorFilterException(int statusCode, String details) {
-			this(statusCode);
-			this.details = details;
-		}
+        public ErrorFilterException(Throwable t) {
+            super(t);
+            this.statusCode = mapStatusCode(t);
+        }
 
-		private int mapStatusCode(Throwable t) {
-			DAOException dao = DAOException.mapping(t);
-			if(dao instanceof DAOValidationException) {
-				return HttpServletResponse.SC_BAD_REQUEST;
-			}
-			if(dao instanceof DAOSecurityException) {
-				return HttpServletResponse.SC_FORBIDDEN;
-			}
-			if(dao instanceof DAOMissingException) {
-				return HttpServletResponse.SC_NOT_FOUND;
-			}
-			return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-		}
+        public ErrorFilterException(int statusCode) {
+            super();
+            this.statusCode = statusCode;
+        }
 
-		public String getAngularServletMessage() {
-			return StringUtils.isEmpty(details) ? getStatusCode() + "" : getAngularServletMessageGroup() + "/" + details;
-		}
+        public ErrorFilterException(int statusCode, String details) {
+            this(statusCode);
+            this.details = details;
+        }
 
-		protected String getAngularServletMessageGroup() {
-			return "OTHER";
-		}
-	}
+        private int mapStatusCode(Throwable t) {
+            DAOException dao = DAOException.mapping(t);
+            if (dao instanceof DAOValidationException) {
+                return HttpServletResponse.SC_BAD_REQUEST;
+            }
+            if (dao instanceof DAOSecurityException) {
+                return HttpServletResponse.SC_FORBIDDEN;
+            }
+            if (dao instanceof DAOMissingException) {
+                return HttpServletResponse.SC_NOT_FOUND;
+            }
+            return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+        }
 
-	// stores the currently accessing tool type, e.g. CONNECTOR
-	public static ThreadLocal<String> accessToolType = new ThreadLocal<>();
+        public String getAngularServletMessage() {
+            return StringUtils.isEmpty(details) ? getStatusCode() + "" : getAngularServletMessageGroup() + "/" + details;
+        }
 
-	Logger logger = Logger.getLogger(ErrorFilter.class);
+        protected String getAngularServletMessageGroup() {
+            return "OTHER";
+        }
+    }
 
-	ServletContext context;
+    Logger logger = Logger.getLogger(ErrorFilter.class);
 
-	@Override
-	public void destroy() {
-	}
+    ServletContext context;
 
-	@Override
-	public void init(FilterConfig config) throws ServletException {
-		this.context=config.getServletContext();
-	}
+    @Override
+    public void destroy() {
+    }
 
-	@Override
-	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
-		try {
-			chain.doFilter(req, res);
-		} catch(Throwable t) {
-			if (t instanceof RenderingException) {
-				logger.error(((RenderingException)t).getTechnicalDetail(), t);
-			} else {
-				logger.error(t.getMessage(), t);
-			}
-			int statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-			if(t instanceof ErrorFilterException) {
-				statusCode = ((ErrorFilterException) t).getStatusCode();
-			}
-			handleError((HttpServletRequest) req, (HttpServletResponse)res, t, statusCode);
-		}
-	}
+    @Override
+    public void init(FilterConfig config) throws ServletException {
+        this.context = config.getServletContext();
+    }
 
-	public static void handleError(HttpServletRequest req, HttpServletResponse resp, Throwable t, int statusCode) {
-		try {
-			if(t != null) {
-				boolean isAboutStatusCall = Optional.ofNullable(req.getQueryString())
-						.map(x->x.contains("timeoutSeconds"))
-						.orElse(false);
+    @Override
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+        try {
+            chain.doFilter(req, res);
+        } catch (Throwable t) {
+            if (t instanceof RenderingException) {
+                logger.error(((RenderingException) t).getTechnicalDetail(), t);
+            } else {
+                logger.error(t.getMessage(), t);
+            }
+            int statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+            if (t instanceof ErrorFilterException) {
+                statusCode = ((ErrorFilterException) t).getStatusCode();
+            }
+            handleError((HttpServletRequest) req, (HttpServletResponse) res, t, statusCode);
+        }
+    }
 
-				if (isAboutStatusCall) {
-					Logger.getLogger(ErrorFilter.class).debug(t.getMessage(), t);
-				} else {
-					Logger.getLogger(ErrorFilter.class).error(t.getMessage(), t);
-				}
-			}
-			String accept = req.getHeader("accept");
-			if (! (accept!=null && accept.toLowerCase().contains("text/html"))) {
-				resp.reset();
-			}
-			ErrorResponse response = new ErrorResponse();
-			response.setError(statusCode + "");
-			if (Logger.getLogger(ErrorFilter.class).getEffectiveLevel().toInt() <= Level.INFO_INT) {
-				response.setMessage(t != null ? t.getMessage() : statusCode+"");
-			} else {
-				response.setMessage("LogLevel is > INFO");
-			}
-			resp.setStatus(statusCode);
-			if (accept!=null && accept.toLowerCase().contains("text/html")) {
-				resp.setContentType("text/html");
-				resp.getWriter().print("<head><script nonce=\"" + SecurityHeadersFilter.ngCspNonce.get() + "\">window.location.href=\"" + URLTool.getNgErrorUrl(
-						(t instanceof ErrorFilterException) ? ((ErrorFilterException)t).getAngularServletMessage() :
-						statusCode + ""
-				) + "\";</script></head>");
-			} else if(accept!=null && accept.toLowerCase().contains("application/json")) {
-				resp.setHeader("Content-Type", "application/json");
-				resp.getWriter().print(new Gson().toJson(response));
-			}
-			else {
-				resp.setHeader("Content-Type", "plain/text");
-				resp.getWriter().print(response.toString());
-			}
-		}catch(IOException e){
-			Logger.getLogger(ErrorFilter.class).error("Fatal error delivering error to client", e);
-		}
-	}
+    public static void handleError(HttpServletRequest req, HttpServletResponse resp, Throwable t, int statusCode) {
+        try {
+            if (t != null) {
+                handleLogging(req, t);
+            }
+            String accept = req.getHeader("accept");
+            if (!(accept != null && accept.toLowerCase().contains("text/html"))) {
+                try {
+                    resp.reset();
+                } catch (Exception e) {
+                    handleLogging(req, e);
+                }
+            }
+            ErrorResponse response = new ErrorResponse();
+            response.setError(statusCode + "");
+            if (Logger.getLogger(ErrorFilter.class).getEffectiveLevel().toInt() <= Level.INFO_INT) {
+                response.setMessage(t != null ? t.getMessage() : statusCode + "");
+            } else {
+                response.setMessage("LogLevel is > INFO");
+            }
+            resp.setStatus(statusCode);
+            if (accept != null && accept.toLowerCase().contains("text/html")) {
+                resp.setContentType("text/html");
+                resp.getWriter().print("<head><script nonce=\"" + SecurityHeadersFilter.ngCspNonce.get() + "\">window.location.href=\"" + URLTool.getNgErrorUrl(
+                        (t instanceof ErrorFilterException) ? ((ErrorFilterException) t).getAngularServletMessage() :
+                                statusCode + ""
+                ) + "\";</script></head>");
+            } else if (accept != null && accept.toLowerCase().contains("application/json")) {
+                resp.setHeader("Content-Type", "application/json");
+                resp.getWriter().print(new Gson().toJson(response));
+            } else {
+                resp.setHeader("Content-Type", "plain/text");
+                resp.getWriter().print(response);
+            }
+        } catch (IOException e) {
+            Logger.getLogger(ErrorFilter.class).error("Fatal error delivering error to client", e);
+        }
+    }
+
+    private static void handleLogging(HttpServletRequest req, Throwable t) {
+        boolean isAboutStatusCall = Optional.ofNullable(req.getQueryString())
+                .map(x -> x.contains("timeoutSeconds"))
+                .orElse(false);
+
+        if (isAboutStatusCall) {
+            Logger.getLogger(ErrorFilter.class).debug(t.getMessage(), t);
+        } else {
+            Logger.getLogger(ErrorFilter.class).error(t.getMessage(), t);
+        }
+    }
 
 
 }
