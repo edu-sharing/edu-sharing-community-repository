@@ -522,6 +522,8 @@
     "file-serlo": "Serlo-Datei",
     "file-curriculum": "Kanban-Board",
     "file-pdf": "PDF-Datei",
+    "file-git-repository": "Git-Repository",
+    "file-jupyter-notebook": "Jupyter Notebook",
     "link": "Website",
     "folder": "Ordner",
     "file": "Unbekannt",

@@ -424,6 +424,8 @@
     "file-qti": "ONYX file",
     "file-h5p": "H5P file",
     "file-pdf": "pdf file",
+    "file-git-repository": "git-repository",
+    "file-jupyter-notebook": "jupyter notebook",
     "link": "Website",
     "folder": "Folder",
     "file": "Unknown",
