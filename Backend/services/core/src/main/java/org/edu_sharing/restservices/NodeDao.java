@@ -1152,7 +1152,7 @@ public class NodeDao {
             List<NodeRef> result = new ArrayList<>();
             assoc.setAssocName(CCConstants.getValidGlobalName(assoc.getAssocName()));
             List<AssociationRef> assocs = nodeService.getNodesByAssoc(getId(), assoc);
-            assocs = ((NodeServiceImpl) NodeServiceFactory.getLocalService()).sortNodeRefList(assocs, filter, sortDefinition);
+            assocs = NodeServiceFactory.getLocalService().sortNodeRefList(assocs, filter, sortDefinition);
             for (AssociationRef childRef : assocs) {
 
                 NodeRef ref = new NodeRef();
@@ -2183,7 +2183,7 @@ public class NodeDao {
             list.add(0, json.toString());
             org.alfresco.service.cmr.repository.NodeRef nodeRef = new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
                     nodeId);
-            NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_INSTRUCTIONS, history.getComment(), false);
+            NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_INSTRUCTIONS, Optional.ofNullable(history.getComment()).orElse("") , false);
             NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_RECEIVER, receivers, false);
             NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_STATUS, history.getStatus(), false);
             NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_PROTOCOL, list, false);
