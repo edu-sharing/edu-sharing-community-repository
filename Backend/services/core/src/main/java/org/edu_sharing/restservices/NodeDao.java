@@ -2164,7 +2164,6 @@ public class NodeDao {
         String nodeType = nodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
         List<String> aspects = Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
 
-        Object protocol = properties.get(CCConstants.CCM_PROP_WF_PROTOCOL);
         List<String> data = (List<String>) NodeServiceHelper.getPropertyNative(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
                 CCConstants.CCM_PROP_WF_PROTOCOL
         );
@@ -2174,8 +2173,9 @@ public class NodeDao {
         }
         try {
             ArrayList<String> receivers = Arrays.stream(history.getReceiver()).map(Authority::getAuthorityName).collect(Collectors.toCollection(ArrayList::new));
+            String comment = Optional.ofNullable(history.getComment()).orElse("");
             JSONObject json = new JSONObject();
-            json.put("comment", history.getComment());
+            json.put("comment", comment);
             json.put("editor", (history.getEditor() != null && !history.getEditor().getAuthorityName().isEmpty()) ? history.getEditor().getAuthorityName() : AuthenticationUtil.getFullyAuthenticatedUser());
             json.put("receiver", receivers);
             json.put("status", history.getStatus());
@@ -2183,14 +2183,14 @@ public class NodeDao {
             list.add(0, json.toString());
             org.alfresco.service.cmr.repository.NodeRef nodeRef = new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
                     nodeId);
-            NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_INSTRUCTIONS, Optional.ofNullable(history.getComment()).orElse("") , false);
+            NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_INSTRUCTIONS, comment, false);
             NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_RECEIVER, receivers, false);
             NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_STATUS, history.getStatus(), false);
             NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_PROTOCOL, list, false);
             if (sendMail) {
                 NotificationService localService = NotificationServiceFactoryUtility.getLocalService();
                 receivers.forEach((receiver) -> localService
-                        .notifyWorkflowChanged(nodeId, nodeType, aspects, properties, receiver, history.getComment(), history.getStatus()));
+                        .notifyWorkflowChanged(nodeId, nodeType, aspects, properties, receiver, comment, history.getStatus()));
             }
         } catch (Throwable t) {
             throw DAOException.mapping(t);
