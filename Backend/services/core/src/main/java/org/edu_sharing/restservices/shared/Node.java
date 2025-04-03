@@ -13,6 +13,7 @@ import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.rating.RatingDetails;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 ;
@@ -70,7 +71,7 @@ public class Node implements Serializable {
 	 * @param ref
 	 * @return
 	 */
-	public static Node FakeFromRef(NodeRef ref) throws IllegalAccessException, InstantiationException {
+	public static Node FakeFromRef(NodeRef ref) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
 		Node node = NodeDao.createEmptyDummy(Node.class, ref);
 		node.setPreview(new Preview());
 		node.setIconURL(new MimeTypesV2().getDefaultIcon());
