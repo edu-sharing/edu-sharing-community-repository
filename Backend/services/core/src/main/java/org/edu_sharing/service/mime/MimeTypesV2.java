@@ -216,6 +216,11 @@ public class MimeTypesV2 {
 			} else if(RessourceInfoExecuter.CCM_RESSOURCETYPE_CONNECTOR.equals(ccressourcetype) && properties.get(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE) != null) {
 				return "file-" + properties.get(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE).toString().trim().toLowerCase();
 			}
+			else if(RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_DEFAULT.equals(ccressourcetype)) {
+				return "file-git-repository";
+			} else if(RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_JUPYTER_BINDER.equals(ccressourcetype)) {
+				return "file-jupyter-notebook";
+			}
 		}
 		if(isLtiDefinition(aspects))
 			return "tool_definition";
@@ -294,7 +299,8 @@ public class MimeTypesV2 {
 			return "file-csv";
 		if(mimetype.startsWith("text"))
 			return "file-txt";
-
+		if(mimetype.equals("application/x-ipynb+json"))
+			return "file-jupyter-notebook";
 		return fallback;
 	}
 	private static boolean isLtiDefinition(List<String> aspects) {
