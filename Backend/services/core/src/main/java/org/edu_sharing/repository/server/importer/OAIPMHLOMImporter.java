@@ -62,6 +62,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 public class OAIPMHLOMImporter implements Importer{
 
@@ -231,8 +232,11 @@ public class OAIPMHLOMImporter implements Importer{
 			logger.error("/OAI-PMH/error:" + errorcode);
 		}
 	}
-	
-	public void updateWithIdentifiersList(String url) throws Throwable{
+
+	public void updateWithIdentifiersList(String url) throws Throwable {
+		updateWithIdentifiersList(url, 1);
+	}
+	public void updateWithIdentifiersList(String url, int retryCount) throws Throwable{
 		if(job!=null && job.isInterrupted()){
 			logger.info("Will cancel oai fetching, job is aborted");
 			return;
@@ -242,9 +246,24 @@ public class OAIPMHLOMImporter implements Importer{
 		String queryResult = getQueryTool().query(url);
 		logger.info("ListIdentifiers;"+url+";" + (System.currentTimeMillis() - currentTime));
 		if(queryResult != null){
+			Document doc;
 			DocumentBuilder builder = factory.newDocumentBuilder();
-			Document doc = builder.parse(new InputSource(new StringReader(queryResult)));
-			
+			try {
+				doc = builder.parse(new InputSource(new StringReader(queryResult)));
+			}catch(RuntimeException | SAXException exception) {
+				logger.warn("Could not parse/fetch result for " + url, exception);
+				if(retryCount < LightbendConfigLoader.get().getLong("importer.retry.count")) {
+					long delay = LightbendConfigLoader.get().getLong("importer.retry.delay");
+					logger.warn("Retrying after " + delay + "ms...");
+					Thread.sleep(LightbendConfigLoader.get().getLong("importer.retry.delay"));
+					updateWithIdentifiersList(url, retryCount + 1);
+					return;
+				} else {
+					logger.error("Max retry count " + retryCount + " reached, giving up");
+					throw exception;
+				}
+			}
+
 			String cursor = (String)xpath.evaluate("/OAI-PMH/ListIdentifiers/resumptionToken/@cursor", doc, XPathConstants.STRING);
 			String completeListSize = (String)xpath.evaluate("/OAI-PMH/ListRecords/resumptionToken/@completeListSize", doc, XPathConstants.STRING);
 			String token = (String)xpath.evaluate("/OAI-PMH/ListIdentifiers/resumptionToken", doc, XPathConstants.STRING);

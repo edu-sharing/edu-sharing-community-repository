@@ -68,6 +68,7 @@ my_http_server_csp_connect="${REPOSITORY_SERVICE_HTTP_SERVER_CSP_CONNECT:-}"
 my_http_server_csp_default="${REPOSITORY_SERVICE_HTTP_SERVER_CSP_DEFAULT:-}"
 my_http_server_csp_font="${REPOSITORY_SERVICE_HTTP_SERVER_CSP_FONT:-}"
 my_http_server_csp_frame="${REPOSITORY_SERVICE_HTTP_SERVER_CSP_FRAME:-}"
+my_http_server_csp_framesrc="${REPOSITORY_SERVICE_HTTP_SERVER_CSP_FRAMESRC:-}"
 my_http_server_csp_img="${REPOSITORY_SERVICE_HTTP_SERVER_CSP_IMG:-}"
 my_http_server_csp_media="${REPOSITORY_SERVICE_HTTP_SERVER_CSP_MEDIA:-}"
 my_http_server_csp_object="${REPOSITORY_SERVICE_HTTP_SERVER_CSP_OBJECT:-}"
@@ -740,6 +741,13 @@ xmlstarlet ed -L \
 }
 [[ -n "${my_http_server_csp_frame}" ]] && {
   hocon -f ${eduSConf} set "angular.headers.Content-Security-Policy.frame-ancestors" '"'"${my_http_server_csp_frame}"'"'
+}
+
+[[ $(hocon -f ${eduSConf} get "angular.headers.Content-Security-Policy.frame-src" 2>/dev/null) ]] && {
+  hocon -f ${eduSConf} unset "angular.headers.Content-Security-Policy.frame-src"
+}
+[[ -n "${my_http_server_csp_framesrc}" ]] && {
+  hocon -f ${eduSConf} set "angular.headers.Content-Security-Policy.frame-src" '"'"${my_http_server_csp_framesrc}"'"'
 }
 
 [[ $(hocon -f ${eduSConf} get "angular.headers.Content-Security-Policy.media-src" 2>/dev/null) ]] && {

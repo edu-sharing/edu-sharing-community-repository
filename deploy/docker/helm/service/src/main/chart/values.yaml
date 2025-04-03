@@ -352,8 +352,10 @@ config:
         default: ""
         ## @param config.http.server.csp.font Set font CSP for http server
         font: ""
-        ## @param config.http.server.csp.frame Set frame CSP for http server
+        ## @param config.http.server.csp.frame Set frame-ancestors CSP for http server
         frame: ""
+        ## @param config.http.server.csp.framesrc Set frame-src CSP for http server
+        framesrc: ""
         ## @param config.http.server.csp.img Set image CSP for http server
         img: ""
         ## @param config.http.server.csp.media Set media CSP for http server

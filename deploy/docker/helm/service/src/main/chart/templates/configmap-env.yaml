@@ -82,6 +82,7 @@ data:
   REPOSITORY_SERVICE_HTTP_SERVER_CSP_DEFAULT: {{ .Values.config.http.server.csp.default | quote }}
   REPOSITORY_SERVICE_HTTP_SERVER_CSP_FONT: {{ .Values.config.http.server.csp.font | quote }}
   REPOSITORY_SERVICE_HTTP_SERVER_CSP_FRAME: {{ .Values.config.http.server.csp.frame | quote }}
+  REPOSITORY_SERVICE_HTTP_SERVER_CSP_FRAMESRC: {{ .Values.config.http.server.csp.framesrc | quote }}
   REPOSITORY_SERVICE_HTTP_SERVER_CSP_IMG: {{ .Values.config.http.server.csp.img | quote }}
   REPOSITORY_SERVICE_HTTP_SERVER_CSP_MEDIA: {{ .Values.config.http.server.csp.media | quote }}
   REPOSITORY_SERVICE_HTTP_SERVER_CSP_OBJECT: {{ .Values.config.http.server.csp.object | quote }}
