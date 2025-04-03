@@ -56,6 +56,7 @@ import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.quartz.Scheduler;
+import org.springframework.extensions.surf.util.URLEncoder;
 import org.springframework.security.crypto.codec.Base64;
 
 import java.io.ByteArrayInputStream;
@@ -677,24 +678,33 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
      * resolve data from github if its a github url
      * for jupyter notebook / binder
      */
-    private void checkGithubData(NodeRef nodeRef, String wwwurl) {
+    void checkGithubData(NodeRef nodeRef, String wwwurl) {
         try {
-            Pattern pattern = Pattern.compile("https?://github\\.com/(.+)");
+            // deeplink to juptyer
+            if(wwwurl.matches("^https?://github\\.com.*/blob/.+\\.ipynb")) {
+                nodeService.setProperty(nodeRef, QName.createQName(RessourceInfoExecuter.CCM_PROP_IO_RESSOURCETYPE), RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_JUPYTER_BINDER);
+                return;
+            }
+            Pattern pattern = Pattern.compile("^https?://github\\.com/([^/]+/[^/]+)(?:/tree/(.+))?$");
             Matcher matcher = pattern.matcher(wwwurl);
 
             if (matcher.find()) {
-                String github = "https://api.github.com/repos/" + matcher.group(1) + "/contents";
+                String branchOrTag = StringUtils.isEmpty(matcher.group(2)) ? "HEAD" : matcher.group(2);
+                String github = "https://api.github.com/repos/" + matcher.group(1) + "/git/trees/" + URLEncoder.encodeUriComponent(branchOrTag) + "?recursive=1";
                 HttpClient client = new HttpClient();
                 GetMethod method = new GetMethod(github);
                 int statusCode = client.executeMethod(method);
                 if(statusCode == 200) {
-                    Type listType = new TypeToken<List<Map<String, Object>>>() {}.getType();
-                    List<Map<String, Object>> result = new Gson().fromJson(method.getResponseBodyAsString(), listType);
+                    Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
+                    Map<String, Object> result = new Gson().fromJson(method.getResponseBodyAsString(), mapType);
+                    List<Map<String, Object>> tree = (List<Map<String, Object>>) result.get("tree");
                     // check if the repo contains a jupyter notebook
-                    if(result.stream().anyMatch(
-                            r -> r.getOrDefault("name", "").toString().toLowerCase().endsWith(".ipynb")
+                    if(tree.stream().anyMatch(
+                            r -> r.getOrDefault("path", "").toString().toLowerCase().endsWith(".ipynb")
                     )) {
-                        nodeService.setProperty(nodeRef, QName.createQName(RessourceInfoExecuter.CCM_PROP_IO_RESSOURCETYPE), RessourceInfoExecuter.CCM_RESSOURCETYPE_JUPYTER_BINDER);
+                        nodeService.setProperty(nodeRef, QName.createQName(RessourceInfoExecuter.CCM_PROP_IO_RESSOURCETYPE), RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_JUPYTER_BINDER);
+                    } else {
+                        nodeService.setProperty(nodeRef, QName.createQName(RessourceInfoExecuter.CCM_PROP_IO_RESSOURCETYPE), RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_DEFAULT);
                     }
 
                 }

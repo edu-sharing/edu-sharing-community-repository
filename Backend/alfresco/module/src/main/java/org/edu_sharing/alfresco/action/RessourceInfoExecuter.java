@@ -74,7 +74,8 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 	public static final String CCM_RESSOURCETYPE_SERLO = "serlo";
 	public static final String CCM_RESSOURCETYPE_EDUHTML = "eduhtml";
 	// Jupyter Notebook
-	public static final String CCM_RESSOURCETYPE_JUPYTER_BINDER = "binder";
+	public static final String CCM_RESSOURCETYPE_GIT_JUPYTER_BINDER = "git-binder";
+	public static final String CCM_RESSOURCETYPE_GIT_DEFAULT = "git-default";
 
 	static ArchiveEntry goToFileInZip(ArchiveInputStream zip, String name) throws IOException {
 		while(true) {

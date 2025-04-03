@@ -1,7 +1,12 @@
 package org.edu_sharing.alfresco.policy;
 
 import org.alfresco.service.cmr.repository.ContentReader;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.namespace.QName;
 import org.apache.tika.mime.MediaType;
+import org.edu_sharing.alfresco.action.RessourceInfoExecuter;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -11,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.times;
 
 class NodeCustomizationPoliciesTest {
 
@@ -90,5 +96,25 @@ class NodeCustomizationPoliciesTest {
                     put(MediaType.OCTET_STREAM.toString(), Collections.singletonList("dummy"));
                 }},
                 true));
+    }
+
+    @Test
+    void checkGithubDataTest() {
+        checkGithubUri("https://github.com/edu-sharing/edu-sharing-community-repository", RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_DEFAULT);
+        checkGithubUri("https://github.com/edu-sharing/edu-sharing-community-repository/tree/release/6.0", RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_DEFAULT);
+        checkGithubUri("https://github.com/edu-sharing/edu-sharing-community-repository/tree/a27f86e5e923779a17c31a838f4a992d6e05188b", RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_DEFAULT);
+        checkGithubUri("https://github.com/KI-Campus/AMALEA", RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_JUPYTER_BINDER);
+        checkGithubUri("https://github.com/KI-Campus/AMALEA/blob/master/Woche%201/1%20Erste%20Schritte.ipynb", RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_JUPYTER_BINDER);
+        checkGithubUri("https://github.com/KI-Campus/AMALEA/blob/data/Woche%201/1%20Erste%20Schritte.ipynb", RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_JUPYTER_BINDER);
+    }
+
+    void checkGithubUri(String uri, String resourceType) {
+        NodeCustomizationPolicies underTest = new NodeCustomizationPolicies();
+
+        NodeService mockedNodeService = Mockito.mock(NodeService.class);
+        underTest.setNodeService(mockedNodeService);
+        NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, UUID.randomUUID().toString());
+        underTest.checkGithubData(nodeRef, uri);
+        Mockito.verify(mockedNodeService, times(1)).setProperty(nodeRef, QName.createQName(RessourceInfoExecuter.CCM_PROP_IO_RESSOURCETYPE), resourceType);
     }
 }
