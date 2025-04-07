@@ -148,8 +148,9 @@ export class PermissionsDeleteComponent implements OnInit, AfterViewInit {
     }
 
     refresh() {
+        this.usersDataSource.reset();
         this.usersDataSource.isLoading = true;
-        this.iam.searchUsers('*', true, 'todelete').subscribe(
+        this.iam.searchUsers('*', true, 'todelete', this.getRequest()).subscribe(
             (users) => {
                 this.usersDataSource.setData(users.users as unknown as User[], users.pagination);
                 this.applicationRef.tick();
@@ -278,20 +279,32 @@ export class PermissionsDeleteComponent implements OnInit, AfterViewInit {
     ngAfterViewInit() {}
 
     fetchMore(event: FetchEvent) {
-        const request: RequestObject = {
-            offset: this.usersDataSource.getData().length,
-        };
         this.usersDataSource.isLoading = true;
-        this.iam.searchUsers('*', true, 'todelete', request).subscribe(
-            (users) => {
-                this.usersDataSource.appendData(users.users as unknown as User[]);
-                this.applicationRef.tick();
-                this.usersDataSource.isLoading = false;
-            },
-            (error) => {
-                this.toast.error(error);
-                this.usersDataSource.isLoading = false;
-            },
-        );
+        this.iam
+            .searchUsers(
+                '*',
+                true,
+                'todelete',
+                this.getRequest(this.usersDataSource.getData().length),
+            )
+            .subscribe(
+                (users) => {
+                    this.usersDataSource.appendData(users.users as unknown as User[]);
+                    this.applicationRef.tick();
+                    this.usersDataSource.isLoading = false;
+                },
+                (error) => {
+                    this.toast.error(error);
+                    this.usersDataSource.isLoading = false;
+                },
+            );
+    }
+
+    private getRequest(offset = 0) {
+        return {
+            offset,
+            sortBy: [RestConstants.AUTHORITY_NAME],
+            sortAscending: [true],
+        } as RequestObject;
     }
 }
