@@ -63,6 +63,9 @@ global:
     common: ${docker.common}
 
   metrics:
+    rules:
+      ## @param global.metrics.rules.enabled Enable metrics rules
+      enabled: false
     scrape:
       ## @param global.metrics.scrape.interval Set prometheus scrape interval
       interval: 60s
@@ -324,6 +327,41 @@ config:
     enabled: true
     ## @param config.metrics.relabelings Relable metrics
     relabelings: []
+
+    rules:
+
+      dbPoolTooManyActiveConns:
+        ## @param config.metrics.rules.dbPoolTooManyActiveConns.enabled Enable metric rule dbPoolTooManyActiveConns
+        enabled: true
+        config:
+          ## @param config.metrics.rules.dbPoolTooManyActiveConns.config.spare Set metric rule dbPoolTooManyActiveConns spare connections
+          spare: 2
+        ## @param config.metrics.rules.dbPoolTooManyActiveConns.for Set metric rule dbPoolTooManyActiveConns wait interval
+        for: 1m
+        labels:
+          ## @param config.metrics.rules.dbPoolTooManyActiveConns.labels.severity Set metric rule dbPoolTooManyActiveConns severity level
+          severity: critical
+
+      hzInsufficientMemberships:
+        ## @param config.metrics.rules.hzInsufficientMemberships.enabled Enable metric rule hzInsufficientMemberships
+        enabled: true
+        ## @param config.metrics.rules.hzInsufficientMemberships.for Set metric rule hzInsufficientMemberships wait interval
+        for: 1m
+        labels:
+          ## @param config.metrics.rules.hzInsufficientMemberships.labels.severity Set metric rule hzInsufficientMemberships severity level
+          severity: critical
+
+      jvmHighGCRate:
+        ## @param config.metrics.rules.jvmHighGCRate.enabled Enable metric rule jvmHighGCRate
+        enabled: true
+        config:
+          ## @param config.metrics.rules.jvmHighGCRate.config.max Set metric rule jvmHighGCRate max gc rate
+          max: 0.3
+        ## @param config.metrics.rules.jvmHighGCRate.for Set metric rule jvmHighGCRate wait interval
+        for: 1m
+        labels:
+          ## @param config.metrics.rules.jvmHighGCRate.labels.severity Set metric rule jvmHighGCRate severity level
+          severity: critical
 
   http:
     client:
