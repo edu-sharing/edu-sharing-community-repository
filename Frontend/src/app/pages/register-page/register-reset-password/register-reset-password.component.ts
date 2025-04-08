@@ -33,7 +33,6 @@ export class RegisterResetPasswordComponent {
                 void this.router.navigate([UIConstants.ROUTER_PREFIX, 'login']);
             },
             (error) => {
-                console.log('error', error);
                 this.toast.closeProgressSpinner();
                 if (error?.error?.error?.includes('DAOInvalidKeyException')) {
                     this.toast.error(null, 'REGISTER.TOAST_INVALID_RESET_KEY');

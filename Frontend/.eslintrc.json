@@ -23,6 +23,7 @@
         "plugin:@angular-eslint/template/process-inline-templates"
       ],
       "rules": {
+        "no-console": ["error", { "allow": ["warn", "error", "info"] }],
         "@typescript-eslint/no-floating-promises": "error",
         "@angular-eslint/directive-selector": [
           "error",

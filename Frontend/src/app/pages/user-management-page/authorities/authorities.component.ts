@@ -223,7 +223,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                     }
                     this.memberSuggestions = ret;
                 },
-                (error) => console.log(error),
+                (error) => console.warn(error),
             );
         } else {
             this.iam.getGroupMembers(this.org.authorityName, event.input, 'USER').subscribe(
@@ -241,7 +241,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                     }
                     this.memberSuggestions = ret;
                 },
-                (error) => console.log(error),
+                (error) => console.warn(error),
             );
         }
     }
@@ -1529,7 +1529,6 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             }
             this._org = event.element as Organization;
         }
-        console.log(event, this._mode);
         this.nodeEntries.getSelection().clear();
         this.nodeEntries.getSelection().select(event.element);
         this.selection.emit(this.nodeEntries.getSelection().selected);

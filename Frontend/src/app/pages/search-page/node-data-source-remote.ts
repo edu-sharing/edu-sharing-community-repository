@@ -163,7 +163,6 @@ export class NodeDataSourceRemote<
 
     dumpState(): NodeDataSourceRemoteState {
         // With this, we implicitly test for `_initDone` and `_resetDone`.
-        console.assert(this.isLoading === false, 'dumping state not supported while loading');
         return {
             _cache: { ...this._cache },
             _pageIndex: this._paginationHandler.pageIndex,

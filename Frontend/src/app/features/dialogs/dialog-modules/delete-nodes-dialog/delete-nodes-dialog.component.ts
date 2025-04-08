@@ -199,7 +199,6 @@ export class DeleteNodesDialogComponent implements OnInit {
         const collections: Node[] = await this.sessionStorageService
             .get(SessionStorageService.KEY_ROOT_COLLECTIONS, [], Store.Session)
             .toPromise();
-        console.log(collections);
         await this.sessionStorageService.set(
             SessionStorageService.KEY_ROOT_COLLECTIONS,
             collections.filter((c) => !nodes.find((n) => c.ref.id === n.ref.id)),

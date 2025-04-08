@@ -601,7 +601,6 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         if (this.isDeleted(permission)) {
             this.deletedPermissions.splice(this.findDeleted(permission), 1);
         } else if (!this.contains(this.permissions, permission, false)) {
-            console.log('does not contain', this.permissions, permission);
             this.newPermissions.push(permission);
             this.permissions.push(permission);
             this.setPermissions(this.permissions);
@@ -683,7 +682,6 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                                         RestConstants.AUTHORITY_TYPE_EVERYONE,
                                 )
                                 .concat(everyone);
-                            console.log(permissions, this.publishEnabled);
                         }
                         try {
                             await this.publishComponent.save().toPromise();

@@ -97,7 +97,6 @@ export class AdminMediacenterComponent {
                         a,
                         this.groupEntriesTable.optionsHelper.getData(),
                     )[0];
-                    console.log(authority);
                     const dialogRef = await this.dialogs.openGenericDialog({
                         title: 'ADMIN.MEDIACENTER.GROUPS.REMOVE_TITLE',
                         message: 'ADMIN.MEDIACENTER.GROUPS.REMOVE_MESSAGE',

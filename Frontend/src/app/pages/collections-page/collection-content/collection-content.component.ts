@@ -896,7 +896,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 message: 'COLLECTIONS.ORDER_COLLECTIONS_INFO',
                 buttons: [{ label: 'SAVE', config: { color: 'primary' } }],
             });
-            console.log('response', response);
             if (response === 'SAVE') {
                 return this.changeCollectionsOrder();
             } else {

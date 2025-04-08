@@ -92,7 +92,6 @@ export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase impleme
                     ...this.editorConfigDefault,
                     ...JSON.parse(this.widget.definition.configuration),
                 };
-                console.log(this.editorConfig);
             } else {
                 this.editorConfig = this.editorConfigDefault;
             }

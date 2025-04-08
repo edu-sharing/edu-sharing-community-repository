@@ -65,7 +65,6 @@ export class NotificationDialogComponent implements OnInit, OnDestroy {
 
     async ngOnInit() {
         this.clientConfig = await this.configService.observeConfig().pipe(first()).toPromise();
-        console.log(this.clientConfig);
         for (let v in NotificationEvents) {
             (this.notificationForm.get('intervals') as FormGroup).addControl(v, new FormControl());
         }

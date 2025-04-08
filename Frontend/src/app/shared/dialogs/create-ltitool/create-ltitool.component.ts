@@ -40,14 +40,6 @@ export class CreateLtitoolComponent implements OnInit {
         if (!this._tool) {
             return;
         }
-        console.debug(
-            'this._tool.appId:' +
-                this._tool.appId +
-                ' parentId:' +
-                this._parent.ref.id +
-                ' nodes:' +
-                this.nodes.length,
-        );
         if (!this._tool.customContentOption) {
             this.openDeepLinkFlow();
         }
@@ -83,7 +75,6 @@ export class CreateLtitoolComponent implements OnInit {
     }
 
     public deeplinkResponse(nodeIds: string[], titles: string[]) {
-        console.log('js function called ' + nodeIds + ' titles:' + titles + ' test');
         this._name = titles[0];
 
         let idx = 0;
@@ -94,6 +85,5 @@ export class CreateLtitoolComponent implements OnInit {
             } as Node);
             idx++;
         });
-        console.log(this.nodes);
     }
 }

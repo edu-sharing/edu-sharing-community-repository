@@ -381,7 +381,6 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
 
         async getSuggestedValues(searchString?: string): Promise<MdsWidgetValue[]> {
-            console.log('getSuggestedValues');
             if (this.definition.values) {
                 return this.getLocalSuggestedValues(searchString);
             } else {
@@ -938,7 +937,6 @@ export class MdsEditorInstanceService implements OnDestroy {
             (p) => p.id === 'mongo-plugin',
         );
         if (this.suggestionsSupported && this.editorMode === 'nodes') {
-            console.log(this.editorMode);
             try {
                 this.suggestionMetadata$.next(
                     await this.mdsEditorCommonService.fetchNodesSuggestions(nodes),
@@ -1336,7 +1334,6 @@ export class MdsEditorInstanceService implements OnDestroy {
     }
     */
     async save(): Promise<Node[] | Values> {
-        console.log('save');
         let newValues: {
             id?: string;
             node?: Node;
@@ -1749,7 +1746,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                 !this.loginInfo?.toolPermissions?.includes(widget.condition.value);
             if (!result) {
                 // tslint:disable-next-line:no-console
-                console.debug(
+                console.info(
                     'hide widget ' +
                         widget.id +
                         ' because toolpermission ' +
@@ -1782,7 +1779,6 @@ export class MdsEditorInstanceService implements OnDestroy {
         const accepted = suggestions.filter((s) => s.status === 'ACCEPTED').map((s) => s.id);
         const declined = suggestions.filter((s) => s.status === 'DECLINED').map((s) => s.id);
         try {
-            console.log('suggestions save', suggestions, suggestionsObject);
             if (accepted.length) {
                 await this.suggestionsService
                     .updateStatus({
@@ -2016,7 +2012,6 @@ export class MdsEditorInstanceService implements OnDestroy {
                 suggestions: {},
             });
         }
-        console.log(suggestionData, this.suggestions);
         let suggestionWidget = this.suggestions.filter((s) => s.nodeId === nodeId)?.[0].suggestions[
             widgetId
         ];
@@ -2031,7 +2026,6 @@ export class MdsEditorInstanceService implements OnDestroy {
             const suggestionCopy = Helper.deepCopy(modified);
             suggestionWidget.push(suggestionCopy);
         }
-        console.log(this.suggestions);
     }
 
     /**

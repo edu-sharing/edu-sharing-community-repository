@@ -708,7 +708,6 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
         this.nodeApi
             .getNodeChildobjects(this.sequenceParent.ref.id, this.sequenceParent.ref.repo)
             .subscribe((data: NodeList) => {
-                console.log('add', 'download', download);
                 this.downloadButton = download;
                 const options: OptionItem[] = [];
                 options.splice(0, 0, download);

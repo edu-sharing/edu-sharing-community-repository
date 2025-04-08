@@ -149,7 +149,6 @@ export class ApplyToLmsPageComponent {
         // let contentParams = node.contentUrl.indexOf("?") == -1 ? '?' : '&';
         // contentParams += "LMS_URL=" + encodeURIComponent(reurl);
         // console.log(node.contentUrl + contentParams);
-        console.log(reurl);
         this.temporaryStorage.set(TemporaryStorageService.APPLY_TO_LMS_PARAMETER_NODE, node);
         window.location.replace(reurl + params);
     }

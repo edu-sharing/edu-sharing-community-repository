@@ -62,7 +62,6 @@ export class WidgetDummy {
     }
 
     setStatus(value: InputStatus): void {
-        console.log(value);
         this.status.next(value);
     }
 

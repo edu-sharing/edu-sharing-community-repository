@@ -63,7 +63,6 @@ export class AdminContextComponent implements OnInit {
 
     async ngOnInit() {
         this.aboutService.getOpenapiJson().subscribe((api) => {
-            console.log(api);
             this.spec = api;
         });
         void this.reload();

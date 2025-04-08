@@ -563,8 +563,6 @@ export class CordovaService extends AppServiceAbstract {
     restartCordova(parameters = ''): void {
         this.setPermanentStorage(RestConstants.CORDOVA_STORAGE_OAUTHTOKENS, null);
         if (parameters) parameters = '&' + parameters;
-        console.log(navigator.userAgent, navigator.userAgent.includes('ionic / edu-sharing-app'));
-        console.log((window as any).device);
         if (navigator.userAgent.includes('ionic / edu-sharing-app')) {
             // go to ionic local server
             if (this.isAndroid() && navigator.userAgent.includes('3.0.1')) {
@@ -1009,8 +1007,6 @@ export class CordovaService extends AppServiceAbstract {
             this.makeSurePermission(
                 'WRITE_EXTERNAL_STORAGE',
                 (win: any) => {
-                    console.log('perm win', win);
-
                     // add oauth token if not alreafy in URL
                     if (downloadURL.indexOf('accessToken=') < 0 && this.oauth !== null) {
                         if (downloadURL.indexOf('?') < 0) {

@@ -41,7 +41,7 @@ export class RenderHelperService {
         );
         const node = securedNode.node;
         const user = await firstValueFrom(this.userService.observeCurrentUserInfo());
-        console.log(this.injector.get(OptionsHelperDataService));
+        console.info(this.injector.get(OptionsHelperDataService));
         this.optionsHelperDataService?.setData({
             scope: Scope.Render,
             activeObjects: [node],
@@ -67,7 +67,7 @@ export class RenderHelperService {
                 error: 'RENDERING.ERROR.RS2_NOT_CONFIGURED',
             };
         }
-        console.log(about.renderingService2?.url);
+        console.info(about.renderingService2?.url);
         if (this.configuration.production) {
             this.injector.get(RSApiConfiguration).rootUrl = about.renderingService2.url.replace(
                 /\/$/g,
@@ -76,9 +76,9 @@ export class RenderHelperService {
         } else {
             this.injector.get(RSApiConfiguration).rootUrl = '/rendering2';
         }
-        console.log(this.injector.get(RSApiConfiguration));
+        console.info(this.injector.get(RSApiConfiguration));
         const token = securedNode.jwt;
-        console.log(token, node);
+        console.info(token, node);
         const request = {
             nodeId: node.ref.id,
             repoId: node.ref.repo,

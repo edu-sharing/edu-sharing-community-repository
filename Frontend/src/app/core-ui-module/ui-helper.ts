@@ -576,7 +576,6 @@ export class UIHelper {
     static openLTIResourceLink(w: Window, node: Node) {
         //let w = window.open('');
         if (w == null) {
-            console.log('window is null');
             w = window.open('');
         }
         w.location.href =

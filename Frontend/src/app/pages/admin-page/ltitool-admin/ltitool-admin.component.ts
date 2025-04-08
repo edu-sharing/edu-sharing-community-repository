@@ -40,8 +40,6 @@ export class LtitoolAdminComponent implements OnInit {
     }
 
     register() {
-        console.log('iframeSrc:' + this.ltiToolDynRegUrl);
-
         try {
             new URL(this.ltiToolDynRegUrl);
         } catch {

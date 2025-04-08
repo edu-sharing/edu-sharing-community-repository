@@ -160,7 +160,6 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     }
 
     onCheckboxChanged(node: T, checked: boolean) {
-        console.log(node, checked, this.uiService.shiftKeyPressed);
         if (this.uiService.shiftKeyPressed) {
             this.expandSelectionTo(node);
         }

@@ -97,7 +97,6 @@ export class RegisterPageComponent implements OnInit, OnDestroy {
         this.translations.waitForInit().subscribe(() => {
             loadingTask.done();
             this.toast.closeProgressSpinner();
-            console.log('done');
             if (['request', 'reset-password', 'done-reset'].indexOf(this.params.status) !== -1) {
                 if (
                     this.configService.instant('register.local', true as boolean) === false &&

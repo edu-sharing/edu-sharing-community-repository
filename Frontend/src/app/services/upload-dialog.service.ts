@@ -192,7 +192,6 @@ export class UploadDialogService {
 
     private async _deleteNodes(nodes: Node[]): Promise<void> {
         this.toast.showProgressSpinner();
-        console.log('delete', nodes);
         await rxjs
             .forkJoin(nodes.map((n) => this.nodeService.deleteNode(n.ref.id, false)))
             .toPromise();

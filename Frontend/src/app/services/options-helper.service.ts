@@ -196,7 +196,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 (nodeData: NodeWrapper) =>
                     this.pasteNode(components, data, addVirtualNodes, nodes.concat(nodeData.node)),
                 (error: any) => {
-                    console.log(error);
                     if (error.error?.error?.indexOf('DAORestrictedAccessException') !== -1) {
                         this.toast.error(null, 'RESTRICTED_ACCESS_COPY_ERROR');
                     } else {
@@ -851,11 +850,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                         n.aspects.includes('ccm:ltitool_node') &&
                         nLtiToolUrl === customContentNodeLtiToolUrl
                     ) {
-                        console.log(
-                            "don't allow nodes created for tool " +
-                                n.properties['ccm:ltitool_url'] +
-                                ' become embedded by the same tool',
-                        );
                         return false;
                     } else return true;
                 });

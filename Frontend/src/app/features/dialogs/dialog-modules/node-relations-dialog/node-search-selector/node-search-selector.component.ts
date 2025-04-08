@@ -183,7 +183,6 @@ export class NodeSearchSelectorComponent implements AfterViewInit {
     }
 
     onMdsLoaded() {
-        console.log('mds loaded', this.mdsEditor.currentWidgets);
         this.hasMds = this.mdsEditor.currentWidgets?.length > 0;
     }
 }

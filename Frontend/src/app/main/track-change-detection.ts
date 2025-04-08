@@ -87,5 +87,4 @@ export function printCurrentTaskInfo(prefix: string): void {
     const frames: Frame[] = (Zone.currentTask?.data as any)?.__creationTrace__;
     const stack = getLongStackTrace(frames);
     const [message, ...format] = getStackTraceLog(stack, 2, 5);
-    console.log(prefix + ' ' + Zone.currentTask?.source + message, ...format);
 }

@@ -166,7 +166,7 @@ export class CreateVariantDialogComponent {
                 },
                 (error) => {
                     this.dialogRef.patchState({ isLoading: false });
-                    console.log(error);
+                    console.warn(error);
                     if (error.error?.error?.indexOf('DAORestrictedAccessException') !== -1) {
                         this.toast.error(null, 'RESTRICTED_ACCESS_COPY_ERROR');
                     } else {

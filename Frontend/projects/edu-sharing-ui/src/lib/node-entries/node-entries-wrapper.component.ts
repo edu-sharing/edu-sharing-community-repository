@@ -363,7 +363,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
                         ),
                     )
                     .subscribe((node) => {
-                        console.log(node);
                         (node as VirtualNode).virtual = true;
                         this.updateNodes([node as T]);
                     });

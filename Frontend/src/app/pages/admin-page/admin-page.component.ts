@@ -1217,7 +1217,6 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         if (name === '*') {
             this.jobClassesSuggested = this.jobClasses;
         } else {
-            console.log(name);
             this.jobClassesSuggested = this.jobClasses.filter(
                 (j) =>
                     (j.title && j.title.toLowerCase().indexOf(name) !== -1) ||
@@ -1559,7 +1558,6 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             }
             modified = true;
         }
-        console.log(data, this.job);
         if (modified) {
             this.job.params = JSON.stringify(data, null, 2);
         }

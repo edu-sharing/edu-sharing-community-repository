@@ -852,7 +852,6 @@ export class AdminStatisticsComponent implements OnInit {
 
                 csvData = Helper.deepCopy(this.customGroupData).map((c: any) => {
                     c[this.customGroup] = c.displayValue;
-                    console.log(c);
                     for (const key of this.customGroupRows) {
                         if (key === 'action' || key === 'count' || key === this.customGroup) {
                             continue;
@@ -933,7 +932,6 @@ export class AdminStatisticsComponent implements OnInit {
                     .concat(countHeaders.map((s) => this.translate.instant('NODE.counts.' + s)));
                 csvData = this.nodesDataSource.getData().map((n) => {
                     const c: any = {};
-                    console.log(Object.keys(n.counts));
                     for (const prop of properties) {
                         c[prop] = n.properties ? n.properties[prop] : n.ref.id;
                         for (const idx of countHeaders) {
@@ -952,7 +950,6 @@ export class AdminStatisticsComponent implements OnInit {
                 csvHeadersTranslated = this.singleDataRows.map((s) =>
                     this.translate.instant('ADMIN.STATISTICS.HEADERS.' + s),
                 );
-                console.log(this.singleData);
                 csvData = this.singleData.map((data: any) => {
                     const c: any = Helper.deepCopy(data);
                     // c.action = this.translate.instant('ADMIN.STATISTICS.ACTIONS.' + data.action);

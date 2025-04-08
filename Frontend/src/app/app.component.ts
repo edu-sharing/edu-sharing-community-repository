@@ -213,7 +213,6 @@ export class AppComponent implements OnInit, DoCheck, AfterViewInit {
                 this.configuration.get('loginSilentMode').subscribe((mode: string) => {
                     if ('iframe' === mode) {
                         const iframe_id: string = 'sso_check';
-                        console.log('guest is active');
                         if (!document.getElementById(iframe_id)) {
                             let iframe = document.createElement('iframe');
                             iframe.style.display = 'none';
@@ -225,12 +224,9 @@ export class AppComponent implements OnInit, DoCheck, AfterViewInit {
                                 try {
                                     var y = iframe.contentDocument;
                                     var pre_info = y.getElementsByTagName('pre')[0].innerHTML;
-                                    console.log('object', pre_info);
                                     var o = JSON.parse(pre_info);
                                     if (o.error && o.error === 'login_required') {
-                                        console.log('login_required');
                                     } else {
-                                        console.log('login exists');
                                         RestHelper.goToLogin(
                                             this.injector.get(Router),
                                             this.configuration,

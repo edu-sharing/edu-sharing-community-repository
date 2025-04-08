@@ -147,7 +147,6 @@ export class SharingPageComponent {
             });
     }
     download(children: Node[] = null) {
-        console.log(children);
         const node = this.params.nodeId;
         const token = this.params.token;
         let url =

@@ -99,7 +99,6 @@ export class AddMaterialDialogComponent implements OnInit {
             .pipe(
                 takeUntilDestroyed(),
                 filter((p) => !!p),
-                tap((p) => console.log(p)),
             )
             .subscribe((parent) => {
                 this.breadcrumbs = null;

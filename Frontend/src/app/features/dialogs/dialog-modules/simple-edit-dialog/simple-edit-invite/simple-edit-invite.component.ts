@@ -493,7 +493,6 @@ export class SimpleEditInviteComponent {
             this.currentPermissions = this.currentPermissions.filter(
                 (p) => p.authority.authorityName !== authority.authorityName,
             );
-            console.log(this.currentPermissions);
         } else {
             const permission = {
                 authority,

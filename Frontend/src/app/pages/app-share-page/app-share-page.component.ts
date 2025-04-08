@@ -274,7 +274,6 @@ export class AppSharePageComponent {
                         this.inbox = data.nodes[0];
                     });
                 this.previewUrl = this.connector.getThemeMimePreview(this.getType() + '.svg');
-                console.log('type', this.mimetype, this.getType());
                 if (this.isLink()) {
                     this.utilities.getWebsiteInformation(this.getUri()).subscribe(
                         (data: any) => {

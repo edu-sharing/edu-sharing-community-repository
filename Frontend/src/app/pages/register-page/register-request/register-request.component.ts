@@ -40,7 +40,6 @@ export class RegisterRequestComponent implements OnDestroy {
             },
             (error) => {
                 this.toast.closeProgressSpinner();
-                console.log(error);
                 if (error?.error?.error?.includes('DAOInvalidKeyException')) {
                     this.toast.error(null, 'REGISTER.TOAST_INVALID_MAIL');
                 } else {

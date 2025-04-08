@@ -295,7 +295,6 @@ export class MdsEditorWidgetContainerComponent
                 behavior: 'smooth',
                 block: 'start',
             });*/
-            console.log(this.injectedView, this.widget.definition.id);
             setTimeout(() => this.injectedView?.focus());
         });
     }

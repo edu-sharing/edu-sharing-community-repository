@@ -440,7 +440,6 @@ export class WorkspaceMetadataComponent implements OnInit {
         if (this.currentChart) {
             this.currentChart.destroy();
         }
-        console.log(this.stats);
         this.currentChart = new Chart(ctx, {
             type: 'bar',
             data: {
