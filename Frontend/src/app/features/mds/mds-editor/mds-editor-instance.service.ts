@@ -23,6 +23,7 @@ import {
     NodeSuggestionResponseDto,
     SuggestionResponseDto,
     SuggestionsV1Service,
+    DEFAULT,
 } from 'ngx-edu-sharing-api';
 import {
     BehaviorSubject,
@@ -1558,7 +1559,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             !this.mdsDefinition$.value
         ) {
             mdsDefinition = await this.mdsService
-                .getMetadataSet({ metadataSet: mdsId, repository })
+                .getMetadataSet({ metadataSet: mdsId || DEFAULT, repository })
                 .toPromise();
         }
         const group = this.getGroup(mdsDefinition, groupId);

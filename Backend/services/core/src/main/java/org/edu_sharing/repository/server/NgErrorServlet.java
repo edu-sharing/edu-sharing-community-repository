@@ -37,7 +37,7 @@ public class NgErrorServlet extends HttpServlet {
 			Object errorMessage= req.getAttribute("jakarta.servlet.error.message");
 			Object errorCode= req.getAttribute("jakarta.servlet.error.status_code");
 			ErrorFilter.handleError(req, resp, new Throwable(
-					errorMessage.toString()),
+							errorMessage.toString()),
 					Integer.parseInt(errorCode.toString())
 			);
 		}catch(NullPointerException e) {

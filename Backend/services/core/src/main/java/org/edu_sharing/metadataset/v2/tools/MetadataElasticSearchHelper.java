@@ -327,7 +327,11 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                         }
                         facetsSearchFilter = Query.of(q -> q.bool(facetQuery.build()));
                     } else {
-                        facetsSearchFilter = getFacetFilter(searchToken.getQueryString(), metadataQueryFacet.get().getItems().get(0).getValue());
+                        String[] facetName = new String[]{"i18n." + currentLocale + "." + facet, "collections.i18n." + currentLocale + "." + facet};
+                        if(!metadataQueryFacet.get().getItems().isEmpty()) {
+                            facetName = new String[]{metadataQueryFacet.get().getItems().get(0).getValue()};
+                        }
+                        facetsSearchFilter = getFacetFilter(searchToken.getQueryString(), facetName);
                     }
                 } else if (isi18nProp) {
                     facetsSearchFilter = getFacetFilter(searchToken.getQueryString(), "i18n." + currentLocale + "." + facet, "collections.i18n." + currentLocale + "." + facet);

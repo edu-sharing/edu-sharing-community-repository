@@ -1,0 +1,45 @@
+{{- if .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" }}
+{{- if .Values.global.metrics.rules.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "edusharing_common_lib.names.name" . }}
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+spec:
+  groups:
+    - name: {{ include "edusharing_common_lib.names.name" . }}
+      rules:
+        {{- if .Values.config.metrics.rules.dbPoolTooManyActiveConns.enabled }}
+        - alert: dbPoolTooManyActiveConns
+          annotations:
+            description: >-
+              {{ include "edusharing_common_lib.names.name" . }} has more than {{ (sub .Values.config.database.pool.max .Values.config.metrics.rules.dbPoolTooManyActiveConns.config.spare) | int }} active connections inside db-pool since {{ .Values.config.metrics.rules.dbPoolTooManyActiveConns.for }}.
+            summary: >-
+              {{ include "edusharing_common_lib.names.name" . }} has too many active connections inside db-pool.
+          expr: rate(alfresco_datasource_active_connection{namespace="{{ .Release.Namespace }}",pod=~"{{ include "edusharing_common_lib.names.name" . }}.*"}[5m]) > {{ (sub .Values.config.database.pool.max .Values.config.metrics.rules.dbPoolTooManyActiveConns.config.spare) | int }}
+          for: {{ .Values.config.metrics.rules.dbPoolTooManyActiveConns.for }}
+          labels: {{ toYaml .Values.config.metrics.rules.dbPoolTooManyActiveConns.labels | nindent 12 }}
+        {{- end }}
+        {{- if .Values.config.metrics.rules.hzInsufficientMemberships.enabled }}
+        - alert: hzInsufficientMemberships
+          annotations:
+            description: >-
+              {{ include "edusharing_common_lib.names.name" . }} has insufficient hazelcast memberships since {{ .Values.config.metrics.rules.hzInsufficientMemberships.for }}.
+            summary: {{ include "edusharing_common_lib.names.name" . }} has insufficient hazelcast memberships.
+          expr: rate(hazelcast_member_total{namespace="{{ .Release.Namespace }}",pod=~"{{ include "edusharing_common_lib.names.name" . }}.*"}[5m]) < kube_statefulset_replicas{namespace="{{ .Release.Namespace }}",statefulset="{{ include "edusharing_common_lib.names.name" . }}"}
+          for: {{ .Values.config.metrics.rules.hzInsufficientMemberships.for }}
+          labels: {{ toYaml .Values.config.metrics.rules.hzInsufficientMemberships.labels | nindent 12 }}
+        {{- end }}
+        {{- if .Values.config.metrics.rules.jvmHighGCRate.enabled }}
+        - alert: jvmHighGCRate
+          annotations:
+            description: >-
+              {{ include "edusharing_common_lib.names.name" . }} has high JVM GC time rate (> {{ .Values.config.metrics.rules.jvmHighGCRate.config.max | float64 }}s) since {{ .Values.config.metrics.rules.jvmHighGCRate.for }}.
+            summary: {{ include "edusharing_common_lib.names.name" . }} has high JVM GC time rate.
+          expr: >-
+            rate(jvm_gc_collection_seconds_sum{namespace="{{ .Release.Namespace }}",pod=~"{{ include "edusharing_common_lib.names.name" . }}.*"}[5m]) > {{ .Values.config.metrics.rules.jvmHighGCRate.config.max | float64 }}
+          for: {{ .Values.config.metrics.rules.jvmHighGCRate.for }}
+          labels: {{ toYaml .Values.config.metrics.rules.jvmHighGCRate.labels | nindent 12 }}
+        {{- end }}
+{{- end }}
+{{- end }}
