@@ -25,7 +25,7 @@ import {
     UIAnimation,
     VirtualNode,
 } from 'ngx-edu-sharing-ui';
-import { combineLatest, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import { delay, map, startWith, takeUntil } from 'rxjs/operators';
 import {
     Connector,
@@ -109,7 +109,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
 
     showPicker: boolean; // keep public - used by extensions
     private params: Params;
-    private destroyed = new Subject<void>();
+    private destroyed = new BehaviorSubject(false);
 
     constructor(
         public bridge: BridgeService,
@@ -187,7 +187,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.destroyed.next();
+        this.destroyed.next(true);
         this.destroyed.complete();
     }
 
@@ -328,7 +328,9 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
 
         // If the menu was open, we just removed all its items, leaving focus on <body>.
         setTimeout(() => {
-            this.dropdown?.menu.focusFirstItem();
+            if (!this.destroyed.value) {
+                this.dropdown?.menu.focusFirstItem();
+            }
         });
     }
 
