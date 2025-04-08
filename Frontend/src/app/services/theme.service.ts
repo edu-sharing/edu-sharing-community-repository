@@ -33,10 +33,7 @@ export class ThemeService {
                 const colors = config.themeColors?.color;
                 this.setFavicon(config.favicon, config.appleTouchIcon);
                 if (colors) {
-                    console.info('apply branding from config', colors);
                     this.applyFromConfigColors(colors);
-                } else {
-                    console.info('no branding colors in config, using defaults');
                 }
             },
             (error) => {
