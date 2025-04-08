@@ -113,18 +113,6 @@ config:
 
     rules:
 
-      handlerErrorRate:
-        ## @param config.metrics.rules.handlerErrorRate.enabled Enable metric rule handlerErrorRate
-        enabled: true
-        config:
-          ## @param config.metrics.rules.handlerErrorRate.config.max Set metric rule handlerErrorRate max error rate
-          max: 0.01
-        ## @param config.metrics.rules.handlerErrorRate.for Set metric rule handlerErrorRate wait interval
-        for: 1m
-        labels:
-          ## @param config.metrics.rules.handlerErrorRate.labels.severity Set metric rule handlerErrorRate severity level
-          severity: critical
-
       jvmHighGCRate:
         ## @param config.metrics.rules.jvmHighGCRate.enabled Enable metric rule jvmHighGCRate
         enabled: true
