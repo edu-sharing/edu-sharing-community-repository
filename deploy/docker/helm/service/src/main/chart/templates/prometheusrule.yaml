@@ -9,26 +9,36 @@ spec:
   groups:
     - name: {{ include "edusharing_common_lib.names.name" . }}
       rules:
-        {{- if .Values.config.metrics.rules.dbPoolTooManyActiveConns.enabled }}
-        - alert: dbPoolTooManyActiveConns
+        {{- if .Values.config.metrics.rules.dbPoolFull.enabled }}
+        - alert: dbPoolFull
           annotations:
             description: >-
-              {{ include "edusharing_common_lib.names.name" . }} has more than {{ (sub .Values.config.database.pool.max .Values.config.metrics.rules.dbPoolTooManyActiveConns.config.spare) | int }} active connections inside db-pool since {{ .Values.config.metrics.rules.dbPoolTooManyActiveConns.for }}.
+              {{ include "edusharing_common_lib.names.name" . }} reached the maximum database connection pool size since {{ .Values.config.metrics.rules.dbPoolFull.for }}.
             summary: >-
-              {{ include "edusharing_common_lib.names.name" . }} has too many active connections inside db-pool.
-          expr: rate(alfresco_datasource_active_connection{namespace="{{ .Release.Namespace }}",pod=~"{{ include "edusharing_common_lib.names.name" . }}.*"}[5m]) > {{ (sub .Values.config.database.pool.max .Values.config.metrics.rules.dbPoolTooManyActiveConns.config.spare) | int }}
-          for: {{ .Values.config.metrics.rules.dbPoolTooManyActiveConns.for }}
-          labels: {{ toYaml .Values.config.metrics.rules.dbPoolTooManyActiveConns.labels | nindent 12 }}
+              {{ include "edusharing_common_lib.names.name" . }} reached the maximum database connection pool size.
+          expr: alfresco_datasource_active_connection{namespace="{{ .Release.Namespace }}",pod=~"{{ include "edusharing_common_lib.names.name" . }}.*"} >= {{ .Values.config.database.pool.max | int }}
+          for: {{ .Values.config.metrics.rules.dbPoolFull.for }}
+          labels: {{ toYaml .Values.config.metrics.rules.dbPoolFull.labels | nindent 12 }}
         {{- end }}
-        {{- if .Values.config.metrics.rules.hzInsufficientMemberships.enabled }}
-        - alert: hzInsufficientMemberships
+        {{- if .Values.config.metrics.rules.hazelcastInsufficientMemberships.enabled }}
+        - alert: hazelcastInsufficientMemberships
           annotations:
             description: >-
-              {{ include "edusharing_common_lib.names.name" . }} has insufficient hazelcast memberships since {{ .Values.config.metrics.rules.hzInsufficientMemberships.for }}.
-            summary: {{ include "edusharing_common_lib.names.name" . }} has insufficient hazelcast memberships.
-          expr: rate(hazelcast_member_total{namespace="{{ .Release.Namespace }}",pod=~"{{ include "edusharing_common_lib.names.name" . }}.*"}[5m]) < kube_statefulset_replicas{namespace="{{ .Release.Namespace }}",statefulset="{{ include "edusharing_common_lib.names.name" . }}"}
-          for: {{ .Values.config.metrics.rules.hzInsufficientMemberships.for }}
-          labels: {{ toYaml .Values.config.metrics.rules.hzInsufficientMemberships.labels | nindent 12 }}
+              {{ include "edusharing_common_lib.names.name" . }} hazelcast has insufficient memberships since {{ .Values.config.metrics.rules.hazelcastInsufficientMemberships.for }}.
+            summary: {{ include "edusharing_common_lib.names.name" . }} hazelcast has insufficient memberships.
+          expr: hazelcast_member_total{namespace="{{ .Release.Namespace }}",pod=~"{{ include "edusharing_common_lib.names.name" . }}.*"} < kube_statefulset_replicas{namespace="{{ .Release.Namespace }}",statefulset="{{ include "edusharing_common_lib.names.name" . }}"}
+          for: {{ .Values.config.metrics.rules.hazelcastInsufficientMemberships.for }}
+          labels: {{ toYaml .Values.config.metrics.rules.hazelcastInsufficientMemberships.labels | nindent 12 }}
+        {{- end }}
+        {{- if .Values.config.metrics.rules.hazelcastUp.enabled }}
+        - alert: hazelcastUp
+          annotations:
+            description: >-
+              {{ include "edusharing_common_lib.names.name" . }} hazelcast is down since {{ .Values.config.metrics.rules.hazelcastUp.for }}.
+            summary: {{ include "edusharing_common_lib.names.name" . }} hazelcast is down.
+          expr: hazelcast_up{namespace="{{ .Release.Namespace }}",pod=~"{{ include "edusharing_common_lib.names.name" . }}.*"} < 1
+          for: {{ .Values.config.metrics.rules.hazelcastUp.for }}
+          labels: {{ toYaml .Values.config.metrics.rules.hazelcastUp.labels | nindent 12 }}
         {{- end }}
         {{- if .Values.config.metrics.rules.jvmHighGCRate.enabled }}
         - alert: jvmHighGCRate

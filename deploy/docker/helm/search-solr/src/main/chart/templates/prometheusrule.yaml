@@ -9,17 +9,6 @@ spec:
   groups:
     - name: {{ include "edusharing_common_lib.names.name" . }}
       rules:
-        {{- if .Values.config.metrics.rules.handlerErrorRate.enabled }}
-        - alert: handlerErrorRate
-          annotations:
-            description: >-
-              {{ include "edusharing_common_lib.names.name" . }} has high handler error rate (> {{ .Values.config.metrics.rules.handlerErrorRate.config.max | float64 }}s) since {{ .Values.config.metrics.rules.handlerErrorRate.for }}.
-            summary: {{ include "edusharing_common_lib.names.name" . }} has high handler error rate.
-          expr: >-
-            rate(solr_handler_request_error_total{namespace="{{ .Release.Namespace }}",pod=~"{{ include "edusharing_common_lib.names.name" . }}.*"}[5m]) > {{ .Values.config.metrics.rules.handlerErrorRate.config.max | float64 }}
-          for: {{ .Values.config.metrics.rules.handlerErrorRate.for }}
-          labels: {{ toYaml .Values.config.metrics.rules.handlerErrorRate.labels | nindent 12 }}
-        {{- end }}
         {{- if .Values.config.metrics.rules.jvmHighGCRate.enabled }}
         - alert: jvmHighGCRate
           annotations:

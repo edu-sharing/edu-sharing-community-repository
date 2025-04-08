@@ -334,25 +334,31 @@ config:
 
     rules:
 
-      dbPoolTooManyActiveConns:
-        ## @param config.metrics.rules.dbPoolTooManyActiveConns.enabled Enable metric rule dbPoolTooManyActiveConns
+      dbPoolFull:
+        ## @param config.metrics.rules.dbPoolFull.enabled Enable metric rule dbPoolFull
         enabled: true
-        config:
-          ## @param config.metrics.rules.dbPoolTooManyActiveConns.config.spare Set metric rule dbPoolTooManyActiveConns spare connections
-          spare: 2
-        ## @param config.metrics.rules.dbPoolTooManyActiveConns.for Set metric rule dbPoolTooManyActiveConns wait interval
+        ## @param config.metrics.rules.dbPoolFull.for Set metric rule dbPoolFull wait interval
         for: 1m
         labels:
-          ## @param config.metrics.rules.dbPoolTooManyActiveConns.labels.severity Set metric rule dbPoolTooManyActiveConns severity level
+          ## @param config.metrics.rules.dbPoolFull.labels.severity Set metric rule dbPoolFull severity level
           severity: critical
 
-      hzInsufficientMemberships:
-        ## @param config.metrics.rules.hzInsufficientMemberships.enabled Enable metric rule hzInsufficientMemberships
+      hazelcastInsufficientMemberships:
+        ## @param config.metrics.rules.hazelcastInsufficientMemberships.enabled Enable metric rule hazelcastInsufficientMemberships
         enabled: true
-        ## @param config.metrics.rules.hzInsufficientMemberships.for Set metric rule hzInsufficientMemberships wait interval
+        ## @param config.metrics.rules.hazelcastInsufficientMemberships.for Set metric rule hazelcastInsufficientMemberships wait interval
         for: 1m
         labels:
-          ## @param config.metrics.rules.hzInsufficientMemberships.labels.severity Set metric rule hzInsufficientMemberships severity level
+          ## @param config.metrics.rules.hazelcastInsufficientMemberships.labels.severity Set metric rule hazelcastInsufficientMemberships severity level
+          severity: critical
+
+      hazelcastUp:
+        ## @param config.metrics.rules.hazelcastUp.enabled Enable metric rule hazelcastUp
+        enabled: true
+        ## @param config.metrics.rules.hazelcastUp.for Set metric rule hazelcastUp wait interval
+        for: 1m
+        labels:
+          ## @param config.metrics.rules.hazelcastUp.labels.severity Set metric rule hazelcastUp severity level
           severity: critical
 
       jvmHighGCRate:
