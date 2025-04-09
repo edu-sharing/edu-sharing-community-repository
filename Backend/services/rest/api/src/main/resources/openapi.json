@@ -1397,9 +1397,11 @@
             "type": "number"
           },
           "description": {
+            "minLength": 1,
             "type": "string"
           },
           "propertyId": {
+            "minLength": 1,
             "type": "string"
           },
           "value": {
