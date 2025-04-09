@@ -404,7 +404,7 @@ export class MdsEditorViewComponent
         setTimeout(() => {
             injected.instance.focus();
             injected.instance.onBlur.pipe(first()).subscribe(() => {
-                void mdsWidgetComponent.finishEdit(injected.instance);
+                void mdsWidgetComponent.finishEdit(injected.instance, true);
             });
         });
         return injected;
