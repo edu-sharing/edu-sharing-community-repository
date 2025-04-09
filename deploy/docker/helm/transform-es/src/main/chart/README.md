@@ -39,7 +39,7 @@
 | `config.metrics.relabelings`                         | Relable metrics                                   | `[]`                                                         |
 | `config.metrics.rules.jvmHighGCRate.enabled`         | Enable metric rule jvmHighGCRate                  | `true`                                                       |
 | `config.metrics.rules.jvmHighGCRate.config.max`      | Set metric rule jvmHighGCRate max gc rate         | `0.3`                                                        |
-| `config.metrics.rules.jvmHighGCRate.for`             | Set metric rule jvmHighGCRate wait interval       | `1m`                                                         |
+| `config.metrics.rules.jvmHighGCRate.for`             | Set metric rule jvmHighGCRate wait interval       | `5m`                                                         |
 | `config.metrics.rules.jvmHighGCRate.labels.severity` | Set metric rule jvmHighGCRate severity level      | `critical`                                                   |
 | `config.override`                                    | Set custom overrides                              | `""`                                                         |
 | `debug`                                              | Enable debugging                                  | `false`                                                      |
