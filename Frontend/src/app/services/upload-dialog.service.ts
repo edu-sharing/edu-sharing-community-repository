@@ -12,7 +12,7 @@ import {
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { DialogType } from '../features/management-dialogs/management-dialogs.component';
 import { BulkBehavior } from '../features/mds/types/types';
-import { merge } from 'rxjs';
+import { firstValueFrom, merge } from 'rxjs';
 import { filter, map, toArray } from 'rxjs/operators';
 import { MdsEditorDialogResult } from '../features/dialogs/dialog-modules/mds-editor-dialog/mds-editor-dialog-data';
 
@@ -56,9 +56,10 @@ export class UploadDialogService {
             chooseParent,
             parent,
             multiple,
+            childobject: false,
             showLti: true,
         });
-        const result = await dialogRef.afterClosed().toPromise();
+        const result = await firstValueFrom(dialogRef.afterClosed());
         if (result) {
             switch (result.kind) {
                 case 'file':

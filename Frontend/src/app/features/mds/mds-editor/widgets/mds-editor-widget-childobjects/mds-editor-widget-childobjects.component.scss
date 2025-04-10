@@ -1,6 +1,16 @@
+@import '../../../../../core-ui-module/styles/mixins';
 @import '../../../../../core-ui-module/styles/variables';
 
 .childobject-wrapper {
+    position: relative;
+    .loading {
+        @include overlay();
+        backdrop-filter: blur(5px);
+        background-color: rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
     background-color: $cardLightBackground;
     padding: 20px $cardPadding;
     margin-left: $cardPadding * -1;
@@ -17,6 +27,10 @@
         .add {
             margin-top: 20px;
         }
+    }
+    .save {
+        display: flex;
+        padding-top: 10px;
     }
 }
 ::ng-deep {

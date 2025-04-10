@@ -10,6 +10,10 @@ export class AddMaterialDialogData {
      */
     chooseParent: boolean;
     /**
+     * Is this dialog for selecting a childobject (i.e. in context of creating a series object)
+     */
+    childobject: boolean;
+    /**
      * Allow the user to upload multiple files.
      */
     multiple: boolean;

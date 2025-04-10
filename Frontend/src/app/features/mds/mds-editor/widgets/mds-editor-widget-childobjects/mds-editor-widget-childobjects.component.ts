@@ -11,9 +11,10 @@ import { NodeHelperService } from '../../../../../services/node-helper.service';
 import { Toast } from '../../../../../services/toast';
 import { DialogsService } from '../../../../dialogs/dialogs.service';
 import { Node } from 'ngx-edu-sharing-api';
-import { Values } from '../../../types/types';
+import { Constraints, Values } from '../../../types/types';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
+import { Helper } from 'ngx-edu-sharing-ui';
 
 interface Childobject {
     icon: string;
@@ -33,9 +34,10 @@ interface ChildobjectEdit {
     styleUrls: ['./mds-editor-widget-childobjects.component.scss'],
 })
 export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidgetComponent {
-    static readonly constraints = {
+    static readonly constraints: Constraints = {
         requiresNode: true,
         supportsBulk: false,
+        supportsInlineEditing: true,
     };
     static readonly graphqlIds: string[] = [];
     hasChanges = new BehaviorSubject<boolean>(false);
@@ -43,9 +45,11 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
     childrenDelete: Node[] = [];
     isSupported: boolean;
     nodes: Node[];
+    private initialChildren: Childobject[] = [];
+    loading$ = new BehaviorSubject(false);
 
     constructor(
-        private mdsEditorValues: MdsEditorInstanceService,
+        public mdsEditorValues: MdsEditorInstanceService,
         private nodeApi: RestNodeService,
         private connector: RestConnectorService,
         private utilities: RestUtilitiesService,
@@ -72,6 +76,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
                             properties: n.properties,
                         };
                     });
+                    this.initialChildren = Helper.deepCopy(this.children);
                     this.nodes = nodes;
                     this.isSupported = nodes[0].type === RestConstants.CCM_TYPE_IO;
                 } else {
@@ -80,8 +85,12 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
             });
     }
 
-    onChange(): void {
-        this.hasChanges.next(true);
+    checkChanges(): void {
+        if (this.children?.length !== this.initialChildren?.length || this.childrenDelete.length) {
+            this.hasChanges.next(true);
+        } else {
+            this.hasChanges.next(!Helper.objectEquals(this.children, this.initialChildren));
+        }
     }
 
     async openUploadSelectDialog(): Promise<void> {
@@ -90,6 +99,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
             // but didn't check whether the values make sense here.
             parent: null,
             chooseParent: false,
+            childobject: true,
             multiple: false,
             showLti: false,
         });
@@ -117,7 +127,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
             };
             this.children.push(child);
         }
-        this.onChange();
+        this.checkChanges();
     }
 
     private addLink(link: string) {
@@ -133,7 +143,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
                 properties,
             };
             this.children.push(data);
-            this.onChange();
+            this.checkChanges();
         };
         this.utilities.getWebsiteInformation(link).subscribe(
             (info) => {
@@ -159,7 +169,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
         edit.child.name = edit.child.properties[RestConstants.LOM_PROP_TITLE]?.[0]
             ? edit.child.properties[RestConstants.LOM_PROP_TITLE][0]
             : edit.child.properties[RestConstants.CM_NAME][0];
-        this.onChange();
+        this.checkChanges();
     }
 
     private getProperties(child: Childobject) {
@@ -206,9 +216,20 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
         if (child.node) {
             this.childrenDelete.push(child.node);
         }
-        this.onChange();
+        this.checkChanges();
     }
-
+    async forceSave() {
+        this.loading$.next(true);
+        try {
+            await this.onSaveNode(this.mdsEditorValues.nodes$.value);
+            this.ngOnInit();
+            this.hasChanges.next(false);
+            this.toast.toast('DIALOG.SAVED');
+        } catch (e) {
+            this.toast.error(e);
+        }
+        this.loading$.next(false);
+    }
     async onSaveNode(nodes: Node[]) {
         await observableForkJoin(
             this.children.map(
@@ -291,7 +312,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
 
     drop(event: CdkDragDrop<string[]>) {
         moveItemInArray(this.children, event.previousIndex, event.currentIndex);
-        this.onChange();
+        this.checkChanges();
     }
 
     private async deleteChildren() {

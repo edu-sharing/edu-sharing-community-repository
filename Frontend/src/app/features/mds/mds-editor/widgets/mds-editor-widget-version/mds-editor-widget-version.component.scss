@@ -1,6 +1,7 @@
 @import '../../../../../core-ui-module/styles/mixins';
 
 es-mds-editor-widget-container {
+    position: relative;
     .loading {
         @include overlay();
         backdrop-filter: blur(5px);

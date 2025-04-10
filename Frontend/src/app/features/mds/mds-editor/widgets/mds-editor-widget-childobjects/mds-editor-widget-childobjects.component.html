@@ -1,4 +1,7 @@
 <div class="childobject-wrapper" *ngIf="isSupported">
+  <div class="loading" *ngIf="loading$ | async">
+    <es-spinner-small [diameter]="30"></es-spinner-small>
+  </div>
   <es-mds-editor-widget-container [label]="'MDS.ADD_CHILD_OBJECT' | translate">
     <div class="group">
       <label>{{ 'MDS.ADD_CHILD_OBJECT_DESCRIPTION' | translate }}</label>
@@ -19,6 +22,11 @@
         <button mat-button color="primary" class="add" (click)="openUploadSelectDialog()">
           <i esIcon="add"></i>
           {{ 'ADD' | translate }}
+        </button>
+      </div>
+      <div class="save" *ngIf="mdsEditorValues.editorMode === 'inline' && (hasChanges | async)">
+        <button mat-flat-button color="primary" (click)="forceSave()">
+          {{ 'SAVE' | translate }}
         </button>
       </div>
     </div>
