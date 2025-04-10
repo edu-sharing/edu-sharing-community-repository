@@ -110,7 +110,7 @@ config:
           ## @param config.metrics.rules.jvmHighGCRate.config.max Set metric rule jvmHighGCRate max gc rate
           max: 0.3
         ## @param config.metrics.rules.jvmHighGCRate.for Set metric rule jvmHighGCRate wait interval
-        for: 1m
+        for: 5m
         labels:
           ## @param config.metrics.rules.jvmHighGCRate.labels.severity Set metric rule jvmHighGCRate severity level
           severity: critical
