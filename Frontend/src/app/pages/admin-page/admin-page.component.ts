@@ -880,10 +880,10 @@ export class AdminPageComponent implements OnInit, OnDestroy {
                                 file,
                                 RestConstants.COMMENT_MAIN_FILE_UPLOAD,
                             )
-                            .subscribe((data) => {
+                            .subscribe(({ node }) => {
                                 this.getTemplates();
                                 this.toast.toast('ADMIN.FOLDERTEMPLATES.UPLOAD_DONE', {
-                                    filename: JSON.parse(data.response).node.name,
+                                    filename: node.name,
                                 });
                                 this.globalProgress = false;
                                 this.templateSelect.nativeElement.value = null;

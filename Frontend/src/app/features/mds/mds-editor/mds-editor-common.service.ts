@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { forkJoin } from 'rxjs';
+import { firstValueFrom, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { RestConstants, RestMdsService, RestNodeService } from '../../../core-module/core.module';
 import { MdsType, Values } from '../types/types';
@@ -69,15 +69,16 @@ export class MdsEditorCommonService {
         ).toPromise();
     }
 
-    async saveNodeContent(node: Node, file: File, versionComment?: string): Promise<void> {
-        return this.restNode
-            .uploadNodeContent(
-                node.ref.id,
-                file,
-                versionComment || RestConstants.COMMENT_CONTENT_UPDATE,
-            )
-            .pipe(map((r) => null))
-            .toPromise();
+    async saveNodeContent(node: Node, file: File, versionComment?: string) {
+        return firstValueFrom(
+            this.restNode
+                .uploadNodeContent(
+                    node.ref.id,
+                    file,
+                    versionComment || RestConstants.COMMENT_CONTENT_UPDATE,
+                )
+                .pipe(map((r) => r.node)),
+        );
     }
 
     async saveNodeProperty(

@@ -1,4 +1,7 @@
 <es-mds-editor-widget-container *ngIf="show" [label]="'WORKSPACE.EDITOR.VERSION' | translate">
+  <div class="loading" *ngIf="loading$ | async">
+    <es-spinner-small [diameter]="30"></es-spinner-small>
+  </div>
   <div class="version-container">
     <div>
       <input
@@ -13,7 +16,7 @@
           {{ 'WORKSPACE.EDITOR.REPLACE_MATERIAL' | translate }}
         </button>
       </div>
-      <mat-form-field>
+      <mat-form-field *ngIf="file || mdsEditorValues?.editorMode !== 'inline'">
         <mat-label>{{ 'VERSION_COMMENT' | translate }}</mat-label>
         <input
           matInput
@@ -23,6 +26,14 @@
           (ngModelChange)="onChange()"
         />
       </mat-form-field>
+      <button
+        *ngIf="file && mdsEditorValues?.editorMode === 'inline'"
+        mat-flat-button
+        color="primary"
+        (click)="forceUpload()"
+      >
+        {{ 'SAVE' | translate }}
+      </button>
     </div>
     <mat-chip-listbox *ngIf="file">
       <mat-chip-option (removed)="file = null">

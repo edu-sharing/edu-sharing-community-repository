@@ -75,6 +75,7 @@ import {
     NativeWidget,
     NativeWidgetType,
     RequiredMode,
+    UserPresentableError,
     Values,
 } from '../types/types';
 import { MdsEditorCommonService } from './mds-editor-common.service';
@@ -1976,6 +1977,21 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
     }
 
+    /**
+     * save content. Only works in inline mode
+     */
+    async saveContent(file: File, comment: string) {
+        if (this.editorMode !== 'inline' || this.nodes$.value?.length !== 1) {
+            throw new UserPresentableError('MDS.ERROR_NOT_SUPPORTED_IN_MODE');
+        }
+        const node = await this.mdsEditorCommonService.saveNodeContent(
+            this.nodes$.value[0],
+            file,
+            comment,
+        );
+        this.nodes$.next([node]);
+        return node;
+    }
     async saveWidgetValue(widget: Widget) {
         const nodes = this.nodes$.value;
         if (nodes?.length !== 1) {

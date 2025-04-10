@@ -1,11 +1,22 @@
+@import '../../../../../core-ui-module/styles/mixins';
+
 es-mds-editor-widget-container {
+    .loading {
+        @include overlay();
+        backdrop-filter: blur(5px);
+        background-color: rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
     .version-container > div {
         display: flex;
         align-items: center;
+        gap: 20px;
+        margin-bottom: 8px;
         width: 100%;
 
         mat-form-field {
-            margin-left: 20px;
             flex-grow: 1;
         }
     }
