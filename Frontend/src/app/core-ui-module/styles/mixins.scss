@@ -77,6 +77,14 @@
         background-color: rgba(255, 255, 255, 0.1);
     }
 }
+@mixin overlay() {
+    position: absolute;
+    z-index: 2;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
 @mixin darken() {
     background-color: $darkenColor;
 }
