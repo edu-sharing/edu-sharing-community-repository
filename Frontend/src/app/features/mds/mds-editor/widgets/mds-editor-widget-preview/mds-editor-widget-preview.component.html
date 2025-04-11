@@ -6,26 +6,37 @@
   (change)="setPreview($event)"
   (cancel)="$event.stopPropagation()"
 />
-<div class="image-container">
-  <div class="delete-overlay" *ngIf="delete">
-    <i esIcon="delete"></i>
-    {{ 'WORKSPACE.EDITOR.PREVIEW_DELETED' | translate }}
+<div class="preview-wrapper">
+  <mat-label *ngIf="mdsEditorValues.editorMode === 'inline'">{{
+    'WORKSPACE.EDITOR.PREVIEW' | translate
+  }}</mat-label>
+  <div class="loading" *ngIf="loading$ | async">
+    <es-spinner-small [diameter]="70"></es-spinner-small>
   </div>
-  <img [src]="src$ | async" />
-  <div class="card-image-backdrop">
-    <img [src]="src$ | async" alt="" />
-  </div>
-  <div class="button-group">
-    <button
-      mat-fab
-      [color]="$any('white')"
-      (click)="file ? (file = null) : (delete = true); updateSrc()"
-      *ngIf="!delete && (file || getType() === 'TYPE_USERDEFINED')"
-    >
+  <div class="image-container">
+    <div class="delete-overlay" *ngIf="delete">
       <i esIcon="delete"></i>
-    </button>
-    <button mat-fab [color]="$any('white')" (click)="fileInput.click()">
-      <i esIcon="file_upload"></i>
-    </button>
+      {{ 'WORKSPACE.EDITOR.PREVIEW_DELETED' | translate }}
+    </div>
+    <img [src]="src$ | async" (load)="loading$.next(false)" />
+    <div class="card-image-backdrop">
+      <img [src]="src$ | async" alt="" />
+    </div>
+    <div class="button-group">
+      <button
+        mat-fab
+        [color]="$any('white')"
+        (click)="file ? (file = null) : (delete = true); updateSrc()"
+        *ngIf="!delete && (file || getType() === 'TYPE_USERDEFINED')"
+      >
+        <i esIcon="delete"></i>
+      </button>
+      <button mat-fab [color]="$any('white')" (click)="fileInput.click()">
+        <i esIcon="file_upload"></i>
+      </button>
+    </div>
+  </div>
+  <div class="save" *ngIf="(hasChanges | async) && mdsEditorValues.editorMode === 'inline'">
+    <button mat-flat-button color="primary" (click)="foreSave()">{{ 'SAVE' | translate }}</button>
   </div>
 </div>

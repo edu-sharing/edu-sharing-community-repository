@@ -1,5 +1,27 @@
 @import 'projects/edu-sharing-ui/assets/scss/mixins';
+@import '../../../../../core-ui-module/styles/mixins';
 
+.preview-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    justify-self: center;
+    width: fit-content;
+    padding: 20px 120px;
+    .loading {
+        @include overlay();
+        backdrop-filter: blur(5px);
+        background-color: rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+}
+.save {
+    display: flex;
+    justify-content: center;
+}
 .image-container {
     position: relative;
     display: flex;

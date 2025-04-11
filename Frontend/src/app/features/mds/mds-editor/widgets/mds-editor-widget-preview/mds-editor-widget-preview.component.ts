@@ -20,6 +20,7 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent {
     static readonly constraints: Constraints = {
         requiresNode: true,
         supportsBulk: false,
+        supportsInlineEditing: true,
         onConstraintFailed: 'hide',
     };
 
@@ -29,9 +30,10 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent {
     file: File;
     node: Node;
     delete = false;
+    loading$ = new BehaviorSubject(false);
 
     constructor(
-        private mdsEditorValues: MdsEditorInstanceService,
+        public mdsEditorValues: MdsEditorInstanceService,
         private nodeService: RestNodeService,
         private toast: Toast,
         private repoUrlService: RepoUrlService,
@@ -84,6 +86,21 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent {
         this.hasChanges.next(this.file != null || this.delete);
     }
 
+    async foreSave() {
+        this.loading$.next(true);
+
+        try {
+            this.node = (await this.onSaveNode(this.mdsEditorValues.nodes$.value))[0];
+            this.file = null;
+            this.delete = false;
+            void this.updateSrc();
+            // loading false is triggered via img load event
+            this.toast.toast('DIALOG.SAVED');
+        } catch (e) {
+            this.toast.error(e);
+        }
+    }
+
     onSaveNode(nodes: Node[]) {
         if (this.delete) {
             return observableForkJoin(
@@ -96,10 +113,13 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent {
             return null;
         }
         return observableForkJoin(
-            nodes.map((n) => this.nodeService.uploadNodePreview(n.ref.id, this.file, false)),
+            nodes.map((n) =>
+                this.nodeService
+                    .uploadNodePreview(n.ref.id, this.file, false)
+                    .pipe(map((n) => n.node)),
+            ),
         )
             .pipe(
-                map(() => nodes),
                 catchError((e) => {
                     this.toast.error(null, 'MDS.ERROR_PREVIEW');
                     return of(nodes);
