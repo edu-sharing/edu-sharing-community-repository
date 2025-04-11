@@ -11,6 +11,7 @@ import { MdsDefinition, MdsType, Values } from '../types/types';
 import { Metadata, BaseMetadataFragment } from 'ngx-edu-sharing-graphql';
 import { Meta } from '@angular/platform-browser';
 import { DocumentNode } from '@apollo/client/link/core/types';
+import { MetadataSetInfo } from 'ngx-edu-sharing-api';
 
 /** Error with a translatable message that is suitable to be shown to the user. */
 export class UserPresentableError extends Error {
@@ -106,18 +107,26 @@ export class MdsEditorCommonService {
      *
      * Throws with a translatable error message if the given nodes cannot be handled by an MDS.
      */
-    getMdsId(nodes: Node[] | BaseMetadataFragment[]): string {
+    async getMdsId(nodes: Node[] | BaseMetadataFragment[]) {
         const types = nodes.map((node) => (node as Node).type || (node as Metadata).nodeType);
         if (!areAllEqual(types)) {
             throw new UserPresentableError('MDS.ERROR_INVALID_TYPE_COMBINATION');
         }
-        const requestedMdsIds = nodes.map(
-            (node) =>
-                (node as Node).metadataset ||
-                (node as Metadata).info.metadataSet ||
-                RestConstants.DEFAULT,
-        );
+        let sets: MetadataSetInfo[];
+        if (nodes?.length > 1 && areAllEqual(nodes.map((n) => (n as Node).ref?.repo))) {
+            sets = (await this.mdsService.getSets((nodes[0] as Node).ref.repo).toPromise())
+                .metadatasets;
+        }
+        const requestedMdsIds = nodes
+            .map(
+                (node) =>
+                    (node as Node).metadataset ||
+                    (node as Metadata).info.metadataSet ||
+                    RestConstants.DEFAULT,
+            )
+            .map((v) => (sets?.length && v === 'default' ? sets[0].id : v));
         if (!areAllEqual(requestedMdsIds)) {
+            console.warn('incompatible mds sets', requestedMdsIds);
             throw new UserPresentableError('MDS.ERROR_INVALID_MDS_COMBINATION');
         }
         if (
