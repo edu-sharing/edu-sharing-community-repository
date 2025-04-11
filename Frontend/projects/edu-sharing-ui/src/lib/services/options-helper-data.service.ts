@@ -15,6 +15,7 @@ import { matchesShortcutCondition } from '../types/keyboard-shortcuts';
 import { KeyboardShortcutsService } from './abstract/keyboard-shortcuts.service';
 import { ActivatedRoute } from '@angular/router';
 import { LocalEventsService } from './local-events.service';
+import { Toast } from 'ngx-edu-sharing-ui';
 
 type DeleteEvent = {
     objects: Node[] | any;
@@ -57,6 +58,7 @@ export class OptionsHelperDataService implements OnDestroy {
         private route: ActivatedRoute,
         private localEvents: LocalEventsService,
         private authenticationService: AuthenticationService,
+        private toast: Toast,
         private userService: UserService,
         private networkService: NetworkService,
         @Optional() private keyboardShortcutsService: KeyboardShortcutsService,
@@ -144,18 +146,22 @@ export class OptionsHelperDataService implements OnDestroy {
         });
     }
 
-    private handleKeyboardEvent(event: KeyboardEvent) {
+    private async handleKeyboardEvent(event: KeyboardEvent) {
         if (this.globalOptions && !this.keyboardShortcutsService?.shouldIgnoreShortcut(event)) {
-            const matchedOption = this.globalOptions.find(
-                (option: OptionItem) =>
-                    option.isEnabled &&
+            for (const option of this.globalOptions) {
+                if (
                     option.keyboardShortcut &&
-                    matchesShortcutCondition(event, option.keyboardShortcut),
-            );
-            if (matchedOption) {
-                event.preventDefault();
-                event.stopPropagation();
-                this.ngZone.run(() => matchedOption.callback(null));
+                    matchesShortcutCondition(event, option.keyboardShortcut)
+                ) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if (await option.enabledCallback()) {
+                        this.ngZone.run(() => option.callback(null));
+                    } else {
+                        this.toast.error(null, 'TOAST.OPTION_DISABLED_OR_UNAVAILABLE');
+                    }
+                    break;
+                }
             }
         }
     }

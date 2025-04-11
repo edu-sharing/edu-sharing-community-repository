@@ -125,23 +125,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         this.destroyed.next();
         this.destroyed.complete();
     }
-
-    private handleKeyboardEvent(event: KeyboardEvent) {
-        if (this.globalOptions && !this.keyboardShortcuts.shouldIgnoreShortcut(event)) {
-            const matchedOption = this.globalOptions.find(
-                (option: OptionItem) =>
-                    option.isEnabled &&
-                    option.keyboardShortcut &&
-                    matchesShortcutCondition(event, option.keyboardShortcut),
-            );
-            if (matchedOption) {
-                event.preventDefault();
-                event.stopPropagation();
-                this.ngZone.run(() => matchedOption.callback(null));
-            }
-        }
-    }
-
     private cutCopyNode(data: OptionData, node: Node, copy: boolean) {
         let list = this.getObjects(node, data);
         if (!list || !list.length) {
@@ -2045,16 +2028,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         }
         options = this.sortOptionsByGroup(options);
         return options;
-    }
-
-    registerGlobalKeyboardShortcuts() {
-        this.ngZone.runOutsideAngular(() => {
-            if (!this.keyboardShortcutsSubscription) {
-                this.keyboardShortcutsSubscription = fromEvent(document, 'keydown')
-                    .pipe(takeUntil(this.destroyed))
-                    .subscribe((event: KeyboardEvent) => this.handleKeyboardEvent(event));
-            }
-        });
     }
 
     private unblockImportedNodes(nodes: Node[]) {
