@@ -45,8 +45,6 @@ public class SecurityConfigurationOpenIdConnect {
 
     public static final String PROFILE_ID = "openidEnabled";
 
-    public static final String DEFAULT_REGISTRATION_ID = "OPENID_DEFAULT";
-
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return EduWebSecurityCustomizer.webSecurityCustomizer();
@@ -145,13 +143,18 @@ public class SecurityConfigurationOpenIdConnect {
     ClientRegistrationRepository clientRegistrationRepository(OpenIdConfigService configService) {
         logger.info("starting oidc registration");
         List<ClientRegistration> registrations = new ArrayList<>();
-        configService.getAllConfigs().forEach(config -> registrations.add(ClientRegistrations
-                .fromIssuerLocation(config.getIssuer())
-                .clientId(config.getClientId())
-                .clientSecret(config.getSecret())
-                .scope(config.getScopes())
-                .registrationId(StringUtils.isNullOrEmpty(config.getContextId()) ? DEFAULT_REGISTRATION_ID : config.getContextId())
-                .build()));
+        configService.getAllConfigs().forEach(config -> {
+            ClientRegistration.Builder builder = ClientRegistrations
+                    .fromIssuerLocation(config.getIssuer())
+                    .clientId(config.getClientId())
+                    .clientSecret(config.getSecret())
+                    .scope(config.getScopes());
+            if(!StringUtils.isNullOrEmpty(config.getContextId())){
+                builder = builder.registrationId(config.getContextId());
+            }
+            //.registrationId(StringUtils.isNullOrEmpty(config.getContextId()) ? DEFAULT_REGISTRATION_ID : config.getContextId());
+            registrations.add(builder.build());
+        });
         return new InMemoryClientRegistrationRepository(registrations);
     }
 

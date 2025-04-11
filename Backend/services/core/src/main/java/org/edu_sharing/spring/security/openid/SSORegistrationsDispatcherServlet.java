@@ -9,34 +9,31 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.spring.ApplicationContextFactory;
+import org.edu_sharing.spring.security.openid.config.OpenIdConfigService;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 
 import java.io.IOException;
 
-import static org.edu_sharing.spring.security.openid.SecurityConfigurationOpenIdConnect.DEFAULT_REGISTRATION_ID;
-
 public class SSORegistrationsDispatcherServlet extends HttpServlet {
 
     Logger logger = Logger.getLogger(SSORegistrationsDispatcherServlet.class);
 
+    ClientRegistrationRepository clientRegistrationRepository = (ClientRegistrationRepository)
+            ApplicationContextFactory.getApplicationContext().getBean("clientRegistrationRepository");
+
+    OpenIdConfigService openIdConfigService = ApplicationContextFactory.getApplicationContext().getBean(OpenIdConfigService.class);
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        ClientRegistrationRepository clientRegistrationRepository = (ClientRegistrationRepository)
-                ApplicationContextFactory.getApplicationContext().getBean("clientRegistrationRepository");
 
         String registrationId = NodeCustomizationPolicies.getEduSharingContext();
-        if(StringUtils.isEmpty(registrationId) || registrationId.equals(CCConstants.EDUCONTEXT_DEFAULT)){
-            registrationId = DEFAULT_REGISTRATION_ID;
-        }
 
-        ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId(registrationId);
+        ClientRegistration clientRegistration = (StringUtils.isEmpty(registrationId) || registrationId.equals(CCConstants.EDUCONTEXT_DEFAULT))
+                ? findByClientId(openIdConfigService.getDefaultConfig().getClientId())
+                : clientRegistrationRepository.findByRegistrationId(registrationId);
 
-        if(clientRegistration == null){
-            logger.warn("Client registration not found:" + registrationId +". trying to resolve with default id:" + DEFAULT_REGISTRATION_ID);
-            clientRegistration = clientRegistrationRepository.findByRegistrationId(DEFAULT_REGISTRATION_ID);
-        }
 
         if(clientRegistration == null){
             String message = "Client registration not found:" + registrationId +". check lightbend context config.";
@@ -51,5 +48,14 @@ public class SSORegistrationsDispatcherServlet extends HttpServlet {
 
         String redirectPath = "/edu-sharing/oauth2/authorization/" + clientRegistration.getRegistrationId();
         resp.sendRedirect(redirectPath);
+    }
+
+    ClientRegistration findByClientId(String clientId){
+        for (ClientRegistration registration : (Iterable<ClientRegistration>) clientRegistrationRepository) {
+            if (registration.getClientId().equals(clientId)) {
+                return registration;
+            }
+        }
+        return null;
     }
 }
