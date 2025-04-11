@@ -65,6 +65,8 @@ import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.version.RepositoryVersionInfo;
+import org.edu_sharing.spring.ApplicationContextFactory;
+import org.edu_sharing.spring.security.SSORegistrationService;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jetbrains.annotations.NotNull;
 
@@ -1620,6 +1622,14 @@ public class AdminApi {
                 false);
 
         return Response.ok().build();
+    }
+
+    @GET
+    @Path("/config/sso")
+    @Operation(summary = "get registered sso.", description = "get registered sso.")
+    public Response getSSOConfig() {
+        SSORegistrationService reg = ApplicationContextFactory.getApplicationContext().getBean(SSORegistrationService.class);
+        return Response.ok().entity(reg.getClientRegistrations()).build();
     }
 
     public enum LuceneStore {
