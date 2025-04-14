@@ -10764,6 +10764,24 @@
         ]
       }
     },
+    "/admin/v1/config/sso": {
+      "get": {
+        "description": "get registered sso.",
+        "operationId": "getSSOConfig",
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {}
+            },
+            "description": "default response"
+          }
+        },
+        "summary": "get registered sso.",
+        "tags": [
+          "ADMIN v1"
+        ]
+      }
+    },
     "/admin/v1/configFile": {
       "get": {
         "operationId": "getConfigFile",
