@@ -15,7 +15,7 @@ import { matchesShortcutCondition } from '../types/keyboard-shortcuts';
 import { KeyboardShortcutsService } from './abstract/keyboard-shortcuts.service';
 import { ActivatedRoute } from '@angular/router';
 import { LocalEventsService } from './local-events.service';
-import { Toast } from 'ngx-edu-sharing-ui';
+import { Toast } from './abstract/toast.service';
 
 type DeleteEvent = {
     objects: Node[] | any;
