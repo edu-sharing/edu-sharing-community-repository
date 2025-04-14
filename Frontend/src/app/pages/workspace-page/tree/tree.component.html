@@ -1,4 +1,11 @@
-<div class="rootNode" [class.rootNodeSelected]="root == MY_FILES" (click)="setRoot(MY_FILES)">
+<div
+  class="rootNode"
+  [esNodesDropTarget]="MY_FILES"
+  [class.rootNodeSelected]="root == MY_FILES"
+  [canDropNodes]="canDropOnMyFiles"
+  (nodeDropped)="onNodesDrop($event)"
+  (click)="setRoot(MY_FILES)"
+>
   <i class="material-icons typeIcon">person</i>{{ 'WORKSPACE.MY_FILES' | translate }}
   <i class="material-icons" *ngIf="root == MY_FILES">keyboard_arrow_down</i>
   <i class="arrow" class="material-icons" *ngIf="root != MY_FILES">keyboard_arrow_right</i>
@@ -33,6 +40,9 @@
 <div
   class="rootNode"
   [class.rootNodeSelected]="root == MY_SHARED_FILES"
+  [esNodesDropTarget]="MY_SHARED_FILES"
+  [canDropNodes]="canDropOnMySharedFiles"
+  (nodeDropped)="onNodesDrop($event)"
   (click)="setRoot(MY_SHARED_FILES)"
 >
   <i class="material-icons typeIcon">share</i>{{ 'WORKSPACE.MY_SHARED_FILES' | translate }}
